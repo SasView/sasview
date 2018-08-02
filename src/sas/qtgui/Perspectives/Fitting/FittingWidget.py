@@ -1969,8 +1969,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
         for row in new_rows:
             self._model_model.appendRow(row)
-            # disable fitting of parameters not listed in self.kernel_module
-            # (probably radius_effective)
+            # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
             if row[0].text() not in self.kernel_module.params.keys():
                 row_num = self._model_model.rowCount() - 1
                 FittingUtilities.markParameterDisabled(self._model_model, row_num)

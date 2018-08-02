@@ -150,9 +150,10 @@ def addSimpleParametersToModel(parameters, is2D):
     return item
 
 def markParameterDisabled(model, row):
-    """Given the QModel row number, format to show it is not available for
-    fitting"""
-    items = [model.item(row, c) for c in range(5)]
+    """Given the QModel row number, format to show it is not available for fitting"""
+
+    # If an error column is present, there are a total of 6 columns.
+    items = [model.item(row, c) for c in range(6)]
 
     model.blockSignals(True)
 
@@ -160,7 +161,6 @@ def markParameterDisabled(model, row):
         if item is None:
             continue
         item.setEditable(False)
-        item.setSelectable(False)
         item.setCheckable(False)
 
     item = items[0]
