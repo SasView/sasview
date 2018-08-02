@@ -1641,7 +1641,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Take func and throw it inside the magnet model row loop
             """
-            for row_i in range(self._model_model.rowCount()):
+            for row_i in range(self._magnet_model.rowCount()):
                 func(row_i)
 
         def updateFittedValues(row):
