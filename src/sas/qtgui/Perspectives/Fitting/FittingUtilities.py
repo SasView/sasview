@@ -148,6 +148,30 @@ def addSimpleParametersToModel(parameters, is2D):
         item.append([item1, item2, item4, item5, item6])
     return item
 
+def markParameterDisabled(model, row):
+    """Given the QModel row number, format to show it is not available for fitting"""
+
+    # If an error column is present, there are a total of 6 columns.
+    items = [model.item(row, c) for c in range(6)]
+
+    model.blockSignals(True)
+
+    for item in items:
+        if item is None:
+            continue
+        item.setEditable(False)
+        item.setCheckable(False)
+
+    item = items[0]
+
+    font = QtGui.QFont()
+    font.setItalic(True)
+    item.setFont(font)
+    item.setForeground(QtGui.QBrush(QtGui.QColor(100, 100, 100)))
+    item.setToolTip("This parameter cannot be fitted.")
+
+    model.blockSignals(False)
+
 def addCheckedListToModel(model, param_list):
     """
     Add a QItem to model. Makes the QItem checkable

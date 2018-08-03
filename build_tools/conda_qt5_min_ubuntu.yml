@@ -1,0 +1,25 @@
+name: qt5_ubuntu
+channels:
+ - conda-forge
+dependencies:
+ - matplotlib
+ - scipy
+ - hdf5
+ - h5py
+ - ipython
+ - jupyter
+ - twisted
+ - lxml
+ - sphinx
+ - cython
+ - pytest
+ - mako
+ - pyinstaller 
+ - pyqt>=5.9 # required for GTK themes to work correctly
+ - pyopencl
+ - pip:
+   - pytools 
+   - periodictable 
+   - bumps 
+   - xhtml2pdf 
+   - qt5reactor 

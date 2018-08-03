@@ -53,6 +53,8 @@ datas.append(('../src/sas/sasview/local_config.py','.'))
 datas.append(('../src/sas/sasview/wxcruft.py','.'))
 datas.append(('../src/sas/logger_config.py','.'))
 datas.append(('../src/sas/logging.ini','.'))
+datas.append(('../src/sas/sasview/custom_config.py','sas/sasview'))
+datas.append(('../src/sas/sasview/local_config.py','sas/sasview'))
 
 # pyinstaller gets mightily confused by upper/lower case,
 # so some modules need to be copied explicitly to avoid
