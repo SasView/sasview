@@ -287,7 +287,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
             painter.save()
             rect = textRect.topLeft()
             y = rect.y()
-            y += 5.0 # magic value for rendering nice display in the table
+            y += 6.0 # magic value for rendering nice display in the table
             rect.setY(y)
             painter.translate(rect)
             painter.setClipRect(textRect.translated(-rect))

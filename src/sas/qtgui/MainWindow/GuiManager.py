@@ -519,15 +519,18 @@ class GuiManager(object):
 
     def actionCopy(self):
         """
+        Send a signal to the fitting perspective so parameters
+        can be saved to the clipboard
         """
-        print("actionCopy TRIGGERED")
+        self.communicate.copyFitParamsSignal.emit("")
         pass
 
     def actionPaste(self):
         """
+        Send a signal to the fitting perspective so parameters
+        from the clipboard can be used to modify the fit state
         """
-        print("actionPaste TRIGGERED")
-        pass
+        self.communicate.pasteFitParamsSignal.emit()
 
     def actionReport(self):
         """
@@ -554,15 +557,17 @@ class GuiManager(object):
 
     def actionExcel(self):
         """
+        Send a signal to the fitting perspective so parameters
+        can be saved to the clipboard
         """
-        print("actionExcel TRIGGERED")
-        pass
+        self.communicate.copyFitParamsSignal.emit("Excel")
 
     def actionLatex(self):
         """
+        Send a signal to the fitting perspective so parameters
+        can be saved to the clipboard
         """
-        print("actionLatex TRIGGERED")
-        pass
+        self.communicate.copyFitParamsSignal.emit("Latex")
 
     #============ VIEW =================
     def actionShow_Grid_Window(self):
