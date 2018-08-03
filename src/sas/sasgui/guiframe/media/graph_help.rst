@@ -325,8 +325,8 @@ Parameters' window. To open the window, select *Edit Slicer Parameters and Batch
 Fitting* in the *Dataset Menu* (see Invoking_the_dataset_menu_). Batch slicing
 options are available at the bottom of the window.
 
-Select the 2D plots you want to apply the slicer. All 2D plots are selected
-by default. The resulting 1d data for all slicers can be saved as a text file
+Select the 2D plots you want to apply the slicer to. All 2D plots are selected
+by default. The resulting 1D data for all slicers can be saved as a text file
 and then sent to fitting by selecting the *Auto save generated 1D* check box.
 Sending data to the fitting perspective requires the data be saved.
 
