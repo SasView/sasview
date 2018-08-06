@@ -1934,7 +1934,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.cbCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
             name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
-        kernel_module = generate.load_kernel_module(name)
+        try:
+            kernel_module = generate.load_kernel_module(name)
+        except ModuleNotFoundError:
+            # maybe it's a recategorised custom model?
+            name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
+            # If this rises, it's a valid problem.
+            kernel_module = generate.load_kernel_module(name)
 
         if hasattr(kernel_module, 'parameters'):
             # built-in and custom models

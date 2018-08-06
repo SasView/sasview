@@ -29,11 +29,14 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         self.parameter_dict = {}
         self.pd_parameter_dict = {}
 
-        # Initialize signals
-        self.addSignals()
-
         # Initialize widgets
         self.addWidgets()
+
+        # Wait for all widgets to finish processing
+        QtWidgets.QApplication.processEvents()
+
+        # Initialize signals
+        self.addSignals()
 
     def addTooltip(self):
         """
@@ -159,9 +162,11 @@ return y
         """
         # keep in mind that this is called every time the text changes.
         # mind the performance!
-        self.addTooltip()
-        self.model['text'] = self.txtFunction.toPlainText().lstrip().rstrip()
-        self.modelModified.emit()
+        #self.addTooltip()
+        new_text = self.txtFunction.toPlainText().lstrip().rstrip()
+        if new_text != self.model['text']:
+            self.model['text'] = new_text
+            self.modelModified.emit()
 
     def onOverwrite(self):
         """
