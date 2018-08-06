@@ -179,7 +179,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.poly_min, self.poly_max):
+        if index.column() in (self.poly_pd, self.poly_min, self.poly_max):
             # Units - present in nice HTML
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
@@ -262,7 +262,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.mag_min, self.mag_max, self.mag_unit):
+        if index.column() in (self.mag_value, self.mag_min, self.mag_max, self.mag_unit):
             # Units - present in nice HTML
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
@@ -287,7 +287,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
             painter.save()
             rect = textRect.topLeft()
             y = rect.y()
-            y += 5.0 # magic value for rendering nice display in the table
+            y += 6.0 # magic value for rendering nice display in the table
             rect.setY(y)
             painter.translate(rect)
             painter.setClipRect(textRect.translated(-rect))

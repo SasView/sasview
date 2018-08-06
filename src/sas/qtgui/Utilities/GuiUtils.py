@@ -254,6 +254,12 @@ class Communicate(QtCore.QObject):
     # Mask Editor requested
     maskEditorSignal = QtCore.pyqtSignal(Data2D)
 
+    # Fitting parameter copy to clipboard
+    copyFitParamsSignal = QtCore.pyqtSignal(str)
+
+    # Fitting parameter paste from clipboard
+    pasteFitParamsSignal = QtCore.pyqtSignal()
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem

@@ -2,7 +2,6 @@ import copy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
-from PyQt5 import QtWidgets
 
 import numpy
 
@@ -98,7 +97,7 @@ def addParametersToModel(parameters, kernel_module, is2D):
                 if p.name != param.name:
                     continue
                 width = kernel_module.getParam(p.name+'.width')
-                type = kernel_module.getParam(p.name+'.type')
+                ptype = kernel_module.getParam(p.name+'.type')
 
                 item1_2 = QtGui.QStandardItem(str(width))
                 item1_2.setEditable(False)
@@ -106,7 +105,7 @@ def addParametersToModel(parameters, kernel_module, is2D):
                 item1_3.setEditable(False)
                 item1_4 = QtGui.QStandardItem()
                 item1_4.setEditable(False)
-                item1_5 = QtGui.QStandardItem(type)
+                item1_5 = QtGui.QStandardItem(ptype)
                 item1_5.setEditable(False)
                 poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
                 break
@@ -457,7 +456,7 @@ def updateKernelWithResults(kernel, results):
     Takes model kernel and applies results dict to its parameters,
     returning the modified (deep) copy of the kernel.
     """
-    assert(isinstance(results, dict))
+    assert isinstance(results, dict)
     local_kernel = copy.deepcopy(kernel)
 
     for parameter in results.keys():
@@ -478,8 +477,8 @@ def getStandardParam(model=None):
 
     for row in range(num_rows):
         param_name = model.item(row, 0).text()
-        checkbox_state = model.item(row,0).checkState() == QtCore.Qt.Checked
-        value= model.item(row, 1).text()
+        checkbox_state = model.item(row, 0).checkState() == QtCore.Qt.Checked
+        value = model.item(row, 1).text()
         column_shift = 0
         if model.columnCount() == 5: # no error column
             error_state = False
@@ -508,7 +507,7 @@ def getOrientationParam(kernel_module=None):
     Get the dictionary with orientation parameters
     """
     param = []
-    if kernel_module is None: 
+    if kernel_module is None:
         return None
     for param_name in list(kernel_module.params.keys()):
         name = param_name
@@ -525,3 +524,108 @@ def getOrientationParam(kernel_module=None):
                      [max_state, details[2]], details[0]])
 
     return param
+
+def formatParameters(parameters):
+    """
+    Prepare the parameter string in the standard SasView layout
+    """
+    assert parameters is not None
+    assert isinstance(parameters, list)
+    output_string = "sasview_parameter_values:"
+    for parameter in parameters:
+        output_string += ",".join([p for p in parameter if p is not None])
+        output_string += ":"
+    return output_string
+
+def formatParametersExcel(parameters):
+    """
+    Prepare the parameter string in the Excel format (tab delimited)
+    """
+    assert parameters is not None
+    assert isinstance(parameters, list)
+    crlf = chr(13) + chr(10)
+    tab = chr(9)
+
+    output_string = ""
+    # names
+    names = ""
+    values = ""
+    for parameter in parameters:
+        names += parameter[0]+tab
+        # Add the error column if fitted
+        if parameter[1] == "True" and parameter[3] is not None:
+            names += parameter[0]+"_err"+tab
+
+        values += parameter[2]+tab
+        if parameter[1] == "True" and parameter[3] is not None:
+            values += parameter[3]+tab
+        # add .npts and .nsigmas when necessary
+        if parameter[0][-6:] == ".width":
+            names += parameter[0].replace('.width', '.nsigmas') + tab
+            names += parameter[0].replace('.width', '.npts') + tab
+            values += parameter[5] + tab + parameter[4] + tab
+
+    output_string = names + crlf + values
+    return output_string
+
+def formatParametersLatex(parameters):
+    """
+    Prepare the parameter string in latex
+    """
+    assert parameters is not None
+    assert isinstance(parameters, list)
+    output_string = r'\begin{table}'
+    output_string += r'\begin{tabular}[h]'
+
+    crlf = chr(13) + chr(10)
+    output_string += '{|'
+    output_string += 'l|l|'*len(parameters)
+    output_string += r'}\hline'
+    output_string += crlf
+
+    for index, parameter in enumerate(parameters):
+        name = parameter[0] # Parameter name
+        output_string += name.replace('_', r'\_')  # Escape underscores
+        # Add the error column if fitted
+        if parameter[1] == "True" and parameter[3] is not None:
+            output_string += ' & '
+            output_string += parameter[0]+r'\_err'
+
+        if index < len(parameters) - 1:
+            output_string += ' & '
+
+        # add .npts and .nsigmas when necessary
+        if parameter[0][-6:] == ".width":
+            output_string += parameter[0].replace('.width', '.nsigmas') + ' & '
+            output_string += parameter[0].replace('.width', '.npts')
+
+            if index < len(parameters) - 1:
+                output_string += ' & '
+
+    output_string += r'\\ \hline'
+    output_string += crlf
+
+    # Construct row of values and errors
+    for index, parameter in enumerate(parameters):
+        output_string += parameter[2]
+        if parameter[1] == "True" and parameter[3] is not None:
+            output_string += ' & '
+            output_string += parameter[3]
+
+        if index < len(parameters) - 1:
+            output_string += ' & '
+
+        # add .npts and .nsigmas when necessary
+        if parameter[0][-6:] == ".width":
+            output_string += parameter[5] + ' & '
+            output_string += parameter[4]
+
+            if index < len(parameters) - 1:
+                output_string += ' & '
+
+    output_string += r'\\ \hline'
+    output_string += crlf
+    output_string += r'\end{tabular}'
+    output_string += r'\end{table}'
+
+    return output_string
