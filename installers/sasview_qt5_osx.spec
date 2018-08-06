@@ -43,9 +43,6 @@ def add_binary(binary):
 
 # ADDITIONAL DATA ############################################################
 datas = [('../src/sas/sasview/images', 'images')]
-
-datas = [('../src/sas/sasview/images/ball.ico', '.')]
-
 datas.append(('../src/sas/sasview/media','media'))
 datas.append(('../src/sas/sasview/test','test'))
 datas.append(('../src/sas/sasview/custom_config.py','.'))
@@ -172,7 +169,7 @@ exe = EXE(pyz,
           name='sasview',
           debug=False,
           upx=UPX,
-          icon=os.path.join("../src/sas/sasview/images","ball.ico"),
+          icon=os.path.join("../src/sas/sasview/images","ball.icns"),
           version="version.txt",
           console=False )
 
@@ -188,6 +185,6 @@ coll = COLLECT(exe,
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
         name='sasview.app',
-        icon='../src/sas/sasview/images/ball.ico',
+        icon='../src/sas/sasview/images/ball.icns',
         bundle_identifier=None)
 
