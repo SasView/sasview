@@ -225,16 +225,16 @@ def _get_clinfo():
     p_index = 0
     for cl_platform in cl_platforms:
         d_index = 0
-        cl_platforms = cl_platform.get_devices()
-        for cl_platform in cl_platforms:
-            if len(cl_platforms) > 1 and len(cl_platforms) > 1:
+        cl_devices = cl_platform.get_devices()
+        for cl_device in cl_devices:
+            if len(cl_platforms) > 1 and len(cl_devices) > 1:
                 combined_index = ":".join([str(p_index), str(d_index)])
             elif len(cl_platforms) > 1:
                 combined_index = str(p_index)
             else:
                 combined_index = str(d_index)
-            clinfo.append((combined_index, ":".join([cl_platform.name,
-                                                     cl_platform.name])))
+            clinfo.append((combined_index, ": ".join([cl_platform.name,
+                                                     cl_device.name])))
             d_index += 1
         p_index += 1
 
