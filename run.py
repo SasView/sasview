@@ -144,6 +144,11 @@ def prepare():
     if os.path.splitext(sys.argv[0])[1].lower() == ".py":
         import sas.qtgui.convertUI
 
+    # initialize OpenCL setting
+    SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
+    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
+        os.environ["SAS_OPENCL"] = SAS_OPENCL
+
 
 if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
