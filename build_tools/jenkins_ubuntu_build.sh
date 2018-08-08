@@ -2,7 +2,7 @@
 #!/bin/bash
 
 ## Set up path for py36 - conda
-export PATH=/home/sasview/miniconda3/bin:$PATH
+export PATH=/home/sasview/anaconda3/bin:$PATH
 
 
 # Set proxy

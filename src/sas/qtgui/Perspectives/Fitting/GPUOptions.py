@@ -33,6 +33,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
 
     clicked = False
     sas_open_cl = None
+    cl_options = None
 
     def __init__(self, parent=None):
         super(GPUOptions, self).__init__(parent)
@@ -48,16 +49,22 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         # Get list of openCL options and add to GUI
         cl_tuple = _get_clinfo()
         self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
+
+        # Keys are the names in the form "platform: device". Corresponding values are the combined indices, e.g.
+        # "0:1", for setting the SAS_OPENCL env.
+        self.cl_options = {}
+
         for title, descr in cl_tuple:
             # Create an item for each openCL option
             check_box = QtWidgets.QCheckBox()
             check_box.setObjectName(_fromUtf8(descr))
             check_box.setText(_translate("GPUOptions", descr, None))
             self.optionsLayout.addWidget(check_box)
-            if (descr == self.sas_open_cl) or (
+            if (title == self.sas_open_cl) or (
                             title == "None" and not self.clicked):
                 check_box.click()
                 self.clicked = True
+            self.cl_options[descr] = title
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
 
     def createLinks(self):
@@ -75,13 +82,13 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         checked = None
         for box in self.openCLCheckBoxGroup.findChildren(QtWidgets.QCheckBox):
-            if box.isChecked() and (str(box.text()) == self.sas_open_cl or (
+            if box.isChecked() and (self.cl_options[str(box.text())] == self.sas_open_cl or (
                     str(box.text()) == "No OpenCL" and self.sas_open_cl == "")):
                 box.setChecked(False)
             elif box.isChecked():
                 checked = box
         if hasattr(checked, "text"):
-            self.sas_open_cl = str(checked.text())
+            self.sas_open_cl = self.cl_options[str(checked.text())]
         else:
             self.sas_open_cl = None
 
@@ -225,16 +232,16 @@ def _get_clinfo():
     p_index = 0
     for cl_platform in cl_platforms:
         d_index = 0
-        cl_platforms = cl_platform.get_devices()
-        for cl_platform in cl_platforms:
-            if len(cl_platforms) > 1 and len(cl_platforms) > 1:
+        cl_devices = cl_platform.get_devices()
+        for cl_device in cl_devices:
+            if len(cl_platforms) > 1 and len(cl_devices) > 1:
                 combined_index = ":".join([str(p_index), str(d_index)])
             elif len(cl_platforms) > 1:
                 combined_index = str(p_index)
             else:
                 combined_index = str(d_index)
-            clinfo.append((combined_index, ":".join([cl_platform.name,
-                                                     cl_platform.name])))
+            clinfo.append((combined_index, ": ".join([cl_platform.name,
+                                                     cl_device.name])))
             d_index += 1
         p_index += 1
 
