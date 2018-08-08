@@ -134,11 +134,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Generate the category list for display
         self.initializeCategoryCombo()
 
-        # Connect signals to controls
-        self.initializeSignals()
-
         # Initial control state
         self.initializeControls()
+
+        QtWidgets.QApplication.processEvents()
+
+        # Connect signals to controls
+        self.initializeSignals()
 
         if data is not None:
             self.data = data
@@ -324,7 +326,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             QTreeView::item {
                 border: 1px;
-                padding: 2px 15px;
+                padding: 2px 1px;
             }
 
             QTreeView::item:hover {

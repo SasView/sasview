@@ -495,11 +495,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
+        ids = [list(self.active_plots.values())[id].data.id for id in range(len(self.active_plots))]
 
         new_plots = []
         for item, plot in plots.items():
             plot_id = plot.id
-            if plot_id in list(self.active_plots.keys()):
+            if plot_id in ids:
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
                 # 'sophisticated' test to generate standalone plot for residuals
