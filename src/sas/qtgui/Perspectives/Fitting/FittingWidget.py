@@ -2919,7 +2919,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.chkPolydispersity.isChecked():
             self.iterateOverPolyModel(gatherPolyParams)
         if self.chkMagnetism.isChecked() and self.chkMagnetism.isEnabled():
-            self.iterateOverMagnetModel(sgatherMagnetParams)
+            self.iterateOverMagnetModel(gatherMagnetParams)
 
         if format=="":
             formatted_output = FittingUtilities.formatParameters(param_list)
