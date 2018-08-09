@@ -56,9 +56,12 @@ def check_model(path):
     from sasmodels.model_test import run_one
     result = run_one(path)
 
+    # remove cached version of the model, if any
+    from sasmodels import sasview_model
+    sasview_model.MODEL_BY_PATH.pop(path, None)
+
     # try running the model
-    from sasmodels.sasview_model import load_custom_model
-    Model = load_custom_model(path)
+    Model = sasview_model.load_custom_model(path)
     model = Model()
     q =  np.array([0.01, 0.1])
     Iq = model.evalDistribution(q)
