@@ -184,7 +184,7 @@ coll = COLLECT(exe,
 
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
-        name='sasview.app',
+        name='SasView5.0.app',
         icon='../src/sas/sasview/images/ball.icns',
         bundle_identifier=None)
 
