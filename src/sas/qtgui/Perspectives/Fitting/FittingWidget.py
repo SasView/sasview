@@ -1325,6 +1325,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Send the finish message from calculate threads to main thread
         """
+        if result is None:
+            result = tuple()
         self.batchFittingFinishedSignal.emit(result)
 
     def batchFitComplete(self, result):
@@ -1334,7 +1336,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.setFittingStopped()
 
-        if result is None:
+        if len(result) == 0:
             msg = "Fitting failed."
             self.communicate.statusBarUpdateSignal.emit(msg)
             return
@@ -1394,6 +1396,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Send the finish message from calculate threads to main thread
         """
+        if result is None:
+            result = tuple()
         self.fittingFinishedSignal.emit(result)
 
     def fitComplete(self, result):
@@ -1404,7 +1408,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.setFittingStopped()
 
-        if result is None:
+        if len(result) == 0:
             msg = "Fitting failed."
             self.communicate.statusBarUpdateSignal.emit(msg)
             return
