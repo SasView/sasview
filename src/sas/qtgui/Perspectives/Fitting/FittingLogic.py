@@ -133,8 +133,8 @@ class FittingLogic(object):
 
     def _create1DPlot(self, tab_id, x, y, model, data, component=None):
         """
-        For internal use: create a new 1D data instance based on fitting results
-        component is a string indicating the model component, e.g. "P(Q)"
+        For internal use: create a new 1D data instance based on fitting results.
+        'component' is a string indicating the model component, e.g. "P(Q)"
         """
         # Create the new plot
         new_plot = Data1D(x=x, y=y)
