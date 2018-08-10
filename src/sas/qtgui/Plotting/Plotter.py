@@ -74,24 +74,25 @@ class PlotterWidget(PlotterBase):
 
         is_fit = (self.data.id=="fit")
 
-        # make sure we have some function to operate on
-        if self.data.xtransform is None:
-            self.data.xtransform = 'log10(x)'
-        if self.data.ytransform is None:
-            self.data.ytransform = 'log10(y)'
+        if not is_fit:
+            # make sure we have some function to operate on
+            if self.data.xtransform is None:
+                self.data.xtransform = 'log10(x)'
+            if self.data.ytransform is None:
+                self.data.ytransform = 'log10(y)'
 
-        # Transform data if required.
-        if self.data.xtransform is not None or self.data.ytransform is not None:
-            _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
-            if xscale != 'log':
-                self.xscale = xscale
-            if yscale != 'log':
-                self.yscale = yscale
+            # Transform data if required.
+            if self.data.xtransform is not None or self.data.ytransform is not None:
+                _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
+                if xscale != 'log':
+                    self.xscale = xscale
+                if yscale != 'log':
+                    self.yscale = yscale
 
-            # Redefine the Scale properties dialog
-            self.properties = ScaleProperties(self,
-                                    init_scale_x=self.data.xtransform,
-                                    init_scale_y=self.data.ytransform)
+                # Redefine the Scale properties dialog
+                self.properties = ScaleProperties(self,
+                                        init_scale_x=self.data.xtransform,
+                                        init_scale_y=self.data.ytransform)
 
         # Shortcuts
         ax = self.ax

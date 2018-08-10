@@ -404,14 +404,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                    outer_item.checkState() == QtCore.Qt.Checked:
                 self.model.beginResetModel()
                 theories_copied += 1
-                new_item = self.recursivelyCloneItem(outer_item)
-                # Append a "unique" descriptor to the name
-                time_bit = str(time.time())[7:-1].replace('.', '')
-                new_name = new_item.text() + '_@' + time_bit
-                new_item.setText(new_name)
+                new_item = self.cloneTheory(outer_item)
                 self.model.appendRow(new_item)
                 self.model.endResetModel()
-            #self.model.reset()
 
         freeze_msg = ""
         if theories_copied == 0:
@@ -426,6 +421,31 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
         # Actively switch tabs
         self.setCurrentIndex(1)
+
+    def cloneTheory(self, item_from):
+        """
+        Manually clone theory items into a new HashableItem
+        """
+        new_item = GuiUtils.HashableStandardItem()
+        new_item.setCheckable(True)
+        new_item.setCheckState(QtCore.Qt.Checked)
+        info_item = QtGui.QStandardItem("Info")
+        data_item = QtGui.QStandardItem()
+        data_item.setData(item_from.child(0).data())
+        new_item.setText(item_from.text())
+        new_item.setChild(0, data_item)
+        new_item.setChild(1, info_item)
+        # Append a "unique" descriptor to the name
+        time_bit = str(time.time())[7:-1].replace('.', '')
+        new_name = new_item.text() + '_@' + time_bit
+        new_item.setText(new_name)
+        # Change the underlying data so it is no longer a theory
+        try:
+            new_item.child(0).data().is_data = True
+        except AttributeError:
+            #no data here, pass
+            pass
+        return new_item
 
     def recursivelyCloneItem(self, item):
         """

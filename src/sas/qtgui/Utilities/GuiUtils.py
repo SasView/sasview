@@ -426,7 +426,7 @@ def plotsFromFilename(filename, model_item):
     # Iterate over model looking for named items
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if str(item.text()) == filename:
+        if filename in str(item.text()):
             # TODO: assure item type is correct (either data1/2D or Plotter)
             plot_data[item] = item.child(0).data()
             # Going 1 level deeper only
