@@ -3,6 +3,7 @@ import sys
 import os
 import time
 import logging
+import re
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -35,6 +36,7 @@ logger = logging.getLogger(__name__)
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
+    theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
     def __init__(self, parent=None, guimanager=None, manager=None):
         super(DataExplorerWindow, self).__init__(parent, guimanager)
@@ -503,6 +505,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if plot_id in ids:
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
+                # Don't plot intermediate data e.g. P(Q), S(Q)
+                match = self.theory_plot_ID_pattern.match(plot_id)
+                if match and match.groups()[1] != None:
+                    continue
                 # 'sophisticated' test to generate standalone plot for residuals
                 if 'esiduals' in plot.title:
                     self.plotData([(item, plot)])

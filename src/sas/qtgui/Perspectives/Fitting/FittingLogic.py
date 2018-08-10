@@ -131,16 +131,11 @@ class FittingLogic(object):
         self._data.ymin = ymin
         self._data.ymax = ymax
 
-    def new1DPlot(self, return_data, tab_id):
+    def _create1DPlot(self, tab_id, x, y, model, data, component=None):
         """
-        Create a new 1D data instance based on fitting results
+        For internal use: create a new 1D data instance based on fitting results
+        component is a string indicating the model component, e.g. "P(Q)"
         """
-        # Unpack return data from Calc1D
-        x, y, page_id, state, weight,\
-        fid, toggle_mode_on, \
-        elapsed, index, model,\
-        data, update_chisqr, source = return_data
-
         # Create the new plot
         new_plot = Data1D(x=x, y=y)
         new_plot.is_data = False
@@ -149,18 +144,31 @@ class FittingLogic(object):
         _xaxis, _xunit = data.get_xaxis()
 
         new_plot.group_id = data.group_id
-        new_plot.id = str(tab_id) + " " + model.id
+        new_plot.id = str(tab_id) + " " + ("[" + component + "] " if component else "") + model.id
 
-        if data.filename:
-            new_plot.name = model.name + " [" + data.filename + "]" # data file
-        else:
-            new_plot.name = model.name + " [" + model.id + "]"  # theory
+        # use data.filename for data, use model.id for theory
+        id_str = data.filename if data.filename else model.id
+        new_plot.name = model.name + ((" " + component) if component else "") + " [" + id_str + "]"
 
         new_plot.title = new_plot.name
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)
 
         return new_plot
+
+    def new1DPlot(self, return_data, tab_id):
+        """
+        Create a new 1D data instance based on fitting results
+        """
+        # Unpack return data from Calc1D
+        x, y, page_id, state, weight,\
+        fid, toggle_mode_on, \
+        elapsed, index, model, \
+        data, update_chisqr, source, \
+        unsmeared_output, unsmeared_data, unsmeared_error, \
+        pq_values, sq_values = return_data
+
+        return self._create1DPlot(tab_id, x, y, model, data)
 
     def new2DPlot(self, return_data):
         """
@@ -203,6 +211,27 @@ class FittingLogic(object):
                                     data_name + "]"
 
         return new_plot
+
+    def new1DProductPlots(self, return_data, tab_id):
+        """
+        If return_data contains separated P(Q) and S(Q) data, create 1D plots for each and return as a tuple.
+        Returns (None, None) if this data is unavailable.
+        """
+        # Unpack return data from Calc1D
+        x, y, page_id, state, weight, \
+        fid, toggle_mode_on, \
+        elapsed, index, model, \
+        data, update_chisqr, source, \
+        unsmeared_output, unsmeared_data, unsmeared_error, \
+        pq_values, sq_values = return_data
+
+        if pq_values is not None and sq_values is not None:
+            pq_plot = self._create1DPlot(tab_id, x, pq_values, model, data, component="P(Q)")
+            sq_plot = self._create1DPlot(tab_id, x, sq_values, model, data, component="S(Q)")
+
+            return pq_plot, sq_plot
+        else:
+            return None, None
 
     def computeDataRange(self):
         """
