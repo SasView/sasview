@@ -214,8 +214,8 @@ class FittingLogic(object):
 
     def new1DProductPlots(self, return_data, tab_id):
         """
-        If return_data contains separated P(Q) and S(Q) data, create 1D plots for each and return as a tuple.
-        Returns (None, None) if this data is unavailable.
+        If return_data contains separated P(Q) and/or S(Q) data, create 1D plots for each and return as the tuple
+        (pq_plot, sq_plot). If either are unavailable, the corresponding plot is None.
         """
         # Unpack return data from Calc1D
         x, y, page_id, state, weight, \
@@ -225,12 +225,15 @@ class FittingLogic(object):
         unsmeared_output, unsmeared_data, unsmeared_error, \
         pq_values, sq_values = return_data
 
-        if pq_values is not None and sq_values is not None:
+        pq_plot = None
+        sq_plot = None
+
+        if pq_values is not None:
             pq_plot = self._create1DPlot(tab_id, x, pq_values, model, data, component="P(Q)")
+        if sq_values is not None:
             sq_plot = self._create1DPlot(tab_id, x, sq_values, model, data, component="S(Q)")
-            return pq_plot, sq_plot
-        else:
-            return None, None
+
+        return pq_plot, sq_plot
 
     def computeDataRange(self):
         """

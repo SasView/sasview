@@ -2232,10 +2232,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
-        if pq_data is not None and sq_data is not None:
+        if pq_data is not None:
             pq_data.symbol = "Line"
-            sq_data.symbol = "Line"
             self.createNewIndex(pq_data)
+        if sq_data is not None:
+            sq_data.symbol = "Line"
             self.createNewIndex(sq_data)
 
     def complete2D(self, return_data):
