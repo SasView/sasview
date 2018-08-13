@@ -70,6 +70,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdNew.clicked.connect(self.newPlot)
         self.cmdNew_2.clicked.connect(self.newPlot)
         self.cmdAppend.clicked.connect(self.appendPlot)
+        self.cmdAppend_2.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
 
@@ -631,8 +632,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Add data set(s) to the existing matplotlib chart
         """
-        # new plot data
-        new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+        # new plot data; check which tab is currently active
+        if self.current_view == self.treeView:
+            new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+        else:
+            new_plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
 
         # old plot data
         plot_id = str(self.cbgraph.currentText())
