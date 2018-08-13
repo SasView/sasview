@@ -114,7 +114,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Add a new tab for passed data
         """
-        tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
+        tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex)
         tab.is_batch_fitting = is_batch
 
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
