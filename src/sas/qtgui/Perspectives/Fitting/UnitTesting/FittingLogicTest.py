@@ -99,8 +99,10 @@ class FittingLogicTest(unittest.TestCase):
         data.name = "boop"
         data.id = "poop"
         return_data = (data.x,data.y, 7, None, None,
-                        0, True, 0.0, 1, data,
-                        data, False, None)
+                       0, True, 0.0, 1, data,
+                       data, False, None,
+                       None, None, None,
+                       None, None)
 
         new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
 
