@@ -19,11 +19,18 @@ cd build_tools
 conda env create --force -f conda_qt5_min_ubuntu.yml
 conda env list
 
-
 # Activate new env
 source activate qt5_ubuntu
 conda list
 conda env list
+
+# List envs
+conda list
+a='/home/sasview/miniconda3/envs'
+b=$conda_env_name
+c='/lib'
+DYLD_LIBRARY_PATH=$a$b$c
+export DYLD_LIBRARY_PATH
 
 # Now build Sasview
 
