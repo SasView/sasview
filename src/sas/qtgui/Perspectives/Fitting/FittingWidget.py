@@ -2766,7 +2766,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create the filewriter, aptly named 'Reader'
         state_reader = Reader(self.loadPageStateCallback)
         filepath = self.saveAsAnalysisFile()
-        if filepath is None:
+        if filepath is None or filepath == "":
             return
         state_reader.write(filename=filepath, fitstate=state)
         pass
@@ -2818,7 +2818,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.categorycombobox = self.cbCategory.currentText()
         state.formfactorcombobox = self.cbModel.currentText()
         if self.cbStructureFactor.isEnabled():
-            state.structureCombobox = self.cbStructureFactor.currentText()
+            state.structurecombobox = self.cbStructureFactor.currentText()
         state.tcChi = self.chi2
 
         state.enable2D = self.is2D
@@ -2850,8 +2850,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         p = self.model_parameters
         # save checkbutton state and txtcrtl values
-        state.parameters = FittingUtilities.getStandardParam()
-        state.orientation_params_disp = FittingUtilities.getOrientationParam()
+        state.parameters = FittingUtilities.getStandardParam(self._model_model)
+        state.orientation_params_disp = FittingUtilities.getOrientationParam(self.kernel_module)
 
         #self._copy_parameters_state(self.orientation_params_disp, self.state.orientation_params_disp)
         #self._copy_parameters_state(self.parameters, self.state.parameters)
