@@ -156,7 +156,7 @@ if __name__ == "__main__":
     root = abspath(dirname(realpath(sys.argv[0])))
 
     addpath(joinpath(root, 'src'))
-    addpath(joinpath(root, '../sasmodels/')) # dependency (for loading custom_config.py during log setup)
+    addpath(joinpath(root, joinpath('..', 'sasmodels'))) # dependency (for loading custom_config.py during log setup)
 
     from sas.logger_config import SetupLogger
     logger = SetupLogger(__name__).config_development()
