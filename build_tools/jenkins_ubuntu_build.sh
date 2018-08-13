@@ -24,14 +24,6 @@ source activate qt5_ubuntu
 conda list
 conda env list
 
-# List envs
-conda list
-a='/home/sasview/miniconda3/envs'
-b=$conda_env_name
-c='/lib'
-DYLD_LIBRARY_PATH=$a$b$c
-export DYLD_LIBRARY_PATH
-
 # Now build Sasview
 
 # Sasmodels
@@ -60,7 +52,7 @@ python setup.py install
 cd $WORKSPACE 
 cd sasview
 cd installers
-pyinstaller sasview_qt5_centos.spec
+pyinstaller sasview_qt5_min_centos.spec
 
 cd $WORKSPACE 
 cd sasview
