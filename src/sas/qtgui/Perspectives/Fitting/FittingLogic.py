@@ -228,7 +228,6 @@ class FittingLogic(object):
         if pq_values is not None and sq_values is not None:
             pq_plot = self._create1DPlot(tab_id, x, pq_values, model, data, component="P(Q)")
             sq_plot = self._create1DPlot(tab_id, x, sq_values, model, data, component="S(Q)")
-
             return pq_plot, sq_plot
         else:
             return None, None

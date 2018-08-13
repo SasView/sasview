@@ -2233,6 +2233,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
         if pq_data is not None and sq_data is not None:
+            pq_data.symbol = "Line"
+            sq_data.symbol = "Line"
             self.createNewIndex(pq_data)
             self.createNewIndex(sq_data)
 
