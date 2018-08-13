@@ -23,7 +23,7 @@ import copy
 import logging
 import json
 import time
-from io import StringIO
+from io import BytesIO
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -367,7 +367,7 @@ class DataManager(object):
 
             # ndarray
             if isinstance(o, np.ndarray):
-                buffer = StringIO()
+                buffer = BytesIO()
                 np.save(buffer, o)
                 buffer.seek(0)
                 content = { 'data': buffer.read().decode('latin-1') }
@@ -434,7 +434,7 @@ class DataManager(object):
 
             # ndarray
             if cls == np.ndarray:
-                buffer = StringIO()
+                buffer = BytesIO()
                 buffer.write(data['data'].encode('latin-1'))
                 buffer.seek(0)
                 return np.load(buffer)
