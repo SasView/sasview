@@ -3,7 +3,7 @@
 
 ## Set up path for py36 - conda
 export PATH=/home/sasview/anaconda3/bin:$PATH
-
+export QT_QPA_PLATFORM=offscreen
 
 # Set proxy
 export http_proxy=http://192.168.1.1:8123

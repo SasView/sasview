@@ -10,13 +10,14 @@ dependencies:
  - jupyter
  - twisted
  - lxml
- - sphinx<1.7.5
+ - sphinx
  - cython
  - pytest
  - mako
  - pyinstaller 
  - pyqt>=5.9 # required for GTK themes to work correctly
  - pyopencl
+ - pocl
  - pip:
    - pytools 
    - periodictable 
