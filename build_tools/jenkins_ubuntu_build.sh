@@ -45,8 +45,7 @@ python setup.py build install
 cd $WORKSPACE 
 cd sasview
 python src/sas/qtgui/convertUI.py
-python setup.py build docs
-python setup.py install
+python setup.py build docs install
 
 # Pyinstaller
 cd $WORKSPACE 
