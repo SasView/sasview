@@ -10,7 +10,7 @@ dependencies:
  - jupyter
  - twisted
  - lxml
- - sphinx
+ - sphinx<1.7.5
  - cython
  - pytest
  - mako
