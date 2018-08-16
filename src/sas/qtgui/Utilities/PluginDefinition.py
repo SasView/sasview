@@ -3,6 +3,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
+from sas.qtgui.Utilities import GuiUtils
 
 # txtName
 # txtDescription
@@ -63,6 +64,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 return y
 """
         self.txtFunction.insertPlainText(text)
+        self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
         rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")

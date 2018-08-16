@@ -2,6 +2,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
+from sas.qtgui.Utilities import GuiUtils
 
 class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
     """
@@ -28,6 +29,8 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
         # DO NOT MOVE TO TOP
         from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
         self.highlight = PythonHighlighter(self.txtEditor.document())
+
+        self.txtEditor.setFont(GuiUtils.getMonospaceFont())
 
     def addSignals(self):
         """

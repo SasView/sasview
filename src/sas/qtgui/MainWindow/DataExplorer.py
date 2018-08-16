@@ -3,6 +3,7 @@ import sys
 import os
 import time
 import logging
+import re
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -35,6 +36,14 @@ logger = logging.getLogger(__name__)
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
+
+    # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
+    # "5 [P(Q)] modelname"
+    # or
+    # "4 modelname".
+    # Useful for determining whether the plot in question is for an intermediate result, such as P(Q) or S(Q) in the
+    # case of a product model; the identifier for this is held in square brackets, as in the example above.
+    theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
     def __init__(self, parent=None, guimanager=None, manager=None):
         super(DataExplorerWindow, self).__init__(parent, guimanager)
@@ -524,6 +533,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if plot_id in ids:
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
+                # Don't plot intermediate results, e.g. P(Q), S(Q)
+                match = self.theory_plot_ID_pattern.match(plot_id)
+                # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
+                if match and match.groups()[1] != None:
+                    continue
                 # 'sophisticated' test to generate standalone plot for residuals
                 if 'esiduals' in plot.title:
                     self.plotData([(item, plot)])
@@ -1239,7 +1253,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for current_index in range(self.theory_model.rowCount()):
             #if current_tab_name in self.theory_model.item(current_index).text():
             if current_tab_name == self.theory_model.item(current_index).text():
-                return
                 self.theory_model.removeRow(current_index)
                 break
 

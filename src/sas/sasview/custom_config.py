@@ -15,3 +15,6 @@ WELCOME_PANEL_SHOW = False
 TOOLBAR_SHOW = True
 DEFAULT_PERSPECTIVE = "Fitting"
 SAS_OPENCL = "None"
+
+# Logging options
+FILTER_DEBUG_LOGS = True

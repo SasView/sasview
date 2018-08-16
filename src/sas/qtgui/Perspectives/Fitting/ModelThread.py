@@ -221,14 +221,17 @@ class Calc1D(CalcThread):
         if isinstance(self.model, MultiplicationModel):
             s_model = self.model.s_model
             p_model = self.model.p_model
-        elif hasattr(self.model, "get_composition_models"):
-            p_model, s_model = self.model.get_composition_models()
+        elif hasattr(self.model, "calc_composition_models"):
+            results = self.model.calc_composition_models(self.data.x[index])
+            if results is not None:
+                pq_values, sq_values = results
 
-        if p_model is not None and s_model is not None:
-            sq_values = numpy.zeros((len(self.data.x)))
-            pq_values = numpy.zeros((len(self.data.x)))
-            sq_values[index] = s_model.evalDistribution(self.data.x[index])
-            pq_values[index] = p_model.evalDistribution(self.data.x[index])
+        if pq_values is None or sq_values is None:
+            if p_model is not None and s_model is not None:
+                sq_values = numpy.zeros((len(self.data.x)))
+                pq_values = numpy.zeros((len(self.data.x)))
+                sq_values[index] = s_model.evalDistribution(self.data.x[index])
+                pq_values[index] = p_model.evalDistribution(self.data.x[index])
 
         elapsed = time.time() - self.starttime
 
@@ -242,7 +245,9 @@ class Calc1D(CalcThread):
                     elapsed, index, self.model,
                     self.data,
                     self.update_chisqr,
-                    self.source)
+                    self.source,
+                    unsmeared_output, unsmeared_data, unsmeared_error,
+                    pq_values, sq_values)
         else:
             self.complete(x=self.data.x[index], y=output[index],
                           page_id=self.page_id,

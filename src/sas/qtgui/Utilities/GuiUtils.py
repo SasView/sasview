@@ -312,6 +312,14 @@ class HashableStandardItem(QtGui.QStandardItem):
         return clone
 
 
+def getMonospaceFont():
+    """Convenience function; returns a monospace font to be used in any shells, code editors, etc."""
+
+    # Note: Consolas is only available on Windows; the style hint is used on other operating systems
+    font = QtGui.QFont("Consolas", 10)
+    font.setStyleHint(QtGui.QFont.Monospace, QtGui.QFont.PreferQuality)
+    return font
+
 def createModelItemWithPlot(update_data, name=""):
     """
     Creates a checkboxed QStandardItem named "name"
