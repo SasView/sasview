@@ -2059,15 +2059,29 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Setting model parameters into QStandardItemModel based on selected _structure factor_
         """
         structure_module = generate.load_kernel_module(structure_factor)
-        structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
 
-        structure_kernel = self.models[structure_factor]()
-        form_kernel = self.kernel_module
+        s_kernel = self.models[structure_factor]()
+        p_kernel = self.kernel_module
 
-        self.kernel_module = MultiplicationModel(form_kernel, structure_kernel)
+        p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
+        s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters) - 1 # no radius_effective
+
+        self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+
+        # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any conflicting
+        # names with P(Q) params will cause a rename; we also lose radius_effective (for now...)
+        s_params = modelinfo.ParameterTable(
+            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len:p_pars_len+s_pars_len])
+
+        # These are the parameters before rename; ignore the first one, as it is radius_effective, which is removed
+        # from the product model to be handled internally (for now...)
+        s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
 
         # Get new rows for QModel
-        new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
+        # Any renamed parameters are stored as data in the relevant item, for later handling
+        new_rows = FittingUtilities.addSimpleParametersToModel(s_params, self.is2D, s_params_orig)
+
+        # TODO: deal with new parameter(s) added to product model, in kernel_parameters[p_pars_len+s_pars_len:]
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
@@ -2107,6 +2121,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         model_row = item.row()
         name_index = self._model_model.index(model_row, 0)
+        name_item = self._model_model.itemFromIndex(name_index)
 
         # Extract changed value.
         try:
@@ -2115,7 +2130,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Unparsable field
             return
 
-        parameter_name = str(self._model_model.data(name_index)) # sld, background etc.
+        # if the item has user data, this is the actual parameter name (e.g. to handle duplicate names)
+        if name_item.data(QtCore.Qt.UserRole):
+            parameter_name = str(name_item.data(QtCore.Qt.UserRole))
+        else:
+            parameter_name = str(self._model_model.data(name_index))
 
         # Update the parameter value - note: this supports +/-inf as well
         self.kernel_module.params[parameter_name] = value

@@ -123,19 +123,35 @@ def addParametersToModel(parameters, kernel_module, is2D):
         item.append([item1, item2, item3, item4, item5])
     return item
 
-def addSimpleParametersToModel(parameters, is2D):
+def addSimpleParametersToModel(parameters, is2D, parameters_original=None):
     """
     Update local ModelModel with sasmodel parameters
+    parameters_original: list of parameters before any tagging on their IDs, e.g. for product model
+    (so that those are the display names; see below)
     """
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
     else:
         params = parameters.iq_parameters
+
+    if parameters_original:
+        # 'parameters_original' contains the parameters as they are to be DISPLAYED, while 'parameters'
+        # contains the parameters as they were renamed; this is for handling name collisions in product model.
+        # The 'real name' of the parameter will be stored in the item's user data.
+        if is2D:
+            params_orig = [p for p in parameters_original.kernel_parameters if p.type != 'magnetic']
+        else:
+            params_orig = parameters_original.iq_parameters
+    else:
+        # no difference in names anyway
+        params_orig = params
+
     item = []
-    for param in params:
+    for param, param_orig in zip(params, params_orig):
         # Create the top level, checkable item
-        item_name = param.name
+        item_name = param_orig.name
         item1 = QtGui.QStandardItem(item_name)
+        item1.setData(param.name, QtCore.Qt.UserRole)
         item1.setCheckable(True)
         item1.setEditable(False)
         # Param values
