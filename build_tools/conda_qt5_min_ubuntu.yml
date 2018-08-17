@@ -16,8 +16,8 @@ dependencies:
  - mako
  - pyinstaller 
  - pyqt>=5.9 # required for GTK themes to work correctly
- - pyopencl
- - pocl
+# - pyopencl
+# - pocl
  - pip:
    - pytools 
    - periodictable 
