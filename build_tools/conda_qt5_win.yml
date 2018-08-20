@@ -22,4 +22,5 @@ dependencies:
    - bumps 
    - xhtml2pdf 
    - qt5reactor 
+   - tinycc
 
