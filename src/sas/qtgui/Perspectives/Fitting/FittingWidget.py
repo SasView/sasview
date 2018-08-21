@@ -1649,7 +1649,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Take func and throw it inside the magnet model row loop
         """
-        for row_i in range(self._model_model.rowCount()):
+        for row_i in range(self._magnet_model.rowCount()):
             func(row_i)
 
     def updateMagnetModelFromList(self, param_dict):
@@ -1661,13 +1661,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         if self._magnet_model.rowCount() == 0:
             return
-
-        def iterateOverMagnetModel(func):
-            """
-            Take func and throw it inside the magnet model row loop
-            """
-            for row_i in range(self._magnet_model.rowCount()):
-                func(row_i)
 
         def updateFittedValues(row):
             # Utility function for main model update
