@@ -3,7 +3,7 @@
 
 ## Set up path for py36 - conda
 export PATH=/home/sasview/anaconda3/bin:$PATH
-
+export QT_QPA_PLATFORM=offscreen
 
 # Set proxy
 export http_proxy=http://192.168.1.1:8123
@@ -45,8 +45,7 @@ python setup.py build install
 cd $WORKSPACE 
 cd sasview
 python src/sas/qtgui/convertUI.py
-python setup.py build docs
-python setup.py install
+python setup.py build docs install
 
 # Pyinstaller
 cd $WORKSPACE 

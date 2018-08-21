@@ -1254,7 +1254,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for current_index in range(self.theory_model.rowCount()):
             #if current_tab_name in self.theory_model.item(current_index).text():
             if current_tab_name == self.theory_model.item(current_index).text():
-                return
                 self.theory_model.removeRow(current_index)
                 break
 
