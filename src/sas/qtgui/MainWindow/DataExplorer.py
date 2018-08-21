@@ -526,11 +526,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
         ids = [list(self.active_plots.values())[id].data.id for id in range(len(self.active_plots))]
+        ids2 = [list(self.active_plots.keys())[id] for id in range(len(self.active_plots))]
 
         new_plots = []
         for item, plot in plots.items():
             plot_id = plot.id
-            if plot_id in ids:
+            if plot_id in ids or plot_id in ids2:
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
                 # Don't plot intermediate results, e.g. P(Q), S(Q)

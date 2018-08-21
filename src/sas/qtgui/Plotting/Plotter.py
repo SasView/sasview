@@ -63,7 +63,7 @@ class PlotterWidget(PlotterBase):
             self.yscale = 'linear'
         self.title(title=value.name)
 
-    def plot(self, data=None, color=None, marker=None, hide_error=False):
+    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
         """
         Add a new plot of self._data to the chart.
         """
@@ -82,7 +82,7 @@ class PlotterWidget(PlotterBase):
                 self.data.ytransform = 'log10(y)'
 
             # Transform data if required.
-            if self.data.xtransform is not None or self.data.ytransform is not None:
+            if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
                 _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
                 if xscale != 'log':
                     self.xscale = xscale
@@ -527,9 +527,8 @@ class PlotterWidget(PlotterBase):
             # This assignment will wrap the label in Latex "$"
             self.xLabel = new_xlabel
             self.yLabel = new_ylabel
-            # Directly overwrite the data to avoid label reassignment
-            self._data = current_plot
-            self.plot()
+
+            self.plot(data=current_plot, transform=False)
 
         pass # debug hook
 
