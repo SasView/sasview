@@ -2226,17 +2226,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current 1D data
         """
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
-        self.calculateResiduals(fitted_data)
+        residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
+
+        new_plots = [fitted_data, residuals]
 
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
         if pq_data is not None:
             pq_data.symbol = "Line"
             self.createNewIndex(pq_data)
+            new_plots.append(pq_data)
         if sq_data is not None:
             sq_data.symbol = "Line"
             self.createNewIndex(sq_data)
+            new_plots.append(sq_data)
+
+        if self.data_is_loaded:
+            GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
 
     def complete2D(self, return_data):
         """
@@ -2272,6 +2279,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
         self.createNewIndex(residuals_plot)
+        return residuals_plot
 
     def onCategoriesChanged(self):
             """
