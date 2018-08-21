@@ -170,7 +170,7 @@ class Reader(FileReader):
                 toks = line.split()
 
                 try:
-                    _x = float(toks[0])
+                    _x = float(toks[4])
                     _y = float(toks[1])
                     _dy = float(toks[2])
                     _dx = float(toks[3])

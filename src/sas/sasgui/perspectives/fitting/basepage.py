@@ -2551,6 +2551,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._update_paramv_on_fit()
             # draw
             self._draw_model()
+            self.Layout()
             self.Refresh()
         except Exception:
             logger.error(traceback.format_exc())

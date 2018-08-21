@@ -247,6 +247,8 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         """
             Complete the loading and compute the slit size
         """
+        if isinstance(data, list):
+            data = data[0]
         if data is None or data.__class__.__name__ == 'Data2D':
             if self.parent.parent is None:
                 return
