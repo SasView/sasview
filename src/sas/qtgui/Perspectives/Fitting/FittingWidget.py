@@ -976,6 +976,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         structure = str(self.cbStructureFactor.currentText())
         if category == CATEGORY_STRUCTURE:
             model = None
+
+        # Reset parameters to fit
+        self.parameters_to_fit = None
+        self.has_error_column = False
+        self.has_poly_error_column = False
+
         self.respondToModelStructure(model=model, structure_factor=structure)
 
     def onCustomModelChange(self):
