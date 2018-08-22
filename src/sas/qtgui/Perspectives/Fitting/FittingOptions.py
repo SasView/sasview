@@ -145,9 +145,15 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
             Utility method for bumps state update
             """
             widget = self.widgetFromOption(option)
-            new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
-                else float(widget.text())
-            self.config.values[self.current_fitter_id][option] = new_value
+            if widget is None:
+                return
+            try:
+                new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
+                    else float(widget.text())
+                self.config.values[self.current_fitter_id][option] = new_value
+            except ValueError:
+                # Don't update bumps if widget has bad data
+                self.reject
 
         # Update the BUMPS singleton
         [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]

@@ -541,7 +541,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     continue
                 # 'sophisticated' test to generate standalone plot for residuals
                 if 'esiduals' in plot.title:
-                    self.plotData([(item, plot)])
+                    self.plotData([(item, plot)], transform=False)
                 else:
                     new_plots.append((item, plot))
 
@@ -582,7 +582,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         #sv.show()
         #============================================
 
-    def plotData(self, plots):
+    def plotData(self, plots, transform=True):
         """
         Takes 1D/2D data and generates a single plot (1D) or multiple plots (2D)
         """
@@ -593,7 +593,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if not 'new_plot' in locals():
                     new_plot = Plotter(self)
                     new_plot.item = item
-                new_plot.plot(plot_set)
+                new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.id] = new_plot
             elif isinstance(plot_set, Data2D):

@@ -334,15 +334,36 @@ def residualsData1D(reference_data, current_data):
     fn = current_data.y[index][0]
     gn = reference_data.y
     en = dy[index][0]
+
+    # x values
+    x_current = current_data.x
+    x_reference = reference_data.x
+
     # build residuals
     residuals = Data1D()
     if len(fn) == len(gn):
         y = (fn - gn)/en
         residuals.y = -y
+    elif len(fn) > len(gn):
+        residuals.y = (fn - gn[1:len(fn)])/en
     else:
-        # TODO: fix case where applying new data from file on top of existing model data
         try:
-            y = (fn - gn[index][0]) / en
+            y = numpy.zeros(len(current_data.y))
+            begin = 0
+            for i, x_value in enumerate(x_reference):
+                if x_value in x_current:
+                    begin = i
+                    break
+            end = len(x_reference)
+            endl = 0
+            for i, x_value in enumerate(list(x_reference)[::-1]):
+                if x_value in x_current:
+                    endl = i
+                    break
+            # make sure we have correct lengths
+            assert len(x_current) == len(x_reference[begin:end-endl])
+
+            y = (fn - gn[begin:end-endl])/en
             residuals.y = y
         except ValueError:
             # value errors may show up every once in a while for malformed columns,
