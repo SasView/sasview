@@ -292,6 +292,30 @@ def updateModelItemWithPlot(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(checkbox_item)
 
+def deleteRedundantPlots(item, new_plots):
+    """
+    Checks all plots that are children of the given item; if any have an ID or name not included in new_plots,
+    it is deleted. Useful for e.g. switching from P(Q)S(Q) to P(Q); this would remove the old S(Q) plot.
+
+    Ensure that new_plots contains ALL the relevant plots(!!!)
+    """
+    assert isinstance(item, QtGui.QStandardItem)
+
+    names = [p.name for p in new_plots if p.name is not None]
+    ids = [p.id for p in new_plots if p.id is not None]
+
+    items_to_delete = []
+
+    for index in range(item.rowCount()):
+        plot_item = item.child(index)
+        if plot_item.isCheckable():
+            plot_data = plot_item.child(0).data()
+            if (plot_data.id is not None) and (plot_data.id not in ids) and (plot_data.name not in names):
+                items_to_delete.append(plot_item)
+
+    for plot_item in items_to_delete:
+        item.removeRow(plot_item.row())
+
 class HashableStandardItem(QtGui.QStandardItem):
     """
     Subclassed standard item with reimplemented __hash__

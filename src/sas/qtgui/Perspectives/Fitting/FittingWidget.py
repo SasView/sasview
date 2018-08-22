@@ -976,6 +976,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         structure = str(self.cbStructureFactor.currentText())
         if category == CATEGORY_STRUCTURE:
             model = None
+
+        # Reset parameters to fit
+        self.parameters_to_fit = None
+        self.has_error_column = False
+        self.has_poly_error_column = False
+
         self.respondToModelStructure(model=model, structure_factor=structure)
 
     def onCustomModelChange(self):
@@ -1649,7 +1655,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Take func and throw it inside the magnet model row loop
         """
-        for row_i in range(self._model_model.rowCount()):
+        for row_i in range(self._magnet_model.rowCount()):
             func(row_i)
 
     def updateMagnetModelFromList(self, param_dict):
@@ -1661,13 +1667,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         if self._magnet_model.rowCount() == 0:
             return
-
-        def iterateOverMagnetModel(func):
-            """
-            Take func and throw it inside the magnet model row loop
-            """
-            for row_i in range(self._magnet_model.rowCount()):
-                func(row_i)
 
         def updateFittedValues(row):
             # Utility function for main model update
@@ -2227,17 +2226,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current 1D data
         """
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
-        self.calculateResiduals(fitted_data)
+        residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
+
+        new_plots = [fitted_data, residuals]
 
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
         if pq_data is not None:
             pq_data.symbol = "Line"
             self.createNewIndex(pq_data)
+            new_plots.append(pq_data)
         if sq_data is not None:
             sq_data.symbol = "Line"
             self.createNewIndex(sq_data)
+            new_plots.append(sq_data)
+
+        if self.data_is_loaded:
+            GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
 
     def complete2D(self, return_data):
         """
@@ -2273,6 +2279,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
         self.createNewIndex(residuals_plot)
+        return residuals_plot
 
     def onCategoriesChanged(self):
             """
