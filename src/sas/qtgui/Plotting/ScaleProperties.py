@@ -11,15 +11,16 @@ from sas.qtgui.Plotting.UI.ScalePropertiesUI import Ui_scalePropertiesUI
 x_values = ["x", "x^(2)", "x^(4)", "ln(x)", "log10(x)", "log10(x^(4))"]
 y_values = ["y", "1/y", "ln(y)", "y^(2)", "y*x^(2)", "y*x^(4)", "1/sqrt(y)",
             "log10(y)", "ln(y*x)", "ln(y*x^(2))", "ln(y*x^(4))", "log10(y*x^(4))"]
-view_values = ["--", "Linear y vs x", "Guinier lny vs x^(2)",
+view_values = ["--", "Linear y vs x", "log(y) vs log(x)", "Guinier lny vs x^(2)",
             "XS Guinier ln(y*x) vs x^(2)", "Porod y*x^(4) vs x^(4)", "Kratky y*x^(2) vs x"]
 view_to_xy = {
     view_values[0]: [None, None], # custom
     view_values[1]: [0, 0], # linear
-    view_values[2]: [1, 2], # Guinier
-    view_values[3]: [1, 8], # XS Guinier
-    view_values[4]: [2, 5], # Porod
-    view_values[5]: [0, 4], # Kratky
+    view_values[2]: [4, 7], # log
+    view_values[3]: [1, 2], # Guinier
+    view_values[4]: [1, 8], # XS Guinier
+    view_values[5]: [2, 5], # Porod
+    view_values[6]: [0, 4], # Kratky
 }
 class ScaleProperties(QtWidgets.QDialog, Ui_scalePropertiesUI):
     def __init__(self, parent=None, init_scale_x='x', init_scale_y='y'):

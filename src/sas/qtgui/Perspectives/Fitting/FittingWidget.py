@@ -183,6 +183,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self._logic[0].data = GuiUtils.dataFromItem(value[0])
         else:
             # batch datasets
+            self._logic = []
             for data_item in value:
                 logic = FittingLogic(data=GuiUtils.dataFromItem(data_item))
                 self._logic.append(logic)
