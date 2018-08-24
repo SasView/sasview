@@ -42,11 +42,11 @@ logger = logging.getLogger(__name__)
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
-    PNL_WIDTH = 450
+    PNL_WIDTH = 500
     PNL_HEIGHT = 320
 else:
     FONT_VARIANT = 1
-    PNL_WIDTH = 590
+    PNL_WIDTH = 655
     PNL_HEIGHT = 350
 M_NAME = 'Model'
 EDITOR_WIDTH = 800
@@ -494,18 +494,25 @@ class TextDialog(wx.Dialog):
         """
         Choose the equation to use depending on whether we now have
         a sum or multiply model then create the appropriate string
+        
+        for the sum model the result will be:
+        scale_factor * (scale1 * model_1 + scale2 * model_2) + background
+        while for ghe multiply model it will just be:
+        scale_factor * (model_1* model_2) + background
         """
         name = ''
         if operator == '*':
             name = 'Multi'
-            factor = 'background'
+            factor_1 = ''
+            factor_2 = ''
         else:
             name = 'Sum'
-            factor = 'scale_factor'
+            factor_1 = 'scale_1 * '
+            factor_2 = 'scale_2 * '
 
         self._operator = operator
-        self.explanation = ("  Plugin_model = scale_factor * (model_1 {} "
-            "model_2) + background").format(operator)
+        self.explanation = ("  Plugin_model = scale_factor * ({}model_1 {} "
+            "{}model_2) + background").format(factor_1,operator,factor_2)
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME
 
