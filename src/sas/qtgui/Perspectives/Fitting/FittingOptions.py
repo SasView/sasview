@@ -137,6 +137,22 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Update the fitter object
         """
+        options = self.config.values[self.current_fitter_id]
+        for option in options.keys():
+            # Find the widget name of the option
+            # e.g. 'samples' for 'dream' is 'self.samples_dream'
+            widget_name = 'self.'+option+'_'+self.current_fitter_id
+            line_edit = eval(widget_name)
+            if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
+                continue
+            color = line_edit.palette().color(QtGui.QPalette.Background).name()
+            if color == '#fff79a':
+                # Show a custom tooltip and return
+                tooltip = "<html><b>Please enter valid values in all fields.</html>"
+                QtWidgets.QToolTip.showText(line_edit.mapToGlobal(
+                    QtCore.QPoint(line_edit.rect().right(), line_edit.rect().bottom() + 2)), tooltip)
+                return
+
         # Notify the perspective, so the window title is updated
         self.fit_option_changed.emit(self.cbAlgorithm.currentText())
 
@@ -157,6 +173,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
 
         # Update the BUMPS singleton
         [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
+        self.close()
 
     def onHelp(self):
         """

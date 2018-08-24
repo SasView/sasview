@@ -264,7 +264,8 @@ def calculateChi2(reference_data, current_data):
     """
     Calculate Chi2 value between two sets of data
     """
-
+    if reference_data is None or current_data is None:
+        return None
     # WEIGHING INPUT
     #from sas.sasgui.perspectives.fitting.utils import get_weight
     #flag = self.get_weight_flag()
