@@ -46,7 +46,7 @@ if sys.platform.count("win32") > 0:
     PNL_HEIGHT = 320
 else:
     FONT_VARIANT = 1
-    PNL_WIDTH = 655
+    PNL_WIDTH = 590
     PNL_HEIGHT = 350
 M_NAME = 'Model'
 EDITOR_WIDTH = 800
