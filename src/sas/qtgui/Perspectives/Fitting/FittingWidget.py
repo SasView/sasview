@@ -1123,8 +1123,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # just the last word
             parameter_name = parameter_name.rsplit()[-1]
 
+        delegate = self.lstPoly.itemDelegate()
+
         # Extract changed value.
-        if model_column == self.lstPoly.itemDelegate().poly_parameter:
+        if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
             parameter_name = parameter_name + '.width'
@@ -1134,8 +1136,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 if parameter_name in self.parameters_to_fit:
                     self.parameters_to_fit.remove(parameter_name)
             self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
-            return
-        elif model_column in [self.lstPoly.itemDelegate().poly_min, self.lstPoly.itemDelegate().poly_max]:
+
+        elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
                 value = GuiUtils.toDouble(item.text())
             except TypeError:
@@ -1143,10 +1145,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
 
             current_details = self.kernel_module.details[parameter_name]
-            current_details[model_column-1] = value
-        elif model_column == self.lstPoly.itemDelegate().poly_function:
+            if self.has_poly_error_column:
+                # err column changes the indexing
+                current_details[model_column-2] = value
+            else:
+                current_details[model_column-1] = value
+
+        elif model_column == delegate.poly_function:
             # name of the function - just pass
-            return
+            pass
+
         else:
             try:
                 value = GuiUtils.toDouble(item.text())
@@ -1156,11 +1164,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
-            self.kernel_module.setParam(parameter_name + '.' + \
-                                        self.lstPoly.itemDelegate().columnDict()[model_column], value)
+            self.kernel_module.setParam(parameter_name + '.' + delegate.columnDict()[model_column], value)
 
             # Update plot
             self.updateData()
+
+        # update in param model
+        if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
+            row = self.getRowFromName(parameter_name)
+            param_item = self._model_model.item(row)
+            param_item.child(0).child(0, model_column).setText(item.text())
 
     def onMagnetModelChange(self, item):
         """
@@ -1543,6 +1556,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._model_model.item(row, 0).child(0).child(0,1).setText(param_repr)
+            # modify the param error
+            if self.has_error_column:
+                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                self._model_model.item(row, 0).child(0).child(0,2).setText(error_repr)
 
         def createErrorColumn(row):
             # Utility function for error column update
@@ -1557,31 +1574,51 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             error_column.append(item)
 
+        def createPolyErrorColumn(row):
+            # Utility function for error column update in the polydispersity sub-rows
+            # NOTE: only creates empty items; updatePolyValues adds the error value
+            item = self._model_model.item(row, 0)
+            if not item.hasChildren():
+                return
+            poly_item = item.child(0)
+            if not poly_item.hasChildren():
+                return
+            poly_item.insertColumn(2, [QtGui.QStandardItem("")])
+
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
         self._model_model.blockSignals(True)
+
+        if not self.has_error_column:
+            # create top-level error column
+            error_column = []
+            self.lstParams.itemDelegate().addErrorColumn()
+            self.iterateOverModel(createErrorColumn)
+
+            # we need to enable signals for this, otherwise the final column mysteriously disappears (don't ask, I don't
+            # know)
+            self._model_model.blockSignals(False)
+            self._model_model.insertColumn(2, error_column)
+            self._model_model.blockSignals(True)
+
+            FittingUtilities.addErrorHeadersToModel(self._model_model)
+
+            # create error column in polydispersity sub-rows
+            self.iterateOverModel(createPolyErrorColumn)
+
+            self.has_error_column = True
+
         self.iterateOverModel(updateFittedValues)
         self.iterateOverModel(updatePolyValues)
+
         self._model_model.blockSignals(False)
 
-        if self.has_error_column:
-            return
-
-        error_column = []
-        self.lstParams.itemDelegate().addErrorColumn()
-        self.iterateOverModel(createErrorColumn)
-
-        # switch off reponse to model change
-        self._model_model.insertColumn(2, error_column)
-        FittingUtilities.addErrorHeadersToModel(self._model_model)
         # Adjust the table cells width.
         # TODO: find a way to dynamically adjust column width while resized expanding
         self.lstParams.resizeColumnToContents(0)
         self.lstParams.resizeColumnToContents(4)
         self.lstParams.resizeColumnToContents(5)
         self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
-        self.has_error_column = True
 
     def iterateOverPolyModel(self, func):
         """
@@ -2431,7 +2468,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if param_name !=  param.name:
                 return
             # Modify the param value
-            self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
+            if self.has_error_column:
+                # err column changes the indexing
+                self._model_model.item(row, 0).child(0).child(0,5).setText(combo_string)
+            else:
+                self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
 
         if combo_string == 'array':
             try:

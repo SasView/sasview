@@ -128,6 +128,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
 
         self.poly_parameter = 0
         self.poly_pd = 1
+        self.poly_error = None
         self.poly_min = 2
         self.poly_max = 3
         self.poly_npts = 4
@@ -152,6 +153,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         self.poly_parameter = 0
         self.poly_pd = 1
+        self.poly_error = 2
         self.poly_min = 3
         self.poly_max = 4
         self.poly_npts = 5
