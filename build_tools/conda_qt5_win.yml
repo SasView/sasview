@@ -2,6 +2,7 @@ name: qt5_win
 channels:
   - conda-forge
 dependencies:
+ - python=3
  - matplotlib==2.1.0
  - scipy
  - hdf5
