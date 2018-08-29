@@ -67,9 +67,7 @@ class Reader(XMLreader):
         Resets the class state to a base case when loading a new data file so previous
         data files do not appear a second time
         """
-        self.current_datainfo = None
-        self.current_dataset = None
-        self.current_data1d = None
+        super(Reader, self).reset_state()
         self.data = []
         self.process = Process()
         self.transspectrum = TransmissionSpectrum()
@@ -78,13 +76,12 @@ class Reader(XMLreader):
         self.detector = Detector()
         self.names = []
         self.cansas_defaults = {}
-        self.output = []
         self.ns_list = None
         self.logging = []
         self.encoding = None
 
     def read(self, xml_file, schema_path="", invalid=True):
-        if schema_path != "" or invalid != True:
+        if schema_path != "" or not invalid:
             # read has been called from self.get_file_contents because xml file doens't conform to schema
             _, self.extension = os.path.splitext(os.path.basename(xml_file))
             return self.get_file_contents(xml_file=xml_file, schema_path=schema_path, invalid=invalid)
@@ -944,7 +941,7 @@ class Reader(XMLreader):
         written = written | self.write_node( \
             pos, "z", datainfo.sample.position.z,
             {"unit": datainfo.sample.position_unit})
-        if written == True:
+        if written:
             self.append(pos, sample)
 
         ori = self.create_element("orientation")
@@ -957,7 +954,7 @@ class Reader(XMLreader):
         written = written | self.write_node( \
             ori, "yaw", datainfo.sample.orientation.z,
             {"unit": datainfo.sample.orientation_unit})
-        if written == True:
+        if written:
             self.append(ori, sample)
 
         for item in datainfo.sample.details:
@@ -1004,7 +1001,7 @@ class Reader(XMLreader):
         written = written | self.write_node( \
             size, "z", datainfo.source.beam_size.z,
             {"unit": datainfo.source.beam_size_unit})
-        if written == True:
+        if written:
             self.append(size, source)
 
         self.write_node(source, "beam_shape", datainfo.source.beam_shape)
@@ -1060,7 +1057,7 @@ class Reader(XMLreader):
                 written = written | self.write_node( \
                     size, "z", aperture.size.z,
                     {"unit": aperture.size_unit})
-                if written == True:
+                if written:
                     self.append(size, apert)
 
                 self.write_node(apert, "distance", aperture.distance,
@@ -1083,7 +1080,7 @@ class Reader(XMLreader):
             written = self.write_node(det, "name", item.name)
             written = written | self.write_node(det, "SDD", item.distance,
                                                 {"unit": item.distance_unit})
-            if written == True:
+            if written:
                 self.append(det, instr)
 
             off = self.create_element("offset")
@@ -1093,7 +1090,7 @@ class Reader(XMLreader):
                                                 {"unit": item.offset_unit})
             written = written | self.write_node(off, "z", item.offset.z,
                                                 {"unit": item.offset_unit})
-            if written == True:
+            if written:
                 self.append(off, det)
 
             ori = self.create_element("orientation")
@@ -1105,7 +1102,7 @@ class Reader(XMLreader):
             written = written | self.write_node(ori, "yaw",
                                                 item.orientation.z,
                                                 {"unit": item.orientation_unit})
-            if written == True:
+            if written:
                 self.append(ori, det)
 
             center = self.create_element("beam_center")
@@ -1117,7 +1114,7 @@ class Reader(XMLreader):
             written = written | self.write_node(center, "z",
                                                 item.beam_center.z,
                                                 {"unit": item.beam_center_unit})
-            if written == True:
+            if written:
                 self.append(center, det)
 
             pix = self.create_element("pixel_size")
@@ -1127,7 +1124,7 @@ class Reader(XMLreader):
                                                 {"unit": item.pixel_size_unit})
             written = written | self.write_node(pix, "z", item.pixel_size.z,
                                                 {"unit": item.pixel_size_unit})
-            if written == True:
+            if written:
                 self.append(pix, det)
             self.write_node(det, "slit_length", item.slit_length,
                 {"unit": item.slit_length_unit})

@@ -25,6 +25,7 @@ FILE_ASSOCIATIONS = {
     ".txt": "ascii_reader",
     ".dat": "red2d_reader",
     ".abs": "abs_reader",
+    ".cor": "abs_reader",
     ".sans": "danse_reader",
     ".pdh": "anton_paar_saxs_reader"
 }

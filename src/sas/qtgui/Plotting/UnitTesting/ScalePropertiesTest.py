@@ -30,7 +30,7 @@ class ScalePropertiesTest(unittest.TestCase):
         self.assertEqual(self.widget.windowTitle(), "Scale Properties")
         self.assertEqual(self.widget.cbX.count(), 6)
         self.assertEqual(self.widget.cbY.count(), 12)
-        self.assertEqual(self.widget.cbView.count(), 6)
+        self.assertEqual(self.widget.cbView.count(), 7)
         
     def testGetValues(self):
         '''Test the values returned'''
@@ -43,7 +43,7 @@ class ScalePropertiesTest(unittest.TestCase):
         '''Test various settings of view'''
         self.widget.cbView.setCurrentIndex(1)
         self.assertEqual(self.widget.getValues(), ("x", "y"))
-        self.widget.cbView.setCurrentIndex(5)
+        self.widget.cbView.setCurrentIndex(6)
         self.assertEqual(self.widget.getValues(), ("x", "y*x^(2)"))
 
         # Assure the View combobox resets on the x index changes

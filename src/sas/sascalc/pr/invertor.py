@@ -221,10 +221,7 @@ class Invertor(Cinvertor):
             return self.get_slit_width()
         elif name == 'est_bck':
             value = self.get_est_bck()
-            if value == 1:
-                return True
-            else:
-                return False
+            return value == 1
         elif name in self.__dict__:
             return self.__dict__[name]
         return None
@@ -459,7 +456,7 @@ class Invertor(Cinvertor):
             nq = 0
 
         # If we need to fit the background, add a term
-        if self.est_bck == True:
+        if self.est_bck:
             nfunc_0 = nfunc
             nfunc += 1
 
@@ -499,13 +496,13 @@ class Invertor(Cinvertor):
         try:
             cov = np.linalg.pinv(inv_cov)
             err = math.fabs(chi2 / float(npts - nfunc)) * cov
-        except Exception as ex:
+        except:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logger.error(ex)
+            logger.error(sys.exc_value)
 
         # Keep a copy of the last output
-        if self.est_bck == False:
+        if not self.est_bck:
             self.out = c
             self.cov = err
         else:
@@ -539,15 +536,15 @@ class Invertor(Cinvertor):
         :return: number of terms, alpha, message
 
         """
-        from sas.sascalc.pr.num_term import NTermEstimator
+        from .num_term import NTermEstimator
         estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
-        except Exception as ex:
+        except:
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % ex)
+            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -633,8 +630,8 @@ class Invertor(Cinvertor):
 
                 return best_alpha, message, elapsed
 
-        except Exception as ex:
-            message = "Invertor.estimate_alpha: %s" % ex
+        except:
+            message = "Invertor.estimate_alpha: %s" % sys.exc_value
             return 0, message, elapsed
 
     def to_file(self, path, npts=100):
@@ -657,7 +654,7 @@ class Invertor(Cinvertor):
         file.write("#slit_height=%g\n" % self.slit_height)
         file.write("#slit_width=%g\n" % self.slit_width)
         file.write("#background=%g\n" % self.background)
-        if self.est_bck == True:
+        if self.est_bck:
             file.write("#has_bck=1\n")
         else:
             file.write("#has_bck=0\n")
@@ -737,10 +734,7 @@ class Invertor(Cinvertor):
                         self.background = float(toks[1])
                     elif line.startswith('#has_bck='):
                         toks = line.split('=')
-                        if int(toks[1]) == 1:
-                            self.est_bck = True
-                        else:
-                            self.est_bck = False
+                        self.est_bck = int(toks[1]) == 1
 
                     # Now read in the parameters
                     elif line.startswith('#C_'):
@@ -753,8 +747,8 @@ class Invertor(Cinvertor):
 
                         self.cov[i][i] = float(toks2[1])
 
-            except Exception as ex:
-                msg = "Invertor.from_file: corrupted file\n%s" % ex
+            except:
+                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_value
                 raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)

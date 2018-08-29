@@ -54,7 +54,7 @@ class NTermEstimator(object):
         odd = self.is_odd(dv)
         medi = 0
         for i in range(dv):
-            if odd == True:
+            if odd:
                 medi = osc[int(med)]
             else:
                 medi = osc[int(med) - 1]
@@ -97,9 +97,9 @@ class NTermEstimator(object):
             if self.err_list[i] < 0.8 and self.err_list[i] >= 0.7:
                 new_osc3.append(self.osc_list[i])
 
-        if flag9 == True:
+        if flag9:
             self.dataset = new_osc1
-        elif flag8 == True:
+        elif flag8:
             self.dataset = new_osc2
         else:
             self.dataset = new_osc3
@@ -140,14 +140,13 @@ class NTermEstimator(object):
             nts = self.compare_err()
             div = len(nts)
             tem = float(div) / 2.0
-            odd = self.is_odd(div)
-            if odd == True:
+            if self.is_odd(div):
                 nt = nts[int(tem)]
             else:
                 nt = nts[int(tem) - 1]
             return nt, self.alpha_list[nt - 10], self.mess_list[nt - 10]
         except:
-            #TODO: check the logic above and make sure it doesn't 
+            #TODO: check the logic above and make sure it doesn't
             # rely on the try-except.
             return self.nterm_min, self.invertor.alpha, ''
 
@@ -182,8 +181,8 @@ def load(path):
                 data_x = np.append(data_x, test_x)
                 data_y = np.append(data_y, test_y)
                 data_err = np.append(data_err, err)
-            except Exception as ex:
-                logger.error(ex)
+            except:
+                logger.error(sys.exc_value)
 
     return data_x, data_y, data_err
 
