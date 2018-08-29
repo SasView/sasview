@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import logging
+import traceback
 from xhtml2pdf import pisa
 
 from PyQt5 import QtWidgets
@@ -99,12 +100,14 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         # Create files with charts
         pictures = self.getPictures(basename)
 
-        # translate png references into html from base64 string to on-disk name
-        cleanr = re.compile('<img src.*$')
+        # self.data_html contains all images at the end of the report, in base64 form;
+        # replace them all with their saved on-disk filenames
+        cleanr = re.compile('<img src.*$', re.DOTALL)
         replacement_name = ""
         html = self.data_html
         for picture in pictures:
             replacement_name += '<img src="'+ picture + '"><p></p>'
+        replacement_name += '\n'
         # <img src="data:image/png;.*>  => <img src=filename>
         html = re.sub(cleanr, replacement_name, self.data_html)
 
@@ -177,7 +180,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
                                             encoding='UTF-8')
                 return pisaStatus.err
         except Exception as ex:
-            logging.error("Error creating pdf: " + str(ex))
+            # logging.error("Error creating pdf: " + str(ex))
+            logging.error("Error creating pdf: " + traceback.format_exc())
         return False
 
 
