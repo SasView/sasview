@@ -150,7 +150,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     @staticmethod
     def onTXTSave(data, filename):
         """
-        Simple txt file serializatio
+        Simple txt file serialization
         """
         with open(filename, 'w') as f:
             f.write(data)
