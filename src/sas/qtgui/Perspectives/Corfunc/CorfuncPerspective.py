@@ -108,7 +108,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
-        self._allow_close = True
+        self._allow_close = False
         self._model_item = None
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
