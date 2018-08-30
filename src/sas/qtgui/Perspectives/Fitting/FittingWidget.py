@@ -2289,7 +2289,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if hasattr(plot, "id") and "esidual" in plot.id:
                 # TODO: fix updates to residuals plot
                 pass
-            else:
+            elif plot is not None:
                 self.communicate.plotUpdateSignal.emit([plot])
 
     def complete2D(self, return_data):
