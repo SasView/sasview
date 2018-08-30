@@ -2274,14 +2274,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if pq_data is not None:
             pq_data.symbol = "Line"
             self.createNewIndex(pq_data)
+            # self.communicate.plotUpdateSignal.emit([pq_data])
             new_plots.append(pq_data)
         if sq_data is not None:
             sq_data.symbol = "Line"
             self.createNewIndex(sq_data)
+            # self.communicate.plotUpdateSignal.emit([sq_data])
             new_plots.append(sq_data)
 
         if self.data_is_loaded:
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
+
+        for plot in new_plots:
+            if hasattr(plot, "id") and "esidual" in plot.id:
+                # TODO: fix updates to residuals plot
+                pass
+            else:
+                self.communicate.plotUpdateSignal.emit([plot])
 
     def complete2D(self, return_data):
         """
@@ -2293,7 +2302,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def calculateResiduals(self, fitted_data):
         """
-        Calculate and print Chi2 and display chart of residuals
+        Calculate and print Chi2 and display chart of residuals. Returns residuals plot object.
         """
         # Create a new index for holding data
         fitted_data.symbol = "Line"
@@ -2308,7 +2317,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-        self.communicate.plotUpdateSignal.emit([fitted_data])
+        # self.communicate.plotUpdateSignal.emit([fitted_data])
 
         # Plot residuals if actual data
         if not self.data_is_loaded:

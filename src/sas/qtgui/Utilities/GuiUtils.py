@@ -335,7 +335,6 @@ class HashableStandardItem(QtGui.QStandardItem):
         clone.__hash__ = self.__hash__
         return clone
 
-
 def getMonospaceFont():
     """Convenience function; returns a monospace font to be used in any shells, code editors, etc."""
 
