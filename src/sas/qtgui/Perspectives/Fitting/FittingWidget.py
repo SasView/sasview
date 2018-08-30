@@ -2067,21 +2067,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters) - 1 # no radius_effective
 
         self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+        all_params = self.kernel_module._model_info.parameters.kernel_parameters
+        all_param_names = [param.name for param in all_params]
 
         # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any conflicting
         # names with P(Q) params will cause a rename; we also lose radius_effective (for now...)
-        s_params = modelinfo.ParameterTable(
-            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len:p_pars_len+s_pars_len])
 
-        # These are the parameters before rename; ignore the first one, as it is radius_effective, which is removed
-        # from the product model to be handled internally (for now...)
-        s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
+        if "radius_effective_mode" in all_param_names:
+            # for this version of sasmodels we do NOT kill radius_effective
+            s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
+            s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
+        else:
+            # kill radius_effective
+            s_pars_len -= 1
+            s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
+            s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
 
         # Get new rows for QModel
         # Any renamed parameters are stored as data in the relevant item, for later handling
         new_rows = FittingUtilities.addSimpleParametersToModel(s_params, self.is2D, s_params_orig)
 
-        # TODO: deal with new parameter(s) added to product model, in kernel_parameters[p_pars_len+s_pars_len:]
+        # TODO: merge the rest of this implementation in
+        # These parameters are not part of P(Q) nor S(Q), but are added only to the product model (e.g. specifying
+        # structure factor calculation mode)
+        # product_params = all_params[p_pars_len+s_pars_len:]
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
@@ -2342,6 +2351,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if self.data_is_loaded:
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
+
+        # TODO: merge rest of beta approx implementation in
+        # TODO: refactor
+        # deal with constrained radius_effective
+        # for row in range(self._model_model.rowCount()):
+        #     if self._model_model.item(row, 0).text() == "radius_effective_mode":
+        #         if GuiUtils.toDouble(self._model_model.item(row, 1).text()) == 0:
+        #             return
+        # radius_effective = intermediate_ER()
+        # if radius_effective:
+        #     for row in range(self._model_model.rowCount()):
+        #         if self._model_model.item(row, 0).text() == "radius_effective":
+        #             self._model_model.item(row, 1).setText(str(radius_effective))
+        #             break
 
         for plot in new_plots:
             if hasattr(plot, "id") and "esidual" in plot.id:

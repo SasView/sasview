@@ -159,7 +159,7 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None):
         item2 = QtGui.QStandardItem(str(param.default))
         item4 = QtGui.QStandardItem(str(param.limits[0]))
         item5 = QtGui.QStandardItem(str(param.limits[1]))
-        item6 = QtGui.QStandardItem(param.units)
+        item6 = QtGui.QStandardItem(str(param.units))
         item6.setEditable(False)
         item.append([item1, item2, item4, item5, item6])
     return item
