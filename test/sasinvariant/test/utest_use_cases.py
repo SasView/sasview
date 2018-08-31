@@ -3,9 +3,15 @@
   
 """
 #TODO: there's no test for smeared extrapolation
+
+import os.path
 import unittest
 from sas.sascalc.dataloader.loader import  Loader
 from sas.sascalc.invariant import invariant
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 class Data1D:
@@ -17,7 +23,7 @@ class TestLineFit(unittest.TestCase):
         Test Line fit 
     """
     def setUp(self):
-        self.data_list = Loader().load("linefittest.txt")
+        self.data_list = Loader().load(find("linefittest.txt"))
         self.data = self.data_list[0]
 
     def test_fit_line_data(self):
@@ -56,7 +62,7 @@ class TestLineFitNoweight(unittest.TestCase):
         Test Line fit without weight(dy data)
     """
     def setUp(self):
-        self.data_list = Loader().load("linefittest_no_weight.txt")
+        self.data_list = Loader().load(find("linefittest_no_weight.txt"))
         self.data = self.data_list[0]
 
     def skip_test_fit_line_data_no_weight(self):
@@ -95,7 +101,7 @@ class TestInvPolySphere(unittest.TestCase):
         Test unsmeared data for invariant computation
     """
     def setUp(self):
-        self.data_list = Loader().load("PolySpheres.txt")
+        self.data_list = Loader().load(find("PolySpheres.txt"))
         self.data = self.data_list[0]
 
     def test_wrong_data(self):
@@ -277,7 +283,7 @@ class TestInvPinholeSmear(unittest.TestCase):
     """
     def setUp(self):
         # data with smear info
-        list = Loader().load("latex_smeared.xml")
+        list = Loader().load(find("latex_smeared.xml"))
         self.data_q_smear = list[0]
 
     def test_use_case_1(self):
