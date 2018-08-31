@@ -436,6 +436,7 @@ class GuiManager(object):
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
+        self._workspace.actionOrientation_Viewer.triggered.connect(self.actionOrientation_Viewer)
         # Fitting
         self._workspace.actionNew_Fit_Page.triggered.connect(self.actionNew_Fit_Page)
         self._workspace.actionConstrained_Fit.triggered.connect(self.actionConstrained_Fit)
@@ -680,6 +681,16 @@ class GuiManager(object):
         self.ipDockWidget.setObjectName("IPythonDockWidget")
         self.ipDockWidget.setWidget(terminal)
         self._workspace.addDockWidget(Qt.RightDockWidgetArea, self.ipDockWidget)
+
+    def actionOrientation_Viewer(self):
+        """
+        Make sasmodels orientation & jitter viewer available
+        """
+        from sasmodels.jitter import run as orientation_run
+        try:
+            orientation_run()
+        except Exception as ex:
+            logging.error(str(ex))
 
     def actionImage_Viewer(self):
         """

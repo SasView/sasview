@@ -90,6 +90,7 @@
     <addaction name="actionGeneric_Scattering_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionPython_Shell_Editor"/>
+    <addaction name="actionOrientation_Viewer"/>
     <addaction name="actionImage_Viewer"/>
    </widget>
    <widget class="QMenu" name="menuFitting">
@@ -526,6 +527,11 @@
   <action name="actionAddMult_Models">
    <property name="text">
     <string>Add/Multiply Models</string>
+   </property>
+  </action>
+  <action name="actionOrientation_Viewer">
+   <property name="text">
+    <string>Orientation Viewer</string>
    </property>
   </action>
  </widget>
