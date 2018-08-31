@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets
 
 import functools
 import copy
-import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.font_manager import FontProperties
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
@@ -125,6 +125,7 @@ class PlotterWidget(PlotterBase):
             color = self.data.custom_color
 
         color = PlotUtilities.getValidColor(color)
+        self.data.custom_color = color
 
         markersize = self._data.markersize
 
@@ -160,6 +161,10 @@ class PlotterWidget(PlotterBase):
                             xlolims=False, xuplims=False,
                             label=self._title,
                             picker=True)
+
+        # Now we know what the potential new color is, let's save it
+        if isinstance(line, mpl.lines.Line2D):
+            self.data.custom_color = line.get_color()
 
         # Update the list of data sets (plots) in chart
         self.plot_dict[self._data.id] = self.data
@@ -432,7 +437,7 @@ class PlotterWidget(PlotterBase):
 
         self.plot_dict = {}
 
-        plt.cla()
+        mpl.pyplot.cla()
         self.ax.cla()
 
         for ids in plot_dict:
@@ -495,7 +500,7 @@ class PlotterWidget(PlotterBase):
         self.plot_dict = {}
 
         # Clean the canvas
-        plt.cla()
+        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate the plots but reverse the error flag for the current
