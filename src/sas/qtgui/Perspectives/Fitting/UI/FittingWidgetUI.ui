@@ -312,6 +312,9 @@
        </item>
        <item row="1" column="3">
         <widget class="QGroupBox" name="groupBox_9">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/DOF (DOF=N&lt;span style=&quot; vertical-align:sub;&quot;&gt;pts&lt;/span&gt;-N&lt;span style=&quot; vertical-align:sub;&quot;&gt;par&lt;/span&gt; fitted)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="title">
           <string>Fitting error</string>
          </property>
