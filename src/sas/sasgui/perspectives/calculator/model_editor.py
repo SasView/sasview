@@ -497,7 +497,7 @@ class TextDialog(wx.Dialog):
         
         for the sum model the result will be:
         scale_factor * (scale1 * model_1 + scale2 * model_2) + background
-        while for ghe multiply model it will just be:
+        while for the multiply model it will just be:
         scale_factor * (model_1* model_2) + background
         """
         name = ''
