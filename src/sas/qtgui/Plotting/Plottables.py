@@ -437,7 +437,7 @@ class Plottable(object):
     # Flag to set whether a plottable has an interactor or not
     interactive = True
     custom_color = None
-    markersize = 5  # default marker size is 'size 5'
+    markersize = 3  # default marker size is 'size 3'
 
     def __init__(self):
         self.view = View()
@@ -1045,7 +1045,7 @@ class PlottableData1D(Plottable):
         self.view = View(self.x, self.y, self.dx, self.dy)
         self.symbol = 0
         self.custom_color = None
-        self.markersize = 5
+        self.markersize = 3
         self.id = None
         self.zorder = 1
         self.hide_error = False

@@ -543,7 +543,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     continue
                 # 'sophisticated' test to generate standalone plot for residuals
                 if 'esiduals' in plot.title:
-                    self.plotData([(item, plot)], transform=False)
+                    plot.yscale='linear'
+                    self.plotData([(item, plot)])
                 else:
                     new_plots.append((item, plot))
 
