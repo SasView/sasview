@@ -225,7 +225,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Dictionary of {model name: model class} for the current category
         self.models = {}
         # Parameters to fit
-        self.parameters_to_fit = None
+        self.main_params_to_fit = []
+        self.poly_params_to_fit = []
+        self.magnet_params_to_fit = []
+
         # Fit options
         self.q_range_min = 0.005
         self.q_range_max = 0.1
@@ -955,7 +958,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.setCurrentIndex(0)
 
         # Reset parameters to fit
-        self.parameters_to_fit = None
+        self.resetParametersToFit()
         self.has_error_column = False
         self.has_poly_error_column = False
 
@@ -979,11 +982,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model = None
 
         # Reset parameters to fit
-        self.parameters_to_fit = None
+        self.resetParametersToFit()
         self.has_error_column = False
         self.has_poly_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=structure)
+
+    def resetParametersToFit(self):
+        """
+        Clears the list of parameters to be fitted
+        """
+        self.main_params_to_fit = []
+        self.poly_params_to_fit = []
+        self.magnet_params_to_fit = []
 
     def onCustomModelChange(self):
         """
@@ -1131,11 +1142,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             value = item.checkState()
             parameter_name = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
-                self.parameters_to_fit.append(parameter_name)
+                self.poly_params_to_fit.append(parameter_name)
             else:
-                if parameter_name in self.parameters_to_fit:
-                    self.parameters_to_fit.remove(parameter_name)
-            self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
+                if parameter_name in self.poly_params_to_fit:
+                    self.poly_params_to_fit.remove(parameter_name)
+            self.cmdFit.setEnabled(self.haveParamsToFit())
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
@@ -1187,11 +1198,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == 0:
             value = item.checkState()
             if value == QtCore.Qt.Checked:
-                self.parameters_to_fit.append(parameter_name)
+                self.magnet_params_to_fit.append(parameter_name)
             else:
-                if parameter_name in self.parameters_to_fit:
-                    self.parameters_to_fit.remove(parameter_name)
-            self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
+                if parameter_name in self.magnet_params_to_fit:
+                    self.magnet_params_to_fit.remove(parameter_name)
+            self.cmdFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
             return
@@ -1476,7 +1487,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model = self.kernel_module
         qmin = self.q_range_min
         qmax = self.q_range_max
-        params_to_fit = self.parameters_to_fit
+
+        params_to_fit = self.main_params_to_fit
+        if self.chkPolydispersity.isChecked():
+            params_to_fit += self.poly_params_to_fit
+        if self.chkMagnetism.isChecked():
+            params_to_fit += self.magnet_params_to_fit
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
 
@@ -2045,6 +2061,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
+    def haveParamsToFit(self):
+        """
+        Finds out if there are any parameters ready to be fitted
+        """
+        return (self.main_params_to_fit!=[]
+                or self.poly_params_to_fit!=[]
+                or self.magnet_params_to_fit != []) and \
+                self.logic.data_is_loaded
+
     def onMainParamsChange(self, item):
         """
         Callback method for updating the sasmodel parameters with the GUI values
@@ -2053,7 +2078,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if model_column == 0:
             self.checkboxSelected(item)
-            self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
+            self.cmdFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
             return
@@ -2112,18 +2137,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._model_model.blockSignals(True)
         # Convert to proper indices and set requested enablement
         self.setParameterSelection(status)
-        #[self._model_model.item(row, 0).setCheckState(status) for row in self.selectedParameters()]
         self._model_model.blockSignals(False)
 
         # update the list of parameters to fit
-        main_params = self.checkedListFromModel(self._model_model)
-        poly_params = self.checkedListFromModel(self._poly_model)
-        magnet_params = self.checkedListFromModel(self._magnet_model)
-
-        # Retrieve poly params names
-        poly_params = [param.rsplit()[-1] + '.width' for param in poly_params]
-
-        self.parameters_to_fit = main_params + poly_params + magnet_params
+        self.main_params_to_fit = self.checkedListFromModel(self._model_model)
 
     def checkedListFromModel(self, model):
         """
@@ -2751,7 +2768,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fp.current_factor = ''
 
         fp.chi2 = self.chi2
-        fp.parameters_to_fit = self.parameters_to_fit
+        fp.main_params_to_fit = self.main_params_to_fit
+        fp.poly_params_to_fit = self.poly_params_to_fit
+        fp.magnet_params_to_fit = self.magnet_params_to_fit
         fp.kernel_module = self.kernel_module
 
         # Algorithm options
