@@ -131,7 +131,7 @@ class PlotterWidget(PlotterBase):
         markersize = self._data.markersize
 
         # Include scaling (log vs. linear)
-        ax.set_xscale(self.xscale, nonposy='clip')
+        ax.set_xscale(self.xscale, nonposx='clip')
         ax.set_yscale(self.yscale, nonposy='clip')
 
         # define the ranges
