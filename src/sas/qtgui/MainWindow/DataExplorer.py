@@ -825,6 +825,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         return wlist
 
+    def setItemsCheckability(self, model, dimension=None, checked=False):
+        """
+        For a given model, check or uncheck all items of given dimension
+        """
+        mode = QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked
+
+        assert isinstance(checked, bool)
+
+        types = (None, Data1D, Data2D)
+        assert dimension in types
+
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if dimension is not None and not isinstance(GuiUtils.dataFromItem(item), dimension):
+                continue
+            if item.isCheckable() and item.checkState() != mode:
+                item.setCheckState(mode)
+            # look for all children
+            for inner_index in range(item.rowCount()):
+                child = item.child(inner_index)
+                if child.isCheckable() and child.checkState() != mode:
+                    child.setCheckState(mode)
+
     def selectData(self, index):
         """
         Callback method for modifying the TreeView on Selection Options change
@@ -835,74 +858,27 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Respond appropriately
         if index == 0:
-            # Select All
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Unchecked:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, checked=True)
+
         elif index == 1:
             # De-select All
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, checked=False)
 
         elif index == 2:
             # Select All 1-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                item.setCheckState(QtCore.Qt.Unchecked)
-
-                try:
-                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if is1D:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, dimension=Data1D, checked=True)
 
         elif index == 3:
             # Unselect All 1-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-
-                try:
-                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is1D:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, dimension=Data1D, checked=False)
 
         elif index == 4:
             # Select All 2-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                item.setCheckState(QtCore.Qt.Unchecked)
-                try:
-                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if is2D:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, dimension=Data2D, checked=True)
 
         elif index == 5:
             # Unselect All 2-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-
-                try:
-                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is2D:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, dimension=Data2D, checked=False)
 
         else:
             msg = "Incorrect value in the Selection Option"

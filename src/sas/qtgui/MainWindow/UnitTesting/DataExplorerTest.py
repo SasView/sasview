@@ -70,7 +70,7 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(self.form.cmdDeleteTheory.text(), "Delete")
         self.assertEqual(self.form.cmdFreeze.text(), "Freeze Theory")
         self.assertEqual(self.form.cmdSendTo.text(), "Send data to")
-        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(48, 48))
+        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(32, 32))
         self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
         self.assertEqual(self.form.chkBatch.text(), "Batch mode")
         self.assertFalse(self.form.chkBatch.isChecked())
@@ -351,14 +351,14 @@ class DataExplorerTest(unittest.TestCase):
 
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Checked)
-        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
+        self.assertTrue(item2D.checkState() == Qt.Checked)
 
         # unselect 1d data
         self.form.cbSelect.setCurrentIndex(3)
 
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
+        self.assertTrue(item2D.checkState() == Qt.Checked)
 
         # select 2d data
         self.form.cbSelect.setCurrentIndex(4)
