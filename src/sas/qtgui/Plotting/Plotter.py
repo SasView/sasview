@@ -178,10 +178,6 @@ class PlotterWidget(PlotterBase):
                             zorder=1,
                             picker=True)
 
-        # Now we know what the potential new color is, let's save it
-        if isinstance(line, mpl.lines.Line2D):
-            self.data.custom_color = line.get_color()
-
         # Update the list of data sets (plots) in chart
         self.plot_dict[self._data.id] = self.data
 
