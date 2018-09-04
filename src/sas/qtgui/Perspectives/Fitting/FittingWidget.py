@@ -1996,16 +1996,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Setting model parameters into QStandardItemModel based on selected _model_
         """
         name = model_name
+        kernel_module = None
         if self.cbCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
             name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
-        except ModuleNotFoundError:
-            # maybe it's a recategorised custom model?
-            name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
-            # If this rises, it's a valid problem.
-            kernel_module = generate.load_kernel_module(name)
+        except ModuleNotFoundError as ex:
+            pass
+
+        if kernel_module is None:
+            # mismatch between "name" attribute and actual filename.
+            curr_model = self.models[model_name]
+            name, _ = os.path.splitext(os.path.basename(curr_model.filename))
+            try:
+                kernel_module = generate.load_kernel_module(name)
+            except ModuleNotFoundError as ex:
+                logging.error("Can't find the model "+ str(ex))
+                return
 
         if hasattr(kernel_module, 'parameters'):
             # built-in and custom models
