@@ -143,7 +143,7 @@ class Invertor(Cinvertor):
         Access the parent class methods for
         x, y, err, d_max, q_min, q_max and alpha
         """
-        if   name == 'x':
+        if name == 'x':
             if 0.0 in value:
                 msg = "Invertor: one of your q-values is zero. "
                 msg += "Delete that entry before proceeding"
@@ -226,6 +226,19 @@ class Invertor(Cinvertor):
             return self.__dict__[name]
         return None
 
+    def add_errors(self, yvalues):
+        """
+        Adds errors to data set is they are not avaialble
+        :return:
+        """
+        stats_errors = np.zeros(len(yvalues))
+        for i in range(len(yvalues)):
+            # Scale the error so that we can fit over several decades of Q
+            scale = 0.05 * np.sqrt(yvalues[i])
+            min_err = 0.01 * yvalues[i]
+            stats_errors[i] = scale * np.sqrt(np.fabs(yvalues[i])) + min_err
+        return stats_errors
+
     def clone(self):
         """
         Return a clone of this instance
@@ -244,6 +257,10 @@ class Invertor(Cinvertor):
         invertor.x = self.x
         invertor.y = self.y
         invertor.err = self.err
+        if np.size(self.err) == 0 or np.all(self.err) == 0:
+            invertor.err = self.add_errors(self.y)
+        else:
+            invertor.err = self.err
         invertor.est_bck = self.est_bck
         invertor.background = self.background
         invertor.slit_height = self.slit_height
