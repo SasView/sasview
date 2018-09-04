@@ -437,6 +437,7 @@ class GuiManager(object):
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
         self._workspace.actionOrientation_Viewer.triggered.connect(self.actionOrientation_Viewer)
+        self._workspace.actionFreeze_Theory.triggered.connect(self.actionFreeze_Theory)
         # Fitting
         self._workspace.actionNew_Fit_Page.triggered.connect(self.actionNew_Fit_Page)
         self._workspace.actionConstrained_Fit.triggered.connect(self.actionConstrained_Fit)
@@ -681,6 +682,12 @@ class GuiManager(object):
         self.ipDockWidget.setObjectName("IPythonDockWidget")
         self.ipDockWidget.setWidget(terminal)
         self._workspace.addDockWidget(Qt.RightDockWidgetArea, self.ipDockWidget)
+
+    def actionFreeze_Theory(self):
+        """
+        Convert a child index with data into a separate top level dataset
+        """
+        self.filesWidget.freezeCheckedData()
 
     def actionOrientation_Viewer(self):
         """

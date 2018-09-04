@@ -391,7 +391,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Tag along functionality
         self.label.setText("Data loaded from: ")
-        self.lblFilename.setText(self.logic.data.filename)
+        if self.logic.data.filename:
+            self.lblFilename.setText(self.logic.data.filename)
+        else:
+            self.lblFilename.setText(self.logic.data.name)
         self.updateQRange()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)

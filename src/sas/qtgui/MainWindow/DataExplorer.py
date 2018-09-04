@@ -394,6 +394,49 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Notify the GuiManager about the send request
         self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
 
+    def freezeCheckedData(self):
+        """
+        Convert checked results (fitted model, residuals) into separate dataset.
+        """
+        outer_index = -1
+        theories_copied = 0
+        orig_model_size = self.model.rowCount()
+        while outer_index < orig_model_size:
+            outer_index += 1
+            outer_item = self.model.item(outer_index)
+            if not outer_item:
+                continue
+            if not outer_item.isCheckable():
+                continue
+            # Look for checked inner items
+            inner_index = -1
+            while inner_index < outer_item.rowCount():
+               inner_item = outer_item.child(inner_index)
+               inner_index += 1
+               if not inner_item:
+                   continue
+               if not inner_item.isCheckable():
+                   continue
+               if inner_item.checkState() != QtCore.Qt.Checked:
+                   continue
+               self.model.beginResetModel()
+               theories_copied += 1
+               new_item = self.cloneTheory(inner_item)
+               self.model.appendRow(new_item)
+               self.model.endResetModel()
+
+        freeze_msg = ""
+        if theories_copied == 0:
+            return
+        elif theories_copied == 1:
+            freeze_msg = "1 theory copied to a separate data set"
+        elif theories_copied > 1:
+            freeze_msg = "%i theories copied to separate data sets" % theories_copied
+        else:
+            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            raise AttributeError(freeze_msg)
+        self.communicator.statusBarUpdateSignal.emit(freeze_msg)
+
     def freezeTheory(self, event):
         """
         Freeze selected theory rows.
