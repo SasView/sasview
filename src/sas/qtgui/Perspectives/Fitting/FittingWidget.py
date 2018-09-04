@@ -2412,8 +2412,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         self._poly_model.clear()
 
+        parameters = self.model_parameters.form_volume_parameters
+        if self.is2D:
+            parameters += self.model_parameters.orientation_parameters
+
         [self.setPolyModelParameters(i, param) for i, param in \
-            enumerate(self.model_parameters.form_volume_parameters) if param.polydisperse]
+            enumerate(parameters) if param.polydisperse]
+
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
 
     def setPolyModelParameters(self, i, param):
