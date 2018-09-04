@@ -100,7 +100,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             filename = '.'.join((filename, ext))
 
         # Create files with charts
-        pictures = self.getPictures(basename)
+        pictures = []
+        if self.data_images is not None:
+            pictures = self.getPictures(basename)
 
         # self.data_html contains all images at the end of the report, in base64 form;
         # replace them all with their saved on-disk filenames

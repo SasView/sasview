@@ -266,6 +266,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.has_poly_error_column = False
         self.has_magnet_error_column = False
 
+        # If the widget generated theory item, save it
+        self.theory_item = None
+
         # signal communicator
         self.communicate = self.parent.communicate
 
@@ -2192,8 +2195,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         name = self.nameFromData(fitted_data)
         # Notify the GUI manager so it can create the theory model in DataExplorer
-        new_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
-        self.communicate.updateTheoryFromPerspectiveSignal.emit(new_item)
+        self.theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
+        self.communicate.updateTheoryFromPerspectiveSignal.emit(self.theory_item)
 
     def nameFromData(self, fitted_data):
         """
@@ -2830,6 +2833,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         index = None
         if self.all_data:
             index = self.all_data[self.data_index]
+        else:
+            index = self.theory_item
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.kernel_module,
                                        data=self.data,
