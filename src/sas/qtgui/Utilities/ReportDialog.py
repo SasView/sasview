@@ -72,10 +72,12 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         location = os.path.expanduser('~')
         # Use a sensible filename default
         default_name = os.path.join(location, 'fit_report.pdf')
+
         kwargs = {
             'parent'   : self,
             'caption'  : 'Save Report',
-            'directory': default_name,
+            # don't use 'directory' in order to remember the previous user choice
+            #'directory': default_name,
             'filter'   : 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)',
             'options'  : QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
