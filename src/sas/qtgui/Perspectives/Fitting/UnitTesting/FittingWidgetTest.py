@@ -253,8 +253,8 @@ class FittingWidgetTest(unittest.TestCase):
         structure_index = self.widget.cbStructureFactor.findText('squarewell')
         self.widget.cbStructureFactor.setCurrentIndex(structure_index)
 
-        # We have 4 more rows now
-        self.assertEqual(self.widget._model_model.rowCount(), rowcount+5)
+        # We have 3 more param rows now (radius_effective is removed), and a new heading
+        self.assertEqual(self.widget._model_model.rowCount(), rowcount+4)
 
         # Switch models
         self.widget.cbModel.setCurrentIndex(0)
@@ -273,7 +273,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Choose the last factor
         last_index = self.widget.cbStructureFactor.count()
         self.widget.cbStructureFactor.setCurrentIndex(last_index-1)
-        # Do we have all the rows?
+        # Do we have all the rows (incl. radius_effective & heading row)?
         self.assertEqual(self.widget._model_model.rowCount(), 5)
 
         # Are the command buttons properly enabled?

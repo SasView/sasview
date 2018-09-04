@@ -1954,30 +1954,34 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Crete/overwrite model items
         self._model_model.clear()
+        self._poly_model.clear()
+        self._magnet_model.clear()
 
-        # First, add parameters from the main model
-        if model_name is not None:
-            self.fromModelToQModel(model_name)
-
-        # Then, add structure factor derived parameters
-        if structure_factor is not None and structure_factor != "None":
-            if model_name is None:
-                # Instantiate the current sasmodel for SF-only models
-                self.kernel_module = self.models[structure_factor]()
-            self.fromStructureFactorToQModel(structure_factor)
+        if model_name is None:
+            if structure_factor not in (None, "None"):
+                # S(Q) on its own, treat the same as a form factor
+                self.kernel_module = None
+                self.fromStructureFactorToQModel(structure_factor)
+            else:
+                # No models selected
+                return
         else:
-            # Allow the SF combobox visibility for the given sasmodel
-            self.enableStructureFactorControl(structure_factor)
+            self.fromModelToQModel(model_name)
+            if structure_factor not in (None, "None"):
+                # add S(Q)
+                self.fromStructureFactorToQModel(structure_factor)
+            else:
+                # enable selection of S(Q)
+                self.enableStructureFactorControl(structure_factor)
+            # Add polydispersity to the model
+            self.setPolyModel()
+            # Add magnetic parameters to the model
+            self.setMagneticModel()
 
         # Then, add multishells
         if model_name is not None:
             # Multishell models need additional treatment
             self.addExtraShells()
-
-        # Add polydispersity to the model
-        self.setPolyModel()
-        # Add magnetic parameters to the model
-        self.setMagneticModel()
 
         # Adjust the table cells width
         self.lstParams.resizeColumnToContents(0)
@@ -2058,39 +2062,56 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into QStandardItemModel based on selected _structure factor_
         """
-        structure_module = generate.load_kernel_module(structure_factor)
-
         s_kernel = self.models[structure_factor]()
         p_kernel = self.kernel_module
 
-        p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
-        s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters) - 1 # no radius_effective
-
-        self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
-        all_params = self.kernel_module._model_info.parameters.kernel_parameters
-        all_param_names = [param.name for param in all_params]
-
-        # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any conflicting
-        # names with P(Q) params will cause a rename; we also lose radius_effective (for now...)
-
-        if "radius_effective_mode" in all_param_names:
-            # for this version of sasmodels we do NOT kill radius_effective
-            s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
-            s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
+        if p_kernel is None:
+            # Not a product model, just S(Q)
+            self.kernel_module = s_kernel
+            params = modelinfo.ParameterTable(self.kernel_module._model_info.parameters.kernel_parameters)
+            new_rows = FittingUtilities.addSimpleParametersToModel(params, self.is2D)
         else:
-            # kill radius_effective
-            s_pars_len -= 1
-            s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
-            s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
+            p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
+            s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
 
-        # Get new rows for QModel
-        # Any renamed parameters are stored as data in the relevant item, for later handling
-        new_rows = FittingUtilities.addSimpleParametersToModel(s_params, self.is2D, s_params_orig)
+            self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+            all_params = self.kernel_module._model_info.parameters.kernel_parameters
+            all_param_names = [param.name for param in all_params]
 
-        # TODO: merge the rest of this implementation in
-        # These parameters are not part of P(Q) nor S(Q), but are added only to the product model (e.g. specifying
-        # structure factor calculation mode)
-        # product_params = all_params[p_pars_len+s_pars_len:]
+            # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any
+            # conflicting names with P(Q) params will cause a rename; we also lose radius_effective (for now...)
+
+            # TODO: merge rest of beta approx implementation in
+            # This is to ensure compatibility when we merge beta approx support in...!
+
+            # radius_effective is always s_params[0]
+
+            # if radius_effective_mode is in all_params, then all_params contains radius_effective and we want to
+            # keep it in the model
+
+            # if radius_effective_mode is NOT in all_params, then radius_effective should NOT be kept, because the user
+            # cannot specify it themselves; but, make sure we only remove it if it's actually there in the first place
+            # (sasmodels master removes it already)
+            if "radius_effective_mode" in all_param_names:
+                # Show all parameters
+                s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
+                s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
+            else:
+                # Ensure radius_effective is not displayed
+                s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
+                if "radius_effective" in all_param_names:
+                    s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
+                else:
+                    s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
+
+            # Get new rows for QModel
+            # Any renamed parameters are stored as data in the relevant item, for later handling
+            new_rows = FittingUtilities.addSimpleParametersToModel(s_params, self.is2D, s_params_orig)
+
+            # TODO: merge rest of beta approx implementation in
+            # These parameters are not part of P(Q) nor S(Q), but are added only to the product model (e.g. specifying
+            # structure factor calculation mode)
+            # product_params = all_params[p_pars_len+s_pars_len:]
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
@@ -2099,9 +2120,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row in new_rows:
             self._model_model.appendRow(row)
             # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
-            if row[0].text() not in self.kernel_module.params.keys():
-                row_num = self._model_model.rowCount() - 1
-                FittingUtilities.markParameterDisabled(self._model_model, row_num)
+            # if row[0].text() not in self.kernel_module.params.keys():
+            #     row_num = self._model_model.rowCount() - 1
+            #     FittingUtilities.markParameterDisabled(self._model_model, row_num)
 
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
