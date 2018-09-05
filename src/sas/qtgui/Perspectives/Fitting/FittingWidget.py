@@ -266,6 +266,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.has_poly_error_column = False
         self.has_magnet_error_column = False
 
+        # If the widget generated theory item, save it
+        self.theory_item = None
+
         # signal communicator
         self.communicate = self.parent.communicate
 
@@ -388,7 +391,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Tag along functionality
         self.label.setText("Data loaded from: ")
-        self.lblFilename.setText(self.logic.data.filename)
+        if self.logic.data.filename:
+            self.lblFilename.setText(self.logic.data.filename)
+        else:
+            self.lblFilename.setText(self.logic.data.name)
         self.updateQRange()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
@@ -951,7 +957,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         model = self.cbModel.currentText()
 
-        # empty combobox forced to be read
+        # Assure the control is active
+        if not self.cbModel.isEnabled():
+            return
+        # Empty combobox forced to be read
         if not model:
             return
         # Reset structure factor
@@ -1105,6 +1114,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if category == CATEGORY_STRUCTURE:
             self.disableModelCombo()
             self.enableStructureCombo()
+            # set the index to 0
+            self.cbStructureFactor.setCurrentIndex(0)
+            self.model_parameters = None
             self._model_model.clear()
             return
 
@@ -1129,8 +1141,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model_column = item.column()
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
-        parameter_name = str(name_index.data()).lower() # "distribution of sld" etc.
-        if "distribution of" in parameter_name:
+        parameter_name = str(name_index.data()) # "distribution of sld" etc.
+        if "istribution of" in parameter_name:
             # just the last word
             parameter_name = parameter_name.rsplit()[-1]
 
@@ -1990,16 +2002,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Setting model parameters into QStandardItemModel based on selected _model_
         """
         name = model_name
+        kernel_module = None
         if self.cbCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
             name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
-        except ModuleNotFoundError:
-            # maybe it's a recategorised custom model?
-            name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
-            # If this rises, it's a valid problem.
-            kernel_module = generate.load_kernel_module(name)
+        except ModuleNotFoundError as ex:
+            pass
+
+        if kernel_module is None:
+            # mismatch between "name" attribute and actual filename.
+            curr_model = self.models[model_name]
+            name, _ = os.path.splitext(os.path.basename(curr_model.filename))
+            try:
+                kernel_module = generate.load_kernel_module(name)
+            except ModuleNotFoundError as ex:
+                logging.error("Can't find the model "+ str(ex))
+                return
 
         if hasattr(kernel_module, 'parameters'):
             # built-in and custom models
@@ -2192,8 +2212,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         name = self.nameFromData(fitted_data)
         # Notify the GUI manager so it can create the theory model in DataExplorer
-        new_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
-        self.communicate.updateTheoryFromPerspectiveSignal.emit(new_item)
+        self.theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
+        self.communicate.updateTheoryFromPerspectiveSignal.emit(self.theory_item)
 
     def nameFromData(self, fitted_data):
         """
@@ -2283,8 +2303,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
-
-        new_plots = [fitted_data, residuals]
+        new_plots = [fitted_data]
+        if residuals is not None:
+            new_plots.append(residuals)
 
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
@@ -2302,12 +2323,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.data_is_loaded:
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
 
+        # Update/generate plots
         for plot in new_plots:
-            if hasattr(plot, "id") and "esidual" in plot.id:
-                # TODO: fix updates to residuals plot
-                pass
-            elif plot is not None:
-                self.communicate.plotUpdateSignal.emit([plot])
+            self.communicate.plotUpdateSignal.emit([plot])
 
     def complete2D(self, return_data):
         """
@@ -2409,8 +2427,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         self._poly_model.clear()
 
+        parameters = self.model_parameters.form_volume_parameters
+        if self.is2D:
+            parameters += self.model_parameters.orientation_parameters
+
         [self.setPolyModelParameters(i, param) for i, param in \
-            enumerate(self.model_parameters.form_volume_parameters) if param.polydisperse]
+            enumerate(parameters) if param.polydisperse]
+
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
 
     def setPolyModelParameters(self, i, param):
@@ -2830,6 +2853,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         index = None
         if self.all_data:
             index = self.all_data[self.data_index]
+        else:
+            index = self.theory_item
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.kernel_module,
                                        data=self.data,

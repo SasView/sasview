@@ -126,8 +126,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Callback for running the mask editor
         """
-        self.parent.communicate.maskEditorSignal.emit(self.logic.data)
-        pass
+        if isinstance(self.logic.data, Data2D):
+            self.parent.communicate.maskEditorSignal.emit(self.logic.data)
 
     def onRangeReset(self):
         """
@@ -156,8 +156,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Enable/disable various UI elements based on data loaded
         """
+        is2Ddata = isinstance(self.logic.data, Data2D)
         self.boxWeighting.setEnabled(True)
-        self.cmdMaskEdit.setEnabled(True)
+        self.cmdMaskEdit.setEnabled(is2Ddata)
         # Switch off txtNpts related controls
         self.txtNpts.setEnabled(False)
         self.txtNptsFit.setEnabled(False)
