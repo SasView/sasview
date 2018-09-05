@@ -957,7 +957,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         model = self.cbModel.currentText()
 
-        # empty combobox forced to be read
+        # Assure the control is active
+        if not self.cbModel.isEnabled():
+            return
+        # Empty combobox forced to be read
         if not model:
             return
         # Reset structure factor
@@ -1111,6 +1114,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if category == CATEGORY_STRUCTURE:
             self.disableModelCombo()
             self.enableStructureCombo()
+            # set the index to 0
+            self.cbStructureFactor.setCurrentIndex(0)
+            self.model_parameters = None
             self._model_model.clear()
             return
 
