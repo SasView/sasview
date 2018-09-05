@@ -2303,8 +2303,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
-
-        new_plots = [fitted_data, residuals]
+        new_plots = [fitted_data]
+        if residuals is not None:
+            new_plots.append(residuals)
 
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
@@ -2322,12 +2323,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.data_is_loaded:
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
 
+        # Update/generate plots
         for plot in new_plots:
-            if hasattr(plot, "id") and "esidual" in plot.id:
-                # TODO: fix updates to residuals plot
-                pass
-            elif plot is not None:
-                self.communicate.plotUpdateSignal.emit([plot])
+            self.communicate.plotUpdateSignal.emit([plot])
 
     def complete2D(self, return_data):
         """
