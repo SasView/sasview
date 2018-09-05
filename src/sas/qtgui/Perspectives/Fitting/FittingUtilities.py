@@ -372,7 +372,7 @@ def residualsData1D(reference_data, current_data):
             pass
 
     residuals.x = current_data.x[index][0]
-    residuals.dy = numpy.ones(len(residuals.y))
+    residuals.dy = numpy.zeros(len(residuals.y))
     residuals.dx = None
     residuals.dxl = None
     residuals.dxw = None
