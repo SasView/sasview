@@ -961,8 +961,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Empty combobox forced to be read
         if not model:
             return
-        # Reset structure factor
-        self.cbStructureFactor.setCurrentIndex(0)
 
         # Reset parameters to fit
         self.resetParametersToFit()
