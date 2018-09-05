@@ -133,8 +133,12 @@ class SldPanel(QtWidgets.QDialog):
         self.ui.editWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editWavelength))
 
         # signals
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.helpButton.clicked.connect(self.displayHelp)
+        self.ui.closeButton.clicked.connect(self.closePanel)
+        self.ui.recalculateButton.clicked.connect(self.calculateSLD)
+
+    def calculateSLD(self):
+        self.recalculateSLD()
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -168,38 +172,41 @@ class SldPanel(QtWidgets.QDialog):
             if (index == MODEL.MOLECULAR_FORMULA) or (index == MODEL.MASS_DENSITY) or (index == MODEL.WAVELENGTH):
                 update = True
 
-        # calcualtion
+        # calculation
         if update:
-            formula = self.model.item(MODEL.MOLECULAR_FORMULA).text()
-            density = self.model.item(MODEL.MASS_DENSITY).text()
-            wavelength = self.model.item(MODEL.WAVELENGTH).text()
-            if len(formula) > 0 and len(density) > 0 and len(wavelength) > 0:
-                try:
-                    results = sldAlgorithm(str(formula), float(density), float(wavelength))
+            self.recalculateSLD()
 
-                    def format(value):
-                        return ("%-5.3g" % value).strip()
+    def recalculateSLD(self):
+        formula = self.model.item(MODEL.MOLECULAR_FORMULA).text()
+        density = self.model.item(MODEL.MASS_DENSITY).text()
+        wavelength = self.model.item(MODEL.WAVELENGTH).text()
+        if len(formula) > 0 and len(density) > 0 and len(wavelength) > 0:
+            try:
+                results = sldAlgorithm(str(formula), float(density), float(wavelength))
 
-                    self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
-                    self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
+                def format(value):
+                    return ("%-5.3g" % value).strip()
 
-                    self.model.item(MODEL.CU_KA_SLD_REAL).setText(format(results.cu_ka_sld_real))
-                    self.model.item(MODEL.CU_KA_SLD_IMAG).setText(format(results.cu_ka_sld_imag))
+                self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
+                self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
 
-                    self.model.item(MODEL.MO_KA_SLD_REAL).setText(format(results.mo_ka_sld_real))
-                    self.model.item(MODEL.MO_KA_SLD_IMAG).setText(format(results.mo_ka_sld_imag))
+                self.model.item(MODEL.CU_KA_SLD_REAL).setText(format(results.cu_ka_sld_real))
+                self.model.item(MODEL.CU_KA_SLD_IMAG).setText(format(results.cu_ka_sld_imag))
 
-                    self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
-                    self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
-                    self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
+                self.model.item(MODEL.MO_KA_SLD_REAL).setText(format(results.mo_ka_sld_real))
+                self.model.item(MODEL.MO_KA_SLD_IMAG).setText(format(results.mo_ka_sld_imag))
 
-                    return
-            
-                except Exception as e:
-                    pass
+                self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
+                self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
+                self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
 
-            for key in list(self._getOutputs().keys()):
-                self.model.item(key).setText("")
+                return
+
+            except Exception as e:
+                pass
+
+        for key in list(self._getOutputs().keys()):
+            self.model.item(key).setText("")
 
     def modelReset(self):
         #self.model.beginResetModel()
@@ -215,4 +222,10 @@ class SldPanel(QtWidgets.QDialog):
         location = "/user/qtgui/Calculators/sld_calculator_help.html"
         self.manager.showHelp(location)
 
+
+    def closePanel(self):
+        """
+        close the window containing this panel
+        """
+        self.close()
 
