@@ -61,7 +61,6 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
 logger = logging.getLogger(__name__)
 
-
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
     Subclass from QStandardItemModel to allow displaying tooltips in
@@ -526,7 +525,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.Calc2DFinishedSignal.connect(self.complete2D)
 
         # Signals from separate tabs asking for replot
-        self.options_widget.plot_signal.connect(self.onOptionsUpdate)
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
 
         # Signals from other widgets
@@ -1508,11 +1506,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
 
-        # Potential smearing added
-        # Remember that smearing_min/max can be None ->
-        # deal with it until Python gets discriminated unions
-        self.addWeightingToData(data)
-
         # Get the constraints.
         constraints = self.getComplexConstraintsForModel()
         if fitter is None:
@@ -1529,15 +1522,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitter_single = Fit() if fitter is None else fitter
             data = GuiUtils.dataFromItem(fit_index)
             # Potential weights added directly to data
-            self.addWeightingToData(data)
+            weighted_data = self.addWeightingToData(data)
             try:
-                fitter_single.set_model(model, fit_id, params_to_fit, data=data,
+                fitter_single.set_model(model, fit_id, params_to_fit, data=weighted_data,
                              constraints=constraints)
             except ValueError as ex:
                 raise ValueError("Setting model parameters failed with: %s" % ex)
 
-            qmin, qmax, _ = self.logic.computeRangeFromData(data)
-            fitter_single.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
+            qmin, qmax, _ = self.logic.computeRangeFromData(weighted_data)
+            fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
             fitter_single.select_problem_for_fit(id=fit_id, value=1)
             if fitter is None:
@@ -1928,13 +1921,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds weighting contribution to fitting data
         """
+        new_data = copy.deepcopy(data)
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
         if self.is2D:
-            data.err_data = weight
+            new_data.err_data = weight
         else:
-            data.dy = weight
-        pass
+            new_data.dy = weight
+
+        return new_data
 
     def updateQRange(self):
         """
@@ -2247,6 +2242,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if completefn is None:
             completefn = self.methodCompleteForData()
         smearer = self.smearing_widget.smearer()
+        weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
+
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
                                                model=model,
@@ -2255,7 +2252,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                qmax=self.q_range_max,
                                                smearer=smearer,
                                                state=None,
-                                               weight=None,
+                                               weight=weight,
                                                fid=None,
                                                toggle_mode_on=False,
                                                completefn=completefn,
@@ -2343,22 +2340,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data.symbol = "Line"
 
         # Modify fitted_data with weighting
-        self.addWeightingToData(fitted_data)
+        weighted_data = self.addWeightingToData(fitted_data)
 
-        self.createNewIndex(fitted_data)
+        self.createNewIndex(weighted_data)
         # Calculate difference between return_data and logic.data
-        self.chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
+        self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.logic.data)
         # Update the control
         chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
-
-        # self.communicate.plotUpdateSignal.emit([fitted_data])
 
         # Plot residuals if actual data
         if not self.data_is_loaded:
             return
 
-        residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
+        residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
         self.createNewIndex(residuals_plot)
         return residuals_plot

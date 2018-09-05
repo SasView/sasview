@@ -249,21 +249,18 @@ class Calc1D(CalcThread):
                     unsmeared_output, unsmeared_data, unsmeared_error,
                     pq_values, sq_values)
         else:
-            self.complete(x=self.data.x[index], y=output[index],
-                          page_id=self.page_id,
-                          state=self.state,
-                          weight=self.weight,
-                          fid=self.fid,
-                          toggle_mode_on=self.toggle_mode_on,
-                          elapsed=elapsed, index=index, model=self.model,
-                          data=self.data,
-                          update_chisqr=self.update_chisqr,
-                          source=self.source,
-                          unsmeared_model=unsmeared_output,
-                          unsmeared_data=unsmeared_data,
-                          unsmeared_error=unsmeared_error,
-                          pq_model=pq_values,
-                          sq_model=sq_values)
+            self.completefn((self.data.x[index], output[index],
+                        self.page_id,
+                        self.state,
+                        self.weight,
+                        self.fid,
+                        self.toggle_mode_on,
+                        elapsed, index, self.model,
+                        self.data,
+                        self.update_chisqr,
+                        self.source,
+                        unsmeared_output, unsmeared_data, unsmeared_error,
+                        pq_values, sq_values))
 
     def results(self):
         """
