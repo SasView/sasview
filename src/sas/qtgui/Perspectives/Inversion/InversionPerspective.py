@@ -308,8 +308,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                             and not self.isBatch
                                             and not self.isCalculating)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded
-                                       and np.all(self.logic.data.dy != 0))
+        self.explorerButton.setEnabled(self.logic.data_is_loaded)
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(
             self.logic.data_is_loaded and
@@ -639,6 +638,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                  updatefn=None)
         self.calcThread.queue()
         self.calcThread.ready(2.5)
+
+        #Perform estimate should be done on value enter this should solve delay problem
+        self.performEstimate()
 
     def stopCalcThread(self):
         """ Stops a thread if it exists and is running """
