@@ -70,7 +70,7 @@ class Invertor(Cinvertor):
 
         A[j][i] = (Fourier transformed base function for point j)
 
-    We them choose a number of r-points, n_r, to evaluate the second
+    We then choose a number of r-points, n_r, to evaluate the second
     derivative of P(r) at. This is used as our regularization term.
     For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -237,6 +237,7 @@ class Invertor(Cinvertor):
             scale = 0.05 * np.sqrt(yvalues[i])
             min_err = 0.01 * yvalues[i]
             stats_errors[i] = scale * np.sqrt(np.fabs(yvalues[i])) + min_err
+        logger.warning("Simulated errors have been added to the data set\n")
         return stats_errors
 
     def clone(self):
@@ -256,7 +257,6 @@ class Invertor(Cinvertor):
 
         invertor.x = self.x
         invertor.y = self.y
-        invertor.err = self.err
         if np.size(self.err) == 0 or np.all(self.err) == 0:
             invertor.err = self.add_errors(self.y)
         else:
@@ -284,7 +284,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
