@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>487</width>
-    <height>488</height>
+    <width>490</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -119,16 +119,6 @@
       <item row="1" column="1">
        <widget class="QLineEdit" name="editMassDensity"/>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="editWavelength">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="readOnly">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
        <widget class="QLabel" name="label_12">
         <property name="text">
@@ -146,7 +136,34 @@
       <item row="2" column="0">
        <widget class="QLabel" name="label_11">
         <property name="text">
-         <string>Wavelength</string>
+         <string>Neutron Wavelength</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="editNeutronWavelength">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="editXrayWavelength"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>X-Ray Wavelength</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Å</string>
         </property>
        </widget>
       </item>
@@ -159,6 +176,16 @@
       <string>Output</string>
      </property>
      <layout class="QGridLayout" name="gridLayoutOutput">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="editNeutronSldReal">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_17">
         <property name="text">
@@ -166,10 +193,27 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="editNeutronSldReal">
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Neutron 1/e length</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="editNeutronIncXs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_21">
+        <property name="text">
+         <string>Neutron Inc. Xs</string>
         </property>
        </widget>
       </item>
@@ -180,37 +224,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="editNeutronSldImag">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>1/Å²</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_19">
-        <property name="text">
-         <string>Cu Ka SLD</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="editCuKaSldReal">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="2">
        <widget class="QLabel" name="label_20">
         <property name="text">
@@ -218,10 +231,61 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QLineEdit" name="editCuKaSldImag">
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="editNeutronSldImag">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2" colspan="2">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>cm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="editNeutronLength">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2" colspan="2">
+       <widget class="QLabel" name="label_24">
+        <property name="text">
+         <string>1/cm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="editNeutronAbsXs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_23">
+        <property name="text">
+         <string>Neutron Abs. Xs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QLabel" name="label_22">
+        <property name="text">
+         <string>1/cm</string>
         </property>
        </widget>
       </item>
@@ -232,42 +296,21 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_19">
         <property name="text">
-         <string>Mo Ka SLD</string>
+         <string>X-Ray SLD</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="editMoKaSldReal">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>-i</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QLineEdit" name="editMoKaSldImag">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
-       <widget class="QLabel" name="label_7">
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_5">
         <property name="text">
          <string>1/Å²</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="5">
+      <item row="2" column="0" colspan="5">
        <widget class="QFrame" name="frame">
         <property name="minimumSize">
          <size>
@@ -289,66 +332,23 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_21">
-        <property name="text">
-         <string>Neutron Inc. Xs</string>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="editXraySldReal">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="editNeutronIncXs">
         <property name="readOnly">
          <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item row="4" column="2" colspan="2">
-       <widget class="QLabel" name="label_22">
-        <property name="text">
-         <string>1/cm</string>
+      <item row="1" column="3">
+       <widget class="QLineEdit" name="editXraySldImag">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_23">
-        <property name="text">
-         <string>Neutron Abs. Xs</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="editNeutronAbsXs">
         <property name="readOnly">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2" colspan="2">
-       <widget class="QLabel" name="label_24">
-        <property name="text">
-         <string>1/cm</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Neutron 1/e length</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="editNeutronLength">
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>cm</string>
         </property>
        </widget>
       </item>
@@ -360,13 +360,9 @@
  <tabstops>
   <tabstop>editMolecularFormula</tabstop>
   <tabstop>editMassDensity</tabstop>
-  <tabstop>editWavelength</tabstop>
+  <tabstop>editNeutronWavelength</tabstop>
   <tabstop>editNeutronSldReal</tabstop>
   <tabstop>editNeutronSldImag</tabstop>
-  <tabstop>editCuKaSldReal</tabstop>
-  <tabstop>editCuKaSldImag</tabstop>
-  <tabstop>editMoKaSldReal</tabstop>
-  <tabstop>editMoKaSldImag</tabstop>
   <tabstop>editNeutronIncXs</tabstop>
   <tabstop>editNeutronAbsXs</tabstop>
   <tabstop>editNeutronLength</tabstop>
