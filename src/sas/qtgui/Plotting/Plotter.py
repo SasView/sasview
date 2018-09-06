@@ -194,12 +194,12 @@ class PlotterWidget(PlotterBase):
         if self.x_label and not is_fit:
             ax.set_xlabel(self.x_label)
 
-        # define the ranges
-        #self.setRange = SetGraphRange(parent=self,
-        #    x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
-
         # refresh canvas
         self.canvas.draw_idle()
+        # This is an important processEvent.
+        # This allows charts to be properly updated in order
+        # of plots being applied.
+        QtWidgets.QApplication.processEvents()
 
     def createContextMenu(self):
         """

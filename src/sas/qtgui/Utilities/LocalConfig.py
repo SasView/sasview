@@ -133,7 +133,7 @@ TOOLBAR_SHOW = False
 DEFAULT_PERSPECTIVE = 'None'
 
 # Default threading model
-USING_TWISTED = True
+USING_TWISTED = False
 
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2

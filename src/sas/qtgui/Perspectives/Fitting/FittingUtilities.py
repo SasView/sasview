@@ -456,10 +456,16 @@ def getWeight(data, is2d, flag=None):
     :param flag: flag to transform error of data.
     """
     weight = None
+    if data is None:
+        return []
     if is2d:
+        if not hasattr(data, 'err_data'):
+            return []
         dy_data = data.err_data
         data = data.data
     else:
+        if not hasattr(data, 'dy'):
+            return []
         dy_data = data.dy
         data = data.y
 

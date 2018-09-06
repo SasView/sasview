@@ -253,6 +253,9 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>:/res/paste.png</normaloff>:/res/paste.png</iconset>

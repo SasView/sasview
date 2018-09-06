@@ -122,6 +122,7 @@ class GuiManager(object):
 
         #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
@@ -394,6 +395,7 @@ class GuiManager(object):
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
@@ -531,6 +533,7 @@ class GuiManager(object):
         can be saved to the clipboard
         """
         self.communicate.copyFitParamsSignal.emit("")
+        self._workspace.actionPaste.setEnabled(True)
         pass
 
     def actionPaste(self):
@@ -885,6 +888,13 @@ class GuiManager(object):
         """
         self.filesWidget.updateTheoryFromPerspective(index)
 
+    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+        """
+        Catch the signal to delete items in the Theory item model which correspond to a model ID.
+        Send the request to the DataExplorer for updating the theory model.
+        """
+        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(model_id)
+
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """
         :param new_item: item to be added to list of loaded files
@@ -951,6 +961,7 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):

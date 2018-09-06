@@ -17,8 +17,10 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-
+import sas.qtgui.Utilities.LocalConfig
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
+from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -259,8 +261,8 @@ class FittingWidgetTest(unittest.TestCase):
         # Switch models
         self.widget.cbModel.setCurrentIndex(0)
 
-        # Observe factor reset to None
-        self.assertEqual(self.widget.cbStructureFactor.currentText(), STRUCTURE_DEFAULT)
+        # Observe factor doesn't reset to None
+        self.assertEqual(self.widget.cbStructureFactor.currentText(), 'squarewell')
 
         # Switch category to structure factor
         structure_index=self.widget.cbCategory.findText(CATEGORY_STRUCTURE)
@@ -318,16 +320,27 @@ class FittingWidgetTest(unittest.TestCase):
         """
         Check that the fitting 1D data object is ready
         """
-        # Mock the thread creation
-        threads.deferToThread = MagicMock()
-        # Model for theory
-        self.widget.SASModelToQModel("cylinder")
-        # Call the tested method
-        self.widget.calculateQGridForModel()
-        time.sleep(1)
-        # Test the mock
-        self.assertTrue(threads.deferToThread.called)
-        self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, "compute")
+
+        if LocalConfig.USING_TWISTED:
+            # Mock the thread creation
+            threads.deferToThread = MagicMock()
+            # Model for theory
+            self.widget.SASModelToQModel("cylinder")
+            # Call the tested method
+            self.widget.calculateQGridForModel()
+            time.sleep(1)
+            # Test the mock
+            self.assertTrue(threads.deferToThread.called)
+            self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, "compute")
+        else:
+            Calc2D.queue = MagicMock()
+            # Model for theory
+            self.widget.SASModelToQModel("cylinder")
+            # Call the tested method
+            self.widget.calculateQGridForModel()
+            time.sleep(1)
+            # Test the mock
+            self.assertTrue(Calc2D.queue.called)
 
     def testCalculateResiduals(self):
         """
@@ -416,9 +429,6 @@ class FittingWidgetTest(unittest.TestCase):
         # click on a poly parameter checkbox
         index = self.widget._poly_model.index(0,0)
 
-        #self.widget.show()
-        #QtWidgets.QApplication(sys.argv).exec_()
-
         # Set the checbox
         self.widget._poly_model.item(0,0).setCheckState(2)
         # Assure the parameter is added
@@ -434,23 +444,26 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget._poly_model.item(0,2).setText("1.0")
         self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
 
+        #self.widget.show()
+        #QtWidgets.QApplication.exec_()
+
         # Change the number of points
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
         self.widget._poly_model.item(0,4).setText("22")
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
 
         # Change the number of sigmas
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 3)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 3)
         self.widget._poly_model.item(0,5).setText("222")
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 222)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 222)
         # try something stupid again
         self.widget._poly_model.item(0,4).setText("beer")
         # no efect
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 222)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 222)
 
     def testOnPolyComboIndexChange(self):
         """
@@ -471,18 +484,18 @@ class FittingWidgetTest(unittest.TestCase):
         # Change the index
         self.widget.onPolyComboIndexChange('rectangle', 0)
         # check values
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
-        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.73205, 5)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.nsigmas'], 1.73205, 5)
         # Change the index
         self.widget.onPolyComboIndexChange('lognormal', 0)
         # check values
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 80)
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 8)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 80)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 8)
         # Change the index
         self.widget.onPolyComboIndexChange('schulz', 0)
         # check values
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 80)
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 8)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 80)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 8)
 
         # mock up file load
         self.widget.loadPolydispArray = MagicMock()
@@ -636,14 +649,12 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertFalse(self.widget.cmdPlot.isEnabled())
         self.assertEqual(self.widget.cmdPlot.text(), 'Show Plot')
 
-        self.widget.show()
-
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
 
         # Change the category index so we have a model available
         category_index = self.widget.cbCategory.findText("Sphere")
@@ -689,6 +700,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertTrue(logging.error.called_with('no fitting parameters'))
         self.widget.close()
 
+    def testOnEmptyFit2(self):
         test_data = Data2D(image=[1.0, 2.0, 3.0],
                            err_image=[0.01, 0.02, 0.03],
                            qx_data=[0.1, 0.2, 0.3],
@@ -699,6 +711,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Force same data into logic
         item = QtGui.QStandardItem()
         updateModelItem(item, test_data, "test")
+
         # Force same data into logic
         self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
@@ -716,8 +729,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertTrue(logging.error.called_with('no fitting parameters'))
         self.widget.close()
 
-
-    def testOnFit1D(self):
+    def notestOnFit1D(self):
         """
         Test the threaded fitting call
         """
@@ -755,7 +767,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.widget.close()
 
-    def testOnFit2D(self):
+    def notestOnFit2D(self):
         """
         Test the threaded fitting call
         """
@@ -850,11 +862,14 @@ class FittingWidgetTest(unittest.TestCase):
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
+        # Force same data into logic
+        self.widget.data = item
 
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
         category_index = self.widget.cbCategory.findText('Sphere')
+
         self.widget.cbCategory.setCurrentIndex(category_index)
         self.widget.main_params_to_fit = ['scale']
         # Invoke the tested method
@@ -936,10 +951,10 @@ class FittingWidgetTest(unittest.TestCase):
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
         self.widget.main_params_to_fit = ['scale']
@@ -961,10 +976,10 @@ class FittingWidgetTest(unittest.TestCase):
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
 
         # Asses the initial state of stack

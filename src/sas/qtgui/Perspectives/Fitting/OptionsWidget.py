@@ -78,14 +78,19 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
+        self.qmin = QMIN_DEFAULT
+        self.qmax = QMAX_DEFAULT
+        self.npts = NPTS_DEFAULT
+        if self.logic.data_is_loaded:
+            self.qmin, self.qmax, self.npts = self.logic.computeDataRange()
         self.initModel()
         self.initMapper()
         self.model.blockSignals(True)
-        self.updateQRange(QMIN_DEFAULT, QMAX_DEFAULT, NPTS_DEFAULT)
-        self.txtMaxRange.setText(str(QMAX_DEFAULT))
-        self.txtMinRange.setText(str(QMIN_DEFAULT))
-        self.txtNpts.setText(str(NPTS_DEFAULT))
-        self.txtNptsFit.setText(str(NPTS_DEFAULT))
+        self.updateQRange(self.qmin, self.qmax, self.npts)
+        self.txtMaxRange.setText(str(self.qmax))
+        self.txtMinRange.setText(str(self.qmin))
+        self.txtNpts.setText(str(self.npts))
+        self.txtNptsFit.setText(str(self.npts))
         self.model.blockSignals(False)
 
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -133,7 +138,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Callback for resetting qmin/qmax
         """
-        self.updateQRange(QMIN_DEFAULT, QMAX_DEFAULT, NPTS_DEFAULT)
+        self.updateQRange(self.qmin, self.qmax, self.npts)
 
     def onWeightingChoice(self, button):
         """
@@ -178,6 +183,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.model.item(MODEL.index('MIN_RANGE')).setText(str(q_range_min))
         self.model.item(MODEL.index('MAX_RANGE')).setText(str(q_range_max))
         self.model.item(MODEL.index('NPTS')).setText(str(npts))
+        self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
 
     def state(self):
         """
