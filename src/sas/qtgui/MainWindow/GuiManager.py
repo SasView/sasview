@@ -394,6 +394,7 @@ class GuiManager(object):
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
@@ -884,6 +885,13 @@ class GuiManager(object):
         Send the request to the DataExplorer for updating the theory model.
         """
         self.filesWidget.updateTheoryFromPerspective(index)
+
+    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+        """
+        Catch the signal to delete items in the Theory item model which correspond to a model ID.
+        Send the request to the DataExplorer for updating the theory model.
+        """
+        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(model_id)
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """

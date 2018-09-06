@@ -2302,6 +2302,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if residuals is not None:
             new_plots.append(residuals)
 
+        if self.data_is_loaded:
+            GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
+        else:
+            # delete theory items for the model, in order to get rid of any redundant items, e.g. beta(Q), S_eff(Q)
+            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
+
         # Create plots for intermediate product data
         pq_data, sq_data = self.logic.new1DProductPlots(return_data, self.tab_id)
         if pq_data is not None:
@@ -2314,9 +2320,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createNewIndex(sq_data)
             # self.communicate.plotUpdateSignal.emit([sq_data])
             new_plots.append(sq_data)
-
-        if self.data_is_loaded:
-            GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
 
         # Update/generate plots
         for plot in new_plots:
