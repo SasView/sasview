@@ -530,6 +530,7 @@ class GuiManager(object):
         can be saved to the clipboard
         """
         self.communicate.copyFitParamsSignal.emit("")
+        self._workspace.actionPaste.setEnabled(True)
         pass
 
     def actionPaste(self):
@@ -944,6 +945,7 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):

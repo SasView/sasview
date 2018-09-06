@@ -48,7 +48,6 @@ from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 
 
-
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
@@ -2934,6 +2933,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # run a loop over all parameters and pull out
         # first - regular params
         param_list = []
+
+        param_list.append(['model_name', str(self.cbModel.currentText())])
         def gatherParams(row):
             """
             Create list of main parameters based on _model_model
@@ -3020,7 +3021,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
             return False
-        for line in lines[1:-1]:
+
+        model = lines[1].split(',')
+
+        if model[0] != 'model_name':
+            return False
+
+        context['model_name'] = [model[1]]
+        for line in lines[2:-1]:
             if len(line) != 0:
                 item = line.split(',')
                 check = item[1]
@@ -3046,6 +3054,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                         context[name].append(value)
                     except IndexError:
                         pass
+
+        if str(self.cbModel.currentText()) != str(context['model_name'][0]):
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setText("The model in the clipboard is not the same as the currently loaded model. \
+                         Not all parameters saved may paste correctly.")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+            result = msg.exec_()
+            if result == QtWidgets.QMessageBox.Ok:
+                pass
+            else:
+                return
 
         self.updateFullModel(context)
         self.updateFullPolyModel(context)
@@ -3084,12 +3104,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self._model_model.item(row, 2+ioffset).setText(param_repr)
             param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
             self._model_model.item(row, 3+ioffset).setText(param_repr)
+            self.setFocus()
+
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
         self._model_model.blockSignals(True)
         self.iterateOverModel(updateFittedValues)
         self._model_model.blockSignals(False)
+
 
     def updateFullPolyModel(self, param_dict):
         """
@@ -3134,11 +3157,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
             self._poly_model.item(row, 5+ioffset).setText(param_repr)
+            self.setFocus()
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
         self._poly_model.blockSignals(True)
         self.iterateOverPolyModel(updateFittedValues)
         self._poly_model.blockSignals(False)
-
 
