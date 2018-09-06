@@ -90,8 +90,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     newModelSignal = QtCore.pyqtSignal()
     fittingFinishedSignal = QtCore.pyqtSignal(tuple)
     batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
-    Calc1DFinishedSignal = QtCore.pyqtSignal(tuple)
-    Calc2DFinishedSignal = QtCore.pyqtSignal(tuple)
+    Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
+    Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None, data=None, tab_id=1):
 
