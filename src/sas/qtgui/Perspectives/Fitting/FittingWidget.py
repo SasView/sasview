@@ -967,7 +967,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.has_error_column = False
         self.has_poly_error_column = False
 
-        self.respondToModelStructure(model=model, structure_factor=None)
+        structure = None
+        if self.cbStructureFactor.isEnabled():
+            structure = str(self.cbStructureFactor.currentText())
+        self.respondToModelStructure(model=model, structure_factor=structure)
 
     def onSelectBatchFilename(self, data_index):
         """
@@ -1961,6 +1964,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # Allow the SF combobox visibility for the given sasmodel
             self.enableStructureFactorControl(structure_factor)
+            if self.cbStructureFactor.isEnabled():
+                structure_factor = self.cbStructureFactor.currentText()
+                self.fromStructureFactorToQModel(structure_factor)
 
         # Then, add multishells
         if model_name is not None:
@@ -2055,6 +2061,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into QStandardItemModel based on selected _structure factor_
         """
+        if structure_factor is None or structure_factor=="None":
+            return
         structure_module = generate.load_kernel_module(structure_factor)
         structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
 

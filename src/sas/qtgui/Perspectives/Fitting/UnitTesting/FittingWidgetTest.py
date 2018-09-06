@@ -261,8 +261,8 @@ class FittingWidgetTest(unittest.TestCase):
         # Switch models
         self.widget.cbModel.setCurrentIndex(0)
 
-        # Observe factor reset to None
-        self.assertEqual(self.widget.cbStructureFactor.currentText(), STRUCTURE_DEFAULT)
+        # Observe factor doesn't reset to None
+        self.assertEqual(self.widget.cbStructureFactor.currentText(), 'squarewell')
 
         # Switch category to structure factor
         structure_index=self.widget.cbCategory.findText(CATEGORY_STRUCTURE)
@@ -638,7 +638,7 @@ class FittingWidgetTest(unittest.TestCase):
         # This time, we got the update signal
         self.assertEqual(spy.count(), 0)
 
-    def notestPlotData(self):
+    def testPlotData(self):
         """
         See that data item can produce a chart
         """
@@ -648,10 +648,10 @@ class FittingWidgetTest(unittest.TestCase):
 
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
 
         # Change the category index so we have a model available
         category_index = self.widget.cbCategory.findText("Sphere")
@@ -673,38 +673,12 @@ class FittingWidgetTest(unittest.TestCase):
         # Make sure the signal has been emitted == new plot
         self.assertEqual(spy.count(), 1)
 
-    def notestOnEmptyFit(self):
+    def testOnEmptyFit(self):
         """
         Test a 1D/2D fit with no parameters
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-        item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
-        # Force same data into logic
-        self.widget.data = item
-        category_index = self.widget.cbCategory.findText("Sphere")
-        self.widget.cbCategory.setCurrentIndex(category_index)
-
-        #self.widget.show()
-
-        # Test no fitting params
-        self.widget.main_params_to_fit = []
-
-        logging.error = MagicMock()
-
-        self.widget.onFit()
-        self.assertTrue(logging.error.called_with('no fitting parameters'))
-        self.widget.close()
-
-        test_data = Data2D(image=[1.0, 2.0, 3.0],
-                           err_image=[0.01, 0.02, 0.03],
-                           qx_data=[0.1, 0.2, 0.3],
-                           qy_data=[0.1, 0.2, 0.3],
-                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
-                           mask=[True, True, True])
-
-        # Force same data into logic
         item = QtGui.QStandardItem()
         updateModelItem(item, test_data, "test")
         # Force same data into logic
@@ -720,10 +694,37 @@ class FittingWidgetTest(unittest.TestCase):
         logging.error = MagicMock()
 
         self.widget.onFit()
+        self.assertTrue(logging.error.called_with('no fitting parameters'))
+        self.widget.close()
+
+    def testOnEmptyFit2(self):
+        test_data = Data2D(image=[1.0, 2.0, 3.0],
+                           err_image=[0.01, 0.02, 0.03],
+                           qx_data=[0.1, 0.2, 0.3],
+                           qy_data=[0.1, 0.2, 0.3],
+                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
+                           mask=[True, True, True])
+
+        # Force same data into logic
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
+
+        # Force same data into logic
+        self.widget.data = item
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        self.widget.show()
+
+        # Test no fitting params
+        self.widget.main_params_to_fit = []
+
+        logging.error = MagicMock()
+
+        self.widget.onFit()
         self.assertTrue(logging.error.called_once())
         self.assertTrue(logging.error.called_with('no fitting parameters'))
-        #self.widget.close()
-
+        self.widget.close()
 
     def notestOnFit1D(self):
         """
@@ -852,17 +853,20 @@ class FittingWidgetTest(unittest.TestCase):
         # Assure the filename is correct
         self.assertIn("magnetism.html", self.widget.parent.showHelp.call_args[0][0])
 
-    def notestReadFitPage(self):
+    def testReadFitPage(self):
         """
         Read in the fitpage object and restore state
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
+        # Force same data into logic
+        self.widget.data = item
 
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
         category_index = self.widget.cbCategory.findText('Sphere')
+
         self.widget.cbCategory.setCurrentIndex(category_index)
         self.widget.main_params_to_fit = ['scale']
         # Invoke the tested method
@@ -938,16 +942,16 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertTrue(self.widget.chkMagnetism.isEnabled())
         self.assertTrue(self.widget.tabFitting.isTabEnabled(4))
 
-    def notestCurrentState(self):
+    def testCurrentState(self):
         """
         Set up the fitpage with current state
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
         self.widget.main_params_to_fit = ['scale']
@@ -963,16 +967,16 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(fp.current_model, "adsorbed_layer")
         self.assertListEqual(fp.main_params_to_fit, ['scale'])
 
-    def notestPushFitPage(self):
+    def testPushFitPage(self):
         """
         Push current state of fitpage onto stack
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
 
         # Asses the initial state of stack
