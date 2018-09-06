@@ -40,7 +40,7 @@ class ReportDialog(BaseReportDialog):
         self.SetTitle("Report: Invariant computaion")
 
         # put image path in the report string
-        self.report_html = self.report_list[0] % "memory:img_inv.png"
+        self.report_html = self.report_list[0] % self.fig_urls[0]
         # layout
         self._setup_layout()
 

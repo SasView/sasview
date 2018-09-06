@@ -1,4 +1,7 @@
 import wx
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ReportImageHandler:
@@ -8,8 +11,8 @@ class ReportImageHandler:
     class _ReportImageHandler:
 
         def __init__(self):
-            self.img_holder = wx.MemoryFSHandler()
             wx.FileSystem.AddHandler(wx.MemoryFSHandler())
+            self.img_holder = wx.MemoryFSHandler()
             self.refs = {}
             self.indices = []
 
@@ -59,7 +62,20 @@ class ReportImageHandler:
     instance = None
 
     @staticmethod
+    def check_for_empty_instance():
+        if ReportImageHandler.instance is None:
+            ReportImageHandler.instance = \
+                ReportImageHandler._ReportImageHandler()
+
+    @staticmethod
     def set_figs(figs, bitmaps, perspective):
-        if not ReportImageHandler.instance:
-            ReportImageHandler.instance = ReportImageHandler._ReportImageHandler()
+        ReportImageHandler.check_for_empty_instance()
         return ReportImageHandler.instance.set_figs(figs, bitmaps, perspective)
+
+    @staticmethod
+    def remove_figure(fig_url):
+        try:
+            ReportImageHandler.check_for_empty_instance()
+            ReportImageHandler.instance.refs.pop(fig_url)
+        except Exception as e:
+            logger.warn(e)

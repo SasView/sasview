@@ -73,14 +73,17 @@ class ReportDialog(BaseReportDialog):
 
         # save figures
         pictures = []
-        for num in range(self.nimages):
-            pic_name = basename + '_img%s.png' % num
+        i = 0
+        for url in self.fig_urls:
+            append_me = url.split(':')[1]
+            pic_name = basename + '_{}'.format(append_me)
             # save the image for use with pdf writer
-            self.report_list[2][num].savefig(pic_name)
+            self.report_list[2][i].savefig(pic_name)
             pictures.append(pic_name)
+            i += 1
 
         # translate png references int html from in-memory name to on-disk name
-        html = self.report_html.replace("memory:img_fit", basename+'_img')
+        html = self.report_html.replace("memory:", basename+'_')
 
         #set file extensions
         img_ext = []
