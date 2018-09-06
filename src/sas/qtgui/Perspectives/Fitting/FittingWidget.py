@@ -247,6 +247,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # copy of current kernel model
         self.kernel_module_copy = None
 
+        # dictionaries of current params
+        self.poly_params = {}
+        self.magnet_params = {}
+
         # Page id for fitting
         # To keep with previous SasView values, use 200 as the start offset
         self.page_id = 200 + self.tab_id
@@ -1185,16 +1189,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
-            self.kernel_module.setParam(parameter_name + '.' + delegate.columnDict()[model_column], value)
+            #self.kernel_module.setParam(parameter_name + '.' + delegate.columnDict()[model_column], value)
+            key = parameter_name + '.' + delegate.columnDict()[model_column]
+            self.poly_params[key] = value
 
             # Update plot
             self.updateData()
-
-        # update in param model
-        if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
-            row = self.getRowFromName(parameter_name)
-            param_item = self._model_model.item(row)
-            param_item.child(0).child(0, model_column).setText(item.text())
 
     def onMagnetModelChange(self, item):
         """
@@ -1223,17 +1223,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except TypeError:
             # Unparsable field
             return
+        delegate = self.lstMagnetic.itemDelegate()
 
-        property_index = self._magnet_model.headerData(1, model_column)-1 # Value, min, max, etc.
-
-        # Update the parameter value - note: this supports +/-inf as well
-        self.kernel_module.params[parameter_name] = value
-
-        # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-        self.kernel_module.details[parameter_name][property_index] = value
-
-        # Force the chart update when actual parameters changed
-        if model_column == 1:
+        if model_column > 1:
+            if model_column == delegate.mag_min:
+                pos = 1
+            elif model_column == delegate.mag_max:
+                pos = 2
+            elif model_column == delegate.mag_unit:
+                pos = 0
+            else:
+                raise AttributeError("Wrong column in magnetism table.")
+            # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
+            self.kernel_module.details[parameter_name][pos] = value
+        else:
+            self.magnet_params[parameter_name] = value
+            #self.kernel_module.setParam(parameter_name) = value
+            # Force the chart update when actual parameters changed
             self.recalculatePlotData()
 
         # Update state stack
@@ -1494,9 +1500,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data going in
         data = self.logic.data
-        model = self.kernel_module
+        model = copy.deepcopy(self.kernel_module)
         qmin = self.q_range_min
         qmax = self.q_range_max
+        # add polydisperse/magnet parameters if asked
+        self.updateKernelModelWithExtraParams(model)
 
         params_to_fit = self.main_params_to_fit
         if self.chkPolydispersity.isChecked():
@@ -1973,8 +1981,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.addExtraShells()
 
         # Add polydispersity to the model
+        self.poly_params = {}
         self.setPolyModel()
         # Add magnetic parameters to the model
+        self.magnet_params = {}
         self.setMagneticModel()
 
         # Adjust the table cells width
@@ -2236,6 +2246,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         '''return the method for result parsin on calc complete '''
         return self.completed1D if isinstance(self.data, Data1D) else self.completed2D
 
+    def updateKernelModelWithExtraParams(self, model=None):
+        """
+        Updates kernel model 'model' with extra parameters from
+        the polydisp and magnetism tab, if the tabs are enabled
+        """
+        if model is None: return
+        if not hasattr(model, 'setParam'): return
+
+        # add polydisperse parameters if asked
+        if self.chkPolydispersity.isChecked():
+            for key, value in self.poly_params.items():
+                model.setParam(key, value)
+        # add magnetic params if asked
+        if self.chkMagnetism.isChecked():
+            for key, value in self.magnet_params.items():
+                model.setParam(key, value)
+
     def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
         """
         Wrapper for Calc1D/2D calls
@@ -2243,7 +2270,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if data is None:
             data = self.data
         if model is None:
-            model = self.kernel_module
+            model = copy.deepcopy(self.kernel_module)
+            self.updateKernelModelWithExtraParams(model)
+
         if completefn is None:
             completefn = self.methodCompleteForData()
         smearer = self.smearing_widget.smearer()
@@ -2337,8 +2366,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current 2D data
         """
         fitted_data = self.logic.new2DPlot(return_data)
-        self.calculateResiduals(fitted_data)
+        residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
+        new_plots = [fitted_data]
+        if residuals is not None:
+            new_plots.append(residuals)
+
+        # Update/generate plots
+        for plot in new_plots:
+            self.communicate.plotUpdateSignal.emit([plot])
 
     def calculateResiduals(self, fitted_data):
         """
@@ -2468,6 +2504,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         npts = self.kernel_module.getParam(param_name + '.npts')
         nsigs = self.kernel_module.getParam(param_name + '.nsigmas')
         _, min, max = self.kernel_module.details[param_name]
+
+        # Update local param dict
+        self.poly_params[param_name + '.width'] = width
+        self.poly_params[param_name + '.npts'] = npts
+        self.poly_params[param_name + '.nsigmas'] = nsigs
 
         # Construct a row with polydisp. related variable.
         # This will get added to the polydisp. model
@@ -2642,6 +2683,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                         str(param.limits[0]),
                         str(param.limits[1]),
                         param.units]
+
+        self.magnet_params[param.name] = param.default
 
         FittingUtilities.addCheckedListToModel(model, checked_list)
 

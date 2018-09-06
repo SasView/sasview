@@ -444,23 +444,26 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget._poly_model.item(0,2).setText("1.0")
         self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
 
+        #self.widget.show()
+        #QtWidgets.QApplication.exec_()
+
         # Change the number of points
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
         self.widget._poly_model.item(0,4).setText("22")
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
 
         # Change the number of sigmas
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 3)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 3)
         self.widget._poly_model.item(0,5).setText("222")
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 222)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 222)
         # try something stupid again
         self.widget._poly_model.item(0,4).setText("beer")
         # no efect
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 222)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 222)
 
     def testOnPolyComboIndexChange(self):
         """
@@ -481,18 +484,18 @@ class FittingWidgetTest(unittest.TestCase):
         # Change the index
         self.widget.onPolyComboIndexChange('rectangle', 0)
         # check values
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
-        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.73205, 5)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.nsigmas'], 1.73205, 5)
         # Change the index
         self.widget.onPolyComboIndexChange('lognormal', 0)
         # check values
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 80)
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 8)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 80)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 8)
         # Change the index
         self.widget.onPolyComboIndexChange('schulz', 0)
         # check values
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 80)
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 8)
+        self.assertEqual(self.widget.poly_params['radius_bell.npts'], 80)
+        self.assertEqual(self.widget.poly_params['radius_bell.nsigmas'], 8)
 
         # mock up file load
         self.widget.loadPolydispArray = MagicMock()
