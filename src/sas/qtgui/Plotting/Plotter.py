@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets
 import functools
 import copy
 import matplotlib as mpl
+import numpy as np
 from matplotlib.font_manager import FontProperties
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
@@ -129,6 +130,14 @@ class PlotterWidget(PlotterBase):
 
         markersize = self._data.markersize
 
+        # Include scaling (log vs. linear)
+        ax.set_xscale(self.xscale, nonposx='clip')
+        ax.set_yscale(self.yscale, nonposy='clip')
+
+        # define the ranges
+        self.setRange = SetGraphRange(parent=self,
+            x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
+
         # Draw non-standard markers
         l_width = markersize * 0.4
         if marker == '-' or marker == '--':
@@ -150,8 +159,14 @@ class PlotterWidget(PlotterBase):
                 line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
                         linestyle='', label=self._title, picker=True)
             else:
+                dy = self._data.view.dy
+                # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
+                if dy is not None and type(dy) == type(()):
+                    dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
+
                 line = ax.errorbar(x, y,
-                            yerr=self._data.view.dy, xerr=None,
+                            yerr=dy,
+                            xerr=None,
                             capsize=2, linestyle='',
                             barsabove=False,
                             color=color,
@@ -160,11 +175,8 @@ class PlotterWidget(PlotterBase):
                             lolims=False, uplims=False,
                             xlolims=False, xuplims=False,
                             label=self._title,
+                            zorder=1,
                             picker=True)
-
-        # Now we know what the potential new color is, let's save it
-        if isinstance(line, mpl.lines.Line2D):
-            self.data.custom_color = line.get_color()
 
         # Update the list of data sets (plots) in chart
         self.plot_dict[self._data.id] = self.data
@@ -182,16 +194,12 @@ class PlotterWidget(PlotterBase):
         if self.x_label and not is_fit:
             ax.set_xlabel(self.x_label)
 
-        # Include scaling (log vs. linear)
-        ax.set_xscale(self.xscale)
-        ax.set_yscale(self.yscale)
-
-        # define the ranges
-        self.setRange = SetGraphRange(parent=self,
-            x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
-
         # refresh canvas
         self.canvas.draw_idle()
+        # This is an important processEvent.
+        # This allows charts to be properly updated in order
+        # of plots being applied.
+        QtWidgets.QApplication.processEvents()
 
     def createContextMenu(self):
         """

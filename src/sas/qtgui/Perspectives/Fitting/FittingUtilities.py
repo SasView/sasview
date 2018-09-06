@@ -429,8 +429,8 @@ def plotResiduals(reference_data, current_data):
     residuals = residuals_dict[method_name](reference_data, data_copy)
 
     theory_name = str(current_data.name.split()[0])
-    residuals.name = "Residuals for " + str(theory_name) + "[" + \
-                    str(reference_data.filename) + "]"
+    res_name = reference_data.filename if reference_data.filename else reference_data.name
+    residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
     residuals.title = residuals.name
     residuals.ytransform = 'y'
 
@@ -456,10 +456,16 @@ def getWeight(data, is2d, flag=None):
     :param flag: flag to transform error of data.
     """
     weight = None
+    if data is None:
+        return []
     if is2d:
+        if not hasattr(data, 'err_data'):
+            return []
         dy_data = data.err_data
         data = data.data
     else:
+        if not hasattr(data, 'dy'):
+            return []
         dy_data = data.dy
         data = data.y
 

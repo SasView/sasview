@@ -3,7 +3,6 @@ import sys
 import os
 import time
 import logging
-import re
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -36,14 +35,6 @@ logger = logging.getLogger(__name__)
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
-
-    # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
-    # "5 [P(Q)] modelname"
-    # or
-    # "4 modelname".
-    # Useful for determining whether the plot in question is for an intermediate result, such as P(Q) or S(Q) in the
-    # case of a product model; the identifier for this is held in square brackets, as in the example above.
-    theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
     def __init__(self, parent=None, guimanager=None, manager=None):
         super(DataExplorerWindow, self).__init__(parent, guimanager)
@@ -394,6 +385,49 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Notify the GuiManager about the send request
         self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
 
+    def freezeCheckedData(self):
+        """
+        Convert checked results (fitted model, residuals) into separate dataset.
+        """
+        outer_index = -1
+        theories_copied = 0
+        orig_model_size = self.model.rowCount()
+        while outer_index < orig_model_size:
+            outer_index += 1
+            outer_item = self.model.item(outer_index)
+            if not outer_item:
+                continue
+            if not outer_item.isCheckable():
+                continue
+            # Look for checked inner items
+            inner_index = -1
+            while inner_index < outer_item.rowCount():
+               inner_item = outer_item.child(inner_index)
+               inner_index += 1
+               if not inner_item:
+                   continue
+               if not inner_item.isCheckable():
+                   continue
+               if inner_item.checkState() != QtCore.Qt.Checked:
+                   continue
+               self.model.beginResetModel()
+               theories_copied += 1
+               new_item = self.cloneTheory(inner_item)
+               self.model.appendRow(new_item)
+               self.model.endResetModel()
+
+        freeze_msg = ""
+        if theories_copied == 0:
+            return
+        elif theories_copied == 1:
+            freeze_msg = "1 theory copied to a separate data set"
+        elif theories_copied > 1:
+            freeze_msg = "%i theories copied to separate data sets" % theories_copied
+        else:
+            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            raise AttributeError(freeze_msg)
+        self.communicator.statusBarUpdateSignal.emit(freeze_msg)
+
     def freezeTheory(self, event):
         """
         Freeze selected theory rows.
@@ -537,13 +571,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 list(self.active_plots.values())[ids_vals.index(plot_id)].replacePlot(plot_id, plot)
             else:
                 # Don't plot intermediate results, e.g. P(Q), S(Q)
-                match = self.theory_plot_ID_pattern.match(plot_id)
+                match = GuiUtils.theory_plot_ID_pattern.match(plot_id)
                 # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
                 if match and match.groups()[1] != None:
                     continue
                 # 'sophisticated' test to generate standalone plot for residuals
                 if 'esiduals' in plot.title:
-                    self.plotData([(item, plot)], transform=False)
+                    plot.yscale='linear'
+                    self.plotData([(item, plot)])
                 else:
                     new_plots.append((item, plot))
 
@@ -824,6 +859,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         return wlist
 
+    def setItemsCheckability(self, model, dimension=None, checked=False):
+        """
+        For a given model, check or uncheck all items of given dimension
+        """
+        mode = QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked
+
+        assert isinstance(checked, bool)
+
+        types = (None, Data1D, Data2D)
+        assert dimension in types
+
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if dimension is not None and not isinstance(GuiUtils.dataFromItem(item), dimension):
+                continue
+            if item.isCheckable() and item.checkState() != mode:
+                item.setCheckState(mode)
+            # look for all children
+            for inner_index in range(item.rowCount()):
+                child = item.child(inner_index)
+                if child.isCheckable() and child.checkState() != mode:
+                    child.setCheckState(mode)
+
     def selectData(self, index):
         """
         Callback method for modifying the TreeView on Selection Options change
@@ -834,74 +892,27 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Respond appropriately
         if index == 0:
-            # Select All
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Unchecked:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, checked=True)
+
         elif index == 1:
             # De-select All
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, checked=False)
 
         elif index == 2:
             # Select All 1-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                item.setCheckState(QtCore.Qt.Unchecked)
-
-                try:
-                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if is1D:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, dimension=Data1D, checked=True)
 
         elif index == 3:
             # Unselect All 1-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-
-                try:
-                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is1D:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, dimension=Data1D, checked=False)
 
         elif index == 4:
             # Select All 2-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                item.setCheckState(QtCore.Qt.Unchecked)
-                try:
-                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if is2D:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, dimension=Data2D, checked=True)
 
         elif index == 5:
             # Unselect All 2-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-
-                try:
-                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError(msg)
-
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is2D:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, dimension=Data2D, checked=False)
 
         else:
             msg = "Incorrect value in the Selection Option"
@@ -1269,3 +1280,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # send in the new item
         self.theory_model.appendRow(model_item)
 
+    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+        """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the
+        case of intermediate results disappearing when changing calculations (in which case you don't want them to be
+        retained in the list)."""
+        items_to_delete = []
+        for r in range(self.theory_model.rowCount()):
+            item = self.theory_model.item(r, 0)
+            data = item.child(0).data()
+            if not hasattr(data, "id"):
+                return
+            match = GuiUtils.theory_plot_ID_pattern.match(data.id)
+            if match:
+                item_model_id = match.groups()[-1]
+                if item_model_id == model_id:
+                    # Only delete those identified as an intermediate plot
+                    if match.groups()[2] not in (None, ""):
+                        items_to_delete.append(item)
+
+        for item in items_to_delete:
+            self.theory_model.removeRow(item.row())

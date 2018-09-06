@@ -72,10 +72,12 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         location = os.path.expanduser('~')
         # Use a sensible filename default
         default_name = os.path.join(location, 'fit_report.pdf')
+
         kwargs = {
             'parent'   : self,
             'caption'  : 'Save Report',
-            'directory': default_name,
+            # don't use 'directory' in order to remember the previous user choice
+            #'directory': default_name,
             'filter'   : 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)',
             'options'  : QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
@@ -98,7 +100,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             filename = '.'.join((filename, ext))
 
         # Create files with charts
-        pictures = self.getPictures(basename)
+        pictures = []
+        if self.data_images is not None:
+            pictures = self.getPictures(basename)
 
         # self.data_html contains all images at the end of the report, in base64 form;
         # replace them all with their saved on-disk filenames

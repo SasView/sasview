@@ -35,6 +35,14 @@ else:
         HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
+# This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
+# "5 [P(Q)] modelname"
+# or
+# "4 modelname".
+# Useful for determining whether the plot in question is for an intermediate result, such as P(Q) or S(Q) in the
+# case of a product model; the identifier for this is held in square brackets, as in the example above.
+theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
+
 def get_app_dir():
     """
         The application directory is the one where the default custom_config.py
@@ -210,6 +218,9 @@ class Communicate(QtCore.QObject):
 
     # New theory data in current perspective
     updateTheoryFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+
+    # Request to delete plots (in the theory view) related to a given model ID
+    deleteIntermediateTheoryPlotsSignal = QtCore.pyqtSignal(str)
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
