@@ -651,14 +651,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         Build image state that wx.html understand
         by plotting, putting it into wx.FileSystem image object
         """
-
-        img_handler = ReportImageHandler()
         bitmaps = []
         for canvas in canvases:
             bitmaps.append(canvas.bitmap)
-        imgs, refs = img_handler.instance.set_figs(figs, bitmaps, 'fit')
+        imgs, refs = ReportImageHandler.set_figs(figs, bitmaps, 'fit')
 
-        return img_handler.instance.img_holder, imgs, refs
+        return ReportImageHandler.instance, imgs, refs
 
     def on_save(self, event):
         """

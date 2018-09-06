@@ -2,7 +2,8 @@ import wx
 
 
 class ReportImageHandler:
-
+    # Singleton class that manages all report plot images
+    # To call the handler, call the static method set_figs
 
     class _ReportImageHandler:
 
@@ -13,6 +14,13 @@ class ReportImageHandler:
             self.indices = []
 
         def set_figs(self, figs, bitmaps, perspective):
+            """
+            Save figures and images to memory and return refernces
+            :param figs: A list of matplotlib Figures
+            :param bitmaps: A list of bitmaps
+            :param perspective: A String with the perspective name
+            :return: A tuple of a list of Figures and a list of memory refs
+            """
             imgs = []
             refs = []
             if figs is None or len(figs) == 0:
@@ -33,6 +41,12 @@ class ReportImageHandler:
             return imgs, refs
 
         def create_unique_name(self, perspective, index=None):
+            """
+            Create a unique key for each item in memory
+            :param perspective: The perspective name as a string
+            :param index: The base index used for incrementing the name
+            :return: A unique file name not currently in use
+            """
             if not index:
                 index = len(self.indices)
             if index in self.indices:
@@ -42,9 +56,10 @@ class ReportImageHandler:
                 name = 'img_{}_{:03d}.png'.format(str(perspective), index)
             return name
 
-
     instance = None
 
-    def __init__(self):
+    @staticmethod
+    def set_figs(figs, bitmaps, perspective):
         if not ReportImageHandler.instance:
             ReportImageHandler.instance = ReportImageHandler._ReportImageHandler()
+        return ReportImageHandler.instance.set_figs(figs, bitmaps, perspective)

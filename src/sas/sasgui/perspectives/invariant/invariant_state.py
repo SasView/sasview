@@ -611,8 +611,7 @@ class InvariantState(object):
         # get the dynamic image for the htmlwindow
         wximgbmp = wx.BitmapFromImage(wximg)
         # store the image in wx.FileSystem Object
-        self.img_handler = ReportImageHandler()
-        imgs, refs = self.img_handler.instance.set_figs([fig], [wximgbmp], 'inv')
+        imgs, refs = ReportImageHandler.set_figs([fig], [wximgbmp], 'inv')
 
         self.wximgbmp = refs[0]
         self.image = imgs[0]
