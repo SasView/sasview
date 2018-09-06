@@ -13,8 +13,8 @@ Description
 This tool enables X-ray users to calculate the slit size (FWHM/2) for smearing
 based on their half beam profile data.
 
-*NOTE! Whilst it may have some more generic applicability, the calculator has
-only been tested with beam profile data from Anton-Paar SAXSess\ :sup:`TM` software.*
+NOTE! Whilst it may have some more generic applicability, the calculator has
+only been tested with beam profile data from Anton-Paar SAXSess\ :sup:`TM` software.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -31,9 +31,9 @@ Using the tool
 3) Once a data is loaded, the slit size is automatically computed and displayed
    in the tool window.
 
-*NOTE! The beam profile file does not carry any information about the units of
-the Q data. This calculator assumes the data has units of 1/\ |Ang|\ . If the
-data is not in these units it must be manually converted beforehand.*
+NOTE! The beam profile file does not carry any information about the units of
+the Q data. This calculator assumes the data has units of 1/|Ang|. If the
+data is not in these units it must be manually converted beforehand.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
