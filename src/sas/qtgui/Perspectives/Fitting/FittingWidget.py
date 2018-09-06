@@ -2819,7 +2819,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # TODO: add polidyspersity and magnetism
 
-
     def updateUndo(self):
         """
         Create a new state page and add it to the stack
