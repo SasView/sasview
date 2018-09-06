@@ -116,21 +116,21 @@ class Calc2D(CalcThread):
                     self.update_chisqr,
                     self.source)
         else:
-            self.complete(image=output,
-                           data=self.data,
-                           page_id=self.page_id,
-                           model=self.model,
-                           state=self.state,
-                           toggle_mode_on=self.toggle_mode_on,
-                           elapsed=elapsed,
-                           index=index_model,
-                           fid=self.fid,
-                           qmin=self.qmin,
-                           qmax=self.qmax,
-                           weight=self.weight,
+            self.completefn((output,
+                           self.data,
+                           self.page_id,
+                           self.model,
+                           self.state,
+                           self.toggle_mode_on,
+                           elapsed,
+                           index_model,
+                           self.fid,
+                           self.qmin,
+                           self.qmax,
+                           self.weight,
                            #qstep=self.qstep,
-                           update_chisqr=self.update_chisqr,
-                           source=self.source)
+                           self.update_chisqr,
+                           self.source))
 
 
 class Calc1D(CalcThread):
