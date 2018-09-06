@@ -74,11 +74,11 @@ def createFixedChoiceComboBox(param, item_row):
     # implementation is not yet concrete; there are several possible indicators that the parameter is fixed-choice.
     # TODO: (when the sasmodels implementation is concrete, clean this up)
     choices = None
-    if type(param.choices) is list and len(param.choices) > 0:
+    if isinstance(param.choices, (list, tuple)) and len(param.choices) > 0:
         # The choices property is concrete in sasmodels, probably will use this
         choices = param.choices
-    elif type(param.units) is list:
-        choices = param.units
+    elif isinstance(param.units, (list, tuple)):
+        choices = [str(x) for x in param.units]
 
     cbox = None
     if choices is not None:
