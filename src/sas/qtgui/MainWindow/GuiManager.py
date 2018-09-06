@@ -122,6 +122,7 @@ class GuiManager(object):
 
         #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
