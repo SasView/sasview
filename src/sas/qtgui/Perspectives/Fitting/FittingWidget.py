@@ -2049,10 +2049,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.shell_names = self.shellNamesList()
 
         # Update the QModel
-        new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.kernel_module, self.is2D)
+        FittingUtilities.addParametersToModel(
+                self._model_model,
+                self.lstParams,
+                self.model_parameters,
+                self.kernel_module,
+                self.is2D)
 
-        for row in new_rows:
-            self._model_model.appendRow(row)
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
@@ -2070,13 +2073,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.kernel_module = MultiplicationModel(form_kernel, structure_kernel)
 
-        new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
-        for row in new_rows:
-            self._model_model.appendRow(row)
-            # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
-            if row[0].text() not in self.kernel_module.params.keys():
-                row_num = self._model_model.rowCount() - 1
-                FittingUtilities.markParameterDisabled(self._model_model, row_num)
+        # Update the QModel
+        FittingUtilities.addSimpleParametersToModel(
+                self._model_model,
+                self.lstParams,
+                structure_parameters,
+                self.is2D)
+
+        # Any parameters removed from the structure factor when producing the product model, e.g. radius_effective, must
+        # be disabled (greyed out, etc.)
+        for r in range(self._last_model_row, self._model_model.rowCount()):
+            param_name = self._model_model.item(r, 0).text()
+            if param_name not in self.kernel_module.params.keys():
+                FittingUtilities.markParameterDisabled(self._model_model, r)
 
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
