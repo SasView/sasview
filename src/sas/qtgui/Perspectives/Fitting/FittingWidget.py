@@ -1506,6 +1506,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # update charts
         self.onPlot()
+        #self.recalculatePlotData()
+
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
@@ -1593,6 +1595,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._model_model.item(row, 1).setText(param_repr)
+            self.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._model_model.item(row, 2).setText(error_repr)
@@ -1634,21 +1637,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             poly_item.insertColumn(2, [QtGui.QStandardItem("")])
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._model_model.blockSignals(True)
-
         if not self.has_error_column:
             # create top-level error column
             error_column = []
             self.lstParams.itemDelegate().addErrorColumn()
             self.iterateOverModel(createErrorColumn)
 
-            # we need to enable signals for this, otherwise the final column mysteriously disappears (don't ask, I don't
-            # know)
-            self._model_model.blockSignals(False)
             self._model_model.insertColumn(2, error_column)
-            self._model_model.blockSignals(True)
 
             FittingUtilities.addErrorHeadersToModel(self._model_model)
 
@@ -1657,10 +1652,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             self.has_error_column = True
 
+        # block signals temporarily, so we don't end up
+        # updating charts with every single model change on the end of fitting
+        self._model_model.itemChanged.disconnect()
         self.iterateOverModel(updateFittedValues)
         self.iterateOverModel(updatePolyValues)
-
-        self._model_model.blockSignals(False)
+        self._model_model.itemChanged.connect(self.onMainParamsChange)
 
         # Adjust the table cells width.
         # TODO: find a way to dynamically adjust column width while resized expanding
@@ -1695,10 +1692,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._poly_model.item(row_i, 1).setText(param_repr)
+            self.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_poly_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._poly_model.item(row_i, 2).setText(error_repr)
-
 
         def createErrorColumn(row_i):
             # Utility function for error column update
@@ -1719,9 +1716,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._poly_model.blockSignals(True)
+        self._poly_model.itemChanged.disconnect()
         self.iterateOverPolyModel(updateFittedValues)
-        self._poly_model.blockSignals(False)
+        self._poly_model.itemChanged.connect(self.onPolyModelChange)
 
         if self.has_poly_error_column:
             return
@@ -1731,9 +1728,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverPolyModel(createErrorColumn)
 
         # switch off reponse to model change
-        self._poly_model.blockSignals(True)
         self._poly_model.insertColumn(2, error_column)
-        self._poly_model.blockSignals(False)
         FittingUtilities.addErrorPolyHeadersToModel(self._poly_model)
 
         self.has_poly_error_column = True
@@ -1766,6 +1761,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._magnet_model.item(row, 1).setText(param_repr)
+            self.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_magnet_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._magnet_model.item(row, 2).setText(error_repr)
@@ -1785,9 +1781,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._magnet_model.blockSignals(True)
+        self._magnet_model.itemChanged.disconnect()
         self.iterateOverMagnetModel(updateFittedValues)
-        self._magnet_model.blockSignals(False)
+        self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
 
         if self.has_magnet_error_column:
             return
@@ -1797,9 +1793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverMagnetModel(createErrorColumn)
 
         # switch off reponse to model change
-        self._magnet_model.blockSignals(True)
         self._magnet_model.insertColumn(2, error_column)
-        self._magnet_model.blockSignals(False)
         FittingUtilities.addErrorHeadersToModel(self._magnet_model)
 
         self.has_magnet_error_column = True
@@ -1811,8 +1805,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
-        self.recalculatePlotData()
         self.showPlot()
+        self.recalculatePlotData()
 
     def onSmearingOptionsUpdate(self):
         """
