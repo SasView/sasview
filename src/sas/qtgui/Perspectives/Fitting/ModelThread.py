@@ -100,38 +100,18 @@ class Calc2D(CalcThread):
         output[index_model] = value
         elapsed = time.time() - self.starttime
 
-        if LocalConfig.USING_TWISTED:
-            return (output,
-                    self.data,
-                    self.page_id,
-                    self.model,
-                    self.state,
-                    self.toggle_mode_on,
-                    elapsed,
-                    index_model,
-                    self.fid,
-                    self.qmin,
-                    self.qmax,
-                    self.weight,
-                    self.update_chisqr,
-                    self.source)
-        else:
-            self.completefn((output,
-                           self.data,
-                           self.page_id,
-                           self.model,
-                           self.state,
-                           self.toggle_mode_on,
-                           elapsed,
-                           index_model,
-                           self.fid,
-                           self.qmin,
-                           self.qmax,
-                           self.weight,
-                           #qstep=self.qstep,
-                           self.update_chisqr,
-                           self.source))
+        res = dict(image = output, data = self.data, page_id = self.page_id,
+            model = self.model, state = self.state,
+            toggle_mode_on = self.toggle_mode_on, elapsed = elapsed,
+            index = index_model, fid = self.fid,
+            qmin = self.qmin, qmax = self.qmax,
+            weight = self.weight, update_chisqr = self.update_chisqr,
+            source = self.source)
 
+        if LocalConfig.USING_TWISTED:
+            return res
+        else:
+            self.completefn(res)
 
 class Calc1D(CalcThread):
     """
@@ -235,32 +215,19 @@ class Calc1D(CalcThread):
 
         elapsed = time.time() - self.starttime
 
+        res = dict(x = self.data.x[index], y = output[index],
+            page_id = self.page_id, state = self.state, weight = self.weight,
+            fid = self.fid, toggle_mode_on = self.toggle_mode_on,
+            elapsed = elapsed, index = index, model = self.model,
+            data = self.data, update_chisqr = self.update_chisqr,
+            source = self.source, unsmeared_output = unsmeared_output,
+            unsmeared_data = unsmeared_data, unsmeared_error = unsmeared_error,
+            pq_values = pq_values, sq_values = sq_values)
+
         if LocalConfig.USING_TWISTED:
-            return (self.data.x[index], output[index],
-                    self.page_id,
-                    self.state,
-                    self.weight,
-                    self.fid,
-                    self.toggle_mode_on,
-                    elapsed, index, self.model,
-                    self.data,
-                    self.update_chisqr,
-                    self.source,
-                    unsmeared_output, unsmeared_data, unsmeared_error,
-                    pq_values, sq_values)
+            return res
         else:
-            self.completefn((self.data.x[index], output[index],
-                        self.page_id,
-                        self.state,
-                        self.weight,
-                        self.fid,
-                        self.toggle_mode_on,
-                        elapsed, index, self.model,
-                        self.data,
-                        self.update_chisqr,
-                        self.source,
-                        unsmeared_output, unsmeared_data, unsmeared_error,
-                        pq_values, sq_values))
+            self.completefn(res)
 
     def results(self):
         """

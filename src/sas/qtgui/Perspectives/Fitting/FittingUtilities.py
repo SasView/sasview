@@ -166,22 +166,38 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
 
     return rows
 
-def addSimpleParametersToModel(parameters, is2D, model=None, view=None):
+def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model=None, view=None):
     """
     Update local ModelModel with sasmodel parameters (non-dispersed, non-magnetic)
     Actually appends to model, if model and view params are not None.
     Always returns list of lists of QStandardItems.
+
+    parameters_original: list of parameters before any tagging on their IDs, e.g. for product model (so that those are
+    the display names; see below)
     """
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
     else:
         params = parameters.iq_parameters
 
+    if parameters_original:
+        # 'parameters_original' contains the parameters as they are to be DISPLAYED, while 'parameters'
+        # contains the parameters as they were renamed; this is for handling name collisions in product model.
+        # The 'real name' of the parameter will be stored in the item's user data.
+        if is2D:
+            params_orig = [p for p in parameters_original.kernel_parameters if p.type != 'magnetic']
+        else:
+            params_orig = parameters_original.iq_parameters
+    else:
+        # no difference in names anyway
+        params_orig = params
+
     rows = []
-    for param in params:
+    for param, param_orig in zip(params, params_orig):
         # Create the top level, checkable item
-        item_name = param.name
+        item_name = param_orig.name
         item1 = QtGui.QStandardItem(item_name)
+        item1.setData(param.name, QtCore.Qt.UserRole)
         item1.setCheckable(True)
         item1.setEditable(False)
 
@@ -239,6 +255,22 @@ def addCheckedListToModel(model, param_list):
     item_list[0].setCheckable(True)
     model.appendRow(item_list)
 
+def addHeadingRowToModel(model, name):
+    """adds a non-interactive top-level row to the model"""
+    header_row = [QtGui.QStandardItem() for i in range(5)]
+    header_row[0].setText(name)
+
+    font = header_row[0].font()
+    font.setBold(True)
+    header_row[0].setFont(font)
+
+    for item in header_row:
+        item.setEditable(False)
+        item.setCheckable(False)
+        item.setSelectable(False)
+
+    model.appendRow(header_row)
+
 def addHeadersToModel(model):
     """
     Adds predefined headers to the model
@@ -284,11 +316,12 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_tooltips.insert(2, error_tooltip)
     model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
-def addShellsToModel(parameters, model, index, view=None):
+def addShellsToModel(parameters, model, index, row_num=None, view=None):
     """
-    Find out multishell parameters and update the model with the requested number of them
-    Always appends to model. If view param is not None, supports fixed-choice params.
-    Returns list of lists of QStandardItems.
+    Find out multishell parameters and update the model with the requested number of them.
+    Inserts them after the row at row_num, if not None; otherwise, appends to end.
+    If view param is not None, supports fixed-choice params.
+    Returns a list of lists of QStandardItem objects.
     """
     multishell_parameters = getIterParams(parameters)
 
@@ -325,8 +358,12 @@ def addShellsToModel(parameters, model, index, view=None):
             row = [item1, item2, item3, item4, item5]
             cbox = createFixedChoiceComboBox(par, row)
 
-            # Always append to the model
-            model.appendRow(row)
+            # Always add to the model
+            if row_num is None:
+                model.appendRow(row)
+            else:
+                model.insertRow(row_num, row)
+                row_num += 1
 
             # Apply combobox if required
             if None not in (view, cbox):
