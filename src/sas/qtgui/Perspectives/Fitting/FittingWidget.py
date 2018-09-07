@@ -1196,6 +1196,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Update plot
             self.updateData()
 
+        # update in param model
+        if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
+            row = self.getRowFromName(parameter_name)
+            param_item = self._model_model.item(row)
+            self._model_model.blockSignals(True)
+            param_item.child(0).child(0, model_column).setText(item.text())
+            self._model_model.blockSignals(False)
+
     def onMagnetModelChange(self, item):
         """
         Callback method for updating the sasmodel magnetic parameters with the GUI values
@@ -2557,15 +2565,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         def updateFunctionCaption(row):
             # Utility function for update of polydispersity function name in the main model
+            self._model_model.blockSignals(True)
             param_name = str(self._model_model.item(row, 0).text())
+            self._model_model.blockSignals(False)
             if param_name !=  param.name:
                 return
             # Modify the param value
+            self._model_model.blockSignals(True)
             if self.has_error_column:
                 # err column changes the indexing
                 self._model_model.item(row, 0).child(0).child(0,5).setText(combo_string)
             else:
                 self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
+            self._model_model.blockSignals(False)
 
         if combo_string == 'array':
             try:
