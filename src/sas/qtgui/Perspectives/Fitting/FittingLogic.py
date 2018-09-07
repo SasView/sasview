@@ -160,30 +160,23 @@ class FittingLogic(object):
         """
         Create a new 1D data instance based on fitting results
         """
-        # Unpack return data from Calc1D
-        x, y, page_id, state, weight,\
-        fid, toggle_mode_on, \
-        elapsed, index, model, \
-        data, update_chisqr, source, \
-        unsmeared_output, unsmeared_data, unsmeared_error, \
-        intermediate_results = return_data
-
-        return self._create1DPlot(tab_id, x, y, model, data)
+        return self._create1DPlot(tab_id, return_data['x'], return_data['y'],
+                                  return_data['model'], return_data['data'])
 
     def new2DPlot(self, return_data):
         """
         Create a new 2D data instance based on fitting results
         """
-        image, data, page_id, model, state, toggle_mode_on,\
-        elapsed, index, fid, qmin, qmax, weight, \
-        update_chisqr, source = return_data
+        image = return_data['image']
+        data = return_data['data']
+        model = return_data['model']
 
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
-        new_plot.id = str(page_id) + " " + data.name
-        new_plot.group_id = str(page_id) + " Model2D"
+        new_plot.id = str(return_data['page_id']) + " " + data.name
+        new_plot.group_id = str(return_data['page_id']) + " Model2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False
@@ -217,17 +210,11 @@ class FittingLogic(object):
         If return_data contains separated P(Q) and/or S(Q) data, create 1D plots for each and return as the tuple
         (pq_plot, sq_plot). If either are unavailable, the corresponding plot is None.
         """
-        # Unpack return data from Calc1D
-        x, y, page_id, state, weight, \
-        fid, toggle_mode_on, \
-        elapsed, index, model, \
-        data, update_chisqr, source, \
-        unsmeared_output, unsmeared_data, unsmeared_error, \
-        intermediate_results = return_data
-
         plots = []
-        for name, result in intermediate_results.items():
-            plots.append(self._create1DPlot(tab_id, x, result, model, data, component=name))
+        for name, result in return_data['intermediate_results'].items():
+            plots.append(self._create1DPlot(tab_id, return_data['x'], result,
+                         return_data['model'], return_data['data'],
+                         component=name))
         return plots
 
     def computeDataRange(self):

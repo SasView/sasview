@@ -559,19 +559,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
-        ids_keys = list(self.active_plots.keys())
-        ids_vals = [val.data.id for val in self.active_plots.values()]
 
         new_plots = []
         for item, plot in plots.items():
-            plot_id = plot.id
-            if plot_id in ids_keys:
-                self.active_plots[plot_id].replacePlot(plot_id, plot)
-            elif plot_id in ids_vals:
-                list(self.active_plots.values())[ids_vals.index(plot_id)].replacePlot(plot_id, plot)
-            else:
+            if not self.updatePlot(plot):
                 # Don't plot intermediate results, e.g. P(Q), S(Q)
-                match = GuiUtils.theory_plot_ID_pattern.match(plot_id)
+                match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
                 # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
                 if match and match.groups()[1] != None:
                     continue
@@ -705,11 +698,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # need this for lookup - otherwise this plot will never update
                 self.active_plots[plot_set.id] = old_plot
 
-    def updatePlot(self, new_data):
+    def updatePlot(self, data):
         """
-        Modify existing plot for immediate response
+        Modify existing plot for immediate response and returns True.
+        Returns false, if the plot does not exist already.
         """
-        data = new_data[0]
+        try: # there might be a list or a single value being passed
+            data = data[0]
+        except TypeError:
+            pass
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
@@ -718,8 +715,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_id = data.id
         if data_id in ids_keys:
             self.active_plots[data_id].replacePlot(data_id, data)
+            return True
         elif data_id in ids_vals:
             list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+            return True
+        return False
 
     def chooseFiles(self):
         """

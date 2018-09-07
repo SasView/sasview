@@ -123,19 +123,35 @@ def addParametersToModel(parameters, kernel_module, is2D):
         item.append([item1, item2, item3, item4, item5])
     return item
 
-def addSimpleParametersToModel(parameters, is2D):
+def addSimpleParametersToModel(parameters, is2D, parameters_original=None):
     """
     Update local ModelModel with sasmodel parameters
+    parameters_original: list of parameters before any tagging on their IDs, e.g. for product model
+    (so that those are the display names; see below)
     """
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
     else:
         params = parameters.iq_parameters
+
+    if parameters_original:
+        # 'parameters_original' contains the parameters as they are to be DISPLAYED, while 'parameters'
+        # contains the parameters as they were renamed; this is for handling name collisions in product model.
+        # The 'real name' of the parameter will be stored in the item's user data.
+        if is2D:
+            params_orig = [p for p in parameters_original.kernel_parameters if p.type != 'magnetic']
+        else:
+            params_orig = parameters_original.iq_parameters
+    else:
+        # no difference in names anyway
+        params_orig = params
+
     item = []
-    for param in params:
+    for param, param_orig in zip(params, params_orig):
         # Create the top level, checkable item
-        item_name = param.name
+        item_name = param_orig.name
         item1 = QtGui.QStandardItem(item_name)
+        item1.setData(param.name, QtCore.Qt.UserRole)
         item1.setCheckable(True)
         item1.setEditable(False)
         # Param values
@@ -143,7 +159,7 @@ def addSimpleParametersToModel(parameters, is2D):
         item2 = QtGui.QStandardItem(str(param.default))
         item4 = QtGui.QStandardItem(str(param.limits[0]))
         item5 = QtGui.QStandardItem(str(param.limits[1]))
-        item6 = QtGui.QStandardItem(param.units)
+        item6 = QtGui.QStandardItem(str(param.units))
         item6.setEditable(False)
         item.append([item1, item2, item4, item5, item6])
     return item
@@ -180,6 +196,22 @@ def addCheckedListToModel(model, param_list):
     item_list = [QtGui.QStandardItem(item) for item in param_list]
     item_list[0].setCheckable(True)
     model.appendRow(item_list)
+
+def addHeadingRowToModel(model, name):
+    """adds a non-interactive top-level row to the model"""
+    header_row = [QtGui.QStandardItem() for i in range(5)]
+    header_row[0].setText(name)
+
+    font = header_row[0].font()
+    font.setBold(True)
+    header_row[0].setFont(font)
+
+    for item in header_row:
+        item.setEditable(False)
+        item.setCheckable(False)
+        item.setSelectable(False)
+
+    model.appendRow(header_row)
 
 def addHeadersToModel(model):
     """
@@ -226,12 +258,15 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_tooltips.insert(2, error_tooltip)
     model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
-def addShellsToModel(parameters, model, index):
+def addShellsToModel(parameters, model, index, row_num=None):
     """
-    Find out multishell parameters and update the model with the requested number of them
+    Find out multishell parameters and update the model with the requested number of them.
+    Inserts them after the row at row_num, if not None; otherwise, appends to end.
+    Returns a list of lists of QStandardItem objects.
     """
     multishell_parameters = getIterParams(parameters)
 
+    rows = []
     for i in range(index):
         for par in multishell_parameters:
             # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
@@ -258,7 +293,16 @@ def addShellsToModel(parameters, model, index):
             item3 = QtGui.QStandardItem(str(par.limits[0]))
             item4 = QtGui.QStandardItem(str(par.limits[1]))
             item5 = QtGui.QStandardItem(par.units)
-            model.appendRow([item1, item2, item3, item4, item5])
+            row = [item1, item2, item3, item4, item5]
+            rows.append(row)
+
+            if row_num is None:
+                model.appendRow(row)
+            else:
+                model.insertRow(row_num, row)
+                row_num += 1
+
+    return rows
 
 def calculateChi2(reference_data, current_data):
     """
