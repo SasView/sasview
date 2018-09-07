@@ -63,6 +63,8 @@
     <addaction name="separator"/>
     <addaction name="actionReport"/>
     <addaction name="actionReset"/>
+    <addaction name="separator"/>
+    <addaction name="actionFreeze_Theory"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -251,6 +253,9 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>:/res/paste.png</normaloff>:/res/paste.png</iconset>
@@ -532,6 +537,11 @@
   <action name="actionOrientation_Viewer">
    <property name="text">
     <string>Orientation Viewer</string>
+   </property>
+  </action>
+  <action name="actionFreeze_Theory">
+   <property name="text">
+    <string>Freeze Theory</string>
    </property>
   </action>
  </widget>

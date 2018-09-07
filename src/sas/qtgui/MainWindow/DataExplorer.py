@@ -3,7 +3,6 @@ import sys
 import os
 import time
 import logging
-import re
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -36,14 +35,6 @@ logger = logging.getLogger(__name__)
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
-
-    # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
-    # "5 [P(Q)] modelname"
-    # or
-    # "4 modelname".
-    # Useful for determining whether the plot in question is for an intermediate result, such as P(Q) or S(Q) in the
-    # case of a product model; the identifier for this is held in square brackets, as in the example above.
-    theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
     def __init__(self, parent=None, guimanager=None, manager=None):
         super(DataExplorerWindow, self).__init__(parent, guimanager)
@@ -394,6 +385,49 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Notify the GuiManager about the send request
         self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
 
+    def freezeCheckedData(self):
+        """
+        Convert checked results (fitted model, residuals) into separate dataset.
+        """
+        outer_index = -1
+        theories_copied = 0
+        orig_model_size = self.model.rowCount()
+        while outer_index < orig_model_size:
+            outer_index += 1
+            outer_item = self.model.item(outer_index)
+            if not outer_item:
+                continue
+            if not outer_item.isCheckable():
+                continue
+            # Look for checked inner items
+            inner_index = -1
+            while inner_index < outer_item.rowCount():
+               inner_item = outer_item.child(inner_index)
+               inner_index += 1
+               if not inner_item:
+                   continue
+               if not inner_item.isCheckable():
+                   continue
+               if inner_item.checkState() != QtCore.Qt.Checked:
+                   continue
+               self.model.beginResetModel()
+               theories_copied += 1
+               new_item = self.cloneTheory(inner_item)
+               self.model.appendRow(new_item)
+               self.model.endResetModel()
+
+        freeze_msg = ""
+        if theories_copied == 0:
+            return
+        elif theories_copied == 1:
+            freeze_msg = "1 theory copied to a separate data set"
+        elif theories_copied > 1:
+            freeze_msg = "%i theories copied to separate data sets" % theories_copied
+        else:
+            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            raise AttributeError(freeze_msg)
+        self.communicator.statusBarUpdateSignal.emit(freeze_msg)
+
     def freezeTheory(self, event):
         """
         Freeze selected theory rows.
@@ -525,19 +559,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
-        ids_keys = list(self.active_plots.keys())
-        ids_vals = [val.data.id for val in self.active_plots.values()]
 
         new_plots = []
         for item, plot in plots.items():
-            plot_id = plot.id
-            if plot_id in ids_keys:
-                self.active_plots[plot_id].replacePlot(plot_id, plot)
-            elif plot_id in ids_vals:
-                list(self.active_plots.values())[ids_vals.index(plot_id)].replacePlot(plot_id, plot)
-            else:
+            if not self.updatePlot(plot):
                 # Don't plot intermediate results, e.g. P(Q), S(Q)
-                match = self.theory_plot_ID_pattern.match(plot_id)
+                match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
                 # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
                 if match and match.groups()[1] != None:
                     continue
@@ -671,11 +698,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # need this for lookup - otherwise this plot will never update
                 self.active_plots[plot_set.id] = old_plot
 
-    def updatePlot(self, new_data):
+    def updatePlot(self, data):
         """
-        Modify existing plot for immediate response
+        Modify existing plot for immediate response and returns True.
+        Returns false, if the plot does not exist already.
         """
-        data = new_data[0]
+        try: # there might be a list or a single value being passed
+            data = data[0]
+        except TypeError:
+            pass
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
@@ -684,8 +715,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_id = data.id
         if data_id in ids_keys:
             self.active_plots[data_id].replacePlot(data_id, data)
+            return True
         elif data_id in ids_vals:
             list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+            return True
+        return False
 
     def chooseFiles(self):
         """
@@ -1246,3 +1280,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # send in the new item
         self.theory_model.appendRow(model_item)
 
+    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+        """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the
+        case of intermediate results disappearing when changing calculations (in which case you don't want them to be
+        retained in the list)."""
+        items_to_delete = []
+        for r in range(self.theory_model.rowCount()):
+            item = self.theory_model.item(r, 0)
+            data = item.child(0).data()
+            if not hasattr(data, "id"):
+                return
+            match = GuiUtils.theory_plot_ID_pattern.match(data.id)
+            if match:
+                item_model_id = match.groups()[-1]
+                if item_model_id == model_id:
+                    # Only delete those identified as an intermediate plot
+                    if match.groups()[2] not in (None, ""):
+                        items_to_delete.append(item)
+
+        for item in items_to_delete:
+            self.theory_model.removeRow(item.row())
