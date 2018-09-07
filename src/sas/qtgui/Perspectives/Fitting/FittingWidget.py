@@ -2096,36 +2096,37 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if structure_factor is None or structure_factor=="None":
             return
 
-        s_kernel = self.models[structure_factor]()
-        p_kernel = self.kernel_module
+        if self.kernel_module is None:
+            # Structure factor is the only selected model; build it and show all its params
+            self.kernel_module = self.models[structure_factor]()
+            s_params = self.kernel_module._model_info.parameters
+            s_params_orig = s_params
 
-        # if p_kernel is None:
-        #     # Not a product model, just S(Q)
-        #     self.kernel_module = s_kernel
-        #     params = modelinfo.ParameterTable(self.kernel_module._model_info.parameters.kernel_parameters)
-        #     FittingUtilities.addSimpleParametersToModel(params, self.is2D)
-        # else:
-        p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
-        s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
-
-        self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
-        all_params = self.kernel_module._model_info.parameters.kernel_parameters
-        all_param_names = [param.name for param in all_params]
-
-        # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any
-        # conflicting names with P(Q) params will cause a rename
-
-        if "radius_effective_mode" in all_param_names:
-            # Show all parameters
-            s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
-            s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
         else:
-            # Ensure radius_effective is not displayed
-            s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
-            if "radius_effective" in all_param_names:
-                s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
+            s_kernel = self.models[structure_factor]()
+            p_kernel = self.kernel_module
+
+            p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
+            s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
+
+            self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+            all_params = self.kernel_module._model_info.parameters.kernel_parameters
+            all_param_names = [param.name for param in all_params]
+
+            # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any
+            # conflicting names with P(Q) params will cause a rename
+
+            if "radius_effective_mode" in all_param_names:
+                # Show all parameters
+                s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
+                s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
             else:
-                s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
+                # Ensure radius_effective is not displayed
+                s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
+                if "radius_effective" in all_param_names:
+                    s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
+                else:
+                    s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
