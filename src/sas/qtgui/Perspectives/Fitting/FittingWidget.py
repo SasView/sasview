@@ -1722,8 +1722,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Take func and throw it inside the magnet model row loop
         """
         for row_i in range(self._magnet_model.rowCount()):
-            if self.isCheckable(row_i):
-                func(row_i)
+            func(row_i)
 
     def updateMagnetModelFromList(self, param_dict):
         """
