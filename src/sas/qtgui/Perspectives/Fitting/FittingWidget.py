@@ -2096,6 +2096,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 row_num = self._model_model.rowCount() - 1
                 FittingUtilities.markParameterDisabled(self._model_model, row_num)
 
+        # grab list of params injected by sasmodels.product
+        # (only supporting sasmodels master until ESS_GUI merge!!!)
+        num_p_params = len(form_kernel._model_info.parameters.kernel_parameters)
+        num_s_params = len(structure_kernel._model_info.parameters.kernel_parameters)
+        product_params = modelinfo.ParameterTable(
+                self.kernel_module._model_info.parameters.kernel_parameters[num_p_params+num_s_params-1:])
+        product_rows = FittingUtilities.addSimpleParametersToModel(product_params, self.is2D)
+
+        # product params should go at the top of the list, below scale & background
+        row_num = 2
+        for row in product_rows:
+            self._model_model.insertRow(row_num, row)
+            row_num += 1
+
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
