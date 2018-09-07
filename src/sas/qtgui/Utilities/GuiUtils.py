@@ -265,6 +265,9 @@ class Communicate(QtCore.QObject):
     # Mask Editor requested
     maskEditorSignal = QtCore.pyqtSignal(Data2D)
 
+    #second Mask Editor for external
+    extMaskEditorSignal = QtCore.pyqtSignal()
+
     # Fitting parameter copy to clipboard
     copyFitParamsSignal = QtCore.pyqtSignal(str)
 

@@ -421,7 +421,6 @@ class GuiManager(object):
         self._workspace.actionReset.triggered.connect(self.actionReset)
         self._workspace.actionExcel.triggered.connect(self.actionExcel)
         self._workspace.actionLatex.triggered.connect(self.actionLatex)
-
         # View
         self._workspace.actionShow_Grid_Window.triggered.connect(self.actionShow_Grid_Window)
         self._workspace.actionHide_Toolbar.triggered.connect(self.actionHide_Toolbar)
@@ -451,6 +450,8 @@ class GuiManager(object):
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
         self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
         self._workspace.actionAddMult_Models.triggered.connect(self.actionAddMult_Models)
+        self._workspace.actionEditMask.triggered.connect(self.actionEditMask)
+
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
         self._workspace.actionTile.triggered.connect(self.actionTile)
@@ -779,6 +780,10 @@ class GuiManager(object):
         # Add Simple Add/Multiply Editor
         self.add_mult_editor = AddMultEditor(self)
         self.add_mult_editor.show()
+
+    def actionEditMask(self):
+
+        self.communicate.extMaskEditorSignal.emit()
 
     #============ ANALYSIS =================
     def actionFitting(self):

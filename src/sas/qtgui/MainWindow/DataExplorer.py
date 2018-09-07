@@ -41,7 +41,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Main model for keeping loaded data
         self.model = QtGui.QStandardItemModel(self)
-
         # Secondary model for keeping frozen data sets
         self.theory_model = QtGui.QStandardItemModel(self)
 
@@ -97,6 +96,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
+        self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -1058,17 +1058,38 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Show the plot
         self.new_plot.show()
 
+    def extShowEditDataMask(self):
+        self.showEditDataMask()
+
     def showEditDataMask(self, data=None):
         """
         Mask Editor for 2D plots
         """
-        if data is None or not isinstance(data, Data2D):
-            index = self.current_view.selectedIndexes()[0]
-            proxy = self.current_view.model()
-            model = proxy.sourceModel()
-            model_item = model.itemFromIndex(proxy.mapToSource(index))
+        try:
+            if data is None or not isinstance(data, Data2D):
+                index = self.current_view.selectedIndexes()[0]
+                proxy = self.current_view.model()
+                model = proxy.sourceModel()
+                model_item = model.itemFromIndex(proxy.mapToSource(index))
 
-            data = GuiUtils.dataFromItem(model_item)
+                data = GuiUtils.dataFromItem(model_item)
+
+            if data is None or not isinstance(data, Data2D):
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Information)
+                msg.setText("Error: cannot apply mask. \
+                                Please select a 2D dataset.")
+                msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
+                msg.exec_()
+                return
+        except:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setText("Error: No dataset selected. \
+                            Please select a 2D dataset.")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
+            msg.exec_()
+            return
 
         mask_editor = MaskEditor(self, data)
         # Modal dialog here.

@@ -47,7 +47,6 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 
-
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
@@ -187,6 +186,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._logic.append(logic)
 
         # Overwrite data type descriptor
+
         self.is2D = True if isinstance(self.logic.data, Data2D) else False
 
         # Let others know we're full of data now
@@ -3211,4 +3211,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.blockSignals(True)
         self.iterateOverPolyModel(updateFittedValues)
         self._poly_model.blockSignals(False)
+
+
 
