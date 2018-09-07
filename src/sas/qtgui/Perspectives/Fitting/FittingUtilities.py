@@ -258,12 +258,15 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_tooltips.insert(2, error_tooltip)
     model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
-def addShellsToModel(parameters, model, index):
+def addShellsToModel(parameters, model, index, row_num=None):
     """
-    Find out multishell parameters and update the model with the requested number of them
+    Find out multishell parameters and update the model with the requested number of them.
+    Inserts them after the row at row_num, if not None; otherwise, appends to end.
+    Returns a list of lists of QStandardItem objects.
     """
     multishell_parameters = getIterParams(parameters)
 
+    rows = []
     for i in range(index):
         for par in multishell_parameters:
             # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
@@ -290,7 +293,16 @@ def addShellsToModel(parameters, model, index):
             item3 = QtGui.QStandardItem(str(par.limits[0]))
             item4 = QtGui.QStandardItem(str(par.limits[1]))
             item5 = QtGui.QStandardItem(par.units)
-            model.appendRow([item1, item2, item3, item4, item5])
+            row = [item1, item2, item3, item4, item5]
+            rows.append(row)
+
+            if row_num is None:
+                model.appendRow(row)
+            else:
+                model.insertRow(row_num, row)
+                row_num += 1
+
+    return rows
 
 def calculateChi2(reference_data, current_data):
     """

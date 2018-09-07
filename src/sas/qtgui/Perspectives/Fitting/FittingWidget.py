@@ -220,8 +220,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.model_has_shells = False
         # Utility variable to enable unselectable option in category combobox
         self._previous_category_index = 0
-        # Utility variable for multishell display
-        self._last_model_row = 0
+        # Utility variables for multishell display
+        self._n_shells_row = 0
+        self._num_shell_params = 0
         # Dictionary of {model name: model class} for the current category
         self.models = {}
         # Parameters to fit
@@ -1967,21 +1968,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
         else:
             self.fromModelToQModel(model_name)
+            self.addExtraShells()
+
             if structure_factor not in (None, "None"):
                 # add S(Q)
                 self.fromStructureFactorToQModel(structure_factor)
             else:
                 # enable selection of S(Q)
                 self.enableStructureFactorControl(structure_factor)
+
             # Add polydispersity to the model
             self.setPolyModel()
             # Add magnetic parameters to the model
             self.setMagneticModel()
-
-        # Then, add multishells
-        if model_name is not None:
-            # Multishell models need additional treatment
-            self.addExtraShells()
 
         # Adjust the table cells width
         self.lstParams.resizeColumnToContents(0)
@@ -2055,8 +2054,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update QModel
         for row in new_rows:
             self._model_model.appendRow(row)
-        # Update the counter used for multishell display
-        self._last_model_row = self._model_model.rowCount()
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
@@ -2123,9 +2120,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # if row[0].text() not in self.kernel_module.params.keys():
             #     row_num = self._model_model.rowCount() - 1
             #     FittingUtilities.markParameterDisabled(self._model_model, row_num)
-
-        # Update the counter used for multishell display
-        self._last_model_row = self._model_model.rowCount()
 
     def haveParamsToFit(self):
         """
@@ -2743,7 +2737,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         shell_index = self._model_model.index(shell_row-1, 1)
 
         self.lstParams.setIndexWidget(shell_index, func)
-        self._last_model_row = self._model_model.rowCount()
+        self._n_shells_row = shell_row - 1
 
         # Set the index to the state-kept value
         func.setCurrentIndex(self.current_shell_displayed
@@ -2754,13 +2748,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Add/remove additional multishell parameters
         """
         # Find row location of the combobox
-        last_row = self._last_model_row
-        remove_rows = self._model_model.rowCount() - last_row
+        first_row = self._n_shells_row + 1
+        remove_rows = self._num_shell_params
 
         if remove_rows > 1:
-            self._model_model.removeRows(last_row, remove_rows)
+            self._model_model.removeRows(first_row, remove_rows)
 
-        FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index)
+        new_rows = FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index, first_row)
+        self._num_shell_params = len(new_rows)
+
         self.current_shell_displayed = index
 
         # Update relevant models
