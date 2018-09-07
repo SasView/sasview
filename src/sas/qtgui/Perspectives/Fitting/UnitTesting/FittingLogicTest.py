@@ -102,7 +102,7 @@ class FittingLogicTest(unittest.TestCase):
                        0, True, 0.0, 1, data,
                        data, False, None,
                        None, None, None,
-                       None, None)
+                       None)
 
         new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
 
