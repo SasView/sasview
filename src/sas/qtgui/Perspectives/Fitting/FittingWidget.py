@@ -2072,15 +2072,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.shell_names = self.shellNamesList()
 
-        # Get new rows for QModel
-        new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.kernel_module, self.is2D)
-
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, model_name)
 
-        # Update QModel
-        for row in new_rows:
-            self._model_model.appendRow(row)
+        # Update the QModel
+        FittingUtilities.addParametersToModel(
+                self.model_parameters,
+                self.kernel_module,
+                self.is2D,
+                self._model_model,
+                self.lstParams)
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
@@ -2089,15 +2090,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if structure_factor is None or structure_factor=="None":
             return
 
-        s_kernel = self.models[structure_factor]()
-        p_kernel = self.kernel_module
+        if self.kernel_module is None:
+            # Structure factor is the only selected model; build it and show all its params
+            self.kernel_module = self.models[structure_factor]()
+            s_params = self.kernel_module._model_info.parameters
+            s_params_orig = s_params
 
-        if p_kernel is None:
-            # Not a product model, just S(Q)
-            self.kernel_module = s_kernel
-            params = modelinfo.ParameterTable(self.kernel_module._model_info.parameters.kernel_parameters)
-            new_rows = FittingUtilities.addSimpleParametersToModel(params, self.is2D)
         else:
+            s_kernel = self.models[structure_factor]()
+            p_kernel = self.kernel_module
+
             p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
             s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
 
@@ -2106,19 +2108,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             all_param_names = [param.name for param in all_params]
 
             # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any
-            # conflicting names with P(Q) params will cause a rename; we also lose radius_effective (for now...)
+            # conflicting names with P(Q) params will cause a rename
 
-            # TODO: merge rest of beta approx implementation in
-            # This is to ensure compatibility when we merge beta approx support in...!
-
-            # radius_effective is always s_params[0]
-
-            # if radius_effective_mode is in all_params, then all_params contains radius_effective and we want to
-            # keep it in the model
-
-            # if radius_effective_mode is NOT in all_params, then radius_effective should NOT be kept, because the user
-            # cannot specify it themselves; but, make sure we only remove it if it's actually there in the first place
-            # (sasmodels master removes it already)
             if "radius_effective_mode" in all_param_names:
                 # Show all parameters
                 s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
@@ -2131,25 +2122,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 else:
                     s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
 
-            # Get new rows for QModel
-            # Any renamed parameters are stored as data in the relevant item, for later handling
-            new_rows = FittingUtilities.addSimpleParametersToModel(s_params, self.is2D, s_params_orig)
-
-            # TODO: merge rest of beta approx implementation in
-            # These parameters are not part of P(Q) nor S(Q), but are added only to the product model (e.g. specifying
-            # structure factor calculation mode)
-            # product_params = all_params[p_pars_len+s_pars_len:]
-
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
 
-        # Update QModel
-        for row in new_rows:
-            self._model_model.appendRow(row)
-            # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
-            # if row[0].text() not in self.kernel_module.params.keys():
-            #     row_num = self._model_model.rowCount() - 1
-            #     FittingUtilities.markParameterDisabled(self._model_model, row_num)
+        # Get new rows for QModel
+        # Any renamed parameters are stored as data in the relevant item, for later handling
+        FittingUtilities.addSimpleParametersToModel(
+                s_params,
+                self.is2D,
+                s_params_orig,
+                self._model_model,
+                self.lstParams)
 
     def haveParamsToFit(self):
         """
@@ -2812,9 +2795,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
-        new_rows = FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index, first_row)
-        self._num_shell_params = len(new_rows)
+        new_rows = FittingUtilities.addShellsToModel(
+                self.model_parameters,
+                self._model_model,
+                index,
+                first_row,
+                self.lstParams)
 
+        self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
 
         # Update relevant models
