@@ -90,9 +90,11 @@ def createFixedChoiceComboBox(param, item_row):
 
     return cbox
 
-def addParametersToModel(model, view, parameters, kernel_module, is2D):
+def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None):
     """
-    Update local ModelModel with sasmodel parameters
+    Update local ModelModel with sasmodel parameters.
+    Actually appends to model, if model and view params are not None.
+    Always returns list of lists of QStandardItems.
     """
     multishell_parameters = getIterParams(parameters)
     multishell_param_name, _ = getMultiplicity(parameters)
@@ -102,6 +104,7 @@ def addParametersToModel(model, view, parameters, kernel_module, is2D):
     else:
         params = parameters.iq_parameters
 
+    rows = []
     for param in params:
         # don't include shell parameters
         if param.name == multishell_param_name:
@@ -155,11 +158,15 @@ def addParametersToModel(model, view, parameters, kernel_module, is2D):
         cbox = createFixedChoiceComboBox(param, row)
 
         # Append to the model and use the combobox, if required
-        model.appendRow(row)
-        if cbox is not None:
-            view.setIndexWidget(item2.index(), cbox)
+        if None not in (model, view):
+            model.appendRow(row)
+            if cbox:
+                view.setIndexWidget(item2.index(), cbox)
+        rows.append(row)
 
-def addSimpleParametersToModel(model, view, parameters, is2D):
+    return rows
+
+def addSimpleParametersToModel(parameters, is2D, model=None, view=None):
     """
     Update local ModelModel with sasmodel parameters (non-dispersed, non-magnetic)
     """
@@ -168,6 +175,7 @@ def addSimpleParametersToModel(model, view, parameters, is2D):
     else:
         params = parameters.iq_parameters
 
+    rows = []
     for param in params:
         # Create the top level, checkable item
         item_name = param.name
@@ -188,9 +196,13 @@ def addSimpleParametersToModel(model, view, parameters, is2D):
         cbox = createFixedChoiceComboBox(param, row)
 
         # Append to the model and use the combobox, if required
-        model.appendRow(row)
-        if cbox is not None:
-            view.setIndexWidget(item2.index(), cbox)
+        if None not in (model, view):
+            model.appendRow(row)
+            if cbox:
+                view.setIndexWidget(item2.index(), cbox)
+        rows.append(row)
+
+    return rows
 
 def markParameterDisabled(model, row):
     """Given the QModel row number, format to show it is not available for fitting"""
@@ -270,12 +282,13 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_tooltips.insert(2, error_tooltip)
     model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
-def addShellsToModel(parameters, model, view, index):
+def addShellsToModel(parameters, model, index, view=None):
     """
     Find out multishell parameters and update the model with the requested number of them
     """
     multishell_parameters = getIterParams(parameters)
 
+    rows = []
     for i in range(index):
         for par in multishell_parameters:
             # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
@@ -308,10 +321,16 @@ def addShellsToModel(parameters, model, view, index):
             row = [item1, item2, item3, item4, item5]
             cbox = createFixedChoiceComboBox(par, row)
 
-            # Append to the model and use the combobox, if required
+            # Always append to the model
             model.appendRow(row)
-            if cbox is not None:
+
+            # Apply combobox if required
+            if None not in (view, cbox):
                 view.setIndexWidget(item2.index(), cbox)
+
+            rows.append(row)
+
+    return rows
 
 def calculateChi2(reference_data, current_data):
     """

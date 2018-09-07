@@ -2050,11 +2050,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update the QModel
         FittingUtilities.addParametersToModel(
-                self._model_model,
-                self.lstParams,
                 self.model_parameters,
                 self.kernel_module,
-                self.is2D)
+                self.is2D,
+                self._model_model,
+                self.lstParams)
 
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
@@ -2075,10 +2075,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update the QModel
         FittingUtilities.addSimpleParametersToModel(
-                self._model_model,
-                self.lstParams,
                 structure_parameters,
-                self.is2D)
+                self.is2D,
+                self._model_model,
+                self.lstParams)
 
         # Any parameters removed from the structure factor when producing the product model, e.g. radius_effective, must
         # be disabled (greyed out, etc.)
@@ -2711,8 +2711,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addShellsToModel(
                 self.model_parameters,
                 self._model_model,
-                self.lstParams,
-                index)
+                index,
+                self.lstParams)
 
         self.current_shell_displayed = index
 
