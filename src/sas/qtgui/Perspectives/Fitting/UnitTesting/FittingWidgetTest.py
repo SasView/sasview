@@ -588,9 +588,12 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # Assure we have the combobox available
-        last_row = self.widget._last_model_row
-        func_index = self.widget._model_model.index(last_row-1, 1)
+        cbox_row = self.widget._n_shells_row
+        func_index = self.widget._model_model.index(cbox_row, 1)
         self.assertIsInstance(self.widget.lstParams.indexWidget(func_index), QtWidgets.QComboBox)
+
+        # get number of rows before changing shell count
+        last_row = self.widget._model_model.rowCount()
 
         # Change the combo box index
         self.widget.lstParams.indexWidget(func_index).setCurrentIndex(3)
