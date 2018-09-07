@@ -29,7 +29,9 @@ class PlotterWidget(PlotterBase):
 
         # Dictionary of {plot_id:Data1d}
         self.plot_dict = {}
+        # Dictionaty of {plot_id:line}
 
+        self.plot_lines = {}
         # Window for text add
         self.addText = AddText(self)
 
@@ -181,6 +183,8 @@ class PlotterWidget(PlotterBase):
         # Update the list of data sets (plots) in chart
         self.plot_dict[self._data.id] = self.data
 
+        self.plot_lines[self._data.id] = line
+
         # Now add the legend with some customizations.
 
         if self.showLegend:
@@ -195,7 +199,7 @@ class PlotterWidget(PlotterBase):
             ax.set_xlabel(self.x_label)
 
         # refresh canvas
-        self.canvas.draw_idle()
+        self.canvas.draw()
         # This is an important processEvent.
         # This allows charts to be properly updated in order
         # of plots being applied.
@@ -415,6 +419,7 @@ class PlotterWidget(PlotterBase):
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
         """
+        import logging
         self.removePlot(id)
         self.plot(data=new_plot)
 
@@ -469,7 +474,7 @@ class PlotterWidget(PlotterBase):
         Allows for MPL modifications to the selected plot
         """
         selected_plot = self.plot_dict[id]
-
+        selected_line = self.plot_lines[id]
         # Old style color - single integer for enum color
         # New style color - #hhhhhh
         color = selected_plot.custom_color
