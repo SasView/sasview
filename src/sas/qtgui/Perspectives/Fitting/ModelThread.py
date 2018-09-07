@@ -214,24 +214,37 @@ class Calc1D(CalcThread):
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
-        sq_values = None
-        pq_values = None
-        s_model = None
-        p_model = None
-        if isinstance(self.model, MultiplicationModel):
-            s_model = self.model.s_model
-            p_model = self.model.p_model
-        elif hasattr(self.model, "calc_composition_models"):
-            results = self.model.calc_composition_models(self.data.x[index])
-            if results is not None:
-                pq_values, sq_values = results
+        results_eval = {}
+        intermediate_results = getattr(self.model, "_intermediate_results", None)
+        if callable(intermediate_results):
+            # support for future sasmodels (beta approx support) - it returns a dict of intermediate results, keyed by
+            # name
+            results_eval = intermediate_results()
+        else:
+            sq_values = None
+            pq_values = None
+            s_model = None
+            p_model = None
+            if isinstance(self.model, MultiplicationModel):
+                s_model = self.model.s_model
+                p_model = self.model.p_model
+            elif hasattr(self.model, "calc_composition_models"):
+                results = self.model.calc_composition_models(self.data.x[index])
+                if results is not None:
+                    pq_values, sq_values = results
 
-        if pq_values is None or sq_values is None:
-            if p_model is not None and s_model is not None:
-                sq_values = numpy.zeros((len(self.data.x)))
-                pq_values = numpy.zeros((len(self.data.x)))
-                sq_values[index] = s_model.evalDistribution(self.data.x[index])
-                pq_values[index] = p_model.evalDistribution(self.data.x[index])
+            if pq_values is None or sq_values is None:
+                if p_model is not None and s_model is not None:
+                    sq_values = numpy.zeros((len(self.data.x)))
+                    pq_values = numpy.zeros((len(self.data.x)))
+                    sq_values[index] = s_model.evalDistribution(self.data.x[index])
+                    pq_values[index] = p_model.evalDistribution(self.data.x[index])
+
+            if pq_values is not None and sq_values is not None:
+                results_eval = {
+                    "P(Q)": pq_values,
+                    "S(Q)": sq_values
+                }
 
         elapsed = time.time() - self.starttime
 
@@ -247,7 +260,7 @@ class Calc1D(CalcThread):
                     self.update_chisqr,
                     self.source,
                     unsmeared_output, unsmeared_data, unsmeared_error,
-                    pq_values, sq_values)
+                    results_eval)
         else:
             self.completefn((self.data.x[index], output[index],
                         self.page_id,
@@ -260,7 +273,7 @@ class Calc1D(CalcThread):
                         self.update_chisqr,
                         self.source,
                         unsmeared_output, unsmeared_data, unsmeared_error,
-                        pq_values, sq_values))
+                        results_eval))
 
     def results(self):
         """

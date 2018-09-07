@@ -166,7 +166,7 @@ class FittingLogic(object):
         elapsed, index, model, \
         data, update_chisqr, source, \
         unsmeared_output, unsmeared_data, unsmeared_error, \
-        pq_values, sq_values = return_data
+        intermediate_results = return_data
 
         return self._create1DPlot(tab_id, x, y, model, data)
 
@@ -223,17 +223,12 @@ class FittingLogic(object):
         elapsed, index, model, \
         data, update_chisqr, source, \
         unsmeared_output, unsmeared_data, unsmeared_error, \
-        pq_values, sq_values = return_data
+        intermediate_results = return_data
 
-        pq_plot = None
-        sq_plot = None
-
-        if pq_values is not None:
-            pq_plot = self._create1DPlot(tab_id, x, pq_values, model, data, component="P(Q)")
-        if sq_values is not None:
-            sq_plot = self._create1DPlot(tab_id, x, sq_values, model, data, component="S(Q)")
-
-        return pq_plot, sq_plot
+        plots = []
+        for name, result in intermediate_results.items():
+            plots.append(self._create1DPlot(tab_id, x, result, model, data, component=name))
+        return plots
 
     def computeDataRange(self):
         """
