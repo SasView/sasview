@@ -1506,6 +1506,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # update charts
         self.onPlot()
+        #self.recalculatePlotData()
+
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
@@ -1593,6 +1595,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._model_model.item(row, 1).setText(param_repr)
+            self.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._model_model.item(row, 2).setText(error_repr)
@@ -1634,21 +1637,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             poly_item.insertColumn(2, [QtGui.QStandardItem("")])
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._model_model.blockSignals(True)
-
         if not self.has_error_column:
             # create top-level error column
             error_column = []
             self.lstParams.itemDelegate().addErrorColumn()
             self.iterateOverModel(createErrorColumn)
 
-            # we need to enable signals for this, otherwise the final column mysteriously disappears (don't ask, I don't
-            # know)
-            self._model_model.blockSignals(False)
             self._model_model.insertColumn(2, error_column)
-            self._model_model.blockSignals(True)
 
             FittingUtilities.addErrorHeadersToModel(self._model_model)
 
@@ -1657,10 +1652,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             self.has_error_column = True
 
+        # block signals temporarily, so we don't end up
+        # updating charts with every single model change on the end of fitting
+        self._model_model.itemChanged.disconnect()
         self.iterateOverModel(updateFittedValues)
         self.iterateOverModel(updatePolyValues)
-
-        self._model_model.blockSignals(False)
+        self._model_model.itemChanged.connect(self.onMainParamsChange)
 
         # Adjust the table cells width.
         # TODO: find a way to dynamically adjust column width while resized expanding
@@ -1695,10 +1692,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._poly_model.item(row_i, 1).setText(param_repr)
+            self.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_poly_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._poly_model.item(row_i, 2).setText(error_repr)
-
 
         def createErrorColumn(row_i):
             # Utility function for error column update
@@ -1719,9 +1716,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._poly_model.blockSignals(True)
+        self._poly_model.itemChanged.disconnect()
         self.iterateOverPolyModel(updateFittedValues)
-        self._poly_model.blockSignals(False)
+        self._poly_model.itemChanged.connect(self.onPolyModelChange)
 
         if self.has_poly_error_column:
             return
@@ -1731,9 +1728,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverPolyModel(createErrorColumn)
 
         # switch off reponse to model change
-        self._poly_model.blockSignals(True)
         self._poly_model.insertColumn(2, error_column)
-        self._poly_model.blockSignals(False)
         FittingUtilities.addErrorPolyHeadersToModel(self._poly_model)
 
         self.has_poly_error_column = True
@@ -1766,6 +1761,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._magnet_model.item(row, 1).setText(param_repr)
+            self.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_magnet_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._magnet_model.item(row, 2).setText(error_repr)
@@ -1785,9 +1781,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._magnet_model.blockSignals(True)
+        self._magnet_model.itemChanged.disconnect()
         self.iterateOverMagnetModel(updateFittedValues)
-        self._magnet_model.blockSignals(False)
+        self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
 
         if self.has_magnet_error_column:
             return
@@ -1797,9 +1793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverMagnetModel(createErrorColumn)
 
         # switch off reponse to model change
-        self._magnet_model.blockSignals(True)
         self._magnet_model.insertColumn(2, error_column)
-        self._magnet_model.blockSignals(False)
         FittingUtilities.addErrorHeadersToModel(self._magnet_model)
 
         self.has_magnet_error_column = True
@@ -1811,8 +1805,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
-        self.recalculatePlotData()
         self.showPlot()
+        self.recalculatePlotData()
 
     def onSmearingOptionsUpdate(self):
         """
@@ -2078,15 +2072,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.shell_names = self.shellNamesList()
 
-        # Get new rows for QModel
-        new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.kernel_module, self.is2D)
-
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, model_name)
 
-        # Update QModel
-        for row in new_rows:
-            self._model_model.appendRow(row)
+        # Update the QModel
+        FittingUtilities.addParametersToModel(
+                self.model_parameters,
+                self.kernel_module,
+                self.is2D,
+                self._model_model,
+                self.lstParams)
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
@@ -2095,15 +2090,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if structure_factor is None or structure_factor=="None":
             return
 
-        s_kernel = self.models[structure_factor]()
-        p_kernel = self.kernel_module
+        if self.kernel_module is None:
+            # Structure factor is the only selected model; build it and show all its params
+            self.kernel_module = self.models[structure_factor]()
+            s_params = self.kernel_module._model_info.parameters
+            s_params_orig = s_params
 
-        if p_kernel is None:
-            # Not a product model, just S(Q)
-            self.kernel_module = s_kernel
-            params = modelinfo.ParameterTable(self.kernel_module._model_info.parameters.kernel_parameters)
-            new_rows = FittingUtilities.addSimpleParametersToModel(params, self.is2D)
         else:
+            s_kernel = self.models[structure_factor]()
+            p_kernel = self.kernel_module
+
             p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
             s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
 
@@ -2112,19 +2108,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             all_param_names = [param.name for param in all_params]
 
             # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any
-            # conflicting names with P(Q) params will cause a rename; we also lose radius_effective (for now...)
+            # conflicting names with P(Q) params will cause a rename
 
-            # TODO: merge rest of beta approx implementation in
-            # This is to ensure compatibility when we merge beta approx support in...!
-
-            # radius_effective is always s_params[0]
-
-            # if radius_effective_mode is in all_params, then all_params contains radius_effective and we want to
-            # keep it in the model
-
-            # if radius_effective_mode is NOT in all_params, then radius_effective should NOT be kept, because the user
-            # cannot specify it themselves; but, make sure we only remove it if it's actually there in the first place
-            # (sasmodels master removes it already)
             if "radius_effective_mode" in all_param_names:
                 # Show all parameters
                 s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
@@ -2137,25 +2122,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 else:
                     s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
 
-            # Get new rows for QModel
-            # Any renamed parameters are stored as data in the relevant item, for later handling
-            new_rows = FittingUtilities.addSimpleParametersToModel(s_params, self.is2D, s_params_orig)
-
-            # TODO: merge rest of beta approx implementation in
-            # These parameters are not part of P(Q) nor S(Q), but are added only to the product model (e.g. specifying
-            # structure factor calculation mode)
-            # product_params = all_params[p_pars_len+s_pars_len:]
-
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
 
-        # Update QModel
-        for row in new_rows:
-            self._model_model.appendRow(row)
-            # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
-            # if row[0].text() not in self.kernel_module.params.keys():
-            #     row_num = self._model_model.rowCount() - 1
-            #     FittingUtilities.markParameterDisabled(self._model_model, row_num)
+        # Get new rows for QModel
+        # Any renamed parameters are stored as data in the relevant item, for later handling
+        FittingUtilities.addSimpleParametersToModel(
+                s_params,
+                self.is2D,
+                s_params_orig,
+                self._model_model,
+                self.lstParams)
 
     def haveParamsToFit(self):
         """
@@ -2812,9 +2789,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
-        new_rows = FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index, first_row)
-        self._num_shell_params = len(new_rows)
+        new_rows = FittingUtilities.addShellsToModel(
+                self.model_parameters,
+                self._model_model,
+                index,
+                first_row,
+                self.lstParams)
 
+        self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
 
         # Update relevant models
