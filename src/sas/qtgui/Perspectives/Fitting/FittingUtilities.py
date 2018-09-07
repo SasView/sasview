@@ -169,6 +169,8 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
 def addSimpleParametersToModel(parameters, is2D, model=None, view=None):
     """
     Update local ModelModel with sasmodel parameters (non-dispersed, non-magnetic)
+    Actually appends to model, if model and view params are not None.
+    Always returns list of lists of QStandardItems.
     """
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
@@ -285,6 +287,8 @@ def addErrorPolyHeadersToModel(model):
 def addShellsToModel(parameters, model, index, view=None):
     """
     Find out multishell parameters and update the model with the requested number of them
+    Always appends to model. If view param is not None, supports fixed-choice params.
+    Returns list of lists of QStandardItems.
     """
     multishell_parameters = getIterParams(parameters)
 
