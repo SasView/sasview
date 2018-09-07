@@ -270,7 +270,7 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_tooltips.insert(2, error_tooltip)
     model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
-def addShellsToModel(parameters, model, index):
+def addShellsToModel(parameters, model, view, index):
     """
     Find out multishell parameters and update the model with the requested number of them
     """
@@ -293,7 +293,7 @@ def addShellsToModel(parameters, model, index):
                     item1_2 = QtGui.QStandardItem(str(p.default))
                     item1_3 = QtGui.QStandardItem(str(p.limits[0]))
                     item1_4 = QtGui.QStandardItem(str(p.limits[1]))
-                    item1_5 = QtGui.QStandardItem(p.units)
+                    item1_5 = QtGui.QStandardItem(str(p.units))
                     poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
                     break
                 item1.appendRow([poly_item])
@@ -301,8 +301,17 @@ def addShellsToModel(parameters, model, index):
             item2 = QtGui.QStandardItem(str(par.default))
             item3 = QtGui.QStandardItem(str(par.limits[0]))
             item4 = QtGui.QStandardItem(str(par.limits[1]))
-            item5 = QtGui.QStandardItem(par.units)
-            model.appendRow([item1, item2, item3, item4, item5])
+            item5 = QtGui.QStandardItem(str(par.units))
+            item5.setEditable(False)
+
+            # Check if fixed-choice (returns combobox, if so, also makes some items uneditable)
+            row = [item1, item2, item3, item4, item5]
+            cbox = createFixedChoiceComboBox(par, row)
+
+            # Append to the model and use the combobox, if required
+            model.appendRow(row)
+            if cbox is not None:
+                view.setIndexWidget(item2.index(), cbox)
 
 def calculateChi2(reference_data, current_data):
     """

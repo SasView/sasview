@@ -2708,7 +2708,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if remove_rows > 1:
             self._model_model.removeRows(last_row, remove_rows)
 
-        FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index)
+        FittingUtilities.addShellsToModel(
+                self.model_parameters,
+                self._model_model,
+                self.lstParams,
+                index)
+
         self.current_shell_displayed = index
 
         # Update relevant models
