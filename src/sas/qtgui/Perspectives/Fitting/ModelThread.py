@@ -163,6 +163,8 @@ class Calc1D(CalcThread):
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
+        intermediate_results = None
+
         # If we use a smearer, also return the unsmeared model
         unsmeared_output = None
         unsmeared_data = None
@@ -173,7 +175,13 @@ class Calc1D(CalcThread):
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin+1]
             unsmeared_output = numpy.zeros((len(self.data.x)))
-            unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+
+            return_data = self.model.calculate_Iq(mask)
+            if isinstance(return_data, tuple):
+                # see sasmodels beta_approx: SasviewModel.calculate_Iq
+                # TODO: implement intermediate results in smearers
+                return_data, _ = return_data
+            unsmeared_output[first_bin:last_bin+1] = return_data
             output = self.smearer(unsmeared_output, first_bin, last_bin)
 
             # Rescale data to unsmeared model
@@ -192,22 +200,26 @@ class Calc1D(CalcThread):
                 unsmeared_data=unsmeared_data[index]
                 unsmeared_error=unsmeared_error
         else:
-            output[index] = self.model.evalDistribution(self.data.x[index])
+            return_data = self.model.calculate_Iq(self.data.x[index])
+            if isinstance(return_data, tuple):
+                # see sasmodels beta_approx: SasviewModel.calculate_Iq
+                return_data, intermediate_results = return_data
+            output[index] = return_data
 
-        results_eval = {}
-        intermediate_results = getattr(self.model, "_intermediate_results", None)
-        if callable(intermediate_results):
-            # support for future sasmodels (beta approx support) - it returns a dict of intermediate results, keyed by
-            # name
-            results_eval = intermediate_results()
+        if intermediate_results:
+            # the model returns a callable which is then used to retrieve the data
+            intermediate_results = intermediate_results()
         else:
+            # TODO: this conditional branch needs refactoring
             sq_values = None
             pq_values = None
             s_model = None
             p_model = None
+
             if isinstance(self.model, MultiplicationModel):
                 s_model = self.model.s_model
                 p_model = self.model.p_model
+
             elif hasattr(self.model, "calc_composition_models"):
                 results = self.model.calc_composition_models(self.data.x[index])
                 if results is not None:
@@ -221,10 +233,12 @@ class Calc1D(CalcThread):
                     pq_values[index] = p_model.evalDistribution(self.data.x[index])
 
             if pq_values is not None and sq_values is not None:
-                results_eval = {
+                intermediate_results  = {
                     "P(Q)": pq_values,
                     "S(Q)": sq_values
                 }
+            else:
+                intermediate_results = {}
 
         elapsed = time.time() - self.starttime
 
@@ -235,7 +249,7 @@ class Calc1D(CalcThread):
             data = self.data, update_chisqr = self.update_chisqr,
             source = self.source, unsmeared_output = unsmeared_output,
             unsmeared_data = unsmeared_data, unsmeared_error = unsmeared_error,
-            intermediate_results = results_eval)
+            intermediate_results = intermediate_results)
 
         if LocalConfig.USING_TWISTED:
             return res
