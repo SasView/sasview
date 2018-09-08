@@ -166,7 +166,7 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
 
     return rows
 
-def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model=None, view=None):
+def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model=None, view=None, row_num=None):
     """
     Update local ModelModel with sasmodel parameters (non-dispersed, non-magnetic)
     Actually appends to model, if model and view params are not None.
@@ -215,9 +215,15 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
 
         # Append to the model and use the combobox, if required
         if None not in (model, view):
-            model.appendRow(row)
+            if row_num is None:
+                model.appendRow(row)
+            else:
+                model.insertRow(row_num, row)
+                row_num += 1
+
             if cbox:
                 view.setIndexWidget(item2.index(), cbox)
+
         rows.append(row)
 
     return rows

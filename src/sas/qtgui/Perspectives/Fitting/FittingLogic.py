@@ -160,7 +160,6 @@ class FittingLogic(object):
         """
         Create a new 1D data instance based on fitting results
         """
-
         return self._create1DPlot(tab_id, return_data['x'], return_data['y'],
                                   return_data['model'], return_data['data'])
 
@@ -211,20 +210,12 @@ class FittingLogic(object):
         If return_data contains separated P(Q) and/or S(Q) data, create 1D plots for each and return as the tuple
         (pq_plot, sq_plot). If either are unavailable, the corresponding plot is None.
         """
-
-        pq_plot = None
-        sq_plot = None
-
-        if return_data.get('pq_values', None) is not None:
-            pq_plot = self._create1DPlot(tab_id, return_data['x'],
-                    return_data['pq_values'], return_data['model'],
-                    return_data['data'], component="P(Q)")
-        if return_data.get('sq_values', None) is not None:
-            sq_plot = self._create1DPlot(tab_id, return_data['x'],
-                    return_data['sq_values'], return_data['model'],
-                    return_data['data'], component="S(Q)")
-
-        return pq_plot, sq_plot
+        plots = []
+        for name, result in return_data['intermediate_results'].items():
+            plots.append(self._create1DPlot(tab_id, return_data['x'], result,
+                         return_data['model'], return_data['data'],
+                         component=name))
+        return plots
 
     def computeDataRange(self):
         """
