@@ -3159,9 +3159,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if format=="":
             formatted_output = FittingUtilities.formatParameters(param_list)
         elif format == "Excel":
-            formatted_output = FittingUtilities.formatParametersExcel(param_list)
+            formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
         elif format == "Latex":
-            formatted_output = FittingUtilities.formatParametersLatex(param_list)
+            formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
         else:
             raise AttributeError("Bad format specifier.")
 
