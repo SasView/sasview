@@ -181,9 +181,9 @@ class PlotterWidget(PlotterBase):
                             picker=True)
 
         # Update the list of data sets (plots) in chart
-        self.plot_dict[self._data.id] = self.data
+        self.plot_dict[self._data.name] = self.data
 
-        self.plot_lines[self._data.id] = line
+        self.plot_lines[self._data.name] = line
 
         # Now add the legend with some customizations.
 
@@ -200,10 +200,6 @@ class PlotterWidget(PlotterBase):
 
         # refresh canvas
         self.canvas.draw()
-        # This is an important processEvent.
-        # This allows charts to be properly updated in order
-        # of plots being applied.
-        QtWidgets.QApplication.processEvents()
 
     def createContextMenu(self):
         """
