@@ -113,7 +113,7 @@
     <addaction name="actionManage_Custom_Models"/>
     <addaction name="actionAddMult_Models"/>
     <addaction name="separator"/>
-    <addaction name="EditMask"/>
+    <addaction name="actionEditMask"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -414,7 +414,7 @@
     <string>Edit Custom Model</string>
    </property>
   </action>
-    <action name="EditMask">
+    <action name="actionEditMask">
    <property name="text">
     <string>Edit Mask</string>
    </property>
