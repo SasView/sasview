@@ -2816,6 +2816,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
 
+        # Change 'n' in the parameter model, thereby updating the underlying model
+        self._model_model.item(self._n_shells_row, 1).setText(str(index))
+
         # Update relevant models
         self.setPolyModel()
         self.setMagneticModel()
