@@ -2101,12 +2101,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if structure_factor is None or structure_factor=="None":
             return
 
+        product_params = None
+
         if self.kernel_module is None:
             # Structure factor is the only selected model; build it and show all its params
             self.kernel_module = self.models[structure_factor]()
             s_params = self.kernel_module._model_info.parameters
             s_params_orig = s_params
-
         else:
             s_kernel = self.models[structure_factor]()
             p_kernel = self.kernel_module
@@ -2123,15 +2124,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             if "radius_effective_mode" in all_param_names:
                 # Show all parameters
+                # In this case, radius_effective is NOT pruned by sasmodels.product
                 s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
                 s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
+                product_params = modelinfo.ParameterTable(
+                        self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len:])
             else:
                 # Ensure radius_effective is not displayed
                 s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
                 if "radius_effective" in all_param_names:
+                    # In this case, radius_effective is NOT pruned by sasmodels.product
                     s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
+                    product_params = modelinfo.ParameterTable(
+                            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len:])
                 else:
+                    # In this case, radius_effective is pruned by sasmodels.product
                     s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
+                    product_params = modelinfo.ParameterTable(
+                            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len-1:])
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
@@ -2139,11 +2149,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Get new rows for QModel
         # Any renamed parameters are stored as data in the relevant item, for later handling
         FittingUtilities.addSimpleParametersToModel(
-                s_params,
-                self.is2D,
-                s_params_orig,
-                self._model_model,
-                self.lstParams)
+                parameters=s_params,
+                is2D=self.is2D,
+                parameters_original=s_params_orig,
+                model=self._model_model,
+                view=self.lstParams)
+
+        # Insert product-only params into QModel
+        if product_params:
+            prod_rows = FittingUtilities.addSimpleParametersToModel(
+                    parameters=product_params,
+                    is2D=self.is2D,
+                    parameters_original=None,
+                    model=self._model_model,
+                    view=self.lstParams,
+                    row_num=2)
+
+            # Since this all happens after shells are dealt with and we've inserted rows, fix this counter
+            self._n_shells_row += len(prod_rows)
 
     def haveParamsToFit(self):
         """
