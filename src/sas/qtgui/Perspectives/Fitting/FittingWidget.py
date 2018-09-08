@@ -799,51 +799,56 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getConstraintForRow(self, row):
         """
-        For the given row, return its constraint, if any
+        For the given row, return its constraint, if any (otherwise None)
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            try:
-                return item.child(0).data()
-            except AttributeError:
-                # return none when no constraints
-                pass
-        return None
+        if not self.isCheckable(row):
+            return None
+        item = self._model_model.item(row, 1)
+        try:
+            return item.child(0).data()
+        except AttributeError:
+            return None
 
     def rowHasConstraint(self, row):
         """
         Finds out if row of the main model has a constraint child
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            if item.hasChildren():
-                c = item.child(0).data()
-                if isinstance(c, Constraint):
-                    return True
+        if not self.isCheckable(row):
+            return False
+        item = self._model_model.item(row, 1)
+        if not item.hasChildren():
+            return False
+        c = item.child(0).data()
+        if isinstance(c, Constraint):
+            return True
         return False
 
     def rowHasActiveConstraint(self, row):
         """
         Finds out if row of the main model has an active constraint child
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            if item.hasChildren():
-                c = item.child(0).data()
-                if isinstance(c, Constraint) and c.active:
-                    return True
+        if not self.isCheckable(row):
+            return False
+        item = self._model_model.item(row, 1)
+        if not item.hasChildren():
+            return False
+        c = item.child(0).data()
+        if isinstance(c, Constraint) and c.active:
+            return True
         return False
 
     def rowHasActiveComplexConstraint(self, row):
         """
         Finds out if row of the main model has an active, nontrivial constraint child
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            if item.hasChildren():
-                c = item.child(0).data()
-                if isinstance(c, Constraint) and c.func and c.active:
-                    return True
+        if not self.isCheckable(row):
+            return False
+        item = self._model_model.item(row, 1)
+        if not item.hasChildren():
+            return False
+        c = item.child(0).data()
+        if isinstance(c, Constraint) and c.func and c.active:
+            return True
         return False
 
     def selectParameters(self):
@@ -1053,10 +1058,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if len(rows) == 1:
             # Show constraint, if present
             row = rows[0].row()
-            if self.rowHasConstraint(row):
-                func = self.getConstraintForRow(row).func
-                if func is not None:
-                    self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
+            if not self.rowHasConstraint(row):
+                return
+            func = self.getConstraintForRow(row).func
+            if func is not None:
+                self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
