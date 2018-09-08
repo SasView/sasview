@@ -41,7 +41,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Main model for keeping loaded data
         self.model = QtGui.QStandardItemModel(self)
-
         # Secondary model for keeping frozen data sets
         self.theory_model = QtGui.QStandardItemModel(self)
 
@@ -97,6 +96,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
+        self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -597,7 +597,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
-        self.active_plots[plot2D.data.id] = plot2D
+        self.active_plots[plot2D.data.name] = plot2D
         #============================================
         # Experimental hook for silx charts
         #============================================
@@ -625,7 +625,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     new_plot.item = item
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
-                self.active_plots[plot_set.id] = new_plot
+                self.active_plots[plot_set.name] = new_plot
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:
@@ -696,7 +696,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 old_plot.data = plot_set
                 old_plot.plot()
                 # need this for lookup - otherwise this plot will never update
-                self.active_plots[plot_set.id] = old_plot
+                self.active_plots[plot_set.name] = old_plot
 
     def updatePlot(self, data):
         """
@@ -710,9 +710,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
-        ids_vals = [val.data.id for val in self.active_plots.values()]
+        ids_vals = [val.data.name for val in self.active_plots.values()]
 
-        data_id = data.id
+        data_id = data.name
         if data_id in ids_keys:
             self.active_plots[data_id].replacePlot(data_id, data)
             return True
@@ -951,17 +951,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
-        if index.isValid():
-            model_item = model.itemFromIndex(proxy.mapToSource(index))
-            # Find the mapped index
-            orig_index = model_item.isCheckable()
-            if orig_index:
-                # Check the data to enable/disable actions
-                is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
-                self.actionQuick3DPlot.setEnabled(is_2D)
-                self.actionEditMask.setEnabled(is_2D)
-                # Fire up the menu
-                self.context_menu.exec_(self.current_view.mapToGlobal(position))
+        if not index.isValid():
+            return
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        # Find the mapped index
+        orig_index = model_item.isCheckable()
+        if not orig_index:
+            return
+        # Check the data to enable/disable actions
+        is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
+        self.actionQuick3DPlot.setEnabled(is_2D)
+        self.actionEditMask.setEnabled(is_2D)
+        # Fire up the menu
+        self.context_menu.exec_(self.current_view.mapToGlobal(position))
 
     def showDataInfo(self):
         """
@@ -1058,17 +1060,38 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Show the plot
         self.new_plot.show()
 
+    def extShowEditDataMask(self):
+        self.showEditDataMask()
+
     def showEditDataMask(self, data=None):
         """
         Mask Editor for 2D plots
         """
-        if data is None or not isinstance(data, Data2D):
-            index = self.current_view.selectedIndexes()[0]
-            proxy = self.current_view.model()
-            model = proxy.sourceModel()
-            model_item = model.itemFromIndex(proxy.mapToSource(index))
+        try:
+            if data is None or not isinstance(data, Data2D):
+                index = self.current_view.selectedIndexes()[0]
+                proxy = self.current_view.model()
+                model = proxy.sourceModel()
+                model_item = model.itemFromIndex(proxy.mapToSource(index))
 
-            data = GuiUtils.dataFromItem(model_item)
+                data = GuiUtils.dataFromItem(model_item)
+
+            if data is None or not isinstance(data, Data2D):
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Information)
+                msg.setText("Error: cannot apply mask. \
+                                Please select a 2D dataset.")
+                msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
+                msg.exec_()
+                return
+        except:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setText("Error: No dataset selected. \
+                            Please select a 2D dataset.")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
+            msg.exec_()
+            return
 
         mask_editor = MaskEditor(self, data)
         # Modal dialog here.

@@ -47,7 +47,6 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 
-
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
@@ -187,6 +186,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._logic.append(logic)
 
         # Overwrite data type descriptor
+
         self.is2D = True if isinstance(self.logic.data, Data2D) else False
 
         # Let others know we're full of data now
@@ -562,7 +562,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         When clicked on parameter(s): fitting/constraints options
         When clicked on white space: model description
         """
-        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()]
+        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()
+                if self.isCheckable(s.row())]
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
             menu.exec_(self.lstParams.viewport().mapToGlobal(position))
@@ -798,51 +799,56 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getConstraintForRow(self, row):
         """
-        For the given row, return its constraint, if any
+        For the given row, return its constraint, if any (otherwise None)
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            try:
-                return item.child(0).data()
-            except AttributeError:
-                # return none when no constraints
-                pass
-        return None
+        if not self.isCheckable(row):
+            return None
+        item = self._model_model.item(row, 1)
+        try:
+            return item.child(0).data()
+        except AttributeError:
+            return None
 
     def rowHasConstraint(self, row):
         """
         Finds out if row of the main model has a constraint child
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            if item.hasChildren():
-                c = item.child(0).data()
-                if isinstance(c, Constraint):
-                    return True
+        if not self.isCheckable(row):
+            return False
+        item = self._model_model.item(row, 1)
+        if not item.hasChildren():
+            return False
+        c = item.child(0).data()
+        if isinstance(c, Constraint):
+            return True
         return False
 
     def rowHasActiveConstraint(self, row):
         """
         Finds out if row of the main model has an active constraint child
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            if item.hasChildren():
-                c = item.child(0).data()
-                if isinstance(c, Constraint) and c.active:
-                    return True
+        if not self.isCheckable(row):
+            return False
+        item = self._model_model.item(row, 1)
+        if not item.hasChildren():
+            return False
+        c = item.child(0).data()
+        if isinstance(c, Constraint) and c.active:
+            return True
         return False
 
     def rowHasActiveComplexConstraint(self, row):
         """
         Finds out if row of the main model has an active, nontrivial constraint child
         """
-        if self.isCheckable(row):
-            item = self._model_model.item(row, 1)
-            if item.hasChildren():
-                c = item.child(0).data()
-                if isinstance(c, Constraint) and c.func and c.active:
-                    return True
+        if not self.isCheckable(row):
+            return False
+        item = self._model_model.item(row, 1)
+        if not item.hasChildren():
+            return False
+        c = item.child(0).data()
+        if isinstance(c, Constraint) and c.func and c.active:
+            return True
         return False
 
     def selectParameters(self):
@@ -1052,10 +1058,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if len(rows) == 1:
             # Show constraint, if present
             row = rows[0].row()
-            if self.rowHasConstraint(row):
-                func = self.getConstraintForRow(row).func
-                if func is not None:
-                    self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
+            if not self.rowHasConstraint(row):
+                return
+            func = self.getConstraintForRow(row).func
+            if func is not None:
+                self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
@@ -1806,6 +1813,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
         self.showPlot()
+        # This is an important processEvent.
+        # This allows charts to be properly updated in order
+        # of plots being applied.
+        QtWidgets.QApplication.processEvents()
         self.recalculatePlotData()
 
     def onSmearingOptionsUpdate(self):
@@ -2090,12 +2101,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if structure_factor is None or structure_factor=="None":
             return
 
+        product_params = None
+
         if self.kernel_module is None:
             # Structure factor is the only selected model; build it and show all its params
             self.kernel_module = self.models[structure_factor]()
             s_params = self.kernel_module._model_info.parameters
             s_params_orig = s_params
-
         else:
             s_kernel = self.models[structure_factor]()
             p_kernel = self.kernel_module
@@ -2112,15 +2124,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             if "radius_effective_mode" in all_param_names:
                 # Show all parameters
+                # In this case, radius_effective is NOT pruned by sasmodels.product
                 s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
                 s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
+                product_params = modelinfo.ParameterTable(
+                        self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len:])
             else:
                 # Ensure radius_effective is not displayed
                 s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
                 if "radius_effective" in all_param_names:
+                    # In this case, radius_effective is NOT pruned by sasmodels.product
                     s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
+                    product_params = modelinfo.ParameterTable(
+                            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len:])
                 else:
+                    # In this case, radius_effective is pruned by sasmodels.product
                     s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
+                    product_params = modelinfo.ParameterTable(
+                            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len-1:])
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
@@ -2128,11 +2149,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Get new rows for QModel
         # Any renamed parameters are stored as data in the relevant item, for later handling
         FittingUtilities.addSimpleParametersToModel(
-                s_params,
-                self.is2D,
-                s_params_orig,
-                self._model_model,
-                self.lstParams)
+                parameters=s_params,
+                is2D=self.is2D,
+                parameters_original=s_params_orig,
+                model=self._model_model,
+                view=self.lstParams)
+
+        # Insert product-only params into QModel
+        if product_params:
+            prod_rows = FittingUtilities.addSimpleParametersToModel(
+                    parameters=product_params,
+                    is2D=self.is2D,
+                    parameters_original=None,
+                    model=self._model_model,
+                    view=self.lstParams,
+                    row_num=2)
+
+            # Since this all happens after shells are dealt with and we've inserted rows, fix this counter
+            self._n_shells_row += len(prod_rows)
 
     def haveParamsToFit(self):
         """
@@ -2799,6 +2833,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
 
+        # Change 'n' in the parameter model, thereby updating the underlying model
+        self._model_model.item(self._n_shells_row, 1).setText(str(index))
+
         # Update relevant models
         self.setPolyModel()
         self.setMagneticModel()
@@ -3308,4 +3345,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.blockSignals(True)
         self.iterateOverPolyModel(updateFittedValues)
         self._poly_model.blockSignals(False)
+
+
 
