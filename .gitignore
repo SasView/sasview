@@ -15,6 +15,7 @@
 # Editor files
 *.pyproj
 *.sln
+.*.swp
 .DS_Store
 /.settings
 /.vscode
