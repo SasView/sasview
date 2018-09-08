@@ -41,7 +41,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.setupUi(self)
         self.parent = parent
 
-        self.setWindowTitle("Dₐₓ Explorer")
+        self.setWindowTitle("Dmax Explorer")
 
         self.pr_state = pr_state
         self.nfunc = nfunc
@@ -115,7 +115,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         osc = []
         bck = []
         chi2 = []
-
+        plotable_xs = [] #Introducing this to make sure size of x and y for plotting is the same.8
         try:
             dmin = float(self.model.item(W.DMIN).text())
             dmax = float(self.model.item(W.DMAX).text())
@@ -127,6 +127,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             logger.error(msg)
 
         original = self.pr_state.d_max
+
         for x in xs:
             self.pr_state.d_max = x
             try:
@@ -139,6 +140,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 osc.append(self.pr_state.oscillations(out))
                 bck.append(self.pr_state.background)
                 chi2.append(self.pr_state.chi2)
+                plotable_xs.append(x)
             except Exception as ex:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
@@ -187,7 +189,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             y_label = "P^{+}_{1\\sigma}"
             y_unit = "a.u."
 
-        data = Data1D(xs, ys)
+        data = Data1D(plotable_xs, ys)
         if self.hasPlot:
             self.plot.removePlot(None)
         self.hasPlot = True
