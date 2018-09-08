@@ -76,18 +76,12 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <property name="iconSize">
-      <size>
-       <width>16</width>
-       <height>16</height>
-      </size>
-     </property>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
        <string>Model</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0" colspan="3">
+       <item row="0" column="0" colspan="4">
         <widget class="QGroupBox" name="groupBox_6">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -163,18 +157,6 @@
        </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="groupBox_7">
-         <property name="minimumSize">
-          <size>
-           <width>80</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
          <property name="title">
           <string>Options </string>
          </property>
@@ -248,41 +230,14 @@
        </item>
        <item row="1" column="1">
         <widget class="QGroupBox" name="groupBox_8">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
          <property name="title">
           <string>Fitting details </string>
          </property>
          <layout class="QGridLayout" name="gridLayout_17">
-          <property name="sizeConstraint">
-           <enum>QLayout::SetFixedSize</enum>
-          </property>
           <item row="0" column="0" colspan="2">
            <layout class="QGridLayout" name="gridLayout_8">
             <item row="0" column="0">
              <widget class="QLabel" name="label_16">
-              <property name="minimumSize">
-               <size>
-                <width>25</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
               <property name="text">
                <string>Min range</string>
               </property>
@@ -290,12 +245,6 @@
             </item>
             <item row="0" column="1">
              <widget class="QLabel" name="lblMinRangeDef">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="text">
                <string>0.005</string>
               </property>
@@ -303,12 +252,6 @@
             </item>
             <item row="0" column="2">
              <widget class="QLabel" name="label_17">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -316,18 +259,6 @@
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_18">
-              <property name="minimumSize">
-               <size>
-                <width>25</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
               <property name="text">
                <string>Max range</string>
               </property>
@@ -335,12 +266,6 @@
             </item>
             <item row="1" column="1">
              <widget class="QLabel" name="lblMaxRangeDef">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="text">
                <string>0.1</string>
               </property>
@@ -348,12 +273,6 @@
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="label_19">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -379,19 +298,20 @@
         </widget>
        </item>
        <item row="1" column="2">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>207</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="3">
         <widget class="QGroupBox" name="groupBox_9">
-         <property name="minimumSize">
-          <size>
-           <width>80</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/DOF (DOF=N&lt;span style=&quot; vertical-align:sub;&quot;&gt;pts&lt;/span&gt;-N&lt;span style=&quot; vertical-align:sub;&quot;&gt;par&lt;/span&gt; fitted)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -410,12 +330,6 @@
             </item>
             <item>
              <widget class="QLabel" name="lblChi2Value">
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;0.01625&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>

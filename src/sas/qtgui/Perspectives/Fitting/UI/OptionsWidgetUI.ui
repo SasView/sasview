@@ -31,12 +31,6 @@
         </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="txtMinRange">
-          <property name="minimumSize">
-           <size>
-            <width>5</width>
-            <height>0</height>
-           </size>
-          </property>
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum value of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -79,7 +73,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>40</width>
+          <width>217</width>
           <height>20</height>
          </size>
         </property>
