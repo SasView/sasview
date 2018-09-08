@@ -597,7 +597,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
-        self.active_plots[plot2D.data.id] = plot2D
+        self.active_plots[plot2D.data.name] = plot2D
         #============================================
         # Experimental hook for silx charts
         #============================================
@@ -625,7 +625,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     new_plot.item = item
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
-                self.active_plots[plot_set.id] = new_plot
+                self.active_plots[plot_set.name] = new_plot
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:
@@ -696,7 +696,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 old_plot.data = plot_set
                 old_plot.plot()
                 # need this for lookup - otherwise this plot will never update
-                self.active_plots[plot_set.id] = old_plot
+                self.active_plots[plot_set.name] = old_plot
 
     def updatePlot(self, data):
         """
@@ -710,9 +710,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
-        ids_vals = [val.data.id for val in self.active_plots.values()]
+        ids_vals = [val.data.name for val in self.active_plots.values()]
 
-        data_id = data.id
+        data_id = data.name
         if data_id in ids_keys:
             self.active_plots[data_id].replacePlot(data_id, data)
             return True

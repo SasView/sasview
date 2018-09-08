@@ -1813,6 +1813,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
         self.showPlot()
+        # This is an important processEvent.
+        # This allows charts to be properly updated in order
+        # of plots being applied.
+        QtWidgets.QApplication.processEvents()
         self.recalculatePlotData()
 
     def onSmearingOptionsUpdate(self):
