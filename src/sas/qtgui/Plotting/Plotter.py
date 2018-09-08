@@ -560,7 +560,7 @@ class PlotterWidget(PlotterBase):
         self.fit_result.dy = None
 
         #Remove another Fit, if exists
-        self.removePlot("fit")
+        self.removePlot("Fit")
 
         self.fit_result.reset_view()
         #self.offset_graph()

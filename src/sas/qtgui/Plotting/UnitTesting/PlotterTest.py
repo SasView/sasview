@@ -56,12 +56,12 @@ class PlotterTest(unittest.TestCase):
         """ Look at the plotting with error bars"""
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        FigureCanvas.draw = MagicMock()
 
         self.plotter.plot(hide_error=False)
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'log')
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        self.assertTrue(FigureCanvas.draw.called)
 
         self.plotter.figure.clf()
 
@@ -69,12 +69,12 @@ class PlotterTest(unittest.TestCase):
         """ Look at the plotting without error bars"""
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        FigureCanvas.draw = MagicMock()
 
         self.plotter.plot(hide_error=True)
 
         self.assertEqual(self.plotter.ax.get_yscale(), 'log')
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        self.assertTrue(FigureCanvas.draw.called)
         self.plotter.figure.clf()
 
     def testPlotWithSesans(self):
@@ -90,13 +90,13 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.data = data
         self.plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        FigureCanvas.draw = MagicMock()
 
         self.plotter.plot(hide_error=True)
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        self.assertTrue(FigureCanvas.draw.called)
 
     def testCreateContextMenuQuick(self):
         """ Test the right click menu """
@@ -261,7 +261,7 @@ class PlotterTest(unittest.TestCase):
 
         # Just this one plot
         self.assertEqual(len(list(self.plotter.plot_dict.keys())), 1)
-        self.plotter.onLinearFit(1)
+        self.plotter.onLinearFit('Test name')
 
         # Check that exec_ got called
         self.assertTrue(QtWidgets.QDialog.exec_.called)
@@ -288,14 +288,14 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(len(list(self.plotter.plot_dict.keys())), 2)
 
         # Delete one set
-        self.plotter.onRemovePlot(2)
+        self.plotter.onRemovePlot('Test name 2')
         # Assure we have two sets
         self.assertEqual(len(list(self.plotter.plot_dict.keys())), 1)
 
         self.plotter.manager = MagicMock()
 
         # Delete the remaining set
-        self.plotter.onRemovePlot(1)
+        self.plotter.onRemovePlot('Test name')
         # Assure we have no plots
         self.assertEqual(len(list(self.plotter.plot_dict.keys())), 0)
         # Assure the plotter window is closed
@@ -330,7 +330,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(xl, "$XAXIS(furlong*fortnight^{-1})$")
         self.assertEqual(yl, "$YAXIS(cake)$")
         # The hide_error flag should also remain
-        self.assertTrue(self.plotter.plot_dict[2].hide_error)
+        self.assertTrue(self.plotter.plot_dict['Test name 2'].hide_error)
         self.plotter.figure.clf()
 
     def testOnToggleHideError(self):
@@ -354,14 +354,14 @@ class PlotterTest(unittest.TestCase):
         self.plotter.plot(data2)
 
         # Reverse the toggle
-        self.plotter.onToggleHideError(2)
+        self.plotter.onToggleHideError('Test name 2')
         # See that the labels didn't change
         xl = self.plotter.ax.xaxis.label.get_text()
         yl = self.plotter.ax.yaxis.label.get_text()
         self.assertEqual(xl, "$XAXIS(furlong*fortnight^{-1})$")
         self.assertEqual(yl, "$YAXIS(cake)$")
         # The hide_error flag should toggle
-        self.assertEqual(self.plotter.plot_dict[2].hide_error, not error_status)
+        self.assertEqual(self.plotter.plot_dict['Test name 2'].hide_error, not error_status)
         self.plotter.figure.clf()
 
     def testOnFitDisplay(self):
@@ -416,7 +416,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(xl, "$XAXIS(furlong*fortnight^{-1})$")
         self.assertEqual(yl, "$YAXIS(cake)$")
         # The hide_error flag should be as set
-        self.assertEqual(self.plotter.plot_dict[2].hide_error, error_status)
+        self.assertEqual(self.plotter.plot_dict['Test name 2'].hide_error, error_status)
         self.plotter.figure.clf()
 
     def notestOnModifyPlot(self):

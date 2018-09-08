@@ -1840,7 +1840,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Show the chart if ready
         data_to_show = self.data if self.data_is_loaded else self.model_data
         if data_to_show is not None:
-            self.communicate.plotRequestedSignal.emit([data_to_show])
+            self.communicate.plotRequestedSignal.emit([data_to_show], self.tab_id)
 
     def onOptionsUpdate(self):
         """
@@ -2421,7 +2421,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             new_plots.append(residuals)
 
         if self.data_is_loaded:
-            GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
+            #GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
+            pass
         else:
             # delete theory items for the model, in order to get rid of any redundant items, e.g. beta(Q), S_eff(Q)
             self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
