@@ -951,17 +951,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
-        if index.isValid():
-            model_item = model.itemFromIndex(proxy.mapToSource(index))
-            # Find the mapped index
-            orig_index = model_item.isCheckable()
-            if orig_index:
-                # Check the data to enable/disable actions
-                is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
-                self.actionQuick3DPlot.setEnabled(is_2D)
-                self.actionEditMask.setEnabled(is_2D)
-                # Fire up the menu
-                self.context_menu.exec_(self.current_view.mapToGlobal(position))
+        if not index.isValid():
+            return
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        # Find the mapped index
+        orig_index = model_item.isCheckable()
+        if not orig_index:
+            return
+        # Check the data to enable/disable actions
+        is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
+        self.actionQuick3DPlot.setEnabled(is_2D)
+        self.actionEditMask.setEnabled(is_2D)
+        # Fire up the menu
+        self.context_menu.exec_(self.current_view.mapToGlobal(position))
 
     def showDataInfo(self):
         """

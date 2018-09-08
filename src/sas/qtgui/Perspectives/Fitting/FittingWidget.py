@@ -562,7 +562,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         When clicked on parameter(s): fitting/constraints options
         When clicked on white space: model description
         """
-        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()]
+        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()
+                if self.isCheckable(s.row())]
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
             menu.exec_(self.lstParams.viewport().mapToGlobal(position))
