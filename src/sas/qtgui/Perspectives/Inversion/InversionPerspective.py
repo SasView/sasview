@@ -42,6 +42,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     name = "Inversion"
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
     calculateSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None):
@@ -193,8 +195,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
+        self.estimateDynamicNTSignal.connect(self._estimateDynamicNTUpdate)
+        self.estimateDynamicSignal.connect(self._estimateDynamicUpdate)
         self.estimateSignal.connect(self._estimateUpdate)
         self.calculateSignal.connect(self._calculateUpdate)
+
+        self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -500,6 +506,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
         self.performEstimate()
 
+    def updateDynamicGuiValues(self):
+        pr = self._calculator
+        alpha = self._calculator.suggested_alpha
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
+        self.noOfTermsSuggestionButton.setText(
+             "{:n}".format(self.nTermsSuggested))
+
+        self.enableButtons()
+
     def updateGuiValues(self):
         pr = self._calculator
         out = self._calculator.out
@@ -672,6 +689,31 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.estimationThreadNT.queue()
         self.estimationThreadNT.ready(2.5)
 
+    def performEstimateDynamicNT(self):
+        """
+        Perform parameter estimation
+        """
+        from .Thread import EstimateNT
+
+        self.updateCalculator()
+
+        # If a thread is already started, stop it
+        self.stopEstimateNTThread()
+
+        pr = self._calculator.clone()
+        # Skip the slit settings for the estimation
+        # It slows down the application and it doesn't change the estimates
+        pr.slit_height = 0.0
+        pr.slit_width = 0.0
+        nfunc = self.getNFunc()
+
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
+                                             error_func=self._threadError,
+                                             completefn=self._estimateDynamicNTCompleted,
+                                             updatefn=None)
+        self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
+
     def stopEstimateNTThread(self):
         if (self.estimationThreadNT is not None and
                 self.estimationThreadNT.isrunning()):
@@ -694,6 +736,23 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.estimationThread.queue()
         self.estimationThread.ready(2.5)
 
+    def performEstimateDynamic(self):
+        """
+            Perform parameter estimation
+        """
+        from .Thread import EstimatePr
+
+        # If a thread is already started, stop it
+        self.stopEstimationThread()
+
+        self.estimationThread = EstimatePr(self._calculator.clone(),
+                                           self.getNFunc(),
+                                           error_func=self._threadError,
+                                           completefn=self._estimateDynamicCompleted,
+                                           updatefn=None)
+        self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
+
     def stopEstimationThread(self):
         """ Stop the estimation thread if it exists and is running """
         if (self.estimationThread is not None and
@@ -706,6 +765,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def _estimateCompleted(self, alpha, message, elapsed):
         ''' Send a signal to the main thread for model update'''
         self.estimateSignal.emit((alpha, message, elapsed))
+
+    def _estimateDynamicCompleted(self, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateDynamicSignal.emit((alpha, message, elapsed))
 
     def _estimateUpdate(self, output_tuple):
         """
@@ -722,9 +785,28 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             logger.info(message)
         self.performEstimateNT()
 
+    def _estimateDynamicUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param elapsed: computation time
+        """
+        alpha, message, elapsed = output_tuple
+        self._calculator.alpha = alpha
+        self._calculator.elapsed += self._calculator.elapsed
+        if message:
+            logger.info(message)
+        self.performEstimateDynamicNT()
+
     def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
         ''' Send a signal to the main thread for model update'''
         self.estimateNTSignal.emit((nterms, alpha, message, elapsed))
+
+    def _estimateDynamicNTCompleted(self, nterms, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateDynamicNTSignal.emit((nterms, alpha, message, elapsed))
 
     def _estimateNTUpdate(self, output_tuple):
         """
@@ -741,6 +823,28 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.nTermsSuggested = nterms
         # Save useful info
         self.updateGuiValues()
+        if message:
+            logger.info(message)
+        if self.isBatch:
+            self.acceptAlpha()
+            self.acceptNoTerms()
+            self.startThread()
+
+    def _estimateDynamicNTUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param nterms: estimated number of terms
+        :param elapsed: computation time
+        """
+        nterms, alpha, message, elapsed = output_tuple
+        self._calculator.elapsed += elapsed
+        self._calculator.suggested_alpha = alpha
+        self.nTermsSuggested = nterms
+        # Save useful info
+        self.updateDynamicGuiValues()
         if message:
             logger.info(message)
         if self.isBatch:
