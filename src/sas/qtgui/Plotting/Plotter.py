@@ -419,7 +419,6 @@ class PlotterWidget(PlotterBase):
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
         """
-        import logging
         self.removePlot(id)
         self.plot(data=new_plot)
 
