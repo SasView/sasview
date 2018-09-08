@@ -212,10 +212,23 @@ class FittingLogic(object):
         """
         plots = []
         for name, result in return_data['intermediate_results'].items():
+            if not isinstance(result, np.ndarray):
+                continue
             plots.append(self._create1DPlot(tab_id, return_data['x'], result,
                          return_data['model'], return_data['data'],
                          component=name))
         return plots
+
+    def getScalarIntermediateResults(self, return_data):
+        """
+        Returns a dict of scalar-only intermediate results from the return data.
+        """
+        res = {}
+        for name, int_res in return_data["intermediate_results"].items():
+            if isinstance(int_res, np.ndarray):
+                continue
+            res[name] = int_res
+        return res
 
     def computeDataRange(self):
         """

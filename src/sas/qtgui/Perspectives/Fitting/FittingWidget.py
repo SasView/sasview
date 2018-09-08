@@ -2228,12 +2228,76 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # TODO: multishell params in self.kernel_module.details[??] = value
 
+        # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
+        # necessary
+        self.processEffectiveRadius()
+
         # Force the chart update when actual parameters changed
         if model_column == 1:
             self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
+
+    def processEffectiveRadius(self):
+        """
+        Checks the value of radius_effective_mode, if existent, and processes radius_effective as necessary.
+        * mode == 0: This means 'unconstrained'; ensure use can specify ER.
+        * mode > 0: This means it is constrained to a P(Q)-computed value in sasmodels; prevent user from editing ER.
+
+        Note: If ER has been computed, it is passed back to SasView as an intermediate result. That value must be
+        displayed for the user; that is not dealt with here, but in complete1D.
+        """
+        ER_row = self.getRowFromName("radius_effective")
+        if ER_row is None:
+            return
+
+        ER_mode_row = self.getRowFromName("radius_effective_mode")
+        if ER_mode_row is None:
+            return
+
+        try:
+            ER_mode = int(self._model_model.item(ER_mode_row, 1).text())
+        except ValueError:
+            logging.error("radius_effective_mode was set to an invalid value.")
+            return
+
+        if ER_mode == 0:
+            # ensure the ER value can be modified by user
+            self.setParamEditableByRow(ER_row, True)
+        elif ER_mode > 0:
+            # ensure the ER value cannot be modified by user
+            self.setParamEditableByRow(ER_row, False)
+        else:
+            logging.error("radius_effective_mode was set to an invalid value.")
+
+    def setParamEditableByRow(self, row, editable=True):
+        """
+        Sets whether the user can edit a parameter in the table. If they cannot, the parameter name's font is changed,
+        the value itself cannot be edited if clicked on, and the parameter may not be fitted.
+        """
+        item_name = self._model_model.item(row, 0)
+        item_value = self._model_model.item(row, 1)
+
+        item_value.setEditable(editable)
+
+        if editable:
+            # reset font
+            item_name.setFont(QtGui.QFont())
+            # reset colour
+            item_name.setForeground(QtGui.QBrush())
+            # make checkable
+            item_name.setCheckable(True)
+        else:
+            # change font
+            font = QtGui.QFont()
+            font.setItalic(True)
+            item_name.setFont(font)
+            # change colour
+            item_name.setForeground(QtGui.QBrush(QtGui.QColor(50, 50, 50)))
+            # make not checkable (and uncheck)
+            item_name.setCheckState(QtCore.Qt.Unchecked)
+            item_name.setCheckable(False)
 
     def isCheckable(self, row):
         return self._model_model.item(row, 0).isCheckable()
@@ -2435,6 +2499,37 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
+
+        # Update radius_effective if relevant
+        def updateRadiusEffective():
+            ER_mode_row = self.getRowFromName("radius_effective_mode")
+            if ER_mode_row is None:
+                return
+            try:
+                ER_mode = int(self._model_model.item(ER_mode_row, 1).text())
+            except ValueError:
+                logging.error("radius_effective_mode was set to an invalid value.")
+                return
+            if ER_mode < 1:
+                # does not need updating if it is not being computed
+                return
+
+            ER_row = self.getRowFromName("radius_effective")
+            if ER_row is None:
+                return
+
+            scalar_results = self.logic.getScalarIntermediateResults(return_data)
+            ER_value = scalar_results.get("effective_radius") # note name of key
+            if ER_value is None:
+                return
+            # ensure the model does not recompute when updating the value
+            self._model_model.blockSignals(True)
+            self._model_model.item(ER_row, 1).setText(str(ER_value))
+            self._model_model.blockSignals(False)
+            # ensure the view is updated immediately
+            self._model_model.layoutChanged.emit()
+
+        updateRadiusEffective()
 
     def complete2D(self, return_data):
         """
