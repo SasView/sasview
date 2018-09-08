@@ -3124,12 +3124,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_checked = str(self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked)
             param_value = str(self._model_model.item(row, 1).text())
             param_error = None
+            param_min = None
+            param_max = None
             column_offset = 0
             if self.has_error_column:
                 param_error = str(self._model_model.item(row, 2).text())
                 column_offset = 1
-            param_min = str(self._model_model.item(row, 2+column_offset).text())
-            param_max = str(self._model_model.item(row, 3+column_offset).text())
+
+            try:
+                param_min = str(self._model_model.item(row, 2+column_offset).text())
+                param_max = str(self._model_model.item(row, 3+column_offset).text())
+            except:
+                pass
+
             param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
 
         def gatherPolyParams(row):
@@ -3219,10 +3226,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 context[name] = [check, value]
 
                 # limits
-                limit_lo = item[3]
-                context[name].append(limit_lo)
-                limit_hi = item[4]
-                context[name].append(limit_hi)
+                try:
+                    limit_lo = item[3]
+                    context[name].append(limit_lo)
+                    limit_hi = item[4]
+                    context[name].append(limit_hi)
+                except:
+                    pass
 
                 # Polydisp
                 if len(item) > 5:
@@ -3281,11 +3291,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 #self._model_model.item(row, 2).setText(error_repr)
                 ioffset = 1
             # min/max
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-            self._model_model.item(row, 2+ioffset).setText(param_repr)
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-            self._model_model.item(row, 3+ioffset).setText(param_repr)
+            try:
+                param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
+                self._model_model.item(row, 2+ioffset).setText(param_repr)
+                param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
+                self._model_model.item(row, 3+ioffset).setText(param_repr)
+            except:
+                pass
+
             self.setFocus()
+
 
 
         # block signals temporarily, so we don't end up
