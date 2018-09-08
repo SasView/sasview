@@ -97,6 +97,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
         self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
+        self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -138,6 +139,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.current_view = self.treeView
         else:
             self.current_view = self.freezeView
+
+    def changeTabs(self, tab=0):
+        """
+        Switch tabs of the data explorer
+        0: data tab
+        1: theory tab
+        """
+        assert(tab in [0,1])
+        self.setCurrentIndex(tab)
 
     def displayHelp(self):
         """

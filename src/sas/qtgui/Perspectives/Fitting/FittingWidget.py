@@ -2286,6 +2286,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitted_data.filename = name
             fitted_data.symbol = "Line"
             self.createTheoryIndex(fitted_data)
+            # Switch to the theory tab for user's glee
+            self.communicate.changeDataExplorerTabSignal.emit(1)
 
     def updateModelIndex(self, fitted_data):
         """

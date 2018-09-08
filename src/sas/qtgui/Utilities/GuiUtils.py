@@ -277,6 +277,9 @@ class Communicate(QtCore.QObject):
     # Notify about new categories/models from category manager
     updateModelCategoriesSignal = QtCore.pyqtSignal()
 
+    # Tell the data explorer to switch tabs
+    changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
