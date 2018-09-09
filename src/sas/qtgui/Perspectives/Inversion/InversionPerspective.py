@@ -535,10 +535,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
-        #FIXME: At the initial initialization trigger Dynamic estimate instead of this one
-        #self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        #self.noOfTermsSuggestionButton.setText(
-        #    "{:n}".format(self.nTermsSuggested))
 
         if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
@@ -656,9 +652,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                  updatefn=None)
         self.calcThread.queue()
         self.calcThread.ready(2.5)
-
-        #Perform estimate should be done on value enter this should solve delay problem
-        #self.performEstimate()
 
     def stopCalcThread(self):
         """ Stops a thread if it exists and is running """
@@ -785,6 +778,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if message:
             logger.info(message)
         self.performEstimateNT()
+        self.performEstimateDynamicNT()
 
     def _estimateDynamicUpdate(self, output_tuple):
         """
