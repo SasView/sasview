@@ -2800,19 +2800,23 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Function called when 'Help' button is pressed next to model
         of interest.  This calls DocumentationWindow from
-        documentation_window.py. It will load the top level of the model
-        help documenation sphinx generated html if no model is presented.
-        If a model IS present then if documention for that model exists
-        it will load to that  point otherwise again it will go to the top.
-        For Wx2.8 and below is used (i.e. non-released through installer)
-        a browser is loaded and the top of the model documentation only is
-        accessible because webbrowser module does not pass anything after
-        the # to the browser.
+        documentation_window.py. It will load the top level of the html model
+        help documenation sphinx generated if either a plugin model (which
+        normally does not have an html help help file) is selected or if no
+        model is selected. Otherwise, if a regula model is selected, the
+        documention for that model will be sent to a browser window.
+
+        :todo the quick fix for no documentation in plugins is the if statment.
+        However, the right way to do this would be to check whether the hmtl
+        file exists and load the model docs if it does and the general docs if
+        it doesn't - this will become important if we ever figure out how to
+        build docs for plugins on the fly.  Sep 9, 2018 -PDB
 
         :param event: on Help Button pressed event
         """
 
-        if self.model is not None:
+        if (self.model is not None) and (self.categorybox.GetValue()
+                                         != "Plugin Models"):
             name = self.formfactorbox.GetValue()
             _TreeLocation = 'user/models/%s.html' % name
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
