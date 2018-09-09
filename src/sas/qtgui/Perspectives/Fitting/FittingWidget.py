@@ -1087,11 +1087,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             return True
 
+    def updateDataVisibility(self, updateOnly):
+        self.dataUpdateOnly = updateOnly
+        for dataitem in self.all_data:
+            data = GuiUtils.dataFromItem(dataitem)
+            data.hidden = self.dataUpdateOnly
+            self.updateModelIndex(data)
+
     def updateData(self):
         """
         Helper function for recalculation of data used in plotting
         """
         # Update the chart
+        self.updateDataVisibility(True)
         if self.data_is_loaded:
             self.cmdPlot.setText("Show Plot")
             self.calculateQGridForModel()
@@ -1812,11 +1820,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
-        self.showPlot()
+#        self.showPlot()
         # This is an important processEvent.
         # This allows charts to be properly updated in order
         # of plots being applied.
-        QtWidgets.QApplication.processEvents()
+#        QtWidgets.QApplication.processEvents()
         self.recalculatePlotData()
 
     def onSmearingOptionsUpdate(self):
@@ -2269,6 +2277,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Create a model or theory index with passed Data1D/Data2D
         """
+        # set some flag which decides if new plots should be created or
+        # just existing ones updated, selectively hiding indiv. plot will also work
+        fitted_data.hidden = getattr(self, 'dataUpdateOnly', True)
         if self.data_is_loaded:
             if not fitted_data.name:
                 name = self.nameForFittedData(self.data.filename)
@@ -2439,6 +2450,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
+        # enable plots to be shown next time if updateData() wasn't called
+        self.updateDataVisibility(False)
 
     def complete2D(self, return_data):
         """
