@@ -61,8 +61,6 @@ Release Notes
            magnetic scattering, and polydispersity distributions. Detailed
            advanced instructions for plugin writing and some scripting
            instructions have been added.
-
-           Two new tutorials have been added.
       - Other work
          - A Third-Party initiative has recently succeeded in getting SasView to
            run on Debian. More details at
