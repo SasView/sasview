@@ -90,7 +90,7 @@ Release Notes
          Fixes # 776: angular dispersity
          Fixes # 784: Add 3D integral to Correlation Function analysis
          Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-         Fixes # 818: “report button” followed by “save” makes an empty pdf file
+         Fixes # 818: "report button" followed by "save" makes an empty pdf file
          Fixes # 838: Fix model download from marketplace
          Fixes # 848: can't save analysis when only one fit page
          Fixes # 849: Load Folder should ignore files starting with .
@@ -198,7 +198,7 @@ Release Notes
       This is a beta pre-release version of 4.2.0.  A number of fixes and changes
       have been made in the year since the previous release. Full release notes
       will be compiled prior to the full release 4.2.0.
-    
+
       Highlights are:
         - Infrastucture for calculating 2D patterns from 3D orientated objects
           has now been totally refactored
@@ -248,7 +248,7 @@ Release Notes
 	adsorbed polymer/surfactant layer.
 
 	A correlation function may be interpreted in terms of an imaginary rod moving 
-	through the structure of the material. Î“1D(R) is the probability that a rod of 
+	through the structure of the material. G1(R) is the probability that a rod of 
 	length R moving through the material has equal electron/neutron scattering 
 	length density at either end. Hence a frequently occurring spacing within a 
 	structure manifests itself as a peak.
