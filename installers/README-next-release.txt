@@ -61,6 +61,7 @@ Release Notes
            magnetic scattering, and polydispersity distributions. Detailed
            advanced instructions for plugin writing and some scripting
            instructions have been added.
+
            Two new tutorials have been added.
       - Other work
          - A Third-Party initiative has recently succeeded in getting SasView to
@@ -648,8 +649,8 @@ Release Notes
 
    *** Note 1:  The easiest approach to setting up the proper environment to
                 build from source is to use conda.  Instructions for setting up
-                using conda can be found at:
-                http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
+                and using conda can be found at:
+                    http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
    *** Note 2:  If you have EXE or ZIP SasView installer, you won't need any of
                 the following.  However it is highly recommended that any
                 previous versions be un-installed prior to installing the
