@@ -18,7 +18,7 @@ Release Notes
       is strongly encouraged to convert their custom models to the new API.
       Finally, the new orientation angles and orientatinal distribution is now
       also complete.
-      
+
       - Changes
          - The infrastucture for calculating 2D patterns from 3D orientated objects
            has been totally re-factored. It is now more accurate and consistent
@@ -143,8 +143,8 @@ Release Notes
          Fixes # 978: load project fails for pages which have not been defined
          Fixes # 983: Remove Nexus Loader
          Fixes # 984: PDF reports are not being properly generated on Windows
-         Fixes # 985: Saving Project Fails  
-         Fixes # 986: Send to fitting overwrites theory page even if blank 
+         Fixes # 985: Saving Project Fails
+         Fixes # 986: Send to fitting overwrites theory page even if blank
            FitPage has focus
          Fixes # 990: utest_sasview.py giving different results than run_one.py
          Fixes # 993: Windows x64 versions not installing to correct folder
@@ -202,15 +202,15 @@ Release Notes
       Highlights are:
         - Infrastucture for calculating 2D patterns from 3D orientated objects
           has now been totally refactored
-        - Plugins have completely migrated to the new infrastructure now, 
-	      including sum/multiply models
+        - Plugins have completely migrated to the new infrastructure now,
+          including sum/multiply models
         - Some batch slicing options have been introduced
         - The known issue with the core_shell_parallelepiped is now fixed
         - Several data loading improvements
         - Several save Project improvements (though there are more to come)
         - Numerous bug fixes
         - Lots of documentation enhancement
-    
+
       In the meantime please report any bugs or issues found while using this beta
 
 
@@ -241,29 +241,29 @@ Release Notes
       ------------------
       This incremental release brings a series of new features and improvements,
       and a host of bug fixes. Of particular note are:
-      
+
       - Correlation Function Analysis (Corfunc)
-      	This performs a correlation function analysis of one-dimensional SAXS/SANS data, 
-	or generates a model-independent volume fraction profile from the SANS from an 
-	adsorbed polymer/surfactant layer.
+        This performs a correlation function analysis of one-dimensional SAXS/SANS data,
+        or generates a model-independent volume fraction profile from the SANS from an
+        adsorbed polymer/surfactant layer.
 
-	A correlation function may be interpreted in terms of an imaginary rod moving 
-	through the structure of the material. G1(R) is the probability that a rod of 
-	length R moving through the material has equal electron/neutron scattering 
-	length density at either end. Hence a frequently occurring spacing within a 
-	structure manifests itself as a peak.
+        A correlation function may be interpreted in terms of an imaginary rod moving
+        through the structure of the material. G1(R) is the probability that a rod of
+        length R moving through the material has equal electron/neutron scattering
+        length density at either end. Hence a frequently occurring spacing within a
+        structure manifests itself as a peak.
 
-	A volume fraction profile \Phi(z) describes how the density of polymer 
-	segments/surfactant molecules varies with distance from an (assumed locally flat)
-	interface.
+        A volume fraction profile \Phi(z) describes how the density of polymer
+        segments/surfactant molecules varies with distance from an (assumed locally flat)
+        interface.
 
       - Fitting of SESANS Data
-      	Data from Spin-Echo SANS measurements can now be loaded and fitted. The data will 
-	be plotted against the correct axes and models will automatically perform a Hankel 
-	transform in order to calculate SESANS from a SANS model.
+        Data from Spin-Echo SANS measurements can now be loaded and fitted. The data will
+        be plotted against the correct axes and models will automatically perform a Hankel
+        transform in order to calculate SESANS from a SANS model.
 
       - Documentation
-      	The documentation has undergone significant checking and updating.
+        The documentation has undergone significant checking and updating.
 
       - Improvements
         - Correlation function (corfunc) analysis of 1D SAS data added from CCP13
@@ -643,14 +643,14 @@ Release Notes
 
    *** Note 1:  The easiest approach to setting up the propoer environment to
                 build from source is to use conda.  Instructions for setting up
-                using conda can be found at: 
+                using conda can be found at:
                 http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
    *** Note 2:  If you have EXE or ZIP SasView installer, you won't need any of
                 the following.  However it is highly recommended that any
                 previous versions be un-installed prior to installing the
                 new version.
    *** Note 3:  Much more information is available at www.sasview.org under links.
-	            Look in the 'For Developers' section and particularly the wiki at
+                Look in the 'For Developers' section and particularly the wiki at
                 www.sasview.org/trac/wiki.
 
    2.1- System Requirements
@@ -663,7 +663,7 @@ Release Notes
               git clone https://github.com/SasView/sasview.git
               git clone https://github.com/Sasview/sasmodels.git
               git clone https://github.com/bumps/bumps.git
-	  - to install a specific version
+          - to install a specific version
 
         - Build, install and run a specific release
           - make sure the requirements below are already installed
@@ -684,7 +684,7 @@ Release Notes
             changing the C model files
 
         -For the latest list of dependencies see the appropriate yml file in
-          the SasView repo at sasview/build_tools/conda/ymls 
+          the SasView repo at sasview/build_tools/conda/ymls
 
 
 3- Known Issues
@@ -714,11 +714,11 @@ Release Notes
         models so that user created models in previous versions should continue
         to work for now. At some point in the future such support will go away.
         Everyone is encouraged to convert to the new structure which should be
-        relatively straight forward and provides a number of benefits. 
+        relatively straight forward and provides a number of benefits.
         - In that vein, the distributed models and those generated by the new
         plugin model editor are in the new format, however those generated by
         sum|multiply models are the old style sum|multiply models. This should
-        also disappear in the near future 
+        also disappear in the near future
         - The on the fly discovery of plugin models and changes thereto behave
         inconsistently.  If a change to a plugin model does not seem to
         register, the Load Plugin Models (under fitting -> Plugin Model
@@ -733,8 +733,8 @@ Release Notes
         at 0 (noted in documentation) while the triaxial ellipsoid does not seem
         to reproduce the limit of the oblate or prolate ellipsoid. If errors are
         found and corrected, corrected versions will be uploaded to the
-        marketplace. 
-   
+        marketplace.
+
    3.1- All systems:
         - The documentation window may take a few seconds to load the first time
           it is called. Also, an internet connection is required before

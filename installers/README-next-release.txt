@@ -9,20 +9,20 @@ Release Notes
       some significant changes from previous versions. Further, as promised, it
       marks the end of support for 32 bit operating systems and is only
       available for 64 bit operating systems.
-      
-      With this version the change to the new model API and plugins infrastructure 
-      begun with 4.0 is essentially complete (though extensions are in the works 
-      and more are likely they should remain backwardly compatible with previous 
+
+      With this version the change to the new model API and plugins infrastructure
+      begun with 4.0 is essentially complete (though extensions are in the works
+      and more are likely they should remain backwardly compatible with previous
       versions of SasView).
-      
+
       NOTE: Old-style plugin models, including old sum|multiply models will continue
       to be supported (i.e. SasView will be able to run them) in 4.x. However,
       the expectation is that such support will be removed in 5.0 and everyone
       is strongly encouraged to convert their custom models to the new API.
-      
-      Finally, the changes to orientation angles and orientational distribution 
+
+      Finally, the changes to orientation angles and orientational distribution
       definitions are now also complete.
-      
+
       - Changes
          - The infrastucture for calculating 2D patterns from 3D orientated objects
            has been totally re-factored. It is now more accurate and consistent
@@ -61,7 +61,7 @@ Release Notes
            magnetic scattering, and polydispersity distributions. Detailed
            advanced instructions for plugin writing and some scripting
            instructions have been added.
-	   Two new tutorials have been added.
+           Two new tutorials have been added.
       - Other work
          - A Third-Party initiative has recently succeeded in getting SasView to
            run on Debian. More details at
@@ -148,8 +148,8 @@ Release Notes
          Fixes # 978: load project fails for pages which have not been defined
          Fixes # 983: Remove Nexus Loader
          Fixes # 984: PDF reports are not being properly generated on Windows
-         Fixes # 985: Saving Project Fails  
-         Fixes # 986: Send to fitting overwrites theory page even if blank 
+         Fixes # 985: Saving Project Fails
+         Fixes # 986: Send to fitting overwrites theory page even if blank
                       FitPage has focus
          Fixes # 990: utest_sasview.py giving different results than run_one.py
          Fixes # 993: Windows x64 versions not installing to correct folder
@@ -203,19 +203,19 @@ Release Notes
       This is a beta pre-release version of 4.2.0.  A number of fixes and changes
       have been made in the year since the previous release. Full release notes
       will be compiled prior to the full release 4.2.0.
-    
+
       Highlights are:
         - Infrastucture for calculating 2D patterns from 3D orientated objects
           has now been totally refactored
-        - Plugins have completely migrated to the new infrastructure now, 
-	      including sum/multiply models
+        - Plugins have completely migrated to the new infrastructure now,
+          including sum/multiply models
         - Some batch slicing options have been introduced
         - The known issue with the core_shell_parallelepiped is now fixed
         - Several data loading improvements
         - Several save Project improvements (though there are more to come)
         - Numerous bug fixes
         - Lots of documentation enhancement
-    
+
       In the meantime please report any bugs or issues found while using this beta
 
 
@@ -246,29 +246,29 @@ Release Notes
       ------------------
       This incremental release brings a series of new features and improvements,
       and a host of bug fixes. Of particular note are:
-      
+
       - Correlation Function Analysis (Corfunc)
-      	This performs a correlation function analysis of one-dimensional SAXS/SANS data, 
-	or generates a model-independent volume fraction profile from the SANS from an 
-	adsorbed polymer/surfactant layer.
+        This performs a correlation function analysis of one-dimensional SAXS/SANS data,
+        or generates a model-independent volume fraction profile from the SANS from an
+        adsorbed polymer/surfactant layer.
 
-	A correlation function may be interpreted in terms of an imaginary rod moving 
-	through the structure of the material. G1(R) is the probability that a rod of 
-	length R moving through the material has equal electron/neutron scattering 
-	length density at either end. Hence a frequently occurring spacing within a 
-	structure manifests itself as a peak.
+        A correlation function may be interpreted in terms of an imaginary rod moving
+        through the structure of the material. G1(R) is the probability that a rod of
+        length R moving through the material has equal electron/neutron scattering
+        length density at either end. Hence a frequently occurring spacing within a
+        structure manifests itself as a peak.
 
-	A volume fraction profile \Phi(z) describes how the density of polymer 
-	segments/surfactant molecules varies with distance from an (assumed locally flat)
-	interface.
+        A volume fraction profile \Phi(z) describes how the density of polymer
+        segments/surfactant molecules varies with distance from an (assumed locally flat)
+        interface.
 
       - Fitting of SESANS Data
-      	Data from Spin-Echo SANS measurements can now be loaded and fitted. The data will 
-	be plotted against the correct axes and models will automatically perform a Hankel 
-	transform in order to calculate SESANS from a SANS model.
+        Data from Spin-Echo SANS measurements can now be loaded and fitted. The data will
+        be plotted against the correct axes and models will automatically perform a Hankel
+        transform in order to calculate SESANS from a SANS model.
 
       - Documentation
-      	The documentation has undergone significant checking and updating.
+        The documentation has undergone significant checking and updating.
 
       - Improvements
         - Correlation function (corfunc) analysis of 1D SAS data added from CCP13
@@ -344,9 +344,9 @@ Release Notes
          changed.  Also the plot range no longer resets after a fit.
       - Bug fixes
          - Fixes bug #511 Errors in linearized fits and clean up of interface
-         including Kratky representation
+           including Kratky representation
          - Fixes bug #186 Data operation Tool now executes when something is
-         entered in the text box and does not wait for the user to hit enter
+           entered in the text box and does not wait for the user to hit enter
          - Fixes bug #459 plot context menu bug
          - Fixes bug #559 copy to clipboard in graph menu broken
          - Fixes bug #466 cannot remove a linear fit from graph
@@ -648,14 +648,14 @@ Release Notes
 
    *** Note 1:  The easiest approach to setting up the proper environment to
                 build from source is to use conda.  Instructions for setting up
-                using conda can be found at: 
+                using conda can be found at:
                 http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
    *** Note 2:  If you have EXE or ZIP SasView installer, you won't need any of
                 the following.  However it is highly recommended that any
                 previous versions be un-installed prior to installing the
                 new version.
    *** Note 3:  Much more information is available at www.sasview.org under links.
-	            Look in the 'For Developers' section and particularly the wiki at
+                Look in the 'For Developers' section and particularly the wiki at
                 www.sasview.org/trac/wiki.
 
    2.1- System Requirements
@@ -668,7 +668,7 @@ Release Notes
               git clone https://github.com/SasView/sasview.git
               git clone https://github.com/Sasview/sasmodels.git
               git clone https://github.com/bumps/bumps.git
-	  - to install a specific version
+          - to install a specific version
 
         - Build, install and run a specific release
           - make sure the requirements below are already installed
@@ -688,8 +688,8 @@ Release Notes
             don't have to rebuild every time you make a change, unless you are
             changing the C model files
 
-        -For the latest list of dependencies see the appropriate yml file in
-          the SasView repo at sasview/build_tools/conda/ymls 
+        - For the latest list of dependencies see the appropriate yml file in
+          the SasView repo at sasview/build_tools/conda/ymls
 
 
 3- Known Issues
@@ -708,38 +708,38 @@ Release Notes
       completed in the next release. In the meantime this leads to a few known
       issues:
         - The way that orientation is defined is being refactored to address
-        long standing issues and comments.  In release 4.1 however only models
-        with symmetry (e.g. a=b) have been converted to the new definitions.
-        The rest (a <> b <> c - e.g. parellelepiped) maintain the same
-        definition as before and will be converted in 4.2.  Note that
-        orientational distribution also makes much more sense in the new
-        framework.  The documentation should indicate which definition is being
-        used for a given model.
+          long standing issues and comments.  In release 4.1 however only models
+          with symmetry (e.g. a=b) have been converted to the new definitions.
+          The rest (a <> b <> c - e.g. parellelepiped) maintain the same
+          definition as before and will be converted in 4.2.  Note that
+          orientational distribution also makes much more sense in the new
+          framework.  The documentation should indicate which definition is being
+          used for a given model.
         - The infrastructure currently handles internal conversion of old style
-        models so that user created models in previous versions should continue
-        to work for now. At some point in the future such support will go away.
-        Everyone is encouraged to convert to the new structure which should be
-        relatively straight forward and provides a number of benefits. 
+          models so that user created models in previous versions should continue
+          to work for now. At some point in the future such support will go away.
+          Everyone is encouraged to convert to the new structure which should be
+          relatively straight forward and provides a number of benefits.
         - In that vein, the distributed models and those generated by the new
-        plugin model editor are in the new format, however those generated by
-        sum|multiply models are the old style sum|multiply models. This should
-        also disappear in the near future 
+          plugin model editor are in the new format, however those generated by
+          sum|multiply models are the old style sum|multiply models. This should
+          also disappear in the near future
         - The on the fly discovery of plugin models and changes thereto behave
-        inconsistently.  If a change to a plugin model does not seem to
-        register, the Load Plugin Models (under fitting -> Plugin Model
-        Operations) can be used.  However, after calling Load Plugin Models, the
-        active plugin will no longer be loaded (even though the GUI looks like
-        it is) unless it is a sum|multiply model which works properly.  All
-        others will need to be recalled from the model dropdown menu to reload
-        the model into the calculation engine.  While it might be annoying it
-        does not appear to prevent SasView from working..
+          inconsistently.  If a change to a plugin model does not seem to
+          register, the Load Plugin Models (under fitting -> Plugin Model
+          Operations) can be used.  However, after calling Load Plugin Models, the
+          active plugin will no longer be loaded (even though the GUI looks like
+          it is) unless it is a sum|multiply model which works properly.  All
+          others will need to be recalled from the model dropdown menu to reload
+          the model into the calculation engine.  While it might be annoying it
+          does not appear to prevent SasView from working..
         - The model code and documentation review is ongoing. At this time the
-        core shell parellelepiped is known to have the C shell effectively fixed
-        at 0 (noted in documentation) while the triaxial ellipsoid does not seem
-        to reproduce the limit of the oblate or prolate ellipsoid. If errors are
-        found and corrected, corrected versions will be uploaded to the
-        marketplace. 
-   
+          core shell parellelepiped is known to have the C shell effectively fixed
+          at 0 (noted in documentation) while the triaxial ellipsoid does not seem
+          to reproduce the limit of the oblate or prolate ellipsoid. If errors are
+          found and corrected, corrected versions will be uploaded to the
+          marketplace.
+
    3.1- All systems:
         - The documentation window may take a few seconds to load the first time
           it is called. Also, an internet connection is required before
