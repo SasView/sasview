@@ -920,12 +920,12 @@ class GuiManager(object):
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayFile(filename=filename, is_data=True)
 
-    def showPlot(self, plot):
+    def showPlot(self, plot, id):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayData(plot)
+            self.filesWidget.displayData(plot, id)
 
     def uncheckAllMenuItems(self, menuObject):
         """

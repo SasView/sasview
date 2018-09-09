@@ -97,6 +97,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
         self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
+        self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -138,6 +139,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.current_view = self.treeView
         else:
             self.current_view = self.freezeView
+
+    def changeTabs(self, tab=0):
+        """
+        Switch tabs of the data explorer
+        0: data tab
+        1: theory tab
+        """
+        assert(tab in [0,1])
+        self.setCurrentIndex(tab)
 
     def displayHelp(self):
         """
@@ -552,22 +562,26 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         item = GuiUtils.itemFromFilename(filename, self.model)
         return item
 
-    def displayFile(self, filename=None, is_data=True):
+    def displayFile(self, filename=None, is_data=True, id=None):
         """
         Forces display of charts for the given filename
         """
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
-
+        # Each fitpage contains the name based on fit widget number
+        fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
         for item, plot in plots.items():
-            if not self.updatePlot(plot):
-                # Don't plot intermediate results, e.g. P(Q), S(Q)
-                match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
-                # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
-                if match and match.groups()[1] != None:
-                    continue
+            if self.updatePlot(plot) and filename != plot.name:
+                continue
+            # Don't plot intermediate results, e.g. P(Q), S(Q)
+            match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
+            # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
+            if match and match.groups()[1] != None:
+                continue
+            # Don't include plots from different fitpages, but always include the original data
+            if fitpage_name in plot.name or filename == plot.name:
                 # 'sophisticated' test to generate standalone plot for residuals
                 if 'esiduals' in plot.title:
                     plot.yscale='linear'
@@ -578,7 +592,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if new_plots:
             self.plotData(new_plots)
 
-    def displayData(self, data_list):
+    def displayData(self, data_list, id=None):
         """
         Forces display of charts for the given data set
         """
@@ -587,7 +601,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # so all the charts related by it can be pulled from 
         # the data explorer indices.
         filename = plot_to_show.filename
-        self.displayFile(filename=filename, is_data=plot_to_show.is_data)
+        self.displayFile(filename=filename, is_data=plot_to_show.is_data, id=id)
 
     def addDataPlot2D(self, plot_set, item):
         """
