@@ -2423,7 +2423,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             new_plots.append(residuals)
 
         if self.data_is_loaded:
-            #GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
+            # delete any plots associated with the data that were not updated (e.g. to remove beta(Q), S_eff(Q))
+            GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
             pass
         else:
             # delete theory items for the model, in order to get rid of any redundant items, e.g. beta(Q), S_eff(Q)
