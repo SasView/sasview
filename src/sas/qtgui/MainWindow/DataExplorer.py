@@ -574,7 +574,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # groups plots which move into an own window
         new_plots = dict(int = [], res = [], pd = [])
         for item, plot in plots.items():
-            if self.updatePlot(plot) and filename != plot.name:
+            if (self.updatePlot(plot) and filename != plot.name) or plot.hidden:
                 continue
             # Don't plot intermediate results, e.g. P(Q), S(Q)
             match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
@@ -582,7 +582,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # result, if present (e.g. "[P(Q)]")
             if match and match.groups()[1] != None:
                 continue
-            # Don't include plots from different fitpages, but always include the original data
+            # Don't include plots from different fitpages,
+            # but always include the original data
             if fitpage_name in plot.name or filename == plot.name:
                 # 'sophisticated' test to generate standalone plot for residuals
                 # this should be done by some kind of grouping by lists
