@@ -2812,9 +2812,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setIndexWidget(shell_index, func)
         self._n_shells_row = shell_row - 1
 
-        # Set the index to the state-kept value
-        func.setCurrentIndex(self.current_shell_displayed
-                             if self.current_shell_displayed < func.count() else 0)
+        # Get the default number of shells for the model
+        kernel_pars = self.kernel_module._model_info.parameters.kernel_parameters
+        shell_par = None
+        for par in kernel_pars:
+            if par.name == param_name:
+                shell_par = par
+                break
+        if not shell_par:
+            logger.error("Could not find %s in kernel parameters.", param_name)
+        default_shell_count = shell_par.default
+
+        # Add default number of shells to the model
+        func.setCurrentIndex(default_shell_count)
 
     def modifyShellsInList(self, index):
         """
