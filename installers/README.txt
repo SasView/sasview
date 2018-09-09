@@ -663,7 +663,6 @@ Release Notes
               git clone https://github.com/SasView/sasview.git
               git clone https://github.com/Sasview/sasmodels.git
               git clone https://github.com/bumps/bumps.git
-          - to install a specific version
 
         - Build, install and run a specific release
           - make sure the requirements below are already installed
