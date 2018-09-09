@@ -2847,7 +2847,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
 
-        # Change 'n' in the parameter model, thereby updating the underlying model
+        # Param values for existing shells were reset to default; force all changes into kernel module
+        for row in new_rows:
+            par = row[0].text()
+            val = GuiUtils.toDouble(row[1].text())
+            self.kernel_module.setParam(par, val)
+
+        # Change 'n' in the parameter model; also causes recalculation
         self._model_model.item(self._n_shells_row, 1).setText(str(index))
 
         # Update relevant models
