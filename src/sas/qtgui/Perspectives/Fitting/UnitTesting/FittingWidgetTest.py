@@ -612,12 +612,13 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.lstParams.indexWidget(func_index).setCurrentIndex(3)
 
         # Check that the number of rows increased
+        # (note that n == 1 by default in core_multi_shell so this increases index by 2)
         more_rows = self.widget._model_model.rowCount() - last_row
-        self.assertEqual(more_rows, 6) # 6 new rows: 2 params per index
+        self.assertEqual(more_rows, 4) # 4 new rows: 2 params per index
 
-        # Back to 0
+        # Set to 0
         self.widget.lstParams.indexWidget(func_index).setCurrentIndex(0)
-        self.assertEqual(self.widget._model_model.rowCount(), last_row)
+        self.assertEqual(self.widget._model_model.rowCount(), last_row - 2) # 2 fewer rows than default
 
     def testPlotTheory(self):
         """

@@ -568,7 +568,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         try:
             menu.exec_(self.lstParams.viewport().mapToGlobal(position))
         except AttributeError as ex:
-            logging.error("Error generating context menu: %s" % ex)
+            logger.error("Error generating context menu: %s" % ex)
         return
 
     def modelContextMenu(self, rows):
@@ -1455,7 +1455,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msg = "Fitting did not converge!"
             self.communicate.statusBarUpdateSignal.emit(msg)
             msg += results.mesg
-            logging.error(msg)
+            logger.error(msg)
             return
 
         param_list = results.param_list # ['radius', 'radius.width']
@@ -1498,7 +1498,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elapsed = result[1]
         if self.calc_fit._interrupting:
             msg = "Fitting cancelled by user after: %s s." % GuiUtils.formatNumber(elapsed)
-            logging.warning("\n"+msg+"\n")
+            logger.warning("\n"+msg+"\n")
         else:
             msg = "Fitting completed successfully in: %s s." % GuiUtils.formatNumber(elapsed)
         self.communicate.statusBarUpdateSignal.emit(msg)
@@ -2051,7 +2051,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             try:
                 kernel_module = generate.load_kernel_module(name)
             except ModuleNotFoundError as ex:
-                logging.error("Can't find the model "+ str(ex))
+                logger.error("Can't find the model "+ str(ex))
                 return
 
         if hasattr(kernel_module, 'parameters'):
@@ -2609,7 +2609,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Thread threw an exception.
         """
         # TODO: remimplement thread cancellation
-        logging.error("".join(traceback.format_exception(etype, value, tb)))
+        logger.error("".join(traceback.format_exception(etype, value, tb)))
 
     def setTableProperties(self, table):
         """
@@ -2791,7 +2791,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
         if not datafile:
-            logging.info("No weight data chosen.")
+            logger.info("No weight data chosen.")
             raise IOError
 
         values = []
@@ -2907,9 +2907,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setIndexWidget(shell_index, func)
         self._n_shells_row = shell_row - 1
 
-        # Set the index to the state-kept value
-        func.setCurrentIndex(self.current_shell_displayed
-                             if self.current_shell_displayed < func.count() else 0)
+        # Get the default number of shells for the model
+        kernel_pars = self.kernel_module._model_info.parameters.kernel_parameters
+        shell_par = None
+        for par in kernel_pars:
+            if par.name == param_name:
+                shell_par = par
+                break
+        if not shell_par:
+            logger.error("Could not find %s in kernel parameters.", param_name)
+        default_shell_count = shell_par.default
+
+        # Add default number of shells to the model
+        func.setCurrentIndex(default_shell_count)
 
     def modifyShellsInList(self, index):
         """
