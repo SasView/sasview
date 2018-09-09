@@ -328,9 +328,9 @@ Release Notes
          - All 3.1.2 models now available in new interface
          - Old custom models should now still work
             - '''NOTE:''' These will be deprecated in a future version. Old
-            custom models should be converted to the new model format which
-            is now the same as the built in models and offers much better
-            support.
+              custom models should be converted to the new model format which
+              is now the same as the built in models and offers much better
+              support.
          - Custom model editor now creates new style models
          - Custom model editor supports better error checking
       - Documentation improvements
@@ -341,7 +341,7 @@ Release Notes
          - Plot annotations can now be moved around after being placed on plot.
          - The active optimizer is now listed on the top of the fit panel.
          - Linear fits now update qmin and max when the x scale limits are
-         changed.  Also the plot range no longer resets after a fit.
+           changed.  Also the plot range no longer resets after a fit.
       - Bug fixes
          - Fixes bug #511 Errors in linearized fits and clean up of interface
            including Kratky representation
