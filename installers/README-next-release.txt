@@ -646,7 +646,7 @@ Release Notes
 2- Downloading and Installing
 =============================
 
-   *** Note 1:  The easiest approach to setting up the propoer environment to
+   *** Note 1:  The easiest approach to setting up the proper environment to
                 build from source is to use conda.  Instructions for setting up
                 using conda can be found at: 
                 http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
