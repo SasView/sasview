@@ -224,7 +224,7 @@ class Communicate(QtCore.QObject):
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.pyqtSignal(list)
+    plotRequestedSignal = QtCore.pyqtSignal(list, int)
 
     # Plot from file names
     plotFromFilenameSignal = QtCore.pyqtSignal(str)
@@ -277,6 +277,9 @@ class Communicate(QtCore.QObject):
     # Notify about new categories/models from category manager
     updateModelCategoriesSignal = QtCore.pyqtSignal()
 
+    # Tell the data explorer to switch tabs
+    changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
@@ -287,19 +290,21 @@ def updateModelItemWithPlot(item, update_data, name=""):
     # Check if data with the same ID is already present
     for index in range(item.rowCount()):
         plot_item = item.child(index)
-        if plot_item.isCheckable():
-            plot_data = plot_item.child(0).data()
-            if plot_data.id is not None and \
-                   (plot_data.name == update_data.name or plot_data.id == update_data.id):
+        if not plot_item.isCheckable():
+            continue
+        plot_data = plot_item.child(0).data()
+        if plot_data.id is not None and \
+                plot_data.name == update_data.name:
+                #(plot_data.name == update_data.name or plot_data.id == update_data.id):
             # if plot_data.id is not None and plot_data.id == update_data.id:
-                # replace data section in item
-                plot_item.child(0).setData(update_data)
-                plot_item.setText(name)
-                # Plot title if any
-                if plot_item.child(1).hasChildren():
-                    plot_item.child(1).child(0).setText("Title: %s"%name)
-                # Force redisplay
-                return
+            # replace data section in item
+            plot_item.child(0).setData(update_data)
+            plot_item.setText(name)
+            # Plot title if any
+            if plot_item.child(1).hasChildren():
+                plot_item.child(1).child(0).setText("Title: %s"%name)
+            # Force redisplay
+            return
 
     # Create the new item
     checkbox_item = createModelItemWithPlot(update_data, name)
