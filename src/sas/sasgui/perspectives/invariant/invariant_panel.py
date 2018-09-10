@@ -783,6 +783,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         report_text_str = self.state.__str__()
         report_img = self.state.image
         report_list = [report_html_str, report_text_str, report_img]
+        ReportImageHandler.check_for_empty_instance()
         imgRAM = ReportImageHandler.instance.img_holder
         refs = [self.state.wximgbmp]
         dialog = ReportDialog(report_list, imgRAM, refs, None, wx.ID_ANY, "")

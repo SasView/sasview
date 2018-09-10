@@ -71,16 +71,11 @@ class ReportDialog(BaseReportDialog):
             return
         filename = basename + ext
 
-        # save figures
-        pictures = []
-        i = 0
-        for url in self.fig_urls:
-            append_me = url.split(':')[1]
-            pic_name = basename + '_{}'.format(append_me)
-            # save the image for use with pdf writer
-            self.report_list[2][i].savefig(pic_name)
-            pictures.append(pic_name)
-            i += 1
+        # save the images for use with pdf writer
+        pictures = [
+            '_'.join((basename, url.split(':')[1])) for url in self.fig_urls]
+        for i, pic in enumerate(pictures):
+            self.report_list[2][i].savefig(pic)
 
         # translate png references int html from in-memory name to on-disk name
         html = self.report_html.replace("memory:", basename+'_')
