@@ -30,6 +30,7 @@ from sas.sascalc.fit.pagestate import PageState
 from sas.sascalc.fit.models import PLUGIN_NAME_BASE
 
 from sas.sasgui.guiframe.panel_base import PanelBase
+from sas.sasgui.guiframe.report_image_handler import ReportImageHandler
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
     check_int
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
@@ -650,36 +651,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         Build image state that wx.html understand
         by plotting, putting it into wx.FileSystem image object
         """
-        images = []
-        refs = []
+        bitmaps = []
+        for canvas in canvases:
+            bitmaps.append(canvas.bitmap)
+        imgs, refs = ReportImageHandler.set_figs(figs, bitmaps, 'fit')
 
-        # For no figures in the list, prepare empty plot
-        if figs is None or len(figs) == 0:
-            figs = [None]
-
-        # Loop over the list of figures
-        # use wx.MemoryFSHandler
-        imgRAM = wx.MemoryFSHandler()
-        for fig in figs:
-            if fig is not None:
-                ind = figs.index(fig)
-                canvas = canvases[ind]
-
-            # store the image in wx.FileSystem Object
-            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
-
-            # index of the fig
-            ind = figs.index(fig)
-
-            # AddFile, image can be retrieved with 'memory:filename'
-            name = 'img_fit%s.png' % ind
-            refs.append('memory:' + name)
-            imgRAM.AddFile(name, canvas.bitmap, wx.BITMAP_TYPE_PNG)
-            # append figs
-            images.append(fig)
-
-        return imgRAM, images, refs
-
+        return ReportImageHandler.instance, imgs, refs
 
     def on_save(self, event):
         """

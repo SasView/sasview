@@ -23,6 +23,7 @@ from sas.sasgui.perspectives.invariant.invariant_widgets import InvTextCtrl
 from sas.sasgui.perspectives.invariant.invariant_state import InvariantState as IState
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from sas.sasgui.guiframe.report_image_handler import ReportImageHandler
 
 logger = logging.getLogger(__name__)
 
@@ -782,7 +783,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         report_text_str = self.state.__str__()
         report_img = self.state.image
         report_list = [report_html_str, report_text_str, report_img]
-        dialog = ReportDialog(report_list, None, -1, "")
+        ReportImageHandler.check_for_empty_instance()
+        imgRAM = ReportImageHandler.instance.img_holder
+        refs = [self.state.wximgbmp]
+        dialog = ReportDialog(report_list, imgRAM, refs, None, wx.ID_ANY, "")
         dialog.Show()
 
     def get_state_by_num(self, state_num=None):

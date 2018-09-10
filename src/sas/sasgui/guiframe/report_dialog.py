@@ -6,6 +6,7 @@ import wx
 import logging
 import sys
 import wx.html as html
+from sas.sasgui.guiframe.report_image_handler import ReportImageHandler
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,8 @@ class BaseReportDialog(wx.Dialog):
         # buttons
         button_close = wx.Button(self, wx.ID_OK, "Close")
         button_close.SetToolTipString("Close this report window.")
+        button_close.Bind(wx.EVT_BUTTON, self.onClose,
+                          id=button_close.GetId())
         hbox.Add(button_close)
         button_close.SetFocus()
 
@@ -116,15 +119,15 @@ class BaseReportDialog(wx.Dialog):
         printh.PrintText(self.report_html)
 
 
-    def OnClose(self, event=None):
+    def onClose(self, event=None):
         """
         Close the Dialog
         : event: Close button event
         """
         for fig in self.fig_urls:
-            self.imgRAM.RemoveFile(fig)
+            ReportImageHandler.remove_figure(fig)
 
-        self.Close()
+        self.Destroy()
 
     def HTML2PDF(self, data, filename):
         """
