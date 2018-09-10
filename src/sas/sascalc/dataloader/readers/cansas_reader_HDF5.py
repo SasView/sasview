@@ -256,22 +256,38 @@ class Reader(FileReader):
 
     def process_2d_data_object(self, data_set, key, unit):
         if key == self.i_name:
-            self.current_dataset.data = data_set
+            self.current_dataset.x_bins, self.current_dataset.y_bins = \
+                data_set.shape
+            self.current_dataset.data = data_set.flatten()
             self.current_dataset.zaxis("Intensity", unit)
         elif key == self.i_uncertainties:
             self.current_dataset.err_data = data_set.flatten()
         elif key in self.q_name:
-            self.current_dataset.xaxis("Q", unit)
-            self.current_dataset.yaxis("Q", unit)
-            #FIXME: This is broken - need to properly handle 2D data
-            # TODO: Check shape of array (2d - cash money, homey!)
-            # TODO: 3D - check dims, etc.
-            # TODO: Put data where it belongs
-            pass
+            self.current_dataset.xaxis("Q_x", unit)
+            self.current_dataset.yaxis("Q_y", unit)
+            if self.q_name[0] == self.q_name[1]:
+                # All q data in a single array
+                self.current_dataset.qx_data = data_set[0].flatten()
+                self.current_dataset.qy_data = data_set[1].flatten()
+            elif self.q_name.index(key) == 0:
+                self.current_dataset.qx_data = data_set.flatten()
+            elif self.q_name.index(key) == 1:
+                self.current_dataset.qy_data = data_set.flatten()
         elif key in self.q_uncertainties or key in self.q_resolutions:
-            # FIXME: This isn't right either.
-            # TODO: find resolution/uncertainty specific to q_name
-            pass
+            if ((self.q_uncertainties[0] == self.q_uncertainties[1]) or
+                    (self.q_resolutions[0] == self.q_resolutions[1])):
+                # All q data in a single array
+                self.current_dataset.dqx_data = data_set[0].flatten()
+                self.current_dataset.dqy_data = data_set[1].flatten()
+            elif (self.q_uncertainties.index(key) == 0 or
+                  self.q_resolutions.index(key) == 0):
+                self.current_dataset.dqx_data = data_set.flatten()
+            elif (self.q_uncertainties.index(key) == 1 or
+                  self.q_resolutions.index(key) == 1):
+                self.current_dataset.dqy_data = data_set.flatten()
+                self.current_dataset.yaxis("Q_y", unit)
+        elif key == self.mask_name:
+            self.current_dataset.mask = data_set.flatten()
         elif key == u'Qy':
             self.current_dataset.yaxis("Q_y", unit)
             self.current_dataset.qy_data = data_set.flatten()
