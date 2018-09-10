@@ -155,7 +155,7 @@ class Reader(FileReader):
 
             elif isinstance(value, h5py.Dataset):
                 # If this is a dataset, store the data appropriately
-                data_set = data[key][:]
+                data_set = value.value
                 unit = self._get_unit(value)
 
                 for data_point in data_set:
