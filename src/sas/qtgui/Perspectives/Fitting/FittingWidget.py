@@ -1218,9 +1218,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # update in param model
         if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
             row = self.getRowFromName(parameter_name)
-            param_item = self._model_model.item(row)
+            param_item = self._model_model.item(row).child(0).child(0, model_column)
+            if param_item is None:
+                return
             self._model_model.blockSignals(True)
-            param_item.child(0).child(0, model_column).setText(item.text())
+            param_item.setText(item.text())
             self._model_model.blockSignals(False)
 
     def onMagnetModelChange(self, item):

@@ -127,7 +127,10 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
             item1_1.setEditable(False)
 
             # Find param in volume_params
-            for p in parameters.form_volume_parameters:
+            poly_pars = parameters.form_volume_parameters
+            if is2D:
+                poly_pars += parameters.orientation_parameters
+            for p in poly_pars:
                 if p.name != param.name:
                     continue
                 width = kernel_module.getParam(p.name+'.width')
