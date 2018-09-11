@@ -94,7 +94,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
-        self.communicator.plotUpdateSignal.connect(self.updatePlot)
+        self.communicator.plotUpdateSignal.connect(self.displayData)
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
         self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
@@ -571,37 +571,48 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plots = GuiUtils.plotsFromFilename(filename, model)
         # Each fitpage contains the name based on fit widget number
         fitpage_name = "" if id is None else "M"+str(id)
-        new_plots = []
+        # groups plots which move into an own window
+        new_plots = dict(int = [], res = [], pd = [])
         for item, plot in plots.items():
-            if self.updatePlot(plot) and filename != plot.name:
+            if (self.updatePlot(plot) and filename != plot.name) or plot.hidden:
                 continue
             # Don't plot intermediate results, e.g. P(Q), S(Q)
             match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
-            # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
+            # 2nd match group contains the identifier for the intermediate
+            # result, if present (e.g. "[P(Q)]")
             if match and match.groups()[1] != None:
                 continue
-            # Don't include plots from different fitpages, but always include the original data
+            # Don't include plots from different fitpages,
+            # but always include the original data
             if fitpage_name in plot.name or filename == plot.name:
                 # 'sophisticated' test to generate standalone plot for residuals
+                # this should be done by some kind of grouping by lists
+                # which helps to indicate which go into a single plot window
                 if 'esiduals' in plot.title:
-                    plot.yscale='linear'
-                    self.plotData([(item, plot)])
+                    plot.yscale = 'linear'
+                    new_plots['res'].append((item, plot))
+                elif 'olydispersity' in plot.title:
+                    plot.yscale = 'linear'
+                    new_plots['pd'].append((item, plot))
                 else:
-                    new_plots.append((item, plot))
+                    new_plots['int'].append((item, plot))
 
-        if new_plots:
-            self.plotData(new_plots)
+        # create entirely new plots for those which could not be updated
+        for plots in new_plots.values():
+            if len(plots):
+                self.plotData(plots)
 
     def displayData(self, data_list, id=None):
         """
         Forces display of charts for the given data set
         """
-        plot_to_show = data_list[0]
-        # passed plot is used ONLY to figure out its title,
-        # so all the charts related by it can be pulled from 
-        # the data explorer indices.
-        filename = plot_to_show.filename
-        self.displayFile(filename=filename, is_data=plot_to_show.is_data, id=id)
+        for plot_to_show in data_list:
+            # may there be duplicates? list(OrderedDict.fromkeys(data_list))
+            # passed plot is used ONLY to figure out its title,
+            # so all the charts related by it can be pulled from
+            # the data explorer indices.
+            filename = plot_to_show.filename
+            self.displayFile(filename=filename, is_data=plot_to_show.is_data, id=id)
 
     def addDataPlot2D(self, plot_set, item):
         """
