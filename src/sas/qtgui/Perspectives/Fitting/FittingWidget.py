@@ -2480,6 +2480,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
+        residuals_plot.plot_role = Data1D.ROLE_RESIDUAL
         self.createNewIndex(residuals_plot)
         return residuals_plot
 

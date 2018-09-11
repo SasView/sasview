@@ -573,7 +573,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
         for item, plot in plots.items():
-            if self.updatePlot(plot) and filename != plot.name:
+            if self.updatePlot(plot) or filename not in plot.name:
                 continue
             # Don't plot intermediate results, e.g. P(Q), S(Q)
             match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
@@ -582,8 +582,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             # Don't include plots from different fitpages, but always include the original data
             if fitpage_name in plot.name or filename == plot.name:
-                # 'sophisticated' test to generate standalone plot for residuals
-                if 'esiduals' in plot.title:
+                # Residuals get their own plot
+                if plot.plot_role == Data1D.ROLE_RESIDUAL:
                     plot.yscale='linear'
                     self.plotData([(item, plot)])
                 else:
@@ -685,7 +685,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.plot_widgets[title]=plot_widget
 
         # Update the active chart list
-        #self.active_plots[new_plot.data.id] = new_plot
+        self.active_plots[new_plot.data.name] = new_plot
 
     def appendPlot(self):
         """
@@ -728,10 +728,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         data_id = data.name
         if data_id in ids_keys:
-            self.active_plots[data_id].replacePlot(data_id, data)
+            # We have data, let's replace data that needs replacing
+            if data.plot_role != Data1D.ROLE_DATA:
+                self.active_plots[data_id].replacePlot(data_id, data)
             return True
         elif data_id in ids_vals:
-            list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+            if data.plot_role != Data1D.ROLE_DATA:
+                list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
             return True
         return False
 
