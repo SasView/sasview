@@ -366,10 +366,10 @@ class Registry(ExtensionRegistry):
         for fn in writers:
             try:
                 return fn(path, data)
-            except Exception:
+            except Exception as exep:
                 pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
-        raise  # reraises last exception
+        raise exep # raises last exception
 
 
 class Loader(object):

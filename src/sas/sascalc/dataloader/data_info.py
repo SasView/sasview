@@ -953,7 +953,8 @@ class Data2D(plottable_2D, DataInfo):
         _str = "%s\n" % DataInfo.__str__(self)
         _str += "Data:\n"
         _str += "   Type:         %s\n" % self.__class__.__name__
-        _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
+        _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
+        _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
         _str += "   Length:       %g \n" % (len(self.data))
         _str += "   Shape:        (%d, %d)\n" % (len(self.y_bins), len(self.x_bins))
@@ -982,6 +983,13 @@ class Data2D(plottable_2D, DataInfo):
             clone = Data2D(data=data, err_data=err_data,
                            qx_data=qx_data, qy_data=qy_data,
                            q_data=q_data, mask=mask)
+
+        clone._xaxis = self._xaxis
+        clone._yaxis = self._yaxis
+        clone._zaxis = self._zaxis
+        clone._xunit = self._xunit
+        clone._yunit = self._yunit
+        clone._zunit = self._zunit
 
         clone.title = self.title
         clone.run = self.run
@@ -1152,7 +1160,8 @@ class Data2D(plottable_2D, DataInfo):
 
 def combine_data_info_with_plottable(data, datainfo):
     """
-    A function that combines the DataInfo data in self.current_datainto with a plottable_1D or 2D data object.
+    A function that combines the DataInfo data in self.current_datainto with a
+    plottable_1D or 2D data object.
 
     :param data: A plottable_1D or plottable_2D data object
     :return: A fully specified Data1D or Data2D object
@@ -1170,8 +1179,9 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
     elif isinstance(data, plottable_2D):
-        final_dataset = Data2D(data.data, data.err_data, data.qx_data, data.qy_data, data.q_data,
-                               data.mask, data.dqx_data, data.dqy_data)
+        final_dataset = Data2D(data.data, data.err_data, data.qx_data,
+                               data.qy_data, data.q_data, data.mask,
+                               data.dqx_data, data.dqy_data)
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
@@ -1180,8 +1190,9 @@ def combine_data_info_with_plottable(data, datainfo):
             final_dataset.y_bins = data.qy_data[0::int(n_cols)]
             final_dataset.x_bins = data.qx_data[:int(n_cols)]
     else:
-        return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
-                        "plottable2d data object"
+        return_string = ("Should Never Happen: _combine_data_info_with_plottabl"
+                         "e input is not a plottable1d or plottable2d data "
+                         "object")
         return return_string
 
     if hasattr(data, "xmax"):

@@ -37,6 +37,7 @@ DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
                        "load the file was made, but, should it be successful, "
                        "SasView cannot guarantee the accuracy of the data.")
 
+
 class FileReader(object):
     # String to describe the type of data this reader can load
     type_name = "ASCII"
@@ -140,7 +141,6 @@ class FileReader(object):
         """
         Returns the entire file as a string.
         """
-        #return self.f_open.read()
         return decode(self.f_open.read())
 
     def handle_error_message(self, msg):
@@ -307,8 +307,8 @@ class FileReader(object):
         """
         Converts al; data to the sasview default of units of A^{-1} for Q and
         cm^{-1} for I.
-        :param default_x_unit: The default x unit used by Sasview
-        :param default_y_unit: The default y unit used by Sasview
+        :param default_q_unit: The default Q unit used by Sasview
+        :param default_i_unit: The default I unit used by Sasview
         """
         new_output = []
         for data in self.output:
@@ -346,12 +346,16 @@ class FileReader(object):
                     data.errors.append(message)
             elif isinstance(data, Data2D):
                 try:
-                    data.qx_data = data_conv_x(data.qx_data, units=default_q_unit)
+                    data.qx_data = data_conv_x(data.qx_data,
+                                               units=default_q_unit)
                     if data.dqx_data is not None:
-                        data.dqx_data = data_conv_x(data.dqx_data, units=default_q_unit)
-                    data.qy_data = data_conv_y(data.qy_data, units=default_q_unit)
+                        data.dqx_data = data_conv_x(data.dqx_data,
+                                                    units=default_q_unit)
+                    data.qy_data = data_conv_y(data.qy_data,
+                                               units=default_q_unit)
                     if data.dqy_data is not None:
-                        data.dqy_data = data_conv_y(data.dqy_data, units=default_q_unit)
+                        data.dqy_data = data_conv_y(data.dqy_data,
+                                                    units=default_q_unit)
                 except KeyError:
                     message = "Unable to convert Q units from {0} to 1/A."
                     message.format(default_q_unit)
@@ -361,7 +365,8 @@ class FileReader(object):
                     data_conv_z = Converter(file_z_unit)
                     data.data = data_conv_z(data.data, units=default_i_unit)
                     if data.err_data is not None:
-                        data.err_data = data_conv_z(data.err_data, units=default_i_unit)
+                        data.err_data = data_conv_z(data.err_data,
+                                                    units=default_i_unit)
                 except KeyError:
                     message = "Unable to convert I units from {0} to 1/cm."
                     message.format(default_q_unit)
@@ -461,11 +466,14 @@ class FileReader(object):
                 np.square(self.current_dataset.qx_data) + np.square(
                     self.current_dataset.qy_data))
             if has_error_dy:
-                self.current_dataset.err_data = self.current_dataset.err_data[x != 0]
+                self.current_dataset.err_data = self.current_dataset.err_data[
+                    x != 0]
             if has_error_dqx:
-                self.current_dataset.dqx_data = self.current_dataset.dqx_data[x != 0]
+                self.current_dataset.dqx_data = self.current_dataset.dqx_data[
+                    x != 0]
             if has_error_dqy:
-                self.current_dataset.dqy_data = self.current_dataset.dqy_data[x != 0]
+                self.current_dataset.dqy_data = self.current_dataset.dqy_data[
+                    x != 0]
             if has_mask:
                 self.current_dataset.mask = self.current_dataset.mask[x != 0]
 
