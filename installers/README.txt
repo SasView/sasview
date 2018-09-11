@@ -355,7 +355,6 @@ Release Notes
          - Numerous bugs introduced in the alpha
 
 
-
     - New in Version 4.0.0-alpha
       --------------------
       This alpha release brings a major overhaul of the model system. The new model
@@ -392,7 +391,6 @@ Release Notes
          - Fixes bug #556 Build script improvements for developers
 
 
-
    - New in Version 3.1.2
      --------------------
      This release is a major stability improvement, having fixed a serious bug
@@ -410,11 +408,11 @@ Release Notes
      - Fixes bug #488 redraw issues in fit page
 
 
-
    - New in Version 3.1.1
      --------------------
      - Fixes bug #457 that prevented SasView from starting if the user was not
        connected to the internet, or was behind a proxy server.
+
 
    - New in Version 3.1.0
      --------------------
@@ -471,6 +469,7 @@ Release Notes
      - Migration of the repository to github simplifying contributions from
        non-project personnel through pull requests.
 
+
    - New in Version 3.0.0
      --------------------
      - The GUI look and feel has been refactored to be more familiar for
@@ -501,6 +500,7 @@ Release Notes
          an image file and will attempt to convert the image pixels to
          data. Supported formats include: TIFF, TIF, PNG, BMP, JPG.
 
+
    - New in Version 2.2.1
      --------------------
      - Minor patch to support CanSAS XML v1.1 file format
@@ -512,6 +512,7 @@ Release Notes
      - Reports can now be saved in pdf format on WIN and MAC
      - Made significant improvements to the batch/grid panel and fixed several bugs
      - Fixed a number of other minor bugs
+
 
    - New in Version 2.2.0
      --------------------
@@ -540,7 +541,6 @@ Release Notes
          analytical model functions
        - Tools: provides a number of useful supplementary tools such as SLD
          calculation
-
      - Fitting
        - Includes a large number of model functions, both form factors and structure factors.
        - Support P(Q)*S(Q) for form factors that flag they can be so multiplied.
@@ -581,7 +581,6 @@ Release Notes
          a single model and provides the results in a tabular form suitable for saving
          or plotting the evolution of the fit parameters with error bars (from within
          the application).
-
      - Tools
        - A scattering length density calculator,including some X-ray information
          is provided.
@@ -591,7 +590,6 @@ Release Notes
          TOF effects is provided
        - A slit size calculator optimized for Anton Paar Saxess is provided.
        - A kiessig fringe thickness calculator is provided
-
      - Plots and plot management
        - A 3D graphing option (for 2d data/results) is provided with the view
          controlled by the mouse
@@ -605,7 +603,6 @@ Release Notes
          plot can currently only have a single plot).
        - Extensive context sensitive plot/fitting/manipulation options are available
          through a right mouse click pop-up menu on plots.
-
      - Data management
        - Supports 2 + column 1D ASCII data, NIST 1D and 2D data, and canSAS data
          via plug-in mechanism which can easily allow other readers as appropriate.
@@ -620,13 +617,11 @@ Release Notes
          not require access to the explorer/manager and can be accessed through
          right click menus and the toolbar.  The data explorer can be re-started
          from the menu bar.
-
      - Data manipulation
        - Support various 2D averaging methods : Circular, sectors, annular,
          boxsum, boxQx and boxQy.
        - A 2D data maks editor is provided
        - 2D mask can be applied to the circular averaging.
-
      - Miscellaneous features
        - limited reports can be generated in pdf format
        - Provides multiprocessor support(Windows only)
@@ -688,10 +683,10 @@ Release Notes
             to the source code folder.
 
    2.4- Building and Installing         
-        - use 'python setup.py build'
-        - use 'python setup.py install'
-        To build the documentation
-          - use'python setup.py docs'
+        - To build the code
+            use 'python setup.py build'
+        - To build the documentation
+            use'python setup.py docs'
 
    2.5- Running SasView
           - use 'python run.py'; this runs from the source directories, so you
