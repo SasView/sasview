@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
 DEFAULT_CMAP = pylab.cm.jet
 from sas.qtgui.Plotting.Binder import BindArtist
@@ -28,6 +29,9 @@ class PlotterBase(QtWidgets.QWidget):
         # Required for the communicator
         self.manager = manager
         self.quickplot = quickplot
+
+        # Set auto layout so x/y axis captions don't get cut off
+        rcParams.update({'figure.autolayout': True})
 
         #plt.style.use('ggplot')
         #plt.style.use('seaborn-darkgrid')

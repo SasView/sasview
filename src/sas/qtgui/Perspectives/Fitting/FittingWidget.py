@@ -1218,9 +1218,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # update in param model
         if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
             row = self.getRowFromName(parameter_name)
-            param_item = self._model_model.item(row)
+            param_item = self._model_model.item(row).child(0).child(0, model_column)
+            if param_item is None:
+                return
             self._model_model.blockSignals(True)
-            param_item.child(0).child(0, model_column).setText(item.text())
+            param_item.setText(item.text())
             self._model_model.blockSignals(False)
 
     def onMagnetModelChange(self, item):
@@ -2795,15 +2797,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item1 = QtGui.QStandardItem(param_name)
 
         func = QtWidgets.QComboBox()
-        # Available range of shells displayed in the combobox
-        func.addItems([str(i) for i in range(param_length+1)])
-
-        # Respond to index change
-        func.currentIndexChanged.connect(self.modifyShellsInList)
 
         # cell 2: combobox
         item2 = QtGui.QStandardItem()
-        self._model_model.appendRow([item1, item2])
+
+        # cell 3: min value
+        item3 = QtGui.QStandardItem()
+
+        # cell 4: max value
+        item4 = QtGui.QStandardItem()
+
+        self._model_model.appendRow([item1, item2, item3, item4])
 
         # Beautify the row:  span columns 2-4
         shell_row = self._model_model.rowCount()
@@ -2822,17 +2826,39 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not shell_par:
             logger.error("Could not find %s in kernel parameters.", param_name)
         default_shell_count = shell_par.default
+        shell_min = 0
+        shell_max = 0
+        try:
+            shell_min = int(shell_par.limits[0])
+            shell_max = int(shell_par.limits[1])
+        except IndexError as ex:
+            # no info about limits
+            pass
+        item3.setText(str(shell_min))
+        item4.setText(str(shell_max))
+
+        # Respond to index change
+        func.currentTextChanged.connect(self.modifyShellsInList)
+
+        # Available range of shells displayed in the combobox
+        func.addItems([str(i) for i in range(shell_min, shell_max+1)])
 
         # Add default number of shells to the model
-        func.setCurrentIndex(default_shell_count)
+        func.setCurrentText(str(default_shell_count))
 
-    def modifyShellsInList(self, index):
+    def modifyShellsInList(self, text):
         """
         Add/remove additional multishell parameters
         """
         # Find row location of the combobox
         first_row = self._n_shells_row + 1
         remove_rows = self._num_shell_params
+        try:
+            index = int(text)
+        except ValueError:
+            # bad text on the control!
+            index = 0
+            logger.error("Multiplicity incorrect! Setting to 0")
 
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
@@ -2847,7 +2873,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
 
-        # Change 'n' in the parameter model, thereby updating the underlying model
+        # Param values for existing shells were reset to default; force all changes into kernel module
+        for row in new_rows:
+            par = row[0].text()
+            val = GuiUtils.toDouble(row[1].text())
+            self.kernel_module.setParam(par, val)
+
+        # Change 'n' in the parameter model; also causes recalculation
         self._model_model.item(self._n_shells_row, 1).setText(str(index))
 
         # Update relevant models
