@@ -102,7 +102,7 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
     else:
-        params = copy.deepcopy(parameters.iq_parameters)
+        params = parameters.iq_parameters
 
     rows = []
     for param in params:
