@@ -444,7 +444,7 @@ class Plotter2DWidget(PlotterBase):
                                 extent=(self.xmin, self.xmax,
                                         self.ymin, self.ymax))
 
-            cbax = self.figure.add_axes([0.84, 0.2, 0.02, 0.7])
+            cbax = self.figure.add_axes([0.88, 0.2, 0.02, 0.7])
 
             # Current labels for axes
             self.ax.set_ylabel(self.y_label)

@@ -2550,6 +2550,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.is2D:
             parameters += self.model_parameters.orientation_parameters
 
+        # only use uniques
+        parameters = list(set(parameters))
+
         [self.setPolyModelParameters(i, param) for i, param in \
             enumerate(parameters) if param.polydisperse]
 
