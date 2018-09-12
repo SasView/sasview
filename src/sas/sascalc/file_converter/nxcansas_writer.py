@@ -108,16 +108,13 @@ class NXcanSASWriter(Cansas2Reader):
         sasentry.attrs['canSAS_class'] = 'SASentry'
         sasentry.attrs['version'] = '1.0'
 
-        i = 1
-
-        for data_obj in dataset:
-            data_entry = sasentry.create_group("sasdata{0:0=2d}".format(i))
+        for i, data_obj in enumerate(dataset):
+            data_entry = sasentry.create_group("sasdata{0:0=2d}".format(i+1))
             data_entry.attrs['canSAS_class'] = 'SASdata'
             if isinstance(data_obj, Data1D):
                 self._write_1d_data(data_obj, data_entry)
             elif isinstance(data_obj, Data2D):
                 self._write_2d_data(data_obj, data_entry)
-            i += 1
 
         data_info = dataset[0]
         # Sample metadata

@@ -11,12 +11,13 @@ import sys
 from ..data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
-from ..data_info import combine_data_info_with_plottable
 from ..loader_exceptions import FileContentsException, DefaultReaderException
 from ..file_reader_base_class import FileReader, decode
 
+
 def h5attr(node, key, default=None):
     return decode(node.attrs.get(key, default))
+
 
 class Reader(FileReader):
     """
@@ -70,7 +71,8 @@ class Reader(FileReader):
                     self.raw_data = h5py.File(filename, 'r')
                 except Exception as e:
                     if extension not in self.ext:
-                        msg = "NXcanSAS HDF5 Reader could not load file {}".format(basename + extension)
+                        msg = "NXcanSAS Reader could not load file {}".format(
+                            basename + extension)
                         raise DefaultReaderException(msg)
                     raise FileContentsException(e.message)
                 try:
@@ -84,11 +86,12 @@ class Reader(FileReader):
                     # Close the data file
                     self.raw_data.close()
 
-                for dataset in self.output:
-                    if isinstance(dataset, Data1D):
-                        if dataset.x.size < 5:
-                            self.output = []
-                            raise FileContentsException("Fewer than 5 data points found.")
+                for data_set in self.output:
+                    if isinstance(data_set, Data1D):
+                        if data_set.x.size < 5:
+                            exception = FileContentsException(
+                                "Fewer than 5 data points found.")
+                            data_set.errors.append(exception)
 
     def reset_state(self):
         """
@@ -104,8 +107,8 @@ class Reader(FileReader):
         self.mask_name = u''
         self.i_name = u''
         self.i_node = u''
-        self.q_uncertainties = []
-        self.q_resolutions = []
+        self.q_uncertainties = None
+        self.q_resolutions = None
         self.i_uncertainties = u''
         self.parent_class = u''
         self.detector = Detector()
@@ -256,9 +259,7 @@ class Reader(FileReader):
 
     def process_2d_data_object(self, data_set, key, unit):
         if key == self.i_name:
-            self.current_dataset.x_bins, self.current_dataset.y_bins = \
-                data_set.shape
-            self.current_dataset.data = data_set.flatten()
+            self.current_dataset.data = data_set
             self.current_dataset.zaxis("Intensity", unit)
         elif key == self.i_uncertainties:
             self.current_dataset.err_data = data_set.flatten()
@@ -267,12 +268,12 @@ class Reader(FileReader):
             self.current_dataset.yaxis("Q_y", unit)
             if self.q_name[0] == self.q_name[1]:
                 # All q data in a single array
-                self.current_dataset.qx_data = data_set[0].flatten()
-                self.current_dataset.qy_data = data_set[1].flatten()
+                self.current_dataset.qx_data = data_set[0]
+                self.current_dataset.qy_data = data_set[1]
             elif self.q_name.index(key) == 0:
-                self.current_dataset.qx_data = data_set.flatten()
+                self.current_dataset.qx_data = data_set
             elif self.q_name.index(key) == 1:
-                self.current_dataset.qy_data = data_set.flatten()
+                self.current_dataset.qy_data = data_set
         elif key in self.q_uncertainties or key in self.q_resolutions:
             if ((self.q_uncertainties[0] == self.q_uncertainties[1]) or
                     (self.q_resolutions[0] == self.q_resolutions[1])):
@@ -536,9 +537,23 @@ class Reader(FileReader):
 
             if dataset.data.ndim == 2:
                 (n_rows, n_cols) = dataset.data.shape
-                dataset.y_bins = dataset.qy_data[0::n_cols]
-                dataset.x_bins = dataset.qx_data[0::n_rows]
+                print(n_rows)
+                print(n_cols)
+                flat_qy = dataset.qy_data[0::n_cols].flatten()
+                if flat_qy[0] == flat_qy[1]:
+                    flat_qy = np.transpose(dataset.qy_data)[0::n_cols].flatten()
+                dataset.y_bins = np.unique(flat_qy)
+                flat_qx = dataset.qx_data[0::n_rows].flatten()
+                if flat_qx[0] == flat_qx[1]:
+                    flat_qx = np.transpose(dataset.qx_data)[0::n_rows].flatten()
+                dataset.x_bins = np.unique(flat_qx)
+                print(dataset.x_bins)
+                print(len(dataset.x_bins))
+                print(dataset.y_bins)
+                print(len(dataset.y_bins))
                 dataset.data = dataset.data.flatten()
+                dataset.qx_data = dataset.qx_data.flatten()
+                dataset.qy_data = dataset.qy_data.flatten()
             self.current_dataset = dataset
             self.send_to_output()
 
@@ -588,8 +603,9 @@ class Reader(FileReader):
     def check_is_list_or_array(iterable):
         try:
             iter(iterable)
-            if (not isinstance(iterable, np.ndarray)) or (isinstance(iterable, str)
-                    or isinstance(iterable, unicode)):
+            if (not isinstance(iterable, np.ndarray) and not isinstance(
+                    iterable, list)) or (isinstance(iterable, str) or
+                                         isinstance(iterable, unicode)):
                 raise TypeError
         except TypeError:
             iterable = iterable.split(",")
