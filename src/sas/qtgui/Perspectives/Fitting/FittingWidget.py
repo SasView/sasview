@@ -2341,12 +2341,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not hasattr(model, 'setParam'): return
 
         # add polydisperse parameters if asked
-        if self.chkPolydispersity.isChecked():
+        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
             for key, value in self.poly_params.items():
                 model.setParam(key, value)
         # add magnetic params if asked
         if self.chkMagnetism.isChecked():
-            for key, value in self.magnet_params.items():
+            for key, value in self.magnet_params.items() and self._magnet_model.rowCount() > 0:
                 model.setParam(key, value)
 
     def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
