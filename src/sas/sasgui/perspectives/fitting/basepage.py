@@ -30,6 +30,7 @@ from sas.sascalc.fit.pagestate import PageState
 from sas.sascalc.fit.models import PLUGIN_NAME_BASE
 
 from sas.sasgui.guiframe.panel_base import PanelBase
+from sas.sasgui.guiframe.report_image_handler import ReportImageHandler
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
     check_int
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
@@ -650,36 +651,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         Build image state that wx.html understand
         by plotting, putting it into wx.FileSystem image object
         """
-        images = []
-        refs = []
+        bitmaps = []
+        for canvas in canvases:
+            bitmaps.append(canvas.bitmap)
+        imgs, refs = ReportImageHandler.set_figs(figs, bitmaps, 'fit')
 
-        # For no figures in the list, prepare empty plot
-        if figs is None or len(figs) == 0:
-            figs = [None]
-
-        # Loop over the list of figures
-        # use wx.MemoryFSHandler
-        imgRAM = wx.MemoryFSHandler()
-        for fig in figs:
-            if fig is not None:
-                ind = figs.index(fig)
-                canvas = canvases[ind]
-
-            # store the image in wx.FileSystem Object
-            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
-
-            # index of the fig
-            ind = figs.index(fig)
-
-            # AddFile, image can be retrieved with 'memory:filename'
-            name = 'img_fit%s.png' % ind
-            refs.append('memory:' + name)
-            imgRAM.AddFile(name, canvas.bitmap, wx.BITMAP_TYPE_PNG)
-            # append figs
-            images.append(fig)
-
-        return imgRAM, images, refs
-
+        return ReportImageHandler.instance, imgs, refs
 
     def on_save(self, event):
         """
@@ -2800,19 +2777,23 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Function called when 'Help' button is pressed next to model
         of interest.  This calls DocumentationWindow from
-        documentation_window.py. It will load the top level of the model
-        help documenation sphinx generated html if no model is presented.
-        If a model IS present then if documention for that model exists
-        it will load to that  point otherwise again it will go to the top.
-        For Wx2.8 and below is used (i.e. non-released through installer)
-        a browser is loaded and the top of the model documentation only is
-        accessible because webbrowser module does not pass anything after
-        the # to the browser.
+        documentation_window.py. It will load the top level of the html model
+        help documenation sphinx generated if either a plugin model (which
+        normally does not have an html help help file) is selected or if no
+        model is selected. Otherwise, if a regula model is selected, the
+        documention for that model will be sent to a browser window.
+
+        :todo the quick fix for no documentation in plugins is the if statment.
+        However, the right way to do this would be to check whether the hmtl
+        file exists and load the model docs if it does and the general docs if
+        it doesn't - this will become important if we ever figure out how to
+        build docs for plugins on the fly.  Sep 9, 2018 -PDB
 
         :param event: on Help Button pressed event
         """
 
-        if self.model is not None:
+        if (self.model is not None) and (self.categorybox.GetValue()
+                                         != "Plugin Models"):
             name = self.formfactorbox.GetValue()
             _TreeLocation = 'user/models/%s.html' % name
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,

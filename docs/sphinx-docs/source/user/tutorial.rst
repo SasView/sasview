@@ -9,4 +9,8 @@ Tutorials
 
 :download:`Getting Started with Sasview <sasview/getting_started_with_sasview.pdf>`
 
+:download:`Basic 1D Fitting in Sasview <sasview/basic_1d_fitting_in_sasview_v3x_4x.pdf>`
+
+:download:`Simultaneous 1D Fitting in Sasview <sasview/simultaneous_1d_fitting_in_sasview_v3x_4x.pdf>`
+
 :download:`Old Tutorial <sasview/Tutorial.pdf>`

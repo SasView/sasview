@@ -11,6 +11,7 @@ import sas.sascalc.dataloader
 # from xml.dom.minidom import parse
 from lxml import etree
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sasgui.guiframe.report_image_handler import ReportImageHandler
 from sas.sascalc.dataloader.readers.cansas_reader import get_content
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
@@ -610,14 +611,10 @@ class InvariantState(object):
         # get the dynamic image for the htmlwindow
         wximgbmp = wx.BitmapFromImage(wximg)
         # store the image in wx.FileSystem Object
-        wx.FileSystem.AddHandler(wx.MemoryFSHandler())
-        # use wx.MemoryFSHandler
-        self.imgRAM = wx.MemoryFSHandler()
-        # AddFile, image can be retrieved with 'memory:filename'
-        self.imgRAM.AddFile('img_inv.png', wximgbmp, wx.BITMAP_TYPE_PNG)
+        imgs, refs = ReportImageHandler.set_figs([fig], [wximgbmp], 'inv')
 
-        self.wximgbmp = 'memory:img_inv.png'
-        self.image = fig
+        self.wximgbmp = refs[0]
+        self.image = imgs[0]
 
 class Reader(CansasReader):
     """

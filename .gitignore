@@ -33,11 +33,6 @@ Thumbs.db
 # doc build
 /docs/sphinx-docs/build
 /docs/sphinx-docs/source-temp
-/docs/sphinx-docs/source/dev/api
-/docs/sphinx-docs/source/user/guiframe
-/docs/sphinx-docs/source/user/models
-/docs/sphinx-docs/source/user/sasview
-/docs/sphinx-docs/source/user/perspectives
 /docs/sphinx-docs/katex*.zip
 /docs/sphinx-docs/node_modules
 /docs/sphinx-docs/node-package.json
