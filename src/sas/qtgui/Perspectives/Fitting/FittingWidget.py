@@ -1376,8 +1376,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.fit_started = True
+
         # Disable some elements
-        self.setFittingStarted()
+        self.disableInteractiveElements()
 
     def stopFit(self):
         """
@@ -1386,9 +1387,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.calc_fit is None or not self.calc_fit.isrunning():
             return
         self.calc_fit.stop()
-        #self.fit_started=False
         #re-enable the Fit button
-        self.setFittingStopped()
+        self.enableInteractiveElements()
 
         msg = "Fitting cancelled."
         self.communicate.statusBarUpdateSignal.emit(msg)
@@ -1402,7 +1402,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def fitFailed(self, reason):
         """
         """
-        self.setFittingStopped()
+        self.enableInteractiveElements()
         msg = "Fitting failed with: "+ str(reason)
         self.communicate.statusBarUpdateSignal.emit(msg)
 
@@ -1419,7 +1419,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Receive and display batch fitting results
         """
         #re-enable the Fit button
-        self.setFittingStopped()
+        self.enableInteractiveElements()
 
         if len(result) == 0:
             msg = "Fitting failed."
@@ -1491,7 +1491,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         "result" is a tuple of actual result list and the fit time in seconds
         """
         #re-enable the Fit button
-        self.setFittingStopped()
+        self.enableInteractiveElements()
 
         if len(result) == 0:
             msg = "Fitting failed."
@@ -2362,6 +2362,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         smearer = self.smearing_widget.smearer()
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
 
+        # Disable buttons/table
+        self.disableInteractiveElements()
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
                                                model=model,
@@ -2403,6 +2405,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Thread returned error
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
         print("Calculate Data failed with ", reason)
 
     def completed1D(self, return_data):
@@ -2415,6 +2419,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
+
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
@@ -2444,6 +2451,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 2D data
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
+
         fitted_data = self.logic.new2DPlot(return_data)
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
@@ -2514,6 +2524,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Thread threw an exception.
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
         # TODO: remimplement thread cancellation
         logger.error("".join(traceback.format_exception(etype, value, tb)))
 
@@ -2891,23 +2903,45 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.setPolyModel()
         self.setMagneticModel()
 
-    def setFittingStarted(self):
+    def setInteractiveElements(self, enabled=True):
         """
-        Set buttion caption on fitting start
+        Switch interactive GUI elements on/off
         """
-        # Notify the user that fitting is being run
-        # Allow for stopping the job
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
-        self.cmdFit.setText('Stop fit')
+        assert isinstance(enabled, bool)
 
-    def setFittingStopped(self):
+        self.lstParams.setEnabled(enabled)
+        self.lstPoly.setEnabled(enabled)
+        self.lstMagnetic.setEnabled(enabled)
+
+        self.cbCategory.setEnabled(enabled)
+        self.cbModel.setEnabled(enabled)
+        self.cbStructureFactor.setEnabled(enabled)
+
+        self.chkPolydispersity.setEnabled(enabled)
+        self.chkMagnetism.setEnabled(enabled)
+        self.chk2DView.setEnabled(enabled)
+
+    def enableInteractiveElements(self):
         """
-        Set button caption on fitting stop
+        Set buttion caption on fitting/calculate finish
+        Enable the param table(s)
         """
         # Notify the user that fitting is available
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.fit_started = False
+        self.setInteractiveElements(True)
+
+    def disableInteractiveElements(self):
+        """
+        Set buttion caption on fitting/calculate start
+        Disable the param table(s)
+        """
+        # Notify the user that fitting is being run
+        # Allow for stopping the job
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setText('Stop fit')
+        self.setInteractiveElements(False)
 
     def readFitPage(self, fp):
         """
