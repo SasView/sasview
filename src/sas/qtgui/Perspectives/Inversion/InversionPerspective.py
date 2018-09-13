@@ -13,6 +13,7 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
+from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 
@@ -558,12 +559,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                            pr.get_pos_err(out, cov))))
         if self.prPlot is not None:
             title = self.prPlot.name
+            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-            self.communicate.plotRequestedSignal.emit([self.prPlot], None)
         if self.dataPlot is not None:
             title = self.dataPlot.name
+            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit([self.dataPlot], None)
+        if self.dataPlot is not None or self.prPlot is not None:
+            self.communicate.plotRequestedSignal.emit([self.logic.data], None)
         self.enableButtons()
 
     def removeData(self, data_list=None):
