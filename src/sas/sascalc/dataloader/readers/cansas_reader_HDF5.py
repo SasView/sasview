@@ -130,6 +130,8 @@ class Reader(FileReader):
             # Get all information for the current key
             value = data.get(key)
             class_name = h5attr(value, u'canSAS_class')
+            if isinstance(class_name, (list, tuple, np.ndarray)):
+                class_name = class_name[0]
             if class_name is None:
                 class_name = h5attr(value, u'NX_class')
             if class_name is not None:
@@ -537,8 +539,6 @@ class Reader(FileReader):
 
             if dataset.data.ndim == 2:
                 (n_rows, n_cols) = dataset.data.shape
-                print(n_rows)
-                print(n_cols)
                 flat_qy = dataset.qy_data[0::n_cols].flatten()
                 if flat_qy[0] == flat_qy[1]:
                     flat_qy = np.transpose(dataset.qy_data)[0::n_cols].flatten()
@@ -547,10 +547,6 @@ class Reader(FileReader):
                 if flat_qx[0] == flat_qx[1]:
                     flat_qx = np.transpose(dataset.qx_data)[0::n_rows].flatten()
                 dataset.x_bins = np.unique(flat_qx)
-                print(dataset.x_bins)
-                print(len(dataset.x_bins))
-                print(dataset.y_bins)
-                print(len(dataset.y_bins))
                 dataset.data = dataset.data.flatten()
                 dataset.qx_data = dataset.qx_data.flatten()
                 dataset.qy_data = dataset.qy_data.flatten()

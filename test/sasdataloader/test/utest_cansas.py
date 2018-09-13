@@ -255,9 +255,9 @@ class cansas_reader_hdf5(unittest.TestCase):
         self.loader = Loader()
         self.datafile_basic = find("simpleexamplefile.h5")
         self.datafile_multiplesasentry = find(
-            "test_data//nxcansas_1Dand2D_multisasdata.h5")
-        self.datafile_multiplesasdata = find(
             "test_data//nxcansas_1Dand2D_multisasentry.h5")
+        self.datafile_multiplesasdata = find(
+            "test_data//nxcansas_1Dand2D_multisasdata.h5")
         self.datafile_multiplesasdata_multiplesasentry = find(
             "test_data//nxcansas_1Dand2D_multisasentry_multisasdata.h5")
 
@@ -276,6 +276,32 @@ class cansas_reader_hdf5(unittest.TestCase):
         else:
             self._check_1d_data(self.data[1])
             self._check_2d_data(self.data[0])
+
+    def test_multiple_sasdatas(self):
+        self.data = self.loader.load(self.datafile_multiplesasdata)
+        self.assertTrue(len(self.data) == 2)
+        self._check_multiple_data(self.data[0])
+        self._check_multiple_data(self.data[1])
+        if isinstance(self.data[0], Data1D):
+            self._check_1d_data(self.data[0])
+            self._check_2d_data(self.data[1])
+        else:
+            self._check_1d_data(self.data[1])
+            self._check_2d_data(self.data[0])
+
+    def test_multiple_sasentries_multiplesasdatas(self):
+        self.data = self.loader.load(
+            self.datafile_multiplesasdata_multiplesasentry)
+        self.assertTrue(len(self.data) == 4)
+        self._check_multiple_data(self.data[0])
+        self._check_multiple_data(self.data[1])
+        self._check_multiple_data(self.data[2])
+        self._check_multiple_data(self.data[3])
+        for data in self.data:
+            if isinstance(data, Data1D):
+                self._check_1d_data(data)
+            else:
+                self._check_2d_data(data)
 
     def _check_multiple_data(self, data):
         self.assertTrue(data.title == "MH4_5deg_16T_SLOW")
@@ -304,9 +330,8 @@ class cansas_reader_hdf5(unittest.TestCase):
         self.assertTrue(isinstance(data, Data2D))
         self.assertTrue(len(data.q_data) == 150*150)
         self.assertTrue(len(data.q_data) == len(data.data))
-        print(data.err_data[10])
         self.assertAlmostEqual(data.err_data[10], 0.186723989418)
-        self.assertAlmostEqual(data.data[10], 0.465181425808)
+        self.assertAlmostEqual(data.data[10], 0.465181)
         self.assertAlmostEqual(data.qx_data[10], -0.129)
         self.assertAlmostEqual(data.qy_data[10], -0.149)
 

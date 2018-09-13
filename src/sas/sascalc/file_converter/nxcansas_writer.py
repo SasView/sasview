@@ -7,10 +7,10 @@ import numpy as np
 import re
 import os
 
-from sas.sascalc.dataloader.readers.cansas_reader_HDF5 import Reader as Cansas2Reader
+from sas.sascalc.dataloader.readers.cansas_reader_HDF5 import Reader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 
-class NXcanSASWriter(Cansas2Reader):
+class NXcanSASWriter(Reader):
     """
     A class for writing in NXcanSAS data files. Any number of data sets may be
     written to the file. Currently 1D and 2D SAS data sets are supported
@@ -86,9 +86,11 @@ class NXcanSASWriter(Cansas2Reader):
                 if units is not None:
                     entry[names[2]].attrs['units'] = units
 
-        valid_data = all([issubclass(d.__class__, (Data1D, Data2D)) for d in dataset])
+        valid_data = all([issubclass(d.__class__, (Data1D, Data2D)) for d in
+                          dataset])
         if not valid_data:
-            raise ValueError("All entries of dataset must be Data1D or Data2D objects")
+            raise ValueError("All entries of dataset must be Data1D or Data2D"
+                             "objects")
 
         # Get run name and number from first Data object
         data_info = dataset[0]
@@ -144,7 +146,7 @@ class NXcanSASWriter(Cansas2Reader):
             if details is not None:
                 sample_entry.create_dataset('details', data=details)
 
-        # Instrumment metadata
+        # Instrument metadata
         instrument_entry = sasentry.create_group('sasinstrument')
         instrument_entry.attrs['canSAS_class'] = 'SASinstrument'
         instrument_entry['name'] = _h5_string(data_info.instrument)
@@ -174,38 +176,40 @@ class NXcanSASWriter(Cansas2Reader):
 
         # Collimation metadata
         if len(data_info.collimation) > 0:
-            i = 1
-            for coll_info in data_info.collimation:
+            for i, coll_info in enumerate(data_info.collimation):
                 collimation_entry = instrument_entry.create_group(
-                    'sascollimation{0:0=2d}'.format(i))
+                    'sascollimation{0:0=2d}'.format(i + 1))
                 collimation_entry.attrs['canSAS_class'] = 'SAScollimation'
                 if coll_info.length is not None:
                     _write_h5_float(collimation_entry, coll_info.length, 'SDD')
-                    collimation_entry['SDD'].attrs['units'] = coll_info.length_unit
+                    collimation_entry['SDD'].attrs['units'] =\
+                        coll_info.length_unit
                 if coll_info.name is not None:
                     collimation_entry['name'] = _h5_string(coll_info.name)
         else:
-            # Create a blank one - at least 1 set of collimation metadata
-            # required by format
-            collimation_entry = instrument_entry.create_group('sascollimation01')
+            # Create a blank one - at least 1 collimation required by format
+            instrument_entry.create_group('sascollimation01')
 
         # Detector metadata
         if len(data_info.detector) > 0:
             i = 1
-            for det_info in data_info.detector:
+            for i, det_info in enumerate(data_info.detector):
                 detector_entry = instrument_entry.create_group(
-                    'sasdetector{0:0=2d}'.format(i))
+                    'sasdetector{0:0=2d}'.format(i + 1))
                 detector_entry.attrs['canSAS_class'] = 'SASdetector'
                 if det_info.distance is not None:
                     _write_h5_float(detector_entry, det_info.distance, 'SDD')
-                    detector_entry['SDD'].attrs['units'] = det_info.distance_unit
+                    detector_entry['SDD'].attrs['units'] =\
+                        det_info.distance_unit
                 if det_info.name is not None:
                     detector_entry['name'] = _h5_string(det_info.name)
                 else:
                     detector_entry['name'] = _h5_string('')
                 if det_info.slit_length is not None:
-                    _write_h5_float(detector_entry, det_info.slit_length, 'slit_length')
-                    detector_entry['slit_length'].attrs['units'] = det_info.slit_length_unit
+                    _write_h5_float(detector_entry, det_info.slit_length,
+                                    'slit_length')
+                    detector_entry['slit_length'].attrs['units'] =\
+                        det_info.slit_length_unit
                 _write_h5_vector(detector_entry, det_info.offset)
                 # NXcanSAS doesn't save information about pitch, only roll
                 # and yaw. The _write_h5_vector method writes vector.y, but we
@@ -219,8 +223,6 @@ class NXcanSASWriter(Cansas2Reader):
                 _write_h5_vector(detector_entry, det_info.pixel_size,
                     names=['x_pixel_size', 'y_pixel_size'],
                     write_fn=_write_h5_float, units=det_info.pixel_size_unit)
-
-                i += 1
         else:
             # Create a blank one - at least 1 detector required by format
             detector_entry = instrument_entry.create_group('sasdetector01')
@@ -228,55 +230,48 @@ class NXcanSASWriter(Cansas2Reader):
             detector_entry.attrs['name'] = ''
 
         # Process meta data
-        if len(data_info.process) > 0 and not data_info.process[0].is_empty():
-            i = 1
-            for process in data_info.process:
-                process_entry = sasentry.create_group(
-                    'sasprocess{0:0=2d}'.format(i))
-                process_entry.attrs['canSAS_class'] = 'SASprocess'
-                if process.name:
-                    name = _h5_string(process.name)
-                    process_entry.create_dataset('name', data=name)
-                if process.date:
-                    date = _h5_string(process.date)
-                    process_entry.create_dataset('date', data=date)
-                if process.description:
-                    desc = _h5_string(process.description)
-                    process_entry.create_dataset('description', data=desc)
-                j = 1
-                for term in process.term:
-                    if term:
-                        h5_term = _h5_string(term)
-                        process_entry.create_dataset('term{0:0=2d}'.format(j),
-                                                     data=h5_term)
-                    j += 1
-                j = 1
-                for note in process.notes:
-                    if note:
-                        h5_note = _h5_string(note)
-                        process_entry.create_dataset('note{0:0=2d}'.format(j),
-                                                     data=h5_note)
-                    j += 1
-                i += 1
+        for i, process in enumerate(data_info.process):
+            process_entry = sasentry.create_group('sasprocess{0:0=2d}'.format(
+                i + 1))
+            process_entry.attrs['canSAS_class'] = 'SASprocess'
+            if process.name:
+                name = _h5_string(process.name)
+                process_entry.create_dataset('name', data=name)
+            if process.date:
+                date = _h5_string(process.date)
+                process_entry.create_dataset('date', data=date)
+            if process.description:
+                desc = _h5_string(process.description)
+                process_entry.create_dataset('description', data=desc)
+            for j, term in enumerate(process.term):
+                # Don't save empty terms
+                if term:
+                    h5_term = _h5_string(term)
+                    process_entry.create_dataset('term{0:0=2d}'.format(
+                        j + 1), data=h5_term)
+            for j, note in enumerate(process.notes):
+                # Don't save empty notes
+                if note:
+                    h5_note = _h5_string(note)
+                    process_entry.create_dataset('note{0:0=2d}'.format(
+                        j + 1), data=h5_note)
 
         # Transmission Spectrum
-        if len(data_info.trans_spectrum) > 0:
-            i = 1
-            for trans in data_info.trans_spectrum:
-                trans_entry = sasentry.create_group(
-                    'sastransmission_spectrum{0:0=2d}'.format(i))
-                trans_entry.attrs['canSAS_class'] = 'SAStransmission_spectrum'
-                trans_entry.attrs['signal'] = 'T'
-                trans_entry.attrs['T_axes'] = 'T'
-                trans_entry.attrs['name'] = trans.name
-                if trans.timestamp is not '':
-                    trans_entry.attrs['timestamp'] = trans.timestamp
-                transmission = trans_entry.create_dataset(
-                    'T', data=trans.transmission)
-                transmission.attrs['unertainties'] = 'Tdev'
-                trans_entry.create_dataset('Tdev',
-                                           data = trans.transmission_deviation)
-                trans_entry.create_dataset('lambda', data=trans.wavelength)
+        for i, trans in enumerate(data_info.trans_spectrum):
+            trans_entry = sasentry.create_group(
+                'sastransmission_spectrum{0:0=2d}'.format(i + 1))
+            trans_entry.attrs['canSAS_class'] = 'SAStransmission_spectrum'
+            trans_entry.attrs['signal'] = 'T'
+            trans_entry.attrs['T_axes'] = 'T'
+            trans_entry.attrs['name'] = trans.name
+            if trans.timestamp is not '':
+                trans_entry.attrs['timestamp'] = trans.timestamp
+            transmission = trans_entry.create_dataset('T',
+                                                      data=trans.transmission)
+            transmission.attrs['unertainties'] = 'Tdev'
+            trans_entry.create_dataset('Tdev',
+                                       data=trans.transmission_deviation)
+            trans_entry.create_dataset('lambda', data=trans.wavelength)
 
         note_entry = sasentry.create_group('sasnote'.format(i))
         note_entry.attrs['canSAS_class'] = 'SASnote'
