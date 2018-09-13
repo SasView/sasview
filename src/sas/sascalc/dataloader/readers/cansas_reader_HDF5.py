@@ -632,11 +632,11 @@ class Reader(FileReader):
                     self.q_uncertainties = q_vals.attrs.get("uncertainties")
                 elif q_vals.attrs.get("uncertainty") is not None:
                     self.q_uncertainties = q_vals.attrs.get("uncertainty")
-                if isinstance(self.q_uncertainties, str) is not None:
-                    self.q_uncertainties = [self.q_uncertainties]
+                if isinstance(self.q_uncertainties, str):
+                    self.q_uncertainties = self.q_uncertainties.split(",")
                 if q_vals.attrs.get("resolutions") is not None:
                     self.q_resolutions = q_vals.attrs.get("resolutions")
-                if isinstance(self.q_resolutions, str):
+                if isinstance(self.q_resolutions, (str, unicode)):
                     self.q_resolutions = self.q_resolutions.split(",")
         if self.i_name in keys:
             i_vals = value.get(self.i_name)

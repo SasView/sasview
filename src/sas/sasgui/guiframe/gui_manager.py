@@ -2529,7 +2529,10 @@ class ViewerFrame(PARENT_FRAME):
         if data.dy is not None:
             text += 'dY_min = %s:  dY_max = %s\n' % (min(data.dy), max(data.dy))
         text += '\nData Points:\n'
-        x_st = "X"
+        text += "<index> \t<X> \t<Y> \t<dY> \t<dX"
+        if data.dxl is not None and data.dxw is not None:
+                text += "l> \t<dxw"
+        text += ">\n"
         for index in range(len(data.x)):
             if data.dy is not None and len(data.dy) > index:
                 dy_val = data.dy[index]
@@ -2540,16 +2543,10 @@ class ViewerFrame(PARENT_FRAME):
             else:
                 dx_val = 0.0
             if data.dxl is not None and len(data.dxl) > index:
-                if index == 0:
-                    x_st = "Xl"
                 dx_val = data.dxl[index]
-            elif data.dxw is not None and len(data.dxw) > index:
-                if index == 0:
-                    x_st = "Xw"
-                dx_val = data.dxw[index]
+                if data.dxw is not None and len(data.dxw) > index:
+                    dx_val = "%s \t%s" % (data.dxl[index], data.dxw[index])
 
-            if index == 0:
-                text += "<index> \t<X> \t<Y> \t<dY> \t<d%s>\n" % x_st
             text += "%s \t%s \t%s \t%s \t%s\n" % (index,
                                                   data.x[index],
                                                   data.y[index],
