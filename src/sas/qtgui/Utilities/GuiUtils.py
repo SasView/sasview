@@ -321,6 +321,7 @@ def deleteRedundantPlots(item, new_plots):
     """
     assert isinstance(item, QtGui.QStandardItem)
 
+    # lists of plots names/ids for all deletable plots on item
     names = [p.name for p in new_plots if p.name is not None]
     ids = [p.id for p in new_plots if p.id is not None]
 
@@ -328,10 +329,14 @@ def deleteRedundantPlots(item, new_plots):
 
     for index in range(item.rowCount()):
         plot_item = item.child(index)
-        if plot_item.isCheckable():
-            plot_data = plot_item.child(0).data()
-            if (plot_data.id is not None) and (plot_data.id not in ids) and (plot_data.name not in names):
-                items_to_delete.append(plot_item)
+        if not plot_item.isCheckable():
+            continue
+        plot_data = plot_item.child(0).data()
+        if (plot_data.id is not None) and \
+            (plot_data.id not in ids) and \
+            (plot_data.name not in names) and \
+            (plot_data.plot_role == Data1D.ROLE_DELETABLE):
+            items_to_delete.append(plot_item)
 
     for plot_item in items_to_delete:
         item.removeRow(plot_item.row())

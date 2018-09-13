@@ -127,7 +127,7 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
             item1_1.setEditable(False)
 
             # Find param in volume_params
-            poly_pars = parameters.form_volume_parameters
+            poly_pars = copy.deepcopy(parameters.form_volume_parameters)
             if is2D:
                 poly_pars += parameters.orientation_parameters
             for p in poly_pars:

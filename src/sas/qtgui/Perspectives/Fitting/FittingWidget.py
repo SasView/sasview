@@ -272,6 +272,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # If the widget generated theory item, save it
         self.theory_item = None
 
+        # list column widths
+        self.lstParamHeaderSizes = {}
+
         # signal communicator
         self.communicate = self.parent.communicate
 
@@ -360,6 +363,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstParams.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        # Column resize signals
+        self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
+
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
         self.setPolyModel()
@@ -1107,6 +1113,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # kernel parameters -> model_model
         self.SASModelToQModel(model, structure_factor)
 
+        for column, width in self.lstParamHeaderSizes.items():
+            self.lstParams.setColumnWidth(column, width)
+
         # Update plot
         self.updateData()
 
@@ -1668,13 +1677,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(updatePolyValues)
         self._model_model.itemChanged.connect(self.onMainParamsChange)
 
-        # Adjust the table cells width.
-        # TODO: find a way to dynamically adjust column width while resized expanding
-        self.lstParams.resizeColumnToContents(0)
-        self.lstParams.resizeColumnToContents(4)
-        self.lstParams.resizeColumnToContents(5)
-        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
     def iterateOverPolyModel(self, func):
         """
         Take func and throw it inside the poly model row loop
@@ -2014,10 +2016,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.magnet_params = {}
             self.setMagneticModel()
 
-        # Adjust the table cells width
-        self.lstParams.resizeColumnToContents(0)
-        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
         # Now we claim the model has been loaded
         self.model_is_loaded = True
         # Change the model name to a monicker
@@ -2341,12 +2339,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not hasattr(model, 'setParam'): return
 
         # add polydisperse parameters if asked
-        if self.chkPolydispersity.isChecked():
+        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
             for key, value in self.poly_params.items():
                 model.setParam(key, value)
         # add magnetic params if asked
         if self.chkMagnetism.isChecked():
-            for key, value in self.magnet_params.items():
+            for key, value in self.magnet_params.items() and self._magnet_model.rowCount() > 0:
                 model.setParam(key, value)
 
     def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
@@ -2480,6 +2478,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
+        residuals_plot.plot_role = Data1D.ROLE_RESIDUAL
         self.createNewIndex(residuals_plot)
         return residuals_plot
 
@@ -2725,6 +2724,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fname = os.path.basename(str(datafile))
         fname_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
         self._poly_model.setData(fname_index, fname)
+
+    def onColumnWidthUpdate(self, index, old_size, new_size):
+        """
+        Simple state update of the current column widths in the  param list
+        """
+        self.lstParamHeaderSizes[index] = new_size
 
     def setMagneticModel(self):
         """
