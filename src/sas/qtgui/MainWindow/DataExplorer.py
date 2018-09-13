@@ -573,7 +573,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
         for item, plot in plots.items():
-            if self.updatePlot(plot) or filename not in plot.name:
+            if self.updatePlot(plot):
+                # Don't create plots which are already displayed
                 continue
             # Don't plot intermediate results, e.g. P(Q), S(Q)
             match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
@@ -581,7 +582,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if match and match.groups()[1] != None:
                 continue
             # Don't include plots from different fitpages, but always include the original data
-            if fitpage_name in plot.name or filename == plot.name:
+            if fitpage_name in plot.name or filename in plot.name or filename == plot.filename:
                 # Residuals get their own plot
                 if plot.plot_role == Data1D.ROLE_RESIDUAL:
                     plot.yscale='linear'
