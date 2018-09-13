@@ -257,10 +257,7 @@ class Invertor(Cinvertor):
 
         invertor.x = self.x
         invertor.y = self.y
-        if np.size(self.err) == 0 or np.all(self.err) == 0:
-            invertor.err = self.add_errors(self.y)
-        else:
-            invertor.err = self.err
+        invertor.err = self.err
         invertor.est_bck = self.est_bck
         invertor.background = self.background
         invertor.slit_height = self.slit_height
@@ -305,8 +302,6 @@ class Invertor(Cinvertor):
         """
         # Reset the background value before proceeding
         # self.background = 0.0
-        if np.size(self.err) == 0 or np.all(self.err) == 0:
-            self.err = self.add_errors(self.y)
         if not self.est_bck:
             self.y -= self.background
         out, cov = self.lstsq(nfunc, nr=nr)

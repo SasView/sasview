@@ -461,6 +461,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
             self._calculator.set_qmax(qmax)
+            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
+                self.logic.data.dy = self._calculator.add_errors(self.logic.data.y)
             self.updateDataList(data)
             self.populateDataComboBox(self.logic.data.filename, data)
         self.dataList.setCurrentIndex(len(self.dataList) - 1)
