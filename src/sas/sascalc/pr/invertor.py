@@ -305,6 +305,8 @@ class Invertor(Cinvertor):
         """
         # Reset the background value before proceeding
         # self.background = 0.0
+        if np.size(self.err) == 0 or np.all(self.err) == 0:
+            self.err = self.add_errors(self.y)
         if not self.est_bck:
             self.y -= self.background
         out, cov = self.lstsq(nfunc, nr=nr)
