@@ -27,6 +27,7 @@ import sas.qtgui.Utilities.LocalConfig as LocalConfig
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.Plotter import PlotterWidget
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
@@ -2824,13 +2825,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # cell 4: max value
         item4 = QtGui.QStandardItem()
 
-        self._model_model.appendRow([item1, item2, item3, item4])
+        # cell 4: SLD button
+        item5 = QtGui.QStandardItem()
+        button = QtWidgets.QPushButton()
+        button.setText("Show SLD Profile")
+
+        self._model_model.appendRow([item1, item2, item3, item4, item5])
 
         # Beautify the row:  span columns 2-4
         shell_row = self._model_model.rowCount()
         shell_index = self._model_model.index(shell_row-1, 1)
+        button_index = self._model_model.index(shell_row-1, 4)
 
         self.lstParams.setIndexWidget(shell_index, func)
+        self.lstParams.setIndexWidget(button_index, button)
         self._n_shells_row = shell_row - 1
 
         # Get the default number of shells for the model
@@ -2857,6 +2865,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Respond to index change
         func.currentTextChanged.connect(self.modifyShellsInList)
 
+        # Respond to button press
+        button.clicked.connect(self.onShowSLDProfile)
+
         # Available range of shells displayed in the combobox
         func.addItems([str(i) for i in range(shell_min, shell_max+1)])
 
@@ -2876,7 +2887,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # bad text on the control!
             index = 0
             logger.error("Multiplicity incorrect! Setting to 0")
-
+        self.kernel_module.multiplicity = index
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
@@ -2902,6 +2913,33 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update relevant models
         self.setPolyModel()
         self.setMagneticModel()
+
+    def onShowSLDProfile(self):
+        """
+        Show a quick plot of SLD profile
+        """
+        # get profile data
+        x, y = self.kernel_module.getProfile()
+        y *= 1.0e6
+        profile_data = Data1D(x=x, y=y)
+        profile_data.name = "SLD"
+        profile_data.scale = 'linear'
+        profile_data.symbol = 'Line'
+        profile_data.hide_error = True
+        profile_data._xaxis = "R(\AA)"
+        profile_data._yaxis = "SLD(10^{-6}\AA^{-2})"
+
+        plotter = PlotterWidget(self, quickplot=True)
+        plotter.data = profile_data
+        plotter.showLegend = True
+        plotter.plot(hide_error=True, marker='-')
+
+        self.plot_widget = QtWidgets.QWidget()
+        self.plot_widget.setWindowTitle("Scattering Length Density Profile")
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(plotter)
+        self.plot_widget.setLayout(layout)
+        self.plot_widget.show()
 
     def setInteractiveElements(self, enabled=True):
         """
