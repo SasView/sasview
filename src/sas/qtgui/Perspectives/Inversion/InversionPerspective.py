@@ -458,6 +458,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                 continue
             # Create initial internal mappings
             self.logic.data = GuiUtils.dataFromItem(data)
+            if not isinstance(self.logic.data, Data1D):
+                msg = "P(r) perspective works for 1D data only"
+                logger.warning(msg)
+                continue
             # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
@@ -467,7 +471,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.updateDataList(data)
             self.populateDataComboBox(self.logic.data.filename, data)
         self.dataList.setCurrentIndex(len(self.dataList) - 1)
-        self.setCurrentData(data)
+        #Checking for 1D again to mitigate the case when 2D data is last on the data list
+        if isinstance(self.logic.data, Data1D):
+            self.setCurrentData(data)
 
     def updateDataList(self, dataRef):
         """Save the current data state of the window into self._data_list"""
