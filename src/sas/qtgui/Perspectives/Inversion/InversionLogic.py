@@ -110,6 +110,9 @@ class InversionLogic(object):
             new_plot.id = IQ_SMEARED_LABEL
             new_plot.title = title
 
+        new_plot.symbol = 'Line'
+        new_plot.hide_error = True
+
         return new_plot
 
     def newPRPlot(self, out, pr, cov=None):
