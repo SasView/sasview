@@ -73,6 +73,7 @@
     <addaction name="actionShow_Grid_Window"/>
     <addaction name="separator"/>
     <addaction name="actionHide_Toolbar"/>
+    <addaction name="actionHide_DataExplorer"/>
     <addaction name="separator"/>
     <addaction name="actionStartup_Settings"/>
     <addaction name="separator"/>
@@ -549,6 +550,11 @@
   <action name="actionFreeze_Theory">
    <property name="text">
     <string>Freeze Fit Results</string>
+   </property>
+  </action>
+  <action name="actionHide_DataExplorer">
+   <property name="text">
+    <string>Hide Data Explorer</string>
    </property>
   </action>
  </widget>

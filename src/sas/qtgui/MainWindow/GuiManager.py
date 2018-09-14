@@ -117,10 +117,9 @@ class GuiManager(object):
         self.dockedFilesWidget.setFloating(False)
         self.dockedFilesWidget.setWidget(self.filesWidget)
 
-        # Disable maximize/minimize and close buttons
-        self.dockedFilesWidget.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        # Modify menu items on widget visibility change
+        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
 
-        #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
@@ -163,6 +162,15 @@ class GuiManager(object):
             import traceback
             logger.error("%s: could not load SasView models")
             logger.error(traceback.format_exc())
+
+    def updateContextMenus(self, visible=False):
+        """
+        Modify the View/Data Explorer menu item text on widget visibility
+        """
+        if visible:
+            self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
+        else:
+            self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
 
     def statusBarSetup(self):
         """
@@ -426,6 +434,7 @@ class GuiManager(object):
         self._workspace.actionHide_Toolbar.triggered.connect(self.actionHide_Toolbar)
         self._workspace.actionStartup_Settings.triggered.connect(self.actionStartup_Settings)
         self._workspace.actionCategory_Manager.triggered.connect(self.actionCategory_Manager)
+        self._workspace.actionHide_DataExplorer.triggered.connect(self.actionHide_DataExplorer)
         # Tools
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
@@ -614,6 +623,18 @@ class GuiManager(object):
         else:
             self._workspace.actionHide_Toolbar.setText("Hide Toolbar")
             self._workspace.toolBar.setVisible(True)
+        pass
+
+    def actionHide_DataExplorer(self):
+        """
+        Toggle Data Explorer vsibility
+        """
+        if self.dockedFilesWidget.isVisible():
+            #self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
+            self.dockedFilesWidget.setVisible(False)
+        else:
+            #self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
+            self.dockedFilesWidget.setVisible(True)
         pass
 
     def actionStartup_Settings(self):
