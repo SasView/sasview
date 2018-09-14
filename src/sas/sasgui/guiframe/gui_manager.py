@@ -1280,7 +1280,9 @@ class ViewerFrame(PARENT_FRAME):
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
             wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&Tutorial', 'Software tutorial')
+            # Pluralised both occurences of 'Tutorial' in the line below
+            # S King, Sep 2018
+            self._help_menu.Append(wx_id, '&Tutorials', 'Software tutorials')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
 
         if config._do_acknowledge:
@@ -2143,44 +2145,19 @@ class ViewerFrame(PARENT_FRAME):
         :param evt: menu event
 
         """
-        if config._do_tutorial:
-            path = config.TUTORIAL_PATH
-            if IS_WIN:
-                try:
-                    from sas.sasgui.guiframe.pdfview import PDFFrame
-                    dialog = PDFFrame(None, -1, "Tutorial", path)
-                    # put icon
-                    self.put_icon(dialog)
-                    dialog.Show(True)
-                except:
-                    logger.error("Error in _onTutorial: %s" % sys.exc_value)
-                    try:
-                        # Try an alternate method
-                        logger.error(
-                            "Could not open the tutorial pdf, trying xhtml2pdf")
-                        from xhtml2pdf import pisa
-                        pisa.startViewer(path)
-                    except:
-                        logger.error(
-                            "Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires 'PDF Viewer'\n"
-                        wx.MessageBox(msg, 'Error')
-            else:
-                try:
-                    command = "open '%s'" % path
-                    os.system(command)
-                except:
-                    try:
-                        # Try an alternate method
-                        logger.error(
-                            "Could not open the tutorial pdf, trying xhtml2pdf")
-                        from xhtml2pdf import pisa
-                        pisa.startViewer(path)
-                    except:
-                        logger.error(
-                            "Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires the Preview application\n"
-                        wx.MessageBox(msg, 'Error')
+        # Action changed from that in 2.x/3.x/4.0.x/4.1.x
+        # Help >> Tutorial used to bring up a pdf of the
+        # original 2.x tutorial.
+        # Code below, implemented from 4.2.0, redirects
+        # action to the Tutorials page of the help 
+        # documentation to give access to all available
+        # tutorials
+        # S King, Sep 2018
+
+        from documentation_window import DocumentationWindow
+        _TreeLocation = "user/tutorial.html"
+        DocumentationWindow(self, -1, _TreeLocation, "",
+                            "SasView Documentation")
 
     def _onSphinxDocs(self, evt):
         """
