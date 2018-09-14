@@ -648,6 +648,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params_list = [s.data() for s in selected_rows]
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
+        # Check if any of the parameters are polydisperse
+        if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
+            # no parameters are pd - reset the text to not show the warning
+            mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
