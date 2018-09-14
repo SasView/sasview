@@ -52,7 +52,6 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
         self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
         self.assertIsInstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
-        self.assertEqual(self.manager.dockedFilesWidget.features(), QDockWidget.NoDockWidgetFeatures)
         self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), Qt.LeftDockWidgetArea)
 
         self.assertIsInstance(self.manager.logDockWidget, QDockWidget)
