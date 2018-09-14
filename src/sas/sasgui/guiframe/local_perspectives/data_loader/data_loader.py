@@ -181,7 +181,6 @@ class Plugin(PluginBase):
                 logger.info(log_msg)
                 file_errors[basename] = [log_msg]
                 continue
-
             try:
                 message = "Loading {}...\n".format(p_file)
                 self.load_update(message=message, info="info")
@@ -203,14 +202,10 @@ class Plugin(PluginBase):
 
                 self.load_update(message="Loaded {}\n".format(p_file),
                                  info="info")
-
             except NoKnownLoaderException as e:
                 exception_occurred = True
                 error_message = "Loading data failed!\n" + e.message
-                self.load_complete(output=None,
-                                   message=error_message,
-                                   info="warning")
-
+                file_errors[basename] = error_message
             except Exception as e:
                 exception_occurred = True
                 file_err = "The Data file you selected could not be "
@@ -219,9 +214,7 @@ class Plugin(PluginBase):
                 file_err += "When contacting the SasView team, mention the"
                 file_err += " following:\n"
                 file_err += e.message
-                self.load_complete(output=None,
-                                   message=file_err,
-                                   info="error")
+                file_errors[basename] = [file_err]
 
         if len(file_errors) > 0:
             error_message = ""
