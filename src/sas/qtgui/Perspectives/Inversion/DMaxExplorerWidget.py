@@ -156,8 +156,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             msg += "for D_max=%s\n%s" % (str(x), ex)
             logger.error(msg)
 
-        plotter = self.model.item(W.VARIABLE).text()
-        y_label = y_unit = ""
+        plotter = self.dependentVariable.currentText()
         x_label = "D_{max}"
         x_unit = "A"
         if plotter == "χ²/dof":
@@ -191,7 +190,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
         data = Data1D(plotable_xs, ys)
         if self.hasPlot:
-            self.plot.removePlot(None)
+            self.plot.removePlot(data.name)
         self.hasPlot = True
         data.title = plotter
         data._xaxis= x_label
