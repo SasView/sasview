@@ -83,7 +83,9 @@ class PlotterWidget(PlotterBase):
                 self.data.xtransform = 'log10(x)'
             if self.data.ytransform is None:
                 self.data.ytransform = 'log10(y)'
-
+            #Added condition to Dmax explorer from P(r) perspective
+            if self.data._xaxis == 'D_{max}':
+                self.xscale = 'linear'
             # Transform data if required.
             if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
                 _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
