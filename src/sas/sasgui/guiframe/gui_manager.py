@@ -1280,7 +1280,7 @@ class ViewerFrame(PARENT_FRAME):
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
             wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&Tutorial', 'Software tutorial')
+            self._help_menu.Append(wx_id, '&Tutorials', 'Software tutorials')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
 
         if config._do_acknowledge:
@@ -2143,44 +2143,48 @@ class ViewerFrame(PARENT_FRAME):
         :param evt: menu event
 
         """
-        if config._do_tutorial:
-            path = config.TUTORIAL_PATH
-            if IS_WIN:
-                try:
-                    from sas.sasgui.guiframe.pdfview import PDFFrame
-                    dialog = PDFFrame(None, -1, "Tutorial", path)
-                    # put icon
-                    self.put_icon(dialog)
-                    dialog.Show(True)
-                except:
-                    logger.error("Error in _onTutorial: %s" % sys.exc_value)
-                    try:
-                        # Try an alternate method
-                        logger.error(
-                            "Could not open the tutorial pdf, trying xhtml2pdf")
-                        from xhtml2pdf import pisa
-                        pisa.startViewer(path)
-                    except:
-                        logger.error(
-                            "Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires 'PDF Viewer'\n"
-                        wx.MessageBox(msg, 'Error')
-            else:
-                try:
-                    command = "open '%s'" % path
-                    os.system(command)
-                except:
-                    try:
-                        # Try an alternate method
-                        logger.error(
-                            "Could not open the tutorial pdf, trying xhtml2pdf")
-                        from xhtml2pdf import pisa
-                        pisa.startViewer(path)
-                    except:
-                        logger.error(
-                            "Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires the Preview application\n"
-                        wx.MessageBox(msg, 'Error')
+#        if config._do_tutorial:
+#            path = config.TUTORIAL_PATH
+#            if IS_WIN:
+#                try:
+#                    from sas.sasgui.guiframe.pdfview import PDFFrame
+#                    dialog = PDFFrame(None, -1, "Tutorial", path)
+#                    # put icon
+#                    self.put_icon(dialog)
+#                    dialog.Show(True)
+#                except:
+#                    logger.error("Error in _onTutorial: %s" % sys.exc_value)
+#                    try:
+#                        # Try an alternate method
+#                        logger.error(
+#                            "Could not open the tutorial pdf, trying xhtml2pdf")
+#                        from xhtml2pdf import pisa
+#                        pisa.startViewer(path)
+#                    except:
+#                        logger.error(
+#                            "Could not open the tutorial pdf with xhtml2pdf")
+#                        msg = "This feature requires 'PDF Viewer'\n"
+#                        wx.MessageBox(msg, 'Error')
+#            else:
+#                try:
+#                    command = "open '%s'" % path
+#                    os.system(command)
+#                except:
+#                    try:
+#                        # Try an alternate method
+#                        logger.error(
+#                            "Could not open the tutorial pdf, trying xhtml2pdf")
+#                        from xhtml2pdf import pisa
+#                        pisa.startViewer(path)
+#                    except:
+#                        logger.error(
+#                            "Could not open the tutorial pdf with xhtml2pdf")
+#                        msg = "This feature requires the Preview application\n"
+#                        wx.MessageBox(msg, 'Error')
+        from documentation_window import DocumentationWindow
+        _TreeLocation = "user/tutorial.html"
+        DocumentationWindow(self, -1, _TreeLocation, "",
+                            "SasView Documentation")
 
     def _onSphinxDocs(self, evt):
         """
