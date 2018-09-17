@@ -112,6 +112,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setupModel()
         # Set up the Widget Map
         self.setupMapper()
+
+        #Hidding calculate all buton
+        self.calculateAllButton.setVisible(False)
         # Set base window state
         self.setupWindow()
 
@@ -122,7 +125,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         return self.communicate
 
     def allowBatch(self):
-        return True
+        return False
 
     def setClosable(self, value=True):
         """
