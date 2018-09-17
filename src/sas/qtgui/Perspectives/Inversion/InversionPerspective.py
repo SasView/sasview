@@ -54,6 +54,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setWindowTitle("P(r) Inversion Perspective")
 
         self._manager = parent
+        self._parent = parent
         self.communicate = parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
 
@@ -656,8 +657,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.stopCalcThread()
 
         pr = self._calculator.clone()
-        nfunc = self.getNFunc()
-        self.calcThread = CalcPr(pr, nfunc,
+        #Making sure that nfunc and alpha parameters are correctly initialized
+        pr.suggested_alpha = self._calculator.alpha
+        self.calcThread = CalcPr(pr, self.nTermsSuggested,
                                  error_func=self._threadError,
                                  completefn=self._calculateCompleted,
                                  updatefn=None)
