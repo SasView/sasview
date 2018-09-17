@@ -44,19 +44,19 @@ class GenericFileReaderTests(unittest.TestCase):
         f = self.generic_reader.load(self.deprecated_file_type)
         last_f = f[0]
         if hasattr(last_f, "errors"):
-            self.assertEquals(len(last_f.errors), 1)
+            self.assertEqual(len(last_f.errors), 1)
         else:
             self.fail("Errors did not propogate to the file properly.")
 
     def test_same_file_unknown_extensions(self):
         # Five files, all with the same content, but different file extensions
-        no_ext = find("test_data//TestExtensions")
-        not_xml = find("test_data//TestExtensions.notxml")
+        no_ext = find("test_data" + os.sep + "TestExtensions")
+        not_xml = find("test_data" + os.sep + "TestExtensions.notxml")
         # Deprecated extensions
-        asc_dep = find("test_data//TestExtensions.asc")
-        nxs_dep = find("test_data//TestExtensions.nxs")
+        asc_dep = find("test_data" + os.sep + "TestExtensions.asc")
+        nxs_dep = find("test_data" + os.sep + "TestExtensions.nxs")
         # Native extension as a baseline
-        xml_native = find("test_data//TestExtensions.xml")
+        xml_native = find("test_data" + os.sep + "TestExtensions.xml")
         # Load the files and check contents
         no_ext_load = self.generic_reader.load(no_ext)
         asc_load = self.generic_reader.load(asc_dep)
@@ -69,14 +69,14 @@ class GenericFileReaderTests(unittest.TestCase):
         self.check_unknown_extension(not_xml_load[0])
         self.check_unknown_extension(xml_load[0])
         # Be sure the deprecation warning is passed with the file
-        self.assertEquals(len(asc_load[0].errors), 1)
-        self.assertEquals(len(nxs_load[0].errors), 1)
+        self.assertEqual(len(asc_load[0].errors), 1)
+        self.assertEqual(len(nxs_load[0].errors), 1)
 
     def check_unknown_extension(self, data):
         self.assertTrue(isinstance(data, Data1D))
-        self.assertEquals(len(data.x), 138)
-        self.assertEquals(data.sample.ID, "TK49 c10_SANS")
-        self.assertEquals(data.meta_data["loader"], "CanSAS XML 1D")
+        self.assertEqual(len(data.x), 138)
+        self.assertEqual(data.sample.ID, "TK49 c10_SANS")
+        self.assertEqual(data.meta_data["loader"], "CanSAS XML 1D")
 
     def tearDown(self):
         if os.path.isfile(self.bad_file):

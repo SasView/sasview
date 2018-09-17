@@ -255,11 +255,11 @@ class cansas_reader_hdf5(unittest.TestCase):
         self.loader = Loader()
         self.datafile_basic = find("simpleexamplefile.h5")
         self.datafile_multiplesasentry = find(
-            "test_data//nxcansas_1Dand2D_multisasentry.h5")
+            "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry.h5")
         self.datafile_multiplesasdata = find(
-            "test_data//nxcansas_1Dand2D_multisasdata.h5")
+            "test_data" + os.sep + "nxcansas_1Dand2D_multisasdata.h5")
         self.datafile_multiplesasdata_multiplesasentry = find(
-            "test_data//nxcansas_1Dand2D_multisasentry_multisasdata.h5")
+            "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
 
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)
@@ -304,43 +304,43 @@ class cansas_reader_hdf5(unittest.TestCase):
                 self._check_2d_data(data)
 
     def _check_multiple_data(self, data):
-        self.assertTrue(data.title == "MH4_5deg_16T_SLOW")
-        self.assertTrue(data.run[0] == '33837')
-        self.assertTrue(len(data.run) == 1)
-        self.assertTrue(data.instrument == "SANS2D")
-        self.assertTrue(data.source.radiation == "Spallation Neutron Source")
-        self.assertTrue(len(data.detector) == 2)
+        self.assertEqual(data.title, "MH4_5deg_16T_SLOW")
+        self.assertEqual(data.run[0], '33837')
+        self.assertEqual(len(data.run), 1)
+        self.assertEqual(data.instrument, "SANS2D")
+        self.assertEqual(data.source.radiation, "Spallation Neutron Source")
+        self.assertEqual(len(data.detector), 2)
         self.assertTrue(data.detector[0].name == "rear-detector"
                         or data.detector[1].name == "rear-detector")
         self.assertTrue(data.detector[0].name == "front-detector"
                         or data.detector[1].name == "front-detector")
         self.assertAlmostEqual(data.detector[0].distance +
                                data.detector[1].distance, 7230.54, 2)
-        self.assertTrue(data.detector[0].distance_unit == 'mm')
-        self.assertTrue(len(data.trans_spectrum) == 1)
+        self.assertEqual(data.detector[0].distance_unit, 'mm')
+        self.assertEqual(len(data.trans_spectrum), 1)
 
     def _check_1d_data(self, data):
-        self.assertTrue(len(data.x) == 66)
-        self.assertTrue(len(data.x) == len(data.y))
-        self.assertTrue(data.dy[10] == 0.207214)
-        self.assertTrue(data.y[10] == 24.1939)
-        self.assertTrue(data.x[10] == 0.00898113)
+        self.assertEqual(len(data.x), 66)
+        self.assertEqual(len(data.x), len(data.y))
+        self.assertAlmostEqual(data.dy[10], 0.207214)
+        self.assertAlmostEqual(data.y[10], 24.1939)
+        self.assertAlmostEqual(data.x[10], 0.00898113)
 
     def _check_2d_data(self, data):
         self.assertTrue(isinstance(data, Data2D))
-        self.assertTrue(len(data.q_data) == 150*150)
-        self.assertTrue(len(data.q_data) == len(data.data))
+        self.assertEqual(len(data.q_data), 150*150)
+        self.assertEqual(len(data.q_data), len(data.data))
         self.assertAlmostEqual(data.err_data[10], 0.186723989418)
         self.assertAlmostEqual(data.data[10], 0.465181)
         self.assertAlmostEqual(data.qx_data[10], -0.129)
         self.assertAlmostEqual(data.qy_data[10], -0.149)
 
     def _check_example_data(self, data):
-        self.assertTrue(data.title == "")
-        self.assertTrue(data.x.size == 100)
-        self.assertTrue(data._xunit == "A^{-1}")
-        self.assertTrue(data._yunit == "cm^{-1}")
-        self.assertTrue(data.y.size == 100)
+        self.assertEqual(data.title, "")
+        self.assertEqual(data.x.size, 100)
+        self.assertEqual(data._xunit, "A^{-1}")
+        self.assertEqual(data._yunit, "cm^{-1}")
+        self.assertEqual(data.y.size, 100)
         self.assertAlmostEqual(data.y[40], 0.952749011516985)
         self.assertAlmostEqual(data.x[40], 0.3834415188257777)
         self.assertAlmostEqual(len(data.meta_data), 0)
