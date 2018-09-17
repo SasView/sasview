@@ -570,6 +570,37 @@ def plotResiduals(reference_data, current_data):
 
     return residuals
 
+def plotPolydispersities(model, disp_models):
+    plots = []
+    if model is None:
+        return plots
+    # test for model being a sasmodels.sasview_model.SasviewModel?
+    for name, pars in model.dispersion.items():
+        if 0 == pars['width']:
+            continue # no actual polydispersity
+        disp_args = pars.copy()
+        disp_type = disp_args.pop('type', None)
+        if disp_type is None:
+            continue # show an error? "poly type ... not found"
+        disp_func = disp_models[disp_type](**disp_args)
+        center = model.params[name]
+        # same as in sasmodels.weights.Dispersion
+        lb = center - disp_args['nsigmas']*disp_args['width']*center
+        ub = center + disp_args['nsigmas']*disp_args['width']*center
+        arr = disp_func.get_weights(center, lb, ub, relative = True)
+        # create Data1D as in residualsData1D() and fill x/y members
+        # similar to FittingLogic._create1DPlot() but different data/axes
+        data1d = Data1D(x = arr[0], y = arr[1])
+        data1d.xaxis('\\rm{{{}}} '.format(name.replace('_', '\_')), 'A') # correct unit?
+        data1d.yaxis('\\rm{{{weight}}}', 'normalized')
+        data1d.scale = 'linear'
+        data1d.symbol = 'Line'
+        data1d.name = "{} polydispersity".format(name)
+        data1d.id = data1d.name # placeholder, has to be completed later
+        data1d.plot_role = Data1D.ROLE_DELETABLE
+        plots.append(data1d)
+    return plots
+
 def binary_encode(i, digits):
     return [i >> d & 1 for d in range(digits)]
 
