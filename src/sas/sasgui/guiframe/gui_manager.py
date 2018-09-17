@@ -1275,15 +1275,26 @@ class ViewerFrame(PARENT_FRAME):
         self._help_menu = wx.Menu()
 
         wx_id = wx.NewId()
-        self._help_menu.Append(wx_id, '&Documentation', '')
+        self._help_menu.Append(wx_id, '&Documentation', 'Help documentation for SasView')
         wx.EVT_MENU(self, wx_id, self._onSphinxDocs)
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
             wx_id = wx.NewId()
             # Pluralised both occurences of 'Tutorial' in the line below
             # S King, Sep 2018
-            self._help_menu.Append(wx_id, '&Tutorials', 'Software tutorials')
+            self._help_menu.Append(wx_id, '&Tutorials', 'Tutorials on how to use SasView')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
+
+        if config.marketplace_url:
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&Model marketplace', 'Plug-in fitting models for SasView')
+            wx.EVT_MENU(self, wx_id, self._on_marketplace_click)
+
+        if config._do_release:
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&Release notes',
+                                   'SasView release notes and known issues')
+            wx.EVT_MENU(self, wx_id, self._onRelease)
 
         if config._do_acknowledge:
             wx_id = wx.NewId()
@@ -1294,13 +1305,8 @@ class ViewerFrame(PARENT_FRAME):
         if config._do_aboutbox:
             logger.info("Doing help menu")
             wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&About', 'Software information')
+            self._help_menu.Append(wx_id, '&About', 'Information about SasView')
             wx.EVT_MENU(self, wx_id, self._onAbout)
-
-        if config.marketplace_url:
-            wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&Model marketplace', '')
-            wx.EVT_MENU(self, wx_id, self._on_marketplace_click)
 
         # Checking for updates
         wx_id = wx.NewId()
@@ -2136,6 +2142,18 @@ class ViewerFrame(PARENT_FRAME):
         if config._do_aboutbox:
             import sas.sasgui.guiframe.aboutbox as AboutBox
             dialog = AboutBox.DialogAbout(None, -1, "")
+            dialog.ShowModal()
+
+    def _onRelease(self, evt):
+        """
+        Pop up the release notes
+
+        :param evt: menu event
+
+        """
+        if config._do_release:
+            import sas.sasgui.guiframe.releasebox as ReleaseBox
+            dialog = ReleaseBox.DialogRelease(None, -1, "")
             dialog.ShowModal()
 
     def _onTutorial(self, evt):
