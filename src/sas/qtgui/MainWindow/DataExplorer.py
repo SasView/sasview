@@ -700,8 +700,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # old plot data
         plot_id = str(self.cbgraph.currentText())
-
-        assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        try:
+            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        except:
+            return
 
         old_plot = PlotHelper.plotById(plot_id)
 
