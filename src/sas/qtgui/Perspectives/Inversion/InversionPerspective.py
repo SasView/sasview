@@ -546,12 +546,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             title = self.prPlot.name
             self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
+            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
         if self.dataPlot is not None:
             title = self.dataPlot.name
             self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
+            self.dataPlot.symbol = "Line"
+            self.dataPlot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-        if self.dataPlot is not None or self.prPlot is not None:
-            self.communicate.plotRequestedSignal.emit([self.logic.data], None)
+            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
         self.enableButtons()
 
     def removeData(self, data_list=None):

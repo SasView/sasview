@@ -566,7 +566,11 @@ def dataFromItem(item):
     Retrieve Data1D/2D component from QStandardItem.
     The assumption - data stored in SasView standard, in child 0
     """
-    return item.child(0).data()
+    try:
+        data = item.child(0).data()
+    except AttributeError:
+        data = None
+    return data
 
 def openLink(url):
     """

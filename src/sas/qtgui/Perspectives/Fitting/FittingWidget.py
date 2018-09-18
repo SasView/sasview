@@ -1848,8 +1848,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Show the chart if ready
         data_to_show = self.data if self.data_is_loaded else self.model_data
-        if data_to_show is not None:
-            self.communicate.plotRequestedSignal.emit([data_to_show], self.tab_id)
+        # Any models for this page
+        current_index = self.all_data[self.data_index]
+        plots = GuiUtils.plotsFromFilename(self.data.filename, current_index.model())
+        fitpage_name = "" if id is None else "M"+str(self.tab_id)
+        # Has the fitted data been shown?
+        data_shown = False
+        #for plot in plots:
+        for item, plot in plots.items():
+            if fitpage_name in plot.name:
+                data_shown = True
+                self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
+        if not data_shown:
+            # fit+data has not been shown - show just data
+            self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
 
     def onOptionsUpdate(self):
         """
@@ -2079,6 +2091,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Instantiate the current sasmodel
         self.kernel_module = self.models[model_name]()
 
+        # Change the model name to a monicker
+        self.kernel_module.name = self.modelName()
+
         # Explicitly add scale and background with default values
         temp_undo_state = self.undo_supported
         self.undo_supported = False
@@ -2111,6 +2126,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.kernel_module is None:
             # Structure factor is the only selected model; build it and show all its params
             self.kernel_module = self.models[structure_factor]()
+            self.kernel_module.name = self.modelName()
             s_params = self.kernel_module._model_info.parameters
             s_params_orig = s_params
         else:
@@ -2121,6 +2137,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
 
             self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+            # Modify the name to correspond to shown items
+            self.kernel_module.name = self.modelName()
             all_params = self.kernel_module._model_info.parameters.kernel_parameters
             all_param_names = [param.name for param in all_params]
 
@@ -2426,7 +2444,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Bring the GUI to normal state
         self.enableInteractiveElements()
-
+        if return_data is None:
+            self.calculateDataFailed("Results not available.")
+            return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
