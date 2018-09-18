@@ -600,8 +600,7 @@ class Reader(FileReader):
         try:
             iter(iterable)
             if (not isinstance(iterable, np.ndarray) and not isinstance(
-                    iterable, list)) or (isinstance(iterable, str) or
-                                         isinstance(iterable, unicode)):
+                    iterable, list)) or (isinstance(iterable, basestring)):
                 raise TypeError
         except TypeError:
             iterable = iterable.split(",")
@@ -632,11 +631,11 @@ class Reader(FileReader):
                     self.q_uncertainties = q_vals.attrs.get("uncertainties")
                 elif q_vals.attrs.get("uncertainty") is not None:
                     self.q_uncertainties = q_vals.attrs.get("uncertainty")
-                if isinstance(self.q_uncertainties, str):
+                if isinstance(self.q_uncertainties, basestring):
                     self.q_uncertainties = self.q_uncertainties.split(",")
                 if q_vals.attrs.get("resolutions") is not None:
                     self.q_resolutions = q_vals.attrs.get("resolutions")
-                if isinstance(self.q_resolutions, (str, unicode)):
+                if isinstance(self.q_resolutions, basestring):
                     self.q_resolutions = self.q_resolutions.split(",")
         if self.i_name in keys:
             i_vals = value.get(self.i_name)

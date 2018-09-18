@@ -2424,9 +2424,7 @@ class ViewerFrame(PARENT_FRAME):
         wildcard = "Text files (*.txt)|*.txt|"\
                     "CanSAS 1D files (*.xml)|*.xml|"\
                      "NXcanSAS files (*.h5)|*.h5|"
-        options = {0: ".txt",
-                   1: ".xml",
-                   2: ".h5"}
+        options = [".txt", ".xml",".h5"]
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
                             default_name, wildcard, wx.SAVE)
@@ -2529,10 +2527,9 @@ class ViewerFrame(PARENT_FRAME):
         if data.dy is not None:
             text += 'dY_min = %s:  dY_max = %s\n' % (min(data.dy), max(data.dy))
         text += '\nData Points:\n'
-        text += "<index> \t<X> \t<Y> \t<dY> \t<dX"
-        if data.dxl is not None and data.dxw is not None:
-                text += "l> \t<dxw"
-        text += ">\n"
+        text += "<index> \t<X> \t<Y> \t<dY> "
+        text += "\t<dX>\n" if(data.dxl is not None and
+                              data.dxw is not None) else "\t<dXl> \t<dXw>\n"
         for index in range(len(data.x)):
             if data.dy is not None and len(data.dy) > index:
                 dy_val = data.dy[index]
