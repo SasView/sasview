@@ -576,21 +576,14 @@ def plotPolydispersities(model, disp_models):
         return plots
     # test for model being a sasmodels.sasview_model.SasviewModel?
     for name, pars in model.dispersion.items():
-        if 0 == pars['width']:
-            continue # no actual polydispersity
-        disp_args = pars.copy()
-        disp_type = disp_args.pop('type', None)
-        if disp_type is None:
-            continue # show an error? "poly type ... not found"
-        disp_func = disp_models[disp_type](**disp_args)
-        center = model.params[name]
-        # same as in sasmodels.weights.Dispersion
-        lb = center - disp_args['nsigmas']*disp_args['width']*center
-        ub = center + disp_args['nsigmas']*disp_args['width']*center
-        arr = disp_func.get_weights(center, lb, ub, relative = True)
+        if 0 == pars['width']: # no actual polydispersity
+            continue
+        _, xarr, yarr = model.get_weights(name)
+        if xarr is None or yarr is None: # param name not found
+            continue
         # create Data1D as in residualsData1D() and fill x/y members
         # similar to FittingLogic._create1DPlot() but different data/axes
-        data1d = Data1D(x = arr[0], y = arr[1])
+        data1d = Data1D(x = xarr, y = yarr)
         xunit = ""
         if name in model.details and len(model.details[name]):
             xunit = model.details[name][0]

@@ -57,6 +57,21 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
+# CRUFT: remove when new release of sasmodels is available
+# https://github.com/SasView/sasview/pull/181#discussion_r218135162
+from sasmodels.sasview_model import SasviewModel
+if not hasattr(SasviewModel, 'get_weights'):
+    def get_weights(self, name):
+        """Returns model weights by parameter name.
+        type: (str) -> Tuple(float, np.ndarray, np.ndarray)
+        Supposed to be a member of SasviewModel."""
+        p = [p for p in self._model_info.parameters.call_parameters
+                        if name is p.name]
+        if not len(p):
+            return None, None, None
+        return self._get_weights(p[0])
+
+    SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
 
