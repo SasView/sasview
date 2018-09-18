@@ -2151,10 +2151,12 @@ class ViewerFrame(PARENT_FRAME):
         :param evt: menu event
 
         """
-        if config._do_release:
-            import sas.sasgui.guiframe.releasebox as ReleaseBox
-            dialog = ReleaseBox.DialogRelease(None, -1, "")
-            dialog.ShowModal()
+        # S King, Sep 2018
+
+        from documentation_window import DocumentationWindow
+        _TreeLocation = "user/release.html"
+        DocumentationWindow(self, -1, _TreeLocation, "",
+                            "SasView Documentation")
 
     def _onTutorial(self, evt):
         """

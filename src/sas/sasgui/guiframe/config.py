@@ -52,12 +52,6 @@ _acknowledgement_citation = \
 _acknowledgement =  \
 '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
 '''
-_release_preamble =\
-'''These Release Notes, incorporating Known Issues, can also be found at:'''
-_release_location1 =\
-'''{SasView Installation Folder}\sasview\installers\README.txt'''
-_release_location2 =\
-'''https://github.com/SasView/sasview/releases/'''
 
 _homepage = "http://www.sasview.org"
 _download = __download_page__
