@@ -112,9 +112,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
 
-        #Disable reporting results
-        self.parent._workspace.actionReport.setEnabled(False)
-
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
         self.setupSlots()

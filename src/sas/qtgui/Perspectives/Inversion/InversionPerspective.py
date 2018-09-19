@@ -114,9 +114,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Set up the Widget Map
         self.setupMapper()
 
-        #Disable reporting results
-        self._parent._workspace.actionReport.setEnabled(False)
-
         #Hidding calculate all buton
         self.calculateAllButton.setVisible(False)
         # Set base window state

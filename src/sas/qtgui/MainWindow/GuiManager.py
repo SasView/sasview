@@ -991,6 +991,7 @@ class GuiManager(object):
         """
         When setting a perspective, sets up the menu bar
         """
+        self._workspace.actionReport.setEnabled(False)
         if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
             self.checkAnalysisOption(self._workspace.actionFitting)
             # Put the fitting menu back in
@@ -1000,6 +1001,7 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+            self._workspace.actionReport.setEnabled(True)
 
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)
