@@ -98,7 +98,7 @@ class InversionTest(unittest.TestCase):
 
     def baseBatchState(self):
         """ Testing the base batch fitting state """
-        self.assertTrue(self.widget.allowBatch())
+        self.assertFalse(self.widget.allowBatch())
         self.assertFalse(self.widget.isBatch)
         self.assertFalse(self.widget.calculateAllButton.isEnabled())
         self.assertEqual(len(self.widget.batchResults), 0)
@@ -303,7 +303,7 @@ class InversionTest(unittest.TestCase):
         self.widget.openExplorerWindow()
         self.assertIsNotNone(self.widget.dmaxWindow)
         self.assertTrue(self.widget.dmaxWindow.isVisible())
-        self.assertTrue(self.widget.dmaxWindow.windowTitle() == "Dₐₓ Explorer")
+        self.assertTrue(self.widget.dmaxWindow.windowTitle() == "Dmax Explorer")
 
 
 if __name__ == "__main__":
