@@ -54,6 +54,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setWindowTitle("P(r) Inversion Perspective")
 
         self._manager = parent
+        #Needed for Batch fitting
         self._parent = parent
         self.communicate = parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
@@ -112,6 +113,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setupModel()
         # Set up the Widget Map
         self.setupMapper()
+
+        #Disable reporting results
+        self._parent._workspace.actionReport.setEnabled(False)
 
         #Hidding calculate all buton
         self.calculateAllButton.setVisible(False)

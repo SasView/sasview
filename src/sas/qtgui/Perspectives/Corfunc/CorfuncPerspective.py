@@ -123,6 +123,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         # Set up the model.
         self.setup_model()
 
+        #Disable reporting results
+        self.parent._workspace.actionReport.setEnabled(False)
+
         # Set up the mapper
         self.setup_mapper()
 

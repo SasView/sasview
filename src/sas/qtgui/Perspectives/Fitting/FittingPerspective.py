@@ -78,6 +78,10 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         self.updateWindowTitle()
 
+        #Enabling Results reporting
+        self.parent._workspace.actionReport.setEnabled(True)
+
+
     def updateWindowTitle(self):
         """
         Update the window title with the current optimizer name
