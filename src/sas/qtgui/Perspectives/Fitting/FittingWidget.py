@@ -1071,9 +1071,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             row = rows[0].row()
             if not self.rowHasConstraint(row):
                 return
+            constr = self.getConstraintForRow(row)
             func = self.getConstraintForRow(row).func
-            if func is not None:
-                self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
+            if constr.func is not None:
+                # inter-parameter constraint
+                update_text = "Active constraint: "+func
+            elif constr.param == rows[0].data():
+                # current value constraint
+                update_text = "Value constrained to: " + str(constr.value)
+            else:
+                # ill defined constraint
+                return
+            self.communicate.statusBarUpdateSignal.emit(update_text)
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
@@ -1821,7 +1830,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
-        self.showPlot()
+        if not self.data_is_loaded:
+            self.showTheoryPlot()
+        else:
+            self.showPlot()
         # This is an important processEvent.
         # This allows charts to be properly updated in order
         # of plots being applied.
@@ -1842,16 +1854,27 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createDefaultDataset()
         self.calculateQGridForModel()
 
+    def showTheoryPlot(self):
+        """
+        Show the current theory plot in MPL
+        """
+        # Show the chart if ready
+        data_to_show = self.model_data
+        if self.theory_item is None:
+            self.recalculatePlotData()
+        else:
+            self.communicate.plotRequestedSignal.emit([self.theory_item, data_to_show], self.tab_id)
+
     def showPlot(self):
         """
         Show the current plot in MPL
         """
         # Show the chart if ready
-        data_to_show = self.data if self.data_is_loaded else self.model_data
+        data_to_show = self.data
         # Any models for this page
         current_index = self.all_data[self.data_index]
-        plots = GuiUtils.plotsFromFilename(self.data.filename, current_index.model())
         fitpage_name = "" if id is None else "M"+str(self.tab_id)
+        plots = GuiUtils.plotsFromFilename(self.data.filename, current_index.model())
         # Has the fitted data been shown?
         data_shown = False
         #for plot in plots:
@@ -2448,6 +2471,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.calculateDataFailed("Results not available.")
             return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
+        if len(fitted_data.x) != len(self.data.x):
+            return
+
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
         new_plots = [fitted_data]
