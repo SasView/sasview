@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 
 from twisted.internet import reactor
 # General SAS imports
+from sas import get_local_config, get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
@@ -135,7 +136,6 @@ class GuiManager(object):
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
-        self.welcomePanel = WelcomePanel()
         self.grid_window = None
         self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
         self._workspace.actionHide_Toolbar.setText("Show Toolbar")
@@ -240,8 +240,6 @@ class GuiManager(object):
         perspective_size = self._current_perspective.sizeHint()
         perspective_width = perspective_size.width()
         self._current_perspective.resize(perspective_width, workspace_height-10)
-        # Resize the mdi area to match the widget within
-        subwindow.resize(subwindow.minimumSizeHint())
 
         self._current_perspective.show()
 
@@ -387,10 +385,24 @@ class GuiManager(object):
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-    def showWelcomeMessage(self):
+    def actionWelcome(self):
         """ Show the Welcome panel """
+        self.welcomePanel = WelcomePanel()
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
+
+    def showWelcomeMessage(self):
+        """ Show the Welcome panel, when required """
+        # Assure the welcome screen is requested
+        show_welcome_widget = True
+        custom_config = get_custom_config()
+        if hasattr(custom_config, "WELCOME_PANEL_SHOW"):
+            if isinstance(custom_config.WELCOME_PANEL_SHOW, bool):
+                show_welcome_widget = custom_config.WELCOME_PANEL_SHOW
+            else:
+                logging.warning("WELCOME_PANEL_SHOW has invalid value in custom_config.py")
+        if show_welcome_widget:
+            self.actionWelcome()
 
     def addCallbacks(self):
         """
@@ -477,6 +489,7 @@ class GuiManager(object):
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)

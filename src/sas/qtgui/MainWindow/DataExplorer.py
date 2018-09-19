@@ -597,12 +597,37 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Forces display of charts for the given data set
         """
-        plot_to_show = data_list[0]
-        # passed plot is used ONLY to figure out its title,
-        # so all the charts related by it can be pulled from 
-        # the data explorer indices.
-        filename = plot_to_show.filename
-        self.displayFile(filename=filename, is_data=plot_to_show.is_data, id=id)
+        # data_list = [QStandardItem, Data1D/Data2D]
+        plot_to_show = data_list[1]
+        plot_item = data_list[0]
+
+        # plots to show
+        new_plots = []
+
+        # Check if this is merely a plot update
+        if self.updatePlot(plot_to_show):
+            return
+
+        # Residuals get their own plot
+        if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
+            plot_to_show.yscale='linear'
+            self.plotData([(plot_item, plot_to_show)])
+        elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
+            # No plot
+            return
+        else:
+            # Plots with main data points on the same chart
+            # Get the main data plot
+            main_data = GuiUtils.dataFromItem(plot_item.parent())
+            if main_data is None:
+                # Try the current item
+                main_data = GuiUtils.dataFromItem(plot_item)
+            if main_data is not None:
+                new_plots.append((plot_item, main_data))
+            new_plots.append((plot_item, plot_to_show))
+
+        if new_plots:
+            self.plotData(new_plots)
 
     def addDataPlot2D(self, plot_set, item):
         """
@@ -700,8 +725,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # old plot data
         plot_id = str(self.cbgraph.currentText())
-
-        assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        try:
+            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        except:
+            return
 
         old_plot = PlotHelper.plotById(plot_id)
 

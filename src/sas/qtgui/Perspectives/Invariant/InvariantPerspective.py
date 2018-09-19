@@ -232,6 +232,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
         plot_data = GuiUtils.plotsFromCheckedItems(self._manager.filesWidget.model)
+        #self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
 
         self._manager.filesWidget.plotData(plot_data)
 
@@ -346,6 +347,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
                 extrapolated_data.name = title
                 extrapolated_data.title = title
+                extrapolated_data.style = "Line"
+                extrapolated_data.has_errors = False
+                extrapolated_data.plot_role = Data1D.ROLE_DEFAULT
 
                 # copy labels and units of axes for plotting
                 extrapolated_data._xaxis = temp_data._xaxis
@@ -377,6 +381,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 high_out_data = self._manager.createGuiData(high_out_data)
                 high_out_data.name = title
                 high_out_data.title = title
+                high_out_data.style = "Line"
+                high_out_data.has_errors = False
+                high_out_data.plot_role = Data1D.ROLE_DEFAULT
 
                 # copy labels and units of axes for plotting
                 high_out_data._xaxis = temp_data._xaxis

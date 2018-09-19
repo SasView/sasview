@@ -27,7 +27,6 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         super(MultiConstraint, self).__init__()
 
         self.setupUi(self)
-        self.setFixedSize(self.minimumSizeHint())
         self.setModal(True)
         self.params = params
         self.parent = parent

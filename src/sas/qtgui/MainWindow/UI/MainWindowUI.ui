@@ -147,6 +147,8 @@
     <addaction name="actionAcknowledge"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionWelcomeWidget"/>
+    <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
    </widget>
    <addaction name="menu_File"/>
@@ -555,6 +557,11 @@
   <action name="actionHide_DataExplorer">
    <property name="text">
     <string>Hide Data Explorer</string>
+   </property>
+  </action>
+  <action name="actionWelcomeWidget">
+   <property name="text">
+    <string>Welcome to SasView</string>
    </property>
   </action>
  </widget>
