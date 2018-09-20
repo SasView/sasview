@@ -582,11 +582,9 @@ def plotPolydispersities(model, disp_models):
         # create Data1D as in residualsData1D() and fill x/y members
         # similar to FittingLogic._create1DPlot() but different data/axes
         data1d = Data1D(x=xarr, y=yarr)
-        xunit = ""
-        if name in model.details and len(model.details[name]):
-            xunit = model.details[name][0]
-        data1d.xaxis('\\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
-        data1d.yaxis('\\rm{{{weight}}}', 'normalized')
+        xunit = model.details[name][0]
+        data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
+        data1d.yaxis(r'\rm{weight}', 'normalized')
         data1d.scale = 'linear'
         data1d.symbol = 'Line'
         data1d.name = "{} polydispersity".format(name)
