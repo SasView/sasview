@@ -7,6 +7,7 @@ import copy
 import matplotlib as mpl
 import numpy as np
 from matplotlib.font_manager import FontProperties
+
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
@@ -223,7 +224,6 @@ class PlotterWidget(PlotterBase):
         self.actionResetGraphRange =\
             self.contextMenu.addAction("Reset Graph Range")
         # Add the title change for dialogs
-        #if self.parent:
         self.contextMenu.addSeparator()
         self.actionWindowTitle = self.contextMenu.addAction("Window Title")
 

@@ -109,13 +109,15 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
-
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        layout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
-            self.toolbar = NavigationToolbar(self.canvas, self)
-            layout.addWidget(self.toolbar)
+            self.toolbar.show()
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
+        else:
+            self.toolbar.hide()
 
         self.setLayout(layout)
 
@@ -218,11 +220,15 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
         self.contextMenu.addSeparator()
+        self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
+        self.contextMenu.addSeparator()
+
 
         # Define the callbacks
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+        self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenu(self):
         """
@@ -369,6 +375,15 @@ class PlotterBase(QtWidgets.QWidget):
         self.setWindowTitle(title)
         # Notify the listeners about a new graph title
         self.manager.communicator.activeGraphName.emit((current_title, title))
+
+    def onToggleMenu(self):
+        """
+        Toggle navigation menu visibility in the chart
+        """
+        if self.toolbar.isVisible():
+            self.toolbar.hide()
+        else:
+            self.toolbar.show()
 
     def offset_graph(self):
         """

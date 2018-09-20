@@ -102,7 +102,7 @@ class PlotterTest(unittest.TestCase):
         """ Test the right click menu """
         self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 7)
+        self.assertEqual(len(actions), 9)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
@@ -114,15 +114,15 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
 
         # Trigger Toggle Grid and make sure the method is called
-        self.assertEqual(actions[4].text(), "Toggle Grid On/Off")
+        self.assertEqual(actions[6].text(), "Toggle Grid On/Off")
         self.plotter.ax.grid = MagicMock()
-        actions[4].trigger()
+        actions[6].trigger()
         self.assertTrue(self.plotter.ax.grid.called)
 
         # Trigger Change Scale and make sure the method is called
-        self.assertEqual(actions[6].text(), "Change Scale")
+        self.assertEqual(actions[8].text(), "Change Scale")
         self.plotter.properties.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
-        actions[6].trigger()
+        actions[8].trigger()
         self.assertTrue(self.plotter.properties.exec_.called)
 
         # Spy on cliboard's dataChanged() signal
