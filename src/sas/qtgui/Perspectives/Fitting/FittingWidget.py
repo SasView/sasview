@@ -1859,11 +1859,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the current theory plot in MPL
         """
         # Show the chart if ready
-        data_to_show = self.model_data
         if self.theory_item is None:
             self.recalculatePlotData()
-        else:
-            self.communicate.plotRequestedSignal.emit([self.theory_item, data_to_show], self.tab_id)
+            return
+        if self.model_data:
+            self._requestPlots(self.model_data.filename, self.theory_item.model())
 
     def showPlot(self):
         """
@@ -1873,18 +1873,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         data_to_show = self.data
         # Any models for this page
         current_index = self.all_data[self.data_index]
-        fitpage_name = "" if id is None else "M"+str(self.tab_id)
-        plots = GuiUtils.plotsFromFilename(self.data.filename, current_index.model())
+        item = self._requestPlots(self.data.filename, current_index.model())
+        if item:
+            # fit+data has not been shown - show just data
+            self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
+
+    def _requestPlots(self, item_name, item_model):
+        """
+        Emits plotRequestedSignal for all plots found in the given model under the provided item name.
+        """
+        fitpage_name = "" if self.tab_id is None else "M"+str(self.tab_id)
+        plots = GuiUtils.plotsFromFilename(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
-        #for plot in plots:
+        item = None
         for item, plot in plots.items():
             if fitpage_name in plot.name:
                 data_shown = True
                 self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
-        if not data_shown:
-            # fit+data has not been shown - show just data
-            self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
+        # return the last data item seen, if nothing was plotted; supposed to be just data)
+        return None if data_shown else item
 
     def onOptionsUpdate(self):
         """
