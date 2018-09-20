@@ -23,8 +23,7 @@ poly_header_captions = ['Parameter', 'PD[ratio]', 'Min', 'Max', 'Npts', 'Nsigs',
 
 poly_header_tooltips = ['Select parameter for fitting',
                         'Enter polydispersity ratio (Std deviation/mean).\n'+
-                        'For angles this can be either std deviation or full width (for uniform distributions) in degrees',
-                        'STD: standard deviation from the mean value',
+                        'For angles this can be either std deviation or half width (for uniform distributions) in degrees',
                         'Enter minimum value for parameter',
                         'Enter maximum value for parameter',
                         'Enter number of points for parameter',
