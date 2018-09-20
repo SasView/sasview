@@ -2471,8 +2471,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.calculateDataFailed("Results not available.")
             return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
-        if len(fitted_data.x) != len(self.data.x):
-            return
 
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
