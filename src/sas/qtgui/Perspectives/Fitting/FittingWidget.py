@@ -2448,8 +2448,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             new_plots.append(residuals)
 
         model = return_data.get('model', None)
-        for plot in FittingUtilities.plotPolydispersities(
-                                        model, POLYDISPERSITY_MODELS):
+        for plot in FittingUtilities.plotPolydispersities(model):
             data_id = fitted_data.id.split()
             plot.id = " ".join([data_id[0], plot.name] + data_id[1:])
             data_name = fitted_data.name.split()

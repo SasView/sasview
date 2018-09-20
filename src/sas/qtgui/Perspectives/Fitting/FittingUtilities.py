@@ -570,7 +570,7 @@ def plotResiduals(reference_data, current_data):
 
     return residuals
 
-def plotPolydispersities(model, disp_models):
+def plotPolydispersities(model):
     plots = []
     if model is None:
         return plots
