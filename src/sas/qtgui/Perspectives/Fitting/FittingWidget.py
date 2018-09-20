@@ -62,14 +62,12 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 from sasmodels.sasview_model import SasviewModel
 if not hasattr(SasviewModel, 'get_weights'):
     def get_weights(self, name):
-        """Returns model weights by parameter name.
-        type: (str) -> Tuple(float, np.ndarray, np.ndarray)
-        Supposed to be a member of SasviewModel."""
-        p = [p for p in self._model_info.parameters.call_parameters
-                        if name is p.name]
-        if not len(p):
-            return None, None, None
-        return self._get_weights(p[0])
+        """
+        Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
+        """
+        # type: (str) -> Tuple(np.ndarray, np.ndarray)
+        _, x, w = self._get_weights(self._model_info.parameters[name])
+        return x, w
 
     SasviewModel.get_weights = get_weights
 
