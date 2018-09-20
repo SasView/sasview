@@ -7,23 +7,18 @@ http://sphinx-doc.org/invocation.html
 """
 from __future__ import print_function
 
-import subprocess
+import sys
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
-import sys
-import fnmatch
 import shutil
+import subprocess
 import imp
-
 from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from shutil import copy
-from os import listdir
-
-platform = '.%s-%s'%(get_platform(),sys.version[:3])
+PLATFORM = '.%s-%s'%(get_platform(), sys.version[:3])
 
 # sphinx paths
 SPHINX_ROOT = dirname(abspath(__file__))
@@ -34,7 +29,7 @@ SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "sasgui", "perspectives")
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
 SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
-SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
+SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+PLATFORM))
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
@@ -64,17 +59,15 @@ run = imp.load_source('run', joinpath(SASVIEW_ROOT, 'run.py'))
 run.prepare()
 
 def inplace_change(filename, old_string, new_string):
-# Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
-        s=open(filename).read()
-        if old_string in s:
-                print('Changing "{old_string}" to "{new_string}"'.format(**locals()))
-                s=s.replace(old_string, new_string)
-                f=open(filename, 'w')
-                f.write(s)
-                f.flush()
-                f.close()
-        else:
-                print('No occurences of "{old_string}" found.'.format(**locals()))
+    # Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
+    s = open(filename).read()
+    if old_string in s:
+        print('Changing "{old_string}" to "{new_string}"'.format(**locals()))
+        s = s.replace(old_string, new_string)
+        with open(filename, 'w') as f:
+            f.write(s)
+    else:
+        print('No occurences of "{old_string}" found.'.format(**locals()))
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
@@ -240,8 +233,8 @@ def fetch_katex(version, destination="_static"):
                 fd_out.write(fd_in.read())
         finally:
             fd_in.close()
-    with ZipFile(cache_path) as zip:
-        zip.extractall(destination)
+    with ZipFile(cache_path) as archive:
+        archive.extractall(destination)
 
 def convert_katex():
     print("=== Preprocess HTML, converting latex to html ===")

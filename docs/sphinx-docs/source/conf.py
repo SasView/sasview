@@ -10,6 +10,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import print_function
 
 import sys, os, collections
 
@@ -21,8 +22,8 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 build_lib = os.path.abspath('../../../build/lib'+platform)
 sys.path.insert(0, build_lib)
 sys.path.insert(0, os.path.abspath('_extensions')) # for sphinx extensions
-print "-- path --"
-print "\n".join(sys.path)
+print("-- path --")
+print("\n".join(sys.path))
 
 # -- General configuration -----------------------------------------------------
 
@@ -70,7 +71,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SasView'
-copyright = u'2017, The SasView Project'
+copyright = u'2018, The SasView Project'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

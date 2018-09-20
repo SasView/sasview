@@ -27,18 +27,46 @@ def check_model(path):
     """
     Check that the model on the path can run.
     """
+    # TODO: fix model caching
+    # model_test.run_one() is directly forcing a reload of the module, but
+    # sasview_model is caching models that have already been loaded.
+    # If the sasview load happens before the test, then the module is
+    # reloaded out from under it, which causes the global variables in
+    # the model function definitions to be cleared (at least in python 2.7).
+    # To fix the proximal problem of models failing on test, perform the
+    # run_one() tests first.  To fix the deeper problem we should either
+    # remove caching from sasmodels.sasview_model.load_custom_model() or
+    # add caching to sasmodels.custom.load_custom_kernel_module().  Another
+    # option is to add a runTests method to SasviewModel which runs the
+    # test suite directly from the model info structure.  Probably some
+    # combination of options:
+    #    (1) have this function (check_model) operate on a loaded model
+    #    so that caching isn't needed in sasview_models.load_custom_model
+    #    (2) add the runTests method to SasviewModel so that tests can
+    #    be run on a loaded module.
+    #
+    # Also, note that the model test suite runs the equivalent of the
+    # "try running the model" block below, and doesn't need to be run
+    # twice.  The reason for duplicating the block here is to generate
+    # an exception that show_model_output can catch.  Need to write the
+    # runTests method so that it returns success flag as well as output
+    # string so that the extra test is not necessary.
+
+    # check the model's unit tests run
+    from sasmodels.model_test import run_one
+    result = run_one(path)
+
+    # remove cached version of the model, if any
+    from sasmodels import sasview_model
+    sasview_model.MODEL_BY_PATH.pop(path, None)
+
     # try running the model
-    from sasmodels.sasview_model import load_custom_model
-    Model = load_custom_model(path)
+    Model = sasview_model.load_custom_model(path)
     model = Model()
     q =  np.array([0.01, 0.1])
     Iq = model.evalDistribution(q)
     qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
     Iqxy = model.evalDistribution([qx, qy])
-
-    # check the model's unit tests run
-    from sasmodels.model_test import run_one
-    result = run_one(path)
 
     return result
 

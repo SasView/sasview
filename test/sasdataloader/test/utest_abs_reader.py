@@ -52,9 +52,9 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
 
         self.assertEqual(self.data.y_unit, 'cm^{-1}')
-        self.assertEqual(self.data.x[0], 0.002618)
-        self.assertEqual(self.data.x[1], 0.007854)
-        self.assertEqual(self.data.x[2], 0.01309)
+        self.assertEqual(self.data.x[0], 0.008082)
+        self.assertEqual(self.data.x[1], 0.0275)
+        self.assertEqual(self.data.x[2], 0.02762)
         self.assertEqual(self.data.x[126], 0.5828)
 
         self.assertEqual(self.data.y[0], 0.02198)

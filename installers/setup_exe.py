@@ -286,6 +286,7 @@ if msvcrtdll:
 packages = [
     'matplotlib', 'scipy', 'encodings', 'comtypes', 'h5py',
     'win32com', 'xhtml2pdf', 'bumps', 'sasmodels', 'sas',
+    'pkg_resources'
     ]
 packages.extend([
     'reportlab',

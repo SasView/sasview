@@ -18,4 +18,6 @@ Working with SasView
 
    Writing a Plugin Model <sasgui/perspectives/fitting/plugin>
 
+   Environment Variables <environment>
+
    Model marketplace <marketplace>

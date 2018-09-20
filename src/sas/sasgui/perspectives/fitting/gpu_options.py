@@ -138,6 +138,9 @@ class GpuOptions(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
 
         test_text = wx.StaticText(self, -1, "WARNING: Running tests can take a few minutes!")
+        test_text2 = wx.StaticText(self, -1, "NOTE: No test will run if No OpenCL is checked")
+        test_text.SetForegroundColour(wx.RED)
+        self.vbox.Add(test_text2, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
         self.vbox.Add(test_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
