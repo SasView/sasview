@@ -573,17 +573,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
         for item, plot in plots.items():
-            if self.updatePlot(plot) and filename != plot.name:
+            if self.updatePlot(plot):
+                # Don't create plots which are already displayed
                 continue
             # Don't plot intermediate results, e.g. P(Q), S(Q)
             match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
-            # 2nd match group contains the identifier for the intermediate result, if present (e.g. "[P(Q)]")
+            # 2nd match group contains the identifier for the intermediate
+            # result, if present (e.g. "[P(Q)]")
             if match and match.groups()[1] != None:
                 continue
-            # Don't include plots from different fitpages, but always include the original data
-            if fitpage_name in plot.name or filename == plot.name:
-                # 'sophisticated' test to generate standalone plot for residuals
-                if 'esiduals' in plot.title:
+            # Don't include plots from different fitpages,
+            # but always include the original data
+            if (fitpage_name in plot.name
+                    or filename in plot.name
+                    or filename == plot.filename):
+                # Residuals get their own plot
+                if plot.plot_role == Data1D.ROLE_RESIDUAL:
                     plot.yscale='linear'
                     self.plotData([(item, plot)])
                 else:
@@ -596,12 +601,37 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Forces display of charts for the given data set
         """
-        plot_to_show = data_list[0]
-        # passed plot is used ONLY to figure out its title,
-        # so all the charts related by it can be pulled from 
-        # the data explorer indices.
-        filename = plot_to_show.filename
-        self.displayFile(filename=filename, is_data=plot_to_show.is_data, id=id)
+        # data_list = [QStandardItem, Data1D/Data2D]
+        plot_to_show = data_list[1]
+        plot_item = data_list[0]
+
+        # plots to show
+        new_plots = []
+
+        # Check if this is merely a plot update
+        if self.updatePlot(plot_to_show):
+            return
+
+        # Residuals get their own plot
+        if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
+            plot_to_show.yscale='linear'
+            self.plotData([(plot_item, plot_to_show)])
+        elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
+            # No plot
+            return
+        else:
+            # Plots with main data points on the same chart
+            # Get the main data plot
+            main_data = GuiUtils.dataFromItem(plot_item.parent())
+            if main_data is None:
+                # Try the current item
+                main_data = GuiUtils.dataFromItem(plot_item)
+            if main_data is not None:
+                new_plots.append((plot_item, main_data))
+            new_plots.append((plot_item, plot_to_show))
+
+        if new_plots:
+            self.plotData(new_plots)
 
     def addDataPlot2D(self, plot_set, item):
         """
@@ -685,7 +715,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.plot_widgets[title]=plot_widget
 
         # Update the active chart list
-        #self.active_plots[new_plot.data.id] = new_plot
+        self.active_plots[new_plot.data.name] = new_plot
 
     def appendPlot(self):
         """
@@ -699,8 +729,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # old plot data
         plot_id = str(self.cbgraph.currentText())
-
-        assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        try:
+            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        except:
+            return
 
         old_plot = PlotHelper.plotById(plot_id)
 
@@ -728,10 +760,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         data_id = data.name
         if data_id in ids_keys:
-            self.active_plots[data_id].replacePlot(data_id, data)
+            # We have data, let's replace data that needs replacing
+            if data.plot_role != Data1D.ROLE_DATA:
+                self.active_plots[data_id].replacePlot(data_id, data)
             return True
         elif data_id in ids_vals:
-            list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+            if data.plot_role != Data1D.ROLE_DATA:
+                list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
             return True
         return False
 
@@ -945,6 +980,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionQuick3DPlot)
         self.context_menu.addAction(self.actionEditMask)
+        #self.context_menu.addSeparator()
+        #self.context_menu.addAction(self.actionFreezeResults)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDelete)
 
@@ -956,6 +993,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteItem)
+        self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
 
     def onCustomContextMenu(self, position):
         """
@@ -976,6 +1014,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
         self.actionQuick3DPlot.setEnabled(is_2D)
         self.actionEditMask.setEnabled(is_2D)
+
+        # Freezing
+        # check that the selection has inner items
+        freeze_enabled = False
+        if model_item.parent() is not None:
+            freeze_enabled = True
+        self.actionFreezeResults.setEnabled(freeze_enabled)
+
         # Fire up the menu
         self.context_menu.exec_(self.current_view.mapToGlobal(position))
 
@@ -1110,6 +1156,32 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         mask_editor = MaskEditor(self, data)
         # Modal dialog here.
         mask_editor.exec_()
+
+    def freezeItem(self, item=None):
+        """
+        Freeze given item
+        """
+        if item is None:
+            return
+        self.model.beginResetModel()
+        new_item = self.cloneTheory(item)
+        self.model.appendRow(new_item)
+        self.model.endResetModel()
+
+    def freezeSelectedItems(self):
+        """
+        Freeze selected items
+        """
+        indices = self.treeView.selectedIndexes()
+
+        proxy = self.treeView.model()
+        model = proxy.sourceModel()
+
+        for index in indices:
+            row_index = proxy.mapToSource(index)
+            item_to_copy = model.itemFromIndex(row_index)
+            if item_to_copy and item_to_copy.isCheckable():
+                self.freezeItem(item_to_copy)
 
     def deleteItem(self):
         """
@@ -1271,7 +1343,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setChild(1, info_item)
 
         # Caption for the theories
-        checkbox_item.setChild(2, QtGui.QStandardItem("THEORIES"))
+        checkbox_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
 
         # New row in the model
         self.model.beginResetModel()

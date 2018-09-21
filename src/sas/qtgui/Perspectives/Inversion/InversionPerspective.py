@@ -13,6 +13,7 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
+from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 
@@ -42,6 +43,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     name = "Inversion"
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
     calculateSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None):
@@ -51,6 +54,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setWindowTitle("P(r) Inversion Perspective")
 
         self._manager = parent
+        #Needed for Batch fitting
+        self._parent = parent
         self.communicate = parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
 
@@ -108,6 +113,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setupModel()
         # Set up the Widget Map
         self.setupMapper()
+
+        #Hidding calculate all buton
+        self.calculateAllButton.setVisible(False)
         # Set base window state
         self.setupWindow()
 
@@ -118,7 +126,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         return self.communicate
 
     def allowBatch(self):
-        return True
+        return False
 
     def setClosable(self, value=True):
         """
@@ -193,8 +201,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
+        self.estimateDynamicNTSignal.connect(self._estimateDynamicNTUpdate)
+        self.estimateDynamicSignal.connect(self._estimateDynamicUpdate)
         self.estimateSignal.connect(self._estimateUpdate)
         self.calculateSignal.connect(self._calculateUpdate)
+
+        self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -308,8 +320,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                             and not self.isBatch
                                             and not self.isCalculating)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded
-                                       and np.all(self.logic.data.dy != 0))
+        self.explorerButton.setEnabled(self.logic.data_is_loaded)
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(
             self.logic.data_is_loaded and
@@ -452,14 +463,22 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                 continue
             # Create initial internal mappings
             self.logic.data = GuiUtils.dataFromItem(data)
+            if not isinstance(self.logic.data, Data1D):
+                msg = "P(r) perspective works for 1D data only"
+                logger.warning(msg)
+                continue
             # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
             self._calculator.set_qmax(qmax)
+            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
+                self.logic.data.dy = self._calculator.add_errors(self.logic.data.y)
             self.updateDataList(data)
             self.populateDataComboBox(self.logic.data.filename, data)
         self.dataList.setCurrentIndex(len(self.dataList) - 1)
-        self.setCurrentData(data)
+        #Checking for 1D again to mitigate the case when 2D data is last on the data list
+        if isinstance(self.logic.data, Data1D):
+            self.setCurrentData(data)
 
     def updateDataList(self, dataRef):
         """Save the current data state of the window into self._data_list"""
@@ -501,6 +520,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
         self.performEstimate()
 
+    def updateDynamicGuiValues(self):
+        pr = self._calculator
+        alpha = self._calculator.suggested_alpha
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
+        self.noOfTermsSuggestionButton.setText(
+             "{:n}".format(self.nTermsSuggested))
+
+        self.enableButtons()
+
     def updateGuiValues(self):
         pr = self._calculator
         out = self._calculator.out
@@ -519,9 +549,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
-        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        self.noOfTermsSuggestionButton.setText(
-            "{:n}".format(self.nTermsSuggested))
 
         if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
@@ -543,12 +570,16 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                            pr.get_pos_err(out, cov))))
         if self.prPlot is not None:
             title = self.prPlot.name
+            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-            self.communicate.plotRequestedSignal.emit([self.prPlot], None)
+            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
         if self.dataPlot is not None:
             title = self.dataPlot.name
+            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
+            self.dataPlot.symbol = "Line"
+            self.dataPlot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit([self.dataPlot], None)
+            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
         self.enableButtons()
 
     def removeData(self, data_list=None):
@@ -632,8 +663,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.stopCalcThread()
 
         pr = self._calculator.clone()
-        nfunc = self.getNFunc()
-        self.calcThread = CalcPr(pr, nfunc,
+        #Making sure that nfunc and alpha parameters are correctly initialized
+        pr.suggested_alpha = self._calculator.alpha
+        self.calcThread = CalcPr(pr, self.nTermsSuggested,
                                  error_func=self._threadError,
                                  completefn=self._calculateCompleted,
                                  updatefn=None)
@@ -670,6 +702,31 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.estimationThreadNT.queue()
         self.estimationThreadNT.ready(2.5)
 
+    def performEstimateDynamicNT(self):
+        """
+        Perform parameter estimation
+        """
+        from .Thread import EstimateNT
+
+        self.updateCalculator()
+
+        # If a thread is already started, stop it
+        self.stopEstimateNTThread()
+
+        pr = self._calculator.clone()
+        # Skip the slit settings for the estimation
+        # It slows down the application and it doesn't change the estimates
+        pr.slit_height = 0.0
+        pr.slit_width = 0.0
+        nfunc = self.getNFunc()
+
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
+                                             error_func=self._threadError,
+                                             completefn=self._estimateDynamicNTCompleted,
+                                             updatefn=None)
+        self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
+
     def stopEstimateNTThread(self):
         if (self.estimationThreadNT is not None and
                 self.estimationThreadNT.isrunning()):
@@ -692,6 +749,23 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.estimationThread.queue()
         self.estimationThread.ready(2.5)
 
+    def performEstimateDynamic(self):
+        """
+            Perform parameter estimation
+        """
+        from .Thread import EstimatePr
+
+        # If a thread is already started, stop it
+        self.stopEstimationThread()
+
+        self.estimationThread = EstimatePr(self._calculator.clone(),
+                                           self.getNFunc(),
+                                           error_func=self._threadError,
+                                           completefn=self._estimateDynamicCompleted,
+                                           updatefn=None)
+        self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
+
     def stopEstimationThread(self):
         """ Stop the estimation thread if it exists and is running """
         if (self.estimationThread is not None and
@@ -704,6 +778,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def _estimateCompleted(self, alpha, message, elapsed):
         ''' Send a signal to the main thread for model update'''
         self.estimateSignal.emit((alpha, message, elapsed))
+
+    def _estimateDynamicCompleted(self, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateDynamicSignal.emit((alpha, message, elapsed))
 
     def _estimateUpdate(self, output_tuple):
         """
@@ -719,10 +797,30 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if message:
             logger.info(message)
         self.performEstimateNT()
+        self.performEstimateDynamicNT()
+
+    def _estimateDynamicUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param elapsed: computation time
+        """
+        alpha, message, elapsed = output_tuple
+        self._calculator.alpha = alpha
+        self._calculator.elapsed += self._calculator.elapsed
+        if message:
+            logger.info(message)
+        self.performEstimateDynamicNT()
 
     def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
         ''' Send a signal to the main thread for model update'''
         self.estimateNTSignal.emit((nterms, alpha, message, elapsed))
+
+    def _estimateDynamicNTCompleted(self, nterms, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateDynamicNTSignal.emit((nterms, alpha, message, elapsed))
 
     def _estimateNTUpdate(self, output_tuple):
         """
@@ -739,6 +837,28 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.nTermsSuggested = nterms
         # Save useful info
         self.updateGuiValues()
+        if message:
+            logger.info(message)
+        if self.isBatch:
+            self.acceptAlpha()
+            self.acceptNoTerms()
+            self.startThread()
+
+    def _estimateDynamicNTUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param nterms: estimated number of terms
+        :param elapsed: computation time
+        """
+        nterms, alpha, message, elapsed = output_tuple
+        self._calculator.elapsed += elapsed
+        self._calculator.suggested_alpha = alpha
+        self.nTermsSuggested = nterms
+        # Save useful info
+        self.updateDynamicGuiValues()
         if message:
             logger.info(message)
         if self.isBatch:

@@ -22,8 +22,8 @@ poly_header_captions = ['Parameter', 'PD[ratio]', 'Min', 'Max', 'Npts', 'Nsigs',
                         'Function', 'Filename']
 
 poly_header_tooltips = ['Select parameter for fitting',
-                        'Enter polydispersity ratio (STD/mean). '
-                        'STD: standard deviation from the mean value',
+                        'Enter polydispersity ratio (Std deviation/mean).\n'+
+                        'For angles this can be either std deviation or half width (for uniform distributions) in degrees',
                         'Enter minimum value for parameter',
                         'Enter maximum value for parameter',
                         'Enter number of points for parameter',
@@ -127,7 +127,10 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
             item1_1.setEditable(False)
 
             # Find param in volume_params
-            for p in parameters.form_volume_parameters:
+            poly_pars = copy.deepcopy(parameters.form_volume_parameters)
+            if is2D:
+                poly_pars += parameters.orientation_parameters
+            for p in poly_pars:
                 if p.name != param.name:
                     continue
                 width = kernel_module.getParam(p.name+'.width')
@@ -566,6 +569,29 @@ def plotResiduals(reference_data, current_data):
 
     return residuals
 
+def plotPolydispersities(model):
+    plots = []
+    if model is None:
+        return plots
+    # test for model being a sasmodels.sasview_model.SasviewModel?
+    for name in model.dispersion.keys():
+        xarr, yarr = model.get_weights(name)
+        if len(xarr) <= 1: # param name not found or no polydisp.
+            continue
+        # create Data1D as in residualsData1D() and fill x/y members
+        # similar to FittingLogic._create1DPlot() but different data/axes
+        data1d = Data1D(x=xarr, y=yarr)
+        xunit = model.details[name][0]
+        data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
+        data1d.yaxis(r'\rm{weight}', 'normalized')
+        data1d.scale = 'linear'
+        data1d.symbol = 'Line'
+        data1d.name = "{} polydispersity".format(name)
+        data1d.id = data1d.name # placeholder, has to be completed later
+        data1d.plot_role = Data1D.ROLE_RESIDUAL
+        plots.append(data1d)
+    return plots
+
 def binary_encode(i, digits):
     return [i >> d & 1 for d in range(digits)]
 
@@ -776,3 +802,18 @@ def formatParametersLatex(parameters):
     output_string += r'\end{table}'
 
     return output_string
+
+def isParamPolydisperse(param_name, kernel_params, is2D=False):
+    """
+    Simple lookup for polydispersity for the given param name
+    """
+    parameters = kernel_params.form_volume_parameters
+    if is2D:
+        parameters += kernel_params.orientation_parameters
+    has_poly = False
+    for param in parameters:
+        if param.name==param_name and param.polydisperse:
+            has_poly = True
+            break
+    return has_poly
+

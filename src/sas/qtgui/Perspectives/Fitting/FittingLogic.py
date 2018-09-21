@@ -154,6 +154,9 @@ class FittingLogic(object):
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)
 
+        if component is not None:
+            new_plot.plot_role = Data1D.ROLE_DELETABLE #deletable
+
         return new_plot
 
     def new1DPlot(self, return_data, tab_id):

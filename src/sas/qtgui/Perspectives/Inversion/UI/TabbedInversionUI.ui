@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>390</width>
-    <height>409</height>
+    <width>446</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -730,7 +730,7 @@ p, li { white-space: pre-wrap; }
      <item>
       <widget class="QPushButton" name="calculateAllButton">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">

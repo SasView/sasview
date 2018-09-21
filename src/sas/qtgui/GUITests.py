@@ -179,7 +179,7 @@ def perspectivesSuite():
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
         #  Inversion
-        #unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
+        unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
         )
     return unittest.TestSuite(suites)
 

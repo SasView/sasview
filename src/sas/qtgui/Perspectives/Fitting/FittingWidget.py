@@ -27,6 +27,7 @@ import sas.qtgui.Utilities.LocalConfig as LocalConfig
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.Plotter import PlotterWidget
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
@@ -56,6 +57,19 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
+# CRUFT: remove when new release of sasmodels is available
+# https://github.com/SasView/sasview/pull/181#discussion_r218135162
+from sasmodels.sasview_model import SasviewModel
+if not hasattr(SasviewModel, 'get_weights'):
+    def get_weights(self, name):
+        """
+        Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
+        """
+        # type: (str) -> Tuple(np.ndarray, np.ndarray)
+        _, x, w = self._get_weights(self._model_info.parameters[name])
+        return x, w
+
+    SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
 
@@ -272,6 +286,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # If the widget generated theory item, save it
         self.theory_item = None
 
+        # list column widths
+        self.lstParamHeaderSizes = {}
+
         # signal communicator
         self.communicate = self.parent.communicate
 
@@ -360,6 +377,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstParams.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        # Column resize signals
+        self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
+
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
         self.setPolyModel()
@@ -641,6 +661,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params_list = [s.data() for s in selected_rows]
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
+        # Check if any of the parameters are polydisperse
+        if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
+            # no parameters are pd - reset the text to not show the warning
+            mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
@@ -1060,9 +1084,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             row = rows[0].row()
             if not self.rowHasConstraint(row):
                 return
+            constr = self.getConstraintForRow(row)
             func = self.getConstraintForRow(row).func
-            if func is not None:
-                self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
+            if constr.func is not None:
+                # inter-parameter constraint
+                update_text = "Active constraint: "+func
+            elif constr.param == rows[0].data():
+                # current value constraint
+                update_text = "Value constrained to: " + str(constr.value)
+            else:
+                # ill defined constraint
+                return
+            self.communicate.statusBarUpdateSignal.emit(update_text)
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
@@ -1099,6 +1132,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cmdPlot.setText("Calculate")
             # Create default datasets if no data passed
             self.createDefaultDataset()
+            self.theory_item = None # ensure theory is recalc. before plot, see showTheoryPlot()
 
     def respondToModelStructure(self, model=None, structure_factor=None):
         # Set enablement on calculate/plot
@@ -1106,6 +1140,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # kernel parameters -> model_model
         self.SASModelToQModel(model, structure_factor)
+
+        for column, width in self.lstParamHeaderSizes.items():
+            self.lstParams.setColumnWidth(column, width)
 
         # Update plot
         self.updateData()
@@ -1218,9 +1255,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # update in param model
         if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
             row = self.getRowFromName(parameter_name)
-            param_item = self._model_model.item(row)
+            param_item = self._model_model.item(row).child(0).child(0, model_column)
+            if param_item is None:
+                return
             self._model_model.blockSignals(True)
-            param_item.child(0).child(0, model_column).setText(item.text())
+            param_item.setText(item.text())
             self._model_model.blockSignals(False)
 
     def onMagnetModelChange(self, item):
@@ -1365,8 +1404,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.fit_started = True
+
         # Disable some elements
-        self.setFittingStarted()
+        self.disableInteractiveElements()
 
     def stopFit(self):
         """
@@ -1375,9 +1415,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.calc_fit is None or not self.calc_fit.isrunning():
             return
         self.calc_fit.stop()
-        #self.fit_started=False
         #re-enable the Fit button
-        self.setFittingStopped()
+        self.enableInteractiveElements()
 
         msg = "Fitting cancelled."
         self.communicate.statusBarUpdateSignal.emit(msg)
@@ -1391,7 +1430,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def fitFailed(self, reason):
         """
         """
-        self.setFittingStopped()
+        self.enableInteractiveElements()
         msg = "Fitting failed with: "+ str(reason)
         self.communicate.statusBarUpdateSignal.emit(msg)
 
@@ -1408,7 +1447,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Receive and display batch fitting results
         """
         #re-enable the Fit button
-        self.setFittingStopped()
+        self.enableInteractiveElements()
 
         if len(result) == 0:
             msg = "Fitting failed."
@@ -1480,7 +1519,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         "result" is a tuple of actual result list and the fit time in seconds
         """
         #re-enable the Fit button
-        self.setFittingStopped()
+        self.enableInteractiveElements()
 
         if len(result) == 0:
             msg = "Fitting failed."
@@ -1666,13 +1705,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(updatePolyValues)
         self._model_model.itemChanged.connect(self.onMainParamsChange)
 
-        # Adjust the table cells width.
-        # TODO: find a way to dynamically adjust column width while resized expanding
-        self.lstParams.resizeColumnToContents(0)
-        self.lstParams.resizeColumnToContents(4)
-        self.lstParams.resizeColumnToContents(5)
-        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
     def iterateOverPolyModel(self, func):
         """
         Take func and throw it inside the poly model row loop
@@ -1812,12 +1844,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
         # Force data recalculation so existing charts are updated
-        self.showPlot()
+        if not self.data_is_loaded:
+            self.showTheoryPlot()
+        else:
+            self.showPlot()
         # This is an important processEvent.
         # This allows charts to be properly updated in order
         # of plots being applied.
         QtWidgets.QApplication.processEvents()
-        self.recalculatePlotData()
+        self.recalculatePlotData() # recalc+plot theory again (2nd)
 
     def onSmearingOptionsUpdate(self):
         """
@@ -1833,14 +1868,44 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createDefaultDataset()
         self.calculateQGridForModel()
 
+    def showTheoryPlot(self):
+        """
+        Show the current theory plot in MPL
+        """
+        # Show the chart if ready
+        if self.theory_item is None:
+            self.recalculatePlotData()
+        elif self.model_data:
+            self._requestPlots(self.model_data.filename, self.theory_item.model())
+
     def showPlot(self):
         """
         Show the current plot in MPL
         """
         # Show the chart if ready
-        data_to_show = self.data if self.data_is_loaded else self.model_data
-        if data_to_show is not None:
-            self.communicate.plotRequestedSignal.emit([data_to_show], self.tab_id)
+        data_to_show = self.data
+        # Any models for this page
+        current_index = self.all_data[self.data_index]
+        item = self._requestPlots(self.data.filename, current_index.model())
+        if item:
+            # fit+data has not been shown - show just data
+            self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
+
+    def _requestPlots(self, item_name, item_model):
+        """
+        Emits plotRequestedSignal for all plots found in the given model under the provided item name.
+        """
+        fitpage_name = "" if self.tab_id is None else "M"+str(self.tab_id)
+        plots = GuiUtils.plotsFromFilename(item_name, item_model)
+        # Has the fitted data been shown?
+        data_shown = False
+        item = None
+        for item, plot in plots.items():
+            if fitpage_name in plot.name:
+                data_shown = True
+                self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
+        # return the last data item seen, if nothing was plotted; supposed to be just data)
+        return None if data_shown else item
 
     def onOptionsUpdate(self):
         """
@@ -2012,10 +2077,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.magnet_params = {}
             self.setMagneticModel()
 
-        # Adjust the table cells width
-        self.lstParams.resizeColumnToContents(0)
-        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
         # Now we claim the model has been loaded
         self.model_is_loaded = True
         # Change the model name to a monicker
@@ -2074,6 +2135,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Instantiate the current sasmodel
         self.kernel_module = self.models[model_name]()
 
+        # Change the model name to a monicker
+        self.kernel_module.name = self.modelName()
+
         # Explicitly add scale and background with default values
         temp_undo_state = self.undo_supported
         self.undo_supported = False
@@ -2106,6 +2170,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.kernel_module is None:
             # Structure factor is the only selected model; build it and show all its params
             self.kernel_module = self.models[structure_factor]()
+            self.kernel_module.name = self.modelName()
             s_params = self.kernel_module._model_info.parameters
             s_params_orig = s_params
         else:
@@ -2116,6 +2181,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
 
             self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+            # Modify the name to correspond to shown items
+            self.kernel_module.name = self.modelName()
             all_params = self.kernel_module._model_info.parameters.kernel_parameters
             all_param_names = [param.name for param in all_params]
 
@@ -2403,12 +2470,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not hasattr(model, 'setParam'): return
 
         # add polydisperse parameters if asked
-        if self.chkPolydispersity.isChecked():
+        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
             for key, value in self.poly_params.items():
                 model.setParam(key, value)
         # add magnetic params if asked
         if self.chkMagnetism.isChecked():
-            for key, value in self.magnet_params.items():
+            for key, value in self.magnet_params.items() and self._magnet_model.rowCount() > 0:
                 model.setParam(key, value)
 
     def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
@@ -2426,6 +2493,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         smearer = self.smearing_widget.smearer()
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
 
+        # Disable buttons/table
+        self.disableInteractiveElements()
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
                                                model=model,
@@ -2467,6 +2536,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Thread returned error
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
         print("Calculate Data failed with ", reason)
 
     def completed1D(self, return_data):
@@ -2479,7 +2550,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
+        if return_data is None:
+            self.calculateDataFailed("Results not available.")
+            return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
+
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
         new_plots = [fitted_data]
@@ -2487,12 +2564,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             new_plots.append(residuals)
 
         if self.data_is_loaded:
-            # delete any plots associated with the data that were not updated (e.g. to remove beta(Q), S_eff(Q))
+            # delete any plots associated with the data that were not updated
+            # (e.g. to remove beta(Q), S_eff(Q))
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
             pass
         else:
-            # delete theory items for the model, in order to get rid of any redundant items, e.g. beta(Q), S_eff(Q)
+            # delete theory items for the model, in order to get rid of any
+            # redundant items, e.g. beta(Q), S_eff(Q)
             self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
+
+        # Create plots for parameters with enabled polydispersity
+        for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
+            data_id = fitted_data.id.split()
+            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            data_name = fitted_data.name.split()
+            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
+            self.createNewIndex(plot)
+            new_plots.append(plot)
 
         # Create plots for intermediate product data
         plots = self.logic.new1DProductPlots(return_data, self.tab_id)
@@ -2539,6 +2627,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 2D data
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
+
         fitted_data = self.logic.new2DPlot(return_data)
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
@@ -2573,6 +2664,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
+        residuals_plot.plot_role = Data1D.ROLE_RESIDUAL
         self.createNewIndex(residuals_plot)
         return residuals_plot
 
@@ -2608,6 +2700,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Thread threw an exception.
         """
+        # Bring the GUI to normal state
+        self.enableInteractiveElements()
         # TODO: remimplement thread cancellation
         logger.error("".join(traceback.format_exception(etype, value, tb)))
 
@@ -2819,6 +2913,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fname_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
         self._poly_model.setData(fname_index, fname)
 
+    def onColumnWidthUpdate(self, index, old_size, new_size):
+        """
+        Simple state update of the current column widths in the  param list
+        """
+        self.lstParamHeaderSizes[index] = new_size
+
     def setMagneticModel(self):
         """
         Set magnetism values on model
@@ -2890,21 +2990,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item1 = QtGui.QStandardItem(param_name)
 
         func = QtWidgets.QComboBox()
-        # Available range of shells displayed in the combobox
-        func.addItems([str(i) for i in range(param_length+1)])
-
-        # Respond to index change
-        func.currentIndexChanged.connect(self.modifyShellsInList)
 
         # cell 2: combobox
         item2 = QtGui.QStandardItem()
-        self._model_model.appendRow([item1, item2])
+
+        # cell 3: min value
+        item3 = QtGui.QStandardItem()
+
+        # cell 4: max value
+        item4 = QtGui.QStandardItem()
+
+        # cell 4: SLD button
+        item5 = QtGui.QStandardItem()
+        button = QtWidgets.QPushButton()
+        button.setText("Show SLD Profile")
+
+        self._model_model.appendRow([item1, item2, item3, item4, item5])
 
         # Beautify the row:  span columns 2-4
         shell_row = self._model_model.rowCount()
         shell_index = self._model_model.index(shell_row-1, 1)
+        button_index = self._model_model.index(shell_row-1, 4)
 
         self.lstParams.setIndexWidget(shell_index, func)
+        self.lstParams.setIndexWidget(button_index, button)
         self._n_shells_row = shell_row - 1
 
         # Get the default number of shells for the model
@@ -2917,18 +3026,43 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not shell_par:
             logger.error("Could not find %s in kernel parameters.", param_name)
         default_shell_count = shell_par.default
+        shell_min = 0
+        shell_max = 0
+        try:
+            shell_min = int(shell_par.limits[0])
+            shell_max = int(shell_par.limits[1])
+        except IndexError as ex:
+            # no info about limits
+            pass
+        item3.setText(str(shell_min))
+        item4.setText(str(shell_max))
+
+        # Respond to index change
+        func.currentTextChanged.connect(self.modifyShellsInList)
+
+        # Respond to button press
+        button.clicked.connect(self.onShowSLDProfile)
+
+        # Available range of shells displayed in the combobox
+        func.addItems([str(i) for i in range(shell_min, shell_max+1)])
 
         # Add default number of shells to the model
-        func.setCurrentIndex(default_shell_count)
+        func.setCurrentText(str(default_shell_count))
 
-    def modifyShellsInList(self, index):
+    def modifyShellsInList(self, text):
         """
         Add/remove additional multishell parameters
         """
         # Find row location of the combobox
         first_row = self._n_shells_row + 1
         remove_rows = self._num_shell_params
-
+        try:
+            index = int(text)
+        except ValueError:
+            # bad text on the control!
+            index = 0
+            logger.error("Multiplicity incorrect! Setting to 0")
+        self.kernel_module.multiplicity = index
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
@@ -2955,23 +3089,72 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.setPolyModel()
         self.setMagneticModel()
 
-    def setFittingStarted(self):
+    def onShowSLDProfile(self):
         """
-        Set buttion caption on fitting start
+        Show a quick plot of SLD profile
         """
-        # Notify the user that fitting is being run
-        # Allow for stopping the job
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
-        self.cmdFit.setText('Stop fit')
+        # get profile data
+        x, y = self.kernel_module.getProfile()
+        y *= 1.0e6
+        profile_data = Data1D(x=x, y=y)
+        profile_data.name = "SLD"
+        profile_data.scale = 'linear'
+        profile_data.symbol = 'Line'
+        profile_data.hide_error = True
+        profile_data._xaxis = "R(\AA)"
+        profile_data._yaxis = "SLD(10^{-6}\AA^{-2})"
 
-    def setFittingStopped(self):
+        plotter = PlotterWidget(self, quickplot=True)
+        plotter.data = profile_data
+        plotter.showLegend = True
+        plotter.plot(hide_error=True, marker='-')
+
+        self.plot_widget = QtWidgets.QWidget()
+        self.plot_widget.setWindowTitle("Scattering Length Density Profile")
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(plotter)
+        self.plot_widget.setLayout(layout)
+        self.plot_widget.show()
+
+    def setInteractiveElements(self, enabled=True):
         """
-        Set button caption on fitting stop
+        Switch interactive GUI elements on/off
+        """
+        assert isinstance(enabled, bool)
+
+        self.lstParams.setEnabled(enabled)
+        self.lstPoly.setEnabled(enabled)
+        self.lstMagnetic.setEnabled(enabled)
+
+        self.cbCategory.setEnabled(enabled)
+        self.cbModel.setEnabled(enabled)
+        self.cbStructureFactor.setEnabled(enabled)
+
+        self.chkPolydispersity.setEnabled(enabled)
+        self.chkMagnetism.setEnabled(enabled)
+        self.chk2DView.setEnabled(enabled)
+
+    def enableInteractiveElements(self):
+        """
+        Set buttion caption on fitting/calculate finish
+        Enable the param table(s)
         """
         # Notify the user that fitting is available
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.fit_started = False
+        self.setInteractiveElements(True)
+
+    def disableInteractiveElements(self):
+        """
+        Set buttion caption on fitting/calculate start
+        Disable the param table(s)
+        """
+        # Notify the user that fitting is being run
+        # Allow for stopping the job
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setText('Stop fit')
+        self.setInteractiveElements(False)
 
     def readFitPage(self, fp):
         """

@@ -53,9 +53,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
+        #TODO: This is not what was inteded to be.
         if output_data is not None:
             # Set a table tooltip describing the model
-            model_name = output_data[0][0].model.id
+            model_name = list(output_data.keys())[0]
             self.tabWidget.setTabToolTip(0, model_name)
 
     def closeEvent(self, event):
@@ -417,11 +418,11 @@ class BatchInversionOutputPanel(BatchOutputPanel):
     """
     def __init__(self, parent = None, output_data=None):
 
-        super(BatchInversionOutputPanel, self).__init__(parent, output_data)
+        super(BatchInversionOutputPanel, self).__init__(parent._parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
 
-    def setupTable(self, data):
+    def setupTable(self, widget=None,  data=None):
         """
         Create tablewidget items and show them, based on params
         """
@@ -430,6 +431,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                       'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]']
 
+        if data is None:
+            return
         keys = data.keys()
         rows = len(keys)
         columns = len(param_list)

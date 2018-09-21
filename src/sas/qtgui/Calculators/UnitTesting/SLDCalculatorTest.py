@@ -80,13 +80,11 @@ class SLDCalculatorTest(unittest.TestCase):
         # self.assertIsInstance(self.widget.ui.editMolecularFormula.validator(), FormulaValidator)
         self.assertEqual(self.widget.ui.editMolecularFormula.styleSheet(), '')
         self.assertEqual(self.widget.model.columnCount(), 1)
-        self.assertEqual(self.widget.model.rowCount(), 12)
+        self.assertEqual(self.widget.model.rowCount(), 11)
         self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
 
     def testSimpleEntry(self):
         ''' Default compound calculations '''
-
-        self.widget.show()
 
         self.widget.ui.editMassDensity.clear()
         self.widget.ui.editMassDensity.insert("1.0")
@@ -101,8 +99,8 @@ class SLDCalculatorTest(unittest.TestCase):
         self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '5.62')
 
         # Change mass density
-        self.widget.ui.editWavelength.clear()
-        self.widget.ui.editWavelength.setText("666.0")
+        self.widget.ui.editNeutronWavelength.clear()
+        self.widget.ui.editNeutronWavelength.setText("666.0")
 
         # Send shift-tab to update the molar volume field
         QTest.keyEvent(QTest.Press, self.widget, key, QtCore.Qt.NoModifier)
@@ -129,11 +127,12 @@ class SLDCalculatorTest(unittest.TestCase):
         QTest.keyEvent(QTest.Press, self.widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
-        self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '43.4')
+        #self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '43.4')
+        self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '2.89')
 
         # Reset the widget
         self.widget.modelReset()
-
+       
         self.assertEqual(self.widget.ui.editMolecularFormula.text(), "H2O")
         self.assertEqual(self.widget.ui.editMassDensity.text(), "1")
         self.assertEqual(self.widget.ui.editWavelength.text(), "6")

@@ -117,6 +117,8 @@ class DataManager(object):
         new_plot.is_data = True
         new_plot.path = path
         new_plot.list_group_id = []
+        # Assign the plot role to data
+        new_plot.plot_role = Data1D.ROLE_DATA
         ##post data to plot
         # plot data
         return new_plot

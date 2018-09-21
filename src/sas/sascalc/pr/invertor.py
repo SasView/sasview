@@ -70,7 +70,7 @@ class Invertor(Cinvertor):
 
         A[j][i] = (Fourier transformed base function for point j)
 
-    We them choose a number of r-points, n_r, to evaluate the second
+    We then choose a number of r-points, n_r, to evaluate the second
     derivative of P(r) at. This is used as our regularization term.
     For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -143,7 +143,7 @@ class Invertor(Cinvertor):
         Access the parent class methods for
         x, y, err, d_max, q_min, q_max and alpha
         """
-        if   name == 'x':
+        if name == 'x':
             if 0.0 in value:
                 msg = "Invertor: one of your q-values is zero. "
                 msg += "Delete that entry before proceeding"
@@ -226,6 +226,20 @@ class Invertor(Cinvertor):
             return self.__dict__[name]
         return None
 
+    def add_errors(self, yvalues):
+        """
+        Adds errors to data set is they are not avaialble
+        :return:
+        """
+        stats_errors = np.zeros(len(yvalues))
+        for i in range(len(yvalues)):
+            # Scale the error so that we can fit over several decades of Q
+            scale = 0.05 * np.sqrt(yvalues[i])
+            min_err = 0.01 * yvalues[i]
+            stats_errors[i] = scale * np.sqrt(np.fabs(yvalues[i])) + min_err
+        logger.warning("Simulated errors have been added to the data set\n")
+        return stats_errors
+
     def clone(self):
         """
         Return a clone of this instance
@@ -267,7 +281,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 

@@ -7,6 +7,7 @@ import copy
 import matplotlib as mpl
 import numpy as np
 from matplotlib.font_manager import FontProperties
+
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
@@ -83,7 +84,9 @@ class PlotterWidget(PlotterBase):
                 self.data.xtransform = 'log10(x)'
             if self.data.ytransform is None:
                 self.data.ytransform = 'log10(y)'
-
+            #Added condition to Dmax explorer from P(r) perspective
+            if self.data._xaxis == 'D_{max}':
+                self.xscale = 'linear'
             # Transform data if required.
             if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
                 _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
@@ -221,7 +224,6 @@ class PlotterWidget(PlotterBase):
         self.actionResetGraphRange =\
             self.contextMenu.addAction("Reset Graph Range")
         # Add the title change for dialogs
-        #if self.parent:
         self.contextMenu.addSeparator()
         self.actionWindowTitle = self.contextMenu.addAction("Window Title")
 

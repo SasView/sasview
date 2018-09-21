@@ -12,6 +12,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 import webbrowser
 
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 
@@ -31,12 +32,11 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.tab_names = None
         self.operator = '='
 
+        self.warning = self.lblWarning.text()
         self.setupData()
-        self.setupWidgets()
         self.setupSignals()
+        self.setupWidgets()
         self.setupTooltip()
-
-        self.setFixedSize(self.minimumSizeHint())
 
         # Default focus is on OK
         self.cmdOK.setFocus()
@@ -100,10 +100,23 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         # Find out the signal source
         source = self.sender().objectName()
+        param1 = self.cbParam1.currentText()
+        param2 = self.cbParam2.currentText()
         if source == "cbParam1":
-            self.txtParam.setText(self.tab_names[0] + ":" + self.cbParam1.currentText())
+            self.txtParam.setText(self.tab_names[0] + ":" + param1)
         else:
-            self.txtConstraint.setText(self.tab_names[1] + "." + self.cbParam2.currentText())
+            self.txtConstraint.setText(self.tab_names[1] + "." + param2)
+        # Check if any of the parameters are polydisperse
+        params_list = [param1, param2]
+        all_pars = [tab.model_parameters for tab in self.tabs]
+        is2Ds = [tab.is2D for tab in self.tabs]
+        txt = ""
+        for pars, is2D in zip(all_pars, is2Ds):
+            if any([FittingUtilities.isParamPolydisperse(p, pars, is2D) for p in params_list]):
+                # no parameters are pd - reset the text to not show the warning
+                txt = self.warning
+        self.lblWarning.setText(txt)
+
 
     def onOperatorChange(self, index):
         """

@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 
 from twisted.internet import reactor
 # General SAS imports
+from sas import get_local_config, get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
@@ -117,10 +118,9 @@ class GuiManager(object):
         self.dockedFilesWidget.setFloating(False)
         self.dockedFilesWidget.setWidget(self.filesWidget)
 
-        # Disable maximize/minimize and close buttons
-        self.dockedFilesWidget.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        # Modify menu items on widget visibility change
+        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
 
-        #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
@@ -136,7 +136,6 @@ class GuiManager(object):
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
-        self.welcomePanel = WelcomePanel()
         self.grid_window = None
         self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
         self._workspace.actionHide_Toolbar.setText("Show Toolbar")
@@ -163,6 +162,15 @@ class GuiManager(object):
             import traceback
             logger.error("%s: could not load SasView models")
             logger.error(traceback.format_exc())
+
+    def updateContextMenus(self, visible=False):
+        """
+        Modify the View/Data Explorer menu item text on widget visibility
+        """
+        if visible:
+            self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
+        else:
+            self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
 
     def statusBarSetup(self):
         """
@@ -232,8 +240,6 @@ class GuiManager(object):
         perspective_size = self._current_perspective.sizeHint()
         perspective_width = perspective_size.width()
         self._current_perspective.resize(perspective_width, workspace_height-10)
-        # Resize the mdi area to match the widget within
-        subwindow.resize(subwindow.minimumSizeHint())
 
         self._current_perspective.show()
 
@@ -379,10 +385,24 @@ class GuiManager(object):
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-    def showWelcomeMessage(self):
+    def actionWelcome(self):
         """ Show the Welcome panel """
+        self.welcomePanel = WelcomePanel()
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
+
+    def showWelcomeMessage(self):
+        """ Show the Welcome panel, when required """
+        # Assure the welcome screen is requested
+        show_welcome_widget = True
+        custom_config = get_custom_config()
+        if hasattr(custom_config, "WELCOME_PANEL_SHOW"):
+            if isinstance(custom_config.WELCOME_PANEL_SHOW, bool):
+                show_welcome_widget = custom_config.WELCOME_PANEL_SHOW
+            else:
+                logging.warning("WELCOME_PANEL_SHOW has invalid value in custom_config.py")
+        if show_welcome_widget:
+            self.actionWelcome()
 
     def addCallbacks(self):
         """
@@ -404,6 +424,16 @@ class GuiManager(object):
         """
         Trigger definitions for all menu/toolbar actions.
         """
+        # disable not yet fully implemented actions
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionUndo.setEnabled(False)
+        self._workspace.actionRedo.setEnabled(False)
+        self._workspace.actionReset.setEnabled(False)
+        self._workspace.actionStartup_Settings.setEnabled(False)
+        self._workspace.actionImage_Viewer.setEnabled(False)
+        self._workspace.actionCombine_Batch_Fit.setEnabled(False)
+        self._workspace.actionFit_Results.setEnabled(False)
+
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
@@ -426,6 +456,7 @@ class GuiManager(object):
         self._workspace.actionHide_Toolbar.triggered.connect(self.actionHide_Toolbar)
         self._workspace.actionStartup_Settings.triggered.connect(self.actionStartup_Settings)
         self._workspace.actionCategory_Manager.triggered.connect(self.actionCategory_Manager)
+        self._workspace.actionHide_DataExplorer.triggered.connect(self.actionHide_DataExplorer)
         # Tools
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
@@ -468,6 +499,7 @@ class GuiManager(object):
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
@@ -614,6 +646,18 @@ class GuiManager(object):
         else:
             self._workspace.actionHide_Toolbar.setText("Hide Toolbar")
             self._workspace.toolBar.setVisible(True)
+        pass
+
+    def actionHide_DataExplorer(self):
+        """
+        Toggle Data Explorer vsibility
+        """
+        if self.dockedFilesWidget.isVisible():
+            #self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
+            self.dockedFilesWidget.setVisible(False)
+        else:
+            #self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
+            self.dockedFilesWidget.setVisible(True)
         pass
 
     def actionStartup_Settings(self):
@@ -957,6 +1001,7 @@ class GuiManager(object):
         """
         When setting a perspective, sets up the menu bar
         """
+        self._workspace.actionReport.setEnabled(False)
         if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
             self.checkAnalysisOption(self._workspace.actionFitting)
             # Put the fitting menu back in
@@ -966,6 +1011,7 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+            self._workspace.actionReport.setEnabled(True)
 
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)

@@ -507,6 +507,11 @@
     <string>Delete</string>
    </property>
   </action>
+  <action name="actionFreezeResults">
+   <property name="text">
+    <string>Freeze Results</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
