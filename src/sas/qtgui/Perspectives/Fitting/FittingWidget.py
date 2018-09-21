@@ -1119,6 +1119,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cmdPlot.setText("Calculate")
             # Create default datasets if no data passed
             self.createDefaultDataset()
+            self.theory_item = None # ensure theory is recalc. before plot, see showTheoryPlot()
 
     def respondToModelStructure(self, model=None, structure_factor=None):
         # Set enablement on calculate/plot
@@ -1838,7 +1839,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # This allows charts to be properly updated in order
         # of plots being applied.
         QtWidgets.QApplication.processEvents()
-        self.recalculatePlotData()
+        self.recalculatePlotData() # recalc+plot theory again (2nd)
 
     def onSmearingOptionsUpdate(self):
         """
@@ -1861,8 +1862,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Show the chart if ready
         if self.theory_item is None:
             self.recalculatePlotData()
-            return
-        if self.model_data:
+        elif self.model_data:
             self._requestPlots(self.model_data.filename, self.theory_item.model())
 
     def showPlot(self):
