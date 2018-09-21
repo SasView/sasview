@@ -569,6 +569,29 @@ def plotResiduals(reference_data, current_data):
 
     return residuals
 
+def plotPolydispersities(model):
+    plots = []
+    if model is None:
+        return plots
+    # test for model being a sasmodels.sasview_model.SasviewModel?
+    for name in model.dispersion.keys():
+        xarr, yarr = model.get_weights(name)
+        if len(xarr) <= 1: # param name not found or no polydisp.
+            continue
+        # create Data1D as in residualsData1D() and fill x/y members
+        # similar to FittingLogic._create1DPlot() but different data/axes
+        data1d = Data1D(x=xarr, y=yarr)
+        xunit = model.details[name][0]
+        data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
+        data1d.yaxis(r'\rm{weight}', 'normalized')
+        data1d.scale = 'linear'
+        data1d.symbol = 'Line'
+        data1d.name = "{} polydispersity".format(name)
+        data1d.id = data1d.name # placeholder, has to be completed later
+        data1d.plot_role = Data1D.ROLE_RESIDUAL
+        plots.append(data1d)
+    return plots
+
 def binary_encode(i, digits):
     return [i >> d & 1 for d in range(digits)]
 

@@ -57,6 +57,19 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
+# CRUFT: remove when new release of sasmodels is available
+# https://github.com/SasView/sasview/pull/181#discussion_r218135162
+from sasmodels.sasview_model import SasviewModel
+if not hasattr(SasviewModel, 'get_weights'):
+    def get_weights(self, name):
+        """
+        Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
+        """
+        # type: (str) -> Tuple(np.ndarray, np.ndarray)
+        _, x, w = self._get_weights(self._model_info.parameters[name])
+        return x, w
+
+    SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
 
@@ -2487,12 +2500,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             new_plots.append(residuals)
 
         if self.data_is_loaded:
-            # delete any plots associated with the data that were not updated (e.g. to remove beta(Q), S_eff(Q))
+            # delete any plots associated with the data that were not updated
+            # (e.g. to remove beta(Q), S_eff(Q))
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
             pass
         else:
-            # delete theory items for the model, in order to get rid of any redundant items, e.g. beta(Q), S_eff(Q)
+            # delete theory items for the model, in order to get rid of any
+            # redundant items, e.g. beta(Q), S_eff(Q)
             self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
+
+        # Create plots for parameters with enabled polydispersity
+        for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
+            data_id = fitted_data.id.split()
+            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            data_name = fitted_data.name.split()
+            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
+            self.createNewIndex(plot)
+            new_plots.append(plot)
 
         # Create plots for intermediate product data
         plots = self.logic.new1DProductPlots(return_data, self.tab_id)
