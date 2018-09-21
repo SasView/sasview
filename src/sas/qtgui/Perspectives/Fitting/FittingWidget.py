@@ -2447,15 +2447,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if residuals is not None:
             new_plots.append(residuals)
 
-        model = return_data.get('model', None)
-        for plot in FittingUtilities.plotPolydispersities(model):
-            data_id = fitted_data.id.split()
-            plot.id = " ".join([data_id[0], plot.name] + data_id[1:])
-            data_name = fitted_data.name.split()
-            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
-            self.createNewIndex(plot)
-            new_plots.append(plot)
-
         if self.data_is_loaded:
             # delete any plots associated with the data that were not updated
             # (e.g. to remove beta(Q), S_eff(Q))
@@ -2465,6 +2456,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # delete theory items for the model, in order to get rid of any
             # redundant items, e.g. beta(Q), S_eff(Q)
             self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
+
+        # Create plots for parameters with enabled polydispersity
+        for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
+            data_id = fitted_data.id.split()
+            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            data_name = fitted_data.name.split()
+            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
+            self.createNewIndex(plot)
+            new_plots.append(plot)
 
         # Create plots for intermediate product data
         plots = self.logic.new1DProductPlots(return_data, self.tab_id)
