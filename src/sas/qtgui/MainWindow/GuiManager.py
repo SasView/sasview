@@ -424,6 +424,16 @@ class GuiManager(object):
         """
         Trigger definitions for all menu/toolbar actions.
         """
+        # disable not yet fully implemented actions
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionUndo.setEnabled(False)
+        self._workspace.actionRedo.setEnabled(False)
+        self._workspace.actionReset.setEnabled(False)
+        self._workspace.actionStartup_Settings.setEnabled(False)
+        self._workspace.actionImage_Viewer.setEnabled(False)
+        self._workspace.actionCombine_Batch_Fit.setEnabled(False)
+        self._workspace.actionFit_Results.setEnabled(False)
+
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
