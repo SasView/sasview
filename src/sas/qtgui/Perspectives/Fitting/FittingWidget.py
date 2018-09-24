@@ -2493,6 +2493,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
+        # assure the current index is set properly for batch
+        if len(self._logic) > 1:
+            for i, logic in enumerate(self._logic):
+                if logic.data.name in fitted_data.name:
+                    self.data_index = i
+
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
         new_plots = [fitted_data]
@@ -2557,8 +2563,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         weighted_data = self.addWeightingToData(fitted_data)
 
         self.createNewIndex(weighted_data)
+
         # Calculate difference between return_data and logic.data
-        self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.logic.data)
+        self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data)
         # Update the control
         chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
@@ -2568,6 +2575,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
+        if residuals_plot is None:
+            return
         residuals_plot.id = "Residual " + residuals_plot.id
         residuals_plot.plot_role = Data1D.ROLE_RESIDUAL
         self.createNewIndex(residuals_plot)

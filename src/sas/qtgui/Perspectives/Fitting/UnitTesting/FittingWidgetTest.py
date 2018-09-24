@@ -392,7 +392,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertFalse(self.widget.lstPoly.horizontalHeader().stretchLastSection())
 
         # Test tooltips
-        self.assertEqual(len(self.widget._poly_model.header_tooltips), 9)
+        self.assertEqual(len(self.widget._poly_model.header_tooltips), 8)
 
         header_tooltips = ['Select parameter for fitting',
                             'Enter polydispersity ratio (Std deviation/mean).\n'+
@@ -701,10 +701,9 @@ class FittingWidgetTest(unittest.TestCase):
         updateModelItem(item, test_data, "test")
         # Force same data into logic
         self.widget.data = item
+
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
-
-        self.widget.show()
 
         # Test no fitting params
         self.widget.main_params_to_fit = []

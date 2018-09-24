@@ -210,7 +210,7 @@ if __name__ == "__main__":
             else:
                 print("\nAll tests successful")
 
-        except KeyError:
+        except KeyError as ex:
             print("Failure : %s "%str(ex))
             print("ERROR: Incorrect suite name: %s " % suite)
             pass

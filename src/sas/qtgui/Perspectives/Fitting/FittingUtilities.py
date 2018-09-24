@@ -548,7 +548,10 @@ def plotResiduals(reference_data, current_data):
     residuals_dict = {"Data1D": residualsData1D,
                       "Data2D": residualsData2D}
 
-    residuals = residuals_dict[method_name](reference_data, data_copy)
+    try:
+        residuals = residuals_dict[method_name](reference_data, data_copy)
+    except ValueError:
+        return None
 
     theory_name = str(current_data.name.split()[0])
     res_name = reference_data.filename if reference_data.filename else reference_data.name
