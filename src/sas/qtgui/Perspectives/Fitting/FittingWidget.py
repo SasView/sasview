@@ -2593,7 +2593,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.communicate.plotUpdateSignal.emit([plot])
 
         # Update radius_effective if relevant
-        self.updateRadiusEffective(return_data)
+        self.updateEffectiveRadius(return_data)
 
     def complete2D(self, return_data):
         """
@@ -2613,7 +2613,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
 
-    def updateRadiusEffective(self, return_data):
+    def updateEffectiveRadius(self, return_data):
         """
         Given return data from sasmodels, update the effective radius parameter in the GUI table with the new
         calculated value as returned by sasmodels (if the value was returned).
