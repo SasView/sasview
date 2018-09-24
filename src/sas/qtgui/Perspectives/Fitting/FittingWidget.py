@@ -2593,35 +2593,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.communicate.plotUpdateSignal.emit([plot])
 
         # Update radius_effective if relevant
-        def updateRadiusEffective():
-            ER_mode_row = self.getRowFromName("radius_effective_mode")
-            if ER_mode_row is None:
-                return
-            try:
-                ER_mode = int(self._model_model.item(ER_mode_row, 1).text())
-            except ValueError:
-                logging.error("radius_effective_mode was set to an invalid value.")
-                return
-            if ER_mode < 1:
-                # does not need updating if it is not being computed
-                return
-
-            ER_row = self.getRowFromName("radius_effective")
-            if ER_row is None:
-                return
-
-            scalar_results = self.logic.getScalarIntermediateResults(return_data)
-            ER_value = scalar_results.get("effective_radius") # note name of key
-            if ER_value is None:
-                return
-            # ensure the model does not recompute when updating the value
-            self._model_model.blockSignals(True)
-            self._model_model.item(ER_row, 1).setText(str(ER_value))
-            self._model_model.blockSignals(False)
-            # ensure the view is updated immediately
-            self._model_model.layoutChanged.emit()
-
-        updateRadiusEffective()
+        self.updateRadiusEffective(return_data)
 
     def complete2D(self, return_data):
         """
@@ -2640,6 +2612,38 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update/generate plots
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
+
+    def updateRadiusEffective(self, return_data):
+        """
+        Given return data from sasmodels, update the effective radius parameter in the GUI table with the new
+        calculated value as returned by sasmodels (if the value was returned).
+        """
+        ER_mode_row = self.getRowFromName("radius_effective_mode")
+        if ER_mode_row is None:
+            return
+        try:
+            ER_mode = int(self._model_model.item(ER_mode_row, 1).text())
+        except ValueError:
+            logging.error("radius_effective_mode was set to an invalid value.")
+            return
+        if ER_mode < 1:
+            # does not need updating if it is not being computed
+            return
+
+        ER_row = self.getRowFromName("radius_effective")
+        if ER_row is None:
+            return
+
+        scalar_results = self.logic.getScalarIntermediateResults(return_data)
+        ER_value = scalar_results.get("effective_radius") # note name of key
+        if ER_value is None:
+            return
+        # ensure the model does not recompute when updating the value
+        self._model_model.blockSignals(True)
+        self._model_model.item(ER_row, 1).setText(str(ER_value))
+        self._model_model.blockSignals(False)
+        # ensure the view is updated immediately
+        self._model_model.layoutChanged.emit()
 
     def calculateResiduals(self, fitted_data):
         """
