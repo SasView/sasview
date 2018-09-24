@@ -310,8 +310,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         # Check if 2D model. If not, remove theta/phi
         if isinstance(model.data.sas_data, Data1D):
-            param_list.remove('theta')
-            param_list.remove('phi')
+            if 'theta' in param_list:
+                param_list.remove('theta')
+            if 'phi' in param_list:
+                param_list.remove('phi')
 
         rows = len(data)
         columns = len(param_list)
