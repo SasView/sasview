@@ -201,15 +201,7 @@ class GuiManager(object):
         """
         Open a local url in the default browser
         """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION + url
-        #WP: Added to handle OSX bundle docs
-        if os.path.isdir(location) == False:
-            sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-            location = sas_path+"/"+location
-        try:
-            webbrowser.open('file://' + os.path.realpath(location))
-        except webbrowser.Error as ex:
-            logging.warning("Cannot display help. %s" % ex)
+        GuiUtils.showHelp(url)
 
     def workspace(self):
         """

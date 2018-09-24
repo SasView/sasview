@@ -3,6 +3,7 @@ Allows users to modify the box slicer parameters.
 """
 import numpy
 import functools
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -85,9 +86,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Display generic data averaging help
         """
-        location = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
-        self.parent.showHelp(location)
-
+        url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
+        GuiUtils.showHelp(url)
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
