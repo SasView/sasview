@@ -205,7 +205,7 @@ class Plugin(PluginBase):
             except NoKnownLoaderException as e:
                 exception_occurred = True
                 error_message = "Loading data failed!\n" + e.message
-                file_errors[basename] = error_message
+                file_errors[basename] = [error_message]
             except Exception as e:
                 exception_occurred = True
                 file_err = "The Data file you selected could not be "
