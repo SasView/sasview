@@ -56,7 +56,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         #TODO: This is not what was inteded to be.
         if output_data is not None:
             # Set a table tooltip describing the model
-            model_name = list(output_data.keys())[0]
+            model_name = output_data[0][0].model.id
             self.tabWidget.setTabToolTip(0, model_name)
 
     def closeEvent(self, event):
