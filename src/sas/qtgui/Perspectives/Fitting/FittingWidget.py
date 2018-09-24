@@ -1055,6 +1055,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.custom_models = self.customModels()
         self.readCustomCategoryInfo()
+        self.onCategoriesChanged()
+
         # See if we need to update the combo in-place
         if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
 
@@ -1979,7 +1981,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for name, plug in self.custom_models.items():
             self.models[name] = plug
             plugin_list.append([name, True])
-        self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
+        if plugin_list:
+            self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
 
     def regenerateModelDict(self):
         """
