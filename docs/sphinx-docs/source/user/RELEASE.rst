@@ -585,6 +585,7 @@ Perspectives Available
   analytical model functions
 * Tools: provides a number of useful supplementary tools such as SLD
   calculation
+
 Fitting
 ^^^^^^^
 * Includes a large number of model functions, both form factors and structure factors.
@@ -626,6 +627,7 @@ Fitting
   a single model and provides the results in a tabular form suitable for saving
   or plotting the evolution of the fit parameters with error bars (from within
   the application).
+
 Tools
 ^^^^^
 * A scattering length density calculator,including some X-ray information
@@ -636,6 +638,7 @@ Tools
   TOF effects is provided
 * A slit size calculator optimized for Anton Paar Saxess is provided.
 * A kiessig fringe thickness calculator is provided
+
 Plots and plot management
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 * A 3D graphing option (for 2d data/results) is provided with the view
@@ -650,6 +653,7 @@ Plots and plot management
   plot can currently only have a single plot).
 * Extensive context sensitive plot/fitting/manipulation options are available
   through a right mouse click pop-up menu on plots.
+
 Data management
 ^^^^^^^^^^^^^^^
 * Supports 2 + column 1D ASCII data, NIST 1D and 2D data, and canSAS data
@@ -665,12 +669,14 @@ Data management
   not require access to the explorer/manager and can be accessed through
   right click menus and the toolbar.  The data explorer can be re-started
   from the menu bar.
+
 Data manipulation
 ^^^^^^^^^^^^^^^^^
 * Support various 2D averaging methods : Circular, sectors, annular,
   boxsum, boxQx and boxQy.
 * A 2D data maks editor is provided
 * 2D mask can be applied to the circular averaging.
+
 Miscellaneous features
 ^^^^^^^^^^^^^^^^^^^^^^
 * Limited reports can be generated in pdf format
