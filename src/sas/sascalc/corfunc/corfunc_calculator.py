@@ -87,7 +87,7 @@ class CorfuncCalculator(object):
             return
         # Only process data of the class Data1D
         if not issubclass(data.__class__, Data1D):
-            raise ValueError("Data must be of the type DataLoader.Data1D")
+            raise ValueError("Correlation function cannot be computed with 2D Data.")
 
         # Prepare the data
         new_data = Data1D(x=data.x, y=data.y)

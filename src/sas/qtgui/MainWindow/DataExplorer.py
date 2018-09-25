@@ -397,7 +397,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return
 
         # Notify the GuiManager about the send request
-        self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+        try:
+            self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            logging.error(msg)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            retval = msgbox.exec_()
+
 
     def freezeCheckedData(self):
         """

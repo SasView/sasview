@@ -782,13 +782,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # plot loaded file
         if not isinstance(self._data, Data1D):
-            msg = "Error(s) occurred: Invariant cannot be computed with 2D data."
-            raise AttributeError(msg)
+            msg = "Invariant cannot be computed with 2D data."
+            raise ValueError(msg)
 
         try:
             filename = data.filename
         except:
-            msg = 'No filename'
+            msg = 'No filename chosen.'
             raise ValueError(msg)
         try:
             qmin = min(self._data.x)
