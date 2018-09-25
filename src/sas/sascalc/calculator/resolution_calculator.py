@@ -1007,7 +1007,7 @@ class ResolutionCalculator(object):
         try:
             detector_offset = self.sample2detector_distance[1]
         except:
-            logger.error(sys.exc_value)
+            logger.error(str(sys.exc_info()[1]))
 
         # detector size in [no of pix_x,no of pix_y]
         detector_pix_nums_x = self.detector_size[0]

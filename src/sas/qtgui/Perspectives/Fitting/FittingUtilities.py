@@ -483,8 +483,6 @@ def residualsData1D(reference_data, current_data):
                 if x_value in x_current:
                     endl = i
                     break
-            # make sure we have correct lengths
-            assert len(x_current) == len(x_reference[begin:end-endl])
 
             y = (fn - gn[begin:end-endl])/en
             residuals.y = y

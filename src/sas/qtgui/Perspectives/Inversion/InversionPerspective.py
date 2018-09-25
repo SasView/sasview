@@ -464,9 +464,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             # Create initial internal mappings
             self.logic.data = GuiUtils.dataFromItem(data)
             if not isinstance(self.logic.data, Data1D):
-                msg = "P(r) perspective works for 1D data only"
-                logger.warning(msg)
-                continue
+                msg = "P(r) perspective cannot be computed with 2D data."
+                logger.error(msg)
+                raise ValueError(msg)
             # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)

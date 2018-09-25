@@ -90,11 +90,12 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
                               range(self.widget.cbOptionsCalc.count())],
                              ['Fixed orientation', 'Debye full avg.'])
 
-        self.assertEqual(self.widget.cbShape.count(), 2)
+        self.assertEqual(self.widget.cbShape.count(), 1)
         self.assertEqual(self.widget.cbShape.currentIndex(), 0)
         self.assertListEqual([self.widget.cbShape.itemText(i) for i in
                               range(self.widget.cbShape.count())],
-                             ['Rectangular', 'Ellipsoid'])
+                             ['Rectangular'])
+                             #['Rectangular', 'Ellipsoid'])
         self.assertFalse(self.widget.cbShape.isEditable())
         # disable buttons
         self.assertFalse(self.widget.cmdSave.isEnabled())

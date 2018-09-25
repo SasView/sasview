@@ -64,6 +64,7 @@ datas.append(('../src/sas/sasview/local_config.py','sas/sasview'))
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
 datas.append((os.path.join('..', '..','sasmodels','sasmodels'),'sasmodels'))
 datas.append((os.path.join('..', 'src','sas','sasgui','perspectives','fitting','plugin_models'),'plugin_models'))
+datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','jedi'),'jedi'))
 print("HW------WH")
 #TRN datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
 datas.append((os.path.join(PYTHON_LOC,'plugins','platforms'),'platforms'))

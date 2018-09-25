@@ -94,7 +94,8 @@ class Plotter2DWidget(PlotterBase):
         if isinstance(data, Data2D):
             self.data = data
 
-        assert self._data
+        if not self._data or data is None:
+            return
 
         # Toggle the scale
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()

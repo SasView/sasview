@@ -1535,7 +1535,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         elapsed = result[1]
-        if self.calc_fit._interrupting:
+        if self.calc_fit is not None and self.calc_fit._interrupting:
             msg = "Fitting cancelled by user after: %s s." % GuiUtils.formatNumber(elapsed)
             logger.warning("\n"+msg+"\n")
         else:
@@ -2411,8 +2411,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for key, value in self.poly_params.items():
                 model.setParam(key, value)
         # add magnetic params if asked
-        if self.chkMagnetism.isChecked():
-            for key, value in self.magnet_params.items() and self._magnet_model.rowCount() > 0:
+        if self.chkMagnetism.isChecked() and self._magnet_model.rowCount() > 0:
+            for key, value in self.magnet_params.items():
                 model.setParam(key, value)
 
     def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
@@ -2490,7 +2490,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Bring the GUI to normal state
         self.enableInteractiveElements()
         if return_data is None:
-            self.calculateDataFailed("Results not available.")
             return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
@@ -2542,7 +2541,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Bring the GUI to normal state
         self.enableInteractiveElements()
 
+        if return_data is None:
+            return
+
         fitted_data = self.logic.new2DPlot(return_data)
+        # assure the current index is set properly for batch
+        if len(self._logic) > 1:
+            for i, logic in enumerate(self._logic):
+                if logic.data.name in fitted_data.name:
+                    self.data_index = i
+
         residuals = self.calculateResiduals(fitted_data)
         self.model_data = fitted_data
         new_plots = [fitted_data]

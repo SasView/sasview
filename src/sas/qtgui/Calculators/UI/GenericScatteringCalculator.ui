@@ -163,11 +163,6 @@
             <string>Rectangular</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Ellipsoid</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item row="1" column="2">

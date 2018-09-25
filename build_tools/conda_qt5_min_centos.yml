@@ -2,7 +2,7 @@ name: qt5_centos
 channels:
   - conda-forge
 dependencies:
- - matplotlib
+ - matplotlib=2
  - scipy
  - hdf5
  - h5py
