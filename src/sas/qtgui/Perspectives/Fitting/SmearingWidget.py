@@ -60,6 +60,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         # Data from the widget
         self.data = None
         self.current_smearer = None
+        self.kernel_model = None
 
         # Let only floats in the line edits
         self.txtSmearDown.setValidator(GuiUtils.DoubleValidator())
@@ -109,17 +110,22 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.data = data
         if data is None:
             self.setElementsVisibility(False)
-        elif isinstance(data, Data1D):
-            self.cbSmearing.addItems(SMEARING_1D)
-        else:
-            self.cbSmearing.addItems(SMEARING_2D)
-        self.cbSmearing.setCurrentIndex(0)
 
     def updateKernelModel(self, kernel_model=None):
         """
         Update the model
         """
         self.kernel_model = kernel_model
+        if self.data is None:
+            self.setElementsVisibility(False)
+            return
+        if self.kernel_model is None:
+            return
+        elif isinstance(self.data, Data1D):
+            self.cbSmearing.addItems(SMEARING_1D)
+        else:
+            self.cbSmearing.addItems(SMEARING_2D)
+        self.cbSmearing.setCurrentIndex(0)
 
     def smearer(self):
         """ Returns the current smearer """
