@@ -62,6 +62,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
+        self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
+        self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
+
         # Perspective window not allowed to close by default
         self._allow_close = False
 
@@ -93,6 +96,12 @@ class FittingWindow(QtWidgets.QTabWidget):
         assert isinstance(value, bool)
 
         self._allow_close = value
+
+    def onParamCopy(self):
+        self.currentTab.onParameterCopy("")
+
+    def onParamPaste(self):
+        self.currentTab.onParameterPaste()
 
     def closeEvent(self, event):
         """

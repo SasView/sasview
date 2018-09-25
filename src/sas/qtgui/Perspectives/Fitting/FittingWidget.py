@@ -555,8 +555,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.communicate.saveAnalysisSignal.connect(self.savePageState)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
-        self.communicate.copyFitParamsSignal.connect(self.onParameterCopy)
-        self.communicate.pasteFitParamsSignal.connect(self.onParameterPaste)
 
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
