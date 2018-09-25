@@ -94,7 +94,7 @@ class Plotter2DWidget(PlotterBase):
         if isinstance(data, Data2D):
             self.data = data
 
-        if not self._data or data is None:
+        if not self._data:
             return
 
         # Toggle the scale

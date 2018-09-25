@@ -123,7 +123,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.plotter.defaultContextMenu()
 
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 6)
+        self.assertEqual(len(actions), 4)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
@@ -146,16 +146,16 @@ class PlotterBaseTest(unittest.TestCase):
         # Make sure clipboard got updated.
         self.assertTrue(self.clipboard_called)
 
-        # Trigger toggle navigation bar and make sure the method is called
-        self.assertEqual(actions[4].text(), "Toggle Navigation Menu")
-        isShown = self.plotter.toolbar.isVisible()
-        self.assertTrue(isShow)
-        actions[4].trigger()
-        isShown = self.plotter.toolbar.isVisible()
-        self.assertFalse(isShow)
-        actions[4].trigger()
-        isShown = self.plotter.toolbar.isVisible()
-        self.assertTrue(isShow)
+        ## Trigger toggle navigation bar and make sure the method is called
+        #self.assertEqual(actions[4].text(), "Toggle Navigation Menu")
+        #isShown = self.plotter.toolbar.isVisible()
+        #self.assertTrue(isShow)
+        #actions[4].trigger()
+        #isShown = self.plotter.toolbar.isVisible()
+        #self.assertFalse(isShow)
+        #actions[4].trigger()
+        #isShown = self.plotter.toolbar.isVisible()
+        #self.assertTrue(isShow)
 
 
     def testOnWindowsTitle(self):
