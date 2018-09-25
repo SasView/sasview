@@ -60,7 +60,7 @@ class GuiManagerTest(unittest.TestCase):
 
         self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
         self.assertIsInstance(self.manager.aboutWidget, AboutBox)
-        self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
+        #self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
 
     def skip_testLogging(self):
         """

@@ -17,6 +17,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
+    windowClosedSignal = QtCore.pyqtSignal()
     def __init__(self, parent = None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
@@ -53,7 +54,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
-        #TODO: This is not what was inteded to be.
         if output_data is not None:
             # Set a table tooltip describing the model
             model_name = output_data[0][0].model.id
@@ -63,8 +63,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
-        # Maybe we should just minimize
-        self.setWindowState(QtCore.Qt.WindowMinimized)
+        # notify the parent so it hides this window
+        self.windowClosedSignal.emit()
         event.ignore()
 
     def addToolbarActions(self):
@@ -152,7 +152,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Create a new tab with batch fitting results
         """
-        self.addTabPage()
+        if self.has_data:
+            self.addTabPage()
         # Update the new widget
         # Fill in the table from input data in the last/newest page
         assert(self.tables)

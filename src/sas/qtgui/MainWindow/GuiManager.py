@@ -137,6 +137,11 @@ class GuiManager(object):
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
         self.grid_window = None
+        self.grid_window = BatchOutputPanel(parent=self)
+        self.grid_subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
+        self.grid_subwindow.setVisible(False)
+        self.grid_window.windowClosedSignal.connect(lambda: self.grid_subwindow.setVisible(False))
+
         self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
         self._workspace.actionHide_Toolbar.setText("Show Toolbar")
 
@@ -615,18 +620,9 @@ class GuiManager(object):
         """
         Display/redisplay the batch fit viewer
         """
-        if self.grid_window is None:
-            self.grid_window = BatchOutputPanel(parent=self, output_data=output_data)
-            subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
-
-            #self.grid_window = BatchOutputPanel(parent=self, output_data=output_data)
-            self.grid_window.show()
-            return
+        self.grid_subwindow.setVisible(True)
         if output_data:
             self.grid_window.addFitResults(output_data)
-        self.grid_window.show()
-        if self.grid_window.windowState() == Qt.WindowMinimized:
-            self.grid_window.setWindowState(Qt.WindowActive)
 
     def actionHide_Toolbar(self):
         """
