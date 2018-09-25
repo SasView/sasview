@@ -297,7 +297,7 @@ class FittingWindow(QtWidgets.QTabWidget):
                 continue
             page_name = "Page%s"%tab_object.tab_id
             if any([page_name in tab for tab in tabs_for_fitting]):
-                tab_object.setFittingStarted()
+                tab_object.disableInteractiveElements()
 
         pass
 
@@ -314,7 +314,7 @@ class FittingWindow(QtWidgets.QTabWidget):
                 continue
             page_name = "Page%s"%tab_object.tab_id
             if any([page_name in tab for tab in tabs_for_fitting]):
-                tab_object.setFittingStopped()
+                tab_object.enableInteractiveElements()
 
         pass
 

@@ -1537,7 +1537,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         elapsed = result[1]
-        if self.calc_fit._interrupting:
+        if self.calc_fit is not None and self.calc_fit._interrupting:
             msg = "Fitting cancelled by user after: %s s." % GuiUtils.formatNumber(elapsed)
             logger.warning("\n"+msg+"\n")
         else:
