@@ -74,7 +74,8 @@ class PlotterWidget(PlotterBase):
         # Data1D
         if isinstance(data, Data1D):
             self.data = data
-        assert(self._data)
+        if not self._data or data is None:
+            return
 
         is_fit = (self.data.id=="fit")
 
