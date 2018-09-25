@@ -516,15 +516,15 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             cal_res.addCallback(self.complete)
             cal_res.addErrback(self.calculateFailed)
 
-            # logging.info("Computation is in progress...")
             self.cmdCompute.setText('Wait...')
             self.cmdCompute.setEnabled(False)
         except:
             raise
 
     def calculateFailed(self, reason):
-        print("calculateFailed Failed with:\n", reason)
-        pass
+        self.cmdCompute.setText('Compute')
+        self.cmdCompute.setEnabled(True)
+        logging.error(str(reason))
 
     def complete(self, image):
         """

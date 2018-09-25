@@ -31,6 +31,7 @@ _Q1D_MIN = 0.001
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
     trigger_plot_3d = QtCore.pyqtSignal()
+    calculationFinishedSignal = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
@@ -99,6 +100,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # plots - 3D in real space
         self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
+
+        # plots - 3D in real space
+        self.calculationFinishedSignal.connect(self.plot_1_2d)
 
         # TODO the option Ellipsoid has not been implemented
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
@@ -544,7 +548,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.cmdCompute.setEnabled(False)
             d = threads.deferToThread(self.complete, inputs, self._update)
             # Add deferred callback for call return
-            d.addCallback(self.plot_1_2d)
+            #d.addCallback(self.plot_1_2d)
+            d.addCallback(self.calculateComplete)
             d.addErrback(self.calculateFailed)
         except:
             log_msg = "{}. stop".format(sys.exc_info()[1])
@@ -562,6 +567,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         print("Calculate Failed with:\n", reason)
         pass
+
+    def calculateComplete(self, d):
+        """
+        Notify the main thread
+        """
+        self.calculationFinishedSignal.emit()
 
     def complete(self, input, update=None):
         """
@@ -628,7 +639,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         plot3D.show()
         self.graph_num += 1
 
-    def plot_1_2d(self, d):
+    def plot_1_2d(self):
         """ Generate 1D or 2D plot, called in Compute"""
         if self.is_avg or self.is_avg is None:
             data = Data1D(x=self.data.x, y=self.data_to_plot)
@@ -636,7 +647,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
             data.yaxis('\\rm{Intensity}', 'cm^{-1}')
-            plot1D = Plotter(self)
+            plot1D = Plotter(self, quickplot=True)
             plot1D.plot(data)
             plot1D.show()
             self.graph_num += 1
@@ -654,7 +665,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           err_image=self.data.err_data)
             data.title = "GenSAS {}  #{} 2D".format(self.file_name,
                                                     int(self.graph_num))
-            plot2D = Plotter2D(self)
+            plot2D = Plotter2D(self, quickplot=True)
             plot2D.plot(data)
             plot2D.show()
             self.graph_num += 1
@@ -823,6 +834,18 @@ class Plotter3DWidget(PlotterBase):
 
         self.figure.canvas.resizing = False
         self.figure.canvas.draw()
+
+    def createContextMenu(self):
+        """
+        Define common context menu and associated actions for the MPL widget
+        """
+        return
+
+    def createContextMenuQuick(self):
+        """
+        Define context menu and associated actions for the quickplot MPL widget
+        """
+        return
 
 
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
