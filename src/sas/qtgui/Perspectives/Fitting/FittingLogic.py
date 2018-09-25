@@ -222,6 +222,17 @@ class FittingLogic(object):
                          component=name))
         return plots
 
+    def getScalarIntermediateResults(self, return_data):
+        """
+        Returns a dict of scalar-only intermediate results from the return data.
+        """
+        res = {}
+        for name, int_res in return_data["intermediate_results"].items():
+            if isinstance(int_res, np.ndarray):
+                continue
+            res[name] = int_res
+        return res
+
     def computeDataRange(self):
         """
         Wrapper for calculating the data range based on local dataset
