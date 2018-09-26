@@ -85,7 +85,7 @@ class Plotter2DWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
         self.title(title=data.title)
 
-    def plot(self, data=None, marker=None, show_colorbar=True):
+    def plot(self, data=None, marker=None, show_colorbar=True, update=False):
         """
         Plot 2D self._data
         marker - unused
@@ -108,7 +108,8 @@ class Plotter2DWidget(PlotterBase):
                       xmax=self.xmax,
                       ymin=self.ymin, ymax=self.ymax,
                       cmap=self.cmap, zmin=zmin_2D_temp,
-                      zmax=zmax_2D_temp, show_colorbar=show_colorbar)
+                      zmax=zmax_2D_temp, show_colorbar=show_colorbar,
+                      update=update)
 
     def calculateDepth(self):
         """
@@ -389,7 +390,8 @@ class Plotter2DWidget(PlotterBase):
         self.plot()
 
     def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
-                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP, show_colorbar=True):
+                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP, show_colorbar=True,
+                 update=False):
         """
         Render and show the current data
         """
@@ -444,11 +446,10 @@ class Plotter2DWidget(PlotterBase):
             if self.vmin is not None:
                 zmin_temp = self.vmin
                 zmax_temp = self.vmax
-            if self.im is not None:
+            if self.im is not None and update:
                 self.im.set_data(output)
             else:
                 self.im = self.ax.imshow(output, interpolation='nearest',
-                                # origin='lower',
                                 vmin=zmin_temp, vmax=zmax_temp,
                                 cmap=self.cmap,
                                 extent=(self.xmin, self.xmax,

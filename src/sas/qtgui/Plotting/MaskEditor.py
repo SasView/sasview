@@ -226,7 +226,7 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
             self.current_slicer = None
 
         # modify imshow data
-        self.plotter.plot(data=temp_data)
+        self.plotter.plot(data=temp_data, update=True)
         self.plotter.draw()
 
         self.subplot = self.plotter.ax
