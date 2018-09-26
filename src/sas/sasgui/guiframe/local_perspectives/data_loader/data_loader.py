@@ -204,7 +204,7 @@ class Plugin(PluginBase):
                                  info="info")
             except NoKnownLoaderException as e:
                 exception_occurred = True
-                error_message = "Loading data failed!\n" + e.message
+                error_message = "Loading data failed!" + e.message
                 file_errors[basename] = [error_message]
             except Exception as e:
                 exception_occurred = True
@@ -223,7 +223,6 @@ class Plugin(PluginBase):
                 error_message += "loading {}:\n".format(filename)
                 for message in error_array:
                     error_message += message + "\n"
-                error_message = error_message[:-1]
             self.load_complete(output=output,
                                message=error_message,
                                info="error")
