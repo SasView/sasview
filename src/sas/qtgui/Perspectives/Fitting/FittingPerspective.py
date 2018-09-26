@@ -64,6 +64,9 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
         self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
+        self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
+        self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
+
 
         # Perspective window not allowed to close by default
         self._allow_close = False
@@ -102,6 +105,12 @@ class FittingWindow(QtWidgets.QTabWidget):
 
     def onParamPaste(self):
         self.currentTab.onParameterPaste()
+
+    def onExcelCopy(self):
+        self.currentTab.onParameterCopy("Excel")
+
+    def onLatexCopy(self):
+        self.currentTab.onParameterCopy("Latex")
 
     def closeEvent(self, event):
         """

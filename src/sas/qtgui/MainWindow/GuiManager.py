@@ -596,14 +596,14 @@ class GuiManager(object):
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyFitParamsSignal.emit("Excel")
+        self.communicate.copyExcelFitParamsSignal.emit("Excel")
 
     def actionLatex(self):
         """
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyFitParamsSignal.emit("Latex")
+        self.communicate.copyLatexFitParamsSignal.emit("Latex")
 
     #============ VIEW =================
     def actionShow_Grid_Window(self):
