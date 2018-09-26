@@ -334,12 +334,21 @@ class Plotter2DWidget(PlotterBase):
         self.figure.canvas.draw()
         self.slicer.update()
 
+        def boxWidgetClosed():
+            # Need to disconnect the signal!!
+            self.boxwidget.closeWidgetSignal.disconnect()
+            # reset box on "Edit Slicer Parameters" window close
+            self.manager.parent.workspace().removeSubWindow(self.boxwidget_subwindow)
+            self.boxwidget = None
+
         # Get the BoxSumCalculator model.
         self.box_sum_model = self.slicer.model()
         # Pass the BoxSumCalculator model to the BoxSum widget
         self.boxwidget = BoxSum(self, model=self.box_sum_model)
         # Add the plot to the workspace
-        self.manager.parent.workspace().addSubWindow(self.boxwidget)
+        self.boxwidget_subwindow = self.manager.parent.workspace().addSubWindow(self.boxwidget)
+        self.boxwidget.closeWidgetSignal.connect(boxWidgetClosed)
+
         self.boxwidget.show()
 
     def onBoxAveragingX(self):

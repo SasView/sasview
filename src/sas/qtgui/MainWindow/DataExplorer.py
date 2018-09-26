@@ -623,6 +623,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # plots to show
         new_plots = []
 
+        # Get the main data plot
+        main_data = GuiUtils.dataFromItem(plot_item.parent())
+        if main_data is None:
+            # Try the current item
+            main_data = GuiUtils.dataFromItem(plot_item)
+
+        # Make sure main data for 2D is always displayed
+        if main_data and not self.isPlotShown(main_data):
+            if isinstance(main_data, Data2D):
+                self.plotData([(plot_item, main_data)])
+
         # Check if this is merely a plot update
         if self.updatePlot(plot_to_show):
             return
@@ -637,16 +648,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         else:
             # Plots with main data points on the same chart
             # Get the main data plot
-            main_data = GuiUtils.dataFromItem(plot_item.parent())
-            if main_data is None:
-                # Try the current item
-                main_data = GuiUtils.dataFromItem(plot_item)
-            if main_data is not None:
+            if main_data and not self.isPlotShown(main_data):
                 new_plots.append((plot_item, main_data))
             new_plots.append((plot_item, plot_to_show))
 
         if new_plots:
             self.plotData(new_plots)
+
+    def isPlotShown(self, plot):
+        """
+        Checks currently shown plots and returns true if match
+        """
+        if not hasattr(plot, 'name'):
+            return False
+        ids_vals = [val.data.name for val in self.active_plots.values()]
+
+        return plot.name in ids_vals
 
     def addDataPlot2D(self, plot_set, item):
         """
