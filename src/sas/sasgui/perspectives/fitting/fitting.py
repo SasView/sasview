@@ -376,7 +376,7 @@ class Plugin(PluginBase):
                         if index == -1:
                             index = 0
                         page.structurebox.SetSelection(index)
-                        page._on_select_model()
+                        page._on_select_model(keep_pars=True)
         except Exception:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
