@@ -113,7 +113,8 @@ class PlotterBase(QtWidgets.QWidget):
         layout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
-            self.toolbar.show()
+            # self.toolbar.show()
+            self.toolbar.hide() # hide for the time being
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
         else:
@@ -219,8 +220,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage = self.contextMenu.addAction("Save Image")
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
-        self.contextMenu.addSeparator()
-        self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
+        #self.contextMenu.addSeparator()
+        #self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.contextMenu.addSeparator()
 
 
@@ -228,7 +229,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
-        self.actionToggleMenu.triggered.connect(self.onToggleMenu)
+        #self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenu(self):
         """
@@ -380,10 +381,13 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Toggle navigation menu visibility in the chart
         """
-        if self.toolbar.isVisible():
-            self.toolbar.hide()
-        else:
-            self.toolbar.show()
+        self.toolbar.hide()
+        # Current toolbar menu is too buggy.
+        # Comment out until we support 3.x, then recheck.
+        #if self.toolbar.isVisible():
+        #    self.toolbar.hide()
+        #else:
+        #    self.toolbar.show()
 
     def offset_graph(self):
         """

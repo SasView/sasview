@@ -46,7 +46,7 @@ class MainWindowTest(unittest.TestCase):
         tmp_main = MainSasViewWindow(None)
         tmp_main.showMaximized()
         # See that only one subwindow is up
-        self.assertEqual(len(tmp_main.workspace.subWindowList()), 1)
+        self.assertEqual(len(tmp_main.workspace.subWindowList()), 2)
         # and that the subwindow is the fitting perspective
         self.assertIsInstance(tmp_main.workspace.subWindowList()[0].widget(),
                               FittingPerspective.FittingWindow)

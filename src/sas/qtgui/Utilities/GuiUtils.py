@@ -28,7 +28,6 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.Utilities import CustomDir
 
-## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
         HELP_DIRECTORY_LOCATION = "doc"
 else:
