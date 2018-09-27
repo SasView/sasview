@@ -2105,6 +2105,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             kernel_module = generate.load_kernel_module(name)
         except ModuleNotFoundError as ex:
             pass
+        except FileNotFoundError as ex:
+            # can happen when name attribute not the same as actual filename
+            pass
 
         if kernel_module is None:
             # mismatch between "name" attribute and actual filename.
