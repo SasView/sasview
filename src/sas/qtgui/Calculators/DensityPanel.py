@@ -54,8 +54,8 @@ class DensityPanel(QtWidgets.QDialog):
         self.ui = Ui_DensityPanel()
         self.ui.setupUi(self)
 
-        # no reason to have this widget resizable
-        self.setFixedSize(self.minimumSizeHint())
+        #self.setFixedSize(self.minimumSizeHint())
+        self.resize(self.minimumSizeHint())
 
         # set validators
         #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
@@ -143,8 +143,9 @@ class DensityPanel(QtWidgets.QDialog):
     def formulaChanged(self, current_text):
         try:
             molarMass = toMolarMass(current_text)
-            molarMass = formatNumber(molarMass, high=True)
-            self.model.item(MODEL.MOLAR_MASS).setText(molarMass)
+            # if this doesn't fail, update the model item for formula
+            # so related values can get recomputed
+            self.model.item(MODEL.MOLECULAR_FORMULA).setText(current_text)
 
         except (ArithmeticError, ValueError):
             self.model.item(MODEL.MOLAR_VOLUME).setText("")
