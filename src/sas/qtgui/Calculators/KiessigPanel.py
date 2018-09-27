@@ -20,12 +20,15 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         self.manager = parent
         self.thickness = KiessigThicknessCalculator()
 
-        self.deltaq_in.setText("0.05")
+        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.deltaq_in.setValidator(QtGui.QRegExpValidator(rx, self.deltaq_in))
 
         # signals
         self.helpButton.clicked.connect(self.onHelp)
-        self.computeButton.clicked.connect(self.onCompute)
+        self.computeButton.setVisible(False)
         self.closeButton.clicked.connect(self.onClose)
+        self.deltaq_in.textChanged.connect(self.onCompute)
+        self.deltaq_in.setText("0.05")
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())

@@ -252,7 +252,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         # check updated values in ui, read from loaded file
         # TODO to be changed
         self.assertEqual(self.widget.txtData.text(), 'diamdsml.pdb')
-        self.assertEqual(self.widget.txtTotalVolume.text(), '170.950584161')
+        self.assertAlmostEqual(float(self.widget.txtTotalVolume.text()), 170.95058, 5)
         self.assertEqual(self.widget.txtNoPixels.text(), '18')
 
         # check disabled TextEdits according to data format
