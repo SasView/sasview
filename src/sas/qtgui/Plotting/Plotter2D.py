@@ -228,7 +228,8 @@ class Plotter2DWidget(PlotterBase):
             return
         def slicer_closed():
             # Need to disconnect the signal!!
-            self.slicer_widget.close_signal.disconnect()
+            self.slicer_widget.closeWidgetSignal.disconnect()
+            self.manager.parent.workspace().removeSubWindow(self.slicer_subwindow)
             # reset slicer_widget on "Edit Slicer Parameters" window close
             self.slicer_widget = None
 
@@ -236,9 +237,9 @@ class Plotter2DWidget(PlotterBase):
         # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(model=self.param_model,
                                               validate_method=self.slicer.validate)
-        self.slicer_widget.close_signal.connect(slicer_closed)
+        self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
-        self.manager.parent.workspace().addSubWindow(self.slicer_widget)
+        self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
 
         self.slicer_widget.show()
 
