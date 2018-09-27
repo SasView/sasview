@@ -463,7 +463,9 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 sample2detector_distance)
 
             detector_size = self.txtDetectorSize.text()
-            detector_size = self._string2list(detector_size)
+            det_size = self._string2list(detector_size)
+            # detector sizes must be ints. recast.
+            detector_size = [int(i) for i in det_size]
             self.resolution.set_detector_size(detector_size)
 
             detector_pix_size = self.txtDetectorPixSize.text()
