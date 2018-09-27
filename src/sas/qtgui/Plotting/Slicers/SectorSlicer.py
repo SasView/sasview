@@ -166,7 +166,9 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.group_id = "2daverage" + self.base.data.name
         new_plot.id = "SectorQ" + self.base.data.name
         new_plot.is_data = True
-        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
+        if self._item.parent() is not None:
+            item = self._item.parent()
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 

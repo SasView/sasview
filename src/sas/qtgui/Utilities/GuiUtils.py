@@ -499,6 +499,20 @@ def plotsFromFilename(filename, model_item):
 
     return plot_data
 
+def getChildrenFromItem(root):
+    """
+    Recursively go down the model item looking for all children
+    """
+    def recurse(parent):
+        for row in range(parent.rowCount()):
+            for column in range(parent.columnCount()):
+                child = parent.child(row, column)
+                yield child
+                if child.hasChildren():
+                    yield from recurse(child)
+    if root is not None:
+        yield from recurse(root)
+
 def plotsFromCheckedItems(model_item):
     """
     Returns the list of plots for items in the model which are checked
@@ -506,20 +520,20 @@ def plotsFromCheckedItems(model_item):
     assert isinstance(model_item, QtGui.QStandardItemModel)
 
     plot_data = []
+
     # Iterate over model looking for items with checkboxes
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
+        if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+            data = item.child(0).data()
+            plot_data.append((item, data))
 
-        # Going 1 level deeper only
-        for index_2 in range(item.rowCount()):
-            item_2 = item.child(index_2)
-            if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
-                # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append((item_2, item_2.child(0).data()))
+        items = list(getChildrenFromItem(item))
 
-        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-            # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append((item, item.child(0).data()))
+        for it in items:
+            if it.isCheckable() and it.checkState() == QtCore.Qt.Checked:
+                data = it.child(0).data()
+                plot_data.append((it, data))
 
     return plot_data
 

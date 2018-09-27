@@ -142,7 +142,10 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
-        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
         if self.update_model:

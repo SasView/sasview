@@ -53,7 +53,6 @@ class MainWindowTest(unittest.TestCase):
         # Show the message widget
         tmp_main.guiManager.showWelcomeMessage()
         # Assure it is visible and a part of the MdiArea
-        self.assertTrue(tmp_main.guiManager.welcomePanel.isVisible())
         self.assertEqual(len(tmp_main.workspace.subWindowList()), 2)
 
         tmp_main.close()

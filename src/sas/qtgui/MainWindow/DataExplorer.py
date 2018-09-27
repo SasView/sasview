@@ -949,19 +949,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert isinstance(checked, bool)
 
         types = (None, Data1D, Data2D)
-        assert dimension in types
+        if not dimension in types:
+            return
 
         for index in range(model.rowCount()):
             item = model.item(index)
-            if dimension is not None and not isinstance(GuiUtils.dataFromItem(item), dimension):
-                continue
             if item.isCheckable() and item.checkState() != mode:
-                item.setCheckState(mode)
-            # look for all children
-            for inner_index in range(item.rowCount()):
-                child = item.child(inner_index)
-                if child.isCheckable() and child.checkState() != mode:
-                    child.setCheckState(mode)
+                data = item.child(0).data()
+                if dimension is None or isinstance(data, dimension):
+                    item.setCheckState(mode)
+
+            items = list(GuiUtils.getChildrenFromItem(item))
+
+            for it in items:
+                if it.isCheckable() and it.checkState() != mode:
+                    data = it.child(0).data()
+                    if dimension is None or isinstance(data, dimension):
+                        it.setCheckState(mode)
 
     def selectData(self, index):
         """
@@ -1413,11 +1417,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # If so, delete them
         current_tab_name = model_item.text()
         for current_index in range(self.theory_model.rowCount()):
-            #if current_tab_name in self.theory_model.item(current_index).text():
             if current_tab_name == self.theory_model.item(current_index).text():
                 self.theory_model.removeRow(current_index)
                 break
-
         # send in the new item
         self.theory_model.appendRow(model_item)
 
