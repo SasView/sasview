@@ -468,10 +468,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def togglePoly(self, isChecked):
         """ Enable/disable the polydispersity tab """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
+        # Check if any parameters are ready for fitting
+        self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
+        # Check if any parameters are ready for fitting
+        self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def toggleChainFit(self, isChecked):
         """ Enable/disable chain fitting """
@@ -1574,7 +1578,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # add polydisperse/magnet parameters if asked
         self.updateKernelModelWithExtraParams(model)
 
-        params_to_fit = self.main_params_to_fit
+        params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
             params_to_fit += self.poly_params_to_fit
         if self.chkMagnetism.isChecked():
@@ -2243,10 +2247,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Finds out if there are any parameters ready to be fitted
         """
-        return (self.main_params_to_fit!=[]
-                or self.poly_params_to_fit!=[]
-                or self.magnet_params_to_fit != []) and \
-                self.logic.data_is_loaded
+        if not self.logic.data_is_loaded:
+            return False
+        if self.main_params_to_fit:
+            return True
+        if self.chkPolydispersity.isChecked() and self.poly_params_to_fit:
+            return True
+        if self.chkMagnetism.isChecked() and self.magnet_params_to_fit:
+            return True
+        return False
 
     def onMainParamsChange(self, item):
         """
