@@ -80,6 +80,10 @@ class DensityPanel(QtWidgets.QDialog):
 
         self.model.dataChanged.connect(self.dataChanged)
 
+        self.ui.editMolarVolume.textEdited.connect(self.volumeChanged)
+        self.ui.editMassDensity.textEdited.connect(self.massChanged)
+        self.ui.editMolecularFormula.textEdited.connect(self.formulaChanged)
+
         self.modelReset()
 
     def setupMapper(self):
@@ -111,6 +115,39 @@ class DensityPanel(QtWidgets.QDialog):
 
             elif index == MODEL.MASS_DENSITY and self.mode == MODES.DENSITY_TO_VOLUME:
                 self._updateVolume()
+
+    def volumeChanged(self, current_text):
+        try:
+            molarMass = float(toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text()))
+            molarVolume = float(current_text)
+
+            molarDensity = molarMass / molarVolume
+            molarDensity = formatNumber(molarDensity, high=True)
+            self.model.item(MODEL.MASS_DENSITY).setText(str(molarDensity))
+
+        except (ArithmeticError, ValueError):
+            self.model.item(MODEL.MASS_DENSITY).setText("")
+
+    def massChanged(self, current_text):
+        try:
+            molarMass = float(toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text()))
+            molarDensity = float(current_text)
+
+            molarVolume = molarMass / molarDensity
+            molarVolume = formatNumber(molarVolume, high=True)
+            self.model.item(MODEL.MOLAR_VOLUME).setText(str(molarVolume))
+
+        except (ArithmeticError, ValueError):
+            self.model.item(MODEL.MOLAR_VOLUME).setText("")
+
+    def formulaChanged(self, current_text):
+        try:
+            molarMass = toMolarMass(current_text)
+            molarMass = formatNumber(molarMass, high=True)
+            self.model.item(MODEL.MOLAR_MASS).setText(molarMass)
+
+        except (ArithmeticError, ValueError):
+            self.model.item(MODEL.MOLAR_VOLUME).setText("")
 
     def setMode(self, mode):
         self.mode = mode
