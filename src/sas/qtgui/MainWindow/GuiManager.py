@@ -430,6 +430,8 @@ class GuiManager(object):
         self._workspace.actionImage_Viewer.setEnabled(False)
         self._workspace.actionCombine_Batch_Fit.setEnabled(False)
         self._workspace.actionFit_Results.setEnabled(False)
+        # orientation viewer set to invisible SASVIEW-1132
+        self._workspace.actionOrientation_Viewer.setVisible(False)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
