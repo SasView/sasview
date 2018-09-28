@@ -346,37 +346,59 @@ class Plugin(PluginBase):
             new_pmodel_list = self.fit_panel.reset_pmodel_list()
             if not new_pmodel_list:
                 return
-            # Set the new plugin model list for all fit pages
+            # Set the new plugin model list for all fit pages; anticipating
+            # categories, the updated plugin may be in either the form factor
+            # or the structure factor combo boxes
             for uid, page in self.fit_panel.opened_pages.iteritems():
-                if hasattr(page, "formfactorbox"):
-                    page.model_list_box = new_pmodel_list
-                    mod_cat = page.categorybox.GetStringSelection()
-                    if mod_cat == custom_model:
-                        box = page.formfactorbox
-                        model_name = box.GetValue()
-                        model = (box.GetClientData(box.GetCurrentSelection())
-                                 if model_name else None)
-                        page._show_combox_helper()
-                        new_index = box.FindString(model_name)
-                        new_model = (box.GetClientData(new_index)
-                                     if new_index >= 0 else None)
-                        if new_index >= 0:
-                            box.SetStringSelection(model_name)
-                        else:
-                            box.SetStringSelection('')
-                        if model and new_model != model:
-                            page._on_select_model(keep_pars=True)
-                    if hasattr(page, "structurebox"):
-                        selected_name = page.structurebox.GetStringSelection()
+                pbox = getattr(page, "formfactorbox", None)
+                sbox = getattr(page, "structurebox", None)
+                if pbox is None:
+                    continue
 
-                        page.structurebox.Clear()
-                        page.initialize_combox()
+                # Set the new model list for the page
+                page.model_list_box = new_pmodel_list
 
-                        index = page.structurebox.FindString(selected_name)
-                        if index == -1:
-                            index = 0
-                        page.structurebox.SetSelection(index)
-                        page._on_select_model(keep_pars=True)
+                # Grab names of the P and S models from the page.  Need to do
+                # this before resetting the form factor box since that clears
+                # the structure factor box.
+                old_struct = old_form = None
+                form_name = pbox.GetValue()
+                struct_name = sbox.GetStringSelection()
+                if form_name:
+                    old_form = pbox.GetClientData(pbox.GetCurrentSelection())
+                if struct_name:
+                    old_struct = sbox.GetClientData(sbox.GetCurrentSelection())
+
+                # Reset form factor combo box.  We are doing this for all
+                # categories not just plugins since eventually the category
+                # manager will allow plugin models to be anywhere.
+                page._show_combox_helper()
+                form_index = pbox.FindString(form_name)
+                pbox.SetSelection(form_index)
+                new_form = (pbox.GetClientData(form_index)
+                            if form_index != wx.NOT_FOUND else None)
+                #print("form: %r"%form_name, old_form, new_form)
+
+                # Reset structure factor combo box.  If a  (even if the model list
+                # hasn't changed, the model may have).  Show the structure
+                # factor combobox if the selected model is a form factor.
+                sbox.Clear()
+                page.initialize_combox()
+                if new_form is not None and getattr(new_form, 'is_form_factor', False):
+                    sbox.Show()
+                    sbox.Enable()
+                    page.text2.Show()
+                    page.text2.Enable()
+                struct_index = sbox.FindString(struct_name)
+                sbox.SetSelection(struct_index)
+                new_struct = (sbox.GetClientData(struct_index)
+                              if struct_index != wx.NOT_FOUND else None)
+                #print("struct: %r"%struct_name, old_struct, new_struct)
+
+                # Update the page if P or S has changed
+                if old_form != new_form or old_struct != new_struct:
+                    #print("triggering model update")
+                    page._on_select_model(keep_pars=True)
         except Exception:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
