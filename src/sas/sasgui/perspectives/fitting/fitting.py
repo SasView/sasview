@@ -338,7 +338,6 @@ class Plugin(PluginBase):
         """
         Update custom model list in the fitpage combo box
         """
-        custom_model = 'Plugin Models'
         try:
             # Update edit menus
             self.set_edit_menu_helper(self.parent, self.edit_custom_model)
@@ -346,6 +345,13 @@ class Plugin(PluginBase):
             new_pmodel_list = self.fit_panel.reset_pmodel_list()
             if not new_pmodel_list:
                 return
+
+            # Redraws to a page not in focus are showing up as if they are
+            # in the current page tab.
+            current_page_index = self.fit_panel.GetSelection()
+            current_page = self.fit_panel.GetCurrentPage()
+            last_drawn_page = current_page
+
             # Set the new plugin model list for all fit pages; anticipating
             # categories, the updated plugin may be in either the form factor
             # or the structure factor combo boxes
@@ -399,6 +405,17 @@ class Plugin(PluginBase):
                 if old_form != new_form or old_struct != new_struct:
                     #print("triggering model update")
                     page._on_select_model(keep_pars=True)
+                    last_drawn_page = page
+
+            # If last drawn is not the current, then switch the current to the
+            # last drawn then switch back.  Very ugly.
+            if last_drawn_page != current_page:
+                for page_index in range(self.fit_panel.PageCount):
+                    if self.fit_panel.GetPage(page_index) == last_drawn_page:
+                        self.fit_panel.SetSelection(page_index)
+                        break
+                self.fit_panel.SetSelection(current_page_index)
+
         except Exception:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
