@@ -32,8 +32,8 @@ the profile is related to the amount of material that is adsorbed.
 
 Both analyses are performed in 3 stages:
 
-*  Extrapolation of the scattering curve to :math:`Q = 0` and toward 
-   :math:`Q = \infty`
+*  Extrapolation of the scattering curve to :math:`q = 0` and toward 
+   :math:`q = \infty`
 *  Smoothed merging of the two extrapolations into the original data
 *  Fourier / Hilbert Transform of the smoothed data to give the correlation
    function or volume fraction profile, respectively
@@ -46,7 +46,7 @@ Both analyses are performed in 3 stages:
 Extrapolation
 -------------
 
-To :math:`Q = 0`
+To :math:`q = 0`
 ................
 
 The data are extrapolated to q = 0 by fitting a Guinier function to the data
@@ -66,7 +66,7 @@ do likewise. However, because of the transform, the correlation functions are
 most affected by the Guinier back-extrapolation at *large* values of x where 
 the impact on any extrapolated parameters will be least significant.
 
-To :math:`Q = \infty`
+To :math:`q = \infty`
 .....................
 
 The data are extrapolated towards q = :math:`\infty` by fitting a Porod model to
@@ -144,9 +144,9 @@ The 3D correlation function is calculated as:
 	- do they tend to zero as x tends to :math:`\infty`?
 	- do they smoothly curve onto the ordinate at x = 0? (if not check the value 
 	  of :math:`\sigma` is sensible)
-	- are there ripples at x values corresponding to (2 :math:`pi` over) the two 
+	- are there ripples at x values corresponding to (2 :math:`\pi` over) the two 
 	  q values at which the extrapolated and experimental data are merged?
-	- are there any artefacts at x values corresponding to 2 :math:`pi` / q\ :sub:`max` in 
+	- are there any artefacts at x values corresponding to 2 :math:`\pi` / q\ :sub:`max` in 
 	  the experimental data? 
 	- and lastly, do the significant features/peaks in the correlation functions 
 	  actually correspond to anticpated spacings in the sample?!!!
@@ -157,7 +157,8 @@ the discrete cosine transform of:
 .. math::
     -q^{4} I(q)
 
-The IDF is proportional to the second derivative of Γ\ :sub:`1`\ (x).
+The IDF is proportional to the second derivative of Γ\ :sub:`1`\ (x) and represents a 
+superposition of thickness distributions from all the contributing lamellae. 
 
 Hilbert
 .......
@@ -191,6 +192,10 @@ The structural parameters extracted are:
 *   Polydispersity :math:`= \Gamma_{\mathrm{min}}/\Gamma_{\mathrm{max}}`
 *   Local Crystallinity :math:`= L_c/L_p`
 
+.. warning:: If the sample does not possess lamellar morphology then "Compute 
+    Parameters" will return garbage!
+	
+
 Volume Fraction Profile
 .......................
 
@@ -212,6 +217,7 @@ structural parameters are obtainable by other means:
    :align: center
 
 The reader is directed to the references for information on these parameters.
+
 
 References
 ----------
@@ -262,7 +268,10 @@ grabbing and dragging, or by entering appropriate values in the Q range input bo
 
 Once the Q ranges have been set, click the "Calculate Bg" button to determine the 
 background level. Alternatively, enter your own value into the box. If the box turns 
-yellow this indicates that background subtraction has created some negative intensities.
+yellow this indicates that background subtraction has created some negative intensities. 
+This may still be fine provided the peak intensity is very much greater than the 
+background level. The important point is that the extrapolated dataset must approach 
+zero at high-q.
 
 Now click the "Extrapolate" button to extrapolate the data. The graph window will update 
 to show the extrapolated data, and the values of the parameters used for the Guinier and 
@@ -295,4 +304,4 @@ will appear in the "Output Parameters" section of the SasView GUI.
 
 
 .. note::
-    This help document was last changed by Steve King, 26Sep2017
+    This help document was last changed by Steve King, 28Sep2017
