@@ -50,7 +50,7 @@ _acknowledgement_publications = \
 _acknowledgement_citation = \
 '''M. Doucet et al. SasView Version 4.2, Zenodo, 10.5281/zenodo.1412041'''
 _acknowledgement =  \
-'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
+'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, BAM and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
 '''
 
 _homepage = "http://www.sasview.org"
@@ -75,6 +75,7 @@ _ill_logo = os.path.join(icon_path, "ill_logo.png")
 _ansto_logo = os.path.join(icon_path, "ansto_logo.png")
 _tudelft_logo = os.path.join(icon_path, "tudelft_logo.png")
 _dls_logo = os.path.join(icon_path, "dls_logo.png")
+_bam_logo = os.path.join(icon_path, "bam_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
 _inst_logo = os.path.join(icon_path, "utlogo.gif")
@@ -93,7 +94,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2018, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, and DLS"
+_copyright = "(c) 2009 - 2018, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS and BAM"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
