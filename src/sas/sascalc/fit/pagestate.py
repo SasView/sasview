@@ -637,9 +637,11 @@ class PageState(object):
                 chi2 = ("Chi2/Npts = " + value)
                 chi2_string = CENTRE % chi2
             elif name == "Title":
+                from sas.sasview.__init__ import __version__ as sasview_version
                 if len(value.strip()) == 0:
                     continue
-                title = value + " [" + repo_time + "]"
+                title = (value + " [" + repo_time + "] [SasView v" +
+                         sasview_version + "]")
                 title_name = HEADER % title
             elif name == "data":
                 try:
