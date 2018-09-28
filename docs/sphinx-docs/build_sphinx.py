@@ -220,7 +220,7 @@ def build():
     """
     print("=== Build HTML Docs from ReST Files ===")
     subprocess.call(["sphinx-build",
-                     "-b", "qthelp", # Builder name. TODO: accept as arg to setup.py.
+                     "-b", "html", # Builder name. TODO: accept as arg to setup.py.
                      "-d", joinpath(SPHINX_BUILD, "doctrees"),
                      SPHINX_SOURCE,
                      joinpath(SPHINX_BUILD, "html")])
