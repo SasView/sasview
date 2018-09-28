@@ -311,7 +311,7 @@ class GuiManagerTest(unittest.TestCase):
 
         # Check if the window is actually opened.
         self.assertTrue(self.manager.ackWidget.isVisible())
-        self.assertIn("developers@sasview.org", self.manager.ackWidget.label.text())
+        self.assertIn("developers@sasview.org", self.manager.ackWidget.label_3.text())
 
     def testActionCheck_for_update(self):
         """

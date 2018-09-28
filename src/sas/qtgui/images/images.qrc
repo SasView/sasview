@@ -7,11 +7,15 @@
     <file>isis_logo.png</file>
     <file>nist_logo.png</file>
     <file>nsf_logo.png</file>
+    <file>dls_logo.png</file>
     <file>sns_logo.png</file>
     <file>SVwelcome.png</file>
+    <file>ornl_logo.png</file>
+    <file>tudelft_logo.png</file>
     <file>SVwelcome_mini.png</file>
     <file>umd_logo.png</file>
     <file>utlogo.gif</file>
+    <file>bam_logo.png</file>
     <file>angles_flat.png</file>
   </qresource>
 </RCC>
