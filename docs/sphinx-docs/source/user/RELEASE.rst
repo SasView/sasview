@@ -758,15 +758,47 @@ Running SasView
 
 Known Issues
 ============
-4.2.0 - All systems
--------------------
-There are currently no major known issues. A full list of known bugs and
-feature requests by release version that users may wish to be aware of
-can be viewed at http://trac.sasview.org/report/3
+
+A full list of known bugs and feature requests by release version that 
+users may wish to be aware of can be viewed at http://trac.sasview.org/report/3
 
 .. note:: Any corrections to models that may become known/available will be
           posted to Marketplace as available (and fixed in the following 
           release)
+
+4.2.0 - All systems
+-------------------
+The refactoring of the plugin model architecture means that some issues 
+may be encountered if Save Project/Analysis files using plugin models 
+created in earlier versions of SasView are loaded in version 4.2.0.
+
+For example:
+
+* on loading an old project file an error window appears with the error 
+  *This model state has missing or outdated information* or *dictionary changed size during iteration*.
+
+   * if this occurs, try restarting SasView and reloading the project.
+   
+* on loading an old project file all the FitPages and Graphs appear, but 
+  only the SasView default model parameters appear in the FitPages.
+
+  * this has happened because plugin model parameter names have changed. 
+    There are two possible workarounds:
+    
+   * Install the version of SasView that the project was created in, 
+     recreate the plugin in that version, then run 4.2.0 and re-load 
+     the project. All being well, 4.2.0 will still compile the old 
+     plugin.
+
+   * If 4.2.0 cannot compile the old plugin, the more tedious solution 
+     is to use a text editor to do global search & replace operations 
+     to change all the parameter names in the project file by hand. The 
+     quickest way to see the *existing* parameter names is simply to 
+     scroll to the bottom of the project file. To see what the *new* 
+     parameter names should be, simply create the equivalent plugin in 
+     SasView 4.2.0. In most instances, what was *p1_parameter* will 
+     become *A_parameter*, *p2_parameter* will become *B_parameter*, 
+     and so on. 
 
 4.1.x- All systems
 ------------------
