@@ -45,7 +45,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
     def testDefaults(self):
         """Test the GUI in its default state"""
         self.assertIsInstance(self.widget, QtWidgets.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "Generic SAS Calculator")
+        self.assertEqual(self.widget.windowTitle(), "Generic Scattering Calculator")
 
         self.assertIn('trigger_plot_3d', dir(self.widget))
 
