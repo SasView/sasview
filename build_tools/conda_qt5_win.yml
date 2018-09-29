@@ -7,7 +7,7 @@ dependencies:
  - scipy
  - hdf5
  - h5py
- - ipython
+ - ipython=6
  - jupyter
  - twisted
  - lxml
