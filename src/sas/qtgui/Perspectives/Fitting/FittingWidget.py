@@ -3068,8 +3068,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except IndexError as ex:
             # no info about limits
             pass
+        # don't update the kernel here - this data is display only
+        self._model_model.blockSignals(True)
         item3.setText(str(shell_min))
         item4.setText(str(shell_max))
+        self._model_model.blockSignals(False)
 
         # Respond to index change
         func.currentTextChanged.connect(self.modifyShellsInList)
