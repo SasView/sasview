@@ -129,10 +129,12 @@ class InvariantState(object):
         compute_state = self.state_list[str(compute_num)]
         my_time, date = self.timestamp
         file_name = self.file
+        from sas.sasview.__init__ import __version__ as sasview_version
 
         state_num = int(self.saved_state['state_num'])
         state = "\n[Invariant computation for %s: " % file_name
-        state += "performed at %s on %s] \n" % (my_time, date)
+        state += "performed at %s on %s] " % (my_time, date)
+        state += "[SasView v%s]\n" % (sasview_version)
         state += "State No.: %d \n" % state_num
         state += "\n=== Inputs ===\n"
 
