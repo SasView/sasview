@@ -6,7 +6,7 @@ dependencies:
  - scipy
  - hdf5
  - h5py
- - ipython
+ - ipython=6
  - jupyter
  - twisted
  - lxml
@@ -16,6 +16,7 @@ dependencies:
  - mako
  - pyinstaller 
  - pyopencl
+ - testpath=0.3.1
  - pip:
    - pytools 
    - periodictable 
