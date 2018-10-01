@@ -86,7 +86,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.freezeView.customContextMenuRequested.connect(self.onCustomContextMenu)
 
         # Connect the comboboxes
-        self.cbSelect.currentIndexChanged.connect(self.selectData)
+        self.cbSelect.activated.connect(self.selectData)
 
         #self.closeEvent.connect(self.closeEvent)
         self.currentChanged.connect(self.onTabSwitch)
