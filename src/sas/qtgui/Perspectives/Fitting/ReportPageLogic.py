@@ -98,33 +98,19 @@ class ReportPageLogic(object):
         for fig in images:
             canvas = FigureCanvas(fig)
             png_output = BytesIO()
-
-            # Create a "safe" location - system tmp
-            tmp_file = tempfile.TemporaryFile(suffix=".png")
             try:
-                fig.savefig(tmp_file.name, dpi=75)
-                fig.savefig(png_output, dpi=75)
-            except PermissionError:
-                # sometimes one gets "permission denied" for temp files
-                # mainly on Windows 7 *gasp*. Let's try local directory
-                tmp_file = open("_tmp.png", "w+")
-                try:
-                    fig.savefig(tmp_file.name, dpi=75)
-                    fig.savefig(png_output, dpi=75)
-                except Exception as ex:
-                    logging.error("Creating of the report failed: %s"%str(ex))
-                    return
-
-            data_to_print = png_output.getvalue() == open(tmp_file.name, 'rb').read()
-            tmp_file.close()
+                fig.savefig(png_output, format="png", dpi=75)
+            except PermissionError as ex:
+                logging.error("Creating of the report failed: %s"%str(ex))
+                return
             data64 = base64.b64encode(png_output.getvalue())
             data_to_print = urllib.parse.quote(data64)
-
             feet = FEET_2
             if sys.platform == "darwin":  # Mac
                 feet = FEET_3
             html += feet.format(data_to_print)
             html += ELINE
+            png_output.close()
             del canvas
         return html
 
