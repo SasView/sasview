@@ -138,6 +138,8 @@ class GuiManager(object):
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
+        if sys.platform == "darwin":
+            self.grid_window.menubar.setNativeMenuBar(False)
         self.grid_subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
         self.grid_subwindow.setVisible(False)
         self.grid_window.windowClosedSignal.connect(lambda: self.grid_subwindow.setVisible(False))
