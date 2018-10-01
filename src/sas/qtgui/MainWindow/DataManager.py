@@ -149,7 +149,7 @@ class DataManager(object):
 
     def add_data(self, data_list):
         """
-        receive a list of
+        receive a list of data items for storage
         """
         for id, data in data_list.items():
             if id  in self.stored_data:

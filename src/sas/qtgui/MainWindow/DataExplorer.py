@@ -536,6 +536,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.setCurrentIndex(ind)
         self.cbgraph.setItemText(ind, current_name)
 
+    def add_data(self, data_list):
+        """
+        Update the data manager with new items
+        """
+        self.manager.add_data(data_list)
+
     def updateGraphCount(self, graph_list):
         """
         Modify the graph name combo and potentially remove
@@ -1201,6 +1207,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return
         self.model.beginResetModel()
         new_item = self.cloneTheory(item)
+        self.model.appendRow(new_item)
+        self.model.endResetModel()
+
+    def freezeDataToItem(self, data=None):
+        """
+        Freeze given set of data to main model
+        """
+        if data is None:
+            return
+        self.model.beginResetModel()
+        new_item = GuiUtils.createModelItemWithPlot(data, data.name)
+
         self.model.appendRow(new_item)
         self.model.endResetModel()
 
