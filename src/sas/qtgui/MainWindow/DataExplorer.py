@@ -1022,8 +1022,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionQuick3DPlot)
         self.context_menu.addAction(self.actionEditMask)
-        #self.context_menu.addSeparator()
-        #self.context_menu.addAction(self.actionFreezeResults)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionFreezeResults)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDelete)
 
