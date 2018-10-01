@@ -18,7 +18,7 @@ may read here: https://github.com/SasView/sasview/blob/master/LICENSE.TXT
 
 SasView is free to download and use, including for commercial purposes.
 
-© 2009-2018 UMD, UTK, NIST, ORNL, ISIS, ESS, ANSTO, ILL, TUD, DLS 
+© 2009-2018 UMD, UTK, NIST, ORNL, ISIS, ESS, ANSTO, ILL, TUD, DLS, BAM  
 
 
 If you use SasView to do productive scientific research that leads to 
