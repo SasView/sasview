@@ -18,6 +18,7 @@ dependencies:
  - mako
  - pyinstaller 
  - pyopencl
+ - testpath=0.3.1
  - pip:
    - pytools 
    - periodictable 
