@@ -385,8 +385,8 @@ class Plugin(PluginBase):
                             if form_index != wx.NOT_FOUND else None)
                 #print("form: %r"%form_name, old_form, new_form)
 
-                # Reset structure factor combo box.  If a  (even if the model list
-                # hasn't changed, the model may have).  Show the structure
+                # Reset structure factor combo box; even if the model list
+                # hasn't changed, the model may have.  Show the structure
                 # factor combobox if the selected model is a form factor.
                 sbox.Clear()
                 page.initialize_combox()
