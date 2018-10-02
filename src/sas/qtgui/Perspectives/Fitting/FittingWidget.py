@@ -2184,6 +2184,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             s_kernel = self.models[structure_factor]()
             p_kernel = self.kernel_module
+            # need to reset multiplicity to get the right product
+            p_kernel.multiplicity = p_kernel.multiplicity_info.number
 
             p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
             s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
