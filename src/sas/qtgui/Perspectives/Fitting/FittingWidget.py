@@ -106,6 +106,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
     Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
 
+    MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
+
     def __init__(self, parent=None, data=None, tab_id=1):
 
         super(FittingWidget, self).__init__()
@@ -422,7 +424,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(self.is2D)
+        self.chkMagnetism.setEnabled(False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
@@ -1008,7 +1010,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Empty combobox forced to be read
         if not model:
             return
-
+        self.chkMagnetism.setEnabled(self.is2D and model in self.MAGNETIC_MODELS)
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
@@ -2185,7 +2187,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             s_kernel = self.models[structure_factor]()
             p_kernel = self.kernel_module
             # need to reset multiplicity to get the right product
-            p_kernel.multiplicity = p_kernel.multiplicity_info.number
+            if p_kernel.is_multiplicity_model:
+                p_kernel.multiplicity = p_kernel.multiplicity_info.number
 
             p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
             s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
@@ -3168,10 +3171,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbCategory.setEnabled(enabled)
         self.cbModel.setEnabled(enabled)
         self.cbStructureFactor.setEnabled(enabled)
-
-        self.chkPolydispersity.setEnabled(enabled)
-        self.chkMagnetism.setEnabled(enabled)
-        self.chk2DView.setEnabled(enabled)
 
     def enableInteractiveElements(self):
         """
