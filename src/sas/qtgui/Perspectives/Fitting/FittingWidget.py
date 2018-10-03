@@ -998,6 +998,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         menu.addAction(action)
         return menu
 
+    def canHaveMagnetism(self):
+        """
+        Checks if the current model has magnetic scattering implemented
+        """
+        current_model = self.cbModel.currentText()
+        return self.is2D and current_model in self.MAGNETIC_MODELS
+
     def onSelectModel(self):
         """
         Respond to select Model from list event
@@ -1010,7 +1017,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Empty combobox forced to be read
         if not model:
             return
-        self.chkMagnetism.setEnabled(self.is2D and model in self.MAGNETIC_MODELS)
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
@@ -1583,7 +1592,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
             params_to_fit += self.poly_params_to_fit
-        if self.chkMagnetism.isChecked():
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
             params_to_fit += self.magnet_params_to_fit
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
@@ -2258,7 +2267,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         if self.chkPolydispersity.isChecked() and self.poly_params_to_fit:
             return True
-        if self.chkMagnetism.isChecked() and self.magnet_params_to_fit:
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnet_params_to_fit:
             return True
         return False
 
@@ -2492,7 +2501,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for key, value in self.poly_params.items():
                 model.setParam(key, value)
         # add magnetic params if asked
-        if self.chkMagnetism.isChecked() and self._magnet_model.rowCount() > 0:
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
                 model.setParam(key, value)
 
@@ -2965,8 +2974,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not self.model_parameters:
             return
         self._magnet_model.clear()
-        [self.addCheckedMagneticListToModel(param, self._magnet_model) for param in \
-            self.model_parameters.call_parameters if param.type == 'magnetic']
+        # default initial value
+        m0 = 0.5e-06
+        for param in self.model_parameters.call_parameters:
+            if param.type != 'magnetic': continue
+            if "M0" in param.name:
+                m0 += 0.5e-06
+                value = m0
+            else:
+                value = param.default
+            self.addCheckedMagneticListToModel(param, value)
+
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
     def shellNamesList(self):
@@ -2983,7 +3001,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 shell_names.append(name+str(i))
         return shell_names
 
-    def addCheckedMagneticListToModel(self, param, model):
+    def addCheckedMagneticListToModel(self, param, value):
         """
         Wrapper for model update with a subset of magnetic parameters
         """
@@ -2998,14 +3016,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
 
         checked_list = [param.name,
-                        str(param.default),
+                        str(value),
                         str(param.limits[0]),
                         str(param.limits[1]),
                         param.units]
 
-        self.magnet_params[param.name] = param.default
+        self.magnet_params[param.name] = value
 
-        FittingUtilities.addCheckedListToModel(model, checked_list)
+        FittingUtilities.addCheckedListToModel(self._magnet_model, checked_list)
 
     def enableStructureFactorControl(self, structure_factor):
         """
@@ -3516,7 +3534,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
             self.iterateOverPolyModel(gatherPolyParams)
-        if self.chkMagnetism.isChecked() and self.chkMagnetism.isEnabled():
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
             self.iterateOverMagnetModel(gatherMagnetParams)
 
         if format=="":
