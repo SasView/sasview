@@ -2883,11 +2883,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         if button.GetLabel().count('ON') > 0:
             self.magnetic_on = True
             button.SetLabel("Magnetic OFF")
-            m_value = 1.0e-06
+            m_value = 1
             for key in self.model.magnetic_params:
                 if key.count('M0') > 0:
                     self.model.setParam(key, m_value)
-                    m_value += 0.5e-06
+                    m_value += 0.5
         else:
             self.magnetic_on = False
             button.SetLabel("Magnetic ON")
@@ -2949,7 +2949,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Get the string copies of the param names and values in the tap
         """
-        content = 'sasview_parameter_values:'
+        content = 'sasview_parameter_values;'
         # Do it if params exist
         if self.parameters:
 
@@ -3211,7 +3211,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             except Exception:
                 logger.error(traceback.format_exc())
             content += name + ',' + str(check) + ',' + value + disfunc + ',' + \
-                       bound_lo + ',' + bound_hi + ':'
+                       bound_lo + ',' + bound_hi + ';'
 
         return content
 
@@ -3250,7 +3250,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         context = {}
         # put the text into dictionary
-        lines = text.split(':')
+        lines = text.split(';')
         if lines[0] != 'sasview_parameter_values':
             self._copy_info(False)
             return False
