@@ -1929,8 +1929,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
             self.options_widget.state()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(str(self.q_range_min))
-        self.lblMaxRangeDef.setText(str(self.q_range_max))
+        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
