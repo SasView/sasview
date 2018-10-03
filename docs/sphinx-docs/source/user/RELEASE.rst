@@ -173,7 +173,6 @@ Bug Fixes
 * Fixes # 970: ASCII loader doesn't handle ISIS 2D ASCII
 * Fixes # 974: blacklist Intel HD 620/630 for double precision
 * Fixes # 978: load project fails for pages which have not been defined
-* Fixes # 980: Inconsistent results between Igor & SasView using Fractal Core-Shell model
 * Fixes # 983: Remove Nexus Loader
 * Fixes # 984: PDF reports are not being properly generated on Windows
 * Fixes # 985: Saving Project Fails
@@ -216,17 +215,13 @@ Bug Fixes
 * Fixes #1083: Magnetic models not being computed
 * Fixes #1099: Erratic behaviour of Sum|Multi model in 4.1.2
 * Fixes #1101: Batch results page not displaying polydispersity values
-* Fixes #1103: Problem with plugin models on mac when using ER
 * Fixes #1128: AutoPlot generation for model documentation does not include background
 * Fixes #1131: OpencCl dialog does not open
 * Fixes #1132: Slit Size Calculator Tool not working
-* Fixes #1133: Reference in Acknowledging SasView box will need updating for release
-* Fixes #1134: sum/multi scale factor in 4.2 seems incorrect?
 * Fixes #1139: Missing Docs and Help for new Batch Slicing
 * Fixes #1141: Intro to scripting.rst needs improvement
 * Fixes #1142: Plugin framework is broken
 * Fixes #1145: Update models in model marketplace to 4.2 when 4.2 is released.
-* Fixes #1146: Need to add Release notes for 4.2
 * Fixes #1155: BE Polyelectrolyte errors
 * Fixes #1160: fix VR for core_shell_cylinder, fractal_core_shell and hollow_cylinder
 * Fixes #1163: Fix help note in sum of sum|multiply interface
@@ -234,11 +229,9 @@ Bug Fixes
 * Fixes #1166: No longer able to report from multiple fit pages
 * Fixes #1167: Clarify the documentation for the Spinodal Model
 * Fixes #1173: more problems with math in plugins
-* Fixes #1174: Update list of contributors on webpage
 * Fixes #1176: Make Release Notes/Known Issues available from Help in Menu Bar
 * Fixes #1179: PDF Report should contain SasView Version Number
 * Fixes #1183: Test from creating new model reset all parameters to default in all open FitPages
-* Fixes #1184: 4.2.0 plugin is does not load earlier project properly
 
 **It is recommended that all users upgrade to this version, but your 
 attention is drawn to the Changes section above.**
@@ -801,10 +794,6 @@ Known Issues
 
 A full list of known bugs and feature requests by release version that 
 users may wish to be aware of can be viewed at http://trac.sasview.org/report/3
-
-.. note:: Any corrections to models that may become known/available will be
-          posted to Marketplace as available (and fixed in the following 
-          release)
 
 4.2.0 - All systems
 -------------------
