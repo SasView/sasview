@@ -511,6 +511,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Change the underlying data so it is no longer a theory
         try:
             new_item.child(0).data().is_data = True
+            new_item.child(0).data().symbol = 'Circle'
         except AttributeError:
             #no data here, pass
             pass
@@ -1217,7 +1218,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if data is None:
             return
         self.model.beginResetModel()
-        new_item = GuiUtils.createModelItemWithPlot(data, data.name)
+        # Append a "unique" descriptor to the name
+        time_bit = str(time.time())[7:-1].replace('.', '')
+        new_name = data.name + '_@' + time_bit
+        # Change the underlying data so it is no longer a theory
+        try:
+            data.is_data = True
+            data.symbol = 'Circle'
+        except AttributeError:
+            #no data here, pass
+            pass
+        new_item = GuiUtils.createModelItemWithPlot(data, new_name)
 
         self.model.appendRow(new_item)
         self.model.endResetModel()

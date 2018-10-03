@@ -466,6 +466,7 @@ class PlotterWidget(PlotterBase):
         Freezes the selected plot to a separate chart
         """
         plot = self.plot_dict[id]
+        plot = copy.deepcopy(plot)
         self.manager.add_data(data_list={id:plot})
         self.manager.freezeDataToItem(plot)
 
