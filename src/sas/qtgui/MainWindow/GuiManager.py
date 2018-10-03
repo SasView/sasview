@@ -4,6 +4,7 @@ import subprocess
 import logging
 import json
 import webbrowser
+import traceback
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -67,6 +68,9 @@ class GuiManager(object):
         # Decide on a locale
         QLocale.setDefault(QLocale('en_US'))
 
+        # Redefine exception hook to not explicitly crash the app.
+        sys.excepthook = self.info
+
         # Add signal callbacks
         self.addCallbacks()
 
@@ -102,6 +106,10 @@ class GuiManager(object):
         self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+
+    def info(self, type, value, tb):
+        logger.error("SasView threw exception: " + str(value))
+        traceback.print_exception(type, value, tb)
 
     def addWidgets(self):
         """
