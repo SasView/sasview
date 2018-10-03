@@ -2,6 +2,8 @@
     FitPanel class contains fields allowing to display results when
     fitting  a model and one data
 """
+from __future__ import print_function
+
 import sys
 import wx
 import wx.lib.newevent
@@ -1254,6 +1256,9 @@ class FitPage(BasicPage):
         # Keep the previous param values
         if saved_pars:
             self.get_paste_params(saved_pars)
+
+        # Make sure the model parameters correspond to the fit parameters
+        self._update_paramv_on_fit()
 
         if event is not None:
             # update list of plugins if new plugin is available
