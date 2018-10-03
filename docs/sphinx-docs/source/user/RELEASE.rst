@@ -829,6 +829,12 @@ For example:
      become *A_parameter*, *p2_parameter* will become *B_parameter*, 
      and so on. 
 
+We are also aware of an issue that manifests itself if you click Compute 
+or Fit in a FitPage containing 2D data with with the magnetic parameters 
+turned on. The FitPage may become unresponsive if the model is changed.
+
+ * if this occurs, try gaining input focus elsewhere; the FitPage may recover.
+
 4.1.x- All systems
 ------------------
 The conversion to sasmodels infrastructure is ongoing and should be
