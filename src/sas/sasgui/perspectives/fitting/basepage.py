@@ -2883,11 +2883,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         if button.GetLabel().count('ON') > 0:
             self.magnetic_on = True
             button.SetLabel("Magnetic OFF")
-            m_value = 1.0e-06
+            m_value = 1
             for key in self.model.magnetic_params:
                 if key.count('M0') > 0:
                     self.model.setParam(key, m_value)
-                    m_value += 0.5e-06
+                    m_value += 0.5
         else:
             self.magnetic_on = False
             button.SetLabel("Magnetic ON")
