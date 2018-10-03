@@ -19,7 +19,7 @@ from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from plot_labels import *
 
 OUTPUT_STRINGS = {
-    'max': "Long Period / 2 (A): ",
+    'max': "Long Period (A): ",
     'Lc': "Average Hard Block Thickness (A): ",
     'dtr': "Average Interface Thickness (A): ",
     'd0': "Average Core Thickness: ",

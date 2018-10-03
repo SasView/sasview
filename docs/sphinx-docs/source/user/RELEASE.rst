@@ -17,14 +17,16 @@ marks the end of support for 32 bit operating systems and is only
 available for 64 bit operating systems.
 
 With this version the change to the new model API and plugins infrastructure
-begun with 4.0 is essentially complete (though extensions are in the works
-and more are likely they should remain backwardly compatible with previous
+begun with 4.0 is essentially complete (though extensions are in the works,
+and more are likely, they should remain backwardly compatible with previous
 versions of SasView).
 
-.. warning:: Old-style plugin models, including old sum|multiply models will continue
-             to be supported (i.e. SasView will be able to run them) in 4.x. However,
-             the expectation is that such support will be removed in 5.0 and everyone
-             is strongly encouraged to convert their custom models to the new API.
+.. warning:: Old-style plugin models, including old sum|multiply models, continue
+             to be supported (i.e. SasView will run them) in 4.x, although our
+             automatic on-the-fly translation may not cope in all use cases (see 
+             Known Issues below). However, this backward compatibility will be 
+             removed in 5.0 and users are therefore strongly encouraged to 
+             convert their custom models to the new API.
 
 Finally, the changes to orientation angles and orientational distribution
 definitions are now also complete.
@@ -55,6 +57,8 @@ Improvements
 * Problems with the computation of magnetic scattering from some
   objects have been rectified. Some questions remain however.
 * The known issue with the core_shell_parallelepiped model is now fixed.
+* An error in the be_polyelectrolyte model was identified and rectified, but 
+  the fix is yet to be validated.
 * A number of issues and inconsistencies with the creation of
   sum|multiply models have been rectified.
 * A Boltzmann distribution has been added for polydispersity/orientational
@@ -63,15 +67,25 @@ Improvements
 * Correlation function analysis now computes both the 1D and 3D functions.
 * There are several data loading improvements.
 * There are several improvements to Save/Load Project.
+* The SasView version number now appears in Reports.
+* The Release Notes are now available from the program Help menu.
 * There have been numerous other bug fixes.
 
 Documentation
 ^^^^^^^^^^^^^
 Several sections of the help documentation have undergone significant
 checking and updating, particularly those relating to orientation,
-magnetic scattering, and polydispersity distributions. Detailed
-advanced instructions for plugin writing and some scripting
-instructions have been added.
+magnetic scattering, and polydispersity distributions.
+
+Detailed advanced instructions for plugin writing and some scripting
+instructions have also been added.
+
+Concerns about the intended versus implemented meaning of some parameters
+in the bcc_paracrystal, fcc_paracrystal, and sc_paracrystal models have
+been brought to our attention. These have yet to be resolved and so a
+Warning has been placed on each of these models. Anyone who feels they
+may have the requisite expertise to investigate these concerns is strongly
+encouraged to contact the Developers!
 
 Other Work
 ^^^^^^^^^^
@@ -89,6 +103,7 @@ Other Work
 
 Bug Fixes
 ^^^^^^^^^
+* Fixes #  14: Loading a saved project is really really slow
 * Fixes # 260: Box integration does not update when entering values in dialog
 * Fixes # 446: Saving plot as PGF (not PDF!) format throws error
 * Fixes # 467: Extend batch functionality to slicer
@@ -108,10 +123,11 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: "report button" followed by "save" makes an empty pdf file
+* Fixes # 818: “report button” followed by “save” makes an empty pdf file???
+* Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
-* Fixes # 849: Load Folder should ignore files starting with "."
+* Fixes # 849: Load Folder should ignore files starting with .
 * Fixes # 852: More unit tests, especially for oriented or 2d models
 * Fixes # 854: remove unnecessary sleep() in fitting perspective
 * Fixes # 856: Reading SAS_OPENCL from custom_config sometimes raises an ERROR
@@ -133,6 +149,7 @@ Bug Fixes
 * Fixes # 903: sasview - all non-gui tests should be converted to run in Python 3
 * Fixes # 906: polydispersity not showing up in tabulated results
 * Fixes # 912: About box points to misleading contributors page on Github
+* Fixes # 913: Need to add Diamond developer and logo in relevant places
 * Fixes # 915: load project issues
 * Fixes # 916: Proper Logging
 * Fixes # 920: Logarithmic binning option in the slice viewer
@@ -150,6 +167,7 @@ Bug Fixes
 * Fixes # 956: Possible problem with new doc build process
 * Fixes # 961: sasmodels tests should fail if the parameter name does not exist
 * Fixes # 962: star polymer typo in docs
+* Fixes # 966: Inconsistent chi2 reporting
 * Fixes # 967: no uncertainties errors on fitting parameters
 * Fixes # 969: About Box not picking up dls_logo.png
 * Fixes # 970: ASCII loader doesn't handle ISIS 2D ASCII
@@ -165,43 +183,58 @@ Bug Fixes
 * Fixes # 995: OpenCL required on Linux even if turned off in GUI
 * Fixes #1006: multiplicity models don't work with SQ
 * Fixes #1007: spherical_sld model freezes SasView
-* Fixes #1008: plugin model scaling not working? S
+* Fixes #1008: plugin model scaling not working?
 * Fixes #1010: Win64 build script not creating working executable
 * Fixes #1011: sld_test failing on ubuntu
+* Fixes #1012: ESS GUI not updating after fitting
 * Fixes #1013: FileReaderBaseClass output[] not reset - same file loaded multiple times
 * Fixes #1018: add Boltzmann distribution
 * Fixes #1021: add PDF documentation to website and document in wiki release process
 * Fixes #1024: Update version numbers in master
 * Fixes #1025: Sum/multiply editor hangs
+* Fixes #1030: volume normalization for hollow shapes is different from solvent-filled shapes
 * Fixes #1032: convert C++ modules to C
 * Fixes #1035: Order of combining P(Q) and S(Q) in Plugins seems to matter
 * Fixes #1037: data loader crop not working? & all fits crashing
 * Fixes #1043: problem compiling marketplace models
+* Fixes #1044: Unable to upload c file to marketplace
+* Fixes #1046: convert non builtin models in the marketplace to new API
 * Fixes #1050: fix appveyor test for sasmodels win 64 python 3
 * Fixes #1052: Can't use a user-created plugin model in a plugin model
+* Fixes #1054: Check plugin & orientation descriptions in full docs once SasModels PR #57 is merged
 * Fixes #1057: phi rotation issue for elliptical cylinder
 * Fixes #1060: incorrect default for rectangle dispersion
 * Fixes #1062: win32 build not installing correctly
-* Fixes #1064: Fitting did not converge!!! error with a Sum|Multi plugin model
+* Fixes #1064: "Fitting did not converge!!!" error with a Sum|Multi plugin model
+* Fixes #1068: 2d data (from NG7) not loadiing - strange format?
 * Fixes #1069: GUI problem when using polydispersity/orientation distributions
 * Fixes #1070: Parameter error boxes should not be editable
+* Fixes #1072: Orientation distributions seem to depend on initial angle
 * Fixes #1079: Remove save button in report dialog on Mac
 * Fixes #1081: GUI problem with new orientation distribution
 * Fixes #1083: Magnetic models not being computed
 * Fixes #1099: Erratic behaviour of Sum|Multi model in 4.1.2
 * Fixes #1101: Batch results page not displaying polydispersity values
+* Fixes #1128: AutoPlot generation for model documentation does not include background
 * Fixes #1131: OpencCl dialog does not open
 * Fixes #1132: Slit Size Calculator Tool not working
 * Fixes #1139: Missing Docs and Help for new Batch Slicing
 * Fixes #1141: Intro to scripting.rst needs improvement
 * Fixes #1142: Plugin framework is broken
-* Fixes #1044: Unable to upload c file to marketplace
 * Fixes #1145: Update models in model marketplace to 4.2 when 4.2 is released.
-* Fixes #1148: Documentation for S(Q) models need updating
-* Fixes #1128: AutoPlot generation for model documentation does not include background
+* Fixes #1155: BE Polyelectrolyte errors
+* Fixes #1160: fix VR for core_shell_cylinder, fractal_core_shell and hollow_cylinder
+* Fixes #1163: Fix help note in sum of sum|multiply interface
+* Fixes #1164: Sphinx doc build does not support superscript or substitution
+* Fixes #1166: No longer able to report from multiple fit pages
+* Fixes #1167: Clarify the documentation for the Spinodal Model
+* Fixes #1173: more problems with math in plugins
+* Fixes #1176: Make Release Notes/Known Issues available from Help in Menu Bar
+* Fixes #1179: PDF Report should contain SasView Version Number
+* Fixes #1183: Test from creating new model reset all parameters to default in all open FitPages
 
-It is recommended that all users upgrade to this version, but your
-attention is drawn to the Changes section above.
+**It is recommended that all users upgrade to this version, but your 
+attention is drawn to the Changes section above.**
 
 
 New in Version 4.2.0-Beta
@@ -585,6 +618,7 @@ Perspectives Available
   analytical model functions
 * Tools: provides a number of useful supplementary tools such as SLD
   calculation
+
 Fitting
 ^^^^^^^
 * Includes a large number of model functions, both form factors and structure factors.
@@ -626,6 +660,7 @@ Fitting
   a single model and provides the results in a tabular form suitable for saving
   or plotting the evolution of the fit parameters with error bars (from within
   the application).
+
 Tools
 ^^^^^
 * A scattering length density calculator,including some X-ray information
@@ -636,6 +671,7 @@ Tools
   TOF effects is provided
 * A slit size calculator optimized for Anton Paar Saxess is provided.
 * A kiessig fringe thickness calculator is provided
+
 Plots and plot management
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 * A 3D graphing option (for 2d data/results) is provided with the view
@@ -650,6 +686,7 @@ Plots and plot management
   plot can currently only have a single plot).
 * Extensive context sensitive plot/fitting/manipulation options are available
   through a right mouse click pop-up menu on plots.
+
 Data management
 ^^^^^^^^^^^^^^^
 * Supports 2 + column 1D ASCII data, NIST 1D and 2D data, and canSAS data
@@ -665,12 +702,14 @@ Data management
   not require access to the explorer/manager and can be accessed through
   right click menus and the toolbar.  The data explorer can be re-started
   from the menu bar.
+
 Data manipulation
 ^^^^^^^^^^^^^^^^^
 * Support various 2D averaging methods : Circular, sectors, annular,
   boxsum, boxQx and boxQy.
 * A 2D data maks editor is provided
 * 2D mask can be applied to the circular averaging.
+
 Miscellaneous features
 ^^^^^^^^^^^^^^^^^^^^^^
 * Limited reports can be generated in pdf format
@@ -752,15 +791,43 @@ Running SasView
 
 Known Issues
 ============
+
+A full list of known bugs and feature requests by release version that 
+users may wish to be aware of can be viewed at http://trac.sasview.org/report/3
+
 4.2.0 - All systems
 -------------------
-There are currently no major known issues. A full list of known bugs and
-feature requests by release version that users may wish to be aware of
-can be viewed at http://trac.sasview.org/report/3
+The refactoring of the plugin model architecture means that some issues 
+may be encountered if Save Project/Analysis files using plugin models 
+created in earlier versions of SasView are loaded in version 4.2.0.
 
-.. note:: Any corrections to models that may become known/available will be
-          posted to Marketplace as available (and fixed in the following 
-          release)
+For example:
+
+* on loading an old project file an error window appears with the error 
+  *This model state has missing or outdated information* or *dictionary changed size during iteration*.
+
+   * if this occurs, try restarting SasView and reloading the project.
+   
+* on loading an old project file all the FitPages and Graphs appear, but 
+  only the SasView default model parameters appear in the FitPages.
+
+  * this has happened because plugin model parameter names have changed. 
+    There are two possible workarounds:
+    
+   * Install the version of SasView that the project was created in, 
+     recreate the plugin in that version, then run 4.2.0 and re-load 
+     the project. All being well, 4.2.0 will still compile the old 
+     plugin.
+
+   * If 4.2.0 cannot compile the old plugin, the more tedious solution 
+     is to use a text editor to do global search & replace operations 
+     to change all the parameter names in the project file by hand. The 
+     quickest way to see the *existing* parameter names is simply to 
+     scroll to the bottom of the project file. To see what the *new* 
+     parameter names should be, simply create the equivalent plugin in 
+     SasView 4.2.0. In most instances, what was *p1_parameter* will 
+     become *A_parameter*, *p2_parameter* will become *B_parameter*, 
+     and so on. 
 
 4.1.x- All systems
 ------------------

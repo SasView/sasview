@@ -766,7 +766,8 @@ class PageState(object):
             elif name == "Title":
                 if len(value.strip()) == 0:
                     continue
-                title = value + " [" + repo_time + "]"
+                title = (value + " [" + repo_time + "] [SasView v" +
+                         SASVIEW_VERSION + "]")
                 title_name = HEADER % title
             elif name == "data":
                 try:

@@ -27,7 +27,7 @@ DEFAULT_STATE = {
 
 # List of output parameters, used by __str__
 output_list = [
-    ['max', "Long Period / 2 (A): "],
+    ['max', "Long Period (A): "],
     ['Lc', "Average Hard Block Thickness (A): "],
     ['dtr', "Average Interface Thickness (A): "],
     ['d0', "Average Core Thickness: "],
