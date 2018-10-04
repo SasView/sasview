@@ -2052,8 +2052,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.data_is_loaded:
             self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(str(self.q_range_min))
-        self.lblMaxRangeDef.setText(str(self.q_range_max))
+        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
 

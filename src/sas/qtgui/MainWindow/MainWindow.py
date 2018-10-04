@@ -31,14 +31,12 @@ class MainSasViewWindow(QMainWindow, Ui_MainWindow):
         except Exception as ex:
             import logging
             logging.error("Application failed with: "+str(ex))
-            print("Application failed with: ", str(ex))
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
             event.accept()
         else:
             event.ignore()
-
 
 def SplashScreen():
     """
