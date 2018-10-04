@@ -186,7 +186,6 @@ Bug Fixes
 * Fixes #1008: plugin model scaling not working?
 * Fixes #1010: Win64 build script not creating working executable
 * Fixes #1011: sld_test failing on ubuntu
-* Fixes #1012: ESS GUI not updating after fitting
 * Fixes #1013: FileReaderBaseClass output[] not reset - same file loaded multiple times
 * Fixes #1018: add Boltzmann distribution
 * Fixes #1021: add PDF documentation to website and document in wiki release process
@@ -232,6 +231,7 @@ Bug Fixes
 * Fixes #1176: Make Release Notes/Known Issues available from Help in Menu Bar
 * Fixes #1179: PDF Report should contain SasView Version Number
 * Fixes #1183: Test from creating new model reset all parameters to default in all open FitPages
+* Fixes #1188: fitpage hangs if change model while magnetism is on
 
 **It is recommended that all users upgrade to this version, but your 
 attention is drawn to the Changes section above.**
@@ -828,12 +828,6 @@ For example:
      SasView 4.2.0. In most instances, what was *p1_parameter* will 
      become *A_parameter*, *p2_parameter* will become *B_parameter*, 
      and so on. 
-
-We are also aware of an issue that manifests itself if you click Compute 
-or Fit in a FitPage containing 2D data with with the magnetic parameters 
-turned on. The FitPage may become unresponsive if the model is changed.
-
- * if this occurs, try gaining input focus elsewhere; the FitPage may recover.
 
 4.1.x- All systems
 ------------------
