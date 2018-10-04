@@ -3,6 +3,19 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 5.0.0
+      --------------------
+      - New, completely refactored GUI
+      - Fitting analysis interface simplified
+      - Constraints definition logic simplified and functionality extended
+      - Plugin model editor refactored and functionality extended
+      - Polydispersity plots added
+      - Improved stability and reliability
+      - Better user experience
+      - More logical workflows
+      - PyQt 5 based GUI
+      - Python3 compatibility
+
     - New in Version 4.1.2
       --------------------
       This point release is a bug-fix release addressing:
