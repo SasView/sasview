@@ -3005,12 +3005,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Wrapper for model update with a subset of magnetic parameters
         """
-        if param.name[param.name.index(':')+1:] in self.shell_names:
-            # check if two-digit shell number
+        try:
+            basename, _ = param.name.rsplit('_', 1)
+        except ValueError:
+            basename = param.name
+        if basename in self.shell_names:
             try:
-                shell_index = int(param.name[-2:])
+                shell_index = int(basename[-2:])
             except ValueError:
-                shell_index = int(param.name[-1:])
+                shell_index = int(basename[-1:])
 
             if shell_index > self.current_shell_displayed:
                 return
