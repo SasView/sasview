@@ -3191,7 +3191,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.cbCategory.setEnabled(enabled)
         self.cbModel.setEnabled(enabled)
-        self.cbStructureFactor.setEnabled(enabled)
+        self.cmdPlot.setEnabled(enabled)
 
     def enableInteractiveElements(self):
         """
