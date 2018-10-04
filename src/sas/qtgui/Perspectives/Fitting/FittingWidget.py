@@ -2975,11 +2975,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         self._magnet_model.clear()
         # default initial value
-        m0 = 0.5e-06
+        m0 = 0.5
         for param in self.model_parameters.call_parameters:
             if param.type != 'magnetic': continue
             if "M0" in param.name:
-                m0 += 0.5e-06
+                m0 += 0.5
                 value = m0
             else:
                 value = param.default
