@@ -829,6 +829,11 @@ For example:
      become *A_parameter*, *p2_parameter* will become *B_parameter*, 
      and so on. 
 
+Magnetic SLD's should be specified fully, even though the FitPage suggests 
+it is only necessary to give the significand (mantissa) as happens with 
+the nuclear SLD's. A fix to harmonise this behaviour will appear in the 
+next release.
+
 4.1.x- All systems
 ------------------
 The conversion to sasmodels infrastructure is ongoing and should be
