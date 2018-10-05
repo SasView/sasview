@@ -119,23 +119,23 @@ class FittingWidgetTest(unittest.TestCase):
         #Test loading from json categories
         fittingWindow.SASModelToQModel("cylinder")
         mag_index = fittingWindow.lstMagnetic.model().index(0,0)
-        self.assertEqual(mag_index.data(), "up:frac_i")
+        self.assertEqual(mag_index.data(), "up_frac_i")
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
-        self.assertEqual(mag_index.data(), "up:frac_f")
+        self.assertEqual(mag_index.data(), "up_frac_f")
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        self.assertEqual(mag_index.data(), "up:angle")
+        self.assertEqual(mag_index.data(), "up_angle")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
-        self.assertEqual(mag_index.data(), "M0:sld")
+        self.assertEqual(mag_index.data(), "sld_M0")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)
-        self.assertEqual(mag_index.data(), "mtheta:sld")
+        self.assertEqual(mag_index.data(), "sld_mtheta")
         mag_index = fittingWindow.lstMagnetic.model().index(5,0)
-        self.assertEqual(mag_index.data(), "mphi:sld")
+        self.assertEqual(mag_index.data(), "sld_mphi")
         mag_index = fittingWindow.lstMagnetic.model().index(6,0)
-        self.assertEqual(mag_index.data(), "M0:sld_solvent")
+        self.assertEqual(mag_index.data(), "sld_solvent_M0")
         mag_index = fittingWindow.lstMagnetic.model().index(7,0)
-        self.assertEqual(mag_index.data(), "mtheta:sld_solvent")
+        self.assertEqual(mag_index.data(), "sld_solvent_mtheta")
         mag_index = fittingWindow.lstMagnetic.model().index(8,0)
-        self.assertEqual(mag_index.data(), "mphi:sld_solvent")
+        self.assertEqual(mag_index.data(), "sld_solvent_mphi")
 
         # test the delegate a bit
         delegate = fittingWindow.lstMagnetic.itemDelegate()
@@ -580,7 +580,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Test rows
         for row in range(self.widget._magnet_model.rowCount()):
             func_index = self.widget._magnet_model.index(row, 0)
-            self.assertIn(':', self.widget._magnet_model.item(row, 0).text())
+            self.assertIn('_', self.widget._magnet_model.item(row, 0).text())
 
 
     def testAddExtraShells(self):

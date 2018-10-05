@@ -306,8 +306,17 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Figure out the headers
         model = data[0][0]
 
-        # TODO: add a conditional for magnetic models
-        param_list = [m for m in model.model.params.keys() if ":" not in m]
+        disperse_params = list(model.model.dispersion.keys())
+        magnetic_params = model.model.magnetic_params
+        optimized_params = model.param_list
+        # Create the main parameter list
+        param_list = [m for m in model.model.params.keys() if (m not in model.model.magnetic_params and ".width" not in m)]
+
+        # add fitted polydisp parameters
+        param_list += [m+".width" for m in disperse_params if m+".width" in optimized_params]
+
+        # add fitted magnetic params
+        param_list += [m for m in magnetic_params if m in optimized_params]
 
         # Check if 2D model. If not, remove theta/phi
         if isinstance(model.data.sas_data, Data1D):
