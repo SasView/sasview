@@ -542,7 +542,7 @@ them in the first place!).
 To tie parameters between the data sets with constraints, select the data sets and right click.
 From the menu choose *Mutual constraint of parameters in selected models*
 
-.. image:: constraint_2.png
+.. image:: constraint_menu.png
 
 When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
 button on the individual *FitPage*'s.
@@ -564,7 +564,7 @@ In the *Const. & Simul. Fit* page select two data sets which are to be constrain
 Right clicking in the *Source choice for simultaneous fitting* area will bring up
 the context menu:
 
-.. image:: constraint_2.png
+.. image:: constraint_menu.png
 
 Here you can choose datasets for fitting and define constraints between parameters in
 both datasets.
