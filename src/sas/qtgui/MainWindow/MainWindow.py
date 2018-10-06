@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
+import os
 import sys
 # Local UI
 from sas.qtgui.UI import main_resources_rc
@@ -43,8 +44,10 @@ def SplashScreen():
     Displays splash screen as soon as humanely possible.
     The screen will disappear as soon as the event loop starts.
     """
-    # TODO: standardize path to images
-    pixmap = QPixmap("src/sas/qtgui/images/SVwelcome_mini.png")
+    pixmap_path = "images/SVwelcome_mini.png"
+    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
+        pixmap_path = "src/sas/qtgui/images/SVwelcome_mini.png"
+    pixmap = QPixmap(pixmap_path)
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 

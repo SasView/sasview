@@ -32,6 +32,7 @@ class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
 
 SMEARING_1D = ["Custom Pinhole Smear", "Custom Slit Smear"]
 SMEARING_2D = ["Custom Pinhole Smear"]
+SMEARING_QD = "Use dQ Data"
 
 MODEL = [
     'SMEARING',
@@ -61,7 +62,10 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.data = None
         self.current_smearer = None
         self.kernel_model = None
-
+        # dQ data variables
+        smear_type = None
+        dq_l = None
+        dq_r = None
         # Let only floats in the line edits
         self.txtSmearDown.setValidator(GuiUtils.DoubleValidator())
         self.txtSmearUp.setValidator(GuiUtils.DoubleValidator())
@@ -116,12 +120,18 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Update the model
         """
         self.kernel_model = kernel_model
+        self.cbSmearing.clear()
+        self.cbSmearing.addItem("None")
         if self.data is None:
             self.setElementsVisibility(False)
             return
         if self.kernel_model is None:
             return
-        elif isinstance(self.data, Data1D):
+        # Find out if data has dQ
+        (self.smear_type, self.dq_l, self.dq_r) = self.getSmearInfo()
+        if self.smear_type is not None:
+            self.cbSmearing.addItem(SMEARING_QD)
+        if isinstance(self.data, Data1D):
             self.cbSmearing.addItems(SMEARING_1D)
         else:
             self.cbSmearing.addItems(SMEARING_2D)
@@ -135,14 +145,22 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Callback for smearing combobox index change
         """
-        if index == 0:
+        text = self.cbSmearing.currentText()
+        if text == 'None':
             self.setElementsVisibility(False)
             self.current_smearer = None
-        elif index == 1:
+        elif text == "Use dQ Data":
+            self.setElementsVisibility(True)
+            self.setDQLabels()
+            if self.smear_type == "Pinhole":
+                self.onPinholeSmear()
+            else:
+                self.onSlitSmear()
+        elif text == "Custom Pinhole Smear":
             self.setElementsVisibility(True)
             self.setPinholeLabels()
             self.onPinholeSmear()
-        elif index == 2:
+        elif text == "Custom Slit Smear":
             self.setElementsVisibility(True)
             self.setSlitLabels()
             self.onSlitSmear()
@@ -190,6 +208,10 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         else:
             self.lblSmearUp.setText('<html><head/><body><p>dQ<span style=" vertical-align:sub;">%</span></p></body></html>')
             self.lblUnitUp.setText('%')
+        self.txtSmearDown.setEnabled(True)
+        self.txtSmearUp.setEnabled(True)
+        self.txtSmearDown.setText(str(0.0))
+        self.txtSmearUp.setText(str(0.0))
 
     def setSlitLabels(self):
         """
@@ -199,6 +221,27 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.lblSmearDown.setText('Slit width')
         self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
+        self.txtSmearDown.setEnabled(True)
+        self.txtSmearUp.setEnabled(True)
+        self.txtSmearDown.setText(str(0.0))
+        self.txtSmearUp.setText(str(0.0))
+
+    def setDQLabels(self):
+        """
+        Use pinhole labels
+        """
+        if self.smear_type == "Pinhole":
+            self.lblSmearDown.setText('<html><head/><body><p>dQ<span style=" vertical-align:sub;">high</span></p></body></html>')
+            self.lblSmearUp.setText('<html><head/><body><p>dQ<span style=" vertical-align:sub;">low</span></p></body></html>')
+        else:
+            self.lblSmearUp.setText('<dQp>')
+            self.lblSmearDown.setText('<dQs>')
+        self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
+        self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
+        self.txtSmearDown.setText(str(self.dq_r))
+        self.txtSmearUp.setText(str(self.dq_l))
+        self.txtSmearDown.setEnabled(False)
+        self.txtSmearUp.setEnabled(False)
 
     def state(self):
         """
@@ -302,3 +345,45 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             data.dxw = np.zeros(data_len)
 
         self.current_smearer = smear_selection(data, self.kernel_model)
+
+    def getSmearInfo(self):
+        """
+        Get the smear info from data.
+
+        :return: self.smear_type, self.dq_l and self.dq_r,
+            respectively the type of the smear, dq_min and
+            dq_max for pinhole smear data
+            while dxl and dxw for slit smear
+        """
+        # default
+        smear_type = None
+        dq_l = None
+        dq_r = None
+        data = self.data
+        if self.data is None:
+            return smear_type, dq_l, dq_r
+        elif isinstance(data, Data2D):
+            if data.dqx_data is None or data.dqy_data is None:
+                return smear_type, dq_l, dq_r
+            elif data.dqx_data.any() != 0 and data.dqx_data.any() != 0:
+                smear_type = "Pinhole2d"
+                dq_l = GuiUtils.formatNumber(np.average(data.dqx_data))
+                dq_r = GuiUtils.formatNumber(np.average(data.dqy_data))
+                return smear_type, dq_l, dq_r
+            else:
+                return smear_type, dq_l, dq_r
+        # check if it is pinhole smear and get min max if it is.
+        if data.dx is not None and np.any(data.dx):
+            smear_type = "Pinhole"
+            dq_l = data.dx[0]
+            dq_r = data.dx[-1]
+
+        # check if it is slit smear and get min max if it is.
+        elif data.dxl is not None or data.dxw is not None:
+            smear_type = "Slit"
+            if data.dxl is not None and np.all(data.dxl, 0):
+                dq_l = data.dxl[0]
+            if data.dxw is not None and np.all(data.dxw, 0):
+                dq_r = data.dxw[0]
+
+        return smear_type, dq_l, dq_r
