@@ -10,6 +10,8 @@ import imp
 import warnings
 import webbrowser
 import urllib.parse
+import json
+from io import BytesIO
 
 import numpy as np
 
@@ -25,6 +27,15 @@ from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.Plottables import Plottable
+from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sas.qtgui.Plotting.Plottables import View
+from sas.qtgui.Plotting.Plottables import PlottableTheory1D
+from sas.qtgui.Plotting.Plottables import PlottableFit1D
+from sas.qtgui.Plotting.Plottables import Text
+from sas.qtgui.Plotting.Plottables import Chisq
+from sas.qtgui.MainWindow.DataState import DataState
+
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.Utilities import CustomDir
 
@@ -285,7 +296,7 @@ class Communicate(QtCore.QObject):
     # Tell the data explorer to switch tabs
     changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
 
-def updateModelItemWithPlot(item, update_data, name=""):
+def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem
     Adds 'update_data' to that row.
@@ -310,10 +321,11 @@ def updateModelItemWithPlot(item, update_data, name=""):
                 plot_item.child(1).child(0).setText("Title: %s"%name)
             # Force redisplay
             return
-
     # Create the new item
     checkbox_item = createModelItemWithPlot(update_data, name)
 
+    if checkbox_state is not None:
+        checkbox_item.setCheckState(checkbox_state)
     # Append the new row to the main item
     item.appendRow(checkbox_item)
 
@@ -1133,6 +1145,143 @@ def checkModel(path):
     result = run_one(path)
 
     return result
+
+def saveData(fp, data):
+    """
+    save content of data to fp (a .write()-supporting file-like object)
+    """
+
+    def add_type(dict, type):
+        dict['__type__'] = type.__name__
+        return dict
+
+    def jdefault(o):
+        """
+        objects that can't otherwise be serialized need to be converted
+        """
+        # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
+        if isinstance(o, (tuple, set)):
+            content = { 'data': list(o) }
+            return add_type(content, type(o))
+
+        # "simple" types
+        if isinstance(o, (Sample, Source, Vector)):
+            return add_type(o.__dict__, type(o))
+        if isinstance(o, (Plottable, View)):
+            return add_type(o.__dict__, type(o))
+
+        # DataState
+        if isinstance(o, (Data1D, Data2D)):
+            # don't store parent
+            content = o.__dict__.copy()
+            #content.pop('parent')
+            return add_type(content, type(o))
+
+        # ndarray
+        if isinstance(o, np.ndarray):
+            buffer = BytesIO()
+            np.save(buffer, o)
+            buffer.seek(0)
+            content = { 'data': buffer.read().decode('latin-1') }
+            return add_type(content, type(o))
+
+        # not supported
+        logging.info("data cannot be serialized to json: %s" % type(o))
+        return None
+
+    json.dump(data, fp, indent=2, sort_keys=True, default=jdefault)
+
+def readDataFromFile(fp):
+    '''
+    '''
+    supported = [
+        tuple, set,
+        Sample, Source, Vector,
+        Plottable, Data1D, Data2D, PlottableTheory1D, PlottableFit1D, Text, Chisq, View,
+        DataState, np.ndarray]
+
+    lookup = dict((cls.__name__, cls) for cls in supported)
+
+    class TooComplexException(Exception):
+        pass
+
+    def simple_type(cls, data, level):
+        class Empty(object):
+            def __init__(self):
+                for key, value in data.items():
+                    setattr(self, key, generate(value, level))
+
+        # create target object
+        o = Empty()
+        o.__class__ = cls
+
+        return o
+
+    def construct(type, data, level):
+        try:
+            cls = lookup[type]
+        except KeyError:
+            logging.info('unknown type: %s' % type)
+            return None
+
+        # tuples and sets
+        if cls in (tuple, set):
+            # convert list to tuple/set
+            return cls(generate(data['data'], level))
+
+        # "simple" types
+        if cls in (Sample, Source, Vector):
+            return simple_type(cls, data, level)
+        if issubclass(cls, Plottable) or (cls == View):
+            return simple_type(cls, data, level)
+
+        # DataState
+        if cls == DataState:
+            o = simple_type(cls, data, level)
+            o.parent = None # TODO: set to ???
+            return o
+
+        # ndarray
+        if cls == np.ndarray:
+            buffer = BytesIO()
+            buffer.write(data['data'].encode('latin-1'))
+            buffer.seek(0)
+            return np.load(buffer)
+
+        logging.info('not implemented: %s, %s' % (type, cls))
+        return None
+
+    def generate(data, level):
+        if level > 16: # recursion limit (arbitrary number)
+            raise TooComplexException()
+        else:
+            level += 1
+
+        if isinstance(data, dict):
+            try:
+                type = data['__type__']
+            except KeyError:
+                # if dictionary doesn't have __type__ then it is assumed to be just an ordinary dictionary
+                o = {}
+                for key, value in data.items():
+                    o[key] = generate(value, level)
+                return o
+
+            return construct(type, data, level)
+
+        if isinstance(data, list):
+            return [generate(item, level) for item in data]
+
+        return data
+
+    new_stored_data = {}
+    for id, data in json.load(fp).items():
+        try:
+            new_stored_data[id] = generate(data, 0)
+        except TooComplexException:
+            logging.info('unable to load %s' % id)
+
+    return new_stored_data
 
 
 def enum(*sequential, **named):

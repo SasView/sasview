@@ -232,45 +232,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
-            load_thread = threads.deferToThread(self.readProject, filename)
-            load_thread.addCallback(self.readProjectComplete)
-            load_thread.addErrback(self.readProjectFailed)
-
-    def loadFailed(self, reason):
-        """
-        """
-        print("file load FAILED: ", reason)
-        pass
-
-    def readProjectFailed(self, reason):
-        """
-        """
-        print("readProjectFailed FAILED: ", reason)
-        pass
-
-    def readProject(self, filename):
-        self.communicator.statusBarUpdateSignal.emit("Loading Project... %s" % os.path.basename(filename))
-        try:
-            manager = DataManager()
-            with open(filename, 'r') as infile:
-                manager.load_from_readable(infile)
-
-            self.communicator.statusBarUpdateSignal.emit("Loaded Project: %s" % os.path.basename(filename))
-            return manager
-
-        except:
-            self.communicator.statusBarUpdateSignal.emit("Failed: %s" % os.path.basename(filename))
-            raise
-
-    def readProjectComplete(self, manager):
-        self.model.clear()
-
-        self.manager.assign(manager)
-        self.model.beginResetModel()
-        for id, item in self.manager.get_all_data().items():
-            self.updateModel(item.data, item.path)
-
-        self.model.endResetModel()
+            self.readProject(filename)
 
     def saveProject(self):
         """
@@ -284,13 +246,96 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
         filename = name_tuple[0]
-        if filename:
-            _, extension = os.path.splitext(filename)
-            if not extension:
-                filename = '.'.join((filename, 'json'))
-            self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
-            with open(filename, 'w') as outfile:
-                self.manager.save_to_writable(outfile)
+        if not filename:
+            return
+        _, extension = os.path.splitext(filename)
+        if not extension:
+            filename = '.'.join((filename, 'json'))
+        self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
+
+        with open(filename, 'w') as outfile:
+            self.saveDataToFile(outfile)
+
+    def allDataForModel(self, model):
+        # data model
+        all_data = {}
+        for i in range(model.rowCount()):
+            properties = {}
+            item = model.item(i)
+            data = GuiUtils.dataFromItem(item)
+            if data is None: continue
+            # Now, all plots under this item
+            filename = data.filename
+            is_checked = item.checkState()
+            properties['checked'] = is_checked
+            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            # skip the main plot
+            other_datas = list(other_datas.values())[1:]
+            all_data[data.id] = [data, properties, other_datas]
+        return all_data
+
+    def saveDataToFile(self, outfile):
+        """
+        Save every dataset to a json file
+        """
+        data = self.allDataForModel(self.model)
+        theory = self.allDataForModel(self.theory_model)
+
+        all_data = {}
+        for key, value in data.items():
+            all_data[key] = value
+        for key, value in theory.items():
+            if key in all_data:
+                raise ValueError("Inconsistent data in Project file.")
+            all_data[key] = value
+
+        # perspectives
+        current_perspective = self._perspective()
+        try:
+            perspective_dump = current_perspective.getCurrentStateAsXml()
+        except Exception:
+            ex = "State of " + current_perspective.windowTitle() + \
+                " cannot be saved."
+            logging.error(ex)
+        if perspective_dump is not None:
+            assert(isinstance(perspective_dump, dict))
+            all_data['perspective'] = perspective_dump
+        # save datas
+        GuiUtils.saveData(outfile, all_data)
+        return
+
+    def readProject(self, filename):
+        """
+        Read out datasets and fitpages from file
+        """
+        with open(filename, 'r') as infile:
+            all_data = GuiUtils.readDataFromFile(infile)
+        # clear the model
+        self.model.clear()
+
+        #self.model.beginResetModel()
+        for key, value in all_data.items():
+            # key - cardinal number of dataset
+            # value - main dataset, [dependant filesets]
+            # add the main index
+            new_data = value[0]
+            assert isinstance(new_data, (Data1D, Data2D))
+            properties = value[1]
+            is_checked = properties['checked']
+            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
+            new_item.setCheckState(is_checked)
+            model = self.theory_model
+            if new_data.is_data:
+                model = self.model
+            model.appendRow(new_item)
+            self.manager.add_data(data_list={new_data.id:new_data})
+
+            # Add the underlying data
+            if not value[2]:
+                continue
+            for plot in value[2]:
+                assert isinstance(plot, (Data1D, Data2D))
+                GuiUtils.updateModelItemWithPlot(new_item, plot, plot.name)
 
     def deleteFile(self, event):
         """
@@ -1393,7 +1438,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item = GuiUtils.HashableStandardItem()
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
-        checkbox_item.setText(os.path.basename(p_file))
+        if p_file is not None:
+            checkbox_item.setText(os.path.basename(p_file))
 
         # Add the actual Data1D/Data2D object
         object_item = GuiUtils.HashableStandardItem()

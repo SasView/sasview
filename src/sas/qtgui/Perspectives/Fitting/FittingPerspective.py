@@ -336,6 +336,15 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         pass
 
+    def getCurrentStateAsXml(self):
+        """
+        Returns an XML version of the current state
+        """
+        state = {}
+        for tab in self.tabs:
+            pass
+        return state
+
     @property
     def currentTab(self):
         """
