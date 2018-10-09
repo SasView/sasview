@@ -114,12 +114,17 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.data = data
         if data is None:
             self.setElementsVisibility(False)
+        if self.kernel_model is not None:
+            # model already present - recalculate
+            model = self.kernel_model
+            self.updateKernelModel(model)
 
     def updateKernelModel(self, kernel_model=None):
         """
         Update the model
         """
         self.kernel_model = kernel_model
+        self.cbSmearing.blockSignals(True)
         self.cbSmearing.clear()
         self.cbSmearing.addItem("None")
         if self.data is None:
@@ -129,13 +134,16 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             return
         # Find out if data has dQ
         (self.smear_type, self.dq_l, self.dq_r) = self.getSmearInfo()
+        index_to_show = 0
         if self.smear_type is not None:
             self.cbSmearing.addItem(SMEARING_QD)
+            index_to_show = 1
         if isinstance(self.data, Data1D):
             self.cbSmearing.addItems(SMEARING_1D)
         else:
             self.cbSmearing.addItems(SMEARING_2D)
-        self.cbSmearing.setCurrentIndex(0)
+        self.cbSmearing.blockSignals(False)
+        self.cbSmearing.setCurrentIndex(index_to_show)
 
     def smearer(self):
         """ Returns the current smearer """
