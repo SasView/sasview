@@ -59,6 +59,8 @@ Improvements
 * The known issue with the core_shell_parallelepiped model is now fixed.
 * An error in the be_polyelectrolyte model was identified and rectified, but 
   the fix is yet to be validated.
+* (Added post-release) An error with the reporting of the scale parameter 
+  from the spinodal model was rectified.
 * A number of issues and inconsistencies with the creation of
   sum|multiply models have been rectified.
 * A Boltzmann distribution has been added for polydispersity/orientational
@@ -232,6 +234,7 @@ Bug Fixes
 * Fixes #1179: PDF Report should contain SasView Version Number
 * Fixes #1183: Test from creating new model reset all parameters to default in all open FitPages
 * Fixes #1188: fitpage hangs if change model while magnetism is on
+* Fixes #1191: Correct erroneous Scale reported by Spinodal model
 
 **It is recommended that all users upgrade to this version, but your 
 attention is drawn to the Changes section above.**
@@ -867,6 +870,8 @@ issues:
   to reproduce the limit of the oblate or prolate ellipsoid. If errors are
   found and corrected, corrected versions will be uploaded to the
   marketplace.
+* (Added after Release 4.2.0) The scale parameter reported from the spinodal 
+  model is the square root of the true value.
 
 3.1- All systems
 ----------------
