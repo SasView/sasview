@@ -146,12 +146,9 @@ class ConsoleUpdate(FitHandler):
                 if m_flag:
                     model_name = str(self.result.model.name)
                 if m_flag and d_flag:
-                    msg += "Data : %s \n" % (str(data_name))#,
-                                                     #str(model_name))
+                    msg += "Data : %s \n" % (str(data_name))
                 msg += str(self.result)
                 msg += "\n"
-            else:
-                msg += "No result available\n"
 
             logging.info(msg)
 
