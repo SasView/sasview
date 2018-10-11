@@ -12,8 +12,6 @@
 ################################################################################
 
 
-import wx
-import wx.aui
 import os
 import sys
 import time
@@ -24,6 +22,10 @@ import logging
 import traceback
 import urllib
 import json
+import copy
+
+import wx
+import wx.aui
 
 from matplotlib import _pylab_helpers
 
@@ -285,7 +287,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         return client size tuple
         """
-        width, height = self.GetClientSizeTuple()
+        width, height = self.GetClientSize()
         height -= 45
         # Adjust toolbar height
         toolbar = self.GetToolBar()
@@ -360,11 +362,10 @@ class ViewerFrame(PARENT_FRAME):
         dlg.Destroy()
         try:
             self.read_batch_tofile(file_name=path)
-        except:
+        except Exception as exc:
             msg = "Error occurred when reading the file; %s\n" % path
-            msg += "%s\n" % sys.exc_value
-            wx.PostEvent(self, StatusEvent(status=msg,
-                                           info="error"))
+            msg += "%s\n" % exc
+            wx.PostEvent(self, StatusEvent(status=msg, info="error"))
 
     def read_batch_tofile(self, file_name):
         """
@@ -704,10 +705,10 @@ class ViewerFrame(PARENT_FRAME):
 
         try:
             self.load_from_cmd(self._input_file)
-        except:
+        except Exception as exc:
             msg = "%s Cannot load file %s\n" % (str(APPLICATION_NAME),
                                                 str(self._input_file))
-            msg += str(sys.exc_value) + '\n'
+            msg += str(exc) + '\n'
             logger.error(msg)
         if self._data_panel is not None and len(self.plugins) > 0:
             self._data_panel.fill_cbox_analysis(self.plugins)
@@ -796,9 +797,9 @@ class ViewerFrame(PARENT_FRAME):
                     import data_loader
                 self._data_plugin = data_loader.Plugin()
                 plugins.append(self._data_plugin)
-            except:
+            except Exception as exc:
                 msg = "ViewerFrame._get_local_plugins:"
-                msg += "cannot import dataloader plugin.\n %s" % sys.exc_value
+                msg += "cannot import dataloader plugin.\n %s" % exc
                 logger.error(msg)
         if style2 == GUIFRAME.PLOTTING_ON:
             try:
@@ -806,9 +807,9 @@ class ViewerFrame(PARENT_FRAME):
                     import plotting
                 self._plotting_plugin = plotting.Plugin()
                 plugins.append(self._plotting_plugin)
-            except:
+            except Exception as exc:
                 msg = "ViewerFrame._get_local_plugins:"
-                msg += "cannot import plotting plugin.\n %s" % sys.exc_value
+                msg += "cannot import plotting plugin.\n %s" % exc
                 logger.error(msg)
 
         return plugins
@@ -855,20 +856,20 @@ class ViewerFrame(PARENT_FRAME):
                                 plugins.append(module.Plugin())
                                 msg = "Found plug-in: %s" % module.PLUGIN_ID
                                 logger.info(msg)
-                            except:
+                            except Exception as exc:
                                 msg = "Error accessing PluginPanel"
-                                msg += " in %s\n  %s" % (name, sys.exc_value)
+                                msg += " in %s\n  %s" % (name, exc)
                                 config.printEVT(msg)
-                    except:
-                        msg = "ViewerFrame._find_plugins: %s" % sys.exc_value
+                    except Exception as exc:
+                        msg = "ViewerFrame._find_plugins: %s" % exc
                         logger.error(msg)
                     finally:
                         if file is not None:
                             file.close()
-        except:
+        except Exception as exc:
             # Should raise and catch at a higher level and
             # display error on status bar
-            logger.error(sys.exc_value)
+            logger.error(exc)
 
         return plugins
 
@@ -1598,7 +1599,7 @@ class ViewerFrame(PARENT_FRAME):
         Display status message
         """
         # This CallAfter fixes many crashes on MAC.
-        wx.CallAfter(self.sb.set_status, evt)
+        wx.CallAfter(self.sb.set_status, evt.Clone())
 
     def on_view(self, evt):
         """
@@ -1642,7 +1643,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         ID = str(uid)
         config.printEVT("delete_panel: %s" % ID)
-        if ID in self.panels.keys():
+        if ID in self.panels:
             self.panel_on_focus = None
             panel = self.panels[ID]
 
@@ -1654,9 +1655,9 @@ class ViewerFrame(PARENT_FRAME):
                 self.schedule_full_draw_list.remove(panel)
 
             # delete uid number not str(uid)
-            if ID in self.plot_panels.keys():
+            if ID in self.plot_panels:
                 del self.plot_panels[ID]
-            if ID in self.panels.keys():
+            if ID in self.panels:
                 del self.panels[ID]
         else:
             logger.error("delete_panel: No such plot id as %s" % ID)
@@ -1690,9 +1691,9 @@ class ViewerFrame(PARENT_FRAME):
                 elif extension == APPLICATION_STATE_EXTENSION:
                     try:
                         reader.read(path)
-                    except:
+                    except Exception as exc:
                         msg = "DataLoader Error: Encounted Non-ASCII character"
-                        msg += "\n(%s)" % sys.exc_value
+                        msg += "\n(%s)" % exc
                         wx.PostEvent(self, StatusEvent(status=msg,
                                                        info="error",
                                                        type="stop"))
@@ -1773,10 +1774,10 @@ class ViewerFrame(PARENT_FRAME):
                 output[data.id] = data
 
             self.add_data(data_list=output)
-        except:
+        except Exception as exc:
             error_message = "Error while loading"
             error_message += " Data from cmd:\n %s\n" % str(path)
-            error_message += str(sys.exc_value) + "\n"
+            error_message += str(exc) + "\n"
             logger.error(error_message)
 
     def load_folder(self, path):
@@ -1794,10 +1795,10 @@ class ViewerFrame(PARENT_FRAME):
                 self._data_plugin.get_data(file_list)
             else:
                 return
-        except:
+        except Exception as exc:
             error_message = "Error while loading"
             error_message += " Data folder from cmd:\n %s\n" % str(path)
-            error_message += str(sys.exc_value) + "\n"
+            error_message += str(exc) + "\n"
             logger.error(error_message)
 
     def _on_open_state_application(self, event):
@@ -1864,8 +1865,8 @@ class ViewerFrame(PARENT_FRAME):
         if msg_box.ShowModal() == wx.ID_OK:
             self._data_panel.selection_cbox.SetValue('Select all Data')
             self._data_panel._on_selection_type(None)
-            for _, theory_dict in self._data_panel.list_cb_theory.iteritems():
-                for key, value in theory_dict.iteritems():
+            for _, theory_dict in self._data_panel.list_cb_theory.items():
+                for key, value in theory_dict.items():
                     item, _, _ = value
                     item.Check(True)
 
@@ -1973,7 +1974,7 @@ class ViewerFrame(PARENT_FRAME):
         if reader is not None:
             # case of a panel with multi-pages
             if hasattr(panel, "opened_pages"):
-                for _, page in panel.opened_pages.iteritems():
+                for _, page in panel.opened_pages.items():
                     data = page.get_data()
                     # state must be cloned
                     state = page.get_state().clone()
@@ -2095,7 +2096,7 @@ class ViewerFrame(PARENT_FRAME):
                 msg = "Could not connect to the application server."
                 msg += " Please try again later."
                 self.SetStatusText(msg)
-            elif cmp(version, config.__version__) > 0:
+            elif version > config.__version__:
                 msg = "Version %s is available! " % str(version)
                 if not standalone:
                     import webbrowser
@@ -2111,9 +2112,9 @@ class ViewerFrame(PARENT_FRAME):
                     msg = "You have the latest version"
                     msg += " of %s" % str(config.__appname__)
                     self.SetStatusText(msg)
-        except:
+        except Exception as exc:
             msg = "guiframe: could not get latest application"
-            msg += " version number\n  %s" % sys.exc_value
+            msg += " version number\n  %s" % exc
             logger.error(msg)
             if not standalone:
                 msg = "Could not connect to the application server."
@@ -2153,7 +2154,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         # S King, Sep 2018
 
-        from documentation_window import DocumentationWindow
+        from .documentation_window import DocumentationWindow
         _TreeLocation = "user/release.html"
         DocumentationWindow(self, -1, _TreeLocation, "",
                             "SasView Documentation")
@@ -2169,12 +2170,12 @@ class ViewerFrame(PARENT_FRAME):
         # Help >> Tutorial used to bring up a pdf of the
         # original 2.x tutorial.
         # Code below, implemented from 4.2.0, redirects
-        # action to the Tutorials page of the help 
+        # action to the Tutorials page of the help
         # documentation to give access to all available
         # tutorials
         # S King, Sep 2018
 
-        from documentation_window import DocumentationWindow
+        from .documentation_window import DocumentationWindow
         _TreeLocation = "user/tutorial.html"
         DocumentationWindow(self, -1, _TreeLocation, "",
                             "SasView Documentation")
@@ -2189,7 +2190,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         # Running SasView "in-place" using run.py means the docs will be in a
         # different place than they would otherwise.
-        from documentation_window import DocumentationWindow
+        from .documentation_window import DocumentationWindow
         _TreeLocation = "user/user.html"
         DocumentationWindow(self, -1, _TreeLocation, "",
                             "SasView Documentation")
@@ -2237,7 +2238,7 @@ class ViewerFrame(PARENT_FRAME):
                 style = self.__gui_style & GUIFRAME.MANAGER_ON
                 if (style == GUIFRAME.MANAGER_ON) \
                         and self.panels[item] == self._data_panel:
-                    if 'data_panel' in self.panels.keys():
+                    if 'data_panel' in self.panels:
                         frame = self.panels['data_panel'].get_frame()
                         if frame is None:
                             continue
@@ -2289,7 +2290,7 @@ class ViewerFrame(PARENT_FRAME):
         self.add_data_helper(data_list)
         # set data in the data panel
         if self._data_panel is not None:
-            data_state = self._data_manager.get_data_state(data_list.keys())
+            data_state = self._data_manager.get_data_state(list(data_list.keys()))
             self._data_panel.load_data_list(data_state)
         # if the data panel is shown wait for the user to press a button
         # to send data to the current perspective. if the panel is not
@@ -2301,7 +2302,7 @@ class ViewerFrame(PARENT_FRAME):
                 self._data_panel.frame.Show(True)
         else:
             # automatically send that to the current perspective
-            self.set_data(data_id=data_list.keys())
+            self.set_data(data_id=list(data_list.keys()))
 
     def set_data(self, data_id, theory_id=None):
         """
@@ -2309,7 +2310,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
-            self._current_perspective.set_data(list_data.values())
+            self._current_perspective.set_data(list(list_data.values()))
 
         else:
             msg = "Guiframe does not have a current perspective"
@@ -2321,9 +2322,9 @@ class ViewerFrame(PARENT_FRAME):
         _, list_theory = self._data_manager.get_by_id(theory_id)
         if self._current_perspective is not None:
             try:
-                self._current_perspective.set_theory(list_theory.values())
-            except:
-                msg = "Guiframe set_theory: \n" + str(sys.exc_value)
+                self._current_perspective.set_theory(list(list_theory.values()))
+            except Exception as exc:
+                msg = "Guiframe set_theory: \n" + str(exc)
                 logger.info(msg)
                 wx.PostEvent(self, StatusEvent(status=msg, info="error"))
         else:
@@ -2337,7 +2338,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         data_list, _ = self._data_manager.get_by_id(data_id)
         _, temp_list_theory = self._data_manager.get_by_id(theory_id)
-        total_plot_list = data_list.values()
+        total_plot_list = list(data_list.values())
         for item in temp_list_theory.values():
             theory_data, theory_state = item
             total_plot_list.append(theory_data)
@@ -2386,7 +2387,7 @@ class ViewerFrame(PARENT_FRAME):
             plug.delete_data(temp)
         data_list, _ = self._data_manager.get_by_id(data_id)
         _, temp_list_theory = self._data_manager.get_by_id(theory_id)
-        total_plot_list = data_list.values()
+        total_plot_list = list(data_list.values())
         for item in temp_list_theory.values():
             theory_data, theory_state = item
             total_plot_list.append(theory_data)
@@ -2409,8 +2410,8 @@ class ViewerFrame(PARENT_FRAME):
             wx.PostEvent(self, NewPlotEvent(id=("res" + str(id)),
                                             group_id=("res" + str(id)),
                                             action='remove'))
-        except:
-            logger.error(sys.exc_value)
+        except Exception as exc:
+            logger.error(exc)
 
     def save_data1d(self, data, fname):
         """
@@ -2515,7 +2516,7 @@ class ViewerFrame(PARENT_FRAME):
                         data.filename
             wx.PostEvent(self, StatusEvent(status=msg,
                                            info="error"))
-            raise ValueError, msg
+            raise ValueError(msg)
         # text = str(data)
         text = data.__str__()
         text += 'Data Min Max:\n'
@@ -2550,7 +2551,7 @@ class ViewerFrame(PARENT_FRAME):
                                                   data.y[index],
                                                   dy_val,
                                                   dx_val)
-        from pdfview import TextFrame
+        from .pdfview import TextFrame
         frame = TextFrame(None, -1, "Data Info: %s" % data.name, text)
         # put icon
         self.put_icon(frame)
@@ -2634,7 +2635,7 @@ class ViewerFrame(PARENT_FRAME):
                 text += ".............\n"
                 break
 
-        from pdfview import TextFrame
+        from .pdfview import TextFrame
         frame = TextFrame(None, -1, "Data Info: %s" % data.name, text)
         # put icon
         self.put_icon(frame)
@@ -2701,7 +2702,7 @@ class ViewerFrame(PARENT_FRAME):
             return
         check = "Theory1D"
         is_theory = len(self.panel_on_focus.plots) <= 1 and \
-            self.panel_on_focus.plots.values()[0].__class__.__name__ == check
+            list(self.panel_on_focus.plots.values())[0].__class__.__name__ == check
 
         is_data2d = hasattr(new_plot, 'data')
 
@@ -3217,11 +3218,11 @@ class SasViewApp(wx.App):
                                                path=SPLASH_SCREEN_PATH)
             else:
                 self.frame.Show()
-        except:
+        except Exception as exc:
             if self.s_screen is not None:
                 self.s_screen.Close()
             msg = "Cannot display splash screen\n"
-            msg += str(sys.exc_value)
+            msg += str(exc)
             logger.error(msg)
             self.frame.Show()
 
@@ -3276,9 +3277,9 @@ class SasViewApp(wx.App):
                         file_path = os.path.join(model_folder, filename)
                         if os.path.isfile(file_path):
                             os.remove(file_path)
-                except:
+                except Exception as exc:
                     logger.error("gui_manager.clean_plugin_models:\n  %s"
-                                  % sys.exc_value)
+                                 % exc)
 
     def set_manager(self, manager):
         """
@@ -3371,6 +3372,11 @@ class SasViewApp(wx.App):
     def display_splash_screen(self, parent,
                               path=SPLASH_SCREEN_PATH):
         """Displays the splash screen.  It will exactly cover the main frame."""
+        try:
+            from wx.adv import SplashScreen, SPLASH_TIMEOUT, SPLASH_CENTRE_ON_SCREEN
+        except ImportError:
+            # CRUFT: wx 4 moved SplashScreen from wx to wx.adv
+            from wx import SplashScreen, SPLASH_TIMEOUT, SPLASH_CENTRE_ON_SCREEN
 
         # Prepare the picture.  On a 2GHz intel cpu, this takes about a second.
         image = wx.Image(path, wx.BITMAP_TYPE_PNG)
@@ -3387,15 +3393,15 @@ class SasViewApp(wx.App):
         #
         # Note that on Linux, the timeout appears to occur immediately in which
         # case the splash screen disappears upon entering the event loop.
-        s_screen = wx.SplashScreen(bitmap=bm,
-                                   splashStyle=(wx.SPLASH_TIMEOUT |
-                                                wx.SPLASH_CENTRE_ON_SCREEN),
-                                   style=(wx.SIMPLE_BORDER |
-                                          wx.FRAME_NO_TASKBAR |
-                                          wx.FRAME_FLOAT_ON_PARENT),
-                                   milliseconds=SS_MAX_DISPLAY_TIME,
-                                   parent=parent,
-                                   id=wx.ID_ANY)
+        s_screen = SplashScreen(bitmap=bm,
+                                splashStyle=(SPLASH_TIMEOUT |
+                                             SPLASH_CENTRE_ON_SCREEN),
+                                style=(wx.SIMPLE_BORDER |
+                                       wx.FRAME_NO_TASKBAR |
+                                       wx.FRAME_FLOAT_ON_PARENT),
+                                milliseconds=SS_MAX_DISPLAY_TIME,
+                                parent=parent,
+                                id=wx.ID_ANY)
         from sas.sasgui.guiframe.gui_statusbar import SPageStatusbar
         statusBar = SPageStatusbar(s_screen)
         s_screen.SetStatusBar(statusBar)

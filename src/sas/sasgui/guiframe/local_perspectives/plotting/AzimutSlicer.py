@@ -4,10 +4,13 @@
 # TODO: NEED MAJOR REFACTOR
 #
 import math
+
 import wx
-from BaseInteractor import _BaseInteractor
+
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
+
+from .BaseInteractor import _BaseInteractor
 
 class SectorInteractor(_BaseInteractor):
     """
@@ -28,7 +31,7 @@ class SectorInteractor(_BaseInteractor):
         theta2 = -2 * math.pi / 3
 
         # Inner circle
-        from Arc import ArcInteractor
+        from .Arc import ArcInteractor
         self.inner_circle = ArcInteractor(self, self.base.subplot,
                                           zorder=zorder,
                                           r=self.qmax / 2.0,
@@ -42,7 +45,7 @@ class SectorInteractor(_BaseInteractor):
                                           theta2=theta2)
         self.outer_circle.qmax = self.qmax * 1.2
         # self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
-        from Edge import RadiusInteractor
+        from .Edge import RadiusInteractor
         self.right_edge = RadiusInteractor(self, self.base.subplot,
                                            zorder=zorder + 1,
                                            arc1=self.inner_circle,

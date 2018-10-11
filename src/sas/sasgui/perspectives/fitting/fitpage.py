@@ -765,7 +765,7 @@ class FitPage(BasicPage):
                 ix = 8
                 disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                        style=wx.CB_READONLY, name='%s' % name1)
-                for key, value in POLYDISPERSITY_MODELS.iteritems():
+                for key, value in POLYDISPERSITY_MODELS.items():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
@@ -929,7 +929,7 @@ class FitPage(BasicPage):
                 ix = 8
                 disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                 style=wx.CB_READONLY, name='%s' % name1)
-                for key, value in POLYDISPERSITY_MODELS.iteritems():
+                for key, value in POLYDISPERSITY_MODELS.items():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
@@ -1371,9 +1371,9 @@ class FitPage(BasicPage):
                 tcrtl.SetBackgroundColour(wx.WHITE)
                 self._check_value_enter(self.fittable_param)
                 self._check_value_enter(self.parameters)
-            except:
+            except Exception as exc:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                msg = "Model Error:wrong value entered : %s" % exc
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
         else:
@@ -1485,12 +1485,13 @@ class FitPage(BasicPage):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                    _, exc, _ = sys.exc_info()
+                    msg = "Model Error:wrong value entered : %s" % exc
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
-            except:
+            except Exception as exc:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                msg = "Model Error:wrong value entered : %s" % exc
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             # Check if # of points for theory model are valid(>0).
@@ -1858,7 +1859,7 @@ class FitPage(BasicPage):
                                 data.filename
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
                                                info="error"))
-                    raise ValueError, msg
+                    raise ValueError(msg)
 
             else:
                 qmin = 0
@@ -1870,7 +1871,7 @@ class FitPage(BasicPage):
                                 data.filename
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
                                                info="error"))
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 # Maximum value of data
                 qmax = math.sqrt(x * x + y * y)
                 npts = len(data.data)
@@ -2112,7 +2113,7 @@ class FitPage(BasicPage):
         # make sure stop button to fit button all the time
         self._on_fit_complete()
         if out is None or not np.isfinite(chisqr):
-            raise ValueError, "Fit error occured..."
+            raise ValueError("Fit error occured...")
 
         is_modified = False
         has_error = False
@@ -2187,7 +2188,7 @@ class FitPage(BasicPage):
                             has_error = True
                 i += 1
             else:
-                raise ValueError, "onsetValues: Invalid parameters..."
+                raise ValueError("onsetValues: Invalid parameters...")
         # Show error title when any errors displayed
         if has_error:
             if not self.text2_3.IsShown():
@@ -2946,9 +2947,9 @@ class FitPage(BasicPage):
 
         # type can be either Guassian or Array
         if len(self.model.dispersion.values()) > 0:
-            type = self.model.dispersion.values()[0]["type"]
+            dist_type = list(self.model.dispersion.values())[0]["type"]
         else:
-            type = "Gaussian"
+            dist_type = "Gaussian"
 
         iy += 1
         ix = 0
@@ -3007,7 +3008,7 @@ class FitPage(BasicPage):
                 break
 
         # For Gaussian only
-        if type.lower() != "array":
+        if dist_type.lower() != "array":
             for item in self.model.orientation_params:
                 if not self.magnetic_on:
                     if item in self.model.magnetic_params:

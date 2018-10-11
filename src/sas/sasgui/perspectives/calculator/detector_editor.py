@@ -33,8 +33,8 @@ class DetectorDialog(wx.Dialog):
             self._description = "Edit Detector"
             self._do_layout()
             self.set_values()
-        except:
-            print("error", sys.exc_value)
+        except Exception as exc:
+            print("error", exc)
 
     def _define_structure(self):
         """

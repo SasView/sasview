@@ -152,7 +152,7 @@ class appearanceDialog(wx.Frame):
         """
         Populate Symbols
         """
-        self.sorted_symbo_labels = sorted(self.symbo_labels.iteritems(),
+        self.sorted_symbo_labels = sorted(self.symbo_labels.items(),
                                           key=operator.itemgetter(1))
         self.sorted_sym_dic = {}
         i = 0
@@ -165,7 +165,7 @@ class appearanceDialog(wx.Frame):
         """
         Populate Colors
         """
-        sortedcolor_labels = sorted(self.color_labels.iteritems(),
+        sortedcolor_labels = sorted(self.color_labels.items(),
                                     key=operator.itemgetter(1))
         for color in sortedcolor_labels:
             self.colorlistbox.Append(str(color[0]))
@@ -196,7 +196,7 @@ class appearanceDialog(wx.Frame):
         """
         Find key
         """
-        return [k for k, v in dic.iteritems() if v == val][0]
+        return [k for k, v in dic.items() if v == val][0]
 
     def get_current_values(self):
         """

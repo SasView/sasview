@@ -85,7 +85,9 @@ class ConsolePanel(wx.Panel):
                 icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
                                                     wx.ART_TOOLBAR)
         self.msg_txt.Newline()
-        self.msg_txt.WriteBitmap(icon_bmp)
+        # wx 3 has WriteImage and WriteBitmap; not sure if there
+        # is any difference between them.  wx 4 has only WriteImage.
+        self.msg_txt.WriteImage(icon_bmp)
         self.msg_txt.BeginTextColour(color)
         self.msg_txt.WriteText("\t")
         self.msg_txt.AppendText(status)

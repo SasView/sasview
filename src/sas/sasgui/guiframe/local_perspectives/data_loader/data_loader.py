@@ -69,7 +69,7 @@ class Plugin(PluginBase):
             if item in cards:
                 cards.remove(item)
         wlist = '|'.join(cards)
-        style = wx.OPEN | wx.FD_MULTIPLE
+        style = wx.FD_OPEN | wx.FD_MULTIPLE
         dlg = wx.FileDialog(self.parent,
                             "Choose a file",
                             self._default_save_location, "",
@@ -195,7 +195,7 @@ class Plugin(PluginBase):
                                                       output,
                                                       error_message)
                     if data_error:
-                        if basename in file_errors.keys():
+                        if basename in file_errors:
                             file_errors[basename] += [error_message]
                         else:
                             file_errors[basename] = [error_message]
@@ -218,7 +218,7 @@ class Plugin(PluginBase):
 
         if len(file_errors) > 0:
             error_message = ""
-            for filename, error_array in file_errors.iteritems():
+            for filename, error_array in file_errors.items():
                 error_message += "The following issues were found whilst "
                 error_message += "loading {}:\n".format(filename)
                 for message in error_array:

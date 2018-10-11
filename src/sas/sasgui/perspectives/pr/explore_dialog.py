@@ -34,7 +34,7 @@ from sas.sasgui.plottools import Data1D as Model1D
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.plottools.plottables import Graph
 
-from pr_widgets import PrTextCtrl
+from .pr_widgets import PrTextCtrl
 
 # Default number of points on the output plot
 DEFAULT_NPTS = 10
@@ -415,10 +415,10 @@ class ExploreDialog(wx.Dialog):
                 results.pos.append(pos)
                 results.pos_err.append(pos_err)
                 results.osc.append(osc)
-            except:
+            except Exception as exc:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(d), sys.exc_value)
+                msg += "for D_max=%s\n%s" % (str(d), exc)
                 logger.error(msg)
 
         self.results = results

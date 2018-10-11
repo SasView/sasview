@@ -3,7 +3,6 @@ from __future__ import print_function
 import inspect
 import wx
 from wx import Timer
-import wx._misc
 
 def call_later_fix():
     # TODO: test if we need the fix
@@ -15,6 +14,7 @@ def trace_new_id():
     wx.NewId = NewId
 
 def NewId():
+    import wx._misc
     id = wx._misc.NewId()
     path, line, function = _get_caller()
     if path == "sas/guiframe/utils.py":

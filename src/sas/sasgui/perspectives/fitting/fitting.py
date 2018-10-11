@@ -146,7 +146,7 @@ class Plugin(PluginBase):
         """
         Given an ID create a fitproblem container
         """
-        if page_id in self.page_finder.iterkeys():
+        if page_id in self.page_finder:
             del self.page_finder[page_id]
 
     def add_color(self, color, id):
@@ -355,7 +355,7 @@ class Plugin(PluginBase):
             # Set the new plugin model list for all fit pages; anticipating
             # categories, the updated plugin may be in either the form factor
             # or the structure factor combo boxes
-            for uid, page in self.fit_panel.opened_pages.iteritems():
+            for uid, page in self.fit_panel.opened_pages.items():
                 pbox = getattr(page, "formfactorbox", None)
                 sbox = getattr(page, "structurebox", None)
                 if pbox is None:
@@ -416,8 +416,8 @@ class Plugin(PluginBase):
                         break
                 self.fit_panel.SetSelection(current_page_index)
 
-        except Exception:
-            logger.error("update_custom_combo: %s", sys.exc_value)
+        except Exception as exc:
+            logger.error("update_custom_combo: %s", exc)
 
     def set_edit_menu(self, owner):
         """
@@ -641,8 +641,8 @@ class Plugin(PluginBase):
                         if group_id not in data.list_group_id:
                             data.list_group_id.append(group_id)
                         self.add_fit_page(data=[data])
-            except:
-                msg = "Fitting set_data: " + str(sys.exc_value)
+            except Exception as exc:
+                msg = "Fitting set_data: " + str(exc)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
 
     def set_theory(self, theory_list=None):
@@ -653,10 +653,10 @@ class Plugin(PluginBase):
             try:
                 _, theory_state = item
                 self.fit_panel.set_model_state(theory_state)
-            except Exception:
+            except Exception as exc:
                 msg = "Fitting: cannot deal with the theory received"
                 evt = StatusEvent(status=msg, info="error")
-                logger.error("set_theory " + msg + "\n" + str(sys.exc_value))
+                logger.error("set_theory " + msg + "\n" + str(exc))
                 wx.PostEvent(self.parent, evt)
 
     def set_state(self, state=None, datainfo=None, format=None):
@@ -779,7 +779,7 @@ class Plugin(PluginBase):
         # there is no point setting the weights.
         if fid is None:
             return
-        if uid in self.page_finder.keys():
+        if uid in self.page_finder:
             self.page_finder[uid].set_weight(flag=flag, is2d=is2d)
 
     def set_fit_range(self, uid, qmin, qmax, fid=None):
@@ -792,7 +792,7 @@ class Plugin(PluginBase):
         :param qmin: minimum  value of the fit range
         :param qmax: maximum  value of the fit range
         """
-        if uid in self.page_finder.keys():
+        if uid in self.page_finder:
             self.page_finder[uid].set_range(qmin=qmin, qmax=qmax, fid=fid)
 
     def schedule_for_fit(self, value=0, uid=None):
@@ -803,7 +803,7 @@ class Plugin(PluginBase):
         :param value: integer 0 or 1
         :param uid: the id related to a page containing fitting information
         """
-        if uid in self.page_finder.keys():
+        if uid in self.page_finder:
             self.page_finder[uid].schedule_tofit(value)
 
     def get_page_finder(self):
@@ -822,7 +822,7 @@ class Plugin(PluginBase):
         :param names: the parameter name
         """
         sim_page_id = self.sim_page.uid
-        for uid, value in self.page_finder.iteritems():
+        for uid, value in self.page_finder.items():
             if uid != sim_page_id and uid != self.batch_page.uid:
                 model_list = value.get_model()
                 model = model_list[0]
@@ -887,7 +887,7 @@ class Plugin(PluginBase):
         """
         Stop the fit
         """
-        if uid in self.fit_thread_list.keys():
+        if uid in self.fit_thread_list:
             calc_fit = self.fit_thread_list[uid]
             if calc_fit is not  None and calc_fit.isrunning():
                 calc_fit.stop()
@@ -899,9 +899,9 @@ class Plugin(PluginBase):
         sim_flag = self.sim_page is not None and uid == self.sim_page.uid
         batch_flag = self.batch_page is not None and uid == self.batch_page.uid
         if sim_flag or batch_flag:
-            for uid, value in self.page_finder.iteritems():
+            for uid, value in self.page_finder.items():
                 if value.get_scheduled() == 1:
-                    if uid in self.fit_panel.opened_pages.keys():
+                    if uid in self.fit_panel.opened_pages:
                         panel = self.fit_panel.opened_pages[uid]
                         panel._on_fit_complete()
 
@@ -918,7 +918,7 @@ class Plugin(PluginBase):
         :param qmax: the maximum value of the theory plotting range
         :param draw: Determine if the theory needs to be plot
         """
-        if uid not in self.page_finder.keys():
+        if uid not in self.page_finder:
             return
         self.page_finder[uid].enable_smearing(flag=enable_smearer)
         self.page_finder[uid].set_smearer(smearer, fid=fid)
@@ -929,7 +929,7 @@ class Plugin(PluginBase):
                 msg = "set_mearer requires at least data.\n"
                 msg += "Got data = %s .\n" % str(data)
                 return
-                #raise ValueError, msg
+                #raise ValueError(msg)
             model = self.page_finder[uid].get_model(fid=fid)
             if model is None:
                 return
@@ -1031,7 +1031,7 @@ class Plugin(PluginBase):
         self.current_pg = None
         list_page_id = []
         fit_id = 0
-        for page_id, page_info in self.page_finder.iteritems():
+        for page_id, page_info in self.page_finder.items():
             # For simulfit (uid give with None), do for-loop
             # if uid is specified (singlefit), do it only on the page.
             if page_id in (sim_page_uid, batch_page_uid): continue
@@ -1058,8 +1058,7 @@ class Plugin(PluginBase):
                         return False
 
                     pars = [str(element[1]) for element in page.param_toFit]
-                    fitproblem_list = page_info.values()
-                    for fitproblem in  fitproblem_list:
+                    for fitproblem in page_info.values():
                         if sim_fitter is None:
                             fitter = Fit()
                             fitter.fitter_id = page_id
@@ -1078,9 +1077,9 @@ class Plugin(PluginBase):
                 evt = StatusEvent(status=msg, info="info", type="stop")
                 wx.PostEvent(self.parent, evt)
                 return True
-            except:
+            except Exception as exc:
                 raise
-                msg = "Fitting error: %s" % str(sys.exc_value)
+                msg = "Fitting error: %s" % exc
                 evt = StatusEvent(status=msg, info="error", type="stop")
                 wx.PostEvent(self.parent, evt)
                 return False
@@ -1137,7 +1136,7 @@ class Plugin(PluginBase):
         :param uid: the id related to the fitpage to close
         :param fid: the id of the fitproblem(data, model, range,etc)
         """
-        if uid not in self.page_finder.keys():
+        if uid not in self.page_finder:
             return
         fitproblemList = self.page_finder[uid].get_fit_problem(fid)
         for fitproblem in fitproblemList:
@@ -1182,8 +1181,8 @@ class Plugin(PluginBase):
                 msg = "Page was already Created"
                 evt = StatusEvent(status=msg, info="warning")
                 wx.PostEvent(self.parent, evt)
-        except Exception:
-            msg = "Creating Fit page: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "Creating Fit page: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
 
     def add_fit_page(self, data):
@@ -1263,11 +1262,11 @@ class Plugin(PluginBase):
         """
         # case that uid is not specified
         if uid is None:
-            for page_id in self.page_finder.keys():
+            for page_id in self.page_finder:
                 self.page_finder[page_id].schedule_tofit(value)
         # when uid is given
         else:
-            if uid in self.page_finder.keys():
+            if uid in self.page_finder:
                 self.page_finder[uid].schedule_tofit(value)
 
     def _add_problem_to_fit(self, fitproblem, pars, fitter, fit_id):
@@ -1301,7 +1300,7 @@ class Plugin(PluginBase):
         """
         panel = self.plot_panel
         if panel is None:
-            raise ValueError, "Fitting:_onSelect: NonType panel"
+            raise ValueError("Fitting:_onSelect: NonType panel")
         Plugin.on_perspective(self, event=event)
         self.select_data(panel)
 
@@ -1334,7 +1333,7 @@ class Plugin(PluginBase):
         :param elapsed: time spent at the fitting level
         """
         uid = page_id[0]
-        if uid in self.fit_thread_list.keys():
+        if uid in self.fit_thread_list:
             del self.fit_thread_list[uid]
 
         wx.CallAfter(self._update_fit_button, page_id)
@@ -1360,18 +1359,18 @@ class Plugin(PluginBase):
                     model = model.model
                 #get all fittable parameters of the current model
                 for param in  model.getParamList():
-                    if param  not in batch_outputs.keys():
+                    if param  not in batch_outputs:
                         batch_outputs[param] = []
                 for param in model.getDispParamList():
                     if not model.is_fittable(param) and \
-                        param in batch_outputs.keys():
+                        param in batch_outputs:
                         del batch_outputs[param]
                 # Add fitted parameters and their error
                 for param in res.param_list:
-                    if param not in batch_outputs.keys():
+                    if param not in batch_outputs:
                         batch_outputs[param] = []
                     err_param = "error on %s" % str(param)
-                    if err_param not in batch_inputs.keys():
+                    if err_param not in batch_inputs:
                         batch_inputs[err_param] = []
         msg = ""
         for list_res in result:
@@ -1525,7 +1524,7 @@ class Plugin(PluginBase):
         data = fitproblem.get_fit_data()
         model = fitproblem.get_model()
         #fill batch result information
-        if "Data" not in batch_outputs.keys():
+        if "Data" not in batch_outputs:
             batch_outputs["Data"] = []
         cell = BatchCell()
         cell.label = data.name
@@ -1554,14 +1553,14 @@ class Plugin(PluginBase):
 
         cell.object = [data, theory_data]
         batch_outputs["Data"].append(cell)
-        for key, value in data.meta_data.iteritems():
-            if key not in batch_inputs.keys():
+        for key, value in data.meta_data.items():
+            if key not in batch_inputs:
                 batch_inputs[key] = []
             #if key.lower().strip() != "loader":
             batch_inputs[key].append(value)
         param = "temperature"
         if hasattr(data.sample, param):
-            if param not in  batch_inputs.keys():
+            if param not in  batch_inputs:
                 batch_inputs[param] = []
             batch_inputs[param].append(data.sample.temperature)
 
@@ -1632,9 +1631,8 @@ class Plugin(PluginBase):
                     evt = StatusEvent(status=fit_msg, info="warning", type="stop")
                     wx.PostEvent(self.parent, evt)
 
-        except Exception:
-            msg = ("Fit completed but the following error occurred: %s"
-                   % sys.exc_value)
+        except Exception as exc:
+            msg = "Fit completed but the following error occurred: %s" % exc
             #msg = "\n".join((traceback.format_exc(), msg))
             evt = StatusEvent(status=msg, info="warning", type="stop")
             wx.PostEvent(self.parent, evt)
@@ -1722,7 +1720,7 @@ class Plugin(PluginBase):
         enable_smearer = evt.enable_smearer
         if model is None:
             return
-        if uid not in self.page_finder.keys():
+        if uid not in self.page_finder:
             return
         # save the name containing the data name with the appropriate model
         self.page_finder[uid].set_model(model)
@@ -2079,9 +2077,9 @@ class Plugin(PluginBase):
                                   exception_handler=self._calc_exception,
                                   source=source)
             self.calc_1D.queue()
-        except:
+        except Exception as exc:
             msg = " Error occurred when drawing %s Model 1D: " % model.name
-            msg += " %s" % sys.exc_value
+            msg += " %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
     def _cal_chisqr(self, page_id, data, weight, fid=None, index=None):

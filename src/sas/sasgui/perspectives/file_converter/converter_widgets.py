@@ -53,7 +53,7 @@ class VectorInput(object):
         """
         v = Vector()
         if not self.Validate(): return v
-        for direction, control in self._inputs.iteritems():
+        for direction, control in self._inputs.items():
             try:
                 value = float(control.GetValue())
                 setattr(v, direction, value)

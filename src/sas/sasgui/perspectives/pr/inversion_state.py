@@ -17,6 +17,7 @@ import os
 import sys
 import logging
 from lxml import etree
+
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.readers.cansas_reader import get_content
@@ -237,7 +238,7 @@ class InversionState(object):
         if file is not None:
             msg = "InversionState no longer supports non-CanSAS"
             msg += " format for P(r) files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version') and node.get('version') == '1.0':
 
@@ -251,9 +252,9 @@ class InversionState(object):
             if entry is not None and entry.get('epoch'):
                 try:
                     self.timestamp = float(entry.get('epoch'))
-                except:
+                except Exception as exc:
                     msg = "InversionState.fromXML: Could not read "
-                    msg += "timestamp\n %s" % sys.exc_value
+                    msg += "timestamp\n %s" % exc
                     logger.error(msg)
 
             # Parse inversion inputs
@@ -431,9 +432,9 @@ class Reader(CansasReader):
                 # Create an empty state
                 state = InversionState()
                 state.fromXML(node=nodes[0])
-        except:
+        except Exception as exc:
             msg = "XML document does not contain P(r) "
-            msg += "information.\n %s" % sys.exc_value
+            msg += "information.\n %s" % exc
             logger.info(msg)
 
         return state
@@ -480,7 +481,7 @@ class Reader(CansasReader):
                         sas_entry.filename = prstate.file
                         output.append(sas_entry)
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
 
         # Return output consistent with the loader's api
         if len(output) == 0:
@@ -524,7 +525,7 @@ class Reader(CansasReader):
         elif not issubclass(datainfo.__class__, Data1D):
             msg = "The cansas writer expects a Data1D "
             msg += "instance: %s" % str(datainfo.__class__.__name__)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         # Create basic XML document
         doc, sasentry = self._to_xml_doc(datainfo)

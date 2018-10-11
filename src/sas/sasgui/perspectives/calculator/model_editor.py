@@ -577,7 +577,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.parent = parent
         self.base = base
         self.path = path
-        self.font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
+        self.font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
         self.font.SetPointSize(10)
         self.reader = None
         self.name = 'untitled'
@@ -780,7 +780,7 @@ class EditorPanel(wx.ScrolledWindow):
         for item in dir(math):
             if item.count("_") < 1:
                 try:
-                    exec "float(math.%s)" % item
+                    exec("float(math.%s)" % item)
                     self.math_combo.Append(str(item))
                 except Exception:
                     self.math_combo.Append(str(item) + "()")

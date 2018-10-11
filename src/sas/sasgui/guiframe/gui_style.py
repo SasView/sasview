@@ -57,26 +57,32 @@ class GUIFRAME_ICON:
     ZOOM_ID_PATH = os.path.join(PATH, 'search_pan.png')
     DRAG_ID_PATH = os.path.join(PATH, 'drag_hand.png')
     RESET_ID_PATH = os.path.join(PATH, 'reset.png')
-    PREVIEW_ID_PATH = os.path.join(PATH, 'report.png')
+    REPORT_ID_PATH = os.path.join(PATH, 'report.png')
+    PREVIEW_ID_PATH = os.path.join(PATH, 'preview.png')
     PRINT_ID_PATH = os.path.join(PATH, 'printer.png')
     HIDE_ID_PATH = os.path.join(PATH, 'hide.png')
     
-  
-    SAVE_ICON = wx.Image(os.path.join(PATH, 'save.png'))
-    UNDO_ICON = wx.Image(os.path.join(PATH, 'undo.png'))
-    REDO_ICON = wx.Image(os.path.join(PATH, 'redo.png'))
-    COPY_ICON = wx.Image(os.path.join(PATH, 'copy.png'))
-    PASTE_ICON = wx.Image(os.path.join(PATH, 'paste.png'))
-    BOOKMARK_ICON = wx.Image(os.path.join(PATH, 'bookmark.png'))
-    ZOOM_IN_ICON = wx.Image(os.path.join(PATH, 'zoom_in.png'))
-    ZOOM_OUT_ICON = wx.Image(os.path.join(PATH, 'zoom_out.png'))
-    ZOOM_ICON = wx.Image(os.path.join(PATH, 'search_pan.png'))
-    DRAG_ICON = wx.Image(os.path.join(PATH, 'drag_hand.png'))
-    RESET_ICON = wx.Image(os.path.join(PATH, 'reset.png'))
-    REPORT_ICON = wx.Image(os.path.join(PATH, 'report.png'))
-    PREVIEW_ICON = wx.Image(os.path.join(PATH, 'preview.png'))
-    PRINT_ICON = wx.Image(os.path.join(PATH, 'printer.png'))
-    HIDE_ICON = wx.Image(os.path.join(PATH, 'hide.png'))
+    # Note: wx 4 requires that the app be defined before
+    # the images are loaded, so they can't be processed
+    # at module load time.  Instead, need to load icons
+    # when the app is created.
+    @classmethod
+    def load_icons(cls):
+        cls.SAVE_ICON = wx.Image(cls.SAVE_ICON_PATH)
+        cls.UNDO_ICON = wx.Image(cls.UNDO_ICON_PATH)
+        cls.REDO_ICON = wx.Image(cls.REDO_ICON_PATH)
+        cls.COPY_ICON = wx.Image(cls.COPY_ICON_PATH)
+        cls.PASTE_ICON = wx.Image(cls.PASTE_ICON_PATH)
+        cls.BOOKMARK_ICON = wx.Image(cls.BOOKMARK_ICON_PATH)
+        cls.ZOOM_IN_ICON = wx.Image(cls.ZOOM_IN_ID_PATH)
+        cls.ZOOM_OUT_ICON = wx.Image(cls.ZOOM_OUT_ID_PATH)
+        cls.ZOOM_ICON = wx.Image(cls.ZOOM_ID_PATH)
+        cls.DRAG_ICON = wx.Image(cls.DRAG_ID_PATH)
+        cls.RESET_ICON = wx.Image(cls.RESET_ID_PATH)
+        cls.REPORT_ICON = wx.Image(cls.REPORT_ID_PATH)
+        cls.PREVIEW_ICON = wx.Image(cls.PREVIEW_ID_PATH)
+        cls.PRINT_ICON = wx.Image(cls.PRINT_ID_PATH)
+        cls.HIDE_ICON = wx.Image(cls.HIDE_ID_PATH)
 
 if __name__ == "__main__":
   

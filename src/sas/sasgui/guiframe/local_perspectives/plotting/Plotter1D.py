@@ -10,19 +10,22 @@
 ################################################################################
 
 
-import wx
 import sys
 import math
-import numpy as np
 import logging
+
+import wx
+import numpy as np
+
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
 from sas.sasgui.guiframe.utils import PanelMenu, IdList
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
-from appearanceDialog import appearanceDialog
-from graphAppearance import graphAppearance
+
+from .appearanceDialog import appearanceDialog
+from .graphAppearance import graphAppearance
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +38,7 @@ IS_MAC = (sys.platform == 'darwin')
 
 def find_key(dic, val):
     """return the key of dictionary dic given the value"""
-    return [k for k, v in dic.iteritems() if v == val][0]
+    return [k for k, v in dic.items() if v == val][0]
 
 class ModelPanel1D(PlotPanel, PanelBase):
     """
@@ -219,7 +222,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             return
         if hasattr(event, 'is_corfunc'):
             self.is_corfunc = event.is_corfunc
-        if event.id in self.plots.keys():
+        if event.id in self.plots:
             ctrl = event.ctrl
             self.cursor_id = event.id
             # Set line position and color
@@ -242,8 +245,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 position = self.get_data_xy_vals(xval)
                 if position is not None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
             if not event.leftdown:
                 # text event
                 try:
@@ -255,8 +258,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
                             is_moved = True
                     if is_moved:
                         self.canvas.draw()
-                except:
-                    logger.error(sys.exc_value)
+                except Exception as exc:
+                    logger.error(exc)
                 event.Skip()
                 return
             self.q_ctrl = ctrl
@@ -409,8 +412,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             ly[vl_ind].set_zorder(nop + 1)
             self.canvas.draw()
             self.q_ctrl[vl_ind].SetValue(str(pos_x))
-        except:
-            logger.error(sys.exc_value)
+        except Exception as exc:
+            logger.error(exc)
 
     def set_resizing(self, resizing=False):
         """
@@ -430,15 +433,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
             Remove data from plot
         """
-        if id in self.plots.keys():
+        if id in self.plots:
             data = self.plots[id]
             self.graph.delete(data)
             data_manager = self._manager.parent.get_data_manager()
             data_list, theory_list = data_manager.get_by_id(id_list=[id])
 
-            if id in data_list.keys():
+            if id in data_list:
                 data = data_list[id]
-            if id in theory_list.keys():
+            if id in theory_list:
                 data = theory_list[id]
 
             del self.plots[id]
@@ -456,7 +459,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         if data.__class__.__name__ == 'Data2D':
             return
-        plot_keys = self.plots.keys()
+        plot_keys = list(self.plots.keys())
         if data.id in plot_keys:
             # Recover panel prop.s
             xlo, xhi = self.subplot.get_xlim()
@@ -475,7 +478,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             ## Set the view scale for all plots
             try:
                 self._onEVT_FUNC_PROPERTY()
-            except Exception, exc:
+            except Exception as exc:
                 wx.PostEvent(self.parent,
                              StatusEvent(status="Plotting Error: %s" % str(exc), info="error"))
             if self.is_zoomed:
@@ -492,7 +495,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 if IS_MAC:
                     # MAC: forcing to plot 2D avg
                     self.canvas._onDrawIdle()
-            except Exception, exc:
+            except Exception as exc:
                 wx.PostEvent(self.parent, StatusEvent(status=\
                     "Plotting Error: %s" % str(exc), info="error"))
             self.toolbar.update()
@@ -566,7 +569,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         event_id = event.GetId()
         self.set_selected_from_menu(menu, event_id)
         ## Check if there is a selected graph to remove
-        if self.graph.selected_plottable in self.plots.keys():
+        if self.graph.selected_plottable in self.plots:
             graph_id = self.graph.selected_plottable
             self.remove_data_by_id(graph_id)
 
@@ -602,7 +605,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             name = plot.name
             plot_menu = wx.Menu()
             if self.graph.selected_plottable:
-                if not self.graph.selected_plottable in self.plots.keys():
+                if not self.graph.selected_plottable in self.plots:
                     continue
                 if plot != self.plots[self.graph.selected_plottable]:
                     continue
@@ -622,9 +625,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     try:
                         plot_menu.Append(wx_id, item[0], name)
                         wx.EVT_MENU(self, wx_id, item[2])
-                    except:
+                    except Exception as exc:
                         msg = "ModelPanel1D.onContextMenu: "
-                        msg += "bad menu item  %s" % sys.exc_value
+                        msg += "bad menu item  %s" % exc
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                 plot_menu.AppendSeparator()
 
