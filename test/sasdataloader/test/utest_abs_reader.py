@@ -79,10 +79,10 @@ class abs_reader(unittest.TestCase):
         data_abs = Loader().load(find("sam14_cor.ABS"))
         data_cor = Loader().load(find("sam14_cor.cor"))
         for i in range(0, len(data_abs) - 1):
-            self.assertEquals(data_abs.x[i], data_cor.x[i])
-            self.assertEquals(data_abs.y[i], data_cor.y[i])
-            self.assertEquals(data_abs.dxl[i], data_cor.dxl[i])
-            self.assertEquals(data_abs.dxw[i], data_cor.dxw[i])
+            self.assertEqual(data_abs.x[i], data_cor.x[i])
+            self.assertEqual(data_abs.y[i], data_cor.y[i])
+            self.assertEqual(data_abs.dxl[i], data_cor.dxl[i])
+            self.assertEqual(data_abs.dxw[i], data_cor.dxw[i])
             self.assertTrue(data_abs.dxl > 0)
 
 
@@ -357,7 +357,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dxw[0], 0.001)
         self.assertEqual(self.data.dy[0], 3)
         self.assertEqual(self.data.x[1], 0.03)
-        self.assertAlmostEquals(self.data.y[1], 1001.0)
+        self.assertAlmostEqual(self.data.y[1], 1001.0)
         self.assertEqual(self.data.dxl[1], 0.005)
         self.assertEqual(self.data.dxw[1], 0.001)
         self.assertEqual(self.data.dy[1], 4)
