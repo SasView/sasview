@@ -127,7 +127,11 @@ class Detector(object):
         if len(size) == 0:
             self.size = 0
         else:
-            self.size = size
+            # TODO: Make sure detector size is number of pixels
+            # Could be detector dimensions in e.g., mm, but
+            # the resolution calculator assumes it is pixels.
+            # Being pixels, it has to be integers rather than float
+            self.size = [int(s) for s in size]
             validate(size[0])
 
     def set_pix_size(self, size=[]):

@@ -474,8 +474,8 @@ class Reader(FileReader):
             try:
                 for i in range(0, dataset.mask.size - 1):
                     zeros[i] = dataset.mask[i]
-            except:
-                self.errors.add(sys.exc_value)
+            except Exception as exc:
+                self.errors.add(exc)
             dataset.mask = zeros
             # Calculate the actual Q matrix
             try:

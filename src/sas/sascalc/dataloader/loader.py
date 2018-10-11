@@ -168,9 +168,9 @@ class Registry(ExtensionRegistry):
                         module = __import__(toks[0], globals(), locals())
                         if self._identify_plugin(module):
                             readers_found += 1
-                    except:
+                    except Exception as exc:
                         msg = "Loader: Error importing "
-                        msg += "%s\n  %s" % (item, sys.exc_value)
+                        msg += "%s\n  %s" % (item, exc)
                         logger.error(msg)
 
                 # Process zip files
@@ -190,14 +190,14 @@ class Registry(ExtensionRegistry):
                                                     locals(), [""])
                                 if self._identify_plugin(module):
                                     readers_found += 1
-                            except:
+                            except Exception as exc:
                                 msg = "Loader: Error importing"
-                                msg += " %s\n  %s" % (mfile, sys.exc_value)
+                                msg += " %s\n  %s" % (mfile, exc)
                                 logger.error(msg)
 
-                    except:
+                    except Exception as exc:
                         msg = "Loader: Error importing "
-                        msg += " %s\n  %s" % (item, sys.exc_value)
+                        msg += " %s\n  %s" % (item, exc)
                         logger.error(msg)
 
         return readers_found
@@ -241,9 +241,9 @@ class Registry(ExtensionRegistry):
                     # Append the new writer to the list
                     self.writers[ext].append(loader.write)
 
-            except:
+            except Exception as exc:
                 msg = "Loader: Error accessing"
-                msg += " Reader in %s\n  %s" % (module.__name__, sys.exc_value)
+                msg += " Reader in %s\n  %s" % (module.__name__, exc)
                 logger.error(msg)
         return reader_found
 
@@ -274,9 +274,9 @@ class Registry(ExtensionRegistry):
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
 
-        except:
+        except Exception as exc:
             msg = "Loader: Error accessing Reader "
-            msg += "in %s\n  %s" % (loader.__name__, sys.exc_value)
+            msg += "in %s\n  %s" % (loader.__name__, exc)
             logger.error(msg)
         return reader_found
 
@@ -319,9 +319,9 @@ class Registry(ExtensionRegistry):
                             self.writers[ext] = []
                         self.writers[ext].insert(0, loader.write)
 
-            except:
+            except Exception as exc:
                 msg = "Loader: Error accessing Reader"
-                msg += " in %s\n  %s" % (module.__name__, sys.exc_value)
+                msg += " in %s\n  %s" % (module.__name__, exc)
                 logger.error(msg)
         return reader_found
 

@@ -181,8 +181,8 @@ def load(path):
                 data_x = np.append(data_x, test_x)
                 data_y = np.append(data_y, test_y)
                 data_err = np.append(data_err, err)
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
 
     return data_x, data_y, data_err
 
