@@ -1,8 +1,11 @@
 /**
   SLD2I module to perform point and I calculations
  */
-#include <Python.h>
 #include <stdio.h>
+
+//#define Py_LIMITED_API 0x03020000
+#include <Python.h>
+
 #include "sld2i.h"
 
 #if PY_MAJOR_VERSION < 3
@@ -159,9 +162,9 @@ static PyMethodDef module_methods[] = {
 };
 
 #define MODULE_DOC "Sld2i C Library"
-#define MODULE_NAME "sld2i"
-#define MODULE_INIT2 initsld2i
-#define MODULE_INIT3 PyInit_sld2i
+#define MODULE_NAME "_sld2i"
+#define MODULE_INIT2 init_sld2i
+#define MODULE_INIT3 PyInit__sld2i
 #define MODULE_METHODS module_methods
 
 /* ==== boilerplate python 2/3 interface bootstrap ==== */

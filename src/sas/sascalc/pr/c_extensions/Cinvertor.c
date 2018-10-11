@@ -4,15 +4,16 @@
  * and provides the underlying computations.
  *
  */
-#include <Python.h>
-#include "structmember.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 
-#include "invertor.h"
+//#define Py_LIMITED_API 0x03050000
+#include <Python.h>
+#include <structmember.h>
 
+#include "invertor.h"
 
 /// Error object for raised exceptions
 PyObject * CinvertorError;
@@ -1120,9 +1121,9 @@ void addCinvertor(PyObject *module) {
 
 
 #define MODULE_DOC "C extension module for inversion to P(r)."
-#define MODULE_NAME "pr_inversion"
-#define MODULE_INIT2 initpr_inversion
-#define MODULE_INIT3 PyInit_pr_inversion
+#define MODULE_NAME "_pr_inversion"
+#define MODULE_INIT2 init_pr_inversion
+#define MODULE_INIT3 PyInit__pr_inversion
 #define MODULE_METHODS module_methods
 
 /* ==== boilerplate python 2/3 interface bootstrap ==== */
