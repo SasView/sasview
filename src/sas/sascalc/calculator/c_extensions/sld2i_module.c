@@ -15,22 +15,26 @@ typedef void (*PyCObject_Destructor)(void *);
 #define PyCapsule_GetPointer(capsule, name) (PyCObject_AsVoidPtr(capsule))
 #endif
 
-
-// Utilities
-#define INVECTOR(obj,buf,len)										\
-    do { \
-        int err = PyObject_AsReadBuffer(obj, (const void **)(&buf), &len); \
-        if (err < 0) return NULL; \
-        len /= sizeof(*buf); \
-    } while (0)
-
-#define OUTVECTOR(obj,buf,len) \
-    do { \
-        int err = PyObject_AsWriteBuffer(obj, (void **)(&buf), &len); \
-        if (err < 0) return NULL; \
-        len /= sizeof(*buf); \
-    } while (0)
-
+// Vector binding glue
+#if (PY_VERSION_HEX > 0x03000000) && !defined(Py_LIMITED_API)
+  // Assuming that a view into a writable vector points to a 
+  // non-changing pointer for the duration of the C call, capture 
+  // the view pointer and immediately free the view.
+  #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
+    Py_buffer VEC_view; \
+    int VEC_err = PyObject_GetBuffer(VEC_obj, &VEC_view, PyBUF_WRITABLE|PyBUF_FORMAT); \
+    if (VEC_err < 0 || sizeof(*VEC_buf) != VEC_view.itemsize) return NULL; \
+    VEC_buf = (typeof(VEC_buf))VEC_view.buf; \
+    VEC_len = VEC_view.len/sizeof(*VEC_buf); \
+    PyBuffer_Release(&VEC_view); \
+  } while (0)
+#else
+  #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
+    int VEC_err = PyObject_AsWriteBuffer(VEC_obj, (void **)(&VEC_buf), &VEC_len); \
+    if (VEC_err < 0) return NULL; \
+    VEC_len /= sizeof(*VEC_buf); \
+  } while (0)
+#endif
 
 /**
  * Delete a GenI object
@@ -75,14 +79,14 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 
 	//printf("new GenI\n");
 	if (!PyArg_ParseTuple(args, "iOOOOOOOOddd", &is_avg, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &vol_pix_obj, &inspin, &outspin, &stheta)) return NULL;
-	INVECTOR(x_val_obj, x_val, n_x);
-	INVECTOR(y_val_obj, y_val, n_y);
-	INVECTOR(z_val_obj, z_val, n_z);
-	INVECTOR(sldn_val_obj, sldn_val, n_sld);
-	INVECTOR(mx_val_obj, mx_val, n_mx);
-	INVECTOR(my_val_obj, my_val, n_my);
-	INVECTOR(mz_val_obj, mz_val, n_mz);
-	INVECTOR(vol_pix_obj, vol_pix, n_vol_pix);
+	VECTOR(x_val_obj, x_val, n_x);
+	VECTOR(y_val_obj, y_val, n_y);
+	VECTOR(z_val_obj, z_val, n_z);
+	VECTOR(sldn_val_obj, sldn_val, n_sld);
+	VECTOR(mx_val_obj, mx_val, n_mx);
+	VECTOR(my_val_obj, my_val, n_my);
+	VECTOR(mz_val_obj, mz_val, n_mz);
+	VECTOR(vol_pix_obj, vol_pix, n_vol_pix);
 	sld2i = PyMem_Malloc(sizeof(GenI));
 	//printf("sldi:%p\n", sld2i);
 	if (sld2i != NULL) {
@@ -110,9 +114,9 @@ PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
 	//printf("in genicom_inputXY\n");
 	if (!PyArg_ParseTuple(args, "OOOO",  &gen_obj, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
 	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
-	INVECTOR(qx_obj, qx, n_qx);
-	INVECTOR(qy_obj, qy, n_qy);
-	OUTVECTOR(I_out_obj, I_out, n_out);
+	VECTOR(qx_obj, qx, n_qx);
+	VECTOR(qy_obj, qy, n_qy);
+	VECTOR(I_out_obj, I_out, n_out);
 	//printf("qx, qy, I_out: %d %d %d, %d %d %d\n", qx, qy, I_out, n_qx, n_qy, n_out);
 
 	// Sanity check
@@ -138,8 +142,8 @@ PyObject * genicom_input(PyObject *self, PyObject *args) {
 
 	if (!PyArg_ParseTuple(args, "OOO",  &gen_obj, &q_obj, &I_out_obj)) return NULL;
 	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
-	INVECTOR(q_obj, q, n_q);
-	OUTVECTOR(I_out_obj, I_out, n_out);
+	VECTOR(q_obj, q, n_q);
+	VECTOR(I_out_obj, I_out, n_out);
 
 	// Sanity check
 	//if (n_q!=n_out) return Py_BuildValue("i",-1);
