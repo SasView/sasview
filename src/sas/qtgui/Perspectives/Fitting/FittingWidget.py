@@ -3474,32 +3474,38 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         param_list.append(['model_name', str(self.cbModel.currentText())])
 
+        try:
+            param_list.append(['structure_factor', str(self.cbStructureFactor.currentText())])
+        except:
+            pass
+
         def gatherParams(row):
             """
             Create list of main parameters based on _model_model
             """
             param_name = str(self._model_model.item(row, 0).text())
-            param_checked = str(self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked)
-            param_value = str(self._model_model.item(row, 1).text())
-            param_error = None
-            param_min = None
-            param_max = None
-            column_offset = 0
-            if self.has_error_column:
-                param_error = str(self._model_model.item(row, 2).text())
-                column_offset = 1
-
-            try:
-                param_min = str(self._model_model.item(row, 2+column_offset).text())
-                param_max = str(self._model_model.item(row, 3+column_offset).text())
-            except:
-                pass
 
             if param_name == str(self.cbModel.currentText()):
                 pass
             elif param_name == str(self.cbStructureFactor.currentText()):
                 pass
             else:
+                param_checked = str(self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked)
+                param_value = str(self._model_model.item(row, 1).text())
+                param_error = None
+                param_min = None
+                param_max = None
+                column_offset = 0
+                if self.has_error_column:
+                    param_error = str(self._model_model.item(row, 2).text())
+                    column_offset = 1
+
+                try:
+                    param_min = str(self._model_model.item(row, 2 + column_offset).text())
+                    param_max = str(self._model_model.item(row, 3 + column_offset).text())
+                except:
+                    pass
+
                 param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
 
         def gatherPolyParams(row):
@@ -3549,9 +3555,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if format=="":
             formatted_output = FittingUtilities.formatParameters(param_list)
         elif format == "Excel":
-            formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
+            formatted_output = FittingUtilities.formatParametersExcel(param_list[2:])
         elif format == "Latex":
-            formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
+            formatted_output = FittingUtilities.formatParametersLatex(param_list[2:])
         else:
             raise AttributeError("Bad format specifier.")
 
@@ -3574,14 +3580,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return False
 
         model = lines[1].split(',')
-        print(model)
 
         if model[0] != 'model_name':
             return False
 
-        context['model_name'] = [model[1]]
+        StrucFac = lines[2].split(',')
 
-        for line in lines[2:-1]:
+        if StrucFac[0] != 'structure_factor':
+            return False
+
+        context['model_name'] = [model[1]]
+        context['structure_factor'] = [StrucFac[1]]
+
+        for line in lines[3:-1]:
             if len(line) != 0:
                 item = line.split(',')
                 check = item[1]
@@ -3611,7 +3622,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     except IndexError:
                         pass
 
-        if str(self.cbModel.currentText()) != str(context['model_name'][0]):
+        if str(self.cbModel.currentText()) != str(context['model_name'][0]) or \
+                str(self.cbStructureFactor.currentText()) != str(context['structure_factor'][0]):
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.setText("The model in the clipboard is not the same as the currently loaded model. \
