@@ -3473,6 +3473,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list = []
 
         param_list.append(['model_name', str(self.cbModel.currentText())])
+
         def gatherParams(row):
             """
             Create list of main parameters based on _model_model
@@ -3495,11 +3496,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
 
             if param_name == str(self.cbModel.currentText()):
-                return
-            elif str(self.cbStructureFactor.currentText()):
-                return
-
-            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
+                pass
+            elif param_name == str(self.cbStructureFactor.currentText()):
+                pass
+            else:
+                param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
 
         def gatherPolyParams(row):
             """
@@ -3573,11 +3574,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return False
 
         model = lines[1].split(',')
+        print(model)
 
         if model[0] != 'model_name':
             return False
 
         context['model_name'] = [model[1]]
+
         for line in lines[2:-1]:
             if len(line) != 0:
                 item = line.split(',')
@@ -3662,8 +3665,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
 
             self.setFocus()
-
-
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
