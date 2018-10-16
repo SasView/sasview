@@ -3496,6 +3496,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             if param_name == str(self.cbModel.currentText()):
                 return
+            elif str(self.cbStructureFactor.currentText()):
+                return
 
             param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
 
