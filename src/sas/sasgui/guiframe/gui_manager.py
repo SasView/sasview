@@ -1276,13 +1276,26 @@ class ViewerFrame(PARENT_FRAME):
         self._help_menu = wx.Menu()
 
         wx_id = wx.NewId()
-        self._help_menu.Append(wx_id, '&Documentation', '')
+        self._help_menu.Append(wx_id, '&Documentation', 'Help documentation for SasView')
         wx.EVT_MENU(self, wx_id, self._onSphinxDocs)
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
             wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&Tutorial', 'Software tutorial')
+            # Pluralised both occurences of 'Tutorial' in the line below
+            # S King, Sep 2018
+            self._help_menu.Append(wx_id, '&Tutorials', 'Tutorials on how to use SasView')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
+
+        if config.marketplace_url:
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&Model marketplace', 'Plug-in fitting models for SasView')
+            wx.EVT_MENU(self, wx_id, self._on_marketplace_click)
+
+        if config._do_release:
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&Release notes',
+                                   'SasView release notes and known issues')
+            wx.EVT_MENU(self, wx_id, self._onRelease)
 
         if config._do_acknowledge:
             wx_id = wx.NewId()
@@ -1293,13 +1306,8 @@ class ViewerFrame(PARENT_FRAME):
         if config._do_aboutbox:
             logger.info("Doing help menu")
             wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&About', 'Software information')
+            self._help_menu.Append(wx_id, '&About', 'Information about SasView')
             wx.EVT_MENU(self, wx_id, self._onAbout)
-
-        if config.marketplace_url:
-            wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&Model marketplace', '')
-            wx.EVT_MENU(self, wx_id, self._on_marketplace_click)
 
         # Checking for updates
         wx_id = wx.NewId()
@@ -2137,6 +2145,20 @@ class ViewerFrame(PARENT_FRAME):
             dialog = AboutBox.DialogAbout(None, -1, "")
             dialog.ShowModal()
 
+    def _onRelease(self, evt):
+        """
+        Pop up the release notes
+
+        :param evt: menu event
+
+        """
+        # S King, Sep 2018
+
+        from documentation_window import DocumentationWindow
+        _TreeLocation = "user/release.html"
+        DocumentationWindow(self, -1, _TreeLocation, "",
+                            "SasView Documentation")
+
     def _onTutorial(self, evt):
         """
         Pop up the tutorial dialog
@@ -2144,44 +2166,19 @@ class ViewerFrame(PARENT_FRAME):
         :param evt: menu event
 
         """
-        if config._do_tutorial:
-            path = config.TUTORIAL_PATH
-            if IS_WIN:
-                try:
-                    from sas.sasgui.guiframe.pdfview import PDFFrame
-                    dialog = PDFFrame(None, -1, "Tutorial", path)
-                    # put icon
-                    self.put_icon(dialog)
-                    dialog.Show(True)
-                except:
-                    logger.error("Error in _onTutorial: %s" % sys.exc_value)
-                    try:
-                        # Try an alternate method
-                        logger.error(
-                            "Could not open the tutorial pdf, trying xhtml2pdf")
-                        from xhtml2pdf import pisa
-                        pisa.startViewer(path)
-                    except:
-                        logger.error(
-                            "Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires 'PDF Viewer'\n"
-                        wx.MessageBox(msg, 'Error')
-            else:
-                try:
-                    command = "open '%s'" % path
-                    os.system(command)
-                except:
-                    try:
-                        # Try an alternate method
-                        logger.error(
-                            "Could not open the tutorial pdf, trying xhtml2pdf")
-                        from xhtml2pdf import pisa
-                        pisa.startViewer(path)
-                    except:
-                        logger.error(
-                            "Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires the Preview application\n"
-                        wx.MessageBox(msg, 'Error')
+        # Action changed from that in 2.x/3.x/4.0.x/4.1.x
+        # Help >> Tutorial used to bring up a pdf of the
+        # original 2.x tutorial.
+        # Code below, implemented from 4.2.0, redirects
+        # action to the Tutorials page of the help 
+        # documentation to give access to all available
+        # tutorials
+        # S King, Sep 2018
+
+        from documentation_window import DocumentationWindow
+        _TreeLocation = "user/tutorial.html"
+        DocumentationWindow(self, -1, _TreeLocation, "",
+                            "SasView Documentation")
 
     def _onSphinxDocs(self, evt):
         """
