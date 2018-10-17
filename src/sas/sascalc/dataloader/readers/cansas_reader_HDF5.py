@@ -103,13 +103,13 @@ class Reader(FileReader):
         self.raw_data = None
         self.errors = set()
         self.logging = []
-        self.q_name = []
+        self.q_names = []
         self.mask_name = u''
         self.i_name = u''
         self.i_node = u''
-        self.q_uncertainties = None
-        self.q_resolutions = None
-        self.i_uncertainties = u''
+        self.i_uncertainties_name = u''
+        self.q_uncertainty_names = []
+        self.q_resolution_names = []
         self.parent_class = u''
         self.detector = Detector()
         self.collimation = Collimation()
@@ -239,17 +239,26 @@ class Reader(FileReader):
         if key == self.i_name:
             self.current_dataset.y = data_set.flatten()
             self.current_dataset.yaxis("Intensity", unit)
-        elif key == self.i_uncertainties:
+        elif key == self.i_uncertainties_name:
             self.current_dataset.dy = data_set.flatten()
-        elif key in self.q_name:
+        elif key in self.q_names:
             self.current_dataset.xaxis("Q", unit)
             self.current_dataset.x = data_set.flatten()
-        elif key in self.q_uncertainties or key in self.q_resolutions:
-            if (len(self.q_resolutions) > 1
-                    and np.where(self.q_resolutions == key)[0] == 0):
+        elif key in self.q_resolution_names:
+            if (len(self.q_resolution_names) > 1
+                    and np.where(self.q_resolution_names == key)[0] == 0):
                 self.current_dataset.dxw = data_set.flatten()
-            elif (len(self.q_resolutions) > 1
-                  and np.where(self.q_resolutions == key)[0] == 1):
+            elif (len(self.q_resolution_names) > 1
+                  and np.where(self.q_resolution_names == key)[0] == 1):
+                self.current_dataset.dxl = data_set.flatten()
+            else:
+                self.current_dataset.dx = data_set.flatten()
+        elif key in self.q_uncertainty_names:
+            if (len(self.q_uncertainty_names) > 1
+                    and np.where(self.q_uncertainty_names == key)[0] == 0):
+                self.current_dataset.dxw = data_set.flatten()
+            elif (len(self.q_uncertainty_names) > 1
+                  and np.where(self.q_uncertainty_names == key)[0] == 1):
                 self.current_dataset.dxl = data_set.flatten()
             else:
                 self.current_dataset.dx = data_set.flatten()
@@ -263,30 +272,30 @@ class Reader(FileReader):
         if key == self.i_name:
             self.current_dataset.data = data_set
             self.current_dataset.zaxis("Intensity", unit)
-        elif key == self.i_uncertainties:
+        elif key == self.i_uncertainties_name:
             self.current_dataset.err_data = data_set.flatten()
-        elif key in self.q_name:
+        elif key in self.q_names:
             self.current_dataset.xaxis("Q_x", unit)
             self.current_dataset.yaxis("Q_y", unit)
-            if self.q_name[0] == self.q_name[1]:
+            if self.q_names[0] == self.q_names[1]:
                 # All q data in a single array
                 self.current_dataset.qx_data = data_set[0]
                 self.current_dataset.qy_data = data_set[1]
-            elif self.q_name.index(key) == 0:
+            elif self.q_names.index(key) == 0:
                 self.current_dataset.qx_data = data_set
-            elif self.q_name.index(key) == 1:
+            elif self.q_names.index(key) == 1:
                 self.current_dataset.qy_data = data_set
-        elif key in self.q_uncertainties or key in self.q_resolutions:
-            if ((self.q_uncertainties[0] == self.q_uncertainties[1]) or
-                    (self.q_resolutions[0] == self.q_resolutions[1])):
+        elif key in self.q_uncertainty_names or key in self.q_resolution_names:
+            if ((self.q_uncertainty_names[0] == self.q_uncertainty_names[1]) or
+                    (self.q_resolution_names[0] == self.q_resolution_names[1])):
                 # All q data in a single array
                 self.current_dataset.dqx_data = data_set[0].flatten()
                 self.current_dataset.dqy_data = data_set[1].flatten()
-            elif (self.q_uncertainties.index(key) == 0 or
-                  self.q_resolutions.index(key) == 0):
+            elif (self.q_uncertainty_names.index(key) == 0 or
+                  self.q_resolution_names.index(key) == 0):
                 self.current_dataset.dqx_data = data_set.flatten()
-            elif (self.q_uncertainties.index(key) == 1 or
-                  self.q_resolutions.index(key) == 1):
+            elif (self.q_uncertainty_names.index(key) == 1 or
+                  self.q_resolution_names.index(key) == 1):
                 self.current_dataset.dqy_data = data_set.flatten()
                 self.current_dataset.yaxis("Q_y", unit)
         elif key == self.mask_name:
@@ -540,10 +549,16 @@ class Reader(FileReader):
             if dataset.data.ndim == 2:
                 (n_rows, n_cols) = dataset.data.shape
                 flat_qy = dataset.qy_data[0::n_cols].flatten()
+                # For 2D arrays of Qx and Qy, the Q value should be constant
+                # along each row -OR- each column. The direction is not
+                # specified in the NXcanSAS standard.
                 if flat_qy[0] == flat_qy[1]:
                     flat_qy = np.transpose(dataset.qy_data)[0::n_cols].flatten()
                 dataset.y_bins = np.unique(flat_qy)
                 flat_qx = dataset.qx_data[0::n_rows].flatten()
+                # For 2D arrays of Qx and Qy, the Q value should be constant
+                # along each row -OR- each column. The direction is not
+                # specified in the NXcanSAS standard.
                 if flat_qx[0] == flat_qx[1]:
                     flat_qx = np.transpose(dataset.qx_data)[0::n_rows].flatten()
                 dataset.x_bins = np.unique(flat_qx)
@@ -587,13 +602,13 @@ class Reader(FileReader):
             y = np.array(0)
             self.current_dataset = plottable_1D(x, y)
         self.current_datainfo.filename = self.raw_data.filename
-        self.mask_name = ""
-        self.i_name = ""
-        self.i_node = ""
-        self.q_name = []
-        self.q_uncertainties = []
-        self.q_resolutions = []
-        self.i_uncertainties = ""
+        self.mask_name = u''
+        self.i_name = u''
+        self.i_node = u''
+        self.i_uncertainties_name = u''
+        self.q_names = []
+        self.q_uncertainty_names = []
+        self.q_resolution_names = []
 
     @staticmethod
     def check_is_list_or_array(iterable):
@@ -621,27 +636,27 @@ class Reader(FileReader):
         keys = value.keys()
         self.mask_name = attrs.get("mask")
         for val in q_indices:
-            self.q_name.append(i_axes[val])
+            self.q_names.append(i_axes[val])
         self.i_name = signal
         self.i_node = value.get(self.i_name)
-        for item in self.q_name:
+        for item in self.q_names:
             if item in keys:
                 q_vals = value.get(item)
                 if q_vals.attrs.get("uncertainties") is not None:
-                    self.q_uncertainties = q_vals.attrs.get("uncertainties")
+                    self.q_uncertainty_names = q_vals.attrs.get("uncertainties")
                 elif q_vals.attrs.get("uncertainty") is not None:
-                    self.q_uncertainties = q_vals.attrs.get("uncertainty")
-                if isinstance(self.q_uncertainties, basestring):
-                    self.q_uncertainties = self.q_uncertainties.split(",")
+                    self.q_uncertainty_names = q_vals.attrs.get("uncertainty")
+                if isinstance(self.q_uncertainty_names, basestring):
+                    self.q_uncertainty_names = self.q_uncertainty_names.split(",")
                 if q_vals.attrs.get("resolutions") is not None:
-                    self.q_resolutions = q_vals.attrs.get("resolutions")
-                if isinstance(self.q_resolutions, basestring):
-                    self.q_resolutions = self.q_resolutions.split(",")
+                    self.q_resolution_names = q_vals.attrs.get("resolutions")
+                if isinstance(self.q_resolution_names, basestring):
+                    self.q_resolution_names = self.q_resolution_names.split(",")
         if self.i_name in keys:
             i_vals = value.get(self.i_name)
-            self.i_uncertainties = i_vals.attrs.get("uncertainties")
-            if self.i_uncertainties is None:
-                self.i_uncertainties = i_vals.attrs.get("uncertainty")
+            self.i_uncertainties_name = i_vals.attrs.get("uncertainties")
+            if self.i_uncertainties_name is None:
+                self.i_uncertainties_name = i_vals.attrs.get("uncertainty")
 
     def _is2d(self, value, basename="I"):
         """
