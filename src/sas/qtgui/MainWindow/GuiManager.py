@@ -135,6 +135,8 @@ class GuiManager(object):
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
+        self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
+
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
@@ -177,6 +179,15 @@ class GuiManager(object):
             import traceback
             logger.error("%s: could not load SasView models")
             logger.error(traceback.format_exc())
+
+    def updateLogContextMenus(self, visible=False):
+        """
+        Modify the View/Data Explorer menu item text on widget visibility
+        """
+        if visible:
+            self._workspace.actionHide_LogExplorer.setText("Hide Log Explorer")
+        else:
+            self._workspace.actionHide_LogExplorer.setText("Show Log Explorer")
 
     def updateContextMenus(self, visible=False):
         """
@@ -432,14 +443,14 @@ class GuiManager(object):
         Trigger definitions for all menu/toolbar actions.
         """
         # disable not yet fully implemented actions
-        self._workspace.actionOpen_Analysis.setEnabled(False)
-        self._workspace.actionUndo.setEnabled(False)
-        self._workspace.actionRedo.setEnabled(False)
-        self._workspace.actionReset.setEnabled(False)
-        self._workspace.actionStartup_Settings.setEnabled(False)
-        self._workspace.actionImage_Viewer.setEnabled(False)
-        self._workspace.actionCombine_Batch_Fit.setEnabled(False)
-        self._workspace.actionFit_Results.setEnabled(False)
+        self._workspace.actionOpen_Analysis.setVisible(False)
+        self._workspace.actionUndo.setVisible(False)
+        self._workspace.actionRedo.setVisible(False)
+        self._workspace.actionReset.setVisible(False)
+        self._workspace.actionStartup_Settings.setVisible(False)
+        self._workspace.actionImage_Viewer.setVisible(False)
+        self._workspace.actionCombine_Batch_Fit.setVisible(False)
+        self._workspace.actionFit_Results.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
         self._workspace.actionOrientation_Viewer.setVisible(False)
 
@@ -466,6 +477,7 @@ class GuiManager(object):
         self._workspace.actionStartup_Settings.triggered.connect(self.actionStartup_Settings)
         self._workspace.actionCategory_Manager.triggered.connect(self.actionCategory_Manager)
         self._workspace.actionHide_DataExplorer.triggered.connect(self.actionHide_DataExplorer)
+        self._workspace.actionHide_LogExplorer.triggered.connect(self.actionHide_LogExplorer)
         # Tools
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
@@ -653,11 +665,19 @@ class GuiManager(object):
         Toggle Data Explorer vsibility
         """
         if self.dockedFilesWidget.isVisible():
-            #self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
             self.dockedFilesWidget.setVisible(False)
         else:
-            #self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
             self.dockedFilesWidget.setVisible(True)
+        pass
+
+    def actionHide_LogExplorer(self):
+        """
+        Toggle Data Explorer vsibility
+        """
+        if self.logDockWidget.isVisible():
+            self.logDockWidget.setVisible(False)
+        else:
+            self.logDockWidget.setVisible(True)
         pass
 
     def actionStartup_Settings(self):
