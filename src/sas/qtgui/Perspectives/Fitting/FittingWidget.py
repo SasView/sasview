@@ -3537,16 +3537,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 param_max = str(self._model_model.item(row, 3+column_offset).text())
             except:
                 pass
-            else:
-                param_checked = str(self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked)
-                param_value = str(self._model_model.item(row, 1).text())
-                param_error = None
-                param_min = None
-                param_max = None
-                column_offset = 0
-                if self.has_error_column:
-                    param_error = str(self._model_model.item(row, 2).text())
-                    column_offset = 1
 
             param_list.append([param_name, param_checked, param_value, param_min, param_max])
 
