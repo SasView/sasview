@@ -2479,11 +2479,11 @@ class ViewerFrame(PARENT_FRAME):
                     has_errors = False
             if has_errors:
                 if data.dx is not None and data.dx != []:
-                    out.write("<X>   <Y>   <dY>   <dX>\n")
+                    out.write("<X>\t<Y>\t<dY>\t<dX>\n")
                 else:
-                    out.write("<X>   <Y>   <dY>\n")
+                    out.write("<X>\t<Y>\t<dY>\n")
             else:
-                out.write("<X>   <Y>\n")
+                out.write("<X>\t<Y>\n")
 
             for i in range(len(data.x)):
                 if has_errors:
