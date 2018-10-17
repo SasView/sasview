@@ -118,6 +118,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
 
+        import sys
+        sys.excepthook = self.info
+
         # Globals
         self.initializeGlobals()
 
@@ -162,6 +165,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
+
+    def info(self, type, value, tb):
+        logger.error("SasView threw exception: " + str(value))
+        traceback.print_exception(type, value, tb)
 
     @property
     def logic(self):
@@ -542,10 +549,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
 
         # Respond to change in parameters from the UI
-        self._model_model.itemChanged.connect(self.onMainParamsChange)
-        #self.constraintAddedSignal.connect(self.modifyViewOnConstraint)
-        self._poly_model.itemChanged.connect(self.onPolyModelChange)
-        self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
+        self._model_model.dataChanged.connect(self.onMainParamsChange)
+        self._poly_model.dataChanged.connect(self.onPolyModelChange)
+        self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
         # Local signals
@@ -1206,11 +1212,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
 
-    def onPolyModelChange(self, item):
+    def onPolyModelChange(self, top, bottom):
         """
         Callback method for updating the main model and sasmodel
         parameters with the GUI values in the polydispersity view
         """
+        item = self._poly_model.itemFromIndex(top)
         model_column = item.column()
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
@@ -1277,10 +1284,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_item.setText(item.text())
             self._model_model.blockSignals(False)
 
-    def onMagnetModelChange(self, item):
+    def onMagnetModelChange(self, top, bottom):
         """
         Callback method for updating the sasmodel magnetic parameters with the GUI values
         """
+        item = self._magnet_model.itemFromIndex(top)
         model_column = item.column()
         model_row = item.row()
         name_index = self._magnet_model.index(model_row, 0)
@@ -1715,10 +1723,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._model_model.itemChanged.disconnect()
+        self._model_model.dataChanged.disconnect()
         self.iterateOverModel(updateFittedValues)
         self.iterateOverModel(updatePolyValues)
-        self._model_model.itemChanged.connect(self.onMainParamsChange)
+        self._model_model.dataChanged.connect(self.onMainParamsChange)
 
     def iterateOverPolyModel(self, func):
         """
@@ -1770,9 +1778,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._poly_model.itemChanged.disconnect()
+        self._poly_model.dataChanged.disconnect()
         self.iterateOverPolyModel(updateFittedValues)
-        self._poly_model.itemChanged.connect(self.onPolyModelChange)
+        self._poly_model.dataChanged.connect(self.onPolyModelChange)
 
         if self.has_poly_error_column:
             return
@@ -1835,9 +1843,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
-        self._magnet_model.itemChanged.disconnect()
+        self._magnet_model.dataChanged.disconnect()
         self.iterateOverMagnetModel(updateFittedValues)
-        self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
+        self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
 
         if self.has_magnet_error_column:
             return
@@ -2271,10 +2279,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def onMainParamsChange(self, item):
+    def onMainParamsChange(self, top, bottom):
         """
         Callback method for updating the sasmodel parameters with the GUI values
         """
+        item = self._model_model.itemFromIndex(top)
+
         model_column = item.column()
 
         if model_column == 0:
@@ -2300,9 +2310,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = str(name_item.data(QtCore.Qt.UserRole))
         else:
             parameter_name = str(self._model_model.data(name_index))
-
-        # Update the parameter value - note: this supports +/-inf as well
-        self.kernel_module.params[parameter_name] = value
 
         # Update the parameter value - note: this supports +/-inf as well
         param_column = self.lstParams.itemDelegate().param_value
@@ -3150,7 +3157,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update relevant models
         self.setPolyModel()
-        self.setMagneticModel()
+        if self.canHaveMagnetism():
+            self.setMagneticModel()
 
     def onShowSLDProfile(self):
         """
@@ -3464,20 +3472,34 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
 
-    def onParameterCopy(self, format=None):
+    def onCopyToClipboard(self, format=None):
+        """
+        Copy current fitting parameters into the clipboard
+        using requested formatting:
+        plain, excel, latex
+        """
+        param_list = self.getFitParameters()
+        if format=="":
+            formatted_output = FittingUtilities.formatParameters(param_list)
+        elif format == "Excel":
+            formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
+        elif format == "Latex":
+            formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
+        else:
+            raise AttributeError("Bad parameter output format specifier.")
+
+        # Dump formatted_output to the clipboard
+        cb = QtWidgets.QApplication.clipboard()
+        cb.setText(formatted_output)
+
+    def getFitParameters(self, format=None):
         """
         Copy current parameters into the clipboard
         """
         # run a loop over all parameters and pull out
         # first - regular params
         param_list = []
-
         param_list.append(['model_name', str(self.cbModel.currentText())])
-
-        try:
-            param_list.append(['structure_factor', str(self.cbStructureFactor.currentText())])
-        except:
-            pass
 
         def gatherParams(row):
             """
@@ -3485,9 +3507,35 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             param_name = str(self._model_model.item(row, 0).text())
 
-            if param_name == str(self.cbModel.currentText()):
-                pass
-            elif param_name == str(self.cbStructureFactor.currentText()):
+            # Assure this is a parameter - must contain a checkbox
+            if not self._model_model.item(row, 0).isCheckable():
+                # maybe it is a combobox item (multiplicity)
+                try:
+                    index = self._model_model.index(row, 1)
+                    widget = self.lstParams.indexWidget(index)
+                    if widget is None:
+                        return
+                    if isinstance(widget, QtWidgets.QComboBox):
+                        # find the index of the combobox
+                        current_index = widget.currentIndex()
+                        param_list.append([param_name, 'None', str(current_index)])
+                except Exception as ex:
+                    pass
+                return
+
+            param_checked = str(self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked)
+            # Value of the parameter. In some cases this is the text of the combobox choice.
+            param_value = str(self._model_model.item(row, 1).text())
+            param_error = None
+            param_min = None
+            param_max = None
+            column_offset = 0
+            if self.has_error_column:
+                column_offset = 1
+            try:
+                param_min = str(self._model_model.item(row, 2+column_offset).text())
+                param_max = str(self._model_model.item(row, 3+column_offset).text())
+            except:
                 pass
             else:
                 param_checked = str(self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked)
@@ -3500,13 +3548,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     param_error = str(self._model_model.item(row, 2).text())
                     column_offset = 1
 
-                try:
-                    param_min = str(self._model_model.item(row, 2 + column_offset).text())
-                    param_max = str(self._model_model.item(row, 3 + column_offset).text())
-                except:
-                    pass
-
-                param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
+            param_list.append([param_name, param_checked, param_value, param_min, param_max])
 
         def gatherPolyParams(row):
             """
@@ -3518,17 +3560,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_error = None
             column_offset = 0
             if self.has_poly_error_column:
-                param_error = str(self._poly_model.item(row, 2).text())
                 column_offset = 1
             param_min   = str(self._poly_model.item(row, 2+column_offset).text())
             param_max   = str(self._poly_model.item(row, 3+column_offset).text())
             param_npts  = str(self._poly_model.item(row, 4+column_offset).text())
             param_nsigs = str(self._poly_model.item(row, 5+column_offset).text())
             param_fun   = str(self._poly_model.item(row, 6+column_offset).text()).rstrip()
+            index = self._poly_model.index(row, 6+column_offset)
+            widget = self.lstPoly.indexWidget(index)
+            if widget is not None and isinstance(widget, QtWidgets.QComboBox):
+                param_fun = widget.currentText()
             # width
             name = param_name+".width"
-            param_list.append([name, param_checked, param_value, param_error,
-                                param_npts, param_nsigs, param_min, param_max, param_fun])
+            param_list.append([name, param_checked, param_value, param_min, param_max,
+                                param_npts, param_nsigs, param_fun])
 
         def gatherMagnetParams(row):
             """
@@ -3540,11 +3585,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_error = None
             column_offset = 0
             if self.has_magnet_error_column:
-                param_error = str(self._magnet_model.item(row, 2).text())
                 column_offset = 1
             param_min = str(self._magnet_model.item(row, 2+column_offset).text())
             param_max = str(self._magnet_model.item(row, 3+column_offset).text())
-            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
+            param_list.append([param_name, param_checked, param_value, param_min, param_max])
 
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
@@ -3552,18 +3596,32 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
             self.iterateOverMagnetModel(gatherMagnetParams)
 
-        if format=="":
-            formatted_output = FittingUtilities.formatParameters(param_list)
-        elif format == "Excel":
-            formatted_output = FittingUtilities.formatParametersExcel(param_list[2:])
-        elif format == "Latex":
-            formatted_output = FittingUtilities.formatParametersLatex(param_list[2:])
-        else:
-            raise AttributeError("Bad format specifier.")
+        if self.kernel_module.is_multiplicity_model:
+            param_list.append(['multiplicity', str(self.kernel_module.multiplicity)])
 
-        # Dump formatted_output to the clipboard
-        cb = QtWidgets.QApplication.clipboard()
-        cb.setText(formatted_output)
+        # option tab
+        param_list.append(['q_range_min', str(self.q_range_min)])
+        param_list.append(['q_range_max', str(self.q_range_max)])
+        param_list.append(['q_weighting', str(self.weighting)])
+
+        # resolution
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        index = self.smearing_widget.cbSmearing.currentIndex()
+        param_list.append(['smearing', str(index)])
+        param_list.append(['smearing_min', str(smearing_min)])
+        param_list.append(['smearing_max', str(smearing_max)])
+
+        # checkboxes, if required
+        has_polydisp = self.chkPolydispersity.isChecked()
+        has_magnetism = self.chkMagnetism.isChecked()
+        has_chain = self.chkChainFit.isChecked()
+        has_2D = self.chk2DView.isChecked()
+        param_list.append(['polydisperse_params', str(has_polydisp)])
+        param_list.append(['magnetic_params', str(has_magnetism)])
+        param_list.append(['chainfit_params', str(has_chain)])
+        param_list.append(['2D_params', str(has_2D)])
+
+        return param_list
 
     def onParameterPaste(self):
         """
@@ -3574,56 +3632,45 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb_text = cb.text()
 
         context = {}
-        # put the text into dictionary
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
             return False
 
-        model = lines[1].split(',')
+        # put the text into dictionary
+        line_dict = {}
+        for line in lines[1:]:
+            content = line.split(',')
+            if len(content) > 1:
+                line_dict[content[0]] = content[1:]
 
-        if model[0] != 'model_name':
+        model = line_dict['model_name'][0]
+
+        if 'model_name' not in line_dict.keys():
             return False
 
-        StrucFac = lines[2].split(',')
+        if 'multiplicity' in line_dict.keys():
+            multip = int(line_dict['multiplicity'][0], 0)
+            # reset the model with multiplicity, so further updates are saved
+            if self.kernel_module.is_multiplicity_model:
+                self.kernel_module.multiplicity=multip
+                self.updateMultiplicityCombo(multip)
 
-        if StrucFac[0] != 'structure_factor':
-            return False
+        if 'polydisperse_params' in line_dict.keys():
+            self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
+        if 'magnetic_params' in line_dict.keys():
+            self.chkMagnetism.setChecked(line_dict['magnetic_params'][0]=='True')
+        if 'chainfit_params' in line_dict.keys():
+            self.chkChainFit.setChecked(line_dict['chainfit_params'][0]=='True')
+        if '2D_params' in line_dict.keys():
+            self.chk2DView.setChecked(line_dict['2D_params'][0]=='True')
 
-        context['model_name'] = [model[1]]
-        context['structure_factor'] = [StrucFac[1]]
+        # Create the context dictionary for parameters
+        context['model_name'] = model
+        for key, value in line_dict.items():
+            if len(value) > 2:
+                context[key] = value
 
-        for line in lines[3:-1]:
-            if len(line) != 0:
-                item = line.split(',')
-                check = item[1]
-                name = item[0]
-                value = item[2]
-                # Transfer the text to content[dictionary]
-                context[name] = [check, value]
-
-                # limits
-                try:
-                    limit_lo = item[3]
-                    context[name].append(limit_lo)
-                    limit_hi = item[4]
-                    context[name].append(limit_hi)
-                except:
-                    pass
-
-                # Polydisp
-                if len(item) > 5:
-                    value = item[5]
-                    context[name].append(value)
-                    try:
-                        value = item[6]
-                        context[name].append(value)
-                        value = item[7]
-                        context[name].append(value)
-                    except IndexError:
-                        pass
-
-        if str(self.cbModel.currentText()) != str(context['model_name'][0]) or \
-                str(self.cbStructureFactor.currentText()) != str(context['structure_factor'][0]):
+        if str(self.cbModel.currentText()) != str(context['model_name']):
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.setText("The model in the clipboard is not the same as the currently loaded model. \
@@ -3635,8 +3682,44 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             else:
                 return
 
+        if 'smearing' in line_dict.keys():
+            try:
+                index = int(line_dict['smearing'][0])
+                self.smearing_widget.cbSmearing.setCurrentIndex(index)
+            except ValueError:
+                pass
+        if 'smearing_min' in line_dict.keys():
+            try:
+                self.smearing_widget.dq_l = float(line_dict['smearing_min'][0])
+            except ValueError:
+                pass
+        if 'smearing_max' in line_dict.keys():
+            try:
+                self.smearing_widget.dq_r = float(line_dict['smearing_max'][0])
+            except ValueError:
+                pass
+
+        if 'q_range_max' in line_dict.keys():
+            try:
+                self.q_range_min = float(line_dict['q_range_min'][0])
+                self.q_range_max = float(line_dict['q_range_max'][0])
+            except ValueError:
+                pass
+        self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
+
         self.updateFullModel(context)
         self.updateFullPolyModel(context)
+        self.updateFullMagnetModel(context)
+
+    def updateMultiplicityCombo(self, multip):
+        """
+        Find and update the multiplicity combobox
+        """
+        index = self._model_model.index(self._n_shells_row, 1)
+        widget = self.lstParams.indexWidget(index)
+        if widget is not None and isinstance(widget, QtWidgets.QComboBox):
+            widget.setCurrentIndex(widget.findText(str(multip)))
+        self.current_shell_displayed = multip
 
     def updateFullModel(self, param_dict):
         """
@@ -3652,20 +3735,41 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_name = str(self._model_model.item(row, 0).text())
             if param_name not in list(param_dict.keys()):
                 return
+            # Special case of combo box in the cell (multiplicity)
+            param_line = param_dict[param_name]
+            if len(param_line) == 1:
+                # modify the shells value
+                try:
+                    combo_index = int(param_line[0])
+                except ValueError:
+                    # quietly pass
+                    return
+                index = self._model_model.index(row, 1)
+                widget = self.lstParams.indexWidget(index)
+                if widget is not None and isinstance(widget, QtWidgets.QComboBox):
+                    #widget.setCurrentIndex(combo_index)
+                    return
             # checkbox state
             param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
             self._model_model.item(row, 0).setCheckState(param_checked)
 
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-            self._model_model.item(row, 1).setText(param_repr)
+            # parameter value can be either just a value or text on the combobox
+            param_text = param_dict[param_name][1]
+            index = self._model_model.index(row, 1)
+            widget = self.lstParams.indexWidget(index)
+            if widget is not None and isinstance(widget, QtWidgets.QComboBox):
+                # Find the right index based on text
+                combo_index = int(param_text, 0)
+                widget.setCurrentIndex(combo_index)
+            else:
+                # modify the param value
+                param_repr = GuiUtils.formatNumber(param_text, high=True)
+                self._model_model.item(row, 1).setText(param_repr)
 
             # Potentially the error column
             ioffset = 0
             if len(param_dict[param_name])>4 and self.has_error_column:
                 # error values are not editable - no need to update
-                #error_repr = GuiUtils.formatNumber(param_dict[param_name][2], high=True)
-                #self._model_model.item(row, 2).setText(error_repr)
                 ioffset = 1
             # min/max
             try:
@@ -3678,12 +3782,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             self.setFocus()
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._model_model.blockSignals(True)
         self.iterateOverModel(updateFittedValues)
-        self._model_model.blockSignals(False)
-
 
     def updateFullPolyModel(self, param_dict):
         """
@@ -3730,11 +3829,41 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self._poly_model.item(row, 5+ioffset).setText(param_repr)
             self.setFocus()
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._poly_model.blockSignals(True)
         self.iterateOverPolyModel(updateFittedValues)
-        self._poly_model.blockSignals(False)
 
+    def updateFullMagnetModel(self, param_dict):
+        """
+        Update the magnetism model with new parameters, create the errors column
+        """
+        assert isinstance(param_dict, dict)
+        if not dict:
+            return
 
+        def updateFittedValues(row):
+            # Utility function for main model update
+            # internal so can use closure for param_dict
+            if row >= self._magnet_model.rowCount():
+                return
+            param_name = str(self._magnet_model.item(row, 0).text()).rsplit()[-1]
+            if param_name not in list(param_dict.keys()):
+                return
+            # checkbox state
+            param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
+            self._magnet_model.item(row,0).setCheckState(param_checked)
 
+            # modify the param value
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+            self._magnet_model.item(row, 1).setText(param_repr)
+
+            # Potentially the error column
+            ioffset = 0
+            if len(param_dict[param_name])>4 and self.has_magnet_error_column:
+                ioffset = 1
+            # min
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
+            self._magnet_model.item(row, 2+ioffset).setText(param_repr)
+            # max
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
+            self._magnet_model.item(row, 3+ioffset).setText(param_repr)
+
+        self.iterateOverMagnetModel(updateFittedValues)

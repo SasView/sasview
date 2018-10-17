@@ -1009,7 +1009,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(len(self.widget.page_stack), 1)
 
         # Change another parameter
-        self.widget._model_model.item(2, 1).setText("3.0")
+        self.widget._model_model.item(3, 1).setText("3.0")
+
         # Check that the stack is updated
         self.assertEqual(len(self.widget.page_stack), 2)
 

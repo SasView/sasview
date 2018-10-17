@@ -101,16 +101,16 @@ class FittingWindow(QtWidgets.QTabWidget):
         self._allow_close = value
 
     def onParamCopy(self):
-        self.currentTab.onParameterCopy("")
+        self.currentTab.onCopyToClipboard("")
 
     def onParamPaste(self):
         self.currentTab.onParameterPaste()
 
     def onExcelCopy(self):
-        self.currentTab.onParameterCopy("Excel")
+        self.currentTab.onCopyToClipboard("Excel")
 
     def onLatexCopy(self):
-        self.currentTab.onParameterCopy("Latex")
+        self.currentTab.onCopyToClipboard("Latex")
 
     def closeEvent(self, event):
         """
