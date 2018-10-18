@@ -3368,22 +3368,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Create and serialize local PageState
         """
-        from sas.sascalc.fit.pagestate import Reader
-        model = self.kernel_module
-
-        # Old style PageState object
-        state = PageState(model=model, data=self.data)
-
-        # Add parameter data to the state
-        self.getCurrentFitState(state)
-
-        # Create the filewriter, aptly named 'Reader'
-        state_reader = Reader(self.loadPageStateCallback)
         filepath = self.saveAsAnalysisFile()
         if filepath is None or filepath == "":
             return
-        state_reader.write(filename=filepath, fitstate=state)
-        pass
+
+        fitpage_state = self.getFitPage()
+        fitpage_state += self.getFitModel()
+
+        with open(filepath, 'w') as statefile:
+            for line in fitpage_state:
+                statefile.write(str(line))
+
+        self.communicate.statusBarUpdateSignal.emit('Analysis saved.')
 
     def saveAsAnalysisFile(self):
         """
@@ -3416,61 +3412,29 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Load the PageState object and update the current widget
         """
-        pass
+        filepath = self.loadAnalysisFile()
+        if filepath is None or filepath == "":
+            return
 
-    def getCurrentFitState(self, state=None):
+        with open(filepath, 'r') as statefile:
+            statefile.read(lines)
+
+        # convert into list of lists
+
+    def loadAnalysisFile(self):
         """
-        Store current state for fit_page
+        Called when the "Open Project" menu item chosen.
         """
-        # save model option
-        #if self.model is not None:
-        #    self.disp_list = self.getDispParamList()
-        #    state.disp_list = copy.deepcopy(self.disp_list)
-        #    #state.model = self.model.clone()
-
-        # Comboboxes
-        state.categorycombobox = self.cbCategory.currentText()
-        state.formfactorcombobox = self.cbModel.currentText()
-        if self.cbStructureFactor.isEnabled():
-            state.structurecombobox = self.cbStructureFactor.currentText()
-        state.tcChi = self.chi2
-
-        state.enable2D = self.is2D
-
-        #state.weights = copy.deepcopy(self.weights)
-        # save data
-        state.data = copy.deepcopy(self.data)
-
-        # save plotting range
-        state.qmin = self.q_range_min
-        state.qmax = self.q_range_max
-        state.npts = self.npts
-
-        #    self.state.enable_disp = self.enable_disp.GetValue()
-        #    self.state.disable_disp = self.disable_disp.GetValue()
-
-        #    self.state.enable_smearer = \
-        #                        copy.deepcopy(self.enable_smearer.GetValue())
-        #    self.state.disable_smearer = \
-        #                        copy.deepcopy(self.disable_smearer.GetValue())
-
-        #self.state.pinhole_smearer = \
-        #                        copy.deepcopy(self.pinhole_smearer.GetValue())
-        #self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
-        #self.state.dI_noweight = copy.deepcopy(self.dI_noweight.GetValue())
-        #self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
-        #self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
-        #self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
-
-        p = self.model_parameters
-        # save checkbutton state and txtcrtl values
-        state.parameters = FittingUtilities.getStandardParam(self._model_model)
-        state.orientation_params_disp = FittingUtilities.getOrientationParam(self.kernel_module)
-
-        #self._copy_parameters_state(self.orientation_params_disp, self.state.orientation_params_disp)
-        #self._copy_parameters_state(self.parameters, self.state.parameters)
-        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+        default_name = "FitPage"+str(self.tab_id)+".fitv"
+        wildcard = "fitv files (*.fitv)"
+        kwargs = {
+            'caption'   : 'Open Analysis',
+            'directory' : default_name,
+            'filter'    : wildcard,
+            'parent'    : self,
+        }
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
+        return filename
 
     def onCopyToClipboard(self, format=None):
         """
@@ -3492,12 +3456,55 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb = QtWidgets.QApplication.clipboard()
         cb.setText(formatted_output)
 
-    def getFitParameters(self, format=None):
+    def getFitModel(self):
         """
-        Copy current parameters into the clipboard
+        serializes model combos state
+        """
+        param_list = []
+        model = str(self.cbModel.currentText())
+        category = str(self.cbCategory.currentText())
+        structure = str(self.cbStructureFactor.currentText())
+        param_list.append(['fitpage_category', category])
+        param_list.append(['fitpage_model', model])
+        param_list.append(['fitpage_structure', structure])
+        return param_list
+
+    def getFitPage(self):
+        """
+        serializes full state of this fit page
         """
         # run a loop over all parameters and pull out
         # first - regular params
+        param_list = self.getFitParameters()
+
+        # option tab
+        param_list.append(['q_range_min', str(self.q_range_min)])
+        param_list.append(['q_range_max', str(self.q_range_max)])
+        param_list.append(['q_weighting', str(self.weighting)])
+
+        # resolution
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        index = self.smearing_widget.cbSmearing.currentIndex()
+        param_list.append(['smearing', str(index)])
+        param_list.append(['smearing_min', str(smearing_min)])
+        param_list.append(['smearing_max', str(smearing_max)])
+
+        # checkboxes, if required
+        has_polydisp = self.chkPolydispersity.isChecked()
+        has_magnetism = self.chkMagnetism.isChecked()
+        has_chain = self.chkChainFit.isChecked()
+        has_2D = self.chk2DView.isChecked()
+        param_list.append(['polydisperse_params', str(has_polydisp)])
+        param_list.append(['magnetic_params', str(has_magnetism)])
+        param_list.append(['chainfit_params', str(has_chain)])
+        param_list.append(['2D_params', str(has_2D)])
+
+        return param_list
+
+    def getFitParameters(self):
+        """
+        serializes current parameters
+        """
         param_list = []
         param_list.append(['model_name', str(self.cbModel.currentText())])
 
@@ -3532,13 +3539,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             column_offset = 0
             if self.has_error_column:
                 column_offset = 1
+                param_error = str(self._model_model.item(row, 1+column_offset).text())
             try:
                 param_min = str(self._model_model.item(row, 2+column_offset).text())
                 param_max = str(self._model_model.item(row, 3+column_offset).text())
             except:
                 pass
 
-            param_list.append([param_name, param_checked, param_value, param_min, param_max])
+            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
 
         def gatherPolyParams(row):
             """
@@ -3551,6 +3559,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             column_offset = 0
             if self.has_poly_error_column:
                 column_offset = 1
+                param_error = str(self._poly_model.item(row, 1+column_offset).text())
             param_min   = str(self._poly_model.item(row, 2+column_offset).text())
             param_max   = str(self._poly_model.item(row, 3+column_offset).text())
             param_npts  = str(self._poly_model.item(row, 4+column_offset).text())
@@ -3562,8 +3571,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 param_fun = widget.currentText()
             # width
             name = param_name+".width"
-            param_list.append([name, param_checked, param_value, param_min, param_max,
-                                param_npts, param_nsigs, param_fun])
+            param_list.append([name, param_checked, param_value, param_error,
+                               param_min, param_max, param_npts, param_nsigs, param_fun])
 
         def gatherMagnetParams(row):
             """
@@ -3576,9 +3585,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             column_offset = 0
             if self.has_magnet_error_column:
                 column_offset = 1
+                param_error = str(self._magnet_model.item(row, 1+column_offset).text())
             param_min = str(self._magnet_model.item(row, 2+column_offset).text())
             param_max = str(self._magnet_model.item(row, 3+column_offset).text())
-            param_list.append([param_name, param_checked, param_value, param_min, param_max])
+            param_list.append([param_name, param_checked, param_value,
+                               param_error, param_min, param_max])
 
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
@@ -3588,28 +3599,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if self.kernel_module.is_multiplicity_model:
             param_list.append(['multiplicity', str(self.kernel_module.multiplicity)])
-
-        # option tab
-        param_list.append(['q_range_min', str(self.q_range_min)])
-        param_list.append(['q_range_max', str(self.q_range_max)])
-        param_list.append(['q_weighting', str(self.weighting)])
-
-        # resolution
-        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-        index = self.smearing_widget.cbSmearing.currentIndex()
-        param_list.append(['smearing', str(index)])
-        param_list.append(['smearing_min', str(smearing_min)])
-        param_list.append(['smearing_max', str(smearing_max)])
-
-        # checkboxes, if required
-        has_polydisp = self.chkPolydispersity.isChecked()
-        has_magnetism = self.chkMagnetism.isChecked()
-        has_chain = self.chkChainFit.isChecked()
-        has_2D = self.chk2DView.isChecked()
-        param_list.append(['polydisperse_params', str(has_polydisp)])
-        param_list.append(['magnetic_params', str(has_magnetism)])
-        param_list.append(['chainfit_params', str(has_chain)])
-        param_list.append(['2D_params', str(has_2D)])
 
         return param_list
 
@@ -3758,15 +3747,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Potentially the error column
             ioffset = 0
-            if len(param_dict[param_name])>4 and self.has_error_column:
+            joffset = 0
+            if len(param_dict[param_name])>3:
                 # error values are not editable - no need to update
                 ioffset = 1
+            if self.has_error_column:
+                joffset = 1
             # min/max
             try:
                 param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-                self._model_model.item(row, 2+ioffset).setText(param_repr)
+                self._model_model.item(row, 2+joffset).setText(param_repr)
                 param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-                self._model_model.item(row, 3+ioffset).setText(param_repr)
+                self._model_model.item(row, 3+joffset).setText(param_repr)
             except:
                 pass
 
@@ -3800,23 +3792,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Potentially the error column
             ioffset = 0
-            if len(param_dict[param_name])>4 and self.has_poly_error_column:
+            joffset = 0
+            if len(param_dict[param_name])>3:
                 ioffset = 1
+            if self.has_poly_error_column:
+                joffset = 1
             # min
             param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-            self._poly_model.item(row, 2+ioffset).setText(param_repr)
+            self._poly_model.item(row, 2+joffset).setText(param_repr)
             # max
             param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-            self._poly_model.item(row, 3+ioffset).setText(param_repr)
+            self._poly_model.item(row, 3+joffset).setText(param_repr)
             # Npts
             param_repr = GuiUtils.formatNumber(param_dict[param_name][4+ioffset], high=True)
-            self._poly_model.item(row, 4+ioffset).setText(param_repr)
+            self._poly_model.item(row, 4+joffset).setText(param_repr)
             # Nsigs
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
-            self._poly_model.item(row, 5+ioffset).setText(param_repr)
+            self._poly_model.item(row, 5+joffset).setText(param_repr)
 
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
-            self._poly_model.item(row, 5+ioffset).setText(param_repr)
             self.setFocus()
 
         self.iterateOverPolyModel(updateFittedValues)
@@ -3847,13 +3840,71 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Potentially the error column
             ioffset = 0
-            if len(param_dict[param_name])>4 and self.has_magnet_error_column:
+            joffset = 0
+            if len(param_dict[param_name])>3:
                 ioffset = 1
+            if self.has_magnet_error_column:
+                joffset = 1
             # min
             param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-            self._magnet_model.item(row, 2+ioffset).setText(param_repr)
+            self._magnet_model.item(row, 2+joffset).setText(param_repr)
             # max
             param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-            self._magnet_model.item(row, 3+ioffset).setText(param_repr)
+            self._magnet_model.item(row, 3+joffset).setText(param_repr)
 
         self.iterateOverMagnetModel(updateFittedValues)
+
+    def getCurrentFitState(self, state=None):
+        """
+        Store current state for fit_page
+        """
+        # save model option
+        #if self.model is not None:
+        #    self.disp_list = self.getDispParamList()
+        #    state.disp_list = copy.deepcopy(self.disp_list)
+        #    #state.model = self.model.clone()
+
+        # Comboboxes
+        state.categorycombobox = self.cbCategory.currentText()
+        state.formfactorcombobox = self.cbModel.currentText()
+        if self.cbStructureFactor.isEnabled():
+            state.structurecombobox = self.cbStructureFactor.currentText()
+        state.tcChi = self.chi2
+
+        state.enable2D = self.is2D
+
+        #state.weights = copy.deepcopy(self.weights)
+        # save data
+        state.data = copy.deepcopy(self.data)
+
+        # save plotting range
+        state.qmin = self.q_range_min
+        state.qmax = self.q_range_max
+        state.npts = self.npts
+
+        #    self.state.enable_disp = self.enable_disp.GetValue()
+        #    self.state.disable_disp = self.disable_disp.GetValue()
+
+        #    self.state.enable_smearer = \
+        #                        copy.deepcopy(self.enable_smearer.GetValue())
+        #    self.state.disable_smearer = \
+        #                        copy.deepcopy(self.disable_smearer.GetValue())
+
+        #self.state.pinhole_smearer = \
+        #                        copy.deepcopy(self.pinhole_smearer.GetValue())
+        #self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
+        #self.state.dI_noweight = copy.deepcopy(self.dI_noweight.GetValue())
+        #self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
+        #self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
+        #self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
+
+        p = self.model_parameters
+        # save checkbutton state and txtcrtl values
+        state.parameters = FittingUtilities.getStandardParam(self._model_model)
+        state.orientation_params_disp = FittingUtilities.getOrientationParam(self.kernel_module)
+
+        #self._copy_parameters_state(self.orientation_params_disp, self.state.orientation_params_disp)
+        #self._copy_parameters_state(self.parameters, self.state.parameters)
+        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+
