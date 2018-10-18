@@ -566,6 +566,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.communicate.saveAnalysisSignal.connect(self.savePageState)
+        #self.communicate.loadAnalysisSignal.connect(self.loadPageState)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
 
         # Communicator signal
@@ -3417,9 +3418,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         with open(filepath, 'r') as statefile:
-            statefile.read(lines)
+            #column_data = [line.rstrip().split() for line in statefile.readlines()]
+            lines = statefile.readlines()
 
         # convert into list of lists
+        pass
 
     def loadAnalysisFile(self):
         """
@@ -3444,6 +3447,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         param_list = self.getFitParameters()
         if format=="":
+            param_list = self.getFitPage()
+            param_list += self.getFitModel()
             formatted_output = FittingUtilities.formatParameters(param_list)
         elif format == "Excel":
             formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
@@ -3458,7 +3463,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getFitModel(self):
         """
-        serializes model combos state
+        serializes combobox state
         """
         param_list = []
         model = str(self.cbModel.currentText())
@@ -3467,6 +3472,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list.append(['fitpage_category', category])
         param_list.append(['fitpage_model', model])
         param_list.append(['fitpage_structure', structure])
+
         return param_list
 
     def getFitPage(self):
@@ -3477,10 +3483,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # first - regular params
         param_list = self.getFitParameters()
 
+        param_list.append(['is_data', str(self.data_is_loaded)])
+        if self.data_is_loaded:
+            param_list.append(['data_id', str(self.logic.data.id)])
+            param_list.append(['data_name', str(self.logic.data.filename)])
+
         # option tab
         param_list.append(['q_range_min', str(self.q_range_min)])
         param_list.append(['q_range_max', str(self.q_range_max)])
         param_list.append(['q_weighting', str(self.weighting)])
+        param_list.append(['weighting', str(self.options_widget.weighting)])
 
         # resolution
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
@@ -3685,6 +3697,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             except ValueError:
                 pass
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
+        try:
+            button_id = int(line_dict['weighting'][0])
+            for button in self.options_widget.weightingGroup.buttons():
+                if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
+                    button.setChecked(True)
+                    break
+        except ValueError:
+            pass
 
         self.updateFullModel(context)
         self.updateFullPolyModel(context)
