@@ -230,10 +230,11 @@ class FileReader(object):
                 if data.mask is not None:
                     data.mask = data.mask.astype(dtype=bool)
 
-                n_rows, n_cols = data.data.shape
-                data.y_bins = data.qy_data[0::int(n_cols)]
-                data.x_bins = data.qx_data[:int(n_cols)]
-                data.data = data.data.flatten()
+                if len(data.data.shape) == 2:
+                    n_rows, n_cols = data.data.shape
+                    data.y_bins = data.qy_data[0::int(n_cols)]
+                    data.x_bins = data.qx_data[:int(n_cols)]
+                    data.data = data.data.flatten()
                 data = self._remove_nans_in_data(data)
                 if len(data.data) > 0:
                     data.xmin = np.min(data.qx_data)
