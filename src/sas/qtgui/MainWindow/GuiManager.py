@@ -443,7 +443,7 @@ class GuiManager(object):
         Trigger definitions for all menu/toolbar actions.
         """
         # disable not yet fully implemented actions
-        self._workspace.actionOpen_Analysis.setVisible(False)
+        #self._workspace.actionOpen_Analysis.setVisible(False)
         self._workspace.actionUndo.setVisible(False)
         self._workspace.actionRedo.setVisible(False)
         self._workspace.actionReset.setVisible(False)
