@@ -3768,7 +3768,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Potentially the error column
             ioffset = 0
             joffset = 0
-            if len(param_dict[param_name])>3:
+            if len(param_dict[param_name])>4:
                 # error values are not editable - no need to update
                 ioffset = 1
             if self.has_error_column:
@@ -3813,7 +3813,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Potentially the error column
             ioffset = 0
             joffset = 0
-            if len(param_dict[param_name])>3:
+            if len(param_dict[param_name])>7:
                 ioffset = 1
             if self.has_poly_error_column:
                 joffset = 1
@@ -3861,7 +3861,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Potentially the error column
             ioffset = 0
             joffset = 0
-            if len(param_dict[param_name])>3:
+            if len(param_dict[param_name])>4:
                 ioffset = 1
             if self.has_magnet_error_column:
                 joffset = 1
