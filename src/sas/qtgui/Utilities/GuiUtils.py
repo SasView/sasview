@@ -269,9 +269,6 @@ class Communicate(QtCore.QObject):
     # Notify the gui manager about new data to be added to the grid view
     sendDataToGridSignal = QtCore.pyqtSignal(list)
 
-    # Action Save Analysis triggered
-    saveAnalysisSignal = QtCore.pyqtSignal()
-
     # Mask Editor requested
     maskEditorSignal = QtCore.pyqtSignal(Data2D)
 
@@ -576,6 +573,8 @@ def infoFromData(data):
     process_item = QtGui.QStandardItem("Process")
     if isinstance(data.process, list) and data.process:
         for process in data.process:
+            if process is None:
+                continue
             process_date = process.date
             process_date_item = QtGui.QStandardItem("Date: " + process_date)
             process_item.appendRow(process_date_item)

@@ -33,8 +33,13 @@ class ComplexConstraintTest(unittest.TestCase):
         # set some models on tabs
         category_index = self.tab1.cbCategory.findText("Shape Independent")
         self.tab1.cbCategory.setCurrentIndex(category_index)
+        model_index = self.tab1.cbModel.findText("be_polyelectrolyte")
+        self.tab1.cbModel.setCurrentIndex(model_index)
+
         category_index = self.tab2.cbCategory.findText("Cylinder")
         self.tab2.cbCategory.setCurrentIndex(category_index)
+        model_index = self.tab2.cbModel.findText("barbell")
+        self.tab2.cbModel.setCurrentIndex(model_index)
 
         tabs = [self.tab1, self.tab2]
         self.widget = ComplexConstraint(parent=None, tabs=tabs)

@@ -234,6 +234,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if filename:
             self.readProject(filename)
 
+    def loadAnalysis(self):
+        """
+        Called when the "Open Analysis" menu item chosen.
+        """
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Open Analysis',
+            'filter'    : 'Project (*.fitv);;All files (*.*)',
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+        }
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
+        if filename:
+            self.readAnalysis(filename)
+
     def saveProject(self):
         """
         Called when the "Save Project" menu item chosen.
@@ -256,6 +270,41 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         with open(filename, 'w') as outfile:
             self.saveDataToFile(outfile)
 
+    def saveAsAnalysisFile(self, tab_id=1):
+        """
+        Show the save as... dialog and return the chosen filepath
+        """
+        default_name = "FitPage"+str(tab_id)+".fitv"
+
+        wildcard = "fitv files (*.fitv)"
+        kwargs = {
+            'caption'   : 'Save As',
+            'directory' : default_name,
+            'filter'    : wildcard,
+            'parent'    : None,
+        }
+        # Query user for filename.
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = filename_tuple[0]
+        return filename
+
+    def saveAnalysis(self, data, tab_id=1):
+        """
+        Called when the "Save Analysis" menu item chosen.
+        """
+        filename = self.saveAsAnalysisFile(tab_id)
+        if not filename:
+            return
+        _, extension = os.path.splitext(filename)
+        if not extension:
+            filename = '.'.join((filename, 'fitv'))
+        self.communicator.statusBarUpdateSignal.emit("Saving analysis... %s\n" % os.path.basename(filename))
+
+        with open(filename, 'w') as outfile:
+            GuiUtils.saveData(outfile, data)
+
+        self.communicator.statusBarUpdateSignal.emit('Analysis saved.')
+
     def allDataForModel(self, model):
         # data model
         all_data = {}
@@ -274,9 +323,30 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             all_data[data.id] = [data, properties, other_datas]
         return all_data
 
-    def saveDataToFile(self, outfile):
+    def getDataForID(self, id):
+        # return the dataset with the given ID
+        all_data = []
+        for model in (self.model, self.theory_model):
+            for i in range(model.rowCount()):
+                properties = {}
+                item = model.item(i)
+                data = GuiUtils.dataFromItem(item)
+                if data is None: continue
+                if data.id != id: continue
+                # We found the dataset - save it.
+                filename = data.filename
+                is_checked = item.checkState()
+                properties['checked'] = is_checked
+                other_datas = GuiUtils.plotsFromFilename(filename, model)
+                # skip the main plot
+                other_datas = list(other_datas.values())[1:]
+                all_data = [data, properties, other_datas]
+                break
+        return all_data
+
+    def getAllData(self):
         """
-        Save every dataset to a json file
+        converts all datasets into serializable dictionary
         """
         data = self.allDataForModel(self.model)
         theory = self.allDataForModel(self.theory_model)
@@ -288,21 +358,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if key in all_data:
                 raise ValueError("Inconsistent data in Project file.")
             all_data[key] = value
+        return all_data
 
-        # perspectives
-        current_perspective = self._perspective()
-        try:
-            perspective_dump = current_perspective.getCurrentStateAsXml()
-        except Exception:
-            ex = "State of " + current_perspective.windowTitle() + \
-                " cannot be saved."
-            logging.error(ex)
-        if perspective_dump is not None:
-            assert(isinstance(perspective_dump, dict))
-            all_data['perspective'] = perspective_dump
+    def saveDataToFile(self, outfile):
+        """
+        Save every dataset to a json file
+        """
+        all_data = self.getAllData()
         # save datas
         GuiUtils.saveData(outfile, all_data)
-        return
 
     def readProject(self, filename):
         """
@@ -310,20 +374,48 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         with open(filename, 'r') as infile:
             all_data = GuiUtils.readDataFromFile(infile)
-        # clear the model
-        self.model.clear()
+            items = self.updateModelFromData(all_data)
 
+        pass # debugger
+
+    def readAnalysis(self, filename):
+        """
+        Read out a single dataset and fitpage from file
+        """
+        with open(filename, 'r') as infile:
+            all_data = GuiUtils.readDataFromFile(infile)
+            # simulate full project structure
+            all_data_dict = {1:all_data['fit_data']}
+            items = self.updateModelFromData(all_data_dict)
+            # TODO: allow other perspectives
+            # send newly created item to its perspective
+            if len(items) > 0:
+                self.sendItemToPerspective(items[0])
+            # Make the perspective read the rest of the read data
+            self._perspective().updateFromParameters(all_data['fit_params'])
+
+            pass
+
+    def updateModelFromData(self, data):
+        """
+        Given data from analysis/project file,
+        create indices and populate data/theory models
+        """
+        # model items for top level datasets
+        items = []
         #self.model.beginResetModel()
-        for key, value in all_data.items():
+        for key, value in data.items():
             # key - cardinal number of dataset
             # value - main dataset, [dependant filesets]
             # add the main index
+            if not value: continue
             new_data = value[0]
             assert isinstance(new_data, (Data1D, Data2D))
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
             new_item.setCheckState(is_checked)
+            items.append(new_item)
             model = self.theory_model
             if new_data.is_data:
                 model = self.model
@@ -336,6 +428,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             for plot in value[2]:
                 assert isinstance(plot, (Data1D, Data2D))
                 GuiUtils.updateModelItemWithPlot(new_item, plot, plot.name)
+        return items
 
     def deleteFile(self, event):
         """
@@ -454,6 +547,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             retval = msgbox.exec_()
 
+    def sendItemToPerspective(self, item):
+        """
+        Send the passed item data to the current perspective and set the relevant notifiers
+        """
+        # Set the signal handlers
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
+        selected_items = [item]
+        # Notify the GuiManager about the send request
+        try:
+            self._perspective().setData(data_item=selected_items, is_batch=False)
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            logging.error(msg)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            retval = msgbox.exec_()
 
     def freezeCheckedData(self):
         """

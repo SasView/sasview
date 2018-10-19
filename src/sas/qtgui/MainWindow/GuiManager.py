@@ -243,7 +243,6 @@ class GuiManager(object):
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
             self._current_perspective.setClosable()
-            #self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._current_perspective.close()
             self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
@@ -547,7 +546,7 @@ class GuiManager(object):
     def actionOpen_Analysis(self):
         """
         """
-        print("actionOpen_Analysis TRIGGERED")
+        self.filesWidget.loadAnalysis()
         pass
 
     def actionSave(self):
@@ -560,7 +559,21 @@ class GuiManager(object):
         """
         Menu File/Save Analysis
         """
-        self.communicate.saveAnalysisSignal.emit()
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            return
+        # get fit page serialization
+        params = per.getSerializedFitpage()
+        data_id = per.currentTabDataId()
+        tab_id = per.currentTab.tab_id
+        data = self.filesWidget.getDataForID(data_id)
+        analysis = {}
+        analysis['fit_data'] = data
+        analysis['fit_params'] = params
+
+        self.filesWidget.saveAnalysis(analysis, tab_id)
+
+        pass
 
     def actionQuit(self):
         """
@@ -1022,6 +1035,12 @@ class GuiManager(object):
         When setting a perspective, sets up the menu bar
         """
         self._workspace.actionReport.setEnabled(False)
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionSave_Analysis.setEnabled(False)
+        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
+            self._workspace.actionOpen_Analysis.setEnabled(True)
+            self._workspace.actionSave_Analysis.setEnabled(True)
+
         if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
             self.checkAnalysisOption(self._workspace.actionFitting)
             # Put the fitting menu back in

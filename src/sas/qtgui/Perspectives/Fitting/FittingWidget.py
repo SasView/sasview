@@ -51,6 +51,7 @@ from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
+MODEL_DEFAULT = "Choose model..."
 CATEGORY_STRUCTURE = "Structure Factor"
 CATEGORY_CUSTOM = "Plugin Models"
 STRUCTURE_DEFAULT = "None"
@@ -565,8 +566,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
-        self.communicate.saveAnalysisSignal.connect(self.savePageState)
-        #self.communicate.loadAnalysisSignal.connect(self.loadPageState)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
 
         # Communicator signal
@@ -1018,6 +1017,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         model = self.cbModel.currentText()
 
+        if model == MODEL_DEFAULT:
+            # if the previous category was not the default, keep it.
+            # Otherwise, just return
+            if self._previous_model_index != 0:
+                # We need to block signals, or else state changes on perceived unchanged conditions
+                self.cbModel.blockSignals(True)
+                self.cbModel.setCurrentIndex(self._previous_model_index)
+                self.cbModel.blockSignals(False)
+            return
+
         # Assure the control is active
         if not self.cbModel.isEnabled():
             return
@@ -1025,7 +1034,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not model:
             return
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+        self._previous_model_index = self.cbModel.currentIndex()
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1199,7 +1210,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.model_parameters = None
             self._model_model.clear()
             return
-
+        # Wipe out the parameter model
+        self._model_model.clear()
         # Safely clear and enable the model combo
         self.cbModel.blockSignals(True)
         self.cbModel.clear()
@@ -1211,7 +1223,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Retrieve the list of models
         model_list = self.master_category_dict[category]
         # Populate the models combobox
+        self.cbModel.blockSignals(True)
+        self.cbModel.addItem(MODEL_DEFAULT)
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+        self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):
         """
@@ -3365,41 +3380,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return report_logic.reportList()
 
-    def savePageState(self):
-        """
-        Create and serialize local PageState
-        """
-        filepath = self.saveAsAnalysisFile()
-        if filepath is None or filepath == "":
-            return
-
-        fitpage_state = self.getFitPage()
-        fitpage_state += self.getFitModel()
-
-        with open(filepath, 'w') as statefile:
-            for line in fitpage_state:
-                statefile.write(str(line))
-
-        self.communicate.statusBarUpdateSignal.emit('Analysis saved.')
-
-    def saveAsAnalysisFile(self):
-        """
-        Show the save as... dialog and return the chosen filepath
-        """
-        default_name = "FitPage"+str(self.tab_id)+".fitv"
-
-        wildcard = "fitv files (*.fitv)"
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
-        # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
-        filename = filename_tuple[0]
-        return filename
-
     def loadPageStateCallback(self,state=None, datainfo=None, format=None):
         """
         This is a callback method called from the CANSAS reader.
@@ -3518,6 +3498,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         serializes current parameters
         """
         param_list = []
+        if self.kernel_module is None:
+            return param_list
+
         param_list.append(['model_name', str(self.cbModel.currentText())])
 
         def gatherParams(row):
@@ -3622,7 +3605,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb = QtWidgets.QApplication.clipboard()
         cb_text = cb.text()
 
-        context = {}
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
             return False
@@ -3634,10 +3616,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if len(content) > 1:
                 line_dict[content[0]] = content[1:]
 
-        model = line_dict['model_name'][0]
+        self.updatePageWithParameters(line_dict)
 
+    def createPageForParameters(self, line_dict):
+        """
+        Sets up page with requested model/str factor
+        and fills it up with sent parameters
+        """
+        if 'fitpage_category' in line_dict:
+            self.cbCategory.setCurrentIndex(self.cbCategory.findText(line_dict['fitpage_category'][0]))
+        if 'fitpage_model' in line_dict:
+            self.cbModel.setCurrentIndex(self.cbModel.findText(line_dict['fitpage_model'][0]))
+        if 'fitpage_structure' in line_dict:
+            self.cbStructureFactor.setCurrentIndex(self.cbStructureFactor.findText(line_dict['fitpage_structure'][0]))
+
+        # Now that the page is ready for parameters, fill it up
+        self.updatePageWithParameters(line_dict)
+
+    def updatePageWithParameters(self, line_dict):
+        """
+        Update FitPage with parameters in line_dict
+        """
         if 'model_name' not in line_dict.keys():
-            return False
+            return
+        model = line_dict['model_name'][0]
+        context = {}
 
         if 'multiplicity' in line_dict.keys():
             multip = int(line_dict['multiplicity'][0], 0)

@@ -112,6 +112,33 @@ class FittingWindow(QtWidgets.QTabWidget):
     def onLatexCopy(self):
         self.currentTab.onCopyToClipboard("Latex")
 
+    def getSerializedFitpage(self):
+        # serialize current(active) fitpage
+        fitpage_state = self.currentTab.getFitPage()
+        fitpage_state += self.currentTab.getFitModel()
+        # put the text into dictionary
+        line_dict = {}
+        for line in fitpage_state:
+            #content = line.split(',')
+            if len(line) > 1:
+                line_dict[line[0]] = line[1:]
+        return line_dict
+
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = None
+        if self.currentTab.data:
+            tab_id = self.currentTab.data.id
+        return tab_id
+
+    def updateFromParameters(self, parameters):
+        """
+        Pass the update parameters to the current fit page
+        """
+        self.currentTab.createPageForParameters(parameters)
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
@@ -254,6 +281,12 @@ class FittingWindow(QtWidgets.QTabWidget):
     def allowBatch(self):
         """
         Tell the caller that we accept multiple data instances
+        """
+        return True
+
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
         """
         return True
 
