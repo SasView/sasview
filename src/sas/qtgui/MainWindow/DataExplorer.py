@@ -99,6 +99,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -368,9 +369,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        # Set the signal handlers
-        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
-
         def isItemReady(index):
             item = self.model.item(index)
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
@@ -1442,11 +1440,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msg = "Wrong data type returned from calculations."
             raise AttributeError(msg)
 
-        # TODO: Assert other properties
-
-        # Reset the view
-        ##self.model.reset()
-        # Pass acting as a debugger anchor
+        # send in the new item
+        self.model.appendRow(model_item)
         pass
 
     def updateTheoryFromPerspective(self, model_item):

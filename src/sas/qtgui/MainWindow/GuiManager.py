@@ -50,6 +50,7 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ImageViewer import ImageViewer
 
 logger = logging.getLogger(__name__)
 
@@ -457,7 +458,7 @@ class GuiManager(object):
         self._workspace.actionRedo.setVisible(False)
         self._workspace.actionReset.setVisible(False)
         self._workspace.actionStartup_Settings.setVisible(False)
-        self._workspace.actionImage_Viewer.setVisible(False)
+        #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
         self._workspace.actionOrientation_Viewer.setVisible(False)
@@ -780,8 +781,14 @@ class GuiManager(object):
     def actionImage_Viewer(self):
         """
         """
-        print("actionImage_Viewer TRIGGERED")
-        pass
+        try:
+            self.image_viewer = ImageViewer(self)
+            if sys.platform == "darwin":
+                self.image_viewer.menubar.setNativeMenuBar(False)
+            self.image_viewer.show()
+        except Exception as ex:
+            logging.error(str(ex))
+            return
 
     #============ FITTING =================
     def actionNew_Fit_Page(self):

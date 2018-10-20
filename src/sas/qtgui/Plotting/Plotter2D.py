@@ -512,6 +512,16 @@ class Plotter2DWidget(PlotterBase):
         else:
             self.figure.canvas.draw()
 
+    def imageShow(self, img, origin=None):
+        """
+        Show background image
+        :Param img: [imread(path) from matplotlib.pyplot]
+        """
+        if origin is not None:
+            im = self.ax.imshow(img, origin=origin)
+        else:
+            im = self.ax.imshow(img)
+
     def update(self):
         self.figure.canvas.draw()
 
