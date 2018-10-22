@@ -5,6 +5,7 @@ The module contains the Invertor class.
 
 FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
+from __future__ import division
 
 import numpy as np
 import sys
@@ -495,7 +496,7 @@ class Invertor(Cinvertor):
 
         try:
             cov = np.linalg.pinv(inv_cov)
-            err = math.fabs(chi2 / float(npts - nfunc)) * cov
+            err = math.fabs(chi2 / (npts - nfunc)) * cov
         except Exception as exc:
             # We were not able to estimate the errors
             # Return an empty error matrix
