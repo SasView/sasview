@@ -473,7 +473,7 @@ class Invertor(Cinvertor):
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
-        c, chi2, _, _ = lstsq(a, b, rcond=None)
+        c, chi2, _, _ = lstsq(a, b, rcond=-1)
         # Sanity check
         try:
             float(chi2)
