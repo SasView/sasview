@@ -553,7 +553,29 @@ class GuiManager(object):
         """
         Menu Save Project
         """
-        self.filesWidget.saveProject()
+        filename = self.filesWidget.saveProject()
+
+        # datasets
+        all_data = self.filesWidget.getAllData()
+
+        # fit tabs
+        params = self.perspective().serializeAllFitpage()
+
+        # project dictionary structure:
+        # analysis[data.id] = [{"fit_data":[data, checkbox, child data],
+        #                       "fit_params":[fitpage_state]}
+        # "fit_params" not present if dataset not sent to fitting
+        analysis = {}
+
+        for id, data in all_data.items():
+            data_content = {"fit_data":data}
+            if id in params.keys():
+                # this dataset is represented also by the fit tab. Add to it.
+                data_content["fit_params"] = params[id]
+            analysis[id] = data_content
+
+        with open(filename, 'w') as outfile:
+            GuiUtils.saveData(outfile, analysis)
 
     def actionSave_Analysis(self):
         """
@@ -563,7 +585,7 @@ class GuiManager(object):
         if not isinstance(per, FittingWindow):
             return
         # get fit page serialization
-        params = per.getSerializedFitpage()
+        params = per.serializeCurrentFitpage()
         data_id = per.currentTabDataId()
         tab_id = per.currentTab.tab_id
         data = self.filesWidget.getDataForID(data_id)

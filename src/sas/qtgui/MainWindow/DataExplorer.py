@@ -267,8 +267,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             filename = '.'.join((filename, 'json'))
         self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
 
-        with open(filename, 'w') as outfile:
-            self.saveDataToFile(outfile)
+        return filename
 
     def saveAsAnalysisFile(self, tab_id=1):
         """
@@ -317,9 +316,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             filename = data.filename
             is_checked = item.checkState()
             properties['checked'] = is_checked
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            other_datas = []
+            # no need to save other_datas - things will be refit on read
+            #other_datas = GuiUtils.plotsFromFilename(filename, model)
             # skip the main plot
-            other_datas = list(other_datas.values())[1:]
+            #other_datas = list(other_datas.values())[1:]
             all_data[data.id] = [data, properties, other_datas]
         return all_data
 
@@ -374,7 +375,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         with open(filename, 'r') as infile:
             all_data = GuiUtils.readDataFromFile(infile)
-            items = self.updateModelFromData(all_data)
+
+        for key, value in all_data.items():
+            data_dict = {key:value['fit_data']}
+            items = self.updateModelFromData(data_dict)
+            # send newly created item to its perspective
+            if 'fit_params' in value:
+                self.sendItemToPerspective(items[0])
+                # Make the perspective read the rest of the read data
+                self._perspective().updateFromParameters(value['fit_params'])
 
         pass # debugger
 
