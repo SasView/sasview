@@ -1303,6 +1303,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # update stored_data
         self.manager.update_stored_data(deleted_names)
 
+    def closeAllPlots(self):
+        """
+        Close all currently displayed plots
+        """
+
+        for plot_id in PlotHelper.currentPlots():
+            try:
+                plotter = PlotHelper.plotById(plot_id)
+                plotter.close()
+                self.plot_widgets[plot_id].close()
+                self.plot_widgets.pop(plot_id, None)
+            except AttributeError as ex:
+                logging.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
+
     def closePlotsForItem(self, item):
         """
         Given standard item, close all its currently displayed plots

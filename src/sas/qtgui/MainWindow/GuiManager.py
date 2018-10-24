@@ -510,6 +510,7 @@ class GuiManager(object):
         self._workspace.actionArrange_Icons.triggered.connect(self.actionArrange_Icons)
         self._workspace.actionNext.triggered.connect(self.actionNext)
         self._workspace.actionPrevious.triggered.connect(self.actionPrevious)
+        self._workspace.actionClosePlots.triggered.connect(self.actionClosePlots)
         # Analysis
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
@@ -909,6 +910,13 @@ class GuiManager(object):
         Gives the input focus to the previous window in the list of child windows.
         """
         self._workspace.workspace.activatePreviousSubWindow()
+
+    def actionClosePlots(self):
+        """
+        Closes all Plotters and Plotter2Ds.
+        """
+        self.filesWidget.closeAllPlots()
+        pass
 
     #============ HELP =================
     def actionDocumentation(self):
