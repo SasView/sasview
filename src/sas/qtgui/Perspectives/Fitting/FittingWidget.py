@@ -2317,7 +2317,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         min_column = self.lstParams.itemDelegate().param_min
         max_column = self.lstParams.itemDelegate().param_max
         if model_column == param_column:
-            self.kernel_module.setParam(parameter_name, value)
+            # don't try to update multiplicity counters if they aren't there.
+            # Note that this will fail for proper bad update where the model
+            # doesn't contain multiplicity parameter
+            if parameter_name != self.kernel_module.multiplicity_info.control:
+                self.kernel_module.setParam(parameter_name, value)
         elif model_column == min_column:
             # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.kernel_module.details[parameter_name][1] = value
