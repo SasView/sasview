@@ -9,8 +9,8 @@ def convertUnit(power, unit):
         Convert units to strings that can be displayed
     """
     if power != 0:
-        if unit.find("^") != -1:  # if the unit contains a powerer ^
-            toks = re.split("\^", unit)
+        if unit.find("^") != -1:  # if the unit contains a power ^
+            toks = re.split(r"\^", unit)
             if toks[0].find("/") != -1 or \
                 toks[0].find("-") != -1:
                 if power == 1:

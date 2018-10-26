@@ -3363,11 +3363,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             index = self.all_data[self.data_index]
         else:
             index = self.theory_item
+        params = FittingUtilities.getStandardParam(self._model_model)
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.kernel_module,
                                        data=self.data,
                                        index=index,
-                                       model=self._model_model)
+                                       params=params)
 
         return report_logic.reportList()
 
