@@ -27,45 +27,6 @@ class CategoryInstaller:
         """ initialization """
 
     @staticmethod
-    def _get_installed_model_dir():
-        """
-        returns the dir where installed_models.txt should be
-        """
-        import sas.sascalc.dataloader.readers
-        return sas.sascalc.dataloader.readers.get_data_path()
-
-    @staticmethod
-    def _get_models_py_dir():
-        """
-        returns the dir where models.py should be
-        """
-        import sas.sasgui.perspectives.fitting.models
-        return sas.sasgui.perspectives.fitting.models.get_model_python_path()
-
-    @staticmethod
-    def _get_default_cat_file_dir():
-        """
-        returns the dir where default_cat.j should be
-        """
-        # The default categories file is usually found with the code, except
-        # when deploying using py2app (it will be in Contents/Resources), or
-        # py2exe (it will be in the exec dir).
-        import sas.sasview
-        cat_file = "default_categories.json"
-
-        possible_cat_file_paths = [
-            os.path.join(os.path.split(sas.sasview.__file__)[0], cat_file),           # Source
-            os.path.join(os.path.dirname(sys.executable), '..', 'Resources', cat_file), # Mac
-            os.path.join(os.path.dirname(sys.executable), cat_file)                     # Windows
-        ]
-
-        for path in possible_cat_file_paths:
-            if os.path.isfile(path):
-                return os.path.dirname(path)
-
-        raise RuntimeError('CategoryInstaller: Could not find folder containing default categories')
-
-    @staticmethod
     def _get_home_dir():
         """
         returns the users sasview config dir

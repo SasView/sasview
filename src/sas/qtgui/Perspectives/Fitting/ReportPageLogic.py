@@ -12,19 +12,18 @@ import urllib.parse
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 
 class ReportPageLogic(object):
     """
     Logic for the Report Page functionality. Refactored from FittingWidget.
     """
-    def __init__(self, parent=None, kernel_module=None, data=None, index=None, model=None):
+    def __init__(self, parent=None, kernel_module=None, data=None, index=None, params=None):
 
         self.parent = parent
         self.kernel_module = kernel_module
         self.data = data
         self._index = index
-        self.model = model
+        self.params = params
 
     @staticmethod
     def cleanhtml(raw_html):
@@ -118,13 +117,12 @@ class ReportPageLogic(object):
         """
         Look at widget state and extract parameters
         """
-        pars = FittingUtilities.getStandardParam(self.model)
-        if pars is None:
+        if self.params is None:
             return ""
 
         report = ""
         plus_minus = " &#177; "
-        for value in pars:
+        for value in self.params:
             try:
                 par_name = value[1]
                 par_fixed = not value[0]

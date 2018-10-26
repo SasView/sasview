@@ -105,14 +105,12 @@ def _find_local_config(confg_file, path):
         config_module = imp.load_module(confg_file, fObj, path_config, descr)
     except ImportError:
         pass
-        #logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     except ValueError:
         print("Value error")
         pass
     finally:
         if fObj is not None:
             fObj.close()
-    #logging.info("GuiManager loaded %s/%s" % (path, confg_file))
     return config_module
 
 
@@ -293,7 +291,9 @@ class Communicate(QtCore.QObject):
     # Tell the data explorer to switch tabs
     changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
 
-def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
+    # Plot fitting results (FittingWidget->GuiManager)
+    resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+
     """
     Adds a checkboxed row named "name" to QStandardItem
     Adds 'update_data' to that row.

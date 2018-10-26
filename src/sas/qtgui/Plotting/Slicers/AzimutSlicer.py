@@ -136,7 +136,7 @@ class SectorInteractor(BaseInteractor):
                           phi_min=phimin, phi_max=phimax)
         sector = sect(self.base.data2D)
 
-        from sas.sasgui.guiframe.dataFitting import Data1D
+        from sas.qtgui.Plotting.PlotterData import Data1D
         if hasattr(sector, "dxl"):
             dxl = sector.dxl
         else:

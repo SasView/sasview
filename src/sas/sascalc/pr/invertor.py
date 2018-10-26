@@ -226,19 +226,12 @@ class Invertor(Cinvertor):
             return self.__dict__[name]
         return None
 
-    def add_errors(self, yvalues):
+    def add_errors(self, sigma=0.05):
         """
-        Adds errors to data set is they are not avaialble
-        :return:
+        Adds errors to data set is they are not available.
+        Uses  $\Delta y = \sigma | y |$.
         """
-        stats_errors = np.zeros(len(yvalues))
-        for i in range(len(yvalues)):
-            # Scale the error so that we can fit over several decades of Q
-            scale = 0.05 * np.sqrt(yvalues[i])
-            min_err = 0.01 * yvalues[i]
-            stats_errors[i] = scale * np.sqrt(np.fabs(yvalues[i])) + min_err
-        logger.warning("Simulated errors have been added to the data set\n")
-        return stats_errors
+        self.dy = sigma * np.fabs(self.y)
 
     def clone(self):
         """
@@ -513,7 +506,7 @@ class Invertor(Cinvertor):
         except:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logger.error(sys.exc_value)
+            logger.error(sys.exc_info()[1])
 
         # Keep a copy of the last output
         if not self.est_bck:
@@ -558,7 +551,7 @@ class Invertor(Cinvertor):
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
+            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_info()[1])
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -645,7 +638,7 @@ class Invertor(Cinvertor):
                 return best_alpha, message, elapsed
 
         except:
-            message = "Invertor.estimate_alpha: %s" % sys.exc_value
+            message = "Invertor.estimate_alpha: %s" % sys.exc_info()[1]
             return 0, message, elapsed
 
     def to_file(self, path, npts=100):
@@ -762,7 +755,7 @@ class Invertor(Cinvertor):
                         self.cov[i][i] = float(toks2[1])
 
             except:
-                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_value
+                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_info()[1]
                 raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)

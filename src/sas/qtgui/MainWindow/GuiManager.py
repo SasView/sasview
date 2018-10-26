@@ -23,6 +23,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
+from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 from sas.qtgui.Utilities.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
@@ -146,6 +147,7 @@ class GuiManager(object):
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
+
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
         if sys.platform == "darwin":
@@ -153,6 +155,11 @@ class GuiManager(object):
         self.grid_subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
         self.grid_subwindow.setVisible(False)
         self.grid_window.windowClosedSignal.connect(lambda: self.grid_subwindow.setVisible(False))
+
+        self.results_panel = ResultPanel(parent=self._parent, manager=self)
+        self.results_frame = self._workspace.workspace.addSubWindow(self.results_panel)
+        self.results_frame.setVisible(False)
+        self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
         self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
         self._workspace.actionHide_Toolbar.setText("Show Toolbar")
@@ -442,14 +449,12 @@ class GuiManager(object):
         Trigger definitions for all menu/toolbar actions.
         """
         # disable not yet fully implemented actions
-        #self._workspace.actionOpen_Analysis.setVisible(False)
         self._workspace.actionUndo.setVisible(False)
         self._workspace.actionRedo.setVisible(False)
         self._workspace.actionReset.setVisible(False)
         self._workspace.actionStartup_Settings.setVisible(False)
         self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
-        self._workspace.actionFit_Results.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
         self._workspace.actionOrientation_Viewer.setVisible(False)
 
@@ -509,6 +514,7 @@ class GuiManager(object):
         self._workspace.actionArrange_Icons.triggered.connect(self.actionArrange_Icons)
         self._workspace.actionNext.triggered.connect(self.actionNext)
         self._workspace.actionPrevious.triggered.connect(self.actionPrevious)
+        self._workspace.actionClosePlots.triggered.connect(self.actionClosePlots)
         # Analysis
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
@@ -523,6 +529,7 @@ class GuiManager(object):
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
+        self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 
     #============ FILE =================
     def actionLoadData(self):
@@ -852,8 +859,15 @@ class GuiManager(object):
     def actionFit_Results(self):
         """
         """
-        print("actionFit_Results TRIGGERED")
-        pass
+        self.showFitResults(None)
+
+    def showFitResults(self, output_data):
+        """
+        Show bumps convergence plots
+        """
+        self.results_frame.setVisible(True)
+        if output_data:
+            self.results_panel.onPlotResults(output_data)
 
     def actionAdd_Custom_Model(self):
         """
@@ -944,6 +958,13 @@ class GuiManager(object):
         Gives the input focus to the previous window in the list of child windows.
         """
         self._workspace.workspace.activatePreviousSubWindow()
+
+    def actionClosePlots(self):
+        """
+        Closes all Plotters and Plotter2Ds.
+        """
+        self.filesWidget.closeAllPlots()
+        pass
 
     #============ HELP =================
     def actionDocumentation(self):

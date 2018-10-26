@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 import os
 import sys
 # Local UI
@@ -57,7 +58,7 @@ def run_sasview():
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()
     splash.show()
-
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     import sys
     if 'twisted.internet.reactor' in sys.modules:

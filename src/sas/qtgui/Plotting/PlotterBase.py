@@ -1,4 +1,3 @@
-import pylab
 import numpy
 
 from PyQt5 import QtCore
@@ -9,9 +8,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib import rcParams
 
-DEFAULT_CMAP = pylab.cm.jet
+DEFAULT_CMAP = mpl.cm.jet
 from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
