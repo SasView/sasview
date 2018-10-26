@@ -1,6 +1,5 @@
 import copy
 import numpy
-import pylab
 import functools
 import logging
 
@@ -8,12 +7,12 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-DEFAULT_CMAP = pylab.cm.jet
 
 #import sys
 #print("SYS.PATH = ", sys.path)
 import matplotlib as mpl
 mpl.use("Qt5Agg")
+DEFAULT_CMAP = mpl.cm.jet
 
 from mpl_toolkits.mplot3d import Axes3D
 
