@@ -285,6 +285,9 @@ class Communicate(QtCore.QObject):
     # Tell the data explorer to switch tabs
     changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
 
+    # Plot fitting results (FittingWidget->GuiManager)
+    resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
