@@ -94,14 +94,12 @@ def _find_local_config(confg_file, path):
         config_module = imp.load_module(confg_file, fObj, path_config, descr)
     except ImportError:
         pass
-        #logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     except ValueError:
         print("Value error")
         pass
     finally:
         if fObj is not None:
             fObj.close()
-    #logging.info("GuiManager loaded %s/%s" % (path, confg_file))
     return config_module
 
 
