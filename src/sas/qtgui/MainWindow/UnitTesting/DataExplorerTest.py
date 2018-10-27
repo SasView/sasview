@@ -853,7 +853,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
 
         # Attempt at deleting
-        self.form.deleteItem()
+        self.form.deleteSelectedItem()
 
         # Test the warning dialog called once
         self.assertTrue(QMessageBox.question.called)
@@ -867,7 +867,7 @@ class DataExplorerTest(unittest.TestCase):
         # Select the newly created item
         self.form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
         # delete it. now for good
-        self.form.deleteItem()
+        self.form.deleteSelectedItem()
 
         # Test the warning dialog called once
         self.assertTrue(QMessageBox.question.called)

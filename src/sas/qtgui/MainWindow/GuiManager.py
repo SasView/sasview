@@ -463,7 +463,7 @@ class GuiManager(object):
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
-        self._workspace.actionSave.triggered.connect(self.actionSave)
+        self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -556,7 +556,7 @@ class GuiManager(object):
         self.filesWidget.loadAnalysis()
         pass
 
-    def actionSave(self):
+    def actionSave_Project(self):
         """
         Menu Save Project
         """

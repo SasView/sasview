@@ -224,14 +224,33 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Open Project" menu item chosen.
         """
+        # check if any items loaded and warn about data deletion
+        if self.model.rowCount() > 0:
+            msg = "This operation will set remove all data, plots and analyses from"
+            msg += " SasView before loading the project. Do you wish to continue?"
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Project Load")
+            # custom buttons
+            button_yes = QtWidgets.QPushButton("Yes")
+            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
+            button_no = QtWidgets.QPushButton("No")
+            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
+            retval = msgbox.exec_()
+            if retval == QtWidgets.QMessageBox.RejectRole:
+                # cancel fit
+                return
+
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Project',
-            'filter'    : 'Project (*.json);;All files (*.*)',
+            'filter'    : 'Project Files (*.json);;Old Project Files (*.svs);;All files (*.*)',
             'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
+            self.deleteAllItems()
             self.readProject(filename)
 
     def loadAnalysis(self):
@@ -373,8 +392,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Read out datasets and fitpages from file
         """
-        with open(filename, 'r') as infile:
-            all_data = GuiUtils.readDataFromFile(infile)
+        # Find out the filetype based on extension
+        ext = os.path.splitext(filename)[1]
+        all_data = {}
+        if 'svs' in ext.lower():
+            # backward compatibility mode.
+            datasets = GuiUtils.readProjectFromSVS(filename)
+            #[[item_1, state_1], [item_2, state_2],...]
+
+            # Convert fitpage properties and update the dict
+            all_data = GuiUtils.convertFromSVS(datasets)
+        else:
+            with open(filename, 'r') as infile:
+                all_data = GuiUtils.readDataFromFile(infile)
 
         for key, value in all_data.items():
             data_dict = {key:value['fit_data']}
@@ -419,6 +449,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # add the main index
             if not value: continue
             new_data = value[0]
+            from sas.sascalc.dataloader.data_info import Data1D as old_data1d
+            from sas.sascalc.dataloader.data_info import Data2D as old_data2d
+            if isinstance(new_data, (old_data1d, old_data2d)):
+                new_data = self.manager.create_gui_data(value[0], new_data.filename)
             assert isinstance(new_data, (Data1D, Data2D))
             properties = value[1]
             is_checked = properties['checked']
@@ -1201,7 +1235,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
-        self.actionDelete.triggered.connect(self.deleteItem)
+        self.actionDelete.triggered.connect(self.deleteSelectedItem)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
 
     def onCustomContextMenu(self, position):
@@ -1414,7 +1448,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item_to_copy and item_to_copy.isCheckable():
                 self.freezeItem(item_to_copy)
 
-    def deleteItem(self):
+    def deleteAllItems(self):
+        """
+        Deletes all datasets from both model and theory_model
+        """
+        deleted_items = [self.model.item(row) for row in range(self.model.rowCount())
+                         if self.model.item(row).isCheckable()]
+        deleted_names = [item.text() for item in deleted_items]
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_items)
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
+
+        # Clear the model
+        self.model.clear()
+
+    def deleteSelectedItem(self):
         """
         Delete the current item
         """
@@ -1431,22 +1480,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if reply == QtWidgets.QMessageBox.No:
             return
 
-        # Every time a row is removed, the indices change, so we'll just remove
-        # rows and keep calling selectedIndexes until it returns an empty list.
         indices = self.current_view.selectedIndexes()
+        self.deleteIndices(indices)
 
+    def deleteIndices(self, indices):
+        """
+        Delete model idices from the current view
+        """
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
         deleted_items = []
         deleted_names = []
 
+        # Every time a row is removed, the indices change, so we'll just remove
+        # rows and keep calling selectedIndexes until it returns an empty list.
         while len(indices) > 0:
             index = indices[0]
-            row_index = proxy.mapToSource(index)
-            item_to_delete = model.itemFromIndex(row_index)
+            #row_index = proxy.mapToSource(index)
+            #item_to_delete = model.itemFromIndex(row_index)
+            item_to_delete = model.itemFromIndex(index)
             if item_to_delete and item_to_delete.isCheckable():
-                row = row_index.row()
+                #row = row_index.row()
+                row = index.row()
 
                 # store the deleted item details so we can pass them on later
                 deleted_names.append(item_to_delete.text())

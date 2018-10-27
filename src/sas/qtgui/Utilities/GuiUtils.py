@@ -294,6 +294,7 @@ class Communicate(QtCore.QObject):
     # Plot fitting results (FittingWidget->GuiManager)
     resultPlotUpdateSignal = QtCore.pyqtSignal(list)
 
+def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem
     Adds 'update_data' to that row.
@@ -1282,6 +1283,106 @@ def readDataFromFile(fp):
 
     return new_stored_data
 
+def readProjectFromSVS(filepath):
+    """
+    Read old SVS file and convert to the project dictionary
+    """
+    from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+    from sas.sascalc.fit.pagestate import Reader
+
+    loader = Loader()
+    loader.associate_file_reader('.svs', Reader)
+    temp = loader.load(filepath)
+    state_reader = Reader()
+    data_svs, state_svs = state_reader.read(filepath)
+
+    output = []
+    if isinstance(temp, list) and isinstance(state_svs, list):
+        for item, state in zip(temp, state_svs):
+            output.append([item, state])
+    else:
+        output[temp, state_svs]
+    return output
+
+def convertFromSVS(datasets):
+    """
+    Read in properties from SVS and convert into a simple dict
+    """
+    content = {}
+    for dataset in datasets:
+        # we already have data - interested only in properties
+        #[[item_1, state_1], [item_2, state_2],...]
+        data = dataset[0]
+        params = dataset[1]
+        content[params.data_id] = {}
+        content[params.data_id]['fit_data'] = [data, {'checked': 2}, []]
+        param_dict = {}
+        param_dict['fitpage_category'] = [params.categorycombobox]
+        param_dict['fitpage_model'] = [params.formfactorcombobox]
+        param_dict['fitpage_structure'] = [params.structurecombobox]
+        param_dict['2D_params'] = [str(params.is_2D)]
+        param_dict['chainfit_params'] = ["False"]
+        param_dict['data_id'] = [params.data_id]
+        param_dict['data_name'] = [params.data_name]
+        param_dict['is_data'] = [str(params.is_data)]
+        param_dict['magnetic_params'] = [str(params.magnetic_on)]
+        param_dict['model_name'] = [params.formfactorcombobox]
+        param_dict['polydisperse_params'] = [str(params.enable_disp)]
+        param_dict['q_range_max'] = [str(params.qmax)]
+        param_dict['q_range_min'] = [str(params.qmin)]
+        # Smearing is a bit trickier. 4.x has multiple keywords,
+        # one for each combobox option
+        if params.enable_smearer:
+            if params.slit_smearer:
+                w = 1
+            elif params.pinhole_smearer:
+                w = 2
+            else:
+                w = 0
+            param_dict['smearing'] = [str(w)]
+        # weighting is a bit trickier. 4.x has multiple keywords,
+        # one for each radio box.
+        if params.dI_noweight:
+            w = 2
+        elif params.dI_didata:
+            w = 3
+        elif params.dI_sqrdata:
+            w = 4
+        elif params.dI_idata:
+            w = 5
+        else:
+            w = 2
+        param_dict['weighting'] = [str(w)]
+
+        # 4.x multi_factor is really the multiplicity
+        if params.multi_factor is not None:
+            param_dict['multiplicity'] = [str(int(params.multi_factor))]
+
+        # playing with titles
+        data.filename = params.file
+        data.title = params.data_name
+        data.name = params.data_name
+
+        # main parameters
+        for p in params.parameters:
+            p_name = p[1]
+            param_dict[p_name] = [str(p[0]), str(p[2]), None, str(p[5][1]), str(p[6][1])]
+        # orientation parameters
+        if params.is_2D:
+            for p in params.orientation_params:
+                p_name = p[1]
+                param_dict[p_name] = [str(p[0]), str(p[2]), None, str(p[5][1]), str(p[6][1])]
+
+        # disperse parameters
+        if params.enable_disp:
+            for p in params.fittable_param:
+                p_name = p[1]
+                param_dict[p_name] = [str(p[0]), str(p[2]), None, str(35), str(3)]
+
+        # magnetic parameters
+
+        content[params.data_id]['fit_params'] = param_dict
+    return content
 
 def enum(*sequential, **named):
     """Create an enumeration object from a list of strings"""
