@@ -59,6 +59,9 @@ class ResultPanel(QtWidgets.QTabWidget):
         for view in (self.convergenceView, self.correlationView,
                      self.uncertaintyView, self.traceView):
             view.close()
+        # close all tabs. REMEMBER TO USE REVERSED RANGE!!!
+        for index in reversed(range(self.count())):
+            self.removeTab(index)
 
         result = results[0][0]
         filename = result.data.sas_data.filename
