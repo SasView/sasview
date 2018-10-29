@@ -835,7 +835,7 @@ class GuiManager(object):
         """
         self.results_frame.setVisible(True)
         if output_data:
-            self.results_panel.onPlotResults(output_data)
+            self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
     def actionAdd_Custom_Model(self):
         """

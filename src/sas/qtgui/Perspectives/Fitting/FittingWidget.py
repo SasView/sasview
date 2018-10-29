@@ -1570,8 +1570,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if param_dict is None:
             return
-        if hasattr(res, 'convergence') and len(res.convergence)>0:
-            self.communicate.resultPlotUpdateSignal.emit(result[0])
+        self.communicate.resultPlotUpdateSignal.emit(result[0])
 
         elapsed = result[1]
         if self.calc_fit is not None and self.calc_fit._interrupting:

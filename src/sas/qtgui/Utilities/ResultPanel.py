@@ -54,7 +54,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         import bumps.gui
         sys.modules['bumps.gui.plot_view'] = PlotView
 
-    def onPlotResults(self, results):
+    def onPlotResults(self, results, optimizer="Unknown"):
         # Clear up previous results
         for view in (self.convergenceView, self.correlationView,
                      self.uncertaintyView, self.traceView):
@@ -65,9 +65,9 @@ class ResultPanel(QtWidgets.QTabWidget):
 
         result = results[0][0]
         filename = result.data.sas_data.filename
-        current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
-        self.setWindowTitle(self.window_name + " - " + filename + " - " + current_time)
-        if hasattr(result, 'convergence'):
+        current_optimizer = optimizer
+        self.setWindowTitle(self.window_name + " - " + filename + " - " + current_optimizer)
+        if hasattr(result, 'convergence') and len(result.convergence) > 0:
             best, pop = result.convergence[:, 0], result.convergence[:, 1:]
             self.convergenceView.update(best, pop)
             self.addTab(self.convergenceView, "Convergence")
@@ -91,6 +91,9 @@ class ResultPanel(QtWidgets.QTabWidget):
         else:
             for view in (self.correlationView, self.uncertaintyView, self.traceView):
                 view.close()
+        # no tabs in the widget - possibly LM optimizer. Mark "closed"
+        if self.count()==0:
+            self.close()
 
     def closeEvent(self, event):
         """
