@@ -12,7 +12,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtWidgets.QStyledItemDelegate, self).__init__()
+        super(ModelViewDelegate, self).__init__()
 
         # Main parameter table view columns
         self.param_error=-1
@@ -124,7 +124,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtWidgets.QStyledItemDelegate, self).__init__()
+        super(PolyViewDelegate, self).__init__()
 
         self.poly_parameter = 0
         self.poly_pd = 1
@@ -225,7 +225,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtWidgets.QStyledItemDelegate, self).__init__()
+        super(MagnetismViewDelegate, self).__init__()
 
         self.mag_parameter = 0
         self.mag_value = 1

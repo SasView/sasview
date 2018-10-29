@@ -8,10 +8,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 
-#import sys
-#print("SYS.PATH = ", sys.path)
 import matplotlib as mpl
-mpl.use("Qt5Agg")
 DEFAULT_CMAP = mpl.cm.jet
 
 from mpl_toolkits.mplot3d import Axes3D

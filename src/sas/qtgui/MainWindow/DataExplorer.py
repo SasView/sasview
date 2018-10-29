@@ -363,7 +363,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # pass temporarily kept as a breakpoint anchor
         pass
 
-    def sendData(self, event):
+    def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
@@ -1170,8 +1170,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Mask Editor for 2D plots
         """
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("Error: cannot apply mask.\n"+
+                    "Please select a 2D dataset.")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
         try:
             if data is None or not isinstance(data, Data2D):
+                # if data wasn't passed - try to get it from
+                # the currently selected item
                 index = self.current_view.selectedIndexes()[0]
                 proxy = self.current_view.model()
                 model = proxy.sourceModel()
@@ -1180,19 +1188,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 data = GuiUtils.dataFromItem(model_item)
 
             if data is None or not isinstance(data, Data2D):
-                msg = QtWidgets.QMessageBox()
-                msg.setIcon(QtWidgets.QMessageBox.Information)
-                msg.setText("Error: cannot apply mask. \
-                                Please select a 2D dataset.")
-                msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
+                # If data is still not right, complain
                 msg.exec_()
                 return
         except:
-            msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setText("Error: No dataset selected. \
-                            Please select a 2D dataset.")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
             msg.exec_()
             return
 
