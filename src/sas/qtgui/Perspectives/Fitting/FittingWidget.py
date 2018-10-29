@@ -1009,8 +1009,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Checks if the current model has magnetic scattering implemented
         """
-        current_model = self.cbModel.currentText()
-        return self.is2D and current_model in self.MAGNETIC_MODELS
+        has_params = False
+        if self.kernel_module:
+            has_mag_params = len(self.kernel_module.magnetic_params) > 0
+        return self.is2D and has_mag_params
 
     def onSelectModel(self):
         """
@@ -1024,8 +1026,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Empty combobox forced to be read
         if not model:
             return
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1163,6 +1163,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # kernel parameters -> model_model
         self.SASModelToQModel(model, structure_factor)
 
+        # Enable magnetism checkbox for selected models
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+
+        # Update column widths
         for column, width in self.lstParamHeaderSizes.items():
             self.lstParams.setColumnWidth(column, width)
 
