@@ -112,7 +112,7 @@ class Plotter2DWidget(PlotterBase):
         Re-calculate the plot depth parameters depending on the scale
         """
         # Toggle the scale
-        zmin_temp = self.zmin if self.zmin else MIN_Z
+        zmin_temp = self.zmin
         zmax_temp = self.zmax
         # self.scale predefined in the baseclass
         # in numpy > 1.12 power(int, -int) raises ValueException
@@ -421,7 +421,7 @@ class Plotter2DWidget(PlotterBase):
         # check scale
         if self.scale == 'log_{10}':
             try:
-                if  self.zmin <= 0  and len(output[output > 0]) > 0:
+                if  self.zmin is None  and len(output[output > 0]) > 0:
                     zmin_temp = self.zmin
                     output[output > 0] = numpy.log10(output[output > 0])
                 elif self.zmin <= 0:
@@ -433,7 +433,6 @@ class Plotter2DWidget(PlotterBase):
                     output[output > 0] = numpy.log10(output[output > 0])
             except:
                 #Too many problems in 2D plot with scale
-                output[output > 0] = numpy.log10(output[output > 0])
                 pass
 
         self.cmap = cmap
@@ -449,6 +448,7 @@ class Plotter2DWidget(PlotterBase):
                 self.im.set_data(output)
             else:
                 self.im = self.ax.imshow(output, interpolation='nearest',
+                                origin='lower',
                                 vmin=zmin_temp, vmax=zmax_temp,
                                 cmap=self.cmap,
                                 extent=(self.xmin, self.xmax,
