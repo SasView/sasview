@@ -218,8 +218,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.lblUnitUp.setText('%')
         self.txtSmearDown.setEnabled(True)
         self.txtSmearUp.setEnabled(True)
-        self.txtSmearDown.setText(str(0.0))
-        self.txtSmearUp.setText(str(0.0))
+        #self.txtSmearDown.setText(str(0.0))
+        #self.txtSmearUp.setText(str(0.0))
 
     def setSlitLabels(self):
         """
@@ -231,8 +231,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.txtSmearDown.setEnabled(True)
         self.txtSmearUp.setEnabled(True)
-        self.txtSmearDown.setText(str(0.0))
-        self.txtSmearUp.setText(str(0.0))
+        #self.txtSmearDown.setText(str(0.0))
+        #self.txtSmearUp.setText(str(0.0))
 
     def setDQLabels(self):
         """
@@ -324,6 +324,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         are compute when fitting
         """
         _, accuracy, d_height, d_width = self.state()
+
         # Check changes in slit width
         if d_width is None:
             d_width = 0.0
@@ -331,6 +332,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             d_height = 0.0
 
         if isinstance(self.data, Data2D):
+            self.current_smearer = smear_selection(self.data, self.kernel_model)
             return
         # make sure once more if it is smearer
         data = copy.deepcopy(self.data)
