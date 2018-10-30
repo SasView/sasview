@@ -1,6 +1,8 @@
 """
 BumpsFitting module runs the bumps optimizer.
 """
+from __future__ import division
+
 import os
 from datetime import timedelta, datetime
 
@@ -33,7 +35,7 @@ from sas.sascalc.fit.expression import compile_constraints
 
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
-        remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
+        remaining_time = int(history.time[0]*(max_step/history.step[0]-1))
         # Depending on the time remaining, either display the expected
         # time of completion, or the amount of time remaining.  Use precision
         # appropriate for the duration.
