@@ -1016,7 +1016,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Checks if the current model has magnetic scattering implemented
         """
-        has_params = False
+        has_mag_params = False
         if self.kernel_module:
             has_mag_params = len(self.kernel_module.magnetic_params) > 0
         return self.is2D and has_mag_params
