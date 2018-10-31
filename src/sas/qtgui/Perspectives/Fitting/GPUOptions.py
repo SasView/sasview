@@ -1,10 +1,14 @@
 # global
 import os
 import sys
-import sasmodels
 import json
 import platform
 import webbrowser
+import logging
+
+import sasmodels
+import sasmodels.model_test
+import sasmodels.kernelcl
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -25,6 +29,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtWidgets.QApplication.translate(context, text, disambig)
 
+logger = logging.getLogger(__name__)
 
 class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     """
@@ -105,10 +110,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
         # Sasmodels kernelcl doesn't exist when initiated with None
-        if 'sasmodels.kernelcl' in sys.modules:
-            sasmodels.kernelcl.ENV = None
-        from importlib import reload # assumed Python > 3.3
-        reload(sasmodels.core)
+        sasmodels.kernelcl.reset_environment()
         return no_opencl_msg
 
     def testButtonClicked(self):
@@ -122,15 +124,14 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         from sasmodels.model_test import model_tests
 
         try:
-            from sasmodels.kernelcl import environment
-            env = environment()
+            env = sasmodels.kernelcl.environment()
             clinfo = [(ctx.devices[0].platform.vendor,
                        ctx.devices[0].platform.version,
                        ctx.devices[0].vendor,
                        ctx.devices[0].name,
                        ctx.devices[0].version)
                       for ctx in env.context]
-        except ImportError:
+        except Exception:
             clinfo = None
 
         failures = []
@@ -221,13 +222,24 @@ def _get_clinfo():
     """
     clinfo = []
     cl_platforms = []
+
     try:
         import pyopencl as cl
-        cl_platforms = cl.get_platforms()
     except ImportError:
-        print("pyopencl import failed. Using only CPU computations")
-    except cl.LogicError as e:
-        print(e.value)
+        cl = None
+
+    if cl is None:
+        logger.warn("Unable to import the pyopencl package.  It may not "
+                    "have been installed.  If you wish to use OpenCL, try "
+                    "running pip install --user pyopencl")
+    else:
+        try:
+            cl_platforms = cl.get_platforms()
+        except cl.LogicError as err:
+            logger.warn("Unable to fetch the OpenCL platforms.  This likely "
+                        "means that the opencl drivers for your system are "
+                        "not installed.")
+            logger.warn(err)
 
     p_index = 0
     for cl_platform in cl_platforms:
