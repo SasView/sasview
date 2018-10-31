@@ -50,6 +50,7 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ImageViewer import ImageViewer
 
 logger = logging.getLogger(__name__)
 
@@ -351,6 +352,8 @@ class GuiManager(object):
 
         # Exit if yes
         if reply == QMessageBox.Yes:
+            # save the paths etc.
+            self.saveCustomConfig()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -456,7 +459,7 @@ class GuiManager(object):
         self._workspace.actionRedo.setVisible(False)
         self._workspace.actionReset.setVisible(False)
         self._workspace.actionStartup_Settings.setVisible(False)
-        self._workspace.actionImage_Viewer.setVisible(False)
+        #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
         self._workspace.actionOrientation_Viewer.setVisible(False)
@@ -824,8 +827,14 @@ class GuiManager(object):
     def actionImage_Viewer(self):
         """
         """
-        print("actionImage_Viewer TRIGGERED")
-        pass
+        try:
+            self.image_viewer = ImageViewer(self)
+            if sys.platform == "darwin":
+                self.image_viewer.menubar.setNativeMenuBar(False)
+            self.image_viewer.show()
+        except Exception as ex:
+            logging.error(str(ex))
+            return
 
     #============ FITTING =================
     def actionNew_Fit_Page(self):
@@ -1113,3 +1122,62 @@ class GuiManager(object):
             self.checkAnalysisOption(self._workspace.actionInversion)
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Corfunc"]):
             self.checkAnalysisOption(self._workspace.actionCorfunc)
+
+    def saveCustomConfig(self):
+        """
+        Save the config file based on current session values
+        """
+        # Load the current file
+        config_content = GuiUtils.custom_config
+
+        changed = self.customSavePaths(config_content)
+        changed = changed or self.customSaveOpenCL(config_content)
+
+        if changed:
+            self.writeCustomConfig(config_content)
+
+    def customSavePaths(self, config_content):
+        """
+        Update the config module with current session paths
+        Returns True if update was done, False, otherwise
+        """
+        changed = False
+        # Find load path
+        open_path = GuiUtils.DEFAULT_OPEN_FOLDER
+        defined_path = self.filesWidget.default_load_location
+        if open_path != defined_path:
+            # Replace the load path
+            config_content.DEFAULT_OPEN_FOLDER = defined_path
+            changed = True
+        return changed
+
+    def customSaveOpenCL(self, config_content):
+        """
+        Update the config module with current session OpenCL choice
+        Returns True if update was done, False, otherwise
+        """
+        changed = False
+        # Find load path
+        file_value = GuiUtils.SAS_OPENCL
+        session_value = os.environ.get("SAS_OPENCL", "")
+        if file_value != session_value:
+            # Replace the load path
+            config_content.SAS_OPENCL = session_value
+            changed = True
+        return changed
+
+    def writeCustomConfig(self, config):
+        """
+        Write custom configuration
+        """
+        from sas import make_custom_config_path
+        path = make_custom_config_path()
+        # Just clobber the file - we already have its content read in
+        with open(path, 'w') as out_f:
+            out_f.write("#Application appearance custom configuration\n")
+            for key, item in config.__dict__.items():
+                if key[:2] != "__":
+                    if isinstance(item, str):
+                        item = '"' + item + '"'
+                    out_f.write("%s = %s\n" % (key, str(item)))
+        pass # debugger anchor

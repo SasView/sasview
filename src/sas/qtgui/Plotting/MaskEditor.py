@@ -41,9 +41,9 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.frame.setLayout(layout)
-        layout.addWidget(self.plotter)
 
         self.plotter.plot()
+        layout.addWidget(self.plotter)
         self.subplot = self.plotter.ax
 
         # update mask

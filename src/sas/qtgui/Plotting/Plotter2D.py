@@ -280,11 +280,16 @@ class Plotter2DWidget(PlotterBase):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
+        item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
+
+        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Show the plot
 
     def setSlicer(self, slicer):
         """
@@ -506,6 +511,16 @@ class Plotter2DWidget(PlotterBase):
             self.figure.canvas.draw_idle()
         else:
             self.figure.canvas.draw()
+
+    def imageShow(self, img, origin=None):
+        """
+        Show background image
+        :Param img: [imread(path) from matplotlib.pyplot]
+        """
+        if origin is not None:
+            im = self.ax.imshow(img, origin=origin)
+        else:
+            im = self.ax.imshow(img)
 
     def update(self):
         self.figure.canvas.draw()

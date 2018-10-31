@@ -161,6 +161,7 @@ try:
     CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
     DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
     CLEANUP_PLOT = custom_config.CLEANUP_PLOT
+    SAS_OPENCL = custom_config.SAS_OPENCL
     # custom open_path
     open_folder = custom_config.DEFAULT_OPEN_FOLDER
     if open_folder is not None and os.path.isdir(open_folder):
@@ -181,6 +182,7 @@ except AttributeError:
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
+    SAS_OPENCL = config.SAS_OPENCL
 
 #DEFAULT_STYLE = config.DEFAULT_STYLE
 
@@ -293,6 +295,9 @@ class Communicate(QtCore.QObject):
 
     # Plot fitting results (FittingWidget->GuiManager)
     resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+
+    # show the plot as a regular in-workspace object
+    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """

@@ -32,6 +32,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     trigger_plot_3d = QtCore.pyqtSignal()
     calculationFinishedSignal = QtCore.pyqtSignal()
+    loadingFinishedSignal = QtCore.pyqtSignal(list)
 
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
@@ -104,6 +105,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # plots - 3D in real space
         self.calculationFinishedSignal.connect(self.plot_1_2d)
 
+        # notify main thread about file load complete
+        self.loadingFinishedSignal.connect(self.complete_loading)
+
         # TODO the option Ellipsoid has not been implemented
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
 
@@ -166,7 +170,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     "Loading File {}".format(os.path.basename(
                         str(self.datafile))))
                 self.reader = GenReader(path=str(self.datafile), loader=loader,
-                                        completefn=self.complete_loading,
+                                        completefn=self.complete_loading_ex,
                                         updatefn=self.load_update)
                 self.reader.queue()
         except (RuntimeError, IOError):
@@ -183,8 +187,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             status_type = "stop"
         logging.info(status_type)
 
+    def complete_loading_ex(self, data=None):
+        """
+        Send the finish message from calculate threads to main thread
+        """
+        self.loadingFinishedSignal.emit(data)
+
     def complete_loading(self, data=None):
         """ Function used in GenRead"""
+        assert isinstance(data, list)
+        assert len(data)==1
+        data = data[0]
         self.cbShape.setEnabled(False)
         try:
             is_pdbdata = False

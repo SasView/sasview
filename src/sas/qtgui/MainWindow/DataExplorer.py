@@ -48,6 +48,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # in order to set the widget parentage properly.
         self.parent = guimanager
         self.loader = Loader()
+
+        # Read in default locations
+        self.default_save_location = None
+        self.default_load_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.default_project_location = None
+
         self.manager = manager if manager is not None else DataManager()
         self.txt_widget = QtWidgets.QTextEdit(None)
 
@@ -98,6 +104,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
         self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
+        self.communicator.forcePlotDisplaySignal.connect(self.displayData)
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -204,16 +212,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
-              QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog)
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Choose a directory',
+            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_load_location
+        }
+        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+
         if folder is None:
             return
 
         folder = str(folder)
-
         if not os.path.isdir(folder):
             return
-
+        self.default_load_location = folder
         # get content of dir into a list
         path_str = [os.path.join(os.path.abspath(folder), filename)
                     for filename in os.listdir(folder)]
@@ -250,6 +263,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
+            self.default_project_location = os.path.dirname(filename)
             self.deleteAllItems()
             self.readProject(filename)
 
@@ -275,12 +289,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Save Project',
             'filter'    : 'Project (*.json)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_project_location
         }
         name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
         filename = name_tuple[0]
         if not filename:
             return
+        self.default_project_location = os.path.dirname(filename)
         _, extension = os.path.splitext(filename)
         if not extension:
             filename = '.'.join((filename, 'json'))
@@ -615,9 +631,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        # Set the signal handlers
-        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
-
         def isItemReady(index):
             item = self.model.item(index)
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
@@ -902,9 +915,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if main_data is None:
             # Try the current item
             main_data = GuiUtils.dataFromItem(plot_item)
+        # 1D dependent plots of 2D sets - special treatment
+        if isinstance(main_data, Data2D) and isinstance(plot_to_show, Data1D):
+            main_data = None
 
         # Make sure main data for 2D is always displayed
-        if main_data and not self.isPlotShown(main_data):
+        if main_data is not None and not self.isPlotShown(main_data):
             if isinstance(main_data, Data2D):
                 self.plotData([(plot_item, main_data)])
 
@@ -922,7 +938,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         else:
             # Plots with main data points on the same chart
             # Get the main data plot
-            if main_data and not self.isPlotShown(main_data):
+            if main_data is not None and not self.isPlotShown(main_data):
                 new_plots.append((plot_item, main_data))
             new_plots.append((plot_item, plot_to_show))
 
@@ -1082,17 +1098,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # List of known extensions
         wlist = self.getWlist()
-
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtWidgets.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Choose files',
+            'filter'    : wlist,
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_load_location
+        }
+        paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
         if not paths:
             return
 
         if not isinstance(paths, list):
             paths = [paths]
 
+        self.default_load_location = os.path.dirname(paths[0])
         return paths
 
     def readData(self, path):
@@ -1728,11 +1750,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msg = "Wrong data type returned from calculations."
             raise AttributeError(msg)
 
-        # TODO: Assert other properties
-
-        # Reset the view
-        ##self.model.reset()
-        # Pass acting as a debugger anchor
+        # send in the new item
+        self.model.appendRow(model_item)
         pass
 
     def updateTheoryFromPerspective(self, model_item):
