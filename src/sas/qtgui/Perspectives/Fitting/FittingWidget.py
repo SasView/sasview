@@ -293,6 +293,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.has_poly_error_column = False
         self.has_magnet_error_column = False
 
+        # Enablement of comboboxes
+        self.enabled_cbmodel = False
+        self.enabled_sfmodel = False
+
         # If the widget generated theory item, save it
         self.theory_item = None
 
@@ -459,21 +463,25 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Disable the combobox """
         self.cbModel.setEnabled(False)
         self.lblModel.setEnabled(False)
+        self.enabled_cbmodel = False
 
     def enableModelCombo(self):
         """ Enable the combobox """
         self.cbModel.setEnabled(True)
         self.lblModel.setEnabled(True)
+        self.enabled_cbmodel = True
 
     def disableStructureCombo(self):
         """ Disable the combobox """
         self.cbStructureFactor.setEnabled(False)
         self.lblStructure.setEnabled(False)
+        self.enabled_sfmodel = False
 
     def enableStructureCombo(self):
         """ Enable the combobox """
         self.cbStructureFactor.setEnabled(True)
         self.lblStructure.setEnabled(True)
+        self.enabled_sfmodel = True
 
     def togglePoly(self, isChecked):
         """ Enable/disable the polydispersity tab """
@@ -1008,8 +1016,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Checks if the current model has magnetic scattering implemented
         """
-        current_model = self.cbModel.currentText()
-        return self.is2D and current_model in self.MAGNETIC_MODELS
+        has_params = False
+        if self.kernel_module:
+            has_mag_params = len(self.kernel_module.magnetic_params) > 0
+        return self.is2D and has_mag_params
 
     def onSelectModel(self):
         """
@@ -1033,6 +1043,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Empty combobox forced to be read
         if not model:
             return
+
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
@@ -1174,6 +1185,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # kernel parameters -> model_model
         self.SASModelToQModel(model, structure_factor)
 
+        # Enable magnetism checkbox for selected models
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+
+        # Update column widths
         for column, width in self.lstParamHeaderSizes.items():
             self.lstParams.setColumnWidth(column, width)
 
@@ -1572,8 +1588,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if param_dict is None:
             return
-        if hasattr(res, 'convergence') and len(res.convergence)>0:
-            self.communicate.resultPlotUpdateSignal.emit(result[0])
+        self.communicate.resultPlotUpdateSignal.emit(result[0])
 
         elapsed = result[1]
         if self.calc_fit is not None and self.calc_fit._interrupting:
@@ -3109,11 +3124,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         kernel_pars = self.kernel_module._model_info.parameters.kernel_parameters
         shell_par = None
         for par in kernel_pars:
-            if par.name == param_name:
+            parname = par.name
+            if '[' in parname:
+                 parname = parname[:parname.index('[')]
+            if parname == param_name:
                 shell_par = par
                 break
-        if not shell_par:
+        if shell_par is None:
             logger.error("Could not find %s in kernel parameters.", param_name)
+            return
         default_shell_count = shell_par.default
         shell_min = 0
         shell_max = 0
@@ -3123,14 +3142,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except IndexError as ex:
             # no info about limits
             pass
+        except Exception as ex:
+            logging.error("Badly defined multiplicity: "+ str(ex))
+            return
         # don't update the kernel here - this data is display only
         self._model_model.blockSignals(True)
         item3.setText(str(shell_min))
         item4.setText(str(shell_max))
         self._model_model.blockSignals(False)
 
-        # Respond to index change
-        func.currentTextChanged.connect(self.modifyShellsInList)
+        ## Respond to index change
+        #func.currentTextChanged.connect(self.modifyShellsInList)
 
         # Respond to button press
         button.clicked.connect(self.onShowSLDProfile)
@@ -3138,8 +3160,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Available range of shells displayed in the combobox
         func.addItems([str(i) for i in range(shell_min, shell_max+1)])
 
+        # Respond to index change
+        func.currentTextChanged.connect(self.modifyShellsInList)
+
         # Add default number of shells to the model
         func.setCurrentText(str(default_shell_count))
+        self.modifyShellsInList(str(default_shell_count))
 
     def modifyShellsInList(self, text):
         """
@@ -3187,7 +3213,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show a quick plot of SLD profile
         """
         # get profile data
-        x, y = self.kernel_module.getProfile()
+        try:
+            x, y = self.kernel_module.getProfile()
+        except TypeError:
+            msg = "SLD profile calculation failed."
+            logging.error(msg)
+            return
+
         y *= 1.0e6
         profile_data = Data1D(x=x, y=y)
         profile_data.name = "SLD"
@@ -3220,7 +3252,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstMagnetic.setEnabled(enabled)
 
         self.cbCategory.setEnabled(enabled)
-        self.cbModel.setEnabled(enabled)
+
+        if enabled:
+            # worry about original enablement of model and SF
+            self.cbModel.setEnabled(self.enabled_cbmodel)
+            self.cbStructureFactor.setEnabled(self.enabled_sfmodel)
+        else:
+            self.cbModel.setEnabled(enabled)
+            self.cbStructureFactor.setEnabled(enabled)
+
         self.cmdPlot.setEnabled(enabled)
 
     def enableInteractiveElements(self):

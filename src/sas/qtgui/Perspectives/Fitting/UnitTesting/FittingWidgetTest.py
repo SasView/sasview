@@ -184,7 +184,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(0)
 
         # Observe no such luck
-        self.assertEqual(self.widget.cbCategory.currentIndex(), 7)
+        self.assertEqual(self.widget.cbCategory.currentIndex(), 6)
         self.assertEqual(self.widget.cbModel.count(), 29)
 
         # Set the structure factor
@@ -218,7 +218,11 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.calculateQGridForModel = MagicMock()
         # 
         # Now change the model
+<<<<<<< HEAD
         self.widget.cbModel.setCurrentIndex(4)
+=======
+        self.widget.cbModel.setCurrentIndex(2)
+>>>>>>> ESS_GUI
         self.assertEqual(self.widget.cbModel.currentText(),'dab')
 
         # No data sent -> no index set, only createDefaultDataset called

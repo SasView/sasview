@@ -10,6 +10,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale, QUrl
 
+import matplotlib as mpl
+mpl.use("Qt5Agg")
+
 from twisted.internet import reactor
 # General SAS imports
 from sas import get_local_config, get_custom_config
@@ -867,7 +870,7 @@ class GuiManager(object):
         """
         self.results_frame.setVisible(True)
         if output_data:
-            self.results_panel.onPlotResults(output_data)
+            self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
     def actionAdd_Custom_Model(self):
         """
