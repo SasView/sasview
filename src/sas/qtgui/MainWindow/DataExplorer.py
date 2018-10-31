@@ -401,7 +401,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             #[[item_1, state_1], [item_2, state_2],...]
 
             # Convert fitpage properties and update the dict
-            all_data = GuiUtils.convertFromSVS(datasets)
+            try:
+                all_data = GuiUtils.convertFromSVS(datasets)
+            except Exception as ex:
+                # disregard malformed SVS and try to recover regardless
+                msg = "Error while reading the project file: "+str(ex)
+                logging.error(msg)
+                pass
         else:
             with open(filename, 'r') as infile:
                 all_data = GuiUtils.readDataFromFile(infile)

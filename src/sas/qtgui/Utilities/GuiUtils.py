@@ -1340,7 +1340,7 @@ def convertFromSVS(datasets):
             else:
                 w = 0
             param_dict['smearing'] = [str(w)]
-        # weighting is a bit trickier. 4.x has multiple keywords,
+        # weighting is also tricky. 4.x has multiple keywords,
         # one for each radio box.
         if params.dI_noweight:
             w = 2
@@ -1371,15 +1371,38 @@ def convertFromSVS(datasets):
         if params.is_2D:
             for p in params.orientation_params:
                 p_name = p[1]
-                param_dict[p_name] = [str(p[0]), str(p[2]), None, str(p[5][1]), str(p[6][1])]
+                p_min = "-360.0"
+                p_max = "360.0"
+                if p[5][1] != "":
+                    p_min = p[5][1]
+                if p[6][1] != "":
+                    p_max = p[6][1]
+                param_dict[p_name] = [str(p[0]), str(p[2]), None, p_min, p_max]
 
         # disperse parameters
         if params.enable_disp:
             for p in params.fittable_param:
                 p_name = p[1]
-                param_dict[p_name] = [str(p[0]), str(p[2]), None, str(35), str(3)]
-
-        # magnetic parameters
+                p_opt = str(p[0])
+                p_err = "0"
+                p_width = str(p[2])
+                p_min = str(0)
+                p_max = "inf"
+                param_npts = p_name.replace('.width','.npts')
+                param_nsigmas = p_name.replace('.width', '.nsigmas')
+                if params.is_2D and p_name in params.disp_obj_dict:
+                    lookup = params.orientation_params_disp
+                    p_min = "-360.0"
+                    p_max = "360.0"
+                else:
+                    lookup = params.fixed_param
+                p_npts = [s[2] for s in lookup if s[1] == param_npts][0]
+                p_nsigmas = [s[2] for s in lookup if s[1] == param_nsigmas][0]
+                if p_name in params.disp_obj_dict:
+                    p_disp = params.disp_obj_dict[p_name]
+                else:
+                    p_disp = "gaussian"
+                param_dict[p_name] = [p_opt, p_width, p_min, p_max, p_npts, p_nsigmas, p_disp]
 
         content[params.data_id]['fit_params'] = param_dict
     return content
