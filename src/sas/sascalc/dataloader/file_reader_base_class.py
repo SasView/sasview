@@ -46,7 +46,7 @@ class FileReader(object):
     # List of allowed extensions
     ext = ['.txt']
     # Deprecated extensions
-    deprecated_extensions = ['.asc', '.nxs']
+    deprecated_extensions = ['.asc']
     # Bypass extension check and try to load anyway
     allow_all = False
     # Able to import the unit converter
@@ -150,9 +150,9 @@ class FileReader(object):
         :param msg: Error message
         """
         if len(self.output) > 0:
-            self.output[-1].errors.append(msg)
+            self.output[-1].errors.add(msg)
         elif isinstance(self.current_datainfo, DataInfo):
-            self.current_datainfo.errors.append(msg)
+            self.current_datainfo.errors.add(msg)
         else:
             logger.warning(msg)
             raise NoKnownLoaderException(msg)
@@ -303,77 +303,63 @@ class FileReader(object):
         data.zaxis("\\rm{Intensity}", "1/cm")
         return data
 
-    def convert_data_units(self, default_q_unit="1/A", default_i_unit="1/cm"):
+    def convert_data_units(self, default_q_unit="1/A"):
         """
         Converts al; data to the sasview default of units of A^{-1} for Q and
         cm^{-1} for I.
         :param default_q_unit: The default Q unit used by Sasview
-        :param default_i_unit: The default I unit used by Sasview
         """
+        convert_q = True
         new_output = []
         for data in self.output:
             if data.isSesans:
                 new_output.append(data)
                 continue
-            file_x_unit = data._xunit
-            data_conv_x = Converter(file_x_unit)
-            file_y_unit = data._yunit
-            data_conv_y = Converter(file_y_unit)
-            if isinstance(data, Data1D):
-                try:
-                    data.x = data_conv_x(data.x, units=default_q_unit)
-                    data._xunit = default_q_unit
-                    data.x_unit = default_q_unit
-                    if data.dx is not None:
-                        data.dx = data_conv_x(data.dx, units=default_q_unit)
-                    if data.dxl is not None:
-                        data.dxl = data_conv_x(data.dxl, units=default_q_unit)
-                    if data.dxw is not None:
-                        data.dxw = data_conv_x(data.dxw, units=default_q_unit)
-                except KeyError:
-                    message = "Unable to convert Q units from {0} to 1/A."
-                    message.format(default_q_unit)
-                    data.errors.append(message)
-                try:
-                    data.y = data_conv_y(data.y, units=default_i_unit)
-                    data._yunit = default_i_unit
-                    data.y_unit = default_i_unit
-                    if data.dy is not None:
-                        data.dy = data_conv_y(data.dy, units=default_i_unit)
-                except KeyError:
-                    message = "Unable to convert I units from {0} to 1/cm."
-                    message.format(default_q_unit)
-                    data.errors.append(message)
-            elif isinstance(data, Data2D):
-                try:
-                    data.qx_data = data_conv_x(data.qx_data,
-                                               units=default_q_unit)
-                    if data.dqx_data is not None:
-                        data.dqx_data = data_conv_x(data.dqx_data,
-                                                    units=default_q_unit)
-                    data.qy_data = data_conv_y(data.qy_data,
-                                               units=default_q_unit)
-                    if data.dqy_data is not None:
-                        data.dqy_data = data_conv_y(data.dqy_data,
-                                                    units=default_q_unit)
-                except KeyError:
-                    message = "Unable to convert Q units from {0} to 1/A."
-                    message.format(default_q_unit)
-                    data.errors.append(message)
-                try:
-                    file_z_unit = data._zunit
-                    data_conv_z = Converter(file_z_unit)
-                    data.data = data_conv_z(data.data, units=default_i_unit)
-                    if data.err_data is not None:
-                        data.err_data = data_conv_z(data.err_data,
-                                                    units=default_i_unit)
-                except KeyError:
-                    message = "Unable to convert I units from {0} to 1/cm."
-                    message.format(default_q_unit)
-                    data.errors.append(message)
-            else:
-                # TODO: Throw error of some sort...
-                pass
+            try:
+                file_x_unit = data._xunit
+                data_conv_x = Converter(file_x_unit)
+            except KeyError:
+                logger.info("Unrecognized Q units in data file. No data "
+                            "conversion attempted")
+                convert_q = False
+            try:
+
+                if isinstance(data, Data1D):
+                        if convert_q:
+                            data.x = data_conv_x(data.x, units=default_q_unit)
+                            data._xunit = default_q_unit
+                            data.x_unit = default_q_unit
+                            if data.dx is not None:
+                                data.dx = data_conv_x(data.dx,
+                                                      units=default_q_unit)
+                            if data.dxl is not None:
+                                data.dxl = data_conv_x(data.dxl,
+                                                       units=default_q_unit)
+                            if data.dxw is not None:
+                                data.dxw = data_conv_x(data.dxw,
+                                                       units=default_q_unit)
+                elif isinstance(data, Data2D):
+                    if convert_q:
+                        data.qx_data = data_conv_x(data.qx_data,
+                                                   units=default_q_unit)
+                        if data.dqx_data is not None:
+                            data.dqx_data = data_conv_x(data.dqx_data,
+                                                        units=default_q_unit)
+                        try:
+                            file_y_unit = data._yunit
+                            data_conv_y = Converter(file_y_unit)
+                            data.qy_data = data_conv_y(data.qy_data,
+                                                       units=default_q_unit)
+                            if data.dqy_data is not None:
+                                data.dqy_data = data_conv_y(data.dqy_data,
+                                                            units=default_q_unit)
+                        except KeyError:
+                            logger.info("Unrecognized Qy units in data file. No"
+                                        " data conversion attempted")
+            except KeyError:
+                message = "Unable to convert Q units from {0} to 1/A."
+                message.format(default_q_unit)
+                data.errors.add(message)
             new_output.append(data)
         self.output = new_output
 

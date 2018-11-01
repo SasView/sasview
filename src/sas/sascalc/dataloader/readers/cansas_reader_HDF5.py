@@ -171,22 +171,25 @@ class Reader(FileReader):
                         data_point = decode(data_point)
                     # Top Level Meta Data
                     if key == u'definition':
-                        self.current_datainfo.meta_data['reader'] = data_point
+                        self.current_datainfo.meta_data['reader'] = data_set
+                        break
                     # Run
                     elif key == u'run':
-                        self.current_datainfo.run.append(data_point)
+                        self.current_datainfo.run.append(data_set)
                         try:
                             run_name = h5attr(value, 'name')
-                            run_dict = {data_point: run_name}
+                            run_dict = {data_set: run_name}
                             self.current_datainfo.run_name = run_dict
                         except Exception:
                             pass
+                        break
                     # Title
                     elif key == u'title':
-                        self.current_datainfo.title = data_point
+                        self.current_datainfo.title = data_set
                     # Note
                     elif key == u'SASnote':
-                        self.current_datainfo.notes.append(data_point)
+                        self.current_datainfo.notes.append(data_set)
+                        break
                     # Sample Information
                     elif self.parent_class == u'SASsample':
                         self.process_sample(data_point, key)
@@ -618,7 +621,10 @@ class Reader(FileReader):
                     iterable, list)) or (isinstance(iterable, basestring)):
                 raise TypeError
         except TypeError:
-            iterable = iterable.split(",")
+            if isinstance(iterable, basestring):
+                iterable = iterable.split(",")
+            else:
+                iterable = [iterable]
         return iterable
 
     def _find_data_attributes(self, value):
