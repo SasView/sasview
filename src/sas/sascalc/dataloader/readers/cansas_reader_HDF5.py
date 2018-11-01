@@ -101,7 +101,7 @@ class Reader(FileReader):
         self.data1d = []
         self.data2d = []
         self.raw_data = None
-        self.errors = set()
+        self.errors = []
         self.logging = []
         self.q_names = []
         self.mask_name = u''
@@ -230,7 +230,7 @@ class Reader(FileReader):
 
             else:
                 # I don't know if this reachable code
-                self.errors.add("ShouldNeverHappenException")
+                self.errors.append("ShouldNeverHappenException")
 
     def process_1d_data_object(self, data_set, key, unit):
         """
@@ -527,7 +527,7 @@ class Reader(FileReader):
 
         # Append errors to dataset and reset class errors
         self.current_datainfo.errors = self.errors
-        self.errors.clear()
+        self.errors = []
 
         # Combine all plottables with datainfo and append each to output
         # Type cast data arrays to float64 and find min/max as appropriate
@@ -537,7 +537,7 @@ class Reader(FileReader):
                 for i in range(0, dataset.mask.size - 1):
                     zeros[i] = dataset.mask[i]
             except:
-                self.errors.add(sys.exc_value)
+                self.errors.append(sys.exc_value)
             dataset.mask = zeros
             # Calculate the actual Q matrix
             try:

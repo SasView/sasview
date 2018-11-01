@@ -70,7 +70,7 @@ class GenericFileReaderTests(unittest.TestCase):
         self.check_unknown_extension(xml_load[0])
         # Be sure the deprecation warning is passed with the file
         self.assertEqual(len(asc_load[0].errors), 1)
-        self.assertEqual(len(nxs_load[0].errors), 1)
+        self.assertEqual(len(nxs_load[0].errors), 0)
 
     def check_unknown_extension(self, data):
         self.assertTrue(isinstance(data, Data1D))

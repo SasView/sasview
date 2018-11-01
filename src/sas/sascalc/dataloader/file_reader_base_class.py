@@ -150,9 +150,9 @@ class FileReader(object):
         :param msg: Error message
         """
         if len(self.output) > 0:
-            self.output[-1].errors.add(msg)
+            self.output[-1].errors.append(msg)
         elif isinstance(self.current_datainfo, DataInfo):
-            self.current_datainfo.errors.add(msg)
+            self.output[-1].errors.append(msg)
         else:
             logger.warning(msg)
             raise NoKnownLoaderException(msg)
@@ -359,7 +359,7 @@ class FileReader(object):
             except KeyError:
                 message = "Unable to convert Q units from {0} to 1/A."
                 message.format(default_q_unit)
-                data.errors.add(message)
+                data.errors.append(message)
             new_output.append(data)
         self.output = new_output
 
