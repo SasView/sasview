@@ -2429,11 +2429,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         status = item.checkState()
 
         # If multiple rows selected - toggle all of them, filtering uncheckable
-        # Switch off signaling from the model to avoid recursion
-        self._model_model.blockSignals(True)
         # Convert to proper indices and set requested enablement
         self.setParameterSelection(status)
-        self._model_model.blockSignals(False)
 
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel(self._model_model)
