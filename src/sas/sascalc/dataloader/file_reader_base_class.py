@@ -152,7 +152,7 @@ class FileReader(object):
         if len(self.output) > 0:
             self.output[-1].errors.append(msg)
         elif isinstance(self.current_datainfo, DataInfo):
-            self.output[-1].errors.append(msg)
+            self.current_datainfo.errors.append(msg)
         else:
             logger.warning(msg)
             raise NoKnownLoaderException(msg)
