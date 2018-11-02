@@ -93,17 +93,18 @@ def setup_custom_config(app_dir, user_dir):
         except Exception:
             logger.error("Could not copy default custom config.")
 
+    custom_config = load_custom_config(path)
+
     #Adding SAS_OPENCL if it doesn't exist in the config file
     # - to support backcompability
-    if not "SAS_OPENCL" in open(path).read():
+    if not hasattr(custom_config, "SAS_OPENCL"):
+        custom_config.SAS_OPENCL = None
         try:
             open(config_file, "a+").write("SAS_OPENCL = \"None\"\n")
         except Exception:
             logger.error("Could not update custom config with SAS_OPENCL.")
 
-    custom_config = load_custom_config(path)
     return custom_config
-
 
 def load_custom_config(path):
     if os.path.exists(path):
