@@ -280,6 +280,7 @@ class Plotter2DWidget(PlotterBase):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
+        item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
