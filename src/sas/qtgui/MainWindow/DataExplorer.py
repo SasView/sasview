@@ -372,6 +372,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         theory = self.allDataForModel(self.theory_model)
 
         all_data = {}
+        all_data['is_batch'] = str(self.chkBatch.isChecked())
+
         for key, value in data.items():
             all_data[key] = value
         for key, value in theory.items():
@@ -413,14 +415,59 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 all_data = GuiUtils.readDataFromFile(infile)
 
         for key, value in all_data.items():
-            data_dict = {key:value['fit_data']}
-            items = self.updateModelFromData(data_dict)
-            # send newly created item to its perspective
-            if 'fit_params' in value:
-                self.sendItemToPerspective(items[0])
-                # Make the perspective read the rest of the read data
-                self._perspective().updateFromParameters(value['fit_params'])
+            if key=='is_batch':
+                self.chkBatch.setChecked(True if value=='True' else False)
+                continue
+            # send newly created items to the perspective
+            self.updatePerspectiveWithProperties(key, value)
 
+        # See if there are any batch pages defined and create them, if so
+        self.updateWithBatchPages(all_data)
+
+    def updateWithBatchPages(self, all_data):
+        """
+        Checks all properties and see if there are any batch pages defined.
+        If so, pull out relevant indices and recreate the batch page(s)
+        """
+        batch_page_counter = 0
+        # {counter:[[item1, item2,...], {properties}]}
+        batch_page_dict = {}
+        batch_pages = []
+        for key, value in all_data.items():
+            if 'fit_params' not in value:
+                continue
+            params = value['fit_params']
+            for page in params:
+                if page['is_batch_fitting'][0] != 'True':
+                    continue
+                batch_ids = page['data_id']
+                batch_pages.append(batch_ids)
+        # Now we have all batchpages in batch_pages.
+        # remove duplicates
+        #for page in batch_pages:
+        #    if page in 
+
+    def updatePerspectiveWithProperties(self, key, value):
+        """
+        """
+        data_dict = {key:value['fit_data']}
+        # Create new model items in the data explorer
+        items = self.updateModelFromData(data_dict)
+
+        if 'fit_params' in value:
+            params = value['fit_params']
+            # Make the perspective read the rest of the read data
+            if not isinstance(params, list):
+                params = [params]
+            for page in params:
+                # Check if this set of parameters is for a batch page
+                # if so, skip the update
+                if page['is_batch_fitting'][0] == 'True':
+                    continue
+                # Send current model item to the perspective
+                self.sendItemToPerspective(items[0])
+                # Assign parameters to the most recent (current) page.
+                self._perspective().updateFromParameters(page)
         pass # debugger
 
     def readAnalysis(self, filename):
@@ -429,17 +476,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         with open(filename, 'r') as infile:
             all_data = GuiUtils.readDataFromFile(infile)
-            # simulate full project structure
-            all_data_dict = {1:all_data['fit_data']}
-            items = self.updateModelFromData(all_data_dict)
-            # TODO: allow other perspectives
-            # send newly created item to its perspective
-            if len(items) > 0:
-                self.sendItemToPerspective(items[0])
-            # Make the perspective read the rest of the read data
-            self._perspective().updateFromParameters(all_data['fit_params'])
 
-            pass
+            # send newly created items to the perspective
+            self.updatePerspectiveWithProperties(1, all_data)
 
     def updateModelFromData(self, data):
         """
@@ -448,12 +487,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # model items for top level datasets
         items = []
-        #self.model.beginResetModel()
         for key, value in data.items():
             # key - cardinal number of dataset
             # value - main dataset, [dependant filesets]
             # add the main index
             if not value: continue
+            #if key=='is_batch':
+            #    self.chkBatch.setChecked(True if value=='True' else False)
+            #    continue
             new_data = value[0]
             from sas.sascalc.dataloader.data_info import Data1D as old_data1d
             from sas.sascalc.dataloader.data_info import Data2D as old_data2d

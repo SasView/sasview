@@ -3511,10 +3511,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list = self.getFitParameters()
 
         param_list.append(['is_data', str(self.data_is_loaded)])
-        if self.data_is_loaded:
-            param_list.append(['data_id', str(self.logic.data.id)])
-            param_list.append(['data_name', str(self.logic.data.filename)])
-
+        data_ids = []
+        filenames = []
+        if self.is_batch_fitting:
+            for item in self.all_data:
+                # need item->data->data_id
+                data = GuiUtils.dataFromItem(item)
+                data_ids.append(data.id)
+                filenames.append(data.filename)
+        else:
+            if self.data_is_loaded:
+                data_ids = [str(self.logic.data.id)]
+                filenames = [str(self.logic.data.filename)]
+        param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
+        param_list.append(['data_name', filenames])
+        param_list.append(['data_id', data_ids])
         # option tab
         param_list.append(['q_range_min', str(self.q_range_min)])
         param_list.append(['q_range_max', str(self.q_range_max)])

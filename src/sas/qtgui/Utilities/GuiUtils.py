@@ -1193,6 +1193,8 @@ def saveData(fp, data):
 
 def readDataFromFile(fp):
     '''
+    Reads in Data1D/Data2 datasets from the file.
+    Datasets are stored in the JSON format.
     '''
     supported = [
         tuple, set,

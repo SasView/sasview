@@ -578,6 +578,9 @@ class GuiManager(object):
         analysis = {}
 
         for id, data in all_data.items():
+            if id=='is_batch':
+                analysis['is_batch'] = data
+                continue
             data_content = {"fit_data":data}
             if id in params.keys():
                 # this dataset is represented also by the fit tab. Add to it.

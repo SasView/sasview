@@ -119,8 +119,19 @@ class FittingWindow(QtWidgets.QTabWidget):
         for i, tab in enumerate(self.tabs):
             tab_data = self.getSerializedFitpage(tab)
             if tab.tab_id is None: continue
+            if 'data_id' not in tab_data: continue
             id = tab_data['data_id'][0]
-            params[id] = tab_data
+            if isinstance(id, list):
+                for i in id:
+                    if i in params:
+                        params[i].append(tab_data)
+                    else:
+                        params[i] = [tab_data]
+            else:
+                if id in params:
+                    params[id].append(tab_data)
+                else:
+                    params[id] = [tab_data]
         return params
 
     def serializeCurrentFitpage(self):
