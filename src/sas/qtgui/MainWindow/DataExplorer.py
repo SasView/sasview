@@ -364,6 +364,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 break
         return all_data
 
+    def getItemForID(self, id):
+        # return the model item with the given ID
+        item = None
+        for model in (self.model, self.theory_model):
+            for i in range(model.rowCount()):
+                properties = {}
+                item = model.item(i)
+                data = GuiUtils.dataFromItem(item)
+                if data is None: continue
+                if data.id != id: continue
+                # We found the item - return it
+                break
+        return item
+
     def getAllData(self):
         """
         converts all datasets into serializable dictionary
@@ -429,9 +443,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Checks all properties and see if there are any batch pages defined.
         If so, pull out relevant indices and recreate the batch page(s)
         """
-        batch_page_counter = 0
-        # {counter:[[item1, item2,...], {properties}]}
-        batch_page_dict = {}
         batch_pages = []
         for key, value in all_data.items():
             if 'fit_params' not in value:
@@ -440,12 +451,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             for page in params:
                 if page['is_batch_fitting'][0] != 'True':
                     continue
-                batch_ids = page['data_id']
-                batch_pages.append(batch_ids)
-        # Now we have all batchpages in batch_pages.
-        # remove duplicates
-        #for page in batch_pages:
-        #    if page in 
+                batch_ids = page['data_id'][0]
+                # check for duplicates
+                batch_set = set(batch_ids)
+                if batch_set in batch_pages:
+                    continue
+                # Found a unique batch page. Send it away
+                items = [self.getItemForID(i) for i in batch_set]
+                # Update the batch page list
+                batch_pages.append(batch_set)
+                # Assign parameters to the most recent (current) page.
+                self._perspective().setData(data_item=items, is_batch=True)
+                self._perspective().updateFromParameters(page)
+
+        pass
 
     def updatePerspectiveWithProperties(self, key, value):
         """
