@@ -147,6 +147,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             item = self._item.parent()
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         if self.update_model:
             self.setModelFromParams()

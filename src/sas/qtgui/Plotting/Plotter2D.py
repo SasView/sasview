@@ -287,6 +287,10 @@ class Plotter2DWidget(PlotterBase):
 
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
+        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Show the plot
+
     def setSlicer(self, slicer):
         """
         Clear the previous slicer and create a new one.

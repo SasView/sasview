@@ -98,6 +98,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.maskEditorSignal.connect(self.showEditDataMask)
         self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
         self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
+        self.communicator.forcePlotDisplaySignal.connect(self.displayData)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -635,9 +636,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if main_data is None:
             # Try the current item
             main_data = GuiUtils.dataFromItem(plot_item)
+        # 1D dependent plots of 2D sets - special treatment
+        if isinstance(main_data, Data2D) and isinstance(plot_to_show, Data1D):
+            main_data = None
 
         # Make sure main data for 2D is always displayed
-        if main_data and not self.isPlotShown(main_data):
+        if main_data is not None and not self.isPlotShown(main_data):
             if isinstance(main_data, Data2D):
                 self.plotData([(plot_item, main_data)])
 
@@ -655,7 +659,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         else:
             # Plots with main data points on the same chart
             # Get the main data plot
-            if main_data and not self.isPlotShown(main_data):
+            if main_data is not None and not self.isPlotShown(main_data):
                 new_plots.append((plot_item, main_data))
             new_plots.append((plot_item, plot_to_show))
 

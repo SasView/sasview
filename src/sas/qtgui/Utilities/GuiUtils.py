@@ -286,6 +286,9 @@ class Communicate(QtCore.QObject):
     # Plot fitting results (FittingWidget->GuiManager)
     resultPlotUpdateSignal = QtCore.pyqtSignal(list)
 
+    # show the plot as a regular in-workspace object
+    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
