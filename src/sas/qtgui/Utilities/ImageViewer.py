@@ -1,16 +1,14 @@
 """
 Image viewer widget.
 """
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
 
 import os
 import logging
 import numpy as np
 import matplotlib
-matplotlib.interactive(False)
 import matplotlib.image as mpimg
+
+from PyQt5 import QtWidgets
 
 from sas.sascalc.dataloader.manipulations import reader2D_converter
 
@@ -22,6 +20,7 @@ from sas.sascalc.dataloader.data_info import Detector
 # Local UI
 from sas.qtgui.Utilities.UI.ImageViewerUI import Ui_ImageViewerUI
 from sas.qtgui.Utilities.UI.ImageViewerOptionsUI import Ui_ImageViewerOptionsUI
+matplotlib.interactive(False)
 
 class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
     """
@@ -33,21 +32,18 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         self.parent = parent
         self.setupUi(self)
 
-        # add plotter to the frame
+        # Other globals
         self.plotter = None
         self.hbox = None
+        self.filename = None
+        self.is_png = False
+        self.image = None
 
         # disable menu items on empty canvas
         self.disableMenus()
 
-        # set up signal callbacks
-        self.addCallbacks()
-
         # set up menu item triggers
         self.addTriggers()
-
-    def addCallbacks(self):
-        pass
 
     def disableMenus(self):
         """
@@ -120,7 +116,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         Copy MPL widget area to buffer
         """
         if self.plotter is not None:
-           self.plotter.onClipboardCopy()
+            self.plotter.onClipboardCopy()
 
     def actionConvertToData(self):
         """
@@ -134,11 +130,9 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         image = self.image
         try:
             self.convertImage(image, xmin, xmax, ymin, ymax, zscale)
-        except:
-            err_msg = "Error occurred while converting Image to Data."
+        except Exception as ex:
+            err_msg = "Error occurred while converting Image to Data: " + str(ex)
             logging.error(err_msg)
-
-        pass
 
     def actionHowTo(self):
         ''' Send the image viewer help URL to the help viewer '''
@@ -173,7 +167,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             # Note that matplotlib only reads png natively.
             # Any other formats (tiff, jpeg, etc) are passed
             # to PIL which seems to have a problem in version
-            # 1.1.7 that causes a close error which shows up in 
+            # 1.1.7 that causes a close error which shows up in
             # the log file.  This does not seem to have any adverse
             # effects.  PDB   --- September 17, 2017.
             self.image = mpimg.imread(filename)
@@ -183,24 +177,24 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             flipped_image = np.flipud(self.image)
             origin = None
             if self.is_png:
-                origin='lower'
+                origin = 'lower'
             self.plotter.imageShow(flipped_image, origin=origin)
             if not self.is_png:
                 ax.set_ylim(ax.get_ylim()[::-1])
             ax.set_xlabel('x [pixel]')
             ax.set_ylabel('y [pixel]')
             self.plotter.figure.subplots_adjust(left=0.15, bottom=0.1,
-                                        right=0.95, top=0.95)
+                                                right=0.95, top=0.95)
             title = 'Picture: ' + self.filename
             self.setWindowTitle(title)
             self.plotter.draw()
         except IOError as ex:
             err_msg = "Failed to load '%s'.\n" % self.filename
-            logging.error(err_msg)
+            logging.error(err_msg+str(ex))
             return
         except Exception as ex:
             err_msg = "Failed to show '%s'.\n" % self.filename
-            logging.error(err_msg)
+            logging.error(err_msg+str(ex))
             return
 
         # Loading successful - enable menu items
@@ -238,8 +232,8 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         output.xmax = xmax
         output.ymin = ymin
         output.ymax = ymax
-        output.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
-        output.yaxis('\\rm{Q_{y}}', '\AA^{-1}')
+        output.xaxis('\\rm{Q_{x}}', r'\AA^{-1}')
+        output.yaxis('\\rm{Q_{y}}', r'\AA^{-1}')
         # Store loading process information
         output.meta_data['loader'] = self.filename.split('.')[-1] + "Reader"
         output.is_data = True
@@ -268,10 +262,10 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         if rgb.ndim == 2:
             grey = np.rollaxis(rgb, axis=0)
         else:
-            red, green, blue = np.rollaxis(rgb[..., :3], axis= -1)
+            red, green, blue = np.rollaxis(rgb[..., :3], axis=-1)
             grey = 0.299 * red + 0.587 * green + 0.114 * blue
         max_i = rgb.max()
-        factor = 255.0 / max_i
+        factor = 255.0/max_i
         grey *= factor
         return np.array(grey)
 
@@ -331,4 +325,3 @@ class ImageViewerOptions(QtWidgets.QDialog, Ui_ImageViewerOptionsUI):
         ymax = float(self.txtYmax.text())
 
         return (xmin, xmax, ymin, ymax, zscale)
-
