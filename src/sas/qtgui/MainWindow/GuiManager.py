@@ -599,16 +599,19 @@ class GuiManager(object):
             return
         # get fit page serialization
         params = per.serializeCurrentFitpage()
+        # Find dataset ids for the current tab
+        # (can be multiple, if batch)
         data_id = per.currentTabDataId()
         tab_id = per.currentTab.tab_id
-        data = self.filesWidget.getDataForID(data_id)
         analysis = {}
-        analysis['fit_data'] = data
-        analysis['fit_params'] = params
+        for id in data_id:
+            an = {}
+            data_for_id = self.filesWidget.getDataForID(id)
+            an['fit_data'] = data_for_id
+            an['fit_params'] = [params]
+            analysis[id] = an
 
         self.filesWidget.saveAnalysis(analysis, tab_id)
-
-        pass
 
     def actionQuit(self):
         """

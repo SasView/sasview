@@ -265,7 +265,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
-            self.readAnalysis(filename)
+            self.readProject(filename)
 
     def saveProject(self):
         """
@@ -413,21 +413,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         all_data = {}
         if 'svs' in ext.lower():
             # backward compatibility mode.
-            datasets = GuiUtils.readProjectFromSVS(filename)
-            #[[item_1, state_1], [item_2, state_2],...]
-
+            try:
+                datasets = GuiUtils.readProjectFromSVS(filename)
+            except Exception as ex:
+                # disregard malformed SVS and try to recover whatever
+                # is available
+                msg = "Error while reading the project file: "+str(ex)
+                logging.error(msg)
+                pass
             # Convert fitpage properties and update the dict
             try:
                 all_data = GuiUtils.convertFromSVS(datasets)
             except Exception as ex:
                 # disregard malformed SVS and try to recover regardless
-                msg = "Error while reading the project file: "+str(ex)
+                msg = "Error while converting the project file: "+str(ex)
                 logging.error(msg)
                 pass
         else:
             with open(filename, 'r') as infile:
-                all_data = GuiUtils.readDataFromFile(infile)
-
+                try:
+                    all_data = GuiUtils.readDataFromFile(infile)
+                except Exception as ex:
+                    logging.error("Project load failed with " + str(ex))
+                    return
         for key, value in all_data.items():
             if key=='is_batch':
                 self.chkBatch.setChecked(True if value=='True' else False)
@@ -488,16 +496,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
         pass # debugger
-
-    def readAnalysis(self, filename):
-        """
-        Read out a single dataset and fitpage from file
-        """
-        with open(filename, 'r') as infile:
-            all_data = GuiUtils.readDataFromFile(infile)
-
-            # send newly created items to the perspective
-            self.updatePerspectiveWithProperties(1, all_data)
 
     def updateModelFromData(self, data):
         """

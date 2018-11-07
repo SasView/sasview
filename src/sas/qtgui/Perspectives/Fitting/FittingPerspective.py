@@ -9,6 +9,7 @@ from bumps import fitters
 
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
@@ -156,9 +157,13 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Returns the data ID of the current tab
         """
-        tab_id = None
-        if self.currentTab.data:
-            tab_id = self.currentTab.data.id
+        tab_id = []
+        if not self.currentTab.data:
+            return tab_id
+        for item in self.currentTab.all_data:
+            data = GuiUtils.dataFromItem(item)
+            tab_id.append(data.id)
+
         return tab_id
 
     def updateFromParameters(self, parameters):
