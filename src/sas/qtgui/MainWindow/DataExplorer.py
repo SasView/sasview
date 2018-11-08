@@ -526,6 +526,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             model = self.theory_model
             if new_data.is_data:
                 model = self.model
+                # Caption for the theories
+                new_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
+
             model.appendRow(new_item)
             self.manager.add_data(data_list={new_data.id:new_data})
 

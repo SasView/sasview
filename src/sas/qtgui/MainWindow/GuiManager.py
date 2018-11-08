@@ -569,7 +569,10 @@ class GuiManager(object):
         all_data = self.filesWidget.getAllData()
 
         # fit tabs
-        params = self.perspective().serializeAllFitpage()
+        params={}
+        perspective = self.perspective()
+        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
+            params = perspective.serializeAllFitpage()
 
         # project dictionary structure:
         # analysis[data.id] = [{"fit_data":[data, checkbox, child data],

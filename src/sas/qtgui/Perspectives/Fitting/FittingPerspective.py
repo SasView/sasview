@@ -1,4 +1,5 @@
 import numpy
+import copy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -305,11 +306,12 @@ class FittingWindow(QtWidgets.QTabWidget):
             return
         for index_to_delete in index_list:
             index_to_delete_str = str(index_to_delete)
-            if index_to_delete_str in list(self.dataToFitTab.keys()):
-                for tab_name in self.dataToFitTab[index_to_delete_str]:
-                    # delete tab #index after corresponding data got removed
-                    self.closeTabByName(tab_name)
-                self.dataToFitTab.pop(index_to_delete_str)
+            orig_dict = copy.deepcopy(self.dataToFitTab)
+            for tab_key in orig_dict.keys():
+                if index_to_delete_str in tab_key:
+                    for tab_name in orig_dict[tab_key]:
+                        self.closeTabByName(tab_name)
+                    self.dataToFitTab.pop(tab_key)
 
     def allowBatch(self):
         """
