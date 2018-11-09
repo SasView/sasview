@@ -171,21 +171,32 @@ class Reader(FileReader):
                         data_point = decode(data_point)
                     # Top Level Meta Data
                     if key == u'definition':
-                        self.current_datainfo.meta_data['reader'] = data_set
-                        break
+                        if isinstance(data_set, basestring):
+                            self.current_datainfo.meta_data['reader'] = data_set
+                            break
+                        else:
+                            self.current_datainfo.meta_data[
+                                'reader'] = data_point
                     # Run
                     elif key == u'run':
-                        self.current_datainfo.run.append(data_set)
                         try:
                             run_name = h5attr(value, 'name')
                             run_dict = {data_set: run_name}
                             self.current_datainfo.run_name = run_dict
                         except Exception:
                             pass
-                        break
+                        if isinstance(data_set, basestring):
+                            self.current_datainfo.run.append(data_set)
+                            break
+                        else:
+                            self.current_datainfo.run.append(data_point)
                     # Title
                     elif key == u'title':
-                        self.current_datainfo.title = data_set
+                        if isinstance(data_set, basestring):
+                            self.current_datainfo.title = data_set
+                            break
+                        else:
+                            self.current_datainfo.title = data_point
                     # Note
                     elif key == u'SASnote':
                         self.current_datainfo.notes.append(data_set)
