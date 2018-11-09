@@ -48,6 +48,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # in order to set the widget parentage properly.
         self.parent = guimanager
         self.loader = Loader()
+
+        # Read in default locations
+        self.default_save_location = None
+        self.default_load_location = os.path.join(os.path.dirname(sys.argv[0]), "test")
+        self.default_project_location = None
+
         self.manager = manager if manager is not None else DataManager()
         self.txt_widget = QtWidgets.QTextEdit(None)
 
@@ -206,16 +212,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
-              QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog)
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Choose a directory',
+            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_load_location
+        }
+        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+
         if folder is None:
             return
 
         folder = str(folder)
-
         if not os.path.isdir(folder):
             return
-
+        self.default_load_location = folder
         # get content of dir into a list
         path_str = [os.path.join(os.path.abspath(folder), filename)
                     for filename in os.listdir(folder)]
@@ -230,10 +241,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Open Project',
             'filter'    : 'Project (*.json);;All files (*.*)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_project_location
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
+            self.default_project_location = os.path.dirname(filename)
             load_thread = threads.deferToThread(self.readProject, filename)
             load_thread.addCallback(self.readProjectComplete)
             load_thread.addErrback(self.readProjectFailed)
@@ -282,11 +295,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Save Project',
             'filter'    : 'Project (*.json)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_project_location
         }
         name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
         filename = name_tuple[0]
         if filename:
+            self.default_project_location = os.path.dirname(filename)
             _, extension = os.path.splitext(filename)
             if not extension:
                 filename = '.'.join((filename, 'json'))
@@ -817,17 +832,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # List of known extensions
         wlist = self.getWlist()
-
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtWidgets.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Choose files',
+            'filter'    : wlist,
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_load_location
+        }
+        paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
         if not paths:
             return
 
         if not isinstance(paths, list):
             paths = [paths]
 
+        self.default_load_location = os.path.dirname(paths[0])
         return paths
 
     def readData(self, path):
