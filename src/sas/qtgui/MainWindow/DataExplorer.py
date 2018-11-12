@@ -51,7 +51,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Read in default locations
         self.default_save_location = None
-        self.default_load_location = os.path.join(os.path.dirname(sys.argv[0]), "test")
+        self.default_load_location = GuiUtils.DEFAULT_OPEN_FOLDER
         self.default_project_location = None
 
         self.manager = manager if manager is not None else DataManager()
