@@ -110,11 +110,6 @@ def prepare(rebuild=True):
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
-<<<<<<< HEAD
-    # Build project if the build directory does not already exist.
-    # PAK: with "update" we can always build since it is fast
-    if rebuild or not os.path.exists(build_path):
-=======
     # Put the sas source tree on the path
     addpath(joinpath(root, 'src'))
 
@@ -131,7 +126,6 @@ def prepare(rebuild=True):
 
     # Build C extensions if necessary.  Do an inplace build to simplify path.
     if rebuild:
->>>>>>> master
         import subprocess
         build_cmd = [sys.executable, "setup.py", "build_ext", "--inplace", "update"]
         if os.name == 'nt':
