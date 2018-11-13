@@ -30,6 +30,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Page id for fitting
         # To keep with previous SasView values, use 300 as the start offset
         self.page_id = 301
+        self.tab_id = self.page_id
 
         # Are we chain fitting?
         self.is_chain_fitting = False
@@ -692,3 +693,79 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row)
+
+    def getFitPage(self):
+        """
+        Retrieves the state of this page
+        """
+        param_list = []
+
+        param_list.append(['is_constraint', 'True'])
+        param_list.append(['data_id', "cs_tab"+str(self.page_id)])
+        param_list.append(['current_type', self.currentType])
+        param_list.append(['is_chain_fitting', str(self.is_chain_fitting)])
+        param_list.append(['special_case', self.cbCases.currentText()])
+
+        return param_list
+
+    def getFitModel(self):
+        """
+        Retrieves current model
+        """
+        model_list = []
+
+        checked_models = {}
+        for row in range(self.tblTabList.rowCount()):
+            model_name = self.tblTabList.item(row,1).data(0)
+            active = self.tblTabList.item(row,0).checkState()# == QtCore.Qt.Checked
+            checked_models[model_name] = str(active)
+
+        checked_constraints = {}
+        for row in range(self.tblConstraints.rowCount()):
+            model_name = self.tblConstraints.item(row,0).data(0)
+            active = self.tblConstraints.item(row,0).checkState()# == QtCore.Qt.Checked
+            checked_constraints[model_name] = str(active)
+
+        model_list.append(['checked_models', checked_models])
+        model_list.append(['checked_constraints', checked_constraints])
+        return model_list
+
+    def createPageForParameters(self, parameters=None):
+        """
+        Update the page with passed parameter values
+        """
+        # checked models
+        if not 'checked_models' in parameters:
+            return
+        models = parameters['checked_models'][0]
+        for model, check_state in models.items():
+            for row in range(self.tblTabList.rowCount()):
+                model_name = self.tblTabList.item(row,1).data(0)
+                if model_name != model:
+                    continue
+                # check/uncheck item
+                self.tblTabList.item(row,0).setCheckState(int(check_state))
+
+        if not 'checked_constraints' in parameters:
+            return
+        # checked constraints
+        models = parameters['checked_constraints'][0]
+        for model, check_state in models.items():
+            for row in range(self.tblConstraints.rowCount()):
+                model_name = self.tblConstraints.item(row,0).data(0)
+                if model_name != model:
+                    continue
+                # check/uncheck item
+                self.tblConstraints.item(row,0).setCheckState(int(check_state))
+
+        # fit/batch radio
+        isBatch = parameters['current_type'][0] == 'BatchPage'
+        if isBatch:
+            self.btnBatch.toggle()
+
+        # chain
+        is_chain = parameters['is_chain_fitting'][0] == 'True'
+        if isBatch:
+            self.chkChain.setChecked(is_chain)
+
+

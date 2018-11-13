@@ -593,6 +593,12 @@ class GuiManager(object):
                 data_content["fit_params"] = params[id]
             analysis[id] = data_content
 
+        # standalone constraint pages
+        for keys, values in params.items():
+            if not 'is_constraint' in values[0]:
+                continue
+            analysis[keys] = values[0]
+
         with open(filename, 'w') as outfile:
             GuiUtils.saveData(outfile, analysis)
 
@@ -1176,8 +1182,9 @@ class GuiManager(object):
         with open(path, 'w') as out_f:
             out_f.write("#Application appearance custom configuration\n")
             for key, item in config.__dict__.items():
-                if key[:2] != "__":
-                    if isinstance(item, str):
-                        item = '"' + item + '"'
-                    out_f.write("%s = %s\n" % (key, str(item)))
+                if key[:2] == "__":
+                    continue
+                if isinstance(item, str):
+                    item = '"' + item + '"'
+                out_f.write("%s = %s\n" % (key, str(item)))
         pass # debugger anchor

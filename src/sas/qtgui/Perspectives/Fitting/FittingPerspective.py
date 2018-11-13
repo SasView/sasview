@@ -38,9 +38,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
 
-        ## Index of the current tab
-        #self.currentTab = 0
-
         # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
 
@@ -120,7 +117,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         params = {}
         for i, tab in enumerate(self.tabs):
             tab_data = self.getSerializedFitpage(tab)
-            if tab.tab_id is None: continue
             if 'data_id' not in tab_data: continue
             id = tab_data['data_id'][0]
             if isinstance(id, list):

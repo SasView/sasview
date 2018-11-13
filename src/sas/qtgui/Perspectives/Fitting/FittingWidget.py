@@ -1951,7 +1951,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Emits plotRequestedSignal for all plots found in the given model under the provided item name.
         """
-        fitpage_name = "" if self.tab_id is None else "M"+str(self.tab_id)
+        fitpage_name = self.kernel_module.name
         plots = GuiUtils.plotsFromFilename(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
@@ -3523,6 +3523,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
         param_list.append(['data_name', filenames])
         param_list.append(['data_id', data_ids])
+        param_list.append(['tab_name', self.modelName()])
         # option tab
         param_list.append(['q_range_min', str(self.q_range_min)])
         param_list.append(['q_range_max', str(self.q_range_max)])
@@ -3595,8 +3596,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 param_max = str(self._model_model.item(row, 3+column_offset).text())
             except:
                 pass
+            # Do we have any constraints on this parameter?
+            constraint = self.getConstraintForRow(row)
+            cons = ()
+            if constraint is not None:
+                value = constraint.value
+                func = constraint.func
+                cons = (value, func)
 
-            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
+            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max, cons])
 
         def gatherPolyParams(row):
             """
@@ -3704,6 +3712,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
 
+        if 'tab_name' in line_dict.keys():
+            self.kernel_module.name = line_dict['tab_name'][0]
         if 'polydisperse_params' in line_dict.keys():
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
         if 'magnetic_params' in line_dict.keys():
@@ -3826,7 +3836,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Potentially the error column
             ioffset = 0
             joffset = 0
-            if len(param_dict[param_name])>4:
+            if len(param_dict[param_name])>5:
                 # error values are not editable - no need to update
                 ioffset = 1
             if self.has_error_column:
@@ -3839,6 +3849,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._model_model.item(row, 3+joffset).setText(param_repr)
             except:
                 pass
+
+            # constraints
+            cons = param_dict[param_name][4+ioffset]
+            if cons is not None and cons:
+                value = cons[0]
+                function = cons[1]
+                constraint = Constraint()
+                constraint.value = value
+                constraint.func = function
+                self.addConstraintToRow(constraint=constraint, row=row)
 
             self.setFocus()
 

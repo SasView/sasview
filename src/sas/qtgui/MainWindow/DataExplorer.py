@@ -456,11 +456,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if key=='is_batch':
                 self.chkBatch.setChecked(True if value=='True' else False)
                 continue
+            if 'cs_tab' in key:
+                continue
             # send newly created items to the perspective
             self.updatePerspectiveWithProperties(key, value)
 
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
+
+        # Only now can we create/assign C&S pages.
+        for key, value in all_data.items():
+            if 'cs_tab' in key:
+                self.updatePerspectiveWithProperties(key, value)
 
     def updateWithBatchPages(self, all_data):
         """
@@ -487,15 +494,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Assign parameters to the most recent (current) page.
                 self._perspective().setData(data_item=items, is_batch=True)
                 self._perspective().updateFromParameters(page)
-
         pass
 
     def updatePerspectiveWithProperties(self, key, value):
         """
         """
-        data_dict = {key:value['fit_data']}
-        # Create new model items in the data explorer
-        items = self.updateModelFromData(data_dict)
+        if 'fit_data' in value:
+            data_dict = {key:value['fit_data']}
+            # Create new model items in the data explorer
+            items = self.updateModelFromData(data_dict)
 
         if 'fit_params' in value:
             params = value['fit_params']
@@ -511,6 +518,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.sendItemToPerspective(items[0])
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
+        if 'cs_tab' in key and 'is_constraint' in value:
+            # Create a C&S page
+            self._perspective().addConstraintTab()
+            # Modify the tab
+            self._perspective().updateFromParameters(value)
+
         pass # debugger
 
     def updateModelFromData(self, data):
