@@ -13,7 +13,7 @@ from periodictable import formula
 from periodictable import nsf
 import numpy as np
 
-from .core import sld2i as mod
+from . import _sld2i
 from .BaseComponent import BaseComponent
 
 logger = logging.getLogger(__name__)
@@ -144,17 +144,17 @@ class GenSAS(BaseComponent):
             self.params['Up_frac_in'],
             self.params['Up_frac_out'],
             self.params['Up_theta'])
-        model = mod.new_GenI(*args)
+        model = _sld2i.new_GenI(*args)
         if len(qy):
             qx, qy = _vec(qx), _vec(qy)
             I_out = np.empty_like(qx)
             #print("npoints", qx.shape, "npixels", pos_x.shape)
-            mod.genicomXY(model, qx, qy, I_out)
+            _sld2i.genicomXY(model, qx, qy, I_out)
             #print("I_out after", I_out)
         else:
             qx = _vec(qx)
             I_out = np.empty_like(qx)
-            mod.genicom(model, qx, I_out)
+            _sld2i.genicom(model, qx, I_out)
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = (self.params['scale'] * vol_correction * I_out
                   + self.params['background'])
@@ -303,8 +303,8 @@ class OMF2SLD(object):
                 z_dir2 = ((self.pos_z - z_c / 2.0) / z_r)
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
-            except Exception:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
@@ -599,8 +599,8 @@ class PDBReader(object):
                         x_lines.append(x_line)
                         y_lines.append(y_line)
                         z_lines.append(z_line)
-                except Exception:
-                    logger.error(sys.exc_value)
+                except Exception as exc:
+                    logger.error(exc)
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
@@ -690,11 +690,11 @@ class SLDReader(object):
                         try:
                             _vol_pix = float(toks[7])
                             vol_pix = np.append(vol_pix, _vol_pix)
-                        except Exception:
+                        except Exception as exc:
                             vol_pix = None
-                    except Exception:
+                    except Exception as exc:
                         # Skip non-data lines
-                        logger.error(sys.exc_value)
+                        logger.error(exc)
             output = MagSLD(pos_x, pos_y, pos_z, sld_n,
                             sld_mx, sld_my, sld_mz)
             output.filename = os.path.basename(path)

@@ -59,6 +59,8 @@ Improvements
 * The known issue with the core_shell_parallelepiped model is now fixed.
 * An error in the be_polyelectrolyte model was identified and rectified, but 
   the fix is yet to be validated.
+* (Added post-release) An error with the reporting of the scale parameter 
+  from the spinodal model was rectified.
 * A number of issues and inconsistencies with the creation of
   sum|multiply models have been rectified.
 * A Boltzmann distribution has been added for polydispersity/orientational
@@ -186,7 +188,6 @@ Bug Fixes
 * Fixes #1008: plugin model scaling not working?
 * Fixes #1010: Win64 build script not creating working executable
 * Fixes #1011: sld_test failing on ubuntu
-* Fixes #1012: ESS GUI not updating after fitting
 * Fixes #1013: FileReaderBaseClass output[] not reset - same file loaded multiple times
 * Fixes #1018: add Boltzmann distribution
 * Fixes #1021: add PDF documentation to website and document in wiki release process
@@ -232,6 +233,8 @@ Bug Fixes
 * Fixes #1176: Make Release Notes/Known Issues available from Help in Menu Bar
 * Fixes #1179: PDF Report should contain SasView Version Number
 * Fixes #1183: Test from creating new model reset all parameters to default in all open FitPages
+* Fixes #1188: fitpage hangs if change model while magnetism is on
+* Fixes #1191: Correct erroneous Scale reported by Spinodal model
 
 **It is recommended that all users upgrade to this version, but your 
 attention is drawn to the Changes section above.**
@@ -867,6 +870,8 @@ issues:
   to reproduce the limit of the oblate or prolate ellipsoid. If errors are
   found and corrected, corrected versions will be uploaded to the
   marketplace.
+* (Added after Release 4.2.0) The scale parameter reported from the spinodal 
+  model is the square root of the true value.
 
 3.1- All systems
 ----------------

@@ -7,11 +7,12 @@ facilities.
 
 Participating facilities include (in alphabetical order): 
 the Australian National Science & Technology Centre for Neutron 
-Scattering, the Diamond Light Source, the European Spallation Source, 
-the Institut Laue Langevin, the ISIS Pulsed Neutron & Muon Source, 
-the National Institute of Standards & Technology Center for Neutron 
-Research, the Oak Ridge National Laboratory Neutron Sciences 
-Directorate, and the Technical University Delft Reactor Institute.
+Scattering, the Bundesanstalt fur Materialforschung und prufung, the 
+Diamond Light Source, the European Spallation Source, the Institut 
+Laue Langevin, the ISIS Pulsed Neutron & Muon Source, the National 
+Institute of Standards & Technology Center for Neutron Research, 
+the Oak Ridge National Laboratory Neutron Sciences Directorate, 
+and the Technical University Delft Reactor Institute.
 
 SasView is distributed under a 'Three-clause' BSD licence which you 
 may read here: https://github.com/SasView/sasview/blob/master/LICENSE.TXT 
