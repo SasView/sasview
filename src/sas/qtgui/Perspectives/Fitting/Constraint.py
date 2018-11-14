@@ -4,9 +4,10 @@ class Constraint(object):
     Currently just a data structure, might get expaned with more functionality,
     hence made into a class.
     """
-    def __init__(self, parent=None, param=None, value=0.0, min=None, max=None, func=None):
+    def __init__(self, parent=None, param=None, value=0.0, min=None, max=None, func=None, value_ex=None):
         self._value = value
         self._param = param
+        self._value_ex = value_ex
         self._func = func
         self.active = True
         self._min = min
@@ -14,6 +15,7 @@ class Constraint(object):
 
     @property
     def value(self):
+        # value/parameter to fit to (e.g. 1.0 or sld)
         return self._value
 
     @value.setter
@@ -21,7 +23,17 @@ class Constraint(object):
         self._value = val
 
     @property
+    def value_ex(self):
+        # full parameter name to fit to (e.g. M1.sld)
+        return self._value_ex
+
+    @value_ex.setter
+    def value_ex(self, val):
+        self._value_ex = val
+
+    @property
     def param(self):
+        # parameter which is being fitted
         return self._param
 
     @param.setter
@@ -30,6 +42,8 @@ class Constraint(object):
 
     @property
     def func(self):
+        # Function to be used for constraint
+        # e.g. sqrt(M1.sld+1.0)
         return self._func
 
     @func.setter
@@ -38,6 +52,7 @@ class Constraint(object):
 
     @property
     def min(self):
+        # min param value for single value constraints
         return self._min
 
     @min.setter
@@ -46,6 +61,7 @@ class Constraint(object):
 
     @property
     def max(self):
+        # max param value for single value constraints
         return self._max
 
     @max.setter

@@ -621,6 +621,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
         has_constraints = any([self.rowHasConstraint(i) for i in rows])
+        has_real_constraints = any([self.rowHasActiveConstraint(i) for i in rows])
 
         self.actionSelect = QtWidgets.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
@@ -638,6 +639,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove constraint"))
 
+        self.actionEditConstraint = QtWidgets.QAction(self)
+        self.actionEditConstraint.setObjectName("actionEditConstrain")
+        self.actionEditConstraint.setText(QtCore.QCoreApplication.translate("self", "Edit constraint"))
+
         self.actionMultiConstrain = QtWidgets.QAction(self)
         self.actionMultiConstrain.setObjectName("actionMultiConstrain")
         self.actionMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain selected parameters to their current values"))
@@ -652,6 +657,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if has_constraints:
             menu.addAction(self.actionRemoveConstraint)
+            if num_rows == 1 and has_real_constraints:
+                menu.addAction(self.actionEditConstraint)
             #if num_rows == 1:
             #    menu.addAction(self.actionEditConstraint)
         else:
@@ -662,6 +669,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Define the callbacks
         self.actionConstrain.triggered.connect(self.addSimpleConstraint)
         self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
+        self.actionEditConstraint.triggered.connect(self.editConstraint)
         self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectParameters)
         self.actionDeselect.triggered.connect(self.deselectParameters)
@@ -699,8 +707,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         updated_param_used = model_name + "." + param_used
         new_func = c_text.replace(param_used, updated_param_used)
         constraint.func = new_func
+        constraint.value_ex = updated_param_used
         # Which row is the constrained parameter in?
         row = self.getRowFromName(constraint.param)
+
+        # what is the parameter to constraint to?
+        constraint.value = param_used
 
         # Create a new item and add the Constraint object as a child
         self.addConstraintToRow(constraint=constraint, row=row)
@@ -796,6 +808,46 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             brush = QtGui.QBrush(QtGui.QColor('blue'))
             self.modifyViewOnRow(row, font=font, brush=brush)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
+
+    def editConstraint(self):
+        """
+        Delete constraints from selected parameters.
+        """
+        params_list = [s.data() for s in self.lstParams.selectionModel().selectedRows()
+                   if self.isCheckable(s.row())]
+        assert len(params_list) == 1
+        row = self.lstParams.selectionModel().selectedRows()[0].row()
+        constraint = self.getConstraintForRow(row)
+        # Create and display the widget for param1 and param2
+        mc_widget = MultiConstraint(self, params=params_list, constraint=constraint)
+        # Check if any of the parameters are polydisperse
+        if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
+            # no parameters are pd - reset the text to not show the warning
+            mc_widget.lblWarning.setText("")
+        if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
+        constraint = Constraint()
+        c_text = mc_widget.txtConstraint.text()
+
+        # widget.params[0] is the parameter we're constraining
+        constraint.param = mc_widget.params[0]
+        # parameter should have the model name preamble
+        model_name = self.kernel_module.name
+        # param_used is the parameter we're using in constraining function
+        param_used = mc_widget.params[1]
+        # Replace param_used with model_name.param_used
+        updated_param_used = model_name + "." + param_used
+        # Update constraint with new values
+        constraint.func = c_text
+        constraint.value_ex = updated_param_used
+        constraint.value = param_used
+
+        # Which row is the constrained parameter in?
+        row = self.getRowFromName(constraint.param)
+
+        # Create a new item and add the Constraint object as a child
+        self.addConstraintToRow(constraint=constraint, row=row)
 
     def deleteConstraint(self):
         """
@@ -3602,7 +3654,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if constraint is not None:
                 value = constraint.value
                 func = constraint.func
-                cons = (value, func)
+                value_ex = constraint.value_ex
+                param = constraint.param
+
+                cons = (value, param, value_ex, func)
 
             param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max, cons])
 
@@ -3852,12 +3907,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # constraints
             cons = param_dict[param_name][4+ioffset]
-            if cons is not None and cons:
+            if cons is not None and len(cons)==4:
                 value = cons[0]
-                function = cons[1]
+                param = cons[1]
+                value_ex = cons[2]
+                function = cons[3]
                 constraint = Constraint()
                 constraint.value = value
                 constraint.func = function
+                constraint.param = param
+                constraint.value_ex = value_ex
                 self.addConstraintToRow(constraint=constraint, row=row)
 
             self.setFocus()
