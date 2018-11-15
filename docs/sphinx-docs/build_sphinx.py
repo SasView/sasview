@@ -29,7 +29,7 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 SPHINX_ROOT = dirname(abspath(__file__))
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
-SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "perspectives")
+SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
 
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
@@ -50,7 +50,7 @@ SASMODELS_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasmodels-api")
 SASMODELS_DEV_SOURCE = joinpath(SASMODELS_DOCS, "developer")
 SASMODELS_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasmodels-dev")
 SASMODELS_GUIDE_SOURCE = joinpath(SASMODELS_DOCS, "guide")
-SASMODELS_GUIDE_TARGET = joinpath(SPHINX_PERSPECTIVES, "fitting")
+SASMODELS_GUIDE_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
 SASMODELS_GUIDE_EXCLUDE = [
     "index.rst", "install.rst", "intro.rst",
 ]
@@ -58,7 +58,7 @@ SASMODELS_GUIDE_EXCLUDE = [
 # bumps paths
 BUMPS_DOCS = joinpath(SASVIEW_ROOT, "..", "bumps", "doc")
 BUMPS_SOURCE = joinpath(BUMPS_DOCS, "guide")
-BUMPS_TARGET = joinpath(SPHINX_PERSPECTIVES, "fitting")
+BUMPS_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
 
 run = imp.load_source('run', joinpath(SASVIEW_ROOT, 'run.py'))
 run.prepare()
