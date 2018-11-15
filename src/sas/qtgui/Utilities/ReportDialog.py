@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtPrintSupport
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Utilities.UI.ReportDialogUI import Ui_ReportDialogUI
 
@@ -26,6 +27,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         assert len(report_list) == 3
 
         self.data_html, self.data_txt, self.data_images = report_list
+        #self.save_location = None
+        #if 'ReportDialog_directory' in ObjectLibrary.listObjects():
+        self.save_location = ObjectLibrary.getObject('ReportDialog_directory')
 
         # Fill in the table from input data
         self.setupDialog(self.data_html)
@@ -69,7 +73,10 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         Display the Save As... prompt and save the report if instructed so
         """
         # Choose user's home directory
-        location = os.path.expanduser('~')
+        if self.save_location is None:
+            location = os.path.expanduser('~')
+        else:
+            location = self.save_location
         # Use a sensible filename default
         default_name = os.path.join(location, 'fit_report.pdf')
 
@@ -77,7 +84,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             'parent'   : self,
             'caption'  : 'Save Report',
             # don't use 'directory' in order to remember the previous user choice
-            #'directory': default_name,
+            'directory': default_name,
             'filter'   : 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)',
             'options'  : QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
@@ -86,6 +93,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         if not filename:
             return
         extension = filename_tuple[1]
+        self.save_location = os.path.dirname(filename)
+        # lifetime of this widget is short - keep the reference elsewhere
+        ObjectLibrary.addObject('ReportDialog_directory', self.save_location)
 
         try:
             # extract extension from filter
