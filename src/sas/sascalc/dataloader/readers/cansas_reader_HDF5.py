@@ -527,7 +527,7 @@ class Reader(FileReader):
                 self.data2d.append(self.current_dataset)
             elif isinstance(self.current_dataset, plottable_1D):
                 if self.multi_frame:
-                    for x in range(0, len(self.data_frames) - 1):
+                    for x in range(0, len(self.data_frames)):
                         self.current_dataset.y = self.data_frames[x]
                         if len(self.data_uncertainty_frames) > x:
                             self.current_dataset.dy = \
