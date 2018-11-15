@@ -66,7 +66,7 @@ def import_dll(modname, build_path):
     return imp.load_dynamic(modname, path)
 
 
-def prepare():
+def prepare(rebuild=True):
     # Don't create *.pyc files
     sys.dont_write_bytecode = True
 
@@ -94,60 +94,46 @@ def prepare():
     # add periodictable to the path
     try:
         import periodictable
-    except:
+    except ImportError:
         addpath(joinpath(root, '..', 'periodictable'))
 
     try:
         import bumps
-    except:
+    except ImportError:
         addpath(joinpath(root, '..', 'bumps'))
 
     try:
         import tinycc
-    except:
+    except ImportError:
         addpath(joinpath(root, '../tinycc/build/lib'))
 
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
-    # Build project if the build directory does not already exist.
-    # PAK: with "update" we can always build since it is fast
-    if True or not os.path.exists(build_path):
+    # Put the sas source tree on the path
+    addpath(joinpath(root, 'src'))
+
+    # Put sasmodels on the path
+    addpath(joinpath(root, '../sasmodels/'))
+
+    # Check if the C extensions are already built
+    try:
+        from sas.sascalc.pr import _pr_inversion
+        from sas.sascalc.calculator import _sld2i
+        from sas.sascalc.file_converter import _bsl_loader
+    except ImportError:
+        rebuild = True
+
+    # Build C extensions if necessary.  Do an inplace build to simplify path.
+    if rebuild:
         import subprocess
-        build_cmd = [sys.executable, "setup.py", "build", "update"]
+        build_cmd = [sys.executable, "setup.py", "build_ext", "--inplace", "update"]
         if os.name == 'nt':
             build_cmd.append('--compiler=tinycc')
         # need shell=True on windows to keep console box from popping up
         shell = (os.name == 'nt')
         with cd(root):
             subprocess.call(build_cmd, shell=shell)
-
-    # Put the source trees on the path
-    addpath(joinpath(root, 'src'))
-
-    # sasmodels on the path
-    addpath(joinpath(root, '../sasmodels/'))
-
-    # The sas.models package Compiled Model files should be pulled in from the build directory even though
-    # the source is stored in src/sas/models.
-
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.pr
-    sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
-                                         joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
-
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.file_converter
-    sas.sascalc.file_converter.core = import_package('sas.sascalc.file_converter.core',
-                                                     joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))
-
-    import sas.sascalc.calculator
-    sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
-                                                 joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
-
-    sys.path.append(build_path)
 
     set_git_tag()
     # print "\n".join(sys.path)

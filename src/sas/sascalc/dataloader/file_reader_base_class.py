@@ -240,7 +240,7 @@ class FileReader(object):
                     data.xmin = np.min(data.qx_data)
                     data.xmax = np.max(data.qx_data)
                     data.ymin = np.min(data.qy_data)
-                    data.ymax = np.max(data.qx_data)
+                    data.ymax = np.max(data.qy_data)
 
     @staticmethod
     def _reorder_1d_array(array, ind):

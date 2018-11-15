@@ -11,16 +11,20 @@ import os
 import subprocess
 import shutil
 import sys
-from distutils.command.build_ext import build_ext
-from distutils.core import Command
 
 import numpy as np
+
 from setuptools import Extension, setup
+from setuptools import Command
+from setuptools.command.build_ext import build_ext
 
 try:
     import tinycc.distutils
 except ImportError:
     pass
+
+# Convert "test" argument to "pytest" so 'python setup.py test' works
+sys.argv = [("pytest" if s == "test" else s) for s in sys.argv]
 
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
@@ -245,11 +249,10 @@ packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
 
 # sas.sascalc.calculator
 gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
-package_dir["sas.sascalc.calculator.core"] = gen_dir
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
-packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
-ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
+packages.append("sas.sascalc.calculator")
+ext_modules.append(Extension("sas.sascalc.calculator._sld2i",
                              sources=[
                                  os.path.join(gen_dir, "sld2i_module.c"),
                                  os.path.join(gen_dir, "sld2i.c"),
@@ -257,15 +260,13 @@ ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                                  os.path.join(gen_dir, "librefl.c"),
                              ],
                              include_dirs=[gen_dir],
-                             )
-                   )
+                             ))
 
 # sas.sascalc.pr
 srcdir = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
-package_dir["sas.sascalc.pr.core"] = srcdir
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
-packages.extend(["sas.sascalc.pr", "sas.sascalc.pr.core"])
-ext_modules.append(Extension("sas.sascalc.pr.core.pr_inversion",
+packages.append("sas.sascalc.pr")
+ext_modules.append(Extension("sas.sascalc.pr._pr_inversion",
                              sources=[os.path.join(srcdir, "Cinvertor.c"),
                                       os.path.join(srcdir, "invertor.c"),
                                       ],
@@ -275,12 +276,10 @@ ext_modules.append(Extension("sas.sascalc.pr.core.pr_inversion",
 
 # sas.sascalc.file_converter
 mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
-package_dir["sas.sascalc.file_converter.core"] = mydir
 package_dir["sas.sascalc.file_converter"] = os.path.join(
     "src", "sas", "sascalc", "file_converter")
-packages.extend(["sas.sascalc.file_converter",
-                 "sas.sascalc.file_converter.core"])
-ext_modules.append(Extension("sas.sascalc.file_converter.core.bsl_loader",
+packages.append("sas.sascalc.file_converter")
+ext_modules.append(Extension("sas.sascalc.file_converter._bsl_loader",
                              sources=[os.path.join(mydir, "bsl_loader.c")],
                              include_dirs=[np.get_include()],
                              ))
@@ -442,5 +441,7 @@ setup(
     },
     cmdclass={'build_ext': build_ext_subclass,
               'docs': BuildSphinxCommand,
-              'disable_openmp': DisableOpenMPCommand}
+              'disable_openmp': DisableOpenMPCommand},
+    setup_requires=['pytest-runner'] if 'pytest' in sys.argv else [],
+    tests_require=['pytest'],
 )
