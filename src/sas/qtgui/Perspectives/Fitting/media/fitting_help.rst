@@ -124,7 +124,7 @@ Model Functions
 ---------------
 
 For a complete list of all the library models available in SasView, see
-the `Model Documentation <../../../index.html>`_ .
+the `Model Documentation <models/index.html>`_ .
 
 It is also possible to add your own models.
 
