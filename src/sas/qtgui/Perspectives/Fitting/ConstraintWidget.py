@@ -22,6 +22,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     Constraints Dialog to select the desired parameter/model constraints.
     """
     fitCompleteSignal = QtCore.pyqtSignal(tuple)
+    batchCompleteSignal = QtCore.pyqtSignal(tuple)
+    fitFailedSignal = QtCore.pyqtSignal(tuple)
+
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
         self.parent = parent
@@ -59,6 +62,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Set up various widget states
         """
+        # disable special cases until properly defined
+        self.label.setVisible(False)
+        self.cbCases.setVisible(False)
+
         labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
         self.editable_tab_columns = [labels.index('Mnemonic')]
@@ -79,7 +86,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.tblConstraints.setEnabled(False)
         header = self.tblConstraints.horizontalHeaderItem(0)
-        header.setToolTip("Double click to edit.")
+        header.setToolTip("Double click a row below to edit the constraint.")
 
         self.tblConstraints.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblConstraints.customContextMenuRequested.connect(self.showConstrContextMenu)
@@ -104,6 +111,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Internal signals
         self.fitCompleteSignal.connect(self.fitComplete)
+        self.batchCompleteSignal.connect(self.batchComplete)
+        self.fitFailedSignal.connect(self.fitFailed)
 
         # External signals
         self.parent.tabsModifiedSignal.connect(self.initializeFitList)
@@ -170,6 +179,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Prepare the fitter object
         try:
             for tab in tabs_to_fit:
+                if not self.isTabImportable(tab): continue
                 tab_object = ObjectLibrary.getObject(tab)
                 if tab_object is None:
                     # No such tab!
@@ -228,6 +238,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
 
         #disable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
         self.cmdFit.setText('Running...')
         self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.cmdFit.setEnabled(False)
@@ -333,6 +344,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to the successful fit complete signal
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
@@ -369,9 +381,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onBatchFitComplete(self, result):
         """
+        Send the fit complete signal to main thread
+        """
+        self.batchCompleteSignal.emit(result)
+
+    def batchComplete(self, result):
+        """
         Respond to the successful batch fit complete signal
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
@@ -394,9 +413,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onFitFailed(self, reason):
         """
+        Send the fit failed signal to main thread
+        """
+        self.fitFailedSignal.emit(result)
+
+    def fitFailed(self, reason):
+        """
         Respond to fitting failure.
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
