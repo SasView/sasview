@@ -11,10 +11,11 @@ class Constraint(object):
         self._param = param
         self._value_ex = value_ex
         self._func = func
-        self.active = True
         self._min = min
         self._max = max
         self._operator = operator
+        self.validate = True
+        self.active = True
 
     @property
     def value(self):

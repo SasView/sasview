@@ -78,6 +78,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.setHorizontalHeaderLabels(labels)
         self.tblConstraints.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.tblConstraints.setEnabled(False)
+        header = self.tblConstraints.horizontalHeaderItem(0)
+        header.setToolTip("Double click to edit.")
 
         self.tblConstraints.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblConstraints.customContextMenuRequested.connect(self.showConstrContextMenu)
@@ -306,8 +308,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         function = function[function.index('=')+1:]
         # No check on function here - trust the user (R)
         if function != constraint.func:
-            #from sas.sascalc.fit.expression import compile_constraints
+            # This becomes rather difficult to validate now.
+            # Turn off validation for Edit Constraint
             constraint.func = function
+            constraint.validate = False
 
     def onTabCellEntered(self, row, column):
         """

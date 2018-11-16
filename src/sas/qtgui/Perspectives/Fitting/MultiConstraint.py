@@ -30,15 +30,19 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         self.setModal(True)
         self.params = params
         self.parent = parent
+        # Text of the constraint
         self.function = None
+        # Should this constraint be validated?
+        self.validate = True
 
         self.input_constraint = constraint
         if self.input_constraint is not None:
             variable = constraint.value
-            #variable = func[func.index('.')+1:]
             self.function = constraint.func
             self.params.append(variable)
             self.model_name = constraint.value_ex
+            # Passed constraint may be too complex for simple validation
+            self.validate = constraint.validate
         else:
             self.model_name = self.params[1]
 
@@ -96,6 +100,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
+        # Don't validate if requested
+        if not self.validate: return
+
         formula_is_valid = False
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:

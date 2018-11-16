@@ -714,6 +714,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # what is the parameter to constraint to?
         constraint.value = param_used
 
+        # Should the new constraint be validated?
+        constraint.validate = mc_widget.validate
+
         # Create a new item and add the Constraint object as a child
         self.addConstraintToRow(constraint=constraint, row=row)
 
@@ -842,6 +845,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint.func = c_text
         constraint.value_ex = updated_param_used
         constraint.value = param_used
+        # Should the new constraint be validated?
+        constraint.validate = mc_widget.validate
 
         # Which row is the constrained parameter in?
         row = self.getRowFromName(constraint.param)
@@ -3683,10 +3688,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 func = constraint.func
                 value_ex = constraint.value_ex
                 param = constraint.param
+                validate = constraint.validate
 
-                cons = (value, param, value_ex, func)
+                cons = (value, param, value_ex, validate, func)
 
-            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max, cons])
+            param_list.append([param_name, param_checked, param_value,param_error, param_min, param_max, cons])
 
         def gatherPolyParams(row):
             """
@@ -3934,16 +3940,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # constraints
             cons = param_dict[param_name][4+ioffset]
-            if cons is not None and len(cons)==4:
+            if cons is not None and len(cons)==5:
                 value = cons[0]
                 param = cons[1]
                 value_ex = cons[2]
-                function = cons[3]
+                validate = cons[3]
+                function = cons[4]
                 constraint = Constraint()
                 constraint.value = value
                 constraint.func = function
                 constraint.param = param
                 constraint.value_ex = value_ex
+                constraint.validate = validate
                 self.addConstraintToRow(constraint=constraint, row=row)
 
             self.setFocus()

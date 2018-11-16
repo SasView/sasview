@@ -81,7 +81,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.actionAddAll.setText(QtCore.QCoreApplication.translate("self", "Add all"))
         ttip = "Add constraints between all identically named parameters in both fitpages"
         self.actionAddAll.setToolTip(ttip)
-        #self.actionAddAll.setStatusTip(ttip)
         self.actionAddAll.triggered.connect(self.onSetAll)
         all_menu.addAction(self.actionAddAll)
         # https://bugreports.qt.io/browse/QTBUG-13663
