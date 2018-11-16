@@ -14,12 +14,15 @@ import webbrowser
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+
 ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
+    constraintReadySignal = QtCore.pyqtSignal(tuple)
     def __init__(self, parent=None, tabs=None):
         super(ComplexConstraint, self).__init__()
 
@@ -31,6 +34,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.params = None
         self.tab_names = None
         self.operator = '='
+        self._constraint = Constraint()
 
         self.warning = self.lblWarning.text()
         self.setupData()
@@ -52,7 +56,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Signals from various elements
         """
-        self.cmdOK.clicked.connect(self.accept)
+        self.cmdOK.clicked.connect(self.onApply)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdRevert.clicked.connect(self.onRevert)
         self.txtConstraint.editingFinished.connect(self.validateFormula)
@@ -68,13 +72,35 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.txtName1.setText(self.tab_names[0])
         self.txtName2.setText(self.tab_names[1])
 
-        # Show only parameters not already constrained
+        self.setupParamWidgets()
+
+        # Add menu to the Apply button
+        all_menu   = QtWidgets.QMenu()
+        self.actionAddAll = QtWidgets.QAction(self)
+        self.actionAddAll.setObjectName("actionAddAll")
+        self.actionAddAll.setText(QtCore.QCoreApplication.translate("self", "Add all"))
+        ttip = "Add constraints between all identically named parameters in both fitpages"
+        self.actionAddAll.setToolTip(ttip)
+        #self.actionAddAll.setStatusTip(ttip)
+        self.actionAddAll.triggered.connect(self.onSetAll)
+        all_menu.addAction(self.actionAddAll)
+        # https://bugreports.qt.io/browse/QTBUG-13663
+        all_menu.setToolTipsVisible(True)
+        self.cmdOK.setMenu(all_menu)
+
+    def setupParamWidgets(self):
+        """
+        Fill out comboboxes and set labels with non-constrained parameters
+        """
         self.cbParam1.clear()
-        items = [param for i,param in enumerate(self.params[0]) if not self.tabs[0].rowHasConstraint(i)]
-        self.cbParam1.addItems(items)
+        items1 = [param for param in self.params[0] if not self.tabs[0].paramHasConstraint(param)]
+        self.cbParam1.addItems(items1)
+
+        # M2 doesn't have to be non-constrained
         self.cbParam2.clear()
-        items = [param for i,param in enumerate(self.params[1]) if not self.tabs[1].rowHasConstraint(i)]
-        self.cbParam2.addItems(items)
+        #items2 = [param for param in self.params[1] if not self.tabs[1].paramHasConstraint(param)]
+        items2 = [param for param in self.params[1]]
+        self.cbParam2.addItems(items2)
 
         self.txtParam.setText(self.tab_names[0] + ":" + self.cbParam1.currentText())
 
@@ -83,6 +109,17 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.txtOperator.setText(self.cbOperator.currentText())
 
         self.txtConstraint.setText(self.tab_names[1]+"."+self.cbParam2.currentText())
+
+        # disable Apply if no parameters available
+        if len(items1)==0:
+            self.cmdOK.setEnabled(False)
+            txt = "No parameters in model "+self.tab_names[0] +\
+                " are available for constraining."
+            self.lblWarning.setText(txt)
+        else:
+            self.cmdOK.setEnabled(True)
+            txt = ""
+            self.lblWarning.setText(txt)
 
     def setupTooltip(self):
         """
@@ -143,6 +180,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.setupWidgets()
 
         # Original indices
+        index2 = index2 if index2 >= 0 else 0
+        index1 = index1 if index1 >= 0 else 0
         self.cbParam1.setCurrentIndex(index2)
         self.cbParam2.setCurrentIndex(index1)
         self.cbOperator.setCurrentIndex(indexOp)
@@ -204,9 +243,62 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
     def constraint(self):
         """
-        Return the generated constraint as tuple (model1, param1, operator, constraint)
+        Return the generated constraint
         """
-        return (self.txtName1.text(), self.cbParam1.currentText(), self.cbOperator.currentText(), self.txtConstraint.text())
+        param = self.cbParam1.currentText()
+        value = self.cbParam2.currentText()
+        func = self.txtConstraint.text()
+        value_ex = self.txtName2.text() + "." + self.cbParam2.currentText()
+        model1 = self.txtName1.text()
+        operator = self.cbOperator.currentText()
+
+        con = Constraint(self,
+                         param=param,
+                         value=value,
+                         func=func,
+                         value_ex=value_ex,
+                         operator=operator)
+
+        return (model1, con)
+
+    def onApply(self):
+        """
+        Respond to Add constraint action.
+        Send a signal that the constraint is ready to be applied
+        """
+        cons_tuple = self.constraint()
+        self.constraintReadySignal.emit(cons_tuple)
+        # reload the comboboxes
+        self.setupParamWidgets()
+
+    def onSetAll(self):
+        """
+        Set constraints on all identically named parameters between two fitpages
+        """
+        # loop over parameters in constrained model
+        items1 = [param for param in self.params[0] if not self.tabs[0].paramHasConstraint(param)]
+        #items2 = [param for param in self.params[1] if not self.tabs[1].paramHasConstraint(i)]
+        items2 = self.params[1]
+        for item in items1:
+            if item not in items2: continue
+            param = item
+            value = item
+            func = self.txtName2.text() + "." + param
+            value_ex = self.txtName1.text() + "." + param
+            model1 = self.txtName1.text()
+            operator = self.cbOperator.currentText()
+
+            con = Constraint(self,
+                             param=param,
+                             value=value,
+                             func=func,
+                             value_ex=value_ex,
+                             operator=operator)
+
+            self.constraintReadySignal.emit((model1, con))
+
+        # reload the comboboxes
+        self.setupParamWidgets()
 
     def onHelp(self):
         """

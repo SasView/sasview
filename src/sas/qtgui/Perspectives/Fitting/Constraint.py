@@ -4,7 +4,9 @@ class Constraint(object):
     Currently just a data structure, might get expaned with more functionality,
     hence made into a class.
     """
-    def __init__(self, parent=None, param=None, value=0.0, min=None, max=None, func=None, value_ex=None):
+    def __init__(self, parent=None, param=None, value=0.0,
+                 min=None, max=None, func=None, value_ex=None,
+                 operator="="):
         self._value = value
         self._param = param
         self._value_ex = value_ex
@@ -12,6 +14,7 @@ class Constraint(object):
         self.active = True
         self._min = min
         self._max = max
+        self._operator = operator
 
     @property
     def value(self):
@@ -67,4 +70,13 @@ class Constraint(object):
     @max.setter
     def max(self, val):
         self._max = val
+
+    @property
+    def operator(self):
+        # operator to use for constraint
+        return self._operator
+
+    @operator.setter
+    def operator(self, val):
+        self._operator = val
 

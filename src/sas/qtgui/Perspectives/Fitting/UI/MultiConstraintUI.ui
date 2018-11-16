@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>369</width>
-    <height>201</height>
+    <width>435</width>
+    <height>233</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -183,13 +183,13 @@
  <resources/>
  <connections>
   <connection>
-   <sender>cmdOK</sender>
+   <sender>cmdCancel</sender>
    <signal>clicked()</signal>
    <receiver>MultiConstraintUI</receiver>
-   <slot>accept()</slot>
+   <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>321</x>
+     <x>187</x>
      <y>121</y>
     </hint>
     <hint type="destinationlabel">
@@ -199,13 +199,13 @@
    </hints>
   </connection>
   <connection>
-   <sender>cmdCancel</sender>
+   <sender>cmdOK</sender>
    <signal>clicked()</signal>
    <receiver>MultiConstraintUI</receiver>
-   <slot>reject()</slot>
+   <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
+     <x>321</x>
      <y>121</y>
     </hint>
     <hint type="destinationlabel">

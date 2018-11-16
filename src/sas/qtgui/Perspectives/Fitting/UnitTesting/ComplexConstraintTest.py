@@ -131,12 +131,17 @@ class ComplexConstraintTest(unittest.TestCase):
         Test the return of specified constraint
         """
         # default data
-        self.assertEqual(self.widget.constraint(), ('M1', 'scale', '=', 'M1.scale'))
+        c = self.widget.constraint()
+        self.assertEqual(c[0], 'M1')
+        self.assertEqual(c[1].func, 'M1.scale')
 
         # Change parameter and operand
         self.widget.cbOperator.setCurrentIndex(3)
-        self.widget.cbParam1.setCurrentIndex(3)
-        self.assertEqual(self.widget.constraint(), ('M1', 'bjerrum_length', '>=', 'M1.scale'))
+        self.widget.cbParam2.setCurrentIndex(3)
+        c = self.widget.constraint()
+        self.assertEqual(c[0], 'M1')
+        self.assertEqual(c[1].func, 'M1.sld_solvent')
+        self.assertEqual(c[1].operator, '>=')
 
     def testOnHelp(self):
         """

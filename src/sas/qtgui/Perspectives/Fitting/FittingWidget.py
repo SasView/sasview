@@ -903,6 +903,33 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except AttributeError:
             return None
 
+    def allParamNames(self):
+        """
+        Returns a list of all parameter names defined on the current model
+        """
+        all_params = self.kernel_module._model_info.parameters.kernel_parameters
+        all_param_names = [param.name for param in all_params]
+        # Assure scale and background are always included
+        if 'scale' not in all_param_names:
+            all_param_names.append('scale')
+        if 'background' not in all_param_names:
+            all_param_names.append('background')
+        return all_param_names
+
+    def paramHasConstraint(self, param=None):
+        """
+        Finds out if the given parameter in the main model has a constraint child
+        """
+        if param is None: return False
+        if param not in self.allParamNames(): return False
+
+        for row in range(self._model_model.rowCount()):
+            if self._model_model.item(row,0).text() != param: continue
+            return self.rowHasConstraint(row)
+
+        # nothing found
+        return False
+
     def rowHasConstraint(self, row):
         """
         Finds out if row of the main model has a constraint child
