@@ -2544,7 +2544,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
 
         # Disable buttons/table
-        self.disableInteractiveElements()
+        self.disableInteractiveElementsOnCalculate()
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
                                                model=model,
@@ -3262,6 +3262,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Allow for stopping the job
         self.cmdFit.setStyleSheet('QPushButton {color: red;}')
         self.cmdFit.setText('Stop fit')
+        self.setInteractiveElements(False)
+
+    def disableInteractiveElementsOnCalculate(self):
+        """
+        Set buttion caption on fitting/calculate start
+        Disable the param table(s)
+        """
+        # Notify the user that fitting is being run
+        # Allow for stopping the job
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setText('Running...')
         self.setInteractiveElements(False)
 
     def readFitPage(self, fp):
