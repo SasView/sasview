@@ -107,6 +107,8 @@ class Plotter2DWidget(PlotterBase):
                       zmax=zmax_2D_temp, show_colorbar=show_colorbar,
                       update=update)
 
+        self.updateCircularAverage()
+
     def calculateDepth(self):
         """
         Re-calculate the plot depth parameters depending on the scale
@@ -239,9 +241,9 @@ class Plotter2DWidget(PlotterBase):
 
         self.slicer_widget.show()
 
-    def onCircularAverage(self):
+    def circularAverage(self):
         """
-        Perform circular averaging on Data2D
+        Calculate the circular average and create the Data object for it
         """
         # Find the best number of bins
         npt = numpy.sqrt(len(self.data.data[numpy.isfinite(self.data.data)]))
@@ -280,16 +282,48 @@ class Plotter2DWidget(PlotterBase):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
+
+        return new_plot
+
+    def onCircularAverage(self):
+        """
+        Perform circular averaging on Data2D
+        """
+        new_plot = self.circularAverage()
+
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
+
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
         self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
-        # Show the plot
+    def updateCircularAverage(self):
+        """
+        Update circular averaging plot on Data2D change
+        """
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+
+        # Get all plots for current item
+        plots = GuiUtils.plotsFromModel("", item)
+        ca_caption = '2daverage'+self.data.name
+        # See if current item plots contain 2D average plot
+        test = [ca_caption in plot.group_id for plot in plots]
+        # return prematurely if no circular average plot found
+        if not any(test): return
+
+        # Create a new plot
+        new_plot = self.circularAverage()
+
+        # Overwrite existing plot
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+        # Show the new plot, if already visible
+        self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
     def setSlicer(self, slicer):
         """
