@@ -14,6 +14,11 @@ from ..data_info import plottable_1D, plottable_2D,\
 from ..loader_exceptions import FileContentsException, DefaultReaderException
 from ..file_reader_base_class import FileReader, decode
 
+try:
+  basestring
+except NameError:  # CRUFT: python 2 support
+  basestring = str
+
 
 def h5attr(node, key, default=None):
     return decode(node.attrs.get(key, default))
@@ -629,7 +634,7 @@ class Reader(FileReader):
 
         :param parent_list: List of names of parent elements
         """
-        if self._is2d(value):
+        if self._is_2d_not_multi_frame(value):
             self.current_dataset = plottable_2D()
         else:
             x = np.array(0)
@@ -638,17 +643,15 @@ class Reader(FileReader):
         self.current_datainfo.filename = self.raw_data.filename
 
     @staticmethod
-    def check_is_list_or_array(iterable):
-        try:
-            iter(iterable)
-            if (not isinstance(iterable, np.ndarray) and not isinstance(
-                    iterable, list)) or (isinstance(iterable, basestring)):
-                raise TypeError
-        except TypeError:
-            if isinstance(iterable, basestring):
-                iterable = iterable.split(",")
-            else:
-                iterable = [iterable]
+    def as_list_or_array(iterable):
+        """
+        Return value as a list if not already a list or array.
+        :param iterable:
+        :return:
+        """
+        if not (isinstance(iterable, np.ndarray) or isinstance(iterable, list)):
+            iterable = iterable.split(",") if isinstance(iterable, basestring)\
+                else [iterable]
         return iterable
 
     def _find_data_attributes(self, value):
@@ -670,13 +673,11 @@ class Reader(FileReader):
         signal = attrs.get("signal", "I")
         i_axes = attrs.get("I_axes", ["Q"])
         q_indices = attrs.get("Q_indices", [0])
-        q_indices = map(int, self.check_is_list_or_array(q_indices))
-        i_axes = self.check_is_list_or_array(i_axes)
+        i_axes = self.as_list_or_array(i_axes)
         keys = value.keys()
         # Assign attributes to appropriate class variables
+        self.q_names = [i_axes[int(v)] for v in self.as_list_or_array(q_indices)]
         self.mask_name = attrs.get("mask")
-        for val in q_indices:
-            self.q_names.append(i_axes[val])
         self.i_name = signal
         self.i_node = value.get(self.i_name)
         for item in self.q_names:
@@ -698,7 +699,7 @@ class Reader(FileReader):
             if self.i_uncertainties_name is None:
                 self.i_uncertainties_name = i_vals.attrs.get("uncertainty")
 
-    def _is2d(self, value, i_base="", q_base=[]):
+    def _is_2d_not_multi_frame(self, value, i_base="", q_base=""):
         """
         A private class to determine if the data set is 1d or 2d.
 
@@ -708,13 +709,13 @@ class Reader(FileReader):
         """
         i_basename = i_base if i_base != "" else self.i_name
         i_vals = value.get(i_basename)
-        q_basename = q_base if q_base != [] else self.q_names
+        q_basename = q_base if q_base != "" else self.q_names
         q_vals = value.get(q_basename[0])
-        self.multi_frame = True if (i_vals is not None and q_vals is not None
-                                    and len(i_vals.shape) != 1
-                                    and len(q_vals.shape) == 1) else False
-        return (i_vals is not None and i_vals.shape is not None
-                and len(i_vals.shape) != 1 and not self.multi_frame)
+        self.multi_frame = (i_vals is not None and q_vals is not None
+                            and len(i_vals.shape) != 1
+                            and len(q_vals.shape) == 1)
+        return (i_vals is not None and len(i_vals.shape) != 1
+                and not self.multi_frame)
 
     def _create_unique_key(self, dictionary, name, numb=0):
         """

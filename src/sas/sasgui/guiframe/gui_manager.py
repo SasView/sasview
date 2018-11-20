@@ -2579,12 +2579,13 @@ class ViewerFrame(PARENT_FRAME):
 
             # Instantiate a loader
             loader = Loader()
-            if os.path.splitext(mypath)[1].lower() == '.dat':
+            ext = os.path.splitext(mypath)[1].lower()
+            if ext == '.dat':
                 # Make sure the ext included in the file name
                 # especially on MAC
                 fileName = os.path.splitext(path)[0] + ext_format
                 loader.save(fileName, data, ext_format)
-            elif os.path.splitext(mypath)[1].lower() == '.h5':
+            elif ext == '.h5':
                 # Make sure the ext included in the file name
                 # especially on MAC
                 fileName = os.path.splitext(path)[0] + ext_format
