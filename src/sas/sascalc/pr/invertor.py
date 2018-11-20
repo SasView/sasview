@@ -5,6 +5,7 @@ The module contains the Invertor class.
 
 FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
+from __future__ import division
 
 import numpy as np
 import sys
@@ -422,7 +423,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -479,7 +480,7 @@ class Invertor(Cinvertor):
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
-        c, chi2, _, _ = lstsq(a, b)
+        c, chi2, _, _ = lstsq(a, b, rcond=-1)
         # Sanity check
         try:
             float(chi2)
@@ -502,8 +503,8 @@ class Invertor(Cinvertor):
 
         try:
             cov = np.linalg.pinv(inv_cov)
-            err = math.fabs(chi2 / float(npts - nfunc)) * cov
-        except:
+            err = math.fabs(chi2 / (npts - nfunc)) * cov
+        except Exception as exc:
             # We were not able to estimate the errors
             # Return an empty error matrix
             logger.error(sys.exc_info()[1])
@@ -547,7 +548,7 @@ class Invertor(Cinvertor):
         estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
-        except:
+        except Exception as exc:
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
