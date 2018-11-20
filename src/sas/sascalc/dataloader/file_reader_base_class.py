@@ -275,7 +275,7 @@ class FileReader(object):
                     dataset.xmin = np.min(dataset.qx_data)
                     dataset.xmax = np.max(dataset.qx_data)
                     dataset.ymin = np.min(dataset.qy_data)
-                    dataset.ymax = np.max(dataset.qx_data)
+                    dataset.ymax = np.max(dataset.qy_data)
 
     def format_unit(self, unit=None):
         """
