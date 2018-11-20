@@ -1492,7 +1492,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # Show the grid panel
-        self.communicate.sendDataToGridSignal.emit(result[0])
+        page_name = "BatchPage" + str(self.tab_id)
+        results = copy.deepcopy(result[0])
+        results.append(page_name)
+        self.communicate.sendDataToGridSignal.emit(results)
 
         elapsed = result[1]
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)

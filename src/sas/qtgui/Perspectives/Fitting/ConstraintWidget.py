@@ -1,4 +1,5 @@
 import logging
+import copy
 
 from twisted.internet import threads
 
@@ -363,7 +364,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         # Show the grid panel
-        self.parent.communicate.sendDataToGridSignal.emit(result[0])
+        page_name = "ConstSimulPage"
+        results = copy.deepcopy(result[0])
+        results.append(page_name)
+        self.parent.communicate.sendDataToGridSignal.emit(results)
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicate.statusBarUpdateSignal.emit(msg)

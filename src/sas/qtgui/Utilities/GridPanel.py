@@ -125,7 +125,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             logging.error("Error generating context menu: %s" % ex)
         return
 
-    def addTabPage(self):
+    def addTabPage(self, name=None):
         """
         Add new tab page with QTableWidget
         """
@@ -140,7 +140,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # One would think naming the tab with current model name would be good.
         # However, some models have LONG names, which doesn't look well on the tab bar.
         self.tab_number += 1
-        tab_name = "Tab " + str(self.tab_number)
+        if name is not None:
+            tab_name = name
+        else:
+            tab_name = "Tab " + str(self.tab_number)
         # each table needs separate slots.
         tab_widget.customContextMenuRequested.connect(self.showContextMenu)
         self.tables.append(tab_widget)
@@ -152,8 +155,17 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Create a new tab with batch fitting results
         """
+        # pull out page name from results
+        page_name = None
+        if len(results)>=2:
+            if isinstance(results[-1], str):
+                page_name = results[-1]
+                _ = results.pop(-1)
+
         if self.has_data:
-            self.addTabPage()
+            self.addTabPage(name=page_name)
+        else:
+            self.tabWidget.setTabText(0, page_name)
         # Update the new widget
         # Fill in the table from input data in the last/newest page
         assert(self.tables)
