@@ -2524,6 +2524,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def isCheckable(self, row):
         return self._model_model.item(row, 0).isCheckable()
 
+    def selectCheckbox(self, row):
+        """
+        Select the checkbox in given row.
+        """
+        assert 0<= row <= self._model_model.rowCount()
+        index = self._model_model.index(row, 0)
+        item = self._model_model.itemFromIndex(index)
+        item.setCheckState(QtCore.Qt.Checked)
+
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
         if not item.isCheckable():

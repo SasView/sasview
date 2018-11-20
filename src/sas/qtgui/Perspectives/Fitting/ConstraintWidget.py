@@ -729,6 +729,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row)
 
+        # Select this parameter for adjusting/fitting
+        constrained_tab.selectCheckbox(constrained_row)
+
+
     def showMultiConstraint(self):
         """
         Invoke the complex constraint editor
@@ -824,5 +828,3 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         is_chain = parameters['is_chain_fitting'][0] == 'True'
         if isBatch:
             self.chkChain.setChecked(is_chain)
-
-
