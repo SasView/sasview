@@ -298,24 +298,28 @@ class Plotter2DWidget(PlotterBase):
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
-
         self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
     def updateCircularAverage(self):
         """
         Update circular averaging plot on Data2D change
         """
+        if not hasattr(self,'_item'): return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
 
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
+        if plots is None: return
         ca_caption = '2daverage'+self.data.name
         # See if current item plots contain 2D average plot
-        test = [ca_caption in plot.group_id for plot in plots]
+        has_plot = False
+        for plot in plots:
+            if plot.group_id is None: continue
+            if ca_caption in plot.group_id: has_plot=True
         # return prematurely if no circular average plot found
-        if not any(test): return
+        if not has_plot: return
 
         # Create a new plot
         new_plot = self.circularAverage()

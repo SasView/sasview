@@ -660,13 +660,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
             data.yaxis('\\rm{Intensity}', 'cm^{-1}')
-            plot1D = Plotter(self, quickplot=True)
-            plot1D.plot(data)
-            plot1D.show()
+
             self.graph_num += 1
-            # TODO
-            print('TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED')
-            return plot1D
         else:
             numpy.nan_to_num(self.data_to_plot)
             data = Data2D(image=self.data_to_plot,
@@ -678,14 +673,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           err_image=self.data.err_data)
             data.title = "GenSAS {}  #{} 2D".format(self.file_name,
                                                     int(self.graph_num))
-            plot2D = Plotter2D(self, quickplot=True)
-            plot2D.plot(data)
-            plot2D.show()
+            zeros = numpy.ones(data.data.size, dtype=bool)
+            data.mask = zeros
+
             self.graph_num += 1
             # TODO
-            print('TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED')
-            return plot2D
-
+        new_item = GuiUtils.createModelItemWithPlot(data, name=data.title)
+        self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
+        self.communicator.forcePlotDisplaySignal.emit([new_item, data])
 
 class Plotter3DWidget(PlotterBase):
     """
