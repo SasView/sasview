@@ -87,6 +87,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.plusButton = QtWidgets.QToolButton(self)
         self.plusButton.setText("+")
         self.setCornerWidget(self.plusButton)
+        self.plusButton.setToolTip("Add a new Fit Page")
         self.plusButton.clicked.connect(lambda: self.addFit(None))
 
     def updateWindowTitle(self):
