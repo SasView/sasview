@@ -16,7 +16,8 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
-ALLOWED_OPERATORS = ['=','<','>','>=','<=']
+#ALLOWED_OPERATORS = ['=','<','>','>=','<=']
+ALLOWED_OPERATORS = ['=']
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
