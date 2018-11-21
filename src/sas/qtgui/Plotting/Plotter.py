@@ -600,6 +600,11 @@ class PlotterWidget(PlotterBase):
         except:
             self.position = None
 
+        x_str = GuiUtils.formatNumber(self.x_click)
+        y_str = GuiUtils.formatNumber(self.y_click)
+        coord_str = "x: {}, y: {}".format(x_str, y_str)
+        self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
+
     def onMplMouseUp(self, event):
         """
         Set the data coordinates of the click

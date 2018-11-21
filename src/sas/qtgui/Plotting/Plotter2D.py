@@ -573,6 +573,27 @@ class Plotter2DWidget(PlotterBase):
         """
         self.plot(data=new_plot)
 
+    def onMplMouseDown(self, event):
+        """
+        Display x/y/intensity on click
+        """
+        # Check that the LEFT button was pressed
+        if event.button != 1:
+            return
+
+        if event.inaxes is None:
+            return
+        x_click = 0.0
+        y_click = 0.0
+        try:
+            x_click = float(event.xdata)  # / size_x
+            y_click = float(event.ydata)  # / size_y
+        except:
+            self.position = None
+        x_str = GuiUtils.formatNumber(x_click)
+        y_str = GuiUtils.formatNumber(y_click)
+        coord_str = "x: {}, y: {}".format(x_str, y_str)
+        self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """
