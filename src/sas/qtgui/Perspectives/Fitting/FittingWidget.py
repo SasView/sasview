@@ -3082,9 +3082,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # cell 3: min value
         item3 = QtGui.QStandardItem()
+        # set the cell to be non-editable
+        item3.setFlags(item3.flags() ^ QtCore.Qt.ItemIsEditable)
 
         # cell 4: max value
         item4 = QtGui.QStandardItem()
+        # set the cell to be non-editable
+        item4.setFlags(item4.flags() ^ QtCore.Qt.ItemIsEditable)
 
         # cell 4: SLD button
         item5 = QtGui.QStandardItem()
@@ -3124,6 +3128,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except IndexError as ex:
             # no info about limits
             pass
+        except OverflowError:
+            # Try to limit shell_par, if possible
+            if float(shell_par.limits[1])==np.inf:
+                shell_max = 9
+            logging.warning("Limiting shell count to 9.")
         except Exception as ex:
             logging.error("Badly defined multiplicity: "+ str(ex))
             return

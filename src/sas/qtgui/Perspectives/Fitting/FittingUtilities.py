@@ -367,6 +367,12 @@ def addShellsToModel(parameters, model, index, row_num=None, view=None):
             row = [item1, item2, item3, item4, item5]
             cbox = createFixedChoiceComboBox(par, row)
 
+            # Apply combobox if required
+            if None not in (view, cbox):
+                # set the min/max cell to be empty
+                item3.setText("")
+                item4.setText("")
+
             # Always add to the model
             if row_num is None:
                 model.appendRow(row)
@@ -374,8 +380,7 @@ def addShellsToModel(parameters, model, index, row_num=None, view=None):
                 model.insertRow(row_num, row)
                 row_num += 1
 
-            # Apply combobox if required
-            if None not in (view, cbox):
+            if cbox is not None:
                 view.setIndexWidget(item2.index(), cbox)
 
             rows.append(row)

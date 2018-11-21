@@ -94,6 +94,10 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         if index.column() in [self.param_property, self.param_error, self.param_unit]:
             # Set some columns uneditable
             return None
+        if index.column() in (self.param_min, self.param_max):
+            # Check if the edit role is set
+            if not (index.flags() & QtCore.Qt.ItemIsEditable):
+                return None
 
         return super(ModelViewDelegate, self).createEditor(widget, option, index)
 
