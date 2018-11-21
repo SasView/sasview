@@ -83,6 +83,12 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         self.updateWindowTitle()
 
+        # Add new tab mini-button
+        self.plusButton = QtWidgets.QToolButton(self)
+        self.plusButton.setText("+")
+        self.setCornerWidget(self.plusButton)
+        self.plusButton.clicked.connect(lambda: self.addFit(None))
+
     def updateWindowTitle(self):
         """
         Update the window title with the current optimizer name
