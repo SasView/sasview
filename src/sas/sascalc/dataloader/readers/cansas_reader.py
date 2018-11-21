@@ -183,7 +183,7 @@ class Reader(XMLreader):
             # Check schema CanSAS version matches file CanSAS version
             if CANSAS_NS.get(self.cansas_version).get("ns") == value.rsplit(" ")[0]:
                 return True
-        if ext == "svs":
+        if ext == ".svs":
             return True # Why is this required?
         # If we get to this point then file isn't valid CanSAS
         logger.warning("File doesn't meet CanSAS schema. Trying to load anyway.")

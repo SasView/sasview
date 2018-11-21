@@ -237,55 +237,49 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Open Project" menu item chosen.
         """
+        # check if any items loaded and warn about data deletion
+        if self.model.rowCount() > 0:
+            msg = "This operation will set remove all data, plots and analyses from"
+            msg += " SasView before loading the project. Do you wish to continue?"
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Project Load")
+            # custom buttons
+            button_yes = QtWidgets.QPushButton("Yes")
+            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
+            button_no = QtWidgets.QPushButton("No")
+            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
+            retval = msgbox.exec_()
+            if retval == QtWidgets.QMessageBox.RejectRole:
+                # cancel fit
+                return
+
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Project',
-            'filter'    : 'Project (*.json);;All files (*.*)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_project_location
+            'filter'    : 'Project Files (*.json);;Old Project Files (*.svs);;All files (*.*)',
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.default_project_location = os.path.dirname(filename)
-            load_thread = threads.deferToThread(self.readProject, filename)
-            load_thread.addCallback(self.readProjectComplete)
-            load_thread.addErrback(self.readProjectFailed)
+            self.deleteAllItems()
+            self.readProject(filename)
 
-    def loadFailed(self, reason):
+    def loadAnalysis(self):
         """
+        Called when the "Open Analysis" menu item chosen.
         """
-        print("file load FAILED: ", reason)
-        pass
-
-    def readProjectFailed(self, reason):
-        """
-        """
-        print("readProjectFailed FAILED: ", reason)
-        pass
-
-    def readProject(self, filename):
-        self.communicator.statusBarUpdateSignal.emit("Loading Project... %s" % os.path.basename(filename))
-        try:
-            manager = DataManager()
-            with open(filename, 'r') as infile:
-                manager.load_from_readable(infile)
-
-            self.communicator.statusBarUpdateSignal.emit("Loaded Project: %s" % os.path.basename(filename))
-            return manager
-
-        except:
-            self.communicator.statusBarUpdateSignal.emit("Failed: %s" % os.path.basename(filename))
-            raise
-
-    def readProjectComplete(self, manager):
-        self.model.clear()
-
-        self.manager.assign(manager)
-        self.model.beginResetModel()
-        for id, item in self.manager.get_all_data().items():
-            self.updateModel(item.data, item.path)
-
-        self.model.endResetModel()
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Open Analysis',
+            'filter'    : 'Project (*.fitv);;All files (*.*)',
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+        }
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
+        if filename:
+            self.readProject(filename)
 
     def saveProject(self):
         """
@@ -300,14 +294,280 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
         filename = name_tuple[0]
-        if filename:
-            self.default_project_location = os.path.dirname(filename)
-            _, extension = os.path.splitext(filename)
-            if not extension:
-                filename = '.'.join((filename, 'json'))
-            self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
-            with open(filename, 'w') as outfile:
-                self.manager.save_to_writable(outfile)
+        if not filename:
+            return
+        self.default_project_location = os.path.dirname(filename)
+        _, extension = os.path.splitext(filename)
+        if not extension:
+            filename = '.'.join((filename, 'json'))
+        self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
+
+        return filename
+
+    def saveAsAnalysisFile(self, tab_id=1):
+        """
+        Show the save as... dialog and return the chosen filepath
+        """
+        default_name = "FitPage"+str(tab_id)+".fitv"
+
+        wildcard = "fitv files (*.fitv)"
+        kwargs = {
+            'caption'   : 'Save As',
+            'directory' : default_name,
+            'filter'    : wildcard,
+            'parent'    : None,
+        }
+        # Query user for filename.
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = filename_tuple[0]
+        return filename
+
+    def saveAnalysis(self, data, tab_id=1):
+        """
+        Called when the "Save Analysis" menu item chosen.
+        """
+        filename = self.saveAsAnalysisFile(tab_id)
+        if not filename:
+            return
+        _, extension = os.path.splitext(filename)
+        if not extension:
+            filename = '.'.join((filename, 'fitv'))
+        self.communicator.statusBarUpdateSignal.emit("Saving analysis... %s\n" % os.path.basename(filename))
+
+        with open(filename, 'w') as outfile:
+            GuiUtils.saveData(outfile, data)
+
+        self.communicator.statusBarUpdateSignal.emit('Analysis saved.')
+
+    def allDataForModel(self, model):
+        # data model
+        all_data = {}
+        for i in range(model.rowCount()):
+            properties = {}
+            item = model.item(i)
+            data = GuiUtils.dataFromItem(item)
+            if data is None: continue
+            # Now, all plots under this item
+            filename = data.filename
+            is_checked = item.checkState()
+            properties['checked'] = is_checked
+            other_datas = []
+            # no need to save other_datas - things will be refit on read
+            #other_datas = GuiUtils.plotsFromFilename(filename, model)
+            # skip the main plot
+            #other_datas = list(other_datas.values())[1:]
+            all_data[data.id] = [data, properties, other_datas]
+        return all_data
+
+    def getDataForID(self, id):
+        # return the dataset with the given ID
+        all_data = []
+        for model in (self.model, self.theory_model):
+            for i in range(model.rowCount()):
+                properties = {}
+                item = model.item(i)
+                data = GuiUtils.dataFromItem(item)
+                if data is None: continue
+                if data.id != id: continue
+                # We found the dataset - save it.
+                filename = data.filename
+                is_checked = item.checkState()
+                properties['checked'] = is_checked
+                other_datas = GuiUtils.plotsFromFilename(filename, model)
+                # skip the main plot
+                other_datas = list(other_datas.values())[1:]
+                all_data = [data, properties, other_datas]
+                break
+        return all_data
+
+    def getItemForID(self, id):
+        # return the model item with the given ID
+        item = None
+        for model in (self.model, self.theory_model):
+            for i in range(model.rowCount()):
+                properties = {}
+                item = model.item(i)
+                data = GuiUtils.dataFromItem(item)
+                if data is None: continue
+                if data.id != id: continue
+                # We found the item - return it
+                break
+        return item
+
+    def getAllData(self):
+        """
+        converts all datasets into serializable dictionary
+        """
+        data = self.allDataForModel(self.model)
+        theory = self.allDataForModel(self.theory_model)
+
+        all_data = {}
+        all_data['is_batch'] = str(self.chkBatch.isChecked())
+
+        for key, value in data.items():
+            all_data[key] = value
+        for key, value in theory.items():
+            if key in all_data:
+                raise ValueError("Inconsistent data in Project file.")
+            all_data[key] = value
+        return all_data
+
+    def saveDataToFile(self, outfile):
+        """
+        Save every dataset to a json file
+        """
+        all_data = self.getAllData()
+        # save datas
+        GuiUtils.saveData(outfile, all_data)
+
+    def readProject(self, filename):
+        """
+        Read out datasets and fitpages from file
+        """
+        # Find out the filetype based on extension
+        ext = os.path.splitext(filename)[1]
+        all_data = {}
+        if 'svs' in ext.lower():
+            # backward compatibility mode.
+            try:
+                datasets = GuiUtils.readProjectFromSVS(filename)
+            except Exception as ex:
+                # disregard malformed SVS and try to recover whatever
+                # is available
+                msg = "Error while reading the project file: "+str(ex)
+                logging.error(msg)
+                pass
+            # Convert fitpage properties and update the dict
+            try:
+                all_data = GuiUtils.convertFromSVS(datasets)
+            except Exception as ex:
+                # disregard malformed SVS and try to recover regardless
+                msg = "Error while converting the project file: "+str(ex)
+                logging.error(msg)
+                pass
+        else:
+            with open(filename, 'r') as infile:
+                try:
+                    all_data = GuiUtils.readDataFromFile(infile)
+                except Exception as ex:
+                    logging.error("Project load failed with " + str(ex))
+                    return
+        for key, value in all_data.items():
+            if key=='is_batch':
+                self.chkBatch.setChecked(True if value=='True' else False)
+                continue
+            if 'cs_tab' in key:
+                continue
+            # send newly created items to the perspective
+            self.updatePerspectiveWithProperties(key, value)
+
+        # See if there are any batch pages defined and create them, if so
+        self.updateWithBatchPages(all_data)
+
+        # Only now can we create/assign C&S pages.
+        for key, value in all_data.items():
+            if 'cs_tab' in key:
+                self.updatePerspectiveWithProperties(key, value)
+
+    def updateWithBatchPages(self, all_data):
+        """
+        Checks all properties and see if there are any batch pages defined.
+        If so, pull out relevant indices and recreate the batch page(s)
+        """
+        batch_pages = []
+        for key, value in all_data.items():
+            if 'fit_params' not in value:
+                continue
+            params = value['fit_params']
+            for page in params:
+                if page['is_batch_fitting'][0] != 'True':
+                    continue
+                batch_ids = page['data_id'][0]
+                # check for duplicates
+                batch_set = set(batch_ids)
+                if batch_set in batch_pages:
+                    continue
+                # Found a unique batch page. Send it away
+                items = [self.getItemForID(i) for i in batch_set]
+                # Update the batch page list
+                batch_pages.append(batch_set)
+                # Assign parameters to the most recent (current) page.
+                self._perspective().setData(data_item=items, is_batch=True)
+                self._perspective().updateFromParameters(page)
+        pass
+
+    def updatePerspectiveWithProperties(self, key, value):
+        """
+        """
+        if 'fit_data' in value:
+            data_dict = {key:value['fit_data']}
+            # Create new model items in the data explorer
+            items = self.updateModelFromData(data_dict)
+
+        if 'fit_params' in value:
+            params = value['fit_params']
+            # Make the perspective read the rest of the read data
+            if not isinstance(params, list):
+                params = [params]
+            for page in params:
+                # Check if this set of parameters is for a batch page
+                # if so, skip the update
+                if page['is_batch_fitting'][0] == 'True':
+                    continue
+                # Send current model item to the perspective
+                self.sendItemToPerspective(items[0])
+                # Assign parameters to the most recent (current) page.
+                self._perspective().updateFromParameters(page)
+        if 'cs_tab' in key and 'is_constraint' in value:
+            # Create a C&S page
+            self._perspective().addConstraintTab()
+            # Modify the tab
+            self._perspective().updateFromParameters(value)
+
+        pass # debugger
+
+    def updateModelFromData(self, data):
+        """
+        Given data from analysis/project file,
+        create indices and populate data/theory models
+        """
+        # model items for top level datasets
+        items = []
+        for key, value in data.items():
+            # key - cardinal number of dataset
+            # value - main dataset, [dependant filesets]
+            # add the main index
+            if not value: continue
+            #if key=='is_batch':
+            #    self.chkBatch.setChecked(True if value=='True' else False)
+            #    continue
+            new_data = value[0]
+            from sas.sascalc.dataloader.data_info import Data1D as old_data1d
+            from sas.sascalc.dataloader.data_info import Data2D as old_data2d
+            if isinstance(new_data, (old_data1d, old_data2d)):
+                new_data = self.manager.create_gui_data(value[0], new_data.filename)
+            assert isinstance(new_data, (Data1D, Data2D))
+            properties = value[1]
+            is_checked = properties['checked']
+            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
+            new_item.setCheckState(is_checked)
+            items.append(new_item)
+            model = self.theory_model
+            if new_data.is_data:
+                model = self.model
+                # Caption for the theories
+                new_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
+
+            model.appendRow(new_item)
+            self.manager.add_data(data_list={new_data.id:new_data})
+
+            # Add the underlying data
+            if not value[2]:
+                continue
+            for plot in value[2]:
+                assert isinstance(plot, (Data1D, Data2D))
+                GuiUtils.updateModelItemWithPlot(new_item, plot, plot.name)
+        return items
 
     def deleteFile(self, event):
         """
@@ -423,6 +683,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             retval = msgbox.exec_()
 
+    def sendItemToPerspective(self, item):
+        """
+        Send the passed item data to the current perspective and set the relevant notifiers
+        """
+        # Set the signal handlers
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
+        selected_items = [item]
+        # Notify the GuiManager about the send request
+        try:
+            self._perspective().setData(data_item=selected_items, is_batch=False)
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            logging.error(msg)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            retval = msgbox.exec_()
 
     def freezeCheckedData(self):
         """
@@ -1058,7 +1337,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
-        self.actionDelete.triggered.connect(self.deleteItem)
+        self.actionDelete.triggered.connect(self.deleteSelectedItem)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
 
     def onCustomContextMenu(self, position):
@@ -1270,7 +1549,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item_to_copy and item_to_copy.isCheckable():
                 self.freezeItem(item_to_copy)
 
-    def deleteItem(self):
+    def deleteAllItems(self):
+        """
+        Deletes all datasets from both model and theory_model
+        """
+        deleted_items = [self.model.item(row) for row in range(self.model.rowCount())
+                         if self.model.item(row).isCheckable()]
+        deleted_names = [item.text() for item in deleted_items]
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_items)
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
+
+        # Clear the model
+        self.model.clear()
+
+    def deleteSelectedItem(self):
         """
         Delete the current item
         """
@@ -1287,22 +1581,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if reply == QtWidgets.QMessageBox.No:
             return
 
-        # Every time a row is removed, the indices change, so we'll just remove
-        # rows and keep calling selectedIndexes until it returns an empty list.
         indices = self.current_view.selectedIndexes()
+        self.deleteIndices(indices)
 
+    def deleteIndices(self, indices):
+        """
+        Delete model idices from the current view
+        """
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
         deleted_items = []
         deleted_names = []
 
+        # Every time a row is removed, the indices change, so we'll just remove
+        # rows and keep calling selectedIndexes until it returns an empty list.
         while len(indices) > 0:
             index = indices[0]
-            row_index = proxy.mapToSource(index)
-            item_to_delete = model.itemFromIndex(row_index)
+            #row_index = proxy.mapToSource(index)
+            #item_to_delete = model.itemFromIndex(row_index)
+            item_to_delete = model.itemFromIndex(index)
             if item_to_delete and item_to_delete.isCheckable():
-                row = row_index.row()
+                #row = row_index.row()
+                row = index.row()
 
                 # store the deleted item details so we can pass them on later
                 deleted_names.append(item_to_delete.text())
@@ -1429,7 +1730,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item = GuiUtils.HashableStandardItem()
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
-        checkbox_item.setText(os.path.basename(p_file))
+        if p_file is not None:
+            checkbox_item.setText(os.path.basename(p_file))
 
         # Add the actual Data1D/Data2D object
         object_item = GuiUtils.HashableStandardItem()

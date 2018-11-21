@@ -1248,14 +1248,15 @@ class Reader(CansasReader):
                             output.append(sas_entry)
 
             else:
-                self.call_back(format=ext)
+                #self.call_back(format=ext)
                 raise RuntimeError("%s is not a file" % path)
 
             # Return output consistent with the loader's api
             if len(output) == 0:
-                self.call_back(state=None, datainfo=None, format=ext)
+                #self.call_back(state=None, datainfo=None, format=ext)
                 return None
             else:
+                states=[]
                 for data in output:
                     # Call back to post the new state
                     state = data.meta_data['fitstate']
@@ -1280,7 +1281,7 @@ class Reader(CansasReader):
                     if data.run_name is not None and len(data.run_name) != 0:
                         if isinstance(data.run_name, dict):
                             # Note: key order in dict is not guaranteed, so sort
-                            name = data.run_name.keys()[0]
+                            name = list(data.run_name.keys())[0]
                         else:
                             name = data.run_name
                     else:
@@ -1288,15 +1289,16 @@ class Reader(CansasReader):
                     state.data.group_id = name
                     state.version = fitstate.version
                     # store state in fitting
-                    self.call_back(state=state, datainfo=data, format=ext)
+                    #self.call_back(state=state, datainfo=data, format=ext)
                     self.state = state
+                    states.append(state)
                 simfitstate = self._parse_simfit_state(entry)
                 if simfitstate is not None:
-                    self.call_back(state=simfitstate)
-
-                return output
+                    #self.call_back(state=simfitstate)
+                    states.append(simfitstate)
+                return (output, states)
         except:
-            self.call_back(format=ext)
+            #self.call_back(format=ext)
             raise
 
     def write(self, filename, datainfo=None, fitstate=None):

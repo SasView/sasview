@@ -33,8 +33,13 @@ class ComplexConstraintTest(unittest.TestCase):
         # set some models on tabs
         category_index = self.tab1.cbCategory.findText("Shape Independent")
         self.tab1.cbCategory.setCurrentIndex(category_index)
+        model_index = self.tab1.cbModel.findText("be_polyelectrolyte")
+        self.tab1.cbModel.setCurrentIndex(model_index)
+
         category_index = self.tab2.cbCategory.findText("Cylinder")
         self.tab2.cbCategory.setCurrentIndex(category_index)
+        model_index = self.tab2.cbModel.findText("barbell")
+        self.tab2.cbModel.setCurrentIndex(model_index)
 
         tabs = [self.tab1, self.tab2]
         self.widget = ComplexConstraint(parent=None, tabs=tabs)
@@ -126,12 +131,17 @@ class ComplexConstraintTest(unittest.TestCase):
         Test the return of specified constraint
         """
         # default data
-        self.assertEqual(self.widget.constraint(), ('M1', 'scale', '=', 'M1.scale'))
+        c = self.widget.constraint()
+        self.assertEqual(c[0], 'M1')
+        self.assertEqual(c[1].func, 'M1.scale')
 
         # Change parameter and operand
-        self.widget.cbOperator.setCurrentIndex(3)
-        self.widget.cbParam1.setCurrentIndex(3)
-        self.assertEqual(self.widget.constraint(), ('M1', 'bjerrum_length', '>=', 'M1.scale'))
+        #self.widget.cbOperator.setCurrentIndex(3)
+        self.widget.cbParam2.setCurrentIndex(3)
+        c = self.widget.constraint()
+        self.assertEqual(c[0], 'M1')
+        self.assertEqual(c[1].func, 'M1.sld_solvent')
+        #self.assertEqual(c[1].operator, '>=')
 
     def testOnHelp(self):
         """

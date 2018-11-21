@@ -22,6 +22,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
     """
+    fitCompleteSignal = QtCore.pyqtSignal(tuple)
+    batchCompleteSignal = QtCore.pyqtSignal(tuple)
+    fitFailedSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
@@ -31,6 +34,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Page id for fitting
         # To keep with previous SasView values, use 300 as the start offset
         self.page_id = 301
+        self.tab_id = self.page_id
 
         # Are we chain fitting?
         self.is_chain_fitting = False
@@ -59,6 +63,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Set up various widget states
         """
+        # disable special cases until properly defined
+        self.label.setVisible(False)
+        self.cbCases.setVisible(False)
+
         labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
         self.editable_tab_columns = [labels.index('Mnemonic')]
@@ -78,6 +86,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.setHorizontalHeaderLabels(labels)
         self.tblConstraints.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.tblConstraints.setEnabled(False)
+        header = self.tblConstraints.horizontalHeaderItem(0)
+        header.setToolTip("Double click a row below to edit the constraint.")
 
         self.tblConstraints.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblConstraints.customContextMenuRequested.connect(self.showConstrContextMenu)
@@ -92,12 +102,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cbCases.currentIndexChanged.connect(self.onSpecialCaseChange)
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdAdd.clicked.connect(self.showMultiConstraint)
         self.chkChain.toggled.connect(self.onChainFit)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
         self.tblTabList.cellDoubleClicked.connect(self.onTabCellEntered)
         self.tblConstraints.cellChanged.connect(self.onConstraintChange)
+
+        # Internal signals
+        self.fitCompleteSignal.connect(self.fitComplete)
+        self.batchCompleteSignal.connect(self.batchComplete)
+        self.fitFailedSignal.connect(self.fitFailed)
 
         # External signals
         self.parent.tabsModifiedSignal.connect(self.initializeFitList)
@@ -156,9 +172,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         fitter = Fit()
         fitter.fitter_id = self.page_id
 
-        # Notify the parent about fitting started
-        self.parent.fittingStartedSignal.emit(tabs_to_fit)
-
         # prepare fitting problems for each tab
         #
         page_ids = []
@@ -167,6 +180,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Prepare the fitter object
         try:
             for tab in tabs_to_fit:
+                if not self.isTabImportable(tab): continue
                 tab_object = ObjectLibrary.getObject(tab)
                 if tab_object is None:
                     # No such tab!
@@ -176,7 +190,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 page_ids.append([tab_object.page_id])
         except ValueError:
             # No parameters selected in one of the tabs
-            no_params_msg = "Fitting can not be performed.\n" +\
+            no_params_msg = "Fitting cannot be performed.\n" +\
                             "Not all tabs chosen for fitting have parameters selected for fitting."
             QtWidgets.QMessageBox.warning(self,
                                           'Warning',
@@ -200,6 +214,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         batch_inputs = {}
         batch_outputs = {}
 
+        # Notify the parent about fitting started
+        self.parent.fittingStartedSignal.emit(tabs_to_fit)
+
         # new fit thread object
         calc_fit = FitThread(handler=handler,
                              fn=sim_fitter_list,
@@ -222,6 +239,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
 
         #disable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
         self.cmdFit.setText('Running...')
         self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.cmdFit.setEnabled(False)
@@ -291,10 +309,21 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Modify the constraint's "active" instance variable.
         """
         item = self.tblConstraints.item(row, column)
-        if column == 0:
-            # Update the tabs for fitting list
-            constraint = self.available_constraints[row]
-            constraint.active = (item.checkState() == QtCore.Qt.Checked)
+        if column != 0: return
+        # Update the tabs for fitting list
+        constraint = self.available_constraints[row]
+        constraint.active = (item.checkState() == QtCore.Qt.Checked)
+        # Update the constraint formula
+        constraint = self.available_constraints[row]
+        function = item.text()
+        # remove anything left of '=' to get the constraint
+        function = function[function.index('=')+1:]
+        # No check on function here - trust the user (R)
+        if function != constraint.func:
+            # This becomes rather difficult to validate now.
+            # Turn off validation for Edit Constraint
+            constraint.func = function
+            constraint.validate = False
 
     def onTabCellEntered(self, row, column):
         """
@@ -307,9 +336,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onFitComplete(self, result):
         """
+        Send the fit complete signal to main thread
+        """
+        self.fitCompleteSignal.emit(result)
+
+    def fitComplete(self, result):
+        """
         Respond to the successful fit complete signal
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
@@ -346,9 +382,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onBatchFitComplete(self, result):
         """
+        Send the fit complete signal to main thread
+        """
+        self.batchCompleteSignal.emit(result)
+
+    def batchComplete(self, result):
+        """
         Respond to the successful batch fit complete signal
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
@@ -374,9 +417,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onFitFailed(self, reason):
         """
+        Send the fit failed signal to main thread
+        """
+        self.fitFailedSignal.emit(result)
+
+    def fitFailed(self, reason):
+        """
         Respond to fitting failure.
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
@@ -385,7 +435,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         msg = "Fitting failed: %s s.\n" % reason
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
- 
+
     def isTabImportable(self, tab):
         """
         Determines if the tab can be imported and included in the widget
@@ -598,6 +648,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
             # Show the text in the constraint table
             item = self.uneditableItem(label)
+            item = QtWidgets.QTableWidgetItem(label)
             item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             item.setCheckState(QtCore.Qt.Checked)
             self.tblConstraints.insertRow(pos)
@@ -666,33 +717,118 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                     continue
         return None
 
+    def onAcceptConstraint(self, con_tuple):
+        """
+        Receive constraint tuple from the ComplexConstraint dialog and adds contraint
+        """
+        #"M1, M2, M3" etc
+        model_name, constraint = con_tuple
+        constrained_tab = self.getObjectByName(model_name)
+        if constrained_tab is None:
+            return
+
+        # Find the constrained parameter row
+        constrained_row = constrained_tab.getRowFromName(constraint.param)
+
+        # Update the tab
+        constrained_tab.addConstraintToRow(constraint, constrained_row)
+
+        # Select this parameter for adjusting/fitting
+        constrained_tab.selectCheckbox(constrained_row)
+
+
     def showMultiConstraint(self):
         """
         Invoke the complex constraint editor
         """
         selected_rows = self.selectedParameters(self.tblTabList)
-        assert(len(selected_rows)==2)
+        if len(selected_rows)!=2:
+            msg = "Please select two fit pages from the Source Choice table."
+            msgbox = QtWidgets.QMessageBox(self.parent)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("2 fit page constraints")
+            retval = msgbox.exec_()
+            return
 
         tab_list = [ObjectLibrary.getObject(self.tblTabList.item(s, 0).data(0)) for s in selected_rows]
         # Create and display the widget for param1 and param2
         cc_widget = ComplexConstraint(self, tabs=tab_list)
+        cc_widget.constraintReadySignal.connect(self.onAcceptConstraint)
+
         if cc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
-        constraint = Constraint()
-        model1, param1, operator, constraint_text = cc_widget.constraint()
+    def getFitPage(self):
+        """
+        Retrieves the state of this page
+        """
+        param_list = []
 
-        constraint.func = constraint_text
-        # param1 is the parameter we're constraining
-        constraint.param = param1
+        param_list.append(['is_constraint', 'True'])
+        param_list.append(['data_id', "cs_tab"+str(self.page_id)])
+        param_list.append(['current_type', self.currentType])
+        param_list.append(['is_chain_fitting', str(self.is_chain_fitting)])
+        param_list.append(['special_case', self.cbCases.currentText()])
 
-        # Find the right tab
-        constrained_tab = self.getObjectByName(model1)
-        if constrained_tab is None:
+        return param_list
+
+    def getFitModel(self):
+        """
+        Retrieves current model
+        """
+        model_list = []
+
+        checked_models = {}
+        for row in range(self.tblTabList.rowCount()):
+            model_name = self.tblTabList.item(row,1).data(0)
+            active = self.tblTabList.item(row,0).checkState()# == QtCore.Qt.Checked
+            checked_models[model_name] = str(active)
+
+        checked_constraints = {}
+        for row in range(self.tblConstraints.rowCount()):
+            model_name = self.tblConstraints.item(row,0).data(0)
+            active = self.tblConstraints.item(row,0).checkState()# == QtCore.Qt.Checked
+            checked_constraints[model_name] = str(active)
+
+        model_list.append(['checked_models', checked_models])
+        model_list.append(['checked_constraints', checked_constraints])
+        return model_list
+
+    def createPageForParameters(self, parameters=None):
+        """
+        Update the page with passed parameter values
+        """
+        # checked models
+        if not 'checked_models' in parameters:
             return
+        models = parameters['checked_models'][0]
+        for model, check_state in models.items():
+            for row in range(self.tblTabList.rowCount()):
+                model_name = self.tblTabList.item(row,1).data(0)
+                if model_name != model:
+                    continue
+                # check/uncheck item
+                self.tblTabList.item(row,0).setCheckState(int(check_state))
 
-        # Find the constrained parameter row
-        constrained_row = constrained_tab.getRowFromName(param1)
+        if not 'checked_constraints' in parameters:
+            return
+        # checked constraints
+        models = parameters['checked_constraints'][0]
+        for model, check_state in models.items():
+            for row in range(self.tblConstraints.rowCount()):
+                model_name = self.tblConstraints.item(row,0).data(0)
+                if model_name != model:
+                    continue
+                # check/uncheck item
+                self.tblConstraints.item(row,0).setCheckState(int(check_state))
 
-        # Update the tab
-        constrained_tab.addConstraintToRow(constraint, constrained_row)
+        # fit/batch radio
+        isBatch = parameters['current_type'][0] == 'BatchPage'
+        if isBatch:
+            self.btnBatch.toggle()
+
+        # chain
+        is_chain = parameters['is_chain_fitting'][0] == 'True'
+        if isBatch:
+            self.chkChain.setChecked(is_chain)

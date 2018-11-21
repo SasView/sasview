@@ -1,4 +1,5 @@
 import numpy
+import copy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -9,6 +10,7 @@ from bumps import fitters
 
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
@@ -35,9 +37,6 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
-
-        ## Index of the current tab
-        #self.currentTab = 0
 
         # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
@@ -84,6 +83,13 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         self.updateWindowTitle()
 
+        # Add new tab mini-button
+        self.plusButton = QtWidgets.QToolButton(self)
+        self.plusButton.setText("+")
+        self.setCornerWidget(self.plusButton)
+        self.plusButton.setToolTip("Add a new Fit Page")
+        self.plusButton.clicked.connect(lambda: self.addFit(None))
+
     def updateWindowTitle(self):
         """
         Update the window title with the current optimizer name
@@ -111,6 +117,64 @@ class FittingWindow(QtWidgets.QTabWidget):
 
     def onLatexCopy(self):
         self.currentTab.onCopyToClipboard("Latex")
+
+    def serializeAllFitpage(self):
+        # serialize all active fitpages and return
+        # a dictionary: {data_id: fitpage_state}
+        params = {}
+        for i, tab in enumerate(self.tabs):
+            tab_data = self.getSerializedFitpage(tab)
+            if 'data_id' not in tab_data: continue
+            id = tab_data['data_id'][0]
+            if isinstance(id, list):
+                for i in id:
+                    if i in params:
+                        params[i].append(tab_data)
+                    else:
+                        params[i] = [tab_data]
+            else:
+                if id in params:
+                    params[id].append(tab_data)
+                else:
+                    params[id] = [tab_data]
+        return params
+
+    def serializeCurrentFitpage(self):
+        # serialize current(active) fitpage
+        return self.getSerializedFitpage(self.currentTab)
+
+    def getSerializedFitpage(self, tab):
+        """
+        get serialize requested fit tab
+        """
+        fitpage_state = tab.getFitPage()
+        fitpage_state += tab.getFitModel()
+        # put the text into dictionary
+        line_dict = {}
+        for line in fitpage_state:
+            #content = line.split(',')
+            if len(line) > 1:
+                line_dict[line[0]] = line[1:]
+        return line_dict
+
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = []
+        if not self.currentTab.data:
+            return tab_id
+        for item in self.currentTab.all_data:
+            data = GuiUtils.dataFromItem(item)
+            tab_id.append(data.id)
+
+        return tab_id
+
+    def updateFromParameters(self, parameters):
+        """
+        Pass the update parameters to the current fit page
+        """
+        self.currentTab.createPageForParameters(parameters)
 
     def closeEvent(self, event):
         """
@@ -245,15 +309,22 @@ class FittingWindow(QtWidgets.QTabWidget):
             return
         for index_to_delete in index_list:
             index_to_delete_str = str(index_to_delete)
-            if index_to_delete_str in list(self.dataToFitTab.keys()):
-                for tab_name in self.dataToFitTab[index_to_delete_str]:
-                    # delete tab #index after corresponding data got removed
-                    self.closeTabByName(tab_name)
-                self.dataToFitTab.pop(index_to_delete_str)
+            orig_dict = copy.deepcopy(self.dataToFitTab)
+            for tab_key in orig_dict.keys():
+                if index_to_delete_str in tab_key:
+                    for tab_name in orig_dict[tab_key]:
+                        self.closeTabByName(tab_name)
+                    self.dataToFitTab.pop(tab_key)
 
     def allowBatch(self):
         """
         Tell the caller that we accept multiple data instances
+        """
+        return True
+
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
         """
         return True
 
@@ -335,6 +406,15 @@ class FittingWindow(QtWidgets.QTabWidget):
                 tab_object.enableInteractiveElements()
 
         pass
+
+    def getCurrentStateAsXml(self):
+        """
+        Returns an XML version of the current state
+        """
+        state = {}
+        for tab in self.tabs:
+            pass
+        return state
 
     @property
     def currentTab(self):

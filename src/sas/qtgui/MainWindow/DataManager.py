@@ -28,7 +28,6 @@ import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.Plottables import Plottable
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
 from sas.qtgui.Plotting.Plottables import Text

@@ -19,7 +19,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
     """
     Logic class for interacting with MultiConstrainedUI view
     """
-    def __init__(self, parent=None, params=None):
+    def __init__(self, parent=None, params=None, constraint=None):
         """
         parent: ConstraintWidget object
         params: tuple of strings describing model parameters
@@ -30,13 +30,30 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         self.setModal(True)
         self.params = params
         self.parent = parent
+        # Text of the constraint
+        self.function = None
+        # Should this constraint be validated?
+        self.validate = True
+
+        self.input_constraint = constraint
+        if self.input_constraint is not None:
+            variable = constraint.value
+            self.function = constraint.func
+            self.params.append(variable)
+            self.model_name = constraint.value_ex
+            # Passed constraint may be too complex for simple validation
+            self.validate = constraint.validate
+        else:
+            self.model_name = self.params[1]
 
         self.setupLabels()
         self.setupTooltip()
 
         # Set param text control to the second parameter passed
-        self.txtConstraint.setText(self.params[1])
-
+        if self.input_constraint is None:
+            self.txtConstraint.setText(self.params[1])
+        else:
+            self.txtConstraint.setText(self.function)
         self.cmdOK.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdRevert.clicked.connect(self.revert)
@@ -51,6 +68,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         # Switch parameters
         self.params[1], self.params[0] = self.params[0], self.params[1]
+        # change fully qualified param name (e.g. M1.sld -> M1.sld_solvent)
+        self.model_name = self.model_name.replace(self.params[0], self.params[1])
         # Try to swap parameter names in the line edit
         current_text = self.txtConstraint.text()
         new_text = current_text.replace(self.params[0], self.params[1])
@@ -63,8 +82,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         Setup labels based on current parameters
         """
-        l1 = self.params[0]
-        l2 = self.params[1]
+        l1 = str(self.params[0])
+        l2 = str(self.params[1])
         self.txtParam1.setText(l1)
         self.txtParam1_2.setText(l1)
         self.txtParam2.setText(l2)
@@ -81,6 +100,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
+        # Don't validate if requested
+        if not self.validate: return
+
         formula_is_valid = False
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
@@ -98,8 +120,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         if not constraint_text or not isinstance(constraint_text, str):
             return False
 
-        param_str = str(self.params[1])
-        constraint_text = constraint_text.strip()
+        param_str = self.model_name
 
         # 1. just the parameter
         if param_str == constraint_text:

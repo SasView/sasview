@@ -51,6 +51,7 @@ from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
+MODEL_DEFAULT = "Choose model..."
 CATEGORY_STRUCTURE = "Structure Factor"
 CATEGORY_CUSTOM = "Plugin Models"
 STRUCTURE_DEFAULT = "None"
@@ -573,8 +574,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
-        self.communicate.saveAnalysisSignal.connect(self.savePageState)
-        #self.communicate.loadAnalysisSignal.connect(self.loadPageState)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
 
         # Communicator signal
@@ -622,6 +621,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
         has_constraints = any([self.rowHasConstraint(i) for i in rows])
+        has_real_constraints = any([self.rowHasActiveConstraint(i) for i in rows])
 
         self.actionSelect = QtWidgets.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
@@ -639,6 +639,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove constraint"))
 
+        self.actionEditConstraint = QtWidgets.QAction(self)
+        self.actionEditConstraint.setObjectName("actionEditConstrain")
+        self.actionEditConstraint.setText(QtCore.QCoreApplication.translate("self", "Edit constraint"))
+
         self.actionMultiConstrain = QtWidgets.QAction(self)
         self.actionMultiConstrain.setObjectName("actionMultiConstrain")
         self.actionMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain selected parameters to their current values"))
@@ -653,6 +657,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if has_constraints:
             menu.addAction(self.actionRemoveConstraint)
+            if num_rows == 1 and has_real_constraints:
+                menu.addAction(self.actionEditConstraint)
             #if num_rows == 1:
             #    menu.addAction(self.actionEditConstraint)
         else:
@@ -663,6 +669,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Define the callbacks
         self.actionConstrain.triggered.connect(self.addSimpleConstraint)
         self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
+        self.actionEditConstraint.triggered.connect(self.editConstraint)
         self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectParameters)
         self.actionDeselect.triggered.connect(self.deselectParameters)
@@ -700,8 +707,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         updated_param_used = model_name + "." + param_used
         new_func = c_text.replace(param_used, updated_param_used)
         constraint.func = new_func
+        constraint.value_ex = updated_param_used
         # Which row is the constrained parameter in?
         row = self.getRowFromName(constraint.param)
+
+        # what is the parameter to constraint to?
+        constraint.value = param_used
+
+        # Should the new constraint be validated?
+        constraint.validate = mc_widget.validate
 
         # Create a new item and add the Constraint object as a child
         self.addConstraintToRow(constraint=constraint, row=row)
@@ -798,6 +812,48 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.modifyViewOnRow(row, font=font, brush=brush)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
 
+    def editConstraint(self):
+        """
+        Delete constraints from selected parameters.
+        """
+        params_list = [s.data() for s in self.lstParams.selectionModel().selectedRows()
+                   if self.isCheckable(s.row())]
+        assert len(params_list) == 1
+        row = self.lstParams.selectionModel().selectedRows()[0].row()
+        constraint = self.getConstraintForRow(row)
+        # Create and display the widget for param1 and param2
+        mc_widget = MultiConstraint(self, params=params_list, constraint=constraint)
+        # Check if any of the parameters are polydisperse
+        if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
+            # no parameters are pd - reset the text to not show the warning
+            mc_widget.lblWarning.setText("")
+        if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
+        constraint = Constraint()
+        c_text = mc_widget.txtConstraint.text()
+
+        # widget.params[0] is the parameter we're constraining
+        constraint.param = mc_widget.params[0]
+        # parameter should have the model name preamble
+        model_name = self.kernel_module.name
+        # param_used is the parameter we're using in constraining function
+        param_used = mc_widget.params[1]
+        # Replace param_used with model_name.param_used
+        updated_param_used = model_name + "." + param_used
+        # Update constraint with new values
+        constraint.func = c_text
+        constraint.value_ex = updated_param_used
+        constraint.value = param_used
+        # Should the new constraint be validated?
+        constraint.validate = mc_widget.validate
+
+        # Which row is the constrained parameter in?
+        row = self.getRowFromName(constraint.param)
+
+        # Create a new item and add the Constraint object as a child
+        self.addConstraintToRow(constraint=constraint, row=row)
+
     def deleteConstraint(self):
         """
         Delete constraints from selected parameters.
@@ -851,6 +907,33 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return item.child(0).data()
         except AttributeError:
             return None
+
+    def allParamNames(self):
+        """
+        Returns a list of all parameter names defined on the current model
+        """
+        all_params = self.kernel_module._model_info.parameters.kernel_parameters
+        all_param_names = [param.name for param in all_params]
+        # Assure scale and background are always included
+        if 'scale' not in all_param_names:
+            all_param_names.append('scale')
+        if 'background' not in all_param_names:
+            all_param_names.append('background')
+        return all_param_names
+
+    def paramHasConstraint(self, param=None):
+        """
+        Finds out if the given parameter in the main model has a constraint child
+        """
+        if param is None: return False
+        if param not in self.allParamNames(): return False
+
+        for row in range(self._model_model.rowCount()):
+            if self._model_model.item(row,0).text() != param: continue
+            return self.rowHasConstraint(row)
+
+        # nothing found
+        return False
 
     def rowHasConstraint(self, row):
         """
@@ -1017,7 +1100,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Checks if the current model has magnetic scattering implemented
         """
-        has_params = False
+        has_mag_params = False
         if self.kernel_module:
             has_mag_params = len(self.kernel_module.magnetic_params) > 0
         return self.is2D and has_mag_params
@@ -1028,12 +1111,27 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         model = self.cbModel.currentText()
 
+        if model == MODEL_DEFAULT:
+            # if the previous category was not the default, keep it.
+            # Otherwise, just return
+            if self._previous_model_index != 0:
+                # We need to block signals, or else state changes on perceived unchanged conditions
+                self.cbModel.blockSignals(True)
+                self.cbModel.setCurrentIndex(self._previous_model_index)
+                self.cbModel.blockSignals(False)
+            return
+
         # Assure the control is active
         if not self.cbModel.isEnabled():
             return
         # Empty combobox forced to be read
         if not model:
             return
+
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+        self._previous_model_index = self.cbModel.currentIndex()
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1212,7 +1310,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.model_parameters = None
             self._model_model.clear()
             return
-
+        # Wipe out the parameter model
+        self._model_model.clear()
         # Safely clear and enable the model combo
         self.cbModel.blockSignals(True)
         self.cbModel.clear()
@@ -1224,7 +1323,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Retrieve the list of models
         model_list = self.master_category_dict[category]
         # Populate the models combobox
+        self.cbModel.blockSignals(True)
+        self.cbModel.addItem(MODEL_DEFAULT)
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+        self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):
         """
@@ -1936,7 +2038,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Emits plotRequestedSignal for all plots found in the given model under the provided item name.
         """
-        fitpage_name = "" if self.tab_id is None else "M"+str(self.tab_id)
+        fitpage_name = self.kernel_module.name
         plots = GuiUtils.plotsFromFilename(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
@@ -2424,6 +2526,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def isCheckable(self, row):
         return self._model_model.item(row, 0).isCheckable()
+
+    def selectCheckbox(self, row):
+        """
+        Select the checkbox in given row.
+        """
+        assert 0<= row <= self._model_model.rowCount()
+        index = self._model_model.index(row, 0)
+        item = self._model_model.itemFromIndex(index)
+        item.setCheckState(QtCore.Qt.Checked)
 
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
@@ -3429,41 +3540,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return report_logic.reportList()
 
-    def savePageState(self):
-        """
-        Create and serialize local PageState
-        """
-        filepath = self.saveAsAnalysisFile()
-        if filepath is None or filepath == "":
-            return
-
-        fitpage_state = self.getFitPage()
-        fitpage_state += self.getFitModel()
-
-        with open(filepath, 'w') as statefile:
-            for line in fitpage_state:
-                statefile.write(str(line))
-
-        self.communicate.statusBarUpdateSignal.emit('Analysis saved.')
-
-    def saveAsAnalysisFile(self):
-        """
-        Show the save as... dialog and return the chosen filepath
-        """
-        default_name = "FitPage"+str(self.tab_id)+".fitv"
-
-        wildcard = "fitv files (*.fitv)"
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
-        # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
-        filename = filename_tuple[0]
-        return filename
-
     def loadPageStateCallback(self,state=None, datainfo=None, format=None):
         """
         This is a callback method called from the CANSAS reader.
@@ -3548,10 +3624,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list = self.getFitParameters()
 
         param_list.append(['is_data', str(self.data_is_loaded)])
-        if self.data_is_loaded:
-            param_list.append(['data_id', str(self.logic.data.id)])
-            param_list.append(['data_name', str(self.logic.data.filename)])
-
+        data_ids = []
+        filenames = []
+        if self.is_batch_fitting:
+            for item in self.all_data:
+                # need item->data->data_id
+                data = GuiUtils.dataFromItem(item)
+                data_ids.append(data.id)
+                filenames.append(data.filename)
+        else:
+            if self.data_is_loaded:
+                data_ids = [str(self.logic.data.id)]
+                filenames = [str(self.logic.data.filename)]
+        param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
+        param_list.append(['data_name', filenames])
+        param_list.append(['data_id', data_ids])
+        param_list.append(['tab_name', self.modelName()])
         # option tab
         param_list.append(['q_range_min', str(self.q_range_min)])
         param_list.append(['q_range_max', str(self.q_range_max)])
@@ -3582,6 +3670,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         serializes current parameters
         """
         param_list = []
+        if self.kernel_module is None:
+            return param_list
+
         param_list.append(['model_name', str(self.cbModel.currentText())])
 
         def gatherParams(row):
@@ -3621,8 +3712,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 param_max = str(self._model_model.item(row, 3+column_offset).text())
             except:
                 pass
+            # Do we have any constraints on this parameter?
+            constraint = self.getConstraintForRow(row)
+            cons = ()
+            if constraint is not None:
+                value = constraint.value
+                func = constraint.func
+                value_ex = constraint.value_ex
+                param = constraint.param
+                validate = constraint.validate
 
-            param_list.append([param_name, param_checked, param_value, param_error, param_min, param_max])
+                cons = (value, param, value_ex, validate, func)
+
+            param_list.append([param_name, param_checked, param_value,param_error, param_min, param_max, cons])
 
         def gatherPolyParams(row):
             """
@@ -3686,7 +3788,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb = QtWidgets.QApplication.clipboard()
         cb_text = cb.text()
 
-        context = {}
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
             return False
@@ -3698,10 +3799,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if len(content) > 1:
                 line_dict[content[0]] = content[1:]
 
-        model = line_dict['model_name'][0]
+        self.updatePageWithParameters(line_dict)
 
+    def createPageForParameters(self, line_dict):
+        """
+        Sets up page with requested model/str factor
+        and fills it up with sent parameters
+        """
+        if 'fitpage_category' in line_dict:
+            self.cbCategory.setCurrentIndex(self.cbCategory.findText(line_dict['fitpage_category'][0]))
+        if 'fitpage_model' in line_dict:
+            self.cbModel.setCurrentIndex(self.cbModel.findText(line_dict['fitpage_model'][0]))
+        if 'fitpage_structure' in line_dict:
+            self.cbStructureFactor.setCurrentIndex(self.cbStructureFactor.findText(line_dict['fitpage_structure'][0]))
+
+        # Now that the page is ready for parameters, fill it up
+        self.updatePageWithParameters(line_dict)
+
+    def updatePageWithParameters(self, line_dict):
+        """
+        Update FitPage with parameters in line_dict
+        """
         if 'model_name' not in line_dict.keys():
-            return False
+            return
+        model = line_dict['model_name'][0]
+        context = {}
 
         if 'multiplicity' in line_dict.keys():
             multip = int(line_dict['multiplicity'][0], 0)
@@ -3710,6 +3832,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
 
+        if 'tab_name' in line_dict.keys():
+            self.kernel_module.name = line_dict['tab_name'][0]
         if 'polydisperse_params' in line_dict.keys():
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
         if 'magnetic_params' in line_dict.keys():
@@ -3832,7 +3956,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Potentially the error column
             ioffset = 0
             joffset = 0
-            if len(param_dict[param_name])>4:
+            if len(param_dict[param_name])>5:
                 # error values are not editable - no need to update
                 ioffset = 1
             if self.has_error_column:
@@ -3845,6 +3969,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._model_model.item(row, 3+joffset).setText(param_repr)
             except:
                 pass
+
+            # constraints
+            cons = param_dict[param_name][4+ioffset]
+            if cons is not None and len(cons)==5:
+                value = cons[0]
+                param = cons[1]
+                value_ex = cons[2]
+                validate = cons[3]
+                function = cons[4]
+                constraint = Constraint()
+                constraint.value = value
+                constraint.func = function
+                constraint.param = param
+                constraint.value_ex = value_ex
+                constraint.validate = validate
+                self.addConstraintToRow(constraint=constraint, row=row)
 
             self.setFocus()
 

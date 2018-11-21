@@ -254,7 +254,6 @@ class GuiManager(object):
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
             self._current_perspective.setClosable()
-            #self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._current_perspective.close()
             self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
@@ -470,7 +469,7 @@ class GuiManager(object):
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
-        self._workspace.actionSave.triggered.connect(self.actionSave)
+        self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -560,20 +559,71 @@ class GuiManager(object):
     def actionOpen_Analysis(self):
         """
         """
-        print("actionOpen_Analysis TRIGGERED")
+        self.filesWidget.loadAnalysis()
         pass
 
-    def actionSave(self):
+    def actionSave_Project(self):
         """
         Menu Save Project
         """
-        self.filesWidget.saveProject()
+        filename = self.filesWidget.saveProject()
+
+        # datasets
+        all_data = self.filesWidget.getAllData()
+
+        # fit tabs
+        params={}
+        perspective = self.perspective()
+        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
+            params = perspective.serializeAllFitpage()
+
+        # project dictionary structure:
+        # analysis[data.id] = [{"fit_data":[data, checkbox, child data],
+        #                       "fit_params":[fitpage_state]}
+        # "fit_params" not present if dataset not sent to fitting
+        analysis = {}
+
+        for id, data in all_data.items():
+            if id=='is_batch':
+                analysis['is_batch'] = data
+                continue
+            data_content = {"fit_data":data}
+            if id in params.keys():
+                # this dataset is represented also by the fit tab. Add to it.
+                data_content["fit_params"] = params[id]
+            analysis[id] = data_content
+
+        # standalone constraint pages
+        for keys, values in params.items():
+            if not 'is_constraint' in values[0]:
+                continue
+            analysis[keys] = values[0]
+
+        with open(filename, 'w') as outfile:
+            GuiUtils.saveData(outfile, analysis)
 
     def actionSave_Analysis(self):
         """
         Menu File/Save Analysis
         """
-        self.communicate.saveAnalysisSignal.emit()
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            return
+        # get fit page serialization
+        params = per.serializeCurrentFitpage()
+        # Find dataset ids for the current tab
+        # (can be multiple, if batch)
+        data_id = per.currentTabDataId()
+        tab_id = per.currentTab.tab_id
+        analysis = {}
+        for id in data_id:
+            an = {}
+            data_for_id = self.filesWidget.getDataForID(id)
+            an['fit_data'] = data_for_id
+            an['fit_params'] = [params]
+            analysis[id] = an
+
+        self.filesWidget.saveAnalysis(analysis, tab_id)
 
     def actionQuit(self):
         """
@@ -1055,6 +1105,12 @@ class GuiManager(object):
         When setting a perspective, sets up the menu bar
         """
         self._workspace.actionReport.setEnabled(False)
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionSave_Analysis.setEnabled(False)
+        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
+            self._workspace.actionOpen_Analysis.setEnabled(True)
+            self._workspace.actionSave_Analysis.setEnabled(True)
+
         if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
             self.checkAnalysisOption(self._workspace.actionFitting)
             # Put the fitting menu back in
@@ -1126,8 +1182,9 @@ class GuiManager(object):
         with open(path, 'w') as out_f:
             out_f.write("#Application appearance custom configuration\n")
             for key, item in config.__dict__.items():
-                if key[:2] != "__":
-                    if isinstance(item, str):
-                        item = '"' + item + '"'
-                    out_f.write("%s = %s\n" % (key, str(item)))
+                if key[:2] == "__":
+                    continue
+                if isinstance(item, str):
+                    item = '"' + item + '"'
+                out_f.write("%s = %s\n" % (key, str(item)))
         pass # debugger anchor
