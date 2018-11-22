@@ -11,9 +11,11 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
     supporting simple highlighting.
     """
     modelModified = QtCore.pyqtSignal()
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, is_python=True):
         super(ModelEditor, self).__init__(parent)
         self.setupUi(self)
+
+        self.is_python = is_python
 
         self.setupWidgets()
 
@@ -28,7 +30,7 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
         # importing QSyntaxHighlighter
         # DO NOT MOVE TO TOP
         from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
-        self.highlight = PythonHighlighter(self.txtEditor.document())
+        self.highlight = PythonHighlighter(self.txtEditor.document(), is_python=self.is_python)
 
         self.txtEditor.setFont(GuiUtils.getMonospaceFont())
 

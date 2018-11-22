@@ -116,6 +116,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logging.info("No data file chosen.")
             return
 
+        # remove c-plugin tab, if present.
+        if self.tabWidget.count()>1:
+            self.tabWidget.removeTab(1)
         self.loadFile(filename)
 
     def loadFile(self, filename):
@@ -129,8 +132,22 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.blockSignals(False)
         self.filename = filename
         display_name, _ = os.path.splitext(os.path.basename(filename))
-
         self.setWindowTitle(self.window_title + " - " + display_name)
+        # Name the tab with .py filename
+        display_name = os.path.basename(filename)
+        self.tabWidget.setTabText(0, display_name)
+
+        # See if there is filename.c present
+        c_path = self.filename.replace(".py", ".c")
+        if not os.path.isfile(c_path): return
+        # add a tab with the same highlighting
+        display_name = os.path.basename(c_path)
+        self.c_editor_widget = ModelEditor(self, is_python=False)
+        self.tabWidget.addTab(self.c_editor_widget, display_name)
+        # Read in the file and set in on the widget
+        with open(c_path, 'r') as plugin:
+            self.c_editor_widget.txtEditor.setPlainText(plugin.read())
+        self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
     def onModifiedExit(self):
         msg_box = QtWidgets.QMessageBox(self)
