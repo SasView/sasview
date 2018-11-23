@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from collections import defaultdict
 
 import copy
@@ -1460,7 +1461,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         tab_id = self.tabFitting.currentIndex()
         helpfile = "fitting.html"
         if tab_id == 0:
-            helpfile = "fitting_help.html"
+            # Look at the model and if set, pull out its help page
+            if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
+                # See if the help file is there
+                # This breaks encapsulation a bit, though.
+                full_path = GuiUtils.HELP_DIRECTORY_LOCATION
+                sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+                location = sas_path + "/" + full_path
+                location += "/user/models/" + self.kernel_module.id + ".html"
+                if os.path.isfile(location):
+                    # We have HTML for this model - show it
+                    tree_location = "/user/models/"
+                    helpfile = self.kernel_module.id + ".html"
+            else:
+                helpfile = "fitting_help.html"
         elif tab_id == 1:
             helpfile = "residuals_help.html"
         elif tab_id == 2:
