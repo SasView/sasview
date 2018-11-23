@@ -18,6 +18,86 @@ from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
+class DnDTableWidget(QtWidgets.QTableWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.viewport().setAcceptDrops(True)
+        self.setDragDropOverwriteMode(False)
+        self.setDropIndicatorShown(True)
+
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+
+        self._is_dragged = True
+
+    def isDragged(self):
+        """
+        Return the drag status
+        """
+        return self._is_dragged
+
+    def dragEnterEvent(self, event):
+        """
+        Called automatically on a drag in the TableWidget
+        """
+        self._is_dragged = True
+        event.accept()
+
+    def dragLeaveEvent(self, event):
+        """
+        Called automatically on a drag stop
+        """
+        self._is_dragged = False
+        event.accept()
+
+    def dropEvent(self, event: QtGui.QDropEvent):
+        if not event.isAccepted() and event.source() == self:
+            drop_row = self.drop_on(event)
+            rows = sorted(set(item.row() for item in self.selectedItems()))
+            rows_to_move = [[QtWidgets.QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())]
+                            for row_index in rows]
+            for row_index in reversed(rows):
+                self.removeRow(row_index)
+                if row_index < drop_row:
+                    drop_row -= 1
+
+            for row_index, data in enumerate(rows_to_move):
+                row_index += drop_row
+                self.insertRow(row_index)
+                for column_index, column_data in enumerate(data):
+                    self.setItem(row_index, column_index, column_data)
+            event.accept()
+            for row_index in range(len(rows_to_move)):
+                self.item(drop_row + row_index, 0).setSelected(True)
+                self.item(drop_row + row_index, 1).setSelected(True)
+        super().dropEvent(event)
+        # Reset the drag flag. Must be done after the drop even got accepted!
+        self._is_dragged = False
+
+    def drop_on(self, event):
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return self.rowCount()
+
+        return index.row() + 1 if self.is_below(event.pos(), index) else index.row()
+
+    def is_below(self, pos, index):
+        rect = self.visualRect(index)
+        margin = 2
+        if pos.y() - rect.top() < margin:
+            return False
+        elif rect.bottom() - pos.y() < margin:
+            return True
+
+        return rect.contains(pos, True) and not \
+            (int(self.model().flags(index)) & QtCore.Qt.ItemIsDropEnabled) and \
+            pos.y() >= rect.center().y()
+
+
 class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
@@ -28,6 +108,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
+
         self.parent = parent
         self.setupUi(self)
         self.currentType = "FitPage"
@@ -35,6 +116,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # To keep with previous SasView values, use 300 as the start offset
         self.page_id = 301
         self.tab_id = self.page_id
+        # fitpage order in the widget
+        self._row_order = []
+
+        # Set the table widget into layout
+        self.tblTabList = DnDTableWidget(self)
+        self.tblLayout.addWidget(self.tblTabList)
 
         # Are we chain fitting?
         self.is_chain_fitting = False
@@ -260,6 +347,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Respond to check/uncheck and to modify the model moniker actions
         """
+        # If this "Edit" is just a response from moving rows around,
+        # update the tab order and leave
+        if self.tblTabList.isDragged():
+            self._row_order = []
+            for i in range(self.tblTabList.rowCount()):
+                self._row_order.append(self.tblTabList.item(i,0).data(0))
+            return
+
         item = self.tblTabList.item(row, column)
         if column == 0:
             # Update the tabs for fitting list
@@ -280,11 +375,21 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             item.setBackground(QtCore.Qt.red)
             self.tblTabList.blockSignals(False)
             self.cmdFit.setEnabled(False)
+            if new_moniker == "":
+                msg = "Please use a non-empty name."
+            else:
+                msg = "Please use a unique name."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            item.setToolTip(msg)
             return
         self.tblTabList.blockSignals(True)
         item.setBackground(QtCore.Qt.white)
         self.tblTabList.blockSignals(False)
         self.cmdFit.setEnabled(True)
+        item.setToolTip("")
+        msg = "Fitpage name changed to {}.".format(new_moniker)
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+
         if not self.current_cell:
             return
         # Remember the value
@@ -681,11 +786,35 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
+        if not self._row_order:
+            # Initialize tab order list
+            self._row_order = tabs
+        else:
+            tabs = self.orderedSublist(self._row_order, tabs)
+            self._row_order = tabs
+
         for tab in tabs:
             self.updateFitLine(tab)
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
             self.cmdFit.setEnabled(True)
+
+    def orderedSublist(self, order_list, target_list):
+        """
+        Orders the target_list such that any elements
+        present in order_list show up first and in the order
+        from order_list.
+        """
+        tmp_list = []
+        # 1. get the non-matching elements
+        nonmatching = list(set(target_list) - set(order_list))
+        # 2: start with matching tabs, in the correct order
+        for elem in order_list:
+            if elem in target_list:
+                tmp_list.append(elem)
+        # 3. add the remaning tabs in any order
+        ordered_list = tmp_list + nonmatching
+        return ordered_list
 
     def validateMoniker(self, new_moniker=None):
         """
