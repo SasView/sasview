@@ -672,14 +672,30 @@ def getStandardParam(model=None):
         max_value = model.item(row, 3+column_shift).text()
         unit = ""
         if model.item(row, 4+column_shift) is not None:
-            unit = model.item(row, 4+column_shift).text()
-
+            u = model.item(row, 4+column_shift).text()
+            # This isn't a unit if it is a number (polyd./magn.)
+            unit = "" if isNumber(u) else u
         param.append([checkbox_state, param_name, value, "",
-                        [error_state, error_value],
-                        [min_state, min_value],
-                        [max_state, max_value], unit])
+                     [error_state, error_value],
+                     [min_state, min_value],
+                     [max_state, max_value], unit])
 
     return param
+
+def isNumber(s):
+    """
+    Checks if string 's' is an int/float
+    """
+    if s.isdigit():
+        # check int
+        return True
+    else:
+        try:
+            # check float
+            _ = float(s)
+        except ValueError:
+            return False
+    return True
 
 def getOrientationParam(kernel_module=None):
     """

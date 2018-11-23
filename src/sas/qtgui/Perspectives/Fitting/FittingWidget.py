@@ -3532,11 +3532,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             index = self.theory_item
         params = FittingUtilities.getStandardParam(self._model_model)
+        poly_params = []
+        magnet_params = []
+        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
+            poly_params = FittingUtilities.getStandardParam(self._poly_model)
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
+            magnet_params = FittingUtilities.getStandardParam(self._magnet_model)
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.kernel_module,
                                        data=self.data,
                                        index=index,
-                                       params=params)
+                                       params=params+poly_params+magnet_params)
 
         return report_logic.reportList()
 
