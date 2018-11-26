@@ -274,9 +274,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Set constraints on all identically named parameters between two fitpages
         """
         # loop over parameters in constrained model
-        items1 = [param for param in self.params[0] if not self.tabs[0].paramHasConstraint(param)]
-        #items2 = [param for param in self.params[1] if not self.tabs[1].paramHasConstraint(i)]
-        items2 = self.params[1]
+        index1 = self.cbModel1.currentIndex()
+        index2 = self.cbModel2.currentIndex()
+        items1 = [param for param in self.params[index1] if not self.tabs[index1].paramHasConstraint(param)]
+        items2 = self.params[index2]
         for item in items1:
             if item not in items2: continue
             param = item
