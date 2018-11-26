@@ -36,6 +36,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.tab_names = None
         self.operator = '='
         self._constraint = Constraint()
+        self.all_menu   = None
 
         self.warning = self.lblWarning.text()
         self.setupData()
@@ -59,8 +60,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         self.cmdOK.clicked.connect(self.onApply)
         self.cmdHelp.clicked.connect(self.onHelp)
-        self.cmdRevert.clicked.connect(self.onRevert)
         self.txtConstraint.editingFinished.connect(self.validateFormula)
+        self.cbModel1.currentIndexChanged.connect(self.onModelIndexChange)
+        self.cbModel2.currentIndexChanged.connect(self.onModelIndexChange)
 
         self.cbParam1.currentIndexChanged.connect(self.onParamIndexChange)
         self.cbParam2.currentIndexChanged.connect(self.onParamIndexChange)
@@ -70,45 +72,56 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Setup widgets based on current parameters
         """
-        self.txtName1.setText(self.tab_names[0])
-        self.txtName2.setText(self.tab_names[1])
+        self.cbModel1.insertItems(0, self.tab_names)
+        self.cbModel2.insertItems(0, self.tab_names)
 
         self.setupParamWidgets()
 
-        # Add menu to the Apply button
-        all_menu   = QtWidgets.QMenu()
+        self.setupMenu()
+
+    def setupMenu(self):
+        # Add menu to the Apply button, if necessary
+        if self.cbModel1.currentText() ==self.cbModel2.currentText():
+            self.cmdOK.setArrowType(QtCore.Qt.NoArrow)
+            self.cmdOK.setPopupMode(QtWidgets.QToolButton.DelayedPopup)
+            self.cmdOK.setMenu(None)
+            return
+        self.all_menu   = QtWidgets.QMenu()
         self.actionAddAll = QtWidgets.QAction(self)
         self.actionAddAll.setObjectName("actionAddAll")
         self.actionAddAll.setText(QtCore.QCoreApplication.translate("self", "Add all"))
         ttip = "Add constraints between all identically named parameters in both fitpages"
         self.actionAddAll.setToolTip(ttip)
         self.actionAddAll.triggered.connect(self.onSetAll)
-        all_menu.addAction(self.actionAddAll)
+        self.all_menu.addAction(self.actionAddAll)
         # https://bugreports.qt.io/browse/QTBUG-13663
-        all_menu.setToolTipsVisible(True)
-        self.cmdOK.setMenu(all_menu)
+        self.all_menu.setToolTipsVisible(True)
+        self.cmdOK.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+        self.cmdOK.setArrowType(QtCore.Qt.DownArrow)
+        self.cmdOK.setMenu(self.all_menu)
 
     def setupParamWidgets(self):
         """
         Fill out comboboxes and set labels with non-constrained parameters
         """
         self.cbParam1.clear()
-        items1 = [param for param in self.params[0] if not self.tabs[0].paramHasConstraint(param)]
+        tab_index1 = self.cbModel1.currentIndex()
+        items1 = [param for param in self.params[tab_index1] if not self.tabs[tab_index1].paramHasConstraint(param)]
         self.cbParam1.addItems(items1)
 
         # M2 doesn't have to be non-constrained
         self.cbParam2.clear()
-        #items2 = [param for param in self.params[1] if not self.tabs[1].paramHasConstraint(param)]
-        items2 = [param for param in self.params[1]]
+        tab_index2 = self.cbModel2.currentIndex()
+        items2 = [param for param in self.params[tab_index2]]
         self.cbParam2.addItems(items2)
 
-        self.txtParam.setText(self.tab_names[0] + ":" + self.cbParam1.currentText())
+        self.txtParam.setText(self.tab_names[tab_index1] + ":" + self.cbParam1.currentText())
 
         self.cbOperator.clear()
         self.cbOperator.addItems(ALLOWED_OPERATORS)
         self.txtOperator.setText(self.cbOperator.currentText())
 
-        self.txtConstraint.setText(self.tab_names[1]+"."+self.cbParam2.currentText())
+        self.txtConstraint.setText(self.tab_names[tab_index2]+"."+self.cbParam2.currentText())
 
         # disable Apply if no parameters available
         if len(items1)==0:
@@ -154,6 +167,14 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
                 txt = self.warning
         self.lblWarning.setText(txt)
 
+    def onModelIndexChange(self, index):
+        """
+        Respond to mode combo box changes
+        """
+        # disable/enable Add All
+        self.setupMenu()
+        # Reload parameters
+        self.setupParamWidgets()
 
     def onOperatorChange(self, index):
         """
@@ -161,36 +182,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         self.txtOperator.setText(self.cbOperator.currentText())
 
-    def onRevert(self):
-        """
-        switch M1 <-> M2
-        """
-        # Switch parameters
-        self.params[1], self.params[0] = self.params[0], self.params[1]
-        self.tab_names[1], self.tab_names[0] = self.tab_names[0], self.tab_names[1]
-        self.tabs[1], self.tabs[0] = self.tabs[0], self.tabs[1]
-        # Try to swap parameter names in the line edit
-        current_text = self.txtConstraint.text()
-        new_text = current_text.replace(self.cbParam1.currentText(), self.cbParam2.currentText())
-        self.txtConstraint.setText(new_text)
-        # Update labels and tooltips
-        index1 = self.cbParam1.currentIndex()
-        index2 = self.cbParam2.currentIndex()
-        indexOp = self.cbOperator.currentIndex()
-        self.setupWidgets()
-
-        # Original indices
-        index2 = index2 if index2 >= 0 else 0
-        index1 = index1 if index1 >= 0 else 0
-        self.cbParam1.setCurrentIndex(index2)
-        self.cbParam2.setCurrentIndex(index1)
-        self.cbOperator.setCurrentIndex(indexOp)
-        self.setupTooltip()
-
     def validateFormula(self):
         """
         Add visual cues when formula is incorrect
         """
+        # temporarily disable validation
+        return
+        #
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
@@ -207,13 +205,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if not constraint_text or not isinstance(constraint_text, str):
             return False
 
-        # M1.scale  --> model_str='M1', constraint_text='scale'
+        # M1.scale --> model_str='M1', constraint_text='scale'
         param_str = self.cbParam2.currentText()
         constraint_text = constraint_text.strip()
-        model_str = self.txtName2.text()
+        model_str = self.cbModel2.currentText()
 
         # 0. Has to contain the model name
-        if model_str != self.txtName2.text():
+        if model_str != model_str:
             return False
 
         # Remove model name from constraint
@@ -248,8 +246,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param = self.cbParam1.currentText()
         value = self.cbParam2.currentText()
         func = self.txtConstraint.text()
-        value_ex = self.txtName2.text() + "." + self.cbParam2.currentText()
-        model1 = self.txtName1.text()
+        value_ex = self.cbModel2.currentText() + "." + self.cbParam2.currentText()
+        model1 = self.cbModel1.currentText()
         operator = self.cbOperator.currentText()
 
         con = Constraint(self,
@@ -283,9 +281,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             if item not in items2: continue
             param = item
             value = item
-            func = self.txtName2.text() + "." + param
-            value_ex = self.txtName1.text() + "." + param
-            model1 = self.txtName1.text()
+            func = self.cbModel2.currentText() + "." + param
+            value_ex = self.cbModel1.currentText() + "." + param
+            model1 = self.cbModel1.currentText()
             operator = self.cbOperator.currentText()
 
             con = Constraint(self,
