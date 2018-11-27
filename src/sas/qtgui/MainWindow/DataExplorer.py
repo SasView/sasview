@@ -1598,12 +1598,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # rows and keep calling selectedIndexes until it returns an empty list.
         while len(indices) > 0:
             index = indices[0]
-            #row_index = proxy.mapToSource(index)
-            #item_to_delete = model.itemFromIndex(row_index)
-            item_to_delete = model.itemFromIndex(index)
+            row_index = proxy.mapToSource(index)
+            item_to_delete = model.itemFromIndex(row_index)
             if item_to_delete and item_to_delete.isCheckable():
-                #row = row_index.row()
-                row = index.row()
+                row = row_index.row()
 
                 # store the deleted item details so we can pass them on later
                 deleted_names.append(item_to_delete.text())

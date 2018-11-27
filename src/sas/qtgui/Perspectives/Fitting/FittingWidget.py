@@ -3054,8 +3054,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Update main model for display
                 self.iterateOverModel(updateFunctionCaption)
                 self.kernel_module.set_dispersion(param.name, self.disp_model)
+                # uncheck the parameter
+                self._poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
-                lo = self.lstPoly.itemDelegate().poly_pd
+                lo = self.lstPoly.itemDelegate().poly_parameter
                 hi = self.lstPoly.itemDelegate().poly_function
                 self._poly_model.blockSignals(True)
                 [self._poly_model.item(row_index, i).setEnabled(False) for i in range(lo, hi)]
