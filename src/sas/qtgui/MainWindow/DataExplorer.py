@@ -386,11 +386,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for model in (self.model, self.theory_model):
             for i in range(model.rowCount()):
                 properties = {}
-                item = model.item(i)
-                data = GuiUtils.dataFromItem(item)
+                data = GuiUtils.dataFromItem(model.item(i))
                 if data is None: continue
                 if data.id != id: continue
                 # We found the item - return it
+                item = model.item(i)
                 break
         return item
 
@@ -547,6 +547,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if isinstance(new_data, (old_data1d, old_data2d)):
                 new_data = self.manager.create_gui_data(value[0], new_data.filename)
             assert isinstance(new_data, (Data1D, Data2D))
+            # make sure the ID is retained
+            new_data.id = value[0].id
+            new_data.group_id = value[0].group_id
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
