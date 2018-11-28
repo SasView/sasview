@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, division
 
 import math
 import numpy as np
@@ -50,7 +50,7 @@ class NTermEstimator(object):
         """
         osc = self.sort_osc()
         dv = len(osc)
-        med = float(dv) / 2.0
+        med = 0.5*dv
         odd = self.is_odd(dv)
         medi = 0
         for i in range(dv):
@@ -139,7 +139,7 @@ class NTermEstimator(object):
             self.isquit_func = isquit_func
             nts = self.compare_err()
             div = len(nts)
-            tem = float(div) / 2.0
+            tem = 0.5*div
             if self.is_odd(div):
                 nt = nts[int(tem)]
             else:

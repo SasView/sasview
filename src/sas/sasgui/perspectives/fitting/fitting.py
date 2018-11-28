@@ -775,10 +775,8 @@ class Plugin(PluginBase):
         :param fid: id corresponding to a fit problem (data, model)
         :param weight: current dy data
         """
-        # If we are not dealing with a specific fit problem, then
-        # there is no point setting the weights.
-        if fid is None:
-            return
+        # Note: this is used to set the data weights for the fit based on
+        # the weight selection in the GUI.
         if uid in self.page_finder:
             self.page_finder[uid].set_weight(flag=flag, is2d=is2d)
 

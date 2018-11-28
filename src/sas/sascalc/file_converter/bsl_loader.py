@@ -1,4 +1,4 @@
-from sas.sascalc.file_converter.core.bsl_loader import CLoader
+from sas.sascalc.file_converter._bsl_loader import CLoader
 from sas.sascalc.dataloader.data_info import Data2D
 from copy import deepcopy
 import os
@@ -66,7 +66,7 @@ class BSLLoader(CLoader):
                     'frames': int(metadata[2]),
                     'swap_bytes': int(metadata[3])
                 }
-            except:
+            except Exception:
                 is_valid = False
                 err_msg = "Invalid metadata in header file for {}"
                 err_msg = err_msg.format(sasdata_filename)

@@ -5,6 +5,7 @@ The module contains the Invertor class.
 
 FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
+from __future__ import division
 
 import numpy as np
 import sys
@@ -16,7 +17,7 @@ import re
 import logging
 from numpy.linalg import lstsq
 from scipy import optimize
-from sas.sascalc.pr.core.pr_inversion import Cinvertor
+from sas.sascalc.pr._pr_inversion import Cinvertor
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class Invertor(Cinvertor):
 
         A[j][i] = (Fourier transformed base function for point j)
 
-    We them choose a number of r-points, n_r, to evaluate the second
+    We then choose a number of r-points, n_r, to evaluate the second
     derivative of P(r) at. This is used as our regularization term.
     For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -143,7 +144,7 @@ class Invertor(Cinvertor):
         Access the parent class methods for
         x, y, err, d_max, q_min, q_max and alpha
         """
-        if   name == 'x':
+        if name == 'x':
             if 0.0 in value:
                 msg = "Invertor: one of your q-values is zero. "
                 msg += "Delete that entry before proceeding"
@@ -267,7 +268,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -415,7 +416,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -472,7 +473,7 @@ class Invertor(Cinvertor):
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
-        c, chi2, _, _ = lstsq(a, b)
+        c, chi2, _, _ = lstsq(a, b, rcond=-1)
         # Sanity check
         try:
             float(chi2)
@@ -495,11 +496,11 @@ class Invertor(Cinvertor):
 
         try:
             cov = np.linalg.pinv(inv_cov)
-            err = math.fabs(chi2 / float(npts - nfunc)) * cov
-        except:
+            err = math.fabs(chi2 / (npts - nfunc)) * cov
+        except Exception as exc:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logger.error(sys.exc_value)
+            logger.error(exc)
 
         # Keep a copy of the last output
         if not self.est_bck:
@@ -536,15 +537,15 @@ class Invertor(Cinvertor):
         :return: number of terms, alpha, message
 
         """
-        from num_term import NTermEstimator
+        from .num_term import NTermEstimator
         estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
-        except:
+        except Exception as exc:
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
+            logger.warning("Invertor.estimate_numterms: %s" % exc)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -630,8 +631,8 @@ class Invertor(Cinvertor):
 
                 return best_alpha, message, elapsed
 
-        except:
-            message = "Invertor.estimate_alpha: %s" % sys.exc_value
+        except Exception as exc:
+            message = "Invertor.estimate_alpha: %s" % exc
             return 0, message, elapsed
 
     def to_file(self, path, npts=100):
@@ -747,8 +748,8 @@ class Invertor(Cinvertor):
 
                         self.cov[i][i] = float(toks2[1])
 
-            except:
-                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_value
+            except Exception as exc:
+                msg = "Invertor.from_file: corrupted file\n%s" % exc
                 raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
