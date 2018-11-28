@@ -32,7 +32,7 @@ class DnDTableWidget(QtWidgets.QTableWidget):
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
 
-        self._is_dragged = True
+        self._is_dragged = False
 
     def isDragged(self):
         """
@@ -871,16 +871,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Invoke the complex constraint editor
         """
         selected_rows = self.selectedParameters(self.tblTabList)
-        if len(selected_rows)!=2:
-            msg = "Please select two fit pages from the Source Choice table."
-            msgbox = QtWidgets.QMessageBox(self.parent)
-            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
-            msgbox.setText(msg)
-            msgbox.setWindowTitle("2 fit page constraints")
-            retval = msgbox.exec_()
-            return
 
-        tab_list = [ObjectLibrary.getObject(self.tblTabList.item(s, 0).data(0)) for s in selected_rows]
+        tab_list = [ObjectLibrary.getObject(self.tblTabList.item(s, 0).data(0)) for s in range(self.tblTabList.rowCount())]
         # Create and display the widget for param1 and param2
         cc_widget = ComplexConstraint(self, tabs=tab_list)
         cc_widget.constraintReadySignal.connect(self.onAcceptConstraint)

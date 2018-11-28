@@ -269,7 +269,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # {model.name:model}
         self.custom_models = self.customModels()
         # Polydisp widget table default index for function combobox
-        self.orig_poly_index = 3
+        self.orig_poly_index = 4
         # copy of current kernel model
         self.kernel_module_copy = None
 
@@ -3021,14 +3021,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param = self.model_parameters.form_volume_parameters[row_index]
         file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         combo_box = self.lstPoly.indexWidget(file_index)
+        try:
+            self.disp_model = POLYDISPERSITY_MODELS[combo_string]()
+        except IndexError:
+            logger.error("Error in setting the dispersion model. Reverting to Gaussian.")
+            self.disp_model = POLYDISPERSITY_MODELS['gaussian']()
 
         def updateFunctionCaption(row):
             # Utility function for update of polydispersity function name in the main model
             if not self.isCheckable(row):
                 return
-            self._model_model.blockSignals(True)
-            param_name = str(self._model_model.item(row, 0).text())
-            self._model_model.blockSignals(False)
+            param_name = self._model_model.item(row, 0).text()
             if param_name !=  param.name:
                 return
             # Modify the param value
@@ -3042,18 +3045,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if combo_string == 'array':
             try:
+                # assure the combo is at the right index
+                combo_box.blockSignals(True)
+                combo_box.setCurrentIndex(combo_box.findText(combo_string))
+                combo_box.blockSignals(False)
+                # Load the file
                 self.loadPolydispArray(row_index)
                 # Update main model for display
                 self.iterateOverModel(updateFunctionCaption)
+                self.kernel_module.set_dispersion(param.name, self.disp_model)
+                # uncheck the parameter
+                self._poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
-                lo = self.lstPoly.itemDelegate().poly_pd
+                lo = self.lstPoly.itemDelegate().poly_parameter
                 hi = self.lstPoly.itemDelegate().poly_function
+                self._poly_model.blockSignals(True)
                 [self._poly_model.item(row_index, i).setEnabled(False) for i in range(lo, hi)]
+                self._poly_model.blockSignals(False)
                 return
             except IOError:
                 combo_box.setCurrentIndex(self.orig_poly_index)
                 # Pass for cancel/bad read
                 pass
+        else:
+            self.kernel_module.set_dispersion(param.name, self.disp_model)
 
         # Enable the row in case it was disabled by Array
         self._poly_model.blockSignals(True)
@@ -3105,7 +3120,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             [appendData(line) for line in column_data]
 
         # If everything went well - update the sasmodel values
-        self.disp_model = POLYDISPERSITY_MODELS['array']()
         self.disp_model.set_weights(np.array(values), np.array(weights))
         # + update the cell with filename
         fname = os.path.basename(str(datafile))

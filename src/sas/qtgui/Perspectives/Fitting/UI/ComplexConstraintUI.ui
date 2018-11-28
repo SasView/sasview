@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>478</width>
-    <height>257</height>
+    <width>496</width>
+    <height>260</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,45 +20,10 @@
       <string>2 parameter constraint</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="txtParam">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>param1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="txtOperator">
-          <property name="text">
-           <string>=</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="txtConstraint">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="txtName1">
-          <property name="text">
-           <string>name1</string>
-          </property>
-         </widget>
+         <widget class="QComboBox" name="cbModel1"/>
         </item>
         <item>
          <widget class="QComboBox" name="cbParam1">
@@ -88,11 +53,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="txtName2">
-          <property name="text">
-           <string>name2</string>
-          </property>
-         </widget>
+         <widget class="QComboBox" name="cbModel2"/>
         </item>
         <item>
          <widget class="QComboBox" name="cbParam2">
@@ -112,23 +73,34 @@
           </item>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QLabel" name="txtParam">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
+          <property name="text">
+           <string>param1</string>
           </property>
-         </spacer>
+         </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="cmdRevert">
+         <widget class="QLabel" name="txtOperator">
           <property name="text">
-           <string>Swap</string>
+           <string>=</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="txtConstraint">
+          <property name="text">
+           <string/>
           </property>
          </widget>
         </item>
@@ -187,7 +159,7 @@
         <string>Add</string>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::MenuButtonPopup</enum>
+        <enum>QToolButton::InstantPopup</enum>
        </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextOnly</enum>
