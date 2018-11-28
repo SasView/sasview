@@ -964,11 +964,11 @@ class EditorPanel(wx.ScrolledWindow):
         out_f.write('def Iq(%s):\n' % ', '.join(['x'] + param_names))
         out_f.write('    """Absolute scattering"""\n')
         if "scipy." in func_str:
-            out_f.write('    import scipy')
+            out_f.write('    import scipy\n')
         if "numpy." in func_str:
-            out_f.write('    import numpy')
+            out_f.write('    import numpy\n')
         if "np." in func_str:
-            out_f.write('    import numpy as np')
+            out_f.write('    import numpy as np\n')
         for func_line in func_str.split('\n'):
             out_f.write('%s%s\n' % ('    ', func_line))
         out_f.write('## uncomment the following if Iq works for vector x\n')
