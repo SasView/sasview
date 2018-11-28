@@ -85,6 +85,7 @@ def make_custom_config_path(user_dir):
 
 def setup_custom_config(app_dir, user_dir):
     path = make_custom_config_path(user_dir)
+    #logger.info("custom config path %s", path)
     if not os.path.isfile(path):
         try:
             # if the custom config file does not exist, copy the default from
@@ -100,7 +101,7 @@ def setup_custom_config(app_dir, user_dir):
     if not hasattr(custom_config, "SAS_OPENCL"):
         custom_config.SAS_OPENCL = None
         try:
-            open(config_file, "a+").write("SAS_OPENCL = \"None\"\n")
+            open(path, "a+").write("SAS_OPENCL = \"None\"\n")
         except Exception:
             logger.error("Could not update custom config with SAS_OPENCL.")
 
