@@ -566,13 +566,6 @@ class Reader(FileReader):
         # Combine all plottables with datainfo and append each to output
         # Type cast data arrays to float64 and find min/max as appropriate
         for dataset in self.data2d:
-            zeros = np.ones(dataset.data.size, dtype=bool)
-            try:
-                for i in range(0, dataset.mask.size - 1):
-                    zeros[i] = dataset.mask[i]
-            except:
-                self.errors.append(sys.exc_value)
-            dataset.mask = zeros
             # Calculate the actual Q matrix
             try:
                 if dataset.q_data.size <= 1:
@@ -584,24 +577,17 @@ class Reader(FileReader):
                 dataset.q_data = None
 
             if dataset.data.ndim == 2:
-                (n_rows, n_cols) = dataset.data.shape
-                flat_qy = dataset.qy_data[0::n_cols].flatten()
-                # For 2D arrays of Qx and Qy, the Q value should be constant
-                # along each row -OR- each column. The direction is not
-                # specified in the NXcanSAS standard.
-                if flat_qy[0] == flat_qy[1]:
-                    flat_qy = np.transpose(dataset.qy_data)[0::n_cols].flatten()
-                dataset.y_bins = np.unique(flat_qy)
-                flat_qx = dataset.qx_data[0::n_rows].flatten()
-                # For 2D arrays of Qx and Qy, the Q value should be constant
-                # along each row -OR- each column. The direction is not
-                # specified in the NXcanSAS standard.
-                if flat_qx[0] == flat_qx[1]:
-                    flat_qx = np.transpose(dataset.qx_data)[0::n_rows].flatten()
-                dataset.x_bins = np.unique(flat_qx)
+                dataset.y_bins = np.unique(dataset.qy_data.flatten())
+                dataset.x_bins = np.unique(dataset.qx_data.flatten())
                 dataset.data = dataset.data.flatten()
                 dataset.qx_data = dataset.qx_data.flatten()
                 dataset.qy_data = dataset.qy_data.flatten()
+
+            try:
+                iter(dataset.mask)
+                dataset.mask = np.invert(np.asarray(dataset.mask, dtype=bool))
+            except TypeError:
+                dataset.mask = np.ones(dataset.data.shape, dtype=bool)
             self.current_dataset = dataset
             self.send_to_output()
 

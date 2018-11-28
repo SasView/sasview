@@ -327,7 +327,8 @@ class NXcanSASWriter(Reader):
 
         (n_rows, n_cols) = (len(data.y_bins), len(data.x_bins))
 
-        if n_rows == 0 and n_cols == 0:
+        if ((n_rows == 0 and n_cols == 0)
+                or (n_cols*n_rows != len(data.data.flatten()))):
             # Calculate rows and columns, assuming detector is square
             # Same logic as used in PlotPanel.py _get_bins
             n_cols = int(np.floor(np.sqrt(len(data.qy_data))))
@@ -359,3 +360,7 @@ class NXcanSASWriter(Reader):
             qy_entry.attrs['resolutions'] = 'dQy'
             dqy_entry = data_entry.create_dataset('dQy', data=data.dqy_data)
             dqy_entry.attrs['units'] = data.Q_unit
+        if data.mask is not None and not all(data.mask == [None]):
+            data_entry.attrs['mask'] = "mask"
+            mask = np.invert(np.asarray(data.mask, dtype=bool))
+            data_entry.create_dataset('mask', data=mask)
