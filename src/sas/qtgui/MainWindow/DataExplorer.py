@@ -3,6 +3,7 @@ import sys
 import os
 import time
 import logging
+import copy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -239,7 +240,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # check if any items loaded and warn about data deletion
         if self.model.rowCount() > 0:
-            msg = "This operation will set remove all data, plots and analyses from"
+            msg = "This operation will remove all data, plots and analyses from"
             msg += " SasView before loading the project. Do you wish to continue?"
             msgbox = QtWidgets.QMessageBox(self)
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
@@ -538,9 +539,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # value - main dataset, [dependant filesets]
             # add the main index
             if not value: continue
-            #if key=='is_batch':
-            #    self.chkBatch.setChecked(True if value=='True' else False)
-            #    continue
             new_data = value[0]
             from sas.sascalc.dataloader.data_info import Data1D as old_data1d
             from sas.sascalc.dataloader.data_info import Data2D as old_data2d
@@ -556,7 +554,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             new_item.setCheckState(is_checked)
             items.append(new_item)
             model = self.theory_model
-            if new_data.is_data:
+            if value[0].is_data:
                 model = self.model
                 # Caption for the theories
                 new_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
@@ -796,7 +794,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_item.setCheckState(QtCore.Qt.Checked)
         info_item = QtGui.QStandardItem("Info")
         data_item = QtGui.QStandardItem()
-        data_item.setData(item_from.child(0).data())
+        orig_data = copy.deepcopy(item_from.child(0).data())
+        data_item.setData(orig_data)
         new_item.setText(item_from.text())
         new_item.setChild(0, data_item)
         new_item.setChild(1, info_item)
@@ -808,6 +807,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         try:
             new_item.child(0).data().is_data = True
             new_item.child(0).data().symbol = 'Circle'
+            new_item.child(0).data().id = new_name
         except AttributeError:
             #no data here, pass
             pass
@@ -1529,6 +1529,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         try:
             data.is_data = True
             data.symbol = 'Circle'
+            data.id = new_name
         except AttributeError:
             #no data here, pass
             pass
@@ -1558,7 +1559,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         deleted_items = [self.model.item(row) for row in range(self.model.rowCount())
                          if self.model.item(row).isCheckable()]
+        deleted_theory_items = [self.theory_model.item(row)
+                                for row in range(self.theory_model.rowCount())
+                                if self.theory_model.item(row).isCheckable()]
+        deleted_items += deleted_theory_items
         deleted_names = [item.text() for item in deleted_items]
+        deleted_names += deleted_theory_items
         # Let others know we deleted data
         self.communicator.dataDeletedSignal.emit(deleted_items)
         # update stored_data
@@ -1566,6 +1572,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Clear the model
         self.model.clear()
+        self.theory_model.clear()
 
     def deleteSelectedItem(self):
         """
