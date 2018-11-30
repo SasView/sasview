@@ -572,7 +572,7 @@ class Reader(FileReader):
                     dataset.q_data = np.sqrt(dataset.qx_data
                                              * dataset.qx_data
                                              + dataset.qy_data
-                                             * dataset.qy_data)
+                                             * dataset.qy_data).flatten()
             except:
                 dataset.q_data = None
 

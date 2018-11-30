@@ -327,8 +327,7 @@ class NXcanSASWriter(Reader):
 
         (n_rows, n_cols) = (len(data.y_bins), len(data.x_bins))
 
-        if ((n_rows == 0 and n_cols == 0)
-                or (n_cols*n_rows != len(data.data.flatten()))):
+        if (n_rows == 0 and n_cols == 0) or (n_cols*n_rows != data.data.size):
             # Calculate rows and columns, assuming detector is square
             # Same logic as used in PlotPanel.py _get_bins
             n_cols = int(np.floor(np.sqrt(len(data.qy_data))))
@@ -347,20 +346,23 @@ class NXcanSASWriter(Reader):
         qx_entry.attrs['units'] = data.Q_unit
         qy_entry = data_entry.create_dataset('Qy', data=qy)
         qy_entry.attrs['units'] = data.Q_unit
-        if data.err_data is not None and not all(data.err_data == [None]):
+        if (data.err_data is not None
+                and not all(v is None for v in data.err_data)):
             d_i = np.reshape(data.err_data, (n_rows, n_cols))
             i_entry.attrs['uncertainties'] = 'Idev'
             i_dev_entry = data_entry.create_dataset('Idev', data=d_i)
             i_dev_entry.attrs['units'] = data.I_unit
-        if data.dqx_data is not None and not all(data.dqx_data == [None]):
+        if (data.dqx_data is not None
+                and not all(v is None for v in data.dqx_data)):
             qx_entry.attrs['resolutions'] = 'dQx'
             dqx_entry = data_entry.create_dataset('dQx', data=data.dqx_data)
             dqx_entry.attrs['units'] = data.Q_unit
-        if data.dqy_data is not None and not all(data.dqy_data == [None]):
+        if (data.dqy_data is not None
+                and not all(v is None for v in data.dqy_data)):
             qy_entry.attrs['resolutions'] = 'dQy'
             dqy_entry = data_entry.create_dataset('dQy', data=data.dqy_data)
             dqy_entry.attrs['units'] = data.Q_unit
-        if data.mask is not None and not all(data.mask == [None]):
+        if data.mask is not None and not all(v is None for v in data.mask):
             data_entry.attrs['mask'] = "mask"
             mask = np.invert(np.asarray(data.mask, dtype=bool))
             data_entry.create_dataset('mask', data=mask)
