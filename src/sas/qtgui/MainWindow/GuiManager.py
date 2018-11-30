@@ -520,6 +520,7 @@ class GuiManager(object):
         self._workspace.actionArrange_Icons.triggered.connect(self.actionArrange_Icons)
         self._workspace.actionNext.triggered.connect(self.actionNext)
         self._workspace.actionPrevious.triggered.connect(self.actionPrevious)
+        self._workspace.actionMinimizePlots.triggered.connect(self.actionMinimizePlots)
         self._workspace.actionClosePlots.triggered.connect(self.actionClosePlots)
         # Analysis
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
@@ -991,6 +992,13 @@ class GuiManager(object):
         Closes all Plotters and Plotter2Ds.
         """
         self.filesWidget.closeAllPlots()
+        pass
+
+    def actionMinimizePlots(self):
+        """
+        Minimizes all Plotters and Plotter2Ds.
+        """
+        self.filesWidget.minimizeAllPlots()
         pass
 
     #============ HELP =================

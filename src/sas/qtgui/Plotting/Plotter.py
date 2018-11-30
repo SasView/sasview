@@ -204,7 +204,7 @@ class PlotterWidget(PlotterBase):
             ax.set_xlabel(self.x_label)
 
         # refresh canvas
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
     def createContextMenu(self):
         """
@@ -351,7 +351,7 @@ class PlotterWidget(PlotterBase):
 
             # Update the list of annotations
             self.textList.append(new_text)
-            self.canvas.draw()
+            self.canvas.draw_idle()
 
     def onRemoveText(self):
         """
@@ -459,7 +459,7 @@ class PlotterWidget(PlotterBase):
         # Reset the labels
         self.ax.set_xlabel(xl)
         self.ax.set_ylabel(yl)
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
     def onFreeze(self, id):
         """
@@ -693,7 +693,6 @@ class PlotterWidget(PlotterBase):
         loc_in_norm_axes = trans_axes.transform_point(loc_in_canvas)
         self.legend_pos_loc = tuple(loc_in_norm_axes)
         self.legend._loc = self.legend_pos_loc
-        # self.canvas.draw()
         self.canvas.draw_idle()
 
     def onMplWheel(self, event):

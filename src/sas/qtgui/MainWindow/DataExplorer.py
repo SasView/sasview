@@ -1101,10 +1101,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # We have data, let's replace data that needs replacing
             if data.plot_role != Data1D.ROLE_DATA:
                 self.active_plots[data_id].replacePlot(data_id, data)
+                # restore minimized window, if applicable
+                self.active_plots[data_id].showNormal()
             return True
         elif data_id in ids_vals:
             if data.plot_role != Data1D.ROLE_DATA:
                 list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+                self.active_plots[data_id].showNormal()
             return True
         return False
 
@@ -1647,6 +1650,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.plot_widgets.pop(plot_id, None)
             except AttributeError as ex:
                 logging.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
+
+    def minimizeAllPlots(self):
+        """
+        Minimize all currently displayed plots
+        """
+        for plot_id in PlotHelper.currentPlots():
+            plotter = PlotHelper.plotById(plot_id)
+            plotter.showMinimized()
 
     def closePlotsForItem(self, item):
         """

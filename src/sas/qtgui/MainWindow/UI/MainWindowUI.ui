@@ -127,6 +127,7 @@
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
     <addaction name="separator"/>
+    <addaction name="actionMinimizePlots"/>
     <addaction name="actionClosePlots"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
@@ -574,6 +575,11 @@
   <action name="actionClosePlots">
    <property name="text">
     <string>Close All Plots</string>
+   </property>
+  </action>
+  <action name="actionMinimizePlots">
+   <property name="text">
+    <string>Minimize All Plots</string>
    </property>
   </action>
  </widget>
