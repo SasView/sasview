@@ -587,6 +587,7 @@ class GuiManager(object):
         for id, data in all_data.items():
             if id=='is_batch':
                 analysis['is_batch'] = data
+                analysis['batch_grid'] = self.grid_window.data_dict
                 continue
             data_content = {"fit_data":data}
             if id in params.keys():
@@ -709,6 +710,7 @@ class GuiManager(object):
         Display/redisplay the batch fit viewer
         """
         self.grid_subwindow.setVisible(True)
+        self.grid_subwindow.raise_()
         if output_data:
             self.grid_window.addFitResults(output_data)
 

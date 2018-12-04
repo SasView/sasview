@@ -36,6 +36,10 @@ from sas.qtgui.Plotting.Plottables import Text
 from sas.qtgui.Plotting.Plottables import Chisq
 from sas.qtgui.MainWindow.DataState import DataState
 
+from sas.sascalc.fit.AbstractFitEngine import FResult
+from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
+from sasmodels.sasview_model import SasviewModel
+
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.Utilities import CustomDir
 
@@ -1170,13 +1174,19 @@ def saveData(fp, data):
             return add_type(content, type(o))
 
         # "simple" types
-        if isinstance(o, (Sample, Source, Vector)):
+        if isinstance(o, (Sample, Source, Vector, FResult)):
             return add_type(o.__dict__, type(o))
         if isinstance(o, (Plottable, View)):
             return add_type(o.__dict__, type(o))
 
+        # SasviewModel - unique
+        if isinstance(o, SasviewModel):
+            # don't store parent
+            content = o.__dict__.copy()
+            return add_type(content, SasviewModel)
+
         # DataState
-        if isinstance(o, (Data1D, Data2D)):
+        if isinstance(o, (Data1D, Data2D, FitData1D, FitData2D)):
             # don't store parent
             content = o.__dict__.copy()
             #content.pop('parent')
@@ -1205,7 +1215,7 @@ def readDataFromFile(fp):
         tuple, set,
         Sample, Source, Vector,
         Plottable, Data1D, Data2D, PlottableTheory1D, PlottableFit1D, Text, Chisq, View,
-        DataState, np.ndarray]
+        DataState, np.ndarray, FResult, FitData1D, FitData2D, SasviewModel]
 
     lookup = dict((cls.__name__, cls) for cls in supported)
 
@@ -1237,7 +1247,7 @@ def readDataFromFile(fp):
             return cls(generate(data['data'], level))
 
         # "simple" types
-        if cls in (Sample, Source, Vector):
+        if cls in (Sample, Source, Vector, FResult, FitData1D, FitData2D, SasviewModel):
             return simple_type(cls, data, level)
         if issubclass(cls, Plottable) or (cls == View):
             return simple_type(cls, data, level)

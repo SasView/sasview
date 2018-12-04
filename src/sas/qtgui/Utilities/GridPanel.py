@@ -36,6 +36,9 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Tab numbering
         self.tab_number = 1
 
+        # save state
+        self.data_dict = {}
+
         # System dependent menu items
         if not self.IS_WIN:
             self.actionOpen_with_Excel.setVisible(False)
@@ -175,7 +178,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Set a table tooltip describing the model
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
-
+        self.data_dict[page_name] = results
 
     @classmethod
     def onHelp(cls):

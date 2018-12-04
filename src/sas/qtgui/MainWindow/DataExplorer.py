@@ -353,10 +353,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             is_checked = item.checkState()
             properties['checked'] = is_checked
             other_datas = []
-            # no need to save other_datas - things will be refit on read
-            #other_datas = GuiUtils.plotsFromFilename(filename, model)
+            # save underlying theories
+            other_datas = GuiUtils.plotsFromFilename(filename, model)
             # skip the main plot
-            #other_datas = list(other_datas.values())[1:]
+            other_datas = list(other_datas.values())[1:]
             all_data[data.id] = [data, properties, other_datas]
         return all_data
 
@@ -456,6 +456,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for key, value in all_data.items():
             if key=='is_batch':
                 self.chkBatch.setChecked(True if value=='True' else False)
+                if 'batch_grid' not in all_data:
+                    continue
+                grid_pages = all_data['batch_grid']
+                for grid_name, grid_page in grid_pages.items():
+                    grid_page.append(grid_name)
+                    self.parent.showBatchOutput(grid_page)
                 continue
             if 'cs_tab' in key:
                 continue
