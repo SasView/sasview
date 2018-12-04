@@ -182,10 +182,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Open a local url in the default browser
         """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
+        location = GuiUtils.HELP_DIRECTORY_LOCATION + url
+        if os.path.isdir(location) == False:
+            sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+            location = sas_path + "/" + location
         try:
-            webbrowser.open('file://' + os.path.realpath(location+url))
+            webbrowser.open('file://' + os.path.realpath(location))
         except webbrowser.Error as ex:
             logging.warning("Cannot display help. %s" % ex)
 
