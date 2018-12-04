@@ -532,8 +532,6 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.onPolyComboIndexChange('array', 0)
         # check values - unchanged since the file doesn't exist
         self.assertTrue(self.widget._poly_model.item(0, 1).isEnabled())
-        with self.assertRaises(AttributeError):
-            self.widget.disp_model()
 
         # good file
         # TODO: this depends on the working directory being src/sas/qtgui,
