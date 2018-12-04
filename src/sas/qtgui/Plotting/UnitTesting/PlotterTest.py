@@ -56,12 +56,12 @@ class PlotterTest(unittest.TestCase):
         """ Look at the plotting with error bars"""
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot(hide_error=False)
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'log')
-        self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
 
         self.plotter.figure.clf()
 
@@ -69,12 +69,12 @@ class PlotterTest(unittest.TestCase):
         """ Look at the plotting without error bars"""
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot(hide_error=True)
 
         self.assertEqual(self.plotter.ax.get_yscale(), 'log')
-        self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
         self.plotter.figure.clf()
 
     def testPlotWithSesans(self):
@@ -90,13 +90,13 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.data = data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot(hide_error=True)
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
 
     def testCreateContextMenuQuick(self):
         """ Test the right click menu """
