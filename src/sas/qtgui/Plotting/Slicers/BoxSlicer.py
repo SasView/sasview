@@ -184,8 +184,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.base.data.name
+        #new_plot. = "2daverage" + self.base.data.name
         new_plot.id = (self.averager.__name__) + self.base.data.name
+        new_plot.group_id = new_plot.id
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
