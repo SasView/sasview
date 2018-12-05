@@ -942,9 +942,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             main_data = None
 
         # Make sure main data for 2D is always displayed
-        if main_data is not None and not self.isPlotShown(main_data):
+        if main_data is not None:
             if isinstance(main_data, Data2D):
-                self.plotData([(plot_item, main_data)])
+                if self.isPlotShown(main_data):
+                    self.active_plots[main_data.name].showNormal()
+                else:
+                    self.plotData([(plot_item, main_data)])
 
         # Check if this is merely a plot update
         if self.updatePlot(plot_to_show):
@@ -963,7 +966,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if main_data is not None and not self.isPlotShown(main_data):
                 new_plots.append((plot_item, main_data))
             new_plots.append((plot_item, plot_to_show))
-
         if new_plots:
             self.plotData(new_plots)
 
