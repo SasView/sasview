@@ -328,14 +328,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         else:
             surface = None
 
+        if self._low_extrapolate:
+            try:
+                qstar_low, qstar_low_err = inv.get_qstar_low()
+            except Exception as ex:
+                calculation_failed = True
+                msg += str(ex)
+        if self._high_extrapolate:
+            try:
+                qstar_high, qstar_high_err = inv.get_qstar_high()
+            except Exception as ex:
+                calculation_failed = True
+                msg += str(ex)
+
         if (calculation_failed):
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
         else:
-
             if self._low_extrapolate:
-                # for presentation in InvariantDetails
-                qstar_low, qstar_low_err = inv.get_qstar_low()
                 extrapolated_data = inv.get_extra_data_low(self._low_points)
                 power_low = inv.get_extrapolation_power(range='low')
 
@@ -369,7 +379,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
                 if qmax_plot > Q_MAXIMUM:
                     qmax_plot = Q_MAXIMUM
-                qstar_high, qstar_high_err = inv.get_qstar_high()
                 power_high = inv.get_extrapolation_power(range='high')
                 high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
 
