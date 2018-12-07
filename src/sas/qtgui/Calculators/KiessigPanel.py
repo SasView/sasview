@@ -30,6 +30,9 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         self.deltaq_in.textChanged.connect(self.onCompute)
         self.deltaq_in.setText("0.05")
 
+        # Set focus away from Close
+        self.computeButton.setFocus()
+
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
 
