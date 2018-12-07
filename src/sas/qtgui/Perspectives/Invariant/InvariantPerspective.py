@@ -344,89 +344,89 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         if (calculation_failed):
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
-        else:
-            if self._low_extrapolate:
-                extrapolated_data = inv.get_extra_data_low(self._low_points)
-                power_low = inv.get_extrapolation_power(range='low')
 
-                # Plot the chart
-                title = "Low-Q extrapolation"
+        if self._low_extrapolate:
+            extrapolated_data = inv.get_extra_data_low(self._low_points)
+            power_low = inv.get_extrapolation_power(range='low')
 
-                # Convert the data into plottable
-                extrapolated_data = self._manager.createGuiData(extrapolated_data)
+            # Plot the chart
+            title = "Low-Q extrapolation"
 
-                extrapolated_data.name = title
-                extrapolated_data.title = title
-                extrapolated_data.symbol = "Line"
-                extrapolated_data.has_errors = False
+            # Convert the data into plottable
+            extrapolated_data = self._manager.createGuiData(extrapolated_data)
 
-                # copy labels and units of axes for plotting
-                extrapolated_data._xaxis = temp_data._xaxis
-                extrapolated_data._xunit = temp_data._xunit
-                extrapolated_data._yaxis = temp_data._yaxis
-                extrapolated_data._yunit = temp_data._yunit
+            extrapolated_data.name = title
+            extrapolated_data.title = title
+            extrapolated_data.symbol = "Line"
+            extrapolated_data.has_errors = False
 
-                # Add the plot to the model item
-                # This needs to run in the main thread
-                reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
+            # copy labels and units of axes for plotting
+            extrapolated_data._xaxis = temp_data._xaxis
+            extrapolated_data._xunit = temp_data._xunit
+            extrapolated_data._yaxis = temp_data._yaxis
+            extrapolated_data._yunit = temp_data._yunit
+
+            # Add the plot to the model item
+            # This needs to run in the main thread
+            reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
                                        self._model_item,
                                        extrapolated_data,
                                        title)
 
-            if self._high_extrapolate:
-                # for presentation in InvariantDetails
-                qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
+        if self._high_extrapolate:
+            # for presentation in InvariantDetails
+            qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
 
-                if qmax_plot > Q_MAXIMUM:
-                    qmax_plot = Q_MAXIMUM
-                power_high = inv.get_extrapolation_power(range='high')
-                high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
+            if qmax_plot > Q_MAXIMUM:
+                qmax_plot = Q_MAXIMUM
+            power_high = inv.get_extrapolation_power(range='high')
+            high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
 
-                # Plot the chart
-                title = "High-Q extrapolation"
+            # Plot the chart
+            title = "High-Q extrapolation"
 
-                # Convert the data into plottable
-                high_out_data = self._manager.createGuiData(high_out_data)
-                high_out_data.name = title
-                high_out_data.title = title
-                high_out_data.symbol = "Line"
-                high_out_data.has_errors = False
+            # Convert the data into plottable
+            high_out_data = self._manager.createGuiData(high_out_data)
+            high_out_data.name = title
+            high_out_data.title = title
+            high_out_data.symbol = "Line"
+            high_out_data.has_errors = False
 
-                # copy labels and units of axes for plotting
-                high_out_data._xaxis = temp_data._xaxis
-                high_out_data._xunit = temp_data._xunit
-                high_out_data._yaxis = temp_data._yaxis
-                high_out_data._yunit = temp_data._yunit
+            # copy labels and units of axes for plotting
+            high_out_data._xaxis = temp_data._xaxis
+            high_out_data._xunit = temp_data._xunit
+            high_out_data._yaxis = temp_data._yaxis
+            high_out_data._yunit = temp_data._yunit
 
-                # Add the plot to the model item
-                # This needs to run in the main thread
-                reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
+            # Add the plot to the model item
+            # This needs to run in the main thread
+            reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
                                        self._model_item, high_out_data, title)
 
-            item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction)))
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction_error)))
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
-            if surface:
-                item = QtGui.QStandardItem(str(float('%.3g'% surface)))
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE, item)
-                item = QtGui.QStandardItem(str(float('%.3g'% surface_error)))
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_total)))
-            self.model.setItem(WIDGETS.W_INVARIANT, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_total_error)))
-            self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction)))
+        self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction_error)))
+        self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
+        if surface:
+            item = QtGui.QStandardItem(str(float('%.3g'% surface)))
+            self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE, item)
+            item = QtGui.QStandardItem(str(float('%.3g'% surface_error)))
+            self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% qstar_total)))
+        self.model.setItem(WIDGETS.W_INVARIANT, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% qstar_total_error)))
+        self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
 
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_low)))
-            self.model.setItem(WIDGETS.D_LOW_QSTAR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_low_err)))
-            self.model.setItem(WIDGETS.D_LOW_QSTAR_ERR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_high)))
-            self.model.setItem(WIDGETS.D_HIGH_QSTAR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_high_err)))
-            self.model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% qstar_low)))
+        self.model.setItem(WIDGETS.D_LOW_QSTAR, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% qstar_low_err)))
+        self.model.setItem(WIDGETS.D_LOW_QSTAR_ERR, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% qstar_high)))
+        self.model.setItem(WIDGETS.D_HIGH_QSTAR, item)
+        item = QtGui.QStandardItem(str(float('%.3g'% qstar_high_err)))
+        self.model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, item)
 
-            return self.model
+        return self.model
 
     def title(self):
         """ Perspective name """
