@@ -254,14 +254,14 @@ class GuiManager(object):
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
             self._current_perspective.setClosable()
+            self._workspace.workspace.removeSubWindow(self.subwindow)
             self._current_perspective.close()
-            self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
 
         self.setupPerspectiveMenubarOptions(self._current_perspective)
 
-        subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
+        self.subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
