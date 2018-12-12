@@ -408,30 +408,28 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
                                        self._model_item, high_out_data, title)
 
-        item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction)))
-        self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
-        item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction_error)))
-        self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
         if surface:
-            item = QtGui.QStandardItem(str(float('%.3g'% surface)))
-            self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% surface_error)))
-            self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
-        item = QtGui.QStandardItem(str(float('%.3g'% qstar_total)))
-        self.model.setItem(WIDGETS.W_INVARIANT, item)
-        item = QtGui.QStandardItem(str(float('%.3g'% qstar_total_error)))
-        self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
+                                                    surface_error)
 
-        item = QtGui.QStandardItem(str(float('%.3g'% qstar_low)))
-        self.model.setItem(WIDGETS.D_LOW_QSTAR, item)
-        item = QtGui.QStandardItem(str(float('%.3g'% qstar_low_err)))
-        self.model.setItem(WIDGETS.D_LOW_QSTAR_ERR, item)
-        item = QtGui.QStandardItem(str(float('%.3g'% qstar_high)))
-        self.model.setItem(WIDGETS.D_HIGH_QSTAR, item)
-        item = QtGui.QStandardItem(str(float('%.3g'% qstar_high_err)))
-        self.model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, item)
-
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
         return self.model
+
+
+    def updateModelFromThread(self, widget, value):
+        """
+        Update the model in the main thread
+        """
+        item = QtGui.QStandardItem(str(float('%.3g' % value)))
+        self.model.setItem(widget, item)
 
     def title(self):
         """ Perspective name """
