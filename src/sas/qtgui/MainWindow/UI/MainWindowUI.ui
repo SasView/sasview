@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
+ <class>SasView</class>
  <widget class="QMainWindow" name="SasView">
   <property name="geometry">
    <rect>
@@ -70,15 +70,14 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionShow_Grid_Window"/>
-    <addaction name="separator"/>
     <addaction name="actionHide_Toolbar"/>
     <addaction name="actionHide_DataExplorer"/>
     <addaction name="actionHide_LogExplorer"/>
     <addaction name="separator"/>
-    <addaction name="actionStartup_Settings"/>
+    <addaction name="actionMinimizePlots"/>
+    <addaction name="actionClosePlots"/>
     <addaction name="separator"/>
-    <addaction name="actionCategory_Manager"/>
+    <addaction name="actionStartup_Settings"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -106,10 +105,13 @@
     <addaction name="actionConstrained_Fit"/>
     <addaction name="actionCombine_Batch_Fit"/>
     <addaction name="separator"/>
+    <addaction name="actionShow_Grid_Window"/>
+    <addaction name="separator"/>
     <addaction name="actionFit_Options"/>
     <addaction name="actionGPU_Options"/>
     <addaction name="actionFit_Results"/>
     <addaction name="separator"/>
+    <addaction name="actionCategory_Manager"/>
     <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
     <addaction name="actionManage_Custom_Models"/>
@@ -126,9 +128,6 @@
     <addaction name="separator"/>
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
-    <addaction name="separator"/>
-    <addaction name="actionMinimizePlots"/>
-    <addaction name="actionClosePlots"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -322,11 +321,6 @@
     <string>Quit</string>
    </property>
   </action>
-  <action name="actionShow_Grid_Window">
-   <property name="text">
-    <string>Show Grid Window</string>
-   </property>
-  </action>
   <action name="actionHide_Toolbar">
    <property name="text">
     <string>Hide Toolbar</string>
@@ -335,14 +329,6 @@
   <action name="actionStartup_Settings">
    <property name="text">
     <string>Startup Settings</string>
-   </property>
-  </action>
-  <action name="actionCategory_Manager">
-   <property name="text">
-    <string>Category Manager</string>
-   </property>
-   <property name="toolTip">
-    <string>Category Manager</string>
    </property>
   </action>
   <action name="actionData_Operation">
@@ -572,14 +558,24 @@
     <string>Hide Log Explorer</string>
    </property>
   </action>
-  <action name="actionClosePlots">
+  <action name="actionCategory_Manager">
    <property name="text">
-    <string>Close All Plots</string>
+    <string>Category Manager</string>
+   </property>
+  </action>
+  <action name="actionShow_Grid_Window">
+   <property name="text">
+    <string>Show Grid Window</string>
    </property>
   </action>
   <action name="actionMinimizePlots">
    <property name="text">
     <string>Minimize All Plots</string>
+   </property>
+  </action>
+  <action name="actionClosePlots">
+   <property name="text">
+    <string>Close All Plots</string>
    </property>
   </action>
  </widget>

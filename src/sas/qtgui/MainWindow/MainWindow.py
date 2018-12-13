@@ -10,9 +10,9 @@ import os
 import sys
 # Local UI
 from sas.qtgui.UI import main_resources_rc
-from .UI.MainWindowUI import Ui_MainWindow
+from .UI.MainWindowUI import Ui_SasView
 
-class MainSasViewWindow(QMainWindow, Ui_MainWindow):
+class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
     def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
