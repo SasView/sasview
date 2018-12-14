@@ -321,16 +321,21 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Save the current state of the Model Editor
         """
-        # make sure we have the file handly ready
-        assert(self.filename != "")
+        filename = self.filename
+        if not self.tabWidget.currentWidget().is_python:
+            base, _ = os.path.splitext(filename)
+            filename = base + '.c'
+
+        # make sure we have the file handle ready
+        assert(filename != "")
         # Retrieve model string
         model_str = self.getModel()['text']
         # Save the file
-        self.writeFile(self.filename, model_str)
+        self.writeFile(filename, model_str)
         # Update the tab title
         self.setTabEdited(False)
         # notify the user
-        msg = self.filename + " successfully saved."
+        msg = filename + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
