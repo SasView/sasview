@@ -61,49 +61,37 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-if not WELCOME_PANEL_ON:
-    WELCOME_PANEL_SHOW = False
-else:
-    WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder is not None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-    else:
-        DEFAULT_OPEN_FOLDER = get_app_dir()
-    SAS_OPENCL = custom_config.SAS_OPENCL
-except:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = get_app_dir()
-    DEFAULT_OPEN_FOLDER = PATH_APP
-    SAS_OPENCL = None
-DEFAULT_STYLE = config.DEFAULT_STYLE
 
+def custom_value(name, default=None):
+    """
+    Fetch a config value from custom_config.  Fallback to config, and then
+    to default if it doesn't exist in config.
+    """
+    default = getattr(config, name, default)
+    return getattr(custom_config, name, default)
+
+# Custom config values in the order they appear.
+DATAPANEL_WIDTH = custom_value('DATAPANEL_WIDTH', -1)
+CLEANUP_PLOT = custom_value('CLEANUP_PLOT', False)
+FIXED_PANEL = custom_value('FIXED_PANEL', True)
+PLOPANEL_WIDTH = custom_value('PLOPANEL_WIDTH', -1)
+DATALOADER_SHOW = custom_value('DATALOADER_SHOW', True)
+GUIFRAME_HEIGHT = custom_value('GUIFRAME_HEIGHT', -1)
+GUIFRAME_WIDTH = custom_value('GUIFRAME_WIDTH', -1)
+CONTROL_WIDTH = custom_value('CONTROL_WIDTH', -1)
+CONTROL_HEIGHT = custom_value('CONTROL_HEIGHT', -1)
+open_folder = custom_value('DEFAULT_OPEN_FOLDER', None)
+if open_folder is not None and os.path.isdir(open_folder):
+    DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
+else:
+    DEFAULT_OPEN_FOLDER = get_app_dir()
+WELCOME_PANEL_SHOW = (custom_value('WELCOME_PANEL_SHOW', False)
+                      if WELCOME_PANEL_ON else False)
+TOOLBAR_SHOW = custom_value('TOOLBAR_SHOW', True)
+DEFAULT_PERSPECTIVE = custom_value('DEFAULT_PERSPECTIVE', 'Fitting')
+SAS_OPENCL = custom_value('SAS_OPENCL', 'None')
+
+DEFAULT_STYLE = config.DEFAULT_STYLE
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
 OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
 VIEW_MENU = config.VIEW_MENU
@@ -2169,7 +2157,7 @@ class ViewerFrame(PARENT_FRAME):
         # Help >> Tutorial used to bring up a pdf of the
         # original 2.x tutorial.
         # Code below, implemented from 4.2.0, redirects
-        # action to the Tutorials page of the help 
+        # action to the Tutorials page of the help
         # documentation to give access to all available
         # tutorials
         # S King, Sep 2018
