@@ -2,7 +2,6 @@
 import sys
 import os
 import datetime
-import numpy as np
 import logging
 import traceback
 
@@ -86,22 +85,39 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.plugin_widget.setEnabled(is_active)
 
+    def saveClose(self):
+        """
+        Check if file needs saving before closing or model reloading
+        """
+        saveCancelled = False
+        ret = self.onModifiedExit()
+        if ret == QtWidgets.QMessageBox.Cancel:
+            saveCancelled = True
+        elif ret == QtWidgets.QMessageBox.Save:
+            self.updateFromEditor()
+        return saveCancelled
+
     def closeEvent(self, event):
         """
         Overwrite the close even to assure intent
         """
         if self.is_modified:
-            ret = self.onModifiedExit()
-            if ret == QtWidgets.QMessageBox.Cancel:
+            saveCancelled = self.saveClose()
+            if saveCancelled:
                 return
-            elif ret == QtWidgets.QMessageBox.Save:
-                self.updateFromEditor()
         event.accept()
 
     def onLoad(self):
         """
         Loads a model plugin file
         """
+        if self.is_modified:
+            saveCancelled = self.saveClose()
+            if saveCancelled:
+                return
+            self.is_modified = False
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+
         plugin_location = models.find_plugins_dir()
         filename = QtWidgets.QFileDialog.getOpenFileName(
                                         self,
@@ -163,11 +179,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Accept if document not modified, confirm intent otherwise.
         """
         if self.is_modified:
-            ret = self.onModifiedExit()
-            if ret == QtWidgets.QMessageBox.Cancel:
+            saveCancelled = self.saveClose()
+            if saveCancelled:
                 return
-            elif ret == QtWidgets.QMessageBox.Save:
-                self.updateFromEditor()
         self.reject()
 
     def onApply(self):
