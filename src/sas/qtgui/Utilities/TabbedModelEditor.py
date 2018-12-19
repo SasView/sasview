@@ -87,7 +87,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
     def saveClose(self):
         """
-        Checking if files is subject of saving before cloasing or reloading or reloading model
+        Check if file needs saving before closing or model reloading
         """
         saveCancelled = False
         ret = self.onModifiedExit()
