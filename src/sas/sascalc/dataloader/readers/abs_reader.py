@@ -47,6 +47,7 @@ class Reader(FileReader):
         self.current_datainfo.filename = filepath
         detector = Detector()
         data_line = 0
+        x_index = 4
         self.reset_data_list(len(lines))
         self.current_datainfo.detector.append(detector)
         self.current_datainfo.filename = filepath
@@ -62,6 +63,8 @@ class Reader(FileReader):
 
         for line in lines:
             # Information line 1
+            if line.find(".bt5") > 0:
+                x_index = 0
             if is_info:
                 is_info = False
                 line_toks = line.split()
@@ -170,7 +173,7 @@ class Reader(FileReader):
                 toks = line.split()
 
                 try:
-                    _x = float(toks[4])
+                    _x = float(toks[x_index])
                     _y = float(toks[1])
                     _dy = float(toks[2])
                     _dx = float(toks[3])
