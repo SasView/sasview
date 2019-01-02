@@ -47,6 +47,7 @@ class Reader(FileReader):
         self.current_datainfo.filename = filepath
         detector = Detector()
         data_line = 0
+        x_index = 4
         self.reset_data_list(len(lines))
         self.current_datainfo.detector.append(detector)
         self.current_datainfo.filename = filepath
@@ -62,6 +63,8 @@ class Reader(FileReader):
 
         for line in lines:
             # Information line 1
+            if line.find(".bt5") > 0:
+                x_index = 0
             if is_info:
                 is_info = False
                 line_toks = line.split()
@@ -170,7 +173,7 @@ class Reader(FileReader):
                 toks = line.split()
 
                 try:
-                    _x = float(toks[4])
+                    _x = float(toks[x_index])
                     _y = float(toks[1])
                     _dy = float(toks[2])
                     _dx = float(toks[3])
@@ -224,14 +227,11 @@ class Reader(FileReader):
             self.set_all_to_none()
             raise ValueError("ascii_reader: could not load file")
 
+        self.current_dataset = self.set_default_1d_units(self.current_dataset)
         if data_conv_q is not None:
             self.current_dataset.xaxis("\\rm{Q}", base_q_unit)
-        else:
-            self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         if data_conv_i is not None:
             self.current_dataset.yaxis("\\rm{Intensity}", base_i_unit)
-        else:
-            self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

@@ -76,14 +76,13 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(data[0].meta_data['loader'], "IGOR 1D")
 
     def test_usans_negative_dxl(self):
-        data_abs = Loader().load(find("sam14_cor.ABS"))
-        data_cor = Loader().load(find("sam14_cor.cor"))
-        for i in range(0, len(data_abs) - 1):
-            self.assertEquals(data_abs.x[i], data_cor.x[i])
-            self.assertEquals(data_abs.y[i], data_cor.y[i])
-            self.assertEquals(data_abs.dxl[i], data_cor.dxl[i])
-            self.assertEquals(data_abs.dxw[i], data_cor.dxw[i])
-            self.assertTrue(data_abs.dxl > 0)
+        data_abs = Loader().load(find("sam14_cor.ABS"))[0]
+        data_cor = Loader().load(find("sam14_cor.txt"))[0]
+        for i in range(0, len(data_abs.x) - 1):
+            self.assertEqual(data_abs.x[i], data_cor.x[i])
+            self.assertEqual(data_abs.y[i], data_cor.y[i])
+            self.assertEqual(data_abs.dxl[i], -data_cor.dx[i])
+            self.assertTrue(data_abs.dxl[i] > 0)
 
 
 class DanseReaderTests(unittest.TestCase):
@@ -117,7 +116,7 @@ class DanseReaderTests(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
 
-        self.assertEqual(self.data.I_unit, '1/cm')
+        self.assertEqual(self.data.I_unit, 'cm^{-1}')
         self.assertEqual(self.data.data[0], 1.57831)
         self.assertEqual(self.data.data[1], 2.70983)
         self.assertEqual(self.data.data[2], 3.83422)
