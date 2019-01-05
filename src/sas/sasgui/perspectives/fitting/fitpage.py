@@ -1627,8 +1627,10 @@ class FitPage(BasicPage):
         # check if it is pinhole smear and get min max if it is.
         if data.dx is not None and np.any(data.dx):
             self.smear_type = "Pinhole"
-            self.dq_l = data.dx[0]
-            self.dq_r = data.dx[-1]
+            #report in % for display makes more sense than absolute value
+            #for pinhole smearing
+            self.dq_l = data.dx[0] / data.x[0] * 100
+            self.dq_r = data.dx[-1] / data.x[-1] * 100
 
         # check if it is slit smear and get min max if it is.
         elif data.dxl is not None or data.dxw is not None:
