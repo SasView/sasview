@@ -1617,7 +1617,7 @@ class FitPage(BasicPage):
                 return
             elif self.current_smearer is not None \
                 and data.dqx_data.any() != 0 \
-                and data.dqx_data.any() != 0:
+                and data.dqy_data.any() != 0:
                 self.smear_type = "Pinhole2d"
                 self.dq_l = format_number(np.average(data.dqx_data))
                 self.dq_r = format_number(np.average(data.dqy_data))
