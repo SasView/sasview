@@ -214,7 +214,9 @@ class FitPage(BasicPage):
               "Please enter a fixed percentage to be applied to all Q values..."
         smear_message_2d_x_title = "<dQp>[1/A]:"
         smear_message_2d_y_title = "<dQs>[1/A]:"
-        smear_message_pinhole_percent_title = "dQ[%]:"
+        smear_message_pinhole_percent_min_title = "[dQ/Q]min(%):"
+        smear_message_pinhole_percent_max_title = "[dQ/Q]max(%):"
+        smear_message_pinhole_percent_title = "dQ/Q(%):"
         smear_message_slit_height_title = "Slit height[1/A]:"
         smear_message_slit_width_title = "Slit width[1/A]:"
 
@@ -422,6 +424,12 @@ class FitPage(BasicPage):
                             smear_message_2d_y_title, style=wx.ALIGN_LEFT)
         self.smear_description_2d_y.SetToolTipString(
                                     " dQs(perpendicular) in q_phi direction.")
+        self.smear_description_pin_percent_min = wx.StaticText(self, wx.ID_ANY,
+                                            smear_message_pinhole_percent_min_title,
+                                            style=wx.ALIGN_LEFT)
+        self.smear_description_pin_percent_max = wx.StaticText(self, wx.ID_ANY,
+                                            smear_message_pinhole_percent_max_title,
+                                            style=wx.ALIGN_LEFT)
         self.smear_description_pin_percent = wx.StaticText(self, wx.ID_ANY,
                                             smear_message_pinhole_percent_title,
                                             style=wx.ALIGN_LEFT)
@@ -448,20 +456,24 @@ class FitPage(BasicPage):
                                  0, wx.CENTER, 10)
         self.sizer_new_smear.Add((15, -1))
         self.sizer_new_smear.Add(self.smear_description_2d_x, 0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_description_pin_percent_min,
+                                 0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_description_pin_percent,
+                                 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_description_slit_height,
                                  0, wx.CENTER, 10)
 
+        self.sizer_new_smear.Add(self.smear_pinhole_percent, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_slit_height, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_data_left, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add((20, -1))
         self.sizer_new_smear.Add(self.smear_description_2d_y,
                                  0, wx.CENTER, 10)
-        self.sizer_new_smear.Add(self.smear_description_pin_percent,
+        self.sizer_new_smear.Add(self.smear_description_pin_percent_max,
                                  0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_description_slit_width,
                                  0, wx.CENTER, 10)
 
-        self.sizer_new_smear.Add(self.smear_pinhole_percent, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_slit_width, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_data_right, 0, wx.CENTER, 10)
 
@@ -1628,7 +1640,9 @@ class FitPage(BasicPage):
         if data.dx is not None and np.any(data.dx):
             self.smear_type = "Pinhole"
             #report in % for display makes more sense than absolute value
-            #for pinhole smearing
+            #for pinhole smearing.  Keep old names of dq_l rather than 
+            #dq_percent_l as it is close entough, minimizez changes,
+            #particularly since both slit AND pinhole are using these variables.
             self.dq_l = data.dx[0] / data.x[0] * 100
             self.dq_r = data.dx[-1] / data.x[-1] * 100
 
@@ -1668,17 +1682,18 @@ class FitPage(BasicPage):
                     self.smear_description_slit_height.Show(True)
                     self.smear_description_slit_width.Show(True)
                 elif self.smear_type == 'Pinhole':
-                    self.smear_description_pin_percent.Show(True)
+                    self.smear_description_pin_percent_min.Show(True)
+                    self.smear_description_pin_percent_max.Show(True)
                 self.smear_description_smear_type.Show(True)
                 self.smear_description_type.Show(True)
                 self.smear_data_left.Show(True)
                 self.smear_data_right.Show(True)
         # custom pinhole smear
         elif self.pinhole_smearer.GetValue():
-            if self.smear_type == 'Pinhole':
-                self.smear_message_new_p.Show(True)
-                self.smear_description_pin_percent.Show(True)
-
+#            if self.smear_type == 'Pinhole':
+            self.smear_message_new_p.Show(True)
+            self.smear_description_pin_percent.Show(True)
+            #note - was outside of above commented out if statement
             self.smear_pinhole_percent.Show(True)
         # custom slit smear
         elif self.slit_smearer.GetValue():
@@ -1704,6 +1719,8 @@ class FitPage(BasicPage):
         self.smear_accuracy.Hide()
         self.smear_data_left.Hide()
         self.smear_data_right.Hide()
+        self.smear_description_pin_percent_min.Hide()
+        self.smear_description_pin_percent_max.Hide()
         self.smear_description_pin_percent.Hide()
         self.smear_pinhole_percent.Hide()
         self.smear_description_slit_height.Hide()
