@@ -1383,7 +1383,7 @@ def convertFromSVS(datasets):
         # main parameters
         for p in params.parameters:
             p_name = p[1]
-            param_dict[p_name] = [str(p[0]), str(p[2]), None, str(p[5][1]), str(p[6][1])]
+            param_dict[p_name] = [str(p[0]), str(p[2]), None, str(p[5][1]), str(p[6][1]), []]
         # orientation parameters
         if params.is_2D:
             for p in params.orientation_params:
@@ -1394,7 +1394,7 @@ def convertFromSVS(datasets):
                     p_min = p[5][1]
                 if p[6][1] != "":
                     p_max = p[6][1]
-                param_dict[p_name] = [str(p[0]), str(p[2]), None, p_min, p_max]
+                param_dict[p_name] = [str(p[0]), str(p[2]), None, p_min, p_max, []]
 
         # disperse parameters
         if params.enable_disp:
@@ -1421,7 +1421,9 @@ def convertFromSVS(datasets):
                     p_disp = "gaussian"
                 param_dict[p_name] = [p_opt, p_width, p_min, p_max, p_npts, p_nsigmas, p_disp]
 
+        param_dict['is_batch_fitting'] = ['False']
         content[params.data_id]['fit_params'] = param_dict
+
     return content
 
 def enum(*sequential, **named):
