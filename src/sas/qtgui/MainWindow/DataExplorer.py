@@ -487,6 +487,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             params = value['fit_params']
             for page in params:
+                if not isinstance(page, dict):
+                    continue
+                if 'is_batch_fitting' not in page:
+                    continue
                 if page['is_batch_fitting'][0] != 'True':
                     continue
                 batch_ids = page['data_id'][0]
@@ -550,17 +554,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             from sas.sascalc.dataloader.data_info import Data2D as old_data2d
             if isinstance(new_data, (old_data1d, old_data2d)):
                 new_data = self.manager.create_gui_data(value[0], new_data.filename)
+            if hasattr(value[0], 'id'):
+                new_data.id = value[0].id
+                new_data.group_id = value[0].group_id
             assert isinstance(new_data, (Data1D, Data2D))
             # make sure the ID is retained
-            new_data.id = value[0].id
-            new_data.group_id = value[0].group_id
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
             new_item.setCheckState(is_checked)
             items.append(new_item)
             model = self.theory_model
-            if value[0].is_data:
+            if new_data.is_data:
                 model = self.model
                 # Caption for the theories
                 new_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
