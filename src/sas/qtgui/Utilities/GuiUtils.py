@@ -29,6 +29,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plottables import Plottable
 from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sas.sascalc.dataloader.data_info import Detector, Process, TransmissionSpectrum
+from sas.sascalc.dataloader.data_info import Aperture, Collimation
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
@@ -1176,6 +1178,10 @@ def saveData(fp, data):
         # "simple" types
         if isinstance(o, (Sample, Source, Vector, FResult)):
             return add_type(o.__dict__, type(o))
+        # detector
+        if isinstance(o, (Detector, Process, TransmissionSpectrum, Aperture, Collimation)):
+            return add_type(o.__dict__, type(o))
+
         if isinstance(o, (Plottable, View)):
             return add_type(o.__dict__, type(o))
 
@@ -1215,6 +1221,7 @@ def readDataFromFile(fp):
         tuple, set,
         Sample, Source, Vector,
         Plottable, Data1D, Data2D, PlottableTheory1D, PlottableFit1D, Text, Chisq, View,
+        Detector, Process, TransmissionSpectrum, Collimation, Aperture,
         DataState, np.ndarray, FResult, FitData1D, FitData2D, SasviewModel]
 
     lookup = dict((cls.__name__, cls) for cls in supported)
@@ -1247,7 +1254,9 @@ def readDataFromFile(fp):
             return cls(generate(data['data'], level))
 
         # "simple" types
-        if cls in (Sample, Source, Vector, FResult, FitData1D, FitData2D, SasviewModel):
+        if cls in (Sample, Source, Vector, FResult, FitData1D, FitData2D,
+                   SasviewModel, Detector, Process, TransmissionSpectrum,
+                   Collimation, Aperture):
             return simple_type(cls, data, level)
         if issubclass(cls, Plottable) or (cls == View):
             return simple_type(cls, data, level)
