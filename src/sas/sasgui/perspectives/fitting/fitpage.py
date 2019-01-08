@@ -1650,7 +1650,7 @@ class FitPage(BasicPage):
         #If not check that data is 1D
         #If so check for pinhole vs slit by veryfing whehter dx or dxl or dxw
         #have data (currently sasview only supports either dx or dxl/dxw but
-        #not both simultaneously) and as, for 2D, are non zero .
+        #not both simultaneously) and, as for 2D, are non zero .
         #Otherwise no smearing can be applied using smear from data (a Gaussian
         #width of zero will cause a divide by zero error)
         elif self.data.__class__.__name__ == "Data1D":
@@ -1659,17 +1659,17 @@ class FitPage(BasicPage):
                 self.smear_type = "Pinhole"
                 #report in % for display makes more sense than absolute value
                 #for pinhole smearing .. but keep old names of dq_l
-                self.dq_l = data.dx[0] / data.x[0] * 100
-                self.dq_r = data.dx[-1] / data.x[-1] * 100
+                self.dq_l = format_number(data.dx[0] / data.x[0] * 100,1)
+                self.dq_r = format_number(data.dx[-1] / data.x[-1] * 100,1)
             #If not, is it valid 1D slit resolution data?
             elif (data.dxl is not None or data.dxw is not None) \
                 and (np.all(data.dxl, 0) or np.all(data.dxw, 0)):
                 self.smear_type = "Slit"
                 #for slit units of 1/A make most sense
                 if data.dxl is not None and np.all(data.dxl, 0):
-                    self.dq_l = data.dxl[0]
+                    self.dq_l = format_number(data.dxl[0],1)
                 if data.dxw is not None and np.all(data.dxw, 0):
-                    self.dq_r = data.dxw[0]
+                    self.dq_r = format_number(data.dxw[0],1)
             #otherwise log that the data did not conatain resolution info
             else:
                 self.msg = "1D Data did not contain recognizable " \
