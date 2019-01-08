@@ -3236,11 +3236,17 @@ class FitPage(BasicPage):
         if self.data.__class__.__name__ == "Data2D" or \
                     self.enable2D:
             self.slit_smearer.Disable()
-            self.pinhole_smearer.Enable(True)
             self.default_mask = copy.deepcopy(self.data.mask)
+            if self.model is not None:
+                self.pinhole_smearer.Enable(True)
+
+        elif self.data.__class__.__name__ == "Data1D":
+            if self.model is not None:
+                self.slit_smearer.Enable(True)
+                self.pinhole_smearer.Enable(True)
         else:
-            self.slit_smearer.Enable(True)
-            self.pinhole_smearer.Enable(True)
+            msg="data is not recognized as either 1D or 2D"
+            logger.info(msg)
 
 
 class BGTextCtrl(wx.TextCtrl):
