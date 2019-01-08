@@ -12,6 +12,7 @@ import copy
 import math
 import time
 import traceback
+import logging
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
@@ -27,6 +28,8 @@ from sas.sasgui.perspectives.fitting.basepage import BasicPage as BasicPage
 from sas.sasgui.perspectives.fitting.basepage import PageInfoEvent as \
     PageInfoEvent
 from .basepage import ModelTextCtrl
+
+logger = logging.getLogger(__name__)
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
@@ -212,8 +215,8 @@ class FitPage(BasicPage):
               "Please enter only the value of interest to customize smearing..."
         smear_message_new_psmear = \
               "Please enter a fixed percentage to be applied to all Q values..."
-        smear_message_2d_x_title = "<dQp>[1/A]:"
-        smear_message_2d_y_title = "<dQs>[1/A]:"
+        smear_message_2d_x_title = "<dQ/Q>p[%]:"
+        smear_message_2d_y_title = "<dQ/Q>s[%]:"
         smear_message_pinhole_percent_min_title = "[dQ/Q]min(%):"
         smear_message_pinhole_percent_max_title = "[dQ/Q]max(%):"
         smear_message_pinhole_percent_title = "dQ/Q(%):"
@@ -1612,75 +1615,108 @@ class FitPage(BasicPage):
         Get the smear info from data.
 
         :return: self.smear_type, self.dq_l and self.dq_r,
-            respectively the type of the smear, dq_min and
-            dq_max for pinhole smear data
-            while dxl and dxw for slit smear
+            respectively the type of the smear, The average <dq/q> radial(p)
+            and <dq/q> theta (s)s for 2D pinhole resolution in % (slit is not
+            currently supported in 2D), (dq/q)_min and (dq/q)_max for 1D pinhole
+            smeared data, again in %, and dxl and/or dxw for slit smeared data
+            given in 1/A and assumed constant.
         """
-        # default
+        # set up defaults
         self.smear_type = None
         self.dq_l = None
         self.dq_r = None
         data = self.data
+        #sanity check - this should only be called if data exits
         if self.data is None:
             return
-        elif self.data.__class__.__name__ == "Data2D" or \
-            self.enable2D:
-            if data.dqx_data is None or data.dqy_data is None:
-                return
-            elif self.current_smearer is not None \
-                and data.dqx_data.any() != 0 \
-                and data.dqy_data.any() != 0:
+        #First check if data is 2D
+        #If so check that data set has smearing info and that none are zero.
+        #Otherwise no smearing can be applied using smear from data (a Gaussian
+        #width of zero will cause a divide by zero error)
+        if self.data.__class__.__name__ == "Data2D":
+            if data.dqx_data is not None and data.dqy_data is not None \
+              and data.dqx_data.all()and data.dqy_data.all():
                 self.smear_type = "Pinhole2d"
-                self.dq_l = format_number(np.average(data.dqx_data))
-                self.dq_r = format_number(np.average(data.dqy_data))
-                return
+                #report as average dQ/Q % as for 1D pinhole
+                self.dq_l = format_number(np.average(data.dqx_data
+                                                     / abs(data.qx_data)) * 100)
+                self.dq_r = format_number(np.average(data.dqy_data
+                                                     / abs(data.qy_data)) * 100)
+            #if not then log that data did not contain resolutin info                                         / abs(data.qy_data)) * 100)
             else:
-                return
-        # check if it is pinhole smear and get min max if it is.
-        if data.dx is not None and np.any(data.dx):
-            self.smear_type = "Pinhole"
-            #report in % for display makes more sense than absolute value
-            #for pinhole smearing.  Keep old names of dq_l rather than 
-            #dq_percent_l as it is close entough, minimizez changes,
-            #particularly since both slit AND pinhole are using these variables.
-            self.dq_l = data.dx[0] / data.x[0] * 100
-            self.dq_r = data.dx[-1] / data.x[-1] * 100
-
-        # check if it is slit smear and get min max if it is.
-        elif data.dxl is not None or data.dxw is not None:
-            self.smear_type = "Slit"
-            if data.dxl is not None and np.all(data.dxl, 0):
-                self.dq_l = data.dxl[0]
-            if data.dxw is not None and np.all(data.dxw, 0):
-                self.dq_r = data.dxw[0]
+                self.msg = "2D Data did not contain recognizable " \
+                           "resolution info."
+                logger.info(self.msg)
+        #If not check that data is 1D
+        #If so check for pinhole vs slit by veryfing whehter dx or dxl or dxw
+        #have data (currently sasview only supports either dx or dxl/dxw but
+        #not both simultaneously) and as, for 2D, are non zero .
+        #Otherwise no smearing can be applied using smear from data (a Gaussian
+        #width of zero will cause a divide by zero error)
+        elif self.data.__class__.__name__ == "Data1D":
+            #is it valid 1D pinhole resolution data?
+            if data.dx is not None and np.all(data.dx):
+                self.smear_type = "Pinhole"
+                #report in % for display makes more sense than absolute value
+                #for pinhole smearing .. but keep old names of dq_l
+                self.dq_l = data.dx[0] / data.x[0] * 100
+                self.dq_r = data.dx[-1] / data.x[-1] * 100
+            #If not, is it valid 1D slit resolution data?
+            elif (data.dxl is not None or data.dxw is not None) \
+                and (np.all(data.dxl, 0) or np.all(data.dxw, 0)):
+                self.smear_type = "Slit"
+                #for slit units of 1/A make most sense
+                if data.dxl is not None and np.all(data.dxl, 0):
+                    self.dq_l = data.dxl[0]
+                if data.dxw is not None and np.all(data.dxw, 0):
+                    self.dq_r = data.dxw[0]
+            #otherwise log that the data did not conatain resolution info
+            else:
+                self.msg = "1D Data did not contain recognizable " \
+                           "resolution info."
+                logger.info(self.msg)
+        #If drops to here it is neither data1D or data2D so log that
+        else:
+            self.msg = "Data was not recognized as either 1D or 2D data."
+            logger.info(self.msg)
         # return self.smear_type,self.dq_l,self.dq_r
 
     def _show_smear_sizer(self):
         """
         Show only the sizers depending on smear selection
         """
-        # smear disabled
+        # smear disabled = No Smearing used
         if self.disable_smearer.GetValue():
             self.smear_description_none.Show(True)
-        # 2Dsmear
+        # 2Dsmearing - for use with 2D data only
         elif self._is_2D():
             self.smear_description_accuracy_type.Show(True)
             self.smear_accuracy.Show(True)
-            self.smear_description_accuracy_type.Show(True)
             self.smear_description_2d.Show(True)
-            self.smear_description_2d_x.Show(True)
-            self.smear_description_2d_y.Show(True)
+            #2D custom pinhole smearing
             if self.pinhole_smearer.GetValue():
+                self.smear_description_pin_percent.Show(True)
                 self.smear_pinhole_percent.Show(True)
-        # smear from data
-        elif self.enable_smearer.GetValue():
+            #get 2D smearing from data
+            elif self.enable_smearer.GetValue():
+                self.smear_description_2d_x.Show(True)
+                self.smear_description_2d_y.Show(True)
+                self.smear_data_left.Show(True)
+                self.smear_data_right.Show(True)
+            #Currently 2D custom slit smearing is not currently supported
+            else:
+                logger.error("2D custom smearing cannot use slit smearing")
 
+        # 1D smearing from data
+        elif self.enable_smearer.GetValue():
             self.smear_description_dqdata.Show(True)
             if self.smear_type is not None:
                 self.smear_description_smear_type.Show(True)
+                #1D data has slit smearing
                 if self.smear_type == 'Slit':
                     self.smear_description_slit_height.Show(True)
                     self.smear_description_slit_width.Show(True)
+                #1D data has pinhole smearing
                 elif self.smear_type == 'Pinhole':
                     self.smear_description_pin_percent_min.Show(True)
                     self.smear_description_pin_percent_max.Show(True)
@@ -1688,20 +1724,20 @@ class FitPage(BasicPage):
                 self.smear_description_type.Show(True)
                 self.smear_data_left.Show(True)
                 self.smear_data_right.Show(True)
-        # custom pinhole smear
+        # 1D custom pinhole smearing
         elif self.pinhole_smearer.GetValue():
-#            if self.smear_type == 'Pinhole':
             self.smear_message_new_p.Show(True)
             self.smear_description_pin_percent.Show(True)
-            #note - was outside of above commented out if statement
             self.smear_pinhole_percent.Show(True)
-        # custom slit smear
+        # 1D custom slit smear
         elif self.slit_smearer.GetValue():
             self.smear_message_new_s.Show(True)
             self.smear_description_slit_height.Show(True)
             self.smear_slit_height.Show(True)
             self.smear_description_slit_width.Show(True)
             self.smear_slit_width.Show(True)
+        else:
+            logger.error("smearing type is not defined")
 
     def _hide_all_smear_info(self):
         """
