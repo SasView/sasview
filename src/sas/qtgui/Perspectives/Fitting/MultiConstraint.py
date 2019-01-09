@@ -9,6 +9,7 @@ import webbrowser
 from numpy import *
 
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -28,6 +29,11 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
         self.setupUi(self)
         self.setModal(True)
+
+        # disable the context help icon
+        windowFlags = self.windowFlags()
+        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.params = params
         self.parent = parent
         # Text of the constraint

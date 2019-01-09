@@ -2,7 +2,7 @@ from functools import partial
 import copy
 import numpy as np
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 
@@ -23,6 +23,8 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
         assert isinstance(data, Data2D)
 
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.data = data
         self.parent = parent

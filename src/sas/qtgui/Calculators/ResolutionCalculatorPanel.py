@@ -40,6 +40,9 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
     def __init__(self, parent=None):
         super(ResolutionCalculatorPanel, self).__init__()
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.manager = parent
 
         # New font to display angstrom symbol

@@ -2,7 +2,7 @@
 import os
 from shutil import copyfile
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from sas.sascalc.fit import models
 from sas.qtgui.Perspectives.Fitting import ModelUtilities
@@ -20,6 +20,9 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
     def __init__(self, parent=None):
         super(PluginManager, self).__init__(parent._parent)
         self.setupUi(self)
+
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.parent = parent
         self.cmdDelete.setEnabled(False)

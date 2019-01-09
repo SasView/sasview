@@ -30,6 +30,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.setupUi(self)
         self.setModal(True)
 
+        # disable the context help icon
+        windowFlags = self.windowFlags()
+        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         # Useful globals
         self.tabs = tabs
         self.params = None
@@ -60,6 +64,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         self.cmdOK.clicked.connect(self.onApply)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdAddAll.clicked.connect(self.onSetAll)
+
         self.txtConstraint.editingFinished.connect(self.validateFormula)
         self.cbModel1.currentIndexChanged.connect(self.onModelIndexChange)
         self.cbModel2.currentIndexChanged.connect(self.onModelIndexChange)
@@ -77,28 +83,16 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
         self.setupParamWidgets()
 
+
         self.setupMenu()
 
     def setupMenu(self):
-        # Add menu to the Apply button, if necessary
+        # Show Add All button, if necessary
         if self.cbModel1.currentText() ==self.cbModel2.currentText():
-            self.cmdOK.setArrowType(QtCore.Qt.NoArrow)
-            self.cmdOK.setPopupMode(QtWidgets.QToolButton.DelayedPopup)
-            self.cmdOK.setMenu(None)
-            return
-        self.all_menu   = QtWidgets.QMenu()
-        self.actionAddAll = QtWidgets.QAction(self)
-        self.actionAddAll.setObjectName("actionAddAll")
-        self.actionAddAll.setText(QtCore.QCoreApplication.translate("self", "Add all"))
-        ttip = "Add constraints between all identically named parameters in both fitpages"
-        self.actionAddAll.setToolTip(ttip)
-        self.actionAddAll.triggered.connect(self.onSetAll)
-        self.all_menu.addAction(self.actionAddAll)
-        # https://bugreports.qt.io/browse/QTBUG-13663
-        self.all_menu.setToolTipsVisible(True)
-        self.cmdOK.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-        self.cmdOK.setArrowType(QtCore.Qt.DownArrow)
-        self.cmdOK.setMenu(self.all_menu)
+            self.cmdAddAll.setVisible(False)
+        else:
+            self.cmdAddAll.setVisible(True)
+        return
 
     def setupParamWidgets(self):
         """
@@ -126,11 +120,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # disable Apply if no parameters available
         if len(items1)==0:
             self.cmdOK.setEnabled(False)
+            self.cmdAddAll.setEnabled(False)
             txt = "No parameters in model "+self.tab_names[0] +\
                 " are available for constraining."
             self.lblWarning.setText(txt)
         else:
             self.cmdOK.setEnabled(True)
+            self.cmdAddAll.setEnabled(True)
             txt = ""
             self.lblWarning.setText(txt)
 
@@ -192,9 +188,11 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
+            self.cmdAddAll.setEnabled(False)
             self.txtConstraint.setStyleSheet("QLineEdit {background-color: red;}")
         else:
             self.cmdOK.setEnabled(True)
+            self.cmdAddAll.setEnabled(True)
             self.txtConstraint.setStyleSheet("QLineEdit {background-color: white;}")
 
     def validateConstraint(self, constraint_text):

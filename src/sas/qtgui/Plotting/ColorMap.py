@@ -27,6 +27,8 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         self.setupUi(self)
         assert(isinstance(data, Data2D))
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.data = data
         self._cmap_orig = self._cmap = cmap if cmap is not None else DEFAULT_MAP

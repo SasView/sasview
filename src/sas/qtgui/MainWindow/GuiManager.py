@@ -58,6 +58,9 @@ class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+
 
 class GuiManager(object):
     """

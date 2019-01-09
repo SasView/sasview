@@ -44,6 +44,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         super(GPUOptions, self).__init__(parent)
         self.parent = parent
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.addOpenCLOptions()
         self.createLinks()
 

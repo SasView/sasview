@@ -55,6 +55,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.parent = parent
 
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         #  uncheck self.chkOverwrite
         self.chkOverwrite.setChecked(False)

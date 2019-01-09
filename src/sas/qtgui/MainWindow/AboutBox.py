@@ -1,5 +1,5 @@
 import functools
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -13,6 +13,8 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
     def __init__(self, parent=None):
         super(AboutBox, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("About")
 

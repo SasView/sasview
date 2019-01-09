@@ -135,6 +135,9 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         super(CategoryManager, self).__init__(parent)
         self.setupUi(self)
 
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.communicator = manager.communicator()
 
         self.setWindowTitle("Category Manager")
@@ -326,6 +329,8 @@ class ChangeCategory(QtWidgets.QDialog, Ui_ChangeCategoryUI):
     def __init__(self, parent=None, categories=None, model=None):
         super(ChangeCategory, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.model = model
         self.parent = parent

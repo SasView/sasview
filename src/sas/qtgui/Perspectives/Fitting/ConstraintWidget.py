@@ -111,6 +111,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         self.parent = parent
         self.setupUi(self)
+
         self.currentType = "FitPage"
         # Page id for fitting
         # To keep with previous SasView values, use 300 as the start offset

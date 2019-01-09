@@ -11,6 +11,8 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
     def __init__(self, parent=None):
         super(AddText, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self._font = QtGui.QFont()
         self._color = "black"

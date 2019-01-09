@@ -25,6 +25,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.setupUi(self)
         self.manager = parent
         self.communicator = self.manager.communicator()
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # To store input datafiles
         self.filenames = None

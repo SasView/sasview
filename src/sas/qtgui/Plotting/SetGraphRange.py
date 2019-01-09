@@ -16,6 +16,9 @@ class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
         super(SetGraphRange, self).__init__()
 
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         assert(isinstance(x_range, tuple))
         assert(isinstance(y_range, tuple))
 
