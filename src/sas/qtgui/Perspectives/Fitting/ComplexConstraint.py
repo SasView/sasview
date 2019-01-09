@@ -25,7 +25,7 @@ from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexCons
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
     constraintReadySignal = QtCore.pyqtSignal(tuple)
     def __init__(self, parent=None, tabs=None):
-        super(ComplexConstraint, self).__init__()
+        super(ComplexConstraint, self).__init__(parent)
 
         self.setupUi(self)
         self.setModal(True)

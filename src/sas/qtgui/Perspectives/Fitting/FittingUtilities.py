@@ -652,7 +652,7 @@ def getStandardParam(model=None):
     param = []
     num_rows = model.rowCount()
     if num_rows < 1:
-        return None
+        return param
 
     for row in range(num_rows):
         param_name = model.item(row, 0).text()

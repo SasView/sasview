@@ -25,7 +25,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         parent: ConstraintWidget object
         params: tuple of strings describing model parameters
         """
-        super(MultiConstraint, self).__init__()
+        super(MultiConstraint, self).__init__(parent)
 
         self.setupUi(self)
         self.setModal(True)
