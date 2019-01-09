@@ -283,6 +283,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data for chosen model
         self.model_data = None
+        self._previous_model_index = 0
 
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
@@ -2019,6 +2020,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         React to changes in the smearing widget
         """
+        # update display
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
 
     def recalculatePlotData(self):
