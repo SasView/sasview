@@ -639,18 +639,27 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Figure out which rows are checked
         ind = -1
-        # Use 'while' so the row count is forced at every iteration
+
+        deleted_items = []
+        deleted_names = []
         while ind < self.theory_model.rowCount():
             ind += 1
             item = self.theory_model.item(ind)
+
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
+                deleted_names.append(str(self.theory_model.item(ind).text()))
+                deleted_items.append(item)
+
                 self.theory_model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
 
-        # pass temporarily kept as a breakpoint anchor
-        pass
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_items)
+
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
 
     def sendData(self, event=None):
         """
@@ -1809,15 +1818,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msg = "Wrong data type returned from calculations."
             raise AttributeError(msg)
 
-        # Check if there are any other items for this tab
-        # If so, delete them
+        # Check if there exists an item for this tab
+        # If so, replace it
         current_tab_name = model_item.text()
         for current_index in range(self.theory_model.rowCount()):
-            if current_tab_name == self.theory_model.item(current_index).text():
-                self.theory_model.removeRow(current_index)
-                break
-        # send in the new item
+            current_item = self.theory_model.item(current_index)
+            if current_tab_name == current_item.text():
+                # replace data instead
+                new_data = GuiUtils.dataFromItem(model_item)
+                current_item.child(0).setData(new_data)
+                return current_item
+
+        # add the new item to the model
         self.theory_model.appendRow(model_item)
+        return model_item
 
     def deleteIntermediateTheoryPlotsByModelID(self, model_id):
         """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the

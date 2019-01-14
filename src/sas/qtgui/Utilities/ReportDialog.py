@@ -5,7 +5,7 @@ import logging
 import traceback
 from xhtml2pdf import pisa
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5 import QtPrintSupport
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -22,6 +22,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
 
         super(ReportDialog, self).__init__(parent._parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         assert isinstance(report_list, list)
         assert len(report_list) == 3

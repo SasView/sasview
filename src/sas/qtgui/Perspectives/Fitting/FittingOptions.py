@@ -40,6 +40,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.config = config
 

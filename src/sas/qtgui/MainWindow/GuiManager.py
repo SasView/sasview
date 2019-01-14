@@ -58,6 +58,9 @@ class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+
 
 class GuiManager(object):
     """
@@ -1048,7 +1051,13 @@ class GuiManager(object):
         Catch the theory update signal from a perspective
         Send the request to the DataExplorer for updating the theory model.
         """
-        self.filesWidget.updateTheoryFromPerspective(index)
+        item = self.filesWidget.updateTheoryFromPerspective(index)
+        # Now notify the perspective that the item was/wasn't replaced
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            # currently only fitting supports generation of theories.
+            return
+        per.currentTab.setTheoryItem(item)
 
     def deleteIntermediateTheoryPlotsByModelID(self, model_id):
         """

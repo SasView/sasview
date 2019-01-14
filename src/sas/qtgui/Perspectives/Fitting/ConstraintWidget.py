@@ -111,6 +111,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         self.parent = parent
         self.setupUi(self)
+
         self.currentType = "FitPage"
         # Page id for fitting
         # To keep with previous SasView values, use 300 as the start offset
@@ -213,8 +214,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         tab_object = ObjectLibrary.getObject(tab)
 
-        # Disconnect all local slots
-        #tab_object.disconnect()
+        # Disconnect all local slots, if connected
+        if tab_object.receivers(tab_object.newModelSignal) > 0:
+            tab_object.newModelSignal.disconnect()
+        if tab_object.receivers(tab_object.constraintAddedSignal) > 0:
+            tab_object.constraintAddedSignal.disconnect()
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)

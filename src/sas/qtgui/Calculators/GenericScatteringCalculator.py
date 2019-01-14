@@ -37,6 +37,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.manager = parent
         self.communicator = self.manager.communicator()
         self.model = sas_gen.GenSAS()

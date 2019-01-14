@@ -14,6 +14,8 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
     def __init__(self, parent=None):
         super(KiessigPanel, self).__init__()
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("Kiessig Thickness Calculator")
 

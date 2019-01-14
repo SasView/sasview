@@ -283,6 +283,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data for chosen model
         self.model_data = None
+        self._previous_model_index = 0
 
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
@@ -2019,6 +2020,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         React to changes in the smearing widget
         """
+        # update display
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
 
     def recalculatePlotData(self):
@@ -2618,9 +2622,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Create a QStandardModelIndex containing model data
         """
         name = self.nameFromData(fitted_data)
-        # Notify the GUI manager so it can create the theory model in DataExplorer
-        self.theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
-        self.communicate.updateTheoryFromPerspectiveSignal.emit(self.theory_item)
+        # Modify the item or add it if new
+        theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
+        self.communicate.updateTheoryFromPerspectiveSignal.emit(theory_item)
+
+    def setTheoryItem(self, item):
+        """
+        Reset the theory item based on the data explorer update
+        """
+        self.theory_item = item
 
     def nameFromData(self, fitted_data):
         """

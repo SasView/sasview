@@ -59,6 +59,7 @@ def run_sasview():
     splash = SplashScreen()
     splash.show()
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     import sys
     if 'twisted.internet.reactor' in sys.modules:

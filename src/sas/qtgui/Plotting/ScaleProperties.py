@@ -26,6 +26,8 @@ class ScaleProperties(QtWidgets.QDialog, Ui_scalePropertiesUI):
     def __init__(self, parent=None, init_scale_x='x', init_scale_y='y'):
         super(ScaleProperties, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # Set up comboboxes
         self.cbX.addItems(x_values)

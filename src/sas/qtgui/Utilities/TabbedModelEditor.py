@@ -5,7 +5,7 @@ import datetime
 import logging
 import traceback
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from sas.sascalc.fit import models
 
@@ -27,6 +27,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent = parent
 
         self.setupUi(self)
+
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # globals
         self.filename = ""

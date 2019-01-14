@@ -14,6 +14,8 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
     def __init__(self, parent=None, is_python=True):
         super(ModelEditor, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.is_python = is_python
 
