@@ -215,8 +215,8 @@ class FitPage(BasicPage):
               "Please enter only the value of interest to customize smearing..."
         smear_message_new_psmear = \
               "Please enter a fixed percentage to be applied to all Q values..."
-        smear_message_2d_x_title = "<dQ/Q>p[%]:"
-        smear_message_2d_y_title = "<dQ/Q>s[%]:"
+        smear_message_2d_x_title = "<dQ/Q>_r[%]:"
+        smear_message_2d_y_title = "<dQ/Q>_phi[%]:"
         smear_message_pinhole_percent_min_title = "[dQ/Q]min(%):"
         smear_message_pinhole_percent_max_title = "[dQ/Q]max(%):"
         smear_message_pinhole_percent_title = "dQ/Q(%):"
@@ -422,11 +422,11 @@ class FitPage(BasicPage):
         self.smear_description_2d_x = wx.StaticText(self, wx.ID_ANY,
                             smear_message_2d_x_title, style=wx.ALIGN_LEFT)
         self.smear_description_2d_x.SetToolTipString(
-                                        "  dQp(parallel) in q_r direction.")
+                                        "  dQ_r q_r in polar coordinates.")
         self.smear_description_2d_y = wx.StaticText(self, wx.ID_ANY,
                             smear_message_2d_y_title, style=wx.ALIGN_LEFT)
         self.smear_description_2d_y.SetToolTipString(
-                                    " dQs(perpendicular) in q_phi direction.")
+                                    " dQ_phi q_phi in polar coordinates.")
         self.smear_description_pin_percent_min = wx.StaticText(self, wx.ID_ANY,
                                             smear_message_pinhole_percent_min_title,
                                             style=wx.ALIGN_LEFT)
