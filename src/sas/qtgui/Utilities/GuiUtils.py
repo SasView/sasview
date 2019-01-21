@@ -43,6 +43,8 @@ from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+
 from sas.qtgui.Utilities import CustomDir
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
@@ -792,7 +794,8 @@ def saveData1D(data):
     default_name += "_out" + extension
 
     wildcard = "Text files (*.txt);;"\
-                "CanSAS 1D files(*.xml)"
+                "CanSAS 1D files(*.xml);;"\
+                "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
         'directory' : default_name,
@@ -811,8 +814,11 @@ def saveData1D(data):
     loader = Loader()
     if os.path.splitext(filename)[1].lower() == ".txt":
         onTXTSave(data, filename)
-    if os.path.splitext(filename)[1].lower() == ".xml":
+    elif os.path.splitext(filename)[1].lower() == ".xml":
         loader.save(filename, data, ".xml")
+    elif os.path.splitext(filename)[1].lower() == ".h5":
+        nxcansaswriter = NXcanSASWriter()
+        nxcansaswriter.write([data], filename)
 
 def saveData2D(data):
     """
@@ -823,7 +829,8 @@ def saveData2D(data):
     ext_format = ".dat"
     default_name += "_out" + ext_format
 
-    wildcard = "IGOR/DAT 2D file in Q_map (*.dat)"
+    wildcard = "IGOR/DAT 2D file in Q_map (*.dat);;"\
+                "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
         'directory' : default_name,
@@ -843,6 +850,10 @@ def saveData2D(data):
 
     if os.path.splitext(filename)[1].lower() == ext_format:
         loader.save(filename, data, ext_format)
+    elif os.path.splitext(filename)[1].lower() == ".h5":
+        nxcansaswriter = NXcanSASWriter()
+        nxcansaswriter.write([data], filename)
+
 
 class FormulaValidator(QtGui.QValidator):
     def __init__(self, parent=None):
