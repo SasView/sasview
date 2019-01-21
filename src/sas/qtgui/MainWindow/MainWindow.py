@@ -55,6 +55,10 @@ def SplashScreen():
 def run_sasview():
     app = QApplication([])
 
+    # Make the event loop interruptable quickly
+    import signal
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()
     splash.show()
