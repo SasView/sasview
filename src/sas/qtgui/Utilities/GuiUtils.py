@@ -11,6 +11,7 @@ import warnings
 import webbrowser
 import urllib.parse
 import json
+import types
 from io import BytesIO
 
 import numpy as np
@@ -1217,6 +1218,11 @@ def saveData(fp, data):
             content = { 'data': buffer.read().decode('latin-1') }
             return add_type(content, type(o))
 
+        if isinstance(o, types.FunctionType):
+            # we have a pure function
+            content = o.__dict__.copy()
+            return add_type(content, type(o))
+
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
         return None
@@ -1229,7 +1235,7 @@ def readDataFromFile(fp):
     Datasets are stored in the JSON format.
     '''
     supported = [
-        tuple, set,
+        tuple, set, types.FunctionType,
         Sample, Source, Vector,
         Plottable, Data1D, Data2D, PlottableTheory1D, PlottableFit1D, Text, Chisq, View,
         Detector, Process, TransmissionSpectrum, Collimation, Aperture,
@@ -1284,6 +1290,10 @@ def readDataFromFile(fp):
             buffer.write(data['data'].encode('latin-1'))
             buffer.seek(0)
             return np.load(buffer)
+
+        # function
+        if cls == types.FunctionType:
+            return cls
 
         logging.info('not implemented: %s, %s' % (type, cls))
         return None
