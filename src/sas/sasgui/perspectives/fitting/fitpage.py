@@ -12,10 +12,12 @@ import copy
 import math
 import time
 import traceback
+import logging
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.sascalc.fit.qsmearing import smear_selection
+from sas.sascalc.dataloader.data_info import Data1D, Data2D
 
 from sas.sasgui.guiframe.events import StatusEvent, NewPlotEvent, \
     PlotQrangeEvent
@@ -27,6 +29,8 @@ from sas.sasgui.perspectives.fitting.basepage import BasicPage as BasicPage
 from sas.sasgui.perspectives.fitting.basepage import PageInfoEvent as \
     PageInfoEvent
 from .basepage import ModelTextCtrl
+
+logger = logging.getLogger(__name__)
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
@@ -183,8 +187,7 @@ class FitPage(BasicPage):
 
         :return: True or False
         """
-        if self.data.__class__.__name__ == "Data2D" or \
-                        self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             return True
         return False
 
@@ -198,8 +201,7 @@ class FitPage(BasicPage):
         is_2d_data = False
 
         # Check if data is 2D
-        if self.data.__class__.__name__ == "Data2D" or \
-                        self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             is_2d_data = True
 
         title = "Fitting"
@@ -212,9 +214,11 @@ class FitPage(BasicPage):
               "Please enter only the value of interest to customize smearing..."
         smear_message_new_psmear = \
               "Please enter a fixed percentage to be applied to all Q values..."
-        smear_message_2d_x_title = "<dQp>[1/A]:"
-        smear_message_2d_y_title = "<dQs>[1/A]:"
-        smear_message_pinhole_percent_title = "dQ[%]:"
+        smear_message_2d_x_title = "<dQ/Q>_r[%]:"
+        smear_message_2d_y_title = "<dQ/Q>_phi[%]:"
+        smear_message_pinhole_percent_min_title = "[dQ/Q]min(%):"
+        smear_message_pinhole_percent_max_title = "[dQ/Q]max(%):"
+        smear_message_pinhole_percent_title = "dQ/Q(%):"
         smear_message_slit_height_title = "Slit height[1/A]:"
         smear_message_slit_width_title = "Slit width[1/A]:"
 
@@ -417,11 +421,17 @@ class FitPage(BasicPage):
         self.smear_description_2d_x = wx.StaticText(self, wx.ID_ANY,
                             smear_message_2d_x_title, style=wx.ALIGN_LEFT)
         self.smear_description_2d_x.SetToolTipString(
-                                        "  dQp(parallel) in q_r direction.")
+                                        "  dQ_r q_r in polar coordinates.")
         self.smear_description_2d_y = wx.StaticText(self, wx.ID_ANY,
                             smear_message_2d_y_title, style=wx.ALIGN_LEFT)
         self.smear_description_2d_y.SetToolTipString(
-                                    " dQs(perpendicular) in q_phi direction.")
+                                    " dQ_phi q_phi in polar coordinates.")
+        self.smear_description_pin_percent_min = wx.StaticText(self, wx.ID_ANY,
+                                            smear_message_pinhole_percent_min_title,
+                                            style=wx.ALIGN_LEFT)
+        self.smear_description_pin_percent_max = wx.StaticText(self, wx.ID_ANY,
+                                            smear_message_pinhole_percent_max_title,
+                                            style=wx.ALIGN_LEFT)
         self.smear_description_pin_percent = wx.StaticText(self, wx.ID_ANY,
                                             smear_message_pinhole_percent_title,
                                             style=wx.ALIGN_LEFT)
@@ -448,20 +458,24 @@ class FitPage(BasicPage):
                                  0, wx.CENTER, 10)
         self.sizer_new_smear.Add((15, -1))
         self.sizer_new_smear.Add(self.smear_description_2d_x, 0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_description_pin_percent_min,
+                                 0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_description_pin_percent,
+                                 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_description_slit_height,
                                  0, wx.CENTER, 10)
 
+        self.sizer_new_smear.Add(self.smear_pinhole_percent, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_slit_height, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_data_left, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add((20, -1))
         self.sizer_new_smear.Add(self.smear_description_2d_y,
                                  0, wx.CENTER, 10)
-        self.sizer_new_smear.Add(self.smear_description_pin_percent,
+        self.sizer_new_smear.Add(self.smear_description_pin_percent_max,
                                  0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_description_slit_width,
                                  0, wx.CENTER, 10)
 
-        self.sizer_new_smear.Add(self.smear_pinhole_percent, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_slit_width, 0, wx.CENTER, 10)
         self.sizer_new_smear.Add(self.smear_data_right, 0, wx.CENTER, 10)
 
@@ -502,7 +516,7 @@ class FitPage(BasicPage):
         is_2d_data = False
 
         # check if it is 2D data
-        if self.data.__class__.__name__ == "Data2D" or self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             is_2d_data = True
 
         self.sizer5.Clear(True)
@@ -805,8 +819,7 @@ class FitPage(BasicPage):
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                         self.sizer4_4.Add(cb, (iy, ix), (1, 1),
                                 wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
-                        if self.data.__class__.__name__ == "Data2D" or \
-                                    self.enable2D:
+                        if isinstance(self.data, Data2D) or self.enable2D:
                             cb.Show(True)
                         elif cb.IsShown():
                             cb.Hide()
@@ -818,8 +831,7 @@ class FitPage(BasicPage):
                         poly_tip = "Absolute Sigma for %s." % item
                         ctl1.SetToolTipString(poly_tip)
                         ctl1.SetValue(str(format_number(value, True)))
-                        if self.data.__class__.__name__ == "Data2D" or \
-                                    self.enable2D:
+                        if isinstance(self.data, Data2D) or self.enable2D:
                             if first_orient:
                                 values.SetLabel('PD[ratio], Sig[deg]')
                                 poly_text = "PD(polydispersity for lengths):\n"
@@ -853,8 +865,7 @@ class FitPage(BasicPage):
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                         ctl2.Hide()
-                        if self.data.__class__.__name__ == "Data2D" or \
-                                self.enable2D:
+                        if isinstance(self.data, Data2D) or self.enable2D:
                             if self.is_mac:
                                 text2.Show(True)
                                 ctl2.Show(True)
@@ -879,8 +890,7 @@ class FitPage(BasicPage):
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                         ctl4.Hide()
 
-                        if self.data.__class__.__name__ == "Data2D" or \
-                                self.enable2D:
+                        if isinstance(self.data, Data2D) or self.enable2D:
                             ctl3.Show(True)
                             ctl4.Show(True)
 
@@ -892,8 +902,7 @@ class FitPage(BasicPage):
                                              style=wx.TE_PROCESS_ENTER)
 
                         Tctl.SetValue(str(format_number(value)))
-                        if self.data.__class__.__name__ == "Data2D" or \
-                                self.enable2D:
+                        if isinstance(self.data, Data2D) or self.enable2D:
                             Tctl.Show(True)
                         else:
                             Tctl.Hide()
@@ -912,8 +921,7 @@ class FitPage(BasicPage):
                                              style=wx.TE_PROCESS_ENTER)
 
                         Tct2.SetValue(str(format_number(value)))
-                        if self.data.__class__.__name__ == "Data2D" or \
-                                self.enable2D:
+                        if isinstance(self.data, Data2D) or self.enable2D:
                             Tct2.Show(True)
                         else:
                             Tct2.Hide()
@@ -940,8 +948,7 @@ class FitPage(BasicPage):
                 self.orientation_params_disp.append([cb, name1, ctl1,
                                             text2, ctl2, ctl3, ctl4, disp_box])
 
-                if self.data.__class__.__name__ == "Data2D" or \
-                                self.enable2D:
+                if isinstance(self.data, Data2D) or self.enable2D:
                     disp_box.Show(True)
                 else:
                     disp_box.Hide()
@@ -1326,8 +1333,7 @@ class FitPage(BasicPage):
                     elif self.pinhole_smearer.GetValue():
                         flag1 = self.update_pinhole_smear()
                         flag = flag or flag1
-                elif self.data.__class__.__name__ != "Data2D" and \
-                        not self.enable2D:
+                elif not isinstance(self.data, Data2D) and not self.enable2D:
                     enable_smearer = not self.disable_smearer.GetValue()
                     self._manager.set_smearer(smearer=temp_smearer,
                                               fid=self.data.id,
@@ -1400,7 +1406,7 @@ class FitPage(BasicPage):
         """
         if event is not None:
             event.Skip()
-        if self.data.__class__.__name__ == "Data2D":
+        if isinstance(self.data, Data2D):
             return
         is_click = event.LeftDown()
         if is_click:
@@ -1418,7 +1424,7 @@ class FitPage(BasicPage):
         """
         if event is not None:
             event.Skip()
-        if self.data.__class__.__name__ == "Data2D":
+        if isinstance(self.data, Data2D):
             return
         act_ctrl = event.GetEventObject()
         d_id = self.data.id
@@ -1434,7 +1440,7 @@ class FitPage(BasicPage):
         On Key down
         """
         event.Skip()
-        if self.data.__class__.__name__ == "Data2D":
+        if isinstance(self.data, Data2D):
             return
         ctrl = event.GetEventObject()
         try:
@@ -1495,8 +1501,7 @@ class FitPage(BasicPage):
                 return
             # Check if # of points for theory model are valid(>0).
             # check for 2d
-            if self.data.__class__.__name__ == "Data2D" or \
-                    self.enable2D:
+            if isinstance(self.data, Data2D) or self.enable2D:
                 # set mask
                 radius = np.sqrt(self.data.qx_data * self.data.qx_data +
                                     self.data.qy_data * self.data.qy_data)
@@ -1548,8 +1553,7 @@ class FitPage(BasicPage):
             for item in self.parameters:
                 if item[0].IsShown():
                     # Skip the angle parameters if 1D data
-                    if self.data.__class__.__name__ != "Data2D" and \
-                            not self.enable2D:
+                    if not isinstance(self.data, Data2D) and not self.enable2D:
                         if item in self.orientation_params:
                             continue
                     if item in self.param_toFit:
@@ -1567,8 +1571,7 @@ class FitPage(BasicPage):
             for item in self.fittable_param:
                 if item[0].IsShown():
                     # Skip the angle parameters if 1D data
-                    if self.data.__class__.__name__ != "Data2D" and \
-                            not self.enable2D:
+                    if not isinstance(self.data, Data2D) and not self.enable2D:
                         if item in self.orientation_params:
                             continue
                     if item in self.param_toFit:
@@ -1600,91 +1603,129 @@ class FitPage(BasicPage):
         Get the smear info from data.
 
         :return: self.smear_type, self.dq_l and self.dq_r,
-            respectively the type of the smear, dq_min and
-            dq_max for pinhole smear data
-            while dxl and dxw for slit smear
+            respectively the type of the smear, The average <dq/q> radial(p)
+            and <dq/q> theta (s)s for 2D pinhole resolution in % (slit is not
+            currently supported in 2D), (dq/q)_min and (dq/q)_max for 1D pinhole
+            smeared data, again in %, and dxl and/or dxw for slit smeared data
+            given in 1/A and assumed constant.
         """
-        # default
+        # set up defaults
         self.smear_type = None
         self.dq_l = None
         self.dq_r = None
         data = self.data
+        #sanity check - this should only be called if data exits
         if self.data is None:
             return
-        elif self.data.__class__.__name__ == "Data2D" or \
-            self.enable2D:
-            if data.dqx_data is None or data.dqy_data is None:
-                return
-            elif self.current_smearer is not None \
-                and data.dqx_data.any() != 0 \
-                and data.dqx_data.any() != 0:
+        #First check if data is 2D
+        #If so check that data set has smearing info and that none are zero.
+        #Otherwise no smearing can be applied using smear from data (a Gaussian
+        #width of zero will cause a divide by zero error)
+        if isinstance(self.data, Data2D):
+            if data.dqx_data is not None and data.dqy_data is not None \
+              and data.dqx_data.all()and data.dqy_data.all():
                 self.smear_type = "Pinhole2d"
-                self.dq_l = format_number(np.average(data.dqx_data))
-                self.dq_r = format_number(np.average(data.dqy_data))
-                return
+                #report as average dQ/Q % as for 1D pinhole
+                self.dq_l = format_number(np.average(data.dqx_data
+                                                     / abs(data.qx_data)) * 100)
+                self.dq_r = format_number(np.average(data.dqy_data
+                                                     / abs(data.qy_data)) * 100)
+            #if not then log that data did not contain resolutin info                                         / abs(data.qy_data)) * 100)
             else:
-                return
-        # check if it is pinhole smear and get min max if it is.
-        if data.dx is not None and np.any(data.dx):
-            self.smear_type = "Pinhole"
-            self.dq_l = data.dx[0]
-            self.dq_r = data.dx[-1]
-
-        # check if it is slit smear and get min max if it is.
-        elif data.dxl is not None or data.dxw is not None:
-            self.smear_type = "Slit"
-            if data.dxl is not None and np.all(data.dxl, 0):
-                self.dq_l = data.dxl[0]
-            if data.dxw is not None and np.all(data.dxw, 0):
-                self.dq_r = data.dxw[0]
+                self.msg = "2D Data did not contain recognizable " \
+                           "resolution info."
+                logger.info(self.msg)
+        #If not check that data is 1D
+        #If so check for pinhole vs slit by veryfing whehter dx or dxl or dxw
+        #have data (currently sasview only supports either dx or dxl/dxw but
+        #not both simultaneously) and, as for 2D, are non zero .
+        #Otherwise no smearing can be applied using smear from data (a Gaussian
+        #width of zero will cause a divide by zero error)
+        elif isinstance(self.data, Data1D):
+            #is it valid 1D pinhole resolution data?
+            if data.dx is not None and np.all(data.dx):
+                self.smear_type = "Pinhole"
+                #report in % for display makes more sense than absolute value
+                #for pinhole smearing .. but keep old names of dq_l
+                self.dq_l = format_number(data.dx[0] / data.x[0] * 100,1)
+                self.dq_r = format_number(data.dx[-1] / data.x[-1] * 100,1)
+            #If not, is it valid 1D slit resolution data?
+            elif (data.dxl is not None or data.dxw is not None) \
+                and (np.all(data.dxl, 0) or np.all(data.dxw, 0)):
+                self.smear_type = "Slit"
+                #for slit units of 1/A make most sense
+                if data.dxl is not None and np.all(data.dxl, 0):
+                    self.dq_l = format_number(data.dxl[0],1)
+                if data.dxw is not None and np.all(data.dxw, 0):
+                    self.dq_r = format_number(data.dxw[0],1)
+            #otherwise log that the data did not conatain resolution info
+            else:
+                self.msg = "1D Data did not contain recognizable " \
+                           "resolution info."
+                logger.info(self.msg)
+        #If drops to here it is neither data1D or data2D so log that
+        else:
+            self.msg = "Data was not recognized as either 1D or 2D data."
+            logger.info(self.msg)
         # return self.smear_type,self.dq_l,self.dq_r
 
     def _show_smear_sizer(self):
         """
         Show only the sizers depending on smear selection
         """
-        # smear disabled
+        # smear disabled = No Smearing used
         if self.disable_smearer.GetValue():
             self.smear_description_none.Show(True)
-        # 2Dsmear
+        # 2Dsmearing - for use with 2D data only
         elif self._is_2D():
             self.smear_description_accuracy_type.Show(True)
             self.smear_accuracy.Show(True)
-            self.smear_description_accuracy_type.Show(True)
             self.smear_description_2d.Show(True)
-            self.smear_description_2d_x.Show(True)
-            self.smear_description_2d_y.Show(True)
+            #2D custom pinhole smearing
             if self.pinhole_smearer.GetValue():
+                self.smear_description_pin_percent.Show(True)
                 self.smear_pinhole_percent.Show(True)
-        # smear from data
-        elif self.enable_smearer.GetValue():
+            #get 2D smearing from data
+            elif self.enable_smearer.GetValue():
+                self.smear_description_2d_x.Show(True)
+                self.smear_description_2d_y.Show(True)
+                self.smear_data_left.Show(True)
+                self.smear_data_right.Show(True)
+            #Currently 2D custom slit smearing is not currently supported
+            else:
+                logger.error("2D custom smearing cannot use slit smearing")
 
+        # 1D smearing from data
+        elif self.enable_smearer.GetValue():
             self.smear_description_dqdata.Show(True)
             if self.smear_type is not None:
                 self.smear_description_smear_type.Show(True)
+                #1D data has slit smearing
                 if self.smear_type == 'Slit':
                     self.smear_description_slit_height.Show(True)
                     self.smear_description_slit_width.Show(True)
+                #1D data has pinhole smearing
                 elif self.smear_type == 'Pinhole':
-                    self.smear_description_pin_percent.Show(True)
+                    self.smear_description_pin_percent_min.Show(True)
+                    self.smear_description_pin_percent_max.Show(True)
                 self.smear_description_smear_type.Show(True)
                 self.smear_description_type.Show(True)
                 self.smear_data_left.Show(True)
                 self.smear_data_right.Show(True)
-        # custom pinhole smear
+        # 1D custom pinhole smearing
         elif self.pinhole_smearer.GetValue():
-            if self.smear_type == 'Pinhole':
-                self.smear_message_new_p.Show(True)
-                self.smear_description_pin_percent.Show(True)
-
+            self.smear_message_new_p.Show(True)
+            self.smear_description_pin_percent.Show(True)
             self.smear_pinhole_percent.Show(True)
-        # custom slit smear
+        # 1D custom slit smear
         elif self.slit_smearer.GetValue():
             self.smear_message_new_s.Show(True)
             self.smear_description_slit_height.Show(True)
             self.smear_slit_height.Show(True)
             self.smear_description_slit_width.Show(True)
             self.smear_slit_width.Show(True)
+        else:
+            logger.error("smearing type is not defined")
 
     def _hide_all_smear_info(self):
         """
@@ -1702,6 +1743,8 @@ class FitPage(BasicPage):
         self.smear_accuracy.Hide()
         self.smear_data_left.Hide()
         self.smear_data_right.Hide()
+        self.smear_description_pin_percent_min.Hide()
+        self.smear_description_pin_percent_max.Hide()
         self.smear_description_pin_percent.Hide()
         self.smear_pinhole_percent.Hide()
         self.smear_description_slit_height.Hide()
@@ -1919,8 +1962,7 @@ class FitPage(BasicPage):
             # more disables for 2D
             di_flag = False
             dq_flag = False
-            if self.data.__class__.__name__ == "Data2D" or \
-                        self.enable2D:
+            if isinstance(self.data, Data2D) or self.enable2D:
                 self.slit_smearer.Disable()
                 self.pinhole_smearer.Enable(True)
                 self.default_mask = copy.deepcopy(self.data.mask)
@@ -2005,7 +2047,7 @@ class FitPage(BasicPage):
         self.Refresh()
         # update model plot with new data information
         if flag:
-            if self.data.__class__.__name__ == "Data2D":
+            if isinstance(self.data, Data2D):
                 self.enable2D = True
                 self.model_view.SetLabel("2D Mode")
             else:
@@ -2072,8 +2114,7 @@ class FitPage(BasicPage):
             return
         npts2fit = 0
         qmin, qmax = self.get_range()
-        if self.data.__class__.__name__ == "Data2D" or \
-                        self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             radius = np.sqrt(self.data.qx_data * self.data.qx_data +
                                 self.data.qy_data * self.data.qy_data)
             index_data = (self.qmin_x <= radius) & (radius <= self.qmax_x)
@@ -2463,7 +2504,7 @@ class FitPage(BasicPage):
         :return: message to inform the user about the validity
             of the values entered for slit smear
         """
-        if self.data.__class__.__name__ == "Data2D" or self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             return
         # make sure once more if it is smearer
         data = copy.deepcopy(self.data)
@@ -2659,8 +2700,7 @@ class FitPage(BasicPage):
         self.param_toFit = []
         for item in self.parameters:
             # Skip t ifhe angle parameters if 1D data
-            if self.data.__class__.__name__ != "Data2D" and\
-                        not self.enable2D:
+            if not isinstance(self.data, Data2D) and not self.enable2D:
                 if item in self.orientation_params:
                     continue
             # Select parameters to fit for list of primary parameters
@@ -2676,8 +2716,7 @@ class FitPage(BasicPage):
         #        with dispersion
         for item in self.fittable_param:
             # Skip t ifhe angle parameters if 1D data
-            if self.data.__class__.__name__ != "Data2D" and\
-                        not self.enable2D:
+            if not isinstance(self.data, Data2D) and not self.enable2D:
                 if item in self.orientation_params:
                     continue
             if item[0].GetValue() and item[0].IsShown():
@@ -2689,8 +2728,7 @@ class FitPage(BasicPage):
                     self.param_toFit.remove(item)
 
         # Calculate num. of angle parameters
-        if self.data.__class__.__name__ == "Data2D" or \
-                       self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             len_orient_para = 0
         else:
             len_orient_para = len(self.orientation_params)  # assume even len
@@ -2983,7 +3021,7 @@ class FitPage(BasicPage):
                 # all buttons on IF mag has mag and has 2D
                 if not self._has_magnetic:
                     mag_on_button.Show(False)
-                elif not self.data.__class__.__name__ == "Data2D":
+                elif not isinstance(self.data, Data2D):
                     mag_on_button.Show(False)
                 else:
                     mag_on_button.Show(True)
@@ -2999,8 +3037,7 @@ class FitPage(BasicPage):
                         mag_help_button.Show(False)
                         mag_angle_help_button.Show(False)
 
-                if not self.data.__class__.__name__ == "Data2D" and \
-                        not self.enable2D:
+                if not isinstance(self.data, Data2D) and not self.enable2D:
                     orient_angle.Hide()
                 else:
                     orient_angle.Show(True)
@@ -3024,8 +3061,7 @@ class FitPage(BasicPage):
                     cb.SetValue(CHECK_STATE)
                     cb.SetToolTipString("Check mark to fit")
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                    if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:
+                    if isinstance(self.data, Data2D) or self.enable2D:
                         cb.Show(True)
                     else:
                         cb.Hide()
@@ -3040,8 +3076,7 @@ class FitPage(BasicPage):
                     ctl1.SetToolTipString(
                                 "Hit 'Enter' after typing to update the plot.")
                     ctl1.SetValue(format_number(value, True))
-                    if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:
+                    if isinstance(self.data, Data2D) or self.enable2D:
                         ctl1.Show(True)
                     else:
                         ctl1.Hide()
@@ -3081,8 +3116,7 @@ class FitPage(BasicPage):
 
                     ctl4.Hide()
 
-                    if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:
+                    if isinstance(self.data, Data2D) or self.enable2D:
                         if self.is_mac:
                             text2.Show(True)
                             ctl2.Show(True)
@@ -3098,8 +3132,7 @@ class FitPage(BasicPage):
                     else:
                         units = wx.StaticText(self, -1, "",
                                               style=wx.ALIGN_LEFT)
-                    if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:
+                    if isinstance(self.data, Data2D) or self.enable2D:
                         units.Show(True)
                     else:
                         units.Hide()
@@ -3178,14 +3211,19 @@ class FitPage(BasicPage):
         Set semarer radio buttons
         """
         # more disables for 2D
-        if self.data.__class__.__name__ == "Data2D" or \
-                    self.enable2D:
+        if isinstance(self.data, Data2D) or self.enable2D:
             self.slit_smearer.Disable()
-            self.pinhole_smearer.Enable(True)
             self.default_mask = copy.deepcopy(self.data.mask)
+            if self.model is not None:
+                self.pinhole_smearer.Enable(True)
+
+        elif isinstance(self.data, Data1D):
+            if self.model is not None:
+                self.slit_smearer.Enable(True)
+                self.pinhole_smearer.Enable(True)
         else:
-            self.slit_smearer.Enable(True)
-            self.pinhole_smearer.Enable(True)
+            msg="data is not recognized as either 1D or 2D"
+            logger.info(msg)
 
 
 class BGTextCtrl(wx.TextCtrl):
