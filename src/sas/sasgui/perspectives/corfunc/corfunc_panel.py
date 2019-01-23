@@ -276,14 +276,14 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         self._transformed_data = transforms
         (transform1, transform3, idf) = transforms
-        plot_x = transform1.x[transform1.x <= 200]
-        plot_y = transform1.y[transform1.x <= 200]
+        plot_x = transform1.x[transform1.x <= 1000]
+        plot_y = transform1.y[transform1.x <= 1000]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
-        # No need to shorten gamma3 as it's only calculated up to x=200
+        # No need to shorten gamma3 as it's only calculated up to x=1000
         self._manager.show_data(transform3, TRANSFORM_LABEL3)
 
-        plot_x = idf.x[idf.x <= 200]
-        plot_y = idf.y[idf.x <= 200]
+        plot_x = idf.x[idf.x <= 1000]
+        plot_y = idf.y[idf.x <= 1000]
         self._manager.show_data(Data1D(plot_x, plot_y), IDF_LABEL)
 
         # Only enable extract params button if a fourier trans. has been done
