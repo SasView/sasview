@@ -14,7 +14,6 @@ dependencies:
  - cython
  - pytest
  - mako
- - packaging=0.18
  - pyinstaller 
  - pyqt>=5.9 # required for GTK themes to work correctly
  - testpath=0.3.1
