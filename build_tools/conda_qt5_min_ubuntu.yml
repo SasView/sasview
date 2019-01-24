@@ -3,7 +3,6 @@ channels:
  - conda-forge
 dependencies:
  - matplotlib=2
- - numpy=1.15
  - scipy
  - hdf5
  - h5py
@@ -15,6 +14,7 @@ dependencies:
  - cython
  - pytest
  - mako
+ - packaging=0.18
  - pyinstaller 
  - pyqt>=5.9 # required for GTK themes to work correctly
  - testpath=0.3.1
