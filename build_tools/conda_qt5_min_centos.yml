@@ -6,7 +6,8 @@ dependencies:
  - scipy
  - hdf5
  - h5py
- - ipython
+ - ipython=6
+ - ipykernel=4.9
  - jupyter
  - twisted
  - lxml
