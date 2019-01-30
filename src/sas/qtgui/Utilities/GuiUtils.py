@@ -11,6 +11,7 @@ import warnings
 import webbrowser
 import urllib.parse
 import json
+import types
 from io import BytesIO
 
 import numpy as np
@@ -43,6 +44,8 @@ from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+
 from sas.qtgui.Utilities import CustomDir
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
@@ -792,7 +795,8 @@ def saveData1D(data):
     default_name += "_out" + extension
 
     wildcard = "Text files (*.txt);;"\
-                "CanSAS 1D files(*.xml)"
+                "CanSAS 1D files(*.xml);;"\
+                "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
         'directory' : default_name,
@@ -811,8 +815,11 @@ def saveData1D(data):
     loader = Loader()
     if os.path.splitext(filename)[1].lower() == ".txt":
         onTXTSave(data, filename)
-    if os.path.splitext(filename)[1].lower() == ".xml":
+    elif os.path.splitext(filename)[1].lower() == ".xml":
         loader.save(filename, data, ".xml")
+    elif os.path.splitext(filename)[1].lower() == ".h5":
+        nxcansaswriter = NXcanSASWriter()
+        nxcansaswriter.write([data], filename)
 
 def saveData2D(data):
     """
@@ -823,7 +830,8 @@ def saveData2D(data):
     ext_format = ".dat"
     default_name += "_out" + ext_format
 
-    wildcard = "IGOR/DAT 2D file in Q_map (*.dat)"
+    wildcard = "IGOR/DAT 2D file in Q_map (*.dat);;"\
+                "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
         'directory' : default_name,
@@ -843,6 +851,10 @@ def saveData2D(data):
 
     if os.path.splitext(filename)[1].lower() == ext_format:
         loader.save(filename, data, ext_format)
+    elif os.path.splitext(filename)[1].lower() == ".h5":
+        nxcansaswriter = NXcanSASWriter()
+        nxcansaswriter.write([data], filename)
+
 
 class FormulaValidator(QtGui.QValidator):
     def __init__(self, parent=None):
@@ -1206,6 +1218,11 @@ def saveData(fp, data):
             content = { 'data': buffer.read().decode('latin-1') }
             return add_type(content, type(o))
 
+        if isinstance(o, types.FunctionType):
+            # we have a pure function
+            content = o.__dict__.copy()
+            return add_type(content, type(o))
+
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
         return None
@@ -1218,7 +1235,7 @@ def readDataFromFile(fp):
     Datasets are stored in the JSON format.
     '''
     supported = [
-        tuple, set,
+        tuple, set, types.FunctionType,
         Sample, Source, Vector,
         Plottable, Data1D, Data2D, PlottableTheory1D, PlottableFit1D, Text, Chisq, View,
         Detector, Process, TransmissionSpectrum, Collimation, Aperture,
@@ -1273,6 +1290,10 @@ def readDataFromFile(fp):
             buffer.write(data['data'].encode('latin-1'))
             buffer.seek(0)
             return np.load(buffer)
+
+        # function
+        if cls == types.FunctionType:
+            return cls
 
         logging.info('not implemented: %s, %s' % (type, cls))
         return None

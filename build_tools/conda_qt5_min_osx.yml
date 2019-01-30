@@ -19,10 +19,11 @@ dependencies:
  - pyinstaller=3.3.1
  - pyopencl
  - testpath=0.3.1
+ - numpy=1.15
  - pip:
    - pytools 
    - periodictable 
    - bumps 
    - xhtml2pdf 
-   - qt5reactor 
+   - qt5reactor
 

@@ -1767,7 +1767,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             except ValueError as ex:
                 raise ValueError("Setting model parameters failed with: %s" % ex)
 
-            qmin, qmax, _ = self.logic.computeRangeFromData(weighted_data)
             fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
             fitter_single.select_problem_for_fit(id=fit_id, value=1)
