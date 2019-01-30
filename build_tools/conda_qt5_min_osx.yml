@@ -3,10 +3,12 @@ channels:
   - conda-forge
 dependencies:
  - matplotlib=2
+ - numpy=1.15
  - scipy
  - hdf5
  - h5py
  - ipython=6
+ - ipykernel=4.9
  - jupyter
  - twisted
  - lxml

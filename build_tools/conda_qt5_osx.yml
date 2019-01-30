@@ -1,4 +1,4 @@
-name: qt5_osx
+name: qt5_osx_2
 channels:
   - diffpy
   - rpmuller
@@ -30,7 +30,6 @@ dependencies:
   - jpeg=9b=2
   - libcxx=6.0.0=0
   - libgfortran=3.0.0=0
-  - libtiff=4.0.9=0
   - libxslt=1.1.32=0
   - llvm-meta=6.0.0=0
   - llvmdev=6.0.0=default_2
