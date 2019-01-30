@@ -1,4 +1,4 @@
-name: qt5_osx_2
+name: qt5_osx
 channels:
   - diffpy
   - rpmuller
