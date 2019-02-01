@@ -82,7 +82,7 @@ datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','jedi')
 #     datas.append(add_binary(LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX))
 # else:
 #     raise Exception("No numerical library for numpy found.")
-# 
+
 
 #import sas.sascalc.dataloader.readers
 #f = os.path.join(sas.sascalc.dataloader.readers.get_data_path(), 'defaults.json')
@@ -152,6 +152,7 @@ hiddenimports = [
  'zmq.backend.cython','zmq.backend.cffi',
  'site','lxml._elementpath','lxml.etree',
  'scipy._lib.messagestream',
+ 'IPython',
 ]
 
 a = Analysis([SCRIPT_TO_SOURCE],
