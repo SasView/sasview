@@ -9,6 +9,30 @@ Release Notes
 Features
 ========
 
+New in Version 4.2.1
+--------------------
+The goal of this point release is to bring the NXcanSAS reader into compliance
+with the final published specification.  The orignal reader was based on a
+draft version of the specification.  As an eraly adopter, interpretation and
+implementation of the spec was iterated with all producers of NXcanSAS reduced
+data known to the SasView team in order to ensure compatibility and verify the
+implementation.  A few minor enhancements and bug fixed were also introduced
+such as cleaning up the resolution section of the fitting page GUI and
+increasing the max size range allowed in the corfunc analysis. 
+everyone's understanding of the published specification
+
+Resolved Issues
+^^^^^^^^^^^^^^^
+* Fixes #  976:	CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files
+* Fixes # 1223:	Expand permitted range of transformed data in Corfunc implementation
+* Fixes # 1129:	NXcanSAS writer not writing all meta data
+* Fixes # 1111:	Convert all input Q units to 1/A
+* Fixes # 1206:	Incorrect (and confusing) presentation of dQ from data in instrumental smearing section
+* Fixes # 1212:	Bug in Iqxqy plotting non rectangular / square matrices?
+* Fixes # 1221:	ABS reader does not read in USANS data properly	GitHub
+* Fixes # 1222:	smearing options incorrect on show2D and show1D in fitpage14: Loading a saved project is really really slow
+
+
 New in Version 4.2.0
 --------------------
 This release heralds many improvements and a host of bug fixes, along with
