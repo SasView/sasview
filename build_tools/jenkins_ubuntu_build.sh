@@ -17,6 +17,7 @@ cd $WORKSPACE
 cd sasview
 cd build_tools
 conda env create --force -f conda_qt5_min_ubuntu.yml
+# conda env create --force -f conda_qt5_ubuntu.yml
 conda env list
 
 # Activate new env
