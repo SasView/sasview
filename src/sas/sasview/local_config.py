@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 # Version of the application
 __appname__ = "SasView"
 __version__ = sas.sasview.__version__
-__DOI__ = "Zenodo, 10.5281/zenodo.1412041"
+__DOI__ = sas.sasview.__DOI__
+__release_date__ = sas.sasview.__release_date__
 __build__ = sas.sasview.__build__
 __download_page__ = 'https://github.com/SasView/sasview/releases'
 __update_URL__ = 'http://www.sasview.org/latestversion.json'
@@ -103,8 +104,8 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = ("(c) 2009 - 2019, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO,"
-              "TU Delft, DLS and BAM")
+_copyright = ("(c) 2009 - %s, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO,"
+              "TU Delft, DLS and BAM") % __release_date__
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
