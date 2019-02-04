@@ -1,4 +1,4 @@
-name: qt5_osx_beta
+name: qt5_osx
 channels:
   - conda-forge
   - intel
@@ -27,7 +27,6 @@ dependencies:
   - jupyter_client=5.1.0=py36_intel_0
   - jupyter_core=4.4.0=py36_intel_1
   - matplotlib=2.2.2=np114py36_intel_1
-  - numpy=1.14.3=py36_intel_0
   - pyparsing=2.2.0=py36_intel_0
   - pysocks=1.6.7=py36_intel_0
   - python=3.6.3=intel_12
@@ -55,9 +54,11 @@ dependencies:
   - jpeg=9b=2
   - pyasn1=0.4.2=py_0
   - pyasn1-modules=0.2.1=py_0
+  - numpy=1.14.3=py36_intel_0
   - pip:
     - backports.shutil-get-terminal-size==1.0.0
     - bumps==0.7.8
+    - periodictable==1.5.0
     - html5lib==1.0.1
     - httplib2==0.11.3
     - olefile==0.45.1
