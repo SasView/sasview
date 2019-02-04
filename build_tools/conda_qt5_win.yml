@@ -16,10 +16,10 @@
  - pyopencl=2018.2.2
  - testpath=0.3.1
  - pip:
-   - pytools=2019.1
-   - periodictable=1.5.0
-   - bumps=0.7.11
-   - xhtml2pdf=0.2.3
-   - qt5reactor=0.5
-   - tinycc=1.1
+   - pytools==2019.1
+   - periodictable==1.5.0
+   - bumps==0.7.11
+   - xhtml2pdf==0.2.3
+   - qt5reactor==0.5
+   - tinycc==1.1
 
