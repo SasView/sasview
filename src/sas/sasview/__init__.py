@@ -1,6 +1,6 @@
-__major_version__ = "4"
-__minor_version__ = "2"
-__version__ = __major_version__ + "." + __minor_version__ + ".1"
+from distutils.version import StrictVersion
+__version__ = "4.2.1"
+StrictVersion(__version__)
 __DOI__ = "Zenodo, 10.5281/zenodo.1412041"
 __release_date__ = "2019"
 __build__ = "GIT_COMMIT"

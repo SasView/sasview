@@ -14,7 +14,7 @@ New in Version 4.2.1
 The major changes for this point release were to fix several problems with using
 the built in editor to create new models and to bring the NXcanSAS reader into
 compliance with the final published specification.  The orignal reader was
-based on a draft version of the specification.  As an eraly adopter,
+based on a draft version of the specification.  As an early adopter,
 interpretation and implementation of the spec was iterated with all producers
 of NXcanSAS reduced data known to the SasView team in order to ensure
 compatibility and verify the implementation.  A few other enhancements and bug
