@@ -467,13 +467,29 @@ class Plotter2DWidget(PlotterBase):
         zmin_temp = self.zmin
         # check scale
         if self.scale == 'log_{10}':
-            with numpy.errstate(all='ignore'):
-                output = numpy.log10(output)
-            index = numpy.isfinite(output)
-            if not index.all():
-                cutoff = (numpy.quantile(output[index], 0.05) - numpy.log10(2) if index.any() else 0.)
-                output[output < cutoff] = cutoff
-                output[~index] = cutoff
+            #with numpy.errstate(all='ignore'):
+            #    output = numpy.log10(output)
+            #index = numpy.isfinite(output)
+            #if not index.all():
+            #    cutoff = (numpy.quantile(output[index], 0.05) - numpy.log10(2) if index.any() else 0.)
+            #    output[output < cutoff] = cutoff
+            #    output[~index] = cutoff
+            try:
+                if  self.zmin <= 0  and len(output[output > 0]) > 0:
+                    zmin_temp = self.zmin
+                    output[output > 0] = numpy.log10(output[output > 0])
+                elif self.zmin <= 0:
+                    zmin_temp = self.zmin
+                    output[output > 0] = numpy.zeros(len(output))
+                    output[output <= 0] = MIN_Z
+                else:
+                    zmin_temp = self.zmin
+                    output[output > 0] = numpy.log10(output[output > 0])
+            except:
+                #Too many problems in 2D plot with scale
+                output[output > 0] = numpy.log10(output[output > 0])
+                pass
+
         vmin, vmax = None, None
 
         self.cmap = cmap
