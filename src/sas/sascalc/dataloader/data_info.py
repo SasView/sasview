@@ -1187,8 +1187,10 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
-        final_dataset.y_bins = data.y_bins
-        final_dataset.x_bins = data.x_bins
+        if hasattr(data, 'y_bins'):
+            final_dataset.y_bins = data.y_bins
+        if hasattr(data, 'y_bins'):
+            final_dataset.x_bins = data.x_bins
     else:
         return_string = ("Should Never Happen: _combine_data_info_with_plottabl"
                          "e input is not a plottable1d or plottable2d data "
