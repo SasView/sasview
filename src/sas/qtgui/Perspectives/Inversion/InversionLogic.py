@@ -155,6 +155,13 @@ class InversionLogic(object):
 
         return new_plot
 
+    def add_errors(self, sigma=0.05):
+        """
+        Adds errors to data set is they are not available.
+        Uses  $\Delta y = \sigma | y |$.
+        """
+        self._data.dy = sigma * np.fabs(self._data.y)
+
     def computeDataRange(self):
         """
         Wrapper for calculating the data range based on local dataset
