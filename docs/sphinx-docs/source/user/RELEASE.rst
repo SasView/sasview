@@ -30,6 +30,7 @@ Resolved Issues
 * Fixes # 1129:	NXcanSAS writer not writing all meta data
 * Fixes # 1142:	Plugin framework is broken
 * Fixes # 1183:	Test from creating new model reset all parameters to default in all open FitPages
+* Fixes # 1188:   Colons removed from magmetic parameter names to address Python variable issue
 * Fixes # 1205:	4.2 set weighting choice seems to be ignored.
 * Fixes # 1206:	Incorrect (and confusing) presentation of dQ from data in instrumental smearing section
 * Fixes # 1212:	Bug in Iqxqy plotting non rectangular / square matrices?
@@ -154,7 +155,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: ìreport buttonî followed by ìsaveî makes an empty pdf file???
+* Fixes # 818: ‚Äúreport button‚Äù followed by ‚Äúsave‚Äù makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
