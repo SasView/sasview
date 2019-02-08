@@ -70,7 +70,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SasView'
-copyright = u'2018, The SasView Project'
+copyright = u'2019, The SasView Project'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
