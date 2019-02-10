@@ -30,7 +30,7 @@ Resolved Issues
 * Fixes # 1129:	NXcanSAS writer not writing all meta data
 * Fixes # 1142:	Plugin framework is broken
 * Fixes # 1183:	Test from creating new model reset all parameters to default in all open FitPages
-* Fixes # 1188:   Colons removed from magnetic parameter names to address Python variable issue
+* Fixes # 1188:   Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
 * Fixes # 1205:	4.2 set weighting choice seems to be ignored.
 * Fixes # 1206:	Incorrect (and confusing) presentation of dQ from data in instrumental smearing section
 * Fixes # 1212:	Bug in Iqxqy plotting non rectangular / square matrices?
