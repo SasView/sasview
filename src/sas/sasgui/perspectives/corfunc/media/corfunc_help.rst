@@ -30,6 +30,11 @@ about the arrangement of polymer/surfactant molecules at the interface. The widt
 of the profile provides measures of the layer thickness, and the area under 
 the profile is related to the amount of material that is adsorbed.
 
+.. note::
+    These transforms assume that the data has been measured on a pinhole-
+    collimated instrument or, if not, that the data has been Lorentz-
+    corrected beforehand.
+
 Both analyses are performed in 3 stages:
 
 *  Extrapolation of the scattering curve to :math:`q = 0` and toward 
