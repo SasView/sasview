@@ -63,3 +63,12 @@ cd dist
 mv sasview SasView
 tar czvf SasView.tar.gz SasView
 
+#Ymls storage
+cd $WORKSPACE
+conda env export >  env-build.yml
+conda list --explicit > explicit.yml
+
+a='/home/sasview/logs/'
+b='_env_build.yml'
+DEST_FILE=$a$BUILD_NUMBER$b
+cp env-build.yml $DEST_FILE
