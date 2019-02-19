@@ -80,7 +80,7 @@ cd installers
 
 
 :: READY FOR INNO
-%PYTHON% installer_generator.py
+%PYTHON% installer_generator64.py
 %INNO% installer.iss
 cd Output
 xcopy setupSasView.exe %WORKSPACE%\sasview\dist
