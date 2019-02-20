@@ -1018,12 +1018,10 @@ class GuiManager(object):
 
     def actionTutorial(self):
         """
-        Open the tutorial PDF file with default PDF renderer
+        Open the page with tutorial PDF links
         """
-        # Not terribly safe here. Shell injection warning.
-        # isfile() helps but this probably needs a better solution.
-        if os.path.isfile(self._tutorialLocation):
-            result = subprocess.Popen([self._tutorialLocation], shell=True)
+        helpfile = "/user/tutorial.html"
+        self.showHelp(helpfile)
 
     def actionAcknowledge(self):
         """

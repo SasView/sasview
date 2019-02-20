@@ -18,4 +18,4 @@ sentence:
 *"This work benefited from the use of the SasView application, originally 
 developed under NSF award DMR-0520547."*
 
-(C) 2009-2015 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT
+(C) 2009-2019 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT
