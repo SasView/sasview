@@ -38,7 +38,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
     # CRUFT: mpl 1.1 uses save rather than save_figure
     try: save_figure = NavigationToolbar2WxAgg.save
     except AttributeError: pass
-    
+
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()
 
@@ -65,8 +65,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
                            'Forward', 'Forward navigation view')
         # todo: get new bitmap
         # todo: update with code from matplotlib/backends/backend_wx.py
-        is_phoenix = 'phoenix' in wx.PlatformInfo
-        if is_phoenix: # wx phoenix >= 4.0.0b2
+        if 'phoenix' in wx.PlatformInfo: # wx phoenix >= 4.0.0b2
             self.AddCheckTool(self._NTB2_PAN, "Pan", _load_bitmap('move.png'),
                               shortHelp='Pan',
                               longHelp='Pan with left, zoom with right')

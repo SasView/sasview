@@ -20,6 +20,15 @@ USER_FILE = 'categories.json'
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info[0] > 2:
+    def json_dump(obj, filename):
+        with open(filename, 'w', newline='\n') as fd:
+            json.dump(obj, fd)
+else: # CRUFT: python 2.7 support
+    def json_dump(obj, filename):
+        with open(filename, 'wb') as fd:
+            json.dump(obj, fd)
+
 class CategoryInstaller(object):
     """
     Class for making sure all category stuff is installed
@@ -170,4 +179,4 @@ class CategoryInstaller(object):
                 CategoryInstaller._regenerate_master_dict(by_model_dict,
                                                           model_enabled_dict)
 
-            json.dump(master_category_dict, open(serialized_file, 'w'))
+            json_dump(master_category_dict, serialized_file)

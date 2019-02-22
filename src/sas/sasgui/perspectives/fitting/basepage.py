@@ -11,7 +11,7 @@ import math
 import json
 import logging
 import traceback
-try:
+try: # CRUFT: python 2.x
     from Queue import Queue
 except ImportError:
     from queue import Queue
