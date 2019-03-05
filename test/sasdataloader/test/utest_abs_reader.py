@@ -356,7 +356,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dxw[0], 0.001)
         self.assertEqual(self.data.dy[0], 3)
         self.assertEqual(self.data.x[1], 0.03)
-        self.assertAlmostEquals(self.data.y[1], 1001.0)
+        self.assertAlmostEqual(self.data.y[1], 1001.0)
         self.assertEqual(self.data.dxl[1], 0.005)
         self.assertEqual(self.data.dxw[1], 0.001)
         self.assertEqual(self.data.dy[1], 4)

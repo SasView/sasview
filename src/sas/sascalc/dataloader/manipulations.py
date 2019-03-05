@@ -927,24 +927,25 @@ class _Sector(object):
             y_counts[i_bin] += 1
 
         # Organize the results
-        for i in range(self.nbins):
-            y[i] = y[i] / y_counts[i]
-            y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
-
-            # The type of averaging: phi,q2, or q
-            # Calculate x[i]should be at the center of the bin
+        with np.errstate(divide='ignore', invalid='ignore'):
+            y = y/y_counts
+            y_err = np.sqrt(y_err)/y_counts
+            # The type of averaging: phi, q2, or q
+            # Calculate x values at the center of the bin
             if run.lower() == 'phi':
-                x[i] = (self.phi_max - self.phi_min) / self.nbins * \
-                    (1.0 * i + 0.5) + self.phi_min
+                step = (self.phi_max - self.phi_min) / self.nbins
+                x = (np.arange(self.nbins) + 0.5) * step + self.phi_min
             else:
-                # We take the center of ring area, not radius.
-                # This is more accurate than taking the radial center of ring.
-                # delta_r = (self.r_max - self.r_min) / self.nbins
-                # r_inner = self.r_min + delta_r * i
-                # r_outer = r_inner + delta_r
-                # x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
-                x[i] = x[i] / y_counts[i]
-        y_err[y_err == 0] = np.average(y_err)
+                # set q to the average of the q values within each bin
+                x = x/y_counts
+
+                ### Alternate algorithm
+                ## We take the center of ring area, not radius.
+                ## This is more accurate than taking the radial center of ring.
+                #step = (self.r_max - self.r_min) / self.nbins
+                #r_inner = self.r_min + step * np.arange(self.nbins)
+                #x = math.sqrt((r_inner**2 + (r_inner + step)**2) / 2)
+
         idx = (np.isfinite(y) & np.isfinite(y_err))
         if x_err is not None:
             d_x = x_err[idx] / y_counts[idx]

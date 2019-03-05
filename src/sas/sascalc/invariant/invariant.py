@@ -343,7 +343,8 @@ class Extrapolator(object):
             return [a, b], [0, math.sqrt(err)]
         else:
             A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
-            (p, residuals, _, _) = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy)
+            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy,
+                                                 rcond=None)
 
             # Get the covariance matrix, defined as inv_cov = a_transposed * a
             err = np.zeros(2)

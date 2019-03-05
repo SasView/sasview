@@ -2,12 +2,16 @@
     Unit tests for DistExplorer class
 """
 
+import sys
 import os.path
 import unittest, math, numpy
-from utest_invertor import load
 from sas.sascalc.pr.invertor import Invertor
 from sas.sascalc.pr.distance_explorer import DistExplorer
 
+try:
+    from utest_invertor import load
+except ImportError:
+    from .utest_invertor import load
 
 def find(filename):
     return os.path.join(os.path.dirname(__file__), filename)
@@ -35,6 +39,6 @@ class TestExplorer(unittest.TestCase):
         results = self.explo(120, 200, 25)
         self.assertEqual(len(results.errors), 0)
         self.assertEqual(len(results.chi2), 25)
-        
+
 if __name__ == '__main__':
     unittest.main()
