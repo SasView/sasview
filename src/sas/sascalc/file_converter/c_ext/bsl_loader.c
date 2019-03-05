@@ -1,9 +1,12 @@
-#include <Python.h>
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <numpy/arrayobject.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "structmember.h"
+
+//#define Py_LIMITED_API 0x03020000
+#include <Python.h>
+#include <structmember.h>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
+
 #include "bsl_loader.h"
 
 typedef struct {
@@ -291,9 +294,9 @@ void addCLoader(PyObject *module)
 }
 
 #define MODULE_DOC "C module for loading bsl."
-#define MODULE_NAME "bsl_loader"
-#define MODULE_INIT2 initbsl_loader
-#define MODULE_INIT3 PyInit_bsl_loader
+#define MODULE_NAME "_bsl_loader"
+#define MODULE_INIT2 init_bsl_loader
+#define MODULE_INIT3 PyInit__bsl_loader
 #define MODULE_METHODS module_methods
 
 /* ==== boilerplate python 2/3 interface bootstrap ==== */

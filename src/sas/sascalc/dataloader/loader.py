@@ -366,10 +366,11 @@ class Registry(ExtensionRegistry):
         for fn in writers:
             try:
                 return fn(path, data)
-            except Exception:
-                pass  # give other loaders a chance to succeed
-        # If we get here it is because all loaders failed
-        raise  # reraises last exception
+            except Exception as exc:
+                msg = "Saving file {} using the {} writer failed.\n".format(
+                    path, type(fn).__name__)
+                msg += str(exc)
+                logger.exception(msg)  # give other loaders a chance to succeed
 
 
 class Loader(object):

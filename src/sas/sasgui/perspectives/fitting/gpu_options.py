@@ -7,11 +7,23 @@ Created on Nov 29, 2016
 @author: wpotrzebowski
 '''
 
+import json
+import platform
 import logging
 import os
 import sys
+
 import wx
+
+try:
+    import pyopencl as cl
+except ImportError:
+    cl = None
+
 import sasmodels
+import sasmodels.model_test
+import sasmodels.sasview_model
+
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 logger = logging.getLogger(__name__)
@@ -168,18 +180,19 @@ class GpuOptions(wx.Dialog):
         """
         clinfo = []
         platforms = []
-        try:
-            import pyopencl as cl
-            platforms = cl.get_platforms()
-        except ImportError:
+
+        if cl is None:
             logger.warn("Unable to import the pyopencl package.  It may not "
                         "have been installed.  If you wish to use OpenCL, try "
                         "running pip install --user pyopencl")
-        except cl.LogicError as err:
-            logger.warn("Unable to fetch the OpenCL platforms.  This likely "
-                        "means that the opencl drivers for your system are "
-                        "not installed.")
-            logger.warn(err)
+        else:
+            try:
+                platforms = cl.get_platforms()
+            except cl.LogicError as err:
+                logger.warn("Unable to fetch the OpenCL platforms.  This likely "
+                            "means that the opencl drivers for your system are "
+                            "not installed.")
+                logger.warn(err)
 
         p_index = 0
         for platform in platforms:
@@ -225,12 +238,7 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
-
-        #Sasmodels kernelcl doesn't exist when initiated with None
-        if 'sasmodels.kernelcl' in sys.modules:
-            sasmodels.kernelcl.ENV = None
-
-        reload(sasmodels.core)
+        sasmodels.sasview_model.reset_environment()
         event.Skip()
 
     def on_reset(self, event):
@@ -246,10 +254,6 @@ class GpuOptions(wx.Dialog):
         """
         Run sasmodels check from here and report results from
         """
-        import json
-        import platform
-        #import sasmodels
-
         #The same block of code as for OK but it is needed if we want to have
         #active response to Test button
         no_opencl_msg = False
@@ -260,33 +264,22 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
-
-        #Sasmodels kernelcl doesn't exist when initiated with None
-        if 'sasmodels.kernelcl' in sys.modules:
-            sasmodels.kernelcl.ENV = None
-
-
-        #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
-        reload(sasmodels.core)
-
-
-        from sasmodels.model_test import model_tests
+        sasmodels.sasview_model.reset_environment()
 
         try:
-            from sasmodels.kernelcl import environment
-            env = environment()
+            env = sasmodels.kernelcl.environment()
             clinfo = [(ctx.devices[0].platform.vendor,
                        ctx.devices[0].platform.version,
                        ctx.devices[0].vendor,
                        ctx.devices[0].name,
                        ctx.devices[0].version)
                       for ctx in env.context]
-        except ImportError:
+        except Exception:
             clinfo = None
 
         failures = []
         tests_completed = 0
-        for test in model_tests():
+        for test in sasmodels.model_test.model_tests():
             try:
                 test()
             except Exception:

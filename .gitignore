@@ -38,6 +38,7 @@ Thumbs.db
 /docs/sphinx-docs/node-package.json
 
 # test outputs
+/.eggs
 /test/pr_inversion/test/test_output.txt
 /test/sasdataloader/test/plugins.zip
 /test/sasdataloader/test/test_log.txt

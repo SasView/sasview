@@ -22,6 +22,7 @@ FILE_ASSOCIATIONS = {
     ".xml": "cansas_reader",
     ".ses": "sesans_reader",
     ".h5": "cansas_reader_HDF5",
+    ".nxs": "cansas_reader_HDF5",
     ".txt": "ascii_reader",
     ".dat": "red2d_reader",
     ".abs": "abs_reader",

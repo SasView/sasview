@@ -156,8 +156,7 @@ class Reader(FileReader):
             raise FileContentsException(msg)
 
         self.remove_empty_q_values()
-        self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
-        self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
+        self.current_dataset = self.set_default_1d_units(self.current_dataset)
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

@@ -9,6 +9,36 @@ Release Notes
 Features
 ========
 
+New in Version 4.2.1
+--------------------
+The major changes for this point release were to fix several problems with using
+the built in editor to create new models and to bring the NXcanSAS reader into
+compliance with the final published specification.  The orignal reader was
+based on a draft version of the specification.  As an early adopter,
+interpretation and implementation of the spec was iterated with all producers
+of NXcanSAS reduced data known to the SasView team in order to ensure
+compatibility and verify the implementation.  A few other enhancements and bug
+fixed were also introduced such as cleaning up the resolution section of the
+fitting page GUI, increasing the max size range allowed in the corfunc
+analysis, and adding the incomplete gamma function to the python library. 
+
+Resolved Issues
+^^^^^^^^^^^^^^^
+* Fixes #  976:	CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files
+* Fixes # 1074:	Add incomplete gamma function to sasmodels
+* Fixes # 1111:	Convert all input Q units to 1/A
+* Fixes # 1129:	NXcanSAS writer not writing all meta data
+* Fixes # 1142:	Plugin framework is broken
+* Fixes # 1183:	Test from creating new model reset all parameters to default in all open FitPages
+* Fixes # 1188:   Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
+* Fixes # 1205:	4.2 set weighting choice seems to be ignored.
+* Fixes # 1206:	Incorrect (and confusing) presentation of dQ from data in instrumental smearing section
+* Fixes # 1212:	Bug in Iqxqy plotting non rectangular / square matrices?
+* Fixes # 1221:	ABS reader does not read in USANS data properly	GitHub
+* Fixes # 1222:	smearing options incorrect on show2D and show1D in fitpage14: Loading a saved project is really really slow
+* Fixes # 1223:	Expand permitted range of transformed data in Corfunc implementation
+
+
 New in Version 4.2.0
 --------------------
 This release heralds many improvements and a host of bug fixes, along with
@@ -125,7 +155,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: ìreport buttonî followed by ìsaveî makes an empty pdf file???
+* Fixes # 818: ‚Äúreport button‚Äù followed by ‚Äúsave‚Äù makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
