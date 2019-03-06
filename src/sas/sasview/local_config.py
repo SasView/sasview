@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 # Version of the application
 __appname__ = "SasView"
 __version__ = sas.sasview.__version__
+__DOI__ = sas.sasview.__DOI__
+__release_date__ = sas.sasview.__release_date__
 __build__ = sas.sasview.__build__
 __download_page__ = 'https://github.com/SasView/sasview/releases'
 __update_URL__ = 'http://www.sasview.org/latestversion.json'
@@ -35,8 +37,8 @@ _do_acknowledge = True
 _do_release = True
 _do_tutorial = True
 _acknowledgement_preamble =\
-'''To ensure the long term support and development of this software please''' +\
-''' remember to:'''
+'''To ensure the long term support and development of this software please
+remember to:'''
 _acknowledgement_preamble_bullet1 =\
 '''Acknowledge its use in your publications as :'''
 _acknowledgement_preamble_bullet2 =\
@@ -46,12 +48,20 @@ _acknowledgement_preamble_bullet3 =\
 _acknowledgement_preamble_bullet4 =\
 '''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
-'''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
+("This work benefited from the use of the SasView application, originally"
+"developed under NSF Award DMR-0520547. SasView also contains code developed"
+"with funding from the EU Horizon 2020 programme under the SINE2020 project"
+"Grant No 654000.")
 _acknowledgement_citation = \
-'''M. Doucet et al. SasView Version 4.2, Zenodo, 10.5281/zenodo.1412041'''
+'''M. Doucet et al. SasView Version %s, %s''' % (__version__, __DOI__)
 _acknowledgement =  \
-'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, BAM and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
-'''
+("This work was originally developed as part of the DANSE project funded by"
+"the US NSF under Award DMR-0520547,\n but is currently maintained by a"
+"collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft,"
+"DLS, BAM and the scattering community.\n\n SasView also contains code"
+"developed with funding from the EU Horizon 2020 programme under the SINE2020"
+"project (Grant No 654000).\nA list of individual contributors can be found"
+"at: http://www.sasview.org/contact.html")
 
 _homepage = "http://www.sasview.org"
 _download = __download_page__
@@ -94,7 +104,8 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2018, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS and BAM"
+_copyright = ("(c) 2009 - %s, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO,"
+              "TU Delft, DLS and BAM") % __release_date__
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read

@@ -44,8 +44,8 @@ class TestLinearFit(unittest.TestCase):
         p, dp = fit.fit()
 
         # Test results
-        self.assertAlmostEquals(p[0], 1.0, 5)
-        self.assertAlmostEquals(p[1], 0.0, 5)
+        self.assertAlmostEqual(p[0], 1.0, 5)
+        self.assertAlmostEqual(p[1], 0.0, 5)
 
     def test_fit_linear_data_with_noise(self):
         """ 
@@ -73,8 +73,8 @@ class TestLinearFit(unittest.TestCase):
         p, dp = fit.fit(power=-1.0)
 
         # Test results
-        self.assertAlmostEquals(p[0], 1.0, 5)
-        self.assertAlmostEquals(p[1], 0.0, 5)
+        self.assertAlmostEqual(p[0], 1.0, 5)
+        self.assertAlmostEqual(p[1], 0.0, 5)
 
     def test_fit_linear_data_with_noise_and_fixed_par(self):
         """ 
@@ -505,7 +505,7 @@ class TestDataExtraLow(unittest.TestCase):
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x)
         for i in range(len(self.data.x)):
             value  = math.fabs(test_y[i]-self.data.y[i])/self.data.y[i]
-            self.assert_(value < 0.001)
+            self.assertTrue(value < 0.001)
             
 class TestDataExtraLowSlitGuinier(unittest.TestCase):
     """
@@ -552,11 +552,11 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         qstar = inv.get_qstar(extrapolation='low')
 
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x[:inv._low_extrapolation_npts])
-        self.assert_(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
+        self.assertTrue(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
         
         for i in range(inv._low_extrapolation_npts):
             value  = math.fabs(test_y[i]-self.data.y[i])/self.data.y[i]
-            self.assert_(value < 0.001)
+            self.assertTrue(value < 0.001)
             
     def test_low_data(self):
         """
@@ -588,10 +588,10 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         data_in_range = inv.get_extra_data_low(q_start=self.data.x[0], 
                                                npts = inv._low_extrapolation_npts) 
         test_y = data_in_range.y
-        self.assert_(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
+        self.assertTrue(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
         for i in range(inv._low_extrapolation_npts):
             value  = math.fabs(test_y[i]-self.data.y[i])/self.data.y[i]
-            self.assert_(value < 0.001)    
+            self.assertTrue(value < 0.001)
        
             
 class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
@@ -641,11 +641,11 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         qstar = inv.get_qstar(extrapolation='high')
         
         test_y = inv._high_extrapolation_function.evaluate_model(x=self.data.x[start: ])
-        self.assert_(len(test_y) == len(self.data.y[start:]))
+        self.assertTrue(len(test_y) == len(self.data.y[start:]))
         
         for i in range(len(self.data.x[start:])):
             value  = math.fabs(test_y[i]-self.data.y[start+i])/self.data.y[start+i]
-            self.assert_(value < 0.001)
+            self.assertTrue(value < 0.001)
             
     def test_high_data(self):
         """
@@ -676,9 +676,9 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         data_in_range= inv.get_extra_data_high(q_end = max(self.data.x),
                                                npts = inv._high_extrapolation_npts) 
         test_y = data_in_range.y
-        self.assert_(len(test_y) == len(self.data.y[start:]))
+        self.assertTrue(len(test_y) == len(self.data.y[start:]))
         temp = self.data.y[start:]
         
         for i in range(len(self.data.x[start:])):
             value  = math.fabs(test_y[i]- temp[i])/temp[i]
-            self.assert_(value < 0.001)                
+            self.assertTrue(value < 0.001)

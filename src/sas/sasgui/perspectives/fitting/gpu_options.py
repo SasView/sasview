@@ -22,7 +22,7 @@ except ImportError:
 
 import sasmodels
 import sasmodels.model_test
-import sasmodels.kernelcl
+import sasmodels.sasview_model
 
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
@@ -238,7 +238,7 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
-        sasmodels.kernelcl.reset_environment()
+        sasmodels.sasview_model.reset_environment()
         event.Skip()
 
     def on_reset(self, event):
@@ -264,7 +264,7 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
-        sasmodels.kernelcl.reset_environment()
+        sasmodels.sasview_model.reset_environment()
 
         try:
             env = sasmodels.kernelcl.environment()
