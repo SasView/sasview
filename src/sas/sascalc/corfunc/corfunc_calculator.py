@@ -244,7 +244,9 @@ class CorfuncCalculator(object):
     def _fit_guinier(self, q, iq):
         """Fit the Guinier region of the curve"""
         A = np.vstack([q**2, np.ones(q.shape)]).T
-        return lstsq(A, np.log(iq), rcond=None)
+        # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+        rcond = np.finfo(float).eps * max(A.shape)
+        return lstsq(A, np.log(iq), rcond=rcond)
 
     def _fit_porod(self, q, iq):
         """Fit the Porod region of the curve"""
