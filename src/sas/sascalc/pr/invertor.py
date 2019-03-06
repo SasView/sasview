@@ -473,7 +473,9 @@ class Invertor(Cinvertor):
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
-        c, chi2, _, _ = lstsq(a, b, rcond=-1)
+        # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+        rcond = np.finfo(float).eps * max(a.shape)
+        c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:
             float(chi2)

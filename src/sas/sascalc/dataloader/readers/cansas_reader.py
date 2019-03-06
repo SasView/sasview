@@ -811,22 +811,22 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo.x_unit})
+                            {'unit': datainfo._xunit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yunit})
             if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yunit})
             if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xunit})
             if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xunit})
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xunit})
         if datainfo.isSesans:
             sesans_attrib = {'x_axis': datainfo._xaxis,
                              'y_axis': datainfo._yaxis,
@@ -1238,11 +1238,10 @@ class Reader(XMLreader):
                     try:
                         conv = Converter(units)
                         setattrchain(storage, variable, conv(value, units=local_unit))
-                    except Exception:
-                        _, exc_value, _ = sys.exc_info()
+                    except Exception as exc:
                         err_mess = "CanSAS reader: could not convert"
                         err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
-                            % (variable, units, local_unit, exc_value)
+                            % (variable, units, local_unit, exc)
                         self.errors.add(err_mess)
                         if optional:
                             logger.info(err_mess)

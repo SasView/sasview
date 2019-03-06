@@ -146,10 +146,10 @@ class TestOrderedDict(unittest.TestCase):
                     OrderedDict(od),
                     ]):
             self.assert_(dup is not od)
-            self.assertEquals(dup, od)
-            self.assertEquals(list(dup.items()), list(od.items()))
-            self.assertEquals(len(dup), len(od))
-            self.assertEquals(type(dup), type(od))
+            self.assertEqual(dup, od)
+            self.assertEqual(list(dup.items()), list(od.items()))
+            self.assertEqual(len(dup), len(od))
+            self.assertEqual(type(dup), type(od))
 
     def test_repr(self):
         od = OrderedDict([('c', 1), ('b', 2), ('a', 3), ('d', 4), ('e', 5), ('f', 6)])

@@ -649,9 +649,9 @@ class PageState(object):
                     file_value = "File name:" + name
                     #Truncating string so print doesn't complain of being outside margins
                     if sys.platform != "win32":
-                        MAX_STRING_LENGHT = 50
-                        if len(file_value) > MAX_STRING_LENGHT:
-                            file_value = "File name:.."+file_value[-MAX_STRING_LENGHT+10:]
+                        MAX_STRING_LENGTH = 50
+                        if len(file_value) > MAX_STRING_LENGTH:
+                            file_value = "File name:.."+file_value[-MAX_STRING_LENGTH+10:]
                     file_name = CENTRE % file_value
                     if len(title) == 0:
                         title = name + " [" + repo_time + "]"
@@ -904,7 +904,7 @@ class PageState(object):
             for model in batch_fit_state.model_list:
                 doc_model = newdoc.createElement('model_list_item')
                 doc_model.setAttribute('checked', str(model[0].GetValue()))
-                keys = model[1].keys()
+                keys = list(model[1].keys())
                 doc_model.setAttribute('name', str(keys[0]))
                 values = model[1].get(keys[0])
                 doc_model.setAttribute('fit_number', str(model[2]))
@@ -963,7 +963,7 @@ class PageState(object):
 
         if node.get('version'):
             # Get the version for model conversion purposes
-            x = re.sub('[^\d.]', '', node.get('version'))
+            x = re.sub(r'[^\d.]', '', node.get('version'))
             self.version = tuple(int(e) for e in str.split(x, "."))
             # The tuple must be at least 3 items long
             while len(self.version) < 3:
@@ -983,9 +983,9 @@ class PageState(object):
             if entry is not None and entry.get('epoch'):
                 try:
                     self.timestamp = float(entry.get('epoch'))
-                except Exception:
+                except Exception as exc:
                     msg = "PageState.fromXML: Could not"
-                    msg += " read timestamp\n %s" % sys.exc_value
+                    msg += " read timestamp\n %s" % exc
                     logger.error(msg)
 
             if entry is not None:
@@ -1281,7 +1281,7 @@ class Reader(CansasReader):
                     if data.run_name is not None and len(data.run_name) != 0:
                         if isinstance(data.run_name, dict):
                             # Note: key order in dict is not guaranteed, so sort
-                            name = data.run_name.keys()[0]
+                            name = list(data.run_name.keys())[0]
                         else:
                             name = data.run_name
                     else:

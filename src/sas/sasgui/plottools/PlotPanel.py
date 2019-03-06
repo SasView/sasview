@@ -1433,6 +1433,7 @@ class PlotPanel(wx.Panel):
         Render the current data
 
         """
+        # TODO: include mask info in plotter
         self.data = data
         self.qx_data = qx_data
         self.qy_data = qy_data
@@ -1450,37 +1451,26 @@ class PlotPanel(wx.Panel):
             output = self._build_matrix()
         else:
             output = copy.deepcopy(self.data)
-        # check scale
+        # rescale data if necessary
         if self.scale == 'log_{10}':
-            try:
-                if  self.zmin_2D <= 0  and len(output[output > 0]) > 0:
-                    zmin_temp = self.zmin_2D
-                    output[output > 0] = np.log10(output[output > 0])
-                    #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(np.min(output[output>0]))
-                elif self.zmin_2D <= 0:
-                    zmin_temp = self.zmin_2D
-                    output[output > 0] = np.zeros(len(output))
-                    output[output <= 0] = -32
-                else:
-                    zmin_temp = self.zmin_2D
-                    output[output > 0] = np.log10(output[output > 0])
-                    #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(np.min(output[output>0]))
-            except:
-                #Too many problems in 2D plot with scale
-                pass
-
-        else:
-            zmin_temp = self.zmin_2D
+            with np.errstate(all='ignore'):
+                output = np.log10(output)
+            index = np.isfinite(output)
+            if not index.all():
+                cutoff = (np.min(output[index]) - np.log10(2)
+                          if index.any() else 0.)
+                output[~index] = cutoff
+        # TODO: fix handling of zmin_2D/zmax_2D in _onToggleScale
+        # For now, use default vmin/vmax from data
+        #vmin, vmax = self.zmin_2D, self.zmax_2D
+        vmin, vmax = None, None
         self.cmap = cmap
         if self.dimension != 3:
             #Re-adjust colorbar
             self.subplot.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)
-
             im = self.subplot.imshow(output, interpolation='nearest',
                                      origin='lower',
-                                     vmin=zmin_temp, vmax=self.zmax_2D,
+                                     vmin=vmin, vmax=vmax,
                                      cmap=self.cmap,
                                      extent=(self.xmin_2D, self.xmax_2D,
                                              self.ymin_2D, self.ymax_2D))

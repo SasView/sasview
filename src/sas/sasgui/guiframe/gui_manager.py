@@ -47,6 +47,7 @@ from sas.sasgui.guiframe.data_processor import GridFrame
 from sas.sasgui.guiframe.events import EVT_NEW_BATCH
 from sas.sasgui.guiframe.CategoryManager import CategoryManager
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 from sas.sasgui.guiframe.proxy import Connection
 
 logger = logging.getLogger(__name__)
@@ -63,49 +64,37 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-if not WELCOME_PANEL_ON:
-    WELCOME_PANEL_SHOW = False
-else:
-    WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder is not None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-    else:
-        DEFAULT_OPEN_FOLDER = get_app_dir()
-    SAS_OPENCL = custom_config.SAS_OPENCL
-except:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = get_app_dir()
-    DEFAULT_OPEN_FOLDER = PATH_APP
-    SAS_OPENCL = None
-DEFAULT_STYLE = config.DEFAULT_STYLE
 
+def custom_value(name, default=None):
+    """
+    Fetch a config value from custom_config.  Fallback to config, and then
+    to default if it doesn't exist in config.
+    """
+    default = getattr(config, name, default)
+    return getattr(custom_config, name, default)
+
+# Custom config values in the order they appear.
+DATAPANEL_WIDTH = custom_value('DATAPANEL_WIDTH', -1)
+CLEANUP_PLOT = custom_value('CLEANUP_PLOT', False)
+FIXED_PANEL = custom_value('FIXED_PANEL', True)
+PLOPANEL_WIDTH = custom_value('PLOPANEL_WIDTH', -1)
+DATALOADER_SHOW = custom_value('DATALOADER_SHOW', True)
+GUIFRAME_HEIGHT = custom_value('GUIFRAME_HEIGHT', -1)
+GUIFRAME_WIDTH = custom_value('GUIFRAME_WIDTH', -1)
+CONTROL_WIDTH = custom_value('CONTROL_WIDTH', -1)
+CONTROL_HEIGHT = custom_value('CONTROL_HEIGHT', -1)
+open_folder = custom_value('DEFAULT_OPEN_FOLDER', None)
+if open_folder is not None and os.path.isdir(open_folder):
+    DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
+else:
+    DEFAULT_OPEN_FOLDER = get_app_dir()
+WELCOME_PANEL_SHOW = (custom_value('WELCOME_PANEL_SHOW', False)
+                      if WELCOME_PANEL_ON else False)
+TOOLBAR_SHOW = custom_value('TOOLBAR_SHOW', True)
+DEFAULT_PERSPECTIVE = custom_value('DEFAULT_PERSPECTIVE', 'Fitting')
+SAS_OPENCL = custom_value('SAS_OPENCL', 'None')
+
+DEFAULT_STYLE = config.DEFAULT_STYLE
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
 OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
 VIEW_MENU = config.VIEW_MENU
@@ -2419,8 +2408,9 @@ class ViewerFrame(PARENT_FRAME):
         """
         default_name = fname
         wildcard = "Text files (*.txt)|*.txt|"\
-                    "CanSAS 1D files(*.xml)|*.xml"
-        path = None
+                    "CanSAS 1D files (*.xml)|*.xml|"\
+                     "NXcanSAS files (*.h5)|*.h5|"
+        options = [".txt", ".xml",".h5"]
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
                             default_name, wildcard, wx.SAVE)
@@ -2430,27 +2420,25 @@ class ViewerFrame(PARENT_FRAME):
             # ext_num = 0 for .txt, ext_num = 1 for .xml
             # This is MAC Fix
             ext_num = dlg.GetFilterIndex()
-            if ext_num == 0:
-                ext_format = '.txt'
-            else:
-                ext_format = '.xml'
+
+            ext_format = options[ext_num]
             path = os.path.splitext(path)[0] + ext_format
             mypath = os.path.basename(path)
+            fName = os.path.splitext(path)[0] + ext_format
 
-            # Instantiate a loader
-            loader = Loader()
-            ext_format = ".txt"
-            if os.path.splitext(mypath)[1].lower() == ext_format:
+            if os.path.splitext(mypath)[1].lower() == options[0]:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fName = os.path.splitext(path)[0] + ext_format
                 self._onsaveTXT(data, fName)
-            ext_format = ".xml"
-            if os.path.splitext(mypath)[1].lower() == ext_format:
+            elif os.path.splitext(mypath)[1].lower() == options[1]:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fName = os.path.splitext(path)[0] + ext_format
+                # Instantiate a loader
+                loader = Loader()
                 loader.save(fName, data, ext_format)
+            elif os.path.splitext(mypath)[1].lower() == options[2]:
+                nxcansaswriter = NXcanSASWriter()
+                nxcansaswriter.write([data], fName)
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
@@ -2477,11 +2465,11 @@ class ViewerFrame(PARENT_FRAME):
                     has_errors = False
             if has_errors:
                 if data.dx is not None and data.dx != []:
-                    out.write("<X>   <Y>   <dY>   <dX>\n")
+                    out.write("<X>\t<Y>\t<dY>\t<dX>\n")
                 else:
-                    out.write("<X>   <Y>   <dY>\n")
+                    out.write("<X>\t<Y>\t<dY>\n")
             else:
-                out.write("<X>   <Y>\n")
+                out.write("<X>\t<Y>\n")
 
             for i in range(len(data.x)):
                 if has_errors:
@@ -2525,7 +2513,9 @@ class ViewerFrame(PARENT_FRAME):
         if data.dy is not None:
             text += 'dY_min = %s:  dY_max = %s\n' % (min(data.dy), max(data.dy))
         text += '\nData Points:\n'
-        x_st = "X"
+        text += "<index> \t<X> \t<Y> \t<dY> "
+        text += "\t<dXl> \t<dXw>\n" if(data.dxl is not None and
+                                       data.dxw is not None) else "\t<dX>\n"
         for index in range(len(data.x)):
             if data.dy is not None and len(data.dy) > index:
                 dy_val = data.dy[index]
@@ -2536,16 +2526,10 @@ class ViewerFrame(PARENT_FRAME):
             else:
                 dx_val = 0.0
             if data.dxl is not None and len(data.dxl) > index:
-                if index == 0:
-                    x_st = "Xl"
                 dx_val = data.dxl[index]
-            elif data.dxw is not None and len(data.dxw) > index:
-                if index == 0:
-                    x_st = "Xw"
-                dx_val = data.dxw[index]
+                if data.dxw is not None and len(data.dxw) > index:
+                    dx_val = "%s \t%s" % (data.dxl[index], data.dxw[index])
 
-            if index == 0:
-                text += "<index> \t<X> \t<Y> \t<dY> \t<d%s>\n" % x_st
             text += "%s \t%s \t%s \t%s \t%s\n" % (index,
                                                   data.x[index],
                                                   data.y[index],
@@ -2562,7 +2546,8 @@ class ViewerFrame(PARENT_FRAME):
         Save data2d dialog
         """
         default_name = fname
-        wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"
+        wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT|"\
+                   "NXcanSAS files (*.h5)|*.h5|"
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
                             default_name, wildcard, wx.SAVE)
@@ -2574,6 +2559,8 @@ class ViewerFrame(PARENT_FRAME):
             ext_num = dlg.GetFilterIndex()
             if ext_num == 0:
                 ext_format = '.dat'
+            elif ext_num == 1:
+                ext_format = '.h5'
             else:
                 ext_format = ''
             path = os.path.splitext(path)[0] + ext_format
@@ -2581,13 +2568,18 @@ class ViewerFrame(PARENT_FRAME):
 
             # Instantiate a loader
             loader = Loader()
-
-            ext_format = ".dat"
-            if os.path.splitext(mypath)[1].lower() == ext_format:
+            ext = os.path.splitext(mypath)[1].lower()
+            if ext == '.dat':
                 # Make sure the ext included in the file name
                 # especially on MAC
                 fileName = os.path.splitext(path)[0] + ext_format
                 loader.save(fileName, data, ext_format)
+            elif ext == '.h5':
+                # Make sure the ext included in the file name
+                # especially on MAC
+                fileName = os.path.splitext(path)[0] + ext_format
+                nxcansaswriter = NXcanSASWriter()
+                nxcansaswriter.write([data], fileName)
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
