@@ -2363,8 +2363,8 @@ class FitPage(BasicPage):
             elif self.dx_percent is not None:
                 percent = self.dx_percent/100
                 if self._is_2D():
-                    data.dqx_data[data.dqx_data == 0] = percent * data.qx_data
-                    data.dqy_data[data.dqy_data == 0] = percent * data.qy_data
+                    q = np.sqrt(data.qx_data**2 + data.qy_data**2)
+                    data.dqx_data = data.dqy_data = percent*q
                 else:
                     data.dx = percent * data.x
             self.current_smearer = smear_selection(data, self.model)
