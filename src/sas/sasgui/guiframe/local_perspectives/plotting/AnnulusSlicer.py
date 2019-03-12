@@ -6,15 +6,17 @@
 #
 
 import math
-import wx
 # from copy import deepcopy
-# Debug printout
+
+import wx
+
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import SlicerParameterEvent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
-from BaseInteractor import _BaseInteractor
 from sas.sasgui.guiframe.dataFitting import Data1D
+
+from .BaseInteractor import _BaseInteractor
 
 class AnnulusInteractor(_BaseInteractor):
     """

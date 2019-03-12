@@ -86,7 +86,7 @@ class ShapeVisitor:
             
             self.sim_canvas._model_changed()
         else:
-            raise ValueError, "SimShapeVisitor: Wrong class for visited object"
+            raise ValueError("SimShapeVisitor: Wrong class for visited object")
         
         
         
@@ -114,7 +114,7 @@ class ShapeVisitor:
             
             self.sim_canvas._model_changed()
         else:
-            raise ValueError, "SimShapeVisitor: Wrong class for visited object"
+            raise ValueError("SimShapeVisitor: Wrong class for visited object")
         
     
     def update(self, volCanvas, shape):
@@ -129,5 +129,5 @@ class ShapeVisitor:
             self.sim_canvas = volCanvas
             shape.accept_update(self)
         else:
-            raise ValueError, "ShapeAdapter: Shape [%s] not in list" % shape.name
+            raise ValueError("ShapeAdapter: Shape [%s] not in list" % shape.name)
 

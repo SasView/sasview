@@ -16,10 +16,10 @@ from sas.sasgui.guiframe.panel_base import PanelBase
 
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
-from calculator_widgets import OutputTextCtrl
-from calculator_widgets import InterActiveOutputTextCtrl
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from .calculator_widgets import OutputTextCtrl
+from .calculator_widgets import InterActiveOutputTextCtrl
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -162,7 +162,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         wildcard = "SAXSess Data 1D (*.DAT, *.dat)|*.DAT"
 
         dlg = wx.FileDialog(self, "Choose a file", location,
-                            "", wildcard, wx.OPEN)
+                            "", wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             filename = os.path.basename(path)
@@ -222,10 +222,10 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
                                     updatefn=self.load_update)
             self.reader.queue()
             self.load_update()
-        except:
+        except Exception as exc:
             if self.parent.parent is None:
                 return
-            msg = "Slit Length Calculator: %s" % (sys.exc_value)
+            msg = "Slit Length Calculator: %s" % exc
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             return
@@ -263,14 +263,14 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
             y = data.y
             if x == [] or  x is None or y == [] or y is None:
                 msg = "The current data is empty please check x and y"
-                raise ValueError, msg
+                raise ValueError(msg)
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=x, y=y)
             slit_length = slit_length_calculator.calculate_slit_length()
-        except:
+        except Exception as exc:
             if self.parent.parent is None:
                 return
-            msg = "Slit Size Calculator: %s" % (sys.exc_value)
+            msg = "Slit Size Calculator: %s" % exc
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             return

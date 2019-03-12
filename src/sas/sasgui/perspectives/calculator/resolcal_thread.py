@@ -45,9 +45,9 @@ class CalcRes(CalcThread):
         """
         executing computation
         """
-        self.image = map(self.func, self.qx, self.qy,
-                        self.qx_min, self.qx_max,
-                        self.qy_min, self.qy_max)[0]
+        self.image = list(map(self.func, self.qx, self.qy,
+                              self.qx_min, self.qx_max,
+                              self.qy_min, self.qy_max))[0]
         elapsed = time.time() - self.starttime
 
         self.complete(image=self.image,

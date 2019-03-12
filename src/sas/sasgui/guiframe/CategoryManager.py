@@ -229,7 +229,7 @@ class CategoryManager(wx.Frame):
         model_name_list.sort()
 
         for model in model_name_list:
-            index = self.cat_list.InsertStringItem(sys.maxint, model)
+            index = self.cat_list.InsertStringItem(sys.maxsize, model)
             self.cat_list.SetStringItem(index, 1, \
                                             str(self.by_model_dict[model]).\
                                             replace("u'","").\
@@ -383,7 +383,7 @@ class CategoryManager(wx.Frame):
         Returns a simple list of categories
         """
         cat_list = list()
-        for category in self.master_category_dict.iterkeys():
+        for category in self.master_category_dict.keys():
             if not category == 'Uncategorized':
                 cat_list.append(category)
     

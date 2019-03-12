@@ -1,13 +1,17 @@
 
 
 import os
+
 import wx
 import wx.lib.newevent
+
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS, EVT_SLICER
 from sas.sasgui.guiframe.events import SlicerParameterEvent, StatusEvent
-from Plotter2D import ModelPanel2D
+
+from .Plotter2D import ModelPanel2D
+
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 save_files, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
 
@@ -99,8 +103,7 @@ class SlicerParameterPanel(wx.Dialog):
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
             iy = 1
             self.parameters = []
-            keys = params.keys()
-            keys.sort()
+            keys = list(sorted(params.keys()))
             for item in keys:
                 ix = 0
                 iy += 1
@@ -126,7 +129,7 @@ class SlicerParameterPanel(wx.Dialog):
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (iy, ix), (1, 1),
                                  wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-                    options = BINNING_OPTIONS.keys()
+                    options = list(BINNING_OPTIONS.keys())
                     self.bin_ctl = wx.ComboBox(parent=self, choices=options)
                     hint_msg = "Modify the value of %s to change" % item
                     hint_msg += " the 2D slicer"
@@ -324,7 +327,7 @@ class SlicerParameterPanel(wx.Dialog):
         fit = self.fitting_options.GetValue()
 
         # Find desired 2D data panels
-        for key, mgr in spp.plot_panels.iteritems():
+        for key, mgr in spp.plot_panels.items():
             if mgr.graph.prop['title'] in self.data_list.CheckedStrings:
                 apply_to_list.append(mgr)
 
@@ -376,7 +379,7 @@ class SlicerParameterPanel(wx.Dialog):
         # Reinitialize loaded data list on redraw
         self.loaded_data = []
         # Iterate over the loaded plots and find all 2D panels
-        for key, value in self.main_window.plot_panels.iteritems():
+        for key, value in self.main_window.plot_panels.items():
             if isinstance(value, ModelPanel2D):
                 self.loaded_data.append(value.data2D.name)
                 if value.data2D.id == self.parent.data2D.id:
@@ -452,7 +455,7 @@ class SlicerParameterPanel(wx.Dialog):
             names.append(f_name.data2D.label)
 
         # Find the correct plots to save
-        for key, plot in self.main_window.plot_panels.iteritems():
+        for key, plot in self.main_window.plot_panels.items():
             if not hasattr(plot, "data2D"):
                 for item in plot.plots:
                     base = item.replace(CONVERT_DICT[evt.type], "")
@@ -460,7 +463,7 @@ class SlicerParameterPanel(wx.Dialog):
                         data_dic[item] = plot.plots[item]
 
         # Save files as Text
-        for item, data1d in data_dic.iteritems():
+        for item, data1d in data_dic.items():
             base = '.'.join(item.split('.')[:-1])
             file_name = base + append + ".txt"
             save_to = evt.path + "\\" + file_name

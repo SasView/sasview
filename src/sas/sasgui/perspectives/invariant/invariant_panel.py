@@ -318,12 +318,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         background = self.background_tcl.GetValue().lstrip().rstrip()
         if background == "":
-            raise ValueError, "Need a background"
+            raise ValueError("Need a background")
         if check_float(self.background_tcl):
             return float(background)
         else:
             msg = "Receive invalid value for background : %s" % (background)
-            raise ValueError, msg
+            raise ValueError(msg)
 
     def get_scale(self):
         """
@@ -331,16 +331,16 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         scale = self.scale_tcl.GetValue().lstrip().rstrip()
         if scale == "":
-            raise ValueError, "Need a background"
+            raise ValueError("Need a background")
         if check_float(self.scale_tcl):
             if float(scale) <= 0.0:
                 self.scale_tcl.SetBackgroundColour("pink")
                 self.scale_tcl.Refresh()
                 msg = "Receive invalid value for scale: %s" % (scale)
-                raise ValueError, msg
+                raise ValueError(msg)
             return float(scale)
         else:
-            raise ValueError, "Receive invalid value for scale : %s" % (scale)
+            raise ValueError("Receive invalid value for scale : %s" % (scale))
 
     def get_contrast(self):
         """
@@ -385,11 +385,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                            extrapolation=extrapolation)
                 self.volume_tcl.SetValue(format_number(v))
                 self.volume_err_tcl.SetValue(format_number(dv))
-            except:
+            except Exception as exc:
                 self.volume_tcl.SetValue(format_number(None))
                 self.volume_err_tcl.SetValue(format_number(None))
                 msg = "Error occurred computing volume "
-                msg += " fraction: %s" % sys.exc_value
+                msg += " fraction: %s" % exc
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       info="error",
                                                       type="stop"))
@@ -405,11 +405,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                    extrapolation=extrapolation)
                 self.surface_tcl.SetValue(format_number(s))
                 self.surface_err_tcl.SetValue(format_number(ds))
-            except:
+            except Exception as exc:
                 self.surface_tcl.SetValue(format_number(None))
                 self.surface_err_tcl.SetValue(format_number(None))
                 msg = "Error occurred computing "
-                msg += "specific surface: %s" % sys.exc_value
+                msg += "specific surface: %s" % exc
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
 
@@ -425,13 +425,13 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                     format_number(qstar_total_err))
             self.inv_container.qstar_total = qstar_total
             self.inv_container.qstar_total_err = qstar_total_err
-        except:
+        except Exception as exc:
             self.inv_container.qstar_total = "Error"
             self.inv_container.qstar_total_err = "Error"
             self.invariant_total_tcl.SetValue(format_number(None))
             self.invariant_total_err_tcl.SetValue(format_number(None))
             msg = "Error occurred computing invariant using"
-            msg += " extrapolation: %s" % sys.exc_value
+            msg += " extrapolation: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
 
     def get_low_qstar(self, inv, npts_low, low_q=False):
@@ -449,20 +449,20 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                     self.power_low_tcl.SetValue(format_number(power_low))
                 self._manager.plot_theory(data=extrapolated_data,
                                           name="Low-Q extrapolation")
-            except:
+            except Exception as exc:
                 self.inv_container.qstar_low = "ERROR"
                 self.inv_container.qstar_low_err = "ERROR"
                 self._manager.plot_theory(name="Low-Q extrapolation")
                 msg = "Error occurred computing low-Q "
-                msg += "invariant: %s" % sys.exc_value
+                msg += "invariant: %s" % exc
                 wx.PostEvent(self.parent,
                              StatusEvent(status=msg, type="stop"))
                 raise
         else:
             try:
                 self._manager.plot_theory(name="Low-Q extrapolation")
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
 
     def get_high_qstar(self, inv, high_q=False):
         """
@@ -482,21 +482,21 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                         npts=500)
                 self._manager.plot_theory(data=high_out_data,
                                           name="High-Q extrapolation")
-            except:
+            except Exception as exc:
                 #raise
                 self.inv_container.qstar_high = "ERROR"
                 self.inv_container.qstar_high_err = "ERROR"
                 self._manager.plot_theory(name="High-Q extrapolation")
                 msg = "Error occurred computing high-Q "
-                msg += "invariant: %s" % sys.exc_value
+                msg += "invariant: %s" % exc
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       type="stop"))
                 raise
         else:
             try:
                 self._manager.plot_theory(name="High-Q extrapolation")
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
 
     def get_qstar(self, inv):
         """
@@ -624,8 +624,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         try:
             background = self.get_background()
             scale = self.get_scale()
-        except:
-            msg = "Invariant Error: %s" % (sys.exc_value)
+        except Exception as exc:
+            msg = "Invariant Error: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
             return
 
@@ -640,8 +640,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         try:
             inv, npts_low = self.set_extrapolation_low(inv=inv, low_q=low_q)
             inv, npts_high = self.set_extrapolation_high(inv=inv, high_q=high_q)
-        except:
-            msg = "Error occurred computing invariant: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "Error occurred computing invariant: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                   info="warning", type="stop"))
             return
@@ -651,8 +651,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #Compute invariant
         try:
             self.get_qstar(inv=inv)
-        except:
-            msg = "Error occurred computing invariant: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "Error occurred computing invariant: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                   info="warning",
                                                   type="stop"))
@@ -673,9 +673,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             # Parse additional parameters
             porod_const = self.get_porod_const()
             contrast = self.get_contrast()
-        except:
-            msg = r_msg + "Error occurred computing invariant: %s" % \
-                                                            sys.exc_value
+        except Exception as exc:
+            msg = r_msg + "Error occurred computing invariant: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                   info="error",
                                                   type="stop"))
@@ -684,8 +683,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.get_volume(inv=inv, contrast=contrast,
                             extrapolation=extrapolation)
             #compute surface and set value to txtcrtl
-        except:
-            msg = "Error occurred computing invariant: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "Error occurred computing invariant: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                   info="warning",
                                                   type="stop"))
@@ -694,8 +693,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                              porod_const=porod_const,
                              extrapolation=extrapolation)
 
-        except:
-            msg = "Error occurred computing invariant: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "Error occurred computing invariant: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                   info="warning",
                                                   type="stop"))
@@ -844,13 +843,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 attr = getattr(self, key)
             if attr.__class__.__name__ == "StaticText":
                 return
-            if value in ["True", "False", True, False]:
-                value = bool(value)
+            if value in ["True", True]:
+                value = 1
+            elif value in ["False", False]:
+                value = 0
             else:
                 value = str(value)
             attr.SetValue(value)
-        except:
-            logger.error("Invariant state: %s", sys.exc_value)
+        except Exception as exc:
+            logger.error("Invariant state: %s", exc)
 
     def get_bookmark_by_num(self, num=None):
         """
@@ -866,9 +867,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # get the previous state
         try:
             _, _, current_state, comp_state = self.state.bookmark_list[int(num)]
-        except:
-            logger.error(sys.exc_value)
-            raise ValueError, "No such bookmark exists"
+        except Exception as exc:
+            logger.error(exc)
+            raise ValueError("No such bookmark exists")
 
         # set the parameters
         for key in comp_state:
@@ -961,8 +962,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_num = self.state.saved_state['state_num']
             self.state.state_list[str(self.state.state_num)] = \
                     self.state.clone_state()
-        except:
-            logger.error(sys.exc_value)
+        except Exception as exc:
+            logger.error(exc)
 
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1005,8 +1006,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         for i in range(self.state.state_num + 1, len(self.state.state_list)):
             try:
                 del self.state.state_list[str(i)]
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
         # Enable the undo button if it was not
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1070,8 +1071,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         for i in range(int(state_num) + 1, len(self.state.state_list)):
             try:
                 del self.state.state_list[str(i)]
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
 
         # try to add new state of the text changes in the state_list
         try:
@@ -1085,8 +1086,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                     self.state.saved_state['state_num'] += 1
             self.state.state_num = self.state.saved_state['state_num']
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
-        except:
-            logger.error(sys.exc_value)
+        except Exception as exc:
+            logger.error(exc)
 
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1107,8 +1108,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         try:
             self.state.saved_state[name] = str(value)
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
-        except:
-            logger.error(sys.exc_value)
+        except Exception as exc:
+            logger.error(exc)
 
     def _get_input_list(self):
         """
@@ -1117,8 +1118,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # get state num of the last compute state
         compute_num = self.state.saved_state['compute_num']
         # find values and put into the input list
-        for key1, value1 in self.state.state_list[str(compute_num)].iteritems():
-            for key, _ in self.state.input_list.iteritems():
+        for key1, value1 in self.state.state_list[str(compute_num)].items():
+            for key, _ in self.state.input_list.items():
                 if key == key1:
                     self.state.input_list[key] = value1
                     break

@@ -91,9 +91,9 @@ class ReportDialog(BaseReportDialog):
                     try:
                         # Mac
                         os.system("open %s" % fName)
-                    except:
+                    except Exception as exc:
                         # DO not open
-                        logger.error("Could not open file: %s" % sys.exc_value)
+                        logger.error("Could not open file: %s" % exc)
             # delete image file
             os.remove(pic_fname)
             return
