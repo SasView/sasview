@@ -471,7 +471,7 @@ class VolumeCanvas(BaseComponent):
         """
             Return a list of the shapes
         """
-        return self.shapes.keys()
+        return list(self.shapes.keys())
 
     def _addSingleShape(self, shapeDesc):
         """

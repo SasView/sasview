@@ -98,10 +98,10 @@ class DistExplorer(object):
                 results.pos.append(pos)
                 results.pos_err.append(pos_err)
                 results.osc.append(osc)
-            except:
+            except Exception as exc:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed for "
-                msg += "D_max=%s\n %s" % (str(d), sys.exc_value)
+                msg += "D_max=%s\n %s" % (str(d), exc)
                 results.errors.append(msg)
 
         return results
