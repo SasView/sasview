@@ -51,7 +51,7 @@ dependencies:
  - jpeg=9c=h1de35cc_1001
  - jsonschema=3.0.0a3=py36_1000
  - jupyter=1.0.0=py_1
- - jupyter_client=5.2.4=py_1
+ - jupyter_client=5.2.4
  - jupyter_console=5.2.0=py36_1
  - jupyter_core=4.4.0=py_0
  - kiwisolver=1.0.1=py36h2d50403_2
@@ -71,10 +71,10 @@ dependencies:
  - matplotlib=2.2.2=py36h0e0179f_2
  - mistune=0.8.4=py36h1de35cc_1000
  - more-itertools=4.3.0=py36_1000
- - nbconvert=5.3.1=py_1
+ - nbconvert=5.3.1
  - nbformat=4.4.0=py_1
  - ncurses=6.1=hfc679d8_2
- - notebook=5.7.4=py36_1000
+ - notebook=5.7.4
  - numpy=1.15.1=py36_blas_openblashd3ea46f_1
  - openblas=0.2.20=8
  - openssl=1.0.2o=0
