@@ -304,6 +304,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             data.dqy_data = np.zeros(len_data)
             data.dqx_data[data.dqx_data == 0] = percent * data.qx_data
             data.dqy_data[data.dqy_data == 0] = percent * data.qy_data
+            q = np.sqrt(data.qx_data**2 + data.qy_data**2)
+            data.dx_data = data.dqy_data = percent*q
         else:
             len_data = len(data.x)
             data.dx = np.zeros(len_data)
