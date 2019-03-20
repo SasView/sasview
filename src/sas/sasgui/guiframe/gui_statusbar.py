@@ -111,7 +111,7 @@ class Console(wx.Frame):
         """
         Method to send an arbitrary number of messages to the console log
 
-        :param messages: A list of strings to be sent to the console log. 
+        :param messages: A list of strings to be sent to the console log.
         """
         if messages:
             for status in messages:
@@ -233,7 +233,7 @@ class StatusBar(wxStatusB):
         """
         If the window is resized, redraw the window.
         """
-        self.reposition() 
+        self.reposition()
         self.size_changed = True
 
     def get_msg_position(self):
@@ -359,7 +359,7 @@ class StatusBar(wxStatusB):
         """
         if hasattr(event, "status"):
             self.SetStatusText(text=str(event.status), event=event)
-  
+
     def set_gauge(self, event):
         """
         change the state of the gauge according the state of the current job
@@ -422,7 +422,7 @@ class SPageStatusbar(wxStatusB):
         wxStatusB.__init__(self, parent, *args, **kwds)
         self.SetFieldsCount(1)
         self.timeout = timeout
-        width, height = parent.GetSizeTuple()
+        width, height = parent.GetSize()
         self.gauge = wx.Gauge(self, style=wx.GA_HORIZONTAL,
                               size=(width, height/10))
         rect = self.GetFieldRect(0)

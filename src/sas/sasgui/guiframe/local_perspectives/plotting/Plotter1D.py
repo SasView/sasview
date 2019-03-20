@@ -204,9 +204,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.resizing = True
         self.canvas.set_resizing(self.resizing)
         self.parent.set_schedule(True)
-        pos_x, pos_y = self.GetPositionTuple()
+        pos_x, pos_y = self.GetPosition()
         if pos_x != 0 and pos_y != 0:
-            self.size, _ = self.GetClientSizeTuple()
+            self.size, _ = self.GetClientSize()
         self.SetSizer(self.sizer)
         wx.CallAfter(self.parent.disable_app_menu, self)
 
@@ -713,7 +713,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
         except:
-            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos_x, pos_y = self.toolbar.GetPosition()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(self._slicerpop, pos)
 

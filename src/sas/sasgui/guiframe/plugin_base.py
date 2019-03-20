@@ -104,7 +104,7 @@ class PluginBase(object):
 
     def delete_data(self, data_id):
         """
-        Delete all references of data which id are in data_list. 
+        Delete all references of data which id are in data_list.
         """
 
     def load_data(self, event):
@@ -141,7 +141,7 @@ class PluginBase(object):
     def populate_menu(self, parent):
         """
         Create and return the list of application menu
-        items for the plug-in. 
+        items for the plug-in.
 
         :param parent: parent window
 
@@ -237,7 +237,7 @@ class PluginBase(object):
 
         if self.frame is not None:
             if old_frame is not None:
-                pos_x, pos_y = old_frame.GetPositionTuple()
+                pos_x, pos_y = old_frame.GetPosition()
                 self.frame.SetPosition((pos_x, pos_y))
             if not self.frame.IsShown():
                 self.frame.Show(True)
@@ -253,14 +253,14 @@ class PluginBase(object):
         """
         need to be overwritten by the derivated class
         """
-    
+
     def post_init(self):
         """
         Post initialization call back to close the loose ends
         """
         pass
 
-    def set_state(self, state=None, datainfo=None):    
+    def set_state(self, state=None, datainfo=None):
         """
         update state
         """

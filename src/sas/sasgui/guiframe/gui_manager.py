@@ -281,7 +281,7 @@ class ViewerFrame(PARENT_FRAME):
         # Adjust toolbar height
         toolbar = self.GetToolBar()
         if toolbar is not None:
-            _, tb_h = toolbar.GetSizeTuple()
+            _, tb_h = toolbar.GetSize()
             height -= tb_h
         return width, height
 
@@ -947,7 +947,7 @@ class ViewerFrame(PARENT_FRAME):
                 w, h = self._get_panels_size(panel_class)
                 if panel_class.CENTER_PANE:
                     self.panels[str(wx_id)] = panel_class
-                    _, pos_y = frame.GetPositionTuple()
+                    _, pos_y = frame.GetPosition()
                     frame.SetPosition((d_panel_width + 1, pos_y))
                     frame.SetSize((w, h))
                     frame.Show(False)
@@ -1115,7 +1115,7 @@ class ViewerFrame(PARENT_FRAME):
         p.frame.name = p.window_name
         if not IS_WIN:
             p.frame.Center()
-            x_pos, _ = p.frame.GetPositionTuple()
+            x_pos, _ = p.frame.GetPosition()
             p.frame.SetPosition((x_pos, 112))
         p.frame.Show(True)
 
@@ -3010,7 +3010,7 @@ class ViewerFrame(PARENT_FRAME):
         size_y = 0
         if self.GetToolBar() is not None and self.GetToolBar().IsShown():
             if not IS_LINUX:
-                _, size_y = self.GetToolBar().GetSizeTuple()
+                _, size_y = self.GetToolBar().GetSize()
         return size_y
 
     def set_schedule_full_draw(self, panel=None, func='del'):
@@ -3129,7 +3129,7 @@ class ViewerFrame(PARENT_FRAME):
         :returns: size
         :rtype: tuple
         """
-        width, height = self.GetSizeTuple()
+        width, height = self.GetSize()
         if not IS_WIN:
             # Subtract toolbar height to get real window side
             if self._toolbar.IsShown():

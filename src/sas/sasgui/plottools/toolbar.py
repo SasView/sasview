@@ -157,8 +157,8 @@ class PlotPrintout(wx.Printout):
         canvas size keeping the aspect ratio intact, then prints as bitmap
         """
         _dc = self.GetDC()
-        (_dcX, _dcY) = _dc.GetSizeTuple()
-        (_bmpX,_bmpY) = self.canvas.GetSize()
+        _dcX, _dcY = _dc.GetSize()
+        _bmpX, _bmpY = self.canvas.GetSize()
         _scale = min(_dcX/_bmpX, _dcY/_bmpY)
         _dc.SetUserScale(_scale, _scale)
         _dc.DrawBitmap(self.canvas.bitmap, 0, 0, False,)
