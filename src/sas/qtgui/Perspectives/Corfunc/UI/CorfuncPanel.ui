@@ -417,7 +417,7 @@
     </layout>
    </item>
    <item row="0" column="1">
-    <layout class="QVBoxLayout" name="columnLayout">
+    <layout class="QVBoxLayout" name="plotLayout">
     </layout>
    </item>
   </layout>

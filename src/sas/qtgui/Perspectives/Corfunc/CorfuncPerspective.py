@@ -117,9 +117,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.txtLowerQMin.setEnabled(False)
 
         self._canvas = MyMplCanvas(self.model)
-        self.columnLayout.insertWidget(0, self._canvas)
+        self.plotLayout.insertWidget(0, self._canvas)
         self._realplot = MyMplCanvas(self.model)
-        self.columnLayout.insertWidget(1, self._realplot)
+        self.plotLayout.insertWidget(1, self._realplot)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
