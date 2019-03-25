@@ -957,3 +957,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         is_chain = parameters['is_chain_fitting'][0] == 'True'
         if isBatch:
             self.chkChain.setChecked(is_chain)
+
+    def getReport(self):
+        """
+        Wrapper for non-existent functionality.
+        Tell the user to use the reporting tool
+        on separate fit pages.
+        """
+        msg = "Please use Report Results directly on fit pages"
+        msg += " involved in the Constrained and Simultaneous fitting process."
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+        msgbox.setText(msg)
+        msgbox.setWindowTitle("Fit Report")
+        _ = msgbox.exec_()
+        return
