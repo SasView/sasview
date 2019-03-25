@@ -416,6 +416,10 @@
      </item>
     </layout>
    </item>
+   <item row="0" column="1">
+    <layout class="QVBoxLayout" name="columnLayout">
+    </layout>
+   </item>
   </layout>
  </widget>
  <resources/>
