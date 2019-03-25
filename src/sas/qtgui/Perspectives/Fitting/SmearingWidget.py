@@ -395,8 +395,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 return smear_type, dq_l, dq_r
             elif data.dqx_data.any() != 0 and data.dqy_data.any() != 0:
                 smear_type = "Pinhole2d"
-                dq_l = GuiUtils.formatNumber(np.average(data.dqx_data)/abs(data.qx_data)*100., high=True)
-                dq_r = GuiUtils.formatNumber(np.average(data.dqy_data)/abd(data.qy_data)*100., high=True)
+                dq_l = GuiUtils.formatNumber(np.average(data.dqx_data/np.abs(data.qx_data))*100., high=True)
+                dq_r = GuiUtils.formatNumber(np.average(data.dqy_data/np.abs(data.qy_data))*100., high=True)
                 return smear_type, dq_l, dq_r
             else:
                 return smear_type, dq_l, dq_r
