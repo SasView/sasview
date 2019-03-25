@@ -405,8 +405,6 @@ class FittingWindow(QtWidgets.QTabWidget):
             if any([page_name in tab for tab in tabs_for_fitting]):
                 tab_object.enableInteractiveElements()
 
-        pass
-
     def getCurrentStateAsXml(self):
         """
         Returns an XML version of the current state

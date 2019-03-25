@@ -127,6 +127,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Are we chain fitting?
         self.is_chain_fitting = False
 
+        # Is the fit job running?
+        self.is_running = False
+        self.calc_fit = None
+
         # Remember previous content of modified cell
         self.current_cell = ""
 
@@ -256,6 +260,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Perform the constrained/simultaneous fit
         """
+        # Stop if we're running
+        if self.is_running:
+            self.is_running = False
+            #re-enable the Fit button
+            self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+            self.cmdFit.setText("Fit")
+            # stop the fitpages
+            self.calc_fit.stop()
+            return
+
         # Find out all tabs to fit
         tabs_to_fit = self.getTabsForFit()
 
@@ -309,7 +323,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.parent.fittingStartedSignal.emit(tabs_to_fit)
 
         # new fit thread object
-        calc_fit = FitThread(handler=handler,
+        self.calc_fit = FitThread(handler=handler,
                              fn=sim_fitter_list,
                              batch_inputs=batch_inputs,
                              batch_outputs=batch_outputs,
@@ -320,20 +334,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         if LocalConfig.USING_TWISTED:
             # start the trhrhread with twisted
-            calc_thread = threads.deferToThread(calc_fit.compute)
-            calc_thread.addCallback(completefn)
-            calc_thread.addErrback(self.onFitFailed)
+            self.calc_fit = threads.deferToThread(self.calc_fit.compute)
+            self.calc_fit.addCallback(completefn)
+            self.calc_fit.addErrback(self.onFitFailed)
         else:
             # Use the old python threads + Queue
-            calc_fit.queue()
-            calc_fit.ready(2.5)
+            self.calc_fit.queue()
+            self.calc_fit.ready(2.5)
 
-
-        #disable the Fit button
+        # modify the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: red;}')
-        self.cmdFit.setText('Running...')
+        self.cmdFit.setText('Stop fit')
         self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
-        self.cmdFit.setEnabled(False)
+        self.is_running = True
 
     def onHelp(self):
         """
@@ -456,7 +469,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
@@ -502,7 +514,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
@@ -537,7 +548,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
