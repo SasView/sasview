@@ -49,6 +49,9 @@ class MyMplCanvas(FigureCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("log")
         self.axes.set_yscale("log")
+        self.axes.set_xlabel("Q [$\AA^{-1}$]")
+        self.axes.set_ylabel("I(Q) [cm$^{-1}$]")
+        self.fig.tight_layout()
 
         qmin = float(self.model.item(W.W_QMIN).text())
         qmax1 = float(self.model.item(W.W_QMAX).text())
@@ -80,6 +83,9 @@ class MyMplCanvas(FigureCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("linear")
         self.axes.set_yscale("linear")
+        self.axes.set_xlabel("Z [$\AA$]")
+        self.axes.set_ylabel("Correlation")
+        self.fig.tight_layout()
 
         if self.data:
             data1, data3, data_idf = self.data
