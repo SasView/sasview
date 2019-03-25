@@ -121,6 +121,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._realplot = MyMplCanvas(self.model)
         self.plotLayout.insertWidget(1, self._realplot)
 
+        self.gridLayout_8.setColumnStretch(0, 1)
+        self.gridLayout_8.setColumnStretch(1, 3)
+
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
         self.setup_slots()
