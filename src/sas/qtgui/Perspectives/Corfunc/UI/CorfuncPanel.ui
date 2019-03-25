@@ -319,7 +319,14 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="txtLongPeriod"/>
+           <widget class="QLineEdit" name="txtLongPeriod" width="50">
+	     <property name="minimumSize" stdset="0">
+	       <size>
+		 <width>60</width>
+		 <height>20</height>
+	       </size>
+	     </property>
+	   </widget>
           </item>
           <item row="0" column="2">
            <widget class="QLabel" name="label_15">
@@ -329,7 +336,14 @@
            </widget>
           </item>
           <item row="0" column="3">
-           <widget class="QLineEdit" name="txtAvgIntThick"/>
+           <widget class="QLineEdit" name="txtAvgIntThick">
+	     <property name="minimumSize" stdset="0">
+	       <size>
+		 <width>60</width>
+		 <height>20</height>
+	       </size>
+	     </property>
+	   </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_16">
