@@ -34,6 +34,7 @@ class MyMplCanvas(FigureCanvas):
 
         self.data = None
         self.extrap = None
+        self.setMinimumSize(300, 300)
 
     def draw_q_space(self):
         """Draw the Q space data in the plot window
