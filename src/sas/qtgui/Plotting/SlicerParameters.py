@@ -73,6 +73,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.proxy.setSourceModel(self.model)
 
+    def keyPressEvent(self, event):
+         key = event.key()
+
+         if key == QtCore.Qt.Key_Escape:
+            self.closeWidgetSignal.emit()
+
     def closeEvent(self, event):
         """
         Overwritten close widget method in order to send the close
