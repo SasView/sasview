@@ -60,6 +60,8 @@ class MyMplCanvas(FigureCanvas):
             self.axes.axvline(qmax2)
             self.axes.set_xlim(min(self.data.x) / 2,
                                max(self.data.x) * 1.5 - 0.5 * min(self.data.x))
+            self.axes.set_ylim(min(self.data.y) / 2,
+                               max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
         if self.extrap:
             self.axes.plot(self.extrap.x, self.extrap.y)
 
