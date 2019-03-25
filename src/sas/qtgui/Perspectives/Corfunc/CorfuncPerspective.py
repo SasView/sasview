@@ -117,6 +117,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         self._canvas = MyMplCanvas(self.model)
         self.mainVerticalLayout.insertWidget(0, self._canvas)
+        self._realplot = MyMplCanvas(self.model)
+        self.mainVerticalLayout.insertWidget(1, self._realplot)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -239,11 +241,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        #self._realplot.data = transforms
+        self._realplot.data = transforms
 
         self.update_real_space_plot(transforms)
 
-        #self._realplot.draw_real_space()
+        self._realplot.draw_real_space()
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""
@@ -359,8 +361,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.draw_q_space()
         self.cmdTransform.setEnabled(False)
 
-        #self._realplot.data = None
-        #self._realplot.draw_real_space()
+        self._realplot.data = None
+        self._realplot.draw_real_space()
 
     def setClosable(self, value=True):
         """
