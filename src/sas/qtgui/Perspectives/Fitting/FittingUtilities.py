@@ -728,6 +728,8 @@ def formatParameters(parameters):
     assert isinstance(parameters, list)
     output_string = "sasview_parameter_values:"
     for parameter in parameters:
+        # recast tuples into strings
+        parameter = [str(p) for p in parameter]
         output_string += ",".join([p for p in parameter if p is not None])
         output_string += ":"
     return output_string
