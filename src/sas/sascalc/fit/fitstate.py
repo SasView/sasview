@@ -394,7 +394,7 @@ def setup_bumps():
 
 def bumps_cli():
     """
-    Install the Refl1D plugin into bumps and run the command line interface.
+    Install the SasView plugin into bumps and run the command line interface.
     """
     setup_sasview()
     setup_bumps()
