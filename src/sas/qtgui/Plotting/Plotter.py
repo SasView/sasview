@@ -419,6 +419,12 @@ class PlotterWidget(PlotterBase):
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
         """
+
+        # Pull the current transform settings from the old plot
+        selected_plot = self.plot_dict[id]
+        new_plot.xtransform = selected_plot.xtransform
+        new_plot.ytransform = selected_plot.ytransform
+
         self.removePlot(id)
         self.plot(data=new_plot)
 
