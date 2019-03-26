@@ -52,6 +52,7 @@ class MyMplCanvas(FigureCanvas):
         self.axes.set_yscale("log")
         self.axes.set_xlabel("Q [$\AA^{-1}$]")
         self.axes.set_ylabel("I(Q) [cm$^{-1}$]")
+        self.axes.set_title("Scattering data")
         self.fig.tight_layout()
 
         qmin = float(self.model.item(W.W_QMIN).text())
@@ -59,7 +60,8 @@ class MyMplCanvas(FigureCanvas):
         qmax2 = float(self.model.item(W.W_QCUTOFF).text())
 
         if self.data:
-            self.axes.plot(self.data.x, self.data.y)
+            # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
+            self.axes.errorbar(self.data.x, self.data.y, yerr=self.data.dy, label="Experimental Data")
             self.axes.axvline(qmin)
             self.axes.axvline(qmax1)
             self.axes.axvline(qmax2)
@@ -67,8 +69,12 @@ class MyMplCanvas(FigureCanvas):
                                max(self.data.x) * 1.5 - 0.5 * min(self.data.x))
             self.axes.set_ylim(min(self.data.y) / 2,
                                max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
+
         if self.extrap:
-            self.axes.plot(self.extrap.x, self.extrap.y)
+            self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
+
+        if self.data or self.extrap:
+            self.axes.legend()
 
         self.draw()
 
@@ -86,6 +92,7 @@ class MyMplCanvas(FigureCanvas):
         self.axes.set_yscale("linear")
         self.axes.set_xlabel("Z [$\AA$]")
         self.axes.set_ylabel("Correlation")
+        self.axes.set_title("Real Space Correlations")
         self.fig.tight_layout()
 
         if self.data:
