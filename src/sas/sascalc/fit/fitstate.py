@@ -143,6 +143,7 @@ class FitState(object):
         # arbitrarily based on whichever happens to come first.
         used = []
         for model in self.simfit.model_list:
+            matched = 0
             for fit in self.fits:
                 #print(model['name'], fit.data_id, model_name(fit), model['model_name'])
                 if (fit.data_id == model['name']
@@ -151,8 +152,11 @@ class FitState(object):
                     fit.fit_page = model['fit_page_source']
                     fit.constraints = constraints.setdefault(fit.fit_page, [])
                     used.append(fit)
-                    break
-            else:
+                    matched += 1
+            if matched > 1:
+                raise ValueError("more than one model matches %s"
+                                 % model['fit_page_source'])
+            elif matched == 0:
                 raise ValueError("could not find model %s in file"
                                  % model['fit_page_source'])
 
