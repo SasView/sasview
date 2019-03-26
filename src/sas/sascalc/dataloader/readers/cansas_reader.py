@@ -492,8 +492,7 @@ class Reader(XMLreader):
             for error in self.errors:
                 self.current_datainfo.errors.add(error)
             self.data_cleanup()
-            self.sort_one_d_data()
-            self.sort_two_d_data()
+            self.sort_data()
             self.reset_data_list()
             return self.output[0], None
 
