@@ -2736,6 +2736,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def completed2D(self, return_data):
         self.Calc2DFinishedSignal.emit(return_data)
 
+    def _appendPlotsPolyDisp(self, new_plots, return_data, fitted_data):
+        """
+        Internal helper for 1D and 2D for creating plots of the polydispersity distribution for
+        parameters which have a polydispersity enabled.
+        """
+        for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
+            data_id = fitted_data.id.split()
+            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
+            data_name = fitted_data.name.split()
+            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
+            self.createNewIndex(plot)
+            new_plots.append(plot)
+
     def complete1D(self, return_data):
         """
         Plot the current 1D data
@@ -2768,14 +2781,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # redundant items, e.g. beta(Q), S_eff(Q)
             self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
 
-        # Create plots for parameters with enabled polydispersity
-        for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
-            data_id = fitted_data.id.split()
-            plot.id = "{} [{}] {}".format(data_id[0], plot.name, " ".join(data_id[1:]))
-            data_name = fitted_data.name.split()
-            plot.name = " ".join([data_name[0], plot.name] + data_name[1:])
-            self.createNewIndex(plot)
-            new_plots.append(plot)
+        self._appendPlotsPolyDisp(new_plots, return_data, fitted_data)
 
         # Create plots for intermediate product data
         plots = self.logic.new1DProductPlots(return_data, self.tab_id)
@@ -2812,6 +2818,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_plots = [fitted_data]
         if residuals is not None:
             new_plots.append(residuals)
+
+        self._appendPlotsPolyDisp(new_plots, return_data, fitted_data)
 
         # Update/generate plots
         for plot in new_plots:
