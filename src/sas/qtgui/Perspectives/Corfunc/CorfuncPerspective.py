@@ -94,7 +94,7 @@ class MyMplCanvas(FigureCanvas):
             self.axes.plot(data3.x, data3.y, label="3D Correlation")
             self.axes.plot(data_idf.x, data_idf.y,
                            label="Interface Distribution Function")
-            self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
+            self.axes.set_xlim(0, max(data1.x) / 4)
             self.axes.legend()
 
         self.draw()
