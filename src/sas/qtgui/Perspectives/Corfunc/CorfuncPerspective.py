@@ -6,6 +6,7 @@ This module provides the intelligence behind the gui interface for Corfunc.
 # global
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
     as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from numpy.linalg.linalg import LinAlgError
 
@@ -124,8 +125,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         self._canvas = MyMplCanvas(self.model)
         self.plotLayout.insertWidget(0, self._canvas)
+        self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._canvas, self))
         self._realplot = MyMplCanvas(self.model)
-        self.plotLayout.insertWidget(1, self._realplot)
+        self.plotLayout.insertWidget(2, self._realplot)
+        self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
 
         self.gridLayout_8.setColumnStretch(0, 1)
         self.gridLayout_8.setColumnStretch(1, 3)
