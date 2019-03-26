@@ -3108,7 +3108,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.setData(nsigs_index, nsigs)
 
         self.iterateOverModel(updateFunctionCaption)
-        self.orig_poly_index = combo_box.currentIndex()
+        if combo_box is not None:
+            self.orig_poly_index = combo_box.currentIndex()
 
     def loadPolydispArray(self, row_index):
         """
