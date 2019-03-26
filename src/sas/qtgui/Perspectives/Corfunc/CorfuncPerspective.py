@@ -6,6 +6,7 @@ This module provides the intelligence behind the gui interface for Corfunc.
 # global
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
     as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from numpy.linalg.linalg import LinAlgError
 
@@ -34,6 +35,7 @@ class MyMplCanvas(FigureCanvas):
 
         self.data = None
         self.extrap = None
+        self.setMinimumSize(300, 300)
 
     def draw_q_space(self):
         """Draw the Q space data in the plot window
@@ -48,20 +50,31 @@ class MyMplCanvas(FigureCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("log")
         self.axes.set_yscale("log")
+        self.axes.set_xlabel("Q [$\AA^{-1}$]")
+        self.axes.set_ylabel("I(Q) [cm$^{-1}$]")
+        self.axes.set_title("Scattering data")
+        self.fig.tight_layout()
 
         qmin = float(self.model.item(W.W_QMIN).text())
         qmax1 = float(self.model.item(W.W_QMAX).text())
         qmax2 = float(self.model.item(W.W_QCUTOFF).text())
 
         if self.data:
-            self.axes.plot(self.data.x, self.data.y)
+            # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
+            self.axes.errorbar(self.data.x, self.data.y, yerr=self.data.dy, label="Experimental Data")
             self.axes.axvline(qmin)
             self.axes.axvline(qmax1)
             self.axes.axvline(qmax2)
             self.axes.set_xlim(min(self.data.x) / 2,
                                max(self.data.x) * 1.5 - 0.5 * min(self.data.x))
+            self.axes.set_ylim(min(self.data.y) / 2,
+                               max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
+
         if self.extrap:
-            self.axes.plot(self.extrap.x, self.extrap.y)
+            self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
+
+        if self.data or self.extrap:
+            self.axes.legend()
 
         self.draw()
 
@@ -77,6 +90,10 @@ class MyMplCanvas(FigureCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("linear")
         self.axes.set_yscale("linear")
+        self.axes.set_xlabel("Z [$\AA$]")
+        self.axes.set_ylabel("Correlation")
+        self.axes.set_title("Real Space Correlations")
+        self.fig.tight_layout()
 
         if self.data:
             data1, data3, data_idf = self.data
@@ -84,7 +101,7 @@ class MyMplCanvas(FigureCanvas):
             self.axes.plot(data3.x, data3.y, label="3D Correlation")
             self.axes.plot(data_idf.x, data_idf.y,
                            label="Interface Distribution Function")
-            self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
+            self.axes.set_xlim(0, max(data1.x) / 4)
             self.axes.legend()
 
         self.draw()
@@ -114,7 +131,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.txtLowerQMin.setEnabled(False)
 
         self._canvas = MyMplCanvas(self.model)
-        self.mainVerticalLayout.insertWidget(0, self._canvas)
+        self.plotLayout.insertWidget(0, self._canvas)
+        self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._canvas, self))
+        self._realplot = MyMplCanvas(self.model)
+        self.plotLayout.insertWidget(2, self._realplot)
+        self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
+
+        self.gridLayout_8.setColumnStretch(0, 1)
+        self.gridLayout_8.setColumnStretch(1, 3)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -237,11 +261,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        #self._realplot.data = transforms
+        self._realplot.data = transforms
 
         self.update_real_space_plot(transforms)
 
-        #self._realplot.draw_real_space()
+        self._realplot.draw_real_space()
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""
@@ -357,8 +381,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.draw_q_space()
         self.cmdTransform.setEnabled(False)
 
-        #self._realplot.data = None
-        #self._realplot.draw_real_space()
+        self._realplot.data = None
+        self._realplot.draw_real_space()
 
     def setClosable(self, value=True):
         """
