@@ -195,21 +195,36 @@ class SldPanel(QtWidgets.QDialog):
             self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
             self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
             self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
+            self.model.item(MODEL.NEUTRON_LENGTH).setEnabled(True)
+            self.ui.editNeutronSldReal.setEnabled(True)
+            self.ui.editNeutronSldImag.setEnabled(True)
+            self.ui.editNeutronIncXs.setEnabled(True)
+            self.ui.editNeutronLength.setEnabled(True)
+            self.ui.editNeutronAbsXs.setEnabled(True)
         else:
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText("")
             self.model.item(MODEL.NEUTRON_SLD_IMAG).setText("")
             self.model.item(MODEL.NEUTRON_INC_XS).setText("")
             self.model.item(MODEL.NEUTRON_ABS_XS).setText("")
             self.model.item(MODEL.NEUTRON_LENGTH).setText("")
+            self.ui.editNeutronSldReal.setEnabled(False)
+            self.ui.editNeutronSldImag.setEnabled(False)
+            self.ui.editNeutronIncXs.setEnabled(False)
+            self.ui.editNeutronLength.setEnabled(False)
+            self.ui.editNeutronAbsXs.setEnabled(False)
 
         if xrayWavelength:
             results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
             self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
+            self.ui.editXraySldReal.setEnabled(True)
+            self.ui.editXraySldImag.setEnabled(True)
         else:
             self.model.item(MODEL.XRAY_SLD_REAL).setText("")
             self.model.item(MODEL.XRAY_SLD_IMAG).setText("")
+            self.ui.editXraySldReal.setEnabled(False)
+            self.ui.editXraySldImag.setEnabled(False)
 
     def modelReset(self):
         #self.model.beginResetModel()
