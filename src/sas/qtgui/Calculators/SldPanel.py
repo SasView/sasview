@@ -1,4 +1,5 @@
 # global
+import numpy as np
 import logging
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -119,6 +120,9 @@ class SldPanel(QtWidgets.QDialog):
         # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
         #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
+        # No need for recalculate
+        self.ui.recalculateButton.setVisible(False)
+
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
         self.ui.editNeutronWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editNeutronWavelength))
@@ -142,7 +146,7 @@ class SldPanel(QtWidgets.QDialog):
         for key in list(self._getOutputs().keys()):
             self.model.setItem(key, QtGui.QStandardItem())
 
-        self.model.dataChanged.connect(self.dataChanged)
+        #self.model.dataChanged.connect(self.dataChanged)
 
         self.ui.editMassDensity.textChanged.connect(self.recalculateSLD)
         self.ui.editMolecularFormula.textChanged.connect(self.recalculateSLD)
@@ -187,7 +191,7 @@ class SldPanel(QtWidgets.QDialog):
         def format(value):
             return ("%-5.3g" % value).strip()
 
-        if neutronWavelength:
+        if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
             results = neutronSldAlgorithm(str(formula), float(density), float(neutronWavelength))
 
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
@@ -213,7 +217,7 @@ class SldPanel(QtWidgets.QDialog):
             self.ui.editNeutronLength.setEnabled(False)
             self.ui.editNeutronAbsXs.setEnabled(False)
 
-        if xrayWavelength:
+        if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
             results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
