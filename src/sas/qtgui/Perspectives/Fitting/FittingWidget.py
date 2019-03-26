@@ -521,7 +521,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
-        self.options_widget.cmdComputePoints.setVisible(False) # probably redundant
         self.chkPolydispersity.setEnabled(True)
         self.chkPolydispersity.setCheckState(False)
         self.chk2DView.setEnabled(True)
@@ -2862,15 +2861,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.createNewIndex(weighted_data)
 
+        # Plot residuals if actual data
+        if not self.data_is_loaded:
+            return
+
         # Calculate difference between return_data and logic.data
         self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data)
         # Update the control
         chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
-
-        # Plot residuals if actual data
-        if not self.data_is_loaded:
-            return
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
         if residuals_plot is None:

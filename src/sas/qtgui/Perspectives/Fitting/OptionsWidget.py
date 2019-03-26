@@ -87,8 +87,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.initMapper()
         self.model.blockSignals(True)
         self.updateQRange(self.qmin, self.qmax, self.npts)
-        self.txtMaxRange.setText(str(self.qmax))
-        self.txtMinRange.setText(str(self.qmin))
+        self.txtMaxRange.setText(GuiUtils.formatNumber(self.qmax, high=True))
+        self.txtMinRange.setText(GuiUtils.formatNumber(self.qmin, high=True))
         self.txtNpts.setText(str(self.npts))
         self.txtNptsFit.setText(str(self.npts))
         self.model.blockSignals(False)
@@ -180,8 +180,10 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Update the local model based on calculated values
         """
-        self.model.item(MODEL.index('MIN_RANGE')).setText(str(q_range_min))
-        self.model.item(MODEL.index('MAX_RANGE')).setText(str(q_range_max))
+        qmax = GuiUtils.formatNumber(self.qmax, high=True)
+        qmin = GuiUtils.formatNumber(self.qmin, high=True)
+        self.model.item(MODEL.index('MIN_RANGE')).setText(qmin)
+        self.model.item(MODEL.index('MAX_RANGE')).setText(qmax)
         self.model.item(MODEL.index('NPTS')).setText(str(npts))
         self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
 
