@@ -318,18 +318,20 @@ def make_fitness(state):
     # Set the data weighting (dI, sqrt(I), I, or uniform)
     weight = get_data_weight(state)
 
+    # Note: wx GUI makes a copy of the data and assigns weight to
+    # data.err_data/data.dy instead of using the err_data/dy keywords
+    # when creating the Fit object.
+
     # Make fit data object and set the data weights
     # TODO: check 2D masked data
     if state.enable2D:
         fitdata = FitData2D(sas_data2d=data, data=data.data,
-                            err_data=data.err_data)
-        fitdata.err_data = weight
+                            err_data=weight)
     else:
         data.mask = (np.isnan(data.y) if data.y is not None
                         else np.zeros_like(data.x, dtype='bool'))
         fitdata = FitData1D(x=data.x, y=data.y,
-                            dx=data.dx, dy=data.dy, smearer=smearer)
-        fitdata.dy = weight
+                            dx=data.dx, dy=weight, smearer=smearer)
         fitdata.set_fit_range(qmin=state.qmin, qmax=state.qmax)
     fitdata.sas_data = data
 
