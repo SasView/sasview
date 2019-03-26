@@ -31,30 +31,26 @@ MODEL = enum(
     'NEUTRON_LENGTH',
 )
 
-class SldResult(object):
-    def __init__(self, molecular_formula, mass_density,
-        neutron_wavelength, neutron_sld_real, neutron_sld_imag,
-        xray_wavelength, xray_sld_real, xray_sld_imag,
-        neutron_inc_xs, neutron_abs_xs, neutron_length):
+class NeutronSldResult(object):
+    def __init__(self, neutron_wavelength, neutron_sld_real,
+                 neutron_sld_imag, neutron_inc_xs, neutron_abs_xs,
+                 neutron_length):
 
-        self.molecular_formula = molecular_formula
-        self.mass_density = mass_density
         self.neutron_wavelength = neutron_wavelength
         self.neutron_sld_real = neutron_sld_real
         self.neutron_sld_imag = neutron_sld_imag
-        self.xray_wavelength = xray_wavelength
-        self.xray_sld_real = xray_sld_real
-        self.xray_sld_imag = xray_sld_imag
         self.neutron_inc_xs = neutron_inc_xs
         self.neutron_abs_xs = neutron_abs_xs
         self.neutron_length = neutron_length
 
-def sldAlgorithm(molecular_formula, mass_density, neutron_wavelength, xray_wavelength):
+class XraySldResult(object):
+    def __init__(self, xray_wavelength, xray_sld_real, xray_sld_imag):
 
-    xray_sld_real, xray_sld_imag = xray_sld(
-            compound=molecular_formula,
-            density=mass_density,
-            wavelength=xray_wavelength)
+        self.xray_wavelength = xray_wavelength
+        self.xray_sld_real = xray_sld_real
+        self.xray_sld_imag = xray_sld_imag
+
+def neutronSldAlgorithm(molecular_formula, mass_density, neutron_wavelength):
 
     (neutron_sld_real, neutron_sld_imag, _), (_, neutron_abs_xs, neutron_inc_xs), neutron_length = \
         neutron_scattering(
@@ -68,16 +64,26 @@ def sldAlgorithm(molecular_formula, mass_density, neutron_wavelength, xray_wavel
     scaled_neutron_sld_real = SCALE * neutron_sld_real
     scaled_neutron_sld_imag = SCALE * abs(neutron_sld_imag)
 
+    return NeutronSldResult(neutron_wavelength, scaled_neutron_sld_real,
+                            scaled_neutron_sld_imag, neutron_inc_xs,
+                            neutron_abs_xs, neutron_length)
+
+def xraySldAlgorithm(molecular_formula, mass_density, xray_wavelength):
+
+    xray_sld_real, xray_sld_imag = xray_sld(
+            compound=molecular_formula,
+            density=mass_density,
+            wavelength=xray_wavelength)
+
+    SCALE = 1e-6
+
     # xray sld
     scaled_xray_sld_real = SCALE * xray_sld_real
     scaled_xray_sld_imag = SCALE * abs(xray_sld_imag)
 
 
-    return SldResult(
-        molecular_formula, mass_density,
-        neutron_wavelength, scaled_neutron_sld_real, scaled_neutron_sld_imag,
-        xray_wavelength, scaled_xray_sld_real, scaled_xray_sld_imag,
-        neutron_inc_xs, neutron_abs_xs, neutron_length)
+    return XraySldResult(xray_wavelength, scaled_xray_sld_real,
+                         scaled_xray_sld_imag)
 
 
 class SldPanel(QtWidgets.QDialog):
@@ -175,30 +181,50 @@ class SldPanel(QtWidgets.QDialog):
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
-        if len(formula) > 0 and len(density) > 0 and len(neutronWavelength) > 0 and len(xrayWavelength) > 0:
-            try:
-                results = sldAlgorithm(str(formula), float(density), float(neutronWavelength), float(xrayWavelength))
+        if not formula or not density:
+            return
 
-                def format(value):
-                    return ("%-5.3g" % value).strip()
+        def format(value):
+            return ("%-5.3g" % value).strip()
 
-                self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
-                self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
+        if neutronWavelength:
+            results = neutronSldAlgorithm(str(formula), float(density), float(neutronWavelength))
 
-                self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
-                self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
+            self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
+            self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
+            self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
+            self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
+            self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
+            self.model.item(MODEL.NEUTRON_LENGTH).setEnabled(True)
+            self.ui.editNeutronSldReal.setEnabled(True)
+            self.ui.editNeutronSldImag.setEnabled(True)
+            self.ui.editNeutronIncXs.setEnabled(True)
+            self.ui.editNeutronLength.setEnabled(True)
+            self.ui.editNeutronAbsXs.setEnabled(True)
+        else:
+            self.model.item(MODEL.NEUTRON_SLD_REAL).setText("")
+            self.model.item(MODEL.NEUTRON_SLD_IMAG).setText("")
+            self.model.item(MODEL.NEUTRON_INC_XS).setText("")
+            self.model.item(MODEL.NEUTRON_ABS_XS).setText("")
+            self.model.item(MODEL.NEUTRON_LENGTH).setText("")
+            self.ui.editNeutronSldReal.setEnabled(False)
+            self.ui.editNeutronSldImag.setEnabled(False)
+            self.ui.editNeutronIncXs.setEnabled(False)
+            self.ui.editNeutronLength.setEnabled(False)
+            self.ui.editNeutronAbsXs.setEnabled(False)
 
-                self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
-                self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
-                self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
+        if xrayWavelength:
+            results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
 
-                return
-
-            except Exception as e:
-                pass
-
-        for key in list(self._getOutputs().keys()):
-            self.model.item(key).setText("")
+            self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
+            self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
+            self.ui.editXraySldReal.setEnabled(True)
+            self.ui.editXraySldImag.setEnabled(True)
+        else:
+            self.model.item(MODEL.XRAY_SLD_REAL).setText("")
+            self.model.item(MODEL.XRAY_SLD_IMAG).setText("")
+            self.ui.editXraySldReal.setEnabled(False)
+            self.ui.editXraySldImag.setEnabled(False)
 
     def modelReset(self):
         #self.model.beginResetModel()
