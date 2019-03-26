@@ -75,26 +75,22 @@ class FitState(object):
         """
         Summarize the fit pages in the state object.
         """
+        # Note: _dump_attrs isn't a closure, but putting it here anyway
+        # because it is specific to show and doesn't need to be efficient.
+        def _dump_attrs(obj, label=""):
+            #print(obj)
+            print("="*20, label)
+            for attr, value in sorted(obj.__dict__.items()):
+                if isinstance(value, (list, tuple)):
+                    print(attr)
+                    for item in value:
+                        print("   ", item)
+                else:
+                    print(attr, value)
         for k, fit in enumerate(self.fits):
-            print("="*20, "Fit page", k+1)
-            #print(fit)
-            for attr, value in sorted(fit.__dict__.items()):
-                if isinstance(value, (list, tuple)):
-                    print(attr)
-                    for item in value:
-                        print("   ", item)
-                else:
-                    print(attr, value)
+            _dump_attrs(fit, label="Fit page "+str(k+1))
         if self.simfit:
-            print("="*20, "Constraints")
-            #print(self.simfit)
-            for attr, value in sorted(self.simfit.__dict__.items()):
-                if isinstance(value, (list, tuple)):
-                    print(attr)
-                    for item in value:
-                        print("   ", item)
-                else:
-                    print(attr, value)
+            _dump_attrs(self.simfit, label="Constraints")
 
     def make_fitproblem(self):
         """
