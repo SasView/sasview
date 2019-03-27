@@ -172,9 +172,11 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         if self.logic.di_flag:
             self.rbWeighting2.setEnabled(True)
             self.rbWeighting2.setChecked(True)
+            self.onWeightingChoice(self.rbWeighting2)
         else:
             self.rbWeighting2.setEnabled(False)
             self.rbWeighting1.setChecked(True)
+            self.onWeightingChoice(self.rbWeighting1)
 
     def updateQRange(self, q_range_min, q_range_max, npts):
         """
