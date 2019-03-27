@@ -431,10 +431,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Modify the constraint's "active" instance variable.
         """
         item = self.tblConstraints.item(row, column)
-        if column != 0: return
-        # Update the tabs for fitting list
-        constraint = self.available_constraints[row]
-        constraint.active = (item.checkState() == QtCore.Qt.Checked)
+        if column == 0:
+            # Update the tabs for fitting list
+            constraint = self.available_constraints[row]
+            constraint.active = (item.checkState() == QtCore.Qt.Checked)
+            return
         # Update the constraint formula
         constraint = self.available_constraints[row]
         function = item.text()
@@ -771,7 +772,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Show the text in the constraint table
             item = self.uneditableItem(label)
             item = QtWidgets.QTableWidgetItem(label)
-            item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
+            # Why was this set to non-interactive??
+            #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             item.setCheckState(QtCore.Qt.Checked)
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
