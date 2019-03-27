@@ -469,6 +469,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
+        self.is_running = False
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
@@ -514,6 +515,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
+        self.is_running = False
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
@@ -548,6 +550,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
+        self.is_running = False
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())

@@ -149,9 +149,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param1 = self.cbParam1.currentText()
         param2 = self.cbParam2.currentText()
         if source == "cbParam1":
-            self.txtParam.setText(self.tab_names[0] + ":" + param1)
+            self.txtParam.setText(self.cbModel1.currentText() + ":" + param1)
         else:
-            self.txtConstraint.setText(self.tab_names[1] + "." + param2)
+            self.txtConstraint.setText(self.cbModel2.currentText() + "." + param2)
         # Check if any of the parameters are polydisperse
         params_list = [param1, param2]
         all_pars = [tab.model_parameters for tab in self.tabs]
