@@ -367,10 +367,10 @@ class BumpsPlugin:
 
     @staticmethod
     def load_model(filename):
-        fit = FitState(filename)
-        #fit.show()
-        #print("====\nfit", fit)
-        problem = fit.make_fitproblem()
+        state = FitState(filename)
+        #state.show()
+        #print("====\nfit", state)
+        problem = state.make_fitproblem()
         #print(problem.show())
         return problem
 
