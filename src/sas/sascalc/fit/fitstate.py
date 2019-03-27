@@ -298,9 +298,8 @@ def make_fitness(state):
         percent = dx_percent / 100.
         if state.enable2D:
             # smear_type is Pinhole2D.
-            # dqx_data, dqy_data initialized to 0
-            data.dqx_data = percent * data.qx_data
-            data.dqy_data = percent * data.qy_data
+            q = np.sqrt(data.qx_data**2 + data.qy_data**2)
+            data.dx_data = data.dqy_data = percent*q
         else:
             data.dx = percent * data.x
             data.dxl = data.dxw = None  # be sure it is not slit-smeared
