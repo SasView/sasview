@@ -18,8 +18,122 @@ import bumps.options
 from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 
 # Set the default optimizer
-fitters.FIT_DEFAULT_ID = 'lm'
 
+class FittingMethodParameter:
+    _shortName = None
+    _longName = None
+    _type = None
+    _defaultValue = None
+    value = None
+
+    def __init__(self, shortName, longName, dtype, defaultValue):
+        self._shortName = shortName
+        self._longName = longName
+        self._type = dtype
+        self._defaultValue = defaultValue
+        self.value = defaultValue
+
+    @property
+    def shortName(self):
+        return self._shortName
+
+    @property
+    def longName(self):
+        return self._longName
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def defaultValue(self):
+        return self._defaultValue
+
+    def __str__(self):
+        return "'{}' ({}): {} ({})".format(
+                self.longName, self.sortName, self.defaultValue, self.type)
+
+class FittingMethod:
+    """
+    Represents a generic fitting method.
+    """
+    _shortName = None
+    _longName = None
+    _params = None    # dict of <param short names>: <FittingMethodParam>
+
+    def __init__(self, shortName, longName, params):
+        self._shortName = shortName
+        self._longName = longName
+        self._params = dict(zip([p.shortName for p in params], params))
+
+    @property
+    def shortName(self):
+        return self._shortName
+
+    @property
+    def longName(self):
+        return self._longName
+
+    @property
+    def params(self):
+        return self._params
+
+    def __str__(self):
+        return "\n".join(["{} ({})".format(self.longName, self.shortName)]
+                + [str(p) for p in self.params])
+
+class FittingMethods:
+    """
+    A container for the available fitting methods.
+    Allows SasView to employ other methods than those provided by the bumps package.
+    """
+    _methods = None # a dict containing FitMethod objects
+    _default = None
+
+    def __init__(self):
+        """Receives a list of FittingMethod instances to be initialized with."""
+        self._methods = dict()
+
+    def add(self, fittingMethod):
+        if not isinstance(fittingMethod, FittingMethod):
+            return
+        self._methods[fittingMethod.longName] = fittingMethod
+
+    def importFromBumps(self, ids):
+        """
+        Import fitting methods indicated by the provided list of ids from the bumps package.
+        """
+        for f in fitters.FITTERS:
+            if f.id not in ids:
+                continue
+            params = []
+            for shortName, defValue in f.settings:
+                longName, dtype = bumps.options.FIT_FIELDS[shortName]
+                param = FittingMethodParameter(shortName, longName, dtype, defValue)
+                params.append(param)
+            self.add(FittingMethod(f.id, f.name, params))
+
+    @property
+    def longNames(self):
+        return list(self._methods.keys())
+
+    @property
+    def ids(self):
+        return [fm.shortName for fm in self._methods.values()]
+
+    def __getitem__(self, name):
+        return self._methods[name]
+
+    @property
+    def default(self):
+        return self._default
+
+    def setDefault(self, methodName):
+        assert methodName in self._methods # silently fail instead?
+        self._default = self._methods[methodName]
+
+    def __str__(self):
+        return "\n".join(["{}: {}".format(key, fm) for key, fm in self._methods.items()])
 
 class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     """
@@ -36,6 +150,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
     """
     fit_option_changed = QtCore.pyqtSignal(str)
+    # storing of fitting methods here for now, dependencies might indicate a better place later
+    fittingMethods = None
 
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
@@ -51,7 +167,14 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self.setWindowTitle("Fit Algorithms")
 
         # Fill up the algorithm combo, based on what BUMPS says is available
-        self.cbAlgorithm.addItems([n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS])
+        self.fittingMethods = FittingMethods()
+        # option 1: hardcode the list of bumps fitting methods according to forms
+        # option 2: create forms dynamically based on selected fitting methods
+        self.fittingMethods.importFromBumps(fitters.FIT_ACTIVE_IDS)
+        self.fittingMethods.add(FittingMethod('mcsas', 'McSAS', []))
+        self.fittingMethods.setDefault('Levenberg-Marquardt')
+        # build up the comboBox finally
+        self.cbAlgorithm.addItems(self.fittingMethods.longNames)
 
         # Handle the Apply button click
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.onApply)
@@ -62,8 +185,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
 
         # Set the default index
-        default_name = [n.name for n in fitters.FITTERS if n.id == fitters.FIT_DEFAULT_ID][0]
-        default_index = self.cbAlgorithm.findText(default_name)
+        default_index = self.cbAlgorithm.findText(self.fittingMethods.default.longName)
         self.cbAlgorithm.setCurrentIndex(default_index)
         # previous algorithm choice
         self.previous_index = default_index
@@ -72,7 +194,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self.assignValidators()
 
         # Set defaults
-        self.current_fitter_id = fitters.FIT_DEFAULT_ID
+        self.current_fitter_id = self.fittingMethods.default.shortName
 
         # OK has to be initialized to True, after initial validator setup
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
@@ -92,7 +214,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                 validator.setBottom(0)
             else:
                 continue
-            for fitter_id in fitters.FIT_ACTIVE_IDS:
+            for fitter_id in self.fittingMethods.ids:
                 line_edit = self.widgetFromOption(str(option), current_fitter=str(fitter_id))
                 if hasattr(line_edit, 'setValidator') and validator is not None:
                     line_edit.setValidator(validator)
@@ -117,8 +239,9 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         Change the page in response to combo box index
         """
         # Find the algorithm ID from name
-        self.current_fitter_id = \
-            [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
+        selectedName = str(self.cbAlgorithm.currentText())
+        if selectedName in self.fittingMethods.longNames:
+            self.current_fitter_id = self.fittingMethods[selectedName].shortName
 
         # find the right stacked widget
         widget_name = "self.page_"+str(self.current_fitter_id)
