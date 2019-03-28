@@ -1160,6 +1160,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         structure = str(self.cbStructureFactor.currentText())
         if category == CATEGORY_STRUCTURE:
             model = None
+        # copy original clipboard
+        cb = QtWidgets.QApplication.clipboard()
+        cb_text = cb.text()
+        # get the screenshot of the current param state
+        self.onCopyToClipboard("")
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1167,6 +1172,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.has_poly_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=structure)
+        # recast the original parameters into the model
+        self.onParameterPaste()
+        # revert to the original clipboard
+        cb.setText(cb_text)
 
     def resetParametersToFit(self):
         """
