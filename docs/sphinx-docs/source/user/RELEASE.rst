@@ -155,7 +155,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: “report button” followed by “save” makes an empty pdf file???
+* Fixes # 818: "report button" followed by "save" makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
@@ -769,7 +769,9 @@ Downloading and Installing
           worry about any of the following.  However, it is highly recommended 
           that any previous versions of SasView are uninstalled prior to 
           installing the new version UNLESS you are installing SasView to 
-          versioned folders.
+          versioned folders. **We recommend you avoid using folder paths 
+          that contain spaces or characters that cannot be found on a 
+          standard keyboard (eg, characters with accents, umlauts, etc).**
 
 .. note:: The easiest approach to setting up the proper environment to
           build from source is to use Conda.  Instructions for setting up
