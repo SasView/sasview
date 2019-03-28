@@ -208,17 +208,14 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     def fittingMethods(self):
         return self._fittingMethods
 
-    def __init__(self, parent=None, config=None):
+    def __init__(self, parent=None):
         super(FittingOptions, self).__init__(parent)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
-        self.config = config
-
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
-
         self.setWindowTitle("Fit Algorithms")
 
         # Fill up the algorithm combo, based on what BUMPS says is available
@@ -319,9 +316,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
 
         # Select the requested widget
         self.stackedWidget.setCurrentIndex(index_for_this_id)
-
         self.updateWidgetFromConfig()
-
         self.assignValidators()
 
         # OK has to be reinitialized to True
