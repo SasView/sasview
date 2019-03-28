@@ -257,7 +257,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Sets the appropriate validators to the line edits as defined by FittingMethodParameter
         """
-        fm = self.fittingMethods[str(self.currentOptimizer)]
+        fm = self.fittingMethods[self.currentOptimizer]
         for param in fm.params.values():
             validator = None
             if type(param.type) == types.FunctionType:
@@ -292,7 +292,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         Change the page in response to combo box index
         """
         # Find the algorithm ID from name
-        selectedName = str(self.currentOptimizer)
+        selectedName = self.currentOptimizer
         if selectedName in self.fittingMethods.longNames:
             self.current_fitter_id = self.fittingMethods[selectedName].shortName
 
@@ -348,7 +348,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Update the fitter object
         """
-        fm = self.fittingMethods[str(self.currentOptimizer)]
+        fm = self.fittingMethods[self.currentOptimizer]
         for param in fm.params.values():
             line_edit = self.paramWidget(fm, param.shortName)
             if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
@@ -393,14 +393,15 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Sends back the current choice of parameters
         """
-        return self.cbAlgorithm.currentText()
+        value = self.cbAlgorithm.currentText()
+        return str(value) # is str() really needed?
 
     def updateWidgetFromConfig(self):
         """
         Given the ID of the current optimizer, fetch the values
         and update the widget
         """
-        fm = self.fittingMethods[str(self.currentOptimizer)]
+        fm = self.fittingMethods[self.currentOptimizer)]
         for param in fm.params.values():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
