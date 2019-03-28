@@ -165,6 +165,7 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
             model.appendRow(row)
             if cbox:
                 view.setIndexWidget(item2.index(), cbox)
+
         rows.append(row)
 
     return rows
@@ -201,7 +202,7 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
         item_name = param_orig.name
         item1 = QtGui.QStandardItem(item_name)
         item1.setData(param.name, QtCore.Qt.UserRole)
-        item1.setCheckable(True)
+        item1.setCheckable(False)
         item1.setEditable(False)
 
         # Param values
@@ -218,14 +219,21 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
 
         # Append to the model and use the combobox, if required
         if None not in (model, view):
+
             if row_num is None:
                 model.appendRow(row)
             else:
                 model.insertRow(row_num, row)
                 row_num += 1
-
             if cbox:
+                item1.setCheckable(False)
+                item3.setText("")
+                item4.setText("")
+                item3.setEditable(False)
+                item4.setEditable(False)
                 view.setIndexWidget(item2.index(), cbox)
+            else:
+                item1.setCheckable(True)
 
         rows.append(row)
 
