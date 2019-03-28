@@ -200,10 +200,9 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-
-        # no reason to have this widget resizable
-        self.setFixedSize(self.minimumSizeHint())
         self.setWindowTitle("Fit Algorithms")
+        # no reason to have this widget resizable
+        self.layout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         # Fill up the algorithm combo, based on what BUMPS says is available
         self._fittingMethods = FittingMethodsBumps()
@@ -220,23 +219,18 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         # handle the Help button click
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
-        # Handle the combo box changes
-        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
-
-        # Set the default index
-        default_index = self.cbAlgorithm.findText(self.fittingMethods.default.longName)
-        self.cbAlgorithm.setCurrentIndex(default_index)
-        # previous algorithm choice
-        self.previous_index = default_index
-
         # Assign appropriate validators
         self.assignValidators()
 
-        # Set defaults
-        self.current_fitter_id = self.fittingMethods.default.shortName
-
         # OK has to be initialized to True, after initial validator setup
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
+
+        # Handle the combo box changes
+        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
+
+        # Set the default index and trigger filling the layout
+        default_index = self.cbAlgorithm.findText(self.fittingMethods.default.longName)
+        self.cbAlgorithm.setCurrentIndex(default_index)
 
     def assignValidators(self):
         """
@@ -276,14 +270,10 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         layout = self.groupBox.layout()
         for i in reversed(list(range(layout.count()))):
             # reversed removal avoids renumbering possibly
-            item = layout.itemAt(i)
-            try:
-                if item.widget().objectName() == "cbAlgorithm":
-                    continue
-            except AttributeError:
-                pass
             item = layout.takeAt(i)
             try: # spaceritem does not have a widget
+                if item.widget().objectName() == "cbAlgorithm":
+                    continue # do not delete the checkbox, will be added later again
                 item.widget().setParent(None)
                 item.widget().deleteLater()
             except AttributeError:
@@ -293,6 +283,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     def _makeLabel(name):
         lbl = QtWidgets.QLabel(name + ":")
         lbl.setAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        lbl.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                                QtWidgets.QSizePolicy.Fixed))
         lbl.setWordWrap(True)
         return lbl
 
@@ -312,10 +304,9 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     def _fillLayout(self):
         fm = self.fittingMethods[self.currentOptimizer]
         layout = self.groupBox.layout()
-        # label for the name of the optimizer, span the whole row
-        layout.addWidget(self._makeLabel(fm.longName), layout.rowCount()+1, 0, 1, -1)
+        layout.addWidget(self.cbAlgorithm, 0, 0, 1, -1)
         for param in fm.params.values():
-            row, column = layout.rowCount()+1, layout.columnCount()
+            row = layout.rowCount()+1
             layout.addWidget(self._makeLabel(param.longName), row, 0)
             widget = self._inputWidgetFromType(param.type, self)
             if widget is None:
@@ -335,37 +326,12 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self._clearLayout()
         self._fillLayout()
 
-        if selectedName in self.fittingMethods.longNames:
-            self.current_fitter_id = self.fittingMethods[selectedName].shortName
-
-        # find the right stacked widget
-        widget_name = "self.page_"+str(self.current_fitter_id)
-
-        # Convert the name into widget instance
-        try:
-            widget_to_activate = eval(widget_name)
-        except AttributeError:
-            # We don't yet have this optimizer.
-            # Show message
-            msg = "This algorithm has not yet been implemented in SasView.\n"
-            msg += "Please choose a different algorithm"
-            QtWidgets.QMessageBox.warning(self,
-                                        'Warning',
-                                        msg,
-                                        QtWidgets.QMessageBox.Ok)
-            # Move the index to previous position
-            self.cbAlgorithm.setCurrentIndex(self.previous_index)
-            return
-
         # Select the requested widget
         self.updateWidgetFromConfig()
         self.assignValidators()
 
         # OK has to be reinitialized to True
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
-
-        # keep reference
-        self.previous_index = index
 
     def paramWidget(self, fittingMethod, paramShortName):
         """
@@ -421,7 +387,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
-        helpfile = "optimizer.html#fit-" + self.current_fitter_id 
+        current_fitter_id = self.fittingMethods[self.currentOptimizer].shortName
+        helpfile = "optimizer.html#fit-" + current_fitter_id
         help_location = tree_location + helpfile
         webbrowser.open('file://' + os.path.realpath(help_location))
 
