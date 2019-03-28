@@ -490,7 +490,12 @@ class PageState(object):
         Helper method to print a state
         """
         for item in list:
-            rep += "parameter name: %s \n" % str(item[1])
+            if str(item[1][-5:]) == 'width':
+                par = str(item[1][:-6])
+                pd_type = str(self.model.dispersion[par]['type'])
+                rep += "parameter name: %s (%s) \n" % (str(item[1]), pd_type)
+            else:
+                rep += "parameter name: %s \n" % str(item[1])
             rep += "value: %s\n" % str(item[2])
             rep += "selected: %s\n" % str(item[0])
             rep += "error displayed : %s \n" % str(item[4][0])
