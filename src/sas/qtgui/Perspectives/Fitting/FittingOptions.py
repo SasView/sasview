@@ -19,18 +19,6 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 
 # Set the default optimizer
 
-def configToBumps(fittingMethod):
-    """
-    Writes the user settings of given fitting method back to be bumps module where it is used
-    once the 'fit' button is hit in the GUI.
-    """
-#    assert isinstance(fittingMethod, FittingMethod) # FIXME once FittingMethod is known here
-    # self.config.values[self.current_fitter_id][option] = new_value
-    fitConfig = bumps.options.FIT_CONFIG
-    fitConfig.selected_id = fittingMethod.shortName
-    for param in fittingMethod.params.values():
-        fitConfig.values[fittingMethod.shortName][param.shortName] = param.value
-
 def parse_int(value):
     """
     Converts user input to integer numbers. (from bumps)
@@ -115,6 +103,12 @@ class FittingMethod:
     def params(self):
         return self._params
 
+    def storeConfig(self):
+        """
+        To be overridden by subclasses specific to optimizers.
+        """
+        pass
+
     def __str__(self):
         return "\n".join(["{} ({})".format(self.longName, self.shortName)]
                 + [str(p) for p in self.params])
@@ -136,20 +130,6 @@ class FittingMethods:
             return
         self._methods[fittingMethod.longName] = fittingMethod
 
-    def importFromBumps(self, ids):
-        """
-        Import fitting methods indicated by the provided list of ids from the bumps package.
-        """
-        for f in fitters.FITTERS:
-            if f.id not in ids:
-                continue
-            params = []
-            for shortName, defValue in f.settings:
-                longName, dtype = bumps.options.FIT_FIELDS[shortName]
-                param = FittingMethodParameter(shortName, longName, dtype, defValue)
-                params.append(param)
-            self.add(FittingMethod(f.id, f.name, params))
-
     @property
     def longNames(self):
         return list(self._methods.keys())
@@ -161,6 +141,12 @@ class FittingMethods:
     def __getitem__(self, longName):
         return self._methods[longName]
 
+    def __len__(self):
+        return len(self._methods)
+
+    def __iter__(self):
+        return self._methods.__iter__
+
     @property
     def default(self):
         return self._default
@@ -171,6 +157,34 @@ class FittingMethods:
 
     def __str__(self):
         return "\n".join(["{}: {}".format(key, fm) for key, fm in self._methods.items()])
+
+class FittingMethodBumps(FittingMethod):
+    def storeConfig(self):
+        """
+        Writes the user settings of given fitting method back to the optimizer backend
+        where it is used once the 'fit' button is hit in the GUI.
+        """
+        fitConfig = bumps.options.FIT_CONFIG
+        fitConfig.selected_id = self.shortName
+        for param in self.params.values():
+            fitConfig.values[self.shortName][param.shortName] = param.value
+
+class FittingMethodsBumps(FittingMethods):
+    def __init__(self):
+        """
+        Import fitting methods indicated by the provided list of ids from the bumps package.
+        """
+        super(FittingMethodsBumps, self).__init__()
+        ids = fitters.FIT_ACTIVE_IDS
+        for f in fitters.FITTERS:
+            if f.id not in ids:
+                continue
+            params = []
+            for shortName, defValue in f.settings:
+                longName, dtype = bumps.options.FIT_FIELDS[shortName]
+                param = FittingMethodParameter(shortName, longName, dtype, defValue)
+                params.append(param)
+            self.add(FittingMethodBumps(f.id, f.name, params))
 
 class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     """
@@ -208,11 +222,10 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self.setWindowTitle("Fit Algorithms")
 
         # Fill up the algorithm combo, based on what BUMPS says is available
-        self._fittingMethods = FittingMethods()
+        self._fittingMethods = FittingMethodsBumps()
         # option 1: hardcode the list of bumps fitting methods according to forms
         # option 2: create forms dynamically based on selected fitting methods
-        self.fittingMethods.importFromBumps(fitters.FIT_ACTIVE_IDS)
-        self.fittingMethods.add(FittingMethod('mcsas', 'McSAS', []))
+        self.fittingMethods.add(FittingMethod('mcsas', 'McSAS', [])) # FIXME just testing for now
         self.fittingMethods.setDefault('Levenberg-Marquardt')
         # build up the comboBox finally
         self.cbAlgorithm.addItems(self.fittingMethods.longNames)
@@ -367,9 +380,9 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                 # Don't update bumps if widget has bad data
                 self.reject
 
+        fm.storeConfig() # write the current settings to bumps module
         # Notify the perspective, so the window title is updated
         self.fit_option_changed.emit(self.cbAlgorithm.currentText())
-        configToBumps(fm) # write the current settings to bumps module
         self.close()
 
     def onHelp(self):
