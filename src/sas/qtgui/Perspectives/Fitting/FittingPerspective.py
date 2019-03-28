@@ -38,9 +38,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
 
-        # The default optimizer
-        self.optimizer = 'Levenberg-Marquardt'
-
         # Dataset index -> Fitting tab mapping
         self.dataToFitTab = {}
 
@@ -71,9 +68,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         self._allow_close = False
 
         # Fit options - uniform for all tabs
-        self.fit_options = options.FIT_CONFIG
-        self.fit_options_widget = FittingOptions(self, config=self.fit_options)
-        self.fit_options.selected_id = fitters.LevenbergMarquardtFit.id
+        self.fit_options_widget = FittingOptions(self)
+        # The default optimizer
+        self.optimizer = self.fit_options_widget.currentOptimizer
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
@@ -94,7 +91,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Update the window title with the current optimizer name
         """
-        self.optimizer = self.fit_options.selected_name
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
 
 
@@ -367,9 +363,8 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         React to the fitting algorithm change by modifying window title
         """
-        fitter = [f.id for f in options.FITTERS if f.name == str(fit_engine)][0]
+        self.optimizer = self.fit_options_widget.currentOptimizer
         # set the optimizer
-        self.fit_options.selected_id = str(fitter)
         # Update the title
         self.updateWindowTitle()
 

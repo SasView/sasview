@@ -19,7 +19,44 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 
 # Set the default optimizer
 
+def configToBumps(fittingMethod):
+    """
+    Writes the user settings of given fitting method back to be bumps module where it is used
+    once the 'fit' button is hit in the GUI.
+    """
+#    assert isinstance(fittingMethod, FittingMethod) # FIXME once FittingMethod is known here
+    # self.config.values[self.current_fitter_id][option] = new_value
+    fitConfig = bumps.options.FIT_CONFIG
+    fitConfig.selected_id = fittingMethod.shortName
+    for param in fittingMethod.params.values():
+        fitConfig.values[fittingMethod.shortName][param.shortName] = param.value
+
+def parse_int(value):
+    """
+    Converts user input to integer numbers. (from bumps)
+    """
+    float_value = float(value)
+    if int(float_value) != float_value:
+        raise ValueError("integer expected")
+    return int(float_value)
+
+class ChoiceList(object):
+    """
+    Validates user input for a distinct number of options.
+    """
+    def __init__(self, *choices):
+        self.choices = choices
+    def __call__(self, value):
+        if not value in self.choices:
+            raise ValueError('invalid option "%s": use %s'
+                    % (value, '|'.join(self.choices)))
+        else:
+            return value
+
 class FittingMethodParameter:
+    """
+    Descriptive meta data of a single parameter of an optimizer.
+    """
     _shortName = None
     _longName = None
     _type = None
@@ -121,8 +158,8 @@ class FittingMethods:
     def ids(self):
         return [fm.shortName for fm in self._methods.values()]
 
-    def __getitem__(self, name):
-        return self._methods[name]
+    def __getitem__(self, longName):
+        return self._methods[longName]
 
     @property
     def default(self):
@@ -151,7 +188,11 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     """
     fit_option_changed = QtCore.pyqtSignal(str)
     # storing of fitting methods here for now, dependencies might indicate a better place later
-    fittingMethods = None
+    _fittingMethods = None
+
+    @property
+    def fittingMethods(self):
+        return self._fittingMethods
 
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
@@ -167,7 +208,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self.setWindowTitle("Fit Algorithms")
 
         # Fill up the algorithm combo, based on what BUMPS says is available
-        self.fittingMethods = FittingMethods()
+        self._fittingMethods = FittingMethods()
         # option 1: hardcode the list of bumps fitting methods according to forms
         # option 2: create forms dynamically based on selected fitting methods
         self.fittingMethods.importFromBumps(fitters.FIT_ACTIVE_IDS)
@@ -201,25 +242,24 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
 
     def assignValidators(self):
         """
-        Use options.FIT_FIELDS to assert which line edit gets what validator
+        Sets the appropriate validators to the line edits as defined by FittingMethodParameter
         """
-        for option in bumps.options.FIT_FIELDS.keys():
-            (f_name, f_type) = bumps.options.FIT_FIELDS[option]
+        fm = self.fittingMethods[str(self.currentOptimizer)]
+        for param in fm.params.values():
             validator = None
-            if type(f_type) == types.FunctionType:
+            if type(param.type) == types.FunctionType:
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
-            elif f_type == float:
+            elif param.type == float:
                 validator = GuiUtils.DoubleValidator()
                 validator.setBottom(0)
             else:
                 continue
-            for fitter_id in self.fittingMethods.ids:
-                line_edit = self.widgetFromOption(str(option), current_fitter=str(fitter_id))
-                if hasattr(line_edit, 'setValidator') and validator is not None:
-                    line_edit.setValidator(validator)
-                    line_edit.textChanged.connect(self.check_state)
-                    line_edit.textChanged.emit(line_edit.text())
+            line_edit = self.paramWidget(fm, param.shortName)
+            if hasattr(line_edit, 'setValidator') and validator is not None:
+                line_edit.setValidator(validator)
+                line_edit.textChanged.connect(self.check_state)
+                line_edit.textChanged.emit(line_edit.text())
 
     def check_state(self, *args, **kwargs):
         sender = self.sender()
@@ -239,7 +279,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         Change the page in response to combo box index
         """
         # Find the algorithm ID from name
-        selectedName = str(self.cbAlgorithm.currentText())
+        selectedName = str(self.currentOptimizer)
         if selectedName in self.fittingMethods.longNames:
             self.current_fitter_id = self.fittingMethods[selectedName].shortName
 
@@ -267,7 +307,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         # Select the requested widget
         self.stackedWidget.setCurrentIndex(index_for_this_id)
 
-        self.updateWidgetFromBumps(self.current_fitter_id)
+        self.updateWidgetFromConfig()
 
         self.assignValidators()
 
@@ -277,20 +317,27 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         # keep reference
         self.previous_index = index
 
+    def paramWidget(self, fittingMethod, paramShortName):
+        """
+        Returns the widget associated to a FittingMethodParameter.
+        """
+        if paramShortName not in fittingMethod.params:
+            return None
+        widget_name = 'self.'+paramShortName+'_'+fittingMethod.shortName
+        widget = None
+        try:
+            widget = eval(widget_name)
+        except AttributeError:
+            pass
+        return widget
+
     def onApply(self):
         """
         Update the fitter object
         """
-        options = self.config.values[self.current_fitter_id]
-        for option in options.keys():
-            # Find the widget name of the option
-            # e.g. 'samples' for 'dream' is 'self.samples_dream'
-            widget_name = 'self.'+option+'_'+self.current_fitter_id
-            try:
-                line_edit = eval(widget_name)
-            except AttributeError:
-                # Skip bumps monitors
-                continue
+        fm = self.fittingMethods[str(self.currentOptimizer)]
+        for param in fm.params.values():
+            line_edit = self.paramWidget(fm, param.shortName)
             if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
                 continue
             color = line_edit.palette().color(QtGui.QPalette.Background).name()
@@ -298,19 +345,15 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                 # Show a custom tooltip and return
                 tooltip = "<html><b>Please enter valid values in all fields.</html>"
                 QtWidgets.QToolTip.showText(line_edit.mapToGlobal(
-                    QtCore.QPoint(line_edit.rect().right(), line_edit.rect().bottom() + 2)), tooltip)
+                    QtCore.QPoint(line_edit.rect().right(), line_edit.rect().bottom() + 2)),
+                    tooltip)
                 return
 
-        # Notify the perspective, so the window title is updated
-        self.fit_option_changed.emit(self.cbAlgorithm.currentText())
-
-        def bumpsUpdate(option):
-            """
-            Utility method for bumps state update
-            """
-            widget = self.widgetFromOption(option)
+        # update config values from widgets before any notification is sent
+        for param in fm.params.values():
+            widget = self.paramWidget(fm, param.shortName)
             if widget is None:
-                return
+                continue
             try:
                 if isinstance(widget, QtWidgets.QComboBox):
                     new_value = widget.currentText()
@@ -319,15 +362,14 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                         new_value = int(widget.text())
                     except ValueError:
                         new_value = float(widget.text())
-                #new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
-                #    else float(widget.text())
-                self.config.values[self.current_fitter_id][option] = new_value
+                fm.params[param.shortName].value = new_value
             except ValueError:
                 # Don't update bumps if widget has bad data
                 self.reject
 
-        # Update the BUMPS singleton
-        [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
+        # Notify the perspective, so the window title is updated
+        self.fit_option_changed.emit(self.cbAlgorithm.currentText())
+        configToBumps(fm) # write the current settings to bumps module
         self.close()
 
     def onHelp(self):
@@ -344,40 +386,26 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         help_location = tree_location + helpfile
         webbrowser.open('file://' + os.path.realpath(help_location))
 
-    def widgetFromOption(self, option_id, current_fitter=None):
-        """
-        returns widget's element linked to the given option_id
-        """
-        if current_fitter is None:
-            current_fitter = self.current_fitter_id
-        if option_id not in list(bumps.options.FIT_FIELDS.keys()): return None
-        option = option_id + '_' + current_fitter
-        if not hasattr(self, option): return None
-        return eval('self.' + option)
-
-    def getResults(self):
+    @property
+    def currentOptimizer(self):
         """
         Sends back the current choice of parameters
         """
-        algorithm = self.cbAlgorithm.currentText()
-        return algorithm
+        return self.cbAlgorithm.currentText()
 
-    def updateWidgetFromBumps(self, fitter_id):
+    def updateWidgetFromConfig(self):
         """
         Given the ID of the current optimizer, fetch the values
         and update the widget
         """
-        options = self.config.values[fitter_id]
-        for option in options.keys():
+        fm = self.fittingMethods[str(self.currentOptimizer)]
+        for param in fm.params.values():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
-            widget_name = 'self.'+option+'_'+fitter_id
-            if option not in bumps.options.FIT_FIELDS:
-                return
-            if isinstance(bumps.options.FIT_FIELDS[option][1], bumps.options.ChoiceList):
+            widget_name = 'self.'+param.shortName+'_'+(fm.shortName)
+            if isinstance(param.type, ChoiceList):
                 control = eval(widget_name)
-                control.setCurrentIndex(control.findText(str(options[option])))
+                control.setCurrentIndex(control.findText(str(param.value)))
             else:
-                eval(widget_name).setText(str(options[option]))
+                eval(widget_name).setText(str(param.value))
 
-        pass
