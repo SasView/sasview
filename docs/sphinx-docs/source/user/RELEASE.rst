@@ -966,7 +966,7 @@ to all developer and user information, tools and resources.
 
 Frequently Asked Questions
 ==========================
-http://www.sasview.org/faq.html
+http://www.sasview.org/faq/
 
 
 Installer Download Website
