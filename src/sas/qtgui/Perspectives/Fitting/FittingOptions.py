@@ -19,28 +19,6 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 
 # Set the default optimizer
 
-def parse_int(value):
-    """
-    Converts user input to integer numbers. (from bumps)
-    """
-    float_value = float(value)
-    if int(float_value) != float_value:
-        raise ValueError("integer expected")
-    return int(float_value)
-
-class ChoiceList(object):
-    """
-    Validates user input for a distinct number of options.
-    """
-    def __init__(self, *choices):
-        self.choices = choices
-    def __call__(self, value):
-        if not value in self.choices:
-            raise ValueError('invalid option "%s": use %s'
-                    % (value, '|'.join(self.choices)))
-        else:
-            return value
-
 class FittingMethodParameter:
     """
     Descriptive meta data of a single parameter of an optimizer.
@@ -182,9 +160,18 @@ class FittingMethodsBumps(FittingMethods):
             params = []
             for shortName, defValue in f.settings:
                 longName, dtype = bumps.options.FIT_FIELDS[shortName]
+                dtype = self._convertParamType(dtype)
                 param = FittingMethodParameter(shortName, longName, dtype, defValue)
                 params.append(param)
             self.add(FittingMethodBumps(f.id, f.name, params))
+
+    @staticmethod
+    def _convertParamType(dtype):
+        if dtype is bumps.options.parse_int:
+            dtype = int
+        elif isinstance(dtype, bumps.options.ChoiceList):
+            dtype = tuple(dtype.choices)
+        return dtype
 
 class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     """
@@ -224,6 +211,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         # option 2: create forms dynamically based on selected fitting methods
         self.fittingMethods.add(FittingMethod('mcsas', 'McSAS', [])) # FIXME just testing for now
         self.fittingMethods.setDefault('Levenberg-Marquardt')
+
         # build up the comboBox finally
         self.cbAlgorithm.addItems(self.fittingMethods.longNames)
 
@@ -257,7 +245,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         fm = self.fittingMethods[self.currentOptimizer]
         for param in fm.params.values():
             validator = None
-            if type(param.type) == types.FunctionType:
+            if param.type == int:
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
             elif param.type == float:
@@ -284,12 +272,69 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
 
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
 
+    def _clearLayout(self):
+        layout = self.groupBox.layout()
+        for i in reversed(list(range(layout.count()))):
+            # reversed removal avoids renumbering possibly
+            item = layout.itemAt(i)
+            try:
+                if item.widget().objectName() == "cbAlgorithm":
+                    continue
+            except AttributeError:
+                pass
+            item = layout.takeAt(i)
+            try: # spaceritem does not have a widget
+                item.widget().setParent(None)
+                item.widget().deleteLater()
+            except AttributeError:
+                pass
+
+    @staticmethod
+    def _makeLabel(name):
+        lbl = QtWidgets.QLabel(name + ":")
+        lbl.setAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        lbl.setWordWrap(True)
+        return lbl
+
+    @staticmethod
+    def _inputWidgetFromType(ptype, parent):
+        """
+        Creates a widget for user input based on the given data type to be entered.
+        """
+        widget = None
+        if ptype in (float, int):
+            widget = QtWidgets.QLineEdit(parent)
+        elif isinstance(ptype, (tuple, list)):
+            widget = QtWidgets.QComboBox(parent)
+            widget.addItems(ptype)
+        return widget
+
+    def _fillLayout(self):
+        fm = self.fittingMethods[self.currentOptimizer]
+        layout = self.groupBox.layout()
+        # label for the name of the optimizer, span the whole row
+        layout.addWidget(self._makeLabel(fm.longName), layout.rowCount()+1, 0, 1, -1)
+        for param in fm.params.values():
+            row, column = layout.rowCount()+1, layout.columnCount()
+            layout.addWidget(self._makeLabel(param.longName), row, 0)
+            widget = self._inputWidgetFromType(param.type, self)
+            if widget is None:
+                continue
+            widgetName = param.shortName+'_'+fm.shortName
+            layout.addWidget(widget, row, 1)
+            setattr(self, widgetName, widget)
+        layout.addItem(QtWidgets.QSpacerItem(0, 0, vPolicy=QtWidgets.QSizePolicy.Expanding))
+
     def onAlgorithmChange(self, index):
         """
         Change the page in response to combo box index
         """
         # Find the algorithm ID from name
         selectedName = self.currentOptimizer
+
+        self._clearLayout()
+        self._fillLayout()
+
         if selectedName in self.fittingMethods.longNames:
             self.current_fitter_id = self.fittingMethods[selectedName].shortName
 
@@ -312,10 +357,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
             self.cbAlgorithm.setCurrentIndex(self.previous_index)
             return
 
-        index_for_this_id = self.stackedWidget.indexOf(widget_to_activate)
-
         # Select the requested widget
-        self.stackedWidget.setCurrentIndex(index_for_this_id)
         self.updateWidgetFromConfig()
         self.assignValidators()
 
@@ -400,8 +442,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         for param in fm.params.values():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
-            widget_name = 'self.'+param.shortName+'_'+(fm.shortName)
-            if isinstance(param.type, ChoiceList):
+            widget_name = 'self.'+param.shortName+'_'+fm.shortName
+            if isinstance(param.type, (tuple, list)):
                 control = eval(widget_name)
                 control.setCurrentIndex(control.findText(str(param.value)))
             else:
