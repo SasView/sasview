@@ -46,6 +46,6 @@ build_sphinx.py
 
 More information can be found here:
 
-http://www.sasview.org/help.html
+http://www.sasview.org/help/
 http://www.sasview.org/faq/
 http://www.sasview.org/trac/wiki/DevNotes
