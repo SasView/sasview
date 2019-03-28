@@ -63,9 +63,15 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.current_smearer = None
         self.kernel_model = None
         # dQ data variables
-        smear_type = None
-        dq_l = None
-        dq_r = None
+        self.smear_type = None
+        self.dq_l = None
+        self.dq_r = None
+
+        # current pinhole/slot values
+        self.pinhole = 0.0
+        self.slit_height = 0.0
+        self.slit_width = 0.0
+
         # Let only floats in the line edits
         self.txtSmearDown.setValidator(GuiUtils.DoubleValidator())
         self.txtSmearUp.setValidator(GuiUtils.DoubleValidator())
@@ -183,6 +189,16 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         # Recalculate the smearing
         index = self.cbSmearing.currentIndex()
+        ## update the backup values based on model choice
+        smearing, accuracy, d_down, d_up = self.state()
+        # don't save the state if dQ Data
+        if smearing == "Custom Pinhole Smear":
+            self.pinhole = d_down
+            self.accuracy = accuracy
+        elif smearing == 'Custom Slit Smear':
+            self.slit_height = d_up
+            self.slit_width = d_down
+
         self.onIndexChange(index)
 
     def setElementsVisibility(self, visible):
@@ -219,6 +235,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         else:
             self.lblSmearUp.setText('<html><head/><body><p>dQ/Q</p></body></html>')
             self.lblUnitUp.setText('%')
+        self.txtSmearUp.setText(str(self.pinhole))
+
         self.txtSmearDown.setEnabled(True)
         self.txtSmearUp.setEnabled(True)
 
@@ -230,6 +248,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.lblSmearDown.setText('Slit width')
         self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
+        self.txtSmearDown.setText(str(self.slit_height))
+        self.txtSmearUp.setText(str(self.slit_width))
         self.txtSmearDown.setEnabled(True)
         self.txtSmearUp.setEnabled(True)
 
@@ -272,11 +292,11 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if smearing != "None":
             accuracy = str(self.model.item(MODEL.index('ACCURACY')).text())
             try:
-                d_down = float(self.model.item(MODEL.index('PINHOLE_MIN')).text())
+                d_down = float(self.txtSmearUp.text())
             except ValueError:
                 d_down = None
             try:
-                d_up = float(self.model.item(MODEL.index('PINHOLE_MAX')).text())
+                d_up = float(self.txtSmearDown.text())
             except ValueError:
                 d_up = None
 
@@ -287,8 +307,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Sets new values for the controls
         """
         # Update the model -> controls update automatically
-        #if smearing is not None:
-            #self.model.item(MODEL.index('SMEARING')).setText(smearing)
         if accuracy is not None:
             self.model.item(MODEL.index('ACCURACY')).setText(accuracy)
         if d_down is not None:
@@ -342,6 +360,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             d_width = 0.0
         if d_height is None:
             d_height = 0.0
+
+        self.slit_width = d_width
+        self.slit_height = d_height
 
         if isinstance(self.data, Data2D):
             self.current_smearer = smear_selection(self.data, self.kernel_model)
