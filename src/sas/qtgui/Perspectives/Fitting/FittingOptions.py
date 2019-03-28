@@ -363,22 +363,11 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                 return
 
         # update config values from widgets before any notification is sent
-        for param in fm.params.values():
-            widget = self.paramWidget(fm, param.shortName)
-            if widget is None:
-                continue
-            try:
-                if isinstance(widget, QtWidgets.QComboBox):
-                    new_value = widget.currentText()
-                else:
-                    try:
-                        new_value = int(widget.text())
-                    except ValueError:
-                        new_value = float(widget.text())
-                fm.params[param.shortName].value = new_value
-            except ValueError:
-                # Don't update bumps if widget has bad data
-                self.reject
+        try:
+            self.updateConfigFromWidget(fm)
+        except ValueError:
+            # Don't update bumps if widget has bad data
+            self.reject
 
         fm.storeConfig() # write the current settings to bumps module
         # Notify the perspective, so the window title is updated
@@ -422,3 +411,19 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
             else:
                 eval(widget_name).setText(str(param.value))
 
+    def updateConfigFromWidget(self, fittingMethod):
+        # update config values from widgets before any notification is sent
+        for param in fittingMethod.params.values():
+            widget = self.paramWidget(fittingMethod, param.shortName)
+            if widget is None:
+                continue
+            new_value = None
+            if isinstance(widget, QtWidgets.QComboBox):
+                new_value = widget.currentText()
+            else:
+                try:
+                    new_value = int(widget.text())
+                except ValueError:
+                    new_value = float(widget.text())
+            if new_value is not None:
+                fittingMethod.params[param.shortName].value = new_value
