@@ -396,7 +396,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         Given the ID of the current optimizer, fetch the values
         and update the widget
         """
-        fm = self.fittingMethods[self.currentOptimizer)]
+        fm = self.fittingMethods[self.currentOptimizer]
         for param in fm.params.values():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
