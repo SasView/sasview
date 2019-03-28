@@ -19,6 +19,13 @@ from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
+def _legendResize(width):
+    """
+    resize factor for the legend, based on total canvas width
+    """
+    # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
+    return (width/100.0)+4.0
+
 class PlotterWidget(PlotterBase):
     """
     1D Plot widget for use with a QDialog
@@ -193,7 +200,9 @@ class PlotterWidget(PlotterBase):
         # Now add the legend with some customizations.
 
         if self.showLegend:
-            self.legend = ax.legend(loc='upper right', shadow=True)
+            width=_legendResize(self.canvas.size().width())
+
+            self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
             if self.legend:
                 self.legend.set_picker(True)
 
@@ -205,6 +214,14 @@ class PlotterWidget(PlotterBase):
 
         # refresh canvas
         self.canvas.draw_idle()
+
+    def onResize(self, event):
+        """
+        Resize the legend window/font on canvas resize
+        """
+        width = _legendResize(event.width)
+        # resize the legend to follow the canvas width.
+        self.legend.prop.set_size(width)
 
     def createContextMenu(self):
         """

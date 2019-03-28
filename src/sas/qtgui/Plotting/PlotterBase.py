@@ -110,6 +110,8 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
+        cid = self.canvas.mpl_connect('resize_event', self.onResize)
+
         layout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
@@ -242,6 +244,12 @@ class PlotterBase(QtWidgets.QWidget):
         Define context menu and associated actions for the quickplot MPL widget
         """
         raise NotImplementedError("Context menu method must be implemented in derived class.")
+
+    def onResize(self, event):
+        """
+        Redefine default resize event
+        """
+        pass
 
     def contextMenuEvent(self, event):
         """
