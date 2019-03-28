@@ -114,6 +114,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Update control elements based on data and model passed
         """
+        # retain the index
+        cur_index = self.cbSmearing.currentIndex()
         self.cbSmearing.clear()
         self.cbSmearing.addItem("None")
         self.gAccuracy.setVisible(False)
@@ -122,6 +124,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.setElementsVisibility(False)
         model = self.kernel_model
         self.updateKernelModel(model)
+        # already has the required setup so modify the index
+        self.cbSmearing.setCurrentIndex(cur_index)
 
     def updateKernelModel(self, kernel_model=None):
         """

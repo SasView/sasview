@@ -2038,6 +2038,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if not self.data_is_loaded:
             self.createDefaultDataset()
+            self.smearing_widget.updateData(self.data)
         self.calculateQGridForModel()
 
     def showTheoryPlot(self):
