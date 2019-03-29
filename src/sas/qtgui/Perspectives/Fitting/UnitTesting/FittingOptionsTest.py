@@ -1,7 +1,6 @@
 import sys
 import unittest
 import webbrowser
-from bumps import options
 
 from PyQt5 import QtGui, QtWidgets
 
@@ -13,7 +12,8 @@ import path_prepare
 from UnitTesting.TestUtils import QtSignalSpy
 
 # Local
-from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+from sas.qtgui.Perspectives.Fitting.FittingOptions import \
+        FittingOptions, FittingMethod, FittingMethodParameter
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -22,7 +22,7 @@ class FittingOptionsTest(unittest.TestCase):
     '''Test the FittingOptions dialog'''
     def setUp(self):
         '''Create FittingOptions dialog'''
-        self.widget = FittingOptions(None, config=options.FIT_CONFIG)
+        self.widget = FittingOptions()
 
     def tearDown(self):
         '''Destroy the GUI'''
@@ -37,7 +37,7 @@ class FittingOptionsTest(unittest.TestCase):
 
         # The combo box
         self.assertIsInstance(self.widget.cbAlgorithm, QtWidgets.QComboBox)
-        self.assertEqual(self.widget.cbAlgorithm.count(), 6)
+        self.assertTrue(self.widget.cbAlgorithm.count() >= 5) # at least the default bumps algos
         self.assertEqual(self.widget.cbAlgorithm.itemText(0), 'Nelder-Mead Simplex')
         self.assertEqual(self.widget.cbAlgorithm.itemText(4), 'Levenberg-Marquardt')
         self.assertEqual(self.widget.cbAlgorithm.currentIndex(), 4)
@@ -49,12 +49,14 @@ class FittingOptionsTest(unittest.TestCase):
         # Can't reliably test the method in action, but can easily check the results
         
         # DREAM
+        self.widget.cbAlgorithm.setCurrentText("DREAM")
         self.assertIsInstance(self.widget.samples_dream.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.burn_dream.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.pop_dream.validator(), QtGui.QDoubleValidator)
         self.assertIsInstance(self.widget.thin_dream.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.steps_dream.validator(), QtGui.QIntValidator)
         # DE
+        self.widget.cbAlgorithm.setCurrentText("Differential Evolution")
         self.assertIsInstance(self.widget.steps_de.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.CR_de.validator(), QtGui.QDoubleValidator)
         self.assertIsInstance(self.widget.pop_de.validator(), QtGui.QDoubleValidator)
@@ -76,22 +78,6 @@ class FittingOptionsTest(unittest.TestCase):
         # This should enable the OK button
         self.assertTrue(self.widget.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).isEnabled())
 
-    def testOnAlgorithmChange(self):
-        '''Test the combo box change callback'''
-        # Current ID
-        self.assertEqual(self.widget.current_fitter_id, 'lm')
-        # index = 0
-        self.widget.onAlgorithmChange(0)
-        # Check Nelder-Mead
-        self.assertEqual(self.widget.stackedWidget.currentIndex(), 1)
-        self.assertEqual(self.widget.current_fitter_id, 'lm')
-
-        # index = 4
-        self.widget.onAlgorithmChange(4)
-        # Check Levenberg-Marquad
-        self.assertEqual(self.widget.stackedWidget.currentIndex(), 1)
-        self.assertEqual(self.widget.current_fitter_id, 'lm')
-
     def testOnApply(self):
         '''Test bumps update'''
         # Spy on the update signal
@@ -109,8 +95,8 @@ class FittingOptionsTest(unittest.TestCase):
         self.assertIn('DREAM', spy_apply.called()[0]['args'][0])
 
         # Check the parameters
-        self.assertEqual(options.FIT_CONFIG.values['dream']['steps'], 50.0)
-        self.assertEqual(options.FIT_CONFIG.values['dream']['init'], 'cov')
+        self.assertEqual(self.widget.fittingMethods['DREAM'].params['steps'].value, 50.)
+        self.assertEqual(self.widget.fittingMethods['DREAM'].params['init'].value, 'cov')
 
     # test disabled until pyQt5 works well
     def testOnHelp(self):
@@ -140,29 +126,55 @@ class FittingOptionsTest(unittest.TestCase):
         # Assure the filename is correct
         self.assertIn("fit-lm", webbrowser.open.call_args[0][0])
 
-    def testWidgetFromOptions(self):
+    def testParamWidget(self):
         '''Test the helper function'''
         # test empty call
-        self.assertIsNone(self.widget.widgetFromOption(None))
+        self.assertIsNone(self.widget.paramWidget(None, None))
         # test silly call
-        self.assertIsNone(self.widget.widgetFromOption('poop'))
-        self.assertIsNone(self.widget.widgetFromOption(QtWidgets.QMainWindow()))
+        self.assertIsNone(self.widget.paramWidget('poop', 'dsfsd'))
+        self.assertIsNone(self.widget.paramWidget(QtWidgets.QMainWindow(), None))
 
         # Switch to DREAM
-        self.widget.cbAlgorithm.setCurrentIndex(2)
+        self.widget.cbAlgorithm.setCurrentText('DREAM')
+        fm = self.widget.fittingMethods['DREAM']
         # test smart call
-        self.assertIsInstance(self.widget.widgetFromOption('samples'), QtWidgets.QLineEdit)
-        self.assertIsInstance(self.widget.widgetFromOption('init'), QtWidgets.QComboBox)
+        self.assertIsInstance(self.widget.paramWidget(fm, 'samples'), QtWidgets.QLineEdit)
+        self.assertIsInstance(self.widget.paramWidget(fm, 'init'), QtWidgets.QComboBox)
 
-    def testUpdateWidgetFromBumps(self):
+    def testUpdateConfigFromWidget(self):
+        '''Test the config update'''
+        # test empty call
+        self.assertIsNone(self.widget.updateConfigFromWidget(None))
+        # test silly call
+        self.assertIsNone(self.widget.updateConfigFromWidget('poop'))
+        self.assertIsNone(self.widget.updateConfigFromWidget(QtWidgets.QMainWindow()))
+
+        # Switch to DREAM
+        self.widget.cbAlgorithm.setCurrentText('DREAM')
+        fm = FittingMethod("dream", "a long dream", [
+            FittingMethodParameter("samples", "# samples", int, 0),
+            FittingMethodParameter("init", "init func", int, 0)])
+        # test smart call
+        self.widget.updateConfigFromWidget(fm)
+        self.assertEqual(fm.params['samples'].value, 10000)
+        self.assertEqual(fm.params['init'].value, 'eps')
+
+    def testUpdateWidgetFromConfig(self):
         '''Test the widget update'''
+        self.widget.cbAlgorithm.setCurrentText("Quasi-Newton BFGS")
         # modify some value
-        options.FIT_CONFIG.values['newton']['steps'] = 1234
-        options.FIT_CONFIG.values['newton']['starts'] = 666
-        options.FIT_CONFIG.values['newton']['xtol'] = 0.01
+        self.assertEqual(self.widget.steps_newton.text(), '3000')
+        self.assertEqual(self.widget.starts_newton.text(), '1')
+        self.assertEqual(self.widget.ftol_newton.text(), '1e-06') # default
+        self.assertEqual(self.widget.xtol_newton.text(), '1e-12')
+        fm = self.widget.fittingMethods["Quasi-Newton BFGS"]
+        fm.params['steps'].value = 1234
+        fm.params['starts'].value = 666
+        fm.params['ftol'].value = 1e-6
+        fm.params['xtol'].value = 0.01
 
         # Invoke the method for the changed 
-        self.widget.updateWidgetFromBumps('newton')
+        self.widget.updateWidgetFromConfig()
 
         # See that the widget picked up the right values
         self.assertEqual(self.widget.steps_newton.text(), '1234')
