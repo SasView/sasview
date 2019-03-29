@@ -335,9 +335,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Change the page in response to combo box index
         """
-        # Find the algorithm ID from name
-        selectedName = self.currentOptimizer
-
+        # update the widget elements
         self._clearLayout()
         self._fillLayout()
 
