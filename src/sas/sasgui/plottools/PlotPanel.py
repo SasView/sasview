@@ -1234,7 +1234,6 @@ class PlotPanel(wx.Panel):
         # TODO: Redraw is brutal.  Render to a backing store and swap in
         # TODO: rather than redrawing on the fly.
         self.subplot.clear()
-        self.subplot.hold(True)
 
     def render(self):
         """Commit the plot after all objects are drawn"""
