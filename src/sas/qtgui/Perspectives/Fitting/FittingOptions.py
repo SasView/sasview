@@ -350,8 +350,9 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Returns the widget associated to a FittingMethodParameter.
         """
-        if paramShortName not in fittingMethod.params:
-            return None
+        if (not isinstance(fittingMethod, FittingMethod)
+            or paramShortName not in fittingMethod.params):
+            return
         widget_name = 'self.'+paramShortName+'_'+fittingMethod.shortName
         widget = None
         try:
@@ -428,6 +429,12 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                 widget.setText(str(param.value))
 
     def updateConfigFromWidget(self, fittingMethod):
+        """
+        Updates the given FittingMethod with the values from the GUI widgets.
+        Does not respect the given data types in the FittingMethod (yet?).
+        """
+        if not isinstance(fittingMethod, FittingMethod):
+            return
         # update config values from widgets before any notification is sent
         for param in fittingMethod.params.values():
             widget = self.paramWidget(fittingMethod, param.shortName)
