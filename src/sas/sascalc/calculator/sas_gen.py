@@ -133,7 +133,7 @@ class GenSAS(BaseComponent):
         sldn = copy.deepcopy(self.data_sldn)
         sldn -= self.params['solvent_SLD']
         # **** WARNING **** new_GenI holds pointers to numpy vectors
-        # be sure that they are contiguous double precision arrays and make 
+        # be sure that they are contiguous double precision arrays and make
         # sure the GC doesn't eat them before genicom is called.
         # TODO: rewrite so that the parameters are passed directly to genicom
         args = (

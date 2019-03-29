@@ -31,7 +31,7 @@ void initGenI(GenI*, int is_avg, int npix, double* x, double* y, double* z,
 		double in_spin, double out_spin,
 		double s_theta);
 // compute function
-void genicomXY(GenI*, int npoints, double* qx, double* qy, double *I_out);
+//void genicomXY(GenI*, int npoints, double* qx, double* qy, double *I_out);
 void genicom(GenI*, int npoints, double* q, double *I_out);
 
 #endif

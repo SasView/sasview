@@ -17,8 +17,8 @@ typedef void (*PyCObject_Destructor)(void *);
 
 // Vector binding glue
 #if (PY_VERSION_HEX > 0x03000000) && !defined(Py_LIMITED_API)
-  // Assuming that a view into a writable vector points to a 
-  // non-changing pointer for the duration of the C call, capture 
+  // Assuming that a view into a writable vector points to a
+  // non-changing pointer for the duration of the C call, capture
   // the view pointer and immediately free the view.
   #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
     Py_buffer VEC_view; \
@@ -100,33 +100,33 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 /**
  * GenI the given input (2D) according to a given object
  */
-PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
-	PyObject *gen_obj;
-	PyObject *qx_obj;
-	PyObject *qy_obj;
-	PyObject *I_out_obj;
-	Py_ssize_t n_qx, n_qy, n_out;
-	double *qx;
-	double *qy;
-	double *I_out;
-	GenI* sld2i;
-
-	//printf("in genicom_inputXY\n");
-	if (!PyArg_ParseTuple(args, "OOOO",  &gen_obj, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
-	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
-	VECTOR(qx_obj, qx, n_qx);
-	VECTOR(qy_obj, qy, n_qy);
-	VECTOR(I_out_obj, I_out, n_out);
-	//printf("qx, qy, I_out: %d %d %d, %d %d %d\n", qx, qy, I_out, n_qx, n_qy, n_out);
-
-	// Sanity check
-	//if(n_q!=n_out) return Py_BuildValue("i",-1);
-
-	genicomXY(sld2i, (int)n_qx, qx, qy, I_out);
-	//printf("done calc\n");
-	//return PyCObject_FromVoidPtr(s, del_genicom);
-	return Py_BuildValue("i",1);
-}
+// PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
+// 	PyObject *gen_obj;
+// 	PyObject *qx_obj;
+// 	PyObject *qy_obj;
+// 	PyObject *I_out_obj;
+// 	Py_ssize_t n_qx, n_qy, n_out;
+// 	double *qx;
+// 	double *qy;
+// 	double *I_out;
+// 	GenI* sld2i;
+//
+// 	//printf("in genicom_inputXY\n");
+// 	if (!PyArg_ParseTuple(args, "OOOO",  &gen_obj, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
+// 	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+// 	VECTOR(qx_obj, qx, n_qx);
+// 	VECTOR(qy_obj, qy, n_qy);
+// 	VECTOR(I_out_obj, I_out, n_out);
+// 	//printf("qx, qy, I_out: %d %d %d, %d %d %d\n", qx, qy, I_out, n_qx, n_qy, n_out);
+//
+// 	// Sanity check
+// 	//if(n_q!=n_out) return Py_BuildValue("i",-1);
+//
+// 	genicomXY(sld2i, (int)n_qx, qx, qy, I_out);
+// 	//printf("done calc\n");
+// 	//return PyCObject_FromVoidPtr(s, del_genicom);
+// 	return Py_BuildValue("i",1);
+// }
 
 /**
  * GenI the given 1D input according to a given object
@@ -160,8 +160,8 @@ static PyMethodDef module_methods[] = {
 		  "Create a new GenI object"},
 	{"genicom",(PyCFunction)genicom_input, METH_VARARGS,
 		  "genicom the given 1d input arrays"},
-	{"genicomXY",(PyCFunction)genicom_inputXY, METH_VARARGS,
-		  "genicomXY the given 2d input arrays"},
+//	{"genicomXY",(PyCFunction)genicom_inputXY, METH_VARARGS,
+//		  "genicomXY the given 2d input arrays"},
     {NULL}
 };
 

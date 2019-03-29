@@ -46,106 +46,111 @@ void initGenI(GenI* this, int is_avg, int npix, double* x, double* y, double* z,
 /**
  * Compute 2D anisotropic
  */
-void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
-	//npoints is given negative for angular averaging
-	// Assumes that q doesn't have qz component and sld_n is all real
-	//double q = 0.0;
-	//double Pi = 4.0*atan(1.0);
-	polar_sld b_sld;
-	double qr = 0.0;
-	Cplx iqr;
-	Cplx ephase;
-	Cplx comp_sld;
 
-	Cplx sumj_uu;
-	Cplx sumj_ud;
-	Cplx sumj_du;
-	Cplx sumj_dd;
-	Cplx temp_fi;
 
-	double count = 0.0;
-	int i, j;
-
-	cassign(&iqr, 0.0, 0.0);
-	cassign(&ephase, 0.0, 0.0);
-	cassign(&comp_sld, 0.0, 0.0);
-
-	//Assume that pixel volumes are given in vol_pix in A^3 unit
-	//int x_size = 0; //in Ang
-	//int y_size = 0; //in Ang
-	//int z_size = 0; //in Ang
-
-	// Loop over q-values and multiply apply matrix
-
-	//printf("npoints: %d, npix: %d\n", npoints, this->n_pix);
-	for(i=0; i<npoints; i++){
-		//I_out[i] = 0.0;
-		cassign(&sumj_uu, 0.0, 0.0);
-		cassign(&sumj_ud, 0.0, 0.0);
-		cassign(&sumj_du, 0.0, 0.0);
-		cassign(&sumj_dd, 0.0, 0.0);
-		//printf("i: %d\n", i);
-		//q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]); // + qz[i]*qz[i]);
-
-		for(j=0; j<this->n_pix; j++){
-			if (this->sldn_val[j]!=0.0
-				||this->mx_val[j]!=0.0
-				||this->my_val[j]!=0.0
-				||this->mz_val[j]!=0.0)
-			{
-			    // printf("i,j: %d,%d\n", i,j);
-				//anisotropic
-				cassign(&temp_fi, 0.0, 0.0);
-				cal_msld(&b_sld, 0, qx[i], qy[i], this->sldn_val[j],
-							 this->mx_val[j], this->my_val[j], this->mz_val[j],
-			 				 this->inspin, this->outspin, this->stheta);
-				qr = (qx[i]*this->x_val[j] + qy[i]*this->y_val[j]);
-				cassign(&iqr, 0.0, qr);
-				cplx_exp(&ephase, iqr);
-
-				//Let's multiply pixel(atomic) volume here
-				rcmult(&ephase, this->vol_pix[j], ephase);
-				//up_up
-				if (this->inspin > 0.0 && this->outspin > 0.0){
-					cassign(&comp_sld, b_sld.uu, 0.0);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_uu, sumj_uu, temp_fi);
-				}
-				//down_down
-				if (this->inspin < 1.0 && this->outspin < 1.0){
-					cassign(&comp_sld, b_sld.dd, 0.0);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_dd, sumj_dd, temp_fi);
-				}
-				//up_down
-				if (this->inspin > 0.0 && this->outspin < 1.0){
-					cassign(&comp_sld, b_sld.re_ud, b_sld.im_ud);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_ud, sumj_ud, temp_fi);
-				}
-				//down_up
-				if (this->inspin < 1.0 && this->outspin > 0.0){
-					cassign(&comp_sld, b_sld.re_du, b_sld.im_du);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_du, sumj_du, temp_fi);
-				}
-
-				if (i == 0){
-					count += this->vol_pix[j];
-				}
-			}
-		}
-		//printf("aa%d=%g %g %d\n", i, (sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im), (sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im), count);
-
-		I_out[i] = (sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im);
-		I_out[i] += (sumj_ud.re*sumj_ud.re + sumj_ud.im*sumj_ud.im);
-		I_out[i] += (sumj_du.re*sumj_du.re + sumj_du.im*sumj_du.im);
-		I_out[i] += (sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im);
-
-		I_out[i] *= (1.0E+8 / count); //in cm (unit) / number; //to be multiplied by vol_pix
-	}
-	//printf("count = %d %g %g %g %g\n", count, this->sldn_val[0],this->mx_val[0], this->my_val[0], this->mz_val[0]);
-}
+ //The code calculating magnetic scattering below seems to be not used.
+ //Keeping it in order to check if it is not breaking anything.
+// void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
+// 	//npoints is given negative for angular averaging
+// 	// Assumes that q doesn't have qz component and sld_n is all real
+// 	//double q = 0.0;
+// 	//double Pi = 4.0*atan(1.0);
+// 	polar_sld b_sld;
+// 	double qr = 0.0;
+// 	Cplx iqr;
+// 	Cplx ephase;
+// 	Cplx comp_sld;
+//
+// 	Cplx sumj_uu;
+// 	Cplx sumj_ud;
+// 	Cplx sumj_du;
+// 	Cplx sumj_dd;
+// 	Cplx temp_fi;
+//
+// 	double count = 0.0;
+// 	int i, j;
+//
+// 	cassign(&iqr, 0.0, 0.0);
+// 	cassign(&ephase, 0.0, 0.0);
+// 	cassign(&comp_sld, 0.0, 0.0);
+//
+// 	//Assume that pixel volumes are given in vol_pix in A^3 unit
+// 	//int x_size = 0; //in Ang
+// 	//int y_size = 0; //in Ang
+// 	//int z_size = 0; //in Ang
+//
+// 	// Loop over q-values and multiply apply matrix
+//
+// 	//printf("npoints: %d, npix: %d\n", npoints, this->n_pix);
+// 	for(i=0; i<npoints; i++){
+// 		//I_out[i] = 0.0;
+// 		cassign(&sumj_uu, 0.0, 0.0);
+// 		cassign(&sumj_ud, 0.0, 0.0);
+// 		cassign(&sumj_du, 0.0, 0.0);
+// 		cassign(&sumj_dd, 0.0, 0.0);
+// 		//printf("i: %d\n", i);
+// 		//q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]); // + qz[i]*qz[i]);
+//
+// 		for(j=0; j<this->n_pix; j++){
+//
+// 			if (this->sldn_val[j]!=0.0
+// 				||this->mx_val[j]!=0.0
+// 				||this->my_val[j]!=0.0
+// 				||this->mz_val[j]!=0.0)
+// 			{
+// 			    // printf("i,j: %d,%d\n", i,j);
+// 				//anisotropic
+// 				cassign(&temp_fi, 0.0, 0.0);
+// 				cal_msld(&b_sld, 0, qx[i], qy[i], this->sldn_val[j],
+// 							 this->mx_val[j], this->my_val[j], this->mz_val[j],
+// 			 				 this->inspin, this->outspin, this->stheta);
+// 				qr = (qx[i]*this->x_val[j] + qy[i]*this->y_val[j]);
+// 				cassign(&iqr, 0.0, qr);
+// 				cplx_exp(&ephase, iqr);
+//
+// 				//Let's multiply pixel(atomic) volume here
+// 				rcmult(&ephase, this->vol_pix[j], ephase);
+// 				//up_up
+// 				if (this->inspin > 0.0 && this->outspin > 0.0){
+// 					cassign(&comp_sld, b_sld.uu, 0.0);
+// 					cplx_mult(&temp_fi, comp_sld, ephase);
+// 					cplx_add(&sumj_uu, sumj_uu, temp_fi);
+// 				}
+// 				//down_down
+// 				if (this->inspin < 1.0 && this->outspin < 1.0){
+// 					cassign(&comp_sld, b_sld.dd, 0.0);
+// 					cplx_mult(&temp_fi, comp_sld, ephase);
+// 					cplx_add(&sumj_dd, sumj_dd, temp_fi);
+// 				}
+// 				//up_down
+// 				if (this->inspin > 0.0 && this->outspin < 1.0){
+// 					cassign(&comp_sld, b_sld.re_ud, b_sld.im_ud);
+// 					cplx_mult(&temp_fi, comp_sld, ephase);
+// 					cplx_add(&sumj_ud, sumj_ud, temp_fi);
+// 				}
+// 				//down_up
+// 				if (this->inspin < 1.0 && this->outspin > 0.0){
+// 					cassign(&comp_sld, b_sld.re_du, b_sld.im_du);
+// 					cplx_mult(&temp_fi, comp_sld, ephase);
+// 					cplx_add(&sumj_du, sumj_du, temp_fi);
+// 				}
+//
+// 				if (i == 0){
+// 					count += this->vol_pix[j];
+// 				}
+// 			}
+// 		}
+// 		//printf("aa%d=%g %g %d\n", i, (sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im), (sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im), count);
+//
+// 		I_out[i] = (sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im);
+// 		I_out[i] += (sumj_ud.re*sumj_ud.re + sumj_ud.im*sumj_ud.im);
+// 		I_out[i] += (sumj_du.re*sumj_du.re + sumj_du.im*sumj_du.im);
+// 		I_out[i] += (sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im);
+//
+// 		I_out[i] *= (1.0E+8  / count); //in cm (unit) / number; //to be multiplied by vol_pix
+// 	}
+// 	//printf("count = %d %g %g %g %g\n", count, this->sldn_val[0],this->mx_val[0], this->my_val[0], this->mz_val[0]);
+// }
 /**
  * Compute 1D isotropic
  * Isotropic: Assumes all slds are real (no magnetic)

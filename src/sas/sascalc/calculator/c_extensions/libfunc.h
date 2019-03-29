@@ -17,8 +17,8 @@ double sinc(double x);
 
 //double gamln(double x);
 
-void cal_msld(polar_sld*, int isangle, double qx, double qy, double bn, double m01, double mtheta1, 
-			double mphi1, double spinfraci, double spinfracf, double spintheta);
+//void cal_msld(polar_sld*, int isangle, double qx, double qy, double bn, double m01, double mtheta1,
+//			double mphi1, double spinfraci, double spinfracf, double spintheta);
 
 //void gser(float *gamser, float a, float x, float *gln);
 
