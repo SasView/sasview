@@ -32,6 +32,33 @@ from sas.sascalc.fit.AbstractFitEngine import FitEngine
 from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.expression import compile_constraints
 
+# converted from FittingOptionsUI.py file
+toolTips = dict(
+        samples_dream = "<html><head/><body><p>Number of points to be drawn from the Markov chain.</p></body></html>",
+        burn_dream = "<html><head/><body><p>The number of iterations to required for the Markov chain to converge to the equilibrium distribution.</p></body></html>",
+        pop_dream = "<html><head/><body><p>The size of the population.</p></body></html>",
+        init_dream = "<html><head/><body><p><span style=\" font-style:italic;\">Initializer</span> determines how the population will be initialized. The options are as follows:</p><p><span style=\" font-style:italic;\">eps</span> (epsilon ball), in which the entire initial population is chosen at random from within a tiny hypersphere centered about the initial point</p><p><span style=\" font-style:italic;\">lhs</span> (latin hypersquare), which chops the bounds within each dimension in <span style=\" font-weight:600;\">k</span> equal sized chunks where <span style=\" font-weight:600;\">k</span> is the size of the population and makes sure that each parameter has at least one value within each chunk across the population.</p><p><span style=\" font-style:italic;\">cov</span> (covariance matrix), in which the uncertainty is estimated using the covariance matrix at the initial point, and points are selected at random from the corresponding gaussian ellipsoid</p><p><span style=\" font-style:italic;\">random</span> (uniform random), in which the points are selected at random within the bounds of the parameters</p></body></html>",
+        thin_dream = "<html><head/><body><p>The amount of thinning to use when collecting the population.</p></body></html>",
+        steps_dream = "<html><head/><body><p>Determines the number of iterations to use for drawing samples after burn in.</p></body></html>",
+        steps_lm = "<html><head/><body><p>The number of gradient steps to take.</p></body></html>",
+        ftol_lm = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected.</p></body></html>",
+        xtol_lm = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected.</p></body></html>",
+        steps_newton = "<html><head/><body><p>The number of gradient steps to take.</p></body></html>",
+        starts_newton = "<html><head/><body><p>Value thattells the optimizer to restart a given number of times. Each time it restarts it uses a random starting point.</p></body></html>",
+        ftol_newton = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected.</p></body></html>",
+        xtol_newton = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected.</p></body></html>",
+        steps_de = "<html><head/><body><p>The number of iterations.</p></body></html>",
+        CR_de = "<html><head/><body><p>The size of the population.</p></body></html>",
+        F_de = "<html><head/><body><p>Determines how much to scale each difference vector before adding it to the candidate point.</p></body></html>",
+        ftol_de = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected.</p></body></html>",
+        xtol_de = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected.</p></body></html>",
+        steps_amoeba = "<html><head/><body><p>The number of simplex update iterations to perform.</p></body></html>",
+        starts_amoeba = "<html><head/><body><p>Tells the optimizer to restart a given number of times. Each time it restarts it uses a random starting point.</p></body></html>",
+        radius_amoeba = "<html><head/><body><p>The initial size of the simplex, as a portion of the bounds defining the parameter space.</p></body></html>",
+        ftol_amoeba = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected. </p></body></html>",
+        xtol_amoeba = "<html><head/><body><p>Used to determine when the fit has reached the point where no significant improvement is expected. </p></body></html>",
+)
+
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))

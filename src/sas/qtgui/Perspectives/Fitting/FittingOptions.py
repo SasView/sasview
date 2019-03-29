@@ -26,13 +26,15 @@ class FittingMethodParameter:
     _shortName = None
     _longName = None
     _type = None
+    _description = None # an optional description for the user, will be shown as UI tooltip
     _defaultValue = None
     value = None
 
-    def __init__(self, shortName, longName, dtype, defaultValue):
+    def __init__(self, shortName, longName, dtype, defaultValue, description = None):
         self._shortName = shortName
         self._longName = longName
         self._type = dtype
+        self._description = description
         self._defaultValue = defaultValue
         self.value = defaultValue
 
@@ -47,6 +49,10 @@ class FittingMethodParameter:
     @property
     def type(self):
         return self._type
+
+    @property
+    def description(self):
+        return self._description
 
     @property
     def defaultValue(self):
@@ -136,6 +142,8 @@ class FittingMethods:
     def __str__(self):
         return "\n".join(["{}: {}".format(key, fm) for key, fm in self._methods.items()])
 
+from sas.sascalc.fit.BumpsFitting import toolTips as bumpsToolTips
+
 class FittingMethodBumps(FittingMethod):
     def storeConfig(self):
         """
@@ -161,7 +169,10 @@ class FittingMethodsBumps(FittingMethods):
             for shortName, defValue in f.settings:
                 longName, dtype = bumps.options.FIT_FIELDS[shortName]
                 dtype = self._convertParamType(dtype)
-                param = FittingMethodParameter(shortName, longName, dtype, defValue)
+                key = shortName+"_"+f.id
+                descr = bumpsToolTips.get(key, None)
+                param = FittingMethodParameter(shortName, longName, dtype, defValue,
+                                               description=descr)
                 params.append(param)
             self.add(FittingMethodBumps(f.id, f.name, params))
 
@@ -307,12 +318,16 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         layout.addWidget(self.cbAlgorithm, 0, 0, 1, -1)
         for param in fm.params.values():
             row = layout.rowCount()+1
-            layout.addWidget(self._makeLabel(param.longName), row, 0)
+            label = self._makeLabel(param.longName)
+            layout.addWidget(label, row, 0)
             widget = self._inputWidgetFromType(param.type, self)
             if widget is None:
                 continue
-            widgetName = param.shortName+'_'+fm.shortName
+            if param.description is not None:
+                widget.setToolTip(param.description)
+                label.setToolTip(param.description)
             layout.addWidget(widget, row, 1)
+            widgetName = param.shortName+'_'+fm.shortName
             setattr(self, widgetName, widget)
         layout.addItem(QtWidgets.QSpacerItem(0, 0, vPolicy=QtWidgets.QSizePolicy.Expanding))
 
