@@ -127,15 +127,7 @@ class SLDCalculatorTest(unittest.TestCase):
         QTest.keyEvent(QTest.Press, self.widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
-        #self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '43.4')
         self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '2.89')
-
-        # Reset the widget
-        self.widget.modelReset()
-       
-        self.assertEqual(self.widget.ui.editMolecularFormula.text(), "H2O")
-        self.assertEqual(self.widget.ui.editMassDensity.text(), "1")
-        self.assertEqual(self.widget.ui.editWavelength.text(), "6")
 
     def testHelp(self):
         """ Assure help file is shown """

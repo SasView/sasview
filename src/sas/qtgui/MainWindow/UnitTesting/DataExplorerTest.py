@@ -739,7 +739,7 @@ class DataExplorerTest(unittest.TestCase):
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
                                 directory='cyl_400_20_out.txt',
-                                filter='Text files (*.txt);;CanSAS 1D files(*.xml)',
+                                filter='Text files (*.txt);;CanSAS 1D files(*.xml);;NXcanSAS files (*.h5)',
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
 
@@ -762,7 +762,7 @@ class DataExplorerTest(unittest.TestCase):
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
                                 directory='P123_D2O_10_percent_out.dat',
-                                filter='IGOR/DAT 2D file in Q_map (*.dat)',
+                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5)',
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
 

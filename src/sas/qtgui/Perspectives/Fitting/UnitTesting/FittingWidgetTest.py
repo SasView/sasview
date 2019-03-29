@@ -241,10 +241,10 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have some models
-        category_index = self.widget.cbCategory.findText("Shape Independent")
+        category_index = self.widget.cbCategory.findText("Cylinder")
         self.widget.cbCategory.setCurrentIndex(category_index)
         # Change the model to one that supports structure factors
-        model_index = self.widget.cbModel.findText('fractal_core_shell')
+        model_index = self.widget.cbModel.findText('cylinder')
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # Check that the factor combo is active and the default is chosen
@@ -259,8 +259,8 @@ class FittingWidgetTest(unittest.TestCase):
         structure_index = self.widget.cbStructureFactor.findText('squarewell')
         self.widget.cbStructureFactor.setCurrentIndex(structure_index)
 
-        # We have 3 more param rows now (radius_effective is removed), and a new heading
-        self.assertEqual(self.widget._model_model.rowCount(), rowcount+4)
+        # We have 3 more param rows now (radius_effective is removed), and new headings
+        self.assertEqual(self.widget._model_model.rowCount(), rowcount+7)
 
         # Switch models
         self.widget.cbModel.setCurrentIndex(0)

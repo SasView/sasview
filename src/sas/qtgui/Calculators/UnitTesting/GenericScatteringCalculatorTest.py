@@ -185,6 +185,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         # wait a bit for data to be loaded
         time.sleep(0.1)
+        QtWidgets.qApp.processEvents()
+
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtData.text(), 'sld_file.sld')
         self.assertEqual(self.widget.txtTotalVolume.text(), '402408.0')
@@ -249,6 +251,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
 
         time.sleep(1)
+        QtWidgets.qApp.processEvents()
+
         # check updated values in ui, read from loaded file
         # TODO to be changed
         self.assertEqual(self.widget.txtData.text(), 'diamdsml.pdb')
@@ -309,6 +313,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         time.sleep(2)
+        QtWidgets.qApp.processEvents()
 
         self.assertEqual(self.widget.txtData.text(), 'A_Raw_Example-1.omf')
         self.assertEqual(self.widget.txtTotalVolume.text(), '128000000.0')
@@ -395,6 +400,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         time.sleep(1)
+        QtWidgets.qApp.processEvents()
 
         self.assertTrue(self.widget.cmdDraw.isEnabled())
         QTest.mouseClick(self.widget.cmdDraw, Qt.LeftButton)
@@ -416,12 +422,15 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.widget.loadFile()
 
         time.sleep(0.1)
+        QtWidgets.qApp.processEvents()
 
         filename1 = "test"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=[filename1, ''])
 
-        QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
+        #QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
         self.widget.onSaveFile()
+        QtWidgets.qApp.processEvents()
+
         self.assertTrue(os.path.isfile(filename1 + '.sld'))
         self.assertTrue(os.path.getsize(filename1 + '.sld') > 0)
 
