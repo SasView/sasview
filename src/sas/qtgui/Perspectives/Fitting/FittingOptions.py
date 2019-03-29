@@ -422,14 +422,12 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         fm = self.fittingMethods[self.currentOptimizer]
         for param in fm.params.values():
-            # Find the widget name of the option
-            # e.g. 'samples' for 'dream' is 'self.samples_dream'
-            widget_name = 'self.'+param.shortName+'_'+fm.shortName
+            # get the widget name of the option
+            widget = self.paramWidget(fm, param.shortName)
             if isinstance(param.type, (tuple, list)):
-                control = eval(widget_name)
-                control.setCurrentIndex(control.findText(str(param.value)))
+                widget.setCurrentIndex(widget.findText(str(param.value)))
             else:
-                eval(widget_name).setText(str(param.value))
+                widget.setText(str(param.value))
 
     def updateConfigFromWidget(self, fittingMethod):
         # update config values from widgets before any notification is sent
