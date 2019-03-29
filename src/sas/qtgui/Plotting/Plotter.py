@@ -81,9 +81,6 @@ class PlotterWidget(PlotterBase):
         is_fit = (self.data.id=="fit")
 
         if not is_fit:
-            logging.info("Plot")
-            logging.info(self.data.ytransform)
-            logging.info(self.data.isSesans)
             # make sure we have some function to operate on
             if self.data.xtransform is None:
                 if self.data.isSesans:
