@@ -131,17 +131,28 @@ double sinc(double x)
 // 	double im_ud = 0.0;
 // 	double re_du = 0.0;
 // 	double im_du = 0.0;
-//
+//  const double norm=outspin;
+
+
+// The norm is needed to make sure that the scattering cross sections are
+//correctly weighted, such that the sum of spin-resolved measurements adds up to
+// the unpolarised or half-polarised scattering cross section. No intensity weighting
+// needed on the incoming polariser side (assuming that a user), has normalised
+// to the incoming flux with polariser in for SANSPOl and unpolarised beam, respectively.
+
+//if (out_spin < 0.5){norm=1-out_spin;}
+//else{norm=out_spin;}
+
 // 	//No mag means no further calculation
 // 	if (isangle>0) {
 // 		if (m_max < 1.0e-32){
-// 			uu = sqrt((1+in_spin)/2 * (1+out_spin)/2) * uu;
-// 			dd = sqrt((1.0 - in_spin)/2 * (1.0 - out_spin)/2) * dd;
+// 			uu = sqrt(in_spin * out_spin/ norm) * uu ;
+// 			dd = sqrt((1.0 - in_spin) * (1.0 - out_spin)/ norm) * dd ;
 // 		}
 // 	}
 // 	else if (fabs(m_max)< 1.0e-32 && fabs(m_phi)< 1.0e-32 && fabs(m_theta)< 1.0e-32){
-// 			uu = sqrt((1+in_spin)/2 * (1+out_spin)/2) * uu;
-// 			dd = sqrt((1.0 - in_spin)/2 * (1.0 - out_spin)/2) * dd;
+// 			uu = sqrt(in_spin * out_spin/ norm) * uu;
+// 			dd = sqrt((1.0 - in_spin) * (1.0 - out_spin)/ norm) * dd;
 // 	} else {
 //
 // 		//These are needed because of the precision of inputs
@@ -191,20 +202,20 @@ double sinc(double x)
 // 		m_sigma_z = (m_perp_z);
 //
 // 		//Find b
-// 		uu -= m_sigma_x;
-// 		dd += m_sigma_x;
+// 		uu += m_sigma_x;
+// 		dd -= m_sigma_x;
 // 		re_ud = m_sigma_y;
 // 		re_du = m_sigma_y;
 // 		im_ud = m_sigma_z;
 // 		im_du = -m_sigma_z;
 //
-// 		uu = sqrt((1+in_spin) * (1 + out_spin)) * uu;
-// 		dd = sqrt((1.0 - in_spin) * (1.0 - out_spin)) * dd;
+// 		uu = sqrt((in_spin) * (out_spin)/ norm) * uu;
+// 		dd = sqrt((1.0 - in_spin) * (1.0 - out_spin)/ norm) * dd;
 //
-// 		re_ud = sqrt(in_spin * (1.0 - out_spin)) * re_ud;
-// 		im_ud = sqrt(in_spin * (1.0 - out_spin)) * im_ud;
-// 		re_du = sqrt((1.0 - in_spin) * out_spin) * re_du;
-// 		im_du = sqrt((1.0 - in_spin) * out_spin) * im_du;
+// 		re_ud = sqrt(in_spin * (1.0 - out_spin)/ norm) * re_ud;
+// 		im_ud = sqrt(in_spin * (1.0 - out_spin)/ norm) * im_ud;
+// 		re_du = sqrt((1.0 - in_spin) * out_spin/ norm) * re_du;
+// 		im_du = sqrt((1.0 - in_spin) * out_spin/ norm) * im_du;
 // 	}
 // 	p_sld->uu = uu;
 // 	p_sld->dd = dd;
