@@ -161,7 +161,7 @@ class FittingMethodsBumps(FittingMethods):
         Import fitting methods indicated by the provided list of ids from the bumps package.
         """
         super(FittingMethodsBumps, self).__init__()
-        ids = fitters.FIT_ACTIVE_IDS
+        ids = [fid for fid in fitters.FIT_ACTIVE_IDS if fid != "mp"] # exclude unusable algos
         for f in fitters.FITTERS:
             if f.id not in ids:
                 continue
@@ -219,7 +219,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         self._fittingMethods = FittingMethodsBumps()
         # option 1: hardcode the list of bumps fitting methods according to forms
         # option 2: create forms dynamically based on selected fitting methods
-        self.fittingMethods.add(FittingMethod('mcsas', 'McSAS', [])) # FIXME just testing for now
+#        self.fittingMethods.add(FittingMethod('mcsas', 'McSAS', [])) # FIXME just testing for now
         self.fittingMethods.setDefault('Levenberg-Marquardt')
 
         # build up the comboBox finally
