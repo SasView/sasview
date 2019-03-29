@@ -256,6 +256,7 @@ class GpuOptions(wx.Dialog):
         """
         #The same block of code as for OK but it is needed if we want to have
         #active response to Test button
+        import numpy as np
         no_opencl_msg = False
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
@@ -268,12 +269,17 @@ class GpuOptions(wx.Dialog):
 
         try:
             env = sasmodels.kernelcl.environment()
-            clinfo = [(ctx.devices[0].platform.vendor,
-                       ctx.devices[0].platform.version,
-                       ctx.devices[0].vendor,
-                       ctx.devices[0].name,
-                       ctx.devices[0].version)
-                      for ctx in env.context]
+            dtype64 = np.dtype('float64')
+            dtype32 = np.dtype('float32')
+            if dtype64 in env.context:
+                ctx = env.context[dtype64].devices[0]
+            else:
+                ctx = env.context[dtype32].devices[0]
+            clinfo = (ctx.platform.vendor,
+                        ctx.platform.version,
+                        ctx.vendor,
+                        ctx.name,
+                        ctx.version)
         except Exception:
             clinfo = None
 
