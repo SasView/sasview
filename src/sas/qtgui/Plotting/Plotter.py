@@ -219,6 +219,8 @@ class PlotterWidget(PlotterBase):
         """
         Resize the legend window/font on canvas resize
         """
+        if not self.showLegend:
+            return
         width = _legendResize(event.width)
         # resize the legend to follow the canvas width.
         self.legend.prop.set_size(width)

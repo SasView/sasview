@@ -12,22 +12,15 @@ import sas.qtgui.path_prepare
 #######
 
 # Local
-from sas.qtgui.Calculators.SldPanel import SldResult
+#from sas.qtgui.Calculators.SldPanel import SldResult
 from sas.qtgui.Calculators.SldPanel import SldPanel
-from sas.qtgui.Calculators.SldPanel import sldAlgorithm
+from sas.qtgui.Calculators.SldPanel import neutronSldAlgorithm, xraySldAlgorithm
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 
 import sas.qtgui.Utilities.LocalConfig
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
-
-class SldResultTest(unittest.TestCase):
-    """ Test the simple container class"""
-    def testObjectSize(self):
-        results = SldResult(0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        self.assertEqual(sys.getsizeof(results), 56)
 
 
 class SldAlgorithmTest(unittest.TestCase):
@@ -37,10 +30,10 @@ class SldAlgorithmTest(unittest.TestCase):
         mass_density = 1.0
         wavelength = 6.0
         
-        results = sldAlgorithm( molecular_formula,
+        results = neutronSldAlgorithm( molecular_formula,
                                 mass_density,
                                 wavelength)
-        self.assertIsInstance(results, SldResult)
+        #self.assertIsInstance(results, SldResult)
         self.assertAlmostEqual(results.neutron_length, 0.175463, 5)
         self.assertAlmostEqual(results.neutron_inc_xs, 5.365857, 5)
         self.assertAlmostEqual(results.neutron_abs_xs, 0.074224, 5)
@@ -50,10 +43,10 @@ class SldAlgorithmTest(unittest.TestCase):
         mass_density = 3.0
         wavelength = 666.0
         
-        results = sldAlgorithm( molecular_formula,
+        results = neutronSldAlgorithm( molecular_formula,
                                 mass_density,
                                 wavelength)
-        self.assertIsInstance(results, SldResult)
+        #self.assertIsInstance(results, SldResult)
         self.assertAlmostEqual(results.neutron_length,   0.059402, 5)
         self.assertAlmostEqual(results.neutron_inc_xs,   0.145427, 5)
         self.assertAlmostEqual(results.neutron_abs_xs,  15.512215, 5)

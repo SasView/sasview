@@ -204,6 +204,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(category_index)
         model_index = self.widget.cbModel.findText("be_polyelectrolyte")
         self.widget.cbModel.setCurrentIndex(model_index)
+        QtWidgets.qApp.processEvents()
 
         # check the enablement of controls
         self.assertTrue(self.widget.cbModel.isEnabled())
@@ -1228,6 +1229,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Switch to another model
         model_index = self.widget.cbModel.findText("pringle")
         self.widget.cbModel.setCurrentIndex(model_index)
+        QtWidgets.qApp.processEvents()
 
         # make sure the parameters are different than before
         self.assertFalse(self.widget.getParamNames() == cylinder_params)

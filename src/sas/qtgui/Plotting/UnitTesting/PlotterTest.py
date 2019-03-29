@@ -408,7 +408,7 @@ class PlotterTest(unittest.TestCase):
         data2.hide_error = error_status
 
         # Replace data in plot
-        self.plotter.replacePlot(1, data2)
+        self.plotter.replacePlot("Test name", data2)
 
         # See that the labels changed
         xl = self.plotter.ax.xaxis.label.get_text()
