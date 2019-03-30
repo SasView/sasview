@@ -340,6 +340,38 @@ on each optimiser, see the :ref:`Fitting_Documentation`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+Fitting Integer Parameters
+--------------------------
+
+Most of the parameters in SasView models will naturally take floating point (decimal) 
+values, but there are some parameters which can only have integer values. Examples 
+include, but are not limited to, the number of shells in a multilayer vesicle, the 
+number of beads in a pearl necklace, the number of arms of a star polymer, and so on.
+Wherever possible/recognised, the integer nature of a parameter is specified in the 
+respective model documentation and/or parameter table, so read the documentation 
+carefully!
+
+Integer parameters must be fitted with care.
+
+Start with your best possible guess for the value of the parameter. And using 
+*a priori* knowledge, fix as many of the other parameters as possible.
+ 
+The SasView optimizers treat integer parameters internally as floating point 
+numbers, but the values presented to the user are truncated or rounded, as 
+appropriate.
+
+In most instances integer parameters will probably be greater than zero. A good 
+policy in such cases is to use a constraint to enforce this.
+
+Because an integer parameter should, by definition, only move in integer steps, 
+problems may be encountered if the optimizer step size is too small. Similarly, 
+be **very careful** about applying polydispersity to integer parameters.
+
+The Levenberg-Marquardt and Quasi-Newton BFGS (and other derivative-based) 
+optimizers are probably best avoided for fitting models with integer parameters.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 Fitting Limits
 --------------
 
