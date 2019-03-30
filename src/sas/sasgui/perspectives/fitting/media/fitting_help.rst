@@ -41,7 +41,7 @@ The models in SasView are grouped into categories. By default these consist of:
    etc)
 *  *Ellipsoid* - ellipsoidal shapes (oblate,prolate, core shell, etc)
 *  *Parellelepiped* - as the name implies
-*  *Sphere* - sheroidal shapes (sphere, core multishell, vesicle, etc)
+*  *Sphere* - spheroidal shapes (sphere, core multishell, vesicle, etc)
 *  *Lamellae* - lamellar shapes (lamellar, core shell lamellar, stacked
    lamellar, etc)
 *  *Shape-Independent* - models describing structure in terms of density
@@ -59,6 +59,9 @@ You can decide your own model categorizations using the :ref:`Category_Manager`.
 
 Once you have selected a model you can read its help documentation by clicking
 on the *Description* button to the right.
+
+S(Q) models can be combined with models in the other categories to generate
+what SasView calls :ref:`Product_Models`.
 
 Show 1D/2D
 ^^^^^^^^^^
@@ -118,7 +121,7 @@ Model Functions
 ---------------
 
 For a complete list of all the library models available in SasView, see
-the `Model Documentation <../../../index.html>`_ .
+the `Model Documentation <../../../sasgui/perspectives/fitting/models/index.html>`_ .
 
 It is also possible to add your own models.
 
