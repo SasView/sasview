@@ -96,9 +96,6 @@ class PlotterTest(unittest.TestCase):
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertEqual(
-            len(self.plotter.data.view.y),
-            len(data.view.y))
         self.assertEqual(self.plotter.data.ytransform, "y")
         self.assertTrue(FigureCanvas.draw_idle.called)
 
