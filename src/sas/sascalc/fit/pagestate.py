@@ -490,7 +490,7 @@ class PageState(object):
         Helper method to print a state
         """
         for item in list:
-            if str(item[1][-5:]) == 'width':
+            if str(item[1][-6:]) == '.width':
                 par = str(item[1][:-6])
                 pd_type = str(self.model.dispersion[par]['type'])
                 rep += "parameter name: %s (%s) \n" % (str(item[1]), pd_type)
