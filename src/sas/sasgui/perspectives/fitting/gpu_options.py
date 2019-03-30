@@ -23,6 +23,7 @@ except ImportError:
 import sasmodels
 import sasmodels.model_test
 import sasmodels.sasview_model
+from sasmodels.generate import F32, F64
 
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
@@ -256,7 +257,7 @@ class GpuOptions(wx.Dialog):
         """
         #The same block of code as for OK but it is needed if we want to have
         #active response to Test button
-        import numpy as np
+
         no_opencl_msg = False
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
@@ -269,17 +270,20 @@ class GpuOptions(wx.Dialog):
 
         try:
             env = sasmodels.kernelcl.environment()
-            dtype64 = np.dtype('float64')
-            dtype32 = np.dtype('float32')
-            if dtype64 in env.context:
-                ctx = env.context[dtype64].devices[0]
-            else:
-                ctx = env.context[dtype32].devices[0]
-            clinfo = (ctx.platform.vendor,
-                        ctx.platform.version,
-                        ctx.vendor,
-                        ctx.name,
-                        ctx.version)
+            ctx = env.context[F64].devices[0]
+            clinfo = ('64bit: ', ctx.platform.vendor,
+                      ctx.platform.version,
+                      ctx.vendor,
+                      ctx.name,
+                      ctx.version)
+            if F32 in env.context:
+                ctx32 = env.context[F32].devices[0]
+                if ctx32 != ctx:
+                    clinfo += ('32bit: ', ctx32.platform.vendor,
+                               ctx32.platform.version,
+                               ctx32.vendor,
+                               ctx32.name,
+                               ctx32.version)
         except Exception:
             clinfo = None
 
