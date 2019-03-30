@@ -61,7 +61,8 @@ Once you have selected a model you can read its help documentation by clicking
 on the *Description* button to the right.
 
 S(Q) models can be combined with models in the other categories to generate
-what SasView calls :ref:`Product_Models`.
+what SasView calls "product models". See :ref:`Product_Models` for more
+information.
 
 Show 1D/2D
 ^^^^^^^^^^
