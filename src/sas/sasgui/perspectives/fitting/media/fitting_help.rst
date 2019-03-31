@@ -63,11 +63,35 @@ on the *Description* button to the right.
 Product Models
 ^^^^^^^^^^^^^^
 
+S(Q) models can be combined with many models in the other categories to
+generate what SasView calls "product models". The combination can be done by
+one of two methods, but how they behave is slightly different.
+
+The first, most straightforward, method is simply to use the S(Q) drop-down in
+the FitPage:
+
 .. figure:: p_and_s_buttons.png
 
-S(Q) models can be combined with models in the other categories to generate
-what SasView calls "product models". See :ref:`Product_Models` for more
-information.
+This example would then generate a product model with the following parameters:
+
+.. figure:: p_and_s_buttons_parameters.png
+
+The other method is to use the :ref:`Sum|Multi(p1,p2)` tool under Fitting >
+Plugin Model Operations:
+
+.. figure:: p_and_s_sum_model.png
+
+This creates a product model with the following parameters:
+
+.. figure:: p_and_s_sum_model_parameters.png
+
+As can be seen, the second method has produced a product model with an extra
+parameter: *radius_effective*. This is the radial distance determining the
+range of the $S(Q)$ interaction and may, or may not, be the same as the
+*radius*, in this example, depending on the concentration of the system. In
+other systems, *radius_effective* may depend on the particle form (shape).
+
+See :ref:`Product_Models` for more information.
 
 Show 1D/2D
 ^^^^^^^^^^
@@ -224,6 +248,8 @@ and to the declarations of the functions Iq and Iqxy:::
 
 Such a plugin should then be available in the S(Q) drop-down box on a FitPage (once
 a P(Q) model has been selected).
+
+.. _Sum|Multi(p1,p2):
 
 Sum|Multi(p1,p2)
 ^^^^^^^^^^^^^^^^
