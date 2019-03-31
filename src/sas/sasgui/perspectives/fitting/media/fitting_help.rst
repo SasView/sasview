@@ -60,6 +60,11 @@ You can decide your own model categorizations using the :ref:`Category_Manager`.
 Once you have selected a model you can read its help documentation by clicking
 on the *Description* button to the right.
 
+Product Models
+^^^^^^^^^^^^^^
+
+.. figure:: p_and_s_buttons.png
+
 S(Q) models can be combined with models in the other categories to generate
 what SasView calls "product models". See :ref:`Product_Models` for more
 information.
