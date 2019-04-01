@@ -336,7 +336,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         dlg = wx.FileDialog(self, "Choose a file",
                             default_save_location, \
-                            self.window_caption, "*.crf", wx.SAVE)
+                            self.window_caption, "*.crf", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             default_save_location = os.path.dirname(path)

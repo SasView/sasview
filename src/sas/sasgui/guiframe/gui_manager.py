@@ -1916,7 +1916,7 @@ class ViewerFrame(PARENT_FRAME):
         dlg = wx.FileDialog(self, "Save Project file",
                             self._default_save_location, "sasview_proj",
                             extension,
-                            wx.SAVE)
+                            wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
@@ -2413,7 +2413,7 @@ class ViewerFrame(PARENT_FRAME):
         options = [".txt", ".xml",".h5"]
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
-                            default_name, wildcard, wx.SAVE)
+                            default_name, wildcard, wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -2550,7 +2550,7 @@ class ViewerFrame(PARENT_FRAME):
                    "NXcanSAS files (*.h5)|*.h5|"
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
-                            default_name, wildcard, wx.SAVE)
+                            default_name, wildcard, wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

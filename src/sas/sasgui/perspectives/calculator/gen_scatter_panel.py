@@ -1670,7 +1670,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         dlg = wx.FileDialog(self, "Save sld file",
                             location, "sld_file",
                              extension,
-                             wx.SAVE)
+                             wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.parent.set_file_location(os.path.dirname(path))

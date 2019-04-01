@@ -675,7 +675,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._default_save_location = \
                         self._manager.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file", self._default_save_location,
-                            self.window_caption, "*.fitv", wx.SAVE)
+                            self.window_caption, "*.fitv", wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

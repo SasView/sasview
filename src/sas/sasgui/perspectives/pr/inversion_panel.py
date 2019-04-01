@@ -281,7 +281,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self._default_save_location = self.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
-                            self.window_caption, "*.prv", wx.SAVE)
+                            self.window_caption, "*.prv", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
