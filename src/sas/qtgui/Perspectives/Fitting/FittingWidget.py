@@ -254,9 +254,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.magnet_params_to_fit = []
 
         # Fit options
-        self.q_range_min = 0.005
-        self.q_range_max = 0.1
-        self.npts = 25
+        self.q_range_min = OptionsWidget.QMIN_DEFAULT
+        self.q_range_max = OptionsWidget.QMAX_DEFAULT
+        self.npts = OptionsWidget.NPTS_DEFAULT
         self.log_points = False
         self.weighting = 0
         self.chi2 = None

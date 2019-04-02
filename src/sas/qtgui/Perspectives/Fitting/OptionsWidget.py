@@ -12,16 +12,6 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
 
-QMIN_DEFAULT = 0.0005
-QMAX_DEFAULT = 0.5
-NPTS_DEFAULT = 50
-
-MODEL = [
-    'MIN_RANGE',
-    'MAX_RANGE',
-    'NPTS',
-    'LOG_SPACED']
-
 class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """
     Custom version of the standard QDataWidgetMapper allowing for proper
@@ -43,6 +33,15 @@ class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
 
 class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
     plot_signal = QtCore.pyqtSignal()
+    QMIN_DEFAULT = 0.0005
+    QMAX_DEFAULT = 0.5
+    NPTS_DEFAULT = 50
+    MODEL = [
+        'MIN_RANGE',
+        'MAX_RANGE',
+        'NPTS',
+        'LOG_SPACED']
+
     def __init__(self, parent=None, logic=None):
         super(OptionsWidget, self).__init__()
 
@@ -78,9 +77,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
-        self.qmin = QMIN_DEFAULT
-        self.qmax = QMAX_DEFAULT
-        self.npts = NPTS_DEFAULT
+        self.qmin = self.QMIN_DEFAULT
+        self.qmax = self.QMAX_DEFAULT
+        self.npts = self.NPTS_DEFAULT
         if self.logic.data_is_loaded:
             self.qmin, self.qmax, self.npts = self.logic.computeDataRange()
         self.initModel()
@@ -102,7 +101,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         Initialize the state
         """
         self.model = QtGui.QStandardItemModel()
-        for model_item in range(len(MODEL)):
+        for model_item in range(len(self.MODEL)):
             self.model.setItem(model_item, QtGui.QStandardItem())
         # Attach slot
         self.model.dataChanged.connect(self.onModelChange)
@@ -116,10 +115,10 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
 
-        self.mapper.addMapping(self.txtMinRange, MODEL.index('MIN_RANGE'))
-        self.mapper.addMapping(self.txtMaxRange, MODEL.index('MAX_RANGE'))
-        self.mapper.addMapping(self.txtNpts,     MODEL.index('NPTS'))
-        self.mapper.addMapping(self.chkLogData,  MODEL.index('LOG_SPACED'))
+        self.mapper.addMapping(self.txtMinRange, self.MODEL.index('MIN_RANGE'))
+        self.mapper.addMapping(self.txtMaxRange, self.MODEL.index('MAX_RANGE'))
+        self.mapper.addMapping(self.txtNpts,     self.MODEL.index('NPTS'))
+        self.mapper.addMapping(self.chkLogData,  self.MODEL.index('LOG_SPACED'))
 
         self.mapper.toFirst()
 
@@ -184,18 +183,18 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         qmax = GuiUtils.formatNumber(self.qmax, high=True)
         qmin = GuiUtils.formatNumber(self.qmin, high=True)
-        self.model.item(MODEL.index('MIN_RANGE')).setText(qmin)
-        self.model.item(MODEL.index('MAX_RANGE')).setText(qmax)
-        self.model.item(MODEL.index('NPTS')).setText(str(npts))
+        self.model.item(self.MODEL.index('MIN_RANGE')).setText(qmin)
+        self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
+        self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
         self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
 
     def state(self):
         """
         Returns current state of controls
         """
-        q_range_min = float(self.model.item(MODEL.index('MIN_RANGE')).text())
-        q_range_max = float(self.model.item(MODEL.index('MAX_RANGE')).text())
-        npts = int(self.model.item(MODEL.index('NPTS')).text())
-        log_points = str(self.model.item(MODEL.index('LOG_SPACED')).text()) == 'true'
+        q_range_min = float(self.model.item(self.MODEL.index('MIN_RANGE')).text())
+        q_range_max = float(self.model.item(self.MODEL.index('MAX_RANGE')).text())
+        npts = int(self.model.item(self.MODEL.index('NPTS')).text())
+        log_points = str(self.model.item(self.MODEL.index('LOG_SPACED')).text()) == 'true'
 
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
