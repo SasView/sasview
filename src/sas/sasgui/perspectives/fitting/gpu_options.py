@@ -15,6 +15,7 @@ import sys
 
 import wx
 
+# TODO: move device query functions to sasmodels
 try:
     import pyopencl as cl
 except ImportError:
@@ -23,12 +24,11 @@ except ImportError:
 import sasmodels
 import sasmodels.model_test
 import sasmodels.sasview_model
+from sasmodels.generate import F32, F64
 
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 logger = logging.getLogger(__name__)
-
-
 
 class CustomMessageBox(wx.Dialog):
     """
@@ -75,8 +75,6 @@ class CustomMessageBox(wx.Dialog):
         self.vbox.Fit(self)
 
         self.SetAutoLayout(True)
-        self.ShowModal()
-        self.Destroy()
 
 
 class GpuOptions(wx.Dialog):
@@ -143,6 +141,7 @@ class GpuOptions(wx.Dialog):
         test_id = wx.NewId()
         test_btn = wx.Button(self, test_id, 'Test')
         test_btn.SetToolTipString("Test if models compile on the given infrastructure")
+        self.test_btn = test_btn
 
         self.Bind(wx.EVT_BUTTON, self.on_OK, accept_btn)
         self.Bind(wx.EVT_BUTTON, self.on_test, test_btn)
@@ -178,6 +177,7 @@ class GpuOptions(wx.Dialog):
         Reading in information about available OpenCL infrastructure
         :return:
         """
+        # TODO: Include cuda platforms if available.
         clinfo = []
         platforms = []
 
@@ -256,6 +256,7 @@ class GpuOptions(wx.Dialog):
         """
         #The same block of code as for OK but it is needed if we want to have
         #active response to Test button
+
         no_opencl_msg = False
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
@@ -264,59 +265,80 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
-        sasmodels.sasview_model.reset_environment()
+        # CRUFT: next version of reset_environment() will return env
+        env = sasmodels.sasview_model.reset_environment()
 
         try:
             env = sasmodels.kernelcl.environment()
-            clinfo = [(ctx.devices[0].platform.vendor,
-                       ctx.devices[0].platform.version,
-                       ctx.devices[0].vendor,
-                       ctx.devices[0].name,
-                       ctx.devices[0].version)
-                      for ctx in env.context]
-        except Exception:
-            clinfo = None
+            clinfo = {}
+            if env.context[F64] is None:
+                clinfo['double'] = "None"
+            else:
+                ctx64 = env.context[F64].devices[0]
+                clinfo['double'] = ", ".join((
+                    ctx64.platform.vendor,
+                    ctx64.platform.version,
+                    ctx64.vendor,
+                    ctx64.name,
+                    ctx64.version))
+            if env.context[F32] is None:
+                clinfo['single'] = "None"
+            else:
+                ctx32 = env.context[F32].devices[0]
+                clinfo['single'] = ", ".join((
+                    ctx32.platform.vendor,
+                    ctx32.platform.version,
+                    ctx32.vendor,
+                    ctx32.name,
+                    ctx32.version))
+            # If the same device is used for single and double precision, then
+            # say so. Whether double is the same as single or single is the
+            # same as double depends on the order they are listed below.
+            if env.context[F32] == env.context[F64]:
+                clinfo['double'] = "same as single precision"
+        except Exception as exc:
+            logger.debug("exc %s", str(exc))
+            clinfo = {'double': "None", 'single': "None"}
+
+        msg = "\nPlatform Details:\n\n"
+        msg += "Sasmodels version: "
+        msg += sasmodels.__version__ + "\n"
+        msg += "\nPlatform used: "
+        msg += json.dumps(platform.uname()) + "\n"
+        if no_opencl_msg:
+            msg += "\nOpenCL driver: None\n"
+        else:
+            msg += "\nOpenCL driver:\n"
+            msg += "   single precision: " + clinfo['single'] + "\n"
+            msg += "   double precision: " + clinfo['double'] + "\n"
+
+        msg_title = 'OpenCL tests results'
+        running = msg + "\nRunning tests.  This may take several minutes.\n\n"
+        msg_dialog = CustomMessageBox(self.panel1, running, msg_title)
+        msg_dialog.Show()
 
         failures = []
         tests_completed = 0
-        for test in sasmodels.model_test.model_tests():
+        self.test_btn.Disable()
+        tests = sasmodels.model_test.make_suite('opencl', ['all'])
+        for test in tests:
             try:
-                test()
-            except Exception:
-                failures.append(test.description)
-
+                wx.Yield()
+                test.run_all()
+                msg_dialog.text.AppendText('.')
+            except Exception as exc:
+                logger.debug("%s failed with %s", test.test_name, str(exc))
+                msg_dialog.text.AppendText('\nFail: ' + test.test_name)
+                failures.append(test.test_name)
             tests_completed += 1
+            # TODO: Put a stop button in CustomDialog and test it here.
+            #if tests_completed > 5: break
 
-        info = {
-            'version':  sasmodels.__version__,
-            'platform': platform.uname(),
-            'opencl': clinfo,
-            'failing tests': failures,
-        }
-
-        msg_info = 'OpenCL tests results'
-
-        msg = str(tests_completed)+' tests completed.\n'
-        if len(failures) > 0:
-            msg += str(len(failures))+' tests failed.\n'
-            msg += 'Failing tests: '
-            msg += json.dumps(info['failing tests'])
-            msg += "\n"
-        else:
-            msg += "All tests passed!\n"
-
-        msg += "\nPlatform Details:\n\n"
-        msg += "Sasmodels version: "
-        msg += info['version']+"\n"
-        msg += "\nPlatform used: "
-        msg += json.dumps(info['platform'])+"\n"
-        if no_opencl_msg:
-            msg += "\nOpenCL driver: None"
-        else:
-            msg += "\nOpenCL driver: "
-            msg += json.dumps(info['opencl'])+"\n"
-
-        CustomMessageBox(self.panel1, msg, msg_info)
+        status = 'Failed %d of %d' % (len(failures), tests_completed)
+        msg_dialog.text.AppendText('\n\n' + status + '\n')
+        self.test_btn.Enable()
+        msg_dialog.ShowModal()
+        msg_dialog.Destroy()
 
     def on_help(self, event):
         """
