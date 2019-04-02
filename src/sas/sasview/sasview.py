@@ -226,13 +226,15 @@ def setup_wx():
 
     try:
         logger.info("Wx version: %s", wx.__version__)
+        logger.info("Wx PlatformInfo: %s", wx.PlatformInfo)
     except AttributeError:
         logger.error("Wx version: error reading version")
 
     # TODO: Do we need the call later fix for wx 3? Or is it wx < 3 only?
     if "phoenix" in wx.PlatformInfo:
         #wx.NewId = wx.Window.NewControlId
-        pass
+        from . import wx4cruft
+        wx4cruft.patch_py_editor()
     else:
         from . import wxcruft
         wxcruft.call_later_fix()
