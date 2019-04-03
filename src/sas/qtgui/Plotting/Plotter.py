@@ -90,9 +90,15 @@ class PlotterWidget(PlotterBase):
         if not is_fit:
             # make sure we have some function to operate on
             if self.data.xtransform is None:
-                self.data.xtransform = 'log10(x)'
+                if self.data.isSesans:
+                    self.data.xtransform='x'
+                else:
+                    self.data.xtransform = 'log10(x)'
             if self.data.ytransform is None:
-                self.data.ytransform = 'log10(y)'
+                if self.data.isSesans:
+                    self.data.ytransform='y'
+                else:
+                    self.data.ytransform = 'log10(y)'
             #Added condition to Dmax explorer from P(r) perspective
             if self.data._xaxis == 'D_{max}':
                 self.xscale = 'linear'

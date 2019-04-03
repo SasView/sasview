@@ -80,7 +80,7 @@ class PlotterTest(unittest.TestCase):
     def testPlotWithSesans(self):
         """ Ensure that Sesans data is plotted in linear cooredinates"""
         data = Data1D(x=[1.0, 2.0, 3.0],
-                      y=[10.0, 11.0, 12.0],
+                      y=[-10.0, -11.0, -12.0],
                       dx=[0.1, 0.2, 0.3],
                       dy=[0.1, 0.2, 0.3])
         data.title = "Sesans data"
@@ -96,6 +96,7 @@ class PlotterTest(unittest.TestCase):
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
+        self.assertEqual(self.plotter.data.ytransform, "y")
         self.assertTrue(FigureCanvas.draw_idle.called)
 
     def testCreateContextMenuQuick(self):
