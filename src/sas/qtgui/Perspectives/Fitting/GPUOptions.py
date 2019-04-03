@@ -5,6 +5,8 @@ import json
 import platform
 import webbrowser
 import logging
+from twisted.internet import threads
+from twisted.internet import reactor
 
 import sasmodels
 import sasmodels.model_test
@@ -40,6 +42,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     clicked = False
     sas_open_cl = None
     cl_options = None
+    testingDoneSignal = QtCore.pyqtSignal(str)
+    testingFailedSignal = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(GPUOptions, self).__init__(parent)
@@ -48,7 +52,10 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.addOpenCLOptions()
+        self.progressBar.setVisible(False)
         self.createLinks()
+        self.testingDoneSignal.connect(self.testCompleted)
+        self.testingFailedSignal.connect(self.testFailed)
 
     def addOpenCLOptions(self):
         """
@@ -120,9 +127,20 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         Run sasmodels check from here and report results from
         """
+        self.model_tests = sasmodels.model_test.make_suite('opencl', ['all'])
+        number_of_tests = len(self.model_tests._tests)
+        self.progressBar.setMinimum(0)
+        self.progressBar.setMaximum(number_of_tests)
+        self.progressBar.setVisible(True)
 
-        no_opencl_msg = self.set_sas_open_cl()
+        test_thread = threads.deferToThread(self.testThread)
+        test_thread.addCallback(self.testComplete)
+        test_thread.addErrback(self.testFail)
 
+    def testThread(self):
+        """
+        Testing in another thread
+        """
         try:
             env = sasmodels.kernelcl.environment()
             clinfo = {}
@@ -157,8 +175,9 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
 
         failures = []
         tests_completed = 0
-        model_tests = sasmodels.model_test.make_suite('opencl', ['all'])
-        for test in model_tests:
+        for counter, test in enumerate(self.model_tests):
+            # update the progress bar
+            reactor.callFromThread(self.updateCounter, counter)
             try:
                 test.run_all()
             except Exception:
@@ -187,12 +206,46 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         msg += info['version'] + "\n"
         msg += "\nPlatform used: "
         msg += json.dumps(info['platform']) + "\n"
-        if no_opencl_msg:
+        if self.set_sas_open_cl():
             msg += "\nOpenCL driver: None"
         else:
             msg += "\nOpenCL driver: "
             msg += "   single precision: " + json.dumps(info['opencl_single']) + "\n"
             msg += "   double precision: " + json.dumps(info['opencl_double']) + "\n"
+
+        return msg
+
+    def updateCounter(self, step):
+        """
+        Update progress bar with current value
+        """
+        self.progressBar.setValue(step)
+        return
+
+    def testComplete(self, msg):
+        """
+        Testing done: send signal to main thread with update
+        """
+        self.testingDoneSignal.emit(msg)
+
+    def testFail(self, msg):
+        """
+        Testing failed: log the reason
+        """
+        self.testingFailedSignal.emit(msg)
+
+    def testFailed(self, msg):
+        """
+        Testing failed: log the reason
+        """
+        self.progressBar.setVisible(False)
+        logging.error(str(msg))
+
+    def testCompleted(self, msg):
+        """
+        Respond to successful test completion
+        """
+        self.progressBar.setVisible(False)
         GPUTestResults(self, msg)
 
     def helpButtonClicked(self):
