@@ -53,6 +53,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.addOpenCLOptions()
         self.progressBar.setVisible(False)
+        self.progressBar.setFormat(" Test %v / %m")
         self.createLinks()
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
@@ -132,12 +133,16 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(number_of_tests)
         self.progressBar.setVisible(True)
+        self.testButton.setEnabled(False)
+        self.okButton.setEnabled(False)
+        self.resetButton.setEnabled(False)
+        no_opencl_msg = self.set_sas_open_cl()
 
-        test_thread = threads.deferToThread(self.testThread)
+        test_thread = threads.deferToThread(self.testThread, no_opencl_msg)
         test_thread.addCallback(self.testComplete)
         test_thread.addErrback(self.testFail)
 
-    def testThread(self):
+    def testThread(self, no_opencl_msg):
         """
         Testing in another thread
         """
@@ -206,7 +211,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         msg += info['version'] + "\n"
         msg += "\nPlatform used: "
         msg += json.dumps(info['platform']) + "\n"
-        if self.set_sas_open_cl():
+        if no_opencl_msg:
             msg += "\nOpenCL driver: None"
         else:
             msg += "\nOpenCL driver: "
@@ -239,6 +244,10 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         Testing failed: log the reason
         """
         self.progressBar.setVisible(False)
+        self.testButton.setEnabled(True)
+        self.okButton.setEnabled(True)
+        self.resetButton.setEnabled(True)
+
         logging.error(str(msg))
 
     def testCompleted(self, msg):
@@ -246,6 +255,10 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         Respond to successful test completion
         """
         self.progressBar.setVisible(False)
+        self.testButton.setEnabled(True)
+        self.okButton.setEnabled(True)
+        self.resetButton.setEnabled(True)
+
         GPUTestResults(self, msg)
 
     def helpButtonClicked(self):
