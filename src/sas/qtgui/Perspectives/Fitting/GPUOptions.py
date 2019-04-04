@@ -9,6 +9,7 @@ import logging
 import sasmodels
 import sasmodels.model_test
 import sasmodels.kernelcl
+from sasmodels.generate import F32, F64
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -111,8 +112,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         else:
             if "SAS_OPENCL" in os.environ:
                 del os.environ["SAS_OPENCL"]
-        # Sasmodels kernelcl doesn't exist when initiated with None
-        sasmodels.kernelcl.reset_environment()
+        # CRUFT: next version of reset_environment() will return env
+        sasmodels.sasview_model.reset_environment()
         return no_opencl_msg
 
     def testButtonClicked(self):
@@ -122,34 +123,53 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
 
         no_opencl_msg = self.set_sas_open_cl()
 
-        # Only import when tests are run
-        from sasmodels.model_test import model_tests
-
         try:
             env = sasmodels.kernelcl.environment()
-            clinfo = [(ctx.devices[0].platform.vendor,
-                       ctx.devices[0].platform.version,
-                       ctx.devices[0].vendor,
-                       ctx.devices[0].name,
-                       ctx.devices[0].version)
-                      for ctx in env.context]
-        except Exception:
-            clinfo = None
+            clinfo = {}
+            if env.context[F64] is None:
+                clinfo['double'] = "None"
+            else:
+                ctx64 = env.context[F64].devices[0]
+                clinfo['double'] = ", ".join((
+                    ctx64.platform.vendor,
+                    ctx64.platform.version,
+                    ctx64.vendor,
+                    ctx64.name,
+                    ctx64.version))
+            if env.context[F32] is None:
+                clinfo['single'] = "None"
+            else:
+                ctx32 = env.context[F32].devices[0]
+                clinfo['single'] = ", ".join((
+                    ctx32.platform.vendor,
+                    ctx32.platform.version,
+                    ctx32.vendor,
+                    ctx32.name,
+                    ctx32.version))
+            # If the same device is used for single and double precision, then
+            # say so. Whether double is the same as single or single is the
+            # same as double depends on the order they are listed below.
+            if env.context[F32] == env.context[F64]:
+                clinfo['double'] = "same as single precision"
+        except Exception as exc:
+            logger.debug("exc %s", str(exc))
+            clinfo = {'double': "None", 'single': "None"}
 
         failures = []
         tests_completed = 0
-        for test in model_tests():
+        model_tests = sasmodels.model_test.make_suite('opencl', ['all'])
+        for test in model_tests:
             try:
-                test()
+                test.run_all()
             except Exception:
                 failures.append(test.description)
-
             tests_completed += 1
 
         info = {
             'version': sasmodels.__version__,
             'platform': platform.uname(),
-            'opencl': clinfo,
+            'opencl_single': clinfo['single'],
+            'opencl_double': clinfo['double'],
             'failing tests': failures,
         }
 
@@ -171,7 +191,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             msg += "\nOpenCL driver: None"
         else:
             msg += "\nOpenCL driver: "
-            msg += json.dumps(info['opencl']) + "\n"
+            msg += "   single precision: " + json.dumps(info['opencl_single']) + "\n"
+            msg += "   double precision: " + json.dumps(info['opencl_double']) + "\n"
         GPUTestResults(self, msg)
 
     def helpButtonClicked(self):
