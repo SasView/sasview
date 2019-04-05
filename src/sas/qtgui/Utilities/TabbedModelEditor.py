@@ -531,7 +531,7 @@ Authorship and Verification
 * **Last Reviewed by:** --- **Date:** %(date)s
 """
 
-from math import *
+from sasmodels.special import *
 from numpy import inf
 
 name = "%(name)s"
