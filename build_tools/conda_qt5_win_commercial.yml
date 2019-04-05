@@ -4,6 +4,8 @@ channels:
 dependencies:
  - colorama
  - ipykernel=4.9.0
+ - ipython=6.5.0
+ - jupyter=1.0.0
  - nbformat
  - pyopencl=2018.2.2
  - scipy=1.2.0
@@ -16,7 +18,7 @@ dependencies:
  - cython=0.29.4
  - sip
  - pip:
-   - matplotlib
+   - matplotlib==2.2.3
    - bumps==0.7.11
    - pyinstaller==3.3.1
    - periodictable==1.5.0
