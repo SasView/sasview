@@ -60,19 +60,21 @@ You can decide your own model categorizations using the :ref:`Category_Manager`.
 Once you have selected a model you can read its help documentation by clicking
 on the *Description* button to the right.
 
-Product Models
-^^^^^^^^^^^^^^
+Interaction Models
+^^^^^^^^^^^^^^^^^^
 
 S(Q) models can be combined with many models in the other categories to
-generate what SasView calls "product models". The combination can be done by
-one of two methods, but how they behave is slightly different.
+generate what SasView calls "interaction models" (previously "product models").
+The combination can be done by one of two methods, but how they behave is
+slightly different.
 
 The first, most straightforward, method is simply to use the S(Q) drop-down in
 the FitPage:
 
 .. figure:: p_and_s_buttons.png
 
-This example would then generate a product model with the following parameters:
+This example would then generate an interaction model with the following
+parameters:
 
 .. figure:: p_and_s_buttons_parameters.png
 
@@ -81,17 +83,17 @@ Plugin Model Operations:
 
 .. figure:: p_and_s_sum_model.png
 
-This creates a product model with the following parameters:
+This creates an interaction model with the following parameters:
 
 .. figure:: p_and_s_sum_model_parameters.png
 
-As can be seen, the second method has produced a product model with an extra
-parameter: *radius_effective*. This is the radial distance determining the
+As can be seen, the second method has produced an interaction model with an
+extra parameter: *radius_effective*. This is the radial distance determining the
 range of the $S(Q)$ interaction and may, or may not, be the same as the
 *radius*, in this example, depending on the concentration of the system. In
 other systems, *radius_effective* may depend on the particle form (shape).
 
-See :ref:`Product_Models` for more information.
+See :ref:`Interaction_Models` for more information.
 
 Show 1D/2D
 ^^^^^^^^^^
