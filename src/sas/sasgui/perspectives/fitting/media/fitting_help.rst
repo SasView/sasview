@@ -63,10 +63,10 @@ on the *Description* button to the right.
 Interaction Models
 ^^^^^^^^^^^^^^^^^^
 
-S(Q) models can be combined with many models in the other categories to
-generate what SasView calls "interaction models" (previously "product models").
-The combination can be done by one of two methods, but how they behave is
-slightly different.
+Structure factor S(Q) models can be combined with many form factor P(Q) models
+in the other categories to generate what SasView calls "interaction models"
+(previously "product models"). The combination can be done by one of two
+methods, but how they behave is slightly different.
 
 The first, most straightforward, method is simply to use the S(Q) drop-down in
 the FitPage:
@@ -94,6 +94,14 @@ range of the $S(Q)$ interaction and may, or may not, be the same as the
 other systems, *radius_effective* may depend on the particle form (shape).
 
 See :ref:`Interaction_Models` for more information.
+
+Mixture Models
+^^^^^^^^^^^^^^
+
+SasView "mixture models" (previously called "sum models") are summations of
+form factor models, or even of form factor models and an "interaction model"
+(see above), and are used to describe mixed-phase systems where the scattering
+is proportional to the volume fraction of each contributing phase.
 
 Show 1D/2D
 ^^^^^^^^^^
