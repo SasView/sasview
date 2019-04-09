@@ -395,23 +395,18 @@ def addShellsToModel(parameters, model, index, row_num=None, view=None):
 
     return rows
 
-def calculateChi2(reference_data, current_data):
+def calculateChi2(reference_data, current_data, weight):
     """
     Calculate Chi2 value between two sets of data
     """
     if reference_data is None or current_data is None:
         return None
-    # WEIGHING INPUT
-    #from sas.sasgui.perspectives.fitting.utils import get_weight
-    #flag = self.get_weight_flag()
-    #weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
     chisqr = None
     if reference_data is None:
         return chisqr
 
     # temporary default values for index and weight
     index = None
-    weight = None
 
     # Get data: data I, theory I, and data dI in order
     if isinstance(reference_data, Data2D):
@@ -426,21 +421,46 @@ def calculateChi2(reference_data, current_data):
         gn = reference_data.data[index]
         en = current_data.err_data[index]
     else:
-        # 1 d theory from model_thread is only in the range of index
+
         if index is None:
             index = numpy.ones(len(current_data.y), dtype=bool)
-        if weight is not None:
-            current_data.dy = weight
         if current_data.dy is None or current_data.dy == []:
             dy = numpy.ones(len(current_data.y))
         else:
-            ## Set consistently w/AbstractFitengine:
-            # But this should be corrected later.
-            dy = copy.deepcopy(current_data.dy)
+            dy = weight
             dy[dy == 0] = 1
+
         fn = current_data.y[index]
         gn = reference_data.y
         en = dy[index]
+
+        x_current = current_data.x
+        x_reference = reference_data.x
+
+        if len(fn) > len(gn):
+            fn = fn[0:len(gn)]
+            en = en[0:len(gn)]
+        else:
+            try:
+                y = numpy.zeros(len(current_data.y))
+                begin = 0
+                for i, x_value in enumerate(x_reference):
+                    if x_value in x_current:
+                        begin = i
+                        break
+                end = len(x_reference)
+                endl = 0
+                for i, x_value in enumerate(list(x_reference)[::-1]):
+                    if x_value in x_current:
+                        endl = i
+                        break
+                en = en[begin:end-endl]
+                y = (fn - gn[begin:end-endl])/en
+            except ValueError:
+                # value errors may show up every once in a while for malformed columns,
+                # just reuse what's there already
+                pass
+
     # Calculate the residual
     try:
         res = (fn - gn) / en
@@ -453,7 +473,7 @@ def calculateChi2(reference_data, current_data):
 
     return chisqr
 
-def residualsData1D(reference_data, current_data):
+def residualsData1D(reference_data, current_data, weights):
     """
     Calculate the residuals for difference of two Data1D sets
     """
@@ -465,9 +485,15 @@ def residualsData1D(reference_data, current_data):
     if current_data.dy is None or current_data.dy == []:
         dy = numpy.ones(len(current_data.y))
     else:
-        dy = weight if weight is not None else numpy.ones(len(current_data.y))
+        #dy = weight if weight is not None else numpy.ones(len(current_data.y))
+        if numpy.all(current_data.dy):
+            dy = current_data.dy
+        else:
+            dy = weights
         dy[dy == 0] = 1
+
     fn = current_data.y[index][0]
+
     gn = reference_data.y
     en = dy[index][0]
 
@@ -481,7 +507,7 @@ def residualsData1D(reference_data, current_data):
         y = (fn - gn)/en
         residuals.y = -y
     elif len(fn) > len(gn):
-        residuals.y = (fn - gn[1:len(fn)])/en
+        residuals.y = -(fn - gn[1:len(fn)])/en
     else:
         try:
             y = numpy.zeros(len(current_data.y))
@@ -496,9 +522,9 @@ def residualsData1D(reference_data, current_data):
                 if x_value in x_current:
                     endl = i
                     break
-
+            en = en[begin:end-endl]
             y = (fn - gn[begin:end-endl])/en
-            residuals.y = y
+            residuals.y = -y
         except ValueError:
             # value errors may show up every once in a while for malformed columns,
             # just reuse what's there already
@@ -516,14 +542,10 @@ def residualsData1D(reference_data, current_data):
 
     return residuals
 
-def residualsData2D(reference_data, current_data):
+def residualsData2D(reference_data, current_data, weight):
     """
     Calculate the residuals for difference of two Data2D sets
     """
-    # temporary default values for index and weight
-    # index = None
-    weight = None
-
     # build residuals
     residuals = Data2D()
     # Not for trunk the line below, instead use the line above
@@ -531,7 +553,10 @@ def residualsData2D(reference_data, current_data):
     residuals.data = None
     fn = current_data.data
     gn = reference_data.data
-    en = current_data.err_data if weight is None else weight
+    if weight is None:
+        en = current_data.err_data
+    else:
+        en = weight
     residuals.data = (fn - gn) / en
     residuals.qx_data = current_data.qx_data
     residuals.qy_data = current_data.qy_data
@@ -549,7 +574,7 @@ def residualsData2D(reference_data, current_data):
         return None
     return residuals
 
-def plotResiduals(reference_data, current_data):
+def plotResiduals(reference_data, current_data, weights):
     """
     Create Data1D/Data2D with residuals, ready for plotting
     """
@@ -560,7 +585,7 @@ def plotResiduals(reference_data, current_data):
                       "Data2D": residualsData2D}
 
     try:
-        residuals = residuals_dict[method_name](reference_data, data_copy)
+        residuals = residuals_dict[method_name](reference_data, data_copy, weights)
     except ValueError:
         return None
 

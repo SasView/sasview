@@ -417,6 +417,7 @@ class PlotterBase(QtWidgets.QWidget):
             text_to_show = GuiUtils.retrieveData2d(plot_data)
         # Hardcoded sizes to enable full width rendering with default font
         self.txt_widget.resize(420,600)
+        self.txt_widget.clear()
 
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)

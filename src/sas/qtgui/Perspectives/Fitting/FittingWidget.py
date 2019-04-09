@@ -2212,6 +2212,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
 
@@ -2880,7 +2881,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.createNewIndex(weighted_data)
 
         # Calculate difference between return_data and logic.data
-        self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data)
+        weights = FittingUtilities.getWeight(self.data, self.is2D, flag = self.weighting)
+        self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
         # Update the control
         chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
@@ -2888,8 +2890,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Plot residuals if actual data
         if not self.data_is_loaded:
             return
-
-        residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data)
+        residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data, weights)
         if residuals_plot is None:
             return
         residuals_plot.id = "Residual " + residuals_plot.id
@@ -4028,10 +4029,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 joffset = 1
             # min/max
             try:
-                param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-                self._model_model.item(row, 2+joffset).setText(param_repr)
-                param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-                self._model_model.item(row, 3+joffset).setText(param_repr)
+                self._model_model.item(row, 2+joffset).setText(param_dict[param_name][2+ioffset])
+                self._model_model.item(row, 3+joffset).setText(param_dict[param_name][3+ioffset])
             except:
                 pass
 
