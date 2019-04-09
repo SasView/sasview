@@ -350,6 +350,12 @@ class StatusBar(wxStatusB):
             e_msg += "Further information might be available in "
             e_msg += "the Console log (bottom right corner)."
             wx.MessageBox(e_msg, style=wx.ICON_ERROR)
+        if msg == "warning":
+            e_msg = "Warning:\n"
+            e_msg += "\t" + event.status + "\n\n"
+            e_msg += "Further information might be available in "
+            e_msg += "the Console log (bottom right corner)."
+            wx.MessageBox(e_msg, style=wx.ICON_EXCLAMATION)
 
     def set_message(self, event):
         """

@@ -1865,13 +1865,16 @@ class ViewerFrame(PARENT_FRAME):
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
             if path is not None:
-                self._default_save_location = os.path.dirname(path)
-                dlg.Destroy()
-                # Reset to a base state
-                self._on_reset_state()
-                self._data_panel.on_remove(None, False)
-                # Load the project file
-                self.load_state(path=path, is_project=True)
+                try:
+                    self._default_save_location = os.path.dirname(path)
+                    dlg.Destroy()
+                    # Reset to a base state
+                    self._on_reset_state()
+                    self._data_panel.on_remove(None, False)
+                    # Load the project file
+                    self.load_state(path=path, is_project=True)
+                except Exception as exc:
+                    logger.error(exc.message)
 
     def _on_reset_state(self):
         """
@@ -1882,7 +1885,10 @@ class ViewerFrame(PARENT_FRAME):
         self._data_panel.set_panel_on_focus()
         # Remove all loaded data
         for plugin in self.plugins:
-            plugin.clear_panel()
+            logger.debug("Clear all instances from {0}".format(plugin.sub_menu))
+            if hasattr(plugin, "clear_panel"):
+                plugin.clear_panel()
+            logger.debug("All instances from {0} clear".format(plugin.sub_menu))
         # Reset plot number to 0
         self.graph_num = 0
 
