@@ -1885,10 +1885,8 @@ class ViewerFrame(PARENT_FRAME):
         self._data_panel.set_panel_on_focus()
         # Remove all loaded data
         for plugin in self.plugins:
-            logger.debug("Clear all instances from {0}".format(plugin.sub_menu))
             if hasattr(plugin, "clear_panel"):
                 plugin.clear_panel()
-            logger.debug("All instances from {0} clear".format(plugin.sub_menu))
         # Reset plot number to 0
         self.graph_num = 0
 

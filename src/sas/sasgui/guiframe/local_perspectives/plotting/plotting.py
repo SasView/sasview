@@ -133,7 +133,7 @@ class Plugin(PluginBase):
         """
         Clear and Hide all plot panels, and remove them from menu
         """
-        for group_id in self.plot_panels.keys():
+        for group_id in list(self.plot_panels.keys()):
             self.clear_panel_by_id(group_id)
         self.plot_panels = {}
 
@@ -143,7 +143,7 @@ class Plugin(PluginBase):
         """
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
-            for plottable in panel.graph.plottables.keys():
+            for plottable in list(panel.graph.plottables.keys()):
                 self.remove_plot(group_id, plottable.id)
             panel.graph.reset()
             return True
