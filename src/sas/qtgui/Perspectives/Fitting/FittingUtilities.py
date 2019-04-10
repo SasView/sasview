@@ -873,4 +873,3 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             has_poly = True
             break
     return has_poly
-

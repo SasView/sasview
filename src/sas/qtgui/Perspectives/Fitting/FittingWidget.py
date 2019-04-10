@@ -579,6 +579,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
+        self.communicate.updateMaskedDataSignal.connect(self.onMaskedData)
 
     def modelName(self):
         """
@@ -4141,6 +4142,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self._magnet_model.item(row, 3+joffset).setText(param_repr)
 
         self.iterateOverMagnetModel(updateFittedValues)
+
+    def onMaskedData(self):
+        """
+        A mask has been applied to current data.
+        Update the Q ranges.
+        """
+        self.updateQRange()
+        self.updateData()
 
     def getCurrentFitState(self, state=None):
         """

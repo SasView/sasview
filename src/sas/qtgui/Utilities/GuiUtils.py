@@ -308,6 +308,9 @@ class Communicate(QtCore.QObject):
     # show the plot as a regular in-workspace object
     forcePlotDisplaySignal = QtCore.pyqtSignal(list)
 
+    # Update the masked ranges in fitting
+    updateMaskedDataSignal = QtCore.pyqtSignal()
+
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem

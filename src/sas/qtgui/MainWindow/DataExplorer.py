@@ -1529,6 +1529,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Modal dialog here.
         mask_editor.exec_()
 
+        # Mask assigning done update qranges (Data has been updated in-place)
+        self.communicator.updateMaskedDataSignal.emit()
+
     def freezeItem(self, item=None):
         """
         Freeze given item
