@@ -2890,7 +2890,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Plot residuals if actual data
         if not self.data_is_loaded:
             return
-        residuals_plot = FittingUtilities.plotResiduals(self.data, weighted_data, weights)
+        residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)
         if residuals_plot is None:
             return
         residuals_plot.id = "Residual " + residuals_plot.id
