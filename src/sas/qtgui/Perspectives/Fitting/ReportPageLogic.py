@@ -98,7 +98,10 @@ class ReportPageLogic(object):
             canvas = FigureCanvas(fig)
             png_output = BytesIO()
             try:
-                fig.savefig(png_output, format="png", dpi=75)
+                if sys.platform == "darwin":
+                    fig.savefig(png_output, format="png", dpi=150)
+                else:
+                    fig.savefig(png_output, format="png", dpi=75)
             except PermissionError as ex:
                 logging.error("Creating of the report failed: %s"%str(ex))
                 return
