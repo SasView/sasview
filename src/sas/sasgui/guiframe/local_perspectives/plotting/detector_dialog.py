@@ -98,8 +98,8 @@ class DetectorDialog(wx.Dialog):
             self.cmap = DEFAULT_CMAP
             self.cmap_selector.SetStringSelection("jet")
             self._on_select_cmap(event=None)
-        except:
-            msg = "error occurs while resetting Detector: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "error occurs while resetting Detector: %s" % exc
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
     def checkValues(self, event):

@@ -5,7 +5,14 @@ from __future__ import print_function
 
 import logging
 import traceback
+import math
+import os
+import operator
+import copy
+
 import wx
+import numpy as np
+
 # Try a normal import first
 # If it fails, try specifying a version
 import matplotlib
@@ -14,27 +21,22 @@ matplotlib.interactive(False)
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
-import os
-import transform
-#TODO: make the plottables interactive
-from binder import BindArtist
 from matplotlib.font_manager import FontProperties
-DEBUG = False
-
-from plottables import Graph
-from TextDialog import TextDialog
-from LabelDialog import LabelDialog
-import operator
-
-import math
 import pylab
 DEFAULT_CMAP = pylab.cm.jet
-import copy
-import numpy as np
 
 from sas.sasgui.guiframe.events import StatusEvent
+
+#TODO: make the plottables interactive
+from . import transform
+from .TextDialog import TextDialog
+from .LabelDialog import LabelDialog
+from .binder import BindArtist
+from .convert_units import convert_unit
+from .plottables import Graph
 from .toolbar import NavigationToolBar, PlotPrintout, bind
 
+DEBUG = False
 logger = logging.getLogger(__name__)
 
 def show_tree(obj, d=0):
@@ -43,7 +45,6 @@ def show_tree(obj, d=0):
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a, d + 1)
 
-from convert_units import convert_unit
 
 
 def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
@@ -115,7 +116,7 @@ class PlotPanel(wx.Panel):
         self.line_collections_list = []
         self.figure = Figure(None, dpi, linewidth=2.0)
         self.color = '#b3b3b3'
-        from canvas import FigureCanvas
+        from .canvas import FigureCanvas
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.SetColor(color)
         self._resizeflag = True
@@ -656,10 +657,10 @@ class PlotPanel(wx.Panel):
                     plot_dict[item] = plotlist[item]
         else:
             plot_dict = plotlist
-        from fitDialog import LinearFit
+        from .fitDialog import LinearFit
 
         if len(plot_dict.keys()) > 0:
-            first_item = plot_dict.keys()[0]
+            first_item = list(plot_dict.keys())[0]
             dlg = LinearFit(parent=None, plottable=first_item,
                             push_data=self.onFitDisplay,
                             transform=self.returnTrans,
@@ -702,7 +703,7 @@ class PlotPanel(wx.Panel):
             :param plot: PlotPanel owning the graph
 
         """
-        from fitDialog import LinearFit
+        from .fitDialog import LinearFit
         if self._fit_dialog is not None:
             return
         self._fit_dialog = LinearFit(None, plot, self.onFitDisplay,
@@ -735,7 +736,7 @@ class PlotPanel(wx.Panel):
         if len(plot_list.keys()) > 0:
             first_item = plot_list.keys()[0]
             if first_item.x != []:
-                from PropertyDialog import Properties
+                from .PropertyDialog import Properties
                 dial = Properties(self, -1, 'Properties')
                 dial.setValues(self.prevXtrans, self.prevYtrans, self.viewModel)
                 if dial.ShowModal() == wx.ID_OK:
@@ -1000,9 +1001,8 @@ class PlotPanel(wx.Panel):
         """
         Remove legend for ax or the current axes.
         """
-        from pylab import gca
         if ax is None:
-            ax = gca()
+            ax = pylab.gca()
         ax.legend_ = None
 
     def _on_addtext(self, event):
@@ -1326,7 +1326,7 @@ class PlotPanel(wx.Panel):
         self.subplot.set_xscale('linear')
         if id is None:
             id = name
-        from plottable_interactor import PointInteractor
+        from .plottable_interactor import PointInteractor
         p = PointInteractor(self, self.subplot, zorder=zorder, id=id)
         if p.markersize is not None:
             markersize = p.markersize
@@ -1343,7 +1343,7 @@ class PlotPanel(wx.Panel):
         self.subplot.set_xscale('linear')
         if id is None:
             id = name
-        from plottable_interactor import PointInteractor
+        from .plottable_interactor import PointInteractor
         p = PointInteractor(self, self.subplot, zorder=zorder, id=id)
         p.curve(x, y, dy=dy, color=color, symbol=symbol, zorder=zorder,
                 label=label)
@@ -1433,6 +1433,7 @@ class PlotPanel(wx.Panel):
         Render the current data
 
         """
+        # TODO: include mask info in plotter
         self.data = data
         self.qx_data = qx_data
         self.qy_data = qy_data
@@ -1450,37 +1451,26 @@ class PlotPanel(wx.Panel):
             output = self._build_matrix()
         else:
             output = copy.deepcopy(self.data)
-        # check scale
+        # rescale data if necessary
         if self.scale == 'log_{10}':
-            try:
-                if  self.zmin_2D <= 0  and len(output[output > 0]) > 0:
-                    zmin_temp = self.zmin_2D
-                    output[output > 0] = np.log10(output[output > 0])
-                    #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(np.min(output[output>0]))
-                elif self.zmin_2D <= 0:
-                    zmin_temp = self.zmin_2D
-                    output[output > 0] = np.zeros(len(output))
-                    output[output <= 0] = -32
-                else:
-                    zmin_temp = self.zmin_2D
-                    output[output > 0] = np.log10(output[output > 0])
-                    #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(np.min(output[output>0]))
-            except:
-                #Too many problems in 2D plot with scale
-                pass
-
-        else:
-            zmin_temp = self.zmin_2D
+            with np.errstate(all='ignore'):
+                output = np.log10(output)
+            index = np.isfinite(output)
+            if not index.all():
+                cutoff = (np.min(output[index]) - np.log10(2)
+                          if index.any() else 0.)
+                output[~index] = cutoff
+        # TODO: fix handling of zmin_2D/zmax_2D in _onToggleScale
+        # For now, use default vmin/vmax from data
+        #vmin, vmax = self.zmin_2D, self.zmax_2D
+        vmin, vmax = None, None
         self.cmap = cmap
         if self.dimension != 3:
             #Re-adjust colorbar
             self.subplot.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)
-
             im = self.subplot.imshow(output, interpolation='nearest',
                                      origin='lower',
-                                     vmin=zmin_temp, vmax=self.zmax_2D,
+                                     vmin=vmin, vmax=vmax,
                                      cmap=self.cmap,
                                      extent=(self.xmin_2D, self.xmax_2D,
                                              self.ymin_2D, self.ymax_2D))
@@ -1753,7 +1743,7 @@ class PlotPanel(wx.Panel):
         if remove_fit:
             self.graph.delete(self.fit_result)
             if hasattr(self, 'plots'):
-                if 'fit' in self.plots.keys():
+                if 'fit' in self.plots:
                     del self.plots['fit']
         self.ly = None
         self.q_ctrl = None

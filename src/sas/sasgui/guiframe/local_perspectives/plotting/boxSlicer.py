@@ -1,12 +1,15 @@
-import wx
 import math
+
+import wx
 import numpy as np
+
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import SlicerParameterEvent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
-from BaseInteractor import _BaseInteractor
 from sas.sasgui.guiframe.dataFitting import Data1D
+
+from .BaseInteractor import _BaseInteractor
 
 
 class BoxInteractor(_BaseInteractor):
@@ -151,7 +154,7 @@ class BoxInteractor(_BaseInteractor):
         if self.averager is None:
             if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
-                raise ValueError, msg
+                raise ValueError(msg)
             self.averager = new_slab
         if self.direction == "X":
             if self.fold:
@@ -167,7 +170,7 @@ class BoxInteractor(_BaseInteractor):
             bin_width = (y_max + y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
-            raise ValueError, msg
+            raise ValueError(msg)
         # # Average data2D given Qx or Qy
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)

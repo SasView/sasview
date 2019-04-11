@@ -11,9 +11,11 @@
 #copyright 2008, University of Tennessee
 ################################################################################
 
-import wx
 import sys
 from copy import deepcopy
+
+import wx
+
 from sas.sasgui.guiframe.events import EVT_NEW_PLOT
 from sas.sasgui.guiframe.events import EVT_PLOT_QRANGE
 from sas.sasgui.guiframe.events import EVT_PLOT_LIM
@@ -22,6 +24,7 @@ from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.gui_manager import MDIFrame
+
 DEFAULT_MENU_ITEM_LABEL = "No graph available"
 DEFAULT_MENU_ITEM_ID = wx.NewId()
 
@@ -90,9 +93,9 @@ class Plugin(PluginBase):
         """
         if event is None:
             return
-        if event.id in self.plot_panels.keys():
+        if event.id in self.plot_panels:
             panel = self.plot_panels[event.id]
-        elif event.group_id in self.plot_panels.keys():
+        elif event.group_id in self.plot_panels:
             panel = self.plot_panels[event.group_id]
         else:
             return
@@ -101,9 +104,9 @@ class Plugin(PluginBase):
     def _on_plot_lim(self, event=None):
         if event is None:
             return
-        if event.id in self.plot_panels.keys():
+        if event.id in self.plot_panels:
             panel = self.plot_panels[event.id]
-        elif event.group_id in self.plot_panels.keys():
+        elif event.group_id in self.plot_panels:
             panel = self.plot_panels[event.group_id]
         else:
             return
@@ -122,7 +125,7 @@ class Plugin(PluginBase):
         remove plot of ID = id from a panel of group ID =group_id
         """
 
-        if group_id in self.plot_panels.keys():
+        if group_id in self.plot_panels:
             panel = self.plot_panels[group_id]
             panel.remove_data_by_id(id=id)
 
@@ -141,7 +144,7 @@ class Plugin(PluginBase):
         """
         clear the graph
         """
-        if group_id in self.plot_panels.keys():
+        if group_id in self.plot_panels:
             panel = self.plot_panels[group_id]
             for plottable in list(panel.graph.plottables.keys()):
                 self.remove_plot(group_id, plottable.id)
@@ -183,7 +186,7 @@ class Plugin(PluginBase):
         """
         # Create a new plot panel if none was available
         if issubclass(data.__class__, Data1D):
-            from Plotter1D import ModelPanel1D
+            from .Plotter1D import ModelPanel1D
             ## get the data representation label of the data to plot
             ## when even the user select "change scale"
             xtransform = data.xtransform
@@ -199,14 +202,14 @@ class Plugin(PluginBase):
             return  new_panel
 
         msg = "1D Panel of group ID %s could not be created" % str(group_id)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     def create_2d_panel(self, data, group_id):
         """
         """
         if issubclass(data.__class__, Data2D):
             ##Create a new plotpanel for 2D data
-            from Plotter2D import ModelPanel2D
+            from .Plotter2D import ModelPanel2D
             scale = data.scale
             win = MDIFrame(self.parent, None, 'None', (200, 150))
             win.Show(False)
@@ -217,7 +220,7 @@ class Plugin(PluginBase):
             new_panel.frame = win
             return new_panel
         msg = "2D Panel of group ID %s could not be created" % str(group_id)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     def update_panel(self, data, panel):
         """
@@ -237,7 +240,7 @@ class Plugin(PluginBase):
             msg = "Cannot add %s" % str(data.name)
             msg += " to panel %s\n" % str(panel.window_caption)
             msg += "Please edit %s's units, labels" % str(data.name)
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             if panel.group_id not in data.list_group_id:
                 data.list_group_id.append(panel.group_id)
@@ -246,14 +249,14 @@ class Plugin(PluginBase):
     def delete_panel(self, group_id):
         """
         """
-        if group_id in self.plot_panels.keys():
+        if group_id in self.plot_panels:
             panel = self.plot_panels[group_id]
             uid = panel.uid
             wx.PostEvent(self.parent,
                          DeletePlotPanelEvent(name=panel.window_caption,
                                               caption=panel.window_caption))
             del self.plot_panels[group_id]
-            if uid in self.parent.plot_panels.keys():
+            if uid in self.parent.plot_panels:
                 del self.parent.plot_panels[uid]
                 panel.frame.Destroy()
             return True
@@ -279,7 +282,7 @@ class Plugin(PluginBase):
                     # Update all existing plots of data with this ID
                     for data in event.plots:
                         for panel in self.plot_panels.values():
-                            if data.id in panel.plots.keys():
+                            if data.id in panel.plots:
                                 plot_exists = True
                                 # Pass each panel it's own copy of the data
                                 # that's being updated, otherwise things like
@@ -309,10 +312,10 @@ class Plugin(PluginBase):
             title = 'Graph'  #event.title
         data = event.plot
         group_id = data.group_id
-        if group_id in self.plot_panels.keys():
+        if group_id in self.plot_panels:
             if action_check:
                 # Check if the plot already exist. if it does, do nothing.
-                if data.id in self.plot_panels[group_id].plots.keys():
+                if data.id in self.plot_panels[group_id].plots:
                     return
             #update a panel graph
             panel = self.plot_panels[group_id]
@@ -326,7 +329,7 @@ class Plugin(PluginBase):
                 if len(self.plot_panels.values()) > 0:
                     for p_group_id in self.plot_panels.keys():
                         p_plot = self.plot_panels[p_group_id]
-                        if data.id in p_plot.plots.keys():
+                        if data.id in p_plot.plots:
                             p_plot.plots[data.id] = data
                             self.plot_panels[group_id] = p_plot
                             if group_id != p_group_id:

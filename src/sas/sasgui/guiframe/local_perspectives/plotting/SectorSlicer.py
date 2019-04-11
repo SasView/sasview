@@ -2,13 +2,16 @@
     Sector interactor
 """
 import math
+
 import wx
-from BaseInteractor import _BaseInteractor
+
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import SlicerParameterEvent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.dataFitting import Data1D
+
+from .BaseInteractor import _BaseInteractor
 
 
 class SectorInteractor(_BaseInteractor):
@@ -237,7 +240,7 @@ class SectorInteractor(_BaseInteractor):
         if math.fabs(self.left_line.phi) != math.fabs(self.right_line.phi):
             msg = "Phi left and phi right are different"
             msg += " %f, %f" % (self.left_line.phi, self.right_line.phi)
-            raise ValueError, msg
+            raise ValueError(msg)
         params["Phi [deg]"] = self.main_line.theta * 180 / math.pi
         params["Delta_Phi [deg]"] = math.fabs(self.left_line.phi * 180 / math.pi)
         params["nbins"] = self.nbins

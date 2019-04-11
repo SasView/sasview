@@ -12,12 +12,13 @@ This module provides Graphic interface for the data_manager module.
 """
 from __future__ import print_function
 
-import wx
-from wx.build import build_options
-
 import sys
+
+import wx
 from wx.lib.scrolledpanel import ScrolledPanel
 import wx.lib.agw.customtreectrl as CT
+#from wx.build import build_options
+
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.panel_base import PanelBase
@@ -443,9 +444,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         data_list, theory_list = \
             self.parent.get_data_manager().get_by_id(id_list=[id])
         if data_list:
-            data = data_list.values()[0]
+            data = list(data_list.values())[0]
         if data is None:
-            data = theory_list.values()[0][0]
+            data = list(theory_list.values())[0][0]
         return data
 
     def on_edit_data(self, event):
@@ -666,7 +667,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         add need data with its theory under the tree
         """
         if list:
-            for state_id, dstate in list.iteritems():
+            for state_id, dstate in list.items():
                 data = dstate.get_data()
                 theory_list = dstate.get_theory()
                 if data is not None:
@@ -763,7 +764,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         if not theory_list:
             return
-        if state_id not in self.list_cb_data.keys():
+        if state_id not in self.list_cb_data:
             root = self.tree_ctrl_theory.root
             tree = self.tree_ctrl_theory
         else:
@@ -782,11 +783,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Append theory helper
         """
-        if state_id in self.list_cb_theory.keys():
+        if state_id in self.list_cb_theory:
             # update current list of theory for this data
             theory_list_ctrl = self.list_cb_theory[state_id]
 
-            for theory_id, item in theory_list.iteritems():
+            for theory_id, item in theory_list.items():
                 theory_data, _ = item
                 if theory_data is None:
                     name = "Unknown"
@@ -827,7 +828,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         else:
             # data didn't have a theory associated it before
             theory_list_ctrl = {}
-            for theory_id, item in theory_list.iteritems():
+            for theory_id, item in theory_list.items():
                 theory_data, _ = item
                 if theory_data is not None:
                     name = theory_data.name
@@ -867,7 +868,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     state_to_plot.append(state_id)
 
         for theory_dict in self.list_cb_theory.values():
-            for _, value in theory_dict.iteritems():
+            for _, value in theory_dict.items():
                 item, _, _ = value
                 if item.IsChecked():
                     theory_id, _, state_id = self.tree_ctrl.GetItemPyData(item)
@@ -923,17 +924,17 @@ class DataPanel(ScrolledPanel, PanelBase):
         data_key = []
         theory_key = []
         # remove  data from treectrl
-        for d_key, item in self.list_cb_data.iteritems():
+        for d_key, item in self.list_cb_data.items():
             data_c, _, _, _,  _, _, _, _ = item
             if data_c.IsChecked():
                 self.tree_ctrl.Delete(data_c)
                 data_key.append(d_key)
-                if d_key in self.list_cb_theory.keys():
+                if d_key in self.list_cb_theory:
                     theory_list_ctrl = self.list_cb_theory[d_key]
-                    theory_to_remove += theory_list_ctrl.keys()
+                    theory_to_remove += list(theory_list_ctrl.keys())
         # Remove theory from treectrl
-        for _, theory_dict in self.list_cb_theory.iteritems():
-            for key, value in theory_dict.iteritems():
+        for _, theory_dict in self.list_cb_theory.items():
+            for key, value in theory_dict.items():
                 item, _, _ = value
                 if item.IsChecked():
                     try:
@@ -949,9 +950,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                 del self.list_cb_theory[key]
         # remove theory  references independently of data
         for key in theory_key:
-            for _, theory_dict in self.list_cb_theory.iteritems():
+            for _, theory_dict in self.list_cb_theory.items():
                 if key in theory_dict:
-                    for key, value in theory_dict.iteritems():
+                    for key, value in theory_dict.items():
                         item, _, _ = value
                         if item.IsChecked():
                             try:
@@ -1046,7 +1047,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         if self.cb_plotpanel and self.cb_plotpanel.IsBeingDeleted():
             return
-        for _, value in self.parent.plot_panels.iteritems():
+        for _, value in self.parent.plot_panels.items():
             name_plot_panel = str(value.window_caption)
             if name_plot_panel not in self.cb_plotpanel.GetItems():
                 self.cb_plotpanel.Append(name_plot_panel, value)
@@ -1128,7 +1129,7 @@ class DataPanel(ScrolledPanel, PanelBase):
 
         #import documentation window here to avoid circular imports
         #if put at top of file with rest of imports.
-        from documentation_window import DocumentationWindow
+        from .documentation_window import DocumentationWindow
 
         _TreeLocation = "user/sasgui/guiframe/data_explorer_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
@@ -1498,8 +1499,8 @@ if __name__ == "__main__":
         window.load_data_list(list=data_list1)
         window.Show(True)
         window.load_data_list(list=temp_data_list)
-    except:
+    except Exception as exc:
         # raise
-        print("error", sys.exc_value)
+        print("error", exc)
 
     app.MainLoop()

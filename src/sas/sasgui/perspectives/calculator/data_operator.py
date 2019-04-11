@@ -201,12 +201,11 @@ class DataOperPanel(wx.ScrolledWindow):
             text = self.data_namectr.GetValue().strip()
         else:
             text = name
-        state_list = self.get_datalist().values()
         name_list = []
-        for state in state_list:
+        for state in self.get_datalist().values():
             if state.data is None:
                 theory_list = state.get_theory()
-                theory, _ = theory_list.values()[0]
+                theory, _ = list(theory_list.values())[0]
                 d_name = str(theory.name)
             else:
                 d_name = str(state.data.name)
@@ -392,11 +391,11 @@ class DataOperPanel(wx.ScrolledWindow):
             return flag
         try:
             self.output = self.make_data_out(data1, data2)
-        except:
+        except Exception as exc:
             self._check_newname()
             self._set_textctrl_color(self.data1_cbox, 'pink')
             self._set_textctrl_color(self.data2_cbox, 'pink')
-            msg = "DataOperation: %s" % sys.exc_value
+            msg = "DataOperation: %s" % exc
             self.send_warnings(msg, 'error')
             self.output = None
             return flag
@@ -410,7 +409,8 @@ class DataOperPanel(wx.ScrolledWindow):
         pos = self.operator_cbox.GetCurrentSelection()
         operator = self.operator_cbox.GetClientData(pos)
         try:
-            exec "output = data1 %s data2" % operator
+            output = eval("data1 %s data2" % operator,
+                          {"data1": data1, "data2": data2})
         except:
             raise
         return output
@@ -531,18 +531,17 @@ class DataOperPanel(wx.ScrolledWindow):
                 val = None
         self.data2_cbox.SetClientData(pos3, val)
         dnames = []
-        ids = self._data.keys()
-        for id in ids:
+        for id in self._data.keys():
             if id is not None:
                 if self._data[id].data is not None:
                     dnames.append(self._data[id].data.name)
                 else:
                     theory_list = self._data[id].get_theory()
-                    theory, _ = theory_list.values()[0]
+                    theory, _ = list(theory_list.values())[0]
                     dnames.append(theory.name)
         ind = np.argsort(dnames)
         if len(ind) > 0:
-            val_list = np.array(self._data.values())[ind]
+            val_list = np.array(list(self._data.values()))[ind]
             for datastate in val_list:
                 data = datastate.data
                 if data is not None:
@@ -587,13 +586,12 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         self.send_warnings('')
         self.data_namectr.SetBackgroundColour('white')
-        state_list = self.get_datalist().values()
         name = self.data_namectr.GetValue().strip()
         name_list = []
-        for state in state_list:
+        for state in self.get_datalist().values():
             if state.data is None:
                 theory_list = state.get_theory()
-                theory, _ = theory_list.values()[0]
+                theory, _ = list(theory_list.values())[0]
                 d_name = str(theory.name)
             else:
                 d_name = str(state.data.name)
@@ -888,15 +886,14 @@ class SmallPanel(PlotPanel):
 
     def _onProperties(self, event):
         """
-        when clicking on Properties on context menu ,
-        The Property dialog is displayed
-        The user selects a transformation for x or y value and
-        a new plot is displayed
+        When clicking on Properties on context menu, the
+        Property dialog is displayed the user selects a
+        transformation for x or y value and a new plot is displayed
         """
-        list = []
-        list = self.graph.returnPlottable()
-        if len(list.keys()) > 0:
-            first_item = list.keys()[0]
+        plottables = self.graph.returnPlottable()
+        if plottables:
+            # TODO: key order is random prior to py 3.7
+            first_item = list(plottables.keys())[0]
             if first_item.x != []:
                 from sas.sasgui.plottools.PropertyDialog import Properties
                 dial = Properties(self, -1, 'Change Scale')
@@ -928,8 +925,6 @@ class SmallPanel(PlotPanel):
         Transforms x and y in View
         and set the scale
         """
-        list = []
-        list = self.graph.returnPlottable()
         # Changing the scale might be incompatible with
         # currently displayed data (for instance, going
         # from ln to log when all plotted values have
@@ -939,7 +934,7 @@ class SmallPanel(PlotPanel):
         self.set_yscale("linear")
         _xscale = 'linear'
         _yscale = 'linear'
-        for item in list:
+        for item in self.graph.returnPlottable():
             item.setLabel(self.xLabel, self.yLabel)
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()

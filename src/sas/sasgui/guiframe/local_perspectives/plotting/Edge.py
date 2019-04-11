@@ -1,5 +1,6 @@
 import math
-from BaseInteractor import _BaseInteractor
+
+from .BaseInteractor import _BaseInteractor
 
 
 class RadiusInteractor(_BaseInteractor):

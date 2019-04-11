@@ -3,11 +3,14 @@
     the sum of pixel of a Data.
 """
 import math
+
 import wx
-from BaseInteractor import _BaseInteractor
+
 from sas.sasgui.guiframe.events import SlicerParamUpdateEvent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.events import StatusEvent
+
+from .BaseInteractor import _BaseInteractor
 
 
 class BoxSum(_BaseInteractor):

@@ -94,14 +94,16 @@ class ImageView:
         path = None
         if location is None:
             location = os.getcwd()
-        wildcard="Images (*.bmp;*.gif;*jpeg,*jpg;*.png;*tif;*.tiff)|*bmp;\
-            *.gif; *.jpg; *.jpeg;*png;*.png;*.tif;*.tiff|"\
-            "Bitmap (*.bmp)|*.bmp|"\
-            "GIF (*.gif)|*.gif|"\
-            "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|"\
-            "PNG (*.png)|*.png|"\
-            "TIFF (*.tif;*.tiff)|*.tif;*tiff|"\
-            "All Files (*.*)|*.*|"
+        wildcard="|".join((
+            "Images (*.bmp;*.gif;*jpeg,*jpg;*.png;*tif;*.tiff)"
+                "|*bmp;*.gif;*.jpg;*.jpeg;*png;*.png;*.tif;*.tiff",
+            "Bitmap (*.bmp)|*.bmp",
+            "GIF (*.gif)|*.gif",
+            "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg",
+            "PNG (*.png)|*.png",
+            "TIFF (*.tif;*.tiff)|*.tif;*tiff",
+            "All Files (*.*)|*.*",
+            ))
 
         dlg = wx.FileDialog(self.parent, "Image Viewer: Choose an image file",
                             location, "", wildcard, style=wx.FD_OPEN

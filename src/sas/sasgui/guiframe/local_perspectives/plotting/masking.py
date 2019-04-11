@@ -17,24 +17,27 @@
 
 
 # #Todo: cleaning up, improving the maskplotpanel initialization, and testing.
-import wx
 import sys
 import time
-import matplotlib.cm as cm
 import math
 import copy
+from functools import partial
+
+import wx
 import numpy as np
+import matplotlib.cm as cm
+
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
-from binder import BindArtist
 from sas.sasgui.guiframe.dataFitting import Data1D, Data2D
-from boxMask import BoxMask
-from sector_mask import SectorMask
-from AnnulusSlicer import CircularMask
-
 from sas.sasgui.guiframe.events import SlicerEvent
 from sas.sasgui.guiframe.events import StatusEvent
-from functools import partial
+
+from .binder import BindArtist
+from .boxMask import BoxMask
+from .sector_mask import SectorMask
+from .AnnulusSlicer import CircularMask
+
 
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 

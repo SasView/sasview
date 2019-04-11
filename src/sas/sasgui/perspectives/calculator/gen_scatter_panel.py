@@ -227,9 +227,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         unit_title = wx.StaticText(self, -1, 'Unit')
         sizer.Add(unit_title, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        key_list = params.keys()
-        key_list.sort()
-        for param in key_list:
+        for param in sorted(params.keys()):
             iy += 1
             ix = 0
             p_name = wx.StaticText(self, -1, param)
@@ -340,7 +338,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = 0
-        #key_list.sort()
         name = wx.StaticText(self, -1, 'No. of Qx (Qy) bins: ')
         sizer.Add(name, (iy, ix), (1, 1), \
                         wx.EXPAND | wx.ADJUST_MINSIZE, 0)
@@ -508,7 +505,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             wildcard.append(type)
         wildcard = '|'.join(wildcard)
         dlg = wx.FileDialog(self, "Choose a file", location,
-                            "", wildcard, wx.OPEN)
+                            "", wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             filename = os.path.basename(path)
@@ -555,11 +552,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                     updatefn=self.load_update)
             self.reader.queue()
             #self.load_update()
-        except:
+        except Exception as exc:
             self.ext = None
             if self.parent.parent is None:
                 return
-            msg = "Generic SAS Calculator: %s" % (sys.exc_value)
+            msg = "Generic SAS Calculator: %s" % exc
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             self.SetFocus()
@@ -773,8 +770,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             a_name = ''
             if output.pix_type == 'atom':
                 # Get atom names not in the list
-                a_names = [symb  for symb in pix_symbol \
-                           if symb not in color_dic.keys()]
+                a_names = [symb  for symb in pix_symbol
+                           if symb not in color_dic]
                 a_name = a_names[0]
                 for name in a_names:
                     new_name = ", " + name
@@ -897,8 +894,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                               updatefn=self._update)
             cal_out.queue()
 
-        except:
-            msg = "%s." % sys.exc_value
+        except Exception as exc:
+            msg = "%s." % exc
             status_type = 'stop'
             self._status_info(msg, status_type)
             wx.PostEvent(self.parent.parent,
@@ -1343,8 +1340,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             self.sld_data = omf2sld.output
             self.sld_data.is_data = False
             self.sld_data.filename = "Default SLD Profile"
-        except:
-            msg = "OMF Panel: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "OMF Panel: %s" % exc
             infor = 'Error'
             #logger.error(msg)
             if self.parent.parent is not None:
@@ -1440,16 +1437,11 @@ class OmfPanel(ScrolledPanel, PanelBase):
         if omfdata is None:
             raise
         sld_key_list = self._get_slds_key_list(omfdata)
-        # Dic is not sorted
-        key_list = [key for key in sld_key_list.keys()]
-        # Sort here
-        key_list.sort()
         is_data = self.sld_data.is_data
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        for key in key_list:
-            value = sld_key_list[key]
+        for key, value in sorted(sld_key_list.items()):
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
@@ -1484,7 +1476,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        for key, value in key_list.iteritems():
+        for key, value in sorted(key_list.items()):
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
@@ -1519,8 +1511,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        #key_list.sort()
-        for key, value in key_list.iteritems():
+        for key, value in sorted(key_list.items()):
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)

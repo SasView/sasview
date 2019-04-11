@@ -9,11 +9,13 @@ copyright 2009, University of Tennessee
 """
 from __future__ import print_function
 
-import wx
 import sys
-import wx.lib.newevent
 from copy import deepcopy
-import SimCanvas
+
+import wx
+import wx.lib.newevent
+
+from . import SimCanvas
 
 (CreateShapeEvent, EVT_ADD_SHAPE) = wx.lib.newevent.NewEvent()
 (EditShapeEvent, EVT_EDIT_SHAPE)  = wx.lib.newevent.NewEvent()
@@ -200,10 +202,8 @@ class ShapeParameterPanel(wx.Panel):
             
             n = 1
             self.parameters = []
-            keys = shape.params.keys()
-            keys.sort()
             
-            for item in keys:
+            for item in sorted(shape.params.keys()):
                 if item in ['contrast', 'order']:
                     continue
                 n += 1
@@ -392,9 +392,9 @@ class ShapeParameterPanel(wx.Panel):
                 tmp = self._readCtrlFloat(item[1])
                 if not tmp==None:
                     self.current_shape.params[item[0]] = tmp 
-        except:
+        except Exception as exc:
             print("Could not create")
-            print(sys.exc_value)
+            print(exc)
                 
     def _onCreate(self, evt):
         """
@@ -488,4 +488,3 @@ class ShapeParameterPanel(wx.Panel):
         if len(indices)>0:
             print("NOT YET IMPLMENTED")
             print("renaming", self.shape_listbox.GetString(indices[0]))
-                

@@ -544,7 +544,7 @@ class FitProblemDictionary(dict):
         """
         return fitproblem contained in this dictionary
         """
-        return self.values()
+        return list(self.values())
 
     def set_result(self, result, fid):
         """

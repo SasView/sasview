@@ -111,13 +111,13 @@ class PluginBase(object):
         """
         Load  data
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def load_folder(self, event):
         """
         Load entire folder
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def set_is_active(self, active=False):
         """
@@ -276,7 +276,7 @@ class PluginBase(object):
             related to available theory state
         """
         msg = "%s plugin: does not support import theory" % str(self.sub_menu)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     def on_set_state_helper(self, event):
         """

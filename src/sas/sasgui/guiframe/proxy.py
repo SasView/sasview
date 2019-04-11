@@ -2,12 +2,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import urllib2
 import sys
 import json
 import logging
 import re
 
+try:
+    # CRUFT: python 3 uses urllib.request instead of urllib2
+    import urllib2
+except ImportError:
+    from urllib import request as urllib2
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +53,7 @@ class Connection(object):
             for i in range(n_vals):
                 this_name, this_val, this_type = winreg.EnumValue(net, i)
                 subkeys[this_name] = this_val
-            if 'AutoConfigURL' in subkeys.keys() and len(subkeys['AutoConfigURL']) > 0:
+            if 'AutoConfigURL' in subkeys and len(subkeys['AutoConfigURL']) > 0:
                 pac_files.append(subkeys['AutoConfigURL'])
         elif sys.platform == 'darwin':
             import plistlib
@@ -60,7 +64,7 @@ class Connection(object):
             for network in networks.items():
                 # the first part is a long identifier
                 net_key, network = network
-                if 'ProxyAutoConfigURLString' in network['Proxies'].keys():
+                if 'ProxyAutoConfigURLString' in network['Proxies']:
                     pac_files.append(
                         network['Proxies']['ProxyAutoConfigURLString'])
         return list(set(pac_files))  # remove redundant ones
@@ -126,16 +130,16 @@ class Connection(object):
         try:
             logger.debug("Trying Direct connection to %s..."%self.url)
             response = urllib2.urlopen(req, timeout=self.timeout)
-        except Exception, e:
+        except Exception as exc:
             logger.debug("Failed!")
-            logger.debug(e)
+            logger.debug(exc)
             try:
                 logger.debug("Trying to use system proxy if it exists...")
                 self._set_proxy()
                 response = urllib2.urlopen(req, timeout=self.timeout)
-            except Exception, e:
+            except Exception as exc:
                 logger.debug("Failed!")
-                logger.debug(e)
+                logger.debug(exc)
                 pac_urls = self._get_addresses_of_proxy_pac()
                 proxy_urls = self._parse_proxy_pac(pac_urls)
                 for proxy in proxy_urls:
@@ -143,9 +147,9 @@ class Connection(object):
                         logger.debug("Trying to use the proxy %s found in proxy.pac configuration"%proxy)
                         self._set_proxy(proxy)
                         response = urllib2.urlopen(req, timeout=self.timeout)
-                    except Exception, e:
+                    except Exception as exc:
                         logger.debug("Failed!")
-                        logger.debug(e)
+                        logger.debug(exc)
         if response is not None:
             logger.debug("The connection to %s was successful."%self.url)
         else:

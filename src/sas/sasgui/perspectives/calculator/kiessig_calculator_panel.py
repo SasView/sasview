@@ -11,12 +11,12 @@ copyright 2008, 2009, University of Tennessee
 import wx
 import sys
 
-from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
-from calculator_widgets import OutputTextCtrl
-from calculator_widgets import InputTextCtrl
+from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from .calculator_widgets import OutputTextCtrl
+from .calculator_widgets import InputTextCtrl
 
 _BOX_WIDTH = 77
 #Slit length panel size

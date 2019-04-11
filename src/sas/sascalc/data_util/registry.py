@@ -147,4 +147,4 @@ class ExtensionRegistry(object):
         if last_exc is not None and len(loaders) != 0:
             # If file has associated loader(s) and they;ve failed
             raise last_exc
-        raise NoKnownLoaderException(e.message)  # raise generic exception
+        raise NoKnownLoaderException(str(message))  # raise generic exception

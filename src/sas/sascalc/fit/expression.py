@@ -187,14 +187,14 @@ def compile_constraints(symtab, exprs, context={}):
 
 
     # Initialize dictionary with available functions
-    globals = {}
-    globals.update(math.__dict__)
-    globals.update(dict(arcsin=math.asin,arccos=math.acos,
-                        arctan=math.atan,arctan2=math.atan2))
-    globals.update(context)
-    globals.update(parameters)
-    globals['id'] = id
-    locals = {}
+    global_context = {}
+    global_context.update(math.__dict__)
+    global_context.update(dict(arcsin=math.asin,arccos=math.acos,
+                               arctan=math.atan,arctan2=math.atan2))
+    global_context.update(context)
+    global_context.update(parameters)
+    global_context['id'] = id
+    local_context = {}
 
     # Define the constraints function
     assignments = ["=".join((p,exprs[p])) for p in order]
@@ -209,14 +209,17 @@ def eval_expressions():
 """%("\n    ".join(assignments),"\n    ".join(code))
 
     #print("Function: "+functiondef)
-    exec functiondef in globals,locals
-    retfn = locals['eval_expressions']
+    # CRUFT: python < 3.0;  doc builder isn't allowing the following exec
+    # https://stackoverflow.com/questions/4484872/why-doesnt-exec-work-in-a-function-with-a-subfunction/41368813#comment73790496_41368813
+    #exec(functiondef, global_context, local_context)
+    eval(compile(functiondef, '<string>', 'exec'), global_context, local_context)
+    retfn = local_context['eval_expressions']
 
     # Remove garbage added to globals by exec
-    globals.pop('__doc__',None)
-    globals.pop('__name__',None)
-    globals.pop('__file__',None)
-    globals.pop('__builtins__')
+    global_context.pop('__doc__', None)
+    global_context.pop('__name__', None)
+    global_context.pop('__file__', None)
+    global_context.pop('__builtins__')
     #print globals.keys()
 
     return retfn
@@ -231,8 +234,9 @@ def order_dependencies(pairs):
     order = []
 
     # Break pairs into left set and right set
-    left,right = [set(s) for s in zip(*pairs)] if pairs != [] else ([],[])
-    while pairs != []:
+    # Note: pairs is array or list, so use "len(pairs) > 0" to check for empty.
+    left,right = [set(s) for s in zip(*pairs)] if len(pairs) > 0 else ([],[])
+    while len(pairs) > 0:
         #print "within",pairs
         # Find which items only occur on the right
         independent = right - left
@@ -260,7 +264,8 @@ def _check(msg,pairs):
     Verify that the list n contains the given items, and that the list
     satisfies the partial ordering given by the pairs in partial order.
     """
-    left,right = zip(*pairs) if pairs != [] else ([],[])
+    # Note: pairs is array or list, so use "len(pairs) > 0" to check for empty.
+    left,right = zip(*pairs) if len(pairs) > 0 else ([],[])
     items = set(left)
     n = order_dependencies(pairs)
     if set(n) != items or len(n) != len(items):

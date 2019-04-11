@@ -1,11 +1,12 @@
 import wx
 import wx.lib.newevent
-from parameters_panel_slicer import SlicerParameterPanel
+
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.events import (SlicerParameterEvent, EVT_SLICER_PARS,
                                         EVT_SLICER)
 
+from .parameters_panel_slicer import SlicerParameterPanel
 
 class SlicerPanel(wx.Panel, PanelBase):
     """
@@ -63,8 +64,7 @@ class SlicerPanel(wx.Panel, PanelBase):
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
             n = 1
             self.parameters = []
-            keys = params.keys()
-            keys.sort()
+            keys = list(sorted(params.keys()))
             for item in keys:
                 if not item.lower() in ["num_points", "avg", "avg_error", "sum",
                                         "sum_error"]:

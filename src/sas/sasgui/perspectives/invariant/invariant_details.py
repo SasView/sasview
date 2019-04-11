@@ -1,11 +1,13 @@
 """
     Invariant panel
 """
-import wx
 import sys
 
+import wx
+
 from sas.sasgui.guiframe.utils import format_number
-from invariant_widgets import OutputTextCtrl
+from .invariant_widgets import OutputTextCtrl
+
 # Dimensions related to chart
 RECTANGLE_WIDTH = 400.0
 RECTANGLE_HEIGHT = 20
@@ -32,7 +34,7 @@ EXTRAPOLATION_COLOR = wx.Colour(169, 169, 168, 128)
 INVARIANT_COLOR = wx.Colour(67, 208, 128, 128)
 
 
-class InvariantContainer(wx.Object):
+class InvariantContainer:
     """
     This class stores some values resulting resulting from invariant
     calculations. Given the value of total invariant, this class can also

@@ -196,7 +196,7 @@ class StartupConfiguration(wx.Dialog):
         path = make_custom_config_path()
         with open(path, 'w') as out_f:
             out_f.write("#Application appearance custom configuration\n")
-            for key, item in self.return_string.iteritems():
+            for key, item in self.return_string.items():
                 if (key == 'DEFAULT_PERSPECTIVE') or \
                     (key == 'DEFAULT_OPEN_FOLDER' and item != None):
                     out_f.write("%s = \"%s\"\n" % (key, str(item)))

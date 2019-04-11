@@ -41,7 +41,9 @@ class SasView(object):
         logger = logging.getLogger(__name__)
 
         from sas.sasgui.guiframe.gui_manager import SasViewApp
+        from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
         self.gui = SasViewApp(0)
+        GUIFRAME_ICON.load_icons()
         if sys.platform == "darwin":
             self.check_sasmodels_compiler()
         # Set the application manager for the GUI
@@ -227,8 +229,13 @@ def setup_wx():
     except AttributeError:
         logger.error("Wx version: error reading version")
 
-    from . import wxcruft
-    wxcruft.call_later_fix()
+    # TODO: Do we need the call later fix for wx 3? Or is it wx < 3 only?
+    if "phoenix" in wx.PlatformInfo:
+        #wx.NewId = wx.Window.NewControlId
+        pass
+    else:
+        from . import wxcruft
+        wxcruft.call_later_fix()
     #wxcruft.trace_new_id()
     #Always use private .matplotlib setup to avoid conflicts with other
     #uses of matplotlib
