@@ -305,6 +305,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # list column widths
         self.lstParamHeaderSizes = {}
 
+        # Fitting just ran - don't recalculate chi2
+        self.fitResults = False
+
         # signal communicator
         self.communicate = self.parent.communicate
 
@@ -1696,6 +1699,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.communicate.statusBarUpdateSignal.emit(msg)
             return
 
+        # Don't recalculate chi2 - it's in res.fitness already
+        self.fitResults = True
         res_list = result[0][0]
         res = res_list[0]
         self.chi2 = res.fitness
@@ -1723,8 +1728,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # update charts
         self.onPlot()
-        #self.recalculatePlotData()
-
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
@@ -2897,10 +2900,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Calculate difference between return_data and logic.data
         weights = FittingUtilities.getWeight(self.data, self.is2D, flag = self.weighting)
-        self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
-        # Update the control
-        chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
-        self.lblChi2Value.setText(chi2_repr)
+        # Recalculate chi2 only for manual parameter change, not after fitting
+        if not self.fitResults:
+            self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
+            # Update the control
+            chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
+            self.lblChi2Value.setText(chi2_repr)
+        self.fitResults = False
 
         # Plot residuals if actual data
         if not self.data_is_loaded:
