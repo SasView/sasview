@@ -311,9 +311,27 @@ that model with *custom*. For instance::
 
      sphere+custom.MyPluginModel
 
-To create a P(Q)*\S(Q) model use the @ symbol instead of * like this::
+.. note::
+
+   **Interaction Models**
+   
+   When the *Easy Sum/Multi Editor* creates a P(Q)*\S(Q) model it will use
+   the * symbol like this::
+
+     sphere*hardsphere
+
+   However, it is probably advisable to edit the model file and use the @
+   symbol instead, for example::
 
      sphere@hardsphere
+
+   This is because * and @ confer different behaviour on the model
+
+   *  *with @* - the radius and volume fraction in the S(Q) model are
+      constrained to have the *same* values as the radius and volume fraction
+      in the P(Q) model.
+   *  *with ** - the radii and volume fractions in the P(Q) and S(Q) models are
+      unconstrained. 
 
 This streamlined approach to building complex plugin models from existing library models, or models
 available on the *Model Marketplace*, also permits the creation of P(Q)*\S(Q) plugin models, something
