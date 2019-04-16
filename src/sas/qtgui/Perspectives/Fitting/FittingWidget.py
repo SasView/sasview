@@ -1833,7 +1833,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Utility function for error column update
             item = QtGui.QStandardItem()
             def createItem(param_name):
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                if param_name not in self.main_params_to_fit:
+                    error_repr = ""
+                else:
+                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 item.setText(error_repr)
             def curr_param():
                 return str(self._model_model.item(row, 0).text())
@@ -1853,20 +1856,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             poly_item.insertColumn(2, [QtGui.QStandardItem("")])
 
-        if not self.has_error_column:
+        if self.has_error_column:
+            # remove previous entries
+            self._model_model.removeColumn(2)
+
+        #if not self.has_error_column:
             # create top-level error column
-            error_column = []
-            self.lstParams.itemDelegate().addErrorColumn()
-            self.iterateOverModel(createErrorColumn)
+        error_column = []
+        self.lstParams.itemDelegate().addErrorColumn()
+        self.iterateOverModel(createErrorColumn)
 
-            self._model_model.insertColumn(2, error_column)
+        self._model_model.insertColumn(2, error_column)
 
-            FittingUtilities.addErrorHeadersToModel(self._model_model)
+        FittingUtilities.addErrorHeadersToModel(self._model_model)
 
-            # create error column in polydispersity sub-rows
-            self.iterateOverModel(createPolyErrorColumn)
+        # create error column in polydispersity sub-rows
+        self.iterateOverModel(createPolyErrorColumn)
 
-            self.has_error_column = True
+        self.has_error_column = True
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
@@ -1913,7 +1920,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             item = QtGui.QStandardItem()
 
             def createItem(param_name):
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                if param_name in self.poly_params_to_fit:
+                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                else:
+                    error_repr = ""
                 item.setText(error_repr)
 
             def poly_param():
@@ -1930,7 +1940,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.dataChanged.connect(self.onPolyModelChange)
 
         if self.has_poly_error_column:
-            return
+            self._poly_model.removeColumn(2)
+            #return
 
         self.lstPoly.itemDelegate().addErrorColumn()
         error_column = []
@@ -1979,7 +1990,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Utility function for error column update
             item = QtGui.QStandardItem()
             def createItem(param_name):
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                if param_name in self.magnet_params_to_fit:
+                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                else:
+                    error_repr = ""
                 item.setText(error_repr)
             def curr_param():
                 return str(self._magnet_model.item(row, 0).text())
@@ -1995,7 +2009,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
 
         if self.has_magnet_error_column:
-            return
+            self._magnet_model.removeColumn(2)
 
         self.lstMagnetic.itemDelegate().addErrorColumn()
         error_column = []
