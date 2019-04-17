@@ -92,8 +92,11 @@ extra parameter: *radius_effective*. This is the radial distance determining the
 range of the $S(Q)$ interaction and may, or may not, be the same as the
 *radius*, in this example, depending on the concentration of the system. In
 other systems, *radius_effective* may depend on the particle form (shape).
+SasView offers the flexibility to automatically constrain (tie) some of these
+parameters together so that, for example, *radius_effective* = *radius*. See
+:ref:`Sum|Multi(p1,p2)`.
 
-See :ref:`Interaction_Models` for more information.
+Also see :ref:`Interaction_Models` for further information.
 
 Mixture Models
 ^^^^^^^^^^^^^^
