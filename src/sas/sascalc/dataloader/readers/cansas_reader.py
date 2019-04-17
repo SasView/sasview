@@ -16,13 +16,12 @@ from sas.sascalc.data_util.nxsunit import Converter
 
 # For saving individual sections of data
 from ..data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D, \
-    Collimation, TransmissionSpectrum, Detector, Process, Aperture, \
-    combine_data_info_with_plottable as combine_data
+    Collimation, TransmissionSpectrum, Detector, Process, Aperture
 from ..loader_exceptions import FileContentsException, DefaultReaderException, \
     DataReaderException
 from . import xml_reader
 from .xml_reader import XMLreader
-from .cansas_constants import CansasConstants, CurrentLevel
+from .cansas_constants import CansasConstants
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +57,7 @@ class Reader(XMLreader):
     # Wildcards
     type = ["XML files (*.xml)|*.xml", "SasView Save Files (*.svs)|*.svs"]
     # List of allowed extensions
-    ext = ['.xml', '.XML', '.svs', '.SVS']
+    ext = ['.xml', '.svs']
     # Flag to bypass extension check
     allow_all = True
 
@@ -80,7 +79,7 @@ class Reader(XMLreader):
         self.logging = []
         self.encoding = None
 
-    def read(self, xml_file, schema_path="", invalid=True):
+    def _read(self, xml_file, schema_path="", invalid=True):
         if schema_path != "" or not invalid:
             # read has been called from self.get_file_contents because xml file doens't conform to schema
             _, self.extension = os.path.splitext(os.path.basename(xml_file))
@@ -89,7 +88,10 @@ class Reader(XMLreader):
         # Otherwise, read has been called by the data loader - file_reader_base_class handles this
         return super(XMLreader, self).read(xml_file)
 
-    def get_file_contents(self, xml_file=None, schema_path="", invalid=True):
+    def get_file_contents(self):
+        return self._get_file_contents(xml_file=None, schema_path="", invalid=True)
+
+    def _get_file_contents(self, xml_file=None, schema_path="", invalid=True):
         # Reset everything since we're loading a new file
         self.reset_state()
         self.invalid = invalid
@@ -123,7 +125,7 @@ class Reader(XMLreader):
             if self.invalid:
                 try:
                     # Load data with less strict schema
-                    self.read(xml_file, invalid_schema, False)
+                    self._get_file_contents(xml_file, invalid_schema, False)
 
                     # File can still be read but doesn't match schema, so raise exception
                     self.load_file_and_schema(xml_file) # Reload strict schema so we can find where error are in file
@@ -492,8 +494,7 @@ class Reader(XMLreader):
             for error in self.errors:
                 self.current_datainfo.errors.add(error)
             self.data_cleanup()
-            self.sort_one_d_data()
-            self.sort_two_d_data()
+            self.sort_data()
             self.reset_data_list()
             return self.output[0], None
 
