@@ -60,6 +60,8 @@ You can decide your own model categorizations using the :ref:`Category_Manager`.
 Once you have selected a model you can read its help documentation by clicking
 on the *Description* button to the right.
 
+.. _Interaction_and_Mixture_Models:
+
 Interaction Models
 ^^^^^^^^^^^^^^^^^^
 
@@ -314,6 +316,12 @@ that model with *custom*. For instance::
 
      sphere+custom.MyPluginModel
 
+This streamlined approach to building complex plugin models from existing 
+library models, or models available on the *Model Marketplace*, also permits
+the creation of P(Q)*\S(Q) plugin models, something that was not possible in
+earlier versions of SasView. Also see :ref:`Interaction_and_Mixture_Models`
+above.
+
 .. note::
 
    **Interaction Models**
@@ -335,10 +343,6 @@ that model with *custom*. For instance::
       in the P(Q) model.
    *  *with ** - the radii and volume fractions in the P(Q) and S(Q) models are
       unconstrained. 
-
-This streamlined approach to building complex plugin models from existing library models, or models
-available on the *Model Marketplace*, also permits the creation of P(Q)*\S(Q) plugin models, something
-that was not possible in earlier versions of SasView.
 
 .. _Advanced_Plugin_Editor:
 
