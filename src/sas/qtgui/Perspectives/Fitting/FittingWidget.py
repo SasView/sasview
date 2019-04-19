@@ -1397,7 +1397,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
-            #self.kernel_module.setParam(parameter_name + '.' + delegate.columnDict()[model_column], value)
+            if model_column not in delegate.columnDict():
+                return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
             self.poly_params[key] = value
 
