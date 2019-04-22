@@ -838,8 +838,14 @@ Running SasView
 Known Issues
 ============
 
-A full list of known bugs and feature requests by release version that 
-users may wish to be aware of can be viewed at http://trac.sasview.org/report/3
+All known bugs/feature requests can be found in the issues on github.  Note the
+sasmodels issues are now separate from the sasview issues (i.e. different
+repositories)
+sasview: https://github.com/SasView/sasview/issues
+sasmodels: https://github.com/SasView/sasmodels/issues
+
+The old list, frozen as of April 2019, given by release version can still be
+viewed at http://trac.sasview.org/report/3
 
 4.2.0 - All systems
 -------------------
