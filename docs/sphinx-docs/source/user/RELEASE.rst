@@ -9,6 +9,19 @@ Release Notes
 Features
 ========
 
+New in Version 4.2.2
+--------------------
+This release fixes two bugs: the inability to read in project files due to the
+the fixes (changes) in the NXcanSAS reader, and the fact that the 2D resolution
+was only being applied to one quadrant.
+
+Resolved Issues
+^^^^^^^^^^^^^^^
+* Fixes # 1269:	Problem reopening saved project .svs file
+* Fixes # 1074:	Resolution smearing is only applied to positive Qx and Qy in 2D
+* Fixes # 1276:	Clarify no longer any pure python orientation/magnetism plugin support in docs
+
+
 New in Version 4.2.1
 --------------------
 The major changes for this point release were to fix several problems with using
@@ -155,7 +168,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: “report button” followed by “save” makes an empty pdf file???
+* Fixes # 818: â€œreport buttonâ€� followed by â€œsaveâ€� makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
