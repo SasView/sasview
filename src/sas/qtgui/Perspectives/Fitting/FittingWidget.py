@@ -2258,7 +2258,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Allow the SF combobox visibility for the given sasmodel
             self.enableStructureFactorControl(structure_factor)
-        
+
             # Add S(Q)
             if self.cbStructureFactor.isEnabled():
                 structure_factor = self.cbStructureFactor.currentText()
@@ -2359,6 +2359,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into QStandardItemModel based on selected _structure factor_
         """
+        from sasmodels.product import VOLFRAC_ID, RADIUS_ID, RADIUS_MODE_ID, STRUCTURE_MODE_ID
         if structure_factor is None or structure_factor=="None":
             return
 
@@ -2369,7 +2370,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.kernel_module = self.models[structure_factor]()
             self.kernel_module.name = self.modelName()
             s_params = self.kernel_module._model_info.parameters
-            s_params_orig = s_params
         else:
             s_kernel = self.models[structure_factor]()
             p_kernel = self.kernel_module
@@ -2377,38 +2377,36 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if p_kernel.is_multiplicity_model:
                 p_kernel.multiplicity = p_kernel.multiplicity_info.number
 
-            p_pars_len = len(p_kernel._model_info.parameters.kernel_parameters)
-            s_pars_len = len(s_kernel._model_info.parameters.kernel_parameters)
-
             self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
             # Modify the name to correspond to shown items
             self.kernel_module.name = self.modelName()
-            all_params = self.kernel_module._model_info.parameters.kernel_parameters
-            all_param_names = [param.name for param in all_params]
 
-            # S(Q) params from the product model are not necessarily the same as those from the S(Q) model; any
-            # conflicting names with P(Q) params will cause a rename
+            # TODO: set model layout in sasmodels
+            info = self.kernel_module._model_info
+            p_info = p_kernel._model_info
+            s_info = s_kernel._model_info
 
-            if "radius_effective_mode" in all_param_names:
-                # Show all parameters
-                # In this case, radius_effective is NOT pruned by sasmodels.product
-                s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len])
-                s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters)
-                product_params = modelinfo.ParameterTable(
-                        self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len:])
-            else:
-                # Ensure radius_effective is not displayed
-                s_params_orig = modelinfo.ParameterTable(s_kernel._model_info.parameters.kernel_parameters[1:])
-                if "radius_effective" in all_param_names:
-                    # In this case, radius_effective is NOT pruned by sasmodels.product
-                    s_params = modelinfo.ParameterTable(all_params[p_pars_len+1:p_pars_len+s_pars_len])
-                    product_params = modelinfo.ParameterTable(
-                            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len:])
-                else:
-                    # In this case, radius_effective is pruned by sasmodels.product
-                    s_params = modelinfo.ParameterTable(all_params[p_pars_len:p_pars_len+s_pars_len-1])
-                    product_params = modelinfo.ParameterTable(
-                            self.kernel_module._model_info.parameters.kernel_parameters[p_pars_len+s_pars_len-1:])
+            def par_index(info, key):
+                for k, p in enumerate(info.parameters.kernel_parameters):
+                    if p.id == key:
+                        return k
+                return -1
+            p_volfrac_id = par_index(p_info, VOLFRAC_ID)
+            s_volfrac_id = par_index(s_info, VOLFRAC_ID)
+            s_pars = s_info.parameters.kernel_parameters[:]
+            if p_volfrac_id >= 0 and s_volfrac_id >= 0:
+                del s_pars[s_volfrac_id]
+
+            er_mode_id = par_index(info, RADIUS_MODE_ID)
+            interaction_mode_id = par_index(info, STRUCTURE_MODE_ID)
+            extras = []
+            if interaction_mode_id >= 0:
+                extras.append(info.parameters.kernel_parameters[interaction_mode_id])
+            if er_mode_id >= 0:
+                extras.append(info.parameters.kernel_parameters[er_mode_id])
+
+            s_params = modelinfo.ParameterTable(s_pars)
+            product_params = modelinfo.ParameterTable(extras)
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
@@ -2418,7 +2416,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addSimpleParametersToModel(
                 parameters=s_params,
                 is2D=self.is2D,
-                parameters_original=s_params_orig,
+                parameters_original=None,
                 model=self._model_model,
                 view=self.lstParams)
 
