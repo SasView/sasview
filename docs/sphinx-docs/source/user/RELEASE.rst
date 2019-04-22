@@ -11,9 +11,9 @@ Features
 
 New in Version 4.2.2
 --------------------
-This release fixes two bugs: the inability to read in project files due to the
-the fixes (changes) in the NXcanSAS reader, and the fact that the 2D resolution
-was only being applied to one quadrant.
+This release fixes the known issues reported in 4.2.1: the inability to read in
+project files due to the fixes (changes) in the NXcanSAS reader, and the fact
+that the 2D resolution was only being applied to one quadrant.
 
 Resolved Issues
 ^^^^^^^^^^^^^^^
