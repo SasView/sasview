@@ -22,17 +22,17 @@ Resolved Issues
 .. PR #103 is already merged. The explanation being that by providing easy
 .. access to the source we absolve ourselves of the need to markup hideous
 .. equations! The commentary above would also need updating.
-.. * Close # 106 (Trac # 646): Check all model documentation for standardization
 .. * Fixes # 146 (Trac # 883): Add link to source code of each model to model documentation
 .. * Nofix #1189 (Trac #1148): Documentation for S(Q) models need updating
 .. * Nofix # 188 (Trac #1187): S(Q) models need function descriptions in documentation
 .. * Nofix #1266 (Trac #1240): Many models do not have their equation in the documentation
 .. * Fixes #1285 (Trac #1263): Change source links in model docs to local paths
 .. 
-.. These next 10 documentation issues were resolved during Code Camp IX
-.. but would have been committed to master I think
+.. These next 11 documentation issues were resolved during Code Camp IX
+.. but would have been committed to master I think?
 * Close # 512 (Trac # 378): Add documentation for BUMPS usage and integrate rst files to SasView from BUMPS repo
 * Close # 647 (Trac # 514): Review User Documentation
+* Close # 106 (Trac # 646): Check all model documentation for standardization
 * Fixes # 799 (Trac # 668): Update plugin model documentation and testing 
 * Fixes # 928 (Trac # 833): Improve smearing help
 * Fixes # 968 (Trac # 882): Add notes to doc about fitting integer parameters
