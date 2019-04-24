@@ -215,6 +215,8 @@ class FittingLogic(object):
         """
         plots = []
         for name, result in return_data['intermediate_results'].items():
+            if isinstance(result, tuple) and len(result) > 1:
+                result = result[1]
             if not isinstance(result, np.ndarray):
                 continue
             plots.append(self._create1DPlot(tab_id, return_data['x'], result,
