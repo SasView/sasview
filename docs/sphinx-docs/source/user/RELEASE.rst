@@ -13,14 +13,44 @@ New in Version 4.2.2
 --------------------
 This release fixes the known issues reported in 4.2.1: the inability to read in
 project files due to the fixes (changes) in the NXcanSAS reader, and the fact
-that the 2D resolution was only being applied to one quadrant.
+that the 2D resolution smearing was only being applied to one quadrant. A
+number of documentation issues were also completed.
 
 Resolved Issues
 ^^^^^^^^^^^^^^^
-* Fixes # 1269:	Problem reopening saved project .svs file
-* Fixes # 1074:	Resolution smearing is only applied to positive Qx and Qy in 2D
-* Fixes # 1276:	Clarify no longer any pure python orientation/magnetism plugin support in docs
+.. These would need including if sasmodels PR #101 (Ticket 1257) is merged;
+.. PR #103 is already merged. The explanation being that by providing easy
+.. access to the source we absolve ourselves of the need to markup hideous
+.. equations! The commentary above would also need updating.
+.. * Close # 106 (Trac # 646): Check all model documentation for standardization
+.. * Fixes # 146 (Trac # 883): Add link to source code of each model to model documentation
+.. * Nofix #1189 (Trac #1148): Documentation for S(Q) models need updating
+.. * Nofix # 188 (Trac #1187): S(Q) models need function descriptions in documentation
+.. * Nofix #1266 (Trac #1240): Many models do not have their equation in the documentation
+.. * Fixes #1285 (Trac #1263): Change source links in model docs to local paths
+.. 
+.. These next 10 documentation issues were resolved during Code Camp IX
+.. but would have been committed to master I think
+* Close # 512 (Trac # 378): Add documentation for BUMPS usage and integrate rst files to SasView from BUMPS repo
+* Close # 647 (Trac # 514): Review User Documentation
+* Fixes # 799 (Trac # 668): Update plugin model documentation and testing 
+* Fixes # 928 (Trac # 833): Improve smearing help
+* Fixes # 968 (Trac # 882): Add notes to doc about fitting integer parameters
+* Close #1024 (Trac # 947): Include sasmodels api docs in sasview developer documentation
+* Nofix #1072 (Trac #1003): Should we use Dispersity instead of Polydispersity/Monodispersity?
+* Fixes # 178 (Trac #1108): "Writing a Plugin Model" does not explain function "random"
+* Fixes #1211 (Trac #1175): Need to rethink Tutorial option in GUI Help menu
+* Fixes #1225 (Trac #1190): Documentation for magnetism need update 
+.. These next 3 are already live on the website
+* Fixes #1254 (Trac #1225): Update correlation function documentation re non-Lorentz-corrected data
+* Fixes #1256 (Trac #1227): Copy over pdfs of updated correlation function tutorial before 4.2.1 release
+* Fixes #1258 (Trac #1229): Copy updated corfunc_help to Github for new website docs
+.. These next 3 are the main reason for 4.2.2
+* Fixes #1268 (Trac #1242): Resolution smearing is only applied to positive Qx and Qy in 2D
+* Fixes #1269 (Trac #1243): Problem reopening saved project .svs file
+* Fixes #1276 (Trac #1253): Clarify no longer any pure python orientation/magnetism plugin support in docs
 
+.. note:: Issues were moved from Trac to Github for 4.2.2. Numbering changed.
 
 New in Version 4.2.1
 --------------------
@@ -43,7 +73,7 @@ Resolved Issues
 * Fixes # 1129:	NXcanSAS writer not writing all meta data
 * Fixes # 1142:	Plugin framework is broken
 * Fixes # 1183:	Test from creating new model reset all parameters to default in all open FitPages
-* Fixes # 1188:   Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
+* Fixes # 1188: Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
 * Fixes # 1205:	4.2 set weighting choice seems to be ignored.
 * Fixes # 1206:	Incorrect (and confusing) presentation of dQ from data in instrumental smearing section
 * Fixes # 1212:	Bug in Iqxqy plotting non rectangular / square matrices?
@@ -838,14 +868,21 @@ Running SasView
 Known Issues
 ============
 
-All known bugs/feature requests can be found in the issues on github.  Note the
-sasmodels issues are now separate from the sasview issues (i.e. different
+All known bugs/feature requests can be found in the issues on github. Note the
+sasmodels issues are now separate from the sasview issues (i.e. in different
 repositories)
-sasview: https://github.com/SasView/sasview/issues
-sasmodels: https://github.com/SasView/sasmodels/issues
+* sasview:   https://github.com/SasView/sasview/issues
+* sasmodels: https://github.com/SasView/sasmodels/issues
 
 The old list, frozen as of April 2019, given by release version can still be
 viewed at http://trac.sasview.org/report/3
+
+4.2.1 - All systems
+-------------------
+Unfortunately, changes made to the data loader to address Trac ticket #976
+(CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files) have
+broken backward compatibility and this version of SasView will not read in
+saved project files (because these store data as NXcanSAS). 
 
 4.2.0 - All systems
 -------------------
