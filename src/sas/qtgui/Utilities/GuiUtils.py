@@ -761,30 +761,31 @@ def onTXTSave(data, path):
                 has_errors = False
         if has_errors:
             if data.dx is not None and data.dx.any():
-                out.write("<X>   <Y>   <dY>   <dX>\n")
+                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>"+" "*20+"<dX>\n")
+                #out.write("<X>   <Y>   <dY>   <dX>\n")
             else:
-                out.write("<X>   <Y>   <dY>\n")
+                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>\n")
         else:
-            out.write("<X>   <Y>\n")
+            out.write("<X>"+" "*20+ "<Y>\n")
 
         for i in range(len(data.x)):
             if has_errors:
                 if data.dx is not None and data.dx.any():
                     if  data.dx[i] is not None:
-                        out.write("%g  %g  %g  %g\n" % (data.x[i],
+                        out.write("%.15e  %.15e  %.15e  %.15e\n" % (data.x[i],
                                                         data.y[i],
                                                         data.dy[i],
                                                         data.dx[i]))
                     else:
-                        out.write("%g  %g  %g\n" % (data.x[i],
+                        out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
                                                     data.y[i],
                                                     data.dy[i]))
                 else:
-                    out.write("%g  %g  %g\n" % (data.x[i],
+                    out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
                                                 data.y[i],
                                                 data.dy[i]))
             else:
-                out.write("%g  %g\n" % (data.x[i],
+                out.write("%.15e  %.15e\n" % (data.x[i],
                                         data.y[i]))
 
 def saveData1D(data):
@@ -802,9 +803,10 @@ def saveData1D(data):
                 "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
-        'directory' : default_name,
+        #'directory' : default_name,
         'filter'    : wildcard,
         'parent'    : None,
+        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
     }
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
@@ -813,6 +815,18 @@ def saveData1D(data):
     # User cancelled.
     if not filename:
         return
+
+    # Check/add extension
+    if not os.path.splitext(filename)[1]:
+        ext = filename_tuple[1]
+        if 'Text files' in ext:
+            filename += '.txt'
+        elif 'CanSAS' in ext:
+            filename += '.xml'
+        elif 'NXcanSAS' in ext:
+            filename += '.h5'
+        else:
+            pass
 
     #Instantiate a loader
     loader = Loader()
@@ -837,9 +851,9 @@ def saveData2D(data):
                 "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
-        'directory' : default_name,
         'filter'    : wildcard,
         'parent'    : None,
+        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
     }
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
@@ -848,6 +862,16 @@ def saveData2D(data):
     # User cancelled.
     if not filename:
         return
+
+    # Check/add extension
+    if not os.path.splitext(filename)[1]:
+        ext = filename_tuple[1]
+        if 'IGOR' in ext:
+            filename += '.dat'
+        elif 'NXcanSAS' in ext:
+            filename += '.h5'
+        else:
+            pass
 
     #Instantiate a loader
     loader = Loader()

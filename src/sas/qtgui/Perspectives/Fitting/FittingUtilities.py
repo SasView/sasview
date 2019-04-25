@@ -85,6 +85,9 @@ def createFixedChoiceComboBox(param, item_row):
         # Use combo box for input, if it is fixed-choice
         cbox = AssociatedComboBox(item_row[1], idx_as_value=True)
         cbox.addItems(choices)
+        if param.default is not None and param.default <= len(choices):
+            # set the param default value in the combobox
+            cbox.setCurrentIndex(param.default)
         item_row[2].setEditable(False)
         item_row[3].setEditable(False)
 
