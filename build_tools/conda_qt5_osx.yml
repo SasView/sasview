@@ -68,7 +68,7 @@ dependencies:
  - macholib=1.8=py_0
  - mako=1.0.7=py36_0
  - markupsafe=1.1.0=py36h1de35cc_1000
- - matplotlib=2.2.2=py36h0e0179f_2
+ - matplotlib=2.2.2
  - mistune=0.8.4=py36h1de35cc_1000
  - more-itertools=4.3.0=py36_1000
  - nbconvert=5.3.1
