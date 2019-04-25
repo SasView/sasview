@@ -19,12 +19,12 @@ def patch_py_editor():
 def read(self):
     """Return contents of file."""
     if self.filepath and os.path.exists(self.filepath):
-        with io.open(self.filepath, 'r', encoding='utf8') as f:
+        with io.open(self.filepath, mode='r', encoding='utf8') as f:
             return f.read()
     else:
         return ''
 
 def write(self, text):
     """Write text to file."""
-    with io.open(self.filepath, 'w', encoding='utf8') as f:
+    with io.open(self.filepath, mode='w', encoding='utf8') as f:
         f.write(text)
