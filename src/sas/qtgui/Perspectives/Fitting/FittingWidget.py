@@ -3724,6 +3724,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if self.data_is_loaded:
                 data_ids = [str(self.logic.data.id)]
                 filenames = [str(self.logic.data.filename)]
+        param_list.append(['tab_index', str(self.tab_id)])
         param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
         param_list.append(['data_name', filenames])
         param_list.append(['data_id', data_ids])
@@ -4176,12 +4177,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Store current state for fit_page
         """
-        # save model option
-        #if self.model is not None:
-        #    self.disp_list = self.getDispParamList()
-        #    state.disp_list = copy.deepcopy(self.disp_list)
-        #    #state.model = self.model.clone()
-
         # Comboboxes
         state.categorycombobox = self.cbCategory.currentText()
         state.formfactorcombobox = self.cbModel.currentText()
@@ -4191,7 +4186,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         state.enable2D = self.is2D
 
-        #state.weights = copy.deepcopy(self.weights)
         # save data
         state.data = copy.deepcopy(self.data)
 
@@ -4200,29 +4194,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.qmax = self.q_range_max
         state.npts = self.npts
 
-        #    self.state.enable_disp = self.enable_disp.GetValue()
-        #    self.state.disable_disp = self.disable_disp.GetValue()
-
-        #    self.state.enable_smearer = \
-        #                        copy.deepcopy(self.enable_smearer.GetValue())
-        #    self.state.disable_smearer = \
-        #                        copy.deepcopy(self.disable_smearer.GetValue())
-
-        #self.state.pinhole_smearer = \
-        #                        copy.deepcopy(self.pinhole_smearer.GetValue())
-        #self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
-        #self.state.dI_noweight = copy.deepcopy(self.dI_noweight.GetValue())
-        #self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
-        #self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
-        #self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
-
         p = self.model_parameters
         # save checkbutton state and txtcrtl values
         state.parameters = FittingUtilities.getStandardParam(self._model_model)
         state.orientation_params_disp = FittingUtilities.getOrientationParam(self.kernel_module)
-
-        #self._copy_parameters_state(self.orientation_params_disp, self.state.orientation_params_disp)
-        #self._copy_parameters_state(self.parameters, self.state.parameters)
-        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-

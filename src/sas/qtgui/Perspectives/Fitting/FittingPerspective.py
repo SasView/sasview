@@ -192,11 +192,15 @@ class FittingWindow(QtWidgets.QTabWidget):
             self.setWindowState(QtCore.Qt.WindowMinimized)
             event.ignore()
 
-    def addFit(self, data, is_batch=False):
+    def addFit(self, data, is_batch=False, tab_index=None):
         """
         Add a new tab for passed data
         """
-        tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex)
+        if tab_index is None:
+            tab_index = self.maxIndex
+        else:
+            self.maxIndex = tab_index
+        tab	= FittingWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.is_batch_fitting = is_batch
 
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
@@ -205,7 +209,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        self.maxIndex += 1
+        #self.maxIndex += 1
+        self.maxIndex = tab_index + 1
+
         icon = QtGui.QIcon()
         if is_batch:
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
@@ -328,7 +334,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return True
 
-    def setData(self, data_item=None, is_batch=False):
+    def setData(self, data_item=None, is_batch=False, tab_index=None):
         """
         Assign new dataset to the fitting instance
         Obtain a QStandardItem object and dissect it to get Data1D/2D
@@ -355,6 +361,9 @@ class FittingWindow(QtWidgets.QTabWidget):
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
 
+            if tab_index is not None:
+                self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
