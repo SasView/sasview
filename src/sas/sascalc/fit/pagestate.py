@@ -687,7 +687,7 @@ class PageState(object):
         temp_parameters = []
         temp_fittable_param = []
         if self.data is not None:
-            is_2D = (self.data.__class__.__name__ == "Data2D")
+            is_2D = isinstance(self.data, Data2D)
             if not is_2D:
                 for item in self.parameters:
                     if item not in self.orientation_params:

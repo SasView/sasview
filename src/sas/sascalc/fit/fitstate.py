@@ -69,9 +69,11 @@ class FitState(object):
             pass
 
     def __str__(self):
+        # type: () -> str
         return '<SasFit %s>'%self.fitfile
 
     def show(self):
+        # type: () -> None
         """
         Summarize the fit pages in the state object.
         """
@@ -93,6 +95,7 @@ class FitState(object):
             _dump_attrs(self.simfit, label="Constraints")
 
     def make_fitproblem(self):
+        # type: () -> FitProblem
         """
         Build collection of bumps fitness calculators and return the FitProblem.
         """
@@ -105,8 +108,11 @@ class FitState(object):
         return fit_problem
 
     def _set_constraints(self):
+        # type: () -> None
         """
         Adds fit_page and constraints list to each model.
+
+        Raises ValueError if cannot resolve constraints unambiguously.
         """
         # early return if no sim fit
         if self.simfit is None:
@@ -158,6 +164,7 @@ class FitState(object):
 
 
 def model_name(state):
+    # type: (FitState) -> str
     """
     Build the model name out of form factor and structure factor (if present).
 
@@ -173,6 +180,7 @@ def model_name(state):
         return p_model
 
 def get_data_weight(state):
+    # type: (FitState) -> np.ndarray
     """
     Get error bars on data.  These could be the values computed by reduction
     and stored in the file, the square root of the intensity (if instensity
@@ -200,8 +208,9 @@ def get_data_weight(state):
         weight = np.abs(data)
     return weight
 
-_MODEL_CACHE = {}
+_MODEL_CACHE = {}  # type: Dict[str, "SasviewModel"]
 def load_model(name):
+    # type: (str) -> Optional["SasviewModel"]
     """
     Given a model name load the Sasview shim model from sasmodels.
 
@@ -222,15 +231,17 @@ def load_model(name):
         path = os.path.abspath(os.path.join(plugins_dir, name + ".py"))
         #print("loading custom", path)
         model = load_custom_model(path)
-    elif name and name is not None and name.lower() != "none":
+        _MODEL_CACHE[name] = model
+    elif name != "" and name.lower() != "none":
         #print("loading standard", name)
         model = _make_standard_model(name)
+        _MODEL_CACHE[name] = model
     else:
         model = None
-    _MODEL_CACHE[name] = model
     return model
 
 def parse_optional_float(value):
+    # type: str -> Optional[float]
     """
     Convert optional floating point from string to value, returning None
     if string is None, empty or contains the word "None" (case insensitive).
@@ -241,6 +252,12 @@ def parse_optional_float(value):
         return None
 
 def make_fitness(state):
+    # type: (FitState) -> SasFitness
+    """
+    Return a Bumps fitness object for the given fit state.
+
+    Raises ValueError if could not parse the fit state.
+    """
     # Load the model
     category_name = state.categorycombobox
     form_factor_name = state.formfactorcombobox
@@ -366,6 +383,7 @@ class BumpsPlugin:
 
     @staticmethod
     def load_model(filename):
+        # type: (str) -> FitProblem
         state = FitState(filename)
         #state.show()
         #print("====\nfit", state)
@@ -379,12 +397,14 @@ class BumpsPlugin:
 
 
 def setup_sasview():
+    # type: () -> None
     from sas.sasview.sasview import setup_logging, setup_mpl, setup_sasmodels
     #setup_logging()
     #setup_mpl()
     setup_sasmodels()
 
 def setup_bumps():
+    # type: () -> None
     """
     Install the refl1d plugin into bumps, but don't run main.
     """
@@ -394,6 +414,7 @@ def setup_bumps():
     bumps.cli.install_plugin(BumpsPlugin)
 
 def bumps_cli():
+    # type: () -> None
     """
     Install the SasView plugin into bumps and run the command line interface.
     """
