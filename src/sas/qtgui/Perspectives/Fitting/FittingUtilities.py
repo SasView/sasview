@@ -126,8 +126,10 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
         if param.polydisperse:
             poly_item = QtGui.QStandardItem("Polydispersity")
             poly_item.setEditable(False)
+            poly_item.setSelectable(False)
             item1_1 = QtGui.QStandardItem("Distribution")
             item1_1.setEditable(False)
+            item1_1.setSelectable(False)
 
             # Find param in volume_params
             poly_pars = copy.deepcopy(parameters.form_volume_parameters)
@@ -140,12 +142,16 @@ def addParametersToModel(parameters, kernel_module, is2D, model=None, view=None)
                 ptype = kernel_module.getParam(p.name+'.type')
                 item1_2 = QtGui.QStandardItem(str(width))
                 item1_2.setEditable(False)
+                item1_2.setSelectable(False)
                 item1_3 = QtGui.QStandardItem()
                 item1_3.setEditable(False)
+                item1_3.setSelectable(False)
                 item1_4 = QtGui.QStandardItem()
                 item1_4.setEditable(False)
+                item1_4.setSelectable(False)
                 item1_5 = QtGui.QStandardItem(ptype)
                 item1_5.setEditable(False)
+                item1_5.setSelectable(False)
                 poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
                 break
 
