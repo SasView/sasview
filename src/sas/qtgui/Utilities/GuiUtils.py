@@ -1234,15 +1234,11 @@ def saveData(fp, data):
         if isinstance(o, (Data1D, Data2D, FitData1D, FitData2D)):
             # don't store parent
             content = o.__dict__.copy()
-            #content.pop('parent')
             return add_type(content, type(o))
 
         # ndarray
         if isinstance(o, np.ndarray):
-            buffer = BytesIO()
-            np.save(buffer, o)
-            buffer.seek(0)
-            content = { 'data': buffer.read().decode('latin-1') }
+            content = {'data':o.tolist()}
             return add_type(content, type(o))
 
         if isinstance(o, types.FunctionType):
@@ -1313,10 +1309,8 @@ def readDataFromFile(fp):
 
         # ndarray
         if cls == np.ndarray:
-            buffer = BytesIO()
-            buffer.write(data['data'].encode('latin-1'))
-            buffer.seek(0)
-            return np.load(buffer)
+            o = data['data']
+            return np.array(o)
 
         # function
         if cls == types.FunctionType:
