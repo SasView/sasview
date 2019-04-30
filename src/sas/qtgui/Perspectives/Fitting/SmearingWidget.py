@@ -114,8 +114,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Update control elements based on data and model passed
         """
-        # retain the index
-        cur_index = self.cbSmearing.currentIndex()
         self.cbSmearing.clear()
         self.cbSmearing.addItem("None")
         self.gAccuracy.setVisible(False)
@@ -123,15 +121,16 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if data is None:
             self.setElementsVisibility(False)
         model = self.kernel_model
-        self.updateKernelModel(model)
-        # already has the required setup so modify the index
-        self.cbSmearing.setCurrentIndex(cur_index)
+        self.updateKernelModel(model, keep_order = True)
 
-    def updateKernelModel(self, kernel_model=None):
+    def updateKernelModel(self, kernel_model=None, keep_order=False):
         """
         Update the model
         """
         self.kernel_model = kernel_model
+        # keep the original cbSmearing value, if already set
+        index_to_show = self.cbSmearing.currentIndex()
+
         self.cbSmearing.blockSignals(True)
         self.cbSmearing.clear()
         self.cbSmearing.addItem("None")
@@ -140,10 +139,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             return
         # Find out if data has dQ
         (self.smear_type, self.dq_l, self.dq_r) = self.getSmearInfo()
-        index_to_show = 0
         if self.smear_type is not None:
             self.cbSmearing.addItem(SMEARING_QD)
-            index_to_show = 1
+            index_to_show = 1 if keep_order else index_to_show
 
         if self.kernel_model is None:
             # No model definend yet - just use data file smearing, if any
@@ -193,15 +191,15 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         # Recalculate the smearing
         index = self.cbSmearing.currentIndex()
-        ## update the backup values based on model choice
+        # update the backup values based on model choice
         smearing, accuracy, d_down, d_up = self.state()
         # don't save the state if dQ Data
         if smearing == "Custom Pinhole Smear":
-            self.pinhole = d_down
+            self.pinhole = d_up
             self.accuracy = accuracy
         elif smearing == 'Custom Slit Smear':
-            self.slit_height = d_up
-            self.slit_width = d_down
+            self.slit_height = d_down
+            self.slit_width = d_up
 
         self.onIndexChange(index)
 
@@ -296,13 +294,13 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if smearing != "None":
             accuracy = str(self.model.item(MODEL.index('ACCURACY')).text())
             try:
-                d_down = float(self.txtSmearUp.text())
+                d_down = float(self.txtSmearDown.text())
             except ValueError:
-                d_down = None
+                d_down = 0.0
             try:
-                d_up = float(self.txtSmearDown.text())
+                d_up = float(self.txtSmearUp.text())
             except ValueError:
-                d_up = None
+                d_up = 0.0
 
         return (smearing, accuracy, d_down, d_up)
 
@@ -323,9 +321,10 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Create a custom pinhole smear object that will change the way residuals
         are compute when fitting
         """
-        _, accuracy, d_percent, _ = self.state()
+        _, accuracy, _, d_percent = self.state()
+        self.pinhole = d_percent
         if d_percent is None or d_percent == 0.0:
-            self.current_smearer=None
+            self.current_smearer = None
             return
         percent = d_percent/100.0
         # copy data
