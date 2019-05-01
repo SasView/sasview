@@ -207,8 +207,20 @@ class Calc1D(CalcThread):
             output[index] = return_data
 
         if intermediate_results:
-            # the model returns a callable which is then used to retrieve the data
-            intermediate_results = intermediate_results()
+            if isinstance(intermediate_results, list):
+                # the model returns an ordered dictionary
+                if len(intermediate_results) == 2:
+                    intermediate_results  = {
+                        "P(Q)": intermediate_results[0],
+                        "S(Q)": intermediate_results[1]
+                    }
+            else:
+                # the model returns a callable which is then used to retrieve the data
+                try:
+                    intermediate_results = intermediate_results()
+                except:
+                    intermediate_results = {}
+
         else:
             # TODO: this conditional branch needs refactoring
             sq_values = None
