@@ -2282,9 +2282,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addHeadersToModel(self._model_model)
         self.lstParams.header().setFont(self.boldFont)
 
-        # Update Q Ranges
-        self.updateQRange()
-
     def fromModelToQModel(self, model_name):
         """
         Setting model parameters into QStandardItemModel based on selected _model_

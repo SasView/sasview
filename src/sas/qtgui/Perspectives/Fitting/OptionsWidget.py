@@ -121,7 +121,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtMinRange, self.MODEL.index('MIN_RANGE'))
         self.mapper.addMapping(self.txtMaxRange, self.MODEL.index('MAX_RANGE'))
         self.mapper.addMapping(self.txtNpts,     self.MODEL.index('NPTS'))
-        self.mapper.addMapping(self.txtNptsFit,     self.MODEL.index('NPTS_FIT'))
+        self.mapper.addMapping(self.txtNptsFit,  self.MODEL.index('NPTS_FIT'))
         self.mapper.addMapping(self.chkLogData,  self.MODEL.index('LOG_SPACED'))
 
         self.mapper.toFirst()
@@ -185,12 +185,11 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         Update the local model based on calculated values
         """
-        qmax = str(self.qmax)
-        qmin = str(self.qmin)
+        qmax = str(q_range_max)
+        qmin = str(q_range_min)
         self.model.item(self.MODEL.index('MIN_RANGE')).setText(qmin)
         self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
         self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
-        #self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
         self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
         npts_fit = self.npts2fit(self.logic.data)
         self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
