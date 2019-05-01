@@ -1310,7 +1310,15 @@ def readDataFromFile(fp):
         # ndarray
         if cls == np.ndarray:
             o = data['data']
-            return np.array(o)
+            if isinstance(o, list):
+                # new format - ndarray as ascii list
+                return np.array(o)
+            else:
+                # pre-5.0-release format - binary ndarray
+                buffer = BytesIO()
+                buffer.write(data['data'].encode('latin-1'))
+                buffer.seek(0)
+                return np.load(buffer)
 
         # function
         if cls == types.FunctionType:
