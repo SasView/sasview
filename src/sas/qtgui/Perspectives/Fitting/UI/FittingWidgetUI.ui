@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>651</width>
-    <height>540</height>
+    <width>540</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -424,6 +424,11 @@ angles</string>
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tabOrder">
+      <attribute name="title">
+       <string>Order</string>
+      </attribute>
      </widget>
     </widget>
    </item>

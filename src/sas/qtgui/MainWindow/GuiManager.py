@@ -122,9 +122,6 @@ class GuiManager(object):
     def addWidgets(self):
         """
         Populate the main window with widgets
-
-        TODO: overwrite close() on Log and DR widgets so they can be hidden/shown
-        on request
         """
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)

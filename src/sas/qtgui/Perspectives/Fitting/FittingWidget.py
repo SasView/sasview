@@ -48,9 +48,11 @@ from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
+from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
+TAB_ORDERING = 5
 CATEGORY_DEFAULT = "Choose category..."
 MODEL_DEFAULT = "Choose model..."
 CATEGORY_STRUCTURE = "Structure Factor"
@@ -209,6 +211,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for data_item in value:
                 logic = FittingLogic(data=GuiUtils.dataFromItem(data_item))
                 self._logic.append(logic)
+            # update the ordering tab
+            self.order_widget.updateData(self.all_data)
 
         # Overwrite data type descriptor
 
@@ -327,6 +331,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         layout.addWidget(self.smearing_widget)
         self.tabResolution.setLayout(layout)
 
+        # Order widget
+        layout = QtWidgets.QGridLayout()
+        # pass all data items to access multiple datasets
+        self.order_widget = OrderWidget(self, self.all_data)
+        layout.addWidget(self.order_widget)
+        self.tabOrder.setLayout(layout)
+
         # Define bold font for use in various controls
         self.boldFont = QtGui.QFont()
         self.boldFont.setBold(True)
@@ -415,6 +426,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.setTableProperties(self.lstMagnetic)
         # Delegates for custom editing and display
         self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
+        # Initial status of the ordering tab - invisible
+        self.tabFitting.removeTab(TAB_ORDERING)
 
     def initializeCategoryCombo(self):
         """
@@ -503,6 +516,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def toggleChainFit(self, isChecked):
         """ Enable/disable chain fitting """
         self.is_chain_fitting = isChecked
+        # show/hide the ordering tab
+        if isChecked:
+            self.tabFitting.insertTab(TAB_ORDERING, self.tabOrder, "Order")
+        else:
+            self.tabFitting.removeTab(TAB_ORDERING)
 
     def toggle2D(self, isChecked):
         """ Enable/disable the controls dependent on 1D/2D data instance """
@@ -1769,7 +1787,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         batch_outputs = {}
 
         fitters = []
-        for fit_index in self.all_data:
+        # order datasets if chain fit
+        order = self.all_data
+        if self.is_chain_fitting:
+            order = self.order_widget.ordering()
+        for fit_index in order:
             fitter_single = Fit() if fitter is None else fitter
             data = GuiUtils.dataFromItem(fit_index)
             # Potential weights added directly to data
