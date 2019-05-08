@@ -9,3 +9,4 @@ if [ -d /etc/fonts ]; then
   export FONTCONFIG_FILE=/etc/fonts/fonts.conf
 fi
 
+export QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb
