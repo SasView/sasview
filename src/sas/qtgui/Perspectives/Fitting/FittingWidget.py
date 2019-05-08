@@ -2928,6 +2928,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.createNewIndex(weighted_data)
 
+        # Plot residuals if actual data
+        if not self.data_is_loaded:
+            return
+
         # Calculate difference between return_data and logic.data
         weights = FittingUtilities.getWeight(self.data, self.is2D, flag = self.weighting)
         # Recalculate chi2 only for manual parameter change, not after fitting
@@ -2938,9 +2942,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.lblChi2Value.setText(chi2_repr)
         self.fitResults = False
 
-        # Plot residuals if actual data
-        if not self.data_is_loaded:
-            return
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)
         if residuals_plot is None:
             return
