@@ -266,6 +266,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if filename:
             self.default_project_location = os.path.dirname(filename)
             self.deleteAllItems()
+            # Currently project load is available only for fitting
+            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
+                self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
             self.readProject(filename)
 
     def loadAnalysis(self):
@@ -525,8 +528,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # if so, skip the update
                 if page['is_batch_fitting'][0] == 'True':
                     continue
+                tab_index=None
+                if 'tab_index' in page:
+                    tab_index = page['tab_index'][0]
+                    tab_index = int(tab_index)
                 # Send current model item to the perspective
-                self.sendItemToPerspective(items[0])
+                self.sendItemToPerspective(items[0], tab_index=tab_index)
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
         if 'cs_tab' in key and 'is_constraint' in value:
@@ -704,7 +711,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             retval = msgbox.exec_()
 
-    def sendItemToPerspective(self, item):
+    def sendItemToPerspective(self, item, tab_index=None):
         """
         Send the passed item data to the current perspective and set the relevant notifiers
         """
@@ -713,7 +720,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         selected_items = [item]
         # Notify the GuiManager about the send request
         try:
-            self._perspective().setData(data_item=selected_items, is_batch=False)
+            if tab_index is None:
+                self._perspective().setData(data_item=selected_items, is_batch=False)
+            else:
+                self._perspective().setData(data_item=selected_items, is_batch=False, tab_index=tab_index)
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
             logging.error(msg)
