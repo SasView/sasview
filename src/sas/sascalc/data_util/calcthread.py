@@ -5,29 +5,24 @@
 #
 from __future__ import print_function
 
-import traceback
 import sys
 import logging
+import traceback
+from time import sleep
+
 try:
     import _thread as thread
 except ImportError: # CRUFT: python 2 support
     import thread
-
-if sys.platform.count("darwin") > 0:
-    import time
-    stime = time.time()
-
-    def clock():
-        return time.time() - stime
-
-    def sleep(t):
-        return time.sleep(t)
-else:
-    from time import clock
-    from time import sleep
+try:
+    from time import perf_counter as clock
+except ImportError: # CRUFT: python < 3.3
+    if sys.platform.count("darwin") > 0:
+        from time import time as clock
+    else:
+        from time import clock
 
 logger = logging.getLogger(__name__)
-
 
 class CalcThread:
     """Threaded calculation class.  Inherit from here and specialize
@@ -247,7 +242,7 @@ class CalcThread:
             try:
                 self.exception_handler(*sys.exc_info())
                 return
-            except Exception:
+            except Exception as exc:
                 pass
         logger.error(traceback.format_exc())
         #print 'CalcThread exception',

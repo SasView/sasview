@@ -11,7 +11,10 @@ Calculator Module
 #copyright 2010, University of Tennessee
 ################################################################################
 
+import logging
+
 import wx
+
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.perspectives.calculator.data_operator import DataOperatorWindow
 from sas.sasgui.perspectives.calculator.data_editor import DataEditorWindow
@@ -25,7 +28,6 @@ from sas.sasgui.perspectives.calculator.resolution_calculator_panel \
 from sas.sasgui.perspectives.calculator.gen_scatter_panel import SasGenWindow
 from sas.sasgui.perspectives.calculator.image_viewer import ImageView
 from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
-import logging
 
 logger = logging.getLogger(__name__)
 

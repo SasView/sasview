@@ -362,10 +362,13 @@ class SldPanel(wx.Panel, PanelBase):
         :param element:  elements a string of existing atom
 
         """
+        # TODO: use periodictable.elements object
+        #    energy = xray_energy(periodictable.elements[element].K_alpha)
+        # TODO: code is very similar to sld helper
         myformula = formula(str(element))
         if len(myformula.atoms) != 1:
             return
-        element = myformula.atoms.keys()[0]
+        element = list(myformula.atoms.keys())[0]
         energy = xray_energy(element.K_alpha)
 
         self.sld_formula = formula(str(self.compound), density=self.density)
@@ -412,6 +415,9 @@ class SldPanel(wx.Panel, PanelBase):
                     flag = False
                     msg += "Error for wavelength value :expect float"
             elif (self.xray_source == 'Element'):
+                # TODO: use periodictable.elements instead of exec() hacks
+                #     if self.xray_source_input not in periodictable.elements:
+                #         ...
                 try:
                     import periodictable
                     exec("periodictable." + self.xray_source_input)
@@ -446,11 +452,14 @@ class SldPanel(wx.Panel, PanelBase):
         :param element:  elements a string of existing atom
 
         """
+        # TODO: use periodictable.elements object
+        #    energy = xray_energy(periodictable.elements[element].K_alpha)
         element_formula = formula(str(element))
         if len(element_formula.atoms) != 1:
             return
-        element = element_formula.atoms.keys()[0]
+        element = list(element_formula.atoms.keys())[0]
         energy = xray_energy(element.K_alpha)
+
         atom = molecule_formula.atoms
         return xray_sld_from_atoms(atom, density=density, energy=energy)
 
@@ -504,9 +513,9 @@ class SldPanel(wx.Panel, PanelBase):
             # display wavelength
             #self.wavelength_ctl.SetValue(str(self.wavelength))
             #self.wavelength_ctl.SetValue(str(self.wavelength))
-        except:
+        except Exception as exc:
             if self.base is not None:
-                msg = "SLD Calculator: %s" % (sys.exc_value)
+                msg = "SLD Calculator: %s" % exc
                 wx.PostEvent(self.base, StatusEvent(status=msg))
         if event is not None:
             event.Skip()

@@ -147,7 +147,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Sort source name because wx2.9 on Mac does not support CB_SORT
         # Custom sorting
         source_list = []
-        for key, _ in self.source_mass.iteritems():
+        for key, _ in self.source_mass.items():
             name_source = str(key)
             source_list.append(name_source)
         source_list.sort()
@@ -666,6 +666,12 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Execute the computation of resolution
         """
+        # Clone the event before CallAfter; the event seems
+        # to delete the event when it is done processing, so
+        # the original will not be available when the call
+        # after method starts.
+        if event is not None:
+            event = event.Clone()
         wx.CallAfter(self.on_compute_call, event)
 
     def on_compute_call(self, event=None):
@@ -752,7 +758,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             self._status_info(msg, status_type)
             wx.MessageBox(msg, 'Warning')
             return
-            #raise ValueError, "Invalid Q Input..."
+            #raise ValueError("Invalid Q Input...")
 
         # Validate the q inputs
         q_input = self._validate_q_input(self.qx, self.qy)
@@ -933,7 +939,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
     def _sigma_strings(self):
         """
-        Recode sigmas as strins
+        Recode sigmas as strings
         """
         sigma_r = self.format_number(self.resolution.sigma_1)
         sigma_phi = self.format_number(self.resolution.sigma_2)
@@ -1081,7 +1087,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             else:
                 msg = "The numbers must be one or two (separated by ',')..."
                 self._status_info(msg, 'stop')
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
         return new_string
 
@@ -1098,8 +1104,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             try:
                 value = float(string_split[ind])
                 new_string.append(value)
-            except:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
 
         return new_string
 
@@ -1140,8 +1146,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                     if string.count(',') > 0:
                         out = self._string2inputlist(string)
                         return out
-                except:
-                    logger.error(sys.exc_value)
+                except Exception as exc:
+                    logger.error(exc)
 
     def _on_xy_coordinate(self, event=None):
         """
@@ -1268,7 +1274,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 return
             try:
                 basename = os.path.basename(path)
-                if basename not in self.spectrum_dic.keys():
+                if basename not in self.spectrum_dic:
                     self.spectrum_cb.Append(basename)
                 self.spectrum_dic[basename] = self._read_file(path)
                 self.spectrum_cb.SetValue(basename)
@@ -1285,7 +1291,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         dlg = wx.FileDialog(self,
                             "Choose a wavelength spectrum file: Intensity vs. wavelength",
-                            self.parent.parent.get_save_location() , "", "*.*", wx.OPEN)
+                            self.parent.parent.get_save_location() , "", "*.*", wx.FD_OPEN)
         path = None
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1317,9 +1323,9 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                     intens = float(toks[1])
                     wavelength.append(wave)
                     intensity.append(intens)
-                except:
+                except Exception as exc:
                     # Skip non-data lines
-                    logger.error(sys.exc_value)
+                    logger.error(exc)
 
             return [wavelength, intensity]
         except:

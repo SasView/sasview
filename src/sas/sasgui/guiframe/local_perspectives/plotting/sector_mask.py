@@ -2,12 +2,14 @@
     Sector mask interactor
 """
 import math
+
 import wx
-#from copy import deepcopy
-from BaseInteractor import _BaseInteractor
-from SectorSlicer import SideInteractor
-from SectorSlicer import LineInteractor
+
 from sas.sasgui.guiframe.events import SlicerParameterEvent
+
+from .BaseInteractor import _BaseInteractor
+from .SectorSlicer import SideInteractor
+from .SectorSlicer import LineInteractor
 
 class SectorMask(_BaseInteractor):
     """
@@ -174,7 +176,7 @@ class SectorMask(_BaseInteractor):
             msg = "Phi left and phi right are "
             msg += "different %f, %f" % (self.left_line.phi,
                                          self.right_line.phi)
-            raise ValueError, msg
+            raise ValueError(msg)
         params["Phi"] = self.main_line.theta
         params["Delta_Phi"] = math.fabs(self.left_line.phi)
         return params

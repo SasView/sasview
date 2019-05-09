@@ -132,7 +132,7 @@ class Plugin(PluginBase):
         if not issubclass(data.__class__, Data1D):
             name = data.__class__.__name__
             msg = "Invariant use only Data1D got: [%s] " % str(name)
-            raise ValueError, msg
+            raise ValueError(msg)
         self.compute_helper(data=data)
 
     def set_data(self, data_list=None):
@@ -143,6 +143,8 @@ class Plugin(PluginBase):
         data = None
         if data_list is None:
             data_list = []
+        else:
+            data_list = list(data_list)  # force iterator to list
         if len(data_list) >= 1:
             if len(data_list) == 1:
                 data = data_list[0]
@@ -189,8 +191,8 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=data.title))
                 try:
                     self.compute_helper(data)
-                except:
-                    msg = "Invariant Set_data: " + str(sys.exc_value)
+                except Exception as exc:
+                    msg = "Invariant Set_data: " + str(exc)
                     wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
         else:
             msg = "invariant cannot be computed for data of "
@@ -239,7 +241,7 @@ class Plugin(PluginBase):
         else:
             msg = "invariant.save_file: the data being saved is"
             msg += " not a sas.sascalc.dataloader.data_info.Data1D object"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def set_state(self, state=None, datainfo=None):
         """
@@ -257,7 +259,7 @@ class Plugin(PluginBase):
             if data is None:
                 msg = "invariant.set_state: datainfo parameter cannot"
                 msg += " be None in standalone mode"
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
             # Make sure the user sees the invariant panel after loading
             # self.parent.set_perspective(self.perspective)
             self.on_perspective(event=None)
@@ -280,8 +282,8 @@ class Plugin(PluginBase):
             # Requires to have self.__data and self.temp_state  first.
             self.on_set_state_helper(None)
 
-        except:
-            logger.error("invariant.set_state: %s" % sys.exc_value)
+        except Exception as exc:
+            logger.error("invariant.set_state: %s" % exc)
 
     def on_set_state_helper(self, event=None):
         """
@@ -319,7 +321,7 @@ class Plugin(PluginBase):
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
             msg = "Scale can not be zero."
-            raise ValueError, msg
+            raise ValueError(msg)
         if len(new_plot.x) == 0:
             return
 

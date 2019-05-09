@@ -16,8 +16,12 @@ Fitting Documentation
 
    Smearing Functions <resolution>
 
+   Fitting Models with Structure Factors <fitting_sq>
+
+   Writing a Plugin Model <plugin>
+
    Polarisation/Magnetic Scattering <magnetism/magnetism>
-   
+
    Oriented Particles <orientation/orientation>
 
    Information on the SasView Optimisers <optimizer>
@@ -25,8 +29,6 @@ Fitting Documentation
    Converting SANS to SESANS for Fitting <sesans/sans_to_sesans>
 
    Fitting SESANS Data <sesans/sesans_fitting>
-
-   Writing a Plugin Model <plugin>
 
    Computations with a GPU <gpu_setup>
 

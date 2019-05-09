@@ -1239,11 +1239,10 @@ class Reader(XMLreader):
                     try:
                         conv = Converter(units)
                         setattrchain(storage, variable, conv(value, units=local_unit))
-                    except Exception:
-                        _, exc_value, _ = sys.exc_info()
+                    except Exception as exc:
                         err_mess = "CanSAS reader: could not convert"
                         err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
-                            % (variable, units, local_unit, exc_value)
+                            % (variable, units, local_unit, exc)
                         self.errors.add(err_mess)
                         if optional:
                             logger.info(err_mess)

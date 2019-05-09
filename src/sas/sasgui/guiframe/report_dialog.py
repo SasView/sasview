@@ -146,6 +146,6 @@ class BaseReportDialog(wx.Dialog):
             resultFile.close()
             self.Update()
             return pisaStatus.err
-        except Exception:
-            logger.error("Error creating pdf: %s" % sys.exc_value)
+        except Exception as exc:
+            logger.error("Error creating pdf: %s" % exc)
         return False

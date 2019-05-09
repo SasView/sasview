@@ -27,14 +27,16 @@ class Selection(object):
     def __ne__(self, other):
         return self.artist is not other.artist
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.artist is not None
+
+    __nonzero__ = __bool__
 
 
 class BindArtist(object):
     """
+    Track keyboard modifiers for events.
     """
-    # Track keyboard modifiers for events.
     # TODO: Move keyboard modifier support into the backend.  We cannot
     # TODO: properly support it from outside the windowing system since there
     # TODO: is no way to recognized whether shift is held down when the mouse
@@ -64,7 +66,7 @@ class BindArtist(object):
                 canvas.mpl_connect('scroll_event', self._onScroll)
             ]
         except:
-            print("bypassing scroll_event: wrong matplotlib version")
+            logger.warn("bypassing scroll_event: wrong matplotlib version")
             self._connections = [
                 canvas.mpl_connect('motion_notify_event', self._onMotion),
                 canvas.mpl_connect('button_press_event', self._onClick),
@@ -72,6 +74,13 @@ class BindArtist(object):
                 canvas.mpl_connect('key_press_event', self._onKey),
                 canvas.mpl_connect('key_release_event', self._onKeyRelease),
             ]
+
+        # Turn off picker if it hasn't already been done
+        try:
+            canvas.mpl_disconnect(canvas.button_pick_id)
+            canvas.mpl_disconnect(canvas.scroll_pick_id)
+        except Exception as exc:
+            logger.error(exc)
 
         self._current = None
         self._actions = {}
@@ -86,7 +95,6 @@ class BindArtist(object):
 
         Use clearall() to reset all connections.
         """
-
         for h in artists:
             for a in self.events:
                 if h in self._actions[a]:
@@ -122,9 +130,10 @@ class BindArtist(object):
         In case we need to disconnect from the canvas...
         """
         try:
-            for cid in self._connections: self.canvas.mpl_disconnect(cid)
-        except:
-            logger.error("Error disconnection canvas: %s" % sys.exc_value)
+            for cid in self._connections:
+                self.canvas.mpl_disconnect(cid)
+        except Exception as exc:
+            logger.error("Error disconnection canvas: %s" % exc)
         self._connections = []
 
     def __del__(self):
@@ -171,25 +180,24 @@ class BindArtist(object):
         When receiving an event, first check the modifier state to be
         sure it applies.  E.g., the callback for 'press' might be:
             if event.button == 1 and event.shift: process Shift-click
-
-        TODO: Only receive events with the correct modifiers (e.g., S-click,
-        TODO:   or *-click for any modifiers).
-        TODO: Only receive button events for the correct button (e.g., click1
-        TODO:   release3, or dclick* for any button)
-        TODO: Support virtual artist, so that and artist can be flagged as
-        TODO:   having a tag list and receive the correct events
-        TODO: Support virtual events for binding to button-3 vs shift button-1
-        TODO:   without changing callback code
-        TODO: Attach multiple callbacks to the same event?
-        TODO: Clean up interaction with toolbar modes
-        TODO: push/pushclear/pop context so that binding changes for
-             the duration
-        TODO:   e.g., to support ? context sensitive help
         """
+        #TODO: Only receive events with the correct modifiers (e.g., S-click,
+        #TODO:   or *-click for any modifiers).
+        #TODO: Only receive button events for the correct button (e.g., click1
+        #TODO:   release3, or dclick* for any button)
+        #TODO: Support virtual artist, so that and artist can be flagged as
+        #TODO:   having a tag list and receive the correct events
+        #TODO: Support virtual events for binding to button-3 vs shift button-1
+        #TODO:   without changing callback code
+        #TODO: Attach multiple callbacks to the same event?
+        #TODO: Clean up interaction with toolbar modes
+        #TODO: push/pushclear/pop context so that binding changes for the duration
+        #TODO:   e.g., to support ? context sensitive help
+
         # Check that the trigger is valid
         if trigger not in self._actions:
-            raise ValueError, "%s invalid --- valid triggers are %s"\
-                 % (trigger, ", ".join(self.events))
+            raise ValueError("%s invalid --- valid triggers are %s"
+                % (trigger, ", ".join(self.events)))
 
         # Register the trigger callback
         self._actions[trigger][artist] = action
@@ -204,7 +212,7 @@ class BindArtist(object):
         to figure, and to 'all' if the event is not processed.
         """
         if action not in self.events:
-            raise ValueError, "Trigger expects " + ", ".join(self.events)
+            raise ValueError("Trigger expects " + ", ".join(self.events))
 
         # Tag the event with modifiers
         for mod in ('alt', 'control', 'shift', 'meta'):
@@ -213,7 +221,7 @@ class BindArtist(object):
         setattr(ev, 'action', action)
         setattr(ev, 'prop', {})
 
-        # Fallback scheme.  If the event does not return false, pass to parent.
+        # Fallback scheme. If the event does not return false, pass to parent.
         processed = False
         artist, prop = actor.artist, actor.prop
         if artist in self._actions[action]:
@@ -236,7 +244,7 @@ class BindArtist(object):
         registered artists.  All others are invisible to the mouse.
         """
         # TODO: sort by zorder of axes then by zorder within axes
-        self._artists.sort(cmp=lambda x, y: cmp(y.zorder, x.zorder))
+        self._artists.sort(key=lambda x: x.zorder, reverse=True)
         found = Selection()
         for artist in self._artists:
             # TODO: should contains() return false if invisible?
@@ -275,7 +283,7 @@ class BindArtist(object):
             # artist rather than the default axes coordinates.
 
             transform = self._hasclick.artist.get_transform()
-            # x,y = event.xdata,event.ydata
+            #x,y = event.xdata,event.ydata
             x, y = event.x, event.y
             try:
                 if transform.__class__.__name__ == "IdentityTransform":
@@ -285,13 +293,13 @@ class BindArtist(object):
                     # # don't know why maybe marker definition
                     # #transform ="CompositeGenericTransform" crash
                     pass
-            except:
-                # # CRUFT matplotlib-0.91 support
+            except: # CRUFT: matplotlib-0.91 support
                 # # exception for transform ="CompositeGenericTransform"
                 # # crashes also here
                 x, y = transform.inverse_xy_tup((x, y))
 
-            # event.xdata, event.ydata = x, y
+            #TODO: why compute (x,y) if it isn't being used?
+            #event.xdata, event.ydata = x, y
             self.trigger(self._hasclick, 'drag', event)
         else:
             found = self._find_current(event)

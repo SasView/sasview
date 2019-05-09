@@ -100,7 +100,7 @@ def sasfit(model, pars, x, y, err_y, qmin=None, qmax=None):
 def calcCommandline(event):
     # Testing implementation
     # Fit a Line model
-    from LineModel import LineModel
+    from .LineModel import LineModel
     line = LineModel()
     cstA = Parameter(line, 'A', event.cstA)
     cstB = Parameter(line, 'B', event.cstB)

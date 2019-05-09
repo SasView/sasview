@@ -55,25 +55,6 @@ ext_modules = []
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SASVIEW_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 
-# TODO: build step should not be messing with existing installation!!
-sas_dir = os.path.join(os.path.expanduser("~"), '.sasview')
-if os.path.isdir(sas_dir):
-    f_path = os.path.join(sas_dir, "sasview.log")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
-    f_path = os.path.join(sas_dir, "categories.json")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
-    f_path = os.path.join(sas_dir, 'config', "custom_config.py")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
-    #f_path = os.path.join(sas_dir, 'plugin_models')
-    # if os.path.isdir(f_path):
-    #     for f in os.listdir(f_path):
-    #         if f in plugin_model_list:
-    #             file_path =  os.path.join(f_path, f)
-    #             os.remove(file_path)
-
 
 # Optionally clean before build.
 dont_clean = 'update' in sys.argv

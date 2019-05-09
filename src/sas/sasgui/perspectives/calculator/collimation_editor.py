@@ -1,13 +1,16 @@
 """
 """
-import wx
 import sys
 from copy import deepcopy
+
+import wx
+
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Aperture, Collimation
-from aperture_editor import ApertureDialog
-
 from sas.sasgui.guiframe.utils import check_float
+
+from .aperture_editor import ApertureDialog
+
 _BOX_WIDTH = 60
 
 if sys.platform.count("win32") > 0:

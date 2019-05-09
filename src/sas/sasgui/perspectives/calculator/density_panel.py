@@ -361,9 +361,9 @@ class DensityPanel(ScrolledPanel, PanelBase):
             output = self._format_number(molar_mass / self.input)
             self.molar_mass_ctl.SetValue(str(self._format_number(molar_mass)))
             self.output_ctl.SetValue(str(output))
-        except:
+        except Exception as exc:
             if self.base is not None:
-                msg = "Density/Volume Calculator: %s" % (sys.exc_value)
+                msg = "Density/Volume Calculator: %s" % exc
                 wx.PostEvent(self.base, StatusEvent(status=msg))
         if event is not None:
             event.Skip()

@@ -233,7 +233,12 @@ class GridPage(sheet.CSheet):
         # NOTE: the following bind to standard sheet methods that are
         # overriden in this subclassn - actually we have currently
         # disabled the on_context_menu that would override the OnRightClick
-        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnCellChange)
+        try:
+            EVT_GRID_CELL_CHANGED = wx.grid.EVT_GRID_CELL_CHANGED
+        except AttributeError:
+            # CRUFT: wx 3.x uses CHANGE rather than CHANGING/CHANGED
+            EVT_GRID_CELL_CHANGED = wx.grid.EVT_GRID_CELL_CHANGE
+        self.Bind(EVT_GRID_CELL_CHANGED, self.OnCellChange)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.OnLeftClick)
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)
         #self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnLeftDoubleClick)
@@ -560,7 +565,7 @@ class GridPage(sheet.CSheet):
             if row < self.max_row_touse:
                 value = self.GetCellValue(row, col)
                 self.data[col_name].append(value)
-                for k, value_list in self.data.iteritems():
+                for k, value_list in self.data.items():
                     if k != col_name:
                         length = len(value_list)
                         if length < self.max_row_touse:
@@ -620,7 +625,7 @@ class GridPage(sheet.CSheet):
         self.InsertCols(pos=col, numCols=1, updateLabels=True)
         if col_name.strip() != "Empty":
             self.SetCellValue(row, col, str(col_name.strip()))
-        if col_name in self.data.keys():
+        if col_name in self.data:
             value_list = self.data[col_name]
             cell_row = 1
             for value in value_list:
@@ -673,7 +678,7 @@ class GridPage(sheet.CSheet):
         if  len(self.data_outputs) > 0:
             self._cols = self.GetNumberCols()
             self._rows = self.GetNumberRows()
-            self.col_names = self.data_outputs.keys()
+            self.col_names = list(self.data_outputs.keys())
             self.col_names.sort()
             nbr_user_cols = len(self.col_names)
             #Add more columns to the grid if necessary
@@ -681,7 +686,7 @@ class GridPage(sheet.CSheet):
                 new_col_nbr = nbr_user_cols - self._cols + 1
                 self.AppendCols(new_col_nbr, True)
             #Add more rows to the grid if necessary
-            nbr_user_row = len(self.data_outputs.values()[0])
+            nbr_user_row = len(list(self.data_outputs.values())[0])
             if nbr_user_row > self._rows + 1:
                 new_row_nbr = nbr_user_row - self._rows + 1
                 self.AppendRows(new_row_nbr, True)
@@ -908,20 +913,20 @@ class Notebook(nb, PanelBase):
                 if c != col:
                     msg = "Edit axis doesn't understand this selection.\n"
                     msg += "Please select only one column"
-                    raise ValueError, msg
+                    raise ValueError(msg)
             for (_, cell_col) in grid.selected_cells:
                 if cell_col != col:
                     msg = "Cannot use cells from different columns for "
                     msg += "this operation.\n"
                     msg += "Please select elements of the same col.\n"
-                    raise ValueError, msg
+                    raise ValueError(msg)
 
             # Finally check the highlighted cell if any cells missing
             self.get_highlighted_row(True)
         else:
             msg = "No item selected.\n"
             msg += "Please select only one column or one cell"
-            raise ValueError, msg
+            raise ValueError(msg)
         return grid.selected_cells
 
     def get_highlighted_row(self, is_number=True):
@@ -1325,7 +1330,7 @@ class GridPanel(SPanel):
         try:
             if sentence.strip() == "":
                 msg = "Select column values for x axis"
-                raise ValueError, msg
+                raise ValueError(msg)
         except:
             msg = "X axis value error."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
@@ -1344,7 +1349,7 @@ class GridPanel(SPanel):
         try:
             if sentence.strip() == "":
                 msg = "select value for y axis"
-                raise ValueError, msg
+                raise ValueError(msg)
         except:
             msg = "Y axis value error."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
@@ -1439,13 +1444,13 @@ class GridPanel(SPanel):
         Get sentence from dict
         """
 
-        for tok, (col_name, list) in dict.iteritems():
+        for tok, (col_name, list) in dict.items():
             col = column_names[col_name]
             axis = self.get_plot_axis(col, list)
             if axis is None:
                 return None
             sentence = sentence.replace(tok, "numpy.array(%s)" % str(axis))
-        for key, value in FUNC_DICT.iteritems():
+        for key, value in FUNC_DICT.items():
             sentence = sentence.replace(key.lower(), value)
         return sentence
 
@@ -1545,8 +1550,8 @@ class GridPanel(SPanel):
         try:
             cell_list = self.notebook.on_edit_axis()
             label, title = self.create_axis_label(cell_list)
-        except:
-            msg = str(sys.exc_value)
+        except Exception as exc:
+            msg = str(exc)
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
             return
         tcrtl = event.GetEventObject()
@@ -2035,7 +2040,7 @@ if __name__ == "__main__":
         data_input["index5"] = [10, 20, 40, 50]
         frame = GridFrame(data_outputs=data, data_inputs=data_input)
         frame.Show(True)
-    except:
-        print(sys.exc_value)
+    except Exception as exc:
+        print(exc)
 
     app.MainLoop()

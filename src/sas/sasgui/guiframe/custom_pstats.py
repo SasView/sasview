@@ -35,32 +35,32 @@ class CustomPstats(pstats.Stats):
        
         width = self.max_name_len
         if self.fcn_list:
-            list = self.fcn_list[:]
+            stats = self.fcn_list[:]
             temp_msg = "   Ordered by: " + self.sort_type + '\n'
         else:
-            list = self.stats.keys()
+            stats = list(self.stats.keys())
             temp_msg = "   Random listing order was used\n"
 
         for selection in amount:
-            list, temp_msg = self.eval_print_amount(selection, list, temp_msg)
+            stats, temp_msg = self.eval_print_amount(selection, stats, temp_msg)
 
-        count = len(list)
+        count = len(stats)
 
-        if not list:
-            width, list = 0, list
+        if not stats:
+            width = 0
         else:
-            msg +=   str(temp_msg) + '\n'
+            msg += str(temp_msg) + '\n'
             if count < len(self.stats):
                 width = 0
-                for func in list:
+                for func in stats:
                     if  len(func_std_string(func)) > width:
                         width = len(func_std_string(func))
        
-            width, list = width+2, list
-        if list:
+            width = width+2
+        if stats:
             msg += '   ncalls  tottime  percall  cumtime  percall'
             msg +=  ' filename:lineno(function)' + "\n"
-            for func in list:
+            for func in stats:
                 cc, nc, tt, ct, callers = self.stats[func]
                 c = str(nc)
                 if nc != cc:
