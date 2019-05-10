@@ -18,4 +18,6 @@ Working with SasView
 
    Writing a Plugin Model <qtgui/Perspectives/Fitting/plugin>
 
+   Environment Variables <environment>
+
    Model marketplace <marketplace>

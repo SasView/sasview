@@ -125,9 +125,9 @@
     <addaction name="separator"/>
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
-     <addaction name="separator"/>
-     <addaction name="actionMinimizePlots"/>
-     <addaction name="actionClosePlots"/>
+    <addaction name="separator"/>
+    <addaction name="actionMinimizePlots"/>
+    <addaction name="actionClosePlots"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -145,6 +145,7 @@
     <addaction name="actionDocumentation"/>
     <addaction name="separator"/>
     <addaction name="actionTutorial"/>
+    <addaction name="actionModel_Marketplace"/>
     <addaction name="separator"/>
     <addaction name="actionAcknowledge"/>
     <addaction name="separator"/>
@@ -576,6 +577,11 @@
   <action name="actionClosePlots">
    <property name="text">
     <string>Close All Plots</string>
+   </property>
+  </action>
+  <action name="actionModel_Marketplace">
+   <property name="text">
+    <string>Model Marketplace</string>
    </property>
   </action>
  </widget>
