@@ -530,6 +530,7 @@ class GuiManager(object):
         # Help
         self._workspace.actionDocumentation.triggered.connect(self.actionDocumentation)
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
+        self._workspace.actionModel_Marketplace.triggered.connect(self.actionMarketplace)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
@@ -1025,6 +1026,13 @@ class GuiManager(object):
         Open the Acknowledgements widget
         """
         self.ackWidget.show()
+
+    def actionMarketplace(self):
+        """
+        Open the marketplace link in default browser
+        """
+        url = LocalConfig.MARKETPLACE_URL
+        webbrowser.open_new(url)
 
     def actionAbout(self):
         """

@@ -20,11 +20,11 @@ Edit
 ----
 The Edit option allows you to:
 
-- undo/redo your recent changes;
 - copy and paste parameters between *SasView* analysis windows;
 - copy parameters from a *SasView* analysis window to the Clipboard as either tab-delimited text (compatible with Microsoft Excel) or LaTex-wrapped text;
 - generate a summary 'Report' of the most recent analysis performed;
-- reset parameter values in the P(r) Inversion analysis page.
+- reset parameter values in the P(r) Inversion analysis page;
+- freeze/copy fit results as separate data sets.
 
 View
 ----
@@ -32,8 +32,6 @@ The View option allows you to:
 
 - show the Batch Fitting Results Panel if it has been closed;
 - show/hide the Toolbar of icons below the Menu Bar;
-- select the default location that *SasView* looks in for data to analyse (the *SasView* installation directory, the initial default, or a custom folder). NB: any change only takes effect when *SasView* is restarted;
-- change the default assignment of categories (*Shapes*\, *Shape-independent*\, *Structure Factor*\) for fitting model functions.
 
 Tools
 -----
@@ -41,7 +39,12 @@ The Tools option provides access to a comprehensive range of tools and utilities
 
 Window
 ------
-The Window option allows you to select which *SasView* windows are visible.  
+The Window option allows you to select which *SasView* windows are visible;
+
+- enable window cascading/tiling;
+- switch between windows in the workspace;
+- minimize all plot windows;
+- close all plot windows;
 
 Analysis
 --------
@@ -62,10 +65,11 @@ The Fitting option allows you to:
 - setting up a Constrained or Simultaneous Fit;
 - change optimiser (under Fit Options);
 - view fit parameter correlations, distributions, and convergence traces (under Fit Results);
-- create a Plugin Model.
-- edit a Plugin Model.
-- manage Plugin Models
-- create a Sum/Multiple Plugin Model
+- manage model categories;
+- create a Plugin Model;
+- edit a Plugin Model;
+- manage Plugin Models;
+- create a Sum/Multiple Plugin Model.
  
 
 Help
@@ -81,4 +85,4 @@ The Help option provides access to:
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 10Oct2016
+.. note::  This help document was last changed by Piotr Rozyczko, 10 May 2019

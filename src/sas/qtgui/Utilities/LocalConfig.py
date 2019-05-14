@@ -144,6 +144,9 @@ UPDATE_TIMEOUT = 2
 # Logging levels to disable, if any
 DISABLE_LOGGING = logging.NOTSET
 
+# Location of the marketplace
+MARKETPLACE_URL = "http://marketplace.sasview.org/"
+
 def printEVT(message):
     """
     Post a debug message to console/file

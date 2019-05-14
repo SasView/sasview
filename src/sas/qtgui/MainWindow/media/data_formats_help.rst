@@ -10,7 +10,9 @@
 Data Formats
 ============
 
-SasView reads several different 1D SAS (*I(Q) vs Q*), 2D SAS(*I(Qx,Qy) vs (Qx,Qy)*) and 1D SESANS (*P(z) vs z*) data files. From SasView 4.1 onwards, a :ref:`File_Converter_Tool` allows some legacy formats to be converted into modern formats that SasView will read.
+SasView reads several different 1D SAS (*I(Q) vs Q*), 2D SAS(*I(Qx,Qy) vs (Qx,Qy)*) and 1D SESANS (*P(z) vs z*) data files.
+.. 
+    From SasView 4.1 onwards, a :ref:`File_Converter_Tool` allows some legacy formats to be converted into modern formats that SasView will read.
 
 1D SAS Formats
 --------------
