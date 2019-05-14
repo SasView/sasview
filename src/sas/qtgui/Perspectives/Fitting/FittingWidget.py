@@ -3050,13 +3050,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Creates a checked row in the poly model with param_name
         """
         # Polydisp. values from the sasmodel
-        width = self.kernel_module.getParam(param_name + '.width')
+        param_wname = param_name + '.width'
+        width = self.kernel_module.getParam(param_wname)
         npts = self.kernel_module.getParam(param_name + '.npts')
         nsigs = self.kernel_module.getParam(param_name + '.nsigmas')
-        _, min, max = self.kernel_module.details[param_name]
+        _, min, max = self.kernel_module.details[param_wname]
 
         # Update local param dict
-        self.poly_params[param_name + '.width'] = width
+        self.poly_params[param_wname] = width
         self.poly_params[param_name + '.npts'] = npts
         self.poly_params[param_name + '.nsigmas'] = nsigs
 
