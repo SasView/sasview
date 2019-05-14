@@ -26,8 +26,6 @@ dependencies:
  - colorama=0.3.9=py36_0
  - constantly=15.1.0=py_0
  - coverage=4.5.1=py36_0
- - cryptography=2.3.1=py36hdffb7b8_0
- - cryptography-vectors=2.3.1=py36_1000
  - cycler=0.10.0=py_1
  - cython=0.28.3=py36_0
  - decorator=4.3.2=py_0
