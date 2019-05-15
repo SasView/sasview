@@ -1380,13 +1380,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name = parameter_name + '.width'
+            parameter_name_w = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
-                self.poly_params_to_fit.append(parameter_name)
+                self.poly_params_to_fit.append(parameter_name_w)
             else:
-                if parameter_name in self.poly_params_to_fit:
-                    self.poly_params_to_fit.remove(parameter_name)
+                if parameter_name_w in self.poly_params_to_fit:
+                    self.poly_params_to_fit.remove(parameter_name_w)
             self.cmdFit.setEnabled(self.haveParamsToFit())
+            # force data update
+            key = parameter_name + '.' + delegate.columnDict()[delegate.poly_pd]
+            self.poly_params[key] = value
+            self.updateData()
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
