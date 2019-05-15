@@ -1882,9 +1882,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             poly_item.insertColumn(2, [QtGui.QStandardItem("")])
 
+        def deletePolyErrorColumn(row):
+            # Utility function for error column removal in the polydispersity sub-rows
+            item = self._model_model.item(row, 0)
+            if not item.hasChildren():
+                return
+            poly_item = item.child(0)
+            if not poly_item.hasChildren():
+                return
+            poly_item.removeColumn(2)
+
         if self.has_error_column:
             # remove previous entries
             self._model_model.removeColumn(2)
+            self.iterateOverModel(deletePolyErrorColumn)
 
         #if not self.has_error_column:
             # create top-level error column
