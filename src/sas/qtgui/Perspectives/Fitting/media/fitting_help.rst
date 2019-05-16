@@ -684,11 +684,7 @@ Simultaneous Fits without Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The results of the model-fitting will be returned to each of the individual
-*FitPage*'s.
-
-Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+*FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
 Simultaneous Fits with Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -725,11 +721,7 @@ A 'free-form' constraint box is also provided.
 Many constraints can be entered for a single fit.
 
 The results of the model-fitting will be returned to each of the individual
-*FitPage*'s.
-
-Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+*FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
