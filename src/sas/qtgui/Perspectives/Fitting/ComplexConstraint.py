@@ -40,7 +40,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.tab_names = None
         self.operator = '='
         self._constraint = Constraint()
-        self.all_menu   = None
+        self.all_menu = None
+        self.parent = parent
 
         self.warning = self.lblWarning.text()
         self.setupData()
@@ -301,13 +302,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Display related help section
         """
-        try:
-            help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
-            webbrowser.open('file://' + os.path.realpath(help_location))
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        tree_location = "/user/qtgui/Perspectives/Fitting/"
 
+        helpfile = "fitting_help.html#simultaneous-fits-with-constraints"
+        help_location = tree_location + helpfile
+        self.parent.parent.parent.showHelp(help_location)
 
 
