@@ -40,7 +40,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.tab_names = None
         self.operator = '='
         self._constraint = Constraint()
-        self.all_menu   = None
+        self.all_menu = None
+        self.parent = parent
 
         self.warning = self.lblWarning.text()
         self.setupData()
