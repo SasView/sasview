@@ -157,8 +157,29 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         # "bottom" is unused
         # update if there's something to update
-        if str(self.model.item(top.row()).text()):
-            self.plot_signal.emit()
+        item_text = self.model.item(top.row()).text()
+        if not item_text:
+            return
+        # Update the npts/fit value
+        if top.row() in [0,1]:
+            qmin, qmax, npts, _, _ = self.state()
+            # if this is a Q value, update NPt/fit
+            value = float(item_text)
+            if top.row() == 0:
+                qmin = value
+                if qmin >= qmax:
+                    qmin = self.qmin
+                    self.model.item(self.MODEL.index('MIN_RANGE')).setText(str(self.qmin))
+            else:
+                qmax = value
+                if qmax <= qmin:
+                    qmax = self.qmax
+                    self.model.item(self.MODEL.index('MAX_RANGE')).setText(str(self.qmax))
+            self.npts_fit = self.npts2fit(data=self.logic.data, qmin=qmin, qmax=qmax, npts=npts)
+            self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(self.npts_fit))
+        # update the plot(s)
+        self.plot_signal.emit()
+
 
     def setEnablementOnDataLoad(self):
         """
@@ -206,7 +227,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
 
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
-    def npts2fit(self, data=None):
+    def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):
         """
         return numbers of data points within qrange
         :Note: This is to normalize chisq by Npts of fit
@@ -215,11 +236,16 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         if data is None:
             return npts2fit
 
-        qmin, qmax, npts = self.logic.computeDataRange()
+        qmin_c, qmax_c, npts_c = self.logic.computeDataRange()
+        if qmin is None:
+            qmin = qmin_c
+        if qmax is None:
+            qmax = qmax_c
+        if npts is None:
+            npts = npts_c
         if isinstance(data, Data2D):
             radius = np.sqrt(data.qx_data * data.qx_data +
                              data.qy_data * data.qy_data)
-            #index_data = (self.qmin_x <= radius) & (radius <= self.qmax_x)
             index_data = (qmin <= radius) & (radius <= qmax)
             index_data = (index_data) & (data.mask)
             index_data = (index_data) & (np.isfinite(data.data))
