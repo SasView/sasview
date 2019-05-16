@@ -15,10 +15,10 @@ Version 4.2 or later)
 
 The following tutorials have been written for Version 4.x
 
-:download:`Getting Started with Sasview <sasview/getting_started_with_sasview.pdf>`
+:download:`Getting Started with Sasview <sasview/getting_started_with_sasview_v5.pdf>`
 
-:download:`Basic 1D Fitting in Sasview <sasview/basic_1d_fitting_in_sasview_v3x_4x.pdf>`
+:download:`Basic 1D Fitting in Sasview <sasview/basic_1d_fitting_in_sasview_v5.pdf>`
 
-:download:`Simultaneous 1D Fitting in Sasview <sasview/simultaneous_1d_fitting_in_sasview_v3x_4x.pdf>`
+:download:`Simultaneous 1D Fitting in Sasview <sasview/simultaneous_1d_fitting_in_sasview_v5.pdf>`
 
-:download:`Correlation Function Analysis in SasView <sasview/correlation_function_analysis_in_sasview_v4x.pdf>`
+:download:`Correlation Function Analysis in SasView <sasview/correlation_function_analysis_in_sasview_v5.pdf>`
