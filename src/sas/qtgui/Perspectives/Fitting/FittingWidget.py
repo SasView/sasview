@@ -1768,8 +1768,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model = copy.deepcopy(self.kernel_module)
         qmin = self.q_range_min
         qmax = self.q_range_max
-        # add polydisperse/magnet parameters if asked
-        self.updateKernelModelWithExtraParams(model)
 
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
