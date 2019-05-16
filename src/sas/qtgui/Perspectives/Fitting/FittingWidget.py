@@ -1380,13 +1380,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name = parameter_name + '.width'
+            parameter_name_w = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
-                self.poly_params_to_fit.append(parameter_name)
+                self.poly_params_to_fit.append(parameter_name_w)
             else:
-                if parameter_name in self.poly_params_to_fit:
-                    self.poly_params_to_fit.remove(parameter_name)
+                if parameter_name_w in self.poly_params_to_fit:
+                    self.poly_params_to_fit.remove(parameter_name_w)
             self.cmdFit.setEnabled(self.haveParamsToFit())
+            # force data update
+            key = parameter_name + '.' + delegate.columnDict()[delegate.poly_pd]
+            self.poly_params[key] = value
+            self.updateData()
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
@@ -1882,9 +1886,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             poly_item.insertColumn(2, [QtGui.QStandardItem("")])
 
+        def deletePolyErrorColumn(row):
+            # Utility function for error column removal in the polydispersity sub-rows
+            item = self._model_model.item(row, 0)
+            if not item.hasChildren():
+                return
+            poly_item = item.child(0)
+            if not poly_item.hasChildren():
+                return
+            poly_item.removeColumn(2)
+
         if self.has_error_column:
             # remove previous entries
             self._model_model.removeColumn(2)
+            self.iterateOverModel(deletePolyErrorColumn)
 
         #if not self.has_error_column:
             # create top-level error column
@@ -3050,13 +3065,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Creates a checked row in the poly model with param_name
         """
         # Polydisp. values from the sasmodel
-        width = self.kernel_module.getParam(param_name + '.width')
+        param_wname = param_name + '.width'
+        width = self.kernel_module.getParam(param_wname)
         npts = self.kernel_module.getParam(param_name + '.npts')
         nsigs = self.kernel_module.getParam(param_name + '.nsigmas')
-        _, min, max = self.kernel_module.details[param_name]
+        _, min, max = self.kernel_module.details[param_wname]
 
         # Update local param dict
-        self.poly_params[param_name + '.width'] = width
+        self.poly_params[param_wname] = width
         self.poly_params[param_name + '.npts'] = npts
         self.poly_params[param_name + '.nsigmas'] = nsigs
 

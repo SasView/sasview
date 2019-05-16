@@ -63,6 +63,8 @@ def run_sasview():
     splash = SplashScreen()
     splash.show()
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    # Main application style.
+    #app.setStyle('Fusion')
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     import sys

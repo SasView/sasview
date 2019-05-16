@@ -73,7 +73,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>:/about/utlogo.gif</normaloff>:/about/utlogo.gif</iconset>
+         <normaloff>:/about/utlogo.png</normaloff>:/about/utlogo.png</iconset>
        </property>
        <property name="iconSize">
         <size>

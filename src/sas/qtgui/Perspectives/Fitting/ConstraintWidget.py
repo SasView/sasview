@@ -805,6 +805,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
+        if len(tabs) < 2:
+            self.cmdAdd.setEnabled(False)
+        else:
+            self.cmdAdd.setEnabled(True)
+
         if not self._row_order:
             # Initialize tab order list
             self._row_order = tabs
