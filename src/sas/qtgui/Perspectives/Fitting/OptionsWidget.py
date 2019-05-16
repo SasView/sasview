@@ -71,6 +71,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         # Let only ints in the number of points edit
         self.txtNpts.setValidator(QtGui.QIntValidator())
 
+        # disable npts/fit - this is a read only control
+        self.txtNptsFit.setEnabled(False)
+
         # Attach slots
         self.cmdReset.clicked.connect(self.onRangeReset)
         self.cmdMaskEdit.clicked.connect(self.onMaskEdit)
@@ -161,7 +164,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         if not item_text:
             return
         # Update the npts/fit value
-        if top.row() in [0,1]:
+        if top.row() in [0, 1, 2]:
             qmin, qmax, npts, _, _ = self.state()
             # if this is a Q value, update NPt/fit
             value = float(item_text)
@@ -170,12 +173,21 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
                 if qmin >= qmax:
                     qmin = self.qmin
                     self.model.item(self.MODEL.index('MIN_RANGE')).setText(str(self.qmin))
-            else:
+                self.npts_fit = self.npts2fit(data=self.logic.data, qmin=qmin, qmax=qmax, npts=npts)
+            elif top.row() == 1:
                 qmax = value
                 if qmax <= qmin:
                     qmax = self.qmax
                     self.model.item(self.MODEL.index('MAX_RANGE')).setText(str(self.qmax))
-            self.npts_fit = self.npts2fit(data=self.logic.data, qmin=qmin, qmax=qmax, npts=npts)
+                self.npts_fit = self.npts2fit(data=self.logic.data, qmin=qmin, qmax=qmax, npts=npts)
+            else:
+                # This is only possible for theories. Just post the number to the field, if valid
+                npts = int(value)
+                if npts <= 0:
+                    npts = self.npts
+                self.npts_fit = npts
+                self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
+
             self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(self.npts_fit))
         # update the plot(s)
         self.plot_signal.emit()
@@ -190,7 +202,6 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.cmdMaskEdit.setEnabled(is2Ddata)
         # Switch off txtNpts related controls
         self.txtNpts.setEnabled(False)
-        self.txtNptsFit.setEnabled(False)
         self.chkLogData.setEnabled(False)
         # Weighting controls
         if self.logic.di_flag:
