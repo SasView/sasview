@@ -154,6 +154,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         else:
             self.cbSmearing.addItems(SMEARING_2D)
         self.cbSmearing.blockSignals(False)
+
         self.cbSmearing.setCurrentIndex(index_to_show)
 
     def smearer(self):
@@ -260,8 +261,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Use appropriate labels
         """
         if self.smear_type == "Pinhole":
-            text_down = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">max</span></p></body></html>'
-            text_up = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">min</span></p></body></html>'
+            text_down = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">min</span></p></body></html>'
+            text_up = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">max</span></p></body></html>'
             text_unit = '%'
         elif self.smear_type == "Slit":
             text_down = '<html><head/><body><p>Slit width</p></body></html>'
@@ -427,8 +428,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         # check if it is pinhole smear and get min max if it is.
         if data.dx is not None and np.all(data.dx):
             smear_type = "Pinhole"
-            dq_l = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
-            dq_r = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)
+            dq_r = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
+            dq_l = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)
 
         # check if it is slit smear and get min max if it is.
         elif data.dxl is not None or data.dxw is not None:

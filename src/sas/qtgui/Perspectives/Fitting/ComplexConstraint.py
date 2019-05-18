@@ -303,11 +303,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Display related help section
         """
         tree_location = "/user/qtgui/Perspectives/Fitting/"
-
         helpfile = "fitting_help.html#simultaneous-fits-with-constraints"
         help_location = tree_location + helpfile
         self.parent.parent.parent.showHelp(help_location)
-
-
-
-
