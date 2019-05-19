@@ -9,8 +9,7 @@ import json
 #zenodo_api_key = "rdNmQU4ogrtYQKp5jd7238DnigkPu51aMKHa8yFttYtp3GgsxOW8MCfL8Exp"
 
 #LIVE SETTINGS!!!!
-zenodo_url = "https://zenodo.org"
-zenodo_api_key = "5tMtV602m44vZvMWV5y3gRsuOlB8iEemP7Oo8m8N56CBl1RSLU9zgljErodz"
+
 
 
 #Record metadata
