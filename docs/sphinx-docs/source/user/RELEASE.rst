@@ -11,27 +11,32 @@ Features
 
 New in Version 5.0
 --------------------
-This is a full version of 5.0 containing improvements and a number of bug fixes. 5.0 release features beta
-(decoup[ling apporximation) for intensity calculation. This released is based on Python 3 and Qt5/PyQt5.
+This is a new version of SasView featuring new and enhanced GUI, back-end calculations, GUI separation, optimization of calculations and other improvements. This release also includes beta (decoupling) approximation for intensity calculation.
+The release is based on Python 3 and Qt5/PyQt5.
+We recommend that you avoid using installation folder paths which contain spaces, non-Latin characters or characters not available on a standard keyboard.
 
-
-Changes/Improvements
-^^^^^^^
+Changes/Improvements from 5.0.beta2
+^^^^^^^^^^
 * Beta (decoupling) approximation has been introduced
-* has been reworked and improved significantly.
 * Stop fit button added to Constrained and Simultaneous Fitting
-* Plotting has been imporved
-* Volume fraction naming convention has been introduced
+* Plotting has been improved
+* Volume fraction naming conflicts has been resolved
 * SLD calculator user interface has been improved
-* Fit Options user interations has been improved
-* Windows installer path specifciation has been resolved
-* Chi2 calcuation for 2D models has been fixed
+* Fit Options tab has been improved
+* Windows installer path specification has been resolved
 * Copy parameters function has been fixed
+* Save/Load Project functionality has been improved
 
 Documentation
 ^^^^^^^^^^^^^
-Documentation for constrained and simulatenous fitting has been considerably reworked.
-Tutorials have been adapted to match 5.0 interface
+* Documentation for Constrained and Simultaneous Fitting has been considerably reworked.
+* Tutorials have been adapted to match 5.0 interface
+
+Known Issues
+^^^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+
+[sasview](https://github.com/SasView/sasview/milestone/9)
 
 
 New in Version 4.2.0
