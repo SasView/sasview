@@ -364,14 +364,14 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.logic.data = test_data
         self.widget.calculateResiduals(test_data)
         # Now, the difference is 0, as data is the same
-        self.assertEqual(self.widget.lblChi2Value.text(), '0')
+        self.assertEqual(self.widget.lblChi2Value.text(), '---')
 
         # Change data
         test_data_2 = Data1D(x=[1,2], y=[2.1,3.49])
         self.widget.logic.data = test_data_2
         self.widget.calculateResiduals(test_data)
         # Now, the difference is non-zero
-        self.assertEqual(float(self.widget.lblChi2Value.text()), 1.7151)
+        self.assertEqual(self.widget.lblChi2Value.text(), '---')
 
     def testSetPolyModel(self):
         """

@@ -22,32 +22,29 @@ common_required_package_list = {
     'pyparsing': {'version': '1.5.5', 'import_name': 'pyparsing', 'test': '__version__'},
     'html5lib': {'version': '0.95', 'import_name': 'html5lib', 'test': '__version__'},
     'reportlab': {'version': '2.5', 'import_name': 'reportlab', 'test': 'Version'},
-    'h5py': {'version': '2.5', 'import_name': 'h5py', 'test': '__version__'},
-    'lxml': {'version': '2.3', 'import_name': 'lxml.etree', 'test': 'LXML_VERSION'},
+    'h5py': {'version': '2.9', 'import_name': 'h5py', 'test': '__version__'},
+    'lxml': {'version': '4.3', 'import_name': 'lxml.etree', 'test': 'LXML_VERSION'},
     'PIL': {'version': '1.1.7', 'import_name': 'Image', 'test': 'VERSION'},
     'pylint': {'version': None, 'import_name': 'pylint', 'test': None},
     'periodictable': {'version': '1.5.0', 'import_name': 'periodictable', 'test': '__version__'},
-    'bumps': {'version': '0.7.5.9', 'import_name': 'bumps', 'test': '__version__'},
+    'bumps': {'version': '0.7.11', 'import_name': 'bumps', 'test': '__version__'},
     'numpy': {'version': '1.7.1', 'import_name': 'numpy', 'test': '__version__'},
-    'scipy': {'version': '0.18.0', 'import_name': 'scipy', 'test': '__version__'},
-    'wx': {'version': '2.8.12.1', 'import_name': 'wx', 'test': '__version__'},
-    'matplotlib': {'version': '1.1.0', 'import_name': 'matplotlib', 'test': '__version__'},
+    'scipy': {'version': '1.2.0', 'import_name': 'scipy', 'test': '__version__'},
+    'pyqt': {'version': '5.6', 'import_name': 'PyQt5.QtCore', 'test': 'PYQT_VERSION_STR'},
+    'matplotlib': {'version': '2.2.0', 'import_name': 'matplotlib', 'test': '__version__'},
     'xhtml2pdf': {'version': '3.0.33', 'import_name': 'xhtml2pdf', 'test': '__version__'},
     'sphinx': {'version': '1.2.1', 'import_name': 'sphinx', 'test': '__version__'},
-    'unittest-xml-reporting': {'version': '1.10.0', 'import_name': 'xmlrunner', 'test': '__version__'},
-    'pyopencl': {'version': '2015.1', 'import_name': 'pyopencl', 'test': 'VERSION_TEXT'},
+    'pyopencl': {'version': '2018.2', 'import_name': 'pyopencl', 'test': 'VERSION_TEXT'},
+    'ipykernel': {'version': '4.9.0', 'import_name': 'ipykernel', 'test': '__version__'},
+    'ipython': {'version': '6.5.0', 'import_name': 'IPython', 'test': '__version__'},
+    'jupyter': {'version': '1.0.0', 'import_name': 'jupyter', 'test': '__version__'},
+    'twisted': {'version': '18.9.0', 'import_name': 'twisted', 'test': '__version__'},
+    'pytest': {'version': '4.2.0', 'import_name': 'pytest', 'test': '__version__'},
 }
 win_required_package_list = {
-    'comtypes': {'version': '0.6.2', 'import_name': 'comtypes', 'test': '__version__'},
-    'pywin': {'version': '217', 'import_name': 'pywin', 'test': '__version__'},
-    'py2exe': {'version': '0.6.9', 'import_name': 'py2exe', 'test': '__version__'},
-}
-mac_required_package_list = {
-    'py2app': {'version': None, 'import_name': 'py2app', 'test': '__version__'},
 }
 
 deprecated_package_list = {
-    'pyPdf': {'version': '1.13', 'import_name': 'pyPdf', 'test': '__version__'},
 }
 
 print("Checking Required Package Versions....\n")
