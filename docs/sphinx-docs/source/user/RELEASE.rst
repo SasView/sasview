@@ -17,41 +17,6 @@ that the 2D resolution smearing was only being applied to one quadrant.
 
 Resolved Issues
 ^^^^^^^^^^^^^^^
-<<<<<<< HEAD
-.. These would need including if sasmodels PR #101 (Ticket 1257) is merged;
-.. PR #103 is already merged. The explanation being that by providing easy
-.. access to the source we absolve ourselves of the need to markup hideous
-.. equations! The commentary above would also need updating.
-.. * Fixes # 146 (Trac # 883): Add link to source code of each model to model documentation
-.. * Nofix #1189 (Trac #1148): Documentation for S(Q) models need updating
-.. * Nofix # 188 (Trac #1187): S(Q) models need function descriptions in documentation
-.. * Nofix #1266 (Trac #1240): Many models do not have their equation in the documentation
-.. * Fixes #1285 (Trac #1263): Change source links in model docs to local paths
-..
-.. These next 11 documentation issues were resolved during Code Camp IX
-.. but would have been committed to master I think?
-* Close # 512 (Trac # 378): Add documentation for BUMPS usage and integrate rst files to SasView from BUMPS repo
-* Close # 647 (Trac # 514): Review User Documentation
-* Close # 106 (Trac # 646): Check all model documentation for standardization
-* Fixes # 799 (Trac # 668): Update plugin model documentation and testing
-* Fixes # 928 (Trac # 833): Improve smearing help
-* Fixes # 968 (Trac # 882): Add notes to doc about fitting integer parameters
-* Close #1024 (Trac # 947): Include sasmodels api docs in sasview developer documentation
-* Nofix #1072 (Trac #1003): Should we use Dispersity instead of Polydispersity/Monodispersity?
-* Fixes # 178 (Trac #1108): "Writing a Plugin Model" does not explain function "random"
-* Fixes #1211 (Trac #1175): Need to rethink Tutorial option in GUI Help menu
-* Fixes #1225 (Trac #1190): Documentation for magnetism need update
-.. These next 3 are already live on the website
-* Fixes #1254 (Trac #1225): Update correlation function documentation re non-Lorentz-corrected data
-* Fixes #1256 (Trac #1227): Copy over pdfs of updated correlation function tutorial before 4.2.1 release
-* Fixes #1258 (Trac #1229): Copy updated corfunc_help to Github for new website docs
-.. These next 3 are the main reason for 4.2.2
-* Fixes #1268 (Trac #1242): Resolution smearing is only applied to positive Qx and Qy in 2D
-* Fixes #1269 (Trac #1243): Problem reopening saved project .svs file
-* Fixes #1276 (Trac #1253): Clarify no longer any pure python orientation/magnetism plugin support in docs
-
-.. note:: Issues were moved from Trac to Github for 4.2.2. Numbering changed.
-=======
 .. note:: Trac tickets were moved to Github issues as of 4.2.2. Not only has
    that changed the numbering, but because different repositories are involved,
    the issue numbers must now be associated with the relevant repo.
@@ -63,7 +28,6 @@ sasview repository issues addressed:
 
 * Fixes sasview # 1268: (Trac #1242): Resolution smearing is only applied to positive Qx and Qy in 2D
 * Fixes sasview # 1269: (Trac #1243): Problem reopening saved project .svs file
->>>>>>> release-4.2.2b
 
 New in Version 4.2.1
 --------------------
@@ -213,11 +177,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-<<<<<<< HEAD
-* Fixes # 818: "report button" followed by "save" makes an empty pdf file???
-=======
 * Fixes # 818: "report" button followed by "save" makes an empty pdf file???
->>>>>>> release-4.2.2b
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
@@ -900,12 +860,6 @@ viewed at http://trac.sasview.org/report/3
 
 4.2.1 - All systems
 -------------------
-<<<<<<< HEAD
-Unfortunately, changes made to the data loader to address Trac ticket #976
-(CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files) have
-broken backward compatibility and this version of SasView will not read in
-saved project files (because these store data as NXcanSAS).
-=======
 The issues with older plugins noted in 4.2.0 release notes remain valid.
 
 Unfortunately, after the release two new issues were discovered:
@@ -915,7 +869,6 @@ Unfortunately, after the release two new issues were discovered:
   saved project files (because these store data as NXcanSAS).
 * Instrumental resolution smearing is currently only being applied to positive
   values of Qx and Qy in 2D.
->>>>>>> release-4.2.2b
 
 4.2.0 - All systems
 -------------------
