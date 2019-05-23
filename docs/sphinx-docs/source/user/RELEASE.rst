@@ -13,11 +13,11 @@ New in Version 4.2.2
 --------------------
 This release fixes the known issues reported in 4.2.1: the inability to read in
 project files due to the fixes (changes) in the NXcanSAS reader, and the fact
-that the 2D resolution smearing was only being applied to one quadrant. A
-number of documentation issues were also completed.
+that the 2D resolution smearing was only being applied to one quadrant.
 
 Resolved Issues
 ^^^^^^^^^^^^^^^
+<<<<<<< HEAD
 .. These would need including if sasmodels PR #101 (Ticket 1257) is merged;
 .. PR #103 is already merged. The explanation being that by providing easy
 .. access to the source we absolve ourselves of the need to markup hideous
@@ -51,6 +51,19 @@ Resolved Issues
 * Fixes #1276 (Trac #1253): Clarify no longer any pure python orientation/magnetism plugin support in docs
 
 .. note:: Issues were moved from Trac to Github for 4.2.2. Numbering changed.
+=======
+.. note:: Trac tickets were moved to Github issues as of 4.2.2. Not only has
+   that changed the numbering, but because different repositories are involved,
+   the issue numbers must now be associated with the relevant repo.
+
+This version of SasView is built with the same sasmodels version (ver 0.99) as
+was 4.2.1.  Hence not sasmodels issues were addressed in this release.
+
+sasview repository issues addressed:
+
+* Fixes sasview # 1268: (Trac #1242): Resolution smearing is only applied to positive Qx and Qy in 2D
+* Fixes sasview # 1269: (Trac #1243): Problem reopening saved project .svs file
+>>>>>>> release-4.2.2b
 
 New in Version 4.2.1
 --------------------
@@ -69,9 +82,11 @@ Resolved Issues
 ^^^^^^^^^^^^^^^
 * Fixes #  976:	CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files
 * Fixes # 1074:	Add incomplete gamma function to sasmodels
+* Fixes # 1108: "Writing a Plugin Model" does not explain function "random"
 * Fixes # 1111:	Convert all input Q units to 1/A
 * Fixes # 1129:	NXcanSAS writer not writing all meta data
 * Fixes # 1142:	Plugin framework is broken
+* Closes # 1175: Need to rethink Tutorial option in GUI Help menu
 * Fixes # 1183:	Test from creating new model reset all parameters to default in all open FitPages
 * Fixes # 1188: Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
 * Fixes # 1205:	4.2 set weighting choice seems to be ignored.
@@ -198,7 +213,11 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
+<<<<<<< HEAD
 * Fixes # 818: "report button" followed by "save" makes an empty pdf file???
+=======
+* Fixes # 818: "report" button followed by "save" makes an empty pdf file???
+>>>>>>> release-4.2.2b
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
@@ -881,10 +900,22 @@ viewed at http://trac.sasview.org/report/3
 
 4.2.1 - All systems
 -------------------
+<<<<<<< HEAD
 Unfortunately, changes made to the data loader to address Trac ticket #976
 (CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files) have
 broken backward compatibility and this version of SasView will not read in
 saved project files (because these store data as NXcanSAS).
+=======
+The issues with older plugins noted in 4.2.0 release notes remain valid.
+
+Unfortunately, after the release two new issues were discovered:
+* Changes made to the data loader to address Trac ticket #976
+  (CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files)
+  broke backward compatibility and this version of SasView will not read in
+  saved project files (because these store data as NXcanSAS).
+* Instrumental resolution smearing is currently only being applied to positive
+  values of Qx and Qy in 2D.
+>>>>>>> release-4.2.2b
 
 4.2.0 - All systems
 -------------------
