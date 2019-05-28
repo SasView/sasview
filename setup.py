@@ -268,8 +268,7 @@ ext_modules.append(Extension("sas.sascalc.file_converter._bsl_loader",
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
     "src", "sas", "sascalc", "corfunc")
-
-packages.extend(["sas.sascalc.corfunc"])
+packages.append("sas.sascalc.corfunc")
 
 # sas.sascalc.fit
 package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")

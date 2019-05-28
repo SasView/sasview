@@ -75,7 +75,8 @@ def prepare(rebuild=True):
 
     # find the directories for the source and build
     from distutils.util import get_platform
-    root = abspath(dirname(__file__))
+    root = abspath(dirname(realpath(__file__)))
+
     platform = '%s-%s' % (get_platform(), sys.version[:3])
     build_path = joinpath(root, 'build', 'lib.' + platform)
 
@@ -116,24 +117,29 @@ def prepare(rebuild=True):
     # Put sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
 
-    # Check if the C extensions are already built
-    try:
-        from sas.sascalc.pr import _pr_inversion
-        from sas.sascalc.calculator import _sld2i
-        from sas.sascalc.file_converter import _bsl_loader
-    except ImportError:
-        rebuild = True
+    # Import the sasview package from root/sasview as sas.sasview.  It would
+    # be better to just store the package in src/sas/sasview.
+    #import sas
+    #sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
 
-    # Build C extensions if necessary.  Do an inplace build to simplify path.
-    if rebuild:
-        import subprocess
-        build_cmd = [sys.executable, "setup.py", "build_ext", "--inplace", "update"]
-        if os.name == 'nt':
-            build_cmd.append('--compiler=tinycc')
-        # need shell=True on windows to keep console box from popping up
-        shell = (os.name == 'nt')
-        with cd(root):
-            subprocess.call(build_cmd, shell=shell)
+    # Compiled modules need to be pulled from the build directory.
+    import sas.sascalc
+    sas.sascalc.pr = import_package(
+        'sas.sascalc.pr',
+        joinpath(build_path, 'sas', 'sascalc', 'pr'))
+    sas.sascalc.file_converter = import_package(
+        'sas.sascalc.file_converter',
+        joinpath(build_path, 'sas', 'sascalc', 'file_converter'))
+    sas.sascalc.calculator = import_package(
+        'sas.sascalc.calculator',
+        joinpath(build_path, 'sas', 'sascalc', 'calculator'))
+
+
+    sys.path.append(build_path)
+
+    # Run the UI conversion tool if executed from script
+    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
+        import sas.qtgui.convertUI
 
     set_git_tag()
     # print "\n".join(sys.path)
