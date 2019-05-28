@@ -52,9 +52,9 @@ def OnPrintPage(self, page):
     except:
         ppw = 1
         pph = 1
-    (pgw, _) = self.GetPageSizePixels()  # page size in pixels
-    (dcw, _) = dc.GetSize()
-    (grw, _) = self.canvas.GetSizeTuple()
+    pgw, _ = self.GetPageSizePixels()  # page size in pixels
+    dcw, _ = dc.GetSize()
+    grw, _ = self.canvas.GetSize()
 
     # save current figure dpi resolution and bg color,
     # so that we can temporarily set them to the dpi of
@@ -151,9 +151,11 @@ class FigureCanvas(FigureCanvasWxAgg):
         """
         Render after a delay if no other render requests have been made.
         """
-        self.panel.subplot.grid(self.panel.grid_on)
-        if self.panel.legend is not None and self.panel.legend_pos_loc:
-            self.panel.legend._loc = self.panel.legend_pos_loc
+        if self.panel is not None:
+            # TODO: grid/panel manip doesn't belong here
+            self.panel.subplot.grid(self.panel.grid_on)
+            if self.panel.legend is not None and self.panel.legend_pos_loc:
+                self.panel.legend._loc = self.panel.legend_pos_loc
         self.idletimer.Restart(5, *args, **kwargs)  # Delay by 5 ms
 
     def _onDrawIdle(self, *args, **kwargs):

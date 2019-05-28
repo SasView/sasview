@@ -78,7 +78,7 @@ def parse_string(sentence, list):
             separator_pos = label_pos + len(label)
             if label_pos != -1 and len(elt) >= separator_pos  and\
                 elt[separator_pos] == "[":
-                # the label contain , meaning the range selected is not 
+                # the label contain , meaning the range selected is not
                 # continuous
                 if elt.count(',') > 0:
                     new_temp = []
@@ -106,11 +106,11 @@ def parse_string(sentence, list):
 
 class SPanel(ScrolledPanel):
     """
-    ensure proper scrolling of GridPanel 
-    
-    Adds a SetupScrolling call to the normal ScrolledPanel init.    
+    ensure proper scrolling of GridPanel
+
+    Adds a SetupScrolling call to the normal ScrolledPanel init.
     GridPanel then subclasses this class
-    
+
     """
     def __init__(self, parent, *args, **kwds):
         """
@@ -128,7 +128,7 @@ class GridCellEditor(sheet.CCellEditor):
     This subclasses the sheet.CCellEditor (itself a subclass of
     grid.GridCellEditor) in order to override two of its methods:
     PaintBackrgound and EndEdit.
-    
+
     This is necessary as the sheet module is broken in wx 3.0.2 and
     improperly subclasses grid.GridCellEditor
     """
@@ -246,7 +246,7 @@ class GridPage(sheet.CSheet):
 
 
 
-        # The following events must be bound even if CSheet is working 
+        # The following events must be bound even if CSheet is working
         # properly and does not need the above re-implementation of the
         # CSheet init method.  Basically these override any intrinsic binding
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
@@ -312,7 +312,7 @@ class GridPage(sheet.CSheet):
 
     def OnCellChange(self, event):
         """
-        Overrides sheet.CSheet.OnCellChange.  
+        Overrides sheet.CSheet.OnCellChange.
 
         Processes when a cell has been edited by a cell editor. Checks for the
         edited row being outside the max row to use attribute and if so updates
@@ -557,7 +557,7 @@ class GridPage(sheet.CSheet):
         Remove the col column from the current grid
         """
 
-        # add data to the grid    
+        # add data to the grid
         row = 0
         col_name = self.GetCellValue(row, col)
         self.data[col_name] = []
@@ -582,7 +582,7 @@ class GridPage(sheet.CSheet):
 
         Sets up to insert column into the current grid before the current
         highlighted column location and sets up what to populate that column
-        with.  Then calls insert_column method to actually do the insertion. 
+        with.  Then calls insert_column method to actually do the insertion.
         """
 
         if self.selected_cols is not None or len(self.selected_cols) > 0:
@@ -603,7 +603,7 @@ class GridPage(sheet.CSheet):
 
         Sets up to insert column into the current grid after the current
         highlighted column location and sets up what to populate that column
-        with.  Then calls insert_column method to actually do the insertion. 
+        with.  Then calls insert_column method to actually do the insertion.
         """
 
         if self.selected_cols is not None or len(self.selected_cols) > 0:
@@ -757,7 +757,7 @@ class GridPage(sheet.CSheet):
 
     def onContextMenu(self, event):
         """
-        Method to handle cell right click context menu. 
+        Method to handle cell right click context menu.
 
         THIS METHOD IS NOT CURRENTLY USED.  It is designed to provide a
         cell pop up context by right clicking on a cell and gives the
@@ -1123,7 +1123,7 @@ class Notebook(nb, PanelBase):
         Append a new column to the grid
         """
 
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         pos = self.GetSelection()
         grid = self.GetPage(pos)
@@ -1133,7 +1133,7 @@ class Notebook(nb, PanelBase):
         """
         Remove the selected column from the grid
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         pos = self.GetSelection()
         grid = self.GetPage(pos)
@@ -1636,7 +1636,7 @@ class GridFrame(wx.Frame):
 
         # We need to grab a WxMenu handle here, otherwise the next one to grab
         # the handle will be treated as the Edit Menu handle when checking in
-        # on_menu_open event handler and thus raise an exception when it hits an 
+        # on_menu_open event handler and thus raise an exception when it hits an
         # unitialized object.  Alternative is to comment out that whole section
         # in on_menu_open, but that would make it more difficult to undo the
         # hidding of the menu.   PDB  July 12, 2015.
@@ -1689,7 +1689,7 @@ class GridFrame(wx.Frame):
         """
         On Copy from the Edit menu item on the menubar
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         if event is not None:
             event.Skip()
@@ -1701,7 +1701,7 @@ class GridFrame(wx.Frame):
         """
         On Paste from the Edit menu item on the menubar
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         if event is not None:
             event.Skip()
@@ -1713,7 +1713,7 @@ class GridFrame(wx.Frame):
         """
         On Clear from the Edit menu item on the menubar
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
@@ -1732,7 +1732,7 @@ class GridFrame(wx.Frame):
         """
         On remove column from the Edit menu Item on the menubar
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
@@ -1823,7 +1823,7 @@ class GridFrame(wx.Frame):
             if self.parent is not None:
                 location = os.path.dirname(grid.file_name)
                 dlg = wx.FileDialog(self, "Save Project file",
-                                    location, grid.file_name, ext, wx.SAVE)
+                                    location, grid.file_name, ext, wx.FD_SAVE)
                 path = None
                 if dlg.ShowModal() == wx.ID_OK:
                     path = dlg.GetPath()
@@ -2008,7 +2008,7 @@ class BatchOutputFrame(wx.Frame):
             if self.parent is not None:
                 location = os.path.dirname(self.file_name)
                 dlg = wx.FileDialog(self, "Save Project file",
-                                    location, self.file_name, ext, wx.SAVE)
+                                    location, self.file_name, ext, wx.FD_SAVE)
                 path = None
                 if dlg.ShowModal() == wx.ID_OK:
                     path = dlg.GetPath()

@@ -338,8 +338,8 @@ class PlotPanel(wx.Panel):
         #else:
         # On Windows platform, default window size is incorrect, so set
         # toolbar width to figure width.
-        tw, th = self.toolbar.GetSizeTuple()
-        fw, fh = self.canvas.GetSizeTuple()
+        tw, th = self.toolbar.GetSize()
+        fw, fh = self.canvas.GetSize()
         # By adding toolbar in sizer, we are able to put it at the bottom
         # of the frame - so appearance is closer to GTK version.
         # As noted above, doesn't work for Mac.
@@ -438,8 +438,8 @@ class PlotPanel(wx.Panel):
         if y > hi_y:
             y = hi_y
         # Move the legend from its previous location by that same amount
-        loc_in_canvas = self.legend_x - mouse_diff_x, \
-                        self.legend_y - mouse_diff_y
+        loc_in_canvas = (self.legend_x - mouse_diff_x,
+                         self.legend_y - mouse_diff_y)
         # Transform into legend coordinate system
         trans_axes = self.legend.parent.transAxes.inverted()
         loc_in_norm_axes = trans_axes.transform_point(loc_in_canvas)
@@ -629,8 +629,8 @@ class PlotPanel(wx.Panel):
         """
         Return values and labels used by Fit Dialog
         """
-        return self.xLabel, self.yLabel, self.Avalue, self.Bvalue, \
-                self.ErrAvalue, self.ErrBvalue, self.Chivalue
+        return (self.xLabel, self.yLabel, self.Avalue, self.Bvalue,
+                self.ErrAvalue, self.ErrBvalue, self.Chivalue)
 
     def setTrans(self, xtrans, ytrans):
         """
@@ -666,8 +666,8 @@ class PlotPanel(wx.Panel):
                             transform=self.returnTrans,
                             title='Linear Fit')
 
-            if (self.xmin != 0.0)and (self.xmax != 0.0)\
-                and(self.xminView != 0.0)and (self.xmaxView != 0.0):
+            if ((self.xmin != 0.0) and (self.xmax != 0.0)
+                    and (self.xminView != 0.0) and (self.xmaxView != 0.0)):
                 dlg.setFitRange(self.xminView, self.xmaxView,
                                 self.xmin, self.xmax)
             else:
@@ -924,7 +924,7 @@ class PlotPanel(wx.Panel):
             pos = self.ScreenToClient(pos_evt)
         except:
             # toolbar event
-            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos_x, pos_y = self.toolbar.GetPosition()
             pos = (pos_x, pos_y + 5)
 
         self.PopupMenu(slicerpop, pos)
@@ -1058,8 +1058,8 @@ class PlotPanel(wx.Panel):
         """
         Allows you to add text to the plot
         """
-        xaxis_label, xaxis_unit, xaxis_font, xaxis_color, \
-                     is_ok, is_tick = self._on_axis_label(axis='x')
+        xaxis_label, xaxis_unit, xaxis_font, xaxis_color, is_ok, is_tick \
+            = self._on_axis_label(axis='x')
         if not is_ok:
             return
 
@@ -1072,8 +1072,8 @@ class PlotPanel(wx.Panel):
 
         if self.data is not None:
             # 2D
-            self.xaxis(self.xaxis_label, self.xaxis_unit, \
-                        self.xaxis_font, self.xaxis_color, self.xaxis_tick)
+            self.xaxis(self.xaxis_label, self.xaxis_unit,
+                       self.xaxis_font, self.xaxis_color, self.xaxis_tick)
             self.subplot.figure.canvas.draw_idle()
         else:
             # 1D
@@ -1105,8 +1105,8 @@ class PlotPanel(wx.Panel):
         """
         Allows you to add text to the plot
         """
-        yaxis_label, yaxis_unit, yaxis_font, yaxis_color, \
-                        is_ok, is_tick = self._on_axis_label(axis='y')
+        yaxis_label, yaxis_unit, yaxis_font, yaxis_color, is_ok, is_tick \
+            = self._on_axis_label(axis='y')
         if not is_ok:
             return
 
@@ -1119,7 +1119,7 @@ class PlotPanel(wx.Panel):
 
         if self.data is not None:
             # 2D
-            self.yaxis(self.yaxis_label, self.yaxis_unit, \
+            self.yaxis(self.yaxis_label, self.yaxis_unit,
                         self.yaxis_font, self.yaxis_color, self.yaxis_tick)
             self.subplot.figure.canvas.draw_idle()
         else:
@@ -1155,9 +1155,10 @@ class PlotPanel(wx.Panel):
                 colour = textdial.getColor()
                 is_tick = textdial.getTickLabel()
                 label_temp = textdial.getText()
-                if label_temp.count("\%s" % "\\") > 0:
+                if r"\\" in label_temp:
+                    label = label_temp.replace(r"\\", r"??")
                     if self.parent is not None:
-                        msg = "Add Label: Error. Can not use double '\\' "
+                        msg = r"Add Label error: Can not use double '\\' "
                         msg += "characters..."
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
@@ -1233,7 +1234,6 @@ class PlotPanel(wx.Panel):
         # TODO: Redraw is brutal.  Render to a backing store and swap in
         # TODO: rather than redrawing on the fly.
         self.subplot.clear()
-        self.subplot.hold(True)
 
     def render(self):
         """Commit the plot after all objects are drawn"""
@@ -1532,8 +1532,8 @@ class PlotPanel(wx.Panel):
 
         """
         # No qx or qy given in a vector format
-        if self.qx_data is None or self.qy_data is None \
-                or self.qx_data.ndim != 1 or self.qy_data.ndim != 1:
+        if (self.qx_data is None or self.qy_data is None
+                or self.qx_data.ndim != 1 or self.qy_data.ndim != 1):
             # do we need deepcopy here?
             return copy.deepcopy(self.data)
 
@@ -1592,8 +1592,8 @@ class PlotPanel(wx.Panel):
         where each one corresponds to  x, or y axis values
         """
         # No qx or qy given in a vector format
-        if self.qx_data is None or self.qy_data is None \
-                or self.qx_data.ndim != 1 or self.qy_data.ndim != 1:
+        if (self.qx_data is None or self.qy_data is None
+                or self.qx_data.ndim != 1 or self.qy_data.ndim != 1):
             # do we need deepcopy here?
             return copy.deepcopy(self.data)
 
@@ -1643,9 +1643,8 @@ class PlotPanel(wx.Panel):
 
         """
         # No image matrix given
-        if image is None or np.ndim(image) != 2 \
-                or np.isfinite(image).all() \
-                or weights is None:
+        if (image is None or np.ndim(image) != 2
+                or np.isfinite(image).all() or weights is None):
             return image
         # Get bin size in y and x directions
         len_y = len(image)
@@ -1675,20 +1674,20 @@ class PlotPanel(wx.Panel):
                         weit[n_y][n_x] += 1
                     # go 4 next nearest neighbors when no non-zero
                     # neighbor exists
-                    if n_y != 0 and n_x != 0 and \
-                            np.isfinite(image[n_y - 1][n_x - 1]):
+                    if (n_y != 0 and n_x != 0
+                            and np.isfinite(image[n_y - 1][n_x - 1])):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x - 1]
                         weit[n_y][n_x] += 1
-                    if n_y != len_y - 1 and n_x != 0 and \
-                            np.isfinite(image[n_y + 1][n_x - 1]):
+                    if (n_y != len_y - 1 and n_x != 0
+                            and np.isfinite(image[n_y + 1][n_x - 1])):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x - 1]
                         weit[n_y][n_x] += 1
-                    if n_y != len_y and n_x != len_x - 1 and \
-                            np.isfinite(image[n_y - 1][n_x + 1]):
+                    if (n_y != len_y and n_x != len_x - 1
+                            and np.isfinite(image[n_y - 1][n_x + 1])):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x + 1]
                         weit[n_y][n_x] += 1
-                    if n_y != len_y - 1 and n_x != len_x - 1 and \
-                            np.isfinite(image[n_y + 1][n_x + 1]):
+                    if (n_y != len_y - 1 and n_x != len_x - 1
+                            and np.isfinite(image[n_y + 1][n_x + 1])):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x + 1]
                         weit[n_y][n_x] += 1
 
@@ -1783,14 +1782,14 @@ class PlotPanel(wx.Panel):
             if self.xLabel == "x^(2)":
                 item.transformX(transform.toX2, transform.errToX2)
                 xunits = convert_unit(2, xunits)
-                self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
+                self.graph._xaxis_transformed("%s^2" % xname, "%s" % xunits)
             if self.xLabel == "x^(4)":
                 item.transformX(transform.toX4, transform.errToX4)
                 xunits = convert_unit(4, xunits)
-                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
+                self.graph._xaxis_transformed("%s^4" % xname, "%s" % xunits)
             if self.xLabel == "ln(x)":
                 item.transformX(transform.toLogX, transform.errToLogX)
-                self.graph._xaxis_transformed("\ln{(%s)}" % xname, "%s" % xunits)
+                self.graph._xaxis_transformed(r"\ln(%s)" % xname, "%s" % xunits)
             if self.xLabel == "log10(x)":
                 item.transformX(transform.toX_pos, transform.errToX_pos)
                 _xscale = 'log'
@@ -1798,11 +1797,11 @@ class PlotPanel(wx.Panel):
             if self.xLabel == "log10(x^(4))":
                 item.transformX(transform.toX4, transform.errToX4)
                 xunits = convert_unit(4, xunits)
-                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
+                self.graph._xaxis_transformed("%s^4" % xname, "%s" % xunits)
                 _xscale = 'log'
             if self.yLabel == "ln(y)":
                 item.transformY(transform.toLogX, transform.errToLogX)
-                self.graph._yaxis_transformed("\ln{(%s)}" % yname, "%s" % yunits)
+                self.graph._yaxis_transformed(r"\ln(%s)" % yname, "%s" % yunits)
             if self.yLabel == "y":
                 item.transformY(transform.toX, transform.errToX)
                 self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
@@ -1821,38 +1820,38 @@ class PlotPanel(wx.Panel):
             if self.yLabel == "y*x^(2)":
                 item.transformY(transform.toYX2, transform.errToYX2)
                 xunits = convert_unit(2, self.xaxis_unit)
-                self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
+                self.graph._yaxis_transformed(r"%s \ \ %s^2" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             if self.yLabel == "y*x^(4)":
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
+                self.graph._yaxis_transformed(r"%s \ \ %s^4" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             if self.yLabel == "1/sqrt(y)":
                 item.transformY(transform.toOneOverSqrtX,
                                 transform.errOneOverSqrtX)
                 yunits = convert_unit(-0.5, yunits)
-                self.graph._yaxis_transformed("1/\sqrt{%s}" % yname,
+                self.graph._yaxis_transformed(r"1/\sqrt{%s}" % yname,
                                               "%s" % yunits)
             if self.yLabel == "ln(y*x)":
                 item.transformY(transform.toLogXY, transform.errToLogXY)
-                self.graph._yaxis_transformed("\ln{(%s \ \ %s)}" % (yname, xname),
+                self.graph._yaxis_transformed(r"\ln(%s \ \ %s)" % (yname, xname),
                                               "%s%s" % (yunits, self.xaxis_unit))
             if self.yLabel == "ln(y*x^(2))":
                 item.transformY(transform.toLogYX2, transform.errToLogYX2)
                 xunits = convert_unit(2, self.xaxis_unit)
-                self.graph._yaxis_transformed("\ln (%s \ \ %s^{2})" % (yname, xname),
+                self.graph._yaxis_transformed(r"\ln(%s \ \ %s^2)" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             if self.yLabel == "ln(y*x^(4))":
                 item.transformY(transform.toLogYX4, transform.errToLogYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
-                self.graph._yaxis_transformed("\ln (%s \ \ %s^{4})" % (yname, xname),
+                self.graph._yaxis_transformed(r"\ln(%s \ \ %s^4)" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             if self.yLabel == "log10(y*x^(4))":
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
                 _yscale = 'log'
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
+                self.graph._yaxis_transformed(r"%s \ \ %s^4" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             item.transformView()
 
@@ -1896,7 +1895,7 @@ class PlotPanel(wx.Panel):
 
         # Saving value to redisplay in Fit Dialog when it is opened again
         self.Avalue, self.Bvalue, self.ErrAvalue, \
-                      self.ErrBvalue, self.Chivalue = func
+            self.ErrBvalue, self.Chivalue = func
         self.xminView = xminView
         self.xmaxView = xmaxView
         self.xmin = xmin

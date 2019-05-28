@@ -61,7 +61,7 @@ class ImageView:
                 # Note that matplotlib only reads png natively.
                 # Any other formats (tiff, jpeg, etc) are passed
                 # to PIL which seems to have a problem in version
-                # 1.1.7 that causes a close error which shows up in 
+                # 1.1.7 that causes a close error which shows up in
                 # the log file.  This does not seem to have any adverse
                 # effects.  PDB   --- September 17, 2017.
                 img = mpimg.imread(file_path)
@@ -382,7 +382,7 @@ class SetDialog(wx.Dialog):
             else:
                 print(err_msg)
 
-        self.OnClose(event)
+        self.EndModal(wx.ID_OK)
 
     def convert_image(self, rgb, xmin, xmax, ymin, ymax, zscale):
         """
@@ -416,8 +416,8 @@ class SetDialog(wx.Dialog):
         output.xmax = xmax
         output.ymin = ymin
         output.ymax = ymax
-        output.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
-        output.yaxis('\\rm{Q_{y}}', '\AA^{-1}')
+        output.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
+        output.yaxis(r'\rm{Q_{y}}', r'\AA^{-1}')
         # Store loading process information
         output.meta_data['loader'] = self.title.split('.')[-1] + "Reader"
         output.is_data = True
@@ -450,7 +450,8 @@ class SetDialog(wx.Dialog):
         """
         # clear event
         event.Skip()
-        self.Destroy()
+        self.EndModal(wx.ID_CANCEL)
+        #self.Destroy()
 
 if __name__ == "__main__":
     app = wx.App()

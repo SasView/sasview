@@ -865,7 +865,7 @@ class SmallPanel(PlotPanel):
             pos = self.ScreenToClient(pos_evt)
         except:
             # toolbar event
-            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos_x, pos_y = self.toolbar.GetPosition()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
 

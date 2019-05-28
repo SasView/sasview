@@ -178,8 +178,8 @@ class ModelPanel2D(ModelPanel1D):
         self.toolbar.Realize()
         # On Windows platform, default window size is incorrect, so set
         # toolbar width to figure width.
-        _, th = self.toolbar.GetSizeTuple()
-        fw, _ = self.canvas.GetSizeTuple()
+        _, th = self.toolbar.GetSize()
+        fw, _ = self.canvas.GetSize()
         self.toolbar.SetSize(wx.Size(fw, th))
         self.sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
         # update the axes menu on the toolbar
@@ -399,7 +399,7 @@ class ModelPanel2D(ModelPanel1D):
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
         except:
-            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos_x, pos_y = self.toolbar.GetPosition()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
 

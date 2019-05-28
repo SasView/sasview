@@ -1254,7 +1254,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._default_save_location = os.getcwd()
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location, \
-                            self.window_caption, "*.inv", wx.SAVE)
+                            self.window_caption, "*.inv", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
