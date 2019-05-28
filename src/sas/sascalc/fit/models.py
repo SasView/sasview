@@ -12,6 +12,8 @@ import traceback
 import py_compile
 import shutil
 
+from six import reraise
+
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
 from sas import get_user_dir
@@ -61,19 +63,18 @@ def _check_plugin(model, name):
         return None
     try:
         new_instance = model()
-    except Exception:
-        msg = "Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
-                                                             str(sys.exc_type),
-                                                             sys.exc_info()[1])
+    except Exception as exc:
+        msg = ("Plugin %s error in __init__ \n\t: %s %s\n"
+               % (name, type(exc), exc))
         plugin_log(msg)
         return None
 
     if hasattr(new_instance, "function"):
         try:
             value = new_instance.function()
-        except Exception:
+        except Exception as exc:
             msg = "Plugin %s: error writing function \n\t :%s %s\n " % \
-                    (str(name), str(sys.exc_type), sys.exc_info()[1])
+                    (str(name), str(type(exc)), exc)
             plugin_log(msg)
             return None
     else:
@@ -138,7 +139,7 @@ class ReportProblem(object):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
             print("Problem with", repr(value))
-            raise (type, value, tb)
+            reraise(type, value, tb)
         return 1
 
 report_problem = ReportProblem()
@@ -152,8 +153,8 @@ def compile_file(dir):
         import compileall
         compileall.compile_dir(dir=dir, ddir=dir, force=0,
                                quiet=report_problem)
-    except Exception:
-        return sys.exc_info()[1]
+    except Exception as exc:
+        return exc
     return None
 
 
@@ -180,8 +181,11 @@ def find_plugin_models():
             path = os.path.abspath(os.path.join(plugins_dir, filename))
             try:
                 model = load_custom_model(path)
+                # TODO: add [plug-in] tag to model name in sasview_model
+                if not model.name.startswith(PLUGIN_NAME_BASE):
+                    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
-            except Exception:
+            except Exception as exc:
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)

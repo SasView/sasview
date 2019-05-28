@@ -886,7 +886,7 @@ def saveData2D(data):
 class FormulaValidator(QtGui.QValidator):
     def __init__(self, parent=None):
         super(FormulaValidator, self).__init__(parent)
-  
+
     def validate(self, input, pos):
 
         self._setStyleSheet("")
@@ -1104,7 +1104,7 @@ def parseName(name, expression):
     """
     if re.match(expression, name) is not None:
         word = re.split(expression, name, 1)
-        for item in word:           
+        for item in word:
             if item.lstrip().rstrip() != '':
                 return item
     else:
@@ -1369,15 +1369,19 @@ def readProjectFromSVS(filepath):
     loader = Loader()
     loader.associate_file_reader('.svs', Reader)
     temp = loader.load(filepath)
-    state_reader = Reader()
-    data_svs, state_svs = state_reader.read(filepath)
 
-    output = []
+    # CRUFT: SasView 4.x uses a callback interface to register bits of state
+    state_svs = []
+    def collector(state=None, datainfo=None, format=None):
+        if state is not None:
+            state_svs.append(state)
+    state_reader = Reader(callback=collector)
+    data_svs = state_reader.read(filepath)
+
     if isinstance(temp, list) and isinstance(state_svs, list):
-        for item, state in zip(temp, state_svs):
-            output.append([item, state])
+        output = list(zip(temp, state_svs))
     else:
-        output[temp, state_svs]
+        output = [(temp, state_svs)]
     return output
 
 def convertFromSVS(datasets):

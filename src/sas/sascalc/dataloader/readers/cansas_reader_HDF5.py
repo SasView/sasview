@@ -21,7 +21,14 @@ except NameError:  # CRUFT: python 2 support
 
 
 def h5attr(node, key, default=None):
-    return decode(node.attrs.get(key, default))
+    value = node.attrs.get(key, default)
+    #print("h5attr", node, key, value, type(value))
+    if isinstance(value, np.ndarray) and value.dtype.char == 'S':
+        return [decode(el) for el in value]
+    elif isinstance(value, list):
+        return [decode(el) for el in value]
+    else:
+        return decode(value)
 
 
 class Reader(FileReader):
@@ -655,47 +662,36 @@ class Reader(FileReader):
         self.q_uncertainty_names = []
         self.q_resolution_names = []
         # Get attributes
-        attrs = value.attrs
-        signal = attrs.get("signal", "I")
-        if isinstance(signal, bytes):
-            signal = signal.decode()
-        i_axes = attrs.get("I_axes", ["Q"])
-        if isinstance(i_axes, bytes):
-            i_axes = i_axes.decode()
-        q_indices = attrs.get("Q_indices", [0])
-        if isinstance(q_indices, bytes):
-            q_indices = q_indices.decode()
+        signal = h5attr(value, "signal", "I")
+        i_axes = h5attr(value, "I_axes", ["Q"])
+        q_indices = h5attr(value, "Q_indices", [0])
         i_axes = self.as_list_or_array(i_axes)
         keys = value.keys()
         # Assign attributes to appropriate class variables
         self.q_names = [i_axes[int(v)] for v in self.as_list_or_array(q_indices)]
-        self.mask_name = attrs.get("mask")
-        if isinstance(self.mask_name, bytes):
-            self.mask_name = self.mask_name.decode()
+        self.mask_name = h5attr(value, "mask")
         self.i_name = signal
         self.i_node = value.get(self.i_name)
-
         for item in self.q_names:
             if item in keys:
                 q_vals = value.get(item)
-                if q_vals.attrs.get("uncertainties") is not None:
-                    self.q_uncertainty_names = q_vals.attrs.get("uncertainties")
-                elif q_vals.attrs.get("uncertainty") is not None:
-                    self.q_uncertainty_names = q_vals.attrs.get("uncertainty")
-                if isinstance(self.q_uncertainty_names, basestring):
-                    self.q_uncertainty_names = self.q_uncertainty_names.split(",")
-                if q_vals.attrs.get("resolutions") is not None:
-                    self.q_resolution_names = q_vals.attrs.get("resolutions")
-                if isinstance(self.q_resolution_names, basestring):
-                    self.q_resolution_names = self.q_resolution_names.split(",")
+                uncertainties = h5attr(q_vals, "uncertainties")
+                if uncertainties is None:
+                    uncertainties = h5attr(q_vals, "uncertainty")
+                if isinstance(uncertainties, basestring):
+                    uncertainties = uncertainties.split(",")
+                if uncertainties is not None:
+                    self.q_uncertainty_names = uncertainties
+                resolutions = h5attr(q_vals, "resolutions")
+                if isinstance(resolutions, basestring):
+                    resolutions = resolutions.split(",")
+                if resolutions is not None:
+                    self.q_resolution_names = resolutions
         if self.i_name in keys:
             i_vals = value.get(self.i_name)
-            self.i_uncertainties_name = i_vals.attrs.get("uncertainties")
+            self.i_uncertainties_name = h5attr(i_vals, "uncertainties")
             if self.i_uncertainties_name is None:
-                self.i_uncertainties_name = i_vals.attrs.get("uncertainty")
-            if isinstance(self.i_uncertainties_name, bytes):
-                key = self.i_uncertainties_name
-                self.i_uncertainties_name = key.decode() if isinstance(key, bytes) else key
+                self.i_uncertainties_name = h5attr(i_vals, "uncertainty")
 
     def _is_2d_not_multi_frame(self, value, i_base="", q_base=""):
         """

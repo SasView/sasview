@@ -75,7 +75,7 @@ def prepare():
 
     # find the directories for the source and build
     from distutils.util import get_platform
-    root = abspath(dirname(sys.argv[0]))
+    root = abspath(dirname(realpath(__file__)))
 
     platform = '%s-%s' % (get_platform(), sys.version[:3])
     build_path = joinpath(root, 'build', 'lib.' + platform)
@@ -121,22 +121,17 @@ def prepare():
     #sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
 
     # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.pr
-    sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
-                                         joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
+    import sas.sascalc
+    sas.sascalc.pr = import_package(
+        'sas.sascalc.pr',
+        joinpath(build_path, 'sas', 'sascalc', 'pr'))
+    sas.sascalc.file_converter = import_package(
+        'sas.sascalc.file_converter',
+        joinpath(build_path, 'sas', 'sascalc', 'file_converter'))
+    sas.sascalc.calculator = import_package(
+        'sas.sascalc.calculator',
+        joinpath(build_path, 'sas', 'sascalc', 'calculator'))
 
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.file_converter
-    sas.sascalc.file_converter.core = import_package('sas.sascalc.file_converter.core',
-                                                     joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))
-
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.calculator
-    sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
-                                  joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
 
     sys.path.append(build_path)
 

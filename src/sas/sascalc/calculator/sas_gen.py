@@ -13,7 +13,7 @@ from periodictable import formula
 from periodictable import nsf
 import numpy as np
 
-from .core import sld2i as mod
+from . import _sld2i
 from .BaseComponent import BaseComponent
 
 logger = logging.getLogger(__name__)
@@ -144,17 +144,17 @@ class GenSAS(BaseComponent):
             self.params['Up_frac_in'],
             self.params['Up_frac_out'],
             self.params['Up_theta'])
-        model = mod.new_GenI(*args)
+        model = _sld2i.new_GenI(*args)
         if len(qy):
             qx, qy = _vec(qx), _vec(qy)
             I_out = np.empty_like(qx)
             #print("npoints", qx.shape, "npixels", pos_x.shape)
-            mod.genicomXY(model, qx, qy, I_out)
+            _sld2i.genicomXY(model, qx, qy, I_out)
             #print("I_out after", I_out)
         else:
             qx = _vec(qx)
             I_out = np.empty_like(qx)
-            mod.genicom(model, qx, I_out)
+            _sld2i.genicom(model, qx, I_out)
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = (self.params['scale'] * vol_correction * I_out
                   + self.params['background'])

@@ -227,11 +227,10 @@ packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
 
 # sas.sascalc.calculator
 gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
-package_dir["sas.sascalc.calculator.core"] = gen_dir
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
-packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
-ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
+packages.append("sas.sascalc.calculator")
+ext_modules.append(Extension("sas.sascalc.calculator._sld2i",
                              sources=[
                                  os.path.join(gen_dir, "sld2i_module.c"),
                                  os.path.join(gen_dir, "sld2i.c"),
@@ -244,10 +243,9 @@ ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
 
 # sas.sascalc.pr
 srcdir = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
-package_dir["sas.sascalc.pr.core"] = srcdir
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
-packages.extend(["sas.sascalc.pr", "sas.sascalc.pr.core"])
-ext_modules.append(Extension("sas.sascalc.pr.core.pr_inversion",
+packages.append("sas.sascalc.pr")
+ext_modules.append(Extension("sas.sascalc.pr._pr_inversion",
                              sources=[os.path.join(srcdir, "Cinvertor.c"),
                                       os.path.join(srcdir, "invertor.c"),
                                       ],
@@ -257,13 +255,10 @@ ext_modules.append(Extension("sas.sascalc.pr.core.pr_inversion",
 
 # sas.sascalc.file_converter
 mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
-package_dir["sas.sascalc.file_converter.core"] = mydir
 package_dir["sas.sascalc.file_converter"] = os.path.join(
     "src", "sas", "sascalc", "file_converter")
-packages.extend(["sas.sascalc.file_converter",
-                 "sas.sascalc.file_converter.core"])
-
-ext_modules.append(Extension("sas.sascalc.file_converter.core.bsl_loader",
+packages.append("sas.sascalc.file_converter")
+ext_modules.append(Extension("sas.sascalc.file_converter._bsl_loader",
                              sources=[os.path.join(mydir, "bsl_loader.c")],
                              include_dirs=[np.get_include()],
                              ))
@@ -271,8 +266,7 @@ ext_modules.append(Extension("sas.sascalc.file_converter.core.bsl_loader",
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
     "src", "sas", "sascalc", "corfunc")
-
-packages.extend(["sas.sascalc.corfunc"])
+packages.append("sas.sascalc.corfunc")
 
 # sas.sascalc.fit
 package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
