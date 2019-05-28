@@ -10,11 +10,14 @@
 ################################################################################
 
 
-import wx
 import sys
 import math
-import numpy as np
 import logging
+
+import wx
+import numpy as np
+from matplotlib.font_manager import FontProperties
+
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
 from sas.sasgui.plottools.TextDialog import TextDialog
@@ -23,11 +26,12 @@ from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
 from sas.sasgui.guiframe.events import SlicerEvent
 from sas.sasgui.guiframe.utils import PanelMenu
-from  sas.sasgui.guiframe.local_perspectives.plotting.binder import BindArtist
-from Plotter1D import ModelPanel1D
+from sas.sasgui.guiframe.local_perspectives.plotting.binder import BindArtist
 from sas.sasgui.plottools.toolbar import NavigationToolBar
-from matplotlib.font_manager import FontProperties
-from graphAppearance import graphAppearance
+
+from .Plotter1D import ModelPanel1D
+from .graphAppearance import graphAppearance
+
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
 logger = logging.getLogger(__name__)
@@ -40,7 +44,7 @@ BIN_WIDTH = 1.0
 
 def find_key(dic, val):
     """return the key of dictionary dic given the value"""
-    return [k for k, v in dic.iteritems() if v == val][0]
+    return [k for k, v in dic.items() if v == val][0]
 
 
 class NavigationToolBar2D(NavigationToolBar):
@@ -174,8 +178,8 @@ class ModelPanel2D(ModelPanel1D):
         self.toolbar.Realize()
         # On Windows platform, default window size is incorrect, so set
         # toolbar width to figure width.
-        _, th = self.toolbar.GetSizeTuple()
-        fw, _ = self.canvas.GetSizeTuple()
+        _, th = self.toolbar.GetSize()
+        fw, _ = self.canvas.GetSize()
         self.toolbar.SetSize(wx.Size(fw, th))
         self.sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
         # update the axes menu on the toolbar
@@ -199,7 +203,7 @@ class ModelPanel2D(ModelPanel1D):
             return
         ## Update self.data2d with the current plot
         self.data2D = data
-        if data.id in self.plots.keys():
+        if data.id in self.plots:
             #replace
             xlo, xhi = self.subplot.get_xlim()
             ylo, yhi = self.subplot.get_ylim()
@@ -325,9 +329,9 @@ class ModelPanel2D(ModelPanel1D):
                     try:
                         slicerpop.Append(wx_id, item[0], item[1])
                         wx.EVT_MENU(self, wx_id, item[2])
-                    except:
+                    except Exception as exc:
                         msg = "ModelPanel1D.onContextMenu: "
-                        msg += "bad menu item  %s" % sys.exc_value
+                        msg += "bad menu item  %s" % exc
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                 slicerpop.AppendSeparator()
 
@@ -395,7 +399,7 @@ class ModelPanel2D(ModelPanel1D):
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
         except:
-            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos_x, pos_y = self.toolbar.GetPosition()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
 
@@ -446,7 +450,7 @@ class ModelPanel2D(ModelPanel1D):
         :param event: wx.menu event
 
         """
-        import detector_dialog
+        from . import detector_dialog
         dialog = detector_dialog.DetectorDialog(self, -1, base=self.parent,
                                                 reset_zmin_ctl=self.default_zmin_ctl,
                                                 reset_zmax_ctl=self.default_zmax_ctl, cmap=self.cmap)
@@ -629,7 +633,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         if self.slicer is not None:
-            from parameters_panel_slicer import SlicerParameterPanel
+            from .parameters_panel_slicer import SlicerParameterPanel
             dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
                               self.slicer.get_params())
@@ -640,7 +644,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         Perform sector averaging on Q and draw sector slicer
         """
-        from SectorSlicer import SectorInteractor
+        from .SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer=SectorInteractor))
 
@@ -648,7 +652,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         Perform sector averaging on Phi and draw annulus slicer
         """
-        from AnnulusSlicer import AnnulusInteractor
+        from .AnnulusSlicer import AnnulusInteractor
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer=AnnulusInteractor))
 
@@ -656,7 +660,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         """
         from sas.sasgui.guiframe.gui_manager import MDIFrame
-        from boxSum import BoxSum
+        from .boxSum import BoxSum
         self.onClearSlicer(event)
         self.slicer_z += 1
         self.slicer = BoxSum(self, self.subplot, zorder=self.slicer_z)
@@ -667,7 +671,7 @@ class ModelPanel2D(ModelPanel1D):
         ## Value used to initially set the slicer panel
         params = self.slicer.get_params()
         ## Create a new panel to display results of summation of Data2D
-        from parameters_panel_boxsum import SlicerPanel
+        from .parameters_panel_boxsum import SlicerPanel
         win = MDIFrame(self.parent, None, 'None', (100, 200))
         new_panel = SlicerPanel(parent=win, id=-1,
                                 base=self, type=self.slicer.__class__.__name__,
@@ -698,7 +702,7 @@ class ModelPanel2D(ModelPanel1D):
 
         :param event: wx.menu event
         """
-        from boxSlicer import BoxInteractorX
+        from .boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer=BoxInteractorX))
 
@@ -710,7 +714,7 @@ class ModelPanel2D(ModelPanel1D):
         :param event: wx.menu event
 
         """
-        from boxSlicer import BoxInteractorY
+        from .boxSlicer import BoxInteractorY
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer=BoxInteractorY))
 

@@ -51,7 +51,7 @@ class ReportDialog(BaseReportDialog):
         # todo: complete saving fig file and as a txt file
         dlg = wx.FileDialog(self, "Choose a file",
                             wildcard=self.wild_card,
-                            style=wx.SAVE | wx.OVERWRITE_PROMPT | wx.CHANGE_DIR)
+                            style=wx.FD_SAVE | wx.OVERWRITE_PROMPT | wx.CHANGE_DIR)
         dlg.SetFilterIndex(0)  # Set .html files to be default
 
         if dlg.ShowModal() != wx.ID_OK:
@@ -91,9 +91,9 @@ class ReportDialog(BaseReportDialog):
                     try:
                         # Mac
                         os.system("open %s" % fName)
-                    except:
+                    except Exception as exc:
                         # DO not open
-                        logger.error("Could not open file: %s" % sys.exc_value)
+                        logger.error("Could not open file: %s" % exc)
             # delete image file
             os.remove(pic_fname)
             return

@@ -1,12 +1,16 @@
 """
     Welcome page
 """
-import wx
-import wx.aui
-import wx.lib.hyperlink
 import os.path
 import os, sys
 
+import wx
+import wx.aui
+try:
+    # CRUFT: wx 4 moved hyperlink to wx.lib.agw
+    from wx.lib import hyperlink
+except ImportError:
+    from wx.lib.agw import hyperlink
 from wx.lib.scrolledpanel import ScrolledPanel
 
 from sas import get_local_config
@@ -114,7 +118,7 @@ class WelcomePage(ScrolledPanel):
         send_ticket = "Send us a ticket at: "
         send_ticket += "help@sasview.org"
         self.hyperlink_paper = \
-            wx.lib.hyperlink.HyperLinkCtrl(self, -1,
+            hyperlink.HyperLinkCtrl(self, -1,
                                            send_ticket, URL=config._license)
 
         self.label_title = \

@@ -207,7 +207,9 @@ class _IdListIterator:
     def __init__(self, id_list):
         self.id_list = id_list
         self.index = -1
-    def next(self):
+    def __next__(self):
         self.index += 1
         return self.id_list[self.index]
+    # CRUFT: python 2 uses next rather than __next__ for iterator
+    next = __next__
 

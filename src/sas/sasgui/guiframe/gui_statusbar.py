@@ -85,7 +85,9 @@ class ConsolePanel(wx.Panel):
                 icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
                                                     wx.ART_TOOLBAR)
         self.msg_txt.Newline()
-        self.msg_txt.WriteBitmap(icon_bmp)
+        # wx 3 has WriteImage and WriteBitmap; not sure if there
+        # is any difference between them.  wx 4 has only WriteImage.
+        self.msg_txt.WriteImage(icon_bmp)
         self.msg_txt.BeginTextColour(color)
         self.msg_txt.WriteText("\t")
         self.msg_txt.AppendText(status)
@@ -109,7 +111,7 @@ class Console(wx.Frame):
         """
         Method to send an arbitrary number of messages to the console log
 
-        :param messages: A list of strings to be sent to the console log. 
+        :param messages: A list of strings to be sent to the console log.
         """
         if messages:
             for status in messages:
@@ -231,7 +233,7 @@ class StatusBar(wxStatusB):
         """
         If the window is resized, redraw the window.
         """
-        self.reposition() 
+        self.reposition()
         self.size_changed = True
 
     def get_msg_position(self):
@@ -350,6 +352,12 @@ class StatusBar(wxStatusB):
             e_msg += "Further information might be available in "
             e_msg += "the Console log (bottom right corner)."
             wx.MessageBox(e_msg, style=wx.ICON_ERROR)
+        if msg == "warning":
+            e_msg = "Warning:\n"
+            e_msg += "\t" + event.status + "\n\n"
+            e_msg += "Further information might be available in "
+            e_msg += "the Console log (bottom right corner)."
+            wx.MessageBox(e_msg, style=wx.ICON_EXCLAMATION)
 
     def set_message(self, event):
         """
@@ -357,7 +365,7 @@ class StatusBar(wxStatusB):
         """
         if hasattr(event, "status"):
             self.SetStatusText(text=str(event.status), event=event)
-  
+
     def set_gauge(self, event):
         """
         change the state of the gauge according the state of the current job
@@ -420,7 +428,7 @@ class SPageStatusbar(wxStatusB):
         wxStatusB.__init__(self, parent, *args, **kwds)
         self.SetFieldsCount(1)
         self.timeout = timeout
-        width, height = parent.GetSizeTuple()
+        width, height = parent.GetSize()
         self.gauge = wx.Gauge(self, style=wx.GA_HORIZONTAL,
                               size=(width, height/10))
         rect = self.GetFieldRect(0)

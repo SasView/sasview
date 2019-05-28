@@ -1,6 +1,7 @@
 """
     State class for the invariant UI
 """
+from __future__ import print_function
 
 # import time
 import os
@@ -139,7 +140,7 @@ class InvariantState(object):
         state += "\n=== Inputs ===\n"
 
         # text ctl general inputs ( excluding extrapolation text ctl)
-        for key, value in self.input_list.iteritems():
+        for key, value in self.input_list.items():
             if value == '':
                 continue
             key_split = key.split('_')
@@ -165,7 +166,7 @@ class InvariantState(object):
         state += "\nExtrapolation:  High=%s; Low=%s\n" % (extra_hi, extra_lo)
         low_off = False
         high_off = False
-        for key, value in self.input_list.iteritems():
+        for key, value in self.input_list.items():
             key_split = key.split('_')
             max_ind = len(key_split) - 1
             if key_split[max_ind] == 'tcl':
@@ -215,7 +216,7 @@ class InvariantState(object):
             else:
                 # other outputs than Q*
                 name = item[0] + "_tcl"
-                if name in self.saved_state.keys():
+                if name in self.saved_state:
                     value = self.saved_state[name]
 
             # Exclude the outputs w/''
@@ -300,7 +301,7 @@ class InvariantState(object):
         state = newdoc.createElement("state")
         top_element.appendChild(state)
 
-        for name, value in self.saved_state.iteritems():
+        for name, value in self.saved_state.items():
             element = newdoc.createElement(str(name))
             element.appendChild(newdoc.createTextNode(str(value)))
             state.appendChild(element)
@@ -309,9 +310,9 @@ class InvariantState(object):
         history = newdoc.createElement("history")
         top_element.appendChild(history)
 
-        for name, value in self.state_list.iteritems():
+        for name, value in self.state_list.items():
             history_element = newdoc.createElement('state_' + str(name))
-            for state_name, state_value in value.iteritems():
+            for state_name, state_value in value.items():
                 state_element = newdoc.createElement(str(state_name))
                 child = newdoc.createTextNode(str(state_value))
                 state_element.appendChild(child)
@@ -324,7 +325,7 @@ class InvariantState(object):
         bookmark = newdoc.createElement("bookmark")
         top_element.appendChild(bookmark)
         item_list = ['time', 'date', 'state', 'comp_state']
-        for name, value_list in self.bookmark_list.iteritems():
+        for name, value_list in self.bookmark_list.items():
             element = newdoc.createElement('mark_' + str(name))
             _, date, state, comp_state = value_list
             time_element = newdoc.createElement('time')
@@ -333,12 +334,12 @@ class InvariantState(object):
             date_element.appendChild(newdoc.createTextNode(str(value_list[1])))
             state_list_element = newdoc.createElement('state')
             comp_state_list_element = newdoc.createElement('comp_state')
-            for state_name, state_value in value_list[2].iteritems():
+            for state_name, state_value in value_list[2].items():
                 state_element = newdoc.createElement(str(state_name))
                 child = newdoc.createTextNode(str(state_value))
                 state_element.appendChild(child)
                 state_list_element.appendChild(state_element)
-            for comp_name, comp_value in value_list[3].iteritems():
+            for comp_name, comp_value in value_list[3].items():
                 comp_element = newdoc.createElement(str(comp_name))
                 comp_element.appendChild(newdoc.createTextNode(str(comp_value)))
                 comp_state_list_element.appendChild(comp_element)
@@ -367,7 +368,7 @@ class InvariantState(object):
         if file is not None:
             msg = "InvariantSate no longer supports non-CanSAS"
             msg += " format for invariant files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version')\
             and node.get('version') == '1.0':
@@ -382,9 +383,9 @@ class InvariantState(object):
             if entry is not None and entry.get('epoch'):
                 try:
                     timestamp = (entry.get('epoch'))
-                except:
+                except Exception as exc:
                     msg = "InvariantSate.fromXML: Could not read"
-                    msg += " timestamp\n %s" % sys.exc_value
+                    msg += " timestamp\n %s" % exc
                     logger.error(msg)
 
             # Parse bookmarks
@@ -452,87 +453,83 @@ class InvariantState(object):
         """
         Get the values (strings) from __str__ for report
         """
-        strings = self.__str__()
-
         # default string values
-        for num in range(1, 19):
-            exec "s_%s = 'NA'" % str(num)
-        lines = strings.split('\n')
+        s = {num: 'NA' for num in range(1, 19)}
         # get all string values from __str__()
-        for line in range(0, len(lines)):
-            if line == 1:
-                s_1 = lines[1]
-            elif line == 2:
-                s_2 = lines[2]
+        lines = str(self).split('\n')
+        for line_num, line in enumerate(lines):
+            if line_num == 1:
+                s[1] = line
+            elif line_num == 2:
+                s[2] = line
             else:
-                item = lines[line].split(':')
+                item = line.split(':')
                 item[0] = item[0].strip()
                 if item[0] == "scale":
-                    s_3 = item[1]
+                    s[3] = item[1]
                 elif item[0] == "porod constant":
-                    s_4 = item[1]
+                    s[4] = item[1]
                 elif item[0] == "background":
-                    s_5 = item[1]
+                    s[5] = item[1]
                 elif item[0] == "contrast":
-                    s_6 = item[1]
+                    s[6] = item[1]
                 elif item[0] == "Extrapolation":
                     extra = item[1].split(";")
                     bool_0 = extra[0].split("=")
                     bool_1 = extra[1].split("=")
-                    s_8 = " " + bool_0[0] + "Q region = " + bool_0[1]
-                    s_7 = " " + bool_1[0] + "Q region = " + bool_1[1]
+                    s[8] = " " + bool_0[0] + "Q region = " + bool_0[1]
+                    s[7] = " " + bool_1[0] + "Q region = " + bool_1[1]
                 elif item[0] == "npts low":
-                    s_9 = item[1]
+                    s[9] = item[1]
                 elif item[0] == "npts high":
-                    s_10 = item[1]
+                    s[10] = item[1]
                 elif item[0] == "volume fraction":
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
-                    s_17 = val + " &plusmn; " + error
+                    s[17] = val + " &plusmn; " + error
                 elif item[0] == "specific surface":
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
-                    s_18 = val + " &plusmn; " + error
+                    s[18] = val + " &plusmn; " + error
                 elif item[0].split("(")[0].strip() == "power low":
-                    s_11 = item[0] + " =" + item[1]
+                    s[11] = item[0] + " =" + item[1]
                 elif item[0].split("(")[0].strip() == "power high":
-                    s_12 = item[0] + " =" + item[1]
+                    s[12] = item[0] + " =" + item[1]
                 elif item[0].split("[")[0].strip() == "Q* from low Q extrapolation":
                     # looks messy but this way the symbols +_ and % work on html
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
                     err = error.split("%")[0].strip()
                     percent = error.split("%")[1].strip()
-                    s_13 = val + " &plusmn; " + err + "&#37" + percent
+                    s[13] = val + " &plusmn; " + err + "&#37" + percent
                 elif item[0].split("[")[0].strip() == "Q* from data":
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
                     err = error.split("%")[0].strip()
                     percent = error.split("%")[1].strip()
-                    s_14 = val + " &plusmn; " + err + "&#37" + percent
+                    s[14] = val + " &plusmn; " + err + "&#37" + percent
                 elif item[0].split("[")[0].strip() == "Q* from high Q extrapolation":
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
                     err = error.split("%")[0].strip()
                     percent = error.split("%")[1].strip()
-                    s_15 = val + " &plusmn; " + err + "&#37" + percent
+                    s[15] = val + " &plusmn; " + err + "&#37" + percent
                 elif item[0].split("[")[0].strip() == "total Q*":
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
-                    s_16 = val + " &plusmn; " + error
+                    s[16] = val + " &plusmn; " + error
                 else:
                     continue
 
-        s_1 = self._check_html_format(s_1)
+        s[1] = self._check_html_format(s[1])
         file_name = self._check_html_format(self.file)
 
         # make plot image
         self.set_plot_state(extra_high=bool_0[1], extra_low=bool_1[1])
         # get ready for report with setting all the html strings
-        self.report_str = str(self.template_str) % (s_1, s_2,
-                                                    s_3, s_4, s_5, s_6, s_7, s_8,
-                                                    s_9, s_10, s_11, s_12, s_13, s_14, s_15,
-                                                    s_16, s_17, s_18, file_name, "%s")
+        self.report_str = str(self.template_str) % (
+            s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8], s[9], s[10], s[11],
+            s[12], s[13], s[14], s[15], s[16], s[17], s[18], file_name, "%s")
 
     def _check_html_format(self, name):
         """
@@ -691,9 +688,9 @@ class Reader(CansasReader):
             if nodes != []:
                 state = InvariantState()
                 state.fromXML(node=nodes[0])
-        except:
+        except Exception as exc:
             msg = "XML document does not contain invariant"
-            msg += " information.\n %s" % sys.exc_value
+            msg += " information.\n %s" % exc
             logger.info(msg)
         return state
 
@@ -735,7 +732,7 @@ class Reader(CansasReader):
                         sas_entry.filename = invstate.file
                         output.append(sas_entry)
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
 
         # Return output consistent with the loader's api
         if len(output) == 0:
@@ -781,7 +778,7 @@ class Reader(CansasReader):
         elif not issubclass(datainfo.__class__, sas.sascalc.dataloader.data_info.Data1D):
             msg = "The cansas writer expects a Data1D"
             msg += " instance: %s" % str(datainfo.__class__.__name__)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         # make sure title and data run is filled up.
         if datainfo.title is None or datainfo.title == '':
             datainfo.title = datainfo.name

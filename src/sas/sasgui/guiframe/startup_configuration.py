@@ -126,7 +126,7 @@ class StartupConfiguration(wx.Dialog):
             p_size = None
             for panel in self.parent.plot_panels.values():
                 #p_panel = self.parent._mgr.GetPane(panel.window_name)
-                width, _ = panel.frame.GetSizeTuple()
+                width, _ = panel.frame.GetSize()
                 if panel.frame.IsShown():
                     if p_size is None or width > p_size:
                         p_size = width
@@ -136,14 +136,14 @@ class StartupConfiguration(wx.Dialog):
 
             try:
                 control_frame = self.parent.get_current_perspective().frame
-                control_w, control_h = control_frame.GetSizeTuple()
+                control_w, control_h = control_frame.GetSize()
                 self.current_string['CONTROL_WIDTH'] = control_w
                 self.current_string['CONTROL_HEIGHT'] = control_h
             except:
                 self.current_string['CONTROL_WIDTH'] = -1
                 self.current_string['CONTROL_HEIGHT'] = -1
 
-            data_pw, _ = self.parent.panels["data_panel"].frame.GetSizeTuple()
+            data_pw, _ = self.parent.panels["data_panel"].frame.GetSize()
             if data_pw is None:
                 data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
             self.current_string['DATAPANEL_WIDTH'] = data_pw
@@ -196,7 +196,7 @@ class StartupConfiguration(wx.Dialog):
         path = make_custom_config_path()
         with open(path, 'w') as out_f:
             out_f.write("#Application appearance custom configuration\n")
-            for key, item in self.return_string.iteritems():
+            for key, item in self.return_string.items():
                 if (key == 'DEFAULT_PERSPECTIVE') or \
                     (key == 'DEFAULT_OPEN_FOLDER' and item != None):
                     out_f.write("%s = \"%s\"\n" % (key, str(item)))

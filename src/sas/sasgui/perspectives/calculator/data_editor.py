@@ -6,17 +6,19 @@ from copy import deepcopy
 
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data2D
-from detector_editor import DetectorDialog
-from collimation_editor import CollimationDialog
-from console import ConsoleDialog
 
 from sas.sasgui.guiframe.events import StatusEvent
+
+from .detector_editor import DetectorDialog
+from .collimation_editor import CollimationDialog
+from .console import ConsoleDialog
+
 
 
 _QMIN_DEFAULT = 0.001
 _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
-#Control panel width 
+#Control panel width
 if sys.platform.count("darwin") == 0:
     PANEL_WIDTH = 500
     PANEL_HEIGTH = 350
@@ -193,7 +195,7 @@ class DataEditorPanel(wx.ScrolledWindow):
                                         size=(-1, 200))
         summary = 'No data info available...'
         self.data_summary.SetValue(summary)
-        #self.summary_sizer.Add(self.data_summary, 1, wx.EXPAND|wx.ALL, 10)  
+        #self.summary_sizer.Add(self.data_summary, 1, wx.EXPAND|wx.ALL, 10)
 
     def _layout_button(self):
         """
@@ -396,7 +398,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         data, _, _ = self.get_current_data()
         if data is None:
             return
-        from sample_editor import SampleDialog
+        from .sample_editor import SampleDialog
         dlg = SampleDialog(parent=self, sample=data.sample)
         dlg.set_manager(self)
         dlg.ShowModal()
@@ -408,7 +410,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         data, data_name, position = self.get_current_data()
         if data is None:
             return
-        from source_editor import SourceDialog
+        from .source_editor import SourceDialog
         dlg = SourceDialog(parent=self, source=data.source)
         dlg.set_manager(self)
         dlg.ShowModal()
@@ -425,7 +427,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         cards = l.get_wildcards()
         wlist = '|'.join(cards)
 
-        dlg = wx.FileDialog(self, "Choose a file", location, "", wlist, wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a file", location, "", wlist, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
@@ -526,7 +528,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         self._default_save_location = path
         try:
             #Load data
-            from load_thread import DataReader
+            from .load_thread import DataReader
             ## If a thread is already started, stop it
             if self.reader is not None and self.reader.isrunning():
                 self.reader.stop()
@@ -534,8 +536,8 @@ class DataEditorPanel(wx.ScrolledWindow):
                                     completefn=self.complete_loading,
                                     updatefn=None)
             self.reader.queue()
-        except:
-            msg = "Data Editor: %s" % (sys.exc_value)
+        except Exception as exc:
+            msg = "Data Editor: %s" % exc
             load_error(msg)
             return
         event.Skip()
@@ -576,7 +578,8 @@ class DataEditorPanel(wx.ScrolledWindow):
         path = None
         wildcard = "CanSAS 1D files(*.xml)|*.xml"
         dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location, "", wildcard , wx.SAVE)
+                            self._default_save_location, "", wildcard ,
+                            wx.FD_SAVE)
 
         for data in self._data:
             if issubclass(data.__class__, Data2D):

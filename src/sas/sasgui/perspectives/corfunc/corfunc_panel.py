@@ -16,7 +16,7 @@ from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
 import sas.sasgui.perspectives.corfunc.corfunc
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
-from plot_labels import *
+from .plot_labels import *
 
 OUTPUT_STRINGS = {
     'max': "Long Period (A): ",
@@ -336,7 +336,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         dlg = wx.FileDialog(self, "Choose a file",
                             default_save_location, \
-                            self.window_caption, "*.crf", wx.SAVE)
+                            self.window_caption, "*.crf", wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             default_save_location = os.path.dirname(path)
@@ -395,7 +395,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             for output in self._extrapolation_outputs.values():
                 output.SetValue('-')
             return
-        for key, value in params.iteritems():
+        for key, value in params.items():
             output = self._extrapolation_outputs[key]
             rounded = self._round_sig_figs(value, 6)
             output.SetValue(rounded)
@@ -416,7 +416,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             if len(params) < len(OUTPUT_STRINGS):
                 # Not all parameters were calculated
                 error = True
-            for key, value in params.iteritems():
+            for key, value in params.items():
                 rounded = self._round_sig_figs(value, 6)
                 self._output_boxes[key].SetValue(rounded)
         if error:
@@ -548,7 +548,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         file_sizer.Add(self._data_name_box, (0, 1), (1, 1),
             wx.CENTER | wx.ADJUST_MINSIZE, 15)
 
-        file_sizer.AddSpacer((1, 25), pos=(0,2))
+        #file_sizer.AddSpacer((1, 25), pos=(0,2))
         databox_sizer.Add(file_sizer, wx.TOP, 15)
 
         vbox.Add(databox_sizer, (y, 0), (1, 1),
@@ -712,7 +712,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         self._output_boxes = dict()
         i = 0
-        for key, value in OUTPUT_STRINGS.iteritems():
+        for key, value in OUTPUT_STRINGS.items():
             # Create a label and a text box for each poperty
             label = wx.StaticText(self, -1, value)
             output_box = OutputTextCtrl(self, wx.NewId(),

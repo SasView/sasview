@@ -111,7 +111,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             # Folder and base filename
             [group_path, group_name] = os.path.split(filepath)
             ext = "." + group_name.split('.')[-1] # File extension
-            for frame_number, frame_data in frame_data.iteritems():
+            for frame_number, frame_data in frame_data.items():
                 # Append frame number to base filename
                 filename = group_name.replace(ext, str(frame_number)+ext)
                 destination = os.path.join(group_path, filename)
@@ -154,7 +154,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             end_char = data[0][-1]
             # If lines end with comma or semi-colon, trim the last character
             if end_char == ',' or end_char == ';':
-                data = map(lambda s: s[0:-1], data)
+                data = [s[0:-1] for s in data]
             else:
                 msg = ("Error reading {}: Lines must end with a digit, comma "
                     "or semi-colon").format(filename.split('\\')[-1])
@@ -274,7 +274,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                         StatusEvent(status=msg))
             else:
                 return { 'frames': [], 'inc': None, 'file': single_file }
-        frames = range(first_frame, last_frame + 1, increment)
+        frames = list(range(first_frame, last_frame + 1, increment))
         return { 'frames': frames, 'inc': increment, 'file': single_file }
 
     def get_metadata(self):
@@ -334,15 +334,15 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             frame_data[i] = data
         if single_file:
             # Only need to set metadata on first Data1D object
-            frame_data = frame_data.values() # Don't need to know frame numbers
+            frame_data = list(frame_data.values()) # Don't need to know frame numbers
             frame_data[0].filename = output_path.split('\\')[-1]
-            for key, value in metadata.iteritems():
+            for key, value in metadata.items():
                 setattr(frame_data[0], key, value)
         else:
             # Need to set metadata for all Data1D objects
             for datainfo in frame_data.values():
                 datainfo.filename = output_path.split('\\')[-1]
-                for key, value in metadata.iteritems():
+                for key, value in metadata.items():
                     setattr(datainfo, key, value)
 
         _, ext = os.path.splitext(output_path)
@@ -354,7 +354,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def convert_2d_data(self, dataset):
         metadata = self.get_metadata()
-        for key, value in metadata.iteritems():
+        for key, value in metadata.items():
             setattr(dataset[0], key, value)
 
         w = NXcanSASWriter()

@@ -34,7 +34,7 @@ from sas.sasgui.plottools import Data1D as Model1D
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.plottools.plottables import Graph
 
-from pr_widgets import PrTextCtrl
+from .pr_widgets import PrTextCtrl
 
 # Default number of points on the output plot
 DEFAULT_NPTS = 10
@@ -49,7 +49,7 @@ class OutputPlot(PlotPanel):
     ## Title for plottools
     window_caption = "D Explorer"
 
-    def __init__(self, d_min, d_max, parent, id= -1, color=None, \
+    def __init__(self, d_min, d_max, parent, id= -1, color=None,
                  dpi=None, style=wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
         Initialization. The parameters added to PlotPanel are:
@@ -76,10 +76,10 @@ class OutputPlot(PlotPanel):
         self.plot.name = DEFAULT_OUTPUT
         self.plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
 
-        # Graph        
+        # Graph
         self.graph = Graph()
-        self.graph.xaxis("\\rm{D_{max}}", 'A')
-        self.graph.yaxis("\\rm{%s}" % DEFAULT_OUTPUT, "")
+        self.graph.xaxis(r"\rm{D_{max}}", 'A')
+        self.graph.yaxis(r"\rm{%s}" % DEFAULT_OUTPUT, "")
         self.graph.add(self.plot)
         self.graph.render(self)
 
@@ -132,10 +132,10 @@ class Results(object):
 
         # Dictionary of outputs
         self.outputs = {}
-        self.outputs['Chi2/dof'] = ["\chi^2/dof", "a.u.", self.chi2]
+        self.outputs['Chi2/dof'] = [r"\chi^2/dof", "a.u.", self.chi2]
         self.outputs['Oscillation parameter'] = ["Osc", "a.u.", self.osc]
         self.outputs['Positive fraction'] = ["P^+", "a.u.", self.pos]
-        self.outputs['1-sigma positive fraction'] = ["P^+_{1\ \sigma}",
+        self.outputs['1-sigma positive fraction'] = [r"P^+_{1\ \sigma}",
                                                      "a.u.", self.pos_err]
         self.outputs['Rg'] = ["R_g", "A", self.rg]
         self.outputs['I(q=0)'] = ["I(q=0)", "1/A", self.iq0]
@@ -415,10 +415,10 @@ class ExploreDialog(wx.Dialog):
                 results.pos.append(pos)
                 results.pos_err.append(pos_err)
                 results.osc.append(osc)
-            except:
+            except Exception as exc:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(d), sys.exc_value)
+                msg += "for D_max=%s\n%s" % (str(d), exc)
                 logger.error(msg)
 
         self.results = results

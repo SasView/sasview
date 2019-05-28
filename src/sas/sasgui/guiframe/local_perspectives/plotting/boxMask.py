@@ -1,8 +1,8 @@
 import math
-from BaseInteractor import _BaseInteractor
-from boxSum import PointInteractor
-from boxSum import VerticalDoubleLine
-from boxSum import HorizontalDoubleLine
+from .BaseInteractor import _BaseInteractor
+from .boxSum import PointInteractor
+from .boxSum import VerticalDoubleLine
+from .boxSum import HorizontalDoubleLine
 
 
 class BoxMask(_BaseInteractor):

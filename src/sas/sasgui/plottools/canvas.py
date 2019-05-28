@@ -52,9 +52,9 @@ def OnPrintPage(self, page):
     except:
         ppw = 1
         pph = 1
-    (pgw, _) = self.GetPageSizePixels()  # page size in pixels
-    (dcw, _) = dc.GetSize()
-    (grw, _) = self.canvas.GetSizeTuple()
+    pgw, _ = self.GetPageSizePixels()  # page size in pixels
+    dcw, _ = dc.GetSize()
+    grw, _ = self.canvas.GetSize()
 
     # save current figure dpi resolution and bg color,
     # so that we can temporarily set them to the dpi of
@@ -96,8 +96,8 @@ def OnPrintPage(self, page):
     except:
         try:
             dc.DrawBitmap(self.canvas.bitmap, (0, 0))
-        except:
-            logger.error(sys.exc_value)
+        except Exception as exc:
+            logger.error(exc)
 
     # restore original figure  resolution
     self.canvas.figure.set_facecolor(bgcolor)
@@ -151,9 +151,11 @@ class FigureCanvas(FigureCanvasWxAgg):
         """
         Render after a delay if no other render requests have been made.
         """
-        self.panel.subplot.grid(self.panel.grid_on)
-        if self.panel.legend is not None and self.panel.legend_pos_loc:
-            self.panel.legend._loc = self.panel.legend_pos_loc
+        if self.panel is not None:
+            # TODO: grid/panel manip doesn't belong here
+            self.panel.subplot.grid(self.panel.grid_on)
+            if self.panel.legend is not None and self.panel.legend_pos_loc:
+                self.panel.legend._loc = self.panel.legend_pos_loc
         self.idletimer.Restart(5, *args, **kwargs)  # Delay by 5 ms
 
     def _onDrawIdle(self, *args, **kwargs):
@@ -207,8 +209,8 @@ class FigureCanvas(FigureCanvasWxAgg):
             # st = time.time()
             try:
                 fig.draw(self)
-            except ValueError:
-                logger.error(sys.exc_value)
+            except ValueError as exc:
+                logger.error(exc)
         else:
             self._isRendered = False
         if self.ndraw <= 1:

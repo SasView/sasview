@@ -14,15 +14,14 @@ import time
 import logging
 
 # Application imports
-import SimCanvas
-import ShapeParameters
-import ShapeAdapter
-from sas.sasgui.guiframe.dataFitting import Data1D
-# Real-space simulation import
-import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
-
+from sas.sascalc.realspace import VolumeCanvas
 from sas.sascalc.data_util.calcthread import CalcThread
+from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.guicomm.events import NewPlotEvent, StatusEvent    
+
+from . import SimCanvas
+from . import ShapeParameters
+from . import ShapeAdapter
 
 logger = logging.getLogger(__name__)
 

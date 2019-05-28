@@ -38,7 +38,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
     # CRUFT: mpl 1.1 uses save rather than save_figure
     try: save_figure = NavigationToolbar2WxAgg.save
     except AttributeError: pass
-    
+
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()
 
@@ -64,11 +64,19 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         self.AddSimpleTool(self._NTB2_FORWARD, _load_bitmap('forward.png'),
                            'Forward', 'Forward navigation view')
         # todo: get new bitmap
-        self.AddCheckTool(self._NTB2_PAN, _load_bitmap('move.png'),
-                          shortHelp='Pan',
-                          longHelp='Pan with left, zoom with right')
-        self.AddCheckTool(self._NTB2_ZOOM, _load_bitmap('zoom_to_rect.png'),
-                          shortHelp='Zoom', longHelp='Zoom to rectangle')
+        # todo: update with code from matplotlib/backends/backend_wx.py
+        if 'phoenix' in wx.PlatformInfo: # wx phoenix >= 4.0.0b2
+            self.AddCheckTool(self._NTB2_PAN, "Pan", _load_bitmap('move.png'),
+                              shortHelp='Pan',
+                              longHelp='Pan with left, zoom with right')
+            self.AddCheckTool(self._NTB2_ZOOM, "Zoom", _load_bitmap('zoom_to_rect.png'),
+                              shortHelp='Zoom', longHelp='Zoom to rectangle')
+        else:
+            self.AddCheckTool(self._NTB2_PAN, _load_bitmap('move.png'),
+                              shortHelp='Pan',
+                              longHelp='Pan with left, zoom with right')
+            self.AddCheckTool(self._NTB2_ZOOM, _load_bitmap('zoom_to_rect.png'),
+                              shortHelp='Zoom', longHelp='Zoom to rectangle')
 
         self.AddSeparator()
         self.AddSimpleTool(self._NTB2_SAVE, _load_bitmap('filesave.png'),
@@ -149,8 +157,8 @@ class PlotPrintout(wx.Printout):
         canvas size keeping the aspect ratio intact, then prints as bitmap
         """
         _dc = self.GetDC()
-        (_dcX, _dcY) = _dc.GetSizeTuple()
-        (_bmpX,_bmpY) = self.canvas.GetSize()
+        _dcX, _dcY = _dc.GetSize()
+        _bmpX, _bmpY = self.canvas.GetSize()
         _scale = min(_dcX/_bmpX, _dcY/_bmpY)
         _dc.SetUserScale(_scale, _scale)
         _dc.DrawBitmap(self.canvas.bitmap, 0, 0, False,)

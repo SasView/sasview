@@ -42,7 +42,7 @@ from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 logger = logging.getLogger(__name__)
 
 _BOX_WIDTH = 76
-#Slit length panel size 
+#Slit length panel size
 if sys.platform.count("win32") > 0:
     PANEL_TOP = 0
     PANEL_WIDTH = 570
@@ -132,10 +132,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                *args, **kwds)
         #kwds['style'] = wx.SUNKEN_BORDER
         PanelBase.__init__(self)
-        #Font size 
+        #Font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         self.SetupScrolling()
-        #thread to read data 
+        #thread to read data
         self.reader = None
         self.ext = None
         self.id = 'GenSAS'
@@ -217,38 +217,36 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ix = 0
         iy = 0
         param_title = wx.StaticText(self, -1, 'Parameter')
-        sizer.Add(param_title, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(param_title, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
         value_title = wx.StaticText(self, -1, 'Value')
-        sizer.Add(value_title, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(value_title, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
         unit_title = wx.StaticText(self, -1, 'Unit')
-        sizer.Add(unit_title, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        key_list = params.keys()
-        key_list.sort()
-        for param in key_list:
+        sizer.Add(unit_title, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        for param in sorted(params.keys()):
             iy += 1
             ix = 0
             p_name = wx.StaticText(self, -1, param)
-            sizer.Add(p_name, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(p_name, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             ## add parameter value
             ix += 1
             value = model.getParam(param)
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH * 2, 20),
                                 style=wx.TE_PROCESS_ENTER)
-            #ctl.SetToolTipString(\
+            #ctl.SetToolTipString(
             #            "Hit 'Enter' after typing to update the plot.")
             ctl.SetValue(format_number(value, True))
             sizer.Add(ctl, (iy, ix), (1, 1), wx.EXPAND)
             ## add unit
             ix += 1
             unit = wx.StaticText(self, -1, details[param][0])
-            sizer.Add(unit, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(unit, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.parameters.append([p_name, ctl, unit])
 
         self.param_sizer.Add(sizer, 0, wx.LEFT, 10)
@@ -340,27 +338,26 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = 0
-        #key_list.sort()
         name = wx.StaticText(self, -1, 'No. of Qx (Qy) bins: ')
-        sizer.Add(name, (iy, ix), (1, 1), \
-                        wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(name, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ## add parameter value
         ix += 1
         self.npt_ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH * 1.5, 20),
-                            style=wx.TE_PROCESS_ENTER)
+                                     style=wx.TE_PROCESS_ENTER)
         self.npt_ctl.Bind(wx.EVT_TEXT, self._onparamEnter)
         self.npt_ctl.SetValue(format_number(self.npts_x, True))
         sizer.Add(self.npt_ctl, (iy, ix), (1, 1), wx.EXPAND)
         ## add unit
         ix += 1
         unit = wx.StaticText(self, -1, '')
-        sizer.Add(unit, (iy, ix), (1, 1), \
-                        wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(unit, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
         name = wx.StaticText(self, -1, 'Qx (Qy) Max: ')
-        sizer.Add(name, (iy, ix), (1, 1), \
-                        wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(name, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ## add parameter value
         ix += 1
         self.qmax_ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH * 1.5, 20),
@@ -371,8 +368,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ## add unit
         ix += 1
         unit = wx.StaticText(self, -1, '[1/A]')
-        sizer.Add(unit, (iy, ix), (1, 1), \
-                        wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(unit, (iy, ix), (1, 1),
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.qrange_sizer.Add(sizer, 0, wx.LEFT, 10)
 
     def _layout_button(self):
@@ -508,7 +505,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             wildcard.append(type)
         wildcard = '|'.join(wildcard)
         dlg = wx.FileDialog(self, "Choose a file", location,
-                            "", wildcard, wx.OPEN)
+                            "", wildcard, wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             filename = os.path.basename(path)
@@ -555,11 +552,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                     updatefn=self.load_update)
             self.reader.queue()
             #self.load_update()
-        except:
+        except Exception as exc:
             self.ext = None
             if self.parent.parent is None:
                 return
-            msg = "Generic SAS Calculator: %s" % (sys.exc_value)
+            msg = "Generic SAS Calculator: %s" % exc
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             self.SetFocus()
@@ -686,7 +683,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
 
         self.sld_data = self.parent.get_sld_from_omf()
         output = self.sld_data
-        #frame_size = wx.Size(470, 470)    
+        #frame_size = wx.Size(470, 470)
         self.plot_frame = PlotFrame(self, -1, 'testView')
         frame = self.plot_frame
         frame.Show(False)
@@ -705,11 +702,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 raise
         panel.dimension = 3
         graph_title = self._sld_plot_helper(ax, output, has_arrow)
-        # Use y, z axes (in mpl 3d) as z, y axes 
+        # Use y, z axes (in mpl 3d) as z, y axes
         # that consistent with our SAS detector coords.
-        ax.set_xlabel('x ($\A%s$)' % output.pos_unit)
-        ax.set_ylabel('z ($\A%s$)' % output.pos_unit)
-        ax.set_zlabel('y ($\A%s$)' % output.pos_unit)
+        # Format Angstrom units (A) as latex $\AA$
+        units = output.pos_unit if output.pos_unit != "A" else r"$\AA$"
+        ax.set_xlabel('x (%s)' % units)
+        ax.set_ylabel('z (%s)' % units)
+        ax.set_zlabel('y (%s)' % units)
         panel.subplot.figure.subplots_adjust(left=0.05, right=0.95,
                                              bottom=0.05, top=0.96)
         if output.pix_type == 'atom':
@@ -743,8 +742,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         if output.pix_type == 'atom':
             marker = 'o'
             m_size = 3.5
-        sld_tot = (np.fabs(sld_mx) + np.fabs(sld_my) + \
-                   np.fabs(sld_mz) + np.fabs(output.sld_n))
+        sld_tot = (np.fabs(sld_mx) + np.fabs(sld_my)
+                   + np.fabs(sld_mz) + np.fabs(output.sld_n))
         is_nonzero = sld_tot > 0.0
         is_zero = sld_tot == 0.0
         # I. Plot null points
@@ -768,13 +767,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 ax.plot(pos_x[chosen_color], pos_z[chosen_color],
                         pos_y[chosen_color], marker, c=color, alpha=0.5,
                         markeredgecolor=color, markersize=m_size, label=key)
-        # III. Plot All others        
+        # III. Plot All others
         if np.any(other_color):
             a_name = ''
             if output.pix_type == 'atom':
                 # Get atom names not in the list
-                a_names = [symb  for symb in pix_symbol \
-                           if symb not in color_dic.keys()]
+                a_names = [symb  for symb in pix_symbol
+                           if symb not in color_dic]
                 a_name = a_names[0]
                 for name in a_names:
                     new_name = ", " + name
@@ -897,8 +896,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                               updatefn=self._update)
             cal_out.queue()
 
-        except:
-            msg = "%s." % sys.exc_value
+        except Exception as exc:
+            msg = "%s." % exc
             status_type = 'stop'
             self._status_info(msg, status_type)
             wx.PostEvent(self.parent.parent,
@@ -1030,8 +1029,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.npts_x = int(float(self.npt_ctl.GetValue()))
         self.data = Data2D()
         qmax = self.qmax_x #/ np.sqrt(2)
-        self.data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
-        self.data.yaxis('\\rm{Q_{y}}', '\AA^{-1}')
+        self.data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
+        self.data.yaxis(r'\rm{Q_{y}}', r'\AA^{-1}')
         self.data.is_data = False
         self.data.id = str(self.uid) + " GenData"
         self.data.group_id = str(self.uid) + " Model2D"
@@ -1122,17 +1121,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         new_plot = Data1D(x=data.x, y=y_out)
         new_plot.dx = data.dx
         new_plot.dy = data.dy
-        new_plot.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
-        new_plot.yaxis('\\rm{Intensity}', 'cm^{-1}')
+        new_plot.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
+        new_plot.yaxis(r'\rm{Intensity}', 'cm^{-1}')
         new_plot.is_data = False
         new_plot.id = str(self.uid) + " GenData1D"
         new_plot.group_id = str(self.uid) + " Model1D"
         new_plot.name = model.name + '1d'
         new_plot.title = "Generic model1D "
-        new_plot.id = str(page_id) + ': ' + self.file_name \
-                        + ' #%s' % str(self.graph_num) + "_1D"
-        new_plot.group_id = str(page_id) + " Model1D" + \
-                             ' #%s' % str(self.graph_num) + "_1D"
+        new_plot.id = (str(page_id) + ': ' + self.file_name
+                       + ' #%s' % str(self.graph_num) + "_1D")
+        new_plot.group_id = (str(page_id) + " Model1D"
+                             + ' #%s' % str(self.graph_num) + "_1D")
         new_plot.is_data = False
 
         title = new_plot.title
@@ -1177,10 +1176,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Generic model 2D "
-        new_plot.id = str(page_id) + ': ' + self.file_name \
-                        + ' #%s' % str(self.graph_num) + "_2D"
-        new_plot.group_id = str(page_id) + " Model2D" \
-                        + ' #%s' % str(self.graph_num) + "_2D"
+        new_plot.id = (str(page_id) + ': ' + self.file_name
+                       + ' #%s' % str(self.graph_num) + "_2D")
+        new_plot.group_id = (str(page_id) + " Model2D"
+                             + ' #%s' % str(self.graph_num) + "_2D")
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False
@@ -1245,7 +1244,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER,
                                *args, **kwds)
         PanelBase.__init__(self)
-        #Font size 
+        #Font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         self.SetupScrolling()
         # Object that receive status event
@@ -1343,8 +1342,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             self.sld_data = omf2sld.output
             self.sld_data.is_data = False
             self.sld_data.filename = "Default SLD Profile"
-        except:
-            msg = "OMF Panel: %s" % sys.exc_value
+        except Exception as exc:
+            msg = "OMF Panel: %s" % exc
             infor = 'Error'
             #logger.error(msg)
             if self.parent.parent is not None:
@@ -1440,21 +1439,16 @@ class OmfPanel(ScrolledPanel, PanelBase):
         if omfdata is None:
             raise
         sld_key_list = self._get_slds_key_list(omfdata)
-        # Dic is not sorted
-        key_list = [key for key in sld_key_list.keys()]
-        # Sort here
-        key_list.sort()
         is_data = self.sld_data.is_data
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        for key in key_list:
-            value = sld_key_list[key]
+        for key, value in sorted(sld_key_list.items()):
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
-            sizer.Add(name, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(name, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             ## add parameter value
             ix += 1
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
@@ -1466,8 +1460,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ix += 1
             s_unit = '[' + omfdata.sld_unit + ']'
             unit = wx.StaticText(self, -1, s_unit)
-            sizer.Add(unit, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(unit, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.slds.append([key, ctl, unit])
         self.sld_sizer.Add(sizer, 0, wx.LEFT, 10)
 
@@ -1484,12 +1478,12 @@ class OmfPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        for key, value in key_list.iteritems():
+        for key, value in sorted(key_list.items()):
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
-            sizer.Add(name, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(name, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             ## add parameter value
             ix += 1
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
@@ -1501,8 +1495,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ## add unit
             ix += 1
             unit = wx.StaticText(self, -1, '')
-            sizer.Add(unit, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(unit, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.nodes.append([key, ctl, unit])
         self.node_sizer.Add(sizer, 0, wx.LEFT, 10)
 
@@ -1519,13 +1513,12 @@ class OmfPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        #key_list.sort()
-        for key, value in key_list.iteritems():
+        for key, value in sorted(key_list.items()):
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
-            sizer.Add(name, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(name, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             ## add parameter value
             ix += 1
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
@@ -1538,8 +1531,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ix += 1
             p_unit = '[' + omfdata.pos_unit + ']'
             unit = wx.StaticText(self, -1, p_unit)
-            sizer.Add(unit, (iy, ix), (1, 1), \
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            sizer.Add(unit, (iy, ix), (1, 1),
+                      wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.stepsize.append([key, ctl, unit])
         self.step_sizer.Add(sizer, 0, wx.LEFT, 10)
 
@@ -1634,7 +1627,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         if sld_data is None:
             for ctr_list in self.slds:
                 ctr_list[1].Enable(False)
-                #break   
+                #break
             return
 
         self.sld_data = sld_data
@@ -1645,8 +1638,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     min_val = np.min(sld_list[key])
                     max_val = np.max(sld_list[key])
                     mean_val = np.mean(sld_list[key])
-                    enable = (min_val == max_val) and \
-                             sld_data.pix_type == 'pixel'
+                    enable = ((min_val == max_val)
+                              and sld_data.pix_type == 'pixel')
                     ctr_list[1].SetValue(format_number(mean_val, True))
                     ctr_list[1].Enable(enable)
                     #ctr_list[2].SetLabel("[" + sld_data.sld_unit + "]")
@@ -1677,7 +1670,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         dlg = wx.FileDialog(self, "Save sld file",
                             location, "sld_file",
                              extension,
-                             wx.SAVE)
+                             wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.parent.set_file_location(os.path.dirname(path))

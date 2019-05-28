@@ -58,7 +58,7 @@ class ResultPanel(Notebook, PanelBase):
 
     def on_plot_results(self, event):
         self.frame.Show(True)
-        result = event.result[0][0]
+        result = list(event.result[0])[0]
         filename = result.data.sas_data.filename
         current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
         self.parent.SetTitle(self.window_name + " - " + filename + " - " + current_time)

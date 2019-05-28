@@ -93,7 +93,7 @@ class FitPanel(nb, PanelBase):
         if self.sim_page is not None:
             batch_state = self.sim_page.set_state()
 
-        for uid, page in self.opened_pages.iteritems():
+        for uid, page in self.opened_pages.items():
             data = page.get_data()
             # state must be cloned
             state = page.get_state().clone()
@@ -134,7 +134,7 @@ class FitPanel(nb, PanelBase):
         """
         if uid not in self.opened_pages:
             msg = "Fitpanel cannot find ID: %s in self.opened_pages" % str(uid)
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             return self.opened_pages[uid]
 
@@ -216,7 +216,7 @@ class FitPanel(nb, PanelBase):
         """
         page_is_opened = False
         if state is not None:
-            for uid, panel in self.opened_pages.iteritems():
+            for uid, panel in self.opened_pages.items():
                 # Don't return any panel is the exact same page is created
                 if uid == panel.uid and panel.data == state.data:
                     # the page is still opened
@@ -395,7 +395,7 @@ class FitPanel(nb, PanelBase):
         Delete the given data
         """
         if data.__class__.__name__ != "list":
-            raise ValueError, "Fitpanel delete_data expect list of id"
+            raise ValueError("Fitpanel delete_data expect list of id")
         else:
             for page in self.opened_pages.values():
                 pos = self.GetPageIndex(page)
@@ -591,7 +591,7 @@ class FitPanel(nb, PanelBase):
             flag = False
         if selected_page in page_finder:
             # Delete the name of the page into the list of open page
-            for uid, list in self.opened_pages.iteritems():
+            for uid, list in self.opened_pages.items():
                 # Don't return any panel is the exact same page is created
                 if flag and selected_page.uid == uid:
                     self._manager.remove_plot(uid, theory=False)
@@ -599,7 +599,7 @@ class FitPanel(nb, PanelBase):
             del page_finder[selected_page]
 
         # Delete the name of the page into the list of open page
-        for uid, list in self.opened_pages.iteritems():
+        for uid, list in self.opened_pages.items():
             # Don't return any panel is the exact same page is created
             if selected_page.uid == uid:
                 del self.opened_pages[selected_page.uid]

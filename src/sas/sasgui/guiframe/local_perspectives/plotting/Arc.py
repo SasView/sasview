@@ -3,8 +3,9 @@
 """
 import math
 
-from BaseInteractor import _BaseInteractor
 from sas.sasgui.guiframe.events import SlicerParameterEvent
+
+from .BaseInteractor import _BaseInteractor
 
 class ArcInteractor(_BaseInteractor):
     """

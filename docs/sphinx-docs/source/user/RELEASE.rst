@@ -9,6 +9,26 @@ Release Notes
 Features
 ========
 
+New in Version 4.2.2
+--------------------
+This release fixes the known issues reported in 4.2.1: the inability to read in
+project files due to the fixes (changes) in the NXcanSAS reader, and the fact
+that the 2D resolution smearing was only being applied to one quadrant.
+
+Resolved Issues
+^^^^^^^^^^^^^^^
+.. note:: Trac tickets were moved to Github issues as of 4.2.2. Not only has
+   that changed the numbering, but because different repositories are involved,
+   the issue numbers must now be associated with the relevant repo.
+
+This version of SasView is built with the same sasmodels version (ver 0.99) as
+was 4.2.1.  Hence not sasmodels issues were addressed in this release.
+
+sasview repository issues addressed:
+
+* Fixes sasview # 1268: (Trac #1242): Resolution smearing is only applied to positive Qx and Qy in 2D
+* Fixes sasview # 1269: (Trac #1243): Problem reopening saved project .svs file
+
 New in Version 4.2.1
 --------------------
 The major changes for this point release were to fix several problems with using
@@ -20,17 +40,19 @@ of NXcanSAS reduced data known to the SasView team in order to ensure
 compatibility and verify the implementation.  A few other enhancements and bug
 fixed were also introduced such as cleaning up the resolution section of the
 fitting page GUI, increasing the max size range allowed in the corfunc
-analysis, and adding the incomplete gamma function to the python library. 
+analysis, and adding the incomplete gamma function to the python library.
 
 Resolved Issues
 ^^^^^^^^^^^^^^^
 * Fixes #  976:	CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files
 * Fixes # 1074:	Add incomplete gamma function to sasmodels
+* Fixes # 1108: "Writing a Plugin Model" does not explain function "random"
 * Fixes # 1111:	Convert all input Q units to 1/A
 * Fixes # 1129:	NXcanSAS writer not writing all meta data
 * Fixes # 1142:	Plugin framework is broken
+* Closes # 1175: Need to rethink Tutorial option in GUI Help menu
 * Fixes # 1183:	Test from creating new model reset all parameters to default in all open FitPages
-* Fixes # 1188:   Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
+* Fixes # 1188: Colons removed from magnetic parameter names to address Python variable issue - done in 4.2. but documented in 4.2.1
 * Fixes # 1205:	4.2 set weighting choice seems to be ignored.
 * Fixes # 1206:	Incorrect (and confusing) presentation of dQ from data in instrumental smearing section
 * Fixes # 1212:	Bug in Iqxqy plotting non rectangular / square matrices?
@@ -53,9 +75,9 @@ versions of SasView).
 
 .. warning:: Old-style plugin models, including old sum|multiply models, continue
              to be supported (i.e. SasView will run them) in 4.x, although our
-             automatic on-the-fly translation may not cope in all use cases (see 
-             Known Issues below). However, this backward compatibility will be 
-             removed in 5.0 and users are therefore strongly encouraged to 
+             automatic on-the-fly translation may not cope in all use cases (see
+             Known Issues below). However, this backward compatibility will be
+             removed in 5.0 and users are therefore strongly encouraged to
              convert their custom models to the new API.
 
 Finally, the changes to orientation angles and orientational distribution
@@ -87,9 +109,9 @@ Improvements
 * Problems with the computation of magnetic scattering from some
   objects have been rectified. Some questions remain however.
 * The known issue with the core_shell_parallelepiped model is now fixed.
-* An error in the be_polyelectrolyte model was identified and rectified, but 
+* An error in the be_polyelectrolyte model was identified and rectified, but
   the fix is yet to be validated.
-* (Added post-release) An error with the reporting of the scale parameter 
+* (Added post-release) An error with the reporting of the scale parameter
   from the spinodal model was rectified.
 * A number of issues and inconsistencies with the creation of
   sum|multiply models have been rectified.
@@ -155,7 +177,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: “report button” followed by “save” makes an empty pdf file???
+* Fixes # 818: "report" button followed by "save" makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
@@ -266,7 +288,7 @@ Bug Fixes
 * Fixes #1188: fitpage hangs if change model while magnetism is on
 * Fixes #1191: Correct erroneous Scale reported by Spinodal model
 
-**It is recommended that all users upgrade to this version, but your 
+**It is recommended that all users upgrade to this version, but your
 attention is drawn to the Changes section above.**
 
 
@@ -415,10 +437,10 @@ Model package changes and improvements
 * Old custom models should now still work
 * Custom model editor now creates new style models
 * Custom model editor supports better error checking
- 
-.. note:: Old custom models should be converted to the new model format 
-          which is now the same as the built-in models and offers much 
-          better support. The old custom model format will be deprecated 
+
+.. note:: Old custom models should be converted to the new model format
+          which is now the same as the built-in models and offers much
+          better support. The old custom model format will be deprecated
           in a future version.
 
 Documentation improvements
@@ -474,7 +496,7 @@ Documentation improvements
   two people following the conversion of the model.
 * Theoretical 1D (and 2D if applicable) scattering curves are auto-generated
   and added to the model documentation for each model.
-   
+
 Bug fixes
 ^^^^^^^^^
 * Fixes #411: No stop button on simultaneous fit page
@@ -766,17 +788,19 @@ Downloading and Installing
 ==========================
 
 .. note:: If you have a SasView installer (.EXE or .MSI), you do not need to
-          worry about any of the following.  However, it is highly recommended 
-          that any previous versions of SasView are uninstalled prior to 
-          installing the new version UNLESS you are installing SasView to 
-          versioned folders.
+          worry about any of the following.  However, it is highly recommended
+          that any previous versions of SasView are uninstalled prior to
+          installing the new version UNLESS you are installing SasView to
+          versioned folders. **We recommend you avoid using folder paths
+          that contain spaces or characters that cannot be found on a
+          standard keyboard (eg, characters with accents, umlauts, etc).**
 
 .. note:: The easiest approach to setting up the proper environment to
           build from source is to use Conda.  Instructions for setting up
           and using Conda can be found at http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
-                    
-.. note:: Much more information is available at www.sasview.org under 
-          links/downloads. In particular, look in the 'For Developers' section. 
+
+.. note:: Much more information is available at www.sasview.org under
+          links/downloads. In particular, look in the 'For Developers' section.
           Also have a look at http://trac.sasview.org/
 
 System Requirements
@@ -818,49 +842,67 @@ Running SasView
 * use 'python run.py'; this runs from the source directories, so you
   don't have to rebuild every time you make a change, unless you are
   changing the C model files.
-* if using Conda the above command will also build SasView, but you 
+* if using Conda the above command will also build SasView, but you
   must issue 'activate sasview' first.
 
 
 Known Issues
 ============
 
-A full list of known bugs and feature requests by release version that 
-users may wish to be aware of can be viewed at http://trac.sasview.org/report/3
+All known bugs/feature requests can be found in the issues on github. Note the
+sasmodels issues are now separate from the sasview issues (i.e. in different
+repositories)
+* sasview:   https://github.com/SasView/sasview/issues
+* sasmodels: https://github.com/SasView/sasmodels/issues
+
+The old list, frozen as of April 2019, given by release version can still be
+viewed at http://trac.sasview.org/report/3
+
+4.2.1 - All systems
+-------------------
+The issues with older plugins noted in 4.2.0 release notes remain valid.
+
+Unfortunately, after the release two new issues were discovered:
+* Changes made to the data loader to address Trac ticket #976
+  (CanSas HDF reader will not read all valid CanSas HDF (NXcanSAS) files)
+  broke backward compatibility and this version of SasView will not read in
+  saved project files (because these store data as NXcanSAS).
+* Instrumental resolution smearing is currently only being applied to positive
+  values of Qx and Qy in 2D.
 
 4.2.0 - All systems
 -------------------
-The refactoring of the plugin model architecture means that some issues 
-may be encountered if Save Project/Analysis files using plugin models 
+The refactoring of the plugin model architecture means that some issues
+may be encountered if Save Project/Analysis files using plugin models
 created in earlier versions of SasView are loaded in version 4.2.0.
 
 For example:
 
-* on loading an old project file an error window appears with the error 
+* on loading an old project file an error window appears with the error
   *This model state has missing or outdated information* or *dictionary changed size during iteration*.
 
    * if this occurs, try restarting SasView and reloading the project.
-   
-* on loading an old project file all the FitPages and Graphs appear, but 
+
+* on loading an old project file all the FitPages and Graphs appear, but
   only the SasView default model parameters appear in the FitPages.
 
-  * this has happened because plugin model parameter names have changed. 
+  * this has happened because plugin model parameter names have changed.
     There are two possible workarounds:
-    
-   * Install the version of SasView that the project was created in, 
-     recreate the plugin in that version, then run 4.2.0 and re-load 
-     the project. All being well, 4.2.0 will still compile the old 
+
+   * Install the version of SasView that the project was created in,
+     recreate the plugin in that version, then run 4.2.0 and re-load
+     the project. All being well, 4.2.0 will still compile the old
      plugin.
 
-   * If 4.2.0 cannot compile the old plugin, the more tedious solution 
-     is to use a text editor to do global search & replace operations 
-     to change all the parameter names in the project file by hand. The 
-     quickest way to see the *existing* parameter names is simply to 
-     scroll to the bottom of the project file. To see what the *new* 
-     parameter names should be, simply create the equivalent plugin in 
-     SasView 4.2.0. In most instances, what was *p1_parameter* will 
-     become *A_parameter*, *p2_parameter* will become *B_parameter*, 
-     and so on. 
+   * If 4.2.0 cannot compile the old plugin, the more tedious solution
+     is to use a text editor to do global search & replace operations
+     to change all the parameter names in the project file by hand. The
+     quickest way to see the *existing* parameter names is simply to
+     scroll to the bottom of the project file. To see what the *new*
+     parameter names should be, simply create the equivalent plugin in
+     SasView 4.2.0. In most instances, what was *p1_parameter* will
+     become *A_parameter*, *p2_parameter* will become *B_parameter*,
+     and so on.
 
 4.1.x- All systems
 ------------------
@@ -900,7 +942,7 @@ issues:
   to reproduce the limit of the oblate or prolate ellipsoid. If errors are
   found and corrected, corrected versions will be uploaded to the
   marketplace.
-* (Added after Release 4.2.0) The scale parameter reported from the spinodal 
+* (Added after Release 4.2.0) The scale parameter reported from the spinodal
   model is the square root of the true value.
 
 3.1- All systems
@@ -957,14 +999,14 @@ SasView Website
 ===============
 http://www.sasview.org
 
-This main project site is the gateway to all information about the sasview 
-project.  It includes information about the project, a FAQ page and links 
+This main project site is the gateway to all information about the sasview
+project.  It includes information about the project, a FAQ page and links
 to all developer and user information, tools and resources.
 
 
 Frequently Asked Questions
 ==========================
-http://www.sasview.org/faq.html
+http://www.sasview.org/faq/
 
 
 Installer Download Website

@@ -6,15 +6,17 @@
 #
 
 import math
-import wx
 # from copy import deepcopy
-# Debug printout
+
+import wx
+
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import SlicerParameterEvent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
-from BaseInteractor import _BaseInteractor
 from sas.sasgui.guiframe.dataFitting import Data1D
+
+from .BaseInteractor import _BaseInteractor
 
 class AnnulusInteractor(_BaseInteractor):
     """
@@ -158,12 +160,12 @@ class AnnulusInteractor(_BaseInteractor):
         new_plot.interactive = True
         new_plot.detector = self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{\phi}", 'degrees')
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.base.data2D.name.count("Residuals") > 0:
+        new_plot.xaxis(r"\rm{\phi}", 'degrees')
+        new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
+        if (hasattr(data, "scale") and data.scale == 'linear'
+                and self.base.data2D.name.count("Residuals") > 0):
             new_plot.ytransform = 'y'
-            new_plot.yaxis("\\rm{Residuals} ", "/")
+            new_plot.yaxis(r"\rm{Residuals} ", "/")
 
         new_plot.group_id = "AnnulusPhi" + self.base.data2D.name
         new_plot.id = "AnnulusPhi" + self.base.data2D.name

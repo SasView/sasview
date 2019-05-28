@@ -20,6 +20,15 @@ USER_FILE = 'categories.json'
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info[0] > 2:
+    def json_dump(obj, filename):
+        with open(filename, 'w', newline='\n') as fd:
+            json.dump(obj, fd)
+else: # CRUFT: python 2.7 support
+    def json_dump(obj, filename):
+        with open(filename, 'wb') as fd:
+            json.dump(obj, fd)
+
 class CategoryInstaller(object):
     """
     Class for making sure all category stuff is installed
@@ -120,7 +129,7 @@ class CategoryInstaller(object):
             Plugin Models which are user supplied.
         """
         _model_dict = {model.name: model for model in model_list}
-        _model_list = _model_dict.keys()
+        _model_list = list(_model_dict.keys())
 
         serialized_file = None
         if homedir is None:
@@ -145,8 +154,8 @@ class CategoryInstaller(object):
                     try:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
-                    except Exception:
-                        logger.error("CategoryInstaller: %s", sys.exc_value)
+                    except Exception as exc:
+                        logger.error("CategoryInstaller: %s", exc)
                 else:
                     add_list.remove(model_name)
         if del_name or (len(add_list) > 0):
@@ -170,4 +179,4 @@ class CategoryInstaller(object):
                 CategoryInstaller._regenerate_master_dict(by_model_dict,
                                                           model_enabled_dict)
 
-            json.dump(master_category_dict, open(serialized_file, 'wb'))
+            json_dump(master_category_dict, serialized_file)

@@ -41,7 +41,7 @@ The models in SasView are grouped into categories. By default these consist of:
    etc)
 *  *Ellipsoid* - ellipsoidal shapes (oblate,prolate, core shell, etc)
 *  *Parellelepiped* - as the name implies
-*  *Sphere* - sheroidal shapes (sphere, core multishell, vesicle, etc)
+*  *Sphere* - spheroidal shapes (sphere, core multishell, vesicle, etc)
 *  *Lamellae* - lamellar shapes (lamellar, core shell lamellar, stacked
    lamellar, etc)
 *  *Shape-Independent* - models describing structure in terms of density
@@ -59,6 +59,54 @@ You can decide your own model categorizations using the :ref:`Category_Manager`.
 
 Once you have selected a model you can read its help documentation by clicking
 on the *Description* button to the right.
+
+.. _Interaction_and_Mixture_Models:
+
+Interaction Models
+^^^^^^^^^^^^^^^^^^
+
+Structure factor S(Q) models can be combined with many form factor P(Q) models
+in the other categories to generate what SasView calls "interaction models"
+(previously "product models"). The combination can be done by one of two
+methods, but how they behave is slightly different.
+
+The first, most straightforward, method is simply to use the S(Q) drop-down in
+the FitPage:
+
+.. figure:: p_and_s_buttons.png
+
+This example would then generate an interaction model with the following
+parameters:
+
+.. figure:: p_and_s_buttons_parameters.png
+
+The other method is to use the :ref:`Sum|Multi(p1,p2)` tool under Fitting >
+Plugin Model Operations:
+
+.. figure:: p_and_s_sum_model.png
+
+This creates an interaction model with the following parameters:
+
+.. figure:: p_and_s_sum_model_parameters.png
+
+As can be seen, the second method has produced an interaction model with an
+extra parameter: *radius_effective*. This is the radial distance determining the
+range of the $S(Q)$ interaction and may, or may not, be the same as the
+*radius*, in this example, depending on the concentration of the system. In
+other systems, *radius_effective* may depend on the particle form (shape).
+SasView offers the flexibility to automatically constrain (tie) some of these
+parameters together so that, for example, *radius_effective* = *radius*. See
+:ref:`Sum|Multi(p1,p2)`.
+
+Also see :ref:`Interaction_Models` for further information.
+
+Mixture Models
+^^^^^^^^^^^^^^
+
+SasView "mixture models" (previously called "sum models") are summations of
+form factor models, or even of form factor models and an "interaction model"
+(see above), and are used to describe mixed-phase systems where the scattering
+is proportional to the volume fraction of each contributing phase.
 
 Show 1D/2D
 ^^^^^^^^^^
@@ -118,7 +166,7 @@ Model Functions
 ---------------
 
 For a complete list of all the library models available in SasView, see
-the `Model Documentation <../../../index.html>`_ .
+the `Model Documentation <../../../sasgui/perspectives/fitting/models/index.html>`_ .
 
 It is also possible to add your own models.
 
@@ -216,6 +264,8 @@ and to the declarations of the functions Iq and Iqxy:::
 Such a plugin should then be available in the S(Q) drop-down box on a FitPage (once
 a P(Q) model has been selected).
 
+.. _Sum|Multi(p1,p2):
+
 Sum|Multi(p1,p2)
 ^^^^^^^^^^^^^^^^
 
@@ -266,13 +316,33 @@ that model with *custom*. For instance::
 
      sphere+custom.MyPluginModel
 
-To create a P(Q)*\S(Q) model use the @ symbol instead of * like this::
+This streamlined approach to building complex plugin models from existing 
+library models, or models available on the *Model Marketplace*, also permits
+the creation of P(Q)*\S(Q) plugin models, something that was not possible in
+earlier versions of SasView. Also see :ref:`Interaction_and_Mixture_Models`
+above.
+
+.. note::
+
+   **Interaction Models**
+   
+   When the *Easy Sum/Multi Editor* creates a P(Q)*\S(Q) model it will use
+   the * symbol like this::
+
+     sphere*hardsphere
+
+   However, it is probably advisable to edit the model file and use the @
+   symbol instead, for example::
 
      sphere@hardsphere
 
-This streamlined approach to building complex plugin models from existing library models, or models
-available on the *Model Marketplace*, also permits the creation of P(Q)*\S(Q) plugin models, something
-that was not possible in earlier versions of SasView.
+   This is because * and @ confer different behaviour on the model
+
+   *  *with @* - the radius and volume fraction in the S(Q) model are
+      constrained to have the *same* values as the radius and volume fraction
+      in the P(Q) model.
+   *  *with ** - the radii and volume fractions in the P(Q) and S(Q) models are
+      unconstrained. 
 
 .. _Advanced_Plugin_Editor:
 
@@ -337,6 +407,38 @@ initially.
 
 These optimisers form the *Bumps* package written by P Kienzle. For more information
 on each optimiser, see the :ref:`Fitting_Documentation`.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Fitting Integer Parameters
+--------------------------
+
+Most of the parameters in SasView models will naturally take floating point (decimal) 
+values, but there are some parameters which can only have integer values. Examples 
+include, but are not limited to, the number of shells in a multilayer vesicle, the 
+number of beads in a pearl necklace, the number of arms of a star polymer, and so on.
+Wherever possible/recognised, the integer nature of a parameter is specified in the 
+respective model documentation and/or parameter table, so read the documentation 
+carefully!
+
+Integer parameters must be fitted with care.
+
+Start with your best possible guess for the value of the parameter. And using 
+*a priori* knowledge, fix as many of the other parameters as possible.
+ 
+The SasView optimizers treat integer parameters internally as floating point 
+numbers, but the values presented to the user are truncated or rounded, as 
+appropriate.
+
+In most instances integer parameters will probably be greater than zero. A good 
+policy in such cases is to use a constraint to enforce this.
+
+Because an integer parameter should, by definition, only move in integer steps, 
+problems may be encountered if the optimizer step size is too small. Similarly, 
+be **very careful** about applying polydispersity to integer parameters.
+
+The Levenberg-Marquardt and Quasi-Newton BFGS (and other derivative-based) 
+optimizers are probably best avoided for fitting models with integer parameters.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

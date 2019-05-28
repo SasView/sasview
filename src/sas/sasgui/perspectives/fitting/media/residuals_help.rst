@@ -31,7 +31,9 @@ an observed data set and an expected dataset (or 'theory') calculated as
 .. math::
 
   \chi^2
-  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{weight}_i^2]
+
+where *weight* is the weighting factor (see below).
 
 Fitting typically minimizes the value of $\chi^2$.  For assessing the quality of
 the model and its "fit" however, *SasView* displays the traditional reduced
@@ -45,8 +47,10 @@ given as
 .. math::
 
   \chi^2_R
-  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{weight}_i^2]
   / [N_\mathrm{pts} - N_\mathrm{par}]
+
+where *weight* is the weighting factor (see below).
 
 Note that this means the displayed value will vary depending on the number of
 parameters used in the fit. In particular, when doing a calculation without a
@@ -75,7 +79,9 @@ fit:
 
 .. math::
 
-  R_i = (Y_i - \mathrm{theory}_i) / \mathrm{error}_i
+  R_i = (Y_i - \mathrm{theory}_i) / \mathrm{weight}_i
+
+where *weight* is the weighting factor (see below).
 
 Think of each normalized residual as the number of standard deviations
 between the measured value and the theory.  For a good fit, 68% of $R_i$
@@ -93,8 +99,29 @@ be meaningless.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+Weights
+^^^^^^^
+
+In the SasView *FitPage* there are several options for setting the weighting
+factor, *weight*:
+
+*  *No Weighting*: use *weight* = 1
+*  *Use dI Data*: use *weight* = supplied *error* on I
+*  *Use |sqrt(I Data)|*: use *weight* = square root of I
+*  *Use |I Data|*: use *weight* = I
+
+*weight* is used to tell the optimizer how much attention it should pay to each
+datapoint during the fitting; the larger the *weight*, the less attention that
+is paid.
+
+The default behaviour of SasView is to *Use dI Data* if it is present in the
+loaded data file.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 *Document History*
 
 | 2015-06-08 Steve King
 | 2017-09-28 Paul Kienzle
 | 2018-03-04 Paul Butler
+| 2019-04-16 Steve King

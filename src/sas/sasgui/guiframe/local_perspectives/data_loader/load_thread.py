@@ -71,9 +71,9 @@ class DataReader(CalcThread):
                 message = "Loading ..." + str(path) + "\n"
                 if self.updatefn is not None:
                     self.updatefn(output=output, message=message)
-            except:
+            except Exception as exc:
                 error_message = "Error while loading: %s\n" % str(path)
-                error_message += str(sys.exc_value) + "\n"
+                error_message += str(exc) + "\n"
                 self.updatefn(output=output, message=error_message)
 
         message = "Loading Complete!"

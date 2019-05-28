@@ -11,7 +11,10 @@ import math
 import json
 import logging
 import traceback
-from Queue import Queue
+try: # CRUFT: python 2.x
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 from threading import Thread
 from collections import defaultdict
 
@@ -65,6 +68,8 @@ else:
     PANEL_WIDTH = 500
     FONT_VARIANT = 1
     ON_MAC = True
+if sys.version_info[0] >= 3:
+    unicode = str
 
 CUSTOM_MODEL = 'Plugin Models'
 
@@ -114,7 +119,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.graph_id = None
         # Q range for data set
         self.qmin_data_set = np.inf
-        self.qmax_data_set = None
+        self.qmax_data_set = -np.inf
         self.npts_data_set = 0
         # Q range
         self.qmin = None
@@ -623,7 +628,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._on_select_model_helper()
         if self.model is not None:
             self.m_name = self.model.name
-        if name in self.saved_states.keys():
+        if name in self.saved_states:
             previous_state = self.saved_states[name]
             # reset state of checkbox,textcrtl  and  regular parameters value
 
@@ -670,7 +675,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._default_save_location = \
                         self._manager.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file", self._default_save_location,
-                            self.window_caption, "*.fitv", wx.SAVE)
+                            self.window_caption, "*.fitv", wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -892,7 +897,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
 
         if len(self._disp_obj_dict) > 0:
-            for k, v in self._disp_obj_dict.iteritems():
+            for k, v in self._disp_obj_dict.items():
                 self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
@@ -959,7 +964,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
 
             if len(self.disp_cb_dict) > 0:
-                for k, v in self.disp_cb_dict.iteritems():
+                for k, v in self.disp_cb_dict.items():
                     if v is None:
                         self.state.disp_cb_dict[k] = v
                     else:
@@ -968,7 +973,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         except Exception:
                             self.state.disp_cb_dict[k] = None
             if len(self._disp_obj_dict) > 0:
-                for k, v in self._disp_obj_dict.iteritems():
+                for k, v in self._disp_obj_dict.items():
                     self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
@@ -1096,8 +1101,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                 [state.values, state.weights]
 
             else:
-                keys = self.model.getParamList()
-                for item in keys:
+                for item in self.model.getParamList():
                     if item in self.disp_list and \
                             item not in self.model.details:
                         self.model.details[item] = ["", None, None]
@@ -1141,7 +1145,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         Iterate through the categories to find the structurefactor
         :return: combo_box_position
         """
-        for key, value in self.master_category_dict.iteritems():
+        for key, value in self.master_category_dict.items():
             formfactor = state.formfactorcombobox.split(":")
             if isinstance(formfactor, list):
                 formfactor = formfactor[0]
@@ -1317,18 +1321,17 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Help to rest page for dispersions
         """
-        keys = self.model.getParamList()
-        for item in keys:
+        for item in self.model.getParamList():
             if item in self.disp_list and \
                             item not in self.model.details:
                 self.model.details[item] = ["", None, None]
-        # for k,v in self.state.disp_cb_dict.iteritems():
+        # for k,v in self.state.disp_cb_dict.items():
         self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
         self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
         self.values = copy.deepcopy(state.values)
         self.weights = copy.deepcopy(state.weights)
 
-        for key, disp_type in state.disp_obj_dict.iteritems():
+        for key, disp_type in state.disp_obj_dict.items():
             # disp_model = disp
             disp_model = POLYDISPERSITY_MODELS[disp_type]()
             self._disp_obj_dict[key] = disp_model
@@ -1377,7 +1380,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self._manager.parent.get_save_location()
         dlg = wx.FileDialog(self, "Choose a weight file",
                             self._default_save_location, "",
-                            "*.*", wx.OPEN)
+                            "*.*", wx.FD_OPEN)
         path = None
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1389,7 +1392,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         reset the context menu
         """
         ids = iter(self._id_pool)  # Reusing ids for context menu
-        for name, _ in self.state.saved_states.iteritems():
+        for name, _ in self.state.saved_states.items():
             self.number_saved_state += 1
             # Add item in the context menu
             wx_id = ids.next()
@@ -1918,13 +1921,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error: wrong value entered: %s" % \
-                          sys.exc_info()[1]
+                    _, exc, _ = sys.exc_info()
+                    msg = "Model Error: wrong value entered: %s" % exc
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
-            except Exception:
+            except Exception as exc:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
+                msg = "Model Error: wrong value entered: %s" % exc
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
                 return
             # Check if # of points for theory model are valid(>0).
@@ -1975,13 +1978,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.theory_qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error: wrong value entered: %s" % \
-                          sys.exc_info()[1]
+                    _, exc, _ = sys.exc_info()
+                    msg = "Model Error: wrong value entered: %s" % exc
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
-            except Exception:
+            except Exception as exc:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
+                msg = "Model Error: wrong value entered: %s" % exc
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             # Check if # of points for theory model are valid(>0).
@@ -2290,7 +2293,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     value = high
                     value_ctrl.SetValue(format_number(value))
 
-                if name not in self.model.details.keys():
+                if name not in self.model.details:
                     self.model.details[name] = ["", None, None]
                 old_low, old_high = self.model.details[name][1:3]
                 if old_low != low or old_high != high:
@@ -2749,7 +2752,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # call gui_manager
         gui_manager = self._manager.parent
         # loops through the panels [dic]
-        for _, item2 in gui_manager.plot_panels.iteritems():
+        for _, item2 in gui_manager.plot_panels.items():
             data_title = self.data.group_id
             # try to get all plots belonging to this control panel
             try:
@@ -3323,7 +3326,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # 2D
             if self.data.__class__.__name__ == "Data2D":
                 name = item[1]
-                if name in content.keys():
+                if name in content:
                     values = content[name]
                     check = values[0]
                     pd = values[1]
@@ -3372,7 +3375,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # for 1D all parameters except orientation
                 if not item[1] in orient_param:
                     name = item[1]
-                    if name in content.keys():
+                    if name in content:
                         check = content[name][0]
                         # Avoid changing combox content
                         value = content[name][1:]
@@ -3479,10 +3482,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.state.values = self.values
                 self.state.weights = self.weights
 
-        except Exception:
+        except Exception as exc:
             logger.error(traceback.format_exc())
-            print("Error in BasePage._paste_poly_help: %s" % \
-                  sys.exc_info()[1])
+            print("Error in BasePage._paste_poly_help: %s" % exc)
 
     def _set_disp_cb(self, isarray, item):
         """
@@ -3547,7 +3549,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._read_category_info()
 
         self.categorybox.Clear()
-        cat_list = sorted(self.master_category_dict.keys())
+        cat_list = list(sorted(self.master_category_dict.keys()))
         if uncat_str not in cat_list:
             cat_list.append(uncat_str)
 
