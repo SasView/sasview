@@ -16,6 +16,10 @@ from sas.sascalc.dataloader.data_info import Data2D as LoadData2D
 class Data1D(PlottableData1D, LoadData1D):
     """
     """
+    ROLE_DATA=0
+    ROLE_DEFAULT=1
+    ROLE_DELETABLE=2
+    ROLE_RESIDUAL=3
     def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
@@ -34,6 +38,12 @@ class Data1D(PlottableData1D, LoadData1D):
         self.ytransform = None
         self.title = ""
         self.scale = None
+        # plot_role:
+        # 0: data - no reload on param change
+        # 1: normal lifecycle (fit)
+        # 2: deletable on model change (Q(I), S(I)...)
+        # 3: separate chart on Show Plot (residuals)
+        self.plot_role = Data1D.ROLE_DEFAULT
         
     def copy_from_datainfo(self, data1d):
         """
@@ -71,11 +81,11 @@ class Data1D(PlottableData1D, LoadData1D):
         result = Data1D(x=[], y=[], dx=None, dy=None)
         result.clone_without_data(length=len(self.x), clone=self)
         result.copy_from_datainfo(data1d=self)
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
             result.dxw = numpy.zeros(len(self.x))
-        if self.dxl == None:
+        if self.dxl is None:
             result.dxl = None
         else:
             result.dxl = numpy.zeros(len(self.x))
@@ -118,19 +128,19 @@ class Data1D(PlottableData1D, LoadData1D):
         result = Data1D(x=[], y=[], dx=None, dy=None)
         tot_length = len(self.x) + len(other.x)
         result = self.clone_without_data(length=tot_length, clone=result)
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
             result.dy = numpy.zeros(tot_length)
-        if self.dx == None or other.dx is None:
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
             result.dx = numpy.zeros(tot_length)
-        if self.dxw == None or other.dxw is None:
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
             result.dxw = numpy.zeros(tot_length)
-        if self.dxl == None or other.dxl is None:
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
             result.dxl = numpy.zeros(tot_length)
@@ -141,7 +151,7 @@ class Data1D(PlottableData1D, LoadData1D):
         result.x = result.x[ind]
         result.y = numpy.append(self.y, other.y)
         result.y = result.y[ind]
-        if result.dy != None:
+        if result.dy is not None:
             result.dy = numpy.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
@@ -183,6 +193,8 @@ class Data2D(PlottableData2D, LoadData2D):
         self.ytransform = None
         self.title = ""
         self.scale = None
+        # Always default
+        self.plot_role = Data1D.ROLE_DEFAULT
         
     def copy_from_datainfo(self, data2d):
         """
@@ -238,7 +250,7 @@ class Data2D(PlottableData2D, LoadData2D):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
@@ -301,8 +313,8 @@ class Data2D(PlottableData2D, LoadData2D):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None :
+        if self.dqx_data is None or self.dqy_data is None or \
+                other.dqx_data is None or other.dqy_data is None :
             result.dqx_data = None
             result.dqy_data = None
         else:

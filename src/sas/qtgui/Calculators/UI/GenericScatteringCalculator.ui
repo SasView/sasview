@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Generic SAS Calculator</string>
+   <string>Generic Scattering Calculator</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -161,11 +161,6 @@
           <item>
            <property name="text">
             <string>Rectangular</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Ellipsoid</string>
            </property>
           </item>
          </widget>

@@ -9,6 +9,9 @@ SasView Documentation Index
 .. toctree::
    :maxdepth: 1
 
-   User Documentation <user/user>
+   USER DOCUMENTATION <user/user>
 
-   Developer Documentation <dev/dev>
+   DEVELOPER DOCUMENTATION <dev/dev>
+   
+   Release Notes <user/RELEASE>
+   

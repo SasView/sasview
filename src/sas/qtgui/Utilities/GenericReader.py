@@ -40,7 +40,7 @@ class GenReader(CalcThread):
         self.starttime = time.time()
         try:
             data = self.loader.read(self.path)
-            self.complete(data=data)
+            self.complete(data=[data])
         except:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...

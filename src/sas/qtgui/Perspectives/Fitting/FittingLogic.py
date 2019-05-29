@@ -15,8 +15,13 @@ class FittingLogic(object):
     def __init__(self, data=None):
         self._data = data
         self.data_is_loaded = False
+        #dq data presence in the dataset
+        self.dq_flag = False
+        #di data presence in the dataset
+        self.di_flag = False
         if data is not None:
             self.data_is_loaded = True
+            self.setDataProperties()
 
     @property
     def data(self):
@@ -27,10 +32,29 @@ class FittingLogic(object):
         """ data setter """
         self._data = value
         self.data_is_loaded = True
+        self.setDataProperties()
 
     def isLoadedData(self):
         """ accessor """
         return self.data_is_loaded
+
+    def setDataProperties(self):
+        """
+        Analyze data and set up some properties important for
+        the Presentation layer
+        """
+        if self._data.__class__.__name__ == "Data2D":
+            if self._data.err_data is not None and np.any(self._data.err_data):
+                self.di_flag = True
+            if self._data.dqx_data is not None and np.any(self._data.dqx_data):
+                self.dq_flag = True
+        else:
+            if self._data.dy is not None and np.any(self._data.dy):
+                self.di_flag = True
+            if self._data.dx is not None and np.any(self._data.dx):
+                self.dq_flag = True
+            elif self._data.dxl is not None and np.any(self._data.dxl):
+                self.dq_flag = True
 
     def createDefault1dData(self, interval, tab_id=0):
         """
@@ -107,16 +131,11 @@ class FittingLogic(object):
         self._data.ymin = ymin
         self._data.ymax = ymax
 
-    def new1DPlot(self, return_data, tab_id):
+    def _create1DPlot(self, tab_id, x, y, model, data, component=None):
         """
-        Create a new 1D data instance based on fitting results
+        For internal use: create a new 1D data instance based on fitting results.
+        'component' is a string indicating the model component, e.g. "P(Q)"
         """
-        # Unpack return data from Calc1D
-        x, y, page_id, state, weight,\
-        fid, toggle_mode_on, \
-        elapsed, index, model,\
-        data, update_chisqr, source = return_data
-
         # Create the new plot
         new_plot = Data1D(x=x, y=y)
         new_plot.is_data = False
@@ -125,28 +144,42 @@ class FittingLogic(object):
         _xaxis, _xunit = data.get_xaxis()
 
         new_plot.group_id = data.group_id
-        new_plot.id = str(tab_id) + " " + data.name
-        new_plot.name = model.name + " [" + data.name + "]"
+        new_plot.id = str(tab_id) + " " + ("[" + component + "] " if component else "") + model.id
+
+        # use data.filename for data, use model.id for theory
+        id_str = data.filename if data.filename else model.id
+        new_plot.name = model.name + ((" " + component) if component else "") + " [" + id_str + "]"
+
         new_plot.title = new_plot.name
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)
 
+        if component is not None:
+            new_plot.plot_role = Data1D.ROLE_DELETABLE #deletable
+
         return new_plot
+
+    def new1DPlot(self, return_data, tab_id):
+        """
+        Create a new 1D data instance based on fitting results
+        """
+        return self._create1DPlot(tab_id, return_data['x'], return_data['y'],
+                                  return_data['model'], return_data['data'])
 
     def new2DPlot(self, return_data):
         """
         Create a new 2D data instance based on fitting results
         """
-        image, data, page_id, model, state, toggle_mode_on,\
-        elapsed, index, fid, qmin, qmax, weight, \
-        update_chisqr, source = return_data
+        image = return_data['image']
+        data = return_data['data']
+        model = return_data['model']
 
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
-        new_plot.id = str(page_id) + " " + data.name
-        new_plot.group_id = str(page_id) + " Model2D"
+        new_plot.id = str(return_data['page_id']) + " " + data.name
+        new_plot.group_id = str(return_data['page_id']) + " Model2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False
@@ -175,6 +208,33 @@ class FittingLogic(object):
 
         return new_plot
 
+    def new1DProductPlots(self, return_data, tab_id):
+        """
+        If return_data contains separated P(Q) and/or S(Q) data, create 1D plots for each and return as the tuple
+        (pq_plot, sq_plot). If either are unavailable, the corresponding plot is None.
+        """
+        plots = []
+        for name, result in return_data['intermediate_results'].items():
+            if isinstance(result, tuple) and len(result) > 1:
+                result = result[1]
+            if not isinstance(result, np.ndarray):
+                continue
+            plots.append(self._create1DPlot(tab_id, return_data['x'], result,
+                         return_data['model'], return_data['data'],
+                         component=name))
+        return plots
+
+    def getScalarIntermediateResults(self, return_data):
+        """
+        Returns a dict of scalar-only intermediate results from the return data.
+        """
+        res = {}
+        for name, int_res in return_data["intermediate_results"].items():
+            if isinstance(int_res, np.ndarray):
+                continue
+            res[name] = int_res
+        return res
+
     def computeDataRange(self):
         """
         Wrapper for calculating the data range based on local dataset
@@ -195,7 +255,7 @@ class FittingLogic(object):
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename
-                raise ValueError, msg
+                raise ValueError(msg)
 
         else:
             qmin = 0
@@ -205,7 +265,7 @@ class FittingLogic(object):
             except (ValueError, TypeError):
                 msg = "Unable to find min/max of \n data named %s" % \
                             self.data.filename
-                raise ValueError, msg
+                raise ValueError(msg)
             qmax = np.sqrt(x * x + y * y)
             npts = len(data.data)
         return qmin, qmax, npts

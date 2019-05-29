@@ -167,7 +167,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         # Process each model and associate old M# with new M#
         i = 0
         for model in self.model_list:
-            model_id = self._format_id(model[1].keys()[0])
+            model_id = self._format_id(list(model[1].keys())[0])
             for saved_model in sim_state.model_list:
                 save_id = saved_model.pop('name')
                 saved_model['name'] = save_id
@@ -194,10 +194,10 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 constraint_value = item.pop('constraint')
                 param = item.pop('param_cbox')
                 equality = item.pop('egal_txt')
-                for key, value in init_map.items():
+                for key, value in list(init_map.items()):
                     model_cbox = model_cbox.replace(key, value)
                     constraint_value = constraint_value.replace(key, value)
-                for key, value in final_map.items():
+                for key, value in list(final_map.items()):
                     model_cbox = model_cbox.replace(key, value)
                     constraint_value = constraint_value.replace(key, value)
 
@@ -327,7 +327,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         tab_used.SetForegroundColour(wx.WHITE)
         sizer.Add(tab_used, (iy, ix), (1, 1),
                   wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        for id, value in self.page_finder.iteritems():
+        for id, value in self.page_finder.items():
             if id not in self.parent.opened_pages:
                 continue
 
@@ -756,12 +756,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.set_button.SetToolTipString(set_tip)
         self.set_button.Disable()
 
-        for id, model in self.constraint_dict.iteritems():
+        for id, model in self.constraint_dict.items():
             # check if all parameters have been selected for constraint
             # then do not allow add constraint on parameters
             self.model_cbox_left.Append(str(model.name), model)
         self.model_cbox_left.Select(0)
-        for id, model in self.constraint_dict.iteritems():
+        for id, model in self.constraint_dict.items():
             # check if all parameters have been selected for constraint
             # then do not allow add constraint on parameters
             self.model_cbox_right.Append(str(model.name), model)
@@ -813,7 +813,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         selection_b = self.model_cbox_right.GetCurrentSelection()
         model_right = self.model_cbox_right.GetValue()
         model_b = self.model_cbox_right.GetClientData(selection_b)
-        for id, dic_model in self.constraint_dict.iteritems():
+        for id, dic_model in self.constraint_dict.items():
             if model == dic_model:
                 param_list = self.page_finder[id].get_param2fit()
             if model_b == dic_model:
@@ -856,7 +856,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.btAdd.Show(True)
         if len(self.constraints_list) != 0:
             nb_fit_param = 0
-            for id, model in self.constraint_dict.iteritems():
+            for id, model in self.constraint_dict.items():
                 nb_fit_param += len(self.page_finder[id].get_param2fit())
             # Don't add anymore
             if len(self.constraints_list) == nb_fit_param:
@@ -878,7 +878,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         # Model list
         model_cbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         model_cbox.Clear()
-        for id, model in self.constraint_dict.iteritems():
+        for id, model in self.constraint_dict.items():
             # check if all parameters have been selected for constraint
             # then do not allow add constraint on parameters
             model_cbox.Append(str(model.name), model)
@@ -897,7 +897,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         # Remove button
         #btRemove = wx.Button(self, self.ID_REMOVE, 'Remove')
-        bt_remove = wx.Button(self, self._ids.next(), 'Remove')
+        bt_remove = wx.Button(self, next(self._ids), 'Remove')
         bt_remove.Bind(wx.EVT_BUTTON, self.on_remove,
                       id=bt_remove.GetId())
         bt_remove.SetToolTipString("Remove constraint.")
@@ -930,7 +930,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         hide buttons related constraint
         """
-        for id in self.page_finder.iterkeys():
+        for id in self.page_finder.keys():
             self.page_finder[id].clear_model_param()
 
         self.nb_constraint = 0
@@ -968,7 +968,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         model = model_cbox.GetClientData(n)
         param_list = []
-        for id, dic_model in self.constraint_dict.iteritems():
+        for id, dic_model in self.constraint_dict.items():
             if model == dic_model:
                 param_list = self.page_finder[id].get_param2fit()
                 break
@@ -1055,7 +1055,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 msg = " Constraint will be ignored!. missing parameters"
                 msg += " in combobox to set constraint! "
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
-            for id, value in self.constraint_dict.iteritems():
+            for id, value in self.constraint_dict.items():
                 if model == value:
                     if constraint == "":
                         msg = " Constraint will be ignored!. missing value"
@@ -1079,7 +1079,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                                 StatusEvent(info="error", status=msg))
                         return False
 
-                    for fid in self.page_finder[id].iterkeys():
+                    for fid in self.page_finder[id].keys():
                         # wrap in param/constraint in str() to remove unicode
                         self.page_finder[id].set_model_param(str(param),
                                 str(constraint), fid=fid)

@@ -4,32 +4,32 @@
 typedef struct {
 	double re;
 	double im;
-} complex;
+} Cplx;
 
 typedef struct {
-	complex a;
-	complex b;
-	complex c;
-	complex d;
+	Cplx a;
+	Cplx b;
+	Cplx c;
+	Cplx d;
 } matrix;
 
-complex cassign(double real, double imag);
+void cassign(Cplx*, double real, double imag);
 
-complex cplx_add(complex x,complex y);
+void cplx_add(Cplx*, Cplx x,Cplx y);
 
-complex rcmult(double x,complex y);
+void rcmult(Cplx*, double x,Cplx y);
 
-complex cplx_sub(complex x,complex y);
+void cplx_sub(Cplx*, Cplx x,Cplx y);
 
-complex cplx_mult(complex x,complex y);
+void cplx_mult(Cplx*, Cplx x,Cplx y);
 
-complex cplx_div(complex x,complex y);
+void cplx_div(Cplx*, Cplx x,Cplx y);
 
-complex cplx_exp(complex b);
+void cplx_exp(Cplx*, Cplx b);
 
-complex cplx_sqrt(complex z);
+void cplx_sqrt(Cplx*, Cplx z);
 
-complex cplx_cos(complex b);
+void cplx_cos(Cplx*, Cplx b);
 
 double intersldfunc(int fun_type, double n_sub, double i, double nu, double sld_l, double sld_r);
 double interfunc(int fun_type, double n_sub, double i, double sld_l, double sld_r);

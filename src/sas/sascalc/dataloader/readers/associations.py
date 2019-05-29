@@ -22,9 +22,11 @@ FILE_ASSOCIATIONS = {
     ".xml": "cansas_reader",
     ".ses": "sesans_reader",
     ".h5": "cansas_reader_HDF5",
+    ".nxs": "cansas_reader_HDF5",
     ".txt": "ascii_reader",
     ".dat": "red2d_reader",
     ".abs": "abs_reader",
+    ".cor": "abs_reader",
     ".sans": "danse_reader",
     ".pdh": "anton_paar_saxs_reader"
 }
@@ -51,7 +53,7 @@ def read_associations(loader, settings=FILE_ASSOCIATIONS):
                      % (ext.lower(), reader))
                 exec("loader.associate_file_type('%s', %s)"
                      % (ext.upper(), reader))
-            except:
+            except Exception as exc:
                 msg = "read_associations: skipping association"
-                msg += " for %s\n  %s" % (ext.lower(), sys.exc_value)
+                msg += " for %s\n  %s" % (ext.lower(), exc)
                 logger.error(msg)

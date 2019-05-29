@@ -1,11 +1,14 @@
 # global
-from PyQt4 import QtGui, QtCore
+import os
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 # UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.MainWindow.UI.DataExplorerUI import Ui_DataLoadWidget
 
-class DroppableDataLoadWidget(QtGui.QTabWidget, Ui_DataLoadWidget):
+class DroppableDataLoadWidget(QtWidgets.QTabWidget, Ui_DataLoadWidget):
     """
     Overwrite drag and drop methods in the base class
     so users can drop files directly onto the Data Explorer
@@ -55,7 +58,14 @@ class DroppableDataLoadWidget(QtGui.QTabWidget, Ui_DataLoadWidget):
         if self.dragIsOK(event):
             filenames=[]
             for url in event.mimeData().urls():
-                filenames.append(str(url.toLocalFile()))
+                files = url.toLocalFile()
+                if os.path.isdir(files):
+                # get content of dir into a list
+                    content = [os.path.join(os.path.abspath(files), filename)
+                                for filename in os.listdir(files)]
+                    filenames += content
+                else:
+                    filenames.append(files)
             self.communicator.fileReadSignal.emit(filenames)
             event.accept()
         else:

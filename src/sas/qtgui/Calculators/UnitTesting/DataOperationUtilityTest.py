@@ -3,12 +3,14 @@ import time
 import numpy
 import logging
 import unittest
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt
-from mock import MagicMock
-from mock import patch
+import webbrowser
+
+from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from twisted.internet import threads
 
@@ -18,8 +20,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.MainWindow.DataState import DataState
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -42,7 +44,7 @@ class DataOperationUtilityTest(unittest.TestCase):
     def testDefaults(self):
         """Test the GUI in its default state"""
 
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
 
         self.assertEqual(self.widget.windowTitle(), "Data Operation")
         self.assertEqual(self.widget.groupBox.title(), "Data Operation "
@@ -97,9 +99,9 @@ class DataOperationUtilityTest(unittest.TestCase):
         self.assertFalse(self.widget.cmdCompute.isEnabled())
         self.assertFalse(self.widget.txtNumber.isEnabled())
 
-        self.assertIsInstance(self.widget.layoutOutput,QtGui.QHBoxLayout)
-        self.assertIsInstance(self.widget.layoutData1,QtGui.QHBoxLayout)
-        self.assertIsInstance(self.widget.layoutData2,QtGui.QHBoxLayout)
+        self.assertIsInstance(self.widget.layoutOutput,QtWidgets.QHBoxLayout)
+        self.assertIsInstance(self.widget.layoutData1,QtWidgets.QHBoxLayout)
+        self.assertIsInstance(self.widget.layoutData2,QtWidgets.QHBoxLayout)
 
         # To store input datafiles
         self.assertIsNone(self.widget.filenames)
@@ -118,8 +120,11 @@ class DataOperationUtilityTest(unittest.TestCase):
 
     def testHelp(self):
         """ Assure help file is shown """
-        # this should not rise
+        self.widget.manager.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('data_operator_help.html', args[0][0])
 
     def testOnReset(self):
         """ Test onReset function """

@@ -27,45 +27,6 @@ class CategoryInstaller:
         """ initialization """
 
     @staticmethod
-    def _get_installed_model_dir():
-        """
-        returns the dir where installed_models.txt should be
-        """
-        import sas.sascalc.dataloader.readers
-        return sas.sascalc.dataloader.readers.get_data_path()
-
-    @staticmethod
-    def _get_models_py_dir():
-        """
-        returns the dir where models.py should be
-        """
-        import sas.sasgui.perspectives.fitting.models
-        return sas.sasgui.perspectives.fitting.models.get_model_python_path()
-
-    @staticmethod
-    def _get_default_cat_file_dir():
-        """
-        returns the dir where default_cat.j should be
-        """
-        # The default categories file is usually found with the code, except
-        # when deploying using py2app (it will be in Contents/Resources), or
-        # py2exe (it will be in the exec dir).
-        import sas.sasview
-        cat_file = "default_categories.json"
-
-        possible_cat_file_paths = [
-            os.path.join(os.path.split(sas.sasview.__file__)[0], cat_file),           # Source
-            os.path.join(os.path.dirname(sys.executable), '..', 'Resources', cat_file), # Mac
-            os.path.join(os.path.dirname(sys.executable), cat_file)                     # Windows
-        ]
-
-        for path in possible_cat_file_paths:
-            if os.path.isfile(path):
-                return os.path.dirname(path)
-
-        raise RuntimeError('CategoryInstaller: Could not find folder containing default categories')
-
-    @staticmethod
     def _get_home_dir():
         """
         returns the users sasview config dir
@@ -102,7 +63,7 @@ class CategoryInstaller:
             for category in by_model_dict[model]:
                 master_category_dict[category].append(\
                     (model, model_enabled_dict[model]))
-        return OrderedDict(sorted(master_category_dict.items(), key=lambda t: t[0]))
+        return OrderedDict(sorted(list(master_category_dict.items()), key=lambda t: t[0]))
 
     @staticmethod
     def get_user_file():
@@ -125,10 +86,10 @@ class CategoryInstaller:
         :param model_list: List of model names except customized models
         """
         _model_dict = { model.name: model for model in model_list}
-        _model_list = _model_dict.keys()
+        _model_list = list(_model_dict.keys())
 
         serialized_file = None
-        if homedir == None:
+        if homedir is None:
             serialized_file = CategoryInstaller.get_user_file()
         else:
             serialized_file = os.path.join(homedir, USER_FILE)
@@ -142,7 +103,7 @@ class CategoryInstaller:
                 CategoryInstaller._regenerate_model_dict(master_category_dict)
         add_list = _model_list
         del_name = False
-        for cat in master_category_dict.keys():
+        for cat in list(master_category_dict.keys()):
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
                 if model_name not in _model_list:
@@ -151,7 +112,7 @@ class CategoryInstaller:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
                     except:
-                        logging.error("CategoryInstaller: %s", sys.exc_value)
+                        logging.error("CategoryInstaller: %s", sys.exc_info()[1])
                 else:
                     add_list.remove(model_name)
         if del_name or (len(add_list) > 0):
@@ -173,5 +134,5 @@ class CategoryInstaller:
                 CategoryInstaller._regenerate_master_dict(by_model_dict,
                                                           model_enabled_dict)
 
-            json.dump(master_category_dict, open(serialized_file, 'wb'))
+            json.dump(master_category_dict, open(serialized_file, "w", encoding="utf8"))
 

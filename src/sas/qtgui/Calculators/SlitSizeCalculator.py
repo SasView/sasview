@@ -3,25 +3,29 @@ Slit Size Calculator Panel
 """
 import os
 import sys
+import logging
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from UI.SlitSizeCalculator import Ui_SlitSizeCalculator
+from .UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 
-class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
+class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
     """
     Provides the slit length calculator GUI.
     """
     def __init__(self, parent=None):
         super(SlitSizeCalculator, self).__init__()
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("Slit Size Calculator")
         self._parent = parent
@@ -44,15 +48,8 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         Calls DocumentationWindow with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/slit_calculator_help.html"
-
-            self._parent._helpView.load(QtCore.QUrl(location))
-            self._parent._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/qtgui/Calculators/slit_calculator_help.html"
+        self._parent.showHelp(location)
 
     def onBrowse(self):
         """
@@ -62,7 +59,13 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         if not path_str:
             return
         loader = Loader()
-        data = loader.load(path_str)[0]
+        try:
+            data = loader.load(path_str)
+            data = data[0]
+        # Can return multiple exceptions - gather them all under one umbrella and complain
+        except Exception as ex:
+            logging.error(ex)
+            return
 
         self.data_file.setText(os.path.basename(path_str))
         self.calculateSlitSize(data)
@@ -74,16 +77,10 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        path = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
-                                                 "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)", None,
-                                                 QtGui.QFileDialog.DontUseNativeDialog)
-
-        if path is None:
-            return
-
-        if isinstance(path, QtCore.QString):
-            path = str(path)
-
+        path = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "",
+                                                 "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)",
+                                                 None,
+                                                 QtWidgets.QFileDialog.DontUseNativeDialog)[0]
         return path
 
     def onClose(self):
@@ -106,12 +103,14 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         if data is None:
             self.clearResults()
             msg = "ERROR: Data hasn't been loaded correctly"
-            raise RuntimeError, msg
+            logging.error(msg)
+            return
 
         if data.__class__.__name__ == 'Data2D':
             self.clearResults()
             msg = "Slit Length cannot be computed for 2D Data"
-            raise RuntimeError, msg
+            logging.error(msg)
+            return
 
         #compute the slit size
         try:
@@ -119,14 +118,16 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
             ydata = data.y
             if xdata == [] or xdata is None or ydata == [] or ydata is None:
                 msg = "The current data is empty please check x and y"
-                raise ValueError, msg
+                logging.error(msg)
+                return
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=xdata, y=ydata)
             slit_length = slit_length_calculator.calculate_slit_length()
         except:
             self.clearResults()
-            msg = "Slit Size Calculator: %s" % (sys.exc_value)
-            raise RuntimeError, msg
+            msg = "Slit Size Calculator: %s" % (sys.exc_info()[1])
+            logging.error(msg)
+            return
 
         slit_length_str = "{:.5f}".format(slit_length)
         self.slit_length_out.setText(slit_length_str)

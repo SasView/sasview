@@ -4,11 +4,11 @@ import unittest
 import webbrowser
 import logging
 
-from PyQt4.QtGui import *
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import *
-from PyQt4.QtWebKit import *
-from mock import MagicMock
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import *
+from unittest.mock import MagicMock
 
 # set up import paths
 import path_prepare
@@ -36,7 +36,7 @@ class GuiManagerTest(unittest.TestCase):
                 super(MainWindow, self).__init__(parent)
         
                 # define workspace for dialogs.
-                self.workspace = QWorkspace(self)
+                self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
 
         self.manager = GuiManager(MainWindow(None))
@@ -52,7 +52,6 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
         self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
         self.assertIsInstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
-        self.assertEqual(self.manager.dockedFilesWidget.features(), QDockWidget.NoDockWidgetFeatures)
         self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), Qt.LeftDockWidgetArea)
 
         self.assertIsInstance(self.manager.logDockWidget, QDockWidget)
@@ -61,7 +60,7 @@ class GuiManagerTest(unittest.TestCase):
 
         self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
         self.assertIsInstance(self.manager.aboutWidget, AboutBox)
-        self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
+        #self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
 
     def skip_testLogging(self):
         """
@@ -73,7 +72,7 @@ class GuiManagerTest(unittest.TestCase):
         # Now, send some message to stdout.
         # We are in the MainWindow scope, so simple 'print' will work
         message = "from stdout"
-        print message
+        print(message)
         self.assertIn(message, self.manager.logDockWidget.widget().toPlainText())
 
         # Send some message to stderr
@@ -147,8 +146,8 @@ class GuiManagerTest(unittest.TestCase):
         Tests the SasView website version polling
         """
         self.manager.processVersion = MagicMock()
-        version = {'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
-                   'version'     : '4.1.2',
+        version = {'version'     : '4.2.1',
+                   'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
                    'download_url': 'https://github.com/SasView/sasview/releases'}
         self.manager.checkUpdate()
 
@@ -161,7 +160,7 @@ class GuiManagerTest(unittest.TestCase):
         Tests the version checker logic
         """
         # 1. version = 0.0.0
-        version_info = {u'version' : u'0.0.0'}
+        version_info = {'version' : '0.0.0'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
 
         self.manager.processVersion(version_info)
@@ -171,7 +170,7 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIn(message, str(spy_status_update.signal(index=0)))
 
         # 2. version < LocalConfig.__version__
-        version_info = {u'version' : u'0.0.1'}
+        version_info = {'version' : '0.0.1'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
 
         self.manager.processVersion(version_info)
@@ -181,7 +180,7 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIn(message, str(spy_status_update.signal(index=0)))
 
         # 3. version > LocalConfig.__version__
-        version_info = {u'version' : u'999.0.0'}
+        version_info = {'version' : '999.0.0'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
         webbrowser.open = MagicMock()
 
@@ -220,7 +219,7 @@ class GuiManagerTest(unittest.TestCase):
         Menu File/Load Data File(s)
         """
         # Mock the system file open method
-        QFileDialog.getOpenFileNames = MagicMock(return_value=None)
+        QFileDialog.getOpenFileNames = MagicMock(return_value=('',''))
 
         # invoke the action
         self.manager.actionLoadData()
@@ -233,7 +232,7 @@ class GuiManagerTest(unittest.TestCase):
         Menu File/Load Data Folder
         """
         # Mock the system file open method
-        QFileDialog.getExistingDirectory = MagicMock(return_value=None)
+        QFileDialog.getExistingDirectory = MagicMock(return_value=('',''))
 
         # invoke the action
         self.manager.actionLoad_Data_Folder()
@@ -250,40 +249,38 @@ class GuiManagerTest(unittest.TestCase):
         self.manager._workspace.show()
 
         # Check the initial state
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
         # Invoke action
         self.manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
-        self.assertFalse(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertTrue(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
         # Revert
         self.manager.actionHide_Toolbar()
 
         # Assure the original values are back
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
 
     #### HELP ####
+    # test when PyQt5 works with html
     def testActionDocumentation(self):
         """
         Menu Help/Documentation
         """
-        #Mock the QWebView method
-        QWebView.show = MagicMock()
-
-        # Assure the filename is correct
-        self.assertIn("index.html", self.manager._helpLocation)
+        webbrowser.open = MagicMock()
 
         # Invoke the action
         self.manager.actionDocumentation()
 
-        # Check if show() got called
-        self.assertTrue(QWebView.show.called)
+        # see that webbrowser open was attempted
+        webbrowser.open.assert_called_once()
+
 
     def skip_testActionTutorial(self):
         """
@@ -314,7 +311,7 @@ class GuiManagerTest(unittest.TestCase):
 
         # Check if the window is actually opened.
         self.assertTrue(self.manager.ackWidget.isVisible())
-        self.assertIn("developers@sasview.org", self.manager.ackWidget.label.text())
+        self.assertIn("developers@sasview.org", self.manager.ackWidget.label_3.text())
 
     def testActionCheck_for_update(self):
         """

@@ -1,9 +1,10 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-class ModelViewDelegate(QtGui.QStyledItemDelegate):
+class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the model view
     """
@@ -11,7 +12,7 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtGui.QStyledItemDelegate, self).__init__()
+        super(ModelViewDelegate, self).__init__()
 
         # Main parameter table view columns
         self.param_error=-1
@@ -42,10 +43,10 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         """
         if index.column() in self.fancyColumns():
             # Units - present in nice HTML
-            options = QtGui.QStyleOptionViewItemV4(option)
+            options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
-            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
@@ -53,23 +54,31 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
+            doc.setDocumentMargin(1)
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter, options.widget);
+            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget);
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
-            textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
+            textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
 
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            rect = textRect.topLeft()
+            x = rect.x()
+            y = rect.y()
+            x += 3.0 # magic value for rendering nice display in the table
+            y += 2.0 # magic value for rendering nice display in the table
+            rect.setX(x)
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
         else:
             # Just the default paint
-            QtGui.QStyledItemDelegate.paint(self, painter, option, index)
+            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
 
     def createEditor(self, widget, option, index):
         """
@@ -78,13 +87,17 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         if not index.isValid():
             return 0
         if index.column() == self.param_value: #only in the value column
-            editor = QtGui.QLineEdit(widget)
-            validator = QtGui.QDoubleValidator()
+            editor = QtWidgets.QLineEdit(widget)
+            validator = GuiUtils.DoubleValidator()
             editor.setValidator(validator)
             return editor
-        if index.column() in [self.param_property, self.param_error]:
+        if index.column() in [self.param_property, self.param_error, self.param_unit]:
             # Set some columns uneditable
             return None
+        if index.column() in (self.param_min, self.param_max):
+            # Check if the edit role is set
+            if not (index.flags() & QtCore.Qt.ItemIsEditable):
+                return None
 
         return super(ModelViewDelegate, self).createEditor(widget, option, index)
 
@@ -99,10 +112,10 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
                 # TODO: present the failure to the user
                 # balloon popup? tooltip? cell background colour flash?
                 return
-        QtGui.QStyledItemDelegate.setModelData(self, editor, model, index)
+        QtWidgets.QStyledItemDelegate.setModelData(self, editor, model, index)
 
 
-class PolyViewDelegate(QtGui.QStyledItemDelegate):
+class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the polydispersity view
     """
@@ -115,10 +128,11 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtGui.QStyledItemDelegate, self).__init__()
+        super(PolyViewDelegate, self).__init__()
 
         self.poly_parameter = 0
         self.poly_pd = 1
+        self.poly_error = None
         self.poly_min = 2
         self.poly_max = 3
         self.poly_npts = 4
@@ -143,6 +157,7 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         """
         self.poly_parameter = 0
         self.poly_pd = 1
+        self.poly_error = 2
         self.poly_min = 3
         self.poly_max = 4
         self.poly_npts = 5
@@ -159,49 +174,54 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
             self.filename_updated.emit(index.row())
             return None
         elif index.column() in self.editableParameters():
-            self.editor = QtGui.QLineEdit(widget)
-            validator = QtGui.QDoubleValidator()
+            self.editor = QtWidgets.QLineEdit(widget)
+            validator = GuiUtils.DoubleValidator()
             self.editor.setValidator(validator)
             return self.editor
         else:
-            QtGui.QStyledItemDelegate.createEditor(self, widget, option, index)
+            QtWidgets.QStyledItemDelegate.createEditor(self, widget, option, index)
 
     def paint(self, painter, option, index):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.poly_min, self.poly_max):
+        if index.column() in (self.poly_pd, self.poly_min, self.poly_max):
             # Units - present in nice HTML
-            options = QtGui.QStyleOptionViewItemV4(option)
+            options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
-            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
-
+            current_font = painter.font()
+            doc.setDefaultFont(current_font)
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter, options.widget);
+            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget);
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
-            textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
-
+            textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+
+            rect = textRect.topLeft()
+            y = rect.y()
+            y += 5.0 # magic value for rendering nice display in the table
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
         else:
             # Just the default paint
-            QtGui.QStyledItemDelegate.paint(self, painter, option, index)
+            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
 
-class MagnetismViewDelegate(QtGui.QStyledItemDelegate):
+class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the magnetism view
     """
@@ -209,7 +229,7 @@ class MagnetismViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtGui.QStyledItemDelegate, self).__init__()
+        super(MagnetismViewDelegate, self).__init__()
 
         self.mag_parameter = 0
         self.mag_value = 1
@@ -233,48 +253,53 @@ class MagnetismViewDelegate(QtGui.QStyledItemDelegate):
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
-        current_text = index.data().toString()
+        current_text = index.data()
         if not index.isValid():
             return 0
         if index.column() in self.editableParameters():
-            editor = QtGui.QLineEdit(widget)
-            validator = QtGui.QDoubleValidator()
+            editor = QtWidgets.QLineEdit(widget)
+            validator = GuiUtils.DoubleValidator()
             editor.setValidator(validator)
             return editor
         else:
-            QtGui.QStyledItemDelegate.createEditor(self, widget, option, index)
+            QtWidgets.QStyledItemDelegate.createEditor(self, widget, option, index)
 
     def paint(self, painter, option, index):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.mag_min, self.mag_max, self.mag_unit):
+        if index.column() in (self.mag_value, self.mag_min, self.mag_max, self.mag_unit):
             # Units - present in nice HTML
-            options = QtGui.QStyleOptionViewItemV4(option)
+            options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
-            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
-
+            current_font = painter.font()
+            doc.setDefaultFont(current_font)
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter, options.widget);
+            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget);
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
-            textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
+            textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
 
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            rect = textRect.topLeft()
+            y = rect.y()
+            y += 6.0 # magic value for rendering nice display in the table
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
         else:
             # Just the default paint
-            QtGui.QStyledItemDelegate.paint(self, painter, option, index)
+            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)

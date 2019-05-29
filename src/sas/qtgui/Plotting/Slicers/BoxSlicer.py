@@ -1,8 +1,6 @@
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
 
-from BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
@@ -135,7 +133,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.averager is None:
             if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
-                raise ValueError, msg
+                raise ValueError(msg)
             self.averager = new_slab
         if self.direction == "X":
             if self.fold:
@@ -151,7 +149,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             bin_width = (y_max + y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
-            raise ValueError, msg
+            raise ValueError(msg)
         # # Average data2D given Qx or Qy
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)
@@ -186,11 +184,15 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.base.data.name
+        #new_plot. = "2daverage" + self.base.data.name
         new_plot.id = (self.averager.__name__) + self.base.data.name
+        new_plot.group_id = new_plot.id
         new_plot.is_data = True
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         if self.update_model:
             self.setModelFromParams()

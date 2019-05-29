@@ -1,5 +1,5 @@
 import functools
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -7,12 +7,14 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
 
-from UI.AboutUI import Ui_AboutUI
+from .UI.AboutUI import Ui_AboutUI
 
-class AboutBox(QtGui.QDialog, Ui_AboutUI):
+class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
     def __init__(self, parent=None):
         super(AboutBox, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("About")
 
@@ -63,5 +65,11 @@ class AboutBox(QtGui.QDialog, Ui_AboutUI):
             GuiUtils.openLink, LocalConfig._ill_url))
         self.cmdLinkANSTO.clicked.connect(functools.partial(
             GuiUtils.openLink, LocalConfig._ansto_url))
+        self.cmdLinkBAM.clicked.connect(functools.partial(
+            GuiUtils.openLink, LocalConfig._bam_url))
+        self.cmdLinkDELFT.clicked.connect(functools.partial(
+            GuiUtils.openLink, LocalConfig._delft_url))
+        self.cmdLinkDIAMOND.clicked.connect(functools.partial(
+            GuiUtils.openLink, LocalConfig._diamond_url))
 
         self.cmdOK.clicked.connect(self.close)

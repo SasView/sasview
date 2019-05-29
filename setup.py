@@ -17,6 +17,11 @@ from distutils.core import Command
 import numpy as np
 from setuptools import Extension, setup
 
+try:
+    import tinycc.distutils
+except ImportError:
+    pass
+
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
     for line in fid:
@@ -52,9 +57,9 @@ if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    f_path = os.path.join(sas_dir, "categories.json")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
+    #f_path = os.path.join(sas_dir, "categories.json")
+    #if os.path.isfile(f_path):
+    #    os.remove(f_path)
     f_path = os.path.join(sas_dir, 'config', "custom_config.py")
     if os.path.isfile(f_path):
         os.remove(f_path)
@@ -191,15 +196,13 @@ class BuildSphinxCommand(Command):
         import build_sphinx
         build_sphinx.rebuild()
 
+_ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
 packages.append("sas")
 
 # sas module
-package_dir["sas.sasgui"] = os.path.join("src", "sas", "sasgui")
-packages.append("sas.sasgui")
-
 # qt module
 package_dir["sas.qtgui"] = os.path.join("src", "sas", "qtgui")
 packages.append("sas.qtgui")
@@ -213,21 +216,6 @@ package_dir["sas.sascalc.invariant"] = os.path.join(
     "src", "sas", "sascalc", "invariant")
 packages.extend(["sas.sascalc.invariant"])
 
-# sas.sasgui.guiframe
-guiframe_path = os.path.join("src", "sas", "sasgui", "guiframe")
-package_dir["sas.sasgui.guiframe"] = guiframe_path
-package_dir["sas.sasgui.guiframe.local_perspectives"] = os.path.join(
-    os.path.join(guiframe_path, "local_perspectives"))
-package_data["sas.sasgui.guiframe"] = ['images/*', 'media/*']
-packages.extend(
-    ["sas.sasgui.guiframe", "sas.sasgui.guiframe.local_perspectives"])
-# build local plugin
-for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
-    if d not in ['.svn', '__init__.py', '__init__.pyc']:
-        package_name = "sas.sasgui.guiframe.local_perspectives." + d
-        packages.append(package_name)
-        package_dir[package_name] = os.path.join(
-            guiframe_path, "local_perspectives", d)
 
 # sas.sascalc.dataloader
 package_dir["sas.sascalc.dataloader"] = os.path.join(
@@ -245,8 +233,8 @@ package_dir["sas.sascalc.calculator"] = os.path.join(
 packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
 ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                              sources=[
-                                 os.path.join(gen_dir, "sld2i_module.cpp"),
-                                 os.path.join(gen_dir, "sld2i.cpp"),
+                                 os.path.join(gen_dir, "sld2i_module.c"),
+                                 os.path.join(gen_dir, "sld2i.c"),
                                  os.path.join(gen_dir, "libfunc.c"),
                                  os.path.join(gen_dir, "librefl.c"),
                              ],
@@ -279,9 +267,11 @@ ext_modules.append(Extension("sas.sascalc.file_converter.core.bsl_loader",
                              sources=[os.path.join(mydir, "bsl_loader.c")],
                              include_dirs=[np.get_include()],
                              ))
+
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
     "src", "sas", "sascalc", "corfunc")
+
 packages.extend(["sas.sascalc.corfunc"])
 
 # sas.sascalc.fit
@@ -289,51 +279,51 @@ package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
 packages.append("sas.sascalc.fit")
 
 # Perspectives
-package_dir["sas.sasgui.perspectives"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives")
-package_dir["sas.sasgui.perspectives.pr"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives", "pr")
-packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.pr"])
-package_data["sas.sasgui.perspectives.pr"] = ['media/*']
+# package_dir["sas.sasgui.perspectives"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives")
+# package_dir["sas.sasgui.perspectives.pr"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives", "pr")
+# packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.pr"])
+# package_data["sas.sasgui.perspectives.pr"] = ['media/*']
 
-package_dir["sas.sasgui.perspectives.invariant"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives", "invariant")
-packages.extend(["sas.sasgui.perspectives.invariant"])
-package_data['sas.sasgui.perspectives.invariant'] = [
-    os.path.join("media", '*')]
+# package_dir["sas.sasgui.perspectives.invariant"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives", "invariant")
+# packages.extend(["sas.sasgui.perspectives.invariant"])
+# package_data['sas.sasgui.perspectives.invariant'] = [
+#     os.path.join("media", '*')]
 
-package_dir["sas.sasgui.perspectives.fitting"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives", "fitting")
-package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
-packages.extend(["sas.sasgui.perspectives.fitting",
-                 "sas.sasgui.perspectives.fitting.plugin_models"])
-package_data['sas.sasgui.perspectives.fitting'] = [
-    'media/*', 'plugin_models/*']
+# package_dir["sas.sasgui.perspectives.fitting"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives", "fitting")
+# package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
+# packages.extend(["sas.sasgui.perspectives.fitting",
+#                  "sas.sasgui.perspectives.fitting.plugin_models"])
+# package_data['sas.sasgui.perspectives.fitting'] = [
+#     'media/*', 'plugin_models/*']
 
-packages.extend(["sas.sasgui.perspectives",
-                 "sas.sasgui.perspectives.calculator"])
-package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
+# packages.extend(["sas.sasgui.perspectives",
+#                  "sas.sasgui.perspectives.calculator"])
+# package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
 
-package_dir["sas.sasgui.perspectives.corfunc"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives", "corfunc")
-packages.extend(["sas.sasgui.perspectives.corfunc"])
-package_data['sas.sasgui.perspectives.corfunc'] = ['media/*']
+# package_dir["sas.sasgui.perspectives.corfunc"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives", "corfunc")
+# packages.extend(["sas.sasgui.perspectives.corfunc"])
+# package_data['sas.sasgui.perspectives.corfunc'] = ['media/*']
 
-package_dir["sas.sasgui.perspectives.file_converter"] = os.path.join(
-    "src", "sas", "sasgui", "perspectives", "file_converter")
-packages.extend(["sas.sasgui.perspectives.file_converter"])
-package_data['sas.sasgui.perspectives.file_converter'] = ['media/*']
+# package_dir["sas.sasgui.perspectives.file_converter"] = os.path.join(
+#     "src", "sas", "sasgui", "perspectives", "file_converter")
+# packages.extend(["sas.sasgui.perspectives.file_converter"])
+# package_data['sas.sasgui.perspectives.file_converter'] = ['media/*']
 
 # Data util
 package_dir["sas.sascalc.data_util"] = os.path.join(
     "src", "sas", "sascalc", "data_util")
 packages.append("sas.sascalc.data_util")
 
-# Plottools
-package_dir["sas.sasgui.plottools"] = os.path.join(
-    "src", "sas", "sasgui", "plottools")
-packages.append("sas.sasgui.plottools")
+# # Plottools
+# package_dir["sas.sasgui.plottools"] = os.path.join(
+#     "src", "sas", "sasgui", "plottools")
+# packages.append("sas.sasgui.plottools")
 
 # QTGUI
 ## UI
@@ -350,6 +340,9 @@ packages.append("sas.qtgui.UnitTesting")
 package_dir["sas.qtgui.Utilities"] = os.path.join(
     "src", "sas", "qtgui", "Utilities")
 packages.append("sas.qtgui.Utilities")
+package_dir["sas.qtgui.UtilitiesUI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities","UI")
+packages.append("sas.qtgui.Utilities.UI")
 
 package_dir["sas.qtgui.Calculators"] = os.path.join(
     "src", "sas", "qtgui", "Calculators")
@@ -380,6 +373,18 @@ package_dir["sas.qtgui.Perspectives.Fitting.UI"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives", "Fitting", "UI")
 packages.extend(["sas.qtgui.Perspectives.Fitting", "sas.qtgui.Perspectives.Fitting.UI"])
 
+package_dir["sas.qtgui.Perspectives.Inversion"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Inversion")
+package_dir["sas.qtgui.Perspectives.Inversion.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Inversion", "UI")
+packages.extend(["sas.qtgui.Perspectives.Inversion", "sas.qtgui.Perspectives.Inversion.UI"])
+
+package_dir["sas.qtgui.Perspectives.Corfunc"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Corfunc")
+package_dir["sas.qtgui.Perspectives.Corfunc.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Corfunc", "UI")
+packages.extend(["sas.qtgui.Perspectives.Corfunc", "sas.qtgui.Perspectives.Corfunc.UI"])
+
 ## Plotting
 package_dir["sas.qtgui.Plotting"] = os.path.join(
     "src", "sas", "qtgui", "Plotting")
@@ -387,9 +392,10 @@ package_dir["sas.qtgui.Plotting.UI"] = os.path.join(
     "src", "sas", "qtgui", "Plotting", "UI")
 package_dir["sas.qtgui.Plotting.Slicers"] = os.path.join(
     "src", "sas", "qtgui", "Plotting", "Slicers")
-packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI", "sas.qtgui.Plotting.Slicers"])
-
-
+package_dir["sas.qtgui.Plotting.Masks"] = os.path.join(
+    "src", "sas", "qtgui", "Plotting", "Masks")
+packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
+                 "sas.qtgui.Plotting.Slicers", "sas.qtgui.Plotting.Masks"])
 
 # # Last of the sas.models
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")
@@ -448,11 +454,21 @@ package_data['sas.sasview'] = ['images/*',
                                'test/upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
+package_data['sas.qtgui'] = ['Calculators/UI/*',
+                             'MainWindow/UI/*',
+                             'Perspectives/Corfunc/UI/*',
+                             'Perspectives/Fitting/UI/*',
+                             'Perspectives/Invariant/UI/*',
+                             'Perspectives/Inversion/UI/*',
+                             'Plotting/UI/*',
+                             'Utilities/UI/*',
+                             'UI/*',
+                             'UI/res/*',
+                             ]
+packages.append("sas.qtgui")
 
 required = [
-    'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing<2.0.0',
-
-    # 'lxml>=2.2.2',
+    'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml', 'h5py',
 
     # The following dependecies won't install automatically, so assume them
@@ -486,7 +502,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            "sasview = sas.run",
+            "sasview=sas.qtgui.MainWindow.MainWindow:run_sasview",
         ]
     },
     cmdclass={'build_ext': build_ext_subclass,

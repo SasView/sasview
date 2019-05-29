@@ -1,7 +1,7 @@
 Quick Intro for Building Sasview
 ================================
 
-Note - at the current time sasview will only run in gui form under Python 2.
+Note - at the current time sasview will only run in gui form under Python 3.
 
 Before trying to install and run sasview you'll need to check what
 dependencies are required:

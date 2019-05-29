@@ -31,7 +31,8 @@ __all__ = []
 
 #plot_version = "0.98"
 #plot_backend = "WXAgg"
-plot_backend = "Qt4Agg"
+print("SET MPL BACKEND TO Qt5")
+plot_backend = "Qt5Agg"
 
 # Sort out matplotlib version
 import matplotlib

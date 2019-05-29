@@ -2,10 +2,15 @@
     Unit tests for slit_length_calculator
 """
 
+import os.path
 import unittest
 from sas.sascalc.dataloader.readers.ascii_reader import Reader
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator \
     as calculator
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 class SlitCalculator(unittest.TestCase):
@@ -18,7 +23,7 @@ class SlitCalculator(unittest.TestCase):
         """
             Test slit_length_calculator"
         """
-        list = self.reader.read("beam profile.DAT")
+        list = self.reader.read(find("beam profile.DAT"))
         self.assertTrue(len(list) == 1)
         f = list[0]
         cal = calculator()

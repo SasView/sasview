@@ -34,7 +34,7 @@ from sas.sasgui.plottools import Data1D as Model1D
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.plottools.plottables import Graph
 
-from pr_widgets import PrTextCtrl
+from .pr_widgets import PrTextCtrl
 
 # Default number of points on the output plot
 DEFAULT_NPTS = 10
@@ -330,7 +330,7 @@ class ExploreDialog(wx.Dialog):
         # Ouput selection box
         selection_msg = wx.StaticText(self, -1, "Select a dependent variable:")
         self.output_box = wx.ComboBox(self, -1, style=wx.CB_READONLY)
-        for item in self.results.outputs.keys():
+        for item in list(self.results.outputs.keys()):
             self.output_box.Append(item, "")
         self.output_box.SetStringSelection(DEFAULT_OUTPUT)
 
@@ -418,7 +418,7 @@ class ExploreDialog(wx.Dialog):
             except:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(d), sys.exc_value)
+                msg += "for D_max=%s\n%s" % (str(d), sys.exc_info()[1])
                 logger.error(msg)
 
         self.results = results

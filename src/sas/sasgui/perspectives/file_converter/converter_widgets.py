@@ -53,7 +53,7 @@ class VectorInput(object):
         """
         v = Vector()
         if not self.Validate(): return v
-        for direction, control in self._inputs.iteritems():
+        for direction, control in self._inputs.items():
             try:
                 value = float(control.GetValue())
                 setattr(v, direction, value)
@@ -85,7 +85,7 @@ class VectorInput(object):
         """
         all_valid = True
         invalid_ctrl = None
-        for control in self._inputs.values():
+        for control in list(self._inputs.values()):
             if control.GetValue() == '': continue
             control.SetBackgroundColour(wx.WHITE)
             control_valid = check_float(control)

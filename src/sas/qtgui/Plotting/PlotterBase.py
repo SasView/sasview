@@ -1,19 +1,17 @@
-import pylab
 import numpy
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets, QtPrintSupport
 
-# TODO: Replace the qt4agg calls below with qt5 equivalent.
-# Requires some code modifications.
-# https://www.boxcontrol.net/embedding-matplotlib-plot-on-pyqt5-gui.html
-#
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib import rcParams
 
-DEFAULT_CMAP = pylab.cm.jet
+DEFAULT_CMAP = mpl.cm.jet
 from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -24,7 +22,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-class PlotterBase(QtGui.QWidget):
+class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterBase, self).__init__(parent)
 
@@ -32,21 +30,25 @@ class PlotterBase(QtGui.QWidget):
         self.manager = manager
         self.quickplot = quickplot
 
+        # Set auto layout so x/y axis captions don't get cut off
+        rcParams.update({'figure.autolayout': True})
+
+        #plt.style.use('ggplot')
+        #plt.style.use('seaborn-darkgrid')
+
         # a figure instance to plot on
         self.figure = plt.figure()
 
         # Define canvas for the figure to be placed on
         self.canvas = FigureCanvas(self.figure)
 
-        # ... and the toolbar with all the default MPL buttons
-        self.toolbar = NavigationToolbar(self.canvas, self)
-
         # Simple window for data display
-        self.txt_widget = QtGui.QTextEdit(None)
+        self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Set the layout and place the canvas widget in it.
-        layout = QtGui.QVBoxLayout()
-        layout.setMargin(0)
+        layout = QtWidgets.QVBoxLayout()
+        # FIXME setMargin -> setContentsMargins in qt5 with 4 args
+        #layout.setContentsMargins(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
@@ -73,6 +75,8 @@ class PlotterBase(QtGui.QWidget):
         self.event_pos = None
         self.leftdown = False
         self.gotLegend = 0
+
+        self.show_legend = True
 
         # Annotations
         self.selectedText = None
@@ -104,13 +108,19 @@ class PlotterBase(QtGui.QWidget):
         self.canvas.mpl_connect('pick_event', self.onMplPick)
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
-        self.contextMenu = QtGui.QMenu(self)
+        self.contextMenu = QtWidgets.QMenu(self)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        cid = self.canvas.mpl_connect('resize_event', self.onResize)
 
+        layout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
-            layout.addWidget(self.toolbar)
+            # self.toolbar.show()
+            self.toolbar.hide() # hide for the time being
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
+        else:
+            self.toolbar.hide()
 
         self.setLayout(layout)
 
@@ -131,6 +141,16 @@ class PlotterBase(QtGui.QWidget):
         self.canvas.setObjectName(title)
 
     @property
+    def item(self):
+        ''' getter for this plot's QStandardItem '''
+        return self._item
+
+    @item.setter
+    def item(self, item=None):
+        ''' setter for this plot's QStandardItem '''
+        self._item = item
+
+    @property
     def xLabel(self, xlabel=""):
         """ x-label setter """
         return self.x_label
@@ -138,7 +158,7 @@ class PlotterBase(QtGui.QWidget):
     @xLabel.setter
     def xLabel(self, xlabel=""):
         """ x-label setter """
-        self.x_label = r'$%s$'% xlabel
+        self.x_label = r'$%s$'% xlabel if xlabel else ""
 
     @property
     def yLabel(self, ylabel=""):
@@ -148,7 +168,7 @@ class PlotterBase(QtGui.QWidget):
     @yLabel.setter
     def yLabel(self, ylabel=""):
         """ y-label setter """
-        self.y_label = r'$%s$'% ylabel
+        self.y_label = r'$%s$'% ylabel if ylabel else ""
 
     @property
     def yscale(self):
@@ -169,8 +189,19 @@ class PlotterBase(QtGui.QWidget):
     @xscale.setter
     def xscale(self, scale='linear'):
         """ X-axis scale setter """
+        self.ax.cla()
         self.ax.set_xscale(scale)
         self._xscale = scale
+
+    @property
+    def showLegend(self):
+        """ Legend visibility getter """
+        return self.show_legend
+
+    @showLegend.setter
+    def showLegend(self, show=True):
+        """ Legend visibility setter """
+        self.show_legend = show
 
     def upatePlotHelper(self):
         """
@@ -191,12 +222,16 @@ class PlotterBase(QtGui.QWidget):
         self.actionSaveImage = self.contextMenu.addAction("Save Image")
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
+        #self.contextMenu.addSeparator()
+        #self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.contextMenu.addSeparator()
+
 
         # Define the callbacks
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+        #self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenu(self):
         """
@@ -209,6 +244,12 @@ class PlotterBase(QtGui.QWidget):
         Define context menu and associated actions for the quickplot MPL widget
         """
         raise NotImplementedError("Context menu method must be implemented in derived class.")
+
+    def onResize(self, event):
+        """
+        Redefine default resize event
+        """
+        pass
 
     def contextMenuEvent(self, event):
         """
@@ -282,6 +323,8 @@ class PlotterBase(QtGui.QWidget):
         """
         Use the internal MPL method for saving to file
         """
+        if not hasattr(self, "toolbar"):
+            self.toolbar = NavigationToolbar(self.canvas, self)
         self.toolbar.save_figure()
 
     def onImagePrint(self):
@@ -289,20 +332,21 @@ class PlotterBase(QtGui.QWidget):
         Display printer dialog and print the MPL widget area
         """
         # Define the printer
-        printer = QtGui.QPrinter()
+        printer = QtPrintSupport.QPrinter()
 
         # Display the print dialog
-        dialog = QtGui.QPrintDialog(printer)
+        dialog = QtPrintSupport.QPrintDialog(printer)
         dialog.setModal(True)
         dialog.setWindowTitle("Print")
-        if dialog.exec_() != QtGui.QDialog.Accepted:
+        if dialog.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         painter = QtGui.QPainter(printer)
         # Grab the widget screenshot
-        pmap = QtGui.QPixmap.grabWidget(self)
+        pmap = QtGui.QPixmap(self.size())
+        self.render(pmap)
         # Create a label with pixmap drawn
-        printLabel = QtGui.QLabel()
+        printLabel = QtWidgets.QLabel()
         printLabel.setPixmap(pmap)
 
         # Print the label
@@ -313,8 +357,9 @@ class PlotterBase(QtGui.QWidget):
         """
         Copy MPL widget area to buffer
         """
-        bmp = QtGui.QApplication.clipboard()
-        pixmap = QtGui.QPixmap.grabWidget(self.canvas)
+        bmp = QtWidgets.QApplication.clipboard()
+        pixmap = QtGui.QPixmap(self.canvas.size())
+        self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
 
     def onGridToggle(self):
@@ -332,13 +377,25 @@ class PlotterBase(QtGui.QWidget):
         current_title = self.windowTitle()
         titleWidget = WindowTitle(self, new_title=current_title)
         result = titleWidget.exec_()
-        if result != QtGui.QDialog.Accepted:
+        if result != QtWidgets.QDialog.Accepted:
             return
 
         title = titleWidget.title()
         self.setWindowTitle(title)
         # Notify the listeners about a new graph title
         self.manager.communicator.activeGraphName.emit((current_title, title))
+
+    def onToggleMenu(self):
+        """
+        Toggle navigation menu visibility in the chart
+        """
+        self.toolbar.hide()
+        # Current toolbar menu is too buggy.
+        # Comment out until we support 3.x, then recheck.
+        #if self.toolbar.isVisible():
+        #    self.toolbar.hide()
+        #else:
+        #    self.toolbar.show()
 
     def offset_graph(self):
         """
@@ -360,6 +417,7 @@ class PlotterBase(QtGui.QWidget):
             text_to_show = GuiUtils.retrieveData2d(plot_data)
         # Hardcoded sizes to enable full width rendering with default font
         self.txt_widget.resize(420,600)
+        self.txt_widget.clear()
 
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
@@ -370,7 +428,7 @@ class PlotterBase(QtGui.QWidget):
         self.txt_widget.show()
         # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+        vertical_scroll_bar.triggerAction(QtWidgets.QScrollBar.SliderToMinimum)
 
     def onSavePoints(self, plot_data):
         """

@@ -3,20 +3,23 @@ Allows users to modify the box slicer parameters.
 """
 import numpy
 import functools
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4 import QtWebKit
+
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
-class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
+class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     """
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
     """
-    close_signal = QtCore.pyqtSignal()
+    closeWidgetSignal = QtCore.pyqtSignal()
     def __init__(self, model=None, validate_method=None):
         super(SlicerParameters, self).__init__()
 
@@ -43,19 +46,19 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         self.delegate.refocus_signal.connect(self.onFocus)
 
         # Display Help on clicking the button
-        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
         # Close doesn't trigger closeEvent automatically, so force it
-        self.buttonBox.button(QtGui.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent, None))
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent, None))
 
         # Disable row number display
         self.lstParams.verticalHeader().setVisible(False)
         self.lstParams.setAlternatingRowColors(True)
-        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         # Header properties for nicer display
         header = self.lstParams.horizontalHeader()
-        header.setResizeMode(QtGui.QHeaderView.Stretch)
+        header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
     def onFocus(self, row, column):
@@ -70,12 +73,18 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.proxy.setSourceModel(self.model)
 
+    def keyPressEvent(self, event):
+         key = event.key()
+
+         if key == QtCore.Qt.Key_Escape:
+            self.closeWidgetSignal.emit()
+
     def closeEvent(self, event):
         """
         Overwritten close widget method in order to send the close
         signal to the parent.
         """
-        self.close_signal.emit()
+        self.closeWidgetSignal.emit()
         if event:
             event.accept()
 
@@ -83,14 +92,10 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         """
         Display generic data averaging help
         """
-        location = "docs/sphinx-docs/build/html" + \
-            "/user/sasgui/guiframe/graph_help.html#d-data-averaging"
-        self.helpView = QtWebKit.QWebView()
-        self.helpView.load(QtCore.QUrl(location))
-        self.helpView.show()
+        url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
+        GuiUtils.showHelp(url)
 
-
-class ProxyModel(QtGui.QIdentityProxyModel):
+class ProxyModel(QtCore.QIdentityProxyModel):
     """
     Trivial proxy model with custom column edit flag
     """
@@ -116,7 +121,7 @@ class ProxyModel(QtGui.QIdentityProxyModel):
             flags &= ~QtCore.Qt.ItemIsEditable
         return flags
 
-class PositiveDoubleEditor(QtGui.QLineEdit):
+class PositiveDoubleEditor(QtWidgets.QLineEdit):
     # a signal to tell the delegate when we have finished editing
     editingFinished = QtCore.Signal()
 
@@ -124,9 +129,9 @@ class PositiveDoubleEditor(QtGui.QLineEdit):
             # Initialize the editor object
             super(PositiveDoubleEditor, self).__init__(parent)
             self.setAutoFillBackground(True)
-            validator = QtGui.QDoubleValidator()
+            validator = GuiUtils.DoubleValidator()
             # Don't use the scientific notation, cause 'e'.
-            validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+            validator.setNotation(GuiUtils.DoubleValidator.StandardNotation)
 
             self.setValidator(validator)
 
@@ -135,7 +140,7 @@ class PositiveDoubleEditor(QtGui.QLineEdit):
             self.editingFinished.emit()
 
 
-class EditDelegate(QtGui.QStyledItemDelegate):
+class EditDelegate(QtWidgets.QStyledItemDelegate):
     refocus_signal = QtCore.pyqtSignal(int, int)
     def __init__(self, parent=None, validate_method=None):
         super(EditDelegate, self).__init__(parent)
@@ -154,7 +159,7 @@ class EditDelegate(QtGui.QStyledItemDelegate):
                 self.index = index
                 return self.editor
         else:
-                return QtGui.QStyledItemDelegate.createEditor(self, parent, option, index)
+                return QtWidgets.QStyledItemDelegate.createEditor(self, parent, option, index)
 
     def setModelData(self, editor, model, index):
         """
@@ -163,8 +168,8 @@ class EditDelegate(QtGui.QStyledItemDelegate):
         self.index = index
 
         # Find out the changed parameter name and proposed value
-        new_value = self.editor.text().toFloat()[0]
-        param_name = str(model.sourceModel().item(index.row(),0).text())
+        new_value = GuiUtils.toDouble(self.editor.text())
+        param_name = model.sourceModel().item(index.row(),0).text()
 
         validated = True
         if self.validate_method:

@@ -276,7 +276,7 @@ class PluginBase(object):
             related to available theory state
         """
         msg = "%s plugin: does not support import theory" % str(self.sub_menu)
-        raise ValueError, msg
+        raise (ValueError, msg)
 
     def on_set_state_helper(self, event):
         """

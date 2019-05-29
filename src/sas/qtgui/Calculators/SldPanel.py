@@ -1,9 +1,12 @@
 # global
+import numpy as np
 import logging
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
-from periodictable.xsf import xray_energy, xray_sld_from_atoms
+from periodictable.xsf import xray_energy, xray_sld
 from periodictable.nsf import neutron_scattering
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -13,90 +16,78 @@ from sas.qtgui.UI import main_resources_rc
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
 
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
     'MOLECULAR_FORMULA',
     'MASS_DENSITY',
-    'WAVELENGTH',
+    'NEUTRON_WAVELENGTH',
     'NEUTRON_SLD_REAL',
     'NEUTRON_SLD_IMAG',
-    'CU_KA_SLD_REAL',
-    'CU_KA_SLD_IMAG',
-    'MO_KA_SLD_REAL',
-    'MO_KA_SLD_IMAG',
+    'XRAY_WAVELENGTH',
+    'XRAY_SLD_REAL',
+    'XRAY_SLD_IMAG',
     'NEUTRON_INC_XS',
     'NEUTRON_ABS_XS',
     'NEUTRON_LENGTH',
 )
 
-class SldResult(object):
-    def __init__(self, molecular_formula, mass_density, wavelength,
-        neutron_sld_real, neutron_sld_imag,
-        cu_ka_sld_real, cu_ka_sld_imag,
-        mo_ka_sld_real, mo_ka_sld_imag,
-        neutron_inc_xs, neutron_abs_xs, neutron_length):
+class NeutronSldResult(object):
+    def __init__(self, neutron_wavelength, neutron_sld_real,
+                 neutron_sld_imag, neutron_inc_xs, neutron_abs_xs,
+                 neutron_length):
 
-        self.molecular_formula = molecular_formula
-        self.mass_density = mass_density
-        self.wavelength = wavelength
+        self.neutron_wavelength = neutron_wavelength
         self.neutron_sld_real = neutron_sld_real
         self.neutron_sld_imag = neutron_sld_imag
-        self.cu_ka_sld_real = cu_ka_sld_real
-        self.cu_ka_sld_imag = cu_ka_sld_imag
-        self.mo_ka_sld_real = mo_ka_sld_real
-        self.mo_ka_sld_imag = mo_ka_sld_imag
         self.neutron_inc_xs = neutron_inc_xs
         self.neutron_abs_xs = neutron_abs_xs
         self.neutron_length = neutron_length
 
-def sldAlgorithm(molecular_formula, mass_density, wavelength):
+class XraySldResult(object):
+    def __init__(self, xray_wavelength, xray_sld_real, xray_sld_imag):
 
-    sld_formula = Formula(molecular_formula, density=mass_density)
+        self.xray_wavelength = xray_wavelength
+        self.xray_sld_real = xray_sld_real
+        self.xray_sld_imag = xray_sld_imag
 
-    def calculate_sld(formula):
-        if len(formula.atoms) != 1:
-            raise NotImplementedError()
-        energy = xray_energy(formula.atoms.keys()[0].K_alpha)
-        return xray_sld_from_atoms(
-            sld_formula.atoms,
-            density=mass_density,
-            energy=energy)
+def neutronSldAlgorithm(molecular_formula, mass_density, neutron_wavelength):
 
-    cu_real, cu_imag = calculate_sld(Formula("Cu"))
-    mo_real, mo_imag = calculate_sld(Formula("Mo"))
-
-    (sld_real, sld_imag, _), (_, neutron_abs_xs, neutron_inc_xs), neutron_length = \
+    (neutron_sld_real, neutron_sld_imag, _), (_, neutron_abs_xs, neutron_inc_xs), neutron_length = \
         neutron_scattering(
             compound=molecular_formula,
             density=mass_density,
-            wavelength=wavelength)
+            wavelength=neutron_wavelength)
 
     SCALE = 1e-6
 
     # neutron sld
-    neutron_sld_real = SCALE * sld_real
-    neutron_sld_imag = SCALE * abs(sld_imag)
+    scaled_neutron_sld_real = SCALE * neutron_sld_real
+    scaled_neutron_sld_imag = SCALE * abs(neutron_sld_imag)
 
-    # Cu sld
-    cu_ka_sld_real = SCALE * cu_real
-    cu_ka_sld_imag = SCALE * abs(cu_imag)
+    return NeutronSldResult(neutron_wavelength, scaled_neutron_sld_real,
+                            scaled_neutron_sld_imag, neutron_inc_xs,
+                            neutron_abs_xs, neutron_length)
 
-    # Mo sld
-    mo_ka_sld_real = SCALE * mo_real
-    mo_ka_sld_imag = SCALE * abs(mo_imag)
+def xraySldAlgorithm(molecular_formula, mass_density, xray_wavelength):
 
-    return SldResult(
-        molecular_formula, mass_density, wavelength,
-        neutron_sld_real, neutron_sld_imag,
-        cu_ka_sld_real, cu_ka_sld_imag,
-        mo_ka_sld_real, mo_ka_sld_imag,
-        neutron_inc_xs, neutron_abs_xs, neutron_length)
+    xray_sld_real, xray_sld_imag = xray_sld(
+            compound=molecular_formula,
+            density=mass_density,
+            wavelength=xray_wavelength)
+
+    SCALE = 1e-6
+
+    # xray sld
+    scaled_xray_sld_real = SCALE * xray_sld_real
+    scaled_xray_sld_imag = SCALE * abs(xray_sld_imag)
 
 
-class SldPanel(QtGui.QDialog):
+    return XraySldResult(xray_wavelength, scaled_xray_sld_real,
+                         scaled_xray_sld_imag)
+
+
+class SldPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super(SldPanel, self).__init__()
@@ -104,6 +95,9 @@ class SldPanel(QtGui.QDialog):
         self.manager = parent
 
         self.setupUi()
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.setupModel()
         self.setupMapper()
 
@@ -111,10 +105,8 @@ class SldPanel(QtGui.QDialog):
         return {
             MODEL.NEUTRON_SLD_REAL: self.ui.editNeutronSldReal,
             MODEL.NEUTRON_SLD_IMAG: self.ui.editNeutronSldImag,
-            MODEL.CU_KA_SLD_REAL: self.ui.editCuKaSldReal,
-            MODEL.CU_KA_SLD_IMAG: self.ui.editCuKaSldImag,
-            MODEL.MO_KA_SLD_REAL: self.ui.editMoKaSldReal,
-            MODEL.MO_KA_SLD_IMAG: self.ui.editMoKaSldImag,
+            MODEL.XRAY_SLD_REAL: self.ui.editXraySldReal,
+            MODEL.XRAY_SLD_IMAG: self.ui.editXraySldImag,
             MODEL.NEUTRON_INC_XS: self.ui.editNeutronIncXs,
             MODEL.NEUTRON_ABS_XS: self.ui.editNeutronAbsXs,
             MODEL.NEUTRON_LENGTH: self.ui.editNeutronLength
@@ -125,102 +117,139 @@ class SldPanel(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # set validators
-        self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
+        # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
+        #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
+
+        # No need for recalculate
+        self.ui.recalculateButton.setVisible(False)
 
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
-        self.ui.editWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editWavelength))
+        self.ui.editNeutronWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editNeutronWavelength))
+        self.ui.editXrayWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editXrayWavelength))
 
         # signals
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.helpButton.clicked.connect(self.displayHelp)
+        self.ui.closeButton.clicked.connect(self.closePanel)
+        self.ui.recalculateButton.clicked.connect(self.calculateSLD)
+
+    def calculateSLD(self):
+        self.recalculateSLD()
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
-        self.model.setItem(MODEL.MOLECULAR_FORMULA, QtGui.QStandardItem())
-        self.model.setItem(MODEL.MASS_DENSITY     , QtGui.QStandardItem())
-        self.model.setItem(MODEL.WAVELENGTH       , QtGui.QStandardItem())
+        self.model.setItem(MODEL.MOLECULAR_FORMULA , QtGui.QStandardItem())
+        self.model.setItem(MODEL.MASS_DENSITY      , QtGui.QStandardItem())
+        self.model.setItem(MODEL.NEUTRON_WAVELENGTH, QtGui.QStandardItem())
+        self.model.setItem(MODEL.XRAY_WAVELENGTH   , QtGui.QStandardItem())
 
-        for key in self._getOutputs().keys():
+        for key in list(self._getOutputs().keys()):
             self.model.setItem(key, QtGui.QStandardItem())
 
-        QtCore.QObject.connect(
-            self.model,
-            QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-            self.dataChanged)
+        #self.model.dataChanged.connect(self.dataChanged)
+
+        self.ui.editMassDensity.textChanged.connect(self.recalculateSLD)
+        self.ui.editMolecularFormula.textChanged.connect(self.recalculateSLD)
+        self.ui.editNeutronWavelength.textChanged.connect(self.recalculateSLD)
+        self.ui.editXrayWavelength.textChanged.connect(self.recalculateSLD)
 
         self.modelReset()
 
     def setupMapper(self):
-        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
+        self.mapper.addMapping(self.ui.editMolecularFormula , MODEL.MOLECULAR_FORMULA)
+        self.mapper.addMapping(self.ui.editMassDensity      , MODEL.MASS_DENSITY)
+        self.mapper.addMapping(self.ui.editNeutronWavelength, MODEL.NEUTRON_WAVELENGTH)
+        self.mapper.addMapping(self.ui.editXrayWavelength   , MODEL.XRAY_WAVELENGTH)
 
-        self.mapper.addMapping(self.ui.editMolecularFormula, MODEL.MOLECULAR_FORMULA)
-        self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
-        self.mapper.addMapping(self.ui.editWavelength      , MODEL.WAVELENGTH)
-
-        for key, edit in self._getOutputs().iteritems():
+        for key, edit in self._getOutputs().items():
             self.mapper.addMapping(edit, key)
 
         self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         update = False
-        for index in xrange(top.row(), bottom.row() + 1):
-            if (index == MODEL.MOLECULAR_FORMULA) or (index == MODEL.MASS_DENSITY) or (index == MODEL.WAVELENGTH):
+        for index in range(top.row(), bottom.row() + 1):
+            if (index == MODEL.MOLECULAR_FORMULA) or (index == MODEL.MASS_DENSITY) or (index == MODEL.NEUTRON_WAVELENGTH) or (index == MODEL.XRAY_WAVELENGTH):
                 update = True
 
-        # calcualtion
+        # calculation
         if update:
-            formula = self.model.item(MODEL.MOLECULAR_FORMULA).text()
-            density = self.model.item(MODEL.MASS_DENSITY).text()
-            wavelength = self.model.item(MODEL.WAVELENGTH).text()
-            if len(formula) > 0 and len(density) > 0 and len(wavelength) > 0:
-                try:
-                    results = sldAlgorithm(str(formula), float(density), float(wavelength))
+            self.recalculateSLD()
 
-                    def format(value):
-                        return ("%-5.3g" % value).strip()
+    def recalculateSLD(self):
+        formula = self.ui.editMolecularFormula.text()
+        density = self.ui.editMassDensity.text()
+        neutronWavelength = self.ui.editNeutronWavelength.text()
+        xrayWavelength = self.ui.editXrayWavelength.text()
 
-                    self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
-                    self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
+        if not formula or not density:
+            return
 
-                    self.model.item(MODEL.CU_KA_SLD_REAL).setText(format(results.cu_ka_sld_real))
-                    self.model.item(MODEL.CU_KA_SLD_IMAG).setText(format(results.cu_ka_sld_imag))
+        def format(value):
+            return ("%-5.3g" % value).strip()
 
-                    self.model.item(MODEL.MO_KA_SLD_REAL).setText(format(results.mo_ka_sld_real))
-                    self.model.item(MODEL.MO_KA_SLD_IMAG).setText(format(results.mo_ka_sld_imag))
+        if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
+            results = neutronSldAlgorithm(str(formula), float(density), float(neutronWavelength))
 
-                    self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
-                    self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
-                    self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
+            self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
+            self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
+            self.model.item(MODEL.NEUTRON_INC_XS).setText(format(results.neutron_inc_xs))
+            self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
+            self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
+            self.model.item(MODEL.NEUTRON_LENGTH).setEnabled(True)
+            self.ui.editNeutronSldReal.setEnabled(True)
+            self.ui.editNeutronSldImag.setEnabled(True)
+            self.ui.editNeutronIncXs.setEnabled(True)
+            self.ui.editNeutronLength.setEnabled(True)
+            self.ui.editNeutronAbsXs.setEnabled(True)
+        else:
+            self.model.item(MODEL.NEUTRON_SLD_REAL).setText("")
+            self.model.item(MODEL.NEUTRON_SLD_IMAG).setText("")
+            self.model.item(MODEL.NEUTRON_INC_XS).setText("")
+            self.model.item(MODEL.NEUTRON_ABS_XS).setText("")
+            self.model.item(MODEL.NEUTRON_LENGTH).setText("")
+            self.ui.editNeutronSldReal.setEnabled(False)
+            self.ui.editNeutronSldImag.setEnabled(False)
+            self.ui.editNeutronIncXs.setEnabled(False)
+            self.ui.editNeutronLength.setEnabled(False)
+            self.ui.editNeutronAbsXs.setEnabled(False)
 
-                    return
-            
-                except Exception as e:
-                    pass
+        if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
+            results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
 
-            for key in self._getOutputs().keys():
-                self.model.item(key).setText("")
+            self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
+            self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
+            self.ui.editXraySldReal.setEnabled(True)
+            self.ui.editXraySldImag.setEnabled(True)
+        else:
+            self.model.item(MODEL.XRAY_SLD_REAL).setText("")
+            self.model.item(MODEL.XRAY_SLD_IMAG).setText("")
+            self.ui.editXraySldReal.setEnabled(False)
+            self.ui.editXraySldImag.setEnabled(False)
 
     def modelReset(self):
         #self.model.beginResetModel()
         try:
-            self.model.item(MODEL.MOLECULAR_FORMULA).setText("H2O")
-            self.model.item(MODEL.MASS_DENSITY     ).setText("1")
-            self.model.item(MODEL.WAVELENGTH       ).setText("6")
+            self.model.item(MODEL.MOLECULAR_FORMULA ).setText("H2O")
+            self.model.item(MODEL.MASS_DENSITY      ).setText("1.0")
+            self.model.item(MODEL.NEUTRON_WAVELENGTH).setText("6.0")
+            self.model.item(MODEL.XRAY_WAVELENGTH   ).setText("1.0")
+            self.recalculateSLD()
         finally:
             pass
-            #self.model.endResetModel()
+        #self.model.endResetModel()
 
     def displayHelp(self):
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/qtgui/Calculators/sld_calculator_help.html"
+        self.manager.showHelp(location)
+
+
+    def closePanel(self):
+        """
+        close the window containing this panel
+        """
+        self.close()
 

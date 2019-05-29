@@ -126,14 +126,14 @@ class Connection(object):
         try:
             logger.debug("Trying Direct connection to %s..."%self.url)
             response = urllib2.urlopen(req, timeout=self.timeout)
-        except Exception, e:
+        except (Exception, e):
             logger.debug("Failed!")
             logger.debug(e)
             try:
                 logger.debug("Trying to use system proxy if it exists...")
                 self._set_proxy()
                 response = urllib2.urlopen(req, timeout=self.timeout)
-            except Exception, e:
+            except (Exception, e):
                 logger.debug("Failed!")
                 logger.debug(e)
                 pac_urls = self._get_addresses_of_proxy_pac()
@@ -143,7 +143,7 @@ class Connection(object):
                         logger.debug("Trying to use the proxy %s found in proxy.pac configuration"%proxy)
                         self._set_proxy(proxy)
                         response = urllib2.urlopen(req, timeout=self.timeout)
-                    except Exception, e:
+                    except (Exception, e):
                         logger.debug("Failed!")
                         logger.debug(e)
         if response is not None:

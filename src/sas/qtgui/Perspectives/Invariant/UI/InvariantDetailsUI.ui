@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>449</width>
+    <width>511</width>
     <height>458</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -28,7 +34,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QProgressBar" name="progressBar">
+       <widget class="QProgressBar" name="progressBarLowQ">
         <property name="value">
          <number>24</number>
         </property>
@@ -42,7 +48,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QProgressBar" name="progressBar_2">
+       <widget class="QProgressBar" name="progressBarData">
         <property name="value">
          <number>24</number>
         </property>
@@ -56,7 +62,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QProgressBar" name="progressBar_3">
+       <widget class="QProgressBar" name="progressBarHighQ">
         <property name="value">
          <number>24</number>
         </property>
@@ -79,7 +85,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="txtQLowQ">
+        <property name="toolTip">
+         <string>Extrapolated invariant from low-Q range.</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="2">
        <widget class="QLabel" name="label_2">
@@ -89,12 +99,16 @@
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QLineEdit" name="lineEdit_2"/>
+       <widget class="QLineEdit" name="txtQLowQErr">
+        <property name="toolTip">
+         <string>Uncertainty on the invariant from low-Q range.</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="lblQLowQUnits">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;[1/(cm*Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;)]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(cm Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -106,7 +120,11 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_3"/>
+       <widget class="QLineEdit" name="txtQData">
+        <property name="toolTip">
+         <string>Invariant in the data set's Q range.</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="2">
        <widget class="QLabel" name="label_6">
@@ -116,12 +134,16 @@
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QLineEdit" name="lineEdit_4"/>
+       <widget class="QLineEdit" name="txtQDataErr">
+        <property name="toolTip">
+         <string>Uncertainty on the invariant from data's range.</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="lblQDataUnits">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;[1/(cm*Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;)]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(cm Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -133,7 +155,11 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEdit_5"/>
+       <widget class="QLineEdit" name="txtQHighQ">
+        <property name="toolTip">
+         <string>Extrapolated invariant from high-Q range.</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="2">
        <widget class="QLabel" name="label_9">
@@ -143,12 +169,16 @@
        </widget>
       </item>
       <item row="2" column="3">
-       <widget class="QLineEdit" name="lineEdit_6"/>
+       <widget class="QLineEdit" name="txtQHighQErr">
+        <property name="toolTip">
+         <string>Uncertainty on the invariant from high-Q range.</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="4">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="lblQHighQUnits">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;[1/(cm*Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;)]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(cm Å&lt;span style=&quot; vertical-align:super;&quot;&gt;3&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -175,7 +205,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="QDialogButtonBox" name="cmdOK">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -189,7 +219,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>cmdOK</sender>
    <signal>accepted()</signal>
    <receiver>Dialog</receiver>
    <slot>accept()</slot>
@@ -205,7 +235,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>cmdOK</sender>
    <signal>rejected()</signal>
    <receiver>Dialog</receiver>
    <slot>reject()</slot>

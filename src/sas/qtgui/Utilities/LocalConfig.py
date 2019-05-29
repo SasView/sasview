@@ -3,6 +3,7 @@
 """
 import time
 import os
+import logging
 
 #from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
@@ -45,8 +46,8 @@ developed under NSF award DMR-0520547.
 '''
 _acknowledgement =  \
 '''This work originally developed as part of the DANSE project funded by the NSF
-under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
-and ILL.
+under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS,
+ILL, ANSTO and BAM.
 
 '''
 _homepage = "http://www.sasview.org"
@@ -71,7 +72,7 @@ _ill_logo = os.path.join(icon_path, "ill_logo.png")
 _ansto_logo = os.path.join(icon_path, "ansto_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
-_inst_logo = os.path.join(icon_path, "utlogo.gif")
+_inst_logo = os.path.join(icon_path, "utlogo.png")
 _nist_url = "http://www.nist.gov/"
 _umd_url = "http://www.umd.edu/"
 _sns_url = "http://neutrons.ornl.gov/"
@@ -80,11 +81,14 @@ _isis_url = "http://www.isis.stfc.ac.uk/"
 _ess_url = "http://ess-scandinavia.eu/"
 _ill_url = "http://www.ill.eu/"
 _ansto_url = "http://www.ansto.gov.au/"
+_bam_url = "http://www.bam.de/"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
+_delft_url = "http://www.tudelft.nl/en/tnw/business/facilities/reactor-instituut-delft/"
+_diamond_url = "http://www.diamond.ac.uk"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2013, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO"
+_copyright = "(c) 2009 - 2019, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and BAM"
 
 
 #edit the list of file state your plugin can read
@@ -127,18 +131,28 @@ DATALOADER_SHOW = True
 CLEANUP_PLOT = False
 WELCOME_PANEL_SHOW = False
 #Show or hide toolbar at the start up
-TOOLBAR_SHOW = True
+TOOLBAR_SHOW = False
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
 
+# Default threading model
+USING_TWISTED = False
+
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
+
+# Logging levels to disable, if any
+DISABLE_LOGGING = logging.NOTSET
+
+# Location of the marketplace
+MARKETPLACE_URL = "http://marketplace.sasview.org/"
+
 def printEVT(message):
     """
     Post a debug message to console/file
     """
     if __EVT_DEBUG__:
-        print "%g:  %s" % (time.clock(), message)
+        print("%g:  %s" % (time.clock(), message))
 
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')

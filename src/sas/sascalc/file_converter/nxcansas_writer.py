@@ -7,10 +7,10 @@ import numpy as np
 import re
 import os
 
-from sas.sascalc.dataloader.readers.cansas_reader_HDF5 import Reader as Cansas2Reader
+from sas.sascalc.dataloader.readers.cansas_reader_HDF5 import Reader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 
-class NXcanSASWriter(Cansas2Reader):
+class NXcanSASWriter(Reader):
     """
     A class for writing in NXcanSAS data files. Any number of data sets may be
     written to the file. Currently 1D and 2D SAS data sets are supported
@@ -86,9 +86,10 @@ class NXcanSASWriter(Cansas2Reader):
                 if units is not None:
                     entry[names[2]].attrs['units'] = units
 
-        valid_data = all([issubclass(d.__class__, (Data1D, Data2D)) for d in dataset])
+        valid_data = all([isinstance(d, (Data1D, Data2D)) for d in dataset])
         if not valid_data:
-            raise ValueError("All entries of dataset must be Data1D or Data2D objects")
+            raise ValueError("All entries of dataset must be Data1D or Data2D"
+                             "objects")
 
         # Get run name and number from first Data object
         data_info = dataset[0]
@@ -108,16 +109,13 @@ class NXcanSASWriter(Cansas2Reader):
         sasentry.attrs['canSAS_class'] = 'SASentry'
         sasentry.attrs['version'] = '1.0'
 
-        i = 1
-
-        for data_obj in dataset:
-            data_entry = sasentry.create_group("sasdata{0:0=2d}".format(i))
+        for i, data_obj in enumerate(dataset):
+            data_entry = sasentry.create_group("sasdata{0:0=2d}".format(i+1))
             data_entry.attrs['canSAS_class'] = 'SASdata'
             if isinstance(data_obj, Data1D):
                 self._write_1d_data(data_obj, data_entry)
             elif isinstance(data_obj, Data2D):
                 self._write_2d_data(data_obj, data_entry)
-            i += 1
 
         data_info = dataset[0]
         # Sample metadata
@@ -147,7 +145,7 @@ class NXcanSASWriter(Cansas2Reader):
             if details is not None:
                 sample_entry.create_dataset('details', data=details)
 
-        # Instrumment metadata
+        # Instrument metadata
         instrument_entry = sasentry.create_group('sasinstrument')
         instrument_entry.attrs['canSAS_class'] = 'SASinstrument'
         instrument_entry['name'] = _h5_string(data_info.instrument)
@@ -175,41 +173,42 @@ class NXcanSASWriter(Cansas2Reader):
             names=['beam_size_x', 'beam_size_y'],
             units=data_info.source.beam_size_unit, write_fn=_write_h5_float)
 
-
         # Collimation metadata
         if len(data_info.collimation) > 0:
-            i = 1
-            for coll_info in data_info.collimation:
+            for i, coll_info in enumerate(data_info.collimation):
                 collimation_entry = instrument_entry.create_group(
-                    'sascollimation{0:0=2d}'.format(i))
+                    'sascollimation{0:0=2d}'.format(i + 1))
                 collimation_entry.attrs['canSAS_class'] = 'SAScollimation'
                 if coll_info.length is not None:
                     _write_h5_float(collimation_entry, coll_info.length, 'SDD')
-                    collimation_entry['SDD'].attrs['units'] = coll_info.length_unit
+                    collimation_entry['SDD'].attrs['units'] =\
+                        coll_info.length_unit
                 if coll_info.name is not None:
                     collimation_entry['name'] = _h5_string(coll_info.name)
         else:
-            # Create a blank one - at least 1 set of collimation metadata
-            # required by format
-            collimation_entry = instrument_entry.create_group('sascollimation01')
+            # Create a blank one - at least 1 collimation required by format
+            instrument_entry.create_group('sascollimation01')
 
         # Detector metadata
         if len(data_info.detector) > 0:
             i = 1
-            for det_info in data_info.detector:
+            for i, det_info in enumerate(data_info.detector):
                 detector_entry = instrument_entry.create_group(
-                    'sasdetector{0:0=2d}'.format(i))
+                    'sasdetector{0:0=2d}'.format(i + 1))
                 detector_entry.attrs['canSAS_class'] = 'SASdetector'
                 if det_info.distance is not None:
                     _write_h5_float(detector_entry, det_info.distance, 'SDD')
-                    detector_entry['SDD'].attrs['units'] = det_info.distance_unit
+                    detector_entry['SDD'].attrs['units'] =\
+                        det_info.distance_unit
                 if det_info.name is not None:
                     detector_entry['name'] = _h5_string(det_info.name)
                 else:
                     detector_entry['name'] = _h5_string('')
                 if det_info.slit_length is not None:
-                    _write_h5_float(detector_entry, det_info.slit_length, 'slit_length')
-                    detector_entry['slit_length'].attrs['units'] = det_info.slit_length_unit
+                    _write_h5_float(detector_entry, det_info.slit_length,
+                                    'slit_length')
+                    detector_entry['slit_length'].attrs['units'] =\
+                        det_info.slit_length_unit
                 _write_h5_vector(detector_entry, det_info.offset)
                 # NXcanSAS doesn't save information about pitch, only roll
                 # and yaw. The _write_h5_vector method writes vector.y, but we
@@ -223,13 +222,55 @@ class NXcanSASWriter(Cansas2Reader):
                 _write_h5_vector(detector_entry, det_info.pixel_size,
                     names=['x_pixel_size', 'y_pixel_size'],
                     write_fn=_write_h5_float, units=det_info.pixel_size_unit)
-
-                i += 1
         else:
             # Create a blank one - at least 1 detector required by format
             detector_entry = instrument_entry.create_group('sasdetector01')
             detector_entry.attrs['canSAS_class'] = 'SASdetector'
             detector_entry.attrs['name'] = ''
+
+        # Process meta data
+        for i, process in enumerate(data_info.process):
+            process_entry = sasentry.create_group('sasprocess{0:0=2d}'.format(
+                i + 1))
+            process_entry.attrs['canSAS_class'] = 'SASprocess'
+            if process.name:
+                name = _h5_string(process.name)
+                process_entry.create_dataset('name', data=name)
+            if process.date:
+                date = _h5_string(process.date)
+                process_entry.create_dataset('date', data=date)
+            if process.description:
+                desc = _h5_string(process.description)
+                process_entry.create_dataset('description', data=desc)
+            for j, term in enumerate(process.term):
+                # Don't save empty terms
+                if term:
+                    h5_term = _h5_string(term)
+                    process_entry.create_dataset('term{0:0=2d}'.format(
+                        j + 1), data=h5_term)
+            for j, note in enumerate(process.notes):
+                # Don't save empty notes
+                if note:
+                    h5_note = _h5_string(note)
+                    process_entry.create_dataset('note{0:0=2d}'.format(
+                        j + 1), data=h5_note)
+
+        # Transmission Spectrum
+        for i, trans in enumerate(data_info.trans_spectrum):
+            trans_entry = sasentry.create_group(
+                'sastransmission_spectrum{0:0=2d}'.format(i + 1))
+            trans_entry.attrs['canSAS_class'] = 'SAStransmission_spectrum'
+            trans_entry.attrs['signal'] = 'T'
+            trans_entry.attrs['T_axes'] = 'T'
+            trans_entry.attrs['name'] = trans.name
+            if trans.timestamp is not '':
+                trans_entry.attrs['timestamp'] = trans.timestamp
+            transmission = trans_entry.create_dataset('T',
+                                                      data=trans.transmission)
+            transmission.attrs['unertainties'] = 'Tdev'
+            trans_entry.create_dataset('Tdev',
+                                       data=trans.transmission_deviation)
+            trans_entry.create_dataset('lambda', data=trans.wavelength)
 
         note_entry = sasentry.create_group('sasnote'.format(i))
         note_entry.attrs['canSAS_class'] = 'SASnote'
@@ -253,16 +294,25 @@ class NXcanSASWriter(Cansas2Reader):
         """
         data_entry.attrs['signal'] = 'I'
         data_entry.attrs['I_axes'] = 'Q'
-        data_entry.attrs['I_uncertainties'] = 'Idev'
-        data_entry.attrs['Q_indicies'] = 0
-
-        dI = data_obj.dy
-        if dI is None:
-            dI = np.zeros((data_obj.y.shape))
-
-        data_entry.create_dataset('Q', data=data_obj.x)
-        data_entry.create_dataset('I', data=data_obj.y)
-        data_entry.create_dataset('Idev', data=dI)
+        data_entry.attrs['Q_indices'] = [0]
+        q_entry = data_entry.create_dataset('Q', data=data_obj.x)
+        q_entry.attrs['units'] = data_obj.x_unit
+        i_entry = data_entry.create_dataset('I', data=data_obj.y)
+        i_entry.attrs['units'] = data_obj.y_unit
+        if data_obj.dy is not None:
+            i_entry.attrs['uncertainties'] = 'Idev'
+            i_dev_entry = data_entry.create_dataset('Idev', data=data_obj.dy)
+            i_dev_entry.attrs['units'] = data_obj.y_unit
+        if data_obj.dx is not None:
+            q_entry.attrs['resolutions'] = 'dQ'
+            dq_entry = data_entry.create_dataset('dQ', data=data_obj.dx)
+            dq_entry.attrs['units'] = data_obj.x_unit
+        elif data_obj.dxl is not None:
+            q_entry.attrs['resolutions'] = ['dQl','dQw']
+            dql_entry = data_entry.create_dataset('dQl', data=data_obj.dxl)
+            dql_entry.attrs['units'] = data_obj.x_unit
+            dqw_entry = data_entry.create_dataset('dQw', data=data_obj.dxw)
+            dqw_entry.attrs['units'] = data_obj.x_unit
 
     def _write_2d_data(self, data, data_entry):
         """
@@ -272,13 +322,12 @@ class NXcanSASWriter(Cansas2Reader):
         :param data_entry: A h5py Group object representing the SASdata
         """
         data_entry.attrs['signal'] = 'I'
-        data_entry.attrs['I_axes'] = 'Q,Q'
-        data_entry.attrs['I_uncertainties'] = 'Idev'
-        data_entry.attrs['Q_indicies'] = [0,1]
+        data_entry.attrs['I_axes'] = 'Qx,Qy'
+        data_entry.attrs['Q_indices'] = [0,1]
 
         (n_rows, n_cols) = (len(data.y_bins), len(data.x_bins))
 
-        if n_rows == 0 and n_cols == 0:
+        if (n_rows == 0 and n_cols == 0) or (n_cols*n_rows != data.data.size):
             # Calculate rows and columns, assuming detector is square
             # Same logic as used in PlotPanel.py _get_bins
             n_cols = int(np.floor(np.sqrt(len(data.qy_data))))
@@ -287,18 +336,33 @@ class NXcanSASWriter(Cansas2Reader):
             if n_rows * n_cols != len(data.qy_data):
                 raise ValueError("Unable to calculate dimensions of 2D data")
 
-        I = np.reshape(data.data, (n_rows, n_cols))
-        dI = np.zeros((n_rows, n_cols))
-        if not all(data.err_data == [None]):
-            dI = np.reshape(data.err_data, (n_rows, n_cols))
-        qx =  np.reshape(data.qx_data, (n_rows, n_cols))
+        intensity = np.reshape(data.data, (n_rows, n_cols))
+        qx = np.reshape(data.qx_data, (n_rows, n_cols))
         qy = np.reshape(data.qy_data, (n_rows, n_cols))
 
-        I_entry = data_entry.create_dataset('I', data=I)
-        I_entry.attrs['units'] = data.I_unit
-        Qx_entry = data_entry.create_dataset('Qx', data=qx)
-        Qx_entry.attrs['units'] = data.Q_unit
-        Qy_entry = data_entry.create_dataset('Qy', data=qy)
-        Qy_entry.attrs['units'] = data.Q_unit
-        Idev_entry = data_entry.create_dataset('Idev', data=dI)
-        Idev_entry.attrs['units'] = data.I_unit
+        i_entry = data_entry.create_dataset('I', data=intensity)
+        i_entry.attrs['units'] = data.I_unit
+        qx_entry = data_entry.create_dataset('Qx', data=qx)
+        qx_entry.attrs['units'] = data.Q_unit
+        qy_entry = data_entry.create_dataset('Qy', data=qy)
+        qy_entry.attrs['units'] = data.Q_unit
+        if (data.err_data is not None
+                and not all(v is None for v in data.err_data)):
+            d_i = np.reshape(data.err_data, (n_rows, n_cols))
+            i_entry.attrs['uncertainties'] = 'Idev'
+            i_dev_entry = data_entry.create_dataset('Idev', data=d_i)
+            i_dev_entry.attrs['units'] = data.I_unit
+        if (data.dqx_data is not None
+                and not all(v is None for v in data.dqx_data)):
+            qx_entry.attrs['resolutions'] = 'dQx'
+            dqx_entry = data_entry.create_dataset('dQx', data=data.dqx_data)
+            dqx_entry.attrs['units'] = data.Q_unit
+        if (data.dqy_data is not None
+                and not all(v is None for v in data.dqy_data)):
+            qy_entry.attrs['resolutions'] = 'dQy'
+            dqy_entry = data_entry.create_dataset('dQy', data=data.dqy_data)
+            dqy_entry.attrs['units'] = data.Q_unit
+        if data.mask is not None and not all(v is None for v in data.mask):
+            data_entry.attrs['mask'] = "mask"
+            mask = np.invert(np.asarray(data.mask, dtype=bool))
+            data_entry.create_dataset('mask', data=mask)

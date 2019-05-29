@@ -80,7 +80,7 @@ class LineModel(object):
                                 self._line(x[0] * math.sin(x[1]))
         elif x.__class__.__name__ == 'tuple':
             msg = "Tuples are not allowed as input to BaseComponent models"
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             return self._line(x)
 
@@ -102,7 +102,7 @@ class LineModel(object):
             return self._line(x[0]) * self._line(x[1])
         elif x.__class__.__name__ == 'tuple':
             msg = "Tuples are not allowed as input to BaseComponent models"
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             return self._line(x)
 

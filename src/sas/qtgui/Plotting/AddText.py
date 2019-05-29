@@ -1,14 +1,18 @@
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 import sas.sasview
 
 from sas.qtgui.Plotting.UI.AddTextUI import Ui_AddText
 
-class AddText(QtGui.QDialog, Ui_AddText):
+class AddText(QtWidgets.QDialog, Ui_AddText):
     """ Simple GUI for a single line text query """
     def __init__(self, parent=None):
         super(AddText, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self._font = QtGui.QFont()
         self._color = "black"
@@ -28,7 +32,7 @@ class AddText(QtGui.QDialog, Ui_AddText):
         """
         Pop up the standard Qt Font change dialog
         """
-        self._font, ok = QtGui.QFontDialog.getFont(parent=self)
+        self._font, ok = QtWidgets.QFontDialog.getFont(parent=self)
         if ok:
             self.textEdit.setFont(self._font)
 
@@ -37,7 +41,7 @@ class AddText(QtGui.QDialog, Ui_AddText):
         Pop up the standard Qt color change dialog
         """
         # Pick up the chosen color
-        self._color = QtGui.QColorDialog.getColor(parent=self)
+        self._color = QtWidgets.QColorDialog.getColor(parent=self)
         # Update the text control
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Text, self._color)

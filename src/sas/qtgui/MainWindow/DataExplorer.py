@@ -3,11 +3,11 @@ import sys
 import os
 import time
 import logging
+import copy
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
-from PyQt4.Qt import QMutex
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from twisted.internet import threads
 
@@ -29,6 +29,10 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 
 import sas.qtgui.Perspectives as Perspectives
 
+DEFAULT_PERSPECTIVE = "Fitting"
+
+logger = logging.getLogger(__name__)
+
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -38,7 +42,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Main model for keeping loaded data
         self.model = QtGui.QStandardItemModel(self)
-
         # Secondary model for keeping frozen data sets
         self.theory_model = QtGui.QStandardItemModel(self)
 
@@ -46,13 +49,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # in order to set the widget parentage properly.
         self.parent = guimanager
         self.loader = Loader()
+
+        # Read in default locations
+        self.default_save_location = None
+        self.default_load_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.default_project_location = None
+
         self.manager = manager if manager is not None else DataManager()
-        self.txt_widget = QtGui.QTextEdit(None)
+        self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Be careful with twisted threads.
-        self.mutex = QMutex()
+        self.mutex = QtCore.QMutex()
 
-        # Active plots
+        # Plot widgets {name:widget}, required to keep track of plots shown as MDI subwindows
+        self.plot_widgets = {}
+
+        # Active plots {id:Plotter1D/2D}, required to keep track of currently displayed plots
         self.active_plots = {}
 
         # Connect the buttons
@@ -64,11 +76,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdNew.clicked.connect(self.newPlot)
         self.cmdNew_2.clicked.connect(self.newPlot)
         self.cmdAppend.clicked.connect(self.appendPlot)
+        self.cmdAppend_2.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
-
-        # Display HTML content
-        self._helpView = QtWebKit.QWebView()
 
         # Fill in the perspectives combo
         self.initPerspectives()
@@ -83,7 +93,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.freezeView.customContextMenuRequested.connect(self.onCustomContextMenu)
 
         # Connect the comboboxes
-        self.cbSelect.currentIndexChanged.connect(self.selectData)
+        self.cbSelect.activated.connect(self.selectData)
 
         #self.closeEvent.connect(self.closeEvent)
         self.currentChanged.connect(self.onTabSwitch)
@@ -92,12 +102,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
+        self.communicator.maskEditorSignal.connect(self.showEditDataMask)
+        self.communicator.extMaskEditorSignal.connect(self.extShowEditDataMask)
+        self.communicator.changeDataExplorerTabSignal.connect(self.changeTabs)
+        self.communicator.forcePlotDisplaySignal.connect(self.displayData)
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
         # Proxy model for showing a subset of Data1D/Data2D content
-        self.data_proxy = QtGui.QSortFilterProxyModel(self)
+        self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
 
         # Don't show "empty" rows with data objects
@@ -107,7 +122,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.treeView.setModel(self.data_proxy)
 
         # Proxy model for showing a subset of Theory content
-        self.theory_proxy = QtGui.QSortFilterProxyModel(self)
+        self.theory_proxy = QtCore.QSortFilterProxyModel(self)
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
@@ -134,14 +149,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         else:
             self.current_view = self.freezeView
 
+    def changeTabs(self, tab=0):
+        """
+        Switch tabs of the data explorer
+        0: data tab
+        1: theory tab
+        """
+        assert(tab in [0,1])
+        self.setCurrentIndex(tab)
+
     def displayHelp(self):
         """
         Show the "Loading data" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION +\
-            "/user/sasgui/guiframe/data_explorer_help.html"
-        self._helpView.load(QtCore.QUrl(tree_location))
-        self._helpView.show()
+        tree_location = "/user/qtgui/MainWindow/data_explorer_help.html"
+        self.parent.showHelp(tree_location)
 
     def enableGraphCombo(self, combo_text):
         """
@@ -154,13 +176,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Populate the Perspective combobox and define callbacks
         """
-        available_perspectives = sorted([p for p in Perspectives.PERSPECTIVES.keys()])
+        available_perspectives = sorted([p for p in list(Perspectives.PERSPECTIVES.keys())])
         if available_perspectives:
             self.cbFitting.clear()
             self.cbFitting.addItems(available_perspectives)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
-        self.updatePerspectiveCombo(0)
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
 
     def _perspective(self):
         """
@@ -174,6 +196,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         load_thread = threads.deferToThread(self.readData, url)
         load_thread.addCallback(self.loadComplete)
+        load_thread.addErrback(self.loadFailed)
 
     def loadFile(self, event=None):
         """
@@ -190,16 +213,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        folder = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
-              QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontUseNativeDialog)
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Choose a directory',
+            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_load_location
+        }
+        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+
         if folder is None:
             return
 
         folder = str(folder)
-
         if not os.path.isdir(folder):
             return
-
+        self.default_load_location = folder
         # get content of dir into a list
         path_str = [os.path.join(os.path.abspath(folder), filename)
                     for filename in os.listdir(folder)]
@@ -210,39 +238,52 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Open Project" menu item chosen.
         """
+        # check if any items loaded and warn about data deletion
+        if self.model.rowCount() > 0:
+            msg = "This operation will remove all data, plots and analyses from"
+            msg += " SasView before loading the project. Do you wish to continue?"
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Project Load")
+            # custom buttons
+            button_yes = QtWidgets.QPushButton("Yes")
+            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
+            button_no = QtWidgets.QPushButton("No")
+            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
+            retval = msgbox.exec_()
+            if retval == QtWidgets.QMessageBox.RejectRole:
+                # cancel fit
+                return
+
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Project',
-            'filter'    : 'Project (*.json);;All files (*.*)',
-            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+            'filter'    : 'Project Files (*.json);;Old Project Files (*.svs);;All files (*.*)',
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtGui.QFileDialog.getOpenFileName(**kwargs))
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
-            load_thread = threads.deferToThread(self.readProject, filename)
-            load_thread.addCallback(self.readProjectComplete)
+            self.default_project_location = os.path.dirname(filename)
+            self.deleteAllItems()
+            # Currently project load is available only for fitting
+            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
+                self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+            self.readProject(filename)
 
-    def readProject(self, filename):
-        self.communicator.statusBarUpdateSignal.emit("Loading Project... %s" % os.path.basename(filename))
-        try:
-            manager = DataManager()
-            with open(filename, 'r') as infile:
-                manager.load_from_readable(infile)
-
-            self.communicator.statusBarUpdateSignal.emit("Loaded Project: %s" % os.path.basename(filename))
-            return manager
-
-        except:
-            self.communicator.statusBarUpdateSignal.emit("Failed: %s" % os.path.basename(filename))
-            raise
-
-    def readProjectComplete(self, manager):
-        self.model.clear()
-
-        self.manager.assign(manager)
-        for id, item in self.manager.get_all_data().iteritems():
-            self.updateModel(item.data, item.path)
-
-        self.model.reset()
+    def loadAnalysis(self):
+        """
+        Called when the "Open Analysis" menu item chosen.
+        """
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Open Analysis',
+            'filter'    : 'Project (*.fitv);;All files (*.*)',
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+        }
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
+        if filename:
+            self.readProject(filename)
 
     def saveProject(self):
         """
@@ -252,13 +293,300 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Save Project',
             'filter'    : 'Project (*.json)',
-            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_project_location
         }
-        filename = str(QtGui.QFileDialog.getSaveFileName(**kwargs))
-        if filename:
-            self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
-            with open(filename, 'w') as outfile:
-                self.manager.save_to_writable(outfile)
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = name_tuple[0]
+        if not filename:
+            return
+        self.default_project_location = os.path.dirname(filename)
+        _, extension = os.path.splitext(filename)
+        if not extension:
+            filename = '.'.join((filename, 'json'))
+        self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
+
+        return filename
+
+    def saveAsAnalysisFile(self, tab_id=1):
+        """
+        Show the save as... dialog and return the chosen filepath
+        """
+        default_name = "FitPage"+str(tab_id)+".fitv"
+
+        wildcard = "fitv files (*.fitv)"
+        kwargs = {
+            'caption'   : 'Save As',
+            'directory' : default_name,
+            'filter'    : wildcard,
+            'parent'    : None,
+        }
+        # Query user for filename.
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = filename_tuple[0]
+        return filename
+
+    def saveAnalysis(self, data, tab_id=1):
+        """
+        Called when the "Save Analysis" menu item chosen.
+        """
+        filename = self.saveAsAnalysisFile(tab_id)
+        if not filename:
+            return
+        _, extension = os.path.splitext(filename)
+        if not extension:
+            filename = '.'.join((filename, 'fitv'))
+        self.communicator.statusBarUpdateSignal.emit("Saving analysis... %s\n" % os.path.basename(filename))
+
+        with open(filename, 'w') as outfile:
+            GuiUtils.saveData(outfile, data)
+
+        self.communicator.statusBarUpdateSignal.emit('Analysis saved.')
+
+    def allDataForModel(self, model):
+        # data model
+        all_data = {}
+        for i in range(model.rowCount()):
+            properties = {}
+            item = model.item(i)
+            data = GuiUtils.dataFromItem(item)
+            if data is None: continue
+            # Now, all plots under this item
+            filename = data.filename
+            is_checked = item.checkState()
+            properties['checked'] = is_checked
+            other_datas = []
+            # save underlying theories
+            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            # skip the main plot
+            other_datas = list(other_datas.values())[1:]
+            all_data[data.id] = [data, properties, other_datas]
+        return all_data
+
+    def getDataForID(self, id):
+        # return the dataset with the given ID
+        all_data = []
+        for model in (self.model, self.theory_model):
+            for i in range(model.rowCount()):
+                properties = {}
+                item = model.item(i)
+                data = GuiUtils.dataFromItem(item)
+                if data is None: continue
+                if data.id != id: continue
+                # We found the dataset - save it.
+                filename = data.filename
+                is_checked = item.checkState()
+                properties['checked'] = is_checked
+                other_datas = GuiUtils.plotsFromFilename(filename, model)
+                # skip the main plot
+                other_datas = list(other_datas.values())[1:]
+                all_data = [data, properties, other_datas]
+                break
+        return all_data
+
+    def getItemForID(self, id):
+        # return the model item with the given ID
+        item = None
+        for model in (self.model, self.theory_model):
+            for i in range(model.rowCount()):
+                properties = {}
+                data = GuiUtils.dataFromItem(model.item(i))
+                if data is None: continue
+                if data.id != id: continue
+                # We found the item - return it
+                item = model.item(i)
+                break
+        return item
+
+    def getAllData(self):
+        """
+        converts all datasets into serializable dictionary
+        """
+        data = self.allDataForModel(self.model)
+        theory = self.allDataForModel(self.theory_model)
+
+        all_data = {}
+        all_data['is_batch'] = str(self.chkBatch.isChecked())
+
+        for key, value in data.items():
+            all_data[key] = value
+        for key, value in theory.items():
+            if key in all_data:
+                raise ValueError("Inconsistent data in Project file.")
+            all_data[key] = value
+        return all_data
+
+    def saveDataToFile(self, outfile):
+        """
+        Save every dataset to a json file
+        """
+        all_data = self.getAllData()
+        # save datas
+        GuiUtils.saveData(outfile, all_data)
+
+    def readProject(self, filename):
+        """
+        Read out datasets and fitpages from file
+        """
+        # Find out the filetype based on extension
+        ext = os.path.splitext(filename)[1]
+        all_data = {}
+        if 'svs' in ext.lower():
+            # backward compatibility mode.
+            try:
+                datasets = GuiUtils.readProjectFromSVS(filename)
+            except Exception as ex:
+                # disregard malformed SVS and try to recover whatever
+                # is available
+                msg = "Error while reading the project file: "+str(ex)
+                logging.error(msg)
+                pass
+            # Convert fitpage properties and update the dict
+            try:
+                all_data = GuiUtils.convertFromSVS(datasets)
+            except Exception as ex:
+                # disregard malformed SVS and try to recover regardless
+                msg = "Error while converting the project file: "+str(ex)
+                logging.error(msg)
+                pass
+        else:
+            with open(filename, 'r') as infile:
+                try:
+                    all_data = GuiUtils.readDataFromFile(infile)
+                except Exception as ex:
+                    logging.error("Project load failed with " + str(ex))
+                    return
+        for key, value in all_data.items():
+            if key=='is_batch':
+                self.chkBatch.setChecked(True if value=='True' else False)
+                if 'batch_grid' not in all_data:
+                    continue
+                grid_pages = all_data['batch_grid']
+                for grid_name, grid_page in grid_pages.items():
+                    grid_page.append(grid_name)
+                    self.parent.showBatchOutput(grid_page)
+                continue
+            if 'cs_tab' in key:
+                continue
+            # send newly created items to the perspective
+            self.updatePerspectiveWithProperties(key, value)
+
+        # See if there are any batch pages defined and create them, if so
+        self.updateWithBatchPages(all_data)
+
+        # Only now can we create/assign C&S pages.
+        for key, value in all_data.items():
+            if 'cs_tab' in key:
+                self.updatePerspectiveWithProperties(key, value)
+
+    def updateWithBatchPages(self, all_data):
+        """
+        Checks all properties and see if there are any batch pages defined.
+        If so, pull out relevant indices and recreate the batch page(s)
+        """
+        batch_pages = []
+        for key, value in all_data.items():
+            if 'fit_params' not in value:
+                continue
+            params = value['fit_params']
+            for page in params:
+                if not isinstance(page, dict):
+                    continue
+                if 'is_batch_fitting' not in page:
+                    continue
+                if page['is_batch_fitting'][0] != 'True':
+                    continue
+                batch_ids = page['data_id'][0]
+                # check for duplicates
+                batch_set = set(batch_ids)
+                if batch_set in batch_pages:
+                    continue
+                # Found a unique batch page. Send it away
+                items = [self.getItemForID(i) for i in batch_set]
+                # Update the batch page list
+                batch_pages.append(batch_set)
+                # Assign parameters to the most recent (current) page.
+                self._perspective().setData(data_item=items, is_batch=True)
+                self._perspective().updateFromParameters(page)
+        pass
+
+    def updatePerspectiveWithProperties(self, key, value):
+        """
+        """
+        if 'fit_data' in value:
+            data_dict = {key:value['fit_data']}
+            # Create new model items in the data explorer
+            items = self.updateModelFromData(data_dict)
+
+        if 'fit_params' in value:
+            params = value['fit_params']
+            # Make the perspective read the rest of the read data
+            if not isinstance(params, list):
+                params = [params]
+            for page in params:
+                # Check if this set of parameters is for a batch page
+                # if so, skip the update
+                if page['is_batch_fitting'][0] == 'True':
+                    continue
+                tab_index=None
+                if 'tab_index' in page:
+                    tab_index = page['tab_index'][0]
+                    tab_index = int(tab_index)
+                # Send current model item to the perspective
+                self.sendItemToPerspective(items[0], tab_index=tab_index)
+                # Assign parameters to the most recent (current) page.
+                self._perspective().updateFromParameters(page)
+        if 'cs_tab' in key and 'is_constraint' in value:
+            # Create a C&S page
+            self._perspective().addConstraintTab()
+            # Modify the tab
+            self._perspective().updateFromParameters(value)
+
+        pass # debugger
+
+    def updateModelFromData(self, data):
+        """
+        Given data from analysis/project file,
+        create indices and populate data/theory models
+        """
+        # model items for top level datasets
+        items = []
+        for key, value in data.items():
+            # key - cardinal number of dataset
+            # value - main dataset, [dependant filesets]
+            # add the main index
+            if not value: continue
+            new_data = value[0]
+            from sas.sascalc.dataloader.data_info import Data1D as old_data1d
+            from sas.sascalc.dataloader.data_info import Data2D as old_data2d
+            if isinstance(new_data, (old_data1d, old_data2d)):
+                new_data = self.manager.create_gui_data(value[0], new_data.filename)
+            if hasattr(value[0], 'id'):
+                new_data.id = value[0].id
+                new_data.group_id = value[0].group_id
+            assert isinstance(new_data, (Data1D, Data2D))
+            # make sure the ID is retained
+            properties = value[1]
+            is_checked = properties['checked']
+            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
+            new_item.setCheckState(is_checked)
+            items.append(new_item)
+            model = self.theory_model
+            if new_data.is_data:
+                model = self.model
+                # Caption for the theories
+                new_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
+
+            model.appendRow(new_item)
+            self.manager.add_data(data_list={new_data.id:new_data})
+
+            # Add the underlying data
+            if not value[2]:
+                continue
+            for plot in value[2]:
+                assert isinstance(plot, (Data1D, Data2D))
+                GuiUtils.updateModelItemWithPlot(new_item, plot, plot.name)
+        return items
 
     def deleteFile(self, event):
         """
@@ -267,19 +595,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self,
+        reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
                                            delete_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
+        if reply == QtWidgets.QMessageBox.No:
             return
 
         # Figure out which rows are checked
         ind = -1
         # Use 'while' so the row count is forced at every iteration
-        deleted_indices = []
+        deleted_items = []
         deleted_names = []
         while ind < self.model.rowCount():
             ind += 1
@@ -288,14 +616,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
                 deleted_names.append(str(self.model.item(ind).text()))
-                deleted_indices.append(item)
+                deleted_items.append(item)
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
 
         # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_indices)
+        self.communicator.dataDeletedSignal.emit(deleted_items)
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
@@ -307,44 +635,50 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self,
+        reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
                                            delete_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
+        if reply == QtWidgets.QMessageBox.No:
             return
 
         # Figure out which rows are checked
         ind = -1
-        # Use 'while' so the row count is forced at every iteration
+
+        deleted_items = []
+        deleted_names = []
         while ind < self.theory_model.rowCount():
             ind += 1
             item = self.theory_model.item(ind)
+
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
+                deleted_names.append(str(self.theory_model.item(ind).text()))
+                deleted_items.append(item)
+
                 self.theory_model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
 
-        # pass temporarily kept as a breakpoint anchor
-        pass
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_items)
 
-    def sendData(self, event):
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
+
+    def sendData(self, event=None):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        # Set the signal handlers
-        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
-
         def isItemReady(index):
             item = self.model.item(index)
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
 
         # Figure out which rows are checked
         selected_items = [self.model.item(index)
-                          for index in xrange(self.model.rowCount())
+                          for index in range(self.model.rowCount())
                           if isItemReady(index)]
 
         if len(selected_items) < 1:
@@ -352,16 +686,96 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Which perspective has been selected?
         if len(selected_items) > 1 and not self._perspective().allowBatch():
-            msg = self._perspective().title() + " does not allow multiple data."
-            msgbox = QtGui.QMessageBox()
-            msgbox.setIcon(QtGui.QMessageBox.Critical)
+            if hasattr(self._perspective(), 'title'):
+                title = self._perspective().title()
+            else:
+                title = self._perspective().windowTitle()
+            msg = title + " does not allow multiple data."
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
-            msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             retval = msgbox.exec_()
             return
 
         # Notify the GuiManager about the send request
-        self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+        try:
+            self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            logging.error(msg)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            retval = msgbox.exec_()
+
+    def sendItemToPerspective(self, item, tab_index=None):
+        """
+        Send the passed item data to the current perspective and set the relevant notifiers
+        """
+        # Set the signal handlers
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
+        selected_items = [item]
+        # Notify the GuiManager about the send request
+        try:
+            if tab_index is None:
+                self._perspective().setData(data_item=selected_items, is_batch=False)
+            else:
+                self._perspective().setData(data_item=selected_items, is_batch=False, tab_index=tab_index)
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            logging.error(msg)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            retval = msgbox.exec_()
+
+    def freezeCheckedData(self):
+        """
+        Convert checked results (fitted model, residuals) into separate dataset.
+        """
+        outer_index = -1
+        theories_copied = 0
+        orig_model_size = self.model.rowCount()
+        while outer_index < orig_model_size:
+            outer_index += 1
+            outer_item = self.model.item(outer_index)
+            if not outer_item:
+                continue
+            if not outer_item.isCheckable():
+                continue
+            # Look for checked inner items
+            inner_index = -1
+            while inner_index < outer_item.rowCount():
+               inner_item = outer_item.child(inner_index)
+               inner_index += 1
+               if not inner_item:
+                   continue
+               if not inner_item.isCheckable():
+                   continue
+               if inner_item.checkState() != QtCore.Qt.Checked:
+                   continue
+               self.model.beginResetModel()
+               theories_copied += 1
+               new_item = self.cloneTheory(inner_item)
+               self.model.appendRow(new_item)
+               self.model.endResetModel()
+
+        freeze_msg = ""
+        if theories_copied == 0:
+            return
+        elif theories_copied == 1:
+            freeze_msg = "1 theory copied to a separate data set"
+        elif theories_copied > 1:
+            freeze_msg = "%i theories copied to separate data sets" % theories_copied
+        else:
+            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            raise AttributeError(freeze_msg)
+        self.communicator.statusBarUpdateSignal.emit(freeze_msg)
 
     def freezeTheory(self, event):
         """
@@ -381,14 +795,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             if outer_item.isCheckable() and \
                    outer_item.checkState() == QtCore.Qt.Checked:
+                self.model.beginResetModel()
                 theories_copied += 1
-                new_item = self.recursivelyCloneItem(outer_item)
-                # Append a "unique" descriptor to the name
-                time_bit = str(time.time())[7:-1].replace('.', '')
-                new_name = new_item.text() + '_@' + time_bit
-                new_item.setText(new_name)
+                new_item = self.cloneTheory(outer_item)
                 self.model.appendRow(new_item)
-            self.model.reset()
+                self.model.endResetModel()
 
         freeze_msg = ""
         if theories_copied == 0:
@@ -399,10 +810,38 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             freeze_msg = "%i theories copied from the Theory tab as data sets" % theories_copied
         else:
             freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
-            raise AttributeError, freeze_msg
+            raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
         # Actively switch tabs
         self.setCurrentIndex(1)
+
+    def cloneTheory(self, item_from):
+        """
+        Manually clone theory items into a new HashableItem
+        """
+        new_item = GuiUtils.HashableStandardItem()
+        new_item.setCheckable(True)
+        new_item.setCheckState(QtCore.Qt.Checked)
+        info_item = QtGui.QStandardItem("Info")
+        data_item = QtGui.QStandardItem()
+        orig_data = copy.deepcopy(item_from.child(0).data())
+        data_item.setData(orig_data)
+        new_item.setText(item_from.text())
+        new_item.setChild(0, data_item)
+        new_item.setChild(1, info_item)
+        # Append a "unique" descriptor to the name
+        time_bit = str(time.time())[7:-1].replace('.', '')
+        new_name = new_item.text() + '_@' + time_bit
+        new_item.setText(new_name)
+        # Change the underlying data so it is no longer a theory
+        try:
+            new_item.child(0).data().is_data = True
+            new_item.child(0).data().symbol = 'Circle'
+            new_item.child(0).data().id = new_name
+        except AttributeError:
+            #no data here, pass
+            pass
+        return new_item
 
     def recursivelyCloneItem(self, item):
         """
@@ -410,7 +849,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         new_item = item.clone()
         # clone doesn't do deepcopy :(
-        for child_index in xrange(item.rowCount()):
+        for child_index in range(item.rowCount()):
             child_item = self.recursivelyCloneItem(item.child(child_index))
             new_item.setChild(child_index, child_item)
         return new_item
@@ -424,6 +863,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.setCurrentIndex(ind)
         self.cbgraph.setItemText(ind, current_name)
 
+    def add_data(self, data_list):
+        """
+        Update the data manager with new items
+        """
+        self.manager.add_data(data_list)
+
     def updateGraphCount(self, graph_list):
         """
         Modify the graph name combo and potentially remove
@@ -434,7 +879,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not self.active_plots:
             return
         new_plots = [PlotHelper.plotById(plot) for plot in graph_list]
-        active_plots_copy = self.active_plots.keys()
+        active_plots_copy = list(self.active_plots.keys())
         for plot in active_plots_copy:
             if self.active_plots[plot] in new_plots:
                 continue
@@ -455,39 +900,108 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Notify the gui manager about the new perspective chosen.
         """
-        self.communicator.perspectiveChangedSignal.emit(self.cbFitting.currentText())
+        self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
-    def displayData(self, data_list):
+    def itemFromFilename(self, filename):
+        """
+        Retrieves model item corresponding to the given filename
+        """
+        item = GuiUtils.itemFromFilename(filename, self.model)
+        return item
+
+    def displayFile(self, filename=None, is_data=True, id=None):
         """
         Forces display of charts for the given filename
         """
-        plot_to_show = data_list[0]
-
-        # passed plot is used ONLY to figure out its title,
-        # so all the charts related by it can be pulled from 
-        # the data explorer indices.
-        filename = plot_to_show.filename
-        model = self.model if plot_to_show.is_data else self.theory_model
-
+        model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
-        item = GuiUtils.itemFromFilename(filename, model)
-
+        # Each fitpage contains the name based on fit widget number
+        fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
-        for plot in plots:
-            plot_id = plot.id
-            if plot_id in self.active_plots.keys():
-                self.active_plots[plot_id].replacePlot(plot_id, plot)
-            else:
-                # 'sophisticated' test to generate standalone plot for residuals
-                if 'esiduals' in plot.title:
+        for item, plot in plots.items():
+            if self.updatePlot(plot):
+                # Don't create plots which are already displayed
+                continue
+            # Don't plot intermediate results, e.g. P(Q), S(Q)
+            match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
+            # 2nd match group contains the identifier for the intermediate
+            # result, if present (e.g. "[P(Q)]")
+            if match and match.groups()[1] != None:
+                continue
+            # Don't include plots from different fitpages,
+            # but always include the original data
+            if (fitpage_name in plot.name
+                    or filename in plot.name
+                    or filename == plot.filename):
+                # Residuals get their own plot
+                if plot.plot_role == Data1D.ROLE_RESIDUAL:
+                    plot.yscale='linear'
                     self.plotData([(item, plot)])
                 else:
                     new_plots.append((item, plot))
 
         if new_plots:
             self.plotData(new_plots)
+
+    def displayData(self, data_list, id=None):
+        """
+        Forces display of charts for the given data set
+        """
+        # data_list = [QStandardItem, Data1D/Data2D]
+        plot_to_show = data_list[1]
+        plot_item = data_list[0]
+
+        # plots to show
+        new_plots = []
+
+        # Get the main data plot
+        main_data = GuiUtils.dataFromItem(plot_item.parent())
+        if main_data is None:
+            # Try the current item
+            main_data = GuiUtils.dataFromItem(plot_item)
+        # 1D dependent plots of 2D sets - special treatment
+        if isinstance(main_data, Data2D) and isinstance(plot_to_show, Data1D):
+            main_data = None
+
+        # Make sure main data for 2D is always displayed
+        if main_data is not None:
+            if isinstance(main_data, Data2D):
+                if self.isPlotShown(main_data):
+                    self.active_plots[main_data.name].showNormal()
+                else:
+                    self.plotData([(plot_item, main_data)])
+
+        # Check if this is merely a plot update
+        if self.updatePlot(plot_to_show):
+            return
+
+        # Residuals get their own plot
+        if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
+            plot_to_show.yscale='linear'
+            self.plotData([(plot_item, plot_to_show)])
+        elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
+            # No plot
+            return
+        else:
+            # Plots with main data points on the same chart
+            # Get the main data plot
+            if main_data is not None and not self.isPlotShown(main_data):
+                new_plots.append((plot_item, main_data))
+            new_plots.append((plot_item, plot_to_show))
+        if new_plots:
+            self.plotData(new_plots)
+
+    def isPlotShown(self, plot):
+        """
+        Checks currently shown plots and returns true if match
+        """
+        if not hasattr(plot, 'name'):
+            return False
+        ids_vals = [val.data.name for val in self.active_plots.values()]
+
+        return plot.name in ids_vals
 
     def addDataPlot2D(self, plot_set, item):
         """
@@ -497,7 +1011,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
-        self.active_plots[plot2D.data.id] = plot2D
+        self.active_plots[plot2D.data.name] = plot2D
         #============================================
         # Experimental hook for silx charts
         #============================================
@@ -512,7 +1026,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         #sv.show()
         #============================================
 
-    def plotData(self, plots):
+    def plotData(self, plots, transform=True):
         """
         Takes 1D/2D data and generates a single plot (1D) or multiple plots (2D)
         """
@@ -522,14 +1036,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if isinstance(plot_set, Data1D):
                 if not 'new_plot' in locals():
                     new_plot = Plotter(self)
-                new_plot.plot(plot_set)
+                    new_plot.item = item
+                new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
-                self.active_plots[plot_set.id] = new_plot
+                self.active_plots[plot_set.name] = new_plot
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:
                 msg = "Incorrect data type passed to Plotting"
-                raise AttributeError, msg
+                raise AttributeError(msg)
 
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
@@ -560,25 +1075,34 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.setObjectName(title)
 
         # Add the plot to the workspace
-        self.parent.workspace().addWindow(new_plot)
+        plot_widget = self.parent.workspace().addSubWindow(new_plot)
 
         # Show the plot
         new_plot.show()
+        new_plot.canvas.draw()
+
+        # Update the plot widgets dict
+        self.plot_widgets[title]=plot_widget
 
         # Update the active chart list
-        #self.active_plots[new_plot.data.id] = new_plot
+        self.active_plots[new_plot.data.name] = new_plot
 
     def appendPlot(self):
         """
         Add data set(s) to the existing matplotlib chart
         """
-        # new plot data
-        new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+        # new plot data; check which tab is currently active
+        if self.current_view == self.treeView:
+            new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+        else:
+            new_plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
 
         # old plot data
         plot_id = str(self.cbgraph.currentText())
-
-        assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        try:
+            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+        except:
+            return
 
         old_plot = PlotHelper.plotById(plot_id)
 
@@ -587,17 +1111,37 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if type(plot_set) is type(old_plot._data):
                 old_plot.data = plot_set
                 old_plot.plot()
+                # need this for lookup - otherwise this plot will never update
+                self.active_plots[plot_set.name] = old_plot
 
-    def updatePlot(self, new_data):
+    def updatePlot(self, data):
         """
-        Modify existing plot for immediate response
+        Modify existing plot for immediate response and returns True.
+        Returns false, if the plot does not exist already.
         """
-        data = new_data[0]
+        try: # there might be a list or a single value being passed
+            data = data[0]
+        except TypeError:
+            pass
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
-        id = data.id
-        if data.id in self.active_plots.keys():
-            self.active_plots[id].replacePlot(id, data)
+        ids_keys = list(self.active_plots.keys())
+        ids_vals = [val.data.name for val in self.active_plots.values()]
+
+        data_id = data.name
+        if data_id in ids_keys:
+            # We have data, let's replace data that needs replacing
+            if data.plot_role != Data1D.ROLE_DATA:
+                self.active_plots[data_id].replacePlot(data_id, data)
+                # restore minimized window, if applicable
+                self.active_plots[data_id].showNormal()
+            return True
+        elif data_id in ids_vals:
+            if data.plot_role != Data1D.ROLE_DATA:
+                list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+                self.active_plots[data_id].showNormal()
+            return True
+        return False
 
     def chooseFiles(self):
         """
@@ -605,20 +1149,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # List of known extensions
         wlist = self.getWlist()
-
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtGui.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, None, QtGui.QFileDialog.DontUseNativeDialog)
-        if paths is None:
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Choose files',
+            'filter'    : wlist,
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.default_load_location
+        }
+        paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
+        if not paths:
             return
-
-        if isinstance(paths, QtCore.QStringList):
-            paths = [str(f) for f in paths]
 
         if not isinstance(paths, list):
             paths = [paths]
 
+        self.default_load_location = os.path.dirname(paths[0])
         return paths
 
     def readData(self, path):
@@ -672,8 +1219,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # Model update should be protected
                     self.mutex.lock()
                     self.updateModel(new_data, p_file)
-                    self.model.reset()
-                    QtGui.qApp.processEvents()
+                    #self.model.reset()
+                    QtWidgets.QApplication.processEvents()
                     self.mutex.unlock()
 
                     if hasattr(item, 'errors'):
@@ -686,7 +1233,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
 
                 any_error = True
             if any_error or error_message != "":
@@ -740,102 +1287,87 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         return wlist
 
+    def setItemsCheckability(self, model, dimension=None, checked=False):
+        """
+        For a given model, check or uncheck all items of given dimension
+        """
+        mode = QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked
+
+        assert isinstance(checked, bool)
+
+        types = (None, Data1D, Data2D)
+        if not dimension in types:
+            return
+
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() != mode:
+                data = item.child(0).data()
+                if dimension is None or isinstance(data, dimension):
+                    item.setCheckState(mode)
+
+            items = list(GuiUtils.getChildrenFromItem(item))
+
+            for it in items:
+                if it.isCheckable() and it.checkState() != mode:
+                    data = it.child(0).data()
+                    if dimension is None or isinstance(data, dimension):
+                        it.setCheckState(mode)
+
     def selectData(self, index):
         """
         Callback method for modifying the TreeView on Selection Options change
         """
         if not isinstance(index, int):
             msg = "Incorrect type passed to DataExplorer.selectData()"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # Respond appropriately
         if index == 0:
-            # Select All
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Unchecked:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, checked=True)
+
         elif index == 1:
             # De-select All
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, checked=False)
 
         elif index == 2:
             # Select All 1-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                item.setCheckState(QtCore.Qt.Unchecked)
-
-                try:
-                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
-
-                if is1D:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, dimension=Data1D, checked=True)
 
         elif index == 3:
             # Unselect All 1-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-
-                try:
-                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
-
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is1D:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, dimension=Data1D, checked=False)
 
         elif index == 4:
             # Select All 2-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-                item.setCheckState(QtCore.Qt.Unchecked)
-                try:
-                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
-
-                if is2D:
-                    item.setCheckState(QtCore.Qt.Checked)
+            self.setItemsCheckability(self.model, dimension=Data2D, checked=True)
 
         elif index == 5:
             # Unselect All 2-D
-            for index in range(self.model.rowCount()):
-                item = self.model.item(index)
-
-                try:
-                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
-                except AttributeError:
-                    msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
-
-                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is2D:
-                    item.setCheckState(QtCore.Qt.Unchecked)
+            self.setItemsCheckability(self.model, dimension=Data2D, checked=False)
 
         else:
             msg = "Incorrect value in the Selection Option"
             # Change this to a proper logging action
-            raise Exception, msg
+            raise Exception(msg)
 
     def contextMenu(self):
         """
         Define actions and layout of the right click context menu
         """
         # Create a custom menu based on actions defined in the UI file
-        self.context_menu = QtGui.QMenu(self)
+        self.context_menu = QtWidgets.QMenu(self)
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionQuick3DPlot)
         self.context_menu.addAction(self.actionEditMask)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionFreezeResults)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionDelete)
+
 
         # Define the callbacks
         self.actionDataInfo.triggered.connect(self.showDataInfo)
@@ -843,6 +1375,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
+        self.actionDelete.triggered.connect(self.deleteSelectedItem)
+        self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
 
     def onCustomContextMenu(self, position):
         """
@@ -852,17 +1386,27 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
-        if index.isValid():
-            model_item = model.itemFromIndex(proxy.mapToSource(index))
-            # Find the mapped index
-            orig_index = model_item.isCheckable()
-            if orig_index:
-                # Check the data to enable/disable actions
-                is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
-                self.actionQuick3DPlot.setEnabled(is_2D)
-                self.actionEditMask.setEnabled(is_2D)
-                # Fire up the menu
-                self.context_menu.exec_(self.current_view.mapToGlobal(position))
+        if not index.isValid():
+            return
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        # Find the mapped index
+        orig_index = model_item.isCheckable()
+        if not orig_index:
+            return
+        # Check the data to enable/disable actions
+        is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
+        self.actionQuick3DPlot.setEnabled(is_2D)
+        self.actionEditMask.setEnabled(is_2D)
+
+        # Freezing
+        # check that the selection has inner items
+        freeze_enabled = False
+        if model_item.parent() is not None:
+            freeze_enabled = True
+        self.actionFreezeResults.setEnabled(freeze_enabled)
+
+        # Fire up the menu
+        self.context_menu.exec_(self.current_view.mapToGlobal(position))
 
     def showDataInfo(self):
         """
@@ -893,7 +1437,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.show()
         # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+        vertical_scroll_bar.triggerAction(QtWidgets.QScrollBar.SliderToMinimum)
 
     def saveDataAs(self):
         """
@@ -925,17 +1469,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if isinstance(data, Data2D):
             method_name='Plotter2D'
 
-        new_plot = globals()[method_name](self, quickplot=True)
-        new_plot.data = data
+        self.new_plot = globals()[method_name](self, quickplot=True)
+        self.new_plot.data = data
         #new_plot.plot(marker='o')
-        new_plot.plot()
+        self.new_plot.plot()
 
         # Update the global plot counter
         title = "Plot " + data.name
-        new_plot.setWindowTitle(title)
+        self.new_plot.setWindowTitle(title)
 
         # Show the plot
-        new_plot.show()
+        self.new_plot.show()
 
     def quickData3DPlot(self):
         """
@@ -948,31 +1492,256 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         data = GuiUtils.dataFromItem(model_item)
 
-        new_plot = Plotter2D(self, quickplot=True, dimension=3)
-        new_plot.data = data
-        new_plot.plot()
+        self.new_plot = Plotter2D(self, quickplot=True, dimension=3)
+        self.new_plot.data = data
+        self.new_plot.plot()
 
         # Update the global plot counter
         title = "Plot " + data.name
-        new_plot.setWindowTitle(title)
+        self.new_plot.setWindowTitle(title)
 
         # Show the plot
-        new_plot.show()
+        self.new_plot.show()
 
-    def showEditDataMask(self):
+    def extShowEditDataMask(self):
+        self.showEditDataMask()
+
+    def showEditDataMask(self, data=None):
         """
         Mask Editor for 2D plots
         """
-        index = self.current_view.selectedIndexes()[0]
-        proxy = self.current_view.model()
-        model = proxy.sourceModel()
-        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("Error: cannot apply mask.\n"+
+                    "Please select a 2D dataset.")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
 
-        data = GuiUtils.dataFromItem(model_item)
+        try:
+            if data is None or not isinstance(data, Data2D):
+                # if data wasn't passed - try to get it from
+                # the currently selected item
+                index = self.current_view.selectedIndexes()[0]
+                proxy = self.current_view.model()
+                model = proxy.sourceModel()
+                model_item = model.itemFromIndex(proxy.mapToSource(index))
+
+                data = GuiUtils.dataFromItem(model_item)
+
+            if data is None or not isinstance(data, Data2D):
+                # If data is still not right, complain
+                msg.exec_()
+                return
+        except:
+            msg.exec_()
+            return
 
         mask_editor = MaskEditor(self, data)
         # Modal dialog here.
         mask_editor.exec_()
+
+        # Mask assigning done update qranges (Data has been updated in-place)
+        self.communicator.updateMaskedDataSignal.emit()
+
+    def freezeItem(self, item=None):
+        """
+        Freeze given item
+        """
+        if item is None:
+            return
+        self.model.beginResetModel()
+        new_item = self.cloneTheory(item)
+        self.model.appendRow(new_item)
+        self.model.endResetModel()
+
+    def freezeDataToItem(self, data=None):
+        """
+        Freeze given set of data to main model
+        """
+        if data is None:
+            return
+        self.model.beginResetModel()
+        # Append a "unique" descriptor to the name
+        time_bit = str(time.time())[7:-1].replace('.', '')
+        new_name = data.name + '_@' + time_bit
+        # Change the underlying data so it is no longer a theory
+        try:
+            data.is_data = True
+            data.symbol = 'Circle'
+            data.id = new_name
+        except AttributeError:
+            #no data here, pass
+            pass
+        new_item = GuiUtils.createModelItemWithPlot(data, new_name)
+
+        self.model.appendRow(new_item)
+        self.model.endResetModel()
+
+    def freezeSelectedItems(self):
+        """
+        Freeze selected items
+        """
+        indices = self.treeView.selectedIndexes()
+
+        proxy = self.treeView.model()
+        model = proxy.sourceModel()
+
+        for index in indices:
+            row_index = proxy.mapToSource(index)
+            item_to_copy = model.itemFromIndex(row_index)
+            if item_to_copy and item_to_copy.isCheckable():
+                self.freezeItem(item_to_copy)
+
+    def deleteAllItems(self):
+        """
+        Deletes all datasets from both model and theory_model
+        """
+        deleted_items = [self.model.item(row) for row in range(self.model.rowCount())
+                         if self.model.item(row).isCheckable()]
+        deleted_theory_items = [self.theory_model.item(row)
+                                for row in range(self.theory_model.rowCount())
+                                if self.theory_model.item(row).isCheckable()]
+        deleted_items += deleted_theory_items
+        deleted_names = [item.text() for item in deleted_items]
+        deleted_names += deleted_theory_items
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_items)
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
+
+        # Clear the model
+        self.model.clear()
+        self.theory_model.clear()
+
+    def deleteSelectedItem(self):
+        """
+        Delete the current item
+        """
+        # Assure this is indeed wanted
+        delete_msg = "This operation will delete the selected data sets " +\
+                     "and all the dependents." +\
+                     "\nDo you want to continue?"
+        reply = QtWidgets.QMessageBox.question(self,
+                                           'Warning',
+                                           delete_msg,
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
+
+        if reply == QtWidgets.QMessageBox.No:
+            return
+
+        indices = self.current_view.selectedIndexes()
+        self.deleteIndices(indices)
+
+    def deleteIndices(self, indices):
+        """
+        Delete model idices from the current view
+        """
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+
+        deleted_items = []
+        deleted_names = []
+
+        # Every time a row is removed, the indices change, so we'll just remove
+        # rows and keep calling selectedIndexes until it returns an empty list.
+        while len(indices) > 0:
+            index = indices[0]
+            row_index = proxy.mapToSource(index)
+            item_to_delete = model.itemFromIndex(row_index)
+            if item_to_delete and item_to_delete.isCheckable():
+                row = row_index.row()
+
+                # store the deleted item details so we can pass them on later
+                deleted_names.append(item_to_delete.text())
+                deleted_items.append(item_to_delete)
+
+                # Delete corresponding open plots
+                self.closePlotsForItem(item_to_delete)
+
+                if item_to_delete.parent():
+                    # We have a child item - delete from it
+                    item_to_delete.parent().removeRow(row)
+                else:
+                    # delete directly from model
+                    model.removeRow(row)
+            indices = self.current_view.selectedIndexes()
+
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_items)
+
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
+
+    def closeAllPlots(self):
+        """
+        Close all currently displayed plots
+        """
+
+        for plot_id in PlotHelper.currentPlots():
+            try:
+                plotter = PlotHelper.plotById(plot_id)
+                plotter.close()
+                self.plot_widgets[plot_id].close()
+                self.plot_widgets.pop(plot_id, None)
+            except AttributeError as ex:
+                logging.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
+
+    def minimizeAllPlots(self):
+        """
+        Minimize all currently displayed plots
+        """
+        for plot_id in PlotHelper.currentPlots():
+            plotter = PlotHelper.plotById(plot_id)
+            plotter.showMinimized()
+
+    def closePlotsForItem(self, item):
+        """
+        Given standard item, close all its currently displayed plots
+        """
+        # item - HashableStandardItems of active plots
+
+        # {} -> 'Graph1' : HashableStandardItem()
+        current_plot_items = {}
+        for plot_name in PlotHelper.currentPlots():
+            current_plot_items[plot_name] = PlotHelper.plotById(plot_name).item
+
+        # item and its hashable children
+        items_being_deleted = []
+        if item.rowCount() > 0:
+            items_being_deleted = [item.child(n) for n in range(item.rowCount())
+                                   if isinstance(item.child(n), GuiUtils.HashableStandardItem)]
+        items_being_deleted.append(item)
+        # Add the parent in case a child is selected
+        if isinstance(item.parent(), GuiUtils.HashableStandardItem):
+            items_being_deleted.append(item.parent())
+
+        # Compare plot items and items to delete
+        plots_to_close = set(current_plot_items.values()) & set(items_being_deleted)
+
+        for plot_item in plots_to_close:
+            for plot_name in current_plot_items.keys():
+                if plot_item == current_plot_items[plot_name]:
+                    plotter = PlotHelper.plotById(plot_name)
+                    # try to delete the plot
+                    try:
+                        plotter.close()
+                        #self.parent.workspace().removeSubWindow(plotter)
+                        self.plot_widgets[plot_name].close()
+                        self.plot_widgets.pop(plot_name, None)
+                    except AttributeError as ex:
+                        logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
+
+        pass # debugger anchor
+
+    def onAnalysisUpdate(self, new_perspective=""):
+        """
+        Update the perspective combo index based on passed string
+        """
+        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        self.cbFitting.blockSignals(True)
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        self.cbFitting.blockSignals(False)
+        pass
 
     def loadComplete(self, output):
         """
@@ -981,7 +1750,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert isinstance(output, tuple)
 
         # Reset the model so the view gets updated.
-        self.model.reset()
+        #self.model.reset()
         self.communicator.progressBarUpdateSignal.emit(-1)
 
         output_data = output[0]
@@ -990,6 +1759,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.statusBarUpdateSignal.emit(message)
         self.communicator.fileDataReceivedSignal.emit(output_data)
         self.manager.add_data(data_list=output_data)
+
+    def loadFailed(self, reason):
+        print("File Load Failed with:\n", reason)
+        pass
 
     def updateModel(self, data, p_file):
         """
@@ -1008,14 +1781,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         #     |-------> THEORIES
 
         # Top-level item: checkbox with label
-        checkbox_item = QtGui.QStandardItem(True)
+        checkbox_item = GuiUtils.HashableStandardItem()
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
-        checkbox_item.setText(os.path.basename(p_file))
+        if p_file is not None:
+            checkbox_item.setText(os.path.basename(p_file))
 
         # Add the actual Data1D/Data2D object
-        object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(data))
+        object_item = GuiUtils.HashableStandardItem()
+        object_item.setData(data)
 
         checkbox_item.setChild(0, object_item)
 
@@ -1026,10 +1800,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setChild(1, info_item)
 
         # Caption for the theories
-        checkbox_item.setChild(2, QtGui.QStandardItem("THEORIES"))
+        checkbox_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
 
         # New row in the model
+        self.model.beginResetModel()
         self.model.appendRow(checkbox_item)
+        self.model.endResetModel()
 
     def updateModelFromPerspective(self, model_item):
         """
@@ -1039,13 +1815,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assert the correct type
         if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
-        # TODO: Assert other properties
-
-        # Reset the view
-        self.model.reset()
-        # Pass acting as a debugger anchor
+        # send in the new item
+        self.model.appendRow(model_item)
         pass
 
     def updateTheoryFromPerspective(self, model_item):
@@ -1056,30 +1829,40 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assert the correct type
         if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
-        # Check if there are any other items for this tab
-        # If so, delete them
-        # TODO: fix this to resemble GuiUtils.updateModelItemWithPlot
-        # 
-        current_tab_name = model_item.text()[:2]
-        for current_index in xrange(self.theory_model.rowCount()):
-            if current_tab_name in self.theory_model.item(current_index).text():
-                self.theory_model.removeRow(current_index)
-                break
+        # Check if there exists an item for this tab
+        # If so, replace it
+        current_tab_name = model_item.text()
+        for current_index in range(self.theory_model.rowCount()):
+            current_item = self.theory_model.item(current_index)
+            if current_tab_name == current_item.text():
+                # replace data instead
+                new_data = GuiUtils.dataFromItem(model_item)
+                current_item.child(0).setData(new_data)
+                return current_item
 
-        # Reset the view
-        self.model.reset()
-
-        # Reset the view
+        # add the new item to the model
         self.theory_model.appendRow(model_item)
+        return model_item
 
-        # Pass acting as a debugger anchor
-        pass
+    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+        """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the
+        case of intermediate results disappearing when changing calculations (in which case you don't want them to be
+        retained in the list)."""
+        items_to_delete = []
+        for r in range(self.theory_model.rowCount()):
+            item = self.theory_model.item(r, 0)
+            data = item.child(0).data()
+            if not hasattr(data, "id"):
+                return
+            match = GuiUtils.theory_plot_ID_pattern.match(data.id)
+            if match:
+                item_model_id = match.groups()[-1]
+                if item_model_id == model_id:
+                    # Only delete those identified as an intermediate plot
+                    if match.groups()[2] not in (None, ""):
+                        items_to_delete.append(item)
 
-
-if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    dlg = DataExplorerWindow()
-    dlg.show()
-    sys.exit(app.exec_())
+        for item in items_to_delete:
+            self.theory_model.removeRow(item.row())

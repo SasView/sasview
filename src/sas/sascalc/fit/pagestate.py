@@ -12,6 +12,7 @@ Class that holds a fit page state
 # copyright 2009, University of Tennessee
 ################################################################################
 import time
+import re
 import os
 import sys
 import copy
@@ -638,13 +639,19 @@ class PageState(object):
             elif name == "Title":
                 if len(value.strip()) == 0:
                     continue
-                title = value + " [" + repo_time + "]"
+                title = (value + " [" + repo_time + "] [SasView v" +
+                         SASVIEW_VERSION + "]")
                 title_name = HEADER % title
             elif name == "data":
                 try:
                     # parsing "data : File:     filename [mmm dd hh:mm]"
                     name = value.split(':', 1)[1].strip()
                     file_value = "File name:" + name
+                    #Truncating string so print doesn't complain of being outside margins
+                    if sys.platform != "win32":
+                        MAX_STRING_LENGTH = 50
+                        if len(file_value) > MAX_STRING_LENGTH:
+                            file_value = "File name:.."+file_value[-MAX_STRING_LENGTH+10:]
                     file_name = CENTRE % file_value
                     if len(title) == 0:
                         title = name + " [" + repo_time + "]"
@@ -720,11 +727,14 @@ class PageState(object):
         # get the strings for report
         html_str, text_str, title = self._get_report_string()
         # Allow 2 figures to append
-        image_links = [FEET_2%fig for fig in fig_urls]
-
+        #Constraining image width for OSX and linux, so print doesn't complain of being outside margins
+        if sys.platform == "win32":
+            image_links = [FEET_2%fig for fig in fig_urls]
+        else:
+            image_links = [FEET_2_unix%fig for fig in fig_urls]
         # final report html strings
         report_str = html_str + ELINE.join(image_links)
-
+        report_str += FEET_3
         return report_str, text_str
 
     def _to_xml_helper(self, thelist, element, newdoc):
@@ -894,7 +904,7 @@ class PageState(object):
             for model in batch_fit_state.model_list:
                 doc_model = newdoc.createElement('model_list_item')
                 doc_model.setAttribute('checked', str(model[0].GetValue()))
-                keys = model[1].keys()
+                keys = list(model[1].keys())
                 doc_model.setAttribute('name', str(keys[0]))
                 values = model[1].get(keys[0])
                 doc_model.setAttribute('fit_number', str(model[2]))
@@ -953,8 +963,8 @@ class PageState(object):
 
         if node.get('version'):
             # Get the version for model conversion purposes
-            self.version = tuple(int(e) for e in
-                                 str.split(node.get('version'), "."))
+            x = re.sub(r'[^\d.]', '', node.get('version'))
+            self.version = tuple(int(e) for e in str.split(x, "."))
             # The tuple must be at least 3 items long
             while len(self.version) < 3:
                 ver_list = list(self.version)
@@ -973,9 +983,9 @@ class PageState(object):
             if entry is not None and entry.get('epoch'):
                 try:
                     self.timestamp = float(entry.get('epoch'))
-                except Exception:
+                except Exception as exc:
                     msg = "PageState.fromXML: Could not"
-                    msg += " read timestamp\n %s" % sys.exc_value
+                    msg += " read timestamp\n %s" % exc
                     logger.error(msg)
 
             if entry is not None:
@@ -1239,14 +1249,15 @@ class Reader(CansasReader):
                             output.append(sas_entry)
 
             else:
-                self.call_back(format=ext)
+                #self.call_back(format=ext)
                 raise RuntimeError("%s is not a file" % path)
 
             # Return output consistent with the loader's api
             if len(output) == 0:
-                self.call_back(state=None, datainfo=None, format=ext)
+                #self.call_back(state=None, datainfo=None, format=ext)
                 return None
             else:
+                states=[]
                 for data in output:
                     # Call back to post the new state
                     state = data.meta_data['fitstate']
@@ -1271,7 +1282,7 @@ class Reader(CansasReader):
                     if data.run_name is not None and len(data.run_name) != 0:
                         if isinstance(data.run_name, dict):
                             # Note: key order in dict is not guaranteed, so sort
-                            name = data.run_name.keys()[0]
+                            name = list(data.run_name.keys())[0]
                         else:
                             name = data.run_name
                     else:
@@ -1279,15 +1290,16 @@ class Reader(CansasReader):
                     state.data.group_id = name
                     state.version = fitstate.version
                     # store state in fitting
-                    self.call_back(state=state, datainfo=data, format=ext)
+                    #self.call_back(state=state, datainfo=data, format=ext)
                     self.state = state
+                    states.append(state)
                 simfitstate = self._parse_simfit_state(entry)
                 if simfitstate is not None:
-                    self.call_back(state=simfitstate)
-
-                return output
+                    #self.call_back(state=simfitstate)
+                    states.append(simfitstate)
+                return (output, states)
         except:
-            self.call_back(format=ext)
+            #self.call_back(format=ext)
             raise
 
     def write(self, filename, datainfo=None, fitstate=None):
@@ -1367,7 +1379,10 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
-"""<img src="%s" ></img>
+"""<img src="%s"></img>
+"""
+FEET_2_unix = \
+"""<img src="%s" width="540"></img>
 """
 FEET_3 = \
 """</center>

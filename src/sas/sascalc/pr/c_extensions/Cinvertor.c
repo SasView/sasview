@@ -734,7 +734,7 @@ static PyObject * oscillations(Cinvertor *self, PyObject *args) {
 }
 
 const char get_peaks_doc[] =
-	"Returns the number of peaks in the output P(r) distrubution\n"
+	"Returns the number of peaks in the output P(r) distribution\n"
 	"for the given set of coefficients.\n"
 	" @param args: c-parameters\n"
 	" @return: number of P(r) peaks";

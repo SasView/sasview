@@ -2,7 +2,7 @@ import sys
 import unittest
 
 import numpy
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -11,9 +11,6 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
 
 
 class FittingLogicTest(unittest.TestCase):
@@ -100,17 +97,25 @@ class FittingLogicTest(unittest.TestCase):
         """
         data = Data1D(x=[1,2,3],y=[3,4,5])
         data.name = "boop"
-        return_data = (data.x,data.y, 7, None, None,
-                        0, True, 0.0, 1, data,
-                        data, False, None)
+        data.id = "poop"
+        # Condensed return data (new1DPlot only uses these fields)
+        return_data = dict(x = data.x,
+                           y = data.y,
+                           model = data,
+                           data = data)
+        # return_data = (data.x,data.y, 7, None, None,
+        #                0, True, 0.0, 1, data,
+        #                data, False, None,
+        #                None, None, None,
+        #                None, None)
 
         new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
 
         self.assertIsInstance(new_plot, Data1D)
         self.assertFalse(new_plot.is_data)
         self.assertEqual(new_plot.dy.size, 3)
-        self.assertEqual(new_plot.title, "boop [boop]")
-        self.assertEqual(new_plot.name, "boop [boop]")
+        self.assertEqual(new_plot.title, "boop [poop]")
+        self.assertEqual(new_plot.name, "boop [poop]")
 
     def testNew2DPlot(self):
         """
@@ -138,9 +143,14 @@ class FittingLogicTest(unittest.TestCase):
 
         qmin, qmax, npts = self.logic.computeDataRange()
 
-        return_data = (x_0, data, 7, data, None,
-                        True, 0.0, 1, 0, qmin, qmax,
-                        0.1, False, None)
+        # Condensed return data (new2DPlot only uses these fields)
+        return_data = dict(image = x_0,
+                           data = data,
+                           page_id = 7,
+                           model = data)
+        # return_data = (x_0, data, 7, data, None,
+        #                 True, 0.0, 1, 0, qmin, qmax,
+        #                 0.1, False, None)
 
         new_plot = self.logic.new2DPlot(return_data=return_data)
 

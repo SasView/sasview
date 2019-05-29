@@ -2,19 +2,19 @@ import sys
 import time
 import numpy
 import unittest
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtTest import QTest
 
-from PyQt4.QtCore import Qt
-from mock import MagicMock
-from mock import patch
+from PyQt5.QtCore import Qt
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 # set up import paths
 import path_prepare
 
 from mpl_toolkits.mplot3d import Axes3D
 from UnitTesting.TestUtils import QtSignalSpy
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
 
@@ -23,9 +23,8 @@ from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.sascalc.calculator import sas_gen
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
-
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class GenericScatteringCalculatorTest(unittest.TestCase):
     """Test the GenericScatteringCalculator"""
@@ -45,8 +44,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
 
     def testDefaults(self):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget, QtGui.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "Generic SAS Calculator")
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
+        self.assertEqual(self.widget.windowTitle(), "Generic Scattering Calculator")
 
         self.assertIn('trigger_plot_3d', dir(self.widget))
 
@@ -91,11 +90,12 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
                               range(self.widget.cbOptionsCalc.count())],
                              ['Fixed orientation', 'Debye full avg.'])
 
-        self.assertEqual(self.widget.cbShape.count(), 2)
+        self.assertEqual(self.widget.cbShape.count(), 1)
         self.assertEqual(self.widget.cbShape.currentIndex(), 0)
         self.assertListEqual([self.widget.cbShape.itemText(i) for i in
                               range(self.widget.cbShape.count())],
-                             ['Rectangular', 'Ellipsoid'])
+                             ['Rectangular'])
+                             #['Rectangular', 'Ellipsoid'])
         self.assertFalse(self.widget.cbShape.isEditable())
         # disable buttons
         self.assertFalse(self.widget.cmdSave.isEnabled())
@@ -104,7 +104,11 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
 
     def testHelpButton(self):
         """ Assure help file is shown """
+        self.widget.manager.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('sas_calculator_help.html', args[0][0])
 
     def testValidator(self):
         """ Test the inputs when validators had been defined """
@@ -174,13 +178,15 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         Load sld data and check modifications of GUI
         """
         filename = os.path.join("UnitTesting", "sld_file.sld")
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
         self.widget.loadFile()
 
         # check modification of text in Load button
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         # wait a bit for data to be loaded
         time.sleep(0.1)
+        QtWidgets.qApp.processEvents()
+
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtData.text(), 'sld_file.sld')
         self.assertEqual(self.widget.txtTotalVolume.text(), '402408.0')
@@ -238,17 +244,19 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         filename = os.path.join("UnitTesting", "diamdsml.pdb")
 
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
         self.widget.loadFile()
 
         # check modification of text in Load button
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
 
         time.sleep(1)
+        QtWidgets.qApp.processEvents()
+
         # check updated values in ui, read from loaded file
         # TODO to be changed
         self.assertEqual(self.widget.txtData.text(), 'diamdsml.pdb')
-        self.assertEqual(self.widget.txtTotalVolume.text(), '170.950584161')
+        self.assertAlmostEqual(float(self.widget.txtTotalVolume.text()), 170.95058, 5)
         self.assertEqual(self.widget.txtNoPixels.text(), '18')
 
         # check disabled TextEdits according to data format
@@ -301,10 +309,11 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         filename = os.path.join("UnitTesting", "A_Raw_Example-1.omf")
 
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         time.sleep(2)
+        QtWidgets.qApp.processEvents()
 
         self.assertEqual(self.widget.txtData.text(), 'A_Raw_Example-1.omf')
         self.assertEqual(self.widget.txtTotalVolume.text(), '128000000.0')
@@ -368,7 +377,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         # load data
         filename = os.path.join("UnitTesting", "diamdsml.pdb")
 
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
         self.widget.loadFile()
         time.sleep(1)
         QTest.mouseClick(self.widget.cmdCompute, Qt.LeftButton)
@@ -387,10 +396,12 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         self.assertFalse(self.widget.cmdDraw.isEnabled())
         filename = os.path.join("UnitTesting", "diamdsml.pdb")
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename,''])
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         time.sleep(1)
+        QtWidgets.qApp.processEvents()
+
         self.assertTrue(self.widget.cmdDraw.isEnabled())
         QTest.mouseClick(self.widget.cmdDraw, Qt.LeftButton)
 
@@ -407,16 +418,19 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         filename = os.path.join("UnitTesting", "sld_file.sld")
 
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
         self.widget.loadFile()
 
         time.sleep(0.1)
+        QtWidgets.qApp.processEvents()
 
         filename1 = "test"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=filename1)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=[filename1, ''])
 
-        QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
+        #QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
         self.widget.onSaveFile()
+        QtWidgets.qApp.processEvents()
+
         self.assertTrue(os.path.isfile(filename1 + '.sld'))
         self.assertTrue(os.path.getsize(filename1 + '.sld') > 0)
 

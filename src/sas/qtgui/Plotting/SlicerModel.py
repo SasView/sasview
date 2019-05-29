@@ -1,5 +1,5 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -18,12 +18,12 @@ class SlicerModel(object):
         parameters = self.getParams()
         self._model.removeRows( 0, self._model.rowCount() )
         # Crete/overwrite model items
-        for parameter in parameters.keys():
+        for parameter in list(parameters.keys()):
             item1 = QtGui.QStandardItem(parameter)
             item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
             self._model.appendRow([item1, item2])
-        self._model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
+        self._model.setHeaderData(0, QtCore.Qt.Horizontal, "Parameter")
+        self._model.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
 
     def setParamsFromModel(self, item):
         """

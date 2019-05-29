@@ -2,10 +2,9 @@
     Sector interactor
 """
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+import logging
 
-from BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
@@ -124,14 +123,14 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # Get the data2D to average
         data = self.base.data
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
         # Averaging
         from sas.sascalc.dataloader.manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
-        if nbins == None:
+        if nbins is None:
             nbins = 20
         sect = SectorQ(r_min=0.0, r_max=radius,
                        phi_min=phimin + numpy.pi,
@@ -167,9 +166,13 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.group_id = "2daverage" + self.base.data.name
         new_plot.id = "SectorQ" + self.base.data.name
         new_plot.is_data = True
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         if self.update_model:
             self.setModelFromParams()
@@ -229,7 +232,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if numpy.fabs(self.left_line.phi) != numpy.fabs(self.right_line.phi):
             msg = "Phi left and phi right are different"
             msg += " %f, %f" % (self.left_line.phi, self.right_line.phi)
-            raise ValueError, msg
+            raise ValueError(msg)
         params["Phi [deg]"] = self.main_line.theta * 180 / numpy.pi
         params["Delta_Phi [deg]"] = numpy.fabs(self.left_line.phi * 180 / numpy.pi)
         params["nbins"] = self.nbins
@@ -283,6 +286,7 @@ class SideInteractor(BaseInteractor):
         # Initialize the class
         self.markers = []
         self.axes = axes
+        self.color = color
         # compute the value of the angle between the current line and
         # the x-axis
         self.save_theta = theta2 + phi
@@ -348,9 +352,9 @@ class SideInteractor(BaseInteractor):
         """
         self.left_moving = left
         theta3 = 0
-        if phi != None:
+        if phi is not None:
             self.phi = phi
-        if delta == None:
+        if delta is None:
             delta = 0
         if  right:
             self.phi = -1 * numpy.fabs(self.phi)
@@ -360,7 +364,7 @@ class SideInteractor(BaseInteractor):
         if side:
             self.theta = mline.theta + self.phi
 
-        if mline != None:
+        if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
@@ -438,7 +442,8 @@ class SideInteractor(BaseInteractor):
         self.phi = numpy.fabs(self.theta2 - self.theta)
         if self.phi > numpy.pi:
             self.phi = 2 * numpy.pi - numpy.fabs(self.theta2 - self.theta)
-        self.base.base.update()
+        #self.base.base.update()
+        self.base.update()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)
@@ -464,6 +469,7 @@ class LineInteractor(BaseInteractor):
         BaseInteractor.__init__(self, base, axes, color=color)
 
         self.markers = []
+        self.color = color
         self.axes = axes
         self.save_theta = theta
         self.theta = theta
@@ -508,7 +514,7 @@ class LineInteractor(BaseInteractor):
         Draw the new roughness on the graph.
         """
 
-        if theta != None:
+        if theta is not None:
             self.theta = theta
         x1 = self.radius * numpy.cos(self.theta)
         y1 = self.radius * numpy.sin(self.theta)
@@ -541,7 +547,8 @@ class LineInteractor(BaseInteractor):
         """
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
-        self.base.base.update()
+        #self.base.base.update()
+        self.base.update()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)

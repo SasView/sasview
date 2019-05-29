@@ -5,7 +5,7 @@ import wx
 import sys
 
 from sas.sasgui.guiframe.utils import format_number
-from invariant_widgets import OutputTextCtrl
+from .invariant_widgets import OutputTextCtrl
 # Dimensions related to chart
 RECTANGLE_WIDTH = 400.0
 RECTANGLE_HEIGHT = 20

@@ -160,9 +160,9 @@ def fillupPixels(image=None, weights=None):
 
     """
     # No image matrix given
-    if image == None or numpy.ndim(image) != 2 \
+    if image is None or numpy.ndim(image) != 2 \
             or numpy.isfinite(image).all() \
-            or weights == None:
+            or weights is None:
         return image
     # Get bin size in y and x directions
     len_y = len(image)
@@ -272,12 +272,16 @@ def getValidColor(color):
     if isinstance(color, int):
         # Check if it's within the range
         if 0 <= color <=6:
-            color = COLORS.values()[color]
-    # Check if it's an RGB string
+            color = list(COLORS.values())[color]
     elif isinstance(color, str):
-        # Assure the correctnes of the string
-        assert(color[0]=="#" and len(color) == 7)
-        assert(all(c in string.hexdigits for c in color[1:]))
+        # This could be a one letter code
+        if len(color) == 1:
+            if not color in list (COLORS.values()):
+                raise AttributeError
+        else:
+            # or an RGB string
+            assert(color[0]=="#" and len(color) == 7)
+            assert(all(c in string.hexdigits for c in color[1:]))
     else:
         raise AttributeError
 

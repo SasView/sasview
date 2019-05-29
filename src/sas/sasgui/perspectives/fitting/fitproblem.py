@@ -308,7 +308,7 @@ class FitProblemDictionary(dict):
         """
         self._smear_on = flag
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.enable_smearing(flag)
         elif fid in self:
             self[fid].enable_smearing(flag)
@@ -319,7 +319,7 @@ class FitProblemDictionary(dict):
         :param smear: smear object from DataLoader
         """
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.set_smearer(smearer)
         elif fid in self:
             self[fid].set_smearer(smearer)
@@ -335,7 +335,7 @@ class FitProblemDictionary(dict):
         """
         """
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.save_model_name(name)
         elif fid in self:
             self[fid].save_model_name(name)
@@ -345,7 +345,7 @@ class FitProblemDictionary(dict):
         """
         result = []
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 result.append(value.get_name())
         elif fid in self:
             result.append(self[fid].get_name())
@@ -359,7 +359,7 @@ class FitProblemDictionary(dict):
         """
         self.model = model
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.set_model(self.model)
         elif fid in self:
             self[fid].set_model(self.model)
@@ -455,7 +455,7 @@ class FitProblemDictionary(dict):
         :param value: value of that parameter
         """
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.set_model_param(name, value)
         elif fid in self:
             self[fid].set_model_param(name, value)
@@ -485,7 +485,7 @@ class FitProblemDictionary(dict):
         set schedule to true to decide if this fit  must be performed
         """
         self.scheduled = schedule
-        for value in self.values():
+        for value in list(self.values()):
             value.schedule_tofit(schedule)
 
     def get_scheduled(self):
@@ -501,7 +501,7 @@ class FitProblemDictionary(dict):
         self.qmin = qmin
         self.qmax = qmax
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.set_range(self.qmin, self.qmax)
         elif fid in self:
             self[fid].value.set_range(self.qmin, self.qmax)
@@ -518,7 +518,7 @@ class FitProblemDictionary(dict):
         fit weight
         """
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.set_weight(flag=flag, is2d=is2d)
         elif fid in self:
             self[fid].set_weight(flag=flag, is2d=is2d)
@@ -535,7 +535,7 @@ class FitProblemDictionary(dict):
         clear constraint info
         """
         if fid is None:
-            for value in self.values():
+            for value in list(self.values()):
                 value.clear_model_param()
         elif fid in self:
             self[fid].clear_model_param()
@@ -544,7 +544,7 @@ class FitProblemDictionary(dict):
         """
         return fitproblem contained in this dictionary
         """
-        return self.values()
+        return list(self.values())
 
     def set_result(self, result, fid):
         """

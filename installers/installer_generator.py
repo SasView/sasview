@@ -54,20 +54,20 @@ def find_extension():
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']
-            file_type, ext = string.split(item, "|*", 1)
+            file_type, ext = item.split("|*", 1)
             if ext.strip() not in ['.*', ''] and ext.strip() not in list_data:
                 list_data.append((ext, 'string', file_type))
     except Exception:
         pass
     try:
-        file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*", 1)
+        file_type, ext = local_config.APPLICATION_WLIST.split("|*", 1)
         if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
             list_app.append((ext, 'string', file_type))
     except Exception:
         pass
     try:
         for item in local_config.PLUGINS_WLIST:
-            file_type, ext = string.split(item, "|*", 1)
+            file_type, ext = item.split("|*", 1)
             if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
                 list_app.append((ext, 'string', file_type))
     except Exception:
@@ -82,8 +82,8 @@ def write_registry(data_extension=None, app_extension=None):
     """
     msg = ""
     if data_extension is not None and data_extension:
-        openwithlist = "OpenWithList\%s" % str(APPLICATION)
         msg = "\n\n[Registry]\n"
+        openwithlist = "OpenWithList\%s" % str(APPLICATION)
         for (ext, type, _) in data_extension:
             list = os.path.join(ext, openwithlist)
             msg +=  """Root: HKCR;\tSubkey: "%s";\t""" % str(list)
@@ -191,7 +191,7 @@ def write_tasks():
     msg += """GroupDescription: "{cm:AdditionalIcons}";\n"""
     return msg
 
-dist_path = "dist"
+dist_path = "dist\sasview"
 def write_file():
     """
     copy some data files
@@ -199,13 +199,11 @@ def write_file():
     msg = "\n\n[Files]\n"
     msg += """Source: "%s\%s";\t""" % (dist_path, str(APPLICATION))
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
-    msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
+    msg += """Source: "dist\sasview\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\plugin_models\*";\tDestDir: "{userdesktop}\..\.sasview\plugin_models";\t"""
+    msg += """Source: "dist\sasview\plugin_models\*";\tDestDir: "{userdesktop}\..\.sasview\plugin_models";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\compiled_models\*";\tDestDir: "{userdesktop}\..\.sasmodels\compiled_models";\t"""
-    msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t"""
+    msg += """Source: "dist\sasview\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n"""
     #msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t"""
     #msg += """DestName: "categories.json";\n"""

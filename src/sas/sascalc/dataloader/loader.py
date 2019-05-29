@@ -89,6 +89,8 @@ class Registry(ExtensionRegistry):
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
+        except NoKnownLoaderException:
+            pass  # Try the Cansas XML reader
         except DefaultReaderException:
             pass  # Loader specific error to try the cansas XML reader
         except FileContentsException as e:
@@ -99,6 +101,8 @@ class Registry(ExtensionRegistry):
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
+        except NoKnownLoaderException:
+            pass  # Try the NXcanSAS reader
         except DefaultReaderException:
             pass  # Loader specific error to try the NXcanSAS reader
         except FileContentsException as e:
@@ -164,9 +168,9 @@ class Registry(ExtensionRegistry):
                         module = __import__(toks[0], globals(), locals())
                         if self._identify_plugin(module):
                             readers_found += 1
-                    except:
+                    except Exception as exc:
                         msg = "Loader: Error importing "
-                        msg += "%s\n  %s" % (item, sys.exc_value)
+                        msg += "%s\n  %s" % (item, exc)
                         logger.error(msg)
 
                 # Process zip files
@@ -186,14 +190,14 @@ class Registry(ExtensionRegistry):
                                                     locals(), [""])
                                 if self._identify_plugin(module):
                                     readers_found += 1
-                            except:
+                            except Exception as exc:
                                 msg = "Loader: Error importing"
-                                msg += " %s\n  %s" % (mfile, sys.exc_value)
+                                msg += " %s\n  %s" % (mfile, exc)
                                 logger.error(msg)
 
-                    except:
+                    except Exception as exc:
                         msg = "Loader: Error importing "
-                        msg += " %s\n  %s" % (item, sys.exc_value)
+                        msg += " %s\n  %s" % (item, exc)
                         logger.error(msg)
 
         return readers_found
@@ -237,9 +241,9 @@ class Registry(ExtensionRegistry):
                     # Append the new writer to the list
                     self.writers[ext].append(loader.write)
 
-            except:
+            except Exception as exc:
                 msg = "Loader: Error accessing"
-                msg += " Reader in %s\n  %s" % (module.__name__, sys.exc_value)
+                msg += " Reader in %s\n  %s" % (module.__name__, exc)
                 logger.error(msg)
         return reader_found
 
@@ -270,9 +274,9 @@ class Registry(ExtensionRegistry):
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
 
-        except:
+        except Exception as exc:
             msg = "Loader: Error accessing Reader "
-            msg += "in %s\n  %s" % (loader.__name__, sys.exc_value)
+            msg += "in %s\n  %s" % (loader.__name__, exc)
             logger.error(msg)
         return reader_found
 
@@ -315,9 +319,9 @@ class Registry(ExtensionRegistry):
                             self.writers[ext] = []
                         self.writers[ext].insert(0, loader.write)
 
-            except:
+            except Exception as exc:
                 msg = "Loader: Error accessing Reader"
-                msg += " in %s\n  %s" % (module.__name__, sys.exc_value)
+                msg += " in %s\n  %s" % (module.__name__, exc)
                 logger.error(msg)
         return reader_found
 
@@ -362,10 +366,11 @@ class Registry(ExtensionRegistry):
         for fn in writers:
             try:
                 return fn(path, data)
-            except Exception:
-                pass  # give other loaders a chance to succeed
-        # If we get here it is because all loaders failed
-        raise  # reraises last exception
+            except Exception as exc:
+                msg = "Saving file {} using the {} writer failed.\n".format(
+                    path, type(fn).__name__)
+                msg += str(exc)
+                logger.exception(msg)  # give other loaders a chance to succeed
 
 
 class Loader(object):

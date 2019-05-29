@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>SasView</class>
+ <widget class="QMainWindow" name="SasView">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>915</width>
-    <height>527</height>
+    <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>SasView</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -63,18 +63,18 @@
     <addaction name="separator"/>
     <addaction name="actionReport"/>
     <addaction name="actionReset"/>
+    <addaction name="separator"/>
+    <addaction name="actionFreeze_Theory"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionShow_Grid_Window"/>
-    <addaction name="separator"/>
     <addaction name="actionHide_Toolbar"/>
+    <addaction name="actionHide_DataExplorer"/>
+    <addaction name="actionHide_LogExplorer"/>
     <addaction name="separator"/>
     <addaction name="actionStartup_Settings"/>
-    <addaction name="separator"/>
-    <addaction name="actionCategry_Manager"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -90,6 +90,7 @@
     <addaction name="actionGeneric_Scattering_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionPython_Shell_Editor"/>
+    <addaction name="actionOrientation_Viewer"/>
     <addaction name="actionImage_Viewer"/>
    </widget>
    <widget class="QMenu" name="menuFitting">
@@ -101,12 +102,19 @@
     <addaction name="actionConstrained_Fit"/>
     <addaction name="actionCombine_Batch_Fit"/>
     <addaction name="separator"/>
+    <addaction name="actionShow_Grid_Window"/>
+    <addaction name="separator"/>
     <addaction name="actionFit_Options"/>
+    <addaction name="actionGPU_Options"/>
     <addaction name="actionFit_Results"/>
     <addaction name="separator"/>
-    <addaction name="actionChain_Fitting"/>
-    <addaction name="separator"/>
+    <addaction name="actionCategory_Manager"/>
+    <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
+    <addaction name="actionManage_Custom_Models"/>
+    <addaction name="actionAddMult_Models"/>
+    <addaction name="separator"/>
+    <addaction name="actionEditMask"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -115,18 +123,20 @@
     <addaction name="actionCascade"/>
     <addaction name="actionTile"/>
     <addaction name="separator"/>
-    <addaction name="actionArrange_Icons"/>
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
     <addaction name="separator"/>
+    <addaction name="actionMinimizePlots"/>
+    <addaction name="actionClosePlots"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
      <string>Analysis</string>
     </property>
+    <addaction name="actionCorfunc"/>
     <addaction name="actionFitting"/>
-    <addaction name="actionInversion"/>
     <addaction name="actionInvariant"/>
+    <addaction name="actionInversion"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -135,10 +145,13 @@
     <addaction name="actionDocumentation"/>
     <addaction name="separator"/>
     <addaction name="actionTutorial"/>
+    <addaction name="actionModel_Marketplace"/>
     <addaction name="separator"/>
     <addaction name="actionAcknowledge"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionWelcomeWidget"/>
+    <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
    </widget>
    <addaction name="menu_File"/>
@@ -248,6 +261,9 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>:/res/paste.png</normaloff>:/res/paste.png</iconset>
@@ -306,11 +322,6 @@
     <string>Quit</string>
    </property>
   </action>
-  <action name="actionShow_Grid_Window">
-   <property name="text">
-    <string>Show Grid Window</string>
-   </property>
-  </action>
   <action name="actionHide_Toolbar">
    <property name="text">
     <string>Hide Toolbar</string>
@@ -319,14 +330,6 @@
   <action name="actionStartup_Settings">
    <property name="text">
     <string>Startup Settings</string>
-   </property>
-  </action>
-  <action name="actionCategry_Manager">
-   <property name="text">
-    <string>Category Manager</string>
-   </property>
-   <property name="toolTip">
-    <string>Category Manager</string>
    </property>
   </action>
   <action name="actionData_Operation">
@@ -351,7 +354,7 @@
   </action>
   <action name="actionSAS_Resolution_Estimator">
    <property name="text">
-    <string>SAS Resolution Estimator</string>
+    <string>Q Resolution Estimator</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
@@ -402,6 +405,11 @@
   <action name="actionEdit_Custom_Model">
    <property name="text">
     <string>Edit Custom Model</string>
+   </property>
+  </action>
+  <action name="actionEditMask">
+   <property name="text">
+    <string>Edit Mask</string>
    </property>
   </action>
   <action name="actionCascade">
@@ -496,6 +504,84 @@
   <action name="actionKeissig_Calculator">
    <property name="text">
     <string>Kiessig Thickness Calculator</string>
+   </property>
+  </action>
+  <action name="actionGPU_Options">
+   <property name="text">
+    <string>GPU Options</string>
+   </property>
+  </action>
+  <action name="actionAdd_Custom_Model">
+   <property name="text">
+    <string>Add Custom Model</string>
+   </property>
+  </action>
+  <action name="actionManage_Custom_Models">
+   <property name="text">
+    <string>Manage Custom Models</string>
+   </property>
+  </action>
+  <action name="actionCorfunc">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Correlation Function</string>
+   </property>
+  </action>
+  <action name="actionAddMult_Models">
+   <property name="text">
+    <string>Add/Multiply Models</string>
+   </property>
+  </action>
+  <action name="actionOrientation_Viewer">
+   <property name="text">
+    <string>Orientation Viewer</string>
+   </property>
+  </action>
+  <action name="actionFreeze_Theory">
+   <property name="text">
+    <string>Freeze Fit Results</string>
+   </property>
+  </action>
+  <action name="actionHide_DataExplorer">
+   <property name="text">
+    <string>Hide Data Explorer</string>
+   </property>
+  </action>
+  <action name="actionWelcomeWidget">
+   <property name="text">
+    <string>Welcome to SasView</string>
+   </property>
+  </action>
+  <action name="actionHide_LogExplorer">
+   <property name="text">
+    <string>Hide Log Explorer</string>
+   </property>
+  </action>
+  <action name="actionCategory_Manager">
+   <property name="text">
+    <string>Category Manager</string>
+   </property>
+  </action>
+  <action name="actionShow_Grid_Window">
+   <property name="text">
+    <string>Show Grid Window</string>
+   </property>
+  </action>
+  <action name="actionMinimizePlots">
+   <property name="text">
+    <string>Minimize All Plots</string>
+   </property>
+  </action>
+  <action name="actionClosePlots">
+   <property name="text">
+    <string>Close All Plots</string>
+   </property>
+  </action>
+  <action name="actionModel_Marketplace">
+   <property name="text">
+    <string>Model Marketplace</string>
    </property>
   </action>
  </widget>

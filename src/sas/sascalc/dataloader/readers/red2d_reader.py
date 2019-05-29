@@ -316,9 +316,7 @@ class Reader(FileReader):
                     self.current_dataset.dqy_data = dqy_data
 
         # Units of axes
-        self.current_dataset.xaxis(r"\rm{Q_{x}}", 'A^{-1}')
-        self.current_dataset.yaxis(r"\rm{Q_{y}}", 'A^{-1}')
-        self.current_dataset.zaxis(r"\rm{Intensity}", "cm^{-1}")
+        self.current_dataset = self.set_default_2d_units(self.current_dataset)
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

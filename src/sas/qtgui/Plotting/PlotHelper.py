@@ -34,7 +34,7 @@ def currentPlots():
     """
     Returns a list of IDs for all currently active plots
     """
-    return this._plots.keys()
+    return list(this._plots.keys())
 
 def plotById(plot_id):
     """
@@ -47,7 +47,7 @@ def idOfPlot(plot):
     Returns the ID of the plot
     """
     plot_id = None
-    for key in this._plots.keys():
+    for key in list(this._plots.keys()):
         if this._plots[key] == plot:
             plot_id = key
             break

@@ -1,6 +1,6 @@
 import sys
 import unittest
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -205,8 +205,8 @@ class FittingUtilitiesTest(unittest.TestCase):
 
         # 1. identical data
         current_data = Data1D(x=[0.1, 0.2], y=[0.0, 0.0])
-
-        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+        weights = None
+        chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should be zero
         self.assertAlmostEqual(chi, 0.0, 8)
@@ -214,16 +214,16 @@ class FittingUtilitiesTest(unittest.TestCase):
         # 2. far data
         current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0])
 
-        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+        chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should not be zero
         self.assertAlmostEqual(chi, 31250.0, 8)
 
         # 3. Wrong data
         current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0, 200.0])
-        chi = FittingUtilities.calculateChi2(reference_data, current_data)
-        # Should be None
-        self.assertIsNone(chi)
+        chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
+        # Should remain unchanged
+        self.assertAlmostEqual(chi, 31250.0, 8)
 
     def testCalculate2DChi2(self):
         """
@@ -240,7 +240,8 @@ class FittingUtilitiesTest(unittest.TestCase):
                       qx_data=[0.1, 0.2, 0.3],
                       qy_data=[0.1, 0.2, 0.3])
 
-        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+        weights = None
+        chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should be zero
         self.assertAlmostEqual(chi, 0.0, 8)
@@ -251,7 +252,7 @@ class FittingUtilitiesTest(unittest.TestCase):
                       qx_data=[0.1, 0.2, 0.3],
                       qy_data=[100.0, 200., 300.])
 
-        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+        chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should not be zero
         self.assertAlmostEqual(chi, 9607.88, 2)
@@ -263,7 +264,27 @@ class FittingUtilitiesTest(unittest.TestCase):
                       qy_data=[0.1, 0.2, 0.3])
         # Should throw
         with self.assertRaises(ValueError):
-            chi = FittingUtilities.calculateChi2(reference_data, current_data)
+            chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
+
+    def notestAddHeadersToModel(self):
+        '''Check to see if headers are correctly applied'''
+        #test model
+        model = QtGui.QStandardItemModel()
+        FittingUtilities.addHeadersToModel(model)
+
+        # Assure we have properly named columns
+        names = FittingUtilities.model_header_captions
+        names_from_model = [model.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
+        self.assertEqual(names, names_from_model)
+
+        # Add another model
+        model2 = QtGui.QStandardItemModel()
+        # Add headers again
+        FittingUtilities.addHeadersToModel(model2)
+        # We still should have only the original names
+        names_from_model2 = [model2.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
+        self.assertEqual(names, names_from_model2)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -363,7 +363,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
             self.output_ctl.SetValue(str(output))
         except:
             if self.base is not None:
-                msg = "Density/Volume Calculator: %s" % (sys.exc_value)
+                msg = "Density/Volume Calculator: %s" % (sys.exc_info()[1])
                 wx.PostEvent(self.base, StatusEvent(status=msg))
         if event is not None:
             event.Skip()
