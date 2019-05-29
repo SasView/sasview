@@ -74,12 +74,13 @@ class KiessigCalculatorTest(unittest.TestCase):
 
     def testComplexEntryLetters(self):
         """ User entered compound calculations and subsequent reset"""
-
+        self.widget.deltaq_in.clear()
         self.widget.deltaq_in.insert("xyz")
 
         # Push Compute with the left mouse button
         computeButton = self.widget.computeButton
         QTest.mouseClick(computeButton, Qt.LeftButton)
+        self.assertEqual(self.widget.deltaq_in.text(), '')
         self.assertEqual(self.widget.lengthscale_out.text(), '')
 
 if __name__ == "__main__":

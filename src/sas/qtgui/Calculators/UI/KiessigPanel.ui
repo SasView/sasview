@@ -7,8 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>365</width>
-    <height>193</height>
+    <height>197</height>
    </rect>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::TabFocus</enum>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>

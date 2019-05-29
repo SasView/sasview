@@ -9,12 +9,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>426</width>
-    <height>162</height>
+    <width>435</width>
+    <height>233</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -118,6 +118,13 @@
     </layout>
    </item>
    <item row="2" column="0">
+    <widget class="QLabel" name="lblWarning">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Warning! Polydisperse parameter selected.&lt;br/&gt;&lt;/span&gt;Constraints involving polydisperse parameters only apply to&lt;br/&gt;starting values and are not re-applied during size or angle polydispersity&lt;br/&gt;integrations. To do so requires creating a custom model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -130,7 +137,7 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <spacer name="horizontalSpacer">
@@ -176,13 +183,13 @@
  <resources/>
  <connections>
   <connection>
-   <sender>cmdOK</sender>
+   <sender>cmdCancel</sender>
    <signal>clicked()</signal>
    <receiver>MultiConstraintUI</receiver>
-   <slot>accept()</slot>
+   <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>321</x>
+     <x>187</x>
      <y>121</y>
     </hint>
     <hint type="destinationlabel">
@@ -192,13 +199,13 @@
    </hints>
   </connection>
   <connection>
-   <sender>cmdCancel</sender>
+   <sender>cmdOK</sender>
    <signal>clicked()</signal>
    <receiver>MultiConstraintUI</receiver>
-   <slot>reject()</slot>
+   <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
+     <x>321</x>
      <y>121</y>
     </hint>
     <hint type="destinationlabel">

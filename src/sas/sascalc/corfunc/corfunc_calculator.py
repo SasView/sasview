@@ -29,21 +29,20 @@ class CorfuncCalculator(object):
             self.g = g
             self.start = start
             self.stop = stop
-            self._lastx = []
-            self._lasty = []
+            self._lastx = np.empty(0, dtype='d')
+            self._lasty = None
 
         def __call__(self, x):
             # If input is a single number, evaluate the function at that number
             # and return a single number
-            if type(x) == float or type(x) == int:
+            if isinstance(x, (float, int)):
                 return self._smoothed_function(np.array([x]))[0]
             # If input is a list, and is different to the last input, evaluate
             # the function at each point. If the input is the same as last time
             # the function was called, return the result that was calculated
             # last time instead of explicity evaluating the function again.
-            elif self._lastx == [] or x.tolist() != self._lastx.tolist():
-                self._lasty = self._smoothed_function(x)
-                self._lastx = x
+            if not np.array_equal(x, self._lastx):
+                self._lastx, self._lasty = x, self._smoothed_function(x)
             return self._lasty
 
         def _smoothed_function(self,x):
@@ -87,7 +86,7 @@ class CorfuncCalculator(object):
             return
         # Only process data of the class Data1D
         if not issubclass(data.__class__, Data1D):
-            raise ValueError("Data must be of the type DataLoader.Data1D")
+            raise ValueError("Correlation function cannot be computed with 2D data.")
 
         # Prepare the data
         new_data = Data1D(x=data.x, y=data.y)

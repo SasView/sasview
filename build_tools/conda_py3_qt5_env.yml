@@ -69,6 +69,7 @@ dependencies:
 - simplegeneric=0.8.1=py36_0
 - sip=4.18=py36_1
 - six=1.11.0=py36_1
+- sphinx=1.5.1=py36_0
 - sqlite=3.13.0=vc14_0
 - tornado=4.5.2=py36_0
 - traitlets=4.3.2=py36_0
@@ -100,9 +101,7 @@ dependencies:
   - pyquante2==0.1
   - qt5reactor==0.4
   - reportlab==3.4.0
-  - sasmodels==0.97
-  - sasview==4.1
   - service-identity==17.0.0
+  - tinycc==1.1
   - webencodings==0.5.1
-prefix: C:\Anaconda\envs\qt5
-
+  - xhtml2pdf==0.2.1

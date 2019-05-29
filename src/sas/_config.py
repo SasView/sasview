@@ -97,7 +97,7 @@ def setup_custom_config(app_dir, user_dir):
     # - to support backcompability
     if not "SAS_OPENCL" in open(path).read():
         try:
-            open(config_file, "a+").write("SAS_OPENCL = \"None\"\n")
+            open(path, "a+").write("SAS_OPENCL = \"None\"\n")
         except Exception:
             logger.error("Could not update custom config with SAS_OPENCL.")
 

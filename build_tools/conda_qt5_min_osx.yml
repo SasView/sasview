@@ -1,0 +1,54 @@
+name: qt5_osx
+channels:
+  - conda-forge
+dependencies:
+ - altgraph=0.15=py_0
+ - appdirs=1.4.3=py_0
+ - attrs=18.1.0=py_0
+ - automat=0.6.0=py36_0
+ - babel=2.6.0=py36_0
+ - backports.functools_lru_cache=1.5=py36_0
+ - ca-certificates=2018.4.16=0
+ - certifi=2018.4.16=py36_0
+ - clangdev=6.0.0=default_0
+ - colorama=0.3.9=py36_0
+ - constantly=15.1.0=py_0
+ - coverage=4.5.1=py36_0
+ - cython=0.28.3=py36_0
+ - h5py=2.8.0=py36h470a237_0
+ - hypothesis=3.57.0=py36h24bf2e0_0
+ - lxml=4.2.1=py36_0
+ - macholib=1.8=py_0
+ - mako=1.0.7=py36_0
+ - openssl=1.0.2o=0
+ - packaging=17.1=py_0
+ - pycrypto=2.6.1=py36_1
+ - pyinstaller=3.3.1=py36_0
+ - pyqt=5.6.0=py36_5
+ - pytools=2018.4=py_0
+ - qt=5.6.2=h9e3eb04_4
+ - qtconsole=4.3.1=py36_0
+ - sphinx=1.7.4=py36_0
+ - sphinxcontrib-websupport=1.0.1=py36_0
+ - tbb=2018_20171205=0
+ - typing=3.6.4=py36_0
+ - service_identity=17.0.0=py36_0
+ - twisted=17.5.0=py36_0
+ - zope=1.0=py36_0
+ - matplotlib=2.2.2
+ - scipy=1.1.0
+ - hdf5=1.10.1
+ - ipython=6
+ - ipykernel=4.9
+ - jupyter
+ - pytest
+ - testpath=0.3.1
+ - numpy=1.15.1
+ - pyopencl=2018.1.1
+ - pip:
+   - pytools==2018.4
+   - periodictable==1.5.0
+   - bumps==0.7.11
+   - xhtml2pdf==0.2.3
+   - qt5reactor==0.5
+

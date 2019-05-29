@@ -1,4 +1,5 @@
 import logging
+import copy
 
 from twisted.internet import threads
 
@@ -17,22 +18,118 @@ from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
+class DnDTableWidget(QtWidgets.QTableWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.viewport().setAcceptDrops(True)
+        self.setDragDropOverwriteMode(False)
+        self.setDropIndicatorShown(True)
+
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+
+        self._is_dragged = False
+
+    def isDragged(self):
+        """
+        Return the drag status
+        """
+        return self._is_dragged
+
+    def dragEnterEvent(self, event):
+        """
+        Called automatically on a drag in the TableWidget
+        """
+        self._is_dragged = True
+        event.accept()
+
+    def dragLeaveEvent(self, event):
+        """
+        Called automatically on a drag stop
+        """
+        self._is_dragged = False
+        event.accept()
+
+    def dropEvent(self, event: QtGui.QDropEvent):
+        if not event.isAccepted() and event.source() == self:
+            drop_row = self.drop_on(event)
+            rows = sorted(set(item.row() for item in self.selectedItems()))
+            rows_to_move = [[QtWidgets.QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())]
+                            for row_index in rows]
+            for row_index in reversed(rows):
+                self.removeRow(row_index)
+                if row_index < drop_row:
+                    drop_row -= 1
+
+            for row_index, data in enumerate(rows_to_move):
+                row_index += drop_row
+                self.insertRow(row_index)
+                for column_index, column_data in enumerate(data):
+                    self.setItem(row_index, column_index, column_data)
+            event.accept()
+            for row_index in range(len(rows_to_move)):
+                self.item(drop_row + row_index, 0).setSelected(True)
+                self.item(drop_row + row_index, 1).setSelected(True)
+        super().dropEvent(event)
+        # Reset the drag flag. Must be done after the drop even got accepted!
+        self._is_dragged = False
+
+    def drop_on(self, event):
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return self.rowCount()
+
+        return index.row() + 1 if self.is_below(event.pos(), index) else index.row()
+
+    def is_below(self, pos, index):
+        rect = self.visualRect(index)
+        margin = 2
+        if pos.y() - rect.top() < margin:
+            return False
+        elif rect.bottom() - pos.y() < margin:
+            return True
+
+        return rect.contains(pos, True) and not \
+            (int(self.model().flags(index)) & QtCore.Qt.ItemIsDropEnabled) and \
+            pos.y() >= rect.center().y()
+
+
 class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
     """
+    fitCompleteSignal = QtCore.pyqtSignal(tuple)
+    batchCompleteSignal = QtCore.pyqtSignal(tuple)
+    fitFailedSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
+
         self.parent = parent
         self.setupUi(self)
+
         self.currentType = "FitPage"
         # Page id for fitting
         # To keep with previous SasView values, use 300 as the start offset
         self.page_id = 301
+        self.tab_id = self.page_id
+        # fitpage order in the widget
+        self._row_order = []
+
+        # Set the table widget into layout
+        self.tblTabList = DnDTableWidget(self)
+        self.tblLayout.addWidget(self.tblTabList)
 
         # Are we chain fitting?
         self.is_chain_fitting = False
+
+        # Is the fit job running?
+        self.is_running = False
+        self.calc_fit = None
 
         # Remember previous content of modified cell
         self.current_cell = ""
@@ -58,6 +155,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Set up various widget states
         """
+        # disable special cases until properly defined
+        self.label.setVisible(False)
+        self.cbCases.setVisible(False)
+
         labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
         self.editable_tab_columns = [labels.index('Mnemonic')]
@@ -77,6 +178,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.setHorizontalHeaderLabels(labels)
         self.tblConstraints.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.tblConstraints.setEnabled(False)
+        header = self.tblConstraints.horizontalHeaderItem(0)
+        header.setToolTip("Double click a row below to edit the constraint.")
 
         self.tblConstraints.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblConstraints.customContextMenuRequested.connect(self.showConstrContextMenu)
@@ -91,12 +194,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cbCases.currentIndexChanged.connect(self.onSpecialCaseChange)
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdAdd.clicked.connect(self.showMultiConstraint)
         self.chkChain.toggled.connect(self.onChainFit)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
         self.tblTabList.cellDoubleClicked.connect(self.onTabCellEntered)
         self.tblConstraints.cellChanged.connect(self.onConstraintChange)
+
+        # Internal signals
+        self.fitCompleteSignal.connect(self.fitComplete)
+        self.batchCompleteSignal.connect(self.batchComplete)
+        self.fitFailedSignal.connect(self.fitFailed)
 
         # External signals
         self.parent.tabsModifiedSignal.connect(self.initializeFitList)
@@ -109,8 +218,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         tab_object = ObjectLibrary.getObject(tab)
 
-        # Disconnect all local slots
-        #tab_object.disconnect()
+        # Disconnect all local slots, if connected
+        if tab_object.receivers(tab_object.newModelSignal) > 0:
+            tab_object.newModelSignal.disconnect()
+        if tab_object.receivers(tab_object.constraintAddedSignal) > 0:
+            tab_object.constraintAddedSignal.disconnect()
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)
@@ -148,15 +260,22 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Perform the constrained/simultaneous fit
         """
+        # Stop if we're running
+        if self.is_running:
+            self.is_running = False
+            #re-enable the Fit button
+            self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+            self.cmdFit.setText("Fit")
+            # stop the fitpages
+            self.calc_fit.stop()
+            return
+
         # Find out all tabs to fit
         tabs_to_fit = self.getTabsForFit()
 
         # Single fitter for the simultaneous run
         fitter = Fit()
         fitter.fitter_id = self.page_id
-
-        # Notify the parent about fitting started
-        self.parent.fittingStartedSignal.emit(tabs_to_fit)
 
         # prepare fitting problems for each tab
         #
@@ -166,6 +285,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Prepare the fitter object
         try:
             for tab in tabs_to_fit:
+                if not self.isTabImportable(tab): continue
                 tab_object = ObjectLibrary.getObject(tab)
                 if tab_object is None:
                     # No such tab!
@@ -175,7 +295,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 page_ids.append([tab_object.page_id])
         except ValueError:
             # No parameters selected in one of the tabs
-            no_params_msg = "Fitting can not be performed.\n" +\
+            no_params_msg = "Fitting cannot be performed.\n" +\
                             "Not all tabs chosen for fitting have parameters selected for fitting."
             QtWidgets.QMessageBox.warning(self,
                                           'Warning',
@@ -199,8 +319,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         batch_inputs = {}
         batch_outputs = {}
 
+        # Notify the parent about fitting started
+        self.parent.fittingStartedSignal.emit(tabs_to_fit)
+
         # new fit thread object
-        calc_fit = FitThread(handler=handler,
+        self.calc_fit = FitThread(handler=handler,
                              fn=sim_fitter_list,
                              batch_inputs=batch_inputs,
                              batch_outputs=batch_outputs,
@@ -211,19 +334,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         if LocalConfig.USING_TWISTED:
             # start the trhrhread with twisted
-            calc_thread = threads.deferToThread(calc_fit.compute)
-            calc_thread.addCallback(completefn)
-            calc_thread.addErrback(self.onFitFailed)
+            self.calc_fit = threads.deferToThread(self.calc_fit.compute)
+            self.calc_fit.addCallback(completefn)
+            self.calc_fit.addErrback(self.onFitFailed)
         else:
             # Use the old python threads + Queue
-            calc_fit.queue()
-            calc_fit.ready(2.5)
+            self.calc_fit.queue()
+            self.calc_fit.ready(2.5)
 
-
-        #disable the Fit button
-        self.cmdFit.setText('Running...')
+        # modify the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setText('Stop fit')
         self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
-        self.cmdFit.setEnabled(False)
+        self.is_running = True
 
     def onHelp(self):
         """
@@ -241,6 +364,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Respond to check/uncheck and to modify the model moniker actions
         """
+        # If this "Edit" is just a response from moving rows around,
+        # update the tab order and leave
+        if self.tblTabList.isDragged():
+            self._row_order = []
+            for i in range(self.tblTabList.rowCount()):
+                self._row_order.append(self.tblTabList.item(i,0).data(0))
+            return
+
         item = self.tblTabList.item(row, column)
         if column == 0:
             # Update the tabs for fitting list
@@ -261,11 +392,21 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             item.setBackground(QtCore.Qt.red)
             self.tblTabList.blockSignals(False)
             self.cmdFit.setEnabled(False)
+            if new_moniker == "":
+                msg = "Please use a non-empty name."
+            else:
+                msg = "Please use a unique name."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            item.setToolTip(msg)
             return
         self.tblTabList.blockSignals(True)
         item.setBackground(QtCore.Qt.white)
         self.tblTabList.blockSignals(False)
         self.cmdFit.setEnabled(True)
+        item.setToolTip("")
+        msg = "Fitpage name changed to {}.".format(new_moniker)
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+
         if not self.current_cell:
             return
         # Remember the value
@@ -294,6 +435,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Update the tabs for fitting list
             constraint = self.available_constraints[row]
             constraint.active = (item.checkState() == QtCore.Qt.Checked)
+            return
+        # Update the constraint formula
+        constraint = self.available_constraints[row]
+        function = item.text()
+        # remove anything left of '=' to get the constraint
+        function = function[function.index('=')+1:]
+        # No check on function here - trust the user (R)
+        if function != constraint.func:
+            # This becomes rather difficult to validate now.
+            # Turn off validation for Edit Constraint
+            constraint.func = function
+            constraint.validate = False
 
     def onTabCellEntered(self, row, column):
         """
@@ -306,11 +459,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onFitComplete(self, result):
         """
+        Send the fit complete signal to main thread
+        """
+        self.fitCompleteSignal.emit(result)
+
+    def fitComplete(self, result):
+        """
         Respond to the successful fit complete signal
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
+        self.is_running = False
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
@@ -345,11 +505,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onBatchFitComplete(self, result):
         """
+        Send the fit complete signal to main thread
+        """
+        self.batchCompleteSignal.emit(result)
+
+    def batchComplete(self, result):
+        """
         Respond to the successful batch fit complete signal
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
+        self.is_running = False
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
@@ -363,25 +530,35 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         # Show the grid panel
-        self.parent.communicate.sendDataToGridSignal.emit(result[0])
+        page_name = "ConstSimulPage"
+        results = copy.deepcopy(result[0])
+        results.append(page_name)
+        self.parent.communicate.sendDataToGridSignal.emit(results)
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
     def onFitFailed(self, reason):
         """
+        Send the fit failed signal to main thread
+        """
+        self.fitFailedSignal.emit(result)
+
+    def fitFailed(self, reason):
+        """
         Respond to fitting failure.
         """
         #re-enable the Fit button
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
+        self.is_running = False
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
 
         msg = "Fitting failed: %s s.\n" % reason
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
- 
+
     def isTabImportable(self, tab):
         """
         Determines if the tab can be imported and included in the widget
@@ -594,7 +771,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
             # Show the text in the constraint table
             item = self.uneditableItem(label)
-            item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
+            item = QtWidgets.QTableWidgetItem(label)
+            # Why was this set to non-interactive??
+            #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             item.setCheckState(QtCore.Qt.Checked)
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
@@ -626,11 +805,40 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
+        if len(tabs) < 2:
+            self.cmdAdd.setEnabled(False)
+        else:
+            self.cmdAdd.setEnabled(True)
+
+        if not self._row_order:
+            # Initialize tab order list
+            self._row_order = tabs
+        else:
+            tabs = self.orderedSublist(self._row_order, tabs)
+            self._row_order = tabs
+
         for tab in tabs:
             self.updateFitLine(tab)
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
             self.cmdFit.setEnabled(True)
+
+    def orderedSublist(self, order_list, target_list):
+        """
+        Orders the target_list such that any elements
+        present in order_list show up first and in the order
+        from order_list.
+        """
+        tmp_list = []
+        # 1. get the non-matching elements
+        nonmatching = list(set(target_list) - set(order_list))
+        # 2: start with matching tabs, in the correct order
+        for elem in order_list:
+            if elem in target_list:
+                tmp_list.append(elem)
+        # 3. add the remaning tabs in any order
+        ordered_list = tmp_list + nonmatching
+        return ordered_list
 
     def validateMoniker(self, new_moniker=None):
         """
@@ -662,33 +870,125 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                     continue
         return None
 
+    def onAcceptConstraint(self, con_tuple):
+        """
+        Receive constraint tuple from the ComplexConstraint dialog and adds contraint
+        """
+        #"M1, M2, M3" etc
+        model_name, constraint = con_tuple
+        constrained_tab = self.getObjectByName(model_name)
+        if constrained_tab is None:
+            return
+
+        # Find the constrained parameter row
+        constrained_row = constrained_tab.getRowFromName(constraint.param)
+
+        # Update the tab
+        constrained_tab.addConstraintToRow(constraint, constrained_row)
+
+        # Select this parameter for adjusting/fitting
+        constrained_tab.selectCheckbox(constrained_row)
+
+
     def showMultiConstraint(self):
         """
         Invoke the complex constraint editor
         """
         selected_rows = self.selectedParameters(self.tblTabList)
-        assert(len(selected_rows)==2)
 
-        tab_list = [ObjectLibrary.getObject(self.tblTabList.item(s, 0).data(0)) for s in selected_rows]
+        tab_list = [ObjectLibrary.getObject(self.tblTabList.item(s, 0).data(0)) for s in range(self.tblTabList.rowCount())]
         # Create and display the widget for param1 and param2
         cc_widget = ComplexConstraint(self, tabs=tab_list)
+        cc_widget.constraintReadySignal.connect(self.onAcceptConstraint)
+
         if cc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
-        constraint = Constraint()
-        model1, param1, operator, constraint_text = cc_widget.constraint()
+    def getFitPage(self):
+        """
+        Retrieves the state of this page
+        """
+        param_list = []
 
-        constraint.func = constraint_text
-        # param1 is the parameter we're constraining
-        constraint.param = param1
+        param_list.append(['is_constraint', 'True'])
+        param_list.append(['data_id', "cs_tab"+str(self.page_id)])
+        param_list.append(['current_type', self.currentType])
+        param_list.append(['is_chain_fitting', str(self.is_chain_fitting)])
+        param_list.append(['special_case', self.cbCases.currentText()])
 
-        # Find the right tab
-        constrained_tab = self.getObjectByName(model1)
-        if constrained_tab is None:
+        return param_list
+
+    def getFitModel(self):
+        """
+        Retrieves current model
+        """
+        model_list = []
+
+        checked_models = {}
+        for row in range(self.tblTabList.rowCount()):
+            model_name = self.tblTabList.item(row,1).data(0)
+            active = self.tblTabList.item(row,0).checkState()# == QtCore.Qt.Checked
+            checked_models[model_name] = str(active)
+
+        checked_constraints = {}
+        for row in range(self.tblConstraints.rowCount()):
+            model_name = self.tblConstraints.item(row,0).data(0)
+            active = self.tblConstraints.item(row,0).checkState()# == QtCore.Qt.Checked
+            checked_constraints[model_name] = str(active)
+
+        model_list.append(['checked_models', checked_models])
+        model_list.append(['checked_constraints', checked_constraints])
+        return model_list
+
+    def createPageForParameters(self, parameters=None):
+        """
+        Update the page with passed parameter values
+        """
+        # checked models
+        if not 'checked_models' in parameters:
             return
+        models = parameters['checked_models'][0]
+        for model, check_state in models.items():
+            for row in range(self.tblTabList.rowCount()):
+                model_name = self.tblTabList.item(row,1).data(0)
+                if model_name != model:
+                    continue
+                # check/uncheck item
+                self.tblTabList.item(row,0).setCheckState(int(check_state))
 
-        # Find the constrained parameter row
-        constrained_row = constrained_tab.getRowFromName(param1)
+        if not 'checked_constraints' in parameters:
+            return
+        # checked constraints
+        models = parameters['checked_constraints'][0]
+        for model, check_state in models.items():
+            for row in range(self.tblConstraints.rowCount()):
+                model_name = self.tblConstraints.item(row,0).data(0)
+                if model_name != model:
+                    continue
+                # check/uncheck item
+                self.tblConstraints.item(row,0).setCheckState(int(check_state))
 
-        # Update the tab
-        constrained_tab.addConstraintToRow(constraint, constrained_row)
+        # fit/batch radio
+        isBatch = parameters['current_type'][0] == 'BatchPage'
+        if isBatch:
+            self.btnBatch.toggle()
+
+        # chain
+        is_chain = parameters['is_chain_fitting'][0] == 'True'
+        if isBatch:
+            self.chkChain.setChecked(is_chain)
+
+    def getReport(self):
+        """
+        Wrapper for non-existent functionality.
+        Tell the user to use the reporting tool
+        on separate fit pages.
+        """
+        msg = "Please use Report Results directly on fit pages"
+        msg += " involved in the Constrained and Simultaneous fitting process."
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+        msgbox.setText(msg)
+        msgbox.setWindowTitle("Fit Report")
+        _ = msgbox.exec_()
+        return

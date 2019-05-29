@@ -17,6 +17,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
+    windowClosedSignal = QtCore.pyqtSignal()
     def __init__(self, parent = None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
@@ -34,6 +35,9 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.has_data = False if output_data is None else True
         # Tab numbering
         self.tab_number = 1
+
+        # save state
+        self.data_dict = {}
 
         # System dependent menu items
         if not self.IS_WIN:
@@ -62,8 +66,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
-        # Maybe we should just minimize
-        self.setWindowState(QtCore.Qt.WindowMinimized)
+        # notify the parent so it hides this window
+        self.windowClosedSignal.emit()
         event.ignore()
 
     def addToolbarActions(self):
@@ -124,7 +128,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             logging.error("Error generating context menu: %s" % ex)
         return
 
-    def addTabPage(self):
+    def addTabPage(self, name=None):
         """
         Add new tab page with QTableWidget
         """
@@ -139,7 +143,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # One would think naming the tab with current model name would be good.
         # However, some models have LONG names, which doesn't look well on the tab bar.
         self.tab_number += 1
-        tab_name = "Tab " + str(self.tab_number)
+        if name is not None:
+            tab_name = name
+        else:
+            tab_name = "Tab " + str(self.tab_number)
         # each table needs separate slots.
         tab_widget.customContextMenuRequested.connect(self.showContextMenu)
         self.tables.append(tab_widget)
@@ -151,7 +158,17 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Create a new tab with batch fitting results
         """
-        self.addTabPage()
+        # pull out page name from results
+        page_name = None
+        if len(results)>=2:
+            if isinstance(results[-1], str):
+                page_name = results[-1]
+                _ = results.pop(-1)
+
+        if self.has_data:
+            self.addTabPage(name=page_name)
+        else:
+            self.tabWidget.setTabText(0, page_name)
         # Update the new widget
         # Fill in the table from input data in the last/newest page
         assert(self.tables)
@@ -161,19 +178,16 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Set a table tooltip describing the model
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
-
+        self.data_dict[page_name] = results
 
     @classmethod
     def onHelp(cls):
         """
         Open a local url in the default browser
         """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        try:
-            webbrowser.open('file://' + os.path.realpath(location+url))
-        except webbrowser.Error as ex:
-            logging.warning("Cannot display help. %s" % ex)
+        GuiUtils.showHelp(url)
+
 
     def onPlot(self):
         """
@@ -304,13 +318,24 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Figure out the headers
         model = data[0][0]
 
-        # TODO: add a conditional for magnetic models
-        param_list = [m for m in model.model.params.keys() if ":" not in m]
+        disperse_params = list(model.model.dispersion.keys())
+        magnetic_params = model.model.magnetic_params
+        optimized_params = model.param_list
+        # Create the main parameter list
+        param_list = [m for m in model.model.params.keys() if (m not in model.model.magnetic_params and ".width" not in m)]
+
+        # add fitted polydisp parameters
+        param_list += [m+".width" for m in disperse_params if m+".width" in optimized_params]
+
+        # add fitted magnetic params
+        param_list += [m for m in magnetic_params if m in optimized_params]
 
         # Check if 2D model. If not, remove theta/phi
         if isinstance(model.data.sas_data, Data1D):
-            param_list.remove('theta')
-            param_list.remove('phi')
+            if 'theta' in param_list:
+                param_list.remove('theta')
+            if 'phi' in param_list:
+                param_list.remove('phi')
 
         rows = len(data)
         columns = len(param_list)
@@ -417,11 +442,11 @@ class BatchInversionOutputPanel(BatchOutputPanel):
     """
     def __init__(self, parent = None, output_data=None):
 
-        super(BatchInversionOutputPanel, self).__init__(parent, output_data)
+        super(BatchInversionOutputPanel, self).__init__(parent._parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
 
-    def setupTable(self, data):
+    def setupTable(self, widget=None,  data=None):
         """
         Create tablewidget items and show them, based on params
         """
@@ -430,6 +455,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                       'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]']
 
+        if data is None:
+            return
         keys = data.keys()
         rows = len(keys)
         columns = len(param_list)
@@ -473,7 +500,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         Open a local url in the default browser
         """
         location = GuiUtils.HELP_DIRECTORY_LOCATION
-        url = "/user/sasgui/perspectives/pr/pr_help.html#batch-pr-mode"
+        url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
         try:
             webbrowser.open('file://' + os.path.realpath(location + url))
         except webbrowser.Error as ex:

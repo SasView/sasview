@@ -98,9 +98,16 @@ class FittingLogicTest(unittest.TestCase):
         data = Data1D(x=[1,2,3],y=[3,4,5])
         data.name = "boop"
         data.id = "poop"
-        return_data = (data.x,data.y, 7, None, None,
-                        0, True, 0.0, 1, data,
-                        data, False, None)
+        # Condensed return data (new1DPlot only uses these fields)
+        return_data = dict(x = data.x,
+                           y = data.y,
+                           model = data,
+                           data = data)
+        # return_data = (data.x,data.y, 7, None, None,
+        #                0, True, 0.0, 1, data,
+        #                data, False, None,
+        #                None, None, None,
+        #                None, None)
 
         new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
 
@@ -136,9 +143,14 @@ class FittingLogicTest(unittest.TestCase):
 
         qmin, qmax, npts = self.logic.computeDataRange()
 
-        return_data = (x_0, data, 7, data, None,
-                        True, 0.0, 1, 0, qmin, qmax,
-                        0.1, False, None)
+        # Condensed return data (new2DPlot only uses these fields)
+        return_data = dict(image = x_0,
+                           data = data,
+                           page_id = 7,
+                           model = data)
+        # return_data = (x_0, data, 7, data, None,
+        #                 True, 0.0, 1, 0, qmin, qmax,
+        #                 0.1, False, None)
 
         new_plot = self.logic.new2DPlot(return_data=return_data)
 

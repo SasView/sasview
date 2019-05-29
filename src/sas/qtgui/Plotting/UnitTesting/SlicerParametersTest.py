@@ -59,7 +59,7 @@ class SlicerParametersTest(unittest.TestCase):
         self.widget.show()
 
         # Set up the spy
-        spy_close = QtSignalSpy(self.widget, self.widget.close_signal)
+        spy_close = QtSignalSpy(self.widget, self.widget.closeWidgetSignal)
         # Click on the "Close" button
         QtTest.QTest.mouseClick(self.widget.buttonBox.button(QtWidgets.QDialogButtonBox.Close), QtCore.Qt.LeftButton)
         # Check the signal

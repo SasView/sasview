@@ -79,7 +79,10 @@ class AboutBoxTest(unittest.TestCase):
                 LocalConfig._ess_url,
                 LocalConfig._ill_url,
                 LocalConfig._ansto_url,
-                LocalConfig._inst_url]
+                LocalConfig._inst_url,
+                LocalConfig._delft_url,
+                LocalConfig._bam_url,
+                LocalConfig._diamond_url]
 
         # Press the buttons
         buttonList = self.widget.findChildren(QtWidgets.QPushButton)

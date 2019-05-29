@@ -147,12 +147,6 @@ class Plotter2DTest(unittest.TestCase):
         actions = self.plotter.contextMenu.actions()
         self.assertEqual(len(actions), 7)
 
-        # Trigger Save Image and make sure the method is called
-        self.assertEqual(actions[0].text(), "Save Image")
-        self.plotter.toolbar.save_figure = MagicMock()
-        actions[0].trigger()
-        self.assertTrue(self.plotter.toolbar.save_figure.called)
-
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
         QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)

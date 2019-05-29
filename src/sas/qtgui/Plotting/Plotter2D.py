@@ -1,6 +1,5 @@
 import copy
 import numpy
-import pylab
 import functools
 import logging
 
@@ -8,12 +7,9 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-DEFAULT_CMAP = pylab.cm.jet
 
-#import sys
-#print("SYS.PATH = ", sys.path)
 import matplotlib as mpl
-mpl.use("Qt5Agg")
+DEFAULT_CMAP = mpl.cm.jet
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -60,6 +56,7 @@ class Plotter2DWidget(PlotterBase):
         self.connect = BindArtist(self.figure)
         self.vmin = None
         self.vmax = None
+        self.im = None
 
         self.manager = manager
 
@@ -84,17 +81,7 @@ class Plotter2DWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
         self.title(title=data.title)
 
-    @property
-    def item(self):
-        ''' getter for this plot's QStandardItem '''
-        return self._item
-
-    @item.setter
-    def item(self, item=None):
-        ''' setter for this plot's QStandardItem '''
-        self._item = item
-
-    def plot(self, data=None, marker=None, show_colorbar=True):
+    def plot(self, data=None, marker=None, show_colorbar=True, update=False):
         """
         Plot 2D self._data
         marker - unused
@@ -103,7 +90,8 @@ class Plotter2DWidget(PlotterBase):
         if isinstance(data, Data2D):
             self.data = data
 
-        assert self._data
+        if not self._data:
+            return
 
         # Toggle the scale
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
@@ -116,14 +104,17 @@ class Plotter2DWidget(PlotterBase):
                       xmax=self.xmax,
                       ymin=self.ymin, ymax=self.ymax,
                       cmap=self.cmap, zmin=zmin_2D_temp,
-                      zmax=zmax_2D_temp, show_colorbar=show_colorbar)
+                      zmax=zmax_2D_temp, show_colorbar=show_colorbar,
+                      update=update)
+
+        self.updateCircularAverage()
 
     def calculateDepth(self):
         """
         Re-calculate the plot depth parameters depending on the scale
         """
         # Toggle the scale
-        zmin_temp = self.zmin if self.zmin else MIN_Z
+        zmin_temp = self.zmin
         zmax_temp = self.zmax
         # self.scale predefined in the baseclass
         # in numpy > 1.12 power(int, -int) raises ValueException
@@ -235,7 +226,8 @@ class Plotter2DWidget(PlotterBase):
             return
         def slicer_closed():
             # Need to disconnect the signal!!
-            self.slicer_widget.close_signal.disconnect()
+            self.slicer_widget.closeWidgetSignal.disconnect()
+            self.manager.parent.workspace().removeSubWindow(self.slicer_subwindow)
             # reset slicer_widget on "Edit Slicer Parameters" window close
             self.slicer_widget = None
 
@@ -243,15 +235,15 @@ class Plotter2DWidget(PlotterBase):
         # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(model=self.param_model,
                                               validate_method=self.slicer.validate)
-        self.slicer_widget.close_signal.connect(slicer_closed)
+        self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
-        self.manager.parent.workspace().addSubWindow(self.slicer_widget)
+        self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
 
         self.slicer_widget.show()
 
-    def onCircularAverage(self):
+    def circularAverage(self):
         """
-        Perform circular averaging on Data2D
+        Calculate the circular average and create the Data object for it
         """
         # Find the best number of bins
         npt = numpy.sqrt(len(self.data.data[numpy.isfinite(self.data.data)]))
@@ -290,9 +282,56 @@ class Plotter2DWidget(PlotterBase):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
-        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
+
+        return new_plot
+
+    def onCircularAverage(self):
+        """
+        Perform circular averaging on Data2D
+        """
+        new_plot = self.circularAverage()
+
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
+        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+    def updateCircularAverage(self):
+        """
+        Update circular averaging plot on Data2D change
+        """
+        if not hasattr(self,'_item'): return
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+
+        # Get all plots for current item
+        plots = GuiUtils.plotsFromModel("", item)
+        if plots is None: return
+        ca_caption = '2daverage'+self.data.name
+        # See if current item plots contain 2D average plot
+        has_plot = False
+        for plot in plots:
+            if plot.group_id is None: continue
+            if ca_caption in plot.group_id: has_plot=True
+        # return prematurely if no circular average plot found
+        if not has_plot: return
+
+        # Create a new plot
+        new_plot = self.circularAverage()
+
+        # Overwrite existing plot
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+        # Show the new plot, if already visible
+        self.manager.communicator.plotUpdateSignal.emit([new_plot])
+
+        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+        # Show the plot
 
     def setSlicer(self, slicer):
         """
@@ -342,12 +381,21 @@ class Plotter2DWidget(PlotterBase):
         self.figure.canvas.draw()
         self.slicer.update()
 
+        def boxWidgetClosed():
+            # Need to disconnect the signal!!
+            self.boxwidget.closeWidgetSignal.disconnect()
+            # reset box on "Edit Slicer Parameters" window close
+            self.manager.parent.workspace().removeSubWindow(self.boxwidget_subwindow)
+            self.boxwidget = None
+
         # Get the BoxSumCalculator model.
         self.box_sum_model = self.slicer.model()
         # Pass the BoxSumCalculator model to the BoxSum widget
         self.boxwidget = BoxSum(self, model=self.box_sum_model)
         # Add the plot to the workspace
-        self.manager.parent.workspace().addSubWindow(self.boxwidget)
+        self.boxwidget_subwindow = self.manager.parent.workspace().addSubWindow(self.boxwidget)
+        self.boxwidget.closeWidgetSignal.connect(boxWidgetClosed)
+
         self.boxwidget.show()
 
     def onBoxAveragingX(self):
@@ -388,7 +436,8 @@ class Plotter2DWidget(PlotterBase):
         self.plot()
 
     def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
-                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP, show_colorbar=True):
+                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP, show_colorbar=True,
+                 update=False):
         """
         Render and show the current data
         """
@@ -410,9 +459,21 @@ class Plotter2DWidget(PlotterBase):
         else:
             output = copy.deepcopy(data)
 
+        # get the x and y_bin arrays.
+        x_bins, y_bins = PlotUtilities.get_bins(self.qx_data, self.qy_data)
+        self._data.x_bins = x_bins
+        self._data.y_bins = y_bins
+
         zmin_temp = self.zmin
         # check scale
         if self.scale == 'log_{10}':
+            #with numpy.errstate(all='ignore'):
+            #    output = numpy.log10(output)
+            #index = numpy.isfinite(output)
+            #if not index.all():
+            #    cutoff = (numpy.quantile(output[index], 0.05) - numpy.log10(2) if index.any() else 0.)
+            #    output[output < cutoff] = cutoff
+            #    output[~index] = cutoff
             try:
                 if  self.zmin <= 0  and len(output[output > 0]) > 0:
                     zmin_temp = self.zmin
@@ -429,6 +490,8 @@ class Plotter2DWidget(PlotterBase):
                 output[output > 0] = numpy.log10(output[output > 0])
                 pass
 
+        vmin, vmax = None, None
+
         self.cmap = cmap
         if self.dimension != 3:
             #Re-adjust colorbar
@@ -438,15 +501,17 @@ class Plotter2DWidget(PlotterBase):
             if self.vmin is not None:
                 zmin_temp = self.vmin
                 zmax_temp = self.vmax
-
-            im = self.ax.imshow(output, interpolation='nearest',
-                                # origin='lower',
+            if self.im is not None and update:
+                self.im.set_data(output)
+            else:
+                self.im = self.ax.imshow(output, interpolation='nearest',
+                                origin='lower',
                                 vmin=zmin_temp, vmax=zmax_temp,
                                 cmap=self.cmap,
                                 extent=(self.xmin, self.xmax,
                                         self.ymin, self.ymax))
 
-            cbax = self.figure.add_axes([0.84, 0.2, 0.02, 0.7])
+            cbax = self.figure.add_axes([0.88, 0.2, 0.02, 0.7])
 
             # Current labels for axes
             self.ax.set_ylabel(self.y_label)
@@ -458,11 +523,11 @@ class Plotter2DWidget(PlotterBase):
 
             if cbax is None:
                 ax.set_frame_on(False)
-                cb = self.figure.colorbar(im, shrink=0.8, aspect=20)
+                cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
             else:
-                cb = self.figure.colorbar(im, cax=cbax)
+                cb = self.figure.colorbar(self.im, cax=cbax)
 
-            cb.update_bruteforce(im)
+            cb.update_bruteforce(self.im)
             cb.set_label('$' + self.scale + '$')
 
             self.vmin = cb.vmin
@@ -499,6 +564,16 @@ class Plotter2DWidget(PlotterBase):
         else:
             self.figure.canvas.draw()
 
+    def imageShow(self, img, origin=None):
+        """
+        Show background image
+        :Param img: [imread(path) from matplotlib.pyplot]
+        """
+        if origin is not None:
+            im = self.ax.imshow(img, origin=origin)
+        else:
+            im = self.ax.imshow(img)
+
     def update(self):
         self.figure.canvas.draw()
 
@@ -512,6 +587,27 @@ class Plotter2DWidget(PlotterBase):
         """
         self.plot(data=new_plot)
 
+    def onMplMouseDown(self, event):
+        """
+        Display x/y/intensity on click
+        """
+        # Check that the LEFT button was pressed
+        if event.button != 1:
+            return
+
+        if event.inaxes is None:
+            return
+        x_click = 0.0
+        y_click = 0.0
+        try:
+            x_click = float(event.xdata)  # / size_x
+            y_click = float(event.ydata)  # / size_y
+        except:
+            self.position = None
+        x_str = GuiUtils.formatNumber(x_click)
+        y_str = GuiUtils.formatNumber(y_click)
+        coord_str = "x: {}, y: {}".format(x_str, y_str)
+        self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """

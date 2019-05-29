@@ -131,16 +131,11 @@ class FittingLogic(object):
         self._data.ymin = ymin
         self._data.ymax = ymax
 
-    def new1DPlot(self, return_data, tab_id):
+    def _create1DPlot(self, tab_id, x, y, model, data, component=None):
         """
-        Create a new 1D data instance based on fitting results
+        For internal use: create a new 1D data instance based on fitting results.
+        'component' is a string indicating the model component, e.g. "P(Q)"
         """
-        # Unpack return data from Calc1D
-        x, y, page_id, state, weight,\
-        fid, toggle_mode_on, \
-        elapsed, index, model,\
-        data, update_chisqr, source = return_data
-
         # Create the new plot
         new_plot = Data1D(x=x, y=y)
         new_plot.is_data = False
@@ -149,33 +144,42 @@ class FittingLogic(object):
         _xaxis, _xunit = data.get_xaxis()
 
         new_plot.group_id = data.group_id
-        new_plot.id = str(tab_id) + " " + model.id
+        new_plot.id = str(tab_id) + " " + ("[" + component + "] " if component else "") + model.id
 
-        if data.filename:
-            new_plot.name = model.name + " [" + data.filename + "]" # data file
-        else:
-            new_plot.name = model.name + " [" + model.id + "]"  # theory
+        # use data.filename for data, use model.id for theory
+        id_str = data.filename if data.filename else model.id
+        new_plot.name = model.name + ((" " + component) if component else "") + " [" + id_str + "]"
 
         new_plot.title = new_plot.name
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)
 
+        if component is not None:
+            new_plot.plot_role = Data1D.ROLE_DELETABLE #deletable
+
         return new_plot
+
+    def new1DPlot(self, return_data, tab_id):
+        """
+        Create a new 1D data instance based on fitting results
+        """
+        return self._create1DPlot(tab_id, return_data['x'], return_data['y'],
+                                  return_data['model'], return_data['data'])
 
     def new2DPlot(self, return_data):
         """
         Create a new 2D data instance based on fitting results
         """
-        image, data, page_id, model, state, toggle_mode_on,\
-        elapsed, index, fid, qmin, qmax, weight, \
-        update_chisqr, source = return_data
+        image = return_data['image']
+        data = return_data['data']
+        model = return_data['model']
 
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
-        new_plot.id = str(page_id) + " " + data.name
-        new_plot.group_id = str(page_id) + " Model2D"
+        new_plot.id = str(return_data['page_id']) + " " + data.name
+        new_plot.group_id = str(return_data['page_id']) + " Model2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False
@@ -203,6 +207,33 @@ class FittingLogic(object):
                                     data_name + "]"
 
         return new_plot
+
+    def new1DProductPlots(self, return_data, tab_id):
+        """
+        If return_data contains separated P(Q) and/or S(Q) data, create 1D plots for each and return as the tuple
+        (pq_plot, sq_plot). If either are unavailable, the corresponding plot is None.
+        """
+        plots = []
+        for name, result in return_data['intermediate_results'].items():
+            if isinstance(result, tuple) and len(result) > 1:
+                result = result[1]
+            if not isinstance(result, np.ndarray):
+                continue
+            plots.append(self._create1DPlot(tab_id, return_data['x'], result,
+                         return_data['model'], return_data['data'],
+                         component=name))
+        return plots
+
+    def getScalarIntermediateResults(self, return_data):
+        """
+        Returns a dict of scalar-only intermediate results from the return data.
+        """
+        res = {}
+        for name, int_res in return_data["intermediate_results"].items():
+            if isinstance(int_res, np.ndarray):
+                continue
+            res[name] = int_res
+        return res
 
     def computeDataRange(self):
         """

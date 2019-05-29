@@ -1,26 +1,33 @@
 """
     Unit tests for the ascii (n-column) reader
 """
+
+import os.path
 import warnings
+import math
 warnings.simplefilter("ignore")
 
 import unittest
 from sas.sascalc.dataloader.loader import Loader
 
 
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class ABSReaderTests(unittest.TestCase):
     
     def setUp(self):
         self.loader = Loader()
-        self.f1_list = self.loader.load("ascii_test_1.txt")
+        self.f1_list = self.loader.load(find("ascii_test_1.txt"))
         self.f1 = self.f1_list[0]
-        self.f2_list = self.loader.load("ascii_test_2.txt")
+        self.f2_list = self.loader.load(find("ascii_test_2.txt"))
         self.f2 = self.f2_list[0]
-        self.f3_list = self.loader.load("ascii_test_3.txt")
+        self.f3_list = self.loader.load(find("ascii_test_3.txt"))
         self.f3 = self.f3_list[0]
-        self.f4_list = self.loader.load("ascii_test_4.abs")
+        self.f4_list = self.loader.load(find("ascii_test_4.abs"))
         self.f4 = self.f4_list[0]
-        self.f5_list = self.loader.load("ascii_test_5.txt")
+        self.f5_list = self.loader.load(find("ascii_test_5.txt"))
         self.f5 = self.f5_list[0]
 
     def test_checkdata(self):
@@ -28,6 +35,11 @@ class ABSReaderTests(unittest.TestCase):
             Test .ABS file loaded as ascii
         """
         # The length of the data is 10
+        self.assertEqual(len(self.f1_list), 1)
+        self.assertEqual(len(self.f2_list), 1)
+        self.assertEqual(len(self.f3_list), 1)
+        self.assertEqual(len(self.f4_list), 1)
+        self.assertEqual(len(self.f5_list), 1)
         self.assertEqual(len(self.f1.x), 10)
         self.assertEqual(self.f1.x[0],0.002618)
         self.assertEqual(self.f1.x[9],0.0497)
@@ -93,10 +105,29 @@ class ABSReaderTests(unittest.TestCase):
         # Test .ABS file loaded as ascii
         f = None
         try:
-            f = self.loader.load("ascii_test_6.txt")
+            f = self.loader.load(find("ascii_test_6.txt"))
         # The length of the data is 5
         except:
             self.assertEqual(f, None)
+
+    def test_nan_values(self):
+        """
+        Test loading an ascii data file with nan values saved in x, y, or dy.
+        """
+        f_1d = self.loader.load(find("nans_in_1d_data.dat"))[0]
+        f_2d = self.loader.load(find("nans_in_2d_data.DAT"))[0]
+        for i in range(0, len(f_1d.x) - 1):
+            self.assertFalse(math.isnan(f_1d.x[i]))
+            self.assertFalse(math.isnan(f_1d.y[i]))
+            self.assertFalse(math.isnan(f_1d.dy[i]))
+        f_2d.data = f_2d.data.flatten()
+        f_2d.qx_data = f_2d.qx_data.flatten()
+        f_2d.qy_data = f_2d.qy_data.flatten()
+        for i in range(0, len(f_2d.data) - 1):
+            self.assertFalse(math.isnan(f_2d.data[i]))
+            self.assertFalse(math.isnan(f_2d.qx_data[i]))
+            self.assertFalse(math.isnan(f_2d.qy_data[i]))
+
 
 if __name__ == '__main__':
     unittest.main()

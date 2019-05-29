@@ -35,13 +35,25 @@ class PythonHighlighter (QSyntaxHighlighter):
     """Syntax highlighter for the Python language.
     """
     # Python keywords
-    keywords = [
+    python_keywords = [
         'and', 'assert', 'break', 'class', 'continue', 'def',
         'del', 'elif', 'else', 'except', 'exec', 'finally',
         'for', 'from', 'global', 'if', 'import', 'in',
         'is', 'lambda', 'not', 'or', 'pass', 'print',
         'raise', 'return', 'try', 'while', 'yield',
         'None', 'True', 'False',
+    ]
+
+    # C keywords
+    c_keywords = [
+        'auto', 'break', 'case', 'char',
+        'const', 'continue', 'default', 'do',
+        'double', 'else', 'enum', 'extern',
+        'float', 'for', 'goto', 'if',
+        'int', 'long', 'register', 'return',
+        'short', 'signed', 'sizeof', 'static',
+        'struct', 'switch', 'typedef', 'union',
+        'unsigned', 'void', 'volatile', 'while'
     ]
 
     # Python operators
@@ -61,7 +73,7 @@ class PythonHighlighter (QSyntaxHighlighter):
     braces = [
         '\{', '\}', '\(', '\)', '\[', '\]',
     ]
-    def __init__(self, document):
+    def __init__(self, document, is_python=True):
         QSyntaxHighlighter.__init__(self, document)
 
         # Multi-line strings (expression, flag, style)
@@ -73,8 +85,10 @@ class PythonHighlighter (QSyntaxHighlighter):
         rules = []
 
         # Keyword, operator, and brace rules
+        keywords = PythonHighlighter.python_keywords if is_python \
+            else PythonHighlighter.c_keywords
         rules += [(r'\b%s\b' % w, 0, STYLES['keyword'])
-            for w in PythonHighlighter.keywords]
+            for w in keywords]
         rules += [(r'%s' % o, 0, STYLES['operator'])
             for o in PythonHighlighter.operators]
         rules += [(r'%s' % b, 0, STYLES['brace'])
@@ -103,6 +117,9 @@ class PythonHighlighter (QSyntaxHighlighter):
             (r'\b[+-]?0[xX][0-9A-Fa-f]+[lL]?\b', 0, STYLES['numbers']),
             (r'\b[+-]?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b', 0, STYLES['numbers']),
         ]
+        # Add "//" to comments for C
+        if not is_python:
+            rules.append((r'//[^\n]*', 0, STYLES['comment']),)
 
         # Build a QRegExp for each pattern
         self.rules = [(QRegExp(pat), index, fmt)

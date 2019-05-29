@@ -28,9 +28,9 @@ class Reader(FileReader):
     # File type
     type_name = "IGOR 1D"
     # Wildcards
-    type = ["IGOR 1D files (*.abs)|*.abs"]
+    type = ["IGOR 1D files (*.abs)|*.abs", "IGOR 1D USANS files (*.cor)|*.cor"]
     # List of allowed extensions
-    ext = ['.abs']
+    ext = ['.abs', '.cor']
 
     def get_file_contents(self):
         """
@@ -45,9 +45,9 @@ class Reader(FileReader):
         self.output = []
         self.current_datainfo = DataInfo()
         self.current_datainfo.filename = filepath
-        self.reset_data_list(len(lines))
         detector = Detector()
         data_line = 0
+        x_index = 4
         self.reset_data_list(len(lines))
         self.current_datainfo.detector.append(detector)
         self.current_datainfo.filename = filepath
@@ -63,6 +63,8 @@ class Reader(FileReader):
 
         for line in lines:
             # Information line 1
+            if line.find(".bt5") > 0:
+                x_index = 0
             if is_info:
                 is_info = False
                 line_toks = line.split()
@@ -171,7 +173,7 @@ class Reader(FileReader):
                 toks = line.split()
 
                 try:
-                    _x = float(toks[0])
+                    _x = float(toks[x_index])
                     _y = float(toks[1])
                     _dy = float(toks[2])
                     _dx = float(toks[3])
@@ -187,7 +189,15 @@ class Reader(FileReader):
                     self.current_dataset.x[data_line] = _x
                     self.current_dataset.y[data_line] = _y
                     self.current_dataset.dy[data_line] = _dy
-                    self.current_dataset.dx[data_line] = _dx
+                    if _dx > 0:
+                        self.current_dataset.dx[data_line] = _dx
+                    else:
+                        if data_line == 0:
+                            self.current_dataset.dx = None
+                            self.current_dataset.dxl = np.zeros(len(lines))
+                            self.current_dataset.dxw = np.zeros(len(lines))
+                        self.current_dataset.dxl[data_line] = abs(_dx)
+                        self.current_dataset.dxw[data_line] = 0
                     data_line += 1
 
                 except ValueError:
@@ -196,9 +206,12 @@ class Reader(FileReader):
                     # skip it.
                     pass
 
+            # SANS Data:
             # The 6 columns are | Q (1/A) | I(Q) (1/cm) | std. dev.
             # I(Q) (1/cm) | sigmaQ | meanQ | ShadowFactor|
-            if line.count("The 6 columns") > 0:
+            # USANS Data:
+            # EMP LEVEL: <value> ; BKG LEVEL: <value>
+            if line.startswith("The 6 columns") or line.startswith("EMP LEVEL"):
                 is_data_started = True
 
         self.remove_empty_q_values()
@@ -214,14 +227,11 @@ class Reader(FileReader):
             self.set_all_to_none()
             raise ValueError("ascii_reader: could not load file")
 
+        self.current_dataset = self.set_default_1d_units(self.current_dataset)
         if data_conv_q is not None:
             self.current_dataset.xaxis("\\rm{Q}", base_q_unit)
-        else:
-            self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         if data_conv_i is not None:
             self.current_dataset.yaxis("\\rm{Intensity}", base_i_unit)
-        else:
-            self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

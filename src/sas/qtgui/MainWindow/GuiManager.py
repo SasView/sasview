@@ -4,15 +4,20 @@ import subprocess
 import logging
 import json
 import webbrowser
+import traceback
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale, QUrl
 
+import matplotlib as mpl
+mpl.use("Qt5Agg")
+
 from twisted.internet import reactor
 # General SAS imports
+from sas import get_local_config, get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
-from sas.qtgui.Utilities.SasviewLogger import XStream
+from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -21,11 +26,13 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
+from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 from sas.qtgui.Utilities.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
+from sas.qtgui.MainWindow.CategoryManager import CategoryManager
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -43,11 +50,17 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ImageViewer import ImageViewer
+
+logger = logging.getLogger(__name__)
 
 class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+
 
 class GuiManager(object):
     """
@@ -62,6 +75,9 @@ class GuiManager(object):
 
         # Decide on a locale
         QLocale.setDefault(QLocale('en_US'))
+
+        # Redefine exception hook to not explicitly crash the app.
+        sys.excepthook = self.info
 
         # Add signal callbacks
         self.addCallbacks()
@@ -83,8 +99,8 @@ class GuiManager(object):
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
-        XStream.stdout().messageWritten.connect(self.listWidget.insertPlainText)
-        XStream.stderr().messageWritten.connect(self.listWidget.insertPlainText)
+        handler = setup_qt_logging()
+        handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(" --- SasView session started ---")
@@ -99,12 +115,13 @@ class GuiManager(object):
                                               "_downloads",
                                               "Tutorial.pdf"))
 
+    def info(self, type, value, tb):
+        logger.error("SasView threw exception: " + str(value))
+        traceback.print_exception(type, value, tb)
+
     def addWidgets(self):
         """
         Populate the main window with widgets
-
-        TODO: overwrite close() on Log and DR widgets so they can be hidden/shown
-        on request
         """
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
@@ -114,15 +131,17 @@ class GuiManager(object):
         self.dockedFilesWidget.setFloating(False)
         self.dockedFilesWidget.setWidget(self.filesWidget)
 
-        # Disable maximize/minimize and close buttons
-        self.dockedFilesWidget.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        # Modify menu items on widget visibility change
+        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
 
-        #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
+        self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
+
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
@@ -131,8 +150,21 @@ class GuiManager(object):
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
-        self.welcomePanel = WelcomePanel()
+        self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
+
         self.grid_window = None
+        self.grid_window = BatchOutputPanel(parent=self)
+        if sys.platform == "darwin":
+            self.grid_window.menubar.setNativeMenuBar(False)
+        self.grid_subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
+        self.grid_subwindow.setVisible(False)
+        self.grid_window.windowClosedSignal.connect(lambda: self.grid_subwindow.setVisible(False))
+
+        self.results_panel = ResultPanel(parent=self._parent, manager=self)
+        self.results_frame = self._workspace.workspace.addSubWindow(self.results_panel)
+        self.results_frame.setVisible(False)
+        self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
+
         self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
         self._workspace.actionHide_Toolbar.setText("Show Toolbar")
 
@@ -155,8 +187,27 @@ class GuiManager(object):
             model_list = ModelManager().cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
+            import traceback
             logger.error("%s: could not load SasView models")
             logger.error(traceback.format_exc())
+
+    def updateLogContextMenus(self, visible=False):
+        """
+        Modify the View/Data Explorer menu item text on widget visibility
+        """
+        if visible:
+            self._workspace.actionHide_LogExplorer.setText("Hide Log Explorer")
+        else:
+            self._workspace.actionHide_LogExplorer.setText("Show Log Explorer")
+
+    def updateContextMenus(self, visible=False):
+        """
+        Modify the View/Data Explorer menu item text on widget visibility
+        """
+        if visible:
+            self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
+        else:
+            self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
 
     def statusBarSetup(self):
         """
@@ -187,11 +238,7 @@ class GuiManager(object):
         """
         Open a local url in the default browser
         """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION + url
-        try:
-            webbrowser.open('file://' + os.path.realpath(location))
-        except webbrowser.Error as ex:
-            logging.warning("Cannot display help. %s" % ex)
+        GuiUtils.showHelp(url)
 
     def workspace(self):
         """
@@ -207,23 +254,20 @@ class GuiManager(object):
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
             self._current_perspective.setClosable()
-            #self._workspace.workspace.removeSubWindow(self._current_perspective)
+            self._workspace.workspace.removeSubWindow(self.subwindow)
             self._current_perspective.close()
-            self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
 
         self.setupPerspectiveMenubarOptions(self._current_perspective)
 
-        subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
+        self.subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
         perspective_size = self._current_perspective.sizeHint()
         perspective_width = perspective_size.width()
         self._current_perspective.resize(perspective_width, workspace_height-10)
-        # Resize the mdi area to match the widget within
-        subwindow.resize(subwindow.minimumSizeHint())
 
         self._current_perspective.show()
 
@@ -266,6 +310,11 @@ class GuiManager(object):
         """
         self.statusLabel.setText(text)
 
+    def appendLog(self, msg):
+        """Appends a message to the list widget in the Log Explorer. Use this
+        instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
+        self.listWidget.append(msg.strip())
+
     def createGuiData(self, item, p_file=None):
         """
         Access the Data1D -> plottable Data1D conversion
@@ -303,6 +352,8 @@ class GuiManager(object):
 
         # Exit if yes
         if reply == QMessageBox.Yes:
+            # save the paths etc.
+            self.saveCustomConfig()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -364,10 +415,24 @@ class GuiManager(object):
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-    def showWelcomeMessage(self):
+    def actionWelcome(self):
         """ Show the Welcome panel """
+        self.welcomePanel = WelcomePanel()
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
+
+    def showWelcomeMessage(self):
+        """ Show the Welcome panel, when required """
+        # Assure the welcome screen is requested
+        show_welcome_widget = True
+        custom_config = get_custom_config()
+        if hasattr(custom_config, "WELCOME_PANEL_SHOW"):
+            if isinstance(custom_config.WELCOME_PANEL_SHOW, bool):
+                show_welcome_widget = custom_config.WELCOME_PANEL_SHOW
+            else:
+                logging.warning("WELCOME_PANEL_SHOW has invalid value in custom_config.py")
+        if show_welcome_widget:
+            self.actionWelcome()
 
     def addCallbacks(self):
         """
@@ -380,6 +445,7 @@ class GuiManager(object):
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
@@ -388,12 +454,22 @@ class GuiManager(object):
         """
         Trigger definitions for all menu/toolbar actions.
         """
+        # disable not yet fully implemented actions
+        self._workspace.actionUndo.setVisible(False)
+        self._workspace.actionRedo.setVisible(False)
+        self._workspace.actionReset.setVisible(False)
+        self._workspace.actionStartup_Settings.setVisible(False)
+        #self._workspace.actionImage_Viewer.setVisible(False)
+        self._workspace.actionCombine_Batch_Fit.setVisible(False)
+        # orientation viewer set to invisible SASVIEW-1132
+        self._workspace.actionOrientation_Viewer.setVisible(False)
+
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
-        self._workspace.actionSave.triggered.connect(self.actionSave)
+        self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
@@ -405,12 +481,13 @@ class GuiManager(object):
         self._workspace.actionReset.triggered.connect(self.actionReset)
         self._workspace.actionExcel.triggered.connect(self.actionExcel)
         self._workspace.actionLatex.triggered.connect(self.actionLatex)
-
         # View
         self._workspace.actionShow_Grid_Window.triggered.connect(self.actionShow_Grid_Window)
         self._workspace.actionHide_Toolbar.triggered.connect(self.actionHide_Toolbar)
         self._workspace.actionStartup_Settings.triggered.connect(self.actionStartup_Settings)
-        self._workspace.actionCategry_Manager.triggered.connect(self.actionCategry_Manager)
+        self._workspace.actionCategory_Manager.triggered.connect(self.actionCategory_Manager)
+        self._workspace.actionHide_DataExplorer.triggered.connect(self.actionHide_DataExplorer)
+        self._workspace.actionHide_LogExplorer.triggered.connect(self.actionHide_LogExplorer)
         # Tools
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
@@ -422,6 +499,8 @@ class GuiManager(object):
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
+        self._workspace.actionOrientation_Viewer.triggered.connect(self.actionOrientation_Viewer)
+        self._workspace.actionFreeze_Theory.triggered.connect(self.actionFreeze_Theory)
         # Fitting
         self._workspace.actionNew_Fit_Page.triggered.connect(self.actionNew_Fit_Page)
         self._workspace.actionConstrained_Fit.triggered.connect(self.actionConstrained_Fit)
@@ -433,12 +512,16 @@ class GuiManager(object):
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
         self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
         self._workspace.actionAddMult_Models.triggered.connect(self.actionAddMult_Models)
+        self._workspace.actionEditMask.triggered.connect(self.actionEditMask)
+
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
         self._workspace.actionTile.triggered.connect(self.actionTile)
         self._workspace.actionArrange_Icons.triggered.connect(self.actionArrange_Icons)
         self._workspace.actionNext.triggered.connect(self.actionNext)
         self._workspace.actionPrevious.triggered.connect(self.actionPrevious)
+        self._workspace.actionMinimizePlots.triggered.connect(self.actionMinimizePlots)
+        self._workspace.actionClosePlots.triggered.connect(self.actionClosePlots)
         # Analysis
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
@@ -447,11 +530,14 @@ class GuiManager(object):
         # Help
         self._workspace.actionDocumentation.triggered.connect(self.actionDocumentation)
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
+        self._workspace.actionModel_Marketplace.triggered.connect(self.actionMarketplace)
         self._workspace.actionAcknowledge.triggered.connect(self.actionAcknowledge)
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
+        self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
+        self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 
     #============ FILE =================
     def actionLoadData(self):
@@ -475,20 +561,72 @@ class GuiManager(object):
     def actionOpen_Analysis(self):
         """
         """
-        print("actionOpen_Analysis TRIGGERED")
+        self.filesWidget.loadAnalysis()
         pass
 
-    def actionSave(self):
+    def actionSave_Project(self):
         """
         Menu Save Project
         """
-        self.filesWidget.saveProject()
+        filename = self.filesWidget.saveProject()
+
+        # datasets
+        all_data = self.filesWidget.getAllData()
+
+        # fit tabs
+        params={}
+        perspective = self.perspective()
+        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
+            params = perspective.serializeAllFitpage()
+
+        # project dictionary structure:
+        # analysis[data.id] = [{"fit_data":[data, checkbox, child data],
+        #                       "fit_params":[fitpage_state]}
+        # "fit_params" not present if dataset not sent to fitting
+        analysis = {}
+
+        for id, data in all_data.items():
+            if id=='is_batch':
+                analysis['is_batch'] = data
+                analysis['batch_grid'] = self.grid_window.data_dict
+                continue
+            data_content = {"fit_data":data}
+            if id in params.keys():
+                # this dataset is represented also by the fit tab. Add to it.
+                data_content["fit_params"] = params[id]
+            analysis[id] = data_content
+
+        # standalone constraint pages
+        for keys, values in params.items():
+            if not 'is_constraint' in values[0]:
+                continue
+            analysis[keys] = values[0]
+
+        with open(filename, 'w') as outfile:
+            GuiUtils.saveData(outfile, analysis)
 
     def actionSave_Analysis(self):
         """
         Menu File/Save Analysis
         """
-        self.communicate.saveAnalysisSignal.emit()
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            return
+        # get fit page serialization
+        params = per.serializeCurrentFitpage()
+        # Find dataset ids for the current tab
+        # (can be multiple, if batch)
+        data_id = per.currentTabDataId()
+        tab_id = per.currentTab.tab_id
+        analysis = {}
+        for id in data_id:
+            an = {}
+            data_for_id = self.filesWidget.getDataForID(id)
+            an['fit_data'] = data_for_id
+            an['fit_params'] = [params]
+            analysis[id] = an
+
+        self.filesWidget.saveAnalysis(analysis, tab_id)
 
     def actionQuit(self):
         """
@@ -511,15 +649,19 @@ class GuiManager(object):
 
     def actionCopy(self):
         """
+        Send a signal to the fitting perspective so parameters
+        can be saved to the clipboard
         """
-        print("actionCopy TRIGGERED")
+        self.communicate.copyFitParamsSignal.emit("")
+        self._workspace.actionPaste.setEnabled(True)
         pass
 
     def actionPaste(self):
         """
+        Send a signal to the fitting perspective so parameters
+        from the clipboard can be used to modify the fit state
         """
-        print("actionPaste TRIGGERED")
-        pass
+        self.communicate.pasteFitParamsSignal.emit()
 
     def actionReport(self):
         """
@@ -546,15 +688,17 @@ class GuiManager(object):
 
     def actionExcel(self):
         """
+        Send a signal to the fitting perspective so parameters
+        can be saved to the clipboard
         """
-        print("actionExcel TRIGGERED")
-        pass
+        self.communicate.copyExcelFitParamsSignal.emit("Excel")
 
     def actionLatex(self):
         """
+        Send a signal to the fitting perspective so parameters
+        can be saved to the clipboard
         """
-        print("actionLatex TRIGGERED")
-        pass
+        self.communicate.copyLatexFitParamsSignal.emit("Latex")
 
     #============ VIEW =================
     def actionShow_Grid_Window(self):
@@ -566,18 +710,10 @@ class GuiManager(object):
         """
         Display/redisplay the batch fit viewer
         """
-        if self.grid_window is None:
-            self.grid_window = BatchOutputPanel(parent=self, output_data=output_data)
-            subwindow = self._workspace.workspace.addSubWindow(self.grid_window)
-
-            #self.grid_window = BatchOutputPanel(parent=self, output_data=output_data)
-            self.grid_window.show()
-            return
+        self.grid_subwindow.setVisible(True)
+        self.grid_subwindow.raise_()
         if output_data:
             self.grid_window.addFitResults(output_data)
-        self.grid_window.show()
-        if self.grid_window.windowState() == Qt.WindowMinimized:
-            self.grid_window.setWindowState(Qt.WindowActive)
 
     def actionHide_Toolbar(self):
         """
@@ -591,17 +727,36 @@ class GuiManager(object):
             self._workspace.toolBar.setVisible(True)
         pass
 
+    def actionHide_DataExplorer(self):
+        """
+        Toggle Data Explorer vsibility
+        """
+        if self.dockedFilesWidget.isVisible():
+            self.dockedFilesWidget.setVisible(False)
+        else:
+            self.dockedFilesWidget.setVisible(True)
+        pass
+
+    def actionHide_LogExplorer(self):
+        """
+        Toggle Data Explorer vsibility
+        """
+        if self.logDockWidget.isVisible():
+            self.logDockWidget.setVisible(False)
+        else:
+            self.logDockWidget.setVisible(True)
+        pass
+
     def actionStartup_Settings(self):
         """
         """
         print("actionStartup_Settings TRIGGERED")
         pass
 
-    def actionCategry_Manager(self):
+    def actionCategory_Manager(self):
         """
         """
-        print("actionCategry_Manager TRIGGERED")
-        pass
+        self.categoryManagerWidget.show()
 
     #============ TOOLS =================
     def actionData_Operation(self):
@@ -663,11 +818,33 @@ class GuiManager(object):
         self.ipDockWidget.setWidget(terminal)
         self._workspace.addDockWidget(Qt.RightDockWidgetArea, self.ipDockWidget)
 
+    def actionFreeze_Theory(self):
+        """
+        Convert a child index with data into a separate top level dataset
+        """
+        self.filesWidget.freezeCheckedData()
+
+    def actionOrientation_Viewer(self):
+        """
+        Make sasmodels orientation & jitter viewer available
+        """
+        from sasmodels.jitter import run as orientation_run
+        try:
+            orientation_run()
+        except Exception as ex:
+            logging.error(str(ex))
+
     def actionImage_Viewer(self):
         """
         """
-        print("actionImage_Viewer TRIGGERED")
-        pass
+        try:
+            self.image_viewer = ImageViewer(self)
+            if sys.platform == "darwin":
+                self.image_viewer.menubar.setNativeMenuBar(False)
+            self.image_viewer.show()
+        except Exception as ex:
+            logging.error(str(ex))
+            return
 
     #============ FITTING =================
     def actionNew_Fit_Page(self):
@@ -713,8 +890,15 @@ class GuiManager(object):
     def actionFit_Results(self):
         """
         """
-        print("actionFit_Results TRIGGERED")
-        pass
+        self.showFitResults(None)
+
+    def showFitResults(self, output_data):
+        """
+        Show bumps convergence plots
+        """
+        self.results_frame.setVisible(True)
+        if output_data:
+            self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
     def actionAdd_Custom_Model(self):
         """
@@ -740,6 +924,10 @@ class GuiManager(object):
         # Add Simple Add/Multiply Editor
         self.add_mult_editor = AddMultEditor(self)
         self.add_mult_editor.show()
+
+    def actionEditMask(self):
+
+        self.communicate.extMaskEditorSignal.emit()
 
     #============ ANALYSIS =================
     def actionFitting(self):
@@ -776,13 +964,13 @@ class GuiManager(object):
         """
         Arranges all the child windows in a cascade pattern.
         """
-        self._workspace.workspace.cascade()
+        self._workspace.workspace.cascadeSubWindows()
 
     def actionTile(self):
         """
         Tile workspace windows
         """
-        self._workspace.workspace.tile()
+        self._workspace.workspace.tileSubWindows()
 
     def actionArrange_Icons(self):
         """
@@ -794,13 +982,27 @@ class GuiManager(object):
         """
         Gives the input focus to the next window in the list of child windows.
         """
-        self._workspace.workspace.activateNextWindow()
+        self._workspace.workspace.activateNextSubWindow()
 
     def actionPrevious(self):
         """
         Gives the input focus to the previous window in the list of child windows.
         """
-        self._workspace.workspace.activatePreviousWindow()
+        self._workspace.workspace.activatePreviousSubWindow()
+
+    def actionClosePlots(self):
+        """
+        Closes all Plotters and Plotter2Ds.
+        """
+        self.filesWidget.closeAllPlots()
+        pass
+
+    def actionMinimizePlots(self):
+        """
+        Minimizes all Plotters and Plotter2Ds.
+        """
+        self.filesWidget.minimizeAllPlots()
+        pass
 
     #============ HELP =================
     def actionDocumentation(self):
@@ -814,18 +1016,23 @@ class GuiManager(object):
 
     def actionTutorial(self):
         """
-        Open the tutorial PDF file with default PDF renderer
+        Open the page with tutorial PDF links
         """
-        # Not terribly safe here. Shell injection warning.
-        # isfile() helps but this probably needs a better solution.
-        if os.path.isfile(self._tutorialLocation):
-            result = subprocess.Popen([self._tutorialLocation], shell=True)
+        helpfile = "/user/tutorial.html"
+        self.showHelp(helpfile)
 
     def actionAcknowledge(self):
         """
         Open the Acknowledgements widget
         """
         self.ackWidget.show()
+
+    def actionMarketplace(self):
+        """
+        Open the marketplace link in default browser
+        """
+        url = LocalConfig.MARKETPLACE_URL
+        webbrowser.open_new(url)
 
     def actionAbout(self):
         """
@@ -847,7 +1054,20 @@ class GuiManager(object):
         Catch the theory update signal from a perspective
         Send the request to the DataExplorer for updating the theory model.
         """
-        self.filesWidget.updateTheoryFromPerspective(index)
+        item = self.filesWidget.updateTheoryFromPerspective(index)
+        # Now notify the perspective that the item was/wasn't replaced
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            # currently only fitting supports generation of theories.
+            return
+        per.currentTab.setTheoryItem(item)
+
+    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+        """
+        Catch the signal to delete items in the Theory item model which correspond to a model ID.
+        Send the request to the DataExplorer for updating the theory model.
+        """
+        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(model_id)
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """
@@ -869,12 +1089,12 @@ class GuiManager(object):
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayFile(filename=filename, is_data=True)
 
-    def showPlot(self, plot):
+    def showPlot(self, plot, id):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayData(plot)
+            self.filesWidget.displayData(plot, id)
 
     def uncheckAllMenuItems(self, menuObject):
         """
@@ -906,6 +1126,13 @@ class GuiManager(object):
         """
         When setting a perspective, sets up the menu bar
         """
+        self._workspace.actionReport.setEnabled(False)
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionSave_Analysis.setEnabled(False)
+        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
+            self._workspace.actionOpen_Analysis.setEnabled(True)
+            self._workspace.actionSave_Analysis.setEnabled(True)
+
         if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
             self.checkAnalysisOption(self._workspace.actionFitting)
             # Put the fitting menu back in
@@ -915,9 +1142,71 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+            self._workspace.actionReport.setEnabled(True)
+
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
             self.checkAnalysisOption(self._workspace.actionInversion)
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Corfunc"]):
             self.checkAnalysisOption(self._workspace.actionCorfunc)
+
+    def saveCustomConfig(self):
+        """
+        Save the config file based on current session values
+        """
+        # Load the current file
+        config_content = GuiUtils.custom_config
+
+        changed = self.customSavePaths(config_content)
+        changed = changed or self.customSaveOpenCL(config_content)
+
+        if changed:
+            self.writeCustomConfig(config_content)
+
+    def customSavePaths(self, config_content):
+        """
+        Update the config module with current session paths
+        Returns True if update was done, False, otherwise
+        """
+        changed = False
+        # Find load path
+        open_path = GuiUtils.DEFAULT_OPEN_FOLDER
+        defined_path = self.filesWidget.default_load_location
+        if open_path != defined_path:
+            # Replace the load path
+            config_content.DEFAULT_OPEN_FOLDER = defined_path
+            changed = True
+        return changed
+
+    def customSaveOpenCL(self, config_content):
+        """
+        Update the config module with current session OpenCL choice
+        Returns True if update was done, False, otherwise
+        """
+        changed = False
+        # Find load path
+        file_value = GuiUtils.SAS_OPENCL
+        session_value = os.environ.get("SAS_OPENCL", "")
+        if file_value != session_value:
+            # Replace the load path
+            config_content.SAS_OPENCL = session_value
+            changed = True
+        return changed
+
+    def writeCustomConfig(self, config):
+        """
+        Write custom configuration
+        """
+        from sas import make_custom_config_path
+        path = make_custom_config_path()
+        # Just clobber the file - we already have its content read in
+        with open(path, 'w') as out_f:
+            out_f.write("#Application appearance custom configuration\n")
+            for key, item in config.__dict__.items():
+                if key[:2] == "__":
+                    continue
+                if isinstance(item, str):
+                    item = '"' + item + '"'
+                out_f.write("%s = %s\n" % (key, str(item)))
+        pass # debugger anchor

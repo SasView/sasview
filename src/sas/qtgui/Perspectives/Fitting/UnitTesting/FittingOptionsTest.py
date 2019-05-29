@@ -37,7 +37,7 @@ class FittingOptionsTest(unittest.TestCase):
 
         # The combo box
         self.assertIsInstance(self.widget.cbAlgorithm, QtWidgets.QComboBox)
-        self.assertEqual(self.widget.cbAlgorithm.count(), 5)
+        self.assertEqual(self.widget.cbAlgorithm.count(), 6)
         self.assertEqual(self.widget.cbAlgorithm.itemText(0), 'Nelder-Mead Simplex')
         self.assertEqual(self.widget.cbAlgorithm.itemText(4), 'Levenberg-Marquardt')
         self.assertEqual(self.widget.cbAlgorithm.currentIndex(), 4)

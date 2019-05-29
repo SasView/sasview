@@ -2,12 +2,14 @@ import os
 import sys
 import re
 import logging
+import traceback
 from xhtml2pdf import pisa
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5 import QtPrintSupport
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Utilities.UI.ReportDialogUI import Ui_ReportDialogUI
 
@@ -20,11 +22,16 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
 
         super(ReportDialog, self).__init__(parent._parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         assert isinstance(report_list, list)
         assert len(report_list) == 3
 
         self.data_html, self.data_txt, self.data_images = report_list
+        #self.save_location = None
+        #if 'ReportDialog_directory' in ObjectLibrary.listObjects():
+        self.save_location = ObjectLibrary.getObject('ReportDialog_directory')
 
         # Fill in the table from input data
         self.setupDialog(self.data_html)
@@ -68,12 +75,17 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         Display the Save As... prompt and save the report if instructed so
         """
         # Choose user's home directory
-        location = os.path.expanduser('~')
+        if self.save_location is None:
+            location = os.path.expanduser('~')
+        else:
+            location = self.save_location
         # Use a sensible filename default
         default_name = os.path.join(location, 'fit_report.pdf')
+
         kwargs = {
             'parent'   : self,
             'caption'  : 'Save Report',
+            # don't use 'directory' in order to remember the previous user choice
             'directory': default_name,
             'filter'   : 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)',
             'options'  : QtWidgets.QFileDialog.DontUseNativeDialog}
@@ -83,6 +95,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         if not filename:
             return
         extension = filename_tuple[1]
+        self.save_location = os.path.dirname(filename)
+        # lifetime of this widget is short - keep the reference elsewhere
+        ObjectLibrary.addObject('ReportDialog_directory', self.save_location)
 
         try:
             # extract extension from filter
@@ -97,14 +112,18 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             filename = '.'.join((filename, ext))
 
         # Create files with charts
-        pictures = self.getPictures(basename)
+        pictures = []
+        if self.data_images is not None:
+            pictures = self.getPictures(basename)
 
-        # translate png references into html from base64 string to on-disk name
-        cleanr = re.compile('<img src="data:image.*>')
+        # self.data_html contains all images at the end of the report, in base64 form;
+        # replace them all with their saved on-disk filenames
+        cleanr = re.compile('<img src.*$', re.DOTALL)
         replacement_name = ""
+        html = self.data_html
         for picture in pictures:
             replacement_name += '<img src="'+ picture + '"><p></p>'
-
+        replacement_name += '\n'
         # <img src="data:image/png;.*>  => <img src=filename>
         html = re.sub(cleanr, replacement_name, self.data_html)
 
@@ -147,7 +166,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     @staticmethod
     def onTXTSave(data, filename):
         """
-        Simple txt file serializatio
+        Simple txt file serialization
         """
         with open(filename, 'w') as f:
             f.write(data)
@@ -177,7 +196,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
                                             encoding='UTF-8')
                 return pisaStatus.err
         except Exception as ex:
-            logging.error("Error creating pdf: " + str(ex))
+            # logging.error("Error creating pdf: " + str(ex))
+            logging.error("Error creating pdf: " + traceback.format_exc())
         return False
 
 

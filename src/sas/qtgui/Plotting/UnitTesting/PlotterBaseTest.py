@@ -46,7 +46,6 @@ class PlotterBaseTest(unittest.TestCase):
         """ default method variables values """
         self.assertIsInstance(self.plotter, QtWidgets.QWidget)
         self.assertIsInstance(self.plotter.canvas, FigureCanvas)
-        self.assertIsInstance(self.plotter.toolbar, NavigationToolbar)
         self.assertIsInstance(self.plotter.properties, ScaleProperties)
 
         self.assertEqual(self.plotter._data, [])
@@ -84,13 +83,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.plotter.closeEvent(None)
         self.assertTrue(PlotHelper.deletePlot.called)
 
-    def testOnImageSave(self):
-        ''' test the workspace save '''
-        self.plotter.toolbar.save_figure = MagicMock()
-        self.plotter.onImageSave()
-        self.assertTrue(self.plotter.toolbar.save_figure.called)
-
-    def testOnImagePrint(self):
+    def notestOnImagePrint(self):
         ''' test the workspace print '''
         QtGui.QPainter.end = MagicMock()
         QtWidgets.QLabel.render = MagicMock()
@@ -132,12 +125,6 @@ class PlotterBaseTest(unittest.TestCase):
         actions = self.plotter.contextMenu.actions()
         self.assertEqual(len(actions), 4)
 
-        # Trigger Save Image and make sure the method is called
-        self.assertEqual(actions[0].text(), "Save Image")
-        self.plotter.toolbar.save_figure = MagicMock()
-        actions[0].trigger()
-        self.assertTrue(self.plotter.toolbar.save_figure.called)
-
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
         QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
@@ -158,6 +145,18 @@ class PlotterBaseTest(unittest.TestCase):
         QtWidgets.qApp.processEvents()
         # Make sure clipboard got updated.
         self.assertTrue(self.clipboard_called)
+
+        ## Trigger toggle navigation bar and make sure the method is called
+        #self.assertEqual(actions[4].text(), "Toggle Navigation Menu")
+        #isShown = self.plotter.toolbar.isVisible()
+        #self.assertTrue(isShow)
+        #actions[4].trigger()
+        #isShown = self.plotter.toolbar.isVisible()
+        #self.assertFalse(isShow)
+        #actions[4].trigger()
+        #isShown = self.plotter.toolbar.isVisible()
+        #self.assertTrue(isShow)
+
 
     def testOnWindowsTitle(self):
         """ Test changing the plot title"""

@@ -26,28 +26,40 @@ Chi2
 ^^^^
 
 $\chi^2$ is a statistical parameter that quantifies the differences between
-an observed data set and an expected dataset (or 'theory').
-
-When showing the a model with the data, *SasView* displays this parameter
-normalized to the number of data points, $N_\mathrm{pts}$ such that
+an observed data set and an expected dataset (or 'theory') calculated as
 
 .. math::
 
-  \chi^2_N
-  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2] / N_\mathrm{pts}
+  \chi^2
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{weight}_i^2]
 
-When performing a fit, *SasView* instead displays the reduced $\chi^2_R$,
-which takes into account the number of fitting parameters $N_\mathrm{par}$
-(to calculate the number of 'degrees of freedom'). This is computed as
+where *weight* is the weighting factor (see below).
+
+Fitting typically minimizes the value of $\chi^2$.  For assessing the quality of
+the model and its "fit" however, *SasView* displays the traditional reduced
+$\chi^2_R$ which normalizes this parameter by dividing it by the number of
+degrees of freedom (or DOF). The DOF is the number of data points being
+considered, $N_\mathrm{pts}$, reduced by the number of free (i.e. fitted)
+parameters, $N_\mathrm{par}$. Note that model parameters that are kept fixed do
+*not* contribute to the DOF (they are not "free"). This reduced value is then
+given as
 
 .. math::
 
   \chi^2_R
-  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{weight}_i^2]
   / [N_\mathrm{pts} - N_\mathrm{par}]
 
-The normalized $\chi^2_N$ and the reduced $\chi^2_R$ are very close to each
-other when $N_\mathrm{pts} \gg N_\mathrm{par}$.
+where *weight* is the weighting factor (see below).
+
+Note that this means the displayed value will vary depending on the number of
+parameters used in the fit. In particular, when doing a calculation without a
+fit (e.g. manually changing a parameter) the DOF will now equal $N_\mathrm{pts}$
+and the $\chi^2_R$ will be the smallest possible for that combination of model,
+data set, and set of parameter values.
+
+When $N_\mathrm{pts} \gg N_\mathrm{par}$ as it should for proper fitting, the
+value of the reduced $\chi^2_R$ will not change very much.
 
 For a good fit, $\chi^2_R$ tends to 1.
 
@@ -67,7 +79,9 @@ fit:
 
 .. math::
 
-  R_i = (Y_i - \mathrm{theory}_i) / \mathrm{error}_i
+  R_i = (Y_i - \mathrm{theory}_i) / \mathrm{weight}_i
+
+where *weight* is the weighting factor (see below).
 
 Think of each normalized residual as the number of standard deviations
 between the measured value and the theory.  For a good fit, 68% of $R_i$
@@ -85,7 +99,29 @@ be meaningless.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+Weights
+^^^^^^^
+
+In the SasView *FitPage* there are several options for setting the weighting
+factor, *weight*:
+
+*  *No Weighting*: use *weight* = 1
+*  *Use dI Data*: use *weight* = supplied *error* on I
+*  *Use |sqrt(I Data)|*: use *weight* = square root of I
+*  *Use |I Data|*: use *weight* = I
+
+*weight* is used to tell the optimizer how much attention it should pay to each
+datapoint during the fitting; the larger the *weight*, the less attention that
+is paid.
+
+The default behaviour of SasView is to *Use dI Data* if it is present in the
+loaded data file.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 *Document History*
 
 | 2015-06-08 Steve King
 | 2017-09-28 Paul Kienzle
+| 2018-03-04 Paul Butler
+| 2019-04-16 Steve King

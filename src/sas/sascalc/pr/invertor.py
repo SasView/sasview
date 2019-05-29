@@ -5,6 +5,7 @@ The module contains the Invertor class.
 
 FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
+from __future__ import division
 
 import numpy as np
 import sys
@@ -70,7 +71,7 @@ class Invertor(Cinvertor):
 
         A[j][i] = (Fourier transformed base function for point j)
 
-    We them choose a number of r-points, n_r, to evaluate the second
+    We then choose a number of r-points, n_r, to evaluate the second
     derivative of P(r) at. This is used as our regularization term.
     For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -143,7 +144,7 @@ class Invertor(Cinvertor):
         Access the parent class methods for
         x, y, err, d_max, q_min, q_max and alpha
         """
-        if   name == 'x':
+        if name == 'x':
             if 0.0 in value:
                 msg = "Invertor: one of your q-values is zero. "
                 msg += "Delete that entry before proceeding"
@@ -221,13 +222,17 @@ class Invertor(Cinvertor):
             return self.get_slit_width()
         elif name == 'est_bck':
             value = self.get_est_bck()
-            if value == 1:
-                return True
-            else:
-                return False
+            return value == 1
         elif name in self.__dict__:
             return self.__dict__[name]
         return None
+
+    def add_errors(self, sigma=0.05):
+        """
+        Adds errors to data set is they are not available.
+        Uses  $\Delta y = \sigma | y |$.
+        """
+        self.dy = sigma * np.fabs(self.y)
 
     def clone(self):
         """
@@ -270,7 +275,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -418,7 +423,7 @@ class Invertor(Cinvertor):
 
             A[i][j] = (Fourier transformed base function for point j)
 
-        We them choose a number of r-points, n_r, to evaluate the second
+        We then choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
@@ -459,7 +464,7 @@ class Invertor(Cinvertor):
             nq = 0
 
         # If we need to fit the background, add a term
-        if self.est_bck == True:
+        if self.est_bck:
             nfunc_0 = nfunc
             nfunc += 1
 
@@ -475,7 +480,7 @@ class Invertor(Cinvertor):
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
-        c, chi2, _, _ = lstsq(a, b)
+        c, chi2, _, _ = lstsq(a, b, rcond=-1)
         # Sanity check
         try:
             float(chi2)
@@ -498,14 +503,14 @@ class Invertor(Cinvertor):
 
         try:
             cov = np.linalg.pinv(inv_cov)
-            err = math.fabs(chi2 / float(npts - nfunc)) * cov
-        except Exception as ex:
+            err = math.fabs(chi2 / (npts - nfunc)) * cov
+        except Exception as exc:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logger.error(ex)
+            logger.error(sys.exc_info()[1])
 
         # Keep a copy of the last output
-        if self.est_bck == False:
+        if not self.est_bck:
             self.out = c
             self.cov = err
         else:
@@ -539,15 +544,15 @@ class Invertor(Cinvertor):
         :return: number of terms, alpha, message
 
         """
-        from sas.sascalc.pr.num_term import NTermEstimator
+        from .num_term import NTermEstimator
         estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
-        except Exception as ex:
+        except Exception as exc:
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % ex)
+            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_info()[1])
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -633,8 +638,8 @@ class Invertor(Cinvertor):
 
                 return best_alpha, message, elapsed
 
-        except Exception as ex:
-            message = "Invertor.estimate_alpha: %s" % ex
+        except:
+            message = "Invertor.estimate_alpha: %s" % sys.exc_info()[1]
             return 0, message, elapsed
 
     def to_file(self, path, npts=100):
@@ -657,7 +662,7 @@ class Invertor(Cinvertor):
         file.write("#slit_height=%g\n" % self.slit_height)
         file.write("#slit_width=%g\n" % self.slit_width)
         file.write("#background=%g\n" % self.background)
-        if self.est_bck == True:
+        if self.est_bck:
             file.write("#has_bck=1\n")
         else:
             file.write("#has_bck=0\n")
@@ -737,10 +742,7 @@ class Invertor(Cinvertor):
                         self.background = float(toks[1])
                     elif line.startswith('#has_bck='):
                         toks = line.split('=')
-                        if int(toks[1]) == 1:
-                            self.est_bck = True
-                        else:
-                            self.est_bck = False
+                        self.est_bck = int(toks[1]) == 1
 
                     # Now read in the parameters
                     elif line.startswith('#C_'):
@@ -753,8 +755,8 @@ class Invertor(Cinvertor):
 
                         self.cov[i][i] = float(toks2[1])
 
-            except Exception as ex:
-                msg = "Invertor.from_file: corrupted file\n%s" % ex
+            except:
+                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_info()[1]
                 raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)

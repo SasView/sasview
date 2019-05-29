@@ -203,6 +203,7 @@ class TabbedModelEditorTest(unittest.TestCase):
         boring_text = "so bored with unit tests"
         self.widget.editor_widget.txtEditor.toPlainText = MagicMock(return_value=boring_text)
         self.widget.writeFile = MagicMock()
+        self.widget.plugin_widget.is_python = MagicMock()
         #invoke the method
         self.widget.updateFromEditor()
 

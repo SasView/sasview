@@ -3,8 +3,10 @@
 #
 # TODO: NEED MAJOR REFACTOR
 #
-import math
-from .BaseInteractor import BaseInteractor
+import numpy as np
+from sas.qtgui.Plotting.Slicers.Arc import ArcInteractor
+from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 class SectorInteractor(BaseInteractor):
     """
@@ -21,11 +23,10 @@ class SectorInteractor(BaseInteractor):
 
         # # Number of points on the plot
         self.nbins = 20
-        theta1 = 2 * math.pi / 3
-        theta2 = -2 * math.pi / 3
+        theta1 = 2 * np.pi / 3
+        theta2 = -2 * np.pi / 3
 
         # Inner circle
-        from .Arc import ArcInteractor
         self.inner_circle = ArcInteractor(self, self.base.subplot,
                                           zorder=zorder,
                                           r=self.qmax / 2.0,
@@ -39,7 +40,6 @@ class SectorInteractor(BaseInteractor):
                                           theta2=theta2)
         self.outer_circle.qmax = self.qmax * 1.2
         # self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
-        from Edge import RadiusInteractor
         self.right_edge = RadiusInteractor(self, self.base.subplot,
                                            zorder=zorder + 1,
                                            arc1=self.inner_circle,
@@ -131,15 +131,12 @@ class SectorInteractor(BaseInteractor):
         else:
             phimin = self.left_edge.get_angle()
             phimax = self.right_edge.get_angle()
-        # print "phimin, phimax, rmin ,rmax",math.degrees(phimin),
-        # math.degrees(phimax), rmin ,rmax
-        # from sas.sascalc.dataloader.manipulations import SectorQ
 
         sect = new_sector(r_min=rmin, r_max=rmax,
                           phi_min=phimin, phi_max=phimax)
         sector = sect(self.base.data2D)
 
-        from sas.sasgui.guiframe.dataFitting import Data1D
+        from sas.qtgui.Plotting.PlotterData import Data1D
         if hasattr(sector, "dxl"):
             dxl = sector.dxl
         else:

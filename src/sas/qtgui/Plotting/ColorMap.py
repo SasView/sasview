@@ -7,7 +7,6 @@ from PyQt5 import QtWidgets
 import sas.qtgui.path_prepare
 
 import matplotlib as mpl
-from matplotlib import pylab
 import numpy
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -28,10 +27,12 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         self.setupUi(self)
         assert(isinstance(data, Data2D))
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.data = data
         self._cmap_orig = self._cmap = cmap if cmap is not None else DEFAULT_MAP
-        self.all_maps = [m for m in pylab.cm.datad]
+        self.all_maps = [m for m in mpl.cm.datad]
         self.maps = sorted(m for m in self.all_maps if not m.endswith("_r"))
         self.rmaps = sorted(set(self.all_maps) - set(self.maps))
 

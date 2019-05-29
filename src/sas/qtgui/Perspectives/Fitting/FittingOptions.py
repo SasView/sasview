@@ -40,6 +40,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.config = config
 
@@ -63,6 +65,8 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         default_name = [n.name for n in fitters.FITTERS if n.id == fitters.FIT_DEFAULT_ID][0]
         default_index = self.cbAlgorithm.findText(default_name)
         self.cbAlgorithm.setCurrentIndex(default_index)
+        # previous algorithm choice
+        self.previous_index = default_index
 
         # Assign appropriate validators
         self.assignValidators()
@@ -120,7 +124,21 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         widget_name = "self.page_"+str(self.current_fitter_id)
 
         # Convert the name into widget instance
-        widget_to_activate = eval(widget_name)
+        try:
+            widget_to_activate = eval(widget_name)
+        except AttributeError:
+            # We don't yet have this optimizer.
+            # Show message
+            msg = "This algorithm has not yet been implemented in SasView.\n"
+            msg += "Please choose a different algorithm"
+            QtWidgets.QMessageBox.warning(self,
+                                        'Warning',
+                                        msg,
+                                        QtWidgets.QMessageBox.Ok)
+            # Move the index to previous position
+            self.cbAlgorithm.setCurrentIndex(self.previous_index)
+            return
+
         index_for_this_id = self.stackedWidget.indexOf(widget_to_activate)
 
         # Select the requested widget
@@ -133,10 +151,33 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         # OK has to be reinitialized to True
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
 
+        # keep reference
+        self.previous_index = index
+
     def onApply(self):
         """
         Update the fitter object
         """
+        options = self.config.values[self.current_fitter_id]
+        for option in options.keys():
+            # Find the widget name of the option
+            # e.g. 'samples' for 'dream' is 'self.samples_dream'
+            widget_name = 'self.'+option+'_'+self.current_fitter_id
+            try:
+                line_edit = eval(widget_name)
+            except AttributeError:
+                # Skip bumps monitors
+                continue
+            if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
+                continue
+            color = line_edit.palette().color(QtGui.QPalette.Background).name()
+            if color == '#fff79a':
+                # Show a custom tooltip and return
+                tooltip = "<html><b>Please enter valid values in all fields.</html>"
+                QtWidgets.QToolTip.showText(line_edit.mapToGlobal(
+                    QtCore.QPoint(line_edit.rect().right(), line_edit.rect().bottom() + 2)), tooltip)
+                return
+
         # Notify the perspective, so the window title is updated
         self.fit_option_changed.emit(self.cbAlgorithm.currentText())
 
@@ -145,12 +186,26 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
             Utility method for bumps state update
             """
             widget = self.widgetFromOption(option)
-            new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
-                else float(widget.text())
-            self.config.values[self.current_fitter_id][option] = new_value
+            if widget is None:
+                return
+            try:
+                if isinstance(widget, QtWidgets.QComboBox):
+                    new_value = widget.currentText()
+                else:
+                    try:
+                        new_value = int(widget.text())
+                    except ValueError:
+                        new_value = float(widget.text())
+                #new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
+                #    else float(widget.text())
+                self.config.values[self.current_fitter_id][option] = new_value
+            except ValueError:
+                # Don't update bumps if widget has bad data
+                self.reject
 
         # Update the BUMPS singleton
         [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
+        self.close()
 
     def onHelp(self):
         """

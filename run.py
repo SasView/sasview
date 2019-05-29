@@ -144,13 +144,21 @@ def prepare():
     if os.path.splitext(sys.argv[0])[1].lower() == ".py":
         import sas.qtgui.convertUI
 
+    # initialize OpenCL setting
+    SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
+    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
+        os.environ["SAS_OPENCL"] = SAS_OPENCL
+
 
 if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
     # so logging can be done during initialization process too
     root = abspath(dirname(realpath(sys.argv[0])))
-    addpath(joinpath(root, 'src','sas'))
-    from logger_config import SetupLogger
+
+    addpath(joinpath(root, 'src'))
+    addpath(joinpath(root, joinpath('..', 'sasmodels'))) # dependency (for loading custom_config.py during log setup)
+
+    from sas.logger_config import SetupLogger
     logger = SetupLogger(__name__).config_development()
 
     logger.debug("Starting SASVIEW in debug mode.")

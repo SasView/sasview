@@ -5,15 +5,14 @@ from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
-
+from PyQt5.QtCore import Qt
+import os
+import sys
 # Local UI
 from sas.qtgui.UI import main_resources_rc
-from .UI.MainWindowUI import Ui_MainWindow
+from .UI.MainWindowUI import Ui_SasView
 
-# Initialize logging
-import sas.qtgui.Utilities.SasviewLogger
-
-class MainSasViewWindow(QMainWindow, Ui_MainWindow):
+class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
     def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
@@ -23,14 +22,17 @@ class MainSasViewWindow(QMainWindow, Ui_MainWindow):
         self.workspace = QMdiArea(self)
         self.setCentralWidget(self.workspace)
 
+        # Temporary solution for problem with menubar on Mac
+        if sys.platform == "darwin":  # Mac
+            self.menubar.setNativeMenuBar(False)
+
         # Create the gui manager
         from .GuiManager import GuiManager
         try:
             self.guiManager = GuiManager(self)
         except Exception as ex:
             import logging
-            logging.error("Application failed with: " + str(ex))
-            print("Application failed with: ", ex)
+            logging.error("Application failed with: "+str(ex))
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
@@ -38,23 +40,31 @@ class MainSasViewWindow(QMainWindow, Ui_MainWindow):
         else:
             event.ignore()
 
-
 def SplashScreen():
     """
     Displays splash screen as soon as humanely possible.
     The screen will disappear as soon as the event loop starts.
     """
-    # TODO: standardize path to images
-    pixmap = QPixmap("src/sas/qtgui/images/SVwelcome_mini.png")
+    pixmap_path = "images/SVwelcome_mini.png"
+    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
+        pixmap_path = "src/sas/qtgui/images/SVwelcome_mini.png"
+    pixmap = QPixmap(pixmap_path)
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
 def run_sasview():
     app = QApplication([])
 
+    # Make the event loop interruptable quickly
+    import signal
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()
     splash.show()
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    # Main application style.
+    #app.setStyle('Fusion')
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     import sys

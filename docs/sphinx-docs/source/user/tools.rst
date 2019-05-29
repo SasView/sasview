@@ -24,7 +24,7 @@ Tools & Utilities
 
    Python Shell <qtgui/Calculators/python_shell_help>
 
-   Image Viewer <qtgui/calculator/image_viewer_help>
+   Image Viewer <qtgui/Calculators/image_viewer_help>
 
    File Converter <qtgui/file_converter/file_converter_help>
    

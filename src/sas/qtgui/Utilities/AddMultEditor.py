@@ -14,6 +14,8 @@ import os
 import numpy as np
 import re
 import logging
+import traceback
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sasmodels.sasview_model import load_standard_models
 from sas.qtgui.Perspectives.Fitting import ModelUtilities
@@ -53,6 +55,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.parent = parent
 
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         #  uncheck self.chkOverwrite
         self.chkOverwrite.setChecked(False)
@@ -201,7 +205,21 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                                      self.cbModel2.currentText(),
                                      self.cbOperator.currentText())
 
-        success = GuiUtils.checkModel(self.plugin_filename)
+        try:
+            success = GuiUtils.checkModel(self.plugin_filename)
+        except Exception as ex:
+            # broad exception from sasmodels
+            msg = "Error building model: "+ str(ex)
+            logging.error(msg)
+            #print three last lines of the stack trace
+            # this will point out the exact line failing
+            last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            logging.error(traceback_to_show)
+
+            # Set the status bar message
+            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            return
 
         if not success:
             return

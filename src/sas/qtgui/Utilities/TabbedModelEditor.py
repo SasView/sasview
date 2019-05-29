@@ -2,11 +2,10 @@
 import sys
 import os
 import datetime
-import numpy as np
 import logging
 import traceback
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from sas.sascalc.fit import models
 
@@ -28,6 +27,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent = parent
 
         self.setupUi(self)
+
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # globals
         self.filename = ""
@@ -76,6 +78,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
         self.cmdLoad.clicked.connect(self.onLoad)
         # signals from tabs
+        self.plugin_widget.modelModified.connect(self.editorModelModified)
         self.editor_widget.modelModified.connect(self.editorModelModified)
         self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
 
@@ -85,22 +88,39 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.plugin_widget.setEnabled(is_active)
 
+    def saveClose(self):
+        """
+        Check if file needs saving before closing or model reloading
+        """
+        saveCancelled = False
+        ret = self.onModifiedExit()
+        if ret == QtWidgets.QMessageBox.Cancel:
+            saveCancelled = True
+        elif ret == QtWidgets.QMessageBox.Save:
+            self.updateFromEditor()
+        return saveCancelled
+
     def closeEvent(self, event):
         """
         Overwrite the close even to assure intent
         """
         if self.is_modified:
-            ret = self.onModifiedExit()
-            if ret == QtWidgets.QMessageBox.Cancel:
+            saveCancelled = self.saveClose()
+            if saveCancelled:
                 return
-            elif ret == QtWidgets.QMessageBox.Save:
-                self.updateFromEditor()
         event.accept()
 
     def onLoad(self):
         """
         Loads a model plugin file
         """
+        if self.is_modified:
+            saveCancelled = self.saveClose()
+            if saveCancelled:
+                return
+            self.is_modified = False
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+
         plugin_location = models.find_plugins_dir()
         filename = QtWidgets.QFileDialog.getOpenFileName(
                                         self,
@@ -115,6 +135,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logging.info("No data file chosen.")
             return
 
+        # remove c-plugin tab, if present.
+        if self.tabWidget.count()>1:
+            self.tabWidget.removeTab(1)
         self.loadFile(filename)
 
     def loadFile(self, filename):
@@ -128,8 +151,22 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.blockSignals(False)
         self.filename = filename
         display_name, _ = os.path.splitext(os.path.basename(filename))
-
         self.setWindowTitle(self.window_title + " - " + display_name)
+        # Name the tab with .py filename
+        display_name = os.path.basename(filename)
+        self.tabWidget.setTabText(0, display_name)
+
+        # See if there is filename.c present
+        c_path = self.filename.replace(".py", ".c")
+        if not os.path.isfile(c_path): return
+        # add a tab with the same highlighting
+        display_name = os.path.basename(c_path)
+        self.c_editor_widget = ModelEditor(self, is_python=False)
+        self.tabWidget.addTab(self.c_editor_widget, display_name)
+        # Read in the file and set in on the widget
+        with open(c_path, 'r') as plugin:
+            self.c_editor_widget.txtEditor.setPlainText(plugin.read())
+        self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
     def onModifiedExit(self):
         msg_box = QtWidgets.QMessageBox(self)
@@ -145,11 +182,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Accept if document not modified, confirm intent otherwise.
         """
         if self.is_modified:
-            ret = self.onModifiedExit()
-            if ret == QtWidgets.QMessageBox.Cancel:
+            saveCancelled = self.saveClose()
+            if saveCancelled:
                 return
-            elif ret == QtWidgets.QMessageBox.Save:
-                self.updateFromEditor()
         self.reject()
 
     def onApply(self):
@@ -169,6 +204,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Disable the plugin editor and show that the model is changed.
         """
         self.setTabEdited(True)
+        self.plugin_widget.txtFunction.setStyleSheet("")
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
 
@@ -236,22 +272,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_str = self.generateModel(model, full_path)
         self.writeFile(full_path, model_str)
 
+        # disable "Apply"
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
         # test the model
 
         # Run the model test in sasmodels
-        try:
-            model_results = GuiUtils.checkModel(full_path)
-            logging.info(model_results)
-        except Exception as ex:
-            msg = "Error building model: "+ str(ex)
-            logging.error(msg)
-            #print three last lines of the stack trace
-            # this will point out the exact line failing
-            last_lines = traceback.format_exc().split('\n')[-4:]
-            traceback_to_show = '\n'.join(last_lines)
-            logging.error(traceback_to_show)
-
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+        if not self.isModelCorrect(full_path):
             return
 
         self.editor_widget.setEnabled(True)
@@ -273,20 +299,60 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
+    def isModelCorrect(self, full_path):
+        """
+        Run the sasmodels method for model check
+        and return True if the model is good.
+        False otherwise.
+        """
+        successfulCheck = True
+        try:
+            model_results = GuiUtils.checkModel(full_path)
+            logging.info(model_results)
+        # We can't guarantee the type of the exception coming from
+        # Sasmodels, so need the overreaching general Exception
+        except Exception as ex:
+            msg = "Error building model: "+ str(ex)
+            logging.error(msg)
+            #print three last lines of the stack trace
+            # this will point out the exact line failing
+            last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            logging.error(traceback_to_show)
+
+            # Set the status bar message
+            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+
+            # Remove the file so it is not being loaded on refresh
+            os.remove(full_path)
+            # Put a thick, red border around the mini-editor
+            self.plugin_widget.txtFunction.setStyleSheet("border: 5px solid red")
+            # Use the last line of the traceback for the tooltip
+            last_lines = traceback.format_exc().split('\n')[-2:]
+            traceback_to_show = '\n'.join(last_lines)
+            self.plugin_widget.txtFunction.setToolTip(traceback_to_show)
+            successfulCheck = False
+        return successfulCheck
+
     def updateFromEditor(self):
         """
         Save the current state of the Model Editor
         """
-        # make sure we have the file handly ready
-        assert(self.filename != "")
+        filename = self.filename
+        if not self.tabWidget.currentWidget().is_python:
+            base, _ = os.path.splitext(filename)
+            filename = base + '.c'
+
+        # make sure we have the file handle ready
+        assert(filename != "")
         # Retrieve model string
         model_str = self.getModel()['text']
         # Save the file
-        self.writeFile(self.filename, model_str)
+        self.writeFile(filename, model_str)
         # Update the tab title
         self.setTabEdited(False)
         # notify the user
-        msg = self.filename + " successfully saved."
+        msg = filename + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
@@ -465,7 +531,7 @@ Authorship and Verification
 * **Last Reviewed by:** --- **Date:** %(date)s
 """
 
-from math import *
+from sasmodels.special import *
 from numpy import inf
 
 name = "%(name)s"

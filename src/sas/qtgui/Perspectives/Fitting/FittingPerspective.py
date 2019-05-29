@@ -1,4 +1,5 @@
 import numpy
+import copy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -9,6 +10,7 @@ from bumps import fitters
 
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
@@ -34,10 +36,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs = []
 
         # Max index for adding new, non-clashing tab names
-        self.maxIndex = 0
-
-        ## Index of the current tab
-        #self.currentTab = 0
+        self.maxIndex = 1
 
         # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
@@ -62,6 +61,12 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
+        self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
+        self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
+        self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
+        self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
+
+
         # Perspective window not allowed to close by default
         self._allow_close = False
 
@@ -77,6 +82,13 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.gpu_options_widget = GPUOptions(self)
 
         self.updateWindowTitle()
+
+        # Add new tab mini-button
+        self.plusButton = QtWidgets.QToolButton(self)
+        self.plusButton.setText("+")
+        self.setCornerWidget(self.plusButton)
+        self.plusButton.setToolTip("Add a new Fit Page")
+        self.plusButton.clicked.connect(lambda: self.addFit(None))
 
     def updateWindowTitle(self):
         """
@@ -94,6 +106,76 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         self._allow_close = value
 
+    def onParamCopy(self):
+        self.currentTab.onCopyToClipboard("")
+
+    def onParamPaste(self):
+        self.currentTab.onParameterPaste()
+
+    def onExcelCopy(self):
+        self.currentTab.onCopyToClipboard("Excel")
+
+    def onLatexCopy(self):
+        self.currentTab.onCopyToClipboard("Latex")
+
+    def serializeAllFitpage(self):
+        # serialize all active fitpages and return
+        # a dictionary: {data_id: fitpage_state}
+        params = {}
+        for i, tab in enumerate(self.tabs):
+            tab_data = self.getSerializedFitpage(tab)
+            if 'data_id' not in tab_data: continue
+            id = tab_data['data_id'][0]
+            if isinstance(id, list):
+                for i in id:
+                    if i in params:
+                        params[i].append(tab_data)
+                    else:
+                        params[i] = [tab_data]
+            else:
+                if id in params:
+                    params[id].append(tab_data)
+                else:
+                    params[id] = [tab_data]
+        return params
+
+    def serializeCurrentFitpage(self):
+        # serialize current(active) fitpage
+        return self.getSerializedFitpage(self.currentTab)
+
+    def getSerializedFitpage(self, tab):
+        """
+        get serialize requested fit tab
+        """
+        fitpage_state = tab.getFitPage()
+        fitpage_state += tab.getFitModel()
+        # put the text into dictionary
+        line_dict = {}
+        for line in fitpage_state:
+            #content = line.split(',')
+            if len(line) > 1:
+                line_dict[line[0]] = line[1:]
+        return line_dict
+
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = []
+        if not self.currentTab.data:
+            return tab_id
+        for item in self.currentTab.all_data:
+            data = GuiUtils.dataFromItem(item)
+            tab_id.append(data.id)
+
+        return tab_id
+
+    def updateFromParameters(self, parameters):
+        """
+        Pass the update parameters to the current fit page
+        """
+        self.currentTab.createPageForParameters(parameters)
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
@@ -110,11 +192,15 @@ class FittingWindow(QtWidgets.QTabWidget):
             self.setWindowState(QtCore.Qt.WindowMinimized)
             event.ignore()
 
-    def addFit(self, data, is_batch=False):
+    def addFit(self, data, is_batch=False, tab_index=None):
         """
         Add a new tab for passed data
         """
-        tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
+        if tab_index is None:
+            tab_index = self.maxIndex
+        else:
+            self.maxIndex = tab_index
+        tab	= FittingWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.is_batch_fitting = is_batch
 
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
@@ -123,13 +209,15 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        self.maxIndex += 1
+        #self.maxIndex += 1
+        self.maxIndex = tab_index + 1
+
         icon = QtGui.QIcon()
         if is_batch:
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
-        self.setCurrentIndex(self.maxIndex-1)
+        self.setCurrentWidget(tab);
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -227,11 +315,12 @@ class FittingWindow(QtWidgets.QTabWidget):
             return
         for index_to_delete in index_list:
             index_to_delete_str = str(index_to_delete)
-            if index_to_delete_str in list(self.dataToFitTab.keys()):
-                for tab_name in self.dataToFitTab[index_to_delete_str]:
-                    # delete tab #index after corresponding data got removed
-                    self.closeTabByName(tab_name)
-                self.dataToFitTab.pop(index_to_delete_str)
+            orig_dict = copy.deepcopy(self.dataToFitTab)
+            for tab_key in orig_dict.keys():
+                if index_to_delete_str in tab_key:
+                    for tab_name in orig_dict[tab_key]:
+                        self.closeTabByName(tab_name)
+                    self.dataToFitTab.pop(tab_key)
 
     def allowBatch(self):
         """
@@ -239,7 +328,13 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return True
 
-    def setData(self, data_item=None, is_batch=False):
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
+    def setData(self, data_item=None, is_batch=False, tab_index=None):
         """
         Assign new dataset to the fitting instance
         Obtain a QStandardItem object and dissect it to get Data1D/2D
@@ -266,6 +361,9 @@ class FittingWindow(QtWidgets.QTabWidget):
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
 
+            if tab_index is not None:
+                self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
@@ -297,7 +395,7 @@ class FittingWindow(QtWidgets.QTabWidget):
                 continue
             page_name = "Page%s"%tab_object.tab_id
             if any([page_name in tab for tab in tabs_for_fitting]):
-                tab_object.setFittingStarted()
+                tab_object.disableInteractiveElements()
 
         pass
 
@@ -314,9 +412,16 @@ class FittingWindow(QtWidgets.QTabWidget):
                 continue
             page_name = "Page%s"%tab_object.tab_id
             if any([page_name in tab for tab in tabs_for_fitting]):
-                tab_object.setFittingStopped()
+                tab_object.enableInteractiveElements()
 
-        pass
+    def getCurrentStateAsXml(self):
+        """
+        Returns an XML version of the current state
+        """
+        state = {}
+        for tab in self.tabs:
+            pass
+        return state
 
     @property
     def currentTab(self):

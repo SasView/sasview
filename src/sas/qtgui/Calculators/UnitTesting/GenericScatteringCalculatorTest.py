@@ -45,7 +45,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
     def testDefaults(self):
         """Test the GUI in its default state"""
         self.assertIsInstance(self.widget, QtWidgets.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "Generic SAS Calculator")
+        self.assertEqual(self.widget.windowTitle(), "Generic Scattering Calculator")
 
         self.assertIn('trigger_plot_3d', dir(self.widget))
 
@@ -90,11 +90,12 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
                               range(self.widget.cbOptionsCalc.count())],
                              ['Fixed orientation', 'Debye full avg.'])
 
-        self.assertEqual(self.widget.cbShape.count(), 2)
+        self.assertEqual(self.widget.cbShape.count(), 1)
         self.assertEqual(self.widget.cbShape.currentIndex(), 0)
         self.assertListEqual([self.widget.cbShape.itemText(i) for i in
                               range(self.widget.cbShape.count())],
-                             ['Rectangular', 'Ellipsoid'])
+                             ['Rectangular'])
+                             #['Rectangular', 'Ellipsoid'])
         self.assertFalse(self.widget.cbShape.isEditable())
         # disable buttons
         self.assertFalse(self.widget.cmdSave.isEnabled())
@@ -184,6 +185,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         # wait a bit for data to be loaded
         time.sleep(0.1)
+        QtWidgets.qApp.processEvents()
+
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtData.text(), 'sld_file.sld')
         self.assertEqual(self.widget.txtTotalVolume.text(), '402408.0')
@@ -248,10 +251,12 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
 
         time.sleep(1)
+        QtWidgets.qApp.processEvents()
+
         # check updated values in ui, read from loaded file
         # TODO to be changed
         self.assertEqual(self.widget.txtData.text(), 'diamdsml.pdb')
-        self.assertEqual(self.widget.txtTotalVolume.text(), '170.950584161')
+        self.assertAlmostEqual(float(self.widget.txtTotalVolume.text()), 170.95058, 5)
         self.assertEqual(self.widget.txtNoPixels.text(), '18')
 
         # check disabled TextEdits according to data format
@@ -308,6 +313,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         time.sleep(2)
+        QtWidgets.qApp.processEvents()
 
         self.assertEqual(self.widget.txtData.text(), 'A_Raw_Example-1.omf')
         self.assertEqual(self.widget.txtTotalVolume.text(), '128000000.0')
@@ -394,6 +400,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
         time.sleep(1)
+        QtWidgets.qApp.processEvents()
 
         self.assertTrue(self.widget.cmdDraw.isEnabled())
         QTest.mouseClick(self.widget.cmdDraw, Qt.LeftButton)
@@ -415,12 +422,15 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.widget.loadFile()
 
         time.sleep(0.1)
+        QtWidgets.qApp.processEvents()
 
         filename1 = "test"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=[filename1, ''])
 
-        QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
+        #QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
         self.widget.onSaveFile()
+        QtWidgets.qApp.processEvents()
+
         self.assertTrue(os.path.isfile(filename1 + '.sld'))
         self.assertTrue(os.path.getsize(filename1 + '.sld') > 0)
 

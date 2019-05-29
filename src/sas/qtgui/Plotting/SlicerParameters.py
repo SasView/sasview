@@ -3,6 +3,7 @@ Allows users to modify the box slicer parameters.
 """
 import numpy
 import functools
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -18,7 +19,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
     """
-    close_signal = QtCore.pyqtSignal()
+    closeWidgetSignal = QtCore.pyqtSignal()
     def __init__(self, model=None, validate_method=None):
         super(SlicerParameters, self).__init__()
 
@@ -72,12 +73,18 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.proxy.setSourceModel(self.model)
 
+    def keyPressEvent(self, event):
+         key = event.key()
+
+         if key == QtCore.Qt.Key_Escape:
+            self.closeWidgetSignal.emit()
+
     def closeEvent(self, event):
         """
         Overwritten close widget method in order to send the close
         signal to the parent.
         """
-        self.close_signal.emit()
+        self.closeWidgetSignal.emit()
         if event:
             event.accept()
 
@@ -85,9 +92,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Display generic data averaging help
         """
-        location = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
-        self.parent.showHelp(location)
-
+        url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
+        GuiUtils.showHelp(url)
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
@@ -162,8 +168,8 @@ class EditDelegate(QtWidgets.QStyledItemDelegate):
         self.index = index
 
         # Find out the changed parameter name and proposed value
-        new_value = self.editor.text().toFloat()[0]
-        param_name = str(model.sourceModel().item(index.row(),0).text())
+        new_value = GuiUtils.toDouble(self.editor.text())
+        param_name = model.sourceModel().item(index.row(),0).text()
 
         validated = True
         if self.validate_method:

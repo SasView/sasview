@@ -7,6 +7,8 @@ See the license text in license.txt
 
 copyright 2010, University of Tennessee
 """
+
+import os.path
 import unittest
 import math
 import numpy as np
@@ -14,7 +16,12 @@ from sas.sascalc.dataloader.loader import  Loader
 from sas.sascalc.dataloader.data_info import Data1D
 
 from sas.sascalc.invariant import invariant
-    
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class TestLinearFit(unittest.TestCase):
     """
         Test Line fit 
@@ -93,7 +100,7 @@ class TestInvariantCalculator(unittest.TestCase):
         Test main functionality of the Invariant calculator
     """
     def setUp(self):
-        data = Loader().load("latex_smeared_slit.xml")
+        data = Loader().load(find("latex_smeared_slit.xml"))
         self.data = data[0]
         self.data.dxl = None
         
@@ -675,4 +682,3 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         for i in range(len(self.data.x[start:])):
             value  = math.fabs(test_y[i]- temp[i])/temp[i]
             self.assert_(value < 0.001)                
-                      

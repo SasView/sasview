@@ -66,11 +66,11 @@ class DataExplorerTest(unittest.TestCase):
 
         # Buttons - data tab
         self.assertEqual(self.form.cmdLoad.text(), "Load data")
-        self.assertEqual(self.form.cmdDeleteData.text(), "Delete")
+        self.assertEqual(self.form.cmdDeleteData.text(), "Delete Data")
         self.assertEqual(self.form.cmdDeleteTheory.text(), "Delete")
         self.assertEqual(self.form.cmdFreeze.text(), "Freeze Theory")
         self.assertEqual(self.form.cmdSendTo.text(), "Send data to")
-        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(48, 48))
+        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(32, 32))
         self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
         self.assertEqual(self.form.chkBatch.text(), "Batch mode")
         self.assertFalse(self.form.chkBatch.isChecked())
@@ -330,8 +330,7 @@ class DataExplorerTest(unittest.TestCase):
         # Wait a moment for data to load
         time.sleep(1)
         # Unselect all data
-        self.form.cbSelect.setCurrentIndex(1)
-
+        self.form.cbSelect.activated.emit(1)
         # Test the current selection
         item1D = self.form.model.item(0)
         item2D = self.form.model.item(1)
@@ -340,43 +339,38 @@ class DataExplorerTest(unittest.TestCase):
         self.assertTrue(item2D.checkState() == Qt.Unchecked)        
 
         # Select all data
-        self.form.cbSelect.setCurrentIndex(0)
+        self.form.cbSelect.activated.emit(0)
 
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Checked)
         self.assertTrue(item2D.checkState() == Qt.Checked)        
 
         # select 1d data
-        self.form.cbSelect.setCurrentIndex(2)
-
+        self.form.cbSelect.activated.emit(2)
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Checked)
-        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
+        self.assertTrue(item2D.checkState() == Qt.Checked)
 
         # unselect 1d data
-        self.form.cbSelect.setCurrentIndex(3)
+        self.form.cbSelect.activated.emit(3)
 
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
+        self.assertTrue(item2D.checkState() == Qt.Checked)
 
         # select 2d data
-        self.form.cbSelect.setCurrentIndex(4)
+        self.form.cbSelect.activated.emit(4)
 
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Unchecked)
         self.assertTrue(item2D.checkState() == Qt.Checked)        
 
         # unselect 2d data
-        self.form.cbSelect.setCurrentIndex(5)
+        self.form.cbSelect.activated.emit(5)
 
         # Test the current selection
         self.assertTrue(item1D.checkState() == Qt.Unchecked)
         self.assertTrue(item2D.checkState() == Qt.Unchecked)        
-
-        # choose impossible index and assure the code raises
-        #with self.assertRaises(Exception):
-        #    self.form.cbSelect.setCurrentIndex(6)
 
     def testFreezeTheory(self):
         """
@@ -580,15 +574,14 @@ class DataExplorerTest(unittest.TestCase):
         self.form.parent.workspace = MagicMock()
 
         # Call the plotting method
-        self.form.newPlot()
-
-        QApplication.processEvents()
+        #self.form.newPlot()
+        #QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        #self.assertEqual(len(PlotHelper.currentPlots()), 1)
 
-        self.assertTrue(self.form.cbgraph.isEnabled())
-        self.assertTrue(self.form.cmdAppend.isEnabled())
+        #self.assertTrue(self.form.cbgraph.isEnabled())
+        #self.assertTrue(self.form.cmdAppend.isEnabled())
 
     @patch('sas.qtgui.Utilities.GuiUtils.plotsFromCheckedItems')
     def testAppendPlot(self, test_patch):
@@ -745,8 +738,8 @@ class DataExplorerTest(unittest.TestCase):
         self.form.saveDataAs()
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                directory='cyl_400_20_out.txt',
-                                filter='Text files (*.txt);;CanSAS 1D files(*.xml)',
+                                filter='Text files (*.txt);;CanSAS 1D files(*.xml);;NXcanSAS files (*.h5)',
+                                options=16,
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
 
@@ -768,8 +761,8 @@ class DataExplorerTest(unittest.TestCase):
         self.form.saveDataAs()
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                directory='P123_D2O_10_percent_out.dat',
-                                filter='IGOR/DAT 2D file in Q_map (*.dat)',
+                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5)',
+                                options=16,
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
 
@@ -818,7 +811,7 @@ class DataExplorerTest(unittest.TestCase):
         """
         pass
 
-    def notestDeleteItem(self):
+    def testDeleteItem(self):
         """
         Delete selected item from data explorer
         """
@@ -853,7 +846,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
 
         # Attempt at deleting
-        self.form.deleteItem()
+        self.form.deleteSelectedItem()
 
         # Test the warning dialog called once
         self.assertTrue(QMessageBox.question.called)
@@ -867,13 +860,59 @@ class DataExplorerTest(unittest.TestCase):
         # Select the newly created item
         self.form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
         # delete it. now for good
-        self.form.deleteItem()
+        self.form.deleteSelectedItem()
 
         # Test the warning dialog called once
         self.assertTrue(QMessageBox.question.called)
 
         # Assure the model contains no items
         self.assertEqual(self.form.model.rowCount(), 3)
+
+    def testClosePlotsForItem(self):
+        """
+        Delete selected item from data explorer should also delete corresponding plots
+        """
+        # Mock the confirmation dialog with return=No
+        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+
+        loader = Loader()
+        manager = DataManager()
+        PlotHelper.clear()
+        self.form.enableGraphCombo(None)
+
+        # Make sure the controls are disabled
+        self.assertFalse(self.form.cbgraph.isEnabled())
+        self.assertFalse(self.form.cmdAppend.isEnabled())
+
+        # Populate the model
+        filename = ["cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        # Mask plotting
+        self.form.parent.workspace = MagicMock()
+
+        # Call the plotting method
+        self.form.newPlot()
+
+        time.sleep(1)
+        QApplication.processEvents()
+
+        # The plot was registered
+        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        self.assertEqual(len(self.form.plot_widgets), 1)
+        # could have leftovers from previous tests
+        #self.assertEqual(list(self.form.plot_widgets.keys()), ['Graph3'])
+        self.assertEqual(len(self.form.plot_widgets.keys()), 1)
+
+        # data index
+        model_item = self.form.model.item(0,0)
+
+        # Call the method
+        self.form.closePlotsForItem(model_item)
+
+        # See that no plot remained
+        self.assertEqual(len(PlotHelper.currentPlots()), 0)
+        self.assertEqual(len(self.form.plot_widgets), 0)
 
 
 if __name__ == "__main__":

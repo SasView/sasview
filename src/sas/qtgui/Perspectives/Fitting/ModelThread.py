@@ -100,38 +100,18 @@ class Calc2D(CalcThread):
         output[index_model] = value
         elapsed = time.time() - self.starttime
 
-        if LocalConfig.USING_TWISTED:
-            return (output,
-                    self.data,
-                    self.page_id,
-                    self.model,
-                    self.state,
-                    self.toggle_mode_on,
-                    elapsed,
-                    index_model,
-                    self.fid,
-                    self.qmin,
-                    self.qmax,
-                    self.weight,
-                    self.update_chisqr,
-                    self.source)
-        else:
-            self.complete(image=output,
-                           data=self.data,
-                           page_id=self.page_id,
-                           model=self.model,
-                           state=self.state,
-                           toggle_mode_on=self.toggle_mode_on,
-                           elapsed=elapsed,
-                           index=index_model,
-                           fid=self.fid,
-                           qmin=self.qmin,
-                           qmax=self.qmax,
-                           weight=self.weight,
-                           #qstep=self.qstep,
-                           update_chisqr=self.update_chisqr,
-                           source=self.source)
+        res = dict(image = output, data = self.data, page_id = self.page_id,
+            model = self.model, state = self.state,
+            toggle_mode_on = self.toggle_mode_on, elapsed = elapsed,
+            index = index_model, fid = self.fid,
+            qmin = self.qmin, qmax = self.qmax,
+            weight = self.weight, update_chisqr = self.update_chisqr,
+            source = self.source)
 
+        if LocalConfig.USING_TWISTED:
+            return res
+        else:
+            self.completefn(res)
 
 class Calc1D(CalcThread):
     """
@@ -183,6 +163,8 @@ class Calc1D(CalcThread):
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
+        intermediate_results = None
+
         # If we use a smearer, also return the unsmeared model
         unsmeared_output = None
         unsmeared_data = None
@@ -193,7 +175,13 @@ class Calc1D(CalcThread):
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin+1]
             unsmeared_output = numpy.zeros((len(self.data.x)))
-            unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+
+            return_data = self.model.calculate_Iq(mask)
+            if isinstance(return_data, tuple):
+                # see sasmodels beta_approx: SasviewModel.calculate_Iq
+                # TODO: implement intermediate results in smearers
+                return_data, _ = return_data
+            unsmeared_output[first_bin:last_bin+1] = return_data
             output = self.smearer(unsmeared_output, first_bin, last_bin)
 
             # Rescale data to unsmeared model
@@ -212,53 +200,73 @@ class Calc1D(CalcThread):
                 unsmeared_data=unsmeared_data[index]
                 unsmeared_error=unsmeared_error
         else:
-            output[index] = self.model.evalDistribution(self.data.x[index])
+            return_data = self.model.calculate_Iq(self.data.x[index])
+            if isinstance(return_data, tuple):
+                # see sasmodels beta_approx: SasviewModel.calculate_Iq
+                return_data, intermediate_results = return_data
+            output[index] = return_data
 
-        sq_values = None
-        pq_values = None
-        s_model = None
-        p_model = None
-        if isinstance(self.model, MultiplicationModel):
-            s_model = self.model.s_model
-            p_model = self.model.p_model
-        elif hasattr(self.model, "get_composition_models"):
-            p_model, s_model = self.model.get_composition_models()
+        if intermediate_results:
+            if isinstance(intermediate_results, list):
+                # the model returns an ordered dictionary
+                if len(intermediate_results) == 2:
+                    intermediate_results  = {
+                        "P(Q)": intermediate_results[0],
+                        "S(Q)": intermediate_results[1]
+                    }
+            else:
+                # the model returns a callable which is then used to retrieve the data
+                try:
+                    intermediate_results = intermediate_results()
+                except:
+                    intermediate_results = {}
 
-        if p_model is not None and s_model is not None:
-            sq_values = numpy.zeros((len(self.data.x)))
-            pq_values = numpy.zeros((len(self.data.x)))
-            sq_values[index] = s_model.evalDistribution(self.data.x[index])
-            pq_values[index] = p_model.evalDistribution(self.data.x[index])
+        else:
+            # TODO: this conditional branch needs refactoring
+            sq_values = None
+            pq_values = None
+            s_model = None
+            p_model = None
+
+            if isinstance(self.model, MultiplicationModel):
+                s_model = self.model.s_model
+                p_model = self.model.p_model
+
+            elif hasattr(self.model, "calc_composition_models"):
+                results = self.model.calc_composition_models(self.data.x[index])
+                if results is not None:
+                    pq_values, sq_values = results
+
+            if pq_values is None or sq_values is None:
+                if p_model is not None and s_model is not None:
+                    sq_values = numpy.zeros((len(self.data.x)))
+                    pq_values = numpy.zeros((len(self.data.x)))
+                    sq_values[index] = s_model.evalDistribution(self.data.x[index])
+                    pq_values[index] = p_model.evalDistribution(self.data.x[index])
+
+            if pq_values is not None and sq_values is not None:
+                intermediate_results  = {
+                    "P(Q)": pq_values,
+                    "S(Q)": sq_values
+                }
+            else:
+                intermediate_results = {}
 
         elapsed = time.time() - self.starttime
 
+        res = dict(x = self.data.x[index], y = output[index],
+            page_id = self.page_id, state = self.state, weight = self.weight,
+            fid = self.fid, toggle_mode_on = self.toggle_mode_on,
+            elapsed = elapsed, index = index, model = self.model,
+            data = self.data, update_chisqr = self.update_chisqr,
+            source = self.source, unsmeared_output = unsmeared_output,
+            unsmeared_data = unsmeared_data, unsmeared_error = unsmeared_error,
+            intermediate_results = intermediate_results)
+
         if LocalConfig.USING_TWISTED:
-            return (self.data.x[index], output[index],
-                    self.page_id,
-                    self.state,
-                    self.weight,
-                    self.fid,
-                    self.toggle_mode_on,
-                    elapsed, index, self.model,
-                    self.data,
-                    self.update_chisqr,
-                    self.source)
+            return res
         else:
-            self.complete(x=self.data.x[index], y=output[index],
-                          page_id=self.page_id,
-                          state=self.state,
-                          weight=self.weight,
-                          fid=self.fid,
-                          toggle_mode_on=self.toggle_mode_on,
-                          elapsed=elapsed, index=index, model=self.model,
-                          data=self.data,
-                          update_chisqr=self.update_chisqr,
-                          source=self.source,
-                          unsmeared_model=unsmeared_output,
-                          unsmeared_data=unsmeared_data,
-                          unsmeared_error=unsmeared_error,
-                          pq_model=pq_values,
-                          sq_model=sq_values)
+            self.completefn(res)
 
     def results(self):
         """

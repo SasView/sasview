@@ -12,6 +12,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.BoxSumUI import Ui_BoxSumUI
 
 class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
+    closeWidgetSignal = QtCore.pyqtSignal()
     def __init__(self, parent=None, model=None):
         super(BoxSum, self).__init__()
 
@@ -43,12 +44,6 @@ class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
 
         self.setFixedSize(self.minimumSizeHint())
 
-        # Handle the Apply button click
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.onClose)
-
-    def onClose(self):
-        """
-        close the window containing this panel
-        """
-        self.close()
+        # Handle the Close button click
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(lambda:self.closeWidgetSignal.emit())
 

@@ -10,6 +10,9 @@ import imp
 import warnings
 import webbrowser
 import urllib.parse
+import json
+import types
+from io import BytesIO
 
 import numpy as np
 
@@ -25,15 +28,39 @@ from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.Plottables import Plottable
+from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sas.sascalc.dataloader.data_info import Detector, Process, TransmissionSpectrum
+from sas.sascalc.dataloader.data_info import Aperture, Collimation
+from sas.qtgui.Plotting.Plottables import View
+from sas.qtgui.Plotting.Plottables import PlottableTheory1D
+from sas.qtgui.Plotting.Plottables import PlottableFit1D
+from sas.qtgui.Plotting.Plottables import Text
+from sas.qtgui.Plotting.Plottables import Chisq
+from sas.qtgui.MainWindow.DataState import DataState
+
+from sas.sascalc.fit.AbstractFitEngine import FResult
+from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
+from sasmodels.sasview_model import SasviewModel
+
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+
 from sas.qtgui.Utilities import CustomDir
 
-## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
         HELP_DIRECTORY_LOCATION = "doc"
 else:
         HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
+
+# This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
+# "5 [P(Q)] modelname"
+# or
+# "4 modelname".
+# Useful for determining whether the plot in question is for an intermediate result, such as P(Q) or S(Q) in the
+# case of a product model; the identifier for this is held in square brackets, as in the example above.
+theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
 def get_app_dir():
     """
@@ -87,14 +114,12 @@ def _find_local_config(confg_file, path):
         config_module = imp.load_module(confg_file, fObj, path_config, descr)
     except ImportError:
         pass
-        #logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     except ValueError:
         print("Value error")
         pass
     finally:
         if fObj is not None:
             fObj.close()
-    #logging.info("GuiManager loaded %s/%s" % (path, confg_file))
     return config_module
 
 
@@ -145,6 +170,7 @@ try:
     CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
     DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
     CLEANUP_PLOT = custom_config.CLEANUP_PLOT
+    SAS_OPENCL = custom_config.SAS_OPENCL
     # custom open_path
     open_folder = custom_config.DEFAULT_OPEN_FOLDER
     if open_folder is not None and os.path.isdir(open_folder):
@@ -165,6 +191,7 @@ except AttributeError:
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
+    SAS_OPENCL = config.SAS_OPENCL
 
 #DEFAULT_STYLE = config.DEFAULT_STYLE
 
@@ -211,9 +238,12 @@ class Communicate(QtCore.QObject):
     # New theory data in current perspective
     updateTheoryFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
 
+    # Request to delete plots (in the theory view) related to a given model ID
+    deleteIntermediateTheoryPlotsSignal = QtCore.pyqtSignal(str)
+
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.pyqtSignal(list)
+    plotRequestedSignal = QtCore.pyqtSignal(list, int)
 
     # Plot from file names
     plotFromFilenameSignal = QtCore.pyqtSignal(str)
@@ -248,10 +278,40 @@ class Communicate(QtCore.QObject):
     # Notify the gui manager about new data to be added to the grid view
     sendDataToGridSignal = QtCore.pyqtSignal(list)
 
-    # Action Save Analysis triggered
-    saveAnalysisSignal = QtCore.pyqtSignal()
+    # Mask Editor requested
+    maskEditorSignal = QtCore.pyqtSignal(Data2D)
 
-def updateModelItemWithPlot(item, update_data, name=""):
+    #second Mask Editor for external
+    extMaskEditorSignal = QtCore.pyqtSignal()
+
+    # Fitting parameter copy to clipboard
+    copyFitParamsSignal = QtCore.pyqtSignal(str)
+
+    # Fitting parameter copy to clipboard for Excel
+    copyExcelFitParamsSignal = QtCore.pyqtSignal(str)
+
+    # Fitting parameter copy to clipboard for Latex
+    copyLatexFitParamsSignal = QtCore.pyqtSignal(str)
+
+    # Fitting parameter paste from clipboard
+    pasteFitParamsSignal = QtCore.pyqtSignal()
+
+    # Notify about new categories/models from category manager
+    updateModelCategoriesSignal = QtCore.pyqtSignal()
+
+    # Tell the data explorer to switch tabs
+    changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
+
+    # Plot fitting results (FittingWidget->GuiManager)
+    resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+
+    # show the plot as a regular in-workspace object
+    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+
+    # Update the masked ranges in fitting
+    updateMaskedDataSignal = QtCore.pyqtSignal()
+
+def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem
     Adds 'update_data' to that row.
@@ -261,25 +321,57 @@ def updateModelItemWithPlot(item, update_data, name=""):
     # Check if data with the same ID is already present
     for index in range(item.rowCount()):
         plot_item = item.child(index)
-        if plot_item.isCheckable():
-            plot_data = plot_item.child(0).data()
-            if plot_data.id is not None and \
-                   (plot_data.name == update_data.name or plot_data.id == update_data.id):
+        if not plot_item.isCheckable():
+            continue
+        plot_data = plot_item.child(0).data()
+        if plot_data.id is not None and \
+                plot_data.name == update_data.name:
+                #(plot_data.name == update_data.name or plot_data.id == update_data.id):
             # if plot_data.id is not None and plot_data.id == update_data.id:
-                # replace data section in item
-                plot_item.child(0).setData(update_data)
-                plot_item.setText(name)
-                # Plot title if any
-                if plot_item.child(1).hasChildren():
-                    plot_item.child(1).child(0).setText("Title: %s"%name)
-                # Force redisplay
-                return
-
+            # replace data section in item
+            plot_item.child(0).setData(update_data)
+            plot_item.setText(name)
+            # Plot title if any
+            if plot_item.child(1).hasChildren():
+                plot_item.child(1).child(0).setText("Title: %s"%name)
+            # Force redisplay
+            return
     # Create the new item
     checkbox_item = createModelItemWithPlot(update_data, name)
 
+    if checkbox_state is not None:
+        checkbox_item.setCheckState(checkbox_state)
     # Append the new row to the main item
     item.appendRow(checkbox_item)
+
+def deleteRedundantPlots(item, new_plots):
+    """
+    Checks all plots that are children of the given item; if any have an ID or name not included in new_plots,
+    it is deleted. Useful for e.g. switching from P(Q)S(Q) to P(Q); this would remove the old S(Q) plot.
+
+    Ensure that new_plots contains ALL the relevant plots(!!!)
+    """
+    assert isinstance(item, QtGui.QStandardItem)
+
+    # lists of plots names/ids for all deletable plots on item
+    names = [p.name for p in new_plots if p.name is not None]
+    ids = [p.id for p in new_plots if p.id is not None]
+
+    items_to_delete = []
+
+    for index in range(item.rowCount()):
+        plot_item = item.child(index)
+        if not plot_item.isCheckable():
+            continue
+        plot_data = plot_item.child(0).data()
+        if (plot_data.id is not None) and \
+            (plot_data.id not in ids) and \
+            (plot_data.name not in names) and \
+            (plot_data.plot_role == Data1D.ROLE_DELETABLE):
+            items_to_delete.append(plot_item)
+
+    for plot_item in items_to_delete:
+        item.removeRow(plot_item.row())
 
 class HashableStandardItem(QtGui.QStandardItem):
     """
@@ -300,6 +392,13 @@ class HashableStandardItem(QtGui.QStandardItem):
         clone.__hash__ = self.__hash__
         return clone
 
+def getMonospaceFont():
+    """Convenience function; returns a monospace font to be used in any shells, code editors, etc."""
+
+    # Note: Consolas is only available on Windows; the style hint is used on other operating systems
+    font = QtGui.QFont("Consolas", 10)
+    font.setStyleHint(QtGui.QFont.Monospace, QtGui.QFont.PreferQuality)
+    return font
 
 def createModelItemWithPlot(update_data, name=""):
     """
@@ -411,21 +510,35 @@ def plotsFromFilename(filename, model_item):
     assert isinstance(model_item, QtGui.QStandardItemModel)
     assert isinstance(filename, str)
 
-    plot_data = []
+    plot_data = {}
     # Iterate over model looking for named items
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if str(item.text()) == filename:
+        if filename in str(item.text()):
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append(item.child(0).data())
+            plot_data[item] = item.child(0).data()
             # Going 1 level deeper only
             for index_2 in range(item.rowCount()):
                 item_2 = item.child(index_2)
                 if item_2 and item_2.isCheckable():
                     # TODO: assure item type is correct (either data1/2D or Plotter)
-                    plot_data.append(item_2.child(0).data())
+                    plot_data[item_2] = item_2.child(0).data()
 
     return plot_data
+
+def getChildrenFromItem(root):
+    """
+    Recursively go down the model item looking for all children
+    """
+    def recurse(parent):
+        for row in range(parent.rowCount()):
+            for column in range(parent.columnCount()):
+                child = parent.child(row, column)
+                yield child
+                if child.hasChildren():
+                    yield from recurse(child)
+    if root is not None:
+        yield from recurse(root)
 
 def plotsFromCheckedItems(model_item):
     """
@@ -434,20 +547,20 @@ def plotsFromCheckedItems(model_item):
     assert isinstance(model_item, QtGui.QStandardItemModel)
 
     plot_data = []
+
     # Iterate over model looking for items with checkboxes
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
+        if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+            data = item.child(0).data()
+            plot_data.append((item, data))
 
-        # Going 1 level deeper only
-        for index_2 in range(item.rowCount()):
-            item_2 = item.child(index_2)
-            if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
-                # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append((item_2, item_2.child(0).data()))
+        items = list(getChildrenFromItem(item))
 
-        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-            # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append((item, item.child(0).data()))
+        for it in items:
+            if it.isCheckable() and it.checkState() == QtCore.Qt.Checked:
+                data = it.child(0).data()
+                plot_data.append((it, data))
 
     return plot_data
 
@@ -478,6 +591,8 @@ def infoFromData(data):
     process_item = QtGui.QStandardItem("Process")
     if isinstance(data.process, list) and data.process:
         for process in data.process:
+            if process is None:
+                continue
             process_date = process.date
             process_date_item = QtGui.QStandardItem("Date: " + process_date)
             process_item.appendRow(process_date_item)
@@ -499,7 +614,11 @@ def dataFromItem(item):
     Retrieve Data1D/2D component from QStandardItem.
     The assumption - data stored in SasView standard, in child 0
     """
-    return item.child(0).data()
+    try:
+        data = item.child(0).data()
+    except AttributeError:
+        data = None
+    return data
 
 def openLink(url):
     """
@@ -512,6 +631,20 @@ def openLink(url):
     else:
         msg = "Attempt at opening an invalid URL"
         raise AttributeError(msg)
+
+def showHelp(url):
+    """
+    Open a local url in the default browser
+    """
+    location = HELP_DIRECTORY_LOCATION + url
+    #WP: Added to handle OSX bundle docs
+    if os.path.isdir(location) == False:
+        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        location = sas_path+"/"+location
+    try:
+        webbrowser.open('file://' + os.path.realpath(location))
+    except webbrowser.Error as ex:
+        logging.warning("Cannot display help. %s" % ex)
 
 def retrieveData1d(data):
     """
@@ -628,30 +761,31 @@ def onTXTSave(data, path):
                 has_errors = False
         if has_errors:
             if data.dx is not None and data.dx.any():
-                out.write("<X>   <Y>   <dY>   <dX>\n")
+                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>"+" "*20+"<dX>\n")
+                #out.write("<X>   <Y>   <dY>   <dX>\n")
             else:
-                out.write("<X>   <Y>   <dY>\n")
+                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>\n")
         else:
-            out.write("<X>   <Y>\n")
+            out.write("<X>"+" "*20+ "<Y>\n")
 
         for i in range(len(data.x)):
             if has_errors:
                 if data.dx is not None and data.dx.any():
                     if  data.dx[i] is not None:
-                        out.write("%g  %g  %g  %g\n" % (data.x[i],
+                        out.write("%.15e  %.15e  %.15e  %.15e\n" % (data.x[i],
                                                         data.y[i],
                                                         data.dy[i],
                                                         data.dx[i]))
                     else:
-                        out.write("%g  %g  %g\n" % (data.x[i],
+                        out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
                                                     data.y[i],
                                                     data.dy[i]))
                 else:
-                    out.write("%g  %g  %g\n" % (data.x[i],
+                    out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
                                                 data.y[i],
                                                 data.dy[i]))
             else:
-                out.write("%g  %g\n" % (data.x[i],
+                out.write("%.15e  %.15e\n" % (data.x[i],
                                         data.y[i]))
 
 def saveData1D(data):
@@ -665,12 +799,14 @@ def saveData1D(data):
     default_name += "_out" + extension
 
     wildcard = "Text files (*.txt);;"\
-                "CanSAS 1D files(*.xml)"
+                "CanSAS 1D files(*.xml);;"\
+                "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
-        'directory' : default_name,
+        #'directory' : default_name,
         'filter'    : wildcard,
         'parent'    : None,
+        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
     }
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
@@ -680,12 +816,27 @@ def saveData1D(data):
     if not filename:
         return
 
+    # Check/add extension
+    if not os.path.splitext(filename)[1]:
+        ext = filename_tuple[1]
+        if 'Text files' in ext:
+            filename += '.txt'
+        elif 'CanSAS' in ext:
+            filename += '.xml'
+        elif 'NXcanSAS' in ext:
+            filename += '.h5'
+        else:
+            pass
+
     #Instantiate a loader
     loader = Loader()
     if os.path.splitext(filename)[1].lower() == ".txt":
         onTXTSave(data, filename)
-    if os.path.splitext(filename)[1].lower() == ".xml":
+    elif os.path.splitext(filename)[1].lower() == ".xml":
         loader.save(filename, data, ".xml")
+    elif os.path.splitext(filename)[1].lower() == ".h5":
+        nxcansaswriter = NXcanSASWriter()
+        nxcansaswriter.write([data], filename)
 
 def saveData2D(data):
     """
@@ -696,12 +847,13 @@ def saveData2D(data):
     ext_format = ".dat"
     default_name += "_out" + ext_format
 
-    wildcard = "IGOR/DAT 2D file in Q_map (*.dat)"
+    wildcard = "IGOR/DAT 2D file in Q_map (*.dat);;"\
+                "NXcanSAS files (*.h5)"
     kwargs = {
         'caption'   : 'Save As',
-        'directory' : default_name,
         'filter'    : wildcard,
         'parent'    : None,
+        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
     }
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
@@ -711,11 +863,25 @@ def saveData2D(data):
     if not filename:
         return
 
+    # Check/add extension
+    if not os.path.splitext(filename)[1]:
+        ext = filename_tuple[1]
+        if 'IGOR' in ext:
+            filename += '.dat'
+        elif 'NXcanSAS' in ext:
+            filename += '.h5'
+        else:
+            pass
+
     #Instantiate a loader
     loader = Loader()
 
     if os.path.splitext(filename)[1].lower() == ext_format:
         loader.save(filename, data, ext_format)
+    elif os.path.splitext(filename)[1].lower() == ".h5":
+        nxcansaswriter = NXcanSASWriter()
+        nxcansaswriter.write([data], filename)
+
 
 class FormulaValidator(QtGui.QValidator):
     def __init__(self, parent=None):
@@ -1009,7 +1175,7 @@ def checkModel(path):
     """
     # The following return needs to be removed once
     # the unittest related changes in Sasmodels are commited
-    return True
+    # return True
     # try running the model
     from sasmodels.sasview_model import load_custom_model
     Model = load_custom_model(path)
@@ -1030,6 +1196,294 @@ def checkModel(path):
 
     return result
 
+def saveData(fp, data):
+    """
+    save content of data to fp (a .write()-supporting file-like object)
+    """
+
+    def add_type(dict, type):
+        dict['__type__'] = type.__name__
+        return dict
+
+    def jdefault(o):
+        """
+        objects that can't otherwise be serialized need to be converted
+        """
+        # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
+        if isinstance(o, (tuple, set)):
+            content = { 'data': list(o) }
+            return add_type(content, type(o))
+
+        # "simple" types
+        if isinstance(o, (Sample, Source, Vector, FResult)):
+            return add_type(o.__dict__, type(o))
+        # detector
+        if isinstance(o, (Detector, Process, TransmissionSpectrum, Aperture, Collimation)):
+            return add_type(o.__dict__, type(o))
+
+        if isinstance(o, (Plottable, View)):
+            return add_type(o.__dict__, type(o))
+
+        # SasviewModel - unique
+        if isinstance(o, SasviewModel):
+            # don't store parent
+            content = o.__dict__.copy()
+            return add_type(content, SasviewModel)
+
+        # DataState
+        if isinstance(o, (Data1D, Data2D, FitData1D, FitData2D)):
+            # don't store parent
+            content = o.__dict__.copy()
+            return add_type(content, type(o))
+
+        # ndarray
+        if isinstance(o, np.ndarray):
+            content = {'data':o.tolist()}
+            return add_type(content, type(o))
+
+        if isinstance(o, types.FunctionType):
+            # we have a pure function
+            content = o.__dict__.copy()
+            return add_type(content, type(o))
+
+        # not supported
+        logging.info("data cannot be serialized to json: %s" % type(o))
+        return None
+
+    json.dump(data, fp, indent=2, sort_keys=True, default=jdefault)
+
+def readDataFromFile(fp):
+    '''
+    Reads in Data1D/Data2 datasets from the file.
+    Datasets are stored in the JSON format.
+    '''
+    supported = [
+        tuple, set, types.FunctionType,
+        Sample, Source, Vector,
+        Plottable, Data1D, Data2D, PlottableTheory1D, PlottableFit1D, Text, Chisq, View,
+        Detector, Process, TransmissionSpectrum, Collimation, Aperture,
+        DataState, np.ndarray, FResult, FitData1D, FitData2D, SasviewModel]
+
+    lookup = dict((cls.__name__, cls) for cls in supported)
+
+    class TooComplexException(Exception):
+        pass
+
+    def simple_type(cls, data, level):
+        class Empty(object):
+            def __init__(self):
+                for key, value in data.items():
+                    setattr(self, key, generate(value, level))
+
+        # create target object
+        o = Empty()
+        o.__class__ = cls
+
+        return o
+
+    def construct(type, data, level):
+        try:
+            cls = lookup[type]
+        except KeyError:
+            logging.info('unknown type: %s' % type)
+            return None
+
+        # tuples and sets
+        if cls in (tuple, set):
+            # convert list to tuple/set
+            return cls(generate(data['data'], level))
+
+        # "simple" types
+        if cls in (Sample, Source, Vector, FResult, FitData1D, FitData2D,
+                   SasviewModel, Detector, Process, TransmissionSpectrum,
+                   Collimation, Aperture):
+            return simple_type(cls, data, level)
+        if issubclass(cls, Plottable) or (cls == View):
+            return simple_type(cls, data, level)
+
+        # DataState
+        if cls == DataState:
+            o = simple_type(cls, data, level)
+            o.parent = None # TODO: set to ???
+            return o
+
+        # ndarray
+        if cls == np.ndarray:
+            o = data['data']
+            if isinstance(o, list):
+                # new format - ndarray as ascii list
+                return np.array(o)
+            else:
+                # pre-5.0-release format - binary ndarray
+                buffer = BytesIO()
+                buffer.write(data['data'].encode('latin-1'))
+                buffer.seek(0)
+                return np.load(buffer)
+
+        # function
+        if cls == types.FunctionType:
+            return cls
+
+        logging.info('not implemented: %s, %s' % (type, cls))
+        return None
+
+    def generate(data, level):
+        if level > 16: # recursion limit (arbitrary number)
+            raise TooComplexException()
+        else:
+            level += 1
+
+        if isinstance(data, dict):
+            try:
+                type = data['__type__']
+            except KeyError:
+                # if dictionary doesn't have __type__ then it is assumed to be just an ordinary dictionary
+                o = {}
+                for key, value in data.items():
+                    o[key] = generate(value, level)
+                return o
+
+            return construct(type, data, level)
+
+        if isinstance(data, list):
+            return [generate(item, level) for item in data]
+
+        return data
+
+    new_stored_data = {}
+    for id, data in json.load(fp).items():
+        try:
+            new_stored_data[id] = generate(data, 0)
+        except TooComplexException:
+            logging.info('unable to load %s' % id)
+
+    return new_stored_data
+
+def readProjectFromSVS(filepath):
+    """
+    Read old SVS file and convert to the project dictionary
+    """
+    from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+    from sas.sascalc.fit.pagestate import Reader
+
+    loader = Loader()
+    loader.associate_file_reader('.svs', Reader)
+    temp = loader.load(filepath)
+    state_reader = Reader()
+    data_svs, state_svs = state_reader.read(filepath)
+
+    output = []
+    if isinstance(temp, list) and isinstance(state_svs, list):
+        for item, state in zip(temp, state_svs):
+            output.append([item, state])
+    else:
+        output[temp, state_svs]
+    return output
+
+def convertFromSVS(datasets):
+    """
+    Read in properties from SVS and convert into a simple dict
+    """
+    content = {}
+    for dataset in datasets:
+        # we already have data - interested only in properties
+        #[[item_1, state_1], [item_2, state_2],...]
+        data = dataset[0]
+        params = dataset[1]
+        content[params.data_id] = {}
+        content[params.data_id]['fit_data'] = [data, {'checked': 2}, []]
+        param_dict = {}
+        param_dict['fitpage_category'] = [params.categorycombobox]
+        param_dict['fitpage_model'] = [params.formfactorcombobox]
+        param_dict['fitpage_structure'] = [params.structurecombobox]
+        param_dict['2D_params'] = [str(params.is_2D)]
+        param_dict['chainfit_params'] = ["False"]
+        param_dict['data_id'] = [params.data_id]
+        param_dict['data_name'] = [params.data_name]
+        param_dict['is_data'] = [str(params.is_data)]
+        param_dict['magnetic_params'] = [str(params.magnetic_on)]
+        param_dict['model_name'] = [params.formfactorcombobox]
+        param_dict['polydisperse_params'] = [str(params.enable_disp)]
+        param_dict['q_range_max'] = [str(params.qmax)]
+        param_dict['q_range_min'] = [str(params.qmin)]
+        # Smearing is a bit trickier. 4.x has multiple keywords,
+        # one for each combobox option
+        if params.enable_smearer:
+            if params.slit_smearer:
+                w = 1
+            elif params.pinhole_smearer:
+                w = 2
+            else:
+                w = 0
+            param_dict['smearing'] = [str(w)]
+        # weighting is also tricky. 4.x has multiple keywords,
+        # one for each radio box.
+        if params.dI_noweight:
+            w = 2
+        elif params.dI_didata:
+            w = 3
+        elif params.dI_sqrdata:
+            w = 4
+        elif params.dI_idata:
+            w = 5
+        else:
+            w = 2
+        param_dict['weighting'] = [str(w)]
+
+        # 4.x multi_factor is really the multiplicity
+        if params.multi_factor is not None:
+            param_dict['multiplicity'] = [str(int(params.multi_factor))]
+
+        # playing with titles
+        data.filename = params.file
+        data.title = params.data_name
+        data.name = params.data_name
+
+        # main parameters
+        for p in params.parameters:
+            p_name = p[1]
+            param_dict[p_name] = [str(p[0]), str(p[2]), None, str(p[5][1]), str(p[6][1]), []]
+        # orientation parameters
+        if params.is_2D:
+            for p in params.orientation_params:
+                p_name = p[1]
+                p_min = "-360.0"
+                p_max = "360.0"
+                if p[5][1] != "":
+                    p_min = p[5][1]
+                if p[6][1] != "":
+                    p_max = p[6][1]
+                param_dict[p_name] = [str(p[0]), str(p[2]), None, p_min, p_max, []]
+
+        # disperse parameters
+        if params.enable_disp:
+            for p in params.fittable_param:
+                p_name = p[1]
+                p_opt = str(p[0])
+                p_err = "0"
+                p_width = str(p[2])
+                p_min = str(0)
+                p_max = "inf"
+                param_npts = p_name.replace('.width','.npts')
+                param_nsigmas = p_name.replace('.width', '.nsigmas')
+                if params.is_2D and p_name in params.disp_obj_dict:
+                    lookup = params.orientation_params_disp
+                    p_min = "-360.0"
+                    p_max = "360.0"
+                else:
+                    lookup = params.fixed_param
+                p_npts = [s[2] for s in lookup if s[1] == param_npts][0]
+                p_nsigmas = [s[2] for s in lookup if s[1] == param_nsigmas][0]
+                if p_name in params.disp_obj_dict:
+                    p_disp = params.disp_obj_dict[p_name]
+                else:
+                    p_disp = "gaussian"
+                param_dict[p_name] = [p_opt, p_width, p_min, p_max, p_npts, p_nsigmas, p_disp]
+
+        param_dict['is_batch_fitting'] = ['False']
+        content[params.data_id]['fit_params'] = param_dict
+
+    return content
 
 def enum(*sequential, **named):
     """Create an enumeration object from a list of strings"""

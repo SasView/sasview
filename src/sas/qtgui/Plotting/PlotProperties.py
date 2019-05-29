@@ -17,13 +17,16 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
                  legend=""):
         super(PlotProperties, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.setFixedSize(self.minimumSizeHint())
 
         self._parent = parent
         self._marker = marker if marker else 0
         self._color = color if color else 0
         self._legend = legend
-        self._markersize = marker_size if marker_size else 5
+        self._markersize = marker_size if marker_size else 3
         self.custom_color = False if isinstance(self._color, int) else True
 
         # Fill out the color combobox

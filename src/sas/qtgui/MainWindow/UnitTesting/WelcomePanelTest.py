@@ -36,7 +36,7 @@ class WelcomePanelTest(unittest.TestCase):
 
         self.assertIn("SasView", version.text())
         self.assertIn("Build:", version.text())
-        self.assertIn("UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO", version.text())
+        self.assertIn("UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and BAM", version.text())
        
 if __name__ == "__main__":
     unittest.main()

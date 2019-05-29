@@ -110,6 +110,9 @@ class InversionLogic(object):
             new_plot.id = IQ_SMEARED_LABEL
             new_plot.title = title
 
+        new_plot.symbol = 'Line'
+        new_plot.hide_error = True
+
         return new_plot
 
     def newPRPlot(self, out, pr, cov=None):
@@ -151,6 +154,13 @@ class InversionLogic(object):
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot
+
+    def add_errors(self, sigma=0.05):
+        """
+        Adds errors to data set is they are not available.
+        Uses  $\Delta y = \sigma | y |$.
+        """
+        self._data.dy = sigma * np.fabs(self._data.y)
 
     def computeDataRange(self):
         """

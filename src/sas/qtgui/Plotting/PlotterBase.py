@@ -1,4 +1,3 @@
-import pylab
 import numpy
 
 from PyQt5 import QtCore
@@ -9,8 +8,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib import rcParams
 
-DEFAULT_CMAP = pylab.cm.jet
+DEFAULT_CMAP = mpl.cm.jet
 from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -28,6 +29,9 @@ class PlotterBase(QtWidgets.QWidget):
         # Required for the communicator
         self.manager = manager
         self.quickplot = quickplot
+
+        # Set auto layout so x/y axis captions don't get cut off
+        rcParams.update({'figure.autolayout': True})
 
         #plt.style.use('ggplot')
         #plt.style.use('seaborn-darkgrid')
@@ -105,13 +109,18 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
         self.contextMenu = QtWidgets.QMenu(self)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        cid = self.canvas.mpl_connect('resize_event', self.onResize)
 
+        layout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
-            self.toolbar = NavigationToolbar(self.canvas, self)
-            layout.addWidget(self.toolbar)
+            # self.toolbar.show()
+            self.toolbar.hide() # hide for the time being
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
+        else:
+            self.toolbar.hide()
 
         self.setLayout(layout)
 
@@ -130,6 +139,16 @@ class PlotterBase(QtWidgets.QWidget):
         self._title = title
         # Set the object name to satisfy the Squish object picker
         self.canvas.setObjectName(title)
+
+    @property
+    def item(self):
+        ''' getter for this plot's QStandardItem '''
+        return self._item
+
+    @item.setter
+    def item(self, item=None):
+        ''' setter for this plot's QStandardItem '''
+        self._item = item
 
     @property
     def xLabel(self, xlabel=""):
@@ -203,12 +222,16 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage = self.contextMenu.addAction("Save Image")
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
+        #self.contextMenu.addSeparator()
+        #self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.contextMenu.addSeparator()
+
 
         # Define the callbacks
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+        #self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenu(self):
         """
@@ -221,6 +244,12 @@ class PlotterBase(QtWidgets.QWidget):
         Define context menu and associated actions for the quickplot MPL widget
         """
         raise NotImplementedError("Context menu method must be implemented in derived class.")
+
+    def onResize(self, event):
+        """
+        Redefine default resize event
+        """
+        pass
 
     def contextMenuEvent(self, event):
         """
@@ -356,6 +385,18 @@ class PlotterBase(QtWidgets.QWidget):
         # Notify the listeners about a new graph title
         self.manager.communicator.activeGraphName.emit((current_title, title))
 
+    def onToggleMenu(self):
+        """
+        Toggle navigation menu visibility in the chart
+        """
+        self.toolbar.hide()
+        # Current toolbar menu is too buggy.
+        # Comment out until we support 3.x, then recheck.
+        #if self.toolbar.isVisible():
+        #    self.toolbar.hide()
+        #else:
+        #    self.toolbar.show()
+
     def offset_graph(self):
         """
         Zoom and offset the graph to the last known settings
@@ -376,6 +417,7 @@ class PlotterBase(QtWidgets.QWidget):
             text_to_show = GuiUtils.retrieveData2d(plot_data)
         # Hardcoded sizes to enable full width rendering with default font
         self.txt_widget.resize(420,600)
+        self.txt_widget.clear()
 
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)

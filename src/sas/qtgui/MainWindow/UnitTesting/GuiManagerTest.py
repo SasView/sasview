@@ -52,7 +52,6 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
         self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
         self.assertIsInstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
-        self.assertEqual(self.manager.dockedFilesWidget.features(), QDockWidget.NoDockWidgetFeatures)
         self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), Qt.LeftDockWidgetArea)
 
         self.assertIsInstance(self.manager.logDockWidget, QDockWidget)
@@ -61,7 +60,7 @@ class GuiManagerTest(unittest.TestCase):
 
         self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
         self.assertIsInstance(self.manager.aboutWidget, AboutBox)
-        self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
+        #self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
 
     def skip_testLogging(self):
         """
@@ -147,8 +146,8 @@ class GuiManagerTest(unittest.TestCase):
         Tests the SasView website version polling
         """
         self.manager.processVersion = MagicMock()
-        version = {'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
-                   'version'     : '4.1.2',
+        version = {'version'     : '4.2.1',
+                   'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
                    'download_url': 'https://github.com/SasView/sasview/releases'}
         self.manager.checkUpdate()
 
@@ -250,22 +249,22 @@ class GuiManagerTest(unittest.TestCase):
         self.manager._workspace.show()
 
         # Check the initial state
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
         # Invoke action
         self.manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
-        self.assertFalse(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertTrue(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
         # Revert
         self.manager.actionHide_Toolbar()
 
         # Assure the original values are back
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
 
     #### HELP ####
@@ -312,7 +311,7 @@ class GuiManagerTest(unittest.TestCase):
 
         # Check if the window is actually opened.
         self.assertTrue(self.manager.ackWidget.isVisible())
-        self.assertIn("developers@sasview.org", self.manager.ackWidget.label.text())
+        self.assertIn("developers@sasview.org", self.manager.ackWidget.label_3.text())
 
     def testActionCheck_for_update(self):
         """

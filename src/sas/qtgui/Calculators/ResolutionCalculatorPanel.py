@@ -40,6 +40,9 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
     def __init__(self, parent=None):
         super(ResolutionCalculatorPanel, self).__init__()
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.manager = parent
 
         # New font to display angstrom symbol
@@ -463,7 +466,9 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 sample2detector_distance)
 
             detector_size = self.txtDetectorSize.text()
-            detector_size = self._string2list(detector_size)
+            det_size = self._string2list(detector_size)
+            # detector sizes must be ints. recast.
+            detector_size = [int(i) for i in det_size]
             self.resolution.set_detector_size(detector_size)
 
             detector_pix_size = self.txtDetectorPixSize.text()
@@ -516,15 +521,15 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             cal_res.addCallback(self.complete)
             cal_res.addErrback(self.calculateFailed)
 
-            # logging.info("Computation is in progress...")
             self.cmdCompute.setText('Wait...')
             self.cmdCompute.setEnabled(False)
         except:
             raise
 
     def calculateFailed(self, reason):
-        print("calculateFailed Failed with:\n", reason)
-        pass
+        self.cmdCompute.setText('Compute')
+        self.cmdCompute.setEnabled(True)
+        logging.error(str(reason))
 
     def complete(self, image):
         """
@@ -706,7 +711,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         """
         Create a template for 2D data
         """
-        self.plotter = Plotter2DWidget(self, quickplot=True)
+        self.plotter = Plotter2DWidget(self, manager=self.manager, quickplot=True)
         self.plotter.scale = 'linear'
         self.plotter.cmap = None
         layout = QtWidgets.QHBoxLayout()

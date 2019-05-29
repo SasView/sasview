@@ -1,9 +1,8 @@
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
-from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
-
 from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
+from sas.qtgui.Utilities import GuiUtils
 
 class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
     """
@@ -12,9 +11,13 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
     supporting simple highlighting.
     """
     modelModified = QtCore.pyqtSignal()
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, is_python=True):
         super(ModelEditor, self).__init__(parent)
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
+        self.is_python = is_python
 
         self.setupWidgets()
 
@@ -25,7 +28,13 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
         Set up dialog widgets.
         Here - just the highlighter connected to the text edit.
         """
-        self.highlight = PythonHighlighter(self.txtEditor.document())
+        # Weird import location - workaround for a bug in Sphinx choking on
+        # importing QSyntaxHighlighter
+        # DO NOT MOVE TO TOP
+        from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
+        self.highlight = PythonHighlighter(self.txtEditor.document(), is_python=self.is_python)
+
+        self.txtEditor.setFont(GuiUtils.getMonospaceFont())
 
     def addSignals(self):
         """

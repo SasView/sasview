@@ -4,6 +4,8 @@ from PyQt5 import QtWidgets
 
 from PyQt5 import QtSvg
 
+from sas.qtgui.Utilities import GuiUtils
+
 def new_load_qt(api_options):
     return QtCore, QtGui, QtSvg, 'pyqt'
 
@@ -33,6 +35,9 @@ class IPythonWidget(RichJupyterWidget):
         from qtconsole.inprocess import QtInProcessKernelManager
         from IPython.lib import guisupport
         app = guisupport.get_app_qt4()
+
+        font = GuiUtils.getMonospaceFont()
+        self.font = font
 
         # Create an in-process kernel
         kernel_manager = QtInProcessKernelManager()

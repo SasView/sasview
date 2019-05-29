@@ -23,12 +23,11 @@ import copy
 import logging
 import json
 import time
-from io import StringIO
+from io import BytesIO
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.Plottables import Plottable
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
 from sas.qtgui.Plotting.Plottables import Text
@@ -117,6 +116,8 @@ class DataManager(object):
         new_plot.is_data = True
         new_plot.path = path
         new_plot.list_group_id = []
+        # Assign the plot role to data
+        new_plot.plot_role = Data1D.ROLE_DATA
         ##post data to plot
         # plot data
         return new_plot
@@ -147,7 +148,7 @@ class DataManager(object):
 
     def add_data(self, data_list):
         """
-        receive a list of
+        receive a list of data items for storage
         """
         for id, data in data_list.items():
             if id  in self.stored_data:
@@ -367,7 +368,7 @@ class DataManager(object):
 
             # ndarray
             if isinstance(o, np.ndarray):
-                buffer = StringIO()
+                buffer = BytesIO()
                 np.save(buffer, o)
                 buffer.seek(0)
                 content = { 'data': buffer.read().decode('latin-1') }
@@ -434,7 +435,7 @@ class DataManager(object):
 
             # ndarray
             if cls == np.ndarray:
-                buffer = StringIO()
+                buffer = BytesIO()
                 buffer.write(data['data'].encode('latin-1'))
                 buffer.seek(0)
                 return np.load(buffer)

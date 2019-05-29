@@ -46,7 +46,7 @@ _acknowledgement_preamble_bullet4 =\
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
 _acknowledgement_citation = \
-'''M. Doucet et al. SasView Version 4.1.2, Zenodo, 10.5281/zenodo.825675'''
+'''M. Doucet et al. SasView Version 5.0'''
 
 _acknowledgement =  \
 '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
@@ -92,7 +92,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+_copyright = "(c) 2009 - 2019, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read

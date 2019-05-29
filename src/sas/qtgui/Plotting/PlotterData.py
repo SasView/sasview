@@ -16,6 +16,10 @@ from sas.sascalc.dataloader.data_info import Data2D as LoadData2D
 class Data1D(PlottableData1D, LoadData1D):
     """
     """
+    ROLE_DATA=0
+    ROLE_DEFAULT=1
+    ROLE_DELETABLE=2
+    ROLE_RESIDUAL=3
     def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
@@ -34,6 +38,12 @@ class Data1D(PlottableData1D, LoadData1D):
         self.ytransform = None
         self.title = ""
         self.scale = None
+        # plot_role:
+        # 0: data - no reload on param change
+        # 1: normal lifecycle (fit)
+        # 2: deletable on model change (Q(I), S(I)...)
+        # 3: separate chart on Show Plot (residuals)
+        self.plot_role = Data1D.ROLE_DEFAULT
         
     def copy_from_datainfo(self, data1d):
         """
@@ -183,6 +193,8 @@ class Data2D(PlottableData2D, LoadData2D):
         self.ytransform = None
         self.title = ""
         self.scale = None
+        # Always default
+        self.plot_role = Data1D.ROLE_DEFAULT
         
     def copy_from_datainfo(self, data2d):
         """

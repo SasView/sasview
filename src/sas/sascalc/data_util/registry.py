@@ -110,7 +110,8 @@ class ExtensionRegistry(object):
             result = []
             for L in loaders:
                 if L not in result: result.append(L)
-            loaders = L
+            loaders = result
+            #loaders = L
         # Raise an error if there are no matching extensions
         if len(loaders) == 0:
             raise ValueError("Unknown file type for "+path)

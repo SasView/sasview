@@ -1,0 +1,29 @@
+name: qt5_ubuntu
+channels:
+ - conda-forge
+dependencies:
+ - matplotlib=2.2.2
+ - scipy=1.1.0
+ - hdf5=1.10.1
+ - h5py=2.8.0
+ - ipython=6
+ - ipykernel=4.9
+ - jupyter
+ - twisted=18.4.0
+ - lxml=4.2.1
+ - sphinx=1.7.4
+ - cython=0.28.3
+ - pytest
+ - mako=1.0.7
+ - pyinstaller=3.3.1 
+ - pyqt>=5.9 # required for GTK themes to work correctly
+ - testpath=0.3.1
+ - numpy=1.14.3  # NEED TO DOWNGRADE NUMPY!!!
+# - pyopencl
+# - pocl
+ - pip:
+   - pytools==2018.4
+   - periodictable==1.5.0
+   - bumps==0.7.8
+   - xhtml2pdf==0.2.2
+   - qt5reactor==0.5

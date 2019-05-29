@@ -17,6 +17,11 @@ from distutils.core import Command
 import numpy as np
 from setuptools import Extension, setup
 
+try:
+    import tinycc.distutils
+except ImportError:
+    pass
+
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
     for line in fid:
@@ -191,15 +196,13 @@ class BuildSphinxCommand(Command):
         import build_sphinx
         build_sphinx.rebuild()
 
+_ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
 packages.append("sas")
 
 # sas module
-#package_dir["sas.sasgui"] = os.path.join("src", "sas", "sasgui")
-#packages.append("sas.sasgui")
-
 # qt module
 package_dir["sas.qtgui"] = os.path.join("src", "sas", "qtgui")
 packages.append("sas.qtgui")
@@ -213,21 +216,6 @@ package_dir["sas.sascalc.invariant"] = os.path.join(
     "src", "sas", "sascalc", "invariant")
 packages.extend(["sas.sascalc.invariant"])
 
-# sas.sasgui.guiframe
-# guiframe_path = os.path.join("src", "sas", "sasgui", "guiframe")
-# package_dir["sas.sasgui.guiframe"] = guiframe_path
-# package_dir["sas.sasgui.guiframe.local_perspectives"] = os.path.join(
-#     os.path.join(guiframe_path, "local_perspectives"))
-# package_data["sas.sasgui.guiframe"] = ['images/*', 'media/*']
-# packages.extend(
-#     ["sas.sasgui.guiframe", "sas.sasgui.guiframe.local_perspectives"])
-# # build local plugin
-# for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
-#     if d not in ['.svn', '__init__.py', '__init__.pyc']:
-#         package_name = "sas.sasgui.guiframe.local_perspectives." + d
-#         packages.append(package_name)
-#         package_dir[package_name] = os.path.join(
-#             guiframe_path, "local_perspectives", d)
 
 # sas.sascalc.dataloader
 package_dir["sas.sascalc.dataloader"] = os.path.join(
@@ -245,8 +233,8 @@ package_dir["sas.sascalc.calculator"] = os.path.join(
 packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
 ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                              sources=[
-                                 os.path.join(gen_dir, "sld2i_module.cpp"),
-                                 os.path.join(gen_dir, "sld2i.cpp"),
+                                 os.path.join(gen_dir, "sld2i_module.c"),
+                                 os.path.join(gen_dir, "sld2i.c"),
                                  os.path.join(gen_dir, "libfunc.c"),
                                  os.path.join(gen_dir, "librefl.c"),
                              ],
@@ -279,9 +267,11 @@ ext_modules.append(Extension("sas.sascalc.file_converter.core.bsl_loader",
                              sources=[os.path.join(mydir, "bsl_loader.c")],
                              include_dirs=[np.get_include()],
                              ))
+
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
     "src", "sas", "sascalc", "corfunc")
+
 packages.extend(["sas.sascalc.corfunc"])
 
 # sas.sascalc.fit
@@ -402,9 +392,10 @@ package_dir["sas.qtgui.Plotting.UI"] = os.path.join(
     "src", "sas", "qtgui", "Plotting", "UI")
 package_dir["sas.qtgui.Plotting.Slicers"] = os.path.join(
     "src", "sas", "qtgui", "Plotting", "Slicers")
-packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI", "sas.qtgui.Plotting.Slicers"])
-
-
+package_dir["sas.qtgui.Plotting.Masks"] = os.path.join(
+    "src", "sas", "qtgui", "Plotting", "Masks")
+packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
+                 "sas.qtgui.Plotting.Slicers", "sas.qtgui.Plotting.Masks"])
 
 # # Last of the sas.models
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")
@@ -463,9 +454,21 @@ package_data['sas.sasview'] = ['images/*',
                                'test/upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
+package_data['sas.qtgui'] = ['Calculators/UI/*',
+                             'MainWindow/UI/*',
+                             'Perspectives/Corfunc/UI/*',
+                             'Perspectives/Fitting/UI/*',
+                             'Perspectives/Invariant/UI/*',
+                             'Perspectives/Inversion/UI/*',
+                             'Plotting/UI/*',
+                             'Utilities/UI/*',
+                             'UI/*',
+                             'UI/res/*',
+                             ]
+packages.append("sas.qtgui")
 
 required = [
-    'bumps>=0.7.5.9', 'periodictable>=1.5.0',
+    'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml', 'h5py',
 
     # The following dependecies won't install automatically, so assume them
@@ -499,7 +502,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            "sasview = sas.run",
+            "sasview=sas.qtgui.MainWindow.MainWindow:run_sasview",
         ]
     },
     cmdclass={'build_ext': build_ext_subclass,

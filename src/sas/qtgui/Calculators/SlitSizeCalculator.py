@@ -24,6 +24,8 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
     def __init__(self, parent=None):
         super(SlitSizeCalculator, self).__init__()
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("Slit Size Calculator")
         self._parent = parent

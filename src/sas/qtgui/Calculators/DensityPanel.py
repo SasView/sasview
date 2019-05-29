@@ -47,6 +47,9 @@ class DensityPanel(QtWidgets.QDialog):
         self.mode = None
         self.manager = parent
         self.setupUi()
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
         self.setupModel()
         self.setupMapper()
 
@@ -54,8 +57,8 @@ class DensityPanel(QtWidgets.QDialog):
         self.ui = Ui_DensityPanel()
         self.ui.setupUi(self)
 
-        # no reason to have this widget resizable
-        self.setFixedSize(self.minimumSizeHint())
+        #self.setFixedSize(self.minimumSizeHint())
+        self.resize(self.minimumSizeHint())
 
         # set validators
         #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
@@ -79,6 +82,10 @@ class DensityPanel(QtWidgets.QDialog):
         self.model.setItem(MODEL.MASS_DENSITY     , QtGui.QStandardItem())
 
         self.model.dataChanged.connect(self.dataChanged)
+
+        self.ui.editMolarVolume.textEdited.connect(self.volumeChanged)
+        self.ui.editMassDensity.textEdited.connect(self.massChanged)
+        self.ui.editMolecularFormula.textEdited.connect(self.formulaChanged)
 
         self.modelReset()
 
@@ -111,6 +118,40 @@ class DensityPanel(QtWidgets.QDialog):
 
             elif index == MODEL.MASS_DENSITY and self.mode == MODES.DENSITY_TO_VOLUME:
                 self._updateVolume()
+
+    def volumeChanged(self, current_text):
+        try:
+            molarMass = float(toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text()))
+            molarVolume = float(current_text)
+
+            molarDensity = molarMass / molarVolume
+            molarDensity = formatNumber(molarDensity, high=True)
+            self.model.item(MODEL.MASS_DENSITY).setText(str(molarDensity))
+
+        except (ArithmeticError, ValueError):
+            self.model.item(MODEL.MASS_DENSITY).setText("")
+
+    def massChanged(self, current_text):
+        try:
+            molarMass = float(toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text()))
+            molarDensity = float(current_text)
+
+            molarVolume = molarMass / molarDensity
+            molarVolume = formatNumber(molarVolume, high=True)
+            self.model.item(MODEL.MOLAR_VOLUME).setText(str(molarVolume))
+
+        except (ArithmeticError, ValueError):
+            self.model.item(MODEL.MOLAR_VOLUME).setText("")
+
+    def formulaChanged(self, current_text):
+        try:
+            molarMass = toMolarMass(current_text)
+            # if this doesn't fail, update the model item for formula
+            # so related values can get recomputed
+            self.model.item(MODEL.MOLECULAR_FORMULA).setText(current_text)
+
+        except (ArithmeticError, ValueError):
+            self.model.item(MODEL.MOLAR_VOLUME).setText("")
 
     def setMode(self, mode):
         self.mode = mode

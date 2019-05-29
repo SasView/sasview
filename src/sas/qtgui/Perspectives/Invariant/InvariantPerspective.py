@@ -232,6 +232,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
         plot_data = GuiUtils.plotsFromCheckedItems(self._manager.filesWidget.model)
+        #self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
 
         self._manager.filesWidget.plotData(plot_data)
 
@@ -330,89 +331,105 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         if (calculation_failed):
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
-        else:
 
-            if self._low_extrapolate:
-                # for presentation in InvariantDetails
+        low_calculation_pass = True
+        high_calculation_pass = True
+        if self._low_extrapolate:
+            try:
                 qstar_low, qstar_low_err = inv.get_qstar_low()
-                extrapolated_data = inv.get_extra_data_low(self._low_points)
-                power_low = inv.get_extrapolation_power(range='low')
+            except Exception as ex:
+                low_calculation_pass = False
+                msg += str(ex)
+                logging.warning('Low-q calculation failed: {}'.format(msg))
+        if self._high_extrapolate:
+            try:
+                qstar_high, qstar_high_err = inv.get_qstar_high()
+            except Exception as ex:
+                high_calculation_pass = False
+                msg += str(ex)
+                logging.warning('High-q calculation failed: {}'.format(msg))
 
-                # Plot the chart
-                title = "Low-Q extrapolation"
 
-                # Convert the data into plottable
-                extrapolated_data = self._manager.createGuiData(extrapolated_data)
+        if self._low_extrapolate and low_calculation_pass:
+            extrapolated_data = inv.get_extra_data_low(self._low_points)
+            power_low = inv.get_extrapolation_power(range='low')
 
-                extrapolated_data.name = title
-                extrapolated_data.title = title
+            # Plot the chart
+            title = "Low-Q extrapolation"
 
-                # copy labels and units of axes for plotting
-                extrapolated_data._xaxis = temp_data._xaxis
-                extrapolated_data._xunit = temp_data._xunit
-                extrapolated_data._yaxis = temp_data._yaxis
-                extrapolated_data._yunit = temp_data._yunit
+            # Convert the data into plottable
+            extrapolated_data = self._manager.createGuiData(extrapolated_data)
 
-                # Add the plot to the model item
-                # This needs to run in the main thread
-                reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
+            extrapolated_data.name = title
+            extrapolated_data.title = title
+            extrapolated_data.symbol = "Line"
+            extrapolated_data.has_errors = False
+
+            # copy labels and units of axes for plotting
+            extrapolated_data._xaxis = temp_data._xaxis
+            extrapolated_data._xunit = temp_data._xunit
+            extrapolated_data._yaxis = temp_data._yaxis
+            extrapolated_data._yunit = temp_data._yunit
+
+            # Add the plot to the model item
+            # This needs to run in the main thread
+            reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
                                        self._model_item,
                                        extrapolated_data,
                                        title)
 
-            if self._high_extrapolate:
-                # for presentation in InvariantDetails
-                qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
+        if self._high_extrapolate and high_calculation_pass:
+            # for presentation in InvariantDetails
+            qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
 
-                if qmax_plot > Q_MAXIMUM:
-                    qmax_plot = Q_MAXIMUM
-                qstar_high, qstar_high_err = inv.get_qstar_high()
-                power_high = inv.get_extrapolation_power(range='high')
-                high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
+            if qmax_plot > Q_MAXIMUM:
+                qmax_plot = Q_MAXIMUM
+            power_high = inv.get_extrapolation_power(range='high')
+            high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
 
-                # Plot the chart
-                title = "High-Q extrapolation"
+            # Plot the chart
+            title = "High-Q extrapolation"
 
-                # Convert the data into plottable
-                high_out_data = self._manager.createGuiData(high_out_data)
-                high_out_data.name = title
-                high_out_data.title = title
+            # Convert the data into plottable
+            high_out_data = self._manager.createGuiData(high_out_data)
+            high_out_data.name = title
+            high_out_data.title = title
+            high_out_data.symbol = "Line"
+            high_out_data.has_errors = False
 
-                # copy labels and units of axes for plotting
-                high_out_data._xaxis = temp_data._xaxis
-                high_out_data._xunit = temp_data._xunit
-                high_out_data._yaxis = temp_data._yaxis
-                high_out_data._yunit = temp_data._yunit
+            # copy labels and units of axes for plotting
+            high_out_data._xaxis = temp_data._xaxis
+            high_out_data._xunit = temp_data._xunit
+            high_out_data._yaxis = temp_data._yaxis
+            high_out_data._yunit = temp_data._yunit
 
-                # Add the plot to the model item
-                # This needs to run in the main thread
-                reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
+            # Add the plot to the model item
+            # This needs to run in the main thread
+            reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
                                        self._model_item, high_out_data, title)
 
-            item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction)))
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% volume_fraction_error)))
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
-            if surface:
-                item = QtGui.QStandardItem(str(float('%.3g'% surface)))
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE, item)
-                item = QtGui.QStandardItem(str(float('%.3g'% surface_error)))
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_total)))
-            self.model.setItem(WIDGETS.W_INVARIANT, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_total_error)))
-            self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
+        if surface:
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
+                                                    surface_error)
 
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_low)))
-            self.model.setItem(WIDGETS.D_LOW_QSTAR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_low_err)))
-            self.model.setItem(WIDGETS.D_LOW_QSTAR_ERR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_high)))
-            self.model.setItem(WIDGETS.D_HIGH_QSTAR, item)
-            item = QtGui.QStandardItem(str(float('%.3g'% qstar_high_err)))
-            self.model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, item)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
+        return self.model
 
-            return self.model
+
+    def updateModelFromThread(self, widget, value):
+        """
+        Update the model in the main thread
+        """
+        item = QtGui.QStandardItem(str(float('%.3g' % value)))
+        self.model.setItem(widget, item)
 
     def title(self):
         """ Perspective name """
@@ -775,13 +792,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # plot loaded file
         if not isinstance(self._data, Data1D):
-            msg = "Error(s) occurred: Invariant cannot be computed with 2D data."
-            raise AttributeError(msg)
+            msg = "Invariant cannot be computed with 2D data."
+            raise ValueError(msg)
 
         try:
             filename = data.filename
         except:
-            msg = 'No filename'
+            msg = 'No filename chosen.'
             raise ValueError(msg)
         try:
             qmin = min(self._data.x)

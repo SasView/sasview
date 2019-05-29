@@ -12,7 +12,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtWidgets.QStyledItemDelegate, self).__init__()
+        super(ModelViewDelegate, self).__init__()
 
         # Main parameter table view columns
         self.param_error=-1
@@ -54,6 +54,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
+            doc.setDocumentMargin(1)
 
             # delete the original content
             options.text = ""
@@ -63,8 +64,15 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
 
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            rect = textRect.topLeft()
+            x = rect.x()
+            y = rect.y()
+            x += 3.0 # magic value for rendering nice display in the table
+            y += 2.0 # magic value for rendering nice display in the table
+            rect.setX(x)
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
@@ -86,6 +94,10 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         if index.column() in [self.param_property, self.param_error, self.param_unit]:
             # Set some columns uneditable
             return None
+        if index.column() in (self.param_min, self.param_max):
+            # Check if the edit role is set
+            if not (index.flags() & QtCore.Qt.ItemIsEditable):
+                return None
 
         return super(ModelViewDelegate, self).createEditor(widget, option, index)
 
@@ -116,10 +128,11 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtWidgets.QStyledItemDelegate, self).__init__()
+        super(PolyViewDelegate, self).__init__()
 
         self.poly_parameter = 0
         self.poly_pd = 1
+        self.poly_error = None
         self.poly_min = 2
         self.poly_max = 3
         self.poly_npts = 4
@@ -144,6 +157,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         self.poly_parameter = 0
         self.poly_pd = 1
+        self.poly_error = 2
         self.poly_min = 3
         self.poly_max = 4
         self.poly_npts = 5
@@ -171,7 +185,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.poly_min, self.poly_max):
+        if index.column() in (self.poly_pd, self.poly_min, self.poly_max):
             # Units - present in nice HTML
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
@@ -180,7 +194,8 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
-
+            current_font = painter.font()
+            doc.setDefaultFont(current_font)
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
@@ -191,10 +206,14 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
-
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+
+            rect = textRect.topLeft()
+            y = rect.y()
+            y += 5.0 # magic value for rendering nice display in the table
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
@@ -210,7 +229,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic constructor to allow for some globals
         """
-        super(QtWidgets.QStyledItemDelegate, self).__init__()
+        super(MagnetismViewDelegate, self).__init__()
 
         self.mag_parameter = 0
         self.mag_value = 1
@@ -249,7 +268,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.mag_min, self.mag_max, self.mag_unit):
+        if index.column() in (self.mag_value, self.mag_min, self.mag_max, self.mag_unit):
             # Units - present in nice HTML
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
@@ -258,7 +277,8 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
-
+            current_font = painter.font()
+            doc.setDefaultFont(current_font)
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
@@ -271,8 +291,12 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
 
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            rect = textRect.topLeft()
+            y = rect.y()
+            y += 6.0 # magic value for rendering nice display in the table
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()

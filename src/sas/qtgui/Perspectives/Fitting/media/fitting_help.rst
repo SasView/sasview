@@ -59,10 +59,60 @@ The graph will update dynamically as the parameter values are changed.
 .. TODO: uncomment after Category_Manager done
 .. You can decide your own model categorizations using the :ref:`Category_Manager`.
 
-Once you have selected a model you can read its help documentation by right clicking
-on the empty space in the parameter table.
+Once you have selected a model you can read its help documentation by clicking
+on the *Help* button.
+Additionally, right clicking on the empty space in the parameter table will display
+a short description of the model.
 
 .. image:: descr_fig.png
+
+
+.. _Interaction_and_Mixture_Models:
+
+Interaction Models
+^^^^^^^^^^^^^^^^^^
+
+Structure factor S(Q) models can be combined with many form factor P(Q) models
+in the other categories to generate what SasView calls "interaction models"
+(previously "product models"). The combination can be done by one of two
+methods, but how they behave is slightly different.
+
+The first, most straightforward, method is simply to use the S(Q) drop-down in
+the FitPage:
+
+.. figure:: p_and_s_buttons.png
+
+This example would then generate an interaction model with the following
+parameters:
+
+.. figure:: p_and_s_buttons_parameters.png
+
+The other method is to use the :ref:`Add/Multiply Models` tool under Fitting menu:
+
+.. figure:: p_and_s_sum_model.png
+
+This creates an interaction model with the following parameters:
+
+.. figure:: p_and_s_sum_model_parameters.png
+
+As can be seen, the second method has produced an interaction model with an
+extra parameter: *radius_effective*. This is the radial distance determining the
+range of the $S(Q)$ interaction and may, or may not, be the same as the
+*radius*, in this example, depending on the concentration of the system. In
+other systems, *radius_effective* may depend on the particle form (shape).
+SasView offers the flexibility to automatically constrain (tie) some of these
+parameters together so that, for example, *radius_effective* = *radius*. See
+:ref:`Add/Multiply Models`.
+
+Also see :ref:`Interaction_and_Mixture_Models` for further information.
+
+Mixture Models
+^^^^^^^^^^^^^^
+
+SasView "mixture models" (previously called "sum models") are summations of
+form factor models, or even of form factor models and an "interaction model"
+(see above), and are used to describe mixed-phase systems where the scattering
+is proportional to the volume fraction of each contributing phase.
 
 Show 1D/2D
 ^^^^^^^^^^
@@ -77,46 +127,41 @@ return to 1D fitting model, de-select the same checkbox.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. TODO: uncomment after Category_Manager done
-..
-  .. _Category_Manager:
+.. _Category_Manager:
 
-  Category Manager
-  ----------------
+Category Manager
+----------------
 
-  To change the model categorizations, either choose *Category Manager* from the
-  *View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
+To change the model categorizations, either choose *Category Manager* from the
+*View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
 
-  .. image:: cat_fig0.png
+.. image:: cat_fig0.png
 
-  The categorization of all models except the user supplied Plugin Models can be
-  reassigned, added to, and removed using *Category Manager*. Models can also be
-  hidden from view in the drop-down menus.
+The categorization of all models except the user supplied Plugin Models can be
+reassigned, added to, and removed using *Category Manager*. Models can also be
+hidden from view in the drop-down menus.
 
-  .. image:: cat_fig1.png
+.. image:: cat_fig1.png
 
-  Changing category
-  ^^^^^^^^^^^^^^^^^
+Changing category
+^^^^^^^^^^^^^^^^^
 
-  To change category, highlight a model in the list by left-clicking on its entry
-  and then click the *Modify* button. Use the *Change Category* panel that appears
-  to make the required changes.
+To change category, highlight a model in the list by left-clicking on its entry
+and then click the *Modify* button. Use the *Change Category* panel that appears
+to make the required changes.
 
-  .. image:: cat_fig2.png
+.. image:: cat_fig2.png
 
-  To create a category for the selected model, click the *Add* button. In order
-  to delete a category, select the category name and click the *Remove Selected*
-  button. Then click *Done*.
+To create a category for the selected model, click the *Add* button. In order
+to delete a category, select the category name and click the *Remove*
+button. Then click *OK*.
 
-  Showing/hiding models
-  ^^^^^^^^^^^^^^^^^^^^^
+Showing/hiding models
+^^^^^^^^^^^^^^^^^^^^^
 
-  Use the *Enable All / Disable All* buttons and the check boxes beside each model
-  to select the models to show/hide. To apply the selection, click *Ok*. Otherwise
-  click *Cancel*.
+Use the *Enable / Disable All* buttons and the check boxes beside each model
+to select the models to show/hide. To apply the selection, click *OK*.
 
-  *NB: It may be necessary to change to a different category and then back again*
-  *before any changes take effect.*
 ..
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -124,7 +169,7 @@ Model Functions
 ---------------
 
 For a complete list of all the library models available in SasView, see
-the `Model Documentation <../../../index.html>`_ .
+the `Model Documentation <models/index.html>`_ .
 
 It is also possible to add your own models.
 
@@ -142,8 +187,8 @@ There are essentially three ways to generate new fitting models for SasView:
 *  By copying/editing an existing model (this can include models generated by
    the New Plugin Model* dialog) in the :ref:`Python_shell` or
    :ref:`Plugin_Editor` (suitable for all use cases)
-*  By writing a model from scratch outside of SasView (only recommended for code
-   monkeys!)
+*  By writing a model from scratch outside of SasView (only recommended for 
+   experienced Python users)
 
 Please read the guidance on :ref:`Writing_a_Plugin` before proceeding.
 
@@ -189,7 +234,7 @@ not (eg, scattering length densities).
 A model file generated by this option can be viewed and further modified using
 the :ref:`Model_Editor`.
 
-**SasView version 4.2** made it possible to specify whether a plugin created with
+It possible to specify whether a plugin created with
 the *New Plugin Model* dialog is actually a form factor P(Q) or a structure factor
 S(Q). To do this, simply add one or other of the following lines under the *import*
 statements.
@@ -220,7 +265,93 @@ Such a plugin should then be available in the S(Q) drop-down box on a FitPage (o
 a P(Q) model has been selected).
 
 
-.. Model_Editor:
+.. _Add/Multiply Models:
+
+Add \ Multiply Models
+^^^^^^^^^^^^^^^^^^^
+
+Choosing the *Add/Multiply models* item from the *Fitting* menu
+
+.. image:: sum_multi_menu.png
+
+displays the *Easy Add/Multiply Editor* dialog.
+
+.. image:: sum_model.png
+
+This option creates a custom Plugin Model of the form::
+
+     Plugin Model = scale_factor * {(scale_1 * model_1) +/- (scale_2 * model_2)} + background
+
+or::
+
+     Plugin Model = scale_factor * (model1 * model2) + background
+
+In the *Easy Add/Multiply Editor* give the new model a function name and brief
+description (to appear under the *Details* button on the *FitPage*). Then select
+two existing models, as p1 and p2, and the required operator, '+' or '*' between
+them. Finally, click the *Apply* button to generate and test the model and then click *Close*.
+
+Any changes to a plugin model generated in this way only become effective *after* it is re-selected
+from the plugin models drop-down menu on the FitPage. If the model is not listed you can force a
+recompilation of the plugins by selecting *Fitting* > *Plugin Model Operations* > *Load Plugin Models*.
+
+**SasView version 4.2** introduced a much simplified and more extensible structure for plugin models
+generated through the Easy Sum/Multi Editor. For example, the code for a combination of a sphere model
+with a power law model now looks like this::
+
+     from sasmodels.core import load_model_info
+     from sasmodels.sasview_model import make_model_from_info
+
+     model_info = load_model_info('sphere+power_law')
+     model_info.name = 'MyPluginModel'
+     model_info.description = 'sphere + power_law'
+     Model = make_model_from_info(model_info)
+
+To change the models or operators contributing to this plugin it is only necessary to edit the string
+in the brackets after *load_model_info*, though it would also be a good idea to update the model name
+and description too!!!
+
+The model specification string can handle multiple models and combinations of operators (+ or *) which
+are processed according to normal conventions. Thus 'model1+model2*model3' would be valid and would
+multiply model2 by model3 before adding model1. In this example, parameters in the *FitPage* would be
+prefixed A (for model2), B (for model3) and C (for model1). Whilst this might appear a little
+confusing, unless you were creating a plugin model from multiple instances of the same model the parameter
+assignments ought to be obvious when you load the plugin.
+
+If you need to include another plugin model in the model specification string, just prefix the name of
+that model with *custom*. For instance::
+
+     sphere+custom.MyPluginModel
+
+This streamlined approach to building complex plugin models from existing 
+library models, or models available on the *Model Marketplace*, also permits
+the creation of P(Q)*\S(Q) plugin models, something that was not possible in
+earlier versions of SasView. Also see :ref:`Interaction_and_Mixture_Models`
+above.
+
+.. note::
+
+   **Interaction Models**
+   
+   When the *Easy Sum/Multi Editor* creates a P(Q)*\S(Q) model it will use
+   the * symbol like this::
+
+     sphere*hardsphere
+
+   However, it is probably advisable to edit the model file and use the @
+   symbol instead, for example::
+
+     sphere@hardsphere
+
+   This is because * and @ confer different behaviour on the model
+
+   *  *with @* - the radius and volume fraction in the S(Q) model are
+      constrained to have the *same* values as the radius and volume fraction
+      in the P(Q) model.
+   *  *with ** - the radii and volume fractions in the P(Q) and S(Q) models are
+      unconstrained. 
+
+.. _Model_Editor:
 
 Model Editor
 ^^^^^^^^^^^^
@@ -391,28 +522,29 @@ To return to including all data in the fit, click the *Reset* button.
 
 ..
 
-  Shortcuts
-  ---------
+Shortcuts
+---------
 
-  Copy/Paste Parameters
-  ^^^^^^^^^^^^^^^^^^^^^
+Copy/Paste Parameters
+^^^^^^^^^^^^^^^^^^^^^
 
-  It is possible to copy the parameters from one *Fit Page* and to paste them into
-  another *Fit Page* using the same model.
+It is possible to copy the parameters from one *Fit Page* and to paste them into
+another *Fit Page* using the same model.
 
-  To *copy* parameters, either:
+To *copy* parameters, either:
 
-  *  Select *Edit -> Copy Params* from the menu bar, or
-  *  Use Ctrl(Cmd on Mac) + Left Mouse Click on the *Fit Page*.
+*  Select *Edit -> Copy Params* from the menu bar, or
+*  Use Ctrl(Cmd on Mac) + Left Mouse Click on the *Fit Page*.
 
-  To *paste* parameters, either:
+To *paste* parameters, either:
 
-  *  Select *Edit -> Paste Params* from the menu bar, or
-  *  Use Ctrl(Cmd on Mac) + Shift + Left-click on the *Fit Page*.
+*  Select *Edit -> Paste Params* from the menu bar, or
+*  Use Ctrl(Cmd on Mac) + Shift + Left-click on the *Fit Page*.
 
-  If either operation is successful a message will appear in the info line at the
-  bottom of the SasView window.
+If either operation is successful a message will appear in the info line at the
+bottom of the SasView window.
 
+  ..
   Bookmark
   ^^^^^^^^
 
@@ -498,8 +630,8 @@ initially.
 Simultaneous Fit Mode
 ---------------------
 
-*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
-*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
+*NB: Before proceeding, ensure that the Batch Mode check button at the bottom of*
+*the Data Explorer is unchecked (see the section* :ref:`Loading_data` *).*
 
 This mode is an extension of the :ref:`Single_Fit_Mode` that fits two or more data
 sets *to the same model* simultaneously. If necessary it is possible to constrain
@@ -539,59 +671,57 @@ them in the first place!).
 
 .. image:: constraint_1.png
 
-To tie parameters between the data sets with constraints, select the data sets and right click.
-From the menu choose *Mutual constraint of parameters in selected models*
+..
+  To tie parameters between the data sets with constraints, select the data sets and right click.
+  From the menu choose *Mutual constraint of parameters in selected models*
 
-.. image:: constraint_2.png
+  .. image:: constraint_menu.png
 
-When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
-button on the individual *FitPage*'s.
+  When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
+  button on the individual *FitPage*'s.
 
 Simultaneous Fits without Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The results of the model-fitting will be returned to each of the individual
-*FitPage*'s.
-
-Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+*FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
 Simultaneous Fits with Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the *Const. & Simul. Fit* page select two data sets which are to be constrained.
-Right clicking in the *Source choice for simultaneous fitting* area will bring up
-the context menu:
+In the *Const. & Simul. Fit* page make sure that at least two fitpages are present.
+Then, click the *Add constraints* button
 
-.. image:: constraint_2.png
+.. image:: add_constraint.png
+
+Alternatively, right clicking on two selected fitpages in the
+*Source choice for simultaneous fitting* area will bring up the context menu:
+
+.. image:: constraint_menu.png
 
 Here you can choose datasets for fitting and define constraints between parameters in
 both datasets.
 
-Selecting this option will bring up the *Complex Constraint* dialog.
+Clicking the *Add constraints* button or choosing the *Mutual constraint of parameters
+in selected models...* option will bring up the *Complex Constraint* dialog.
 
 .. image:: complex_constraint.png
 
 Constraints will generally be of the form
 
-  Mi Parameter1 = Mj.Parameter1
+  Mi:Parameter1 = Mj.Parameter1
 
 however the text box after the '=' sign can be used to adjust this
 relationship; for example
 
-  Mi Parameter1 = scalar \* Mj.Parameter1
+  Mi:Parameter1 = scalar \* Mj.Parameter1
 
 A 'free-form' constraint box is also provided.
 
 Many constraints can be entered for a single fit.
 
 The results of the model-fitting will be returned to each of the individual
-*FitPage*'s.
-
-Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+*FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -600,8 +730,8 @@ bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
 Batch Fit Mode
 --------------
 
-*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
-*the Data Explorer is checked (see the section* :ref:`Loading_data` *). The Batch*
+*NB: Before proceeding, ensure that the Batch Mode check button at the bottom of*
+*the Data Explorer is unchecked (see the section* :ref:`Loading_data` *). The Batch*
 *Mode button will be used later on!*
 
 This mode *sequentially* fits two or more data sets *to the same model*. Unlike in
@@ -619,12 +749,12 @@ available first (see* :ref:`Adding_your_own_models` *).*
 Method
 ^^^^^^
 
-Now *Select All Data* in the *Data Explorer*, check the *Batch Mode* radio button
+Now *Select All Data* in the *Data Explorer*, check the *Batch Mode* check button
 at the bottom of that panel and *Send To Fitting*. A *BatchPage* will be created.
 
 .. image:: batch_button_area.png
 
-*NB: The Batch Page can also be created by checking the Batch Mode radio button*
+*NB: The Batch Page can also be created by checking the Batch Mode check button*
 *and selecting New Fit Page under Fitting in the menu bar.*
 
 Using the drop-down menus in the *BatchPage*, now set up the *same* data set
@@ -669,6 +799,10 @@ are gradually changing. Do not use chain fitting on disparate data sets.
 
 To use chain fitting, select *Chain Fitting* under *Fitting* in the menu bar. It
 toggles on/off, so selecting it again will switch back to normal batch fitting.
+
+To choose the order of the fitpages in the fitting process, drag and drop rows in the
+*Source choice for simultaneous fitting* table. The order of the table determines
+the order of the chain fitting performed.
 
 .. _Grid_Window:
 
@@ -804,6 +938,9 @@ Fitting with the following caveats:
    second and later *BatchPage* s that have the same name as a parameter in the
    first will show up allowing for plotting of that parameter across the
    models. The other parameters will not be available in the grid.
+  To choose the order of the fitpages in the fitting process, drag and drop rows in the
+  *Source choice for simultaneous fitting* table. 
+
 .. note::
    a corralary of the above is that currently models created as a sum|multiply
    model will not work as desired because the generated model parameters have a
@@ -829,4 +966,4 @@ Fitting with the following caveats:
 ..
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Piotr Rozyczko, 18 May 2018
+.. note::  This help document was last changed by Piotr Rozyczko, 10 May 2019

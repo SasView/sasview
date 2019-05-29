@@ -2,8 +2,11 @@ import sys
 import time
 import copy
 import traceback
+import logging
 
 from sas.sascalc.data_util.calcthread import CalcThread
+
+logger = logging.getLogger(__name__)
 
 def map_getattr(classInstance, classFunc, *args):
     """
@@ -92,6 +95,7 @@ class FitThread(CalcThread):
             if self.handler is not None:
                 self.handler.stop(msg=msg)
         except Exception as ex:
+            logger.error("Fitting failed: %s", traceback.format_exc())
             # print "ERROR IN FIT THREAD: ", traceback.format_exc()
             if self.handler is not None:
                 self.handler.error(msg=str(ex))

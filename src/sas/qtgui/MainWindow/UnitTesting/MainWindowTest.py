@@ -46,15 +46,14 @@ class MainWindowTest(unittest.TestCase):
         tmp_main = MainSasViewWindow(None)
         tmp_main.showMaximized()
         # See that only one subwindow is up
-        self.assertEqual(len(tmp_main.workspace.subWindowList()), 1)
+        self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
         # and that the subwindow is the fitting perspective
         self.assertIsInstance(tmp_main.workspace.subWindowList()[0].widget(),
                               FittingPerspective.FittingWindow)
         # Show the message widget
         tmp_main.guiManager.showWelcomeMessage()
         # Assure it is visible and a part of the MdiArea
-        self.assertTrue(tmp_main.guiManager.welcomePanel.isVisible())
-        self.assertEqual(len(tmp_main.workspace.subWindowList()), 2)
+        self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
 
         tmp_main.close()
 

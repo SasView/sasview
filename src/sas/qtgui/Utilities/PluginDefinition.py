@@ -3,7 +3,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
-from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
+from sas.qtgui.Utilities import GuiUtils
 
 # txtName
 # txtDescription
@@ -30,17 +30,19 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         self.parameter_dict = {}
         self.pd_parameter_dict = {}
 
-        # Initialize signals
-        self.addSignals()
-
         # Initialize widgets
         self.addWidgets()
 
-    def addWidgets(self):
+        # Wait for all widgets to finish processing
+        QtWidgets.QApplication.processEvents()
+
+        # Initialize signals
+        self.addSignals()
+
+    def addTooltip(self):
         """
-        Initialize various widgets in the dialog
+        Add the default tooltip to the text field
         """
-        # Set the tooltip
         hint_function = "#Example:\n\n"
         hint_function += "if x <= 0:\n"
         hint_function += "    y = A + B\n"
@@ -48,6 +50,13 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         hint_function += "    y = A + B * cos(2 * pi * x)\n"
         hint_function += "return y\n"
         self.txtFunction.setToolTip(hint_function)
+
+    def addWidgets(self):
+        """
+        Initialize various widgets in the dialog
+        """
+        self.addTooltip()
+
         # Initial text in the function table
         text = \
 """y = x
@@ -55,12 +64,17 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 return y
 """
         self.txtFunction.insertPlainText(text)
+        self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
         rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
 
         txt_validator = QtGui.QRegExpValidator(rx)
         self.txtName.setValidator(txt_validator)
+        # Weird import location - workaround for a bug in Sphinx choking on
+        # importing QSyntaxHighlighter
+        # DO NOT MOVE TO TOP
+        from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
         self.highlight = PythonHighlighter(self.txtFunction.document())
 
     def initializeModel(self):
@@ -150,8 +164,11 @@ return y
         """
         # keep in mind that this is called every time the text changes.
         # mind the performance!
-        self.model['text'] = self.txtFunction.toPlainText().lstrip().rstrip()
-        self.modelModified.emit()
+        #self.addTooltip()
+        new_text = self.txtFunction.toPlainText().lstrip().rstrip()
+        if new_text != self.model['text']:
+            self.model['text'] = new_text
+            self.modelModified.emit()
 
     def onOverwrite(self):
         """

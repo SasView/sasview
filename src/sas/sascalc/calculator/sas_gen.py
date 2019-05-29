@@ -117,7 +117,7 @@ class GenSAS(BaseComponent):
         """
         self.is_avg = is_avg
 
-    def _gen(self, x, y, i):
+    def _gen(self, qx, qy):
         """
         Evaluate the function
         :Param x: array of x-values
@@ -128,26 +128,37 @@ class GenSAS(BaseComponent):
         pos_x = self.data_x
         pos_y = self.data_y
         pos_z = self.data_z
-        len_x = len(pos_x)
         if self.is_avg is None:
-            len_x *= -1
             pos_x, pos_y, pos_z = transform_center(pos_x, pos_y, pos_z)
-        len_q = len(x)
         sldn = copy.deepcopy(self.data_sldn)
         sldn -= self.params['solvent_SLD']
-        model = mod.new_GenI(len_x, pos_x, pos_y, pos_z,
-                             sldn, self.data_mx, self.data_my,
-                             self.data_mz, self.data_vol,
-                             self.params['Up_frac_in'],
-                             self.params['Up_frac_out'],
-                             self.params['Up_theta'])
-        if y == []:
-            mod.genicom(model, len_q, x, i)
+        # **** WARNING **** new_GenI holds pointers to numpy vectors
+        # be sure that they are contiguous double precision arrays and make 
+        # sure the GC doesn't eat them before genicom is called.
+        # TODO: rewrite so that the parameters are passed directly to genicom
+        args = (
+            (1 if self.is_avg else 0),
+            pos_x, pos_y, pos_z,
+            sldn, self.data_mx, self.data_my,
+            self.data_mz, self.data_vol,
+            self.params['Up_frac_in'],
+            self.params['Up_frac_out'],
+            self.params['Up_theta'])
+        model = mod.new_GenI(*args)
+        if len(qy):
+            qx, qy = _vec(qx), _vec(qy)
+            I_out = np.empty_like(qx)
+            #print("npoints", qx.shape, "npixels", pos_x.shape)
+            mod.genicomXY(model, qx, qy, I_out)
+            #print("I_out after", I_out)
         else:
-            mod.genicomXY(model, len_q, x, y, i)
+            qx = _vec(qx)
+            I_out = np.empty_like(qx)
+            mod.genicom(model, qx, I_out)
         vol_correction = self.data_total_volume / self.params['total_volume']
-        return  self.params['scale'] * vol_correction * i + \
-                        self.params['background']
+        result = (self.params['scale'] * vol_correction * I_out
+                  + self.params['background'])
+        return result
 
     def set_sld_data(self, sld_data=None):
         """
@@ -155,14 +166,14 @@ class GenSAS(BaseComponent):
         """
         self.sld_data = sld_data
         self.data_pos_unit = sld_data.pos_unit
-        self.data_x = sld_data.pos_x
-        self.data_y = sld_data.pos_y
-        self.data_z = sld_data.pos_z
-        self.data_sldn = sld_data.sld_n
-        self.data_mx = sld_data.sld_mx
-        self.data_my = sld_data.sld_my
-        self.data_mz = sld_data.sld_mz
-        self.data_vol = sld_data.vol_pix
+        self.data_x = _vec(sld_data.pos_x)
+        self.data_y = _vec(sld_data.pos_y)
+        self.data_z = _vec(sld_data.pos_z)
+        self.data_sldn = _vec(sld_data.sld_n)
+        self.data_mx = _vec(sld_data.sld_mx)
+        self.data_my = _vec(sld_data.sld_my)
+        self.data_mz = _vec(sld_data.sld_mz)
+        self.data_vol = _vec(sld_data.vol_pix)
         self.data_total_volume = sum(sld_data.vol_pix)
         self.params['total_volume'] = sum(sld_data.vol_pix)
 
@@ -179,13 +190,12 @@ class GenSAS(BaseComponent):
         :param x: simple value
         :return: (I value)
         """
-        if x.__class__.__name__ == 'list':
+        if isinstance(x, list):
             if len(x[1]) > 0:
                 msg = "Not a 1D."
                 raise ValueError(msg)
-            i_out = np.zeros_like(x[0])
             # 1D I is found at y =0 in the 2D pattern
-            out = self._gen(x[0], [], i_out)
+            out = self._gen(x[0], [])
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
@@ -198,10 +208,8 @@ class GenSAS(BaseComponent):
         :return: I value
         :Use this runXY() for the computation
         """
-        if x.__class__.__name__ == 'list':
-            i_out = np.zeros_like(x[0])
-            out = self._gen(x[0], x[1], i_out)
-            return out
+        if isinstance(x, list):
+            return self._gen(x[0], x[1])
         else:
             msg = "Q must be given as list of qx's and qy's"
             raise ValueError(msg)
@@ -213,16 +221,15 @@ class GenSAS(BaseComponent):
         :param qdist: ndarray of scalar q-values (for 1D) or list [qx,qy]
                       where qx,qy are 1D ndarrays (for 2D).
         """
-        if qdist.__class__.__name__ == 'list':
-            if len(qdist[1]) < 1:
-                out = self.run(qdist)
-            else:
-                out = self.runXY(qdist)
-            return out
+        if isinstance(qdist, list):
+            return self.run(qdist) if len(qdist[1]) < 1 else self.runXY(qdist)
         else:
             mesg = "evalDistribution is expecting an ndarray of "
             mesg += "a list [qx,qy] where qx,qy are arrays."
             raise RuntimeError(mesg)
+
+def _vec(v):
+    return np.ascontiguousarray(v, 'd')
 
 class OMF2SLD(object):
     """
@@ -296,8 +303,8 @@ class OMF2SLD(object):
                 z_dir2 = ((self.pos_z - z_c / 2.0) / z_r)
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
-            except Exception:
-                logger.error(sys.exc_value)
+            except Exception as exc:
+                logger.error(exc)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
@@ -592,8 +599,8 @@ class PDBReader(object):
                         x_lines.append(x_line)
                         y_lines.append(y_line)
                         z_lines.append(z_line)
-                except Exception:
-                    logger.error(sys.exc_value)
+                except Exception as exc:
+                    logger.error(exc)
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
@@ -683,11 +690,11 @@ class SLDReader(object):
                         try:
                             _vol_pix = float(toks[7])
                             vol_pix = np.append(vol_pix, _vol_pix)
-                        except Exception:
+                        except Exception as exc:
                             vol_pix = None
-                    except Exception:
+                    except Exception as exc:
                         # Skip non-data lines
-                        logger.error(sys.exc_value)
+                        logger.error(exc)
             output = MagSLD(pos_x, pos_y, pos_z, sld_n,
                             sld_mx, sld_my, sld_mz)
             output.filename = os.path.basename(path)
@@ -1040,25 +1047,25 @@ class MagSLD(object):
         self.line_y = line_y
         self.line_z = line_z
 
+def _get_data_path(*path_parts):
+    from os.path import realpath, join as joinpath, dirname, abspath
+    # in sas/sascalc/calculator;  want sas/sasview/test
+    return joinpath(dirname(realpath(__file__)),
+                    '..', '..', 'sasview', 'test', *path_parts)
+
 def test_load():
     """
         Test code
     """
     from mpl_toolkits.mplot3d import Axes3D
-    current_dir = os.path.abspath(os.path.curdir)
-    print(current_dir)
-    for i in range(6):
-        current_dir, _ = os.path.split(current_dir)
-        tfile = os.path.join(current_dir, "test", "CoreXY_ShellZ.txt")
-        ofile = os.path.join(current_dir, "test", "A_Raw_Example-1.omf")
-        if os.path.isfile(tfile):
-            tfpath = tfile
-            ofpath = ofile
-            break
+    tfpath = _get_data_path("1d_data", "CoreXY_ShellZ.txt")
+    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    if not os.path.isfile(tfpath) or not os.path.isfile(ofpath):
+        raise ValueError("file(s) not found: %r, %r"%(tfpath, ofpath))
     reader = SLDReader()
     oreader = OMFReader()
-    output = decode(reader.read(tfpath))
-    ooutput = decode(oreader.read(ofpath))
+    output = reader.read(tfpath)
+    ooutput = oreader.read(ofpath)
     foutput = OMF2SLD()
     foutput.set_data(ooutput)
 
@@ -1087,31 +1094,35 @@ def test_load():
     colors = np.column_stack((color_x, color_y, color_z))
     plt.show()
 
+def test_save():
+    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    if not os.path.isfile(ofpath):
+        raise ValueError("file(s) not found: %r"%(ofpath,))
+    oreader = OMFReader()
+    omfdata = oreader.read(ofpath)
+    omf2sld = OMF2SLD()
+    omf2sld.set_data(omfdata)
+    writer = SLDReader()
+    writer.write("out.txt", omf2sld.output)
+
 def test():
     """
         Test code
     """
-    current_dir = os.path.abspath(os.path.curdir)
-    for i in range(3):
-        current_dir, _ = os.path.split(current_dir)
-        ofile = os.path.join(current_dir, "test", "A_Raw_Example-1.omf")
-        if os.path.isfile(ofile):
-            ofpath = ofile
-            break
+    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    if not os.path.isfile(ofpath):
+        raise ValueError("file(s) not found: %r"%(ofpath,))
     oreader = OMFReader()
-    ooutput = decode(oreader.read(ofpath))
-    foutput = OMF2SLD()
-    foutput.set_data(ooutput)
-    writer = SLDReader()
-    writer.write(os.path.join(os.path.dirname(ofpath), "out.txt"),
-                 foutput.output)
+    omfdata = oreader.read(ofpath)
+    omf2sld = OMF2SLD()
+    omf2sld.set_data(omfdata)
     model = GenSAS()
-    model.set_sld_data(foutput.output)
-    x = np.arange(1000)/10000. + 1e-5
-    y = np.arange(1000)/10000. + 1e-5
-    i = np.zeros(1000)
-    model.runXY([x, y, i])
+    model.set_sld_data(omf2sld.output)
+    x = np.linspace(0, 0.1, 11)[1:]
+    return model.runXY([x, x])
 
 if __name__ == "__main__":
+    #test_load()
+    #test_save()
+    #print(test())
     test()
-    test_load()
