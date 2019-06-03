@@ -1375,7 +1375,7 @@ def readProjectFromSVS(filepath):
     def collector(state=None, datainfo=None, format=None):
         if state is not None:
             state_svs.append(state)
-    state_reader = Reader(callback=collector)
+    state_reader = Reader(call_back=collector)
     data_svs = state_reader.read(filepath)
 
     if isinstance(temp, list) and isinstance(state_svs, list):
