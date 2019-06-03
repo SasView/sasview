@@ -308,7 +308,13 @@ class GuiUtilsTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(path))
         with open(path,'r') as out:
             data_read = out.read()
-            self.assertEqual("<X>   <Y>\n1  10\n2  11\n3  12\n", data_read)
+            expected = \
+            "<X>                    <Y>\n"+\
+            "1.000000000000000e+00  1.000000000000000e+01\n" +\
+            "2.000000000000000e+00  1.100000000000000e+01\n" +\
+            "3.000000000000000e+00  1.200000000000000e+01\n"
+
+            self.assertEqual(expected, data_read)
 
         if os.path.isfile(path):
             os.remove(path)
@@ -320,10 +326,10 @@ class GuiUtilsTest(unittest.TestCase):
         onTXTSave(data, path)
         with open(path,'r') as out:
             data_read = out.read()
-            self.assertIn("<X>   <Y>   <dY>   <dX>\n", data_read)
-            self.assertIn("1  10  0.1  0.1\n", data_read)
-            self.assertIn("2  11  0.2  0.2\n", data_read)
-            self.assertIn("3  12  0.3  0.3\n", data_read)
+            self.assertIn("<X>                    <Y>                    <dY>                    <dX>\n", data_read)
+            self.assertIn("1.000000000000000e+00  1.000000000000000e+01  1.000000000000000e-01  1.000000000000000e-01\n", data_read)
+            self.assertIn("2.000000000000000e+00  1.100000000000000e+01  2.000000000000000e-01  2.000000000000000e-01\n", data_read)
+            self.assertIn("3.000000000000000e+00  1.200000000000000e+01  3.000000000000000e-01  3.000000000000000e-01\n", data_read)
 
         if os.path.isfile(path):
             os.remove(path)

@@ -9,6 +9,36 @@ Release Notes
 Features
 ========
 
+New in Version 5.0
+--------------------
+This is a new version of SasView featuring new and enhanced GUI, back-end calculations, GUI separation, optimization of calculations and other improvements. This release also includes beta (decoupling) approximation for intensity calculation.
+The release is based on Python 3 and Qt5/PyQt5.
+We recommend that you avoid using installation folder paths which contain spaces, non-Latin characters or characters not available on a standard keyboard.
+
+Changes/Improvements from 5.0.beta2
+^^^^^^^^^^
+* Beta (decoupling) approximation has been introduced
+* Stop fit button added to Constrained and Simultaneous Fitting
+* Plotting has been improved
+* Volume fraction naming conflicts has been resolved
+* SLD calculator user interface has been improved
+* Fit Options tab has been improved
+* Windows installer path specification has been resolved
+* Copy parameters function has been fixed
+* Save/Load Project functionality has been improved
+
+Documentation
+^^^^^^^^^^^^^
+* Documentation for Constrained and Simultaneous Fitting has been considerably reworked.
+* Tutorials have been adapted to match 5.0 interface
+
+Known Issues
+^^^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+
+[sasview](https://github.com/SasView/sasview/milestone/9)
+
+
 New in Version 4.2.0
 --------------------
 This release heralds many improvements and a host of bug fixes, along with
@@ -125,7 +155,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: “report button” followed by “save” makes an empty pdf file???
+* Fixes # 818: ï¿½report buttonï¿½ followed by ï¿½saveï¿½ makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
