@@ -65,7 +65,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
         self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
         self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
-
+        self.communicate.SaveFitParamsSignal.connect(self.onParamSave)
 
         # Perspective window not allowed to close by default
         self._allow_close = False
@@ -175,6 +175,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         Pass the update parameters to the current fit page
         """
         self.currentTab.createPageForParameters(parameters)
+
+    def onParamSave(self):
+        self.currentTab.onCopyToClipboard("Save")
 
     def closeEvent(self, event):
         """

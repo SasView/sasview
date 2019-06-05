@@ -3726,12 +3726,45 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
         elif format == "Latex":
             formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
+        elif format == "Save":
+            Text_output = FittingUtilities.formatParameters(param_list, False)
+            Excel_output = FittingUtilities.formatParametersExcel(param_list[1:])
+            Latex_output = FittingUtilities.formatParametersLatex(param_list[1:])
         else:
             raise AttributeError("Bad parameter output format specifier.")
 
         # Dump formatted_output to the clipboard
-        cb = QtWidgets.QApplication.clipboard()
-        cb.setText(formatted_output)
+
+
+        if format == "Save":
+            save_dialog = QtWidgets.QFileDialog()
+            save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+            kwargs = {
+                'parent': self,
+                'caption': 'Save Project',
+                'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
+                'options': QtWidgets.QFileDialog.DontUseNativeDialog
+            }
+            file_path = save_dialog.getSaveFileName(**kwargs)
+            filename = file_path[0]
+
+            if file_path[1] == 'Text (*.txt)':
+                Type_output = Text_output
+                filename = '.'.join((filename, 'txt'))
+            elif file_path[1] == 'Excel (*.xls)':
+                Type_output = Excel_output
+                filename = '.'.join((filename, 'xls'))
+            elif file_path[1] == 'Latex (*.log)':
+                Type_output = Latex_output
+                filename = '.'.join((filename, 'log'))
+
+            file_open = open(filename, 'w')
+            with file_open:
+                file_open.write(Type_output)
+        else:
+            cb = QtWidgets.QApplication.clipboard()
+            cb.setText(formatted_output)
+
 
     def getFitModel(self):
         """

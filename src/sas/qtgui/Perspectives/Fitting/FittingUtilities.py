@@ -762,7 +762,7 @@ def getOrientationParam(kernel_module=None):
 
     return param
 
-def formatParameters(parameters):
+def formatParameters(parameters, Check):
     """
     Prepare the parameter string in the standard SasView layout
     """
@@ -774,7 +774,12 @@ def formatParameters(parameters):
         parameter = [str(p) for p in parameter]
         output_string += ",".join([p for p in parameter if p is not None])
         output_string += ":"
-    return output_string
+
+    if Check == False:
+        new_string = output_string.replace(':', '\n')
+        return new_string
+    else:
+        return output_string
 
 def formatParametersExcel(parameters):
     """
@@ -789,6 +794,7 @@ def formatParametersExcel(parameters):
     # names
     names = ""
     values = ""
+    check = ""
     for parameter in parameters:
         names += parameter[0]+tab
         # Add the error column if fitted
@@ -796,6 +802,7 @@ def formatParametersExcel(parameters):
             names += parameter[0]+"_err"+tab
 
         values += parameter[2]+tab
+        check += parameter[1]+tab
         if parameter[1] == "True" and parameter[3] is not None:
             values += parameter[3]+tab
         # add .npts and .nsigmas when necessary
@@ -804,7 +811,7 @@ def formatParametersExcel(parameters):
             names += parameter[0].replace('.width', '.npts') + tab
             values += parameter[5] + tab + parameter[4] + tab
 
-    output_string = names + crlf + values
+    output_string = names + crlf + values + crlf + check
     return output_string
 
 def formatParametersLatex(parameters):
