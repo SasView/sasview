@@ -29,13 +29,13 @@ class BoxInteractor(_BaseInteractor):
         # # determine x y  values
         self.x = 0.5 * min(math.fabs(self.base.data2D.xmax),
                            math.fabs(self.base.data2D.xmin))
-        self.y = 0.5 * min(math.fabs(self.base.data2D.xmax),
-                           math.fabs(self.base.data2D.xmin))
+        self.y = 0.5 * min(math.fabs(self.base.data2D.ymax),
+                           math.fabs(self.base.data2D.ymin))
         # # when reach qmax reset the graph
         self.qmax = max(self.base.data2D.xmax, self.base.data2D.xmin,
                         self.base.data2D.ymax, self.base.data2D.ymin)
         # # Number of points on the plot
-        self.nbins = 30
+        self.nbins = 60
         # # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
         self.fold = True
@@ -57,8 +57,8 @@ class BoxInteractor(_BaseInteractor):
                                                 x=self.x,
                                                 y=self.y)
         self.horizontal_lines.qmax = self.qmax
-        # # draw the rectangle and plost the data 1D resulting
-        # # of averaging data2D
+        # # draw the rectangle and plot the resulting 1D data resulting
+        # # from averaging data2D
         self.update()
         self._post_data()
         # # Bind to slice parameter events
