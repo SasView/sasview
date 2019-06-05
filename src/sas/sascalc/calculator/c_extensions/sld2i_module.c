@@ -17,17 +17,18 @@ typedef void (*PyCObject_Destructor)(void *);
 
 // Vector binding glue
 #if (PY_VERSION_HEX > 0x03000000) && !defined(Py_LIMITED_API)
-  // Assuming that a view into a writable vector points to a 
-  // non-changing pointer for the duration of the C call, capture 
+  // Assuming that a view into a writable vector points to a
+  // non-changing pointer for the duration of the C call, capture
   // the view pointer and immediately free the view.
   #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
     Py_buffer VEC_view; \
     int VEC_err = PyObject_GetBuffer(VEC_obj, &VEC_view, PyBUF_WRITABLE|PyBUF_FORMAT); \
     if (VEC_err < 0 || sizeof(*VEC_buf) != VEC_view.itemsize) return NULL; \
-    VEC_buf = (typeof(VEC_buf))VEC_view.buf; \
+    VEC_buf = VEC_view.buf; \
     VEC_len = VEC_view.len/sizeof(*VEC_buf); \
     PyBuffer_Release(&VEC_view); \
   } while (0)
+  // Maybe use:   VEC_buf = (typeof(VEC_buf))VEC_view.buf;
 #else
   #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
     int VEC_err = PyObject_AsWriteBuffer(VEC_obj, (void **)(&VEC_buf), &VEC_len); \
