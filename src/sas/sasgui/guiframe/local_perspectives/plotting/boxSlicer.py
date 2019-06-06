@@ -26,10 +26,32 @@ class BoxInteractor(_BaseInteractor):
         self.connect = self.base.connect
         # # which direction is the preferred interaction direction
         self.direction = None
-        # # determine x y  values
+        # # Determine initial x y  values (top, right)
+        # # Determine initial xmin, xmax, ymin, and y max values
+        # # If Qi=0 is contained in the data use a box centered on Qi=0 and
+        # # half the width of the smallest range (neg or pos). Otherwise use
+        # # a box of half the full range of q centered on that range. 
         self.x = 0.5 * min(math.fabs(self.base.data2D.xmax),
                            math.fabs(self.base.data2D.xmin))
         self.y = 0.5 * min(math.fabs(self.base.data2D.ymax),
+                           math.fabs(self.base.data2D.ymin))
+        self.xrange = self.base.data2D.xmax - self.base.data2D.xmin
+        self.yrange = self.base.data2D.ymax - self.base.data2D.ymin
+        if (self.base.data2D.xmax < 0) or (self.base.data2D.xmin > 0):
+            self.xmin = self.base.data2D.xmin + 0.25 * self.xrange
+            self.xmax = self.base.data2D.xmax + 0.25 * self.xrange
+        else:
+            self.xmin = -0.5 * min(math.fabs(self.base.data2D.xmax),
+                           math.fabs(self.base.data2D.xmin))
+            self.xmax = 0.5 * min(math.fabs(self.base.data2D.xmax),
+                           math.fabs(self.base.data2D.xmin))
+        if (self.base.data2D.ymax < 0) or (self.base.data2D.ymin > 0):
+            self.ymin = self.base.data2D.ymin + 0.25 * self.range
+            self.ymax = self.base.data2D.ymax + 0.25 * self.yrange
+        else:
+            self.ymin = -0.5 * min(math.fabs(self.base.data2D.ymax),
+                           math.fabs(self.base.data2D.ymin))
+            self.ymax = 0.5 * min(math.fabs(self.base.data2D.ymax),
                            math.fabs(self.base.data2D.ymin))
         # # when reach qmax reset the graph
         self.qmax = max(self.base.data2D.xmax, self.base.data2D.xmin,
@@ -38,7 +60,7 @@ class BoxInteractor(_BaseInteractor):
         self.nbins = 60
         # # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
-        self.fold = True
+        self.fold = False
         # # reference of the current  Slab averaging
         self.averager = None
         # # Create vertical and horizaontal lines for the rectangle
