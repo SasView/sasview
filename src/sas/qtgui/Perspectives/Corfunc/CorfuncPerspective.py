@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from numpy.linalg.linalg import LinAlgError
+import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
