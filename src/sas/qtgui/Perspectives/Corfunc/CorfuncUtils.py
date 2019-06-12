@@ -15,4 +15,5 @@ WIDGETS = enum( 'W_QMIN',
                 'W_CRYSTAL',
                 'W_POLY',
                 'W_PERIOD',
+                'W_FILENAME',
                 )

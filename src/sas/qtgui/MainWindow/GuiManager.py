@@ -481,6 +481,8 @@ class GuiManager(object):
         self._workspace.actionReset.triggered.connect(self.actionReset)
         self._workspace.actionExcel.triggered.connect(self.actionExcel)
         self._workspace.actionLatex.triggered.connect(self.actionLatex)
+        self._workspace.actionSaveParamsAs.triggered.connect(self.actionSaveParamsAs)
+
         # View
         self._workspace.actionShow_Grid_Window.triggered.connect(self.actionShow_Grid_Window)
         self._workspace.actionHide_Toolbar.triggered.connect(self.actionHide_Toolbar)
@@ -699,6 +701,12 @@ class GuiManager(object):
         can be saved to the clipboard
         """
         self.communicate.copyLatexFitParamsSignal.emit("Latex")
+
+    def actionSaveParamsAs(self):
+        """
+        Menu Save Params
+        """
+        self.communicate.SaveFitParamsSignal.emit("Save")
 
     #============ VIEW =================
     def actionShow_Grid_Window(self):
