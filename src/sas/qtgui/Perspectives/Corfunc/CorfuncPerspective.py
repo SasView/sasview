@@ -122,6 +122,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         self.parent = parent
         self.mapper = None
+        self._path = ""
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
@@ -169,6 +170,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def setup_model(self):
         """Populate the model with default data."""
+        # filename
+        item = QtGui.QStandardItem(self._path)
+        self.model.setItem(W.W_FILENAME, item)
+
         self.model.setItem(W.W_QMIN,
                            QtGui.QStandardItem("0.01"))
         self.model.setItem(W.W_QMAX,
@@ -316,6 +321,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper.addMapping(self.txtLongPeriod, W.W_PERIOD)
         self.mapper.addMapping(self.txtLocalCrystal, W.W_CRYSTAL)
 
+        self.mapper.addMapping(self.txtFilename, W.W_FILENAME)
+
         self.mapper.toFirst()
 
     def calculate_background(self):
@@ -383,9 +390,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.extrap = None
         self._canvas.draw_q_space()
         self.cmdTransform.setEnabled(False)
-
+        self._path = data.name
         self._realplot.data = None
         self._realplot.draw_real_space()
+
+        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
 
     def setClosable(self, value=True):
         """

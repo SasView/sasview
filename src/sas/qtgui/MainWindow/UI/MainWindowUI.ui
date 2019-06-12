@@ -60,6 +60,7 @@
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
     <addaction name="menuCopy_Params_As"/>
+    <addaction name="actionSaveParamsAs"/>
     <addaction name="separator"/>
     <addaction name="actionReport"/>
     <addaction name="actionReset"/>
@@ -273,6 +274,11 @@
    </property>
    <property name="toolTip">
     <string>Paste parameter values</string>
+   </property>
+  </action>
+  <action name="actionSaveParamsAs">
+   <property name="text">
+    <string>Save Params to File</string>
    </property>
   </action>
   <action name="actionBookmarks">
