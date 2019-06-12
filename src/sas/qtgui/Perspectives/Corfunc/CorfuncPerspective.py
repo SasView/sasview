@@ -156,6 +156,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdExtrapolate.setEnabled(False)
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+        self.cmdSave.clicked.connect(self.on_save)
+        self.cmdSave.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
@@ -266,6 +268,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.update_real_space_plot(transforms)
 
         self._realplot.draw_real_space()
+        self.cmdSave.setEnabled(True)
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""
@@ -414,4 +417,22 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         Check DataExplorer.py, line 355
         """
         return "Corfunc Perspective"
+
+    def on_save(self):
+        """
+        Save corfunc state into a file
+        """
+        f_name = QtWidgets.QFileDialog.getSaveFileName(
+            caption="Save As",
+            filter="Corfunc Text Output (*.crf)",
+            parent=None)[0]
+        if "." not in f_name:
+            f_name += ".crf"
+
+        data1, data3, data_idf = self._realplot.data
+
+        with open(f_name, "w") as outfile:
+            outfile.write("X 1D 3D IDF\n")
+            np.savetxt(outfile,
+                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
