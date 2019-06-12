@@ -78,7 +78,7 @@ class FourierThread(CalcThread):
         self.update(msg="Fourier transform completed.")
 
         transform1 = Data1D(xs, gamma1)
-        transform3 = Data1D(xs[xs <= 1000], gamma3)
+        transform3 = Data1D(xs, gamma3)
         idf = Data1D(xs, idf)
 
         transforms = (transform1, transform3, idf)
