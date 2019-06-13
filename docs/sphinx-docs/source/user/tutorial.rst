@@ -13,7 +13,7 @@ Version 4.2 or later)
 
 :download:`Old Tutorial <sasview/Tutorial.pdf>`
 
-The following tutorials have been written for Version 4.x
+The following tutorials have been written for Version 5.x
 
 :download:`Getting Started with Sasview <sasview/getting_started_with_sasview_v5.pdf>`
 
