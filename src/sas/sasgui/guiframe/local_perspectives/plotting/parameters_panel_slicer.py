@@ -4,6 +4,7 @@ import os
 
 import wx
 import wx.lib.newevent
+import logging
 
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
 from sas.sasgui.guiframe.utils import format_number
@@ -14,6 +15,7 @@ from .Plotter2D import ModelPanel2D
 
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 save_files, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
+logger = logging.getLogger(__name__)
 
 FIT_OPTIONS = ["No fitting", "Fitting", "Batch Fitting"]
 CONVERT_KEYS = ["SectorInteractor", "AnnulusInteractor", "BoxInteractorX",
@@ -128,17 +130,13 @@ class SlicerParameterPanel(wx.Dialog):
                 elif item == 'abs q':
                     self.abs_box = wx.CheckBox(parent=self, id=wx.NewId(),
                                          label=item + " = true:")
-                    if params[item]:
-                        self.abs_box.SetValue(True)
-                    else:
-                        self.abs_box.SetValue(False)
+                    self.abs_box.SetValue(params[item])
                     hint_msg = "check to average qi and -qi together "
                     self.abs_box.SetToolTipString(hint_msg)
                     self.Bind(wx.EVT_CHECKBOX, self.on_checbox_checked)
                     self.bck.Add(self.abs_box, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                     self.parameters.append([item, self.abs_box])
-
                 elif item == 'binning base':
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (iy, ix), (1, 1),
@@ -548,16 +546,24 @@ class SlicerParameterPanel(wx.Dialog):
         
         """
         _cb = evt.GetEventObject()
-        if _cb == self.abs_box:
-            _param_index = next((i for i, v in enumerate(self.parameters)
-                                 if v[0] == "abs q"), None)
-            (self.parameters[_param_index])[1] = _cb
-            self.on_text_enter(wx.EVT_CHECKBOX)
-
-        else:
+        _cb_not_found = True
+        _param_index = next((i for i, v in enumerate(self.parameters)
+                                     if v[0] == "abs q"), None)
+        if (_param_index != None):
+            if _cb == self.abs_box:
+                _cb_not_found = False
+                (self.parameters[_param_index])[1] = _cb
+                self.on_text_enter(wx.EVT_CHECKBOX)
+        if _cb == self.auto_save:
+            _cb_not_found = False
             self.append_name.Enable(self.auto_save.IsChecked())
             self.path.Enable(self.auto_save.IsChecked())
             self.fitting_options.Enable(self.auto_save.IsChecked())
+        if _cb_not_found:
+            self.msg = "Checkbox generating event does not seem to be active."
+            logger.info(self.msg)
+
+
 
     def check_item_and_children(self, data_ctrl, check_value=True):
         self.data_panel.tree_ctrl.CheckItem(data_ctrl, check_value)
