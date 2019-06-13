@@ -275,6 +275,7 @@ class BoxInteractor(_BaseInteractor):
         params["x_max"] = math.fabs(self.vertical_lines.x)
         params["y_max"] = math.fabs(self.horizontal_lines.y)
         params["nbins"] = self.nbins
+        params["abs q"] = self.fold
         return params
 
     def set_params(self, params):
@@ -288,6 +289,7 @@ class BoxInteractor(_BaseInteractor):
         self.x = float(math.fabs(params["x_max"]))
         self.y = float(math.fabs(params["y_max"]))
         self.nbins = params["nbins"]
+        self.fold = params["abs q"]
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
@@ -335,6 +337,13 @@ class HorizontalLines(_BaseInteractor):
                                            pickradius=5, label="pick",
                                            zorder=zorder,
                                            visible=True)[0]
+        # Outer circle marker
+        self.outer_marker = self.axes.plot([0], [-self.y], linestyle='',
+                                           marker='s', markersize=10,
+                                           color=self.color, alpha=0.6,
+                                           pickradius=5, label="pick",
+                                           zorder=zorder,
+                                           visible=True)[0]
         # # Define 2 horizontal lines
         self.top_line = self.axes.plot([self.x, -self.x], [self.y, self.y],
                                        linestyle='-', marker='',
@@ -346,6 +355,7 @@ class HorizontalLines(_BaseInteractor):
         self.has_move = False
         # # Connecting markers to mouse events and draw
         self.connect_markers([self.top_line, self.inner_marker])
+        self.connect_markers([self.bottom_line, self.outer_marker])
         self.update()
 
     def set_layer(self, n):
@@ -365,6 +375,7 @@ class HorizontalLines(_BaseInteractor):
         self.clear_markers()
         try:
             self.inner_marker.remove()
+            self.outer_marker.remove()
             self.top_line.remove()
             self.bottom_line.remove()
         except:
@@ -387,6 +398,7 @@ class HorizontalLines(_BaseInteractor):
             self.y = np.sign(self.y) * math.fabs(y)
         # # Draw lines and markers
         self.inner_marker.set(xdata=[0], ydata=[self.y])
+        self.outer_marker.set(xdata=[0], ydata=[-self.y])
         self.top_line.set(xdata=[self.x, -self.x], ydata=[self.y, self.y])
         self.bottom_line.set(xdata=[self.x, -self.x], ydata=[-self.y, -self.y])
 

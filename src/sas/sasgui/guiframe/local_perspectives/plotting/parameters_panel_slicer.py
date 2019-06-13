@@ -107,7 +107,7 @@ class SlicerParameterPanel(wx.Dialog):
             for item in keys:
                 ix = 0
                 iy += 1
-                if item not in ["count", "errors", "binning base"]:
+                if item not in ["count", "errors", "binning base", "abs q"]:
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (iy, ix), (1, 1),
                                  wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
@@ -125,6 +125,20 @@ class SlicerParameterPanel(wx.Dialog):
                     ix = 3
                     self.bck.Add((20, 20), (iy, ix), (1, 1),
                                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+                elif item == 'abs q':
+                    self.abs_box = wx.CheckBox(parent=self, id=wx.NewId(),
+                                         label=item + " = true:")
+                    if params[item]:
+                        self.abs_box.SetValue(True)
+                    else:
+                        self.abs_box.SetValue(False)
+                    hint_msg = "check to average qi and -qi together "
+                    self.abs_box.SetToolTipString(hint_msg)
+                    self.Bind(wx.EVT_CHECKBOX, self.on_checbox_checked)
+                    self.bck.Add(self.abs_box, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                    self.parameters.append([item, self.abs_box])
+
                 elif item == 'binning base':
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (iy, ix), (1, 1),
@@ -199,7 +213,7 @@ class SlicerParameterPanel(wx.Dialog):
             iy += 1
             self.auto_save = wx.CheckBox(parent=self, id=wx.NewId(),
                                          label="Auto save generated 1D:")
-            self.Bind(wx.EVT_CHECKBOX, self.on_auto_save_checked)
+            self.Bind(wx.EVT_CHECKBOX, self.on_checbox_checked)
             self.bck.Add(self.auto_save, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
@@ -293,6 +307,9 @@ class SlicerParameterPanel(wx.Dialog):
                 if item[0] == "binning base":
                     title = self.bin_ctl.GetValue()
                     params["binning base"] = BINNING_OPTIONS.get(title)
+                    continue
+                if item[0] == "abs q":
+                    params["abs q"] = item[1].GetValue()
                     continue
                 params[item[0]] = float(item[1].GetValue())
                 item[1].SetBackgroundColour(
@@ -519,14 +536,28 @@ class SlicerParameterPanel(wx.Dialog):
                                     self.data_panel.bt_import.GetId())
             wx.PostEvent(self.data_panel, evt)
 
-    def on_auto_save_checked(self, evt=None):
+    def on_checbox_checked(self, evt=None):
         """
-        Enable/Disable auto append when checkbox is checked
+        All wx.checkbox events go to the same method so we have get the event
+        object to determine which box was checked and thus which code to
+        execute.  For this class the two checkbox events are used to:
+        
+        a) Enable/Disable auto append
+        b) togle between +/-q or abs q (|q|) slicer averaging/plotting
         :param evt: Event
+        
         """
-        self.append_name.Enable(self.auto_save.IsChecked())
-        self.path.Enable(self.auto_save.IsChecked())
-        self.fitting_options.Enable(self.auto_save.IsChecked())
+        _cb = evt.GetEventObject()
+        if _cb == self.abs_box:
+            _param_index = next((i for i, v in enumerate(self.parameters)
+                                 if v[0] == "abs q"), None)
+            (self.parameters[_param_index])[1] = _cb
+            self.on_text_enter(wx.EVT_CHECKBOX)
+
+        else:
+            self.append_name.Enable(self.auto_save.IsChecked())
+            self.path.Enable(self.auto_save.IsChecked())
+            self.fitting_options.Enable(self.auto_save.IsChecked())
 
     def check_item_and_children(self, data_ctrl, check_value=True):
         self.data_panel.tree_ctrl.CheckItem(data_ctrl, check_value)
