@@ -140,7 +140,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
 
         self.gridLayout_8.setColumnStretch(0, 1)
-        self.gridLayout_8.setColumnStretch(1, 3)
+        self.gridLayout_8.setColumnStretch(1, 2)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
