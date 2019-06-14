@@ -255,7 +255,8 @@ Upon sending data for correlation function analysis, it will be plotted (minus
 the background value), along with a bar indicating the *upper end of the
 low-Q range* (used for Guinier back-extrapolation), and 2 bars indicating 
 the range to be used for Porod forward-extrapolation. These bars may be moved by 
-entering appropriate values in the Q range input boxes.
+entering appropriate values in the Q range input boxes or by clicking on them and
+dragging them to the desired location..
 
 .. figure:: tutorial1.png
    :align: center
