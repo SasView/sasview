@@ -384,6 +384,9 @@
          <property name="text">
           <string>Extrapolate</string>
          </property>
+         <property name="toolTip">
+          <string>Find the Guinier and Porod extrapolations of the data as Q → 0 and Q → ∞</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -391,12 +394,18 @@
          <property name="text">
           <string>Transform</string>
          </property>
+         <property name="toolTip">
+          <string>Calculate the real space correlation that matches the scattering data.</string>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="cmdSave">
          <property name="text">
           <string>Save</string>
+         </property>
+         <property name="toolTip">
+          <string>Export the calculated real space correlation function to a file.</string>
          </property>
         </widget>
        </item>
