@@ -436,6 +436,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             caption="Save As",
             filter="Corfunc Text Output (*.crf)",
             parent=None)[0]
+        if not f_name:
+            return
         if "." not in f_name:
             f_name += ".crf"
 
