@@ -293,6 +293,9 @@ class Communicate(QtCore.QObject):
     # Fitting parameter copy to clipboard for Latex
     copyLatexFitParamsSignal = QtCore.pyqtSignal(str)
 
+    # Fitting parameter copy to clipboard for Latex
+    SaveFitParamsSignal = QtCore.pyqtSignal(str)
+
     # Fitting parameter paste from clipboard
     pasteFitParamsSignal = QtCore.pyqtSignal()
 
