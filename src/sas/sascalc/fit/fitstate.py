@@ -316,7 +316,7 @@ def make_fitness(state):
         if state.enable2D:
             # smear_type is Pinhole2D.
             q = np.sqrt(data.qx_data**2 + data.qy_data**2)
-            data.dx_data = data.dqy_data = percent*q
+            data.dqx_data = data.dqy_data = percent*q
         else:
             data.dx = percent * data.x
             data.dxl = data.dxw = None  # be sure it is not slit-smeared
