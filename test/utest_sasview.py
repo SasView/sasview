@@ -63,6 +63,7 @@ def run_tests(dirs=None, run_all=False):
                     std_out, std_err = proc.communicate()
                     std_out, std_err = std_out.decode(), (std_err.decode() if std_err else None)
                     #print(">>>>>> standard out", file_path, "\n", std_out, "\n>>>>>>>>> end stdout", file_path)
+                    #print(">>>>>> standard err", file_path, "\n", std_err, "\n>>>>>>>>> end stderr", file_path)
                     #sys.exit()
                     m = re.search("Ran ([0-9]+) test", std_out)
                     if m is not None:

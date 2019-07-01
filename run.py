@@ -75,7 +75,7 @@ def prepare(rebuild=True):
 
     # find the directories for the source and build
     from distutils.util import get_platform
-    root = abspath(dirname(realpath(__file__)))
+    root = abspath(dirname(__file__))
 
     platform = '%s-%s' % (get_platform(), sys.version[:3])
     build_path = joinpath(root, 'build', 'lib.' + platform)
