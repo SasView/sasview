@@ -11,6 +11,7 @@ in-memory representation.
 """
 from __future__ import print_function, division
 
+import os
 import copy
 from collections import namedtuple
 
@@ -173,7 +174,14 @@ def model_name(state):
     factor given on the individual fit pages.  The model name is used to help
     disambiguate different SASentry sections with the same dataset.
     """
+    # TODO: need better handling of "[plug-in]" prefix for reloaded models
+    # The constraint box appears to use the base name while the fit pages
+    # prefix the name with "[plug-in] ".
     p_model, s_model = state.formfactorcombobox, state.structurecombobox
+    if p_model.startswith(PLUGIN_NAME_BASE):
+        p_model = p_model[len(PLUGIN_NAME_BASE):]
+    if s_model.startswith(PLUGIN_NAME_BASE):
+        s_model = s_model[len(PLUGIN_NAME_BASE):]
     if s_model is not None and s_model != "" and s_model.lower() != "none":
         return '*'.join((p_model, s_model))
     else:
