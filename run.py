@@ -75,7 +75,8 @@ def prepare():
 
     # find the directories for the source and build
     from distutils.util import get_platform
-    root = abspath(dirname(sys.argv[0]))
+    #root = abspath(dirname(sys.argv[0]))
+    root = abspath(dirname(__file__))
 
     platform = '%s-%s' % (get_platform(), sys.version[:3])
     build_path = joinpath(root, 'build', 'lib.' + platform)
