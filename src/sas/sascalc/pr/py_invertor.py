@@ -30,13 +30,18 @@ class Pinvertor:
         pass
 
 #Private Methods
+@njit
+def pr_sphere(R, r):
+    if(r <= 2.0*R):
+        return 12.0* (0.5*r/R)**2 * (1.0-0.5*r/R)**2 * (2.0+0.5*r/R)
+    else:
+        return 0
 
-@njit()
+#@njit()
 def ortho_transformed(d_max, n, q):
     """
-    ortho transformed implemented in Python
-
-
+    Fourier transform of the nth orthagonal function
+    
     With vectorize time was 
     \@vectorize() ~= 1.4e-05
     \@njit() ~= 3e-06
@@ -44,12 +49,18 @@ def ortho_transformed(d_max, n, q):
     and time was the same as @njit()
     """
     return 8.0*(np.pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (np.pi*n)**2 - (q*d_max)**2 )
+    #pi = math.pi
+    #qd = q * (d_max/math.pi)
+    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
+def quick_demo():
+    print(ortho_transformed(1,1,1))
 
 @njit()
 def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     """
-    For loop implementation using njit
+    Slit-smeared Fourier transform of the nth orthagonal function.
+    Smearing follows Lake, Acta Cryst. (1967) 23, 191.
 
     \@njit() - 5 - time roughly 4.5e-05
     \@njit() - npts 1000 - 0.031
@@ -80,19 +91,18 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
 
     count_w = 0.0
 
+    #Pre compute dz, y0 and dy
+    dz = height/fnpts
+    y0, dy = -0.5*width, width/fnpts
+
     for j in range(0, n_height):
-        if(height>0):
-            z = height/fnpts*float(j)
-        else:
-            z = 0.0
+        zsq = (j * dz)**2
+
         for i in range(0, n_width):
-            if(width>0):
-                y = -width/2.0+width/fnpts* float(i)
-            else:
-                y = 0.0
-            if (((q - y) * (q - y) + z * z) > 0.0):
-                count_w += 1.0
-                sum += ortho_transformed(d_max, n, math.sqrt((q - y)*(q - y) + z * z))
+            y = y0 + i*dy
+            qsq = (q - y)**2 + zsq
+            count_w += qsq > 0
+            sum += ortho_transformed(d_max, n, math.sqrt(qsq))
     return sum / count_w
 
 def demo():
@@ -105,4 +115,4 @@ def demo():
         print("Time elapsed py : %s" % (end - start))
 
 if(__name__ == "__main__"):
-    demo()
+    quick_demo()
