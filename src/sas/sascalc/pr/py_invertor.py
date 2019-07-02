@@ -140,17 +140,17 @@ def iq(pars, d_max, n_c, q):
     using njit, no parallel possible ~= 1.3e-05
     """
     sum = 0.0
-    i = 0
     for i in range(0, n_c):
         sum += pars[i] * ortho_transformed(d_max, i + 1, q)
 
     return sum
 
 #testing
+
 def demo_ot():
     print(ortho_transformed(1,1,0))
 
-def demo(): #-0.8298952166821104
+def demo():
     tests = 5
     for i in range(0, tests): 
         start = time.clock()
