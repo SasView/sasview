@@ -30,14 +30,31 @@ class Pinvertor:
         pass
 
 #Private Methods
+
+
 @njit
 def pr_sphere(R, r):
+    """
+    P(r) of a sphere, for test purposes
+
+    @param R: radius of the sphere
+    @param r: distance, in same units as the radius
+    @return: P(r)
+    """
     if(r <= 2.0*R):
         return 12.0* (0.5*r/R)**2 * (1.0-0.5*r/R)**2 * (2.0+0.5*r/R)
     else:
         return 0
 
-#@njit()
+@njit
+def ortho(d_max, n, r):
+    """
+    Orthogonal Functions:
+    B(r) = 2r sin(pi*nr/d)
+    """
+    return 2.0 * r * np.sin(np.pi * n * r/d_max)
+
+@njit()
 def ortho_transformed(d_max, n, q):
     """
     Fourier transform of the nth orthagonal function
@@ -48,13 +65,12 @@ def ortho_transformed(d_max, n, q):
     \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
     and time was the same as @njit()
     """
-    return 8.0*(np.pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (np.pi*n)**2 - (q*d_max)**2 )
-    #pi = math.pi
-    #qd = q * (d_max/math.pi)
-    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #return 8.0*(np.pi)**2/q * d_max * n * (-1.0)**(n+1) * math.sin(q*d_max) / ( (math.pi*n)**2 - (q*d_max)**2 )
+    pi = np.pi
+    qd = q * (d_max/pi)
+    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
-def quick_demo():
-    print(ortho_transformed(1,1,1))
+
 
 @njit()
 def ortho_transformed_smeared(d_max, n, height, width, q, npts):
@@ -92,8 +108,9 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     count_w = 0.0
 
     #Pre compute dz, y0 and dy
-    dz = height/fnpts
-    y0, dy = -0.5*width, width/fnpts
+    dz = height/(npts-1)
+    y0 = -0.5*width
+    dy = width/(npts-1)
 
     for j in range(0, n_height):
         zsq = (j * dz)**2
@@ -102,17 +119,45 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
             y = y0 + i*dy
             qsq = (q - y)**2 + zsq
             count_w += qsq > 0
-            sum += ortho_transformed(d_max, n, math.sqrt(qsq))
+            sum += ortho_transformed(d_max, n, np.sqrt(qsq))
     return sum / count_w
 
-def demo():
+@njit()
+def ortho_derived(d_max, n, r):
+    """
+    First derivative in of the orthogonal function dB(r)/dr
+    """
+    pinr = pi * n * r/d_max
+    return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
+
+@njit()
+def iq(pars, d_max, n_c, q):
+    """
+    Scattering intensity calculated from the expansion
+
+    basic python ~=0.00014 with array of size 20
+    vectorised operations ~= 0.0002
+    using njit, no parallel possible ~= 1.3e-05
+    """
+    sum = 0.0
+    i = 0
+    for i in range(0, n_c):
+        sum += pars[i] * ortho_transformed(d_max, i + 1, q)
+
+    return sum
+
+#testing
+def demo_ot():
+    print(ortho_transformed(1,1,0))
+
+def demo(): #-0.8298952166821104
     tests = 5
-    for i in range(0, tests):
+    for i in range(0, tests): 
         start = time.clock()
-        x = ortho_transformed_smeared(1, 1, 1, 1, 1, 5)
+        x = iq(np.arange(20), 3, 20, 1)
         end = time.clock()
         print(x)
         print("Time elapsed py : %s" % (end - start))
 
 if(__name__ == "__main__"):
-    quick_demo()
+    demo()
