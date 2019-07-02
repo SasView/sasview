@@ -13,7 +13,7 @@ import os
 import re
 import logging
 import time
-from numba import njit, vectorize, float64
+from numba import jit, njit, vectorize, float64, guvectorize
 
 #class stub for final Pinvertor class
 #taking signatures from Cinvertor.c and docstrings
@@ -145,16 +145,50 @@ def iq(pars, d_max, n_c, q):
 
     return sum
 
+@njit()
+def iq_smeared(pars, d_max, n_c, height, width, q, npts):
+    """
+    Scattering intensity calculated from expansion,
+    slit smeared.
+
+    for test data of size 20 ~= 0.0005 basic
+    ~= 0.0003 njit
+    ~= 0.12 using numba vectorize()
+    Couldn't use njit and vectorize in same method, looked on
+    github seems to be issue for a long time with numba.
+    Maybe faster if work together ?
+    njit() compilation only slightly faster. Maybe with working
+    njit() and vector operations be faster.
+    """
+    sum = 0.0
+
+    for i in range(0, n_c):
+        sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
+    return sum
+
+@njit()
+def pr(pars, d_max, n_c, r):
+    """
+    P(r) calculated from the expansion
+    """
+    sum = 0.0
+    for i in range(0, n_c):
+        sum += pars[i] * ortho(d_max, i+1, r)
+    return sum
+
+
+
+
 #testing
 
 def demo_ot():
     print(ortho_transformed(1,1,0))
 
 def demo():
-    tests = 5
+    tests = 10
     for i in range(0, tests): 
         start = time.clock()
-        x = iq(np.arange(20), 3, 20, 1)
+        x = iq_smeared(np.arange(20), 3, 20, 10, 10, 20, 20)
         end = time.clock()
         print(x)
         print("Time elapsed py : %s" % (end - start))
