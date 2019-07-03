@@ -71,7 +71,6 @@ def ortho_transformed(d_max, n, q):
     return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
 
-
 @njit()
 def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     """
@@ -144,11 +143,11 @@ def iq(pars, d_max, q):
     #q = np.asanyarray(q)
     sum = 0.0
     for i in prange(pars.shape[0]):
-        for j in prange(q.shape[0]):
-            sum += pars[i] * ortho_transformed(d_max, i + 1, q[j])
+        #for j in prange(q.shape[0]):
+        sum += pars[i] * ortho_transformed(d_max, i + 1, q)
     return sum
 
-def iq_vectorize(pars, d_max, q):
+def iq_vectorized(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion
 
@@ -250,21 +249,33 @@ def dprdr(pars, d_max, r):
     sum = 0.0
     #300, 2.5e-05
     for i in range(0, pars.shape[0]):
-        sum += pars[i] * 2.0*(np.sin(pi*i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max)
+        sum += pars[i] * 2.0*(np.sin(pi*(i+1))*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max)
     return sum
 
-@njit()
-def dprdr_adv(pars, d_max, r):
+def dprdr_vec(pars, d_max, r):
+    #Errors on roughly 1e-11 place but faster than dprdr without njit()
     sum = 0.0
-    var = pi * r/d_max
+    rd = r/d_max
+    var = pi * rd
+
     def func(x, y):
-        temp = (x + 1) * var
-        return y * 2.0 * (np.sin(temp) + temp * np.cos(temp))
+        temp = (x + 1)
+        return y * 2.0*(np.sin(pi * temp) * rd) + (temp * var) * np.cos(temp * var)
+    f = np.vectorize(func)
 
-    for i in range(0, pars.shape[0]):
-        sum += func(i, pars[i])
-    return sum
+    i = np.arange(pars.shape[0])
+    return np.sum(f(i, pars))
 
+def demo_dp():
+    pars = np.arange(2000)
+    time1 = time.clock()
+    dprdr(pars, 104, 8)
+    end1 = time.clock()
+    time2 = time.clock()
+    dprdr_vec(pars, 104, 8)
+    end2 = time.clock()
+    print("time 1: ", end1 - time1)
+    print("time 2: ", end2 - time2)
 
 
 
@@ -277,16 +288,36 @@ def demo_ot():
 
 def demo():
     tests = 6
-    minq = 0
-    maxq = 30000
-    q = np.arange(minq, maxq, maxq/301)
-    #iq(np.arange(10000), 3, q)
-    print(q)
-    for i in range(0, tests): 
+    testVals = np.zeros([tests,2])
+
+    for j in range(0, tests): 
+        coeff = np.arange(100)
+        minq = 0
+        maxq = 30000
+        d_max = 30
+
         start = time.clock() 
-        x = iq_smeared(np.arange(10000), 3, 100, 100, 30, 400)
+        x = np.linspace(minq, maxq, 301)
+        print(x.shape)
+        y = np.zeros_like(x)
+        for i, qi in enumerate(x):
+            y[i] = iq(coeff, d_max, qi)
         end = time.clock()
-        print("Time elapsed py : %s" % (end - start))
+        
+        testVals[j][0] = (end - start)
+        print("Time elapsed 1 : %s" % testVals[j][0])
+
+        start2 = time.clock()
+        x = np.linspace(minq, maxq, 301)
+        y = iq_vectorized(coeff, d_max, x)
+
+        end2 = time.clock()
+        testVals[j][1] = (end2 - start2)
+        print("Time elapsed 2 : %s" % testVals[j][1])
+
+    print("Mean time 1: ", np.mean(testVals[1::, 0]))
+    print("Mean time 2: ", np.mean(testVals[1::, 1]))
+
         
 if(__name__ == "__main__"):
-    demo_ot()
+    demo_dp()
