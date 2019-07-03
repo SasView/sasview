@@ -5,6 +5,7 @@ At the moment experimenting with different methods of implementing individual
 functions.
 """
 import numpy as np
+from numpy import pi
 import sys
 import math
 import time
@@ -13,7 +14,7 @@ import os
 import re
 import logging
 import time
-from numba import jit, njit, vectorize, float64, guvectorize
+from numba import jit, njit, vectorize, float64, guvectorize, prange
 
 #class stub for final Pinvertor class
 #taking signatures from Cinvertor.c and docstrings
@@ -32,7 +33,7 @@ class Pinvertor:
 #Private Methods
 
 
-@njit
+@njit()
 def pr_sphere(R, r):
     """
     P(r) of a sphere, for test purposes
@@ -46,13 +47,13 @@ def pr_sphere(R, r):
     else:
         return 0
 
-@njit
+@njit()
 def ortho(d_max, n, r):
     """
     Orthogonal Functions:
     B(r) = 2r sin(pi*nr/d)
     """
-    return 2.0 * r * np.sin(np.pi * n * r/d_max)
+    return 2.0 * r * np.sin(pi * n * r/d_max)
 
 @njit()
 def ortho_transformed(d_max, n, q):
@@ -66,7 +67,6 @@ def ortho_transformed(d_max, n, q):
     and time was the same as @njit()
     """
     #return 8.0*(np.pi)**2/q * d_max * n * (-1.0)**(n+1) * math.sin(q*d_max) / ( (math.pi*n)**2 - (q*d_max)**2 )
-    pi = np.pi
     qd = q * (d_max/pi)
     return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
@@ -130,23 +130,63 @@ def ortho_derived(d_max, n, r):
     pinr = pi * n * r/d_max
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
-@njit()
-def iq(pars, d_max, n_c, q):
+@njit(parallel = True)
+def iq(pars, d_max, q):
+    """
+    Scattering intensity calculated from the expansion
+
+    Dataset of 10,000 pars 302 q
+    using njit, parallel ~= 0.04
+    using njit default ~= 0.11
+    using vectorize ~= 7
+    using default python ~= 18
+    """
+    #q = np.asanyarray(q)
+    sum = 0.0
+    for i in prange(pars.shape[0]):
+        for j in prange(q.shape[0]):
+            sum += pars[i] * ortho_transformed(d_max, i + 1, q[j])
+    return sum
+
+def iq_vectorize(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion
 
     basic python ~=0.00014 with array of size 20
     vectorised operations ~= 0.0002
     using njit, no parallel possible ~= 1.3e-05
-    """
-    sum = 0.0
-    for i in range(0, n_c):
-        sum += pars[i] * ortho_transformed(d_max, i + 1, q)
 
-    return sum
+    Array size 300 
+    3386 result
+    """
+    q = np.asanyarray(q)
+    def result(x, y):
+        def apply_q(q):
+            return x * ortho_transformed(d_max, y + 1, q)
+        g = np.vectorize(apply_q)
+        return np.sum(g(q[0]))
+
+    f = np.vectorize(result)
+    result = f(pars, np.arange(pars.shape[0]))
+
+    final_result = np.sum(result)
+
+    return final_result
 
 @njit()
-def iq_smeared(pars, d_max, n_c, height, width, q, npts):
+def parallel_test(n):
+    shp = (13, 17)
+    result1 = 2 * np.ones(shp, np.int_)
+    tmp = 2 * np.ones_like(result1)
+
+    for i in prange(n):
+        result1 *= tmp
+
+    return result1
+
+
+@njit(parallel = True)
+def iq_smeared(pars, d_max, height, width, q, npts):
     """
     Scattering intensity calculated from expansion,
     slit smeared.
@@ -159,22 +199,72 @@ def iq_smeared(pars, d_max, n_c, height, width, q, npts):
     Maybe faster if work together ?
     njit() compilation only slightly faster. Maybe with working
     njit() and vector operations be faster.
+    
+    iq_smeared(np.arange(10000), 3, 100, 100, 30, 400) - no parallel - 75
+    - parallel - 23.13, over 3x speedup. 
+    
     """
     sum = 0.0
 
-    for i in range(0, n_c):
+    for i in prange(pars.shape[0]):
         sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
     return sum
 
 @njit()
-def pr(pars, d_max, n_c, r):
+def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
     """
     sum = 0.0
-    for i in range(0, n_c):
+    for i in range(0, pars.shape[0]):
         sum += pars[i] * ortho(d_max, i+1, r)
     return sum
+
+@njit()
+def pr_err(pars, err, d_max, r, pr_value, pr_value_err):
+    """
+    P(r) calculated from the expansion,
+    with errors
+    """
+    sum = 0.0
+    sum_err = 0.0
+    func_value = 0
+    n_c = pars.shape[0]
+    
+    for i in range(0, n_c):
+        func_value = ortho(d_max, i+1, r)
+        sum += pars[i] * func_value
+        sum_err += err[i * n_c + i] * func_value * func_value
+    
+    pr_value = sum
+    if(sum_err > 0):
+        pr_value_err = np.sqrt(sum_err)
+    else:
+        pr_value_err = sum
+
+@njit()
+def dprdr(pars, d_max, r):
+    #test sample 10,000 - 0.00039/38
+        #adv - 0.00048
+        
+    sum = 0.0
+    #300, 2.5e-05
+    for i in range(0, pars.shape[0]):
+        sum += pars[i] * 2.0*(np.sin(pi*i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max)
+    return sum
+
+@njit()
+def dprdr_adv(pars, d_max, r):
+    sum = 0.0
+    var = pi * r/d_max
+    def func(x, y):
+        temp = (x + 1) * var
+        return y * 2.0 * (np.sin(temp) + temp * np.cos(temp))
+
+    for i in range(0, pars.shape[0]):
+        sum += func(i, pars[i])
+    return sum
+
 
 
 
@@ -182,16 +272,21 @@ def pr(pars, d_max, n_c, r):
 #testing
 
 def demo_ot():
-    print(ortho_transformed(1,1,0))
+    print(pr(np.arange(100), 20, 100))
+
 
 def demo():
-    tests = 10
+    tests = 6
+    minq = 0
+    maxq = 30000
+    q = np.arange(minq, maxq, maxq/301)
+    #iq(np.arange(10000), 3, q)
+    print(q)
     for i in range(0, tests): 
-        start = time.clock()
-        x = iq_smeared(np.arange(20), 3, 20, 10, 10, 20, 20)
+        start = time.clock() 
+        x = iq_smeared(np.arange(10000), 3, 100, 100, 30, 400)
         end = time.clock()
-        print(x)
         print("Time elapsed py : %s" % (end - start))
-
+        
 if(__name__ == "__main__"):
-    demo()
+    demo_ot()
