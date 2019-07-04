@@ -291,6 +291,7 @@ def ortho_transformed_qvec(q, d_max, n):
     return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
 #qvec methods with njit and parallelization
+#Parallelizing this method increases speed but decrases accuracy slightly.
 @njit(parallel = True)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     total = np.zeros_like(q)
@@ -298,13 +299,13 @@ def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
          total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
     return total
 
-@njit(parallel = True)
+@njit()
 def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
     n_width = npts if width > 0 else 1
     n_height = npts if height > 0 else 1
     dz = height/(npts-1)
     y0, dy = -0.5*width, width/(npts-1)
-    total = np.zeros(len(q))
+    total = np.zeros(len(q), dtype = np.dtype('d'))
     # note: removing count_w since ortho now handles q=0 case
     for j in prange(n_height):
         zsq = (j * dz)**2
@@ -314,10 +315,37 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
             total += ortho_transformed_qvec_njit(np.sqrt(qsq), d_max, n)
     return total / (n_width*n_height) 
 
-@njit(parallel = True)
+#Strangely, parallelizing this method slows down the entire computation
+#by about half.
+@njit()
 def ortho_transformed_qvec_njit(q, d_max, n):
     qd = q * (d_max/pi)
     return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+
+@njit()
+def reg_term(pars, d_max, nslice):
+    """
+    Regularization term calculated from the expansion.
+    """
+    sum = 0.0
+    r = 0.0
+    deriv = 0.0
+    #pre computing, implicitly convering nslice to double
+    #as originally done in loop
+    nslice_double = 1.0 * nslice
+    for i in range(nslice):
+        r = d_max/nslice_double*i
+        deriv = dprdr(pars, d_max, r)
+        sum += deriv*deriv
+
+    return sum/nslice_double * d_max
+
+@njit()
+def int_p2(pars, d_max, nslice):
+    """
+    Regularization term calculated from the expansion. 
+    """
+
 
 #testing
 def demo_dp():
@@ -372,6 +400,7 @@ npts = 30'''
     print("Result Parallelized: ", test_result_p)
     print(test_result_n.shape)
     print(test_result_p.shape)
+
     if(np.array_equal(test_result_p, test_result_n)):
         print("*Identical Results*")
     else:
