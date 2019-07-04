@@ -16,6 +16,7 @@ import logging
 import time
 from numba import jit, njit, vectorize, float64, guvectorize, prange
 import timeit
+from functools import reduce
 
 #class stub for final Pinvertor class
 #taking signatures from Cinvertor.c and docstrings
@@ -204,7 +205,7 @@ def iq_smeared(pars, d_max, height, width, q, npts):
         sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
     return sum
 
-@njit()
+#@njit()
 def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
@@ -332,22 +333,149 @@ def reg_term(pars, d_max, nslice):
     deriv = 0.0
     #pre computing, implicitly convering nslice to double
     #as originally done in loop
-    nslice_double = 1.0 * nslice
+    nslice_d = 1.0 * nslice
     for i in range(nslice):
-        r = d_max/nslice_double*i
+        r = d_max/nslice_d*i
         deriv = dprdr(pars, d_max, r)
         sum += deriv*deriv
 
-    return sum/nslice_double * d_max
+    return sum/nslice_d * d_max
 
 @njit()
 def int_p2(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion. 
     """
+    sum = 0.0
+    r = 0.0
+    value = 0.0
+    nslice_d = 1.0 * nslice
+    for i in range(nslice):
+        r = d_max/nslice_d * i
+        value = pr(pars, d_max, r)
+        sum += value * value
+    return sum/nslice_d * d_max
+
+@njit()
+def int_p(pars, d_max, nslice):
+    """
+    Integral of P(r)
+    """
+    sum = 0.0
+    r = 0.0
+    value = 0.0
+    nslice_d = 1.0 * nslice
+    for i in range(nslice):
+        r = d_max/nslice_d * i
+        value = pr(pars, d_max, r)
+        sum += value
+    return sum/nslice_d * d_max
+
+@njit()
+def npeaks(pars, d_max, nslice):
+    """
+    Get the number of P(r) peaks
+    """
+    r = 0.0
+    value = 0.0
+    previous = 0.0
+    slope = 0.0
+    count = 0
+    nslice_d = nslice * 1.0
+    for i in range(nslice):
+        r = d_max/nslice_d * i
+        value = pr(pars, d_max, r)
+        #print("i: ", value)
+        if(previous<=value):
+            slope = 1
+        else:
+            if(slope>0):
+                count = count + 1
+            slope = -1
+        previous = value
+
+    return count
+
+def positive_integral(pars, d_max, nslice):
+    """
+    Get the fraction of the integral of P(r) over the whole
+    range of r that is above 0.
+    A valid P(r) is defined as being positive for all r. 
+    """
+    r = 0.0
+    value = 0.0
+    sum_pos = 0.0
+    sum = 0.0
+    nslice_d = 1.0 * nslice
+    for i in range(nslice):
+        r = d_max/nslice_d * i
+        value = pr(pars, d_max, r)
+        if(value>0.0):
+           sum_pos += value
+        sum += fabs(value)
+    return sum_pos / sum
+
+def positive_errors(pars, err, d_max, nslice):
+    """
+    Get the fraction of the integral of P(r) over the whole range
+    of r that is at least one sigma above 0. 
+    """
+    r = 0.0
+    sum_pos = 0.0
+    sum = 0.0
+    pr_val = 0.0
+    pr_val_err = 0.0
+    nslice_d = 1.0 * nslice
+    for i in range(nslice):
+        r = d_max/nslice_d * i
+        pr_err(pars, err, d_max, r, pr_val, pr_val_err)
+        if(pr_val>pr_val_err):
+            sum_pos += pr_val
+        sum += fabs(pr_val)
+    return sum_pos/sum
+
+def rg(pars, d_max, nslice):
+    """
+    R_g radius of gyration calculation
+
+    R_g**2 = integral[r**2 * p(r) dr] / (2.0 * integral[p(r) dr])
+    """
+    sum_r2 = 0.0
+    sum = 0.0
+    r = 0.0
+    value = 0.0
+    nslice_d = range(nslice)
+    for i in range(nslice):
+        r = d_max/nslice_d * i
+        value = pr(pars, d_max, r)
+        sum += value
+        sum_r2 += r*r*value
+
+    return np.sqrt(sum_r2/(2.0*sum))
+
+
 
 
 #testing
+
+def demo_npeaks():
+    setup = '''
+from __main__ import npeaks
+from __main__ import npeaks_alt
+import numpy as np
+pars = np.arange(40)
+d_max = 2000
+nslice = 1000'''
+    run = '''
+npeaks(pars, d_max, nslice)
+    '''
+    run2 = '''
+npeaks_alt(pars, d_max, nslice)
+'''
+    print(timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1))
+    print(timeit.repeat(setup = setup, stmt = run2, repeat = 10, number = 1))
+    
+
 def demo_dp():
     pars = np.arange(2000)
     time1 = time.clock()
@@ -448,4 +576,5 @@ def demo():
 
         
 if(__name__ == "__main__"):
-    demo_qvec()
+    demo_npeaks()
+    #print(reg_term(np.arange(40), 2000, 100))
