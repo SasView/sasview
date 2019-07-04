@@ -15,20 +15,15 @@ import re
 import logging
 import time
 from numba import jit, njit, vectorize, float64, guvectorize, prange
+import timeit
 
 #class stub for final Pinvertor class
 #taking signatures from Cinvertor.c and docstrings
-class Pinvertor:
-    def __init__(self):
-        pass
-    def residuals(self, args):
-        """
-        Function to call to evaluate the residuals\n
-	    for P(r) inversion\n
-	    @param args: input parameters\n
-	    @return: list of residuals
-        """
-        pass
+
+
+
+
+
 
 #Private Methods
 
@@ -266,6 +261,65 @@ def dprdr_vec(pars, d_max, r):
     i = np.arange(pars.shape[0])
     return np.sum(f(i, pars))
 
+
+
+
+#qvec methods
+def iq_smeared_qvec(p, q, d_max, height, width, npts):
+    total = np.zeros_like(q)
+    for i, pi in enumerate(p):
+         total += pi * ortho_transformed_smeared_qvec(q, d_max, i+1, height, width, npts)
+    return total
+
+def ortho_transformed_smeared_qvec(q, d_max, n, height, width, npts):
+    n_width = npts if width > 0 else 1
+    n_height = npts if height > 0 else 1
+    dz = height/(npts-1)
+    y0, dy = -0.5*width, width/(npts-1)
+    total = np.zeros(len(q), dtype='d')
+    # note: removing count_w since ortho now handles q=0 case
+    for j in range(n_height):
+        zsq = (j * dz)**2
+        for i in range(n_width):
+            y = y0 + i*dy
+            qsq = (q - y)**2 + zsq
+            total += ortho_transformed_qvec(np.sqrt(qsq), d_max, n)
+    return total / (n_width*n_height) 
+
+def ortho_transformed_qvec(q, d_max, n):
+    qd = q * (d_max/pi)
+    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+
+#qvec methods with njit and parallelization
+@njit(parallel = True)
+def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
+    total = np.zeros_like(q)
+    for i in prange(p.shape[0]):
+         total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
+    return total
+
+@njit(parallel = True)
+def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
+    n_width = npts if width > 0 else 1
+    n_height = npts if height > 0 else 1
+    dz = height/(npts-1)
+    y0, dy = -0.5*width, width/(npts-1)
+    total = np.zeros(len(q))
+    # note: removing count_w since ortho now handles q=0 case
+    for j in prange(n_height):
+        zsq = (j * dz)**2
+        for i in prange(n_width):
+            y = y0 + i*dy
+            qsq = (q - y)**2 + zsq
+            total += ortho_transformed_qvec_njit(np.sqrt(qsq), d_max, n)
+    return total / (n_width*n_height) 
+
+@njit(parallel = True)
+def ortho_transformed_qvec_njit(q, d_max, n):
+    qd = q * (d_max/pi)
+    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+
+#testing
 def demo_dp():
     pars = np.arange(2000)
     time1 = time.clock()
@@ -278,12 +332,57 @@ def demo_dp():
     print("time 2: ", end2 - time2)
 
 
-
-
-#testing
-
 def demo_ot():
     print(pr(np.arange(100), 20, 100))
+
+def demo_qvec():
+    q = np.linspace(0.001, 0.5, 301)
+    p = np.arange(40)
+    d_max = 2000
+    width, height = 0.01, 3
+    npts = 30
+    setup = '''
+from __main__ import iq_smeared_qvec_njit
+from __main__ import iq_smeared_qvec
+import numpy as np
+q = np.linspace(0.001, 0.5, 301)
+p = np.arange(40)
+d_max = 2000
+width, height = 0.01, 3
+npts = 30'''
+    codeP = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
+    code = '''iq_smeared_qvec(p, q, d_max, height, width, npts)'''
+
+    #print(iq_smeared_qvec(p, q, d_max, height, width, npts))
+    #repeat 3 times each executing loop once take minimuim because higher values 
+    #not usually caused by python by other processes scheduled by os
+    
+
+    timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
+    times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+    
+    print("Parallel Times: \n", timesParallel)
+    print("Lowest Time P: ", min(timesParallel))
+    print("Normal Times: \n", times)
+    print("Lowest Time N: ", min(times))
+
+    test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
+    test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
+    print("Result Normal: ", test_result_n)
+    print("Result Parallelized: ", test_result_p)
+    print(test_result_n.shape)
+    print(test_result_p.shape)
+    if(np.array_equal(test_result_p, test_result_n)):
+        print("*Identical Results*")
+    else:
+        print("*Different Results*")
+        print("Difference: ")
+        print(test_result_p - test_result_n)
+    #For this code, result = ~1.71 seconds
+
+
+
+    #iq_smeared_qvec(p, q, d_max, height, width, npts)
 
 
 def demo():
@@ -320,4 +419,4 @@ def demo():
 
         
 if(__name__ == "__main__"):
-    demo_dp()
+    demo_qvec()
