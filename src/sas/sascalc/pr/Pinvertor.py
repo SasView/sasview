@@ -49,6 +49,54 @@ class Pinvertor:
         pass
     def get_alpha(self, args):
         pass
+    def set_slit_width(self, args):
+        pass
+    def get_slit_width(self, args):
+        pass
+    def set_slit_height(self, args):
+        pass
+    def get_slit_height(self, args):
+        pass
+    def set_est_bck(self, args):
+        pass
+    def get_est_bck(self, args):
+        pass
+    def get_nx(self, args):
+        pass
+    def get_ny(self, args):
+        pass
+    def get_nerr(self, args):
+        pass
+    def iq(self, args):
+        pass
+    def iq_smeared(self, args):
+        pass
+    def pr(self, args):
+        pass
+    def get_pr_err(self, args):
+        pass
+    def is_valid(self, args):
+        pass
+    def basefunc_ft(self, args):
+        pass
+    def oscillations(self, args):
+        pass
+    def get_peaks(self, args):
+        pass
+    def get_positive(self, args):
+        pass
+    def get_pos_err(self, args):
+        pass
+    def rg(self, args):
+        pass
+    def iq0(self, args):
+        pass
+    def _get_matrix(self, args):
+        pass
+    def _get_invcov_matrix(self, args):
+        pass
+    def _get_reg_size(self, args):
+        pass
 
 if(__name__ == "__main__"):
     pr_sphere()
