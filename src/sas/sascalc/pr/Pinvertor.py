@@ -41,8 +41,32 @@ class Pinvertor:
 	    @param args: input parameters\n
 	    @return: list of residuals
         """
-        #regterm = reg_term(pars, )
-        pass
+        residuals = [] 
+        #need to check this, OUTVECTOR implementation
+        pars = np.empty([], dtype = np.float)
+        residual = 0.0
+        diff = 0.0
+        regterm = 0.0
+        nslice = 25
+        regterm = reg_term(pars, d_max, nslice)
+        #todo: if(!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
+        #OUTVECTOR(data_obj, pars, npars);
+        for i in range(npoints):
+            diff = y[i] - iq(pars, d_max, x[i])
+            residual = diff*diff / (err[i] * err[i])
+
+            residual =  alpha * regterm
+
+            residuals.append(residual)
+            """
+            todo:
+            if (PyList_SetItem(residuals, i, Py_BuildValue("d",residual) ) < 0){
+    	    PyErr_SetString(CinvertorError,
+    	    	"Cinvertor.residuals: error setting residual.");
+    		return NULL;
+    	    };
+            """
+        return residuals
     def set_x(self, args):
         """
         Function to set the x data
@@ -158,4 +182,4 @@ if(__name__ == "__main__"):
     #it = Invertor_Test()
     #it.test()
     #it.test2()
-    print(reg_term(np.arange(40), 2000, 100))
+    #print(reg_term(np.arange(40), 2000, 100))
