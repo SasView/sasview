@@ -396,6 +396,9 @@ def npeaks(pars, d_max, nslice):
 
     return count
 
+
+
+
 def positive_integral(pars, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole
@@ -457,6 +460,49 @@ def rg(pars, d_max, nslice):
 
 
 #testing
+#@njit()
+def speed_test_njit(x):
+    
+    result = np.zeros([x.shape[0]])
+    
+    for i, xi in enumerate(x):
+        result[i] = xi * xi
+    return result
+
+def speed_test_vec(x):
+
+    @vectorize([float64(float64)])
+    def multiply(y):
+        return y * y
+    multiply(x)
+def speed_test_numpy_vec(x):
+
+    def multiply(y):
+        return y * y
+    f = np.vectorize(multiply)
+    f(x)
+
+
+def demo_speedtest():
+    setup = '''
+from __main__ import speed_test_njit
+from __main__ import speed_test_vec
+from __main__ import speed_test_numpy_vec
+import numpy as np
+x = np.arange(1000000)
+'''
+    run_njit = '''
+speed_test_njit(x)
+'''
+    run_vec = '''
+speed_test_vec(x)
+'''
+    run_np = '''
+speed_test_numpy_vec(x)
+'''
+    print(timeit.repeat(setup = setup, stmt = run_njit, repeat = 10, number = 1))
+    print(timeit.repeat(setup = setup, stmt = run_vec, repeat = 10, number = 1))
+    print(timeit.repeat(setup = setup, stmt = run_np, repeat = 10, number = 1))
 
 def demo_npeaks():
     setup = '''
@@ -576,5 +622,5 @@ def demo():
 
         
 if(__name__ == "__main__"):
-    demo_npeaks()
+    demo_speedtest()
     #print(reg_term(np.arange(40), 2000, 100))
