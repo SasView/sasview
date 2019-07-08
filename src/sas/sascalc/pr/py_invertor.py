@@ -590,12 +590,42 @@ def demo_dp():
 def demo_ot():
     print(pr(np.arange(100), 20, 100))
 
-def demo_qvec():
-    q = np.linspace(0.001, 0.5, 301)
+def demo_c_equiv():
+    #q = 0.05
     p = np.arange(40)
+    print(p)
     d_max = 2000
     width, height = 0.01, 3
     npts = 30
+    q = np.array([1], dtype = np.float)
+    q[0] = 0.05
+    setup = '''
+from __main__ import iq_smeared_qvec_njit
+import numpy as np
+p = np.arange(40)
+print(p)
+d_max = 2000
+width, height = 0.01, 3
+npts = 30
+q = np.array([1], dtype = np.float)
+q[0] = 0.05'''
+    run = '''
+iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
+    times = timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1)
+    print(times)
+    print(iq_smeared_qvec(p, q, d_max, height, width, npts))
+
+
+def demo_qvec():
+    #q = np.linspace(0.001, 0.5, 301)
+    q = 0.05
+    p = np.arange(40)
+    print(q)
+    print(p)
+    d_max = 2000
+    width, height = 0.01, 3
+    npts = 30
+
     setup = '''
 from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
@@ -675,5 +705,49 @@ def demo():
 
 
 if(__name__ == "__main__"):
-    demo_speedtest()
+    demo_c_equiv()
     #print(reg_term(np.arange(40), 2000, 100))
+
+"""
+C driver code for testing speed
+int main(void) {
+  printf("Hello World\n");
+  int size_p = 40;
+  int size_q = 301;
+  double* p = malloc(size_p * sizeof(double));
+  double* q = malloc(size_q * sizeof(double));
+  int i;
+  for(i = 0; i < size_q; i++) {
+      q[i] = 0.01 + (0.00166 * i);
+      printf("%f, ", q[i]);
+  }
+  printf("\n");
+  for(i = 0; i < size_p; i++) {
+       p[i] = i;
+       printf("%f, ", p[i]);
+  }
+  double d_max = 2000;
+  double width = 0.01;
+  double height = 3;
+  int npts = 30;
+
+   clock_t start, end;
+   double cpu_time_used;
+     
+   start = clock();
+   double res = iq_smeared(p, d_max, size_p, height, width, 0.5, npts);
+   end = clock();
+   cpu_time_used = ((double) ((end - start) / CLOCKS_PER_SEC));
+  
+
+  printf("\n Result: %f\n\n\n", res);
+  printf("Time taken: %f\n\n\n", cpu_time_used);
+
+  free(p);
+  free(q);
+  p = NULL;
+  q = NULL;
+
+  return 0;
+}
+"""
