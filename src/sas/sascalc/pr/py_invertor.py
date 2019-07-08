@@ -515,9 +515,9 @@ def rg(pars, d_max, nslice):
 #testing
 #@njit()
 def speed_test_njit(x):
-    
+
     result = np.zeros([x.shape[0]])
-    
+
     for i, xi in enumerate(x):
         result[i] = xi * xi
     return result
@@ -733,12 +733,12 @@ int main(void) {
 
    clock_t start, end;
    double cpu_time_used;
-     
+
    start = clock();
    double res = iq_smeared(p, d_max, size_p, height, width, 0.5, npts);
    end = clock();
    cpu_time_used = ((double) ((end - start) / CLOCKS_PER_SEC));
-  
+
 
   printf("\n Result: %f\n\n\n", res);
   printf("Time taken: %f\n\n\n", cpu_time_used);
