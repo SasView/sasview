@@ -55,8 +55,8 @@ def ortho(d_max, n, r):
 def ortho_transformed(d_max, n, q):
     """
     Fourier transform of the nth orthagonal function
-    
-    With vectorize time was 
+
+    With vectorize time was
     \@vectorize() ~= 1.4e-05
     \@njit() ~= 3e-06
     \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
@@ -151,7 +151,7 @@ def iq_vectorized(pars, d_max, q):
     vectorised operations ~= 0.0002
     using njit, no parallel possible ~= 1.3e-05
 
-    Array size 300 
+    Array size 300
     3386 result
     """
     q = np.asanyarray(q)
@@ -194,10 +194,10 @@ def iq_smeared(pars, d_max, height, width, q, npts):
     Maybe faster if work together ?
     njit() compilation only slightly faster. Maybe with working
     njit() and vector operations be faster.
-    
+
     iq_smeared(np.arange(10000), 3, 100, 100, 30, 400) - no parallel - 75
-    - parallel - 23.13, over 3x speedup. 
-    
+    - parallel - 23.13, over 3x speedup.
+
     """
     sum = 0.0
 
@@ -225,12 +225,12 @@ def pr_err(pars, err, d_max, r, pr_value, pr_value_err):
     sum_err = 0.0
     func_value = 0
     n_c = pars.shape[0]
-    
+
     for i in range(0, n_c):
         func_value = ortho(d_max, i+1, r)
         sum += pars[i] * func_value
         sum_err += err[i * n_c + i] * func_value * func_value
-    
+
     pr_value = sum
     if(sum_err > 0):
         pr_value_err = np.sqrt(sum_err)
@@ -241,7 +241,7 @@ def pr_err(pars, err, d_max, r, pr_value, pr_value_err):
 def dprdr(pars, d_max, r):
     #test sample 10,000 - 0.00039/38
         #adv - 0.00048
-        
+
     sum = 0.0
     #300, 2.5e-05
     for i in range(0, pars.shape[0]):
@@ -264,6 +264,56 @@ def dprdr_vec(pars, d_max, r):
 
 
 
+#mp methods
+def iq_smeared_mp(p, q, d_max, height, width, npts):
+    total = q*0
+    for k, pk in enumerate(p):
+         total += pk * ortho_transformed_smeared_mp(q, d_max, k+1, height, width, npts)
+    return total
+
+def ortho_transformed_smeared_mp(q, d_max, n, height, width, npts):
+    import mpmath as mp
+    n_width = npts if width > 0 else 1
+    n_height = npts if height > 0 else 1
+    dz = height/(npts-1)
+    y0, dy = -width/2, width/(npts-1)
+    total = q*0
+    # note: removing count_w since ortho now handles q=0 case
+    for j in range(n_height):
+        zsq = (j * dz)**2
+        for i in range(n_width):
+            y = y0 + i*dy
+            qsq = (q - y)**2 + zsq
+            total += ortho_transformed_mp(mp.sqrt(qsq), d_max, n)
+    return total / (n_width*n_height)
+
+def ortho_transformed_mp(q, d_max, n):
+    import mpmath as mp
+    qd = q * (d_max/mp.pi)
+    return ( 8 * d_max**2/mp.pi * n * (-1.0)**(n+1) ) * mp.sincpi(qd) / (n**2 - qd**2)
+
+def check_mp(bits=500):
+    import mpmath as mp
+    from mpmath import mpf
+    with mp.workprec(bits):
+        npts = 30
+        one = mp.mpf(1)
+        q = mp.linspace(one/1000, one/2, 5)
+        p = mp.arange(40)
+        d_max = one*2000
+        width, height = one/100, one*3
+        mp_result = [iq_smeared_mp(p, qk, d_max, height, width, npts) for qk in q]
+
+        p = np.array([float(pk) for pk in p])
+        q = np.array([float(qk) for qk in q])
+        d_max = float(d_max)
+        width, height = float(width), float(height)
+        np_result = iq_smeared_qvec(p, q, d_max, height, width, npts)
+        njit_result = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
+
+        for qk, mpk, npk, jitk in zip(q, mp_result, np_result, njit_result):
+            #print(qk, mpk, npk, float((mpk-npk)/mpk))
+            print(qk, float(mpk), npk, jitk, "err", float((mpk-npk)/mpk), float((mpk-jitk)/mpk))
 
 #qvec methods
 def iq_smeared_qvec(p, q, d_max, height, width, npts):
@@ -285,18 +335,20 @@ def ortho_transformed_smeared_qvec(q, d_max, n, height, width, npts):
             y = y0 + i*dy
             qsq = (q - y)**2 + zsq
             total += ortho_transformed_qvec(np.sqrt(qsq), d_max, n)
-    return total / (n_width*n_height) 
+    return total / (n_width*n_height)
 
 def ortho_transformed_qvec(q, d_max, n):
     qd = q * (d_max/pi)
-    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n + qd) / (n - qd)
 
 #qvec methods with njit and parallelization
 #Parallelizing this method increases speed but decrases accuracy slightly.
 @njit(parallel = True)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
-    total = np.zeros_like(q)
-    for i in prange(p.shape[0]):
+    total = np.zeros(len(q), dtype=np.float64)
+    #total = np.zeros_like(q)
+    for i in range(p.shape[0]):
          total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
     return total
 
@@ -306,7 +358,8 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
     n_height = npts if height > 0 else 1
     dz = height/(npts-1)
     y0, dy = -0.5*width, width/(npts-1)
-    total = np.zeros(len(q), dtype = np.dtype('d'))
+    total = np.zeros(len(q), dtype=np.float64)
+    #total = np.zeros_like(q)
     # note: removing count_w since ortho now handles q=0 case
     for j in prange(n_height):
         zsq = (j * dz)**2
@@ -314,7 +367,7 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
             y = y0 + i*dy
             qsq = (q - y)**2 + zsq
             total += ortho_transformed_qvec_njit(np.sqrt(qsq), d_max, n)
-    return total / (n_width*n_height) 
+    return total / (n_width*n_height)
 
 #Strangely, parallelizing this method slows down the entire computation
 #by about half.
@@ -344,7 +397,7 @@ def reg_term(pars, d_max, nslice):
 @njit()
 def int_p2(pars, d_max, nslice):
     """
-    Regularization term calculated from the expansion. 
+    Regularization term calculated from the expansion.
     """
     sum = 0.0
     r = 0.0
@@ -403,7 +456,7 @@ def positive_integral(pars, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole
     range of r that is above 0.
-    A valid P(r) is defined as being positive for all r. 
+    A valid P(r) is defined as being positive for all r.
     """
     r = 0.0
     value = 0.0
@@ -421,7 +474,7 @@ def positive_integral(pars, d_max, nslice):
 def positive_errors(pars, err, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole range
-    of r that is at least one sigma above 0. 
+    of r that is at least one sigma above 0.
     """
     r = 0.0
     sum_pos = 0.0
@@ -520,7 +573,7 @@ npeaks_alt(pars, d_max, nslice)
 '''
     print(timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1))
     print(timeit.repeat(setup = setup, stmt = run2, repeat = 10, number = 1))
-    
+
 
 def demo_dp():
     pars = np.arange(2000)
@@ -556,13 +609,13 @@ npts = 30'''
     code = '''iq_smeared_qvec(p, q, d_max, height, width, npts)'''
 
     #print(iq_smeared_qvec(p, q, d_max, height, width, npts))
-    #repeat 3 times each executing loop once take minimuim because higher values 
+    #repeat 3 times each executing loop once take minimuim because higher values
     #not usually caused by python by other processes scheduled by os
-    
+
 
     timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
     times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
-    
+
     print("Parallel Times: \n", timesParallel)
     print("Lowest Time P: ", min(timesParallel))
     print("Normal Times: \n", times)
@@ -592,20 +645,20 @@ def demo():
     tests = 6
     testVals = np.zeros([tests,2])
 
-    for j in range(0, tests): 
+    for j in range(0, tests):
         coeff = np.arange(100)
         minq = 0
         maxq = 30000
         d_max = 30
 
-        start = time.clock() 
+        start = time.clock()
         x = np.linspace(minq, maxq, 301)
         print(x.shape)
         y = np.zeros_like(x)
         for i, qi in enumerate(x):
             y[i] = iq(coeff, d_max, qi)
         end = time.clock()
-        
+
         testVals[j][0] = (end - start)
         print("Time elapsed 1 : %s" % testVals[j][0])
 
@@ -620,7 +673,7 @@ def demo():
     print("Mean time 1: ", np.mean(testVals[1::, 0]))
     print("Mean time 2: ", np.mean(testVals[1::, 1]))
 
-        
+
 if(__name__ == "__main__"):
     demo_speedtest()
     #print(reg_term(np.arange(40), 2000, 100))
