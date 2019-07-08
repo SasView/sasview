@@ -1,5 +1,13 @@
+"""
+Under Development-
+Class duplicating Cinvertor.c's functionality in Python
+depends on py_invertor.py as a pose to invertor.c
+"""
 import py_invertor
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Pinvertor:
     #class variables, from internal data structure P(r) inversion
@@ -41,31 +49,31 @@ class Pinvertor:
 	    @param args: input parameters\n
 	    @return: list of residuals
         """
-        residuals = [] 
-        #need to check this, OUTVECTOR implementation
-        pars = np.empty([], dtype = np.float)
+        #May not be correct, initial version
+        #check for null case
+        if args is None:
+            return None
+
+        residuals = []
+
+        pars = np.asanyarray(args, dtype = np.float)
+
         residual = 0.0
         diff = 0.0
         regterm = 0.0
         nslice = 25
         regterm = reg_term(pars, d_max, nslice)
-        #todo: if(!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-        #OUTVECTOR(data_obj, pars, npars);
-        for i in range(npoints):
+
+        for i in range(self.npoints):
             diff = y[i] - iq(pars, d_max, x[i])
             residual = diff*diff / (err[i] * err[i])
 
-            residual =  alpha * regterm
+            residual += alpha * regterm
+            try:
+                residuals.append(residual)
+            except:
+                logger.error("Pinvertor.residuals: error setting residual.")
 
-            residuals.append(residual)
-            """
-            todo:
-            if (PyList_SetItem(residuals, i, Py_BuildValue("d",residual) ) < 0){
-    	    PyErr_SetString(CinvertorError,
-    	    	"Cinvertor.residuals: error setting residual.");
-    		return NULL;
-    	    };
-            """
         return residuals
     def set_x(self, args):
         """
@@ -73,14 +81,51 @@ class Pinvertor:
         Takes an array of the doubles as input
         Returns the number of entries found
         """
-        pass
+        #check for null input case
+        if args is None:
+            return None
+
+        data = np.asanyarray(args, dtype = np.float)
+        #not 100% about this line
+        ndata = data.shape[0]
+
+        #try to set every element in x to data input
+        #try:
+        self.x = np.ones(20)
+        for i in range(ndata):
+            self.x[i] = data[i]
+        #except:
+         #   logger.error("Pinvertor.set_x: problem allocating memory.")
+          #  return None
+
+        self.npoints = int(ndata)
+        return self.npoints
+
     def get_x(self, args):
         """
         Function to get the x data
         Takes an array of doubles as input
         @return: number of entries found
         """
-        pass
+        if args is None:
+            return None
+
+
+        data = np.asanyarray(args, dtype = np.float)
+        ndata = data.shape[0]
+
+        #Check that the input array is large enough
+
+        if(ndata < self.npoints):
+            logger.error("Pinvertor.get_x: input array too short for data. ")
+            return None
+
+        for i in range(self.npoints):
+            data[i] = self.x[i]
+
+        return self.npoints
+
+
     def set_y(self, args):
         """
         Function to set the y data
@@ -172,14 +217,13 @@ class Pinvertor:
 class Invertor_Test(Pinvertor):
     def __init__(self):
         Pinvertor.__init__(self)
-    def test(self):
-        print("asdf")
-    def test2(self):
-        Pinvertor._get_matrix(self, 34)
+    def set_x(self):
+        return Pinvertor.set_x(self, np.arange(20))
+    def get_x(self):
+        return Pinvertor.get_x(self, np.empty([20]))
 
 
 if(__name__ == "__main__"):
-    #it = Invertor_Test()
-    #it.test()
-    #it.test2()
-    #print(reg_term(np.arange(40), 2000, 100))
+    it = Invertor_Test()
+    print(it.set_x())
+    print(it.get_x())
