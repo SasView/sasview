@@ -14,7 +14,7 @@ import os
 import re
 import logging
 import time
-from numba import jit, njit, vectorize, float64, guvectorize, prange
+from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
 import timeit
 from functools import reduce
 
@@ -348,7 +348,7 @@ def ortho_transformed_qvec(q, d_max, n):
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
     #total = np.zeros_like(q)
-    for i in range(p.shape[0]):
+    for i in prange(p.shape[0]):
          total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
     return total
 
@@ -369,12 +369,11 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
             total += ortho_transformed_qvec_njit(np.sqrt(qsq), d_max, n)
     return total / (n_width*n_height)
 
-#Strangely, parallelizing this method slows down the entire computation
-#by about half.
 @njit(cache = True)
 def ortho_transformed_qvec_njit(q, d_max, n):
-    qd = q * (d_max/pi)
-    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
+    #qd = q * (d_max/pi)
+    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
 @njit()
 def reg_term(pars, d_max, nslice):
@@ -535,6 +534,34 @@ def speed_test_numpy_vec(x):
     f = np.vectorize(multiply)
     f(x)
 
+@generated_jit(nopython = True)
+def gen_jit_test(x):
+    temp = 1
+    for i in range(40):
+        temp *= x[i]
+    return temp
+
+@njit(cache = True)
+def jit_test(x):
+    temp = 1
+    for i in range(40):
+        temp *= x[i]
+    return temp
+
+def demo_genjit():
+    setup = '''
+from __main__ import jit_test, gen_jit_test
+import numpy as np
+x = np.arange(40)'''
+    run_gen = '''
+gen_jit_test(x)
+    '''
+    run = '''
+jit_test(x)
+    '''
+    print("Gen_jit: ", timeit.repeat(setup = setup, stmt = run_gen, repeat = 10, number = 1))
+    print("Gen: ", timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1))
+
 #@njit(cache = True)
 @njit(cache = True)
 def cache_test(x):
@@ -622,7 +649,7 @@ def demo_ot():
 def demo_c_equiv():
     #q = 0.05
     p = np.arange(40)
-    print(p)
+    #print(p)
     d_max = 2000
     width, height = 0.01, 3
     npts = 30
@@ -638,14 +665,14 @@ npts = 30
 q = np.linspace(0.001, 0.5, 301)'''
     run = '''
 iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
-    times = timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1)
-    print(times)
+    #times = timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1)
+    #print(times)
+
     print("Result:", np.sum(iq_smeared_qvec_njit(p, q, d_max, height, width, npts)))
 
 
 def demo_qvec():
-    #q = np.linspace(0.001, 0.5, 301)
-    q = 0.05
+    q = np.linspace(0.001, 0.5, 301)
     p = np.arange(40)
     print(q)
     print(p)
@@ -732,7 +759,7 @@ def demo():
 
 
 if(__name__ == "__main__"):
-    demo_c_equiv()
+    demo_genjit()
     #print(reg_term(np.arange(40), 2000, 100))
 
 """
