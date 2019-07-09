@@ -89,14 +89,17 @@ class Pinvertor:
         #not 100% about this line
         ndata = data.shape[0]
 
+        #reset x
+        self.x = None
+        self.x = np.zeros(ndata)
+
         #try to set every element in x to data input
-        #try:
-        self.x = np.ones(20)
-        for i in range(ndata):
-            self.x[i] = data[i]
-        #except:
-         #   logger.error("Pinvertor.set_x: problem allocating memory.")
-          #  return None
+        try:
+            for i in range(ndata):
+                self.x[i] = data[i]
+        except:
+            logger.error("Pinvertor.set_x: problem allocating memory.")
+            return None
 
         self.npoints = int(ndata)
         return self.npoints
@@ -107,21 +110,14 @@ class Pinvertor:
         Takes an array of doubles as input
         @return: number of entries found
         """
-        if args is None:
-            return None
-
-
-        data = np.asanyarray(args, dtype = np.float)
-        ndata = data.shape[0]
-
-        #Check that the input array is large enough
-
-        if(ndata < self.npoints):
-            logger.error("Pinvertor.get_x: input array too short for data. ")
+        ndata = args.shape[0]
+        #check that the input array is large enough
+        if(ndata <  self.npoints):
+            logger.error("Pinvertor.get_x: input array too short for data.")
             return None
 
         for i in range(self.npoints):
-            data[i] = self.x[i]
+            args[i] = self.x[i]
 
         return self.npoints
 
@@ -132,14 +128,47 @@ class Pinvertor:
         Takes an array of doubles as input
         @return: number of entries found
         """
-        pass
+        #check for null input case
+        if args is None:
+            return None
+
+        data = np.asanyarray(args, dtype = np.float)
+        #not 100% about this line
+        ndata = data.shape[0]
+
+        #reset y
+        self.y = None
+        self.y = np.zeros(ndata)
+
+        #try to set every element in y to data input
+        try:
+            for i in range(ndata):
+                self.y[i] = data[i]
+        except:
+            logger.error("Pinvertor.set_y: problem allocating memory.")
+            return None
+
+        self.ny = int(ndata)
+        return self.ny
+
+
     def get_y(self, args):
         """
         Function to get the y data
         Takes an arrayof doubles as input
         @return: number of entries found
         """
-        pass
+        ndata = args.shape[0]
+        #check that the input array is large enough
+        if(ndata <  self.ny):
+            logger.error("Pinvertor.get_y: input array too short for data.")
+            return None
+
+        for i in range(self.ny):
+            args[i] = self.y[i]
+
+        return self.npoints
+
     def set_err(self, args):
         """
         Function to set the err data
@@ -217,13 +246,15 @@ class Pinvertor:
 class Invertor_Test(Pinvertor):
     def __init__(self):
         Pinvertor.__init__(self)
-    def set_x(self):
-        return Pinvertor.set_x(self, np.arange(20))
-    def get_x(self):
-        return Pinvertor.get_x(self, np.empty([20]))
+    def set_x(self, x):
+        return Pinvertor.set_x(self, x)
+    def get_x(self, x):
+        return Pinvertor.get_x(self, x)
 
 
 if(__name__ == "__main__"):
     it = Invertor_Test()
-    print(it.set_x())
-    print(it.get_x())
+    print(it.set_y(np.arange(20)))
+    out = np.ones(30)
+    print(it.get_y(out))
+    print(out)
