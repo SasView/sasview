@@ -344,7 +344,7 @@ def ortho_transformed_qvec(q, d_max, n):
 
 #qvec methods with njit and parallelization
 #Parallelizing this method increases speed but decrases accuracy slightly.
-@njit(parallel = True)
+@njit(parallel = True, cache = True)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
     #total = np.zeros_like(q)
@@ -352,7 +352,7 @@ def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
          total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
     return total
 
-@njit()
+@njit(cache = True)
 def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
     n_width = npts if width > 0 else 1
     n_height = npts if height > 0 else 1
@@ -371,7 +371,7 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
 
 #Strangely, parallelizing this method slows down the entire computation
 #by about half.
-@njit()
+@njit(cache = True)
 def ortho_transformed_qvec_njit(q, d_max, n):
     qd = q * (d_max/pi)
     return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
@@ -535,6 +535,35 @@ def speed_test_numpy_vec(x):
     f = np.vectorize(multiply)
     f(x)
 
+#@njit(cache = True)
+@njit(cache = True)
+def cache_test(x):
+    return x ** 2
+
+@njit()
+def test(x):
+    return x ** 2
+
+def cache_demo():
+    setup = '''
+from __main__ import cache_test
+from __main__ import test
+import numpy as np
+x = np.arange(1000)
+'''
+    run_cache = '''
+cache_test(x)
+'''
+    run = '''
+test(x)
+'''
+    cache_time = timeit.repeat(stmt = run_cache, setup = setup, repeat = 10, number = 1)
+    n_time = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+
+    print("Cache: ", cache_time)
+    print("N Time: ", n_time)
+
+
 
 def demo_speedtest():
     setup = '''
@@ -597,8 +626,7 @@ def demo_c_equiv():
     d_max = 2000
     width, height = 0.01, 3
     npts = 30
-    q = np.array([1], dtype = np.float)
-    q[0] = 0.05
+    q = np.linspace(0.001, 0.5, 301)
     setup = '''
 from __main__ import iq_smeared_qvec_njit
 import numpy as np
@@ -607,13 +635,12 @@ print(p)
 d_max = 2000
 width, height = 0.01, 3
 npts = 30
-q = np.array([1], dtype = np.float)
-q[0] = 0.05'''
+q = np.linspace(0.001, 0.5, 301)'''
     run = '''
 iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
     times = timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1)
     print(times)
-    print(iq_smeared_qvec(p, q, d_max, height, width, npts))
+    print("Result:", np.sum(iq_smeared_qvec_njit(p, q, d_max, height, width, npts)))
 
 
 def demo_qvec():
@@ -711,7 +738,6 @@ if(__name__ == "__main__"):
 """
 C driver code for testing speed
 int main(void) {
-  printf("Hello World\n");
   int size_p = 40;
   int size_q = 301;
   double* p = malloc(size_p * sizeof(double));
