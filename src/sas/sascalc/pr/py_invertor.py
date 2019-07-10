@@ -205,13 +205,13 @@ def iq_smeared(pars, d_max, height, width, q, npts):
         sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
     return sum
 
-#@njit()
+@njit(parallel = True)
 def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
     """
     sum = 0.0
-    for i in range(0, pars.shape[0]):
+    for i in prange(pars.shape[0]):
         sum += pars[i] * ortho(d_max, i+1, r)
     return sum
 
@@ -439,7 +439,7 @@ def npeaks(pars, d_max, nslice):
     slope = 0.0
     count = 0
     nslice_d = nslice * 1.0
-    for i in range(nslice):
+    for i in prange(nslice):
         r = d_max/nslice_d * i
         value = pr(pars, d_max, r)
         #print("i: ", value)
@@ -779,9 +779,22 @@ def demo():
     print("Mean time 1: ", np.mean(testVals[1::, 0]))
     print("Mean time 2: ", np.mean(testVals[1::, 1]))
 
+def demo_npeaks():
+    setup = '''
+from __main__ import npeaks
+import numpy as np
+pars = np.arange(1000, dtype = np.float64)
+d_max = 2000
+nslice = 20'''
+    run = '''
+print(npeaks(pars, d_max, nslice))'''
+    print(timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1))
+
+
+
 
 if(__name__ == "__main__"):
-    demo_qvec()
+    demo_npeaks()
 
 """
 C driver code for testing speed
