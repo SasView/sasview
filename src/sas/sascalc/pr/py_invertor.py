@@ -62,9 +62,9 @@ def ortho_transformed(d_max, n, q):
     \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
     and time was the same as @njit()
     """
-    #return 8.0*(np.pi)**2/q * d_max * n * (-1.0)**(n+1) * math.sin(q*d_max) / ( (math.pi*n)**2 - (q*d_max)**2 )
-    qd = q * (d_max/pi)
-    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    return 8.0*(np.pi)**2/q * d_max * n * (-1.0)**(n+1) * math.sin(q*d_max) / ( (math.pi*n)**2 - (q*d_max)**2 )
+    #qd = q * (d_max/pi)
+    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
 
 @njit()
@@ -317,6 +317,7 @@ def check_mp(bits=500):
 
 #qvec methods
 def iq_smeared_qvec(p, q, d_max, height, width, npts):
+    print(q)
     total = np.zeros_like(q)
     for i, pi in enumerate(p):
          total += pi * ortho_transformed_smeared_qvec(q, d_max, i+1, height, width, npts)
@@ -338,9 +339,9 @@ def ortho_transformed_smeared_qvec(q, d_max, n, height, width, npts):
     return total / (n_width*n_height)
 
 def ortho_transformed_qvec(q, d_max, n):
+    #pi = 3.1416
     qd = q * (d_max/pi)
-    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
-    return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n + qd) / (n - qd)
+    return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
 #qvec methods with njit and parallelization
 #Parallelizing this method increases speed but decrases accuracy slightly.
@@ -371,9 +372,13 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
 
 @njit(cache = True)
 def ortho_transformed_qvec_njit(q, d_max, n):
-    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
-    #qd = q * (d_max/pi)
-    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #pi = 3.1416
+    qd = q * (d_max/pi)
+    return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+
+
+
+
 
 @njit()
 def reg_term(pars, d_max, nslice):
@@ -630,6 +635,12 @@ npeaks_alt(pars, d_max, nslice)
     print(timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1))
     print(timeit.repeat(setup = setup, stmt = run2, repeat = 10, number = 1))
 
+def demo_rearrange():
+    func1 = lambda q, d_max, n : 8 * (pi)**2/ q * d_max * n * (-1)**(n + 1)
+    func2 = lambda q, d_max, n : (8 * (pi)**2 * d_max * n * (-1)**(n + 1))/q
+
+    print(func1(0.5, 2000, 30))
+    print(func2(0.5, 2000, 30))
 
 def demo_dp():
     pars = np.arange(2000)
@@ -645,6 +656,10 @@ def demo_dp():
 
 def demo_ot():
     print(pr(np.arange(100), 20, 100))
+def demo_ortho():
+    q = 0.05
+
+    print(ortho_transformed_qvec_njit(q, 2000, 30))
 
 def demo_c_equiv():
     #q = 0.05
@@ -662,17 +677,22 @@ print(p)
 d_max = 2000
 width, height = 0.01, 3
 npts = 30
-q = np.linspace(0.001, 0.5, 301)'''
+q = np.linspace(0.001, 0.5, 301)
+print("Working q: ", q.shape)
+print(q)'''
     run = '''
-iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
+iq_smeared_qvec(p, q, d_max, height, width, npts)'''
     #times = timeit.repeat(setup = setup, stmt = run, repeat = 10, number = 1)
     #print(times)
-
-    print("Result:", np.sum(iq_smeared_qvec_njit(p, q, d_max, height, width, npts)))
+    for i in range(q.shape[0]):
+        q[i] = 0.01 + (0.00166 * i)
+    print(q)
+    print("Result:", np.sum(iq_smeared_qvec(p, q, d_max, height, width, npts)))
 
 
 def demo_qvec():
-    q = np.linspace(0.001, 0.5, 301)
+    #q = np.linspace(0.001, 0.5, 301)
+    q = np.arange(301, dtype = np.float64)
     p = np.arange(40)
     print(q)
     print(p)
@@ -717,6 +737,8 @@ npts = 30'''
     else:
         print("*Different Results*")
         print("Difference: ")
+        print(np.sum(test_result_p))
+        print(np.sum(test_result_n))
         print(test_result_p - test_result_n)
     #For this code, result = ~1.71 seconds
 
@@ -759,8 +781,7 @@ def demo():
 
 
 if(__name__ == "__main__"):
-    demo_genjit()
-    #print(reg_term(np.arange(40), 2000, 100))
+    demo_qvec()
 
 """
 C driver code for testing speed
