@@ -6,6 +6,9 @@ depends on py_invertor.py as a pose to invertor.c
 import py_invertor
 import numpy as np
 import logging
+import math
+import timeit
+from numba import njit
 
 logger = logging.getLogger(__name__)
 
@@ -551,22 +554,25 @@ class Pinvertor:
             #Vector too small
             #abort program execution, replace C assert()
             #may need more error messages here etc.
+            print("b too small")
             return None
         if(a_obj.shape[0] < nfunc*(nr + self.npoints)):
+            print("a too small")
             return None
 
         a = a_obj
         b = b_obj
 
         sqrt_alpha = np.sqrt(self.alpha)
-        pi = math.acos(-1.0)
+        pi = np.arccos(-1.0)
         offset = (1, 0)[self.est_bck == 1]
 
         #instead of checking for 0 in err in for loop, check all
         #for 0 before
         def check_for_zero(x):
-            if(x.any() == 0.0):
-                return True
+            for i, ni in enumerate(x):
+                if(ni == 0):
+                    return True
             return False
 
         if(check_for_zero(self.err)):
@@ -574,6 +580,20 @@ class Pinvertor:
             return None
 
         for j in range(nfunc):
+            for i in range(self.npoints):
+                index = i * nfunc + j
+                npts = 21
+                if(self.accept_q(self.x[i])):
+
+                    if(self.est_bck == 1 and j == 0):
+                        a[index] = 1.0/self.err[i]
+
+                    else:
+                        if(self.slit_width > 0 or self.slit_height > 0):
+                            a[index] = py_invertor.ortho_transformed_smeared_qvec_njit(self.x[i], self.d_max, j + offset,
+                                                                             self.slit_height, self.slit_width, npts)/self.err[i]
+                        else:
+                            a[index] = py_invertor.ortho_transformed_qvec_njit(self.x[i], self.d_max, j + offset)/self.err[i]
 
             for i_r in range(nr):
                 index = (i_r + self.npoints) * nfunc + j
@@ -589,19 +609,98 @@ class Pinvertor:
 
                     a[index] =  t1 * t2
 
-        for i in range(npoints):
-            if(accept_q(self, self.x[i])):
+        for i in range(self.npoints):
+            if(self.accept_q(self.x[i])):
                 b[i] = self.y[i] / self.err[i]
 
         return 0
+    #same but using pre computed values for ortho transforms.
+    def get_matrix_precomputed(self, nfunc, nr, a_obj, b_obj):
+        """
+        Returns A matrix and b vector for least square problem.
+        @param nfunc: number of base functions
+        @param nr: number of r-points used when evaluating reg term.
+        @param a: A array to fill
+        @param b: b vector to fill
+        @return: 0
+        """
+        #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
 
+        if(b_obj.shape[0] < nfunc):
+            #Vector too small
+            #abort program execution, replace C assert()
+            #may need more error messages here etc.
+            print("b too small")
+            return None
+        if(a_obj.shape[0] < nfunc*(nr + self.npoints)):
+            print("a too small")
+            return None
 
+        a = a_obj
+        b = b_obj
 
+        sqrt_alpha = np.sqrt(self.alpha)
+        pi = np.arccos(-1.0)
+        offset = (1, 0)[self.est_bck == 1]
 
+        #instead of checking for 0 in err in for loop, check all
+        #for 0 before
+        def check_for_zero(x):
+            if(x.any() == 0.0):
+                return True
+            return False
 
+        if(check_for_zero(self.err)):
+            logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
+            return None
+        #pre computed ortho_transformed_smeared -
+        npts = 21
+        #whether to use smeared function or ortho_transform
+        smeared = (self.slit_width > 0) or (self.slit_height > 0)
+        for j in range(nfunc):
+            matrix = 0
+            if(smeared):
+                ortho_sm = np.zeros(self.npoints)
+                ortho_sm = py_invertor.ortho_transformed_smeared_qvec_njit(self.x, self.d_max, j + offset,
+                                                                   self.slit_height, self.slit_width, npts)
+                ortho_sm /= self.err
+                matrix = ortho_sm
+            else:
+                ortho = np.zeros(self.npoints)
+                ortho = py_invertor.ortho_transformed_qvec_njit( self.x, self.d_max, j + offset)
+                ortho /= self.err
+                matrix = ortho
 
+            for i in range(self.npoints):
+                index = i * nfunc + j
+                npts = 21
+                if(self.accept_q(self.x[i])):
 
+                    if(self.est_bck == 1 and j == 0):
+                        a[index] = 1.0/self.err[i]
 
+                    else:
+                        a[index] = matrix[i]
+
+            for i_r in range(nr):
+                index = (i_r + self.npoints) * nfunc + j
+                if(self.est_bck == 1 and j == 0):
+                    a[index] = 0.0
+                else:
+                    r = self.d_max / nr * i_r
+                    tmp = pi * (j + offset) / self.d_max
+                    t1 = sqrt_alpha * 1.0/nr * self.d_max * 2.0
+
+                    t2 = (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
+                    + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
+
+                    a[index] =  t1 * t2
+
+        for i in range(self.npoints):
+            if(self.accept_q(self.x[i])):
+                b[i] = self.y[i] / self.err[i]
+
+        return 0
 
     def get_invcov_matrix(self, args):
         pass
@@ -612,8 +711,7 @@ class Invertor_Test(Pinvertor):
     def __init__(self):
         Pinvertor.__init__(self)
 
-
-if(__name__ == "__main__"):
+def demo():
     it = Pinvertor()
     d_max = 2000.0
     n = 21
@@ -625,5 +723,59 @@ if(__name__ == "__main__"):
     print(it.set_dmax(d_max))
 
     print(it.get_iq0(pars))
-    #print(py_invertor.rg(pars, d_max, nslice))
+    it.set_x(np.arange(100))
+    it.set_y(np.arange(100))
+    it.set_err(np.arange(100))
+    a = np.zeros(100*100*it.get_nx())
+    b = np.zeros(100)
+    print(it.get_matrix_precomputed(100, 100, a, b))
+    c = np.zeros(100*100*it.get_nx())
+    print(it.get_matrix(100, 100, c, b))
+
+    if(np.array_equal(a, c)):
+        print("Same")
+    else:
+        print("different")
+        for i in range(a.shape[0]):
+            if(a[i] - c[i] != 0):
+                print("Position: ", i)
+                print("pre_computed: ", a[i])
+                print("normal: ", c[i])
+                print("difference: ", a[i] - c[i])
+
+
+    #for i, ni in enumerate(a):
+    #    print(ni)
+    print("B:", b)
+    #print(py_invertor.rg(pars, d_max, nslice))]
+def test():
+    setup = '''
+from __main__ import Pinvertor
+import numpy as np
+it = Pinvertor()
+d_max = 2000.0
+n = 21
+q = 0.5
+pars = np.arange(50)
+pars_err = np.arange(50)
+nslice = 101
+
+#print(it.set_dmax(d_max))
+
+#print(it.get_iq0(pars))
+it.set_x(np.arange(100))
+it.set_y(np.arange(100))
+it.set_err(np.arange(100) + 1)
+a = np.zeros(100*100*it.get_nx())
+b = np.zeros(100)
+'''
+    run_prec = '''
+it.get_matrix_precomputed(100, 100, a, b)'''
+    run_norm = '''
+it.get_matrix(100, 100, a, b)'''
+    print("pre-computed:", timeit.repeat(stmt = run_prec, setup = setup, repeat = 1, number = 1))
+    print("normal", timeit.repeat(stmt = run_norm, setup = setup, repeat = 1, number = 1))
+
+if(__name__ == "__main__"):
+    test()
 
