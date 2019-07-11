@@ -36,7 +36,7 @@ class Pinvertor:
     #while inverting
     est_bck = 0
     #Slit height in units of q [A-1]
-    slight_height = 0.0
+    slit_height = 0.0
     #Slit width in units of q [A-1]
     slit_width = 0.0
 
@@ -83,6 +83,9 @@ class Pinvertor:
         """
         #check for null input case
         if args is None:
+            return None
+        #if given an array with shape = []
+        if(len(args.shape) == 0):
             return None
 
         data = np.asanyarray(args, dtype = np.float)
@@ -131,6 +134,9 @@ class Pinvertor:
         #check for null input case
         if args is None:
             return None
+        #if given an array with shape = []
+        if(len(args.shape) == 0):
+            return None
 
         data = np.asanyarray(args, dtype = np.float)
         #not 100% about this line
@@ -175,6 +181,12 @@ class Pinvertor:
         Takes an array of doubles as input
         Returns the number of entries found
         """
+        if(args is None):
+            return None
+        #if given an array with shape = []
+        if(len(args.shape) == 0):
+            return None
+
         ndata = args.shape[0]
 
         self.err = None
@@ -316,46 +328,180 @@ class Pinvertor:
 
     def set_est_bck(self, args):
         """
-        Sets the maximum distance.
+        Sets background flag.
         Takes a single int, returns est_bck value if successful
         """
         if not isinstance(args, int):
             logger.error("Pinvertor.set_est_bck: input not of type int")
             return None
         self.est_bck = args
-        return est_bck
+        return self.est_bck
 
-    def get_est_bck(self, args):
+    def get_est_bck(self):
+        """
+        Gets background flag.
+        """
+        return self.est_bck
+
+    def get_nx(self):
+        """
+        Gets the number of x points
+        """
+        return self.npoints
+
+    def get_ny(self):
+        """
+        Gets the number of y points
+        """
+        return self.ny
+
+    def get_nerr(self):
+        """
+        Gets the number of error points
+        """
+        return self.nerr
+
+    def get_iq(self, pars, q):
+        """
+        Function to call to evaluate the scattering intensity
+        @param args: c-parameters, and q
+        @return: I(q)
+        """
+        if not isinstance(q, float):
+            logger.error("Pinvertor.get_iq: q is not a float.")
+            return None
+
+        iq_val = py_invertor.iq(pars, self.d_max, q)
+        return iq_val
+
+    def get_iq_smeared(self, pars, q):
+        """
+        Function to call to evaluate the scattering intensity.
+        The scattering intensity is slit-smeared.
+        @param args: c-parameters, and q
+        @return: I(q)
+        """
+        if not isinstance(q, float):
+            logger.error("Pinvertor.get_iq_smeared: q is not a float.")
+            return None
+
+        #npts = 21 hardcoded in Cinvertor.c
+        npts = 21
+        iq_val = py_invertor.iq_smeared(pars, self.d_max, self.slit_height,
+                                       self.slit_width, q, npts)
+        return iq_val
+
+    def get_pr(self, pars, r):
+        """
+        Function to call to evaluate P(r)
+        @param args: c-parameters and r
+        @return: P(r)
+        """
+        if not isinstance(r, float):
+            logger.error("Pinvertor.get_pr: r is not of type float.")
+            return None
+
+        pr_val =py_invertor.pr(pars, self.d_max, r)
+        return pr_val
+
+    def get_pr_err(self, pars, pars_err, r):
+        """
+        Function to call to evaluate P(r) with errors
+        @param args: c-parameters and r
+        @return: (P(r), dP(r))
+        """
+        if not isinstance(r, float):
+            logger.error("Pinvertor.get_pr_err: r is not of type float")
+            return None
+
+        pr_val = 0.0
+        pr_err_val = 0.0
+        (pr_val, pr_err_val) = py_invertor.pr_err(pars, pars_err, self.d_max, r)
+
+        return (pr_val, pr_err_val)
+
+    def is_valid(self):
+        """
+        Check the validity of the stored data
+        @return: Returns the number of points if it's all good, -1 otherwise
+        """
+        if(self.npoints == self.ny and self.npoints == self.nerr):
+            #Success, return number of piontspoints
+            return self.npoints
+        else:
+            #Failure, return -1
+            return -1
+
+    def basefunc_ft(self, d_max, n, q):
+        """
+        Returns the value of the nth Fourier transformed base function
+        @param args: c-parameters, n and q
+        @return: nth Fourier transformed base function, evaluated at q
+        """
+        if not isinstance(d_max, float):
+            logger.error("Pinvertor.basefunc_ft: d_max is not of type float.")
+            return None
+        if not isinstance(n, int):
+            logger.error("Pinvertor.basefunc_ft: n is not of type int.")
+            return None
+        if not isinstance(q, float):
+            logger.error("Pinvertor.basefunc_ft: q is not of type float.")
+            return None
+        ortho_val = py_invertor.ortho_transformed(d_max, n, q)
+
+        return ortho_val
+
+    def oscillations(self, pars):
+        """
+        Returns the value of the oscillation figure of merit for
+        the given set of coefficients. For a sphere, the oscillation
+        figure of merit is 1.1.
+        @param args:c-parameters
+        @return: oscillation figure of merit
+        """
+        #nslice hardcoded to 100
+        nslice = 100
+        oscill = py_invertor.reg_term(pars, self.d_max, nslice)
+        norm = py_invertor.int_p2(pars, self.d_max, nslice)
+        ret_val = np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max
+
+        return ret_val
+
+    def get_peaks(self, pars):
+        """
+        Returns the number of peaks in the output P(r) distribution
+        for the given set of coefficients.
+        @param args: c-parameters
+        @return: number of P(r) peaks
+        """
+        nslice = 100
+        count = py_invertor.npeaks(pars, self.d_max, nslice)
+
+        return count
+
+    def get_positive(self, pars):
+        """
+        Returns the fraction of P(r) that is positive over
+        the full range of r for the given set of coefficients.
+        @param args: c-parameters
+        @return: fraction of P(r) that is positive
+        """
+        nslice = 100
+        fraction = py_invertor.positive_integral(pars, self.d_max, nslice)
+
+        return fraction
+
+    def get_pos_err(self, pars):
+        """
+        Returns the fraction of P(r) that is 1 standard deviation
+        above zero over the full range of r for the given set of coefficients.
+        @param args: c-parameters
+        @return: fraction of P(r) that is positive
+        """
         pass
-    def get_nx(self, args):
+    def get_rg(self, args):
         pass
-    def get_ny(self, args):
-        pass
-    def get_nerr(self, args):
-        pass
-    def iq(self, args):
-        pass
-    def iq_smeared(self, args):
-        pass
-    def pr(self, args):
-        pass
-    def get_pr_err(self, args):
-        pass
-    def is_valid(self, args):
-        pass
-    def basefunc_ft(self, args):
-        pass
-    def oscillations(self, args):
-        pass
-    def get_peaks(self, args):
-        pass
-    def get_positive(self, args):
-        pass
-    def get_pos_err(self, args):
-        pass
-    def rg(self, args):
-        pass
-    def iq0(self, args):
+    def get_iq0(self, args):
         pass
     def _get_matrix(self, args):
         pass
@@ -371,10 +517,12 @@ class Invertor_Test(Pinvertor):
 
 if(__name__ == "__main__"):
     it = Pinvertor()
-    print(it.set_slit_height(6.0))
-    print(it.set_slit_height(2))
-    print(it.set_slit_height(""))
-    print(it.set_slit_height(''))
-    print(it.get_slit_height())
+    d_max = 2000.0
+    n = 21
+    q = 0.5
+    pars = np.arange(50)
 
+    print(it.set_dmax(d_max))
+    print(it.get_positive(pars))
+    print(py_invertor.positive_integral(pars, d_max, 100))
 
