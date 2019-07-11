@@ -491,23 +491,121 @@ class Pinvertor:
 
         return fraction
 
-    def get_pos_err(self, pars):
+    def get_pos_err(self, pars, pars_err):
         """
         Returns the fraction of P(r) that is 1 standard deviation
         above zero over the full range of r for the given set of coefficients.
         @param args: c-parameters
         @return: fraction of P(r) that is positive
         """
+        nslice = 51
+        fraction = py_invertor.positive_errors(pars, pars_err, self.d_max, nslice)
+
+        return fraction
+
+    def get_rg(self, pars):
+        """
+        Returns the value of the radius of gyration Rg.
+        @param args: c-parameters
+        @return: Rg
+        """
+        nslice = 101
+        val = py_invertor.rg(pars, self.d_max, nslice)
+
+        return val
+
+
+    def get_iq0(self, pars):
+        """
+        Returns the value of I(q=0).
+        @param args: c-parameters
+        @return: I(q=0)
+        """
+        nslice = 101
+        val = 4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice)
+
+        return val
+    def accept_q(self, q):
+        """
+        Check whether a q-value is within acceptable limits
+        Returns 1 if accepted, 0 if rejected.
+        """
+        if(self.q_min > 0 and q < self.q_min):
+            return 0
+        if(self.q_max > 0 and q > self.q_max):
+            return 0
+        return 1
+
+    def get_matrix(self, nfunc, nr, a_obj, b_obj):
+        """
+        Returns A matrix and b vector for least square problem.
+        @param nfunc: number of base functions
+        @param nr: number of r-points used when evaluating reg term.
+        @param a: A array to fill
+        @param b: b vector to fill
+        @return: 0
+        """
+        #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
+
+        if(b_obj.shape[0] < nfunc):
+            #Vector too small
+            #abort program execution, replace C assert()
+            #may need more error messages here etc.
+            return None
+        if(a_obj.shape[0] < nfunc*(nr + self.npoints)):
+            return None
+
+        a = a_obj
+        b = b_obj
+
+        sqrt_alpha = np.sqrt(self.alpha)
+        pi = math.acos(-1.0)
+        offset = (1, 0)[self.est_bck == 1]
+
+        #instead of checking for 0 in err in for loop, check all
+        #for 0 before
+        def check_for_zero(x):
+            if(x.any() == 0.0):
+                return True
+            return False
+
+        if(check_for_zero(self.err)):
+            logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
+            return None
+
+        for j in range(nfunc):
+
+            for i_r in range(nr):
+                index = (i_r + self.npoints) * nfunc + j
+                if(self.est_bck == 1 and j == 0):
+                    a[index] = 0.0
+                else:
+                    r = self.d_max / nr * i_r
+                    tmp = pi * (j + offset) / self.d_max
+                    t1 = sqrt_alpha * 1.0/nr * self.d_max * 2.0
+
+                    t2 = (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
+                    + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
+
+                    a[index] =  t1 * t2
+
+        for i in range(npoints):
+            if(accept_q(self, self.x[i])):
+                b[i] = self.y[i] / self.err[i]
+
+        return 0
+
+
+
+
+
+
+
+
+
+    def get_invcov_matrix(self, args):
         pass
-    def get_rg(self, args):
-        pass
-    def get_iq0(self, args):
-        pass
-    def _get_matrix(self, args):
-        pass
-    def _get_invcov_matrix(self, args):
-        pass
-    def _get_reg_size(self, args):
+    def get_reg_size(self, args):
         pass
 
 class Invertor_Test(Pinvertor):
@@ -521,8 +619,11 @@ if(__name__ == "__main__"):
     n = 21
     q = 0.5
     pars = np.arange(50)
+    pars_err = np.arange(50)
+    nslice = 101
 
     print(it.set_dmax(d_max))
-    print(it.get_positive(pars))
-    print(py_invertor.positive_integral(pars, d_max, 100))
+
+    print(it.get_iq0(pars))
+    #print(py_invertor.rg(pars, d_max, nslice))
 

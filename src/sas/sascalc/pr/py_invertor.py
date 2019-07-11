@@ -418,7 +418,7 @@ def int_p2(pars, d_max, nslice):
     return sum/nslice_d * d_max
 
 @njit()
-def int_p(pars, d_max, nslice):
+def int_pr(pars, d_max, nslice):
     """
     Integral of P(r)
     """
@@ -487,15 +487,13 @@ def positive_errors(pars, err, d_max, nslice):
     r = 0.0
     sum_pos = 0.0
     sum = 0.0
-    pr_val = 0.0
-    pr_val_err = 0.0
     nslice_d = 1.0 * nslice
     for i in range(nslice):
         r = d_max/nslice_d * i
-        pr_err(pars, err, d_max, r, pr_val, pr_val_err)
+        (pr_val, pr_val_err) = pr_err(pars, err, d_max, r)
         if(pr_val>pr_val_err):
             sum_pos += pr_val
-        sum += fabs(pr_val)
+        sum += math.fabs(pr_val)
     return sum_pos/sum
 
 def rg(pars, d_max, nslice):
@@ -508,9 +506,8 @@ def rg(pars, d_max, nslice):
     sum = 0.0
     r = 0.0
     value = 0.0
-    nslice_d = range(nslice)
     for i in range(nslice):
-        r = d_max/nslice_d * i
+        r = (d_max/nslice) * i
         value = pr(pars, d_max, r)
         sum += value
         sum_r2 += r*r*value
