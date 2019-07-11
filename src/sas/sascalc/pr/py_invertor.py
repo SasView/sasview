@@ -216,10 +216,12 @@ def pr(pars, d_max, r):
     return sum
 
 @njit()
-def pr_err(pars, err, d_max, r, pr_value, pr_value_err):
+def pr_err(pars, err, d_max, r):
     """
     P(r) calculated from the expansion,
     with errors
+    changed to instead of return value by reference, returns
+    tuple of (pr_value, pr_value_err)
     """
     sum = 0.0
     sum_err = 0.0
@@ -236,6 +238,8 @@ def pr_err(pars, err, d_max, r, pr_value, pr_value_err):
         pr_value_err = np.sqrt(sum_err)
     else:
         pr_value_err = sum
+
+    return (pr_value, pr_value_err)
 
 @njit()
 def dprdr(pars, d_max, r):
@@ -472,7 +476,7 @@ def positive_integral(pars, d_max, nslice):
         value = pr(pars, d_max, r)
         if(value>0.0):
            sum_pos += value
-        sum += fabs(value)
+        sum += math.fabs(value)
     return sum_pos / sum
 
 def positive_errors(pars, err, d_max, nslice):
