@@ -39,13 +39,17 @@ class MyMplCanvas(FigureCanvas):
         self.extrap = None
         self.dragging = None
         self.draggable = False
+        self.leftdown = False
         self.setMinimumSize(300, 300)
         self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
         self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
+        self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def on_mouse_down(self, event):
         if not self.draggable:
             return
+        if event.button == 1:
+            self.leftdown = True
 
         qmin = float(self.model.item(W.W_QMIN).text())
         qmax1 = float(self.model.item(W.W_QMAX).text())
@@ -64,6 +68,8 @@ class MyMplCanvas(FigureCanvas):
     def on_mouse_up(self, event):
         if not self.dragging:
             return None
+        if event.button == 1:
+            self.leftdown = False
 
         if self.dragging == "qmin":
             item = W.W_QMIN
@@ -75,6 +81,24 @@ class MyMplCanvas(FigureCanvas):
         self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
 
         self.dragging = None
+
+    def on_motion(self, event):
+        if not self.leftdown:
+            return
+        if not self.draggable:
+            return
+        if self.dragging is None:
+            return
+
+        if self.dragging == "qmin":
+            item = W.W_QMIN
+        elif self.dragging == "qmax1":
+            item = W.W_QMAX
+        else:
+            item = W.W_QCUTOFF
+
+        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+
 
     def draw_q_space(self):
         """Draw the Q space data in the plot window
