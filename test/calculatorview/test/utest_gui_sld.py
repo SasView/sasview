@@ -32,19 +32,19 @@ class testTextCtrl(unittest.TestCase):
         clickEvent = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, id)
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'pink')
+        self.assertTrue(bkg.GetAsString() == 'pink')
         #compute invariant without entering a value for compound
         self.sld_frame.panel.compound_ctl.SetValue("")
         self.sld_frame.panel.density_ctl.SetValue(str(H2O_DENSITY))
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'pink')
+        self.assertTrue(bkg.GetAsString() == 'pink')
         #compute invariant without entering a value for compound
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
         self.sld_frame.panel.density_ctl.SetValue(str(H2O_DENSITY))
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'white')
+        self.assertTrue(bkg.GetAsString() == 'white')
        
     def testDensityTextCtrl(self):
         """
@@ -58,19 +58,19 @@ class testTextCtrl(unittest.TestCase):
         clickEvent = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, id)
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'pink')
+        self.assertTrue(bkg.GetAsString() == 'pink')
         #compute invariant without entering a value for density
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
         self.sld_frame.panel.density_ctl.SetValue("")
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'pink')
+        self.assertTrue(bkg.GetAsString() == 'pink')
         #compute invariant without entering a value for density
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
         self.sld_frame.panel.density_ctl.SetValue(str(H2O_DENSITY))
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'white')
+        self.assertTrue(bkg.GetAsString() == 'white')
         
     def testWavelengthTextCtrl(self):
         """
@@ -85,20 +85,20 @@ class testTextCtrl(unittest.TestCase):
         clickEvent = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, id)
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.wavelength_ctl.GetBackgroundColour()
-        self.assert_(bkg.GetAsString() == 'pink')
+        self.assertTrue(bkg.GetAsString() == 'pink')
         #compute invariant without entering a value for wavelegnth
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
         self.sld_frame.panel.density_ctl.SetValue(str(H2O_DENSITY))
         self.sld_frame.panel.wavelength_ctl.SetValue("")
         self.sld_frame.panel.ProcessEvent(clickEvent)
         cp_bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(cp_bkg.GetAsString() == 'white')
+        self.assertTrue(cp_bkg.GetAsString() == 'white')
         ds_bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(ds_bkg.GetAsString() == 'white')
+        self.assertTrue(ds_bkg.GetAsString() == 'white')
         wv_bkg = self.sld_frame.panel.wavelength_ctl.GetBackgroundColour()
         value = self.sld_frame.panel.wavelength_ctl.GetValue()
-        self.assert_(wv_bkg.GetAsString() == 'white')
-        self.assert_(float(value) == WAVELENGTH)
+        self.assertTrue(wv_bkg.GetAsString() == 'white')
+        self.assertTrue(float(value) == WAVELENGTH)
         sld_real = self.sld_frame.panel.neutron_sld_real_ctl.GetValue()
         sld_im = self.sld_frame.panel.neutron_sld_im_ctl.GetValue()
         mo_real = self.sld_frame.panel.mo_ka_sld_real_ctl.GetValue()
@@ -109,19 +109,19 @@ class testTextCtrl(unittest.TestCase):
         incoh = self.sld_frame.panel.neutron_inc_ctl.GetValue()
         length = self.sld_frame.panel.neutron_length_ctl.GetValue()
         
-        self.assertAlmostEquals(float(sld_real), 1.04e-6, 1)
-        self.assertAlmostEquals(float(sld_im), -1.5e-7, 1)
+        self.assertAlmostEqual(float(sld_real), 1.04e-6, 1)
+        self.assertAlmostEqual(float(sld_im), -1.5e-7, 1)
         #test absorption value
-        self.assertAlmostEquals(float(abs) , 0.0741, 2)
-        self.assertAlmostEquals(float(incoh), 5.62, 2)
+        self.assertAlmostEqual(float(abs) , 0.0741, 2)
+        self.assertAlmostEqual(float(incoh), 5.62, 2)
         #Test length
-        self.assertAlmostEquals(float(length), 0.1755, 2)
+        self.assertAlmostEqual(float(length), 0.1755, 2)
         #test Cu sld
-        self.assertAlmostEquals(float(cu_real), 9.46e-6, 1)
-        self.assertAlmostEquals(float(cu_im), 3.01e-8)
+        self.assertAlmostEqual(float(cu_real), 9.46e-6, 1)
+        self.assertAlmostEqual(float(cu_im), 3.01e-8)
         # test Mo sld
-        self.assertAlmostEquals(float(mo_real), 9.43e-6)
-        self.assertAlmostEquals(float(mo_im), 5.65e-7, 1)
+        self.assertAlmostEqual(float(mo_real), 9.43e-6)
+        self.assertAlmostEqual(float(mo_im), 5.65e-7, 1)
         #compute invariant with all correct inputs value
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
         self.sld_frame.panel.density_ctl.SetValue(str(H2O_DENSITY))
@@ -129,8 +129,8 @@ class testTextCtrl(unittest.TestCase):
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.wavelength_ctl.GetBackgroundColour()
         value = self.sld_frame.panel.wavelength_ctl.GetValue()
-        self.assert_(bkg.GetAsString() == 'white')
-        self.assert_(float(value) == WAVELENGTH/2)
+        self.assertTrue(bkg.GetAsString() == 'white')
+        self.assertTrue(float(value) == WAVELENGTH/2)
         
     def testSomeCombination(self):
         """
@@ -144,11 +144,11 @@ class testTextCtrl(unittest.TestCase):
         clickEvent = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, id)
         self.sld_frame.panel.ProcessEvent(clickEvent)
         cp_bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(cp_bkg.GetAsString() == 'white')
+        self.assertTrue(cp_bkg.GetAsString() == 'white')
         ds_bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(ds_bkg.GetAsString() == 'white')
+        self.assertTrue(ds_bkg.GetAsString() == 'white')
         wv_bkg = self.sld_frame.panel.wavelength_ctl.GetBackgroundColour()
-        self.assert_(wv_bkg.GetAsString() == 'pink')
+        self.assertTrue(wv_bkg.GetAsString() == 'pink')
         #density, wavelength is invalid
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
         self.sld_frame.panel.density_ctl.SetValue("invalid density")
@@ -157,11 +157,11 @@ class testTextCtrl(unittest.TestCase):
         clickEvent = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, id)
         self.sld_frame.panel.ProcessEvent(clickEvent)
         cp_bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(cp_bkg.GetAsString() == 'white')
+        self.assertTrue(cp_bkg.GetAsString() == 'white')
         ds_bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(ds_bkg.GetAsString() == 'pink')
+        self.assertTrue(ds_bkg.GetAsString() == 'pink')
         wv_bkg = self.sld_frame.panel.wavelength_ctl.GetBackgroundColour()
-        self.assert_(wv_bkg.GetAsString() == 'pink')
+        self.assertTrue(wv_bkg.GetAsString() == 'pink')
         #density, wavelength is invalid
         self.sld_frame.panel.compound_ctl.SetValue("invalid compound")
         self.sld_frame.panel.density_ctl.SetValue("invalid density")
@@ -170,13 +170,13 @@ class testTextCtrl(unittest.TestCase):
         clickEvent = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, id)
         self.sld_frame.panel.ProcessEvent(clickEvent)
         cp_bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
-        self.assert_(cp_bkg.GetAsString() == 'pink')
+        self.assertTrue(cp_bkg.GetAsString() == 'pink')
         ds_bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
-        self.assert_(ds_bkg.GetAsString() == 'pink')
+        self.assertTrue(ds_bkg.GetAsString() == 'pink')
         wv_bkg = self.sld_frame.panel.wavelength_ctl.GetBackgroundColour()
-        self.assert_(wv_bkg.GetAsString() == 'white')
+        self.assertTrue(wv_bkg.GetAsString() == 'white')
         value = self.sld_frame.panel.wavelength_ctl.GetValue()
-        self.assert_(float(value) == WAVELENGTH)
+        self.assertTrue(float(value) == WAVELENGTH)
 
         
         
