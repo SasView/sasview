@@ -775,3 +775,4 @@ if(__name__ == "__main__"):
     print(a)
     print(test.get_nx())
     print(len(a))
+    print(test.get_positive())

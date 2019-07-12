@@ -17,11 +17,11 @@ class Pinvertor:
     #Maximum distance between any two points in the system
     d_max = 0.0
     #q data
-    x = np.empty([], dtype = np.float)
+    x = np.empty(0, dtype = np.float)
     #I(q) data
-    y = np.empty([], dtype = np.float)
+    y = np.empty(0, dtype = np.float)
     #dI(q) data
-    err = np.empty([], dtype = np.float)
+    err = np.empty(0, dtype = np.float)
     #Number of q points
     npoints = 0
     #Number of I(q) points
@@ -106,9 +106,11 @@ class Pinvertor:
         """
         #check for null input case
         if args is None:
+            self.__dict__['x'] = np.zeros(1)
             return None
         #if given an array with shape = []
         if(len(args.shape) == 0):
+            self.__dict__['x'] = np.zeros(1)
             return None
 
         data = np.asanyarray(args, dtype = np.float)
@@ -776,6 +778,7 @@ class Pinvertor:
         if not isinstance(nr, int):
             logger.error("Pinvertor.get_invcov_matrix: nr not of type int.")
             return None
+
         n_a = len(a_obj)
         n_cov = len(cov_obj)
         a = a_obj
@@ -804,15 +807,19 @@ class Pinvertor:
         @param inv_cov: inverse covariance array to be filled
         @return: 0
         """
-        if not isinstance(nfunc, int):
-            logger.error("Pinvertor.get_reg_size: nfunc not of type int")
-            #return None
-        if not isinstance(nr, int):
-            logger.error("Pinvertor.get_reg_size: nr not of type int")
-            #return None
+        #if not isinstance(nfunc, int):
+        #    logger.error("Pinvertor.get_reg_size: nfunc not of type int")
+        #    return None,None
+        #if not isinstance(nr, int):
+        #    logger.error("Pinvertor.get_reg_size: nr not of type int")
+        #    return None,None
         if(a_obj.shape[0] < (nfunc * (nr + self.npoints))):
             logger.error("Pinvertor.get_reg_size: array a too small")
-            #return None
+            raise RuntimeError
+            return None,None
+
+        assert len(a_obj) >= nfunc * (nr + self.npoints)
+
         sum_sig = 0.0
         sum_reg = 0.0
         a = a_obj
