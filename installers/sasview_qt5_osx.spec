@@ -147,6 +147,7 @@ hiddenimports = [
  'zmq.backend.cython','zmq.backend.cffi',
  'site','lxml._elementpath','lxml.etree',
  'scipy._lib.messagestream',
+ 'numba',
 ]
 
 a = Analysis([SCRIPT_TO_SOURCE],
