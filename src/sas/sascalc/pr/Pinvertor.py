@@ -549,6 +549,13 @@ class Pinvertor:
         @return: 0
         """
         #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
+        if not isinstance(nfunc, int):
+            logger.error("Pinvertor.get_matrix: nfunc not of type int.")
+            return None
+
+        if not isinstance(nr, int):
+            logger.error("Pinvertor.get_matrix: nr not of type int.")
+            return None
 
         if(b_obj.shape[0] < nfunc):
             #Vector too small
@@ -614,7 +621,6 @@ class Pinvertor:
                 b[i] = self.y[i] / self.err[i]
 
         return 0
-    #same but using pre computed values for ortho transforms.
     def get_matrix_precomputed(self, nfunc, nr, a_obj, b_obj):
         """
         Returns A matrix and b vector for least square problem.
@@ -625,6 +631,14 @@ class Pinvertor:
         @return: 0
         """
         #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
+
+        if not isinstance(nfunc, int):
+            logger.error("Pinvertor.get_matrix: nfunc not of type int.")
+            return None
+
+        if not isinstance(nr, int):
+            logger.error("Pinvertor.get_matrix: nr not of type int.")
+            return None
 
         if(b_obj.shape[0] < nfunc):
             #Vector too small
@@ -702,10 +716,69 @@ class Pinvertor:
 
         return 0
 
-    def get_invcov_matrix(self, args):
-        pass
-    def get_reg_size(self, args):
-        pass
+    def get_invcov_matrix(self, nfunc, nr, a_obj, cov_obj):
+        """
+        Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
+        @param nfunc: number of base functions
+        @param nr: number of r-points used when evaluating reg term.
+        @param a: A array to fill
+        @param inv_cov: inverse covariance array to be filled
+        @return: 0
+        """
+        if not isinstance(nfunc, int):
+            logger.error("Pinvertor.get_invcov_matrix: nfunc not of type int.")
+            return None
+
+        if not isinstance(nr, int):
+            logger.error("Pinvertor.get_invcov_matrix: nr not of type int.")
+            return None
+        n_a = a_obj.shape[0]
+        n_cov = cov_obj.shape[0]
+        a = a_obj
+        inv_cov = cov_obj
+
+        if(n_cov < (nfunc * nfunc)):
+            logger.error("Pinvertor.get_invcov_matrix: cov_obj too small.")
+            return None
+        if(n_a < (nfunc * (nr + self.npoints))):
+            logger.error("Pinvertor.get_invcov_matrix: array a too small.")
+            return None
+        for i in range(nfunc):
+            for j in range(nfunc):
+                inv_cov[i * nfunc + j] = 0.0
+                for k in range(nr + self.npoints):
+                    inv_cov[i * nfunc+j] += a[k*nfunc+i]*a[k*nfunc+j]
+        return 0
+
+    def get_reg_size(self, nfunc, nr, a_obj):
+        #in Cinvertor, doc was same as invcov_matrix so for now left -
+        """
+        Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
+        @param nfunc: number of base functions
+        @param nr: number of r-points used when evaluating reg term.
+        @param a: A array to fill
+        @param inv_cov: inverse covariance array to be filled
+        @return: 0
+        """
+        if not isinstance(nfunc, int):
+            logger.error("Pinvertor.get_reg_size: nfunc not of type int")
+            return None
+        if not isinstance(nr, int):
+            logger.error("Pinvertor.get_reg_size: nr not of type int")
+            return None
+        if(a_obj.shape[0] < (nfunc * (nr + self.npoints))):
+            logger.error("Pinvertor.get_reg_size: array a too small")
+            return None
+        sum_sig = 0.0
+        sum_reg = 0.0
+        a = a_obj
+        for j in range(nfunc):
+            for i in range(self.npoints):
+                if(self.accept_q(self.x[i]) == 1):
+                    sum_sig += (a[i * nfunc + j]) * a[i * nfunc + j]
+            for i in range(nr):
+                sum_reg += (a[(i+self.npoints)*nfunc+j])*(a[(i+self.npoints)*nfunc+j]);
+        return (sum_sig, sum_reg)
 
 class Invertor_Test(Pinvertor):
     def __init__(self):
@@ -726,27 +799,30 @@ def demo():
     it.set_x(np.arange(100))
     it.set_y(np.arange(100))
     it.set_err(np.arange(100))
-    a = np.zeros(100*100*it.get_nx())
-    b = np.zeros(100)
-    print(it.get_matrix_precomputed(100, 100, a, b))
-    c = np.zeros(100*100*it.get_nx())
-    print(it.get_matrix(100, 100, c, b))
+    a = np.arange(100*100*it.get_nx())
+    b = np.arange(100 * (100 + it.get_nx()))
 
-    if(np.array_equal(a, c)):
-        print("Same")
-    else:
-        print("different")
-        for i in range(a.shape[0]):
-            if(a[i] - c[i] != 0):
-                print("Position: ", i)
-                print("pre_computed: ", a[i])
-                print("normal: ", c[i])
-                print("difference: ", a[i] - c[i])
+    print(it.get_reg_size(100, 100, b))
+    print(b)
+    #print(it.get_matrix(100, 100, c, b))
+
+
+
+    #if(np.array_equal(a, c)):
+    #    print("Same")
+    #else:
+    #    print("different")
+    #    for i in range(a.shape[0]):
+    #        if(a[i] - c[i] != 0):
+    #            print("Position: ", i)
+    #            print("pre_computed: ", a[i])
+    #            print("normal: ", c[i])
+    #            print("difference: ", a[i] - c[i])
 
 
     #for i, ni in enumerate(a):
     #    print(ni)
-    print("B:", b)
+    #print("B:", b)
     #print(py_invertor.rg(pars, d_max, nslice))]
 def test():
     setup = '''
@@ -773,9 +849,8 @@ b = np.zeros(100)
 it.get_matrix_precomputed(100, 100, a, b)'''
     run_norm = '''
 it.get_matrix(100, 100, a, b)'''
-    print("pre-computed:", timeit.repeat(stmt = run_prec, setup = setup, repeat = 1, number = 1))
+    #print("pre-computed:", timeit.repeat(stmt = run_prec, setup = setup, repeat = 1, number = 1))
     print("normal", timeit.repeat(stmt = run_norm, setup = setup, repeat = 1, number = 1))
 
 if(__name__ == "__main__"):
-    test()
-
+    demo()
