@@ -13,38 +13,36 @@ from numba import njit
 logger = logging.getLogger(__name__)
 
 class Pinvertor:
-    #class variables, from internal data structure P(r) inversion
-    #invertor.h
-    #Maximum distance between any two points in the system
-    d_max = 0.0
-    #q data
-    x = np.empty([], dtype = np.float)
-    #I(q) data
-    y = np.empty([], dtype = np.float)
-    #dI(q) data
-    err = np.empty([], dtype = np.float)
-    #Number of q points
-    npoints = 0
-    #Number of I(q) points
-    ny = 0
-    #Number of dI(q) points
-    nerr = 0
-    #Alpha value
-    alpha = 0.0
-    #Minimum q to include in inversion
-    q_min = 0.0
-    #Maximum q to include in inversion
-    q_max = 0.0
-    #Flag for whether or not to evaluate a constant background
-    #while inverting
-    est_bck = 0
-    #Slit height in units of q [A-1]
-    slit_height = 0.0
-    #Slit width in units of q [A-1]
-    slit_width = 0.0
 
     def __init__(self):
-        pass
+        #invertor.h
+        #Maximum distance between any two points in the system
+        self.d_max = 0.1
+        #q data
+        self.x = np.empty([], dtype = np.float)
+        #I(q) data
+        self.y = np.empty([], dtype = np.float)
+        #dI(q) data
+        self.err = np.empty([], dtype = np.float)
+        #Number of q points
+        self.npoints = 0
+        #Number of I(q) points
+        self.ny = 0
+        #Number of dI(q) points
+        self.nerr = 0
+        #Alpha value
+        self.alpha = 0.0
+        #Minimum q to include in inversion
+        self.q_min = 0.0
+        #Maximum q to include in inversion
+        self.q_max = 0.0
+        #Flag for whether or not to evaluate a constant background
+        #while inverting
+        self.est_bck = 0
+        #Slit height in units of q [A-1]
+        self.slit_height = 0.0
+        #Slit width in units of q [A-1]
+        self.slit_width = 0.0
     def residuals(self, args):
         """
         Function to call to evaluate the residuals\n
@@ -793,7 +791,7 @@ def demo():
     pars_err = np.arange(50)
     nslice = 101
 
-    print(it.set_dmax(d_max))
+    print(it._dmax(d_max))
 
     print(it.get_iq0(pars))
     it.set_x(np.arange(100))
@@ -853,4 +851,5 @@ it.get_matrix(100, 100, a, b)'''
     print("normal", timeit.repeat(stmt = run_norm, setup = setup, repeat = 1, number = 1))
 
 if(__name__ == "__main__"):
-    demo()
+    test = Pinvertor()
+    #demo()

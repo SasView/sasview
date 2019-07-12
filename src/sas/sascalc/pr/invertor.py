@@ -17,7 +17,8 @@ import re
 import logging
 from numpy.linalg import lstsq
 from scipy import optimize
-from sas.sascalc.pr.core.pr_inversion import Cinvertor
+#from sas.sascalc.pr.core.pr_inversion import Cinvertor
+from Pinvertor import Pinvertor
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def help():
     return info_txt
 
 
-class Invertor(Cinvertor):
+class Invertor(Pinvertor):
     """
     Invertor class to perform P(r) inversion
 
@@ -112,7 +113,7 @@ class Invertor(Cinvertor):
     info = {}
 
     def __init__(self):
-        Cinvertor.__init__(self)
+        Pinvertor.__init__(self)
 
     def __setstate__(self, state):
         """
@@ -183,7 +184,7 @@ class Invertor(Cinvertor):
             else:
                 raise ValueError("Invertor: est_bck can only be True or False")
 
-        return Cinvertor.__setattr__(self, name, value)
+        return Pinvertor.__setattr__(self, name, value)
 
     def __getattr__(self, name):
         """
@@ -311,7 +312,7 @@ class Invertor(Cinvertor):
         :return: I(q)
 
         """
-        return Cinvertor.iq(self, out, q) + self.background
+        return Pinvertor.iq(self, out, q) + self.background
 
     def invert_optimize(self, nfunc=10, nr=20):
         """
@@ -761,3 +762,8 @@ class Invertor(Cinvertor):
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
             raise RuntimeError(msg)
+
+if(__name__ == "__main__"):
+    test = Invertor()
+    #test.__setattr__('d_max', 2000.0)
+    test.set_dmax(2000.0)
