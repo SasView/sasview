@@ -17,8 +17,9 @@ import re
 import logging
 from numpy.linalg import lstsq
 from scipy import optimize
-#from sas.sascalc.pr.core.pr_inversion import Cinvertor
-from Pinvertor import Pinvertor
+from sas.sascalc.pr.core.pr_inversion import Cinvertor
+#import Cinvertor
+from sas.sascalc.pr.Pinvertor import Pinvertor
 
 logger = logging.getLogger(__name__)
 
@@ -773,3 +774,4 @@ if(__name__ == "__main__"):
     print(test.get_x(a))
     print(a)
     print(test.get_nx())
+    print(len(a))

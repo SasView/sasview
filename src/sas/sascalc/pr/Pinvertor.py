@@ -3,7 +3,7 @@ Under Development-
 Class duplicating Cinvertor.c's functionality in Python
 depends on py_invertor.py as a pose to invertor.c
 """
-import py_invertor
+import sas.sascalc.pr.py_invertor as py_invertor
 import numpy as np
 import logging
 import math
@@ -64,10 +64,10 @@ class Pinvertor:
         diff = 0.0
         regterm = 0.0
         nslice = 25
-        regterm = reg_term(pars, d_max, nslice)
+        regterm = py_invertor.reg_term(pars, d_max, nslice)
 
         for i in range(self.npoints):
-            diff = y[i] - iq(pars, d_max, x[i])
+            diff = y[i] - py_invertor.iq(pars, d_max, x[i])
             residual = diff*diff / (err[i] * err[i])
 
             residual += alpha * regterm
@@ -77,6 +77,27 @@ class Pinvertor:
                 logger.error("Pinvertor.residuals: error setting residual.")
 
         return residuals
+
+    def pr_residuals(self, pars):
+        """
+        Function to call to evaluate the residuals
+        for P(r) minimization (for testing purposes)
+        @param args: input parameters
+        @return: list of residuals
+        """
+        regterm = 0.0
+        nslice = 25
+        residuals = []
+        regterm = py_invertor.reg_term(pars, self.d_max, nslice)
+        for i in range(self.npoints):
+            diff = self.y[i] - py_invertor.pr(pars, self.d_max, self.x[i])
+            residual = diff*diff / (self.err[i] * self.err[i])
+
+            residual += self.alpha * regterm
+
+            residuals.append(residual)
+        return residuals
+
     def set_x(self, args):
         """
         Function to set the x data
@@ -106,8 +127,6 @@ class Pinvertor:
 
         for i in range(ndata):
             self.__dict__['x'][i] = data[i]
-        print("***X:***", self.x)
-
 
         self.__dict__['npoints'] = int(ndata)
         #self.__dict__['npoints'] = int(ndata)
@@ -128,7 +147,6 @@ class Pinvertor:
 
         for i in range(self.npoints):
             args[i] = self.x[i]
-        print("get_x args: ", args)
         return self.npoints
 
 
@@ -255,7 +273,6 @@ class Pinvertor:
         """
         if not isinstance(args, float):
             logger.error("Pinvertor.set_qmin: input not of type float.")
-            return None
         self.__dict__['q_min'] = args
         return self.q_min
 
@@ -271,7 +288,6 @@ class Pinvertor:
         """
         if not isinstance(args, float):
             logger.error("Pinvertor.set_qmax: input not of type float.")
-            return None
         self.__dict__['q_max'] = args
         return self.q_max
 
@@ -379,6 +395,19 @@ class Pinvertor:
         iq_val = py_invertor.iq(pars, self.d_max, q)
         return iq_val
 
+    def iq(self, pars, q):
+        """
+        Function to call to evaluate the scattering intensity
+        @param args: c-parameters, and q
+        @return: I(q)
+        """
+        if not isinstance(q, float):
+            logger.error("Pinvertor.get_iq: q is not a float.")
+            return None
+
+        iq_val = py_invertor.iq(pars, self.d_max, q)
+        return iq_val
+
     def get_iq_smeared(self, pars, q):
         """
         Function to call to evaluate the scattering intensity.
@@ -406,7 +435,20 @@ class Pinvertor:
             logger.error("Pinvertor.get_pr: r is not of type float.")
             return None
 
-        pr_val =py_invertor.pr(pars, self.d_max, r)
+        pr_val = py_invertor.pr(pars, self.d_max, r)
+        return pr_val
+
+    def pr(self, pars, r):
+        """
+        Function to call to evaluate P(r)
+        @param args: c-parameters and r
+        @return: P(r)
+        """
+        if not isinstance(r, float):
+            logger.error("Pinvertor.get_pr: r is not of type float.")
+            return None
+
+        pr_val = py_invertor.pr(pars, self.d_max, r)
         return pr_val
 
     def get_pr_err(self, pars, pars_err, r):
@@ -508,7 +550,7 @@ class Pinvertor:
 
         return fraction
 
-    def get_rg(self, pars):
+    def rg(self, pars):
         """
         Returns the value of the radius of gyration Rg.
         @param args: c-parameters
@@ -520,7 +562,7 @@ class Pinvertor:
         return val
 
 
-    def get_iq0(self, pars):
+    def iq0(self, pars):
         """
         Returns the value of I(q=0).
         @param args: c-parameters
@@ -541,7 +583,7 @@ class Pinvertor:
             return 0
         return 1
 
-    def get_matrix(self, nfunc, nr, a_obj, b_obj):
+    def _get_matrix(self, nfunc, nr, a_obj, b_obj):
         """
         Returns A matrix and b vector for least square problem.
         @param nfunc: number of base functions
@@ -623,7 +665,7 @@ class Pinvertor:
                 b[i] = self.y[i] / self.err[i]
 
         return 0
-    def get_matrix_precomputed(self, nfunc, nr, a_obj, b_obj):
+    def _get_matrix_precomputed(self, nfunc, nr, a_obj, b_obj):
         """
         Returns A matrix and b vector for least square problem.
         @param nfunc: number of base functions
@@ -718,7 +760,7 @@ class Pinvertor:
 
         return 0
 
-    def get_invcov_matrix(self, nfunc, nr, a_obj, cov_obj):
+    def _get_invcov_matrix(self, nfunc, nr, a_obj, cov_obj):
         """
         Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
         @param nfunc: number of base functions
@@ -734,8 +776,8 @@ class Pinvertor:
         if not isinstance(nr, int):
             logger.error("Pinvertor.get_invcov_matrix: nr not of type int.")
             return None
-        n_a = a_obj.shape[0]
-        n_cov = cov_obj.shape[0]
+        n_a = len(a_obj)
+        n_cov = len(cov_obj)
         a = a_obj
         inv_cov = cov_obj
 
@@ -752,7 +794,7 @@ class Pinvertor:
                     inv_cov[i * nfunc+j] += a[k*nfunc+i]*a[k*nfunc+j]
         return 0
 
-    def get_reg_size(self, nfunc, nr, a_obj):
+    def _get_reg_size(self, nfunc, nr, a_obj):
         #in Cinvertor, doc was same as invcov_matrix so for now left -
         """
         Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
@@ -764,13 +806,13 @@ class Pinvertor:
         """
         if not isinstance(nfunc, int):
             logger.error("Pinvertor.get_reg_size: nfunc not of type int")
-            return None
+            #return None
         if not isinstance(nr, int):
             logger.error("Pinvertor.get_reg_size: nr not of type int")
-            return None
+            #return None
         if(a_obj.shape[0] < (nfunc * (nr + self.npoints))):
             logger.error("Pinvertor.get_reg_size: array a too small")
-            return None
+            #return None
         sum_sig = 0.0
         sum_reg = 0.0
         a = a_obj
@@ -780,7 +822,7 @@ class Pinvertor:
                     sum_sig += (a[i * nfunc + j]) * a[i * nfunc + j]
             for i in range(nr):
                 sum_reg += (a[(i+self.npoints)*nfunc+j])*(a[(i+self.npoints)*nfunc+j]);
-        return (sum_sig, sum_reg)
+        return sum_sig, sum_reg
 
 class Invertor_Test(Pinvertor):
     def __init__(self):
