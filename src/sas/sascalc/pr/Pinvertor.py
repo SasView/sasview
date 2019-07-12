@@ -13,36 +13,37 @@ from numba import njit
 logger = logging.getLogger(__name__)
 
 class Pinvertor:
+    #invertor.h
+    #Maximum distance between any two points in the system
+    d_max = 0.0
+    #q data
+    x = np.empty([], dtype = np.float)
+    #I(q) data
+    y = np.empty([], dtype = np.float)
+    #dI(q) data
+    err = np.empty([], dtype = np.float)
+    #Number of q points
+    npoints = 0
+    #Number of I(q) points
+    ny = 0
+    #Number of dI(q) points
+    nerr = 0
+    #Alpha value
+    alpha = 0.0
+    #Minimum q to include in inversion
+    q_min = 0.0
+    #Maximum q to include in inversion
+    q_max = 0.0
+    #Flag for whether or not to evaluate a constant background
+    #while inverting
+    est_bck = 0
+    #Slit height in units of q [A-1]
+    slit_height = 0.0
+    #Slit width in units of q [A-1]
+    slit_width = 0.0
 
     def __init__(self):
-        #invertor.h
-        #Maximum distance between any two points in the system
-        self.d_max = 0.1
-        #q data
-        self.x = np.empty([], dtype = np.float)
-        #I(q) data
-        self.y = np.empty([], dtype = np.float)
-        #dI(q) data
-        self.err = np.empty([], dtype = np.float)
-        #Number of q points
-        self.npoints = 0
-        #Number of I(q) points
-        self.ny = 0
-        #Number of dI(q) points
-        self.nerr = 0
-        #Alpha value
-        self.alpha = 0.0
-        #Minimum q to include in inversion
-        self.q_min = 0.0
-        #Maximum q to include in inversion
-        self.q_max = 0.0
-        #Flag for whether or not to evaluate a constant background
-        #while inverting
-        self.est_bck = 0
-        #Slit height in units of q [A-1]
-        self.slit_height = 0.0
-        #Slit width in units of q [A-1]
-        self.slit_width = 0.0
+        pass
     def residuals(self, args):
         """
         Function to call to evaluate the residuals\n
@@ -94,17 +95,22 @@ class Pinvertor:
         ndata = data.shape[0]
 
         #reset x
-        self.x = None
-        self.x = np.zeros(ndata)
+        #self.x = None
+        #self.x = np.zeros(ndata)
+        self.__dict__['x'] = np.zeros(ndata)
+
 
         #if(self.x == None):
         #    logger.error("Pinvertor.set_x: problem allocating memory.")
         #    return None
 
         for i in range(ndata):
-            self.x[i] = data[i]
+            self.__dict__['x'][i] = data[i]
+        print("***X:***", self.x)
 
-        self.npoints = int(ndata)
+
+        self.__dict__['npoints'] = int(ndata)
+        #self.__dict__['npoints'] = int(ndata)
         return self.npoints
 
     def get_x(self, args):
@@ -122,7 +128,7 @@ class Pinvertor:
 
         for i in range(self.npoints):
             args[i] = self.x[i]
-
+        print("get_x args: ", args)
         return self.npoints
 
 
@@ -144,18 +150,17 @@ class Pinvertor:
         ndata = data.shape[0]
 
         #reset y
-        self.y = None
-        self.y = np.zeros(ndata)
+        self.__dict__['y'] = np.zeros(ndata)
 
         #if(self.y = None):
          #   logger.error("Pinvertor.set_y: problem allocating memory.")
           #  return None
 
         for i in range(ndata):
-            self.y[i] = data[i]
+            self.__dict__['y'][i] = data[i]
 
 
-        self.ny = int(ndata)
+        self.__dict__['ny'] = int(ndata)
         return self.ny
 
 
@@ -190,17 +195,16 @@ class Pinvertor:
 
         ndata = args.shape[0]
 
-        self.err = None
-        self.err = np.zeros(ndata)
+        self.__dict__['err'] = np.zeros(ndata)
 
         #if(self.err == None):
         #    logger.error("Pinvertor.set_err: problem allocating memory.")
         #    return None
 
         for i in range(ndata):
-            self.err[i] = args[i]
+            self.__dict__['err'][i] = args[i]
 
-        self.nerr = int(ndata)
+        self.__dict__['nerr'] = int(ndata)
         return self.nerr
 
 
@@ -233,8 +237,8 @@ class Pinvertor:
         if not isinstance(args, float):
             logger.error("Pinvertor.set_dmax: input not of type float.")
             return None
-        self.d_max = args
-
+        #self.d_max = args
+        self.__dict__['d_max'] = args
         return self.d_max
 
     def get_dmax(self):
@@ -252,7 +256,7 @@ class Pinvertor:
         if not isinstance(args, float):
             logger.error("Pinvertor.set_qmin: input not of type float.")
             return None
-        self.q_min = args
+        self.__dict__['q_min'] = args
         return self.q_min
 
     def get_qmin(self):
@@ -268,7 +272,7 @@ class Pinvertor:
         if not isinstance(args, float):
             logger.error("Pinvertor.set_qmax: input not of type float.")
             return None
-        self.q_max = args
+        self.__dict__['q_max'] = args
         return self.q_max
 
     def get_qmax(self):
@@ -286,7 +290,7 @@ class Pinvertor:
         if not isinstance(args, float):
             logger.error("Pinvertor.set_alpha: input not of type float.")
             return None
-        self.alpha = args
+        self.__dict__['alpha'] = args
         return self.alpha
 
     def get_alpha(self):
@@ -302,7 +306,7 @@ class Pinvertor:
         if not isinstance(args, float):
             logger.error("Pinvertor.set_slit_width: input not of type float.")
             return None
-        self.slit_width = args
+        self.__dict__['slit_width'] = args
         return self.slit_width
 
     def get_slit_width(self):
@@ -318,7 +322,7 @@ class Pinvertor:
         if not isinstance(args, float):
             logger.error("Pinvertor.set_slit_height: input not of type float.")
             return None
-        self.slit_height = args
+        self.__dict__['slit_height'] = args
         return self.slit_height
 
     def get_slit_height(self):
@@ -335,7 +339,7 @@ class Pinvertor:
         if not isinstance(args, int):
             logger.error("Pinvertor.set_est_bck: input not of type int")
             return None
-        self.est_bck = args
+        self.__dict__['est_bck'] = args
         return self.est_bck
 
     def get_est_bck(self):

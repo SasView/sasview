@@ -766,4 +766,10 @@ class Invertor(Pinvertor):
 if(__name__ == "__main__"):
     test = Invertor()
     #test.__setattr__('d_max', 2000.0)
-    test.set_dmax(2000.0)
+    print(test.set_dmax(2000.0))
+    print(test.get_dmax())
+    print(test.set_x(np.arange(200)))
+    a = np.zeros(200)
+    print(test.get_x(a))
+    print(a)
+    print(test.get_nx())
