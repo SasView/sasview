@@ -4,6 +4,7 @@ Class duplicating Cinvertor.c's functionality in Python
 depends on py_invertor.py as a pose to invertor.c
 """
 import sas.sascalc.pr.py_invertor as py_invertor
+#import py_invertor
 import numpy as np
 import logging
 import math
@@ -52,9 +53,6 @@ class Pinvertor:
 	    @return: list of residuals
         """
         #May not be correct, initial version
-        #check for null case
-        if args is None:
-            return None
 
         residuals = []
 
@@ -104,14 +102,9 @@ class Pinvertor:
         Takes an array of the doubles as input
         Returns the number of entries found
         """
-        #check for null input case
-        if args is None:
-            self.__dict__['x'] = np.zeros(1)
-            return None
+
         #if given an array with shape = []
-        if(len(args.shape) == 0):
-            self.__dict__['x'] = np.zeros(1)
-            return None
+        assert (len(args.shape) > 0)
 
         data = np.asanyarray(args, dtype = np.float)
 
@@ -143,9 +136,7 @@ class Pinvertor:
         ndata = args.shape[0]
 
         #check that the input array is large enough
-        if(ndata < self.npoints):
-            logger.error("Pinvertor.get_x: input array too short for data.")
-            return None
+        assert (ndata >= self.npoints)
 
         for i in range(self.npoints):
             args[i] = self.x[i]
@@ -158,12 +149,8 @@ class Pinvertor:
         Takes an array of doubles as input
         @return: number of entries found
         """
-        #check for null input case
-        if args is None:
-            return None
         #if given an array with shape = []
-        if(len(args.shape) == 0):
-            return None
+        assert (len(args.shape) > 0)
 
         data = np.asanyarray(args, dtype = np.float)
         #not 100% about this line
@@ -192,9 +179,7 @@ class Pinvertor:
         """
         ndata = args.shape[0]
         #check that the input array is large enough
-        if(ndata < self.ny):
-            logger.error("Pinvertor.get_y: input array too short for data.")
-            return None
+        assert (ndata >= self.ny)
 
         for i in range(self.ny):
             args[i] = self.y[i]
@@ -207,11 +192,8 @@ class Pinvertor:
         Takes an array of doubles as input
         Returns the number of entries found
         """
-        if(args is None):
-            return None
         #if given an array with shape = []
-        if(len(args.shape) == 0):
-            return None
+        assert (len(args.shape) > 0)
 
         ndata = args.shape[0]
 
@@ -236,9 +218,7 @@ class Pinvertor:
         """
         ndata = args.shape[0]
 
-        if(ndata < self.nerr):
-            logger.error("Pinvertor.get_err: input array too short for data.")
-            return None
+        assert (ndata >= self.nerr)
 
         for i in range(self.nerr):
             args[i] = self.err[i]
@@ -254,9 +234,8 @@ class Pinvertor:
         #attempt to replace pyarg_parsetuple(args, "d")
         #to read as type of d, floating point number
         #if not return null
-        if not isinstance(args, float):
-            logger.error("Pinvertor.set_dmax: input not of type float.")
-            return None
+        args = float(args)
+
         #self.d_max = args
         self.__dict__['d_max'] = args
         return self.d_max
@@ -273,8 +252,8 @@ class Pinvertor:
         Input is single float, output is if succesful
         the new value of q_min
         """
-        if not isinstance(args, float):
-            logger.error("Pinvertor.set_qmin: input not of type float.")
+        args = float(args)
+
         self.__dict__['q_min'] = args
         return self.q_min
 
@@ -288,8 +267,8 @@ class Pinvertor:
         """
         Sets the maximum q
         """
-        if not isinstance(args, float):
-            logger.error("Pinvertor.set_qmax: input not of type float.")
+        args = float(args)
+
         self.__dict__['q_max'] = args
         return self.q_max
 
@@ -305,9 +284,8 @@ class Pinvertor:
         Takes a float, returns if succesful the
         new alpha value.
         """
-        if not isinstance(args, float):
-            logger.error("Pinvertor.set_alpha: input not of type float.")
-            return None
+        args = float(args)
+
         self.__dict__['alpha'] = args
         return self.alpha
 
@@ -321,9 +299,8 @@ class Pinvertor:
         """
         Sets the slit width in units of q [A-1]
         """
-        if not isinstance(args, float):
-            logger.error("Pinvertor.set_slit_width: input not of type float.")
-            return None
+        args = float(args)
+
         self.__dict__['slit_width'] = args
         return self.slit_width
 
@@ -337,9 +314,8 @@ class Pinvertor:
         """
         Sets the slit height in units of q [A-1]
         """
-        if not isinstance(args, float):
-            logger.error("Pinvertor.set_slit_height: input not of type float.")
-            return None
+        args = float(args)
+
         self.__dict__['slit_height'] = args
         return self.slit_height
 
@@ -354,9 +330,8 @@ class Pinvertor:
         Sets background flag.
         Takes a single int, returns est_bck value if successful
         """
-        if not isinstance(args, int):
-            logger.error("Pinvertor.set_est_bck: input not of type int")
-            return None
+        args = int(args)
+
         self.__dict__['est_bck'] = args
         return self.est_bck
 
@@ -384,28 +359,13 @@ class Pinvertor:
         """
         return self.nerr
 
-    def get_iq(self, pars, q):
-        """
-        Function to call to evaluate the scattering intensity
-        @param args: c-parameters, and q
-        @return: I(q)
-        """
-        if not isinstance(q, float):
-            logger.error("Pinvertor.get_iq: q is not a float.")
-            return None
-
-        iq_val = py_invertor.iq(pars, self.d_max, q)
-        return iq_val
-
     def iq(self, pars, q):
         """
         Function to call to evaluate the scattering intensity
         @param args: c-parameters, and q
         @return: I(q)
         """
-        if not isinstance(q, float):
-            logger.error("Pinvertor.get_iq: q is not a float.")
-            return None
+        q = float(q)
 
         iq_val = py_invertor.iq(pars, self.d_max, q)
         return iq_val
@@ -417,9 +377,7 @@ class Pinvertor:
         @param args: c-parameters, and q
         @return: I(q)
         """
-        if not isinstance(q, float):
-            logger.error("Pinvertor.get_iq_smeared: q is not a float.")
-            return None
+        q = float(q)
 
         #npts = 21 hardcoded in Cinvertor.c
         npts = 21
@@ -427,28 +385,13 @@ class Pinvertor:
                                        self.slit_width, q, npts)
         return iq_val
 
-    def get_pr(self, pars, r):
-        """
-        Function to call to evaluate P(r)
-        @param args: c-parameters and r
-        @return: P(r)
-        """
-        if not isinstance(r, float):
-            logger.error("Pinvertor.get_pr: r is not of type float.")
-            return None
-
-        pr_val = py_invertor.pr(pars, self.d_max, r)
-        return pr_val
-
     def pr(self, pars, r):
         """
         Function to call to evaluate P(r)
         @param args: c-parameters and r
         @return: P(r)
         """
-        if not isinstance(r, float):
-            logger.error("Pinvertor.get_pr: r is not of type float.")
-            return None
+        r = float(r)
 
         pr_val = py_invertor.pr(pars, self.d_max, r)
         return pr_val
@@ -459,9 +402,7 @@ class Pinvertor:
         @param args: c-parameters and r
         @return: (P(r), dP(r))
         """
-        if not isinstance(r, float):
-            logger.error("Pinvertor.get_pr_err: r is not of type float")
-            return None
+        r = float(r)
 
         pr_val = 0.0
         pr_err_val = 0.0
@@ -487,15 +428,10 @@ class Pinvertor:
         @param args: c-parameters, n and q
         @return: nth Fourier transformed base function, evaluated at q
         """
-        if not isinstance(d_max, float):
-            logger.error("Pinvertor.basefunc_ft: d_max is not of type float.")
-            return None
-        if not isinstance(n, int):
-            logger.error("Pinvertor.basefunc_ft: n is not of type int.")
-            return None
-        if not isinstance(q, float):
-            logger.error("Pinvertor.basefunc_ft: q is not of type float.")
-            return None
+        d_max = float(d_max)
+        n = int(n)
+        q = float(q)
+
         ortho_val = py_invertor.ortho_transformed(d_max, n, q)
 
         return ortho_val
@@ -594,24 +530,13 @@ class Pinvertor:
         @param b: b vector to fill
         @return: 0
         """
-        #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
-        if not isinstance(nfunc, int):
-            logger.error("Pinvertor.get_matrix: nfunc not of type int.")
-            return None
+        #read in input as integer, cast to integer.
+        nfunc = int(nfunc)
+        nr = int(nr)
 
-        if not isinstance(nr, int):
-            logger.error("Pinvertor.get_matrix: nr not of type int.")
-            return None
+        assert (b_obj.shape[0] >= nfunc)
 
-        if(b_obj.shape[0] < nfunc):
-            #Vector too small
-            #abort program execution, replace C assert()
-            #may need more error messages here etc.
-            print("b too small")
-            return None
-        if(a_obj.shape[0] < nfunc*(nr + self.npoints)):
-            print("a too small")
-            return None
+        assert (a_obj.shape[0] >= nfunc*(nr + self.npoints))
 
         a = a_obj
         b = b_obj
@@ -678,23 +603,11 @@ class Pinvertor:
         """
         #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
 
-        if not isinstance(nfunc, int):
-            logger.error("Pinvertor.get_matrix: nfunc not of type int.")
-            return None
+        nfunc = int(nfunc)
+        nr = int(nr)
 
-        if not isinstance(nr, int):
-            logger.error("Pinvertor.get_matrix: nr not of type int.")
-            return None
-
-        if(b_obj.shape[0] < nfunc):
-            #Vector too small
-            #abort program execution, replace C assert()
-            #may need more error messages here etc.
-            print("b too small")
-            return None
-        if(a_obj.shape[0] < nfunc*(nr + self.npoints)):
-            print("a too small")
-            return None
+        assert (b_obj.shape[0] >= nfunc)
+        assert (a_obj.shape[0] >= nfunc*(nr + self.npoints))
 
         a = a_obj
         b = b_obj
@@ -771,25 +684,18 @@ class Pinvertor:
         @param inv_cov: inverse covariance array to be filled
         @return: 0
         """
-        if not isinstance(nfunc, int):
-            logger.error("Pinvertor.get_invcov_matrix: nfunc not of type int.")
-            return None
-
-        if not isinstance(nr, int):
-            logger.error("Pinvertor.get_invcov_matrix: nr not of type int.")
-            return None
+        nfunc = int(nfunc)
+        nr = int(nr)
 
         n_a = len(a_obj)
         n_cov = len(cov_obj)
         a = a_obj
         inv_cov = cov_obj
 
-        if(n_cov < (nfunc * nfunc)):
-            logger.error("Pinvertor.get_invcov_matrix: cov_obj too small.")
-            return None
-        if(n_a < (nfunc * (nr + self.npoints))):
-            logger.error("Pinvertor.get_invcov_matrix: array a too small.")
-            return None
+        assert (n_cov >= (nfunc * nfunc))
+
+        assert (n_a < (nfunc * (nr + self.npoints)))
+
         for i in range(nfunc):
             for j in range(nfunc):
                 inv_cov[i * nfunc + j] = 0.0
@@ -813,10 +719,7 @@ class Pinvertor:
         #if not isinstance(nr, int):
         #    logger.error("Pinvertor.get_reg_size: nr not of type int")
         #    return None,None
-        if(a_obj.shape[0] < (nfunc * (nr + self.npoints))):
-            logger.error("Pinvertor.get_reg_size: array a too small")
-            raise RuntimeError
-            return None,None
+        #assert (a_obj.shape[0] >= (nfunc * (nr + self.npoints)))
 
         assert len(a_obj) >= nfunc * (nr + self.npoints)
 
@@ -844,16 +747,16 @@ def demo():
     pars_err = np.arange(50)
     nslice = 101
 
-    print(it._dmax(d_max))
+    print(it.set_dmax(d_max))
 
-    print(it.get_iq0(pars))
+    print(it.iq0(pars))
     it.set_x(np.arange(100))
     it.set_y(np.arange(100))
     it.set_err(np.arange(100))
     a = np.arange(100*100*it.get_nx())
-    b = np.arange(100 * (100 + it.get_nx()))
+    b = np.arange(99 * (100 + it.get_nx()))
 
-    print(it.get_reg_size(100, 100, b))
+    print(it._get_reg_size(100, 100, b))
     print(b)
     #print(it.get_matrix(100, 100, c, b))
 
@@ -905,4 +808,4 @@ it.get_matrix(100, 100, a, b)'''
 
 if(__name__ == "__main__"):
     test = Pinvertor()
-    #demo()
+    demo()
