@@ -30,8 +30,8 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(len(f.qx_data),  36864)
         self.assertEqual(f.qx_data[0],-0.03573497)
         self.assertEqual(f.qx_data[36863],0.2908819)
-        self.assertEqual(f.Q_unit, '1/A')
-        self.assertEqual(f.I_unit, '1/cm')
+        self.assertEqual(f.Q_unit, 'A^{-1}')
+        self.assertEqual(f.I_unit, 'cm^{-1}')
 
         self.assertEqual(f.meta_data['loader'],"IGOR/DAT 2D Q_map")
 

@@ -4,33 +4,41 @@
  * and provides the underlying computations.
  *
  */
-#include <Python.h>
-#include "structmember.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 
-#include "invertor.h"
+//#define Py_LIMITED_API 0x03050000
+#include <Python.h>
+#include <structmember.h>
 
+// Vector binding glue
+#if (PY_VERSION_HEX > 0x03000000) && !defined(Py_LIMITED_API)
+  // Assuming that a view into a writable vector points to a
+  // non-changing pointer for the duration of the C call, capture
+  // the view pointer and immediately free the view.
+  #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
+    Py_buffer VEC_view; \
+    int VEC_err = PyObject_GetBuffer(VEC_obj, &VEC_view, PyBUF_WRITABLE|PyBUF_FORMAT); \
+    if (VEC_err < 0 || sizeof(*VEC_buf) != VEC_view.itemsize) return NULL; \
+    VEC_buf = VEC_view.buf; \
+    VEC_len = VEC_view.len/sizeof(*VEC_buf); \
+    PyBuffer_Release(&VEC_view); \
+  } while (0)
+  // Maybe use:   VEC_buf = (typeof(VEC_buf))VEC_view.buf;
+#else
+  #define VECTOR(VEC_obj, VEC_buf, VEC_len) do { \
+    int VEC_err = PyObject_AsWriteBuffer(VEC_obj, (void **)(&VEC_buf), &VEC_len); \
+    if (VEC_err < 0) return NULL; \
+    VEC_len /= sizeof(*VEC_buf); \
+  } while (0)
+#endif
+
+#include "invertor.h"
 
 /// Error object for raised exceptions
 PyObject * CinvertorError;
-
-#define INVECTOR(obj,buf,len)										\
-    do { \
-        int err = PyObject_AsReadBuffer(obj, (const void **)(&buf), &len); \
-        if (err < 0) return NULL; \
-        len /= sizeof(*buf); \
-    } while (0)
-
-#define OUTVECTOR(obj,buf,len) \
-    do { \
-        int err = PyObject_AsWriteBuffer(obj, (void **)(&buf), &len); \
-        if (err < 0) return NULL; \
-        len /= sizeof(*buf); \
-    } while (0)
-
 
 // Class definition
 /**
@@ -98,7 +106,7 @@ static PyObject * set_x(Cinvertor *self, PyObject *args) {
 	int i;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,data,ndata);
+	VECTOR(data_obj,data,ndata);
 
 	free(self->params.x);
 	self->params.x = (double*) malloc(ndata*sizeof(double));
@@ -130,7 +138,7 @@ static PyObject * get_x(Cinvertor *self, PyObject *args) {
     int i;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj, data, ndata);
+	VECTOR(data_obj, data, ndata);
 
 	// Check that the input array is large enough
 	if (ndata < self->params.npoints) {
@@ -163,7 +171,7 @@ static PyObject * set_y(Cinvertor *self, PyObject *args) {
 	int i;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,data,ndata);
+	VECTOR(data_obj,data,ndata);
 
 	free(self->params.y);
 	self->params.y = (double*) malloc(ndata*sizeof(double));
@@ -195,7 +203,7 @@ static PyObject * get_y(Cinvertor *self, PyObject *args) {
     int i;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj, data, ndata);
+	VECTOR(data_obj, data, ndata);
 
 	// Check that the input array is large enough
 	if (ndata < self->params.ny) {
@@ -228,7 +236,7 @@ static PyObject * set_err(Cinvertor *self, PyObject *args) {
 	int i;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,data,ndata);
+	VECTOR(data_obj,data,ndata);
 
 	free(self->params.err);
 	self->params.err = (double*) malloc(ndata*sizeof(double));
@@ -260,7 +268,7 @@ static PyObject * get_err(Cinvertor *self, PyObject *args) {
     int i;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj, data, ndata);
+	VECTOR(data_obj, data, ndata);
 
 	// Check that the input array is large enough
 	if (ndata < self->params.nerr) {
@@ -516,7 +524,7 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
     // PyList of residuals
 	// Should create this list only once and refill it
@@ -567,7 +575,7 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	// Should create this list only once and refill it
     residuals = PyList_New(self->params.npoints);
@@ -608,7 +616,7 @@ static PyObject * get_iq(Cinvertor *self, PyObject *args) {
 	Py_ssize_t npars;
 
 	if (!PyArg_ParseTuple(args, "Od", &data_obj, &q)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	iq_value = iq(pars, self->params.d_max, (int)npars, q);
 	return Py_BuildValue("f", iq_value);
@@ -633,7 +641,7 @@ static PyObject * get_iq_smeared(Cinvertor *self, PyObject *args) {
 	Py_ssize_t npars;
 
 	if (!PyArg_ParseTuple(args, "Od", &data_obj, &q)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	iq_value = iq_smeared(pars, self->params.d_max, (int)npars,
 							self->params.slit_height, self->params.slit_width,
@@ -658,7 +666,7 @@ static PyObject * get_pr(Cinvertor *self, PyObject *args) {
 	Py_ssize_t npars;
 
 	if (!PyArg_ParseTuple(args, "Od", &data_obj, &r)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	pr_value = pr(pars, self->params.d_max, (int)npars, r);
 	return Py_BuildValue("f", pr_value);
@@ -685,13 +693,13 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 	Py_ssize_t npars2;
 
 	if (!PyArg_ParseTuple(args, "OOd", &data_obj, &err_obj, &r)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	if (err_obj == Py_None) {
 		pr_value = pr(pars, self->params.d_max, (int)npars, r);
 		pr_err_value = 0.0;
 	} else {
-		OUTVECTOR(err_obj,pars_err,npars2);
+		VECTOR(err_obj,pars_err,npars2);
 		pr_err(pars, pars_err, self->params.d_max, (int)npars, r, &pr_value, &pr_err_value);
 	}
 	return Py_BuildValue("ff", pr_value, pr_err_value);
@@ -725,7 +733,7 @@ static PyObject * oscillations(Cinvertor *self, PyObject *args) {
 	double oscill, norm;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	oscill = reg_term(pars, self->params.d_max, (int)npars, 100);
 	norm   = int_p2(pars, self->params.d_max, (int)npars, 100);
@@ -746,7 +754,7 @@ static PyObject * get_peaks(Cinvertor *self, PyObject *args) {
 	int count;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	count = npeaks(pars, self->params.d_max, (int)npars, 100);
 
@@ -767,7 +775,7 @@ static PyObject * get_positive(Cinvertor *self, PyObject *args) {
 	double fraction;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	fraction = positive_integral(pars, self->params.d_max, (int)npars, 100);
 
@@ -791,8 +799,8 @@ static PyObject * get_pos_err(Cinvertor *self, PyObject *args) {
 	double fraction;
 
 	if (!PyArg_ParseTuple(args, "OO", &data_obj, &err_obj)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
-	OUTVECTOR(err_obj,pars_err,npars2);
+	VECTOR(data_obj,pars,npars);
+	VECTOR(err_obj,pars_err,npars2);
 
 	fraction = positive_errors(pars, pars_err, self->params.d_max, (int)npars, 51);
 
@@ -812,7 +820,7 @@ static PyObject * get_rg(Cinvertor *self, PyObject *args) {
 	double value;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	value = rg(pars, self->params.d_max, (int)npars, 101);
 
@@ -832,7 +840,7 @@ static PyObject * get_iq0(Cinvertor *self, PyObject *args) {
 	double value;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	VECTOR(data_obj,pars,npars);
 
 	value = 4.0*acos(-1.0)*int_pr(pars, self->params.d_max, (int)npars, 101);
 
@@ -873,8 +881,8 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
 	int offset;
 
 	if (!PyArg_ParseTuple(args, "iiOO", &nfunc, &nr, &a_obj, &b_obj)) return NULL;
-	OUTVECTOR(a_obj,a,n_a);
-	OUTVECTOR(b_obj,b,n_b);
+	VECTOR(a_obj,a,n_a);
+	VECTOR(b_obj,b,n_b);
 
 	assert(n_b>=nfunc);
 	assert(n_a>=nfunc*(nr+self->params.npoints));
@@ -946,8 +954,8 @@ static PyObject * get_invcov_matrix(Cinvertor *self, PyObject *args) {
 	int i, j, k;
 
 	if (!PyArg_ParseTuple(args, "iiOO", &nfunc, &nr, &a_obj, &cov_obj)) return NULL;
-	OUTVECTOR(a_obj,a,n_a);
-	OUTVECTOR(cov_obj,inv_cov,n_cov);
+	VECTOR(a_obj,a,n_a);
+	VECTOR(cov_obj,inv_cov,n_cov);
 
 	assert(n_cov>=nfunc*nfunc);
 	assert(n_a>=nfunc*(nr+self->params.npoints));
@@ -980,7 +988,7 @@ static PyObject * get_reg_size(Cinvertor *self, PyObject *args) {
 	double sum_sig, sum_reg;
 
 	if (!PyArg_ParseTuple(args, "iiO", &nfunc, &nr, &a_obj)) return NULL;
-	OUTVECTOR(a_obj,a,n_a);
+	VECTOR(a_obj,a,n_a);
 
 	assert(n_a>=nfunc*(nr+self->params.npoints));
 
@@ -1120,9 +1128,9 @@ void addCinvertor(PyObject *module) {
 
 
 #define MODULE_DOC "C extension module for inversion to P(r)."
-#define MODULE_NAME "pr_inversion"
-#define MODULE_INIT2 initpr_inversion
-#define MODULE_INIT3 PyInit_pr_inversion
+#define MODULE_NAME "_pr_inversion"
+#define MODULE_INIT2 init_pr_inversion
+#define MODULE_INIT3 PyInit__pr_inversion
 #define MODULE_METHODS module_methods
 
 /* ==== boilerplate python 2/3 interface bootstrap ==== */
