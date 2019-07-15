@@ -2,7 +2,6 @@ name: qt5_osx
 channels:
  - conda-forge
  - defaults
- - numba
 dependencies:
  - alabaster=0.7.12=py_0
  - altgraph=0.15=py_0
@@ -140,7 +139,6 @@ dependencies:
  - service_identity=17.0.0=py36_0
  - twisted=17.5.0=py36_0
  - zope=1.0=py36_0
- - numba
  - pip:
    - pytools==2018.4
    - periodictable==1.5.0
