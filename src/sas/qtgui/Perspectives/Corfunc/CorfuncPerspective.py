@@ -27,6 +27,7 @@ from .CorfuncUtils import WIDGETS as W
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
     def __init__(self, model, width=5, height=4, dpi=100):
         self.model = model
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -36,7 +37,68 @@ class MyMplCanvas(FigureCanvas):
 
         self.data = None
         self.extrap = None
+        self.dragging = None
+        self.draggable = False
+        self.leftdown = False
         self.setMinimumSize(300, 300)
+        self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
+        self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
+        self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
+
+    def on_mouse_down(self, event):
+        if not self.draggable:
+            return
+        if event.button == 1:
+            self.leftdown = True
+
+        qmin = float(self.model.item(W.W_QMIN).text())
+        qmax1 = float(self.model.item(W.W_QMAX).text())
+        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
+
+        q = event.xdata
+
+        if (np.abs(q-qmin) < np.abs(q-qmax1) and
+            np.abs(q-qmin) < np.abs(q-qmax2)):
+            self.dragging = "qmin"
+        elif (np.abs(q-qmax2) < np.abs(q-qmax1)):
+            self.dragging = "qmax2"
+        else:
+            self.dragging = "qmax1"
+
+    def on_mouse_up(self, event):
+        if not self.dragging:
+            return None
+        if event.button == 1:
+            self.leftdown = False
+
+        if self.dragging == "qmin":
+            item = W.W_QMIN
+        elif self.dragging == "qmax1":
+            item = W.W_QMAX
+        else:
+            item = W.W_QCUTOFF
+
+        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+
+        self.dragging = None
+
+    def on_motion(self, event):
+        if not self.leftdown:
+            return
+        if not self.draggable:
+            return
+        if self.dragging is None:
+            return
+
+        if self.dragging == "qmin":
+            item = W.W_QMIN
+        elif self.dragging == "qmax1":
+            item = W.W_QMAX
+        else:
+            item = W.W_QCUTOFF
+
+        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+
 
     def draw_q_space(self):
         """Draw the Q space data in the plot window
@@ -45,7 +107,8 @@ class MyMplCanvas(FigureCanvas):
         as the bounds set by self.qmin, self.qmax1, and self.qmax2.
         It will also plot the extrpolation in self.extrap, if it exists."""
 
-        # TODO: add interactivity to axvlines so qlimits are immediately updated!
+        self.draggable = True;
+
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -86,6 +149,9 @@ class MyMplCanvas(FigureCanvas):
         The 1d correlation function in self.data, the 3d correlation function
         in self.data3, and the interface distribution function in self.data_idf
         are all draw in on the plot in linear cooredinates."""
+
+        self.draggable = False
+
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
