@@ -164,12 +164,12 @@ class Invertor(Pinvertor):
                 raise ValueError(msg)
             return self.set_dmax(value)
         elif name == 'q_min':
-            if value is None:
-                return self.set_qmin(-1.0)
+            #if value is None:
+            #    return self.set_qmin(-1.0)
             return self.set_qmin(value)
         elif name == 'q_max':
-            if value is None:
-                return self.set_qmax(-1.0)
+            #if value is None:
+            #    return self.set_qmax(-1.0)
             return self.set_qmax(value)
         elif name == 'alpha':
             return self.set_alpha(value)
