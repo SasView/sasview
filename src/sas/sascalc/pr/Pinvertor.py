@@ -518,9 +518,9 @@ class Pinvertor:
         Check whether a q-value is within acceptable limits
         Returns 1 if accepted, 0 if rejected.
         """
-        if(self.q_min > 0 and q < self.q_min):
+        if(self.get_qmin() > 0 and q < self.get_qmin()):
             return 0
-        if(self.q_max > 0 and q > self.q_max):
+        if(self.get_qmax() > 0 and q > self.get_qmax()):
             return 0
         return 1
 
