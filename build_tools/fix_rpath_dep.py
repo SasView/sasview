@@ -41,7 +41,7 @@ def fix_qt_paths(app):
 
     def fix_qt_rpath(program, rpath):
         fixed_rpath = rpath.replace("@rpath", "@executable_path/../Frameworks")
-        print("Fixed path",fixed_rpath)
+        print("Fixed path",fixed_rpath, program)
         fixed.append(program)
 
         proc = Popen(["install_name_tool", "-change", rpath, fixed_rpath, program], stderr=PIPE, stdout=PIPE)
