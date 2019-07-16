@@ -18,7 +18,7 @@ import logging
 from numpy.linalg import lstsq
 from scipy import optimize
 from sas.sascalc.pr.core.pr_inversion import Cinvertor
-#import Cinvertor
+#from Pinvertor import Pinvertor
 from sas.sascalc.pr.Pinvertor import Pinvertor
 
 logger = logging.getLogger(__name__)
@@ -164,12 +164,12 @@ class Invertor(Pinvertor):
                 raise ValueError(msg)
             return self.set_dmax(value)
         elif name == 'q_min':
-            #if value is None:
-            #    return self.set_qmin(-1.0)
+            if value is None:
+                return self.set_qmin(-1.0)
             return self.set_qmin(value)
         elif name == 'q_max':
-            #if value is None:
-            #    return self.set_qmax(-1.0)
+            if value is None:
+                return self.set_qmax(-1.0)
             return self.set_qmax(value)
         elif name == 'alpha':
             return self.set_alpha(value)
@@ -208,6 +208,7 @@ class Invertor(Pinvertor):
             return self.get_dmax()
         elif name == 'q_min':
             qmin = self.get_qmin()
+            print(qmin)
             if qmin < 0:
                 return None
             return qmin
@@ -767,12 +768,6 @@ class Invertor(Pinvertor):
 if(__name__ == "__main__"):
     test = Invertor()
     #test.__setattr__('d_max', 2000.0)
-    print(test.set_dmax(2000.0))
-    print(test.get_dmax())
-    print(test.set_x(np.arange(200)))
-    a = np.zeros(200)
-    print(test.get_x(a))
-    print(a)
-    print(test.get_nx())
-    print(len(a))
-    print(test.get_positive())
+    print(test.set_x(np.arange(2000)))
+    test.q_min = None
+    print(test.q_min)

@@ -50,7 +50,6 @@ def ortho(d_max, n, r):
     B(r) = 2r sin(pi*nr/d)
     """
     return 2.0 * r * np.sin(pi * n * r/d_max)
-
 @njit()
 def ortho_transformed(d_max, n, q):
     """
@@ -143,42 +142,6 @@ def iq(pars, d_max, q):
         sum += pars[i] * ortho_transformed(d_max, i + 1, q)
     return sum
 
-def iq_vectorized(pars, d_max, q):
-    """
-    Scattering intensity calculated from the expansion
-
-    basic python ~=0.00014 with array of size 20
-    vectorised operations ~= 0.0002
-    using njit, no parallel possible ~= 1.3e-05
-
-    Array size 300
-    3386 result
-    """
-    q = np.asanyarray(q)
-    def result(x, y):
-        def apply_q(q):
-            return x * ortho_transformed(d_max, y + 1, q)
-        g = np.vectorize(apply_q)
-        return np.sum(g(q[0]))
-
-    f = np.vectorize(result)
-    result = f(pars, np.arange(pars.shape[0]))
-
-    final_result = np.sum(result)
-
-    return final_result
-
-@njit()
-def parallel_test(n):
-    shp = (13, 17)
-    result1 = 2 * np.ones(shp, np.int_)
-    tmp = 2 * np.ones_like(result1)
-
-    for i in prange(n):
-        result1 *= tmp
-
-    return result1
-
 
 @njit(parallel = True)
 def iq_smeared(pars, d_max, height, width, q, npts):
@@ -212,8 +175,35 @@ def pr(pars, d_max, r):
     """
     sum = 0.0
     for i in prange(pars.shape[0]):
+
         sum += pars[i] * ortho(d_max, i+1, r)
     return sum
+
+@njit(parallel = True)
+def pr_err_p(pars, err, d_max, r):
+    """
+    P(r) calculated from the expansion,
+    with errors
+    changed to instead of return value by reference, returns
+    tuple of (pr_value, pr_value_err)
+    """
+    sum = 0.0
+    sum_err = 0.0
+    func_value = 0
+    n_c = pars.shape[0]
+
+    for i in prange(0, n_c):
+        func_value = ortho(d_max, i+1, r)
+        sum += pars[i] * func_value
+        sum_err += err[i * n_c + i] * func_value * func_value
+
+    pr_value = sum
+    if(sum_err > 0):
+        pr_value_err = np.sqrt(sum_err)
+    else:
+        pr_value_err = sum
+
+    return (pr_value, pr_value_err)
 
 @njit()
 def pr_err(pars, err, d_max, r):
@@ -231,7 +221,7 @@ def pr_err(pars, err, d_max, r):
     for i in range(0, n_c):
         func_value = ortho(d_max, i+1, r)
         sum += pars[i] * func_value
-        sum_err += err[i * n_c + i] * func_value * func_value
+        sum_err += err[i, i] * func_value * func_value
 
     pr_value = sum
     if(sum_err > 0):
@@ -443,7 +433,7 @@ def npeaks(pars, d_max, nslice):
     slope = 0.0
     count = 0
     nslice_d = nslice * 1.0
-    for i in prange(nslice):
+    for i in range(nslice):
         r = d_max/nslice_d * i
         value = pr(pars, d_max, r)
         #print("i: ", value)
@@ -457,26 +447,55 @@ def npeaks(pars, d_max, nslice):
 
     return count
 
-
-
-
+@njit(parallel = True)
 def positive_integral(pars, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole
     range of r that is above 0.
     A valid P(r) is defined as being positive for all r.
+
+    Parallelization of this method gives ~=40% speedup.
     """
     r = 0.0
     value = 0.0
     sum_pos = 0.0
     sum = 0.0
     nslice_d = 1.0 * nslice
-    for i in range(nslice):
+    for i in prange(nslice):
         r = d_max/nslice_d * i
         value = pr(pars, d_max, r)
         if(value>0.0):
            sum_pos += value
         sum += math.fabs(value)
+    return sum_pos / sum
+
+@njit(parallel = True)
+def positive_integral_vec(pars, d_max, nslice):
+    """
+    Get the fraction of the integral of P(r) over the whole
+    range of r that is above 0.
+    A valid P(r) is defined as being positive for all r.
+
+    Parallelization of this method gives ~=40% speedup.
+    """
+    #compute r as a vector first then give r to pr()
+    #which because of the implementation should be able to
+    #handle r as a vector.
+    r = np.zeros(nslice)
+    value = 0.0
+    sum_pos = 0.0
+    sum = 0.0
+    nslice_d = 1.0 * nslice
+    for i in prange(nslice):
+        r[i] = d_max/nslice_d * i
+
+    value = pr(pars, d_max, r)
+
+    for i in prange(nslice):
+        if(value[i]>0.0):
+            sum_pos += value
+            sum += math.fabs(value)
+
     return sum_pos / sum
 
 def positive_errors(pars, err, d_max, nslice):
@@ -596,8 +615,6 @@ test(x)
     print("Cache: ", cache_time)
     print("N Time: ", n_time)
 
-
-
 def demo_speedtest():
     setup = '''
 from __main__ import speed_test_njit
@@ -693,7 +710,8 @@ iq_smeared_qvec(p, q, d_max, height, width, npts)'''
 
 def demo_qvec():
     #q = np.linspace(0.001, 0.5, 301)
-    q = np.arange(301, dtype = np.float64)
+    #q = np.arange(301, dtype = np.float64)
+    q = 5
     p = np.arange(40)
     print(q)
     print(p)
@@ -718,13 +736,13 @@ npts = 30'''
     #not usually caused by python by other processes scheduled by os
 
 
-    timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
-    times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+    #timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
+    #times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
 
-    print("Parallel Times: \n", timesParallel)
-    print("Lowest Time P: ", min(timesParallel))
-    print("Normal Times: \n", times)
-    print("Lowest Time N: ", min(times))
+    #print("Parallel Times: \n", timesParallel)
+    #print("Lowest Time P: ", min(timesParallel))
+    #print("Normal Times: \n", times)
+    #print("Lowest Time N: ", min(times))
 
     test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
     test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
@@ -793,9 +811,46 @@ print(npeaks(pars, d_max, nslice))'''
 
 
 
+def demo_positive_integrals():
+    setup = '''
+from __main__ import positive_integral_vec
+from __main__ import positive_integral
+import numpy as np
+pars = np.arange(1000)
+d_max = 2000
+nslice = 21
+'''
+    run = '''
+positive_integral(pars, d_max, nslice)
+'''
+    run_p = '''
+positive_integral(pars, d_max, nslice)
+'''
+    results_p = np.asanyarray(timeit.repeat(stmt = run_p, setup = setup, repeat = 10, number = 1))
+
+    results_n = np.asanyarray(timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1))
+    test_result_n = positive_integral(np.arange(1000), 2000, 21)
+    test_result_p = positive_integral(np.arange(1000), 2000, 21)
+    print(test_result_n)
+    print(test_result_p)
+    print(results_n)
+    print(results_p)
+    print(results_p / results_n)
+
+@njit()
+def test_atleast1d(x):
+    if(np.shape(x) == 0):
+        return np.sum(np.array(x))
+    else:
+        return np.sum(x)
 
 if(__name__ == "__main__"):
-    demo_npeaks()
+    #print(positive_integral(np.arange(1000), 2000, 21))
+    #print(pr(np.arange(1000), 2000, 20))
+    #print(test_atleast1d(20))
+    #demo_qvec()
+    #demo_positive_integrals()
+    demo_qvec()
 
 """
 C driver code for testing speed
