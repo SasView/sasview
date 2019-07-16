@@ -14,9 +14,9 @@ from numba import njit
 logger = logging.getLogger(__name__)
 
 class Pinvertor:
-    #invertor.h
+        #invertor.h
     #Maximum distance between any two points in the system
-    d_max = 0.0
+    #d_max = 0.0
     #q data
     x = np.empty(0, dtype = np.float)
     #I(q) data
@@ -32,19 +32,24 @@ class Pinvertor:
     #Alpha value
     alpha = 0.0
     #Minimum q to include in inversion
-    q_min = 0.0
+    #q_min = 0.0
     #Maximum q to include in inversion
-    q_max = 0.0
+    #q_max = 0.0
     #Flag for whether or not to evaluate a constant background
     #while inverting
-    est_bck = 0
+    #est_bck = 0
     #Slit height in units of q [A-1]
     slit_height = 0.0
     #Slit width in units of q [A-1]
     slit_width = 0.0
 
     def __init__(self):
-        pass
+        #replace invertor.c invertor_init
+        self.set_qmax(180)
+        self.set_qmin(-1.0)
+        self.set_qmax(-1.0)
+        self.set_est_bck(0)
+
     def residuals(self, args):
         """
         Function to call to evaluate the residuals\n
@@ -62,13 +67,13 @@ class Pinvertor:
         diff = 0.0
         regterm = 0.0
         nslice = 25
-        regterm = py_invertor.reg_term(pars, d_max, nslice)
+        regterm = py_invertor.reg_term(pars, self.d_max, nslice)
 
         for i in range(self.npoints):
-            diff = y[i] - py_invertor.iq(pars, d_max, x[i])
-            residual = diff*diff / (err[i] * err[i])
+            diff = self.y[i] - py_invertor.iq(pars, self.d_max, self.x[i])
+            residual = diff*diff / (self.err[i] * self.err[i])
 
-            residual += alpha * regterm
+            residual += self.alpha * regterm
             try:
                 residuals.append(residual)
             except:
@@ -103,9 +108,6 @@ class Pinvertor:
         Returns the number of entries found
         """
 
-        #if given an array with shape = []
-        assert (len(args.shape) > 0)
-
         data = np.asanyarray(args, dtype = np.float)
 
         ndata = data.shape[0]
@@ -136,7 +138,9 @@ class Pinvertor:
         ndata = args.shape[0]
 
         #check that the input array is large enough
-        assert (ndata >= self.npoints)
+        if (ndata < self.npoints):
+            logger.error("Pinvertor.get_x: input array too short for data.")
+            return None
 
         for i in range(self.npoints):
             args[i] = self.x[i]
@@ -149,8 +153,6 @@ class Pinvertor:
         Takes an array of doubles as input
         @return: number of entries found
         """
-        #if given an array with shape = []
-        assert (len(args.shape) > 0)
 
         data = np.asanyarray(args, dtype = np.float)
         #not 100% about this line
@@ -179,7 +181,9 @@ class Pinvertor:
         """
         ndata = args.shape[0]
         #check that the input array is large enough
-        assert (ndata >= self.ny)
+        if (ndata < self.ny):
+            logger.error("Pinvertor.get_y: input array too short for data.")
+            return None
 
         for i in range(self.ny):
             args[i] = self.y[i]
@@ -193,7 +197,6 @@ class Pinvertor:
         Returns the number of entries found
         """
         #if given an array with shape = []
-        assert (len(args.shape) > 0)
 
         ndata = args.shape[0]
 
@@ -218,7 +221,9 @@ class Pinvertor:
         """
         ndata = args.shape[0]
 
-        assert (ndata >= self.nerr)
+        if (ndata < self.nerr):
+            logger.error("Pinvertor.get_err: input array too short for data.")
+            return None
 
         for i in range(self.nerr):
             args[i] = self.err[i]
@@ -253,15 +258,14 @@ class Pinvertor:
         the new value of q_min
         """
         args = float(args)
-
-        self.__dict__['q_min'] = args
-        return self.q_min
+        self._q_min = args
+        return self._q_min
 
     def get_qmin(self):
         """
         Gets the minimum q
         """
-        return self.q_min
+        return self._q_min
 
     def set_qmax(self, args):
         """
@@ -269,14 +273,14 @@ class Pinvertor:
         """
         args = float(args)
 
-        self.__dict__['q_max'] = args
-        return self.q_max
+        self._q_max = args
+        return self._q_max
 
     def get_qmax(self):
         """
         Gets the maximum q
         """
-        return self.q_max
+        return self._q_max
 
     def set_alpha(self, args):
         """
@@ -294,7 +298,6 @@ class Pinvertor:
         Gets the alpha parameter.
         """
         return self.alpha
-
     def set_slit_width(self, args):
         """
         Sets the slit width in units of q [A-1]
@@ -534,9 +537,11 @@ class Pinvertor:
         nfunc = int(nfunc)
         nr = int(nr)
 
-        assert (b_obj.shape[0] >= nfunc)
+        if not (b_obj.shape[0] >= nfunc):
+            raise RuntimeError("Pinvertor: b vector too small.")
 
-        assert (a_obj.shape[0] >= nfunc*(nr + self.npoints))
+        if not (a_obj.size >= nfunc*(nr + self.npoints)):
+            raise RuntimeError("Pinvertor: a array too small.")
 
         a = a_obj
         b = b_obj
@@ -559,7 +564,7 @@ class Pinvertor:
 
         for j in range(nfunc):
             for i in range(self.npoints):
-                index = i * nfunc + j
+                index = (i * nfunc) + j
                 npts = 21
                 if(self.accept_q(self.x[i])):
 
@@ -568,15 +573,16 @@ class Pinvertor:
 
                     else:
                         if(self.slit_width > 0 or self.slit_height > 0):
-                            a[index] = py_invertor.ortho_transformed_smeared_qvec_njit(self.x[i], self.d_max, j + offset,
+                            a[i, j] = py_invertor.ortho_transformed_smeared(self.x[i], self.d_max, j + offset,
                                                                              self.slit_height, self.slit_width, npts)/self.err[i]
                         else:
-                            a[index] = py_invertor.ortho_transformed_qvec_njit(self.x[i], self.d_max, j + offset)/self.err[i]
+                            a[i, j] = py_invertor.ortho_transformed(self.x[i], self.d_max, j + offset)/self.err[i]
 
             for i_r in range(nr):
-                index = (i_r + self.npoints) * nfunc + j
+                index_i = i_r
+                index_j = j
                 if(self.est_bck == 1 and j == 0):
-                    a[index] = 0.0
+                    a[index_i, index_j] = 0.0
                 else:
                     r = self.d_max / nr * i_r
                     tmp = pi * (j + offset) / self.d_max
@@ -585,7 +591,7 @@ class Pinvertor:
                     t2 = (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
                     + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
 
-                    a[index] =  t1 * t2
+                    a[index_i, index_j] =  t1 * t2
 
         for i in range(self.npoints):
             if(self.accept_q(self.x[i])):
@@ -601,13 +607,12 @@ class Pinvertor:
         @param b: b vector to fill
         @return: 0
         """
-        #replace assert(n_b>=nfunc) and assert(n_a>=nfunc*(nr+self.npoints))
 
         nfunc = int(nfunc)
         nr = int(nr)
 
         assert (b_obj.shape[0] >= nfunc)
-        assert (a_obj.shape[0] >= nfunc*(nr + self.npoints))
+        assert (a_obj.size >= nfunc*(nr + self.npoints))
 
         a = a_obj
         b = b_obj
@@ -634,13 +639,13 @@ class Pinvertor:
             matrix = 0
             if(smeared):
                 ortho_sm = np.zeros(self.npoints)
-                ortho_sm = py_invertor.ortho_transformed_smeared_qvec_njit(self.x, self.d_max, j + offset,
+                ortho_sm = py_invertor.ortho_transformed_smeared(self.x, self.d_max, j + offset,
                                                                    self.slit_height, self.slit_width, npts)
                 ortho_sm /= self.err
                 matrix = ortho_sm
             else:
                 ortho = np.zeros(self.npoints)
-                ortho = py_invertor.ortho_transformed_qvec_njit( self.x, self.d_max, j + offset)
+                ortho = py_invertor.ortho_transformed( self.x, self.d_max, j + offset)
                 ortho /= self.err
                 matrix = ortho
 
@@ -687,20 +692,22 @@ class Pinvertor:
         nfunc = int(nfunc)
         nr = int(nr)
 
-        n_a = len(a_obj)
-        n_cov = len(cov_obj)
+        n_a = (a_obj).size
+        n_cov = cov_obj.size
         a = a_obj
         inv_cov = cov_obj
 
-        assert (n_cov >= (nfunc * nfunc))
+        if not (n_cov >= (nfunc * nfunc)):
+            raise RuntimeError("Pinvertor._get_invcov_matrix: cov array too small.")
 
-        assert (n_a < (nfunc * (nr + self.npoints)))
+        if not (n_a >= (nfunc * (nr + self.npoints))):
+            raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         for i in range(nfunc):
             for j in range(nfunc):
-                inv_cov[i * nfunc + j] = 0.0
+                inv_cov[i, j] = 0.0
                 for k in range(nr + self.npoints):
-                    inv_cov[i * nfunc+j] += a[k*nfunc+i]*a[k*nfunc+j]
+                    inv_cov[i, j] += a[k, i]*a[k, j]
         return 0
 
     def _get_reg_size(self, nfunc, nr, a_obj):
@@ -721,7 +728,8 @@ class Pinvertor:
         #    return None,None
         #assert (a_obj.shape[0] >= (nfunc * (nr + self.npoints)))
 
-        assert len(a_obj) >= nfunc * (nr + self.npoints)
+        if not (a_obj.size >= nfunc * (nr + self.npoints)):
+            raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
         sum_sig = 0.0
         sum_reg = 0.0
@@ -729,9 +737,9 @@ class Pinvertor:
         for j in range(nfunc):
             for i in range(self.npoints):
                 if(self.accept_q(self.x[i]) == 1):
-                    sum_sig += (a[i * nfunc + j]) * a[i * nfunc + j]
+                    sum_sig += (a[i, j]) * a[i, j]
             for i in range(nr):
-                sum_reg += (a[(i+self.npoints)*nfunc+j])*(a[(i+self.npoints)*nfunc+j]);
+                sum_reg += (a[(i+self.npoints), j])*(a[(i+self.npoints), j]);
         return sum_sig, sum_reg
 
 class Invertor_Test(Pinvertor):
