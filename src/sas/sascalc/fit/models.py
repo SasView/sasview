@@ -182,8 +182,8 @@ def find_plugin_models():
             try:
                 model = load_custom_model(path)
                 # TODO: add [plug-in] tag to model name in sasview_model
-                if not model.name.startswith(PLUGIN_NAME_BASE):
-                    model.name = PLUGIN_NAME_BASE + model.name
+                #if not model.name.startswith(PLUGIN_NAME_BASE):
+                #    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception as exc:
                 msg = traceback.format_exc()

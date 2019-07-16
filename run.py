@@ -22,6 +22,7 @@ from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname, realpath
 
+PLUGIN_MODEL_DIR = 'plugin_models'
 
 def addpath(path):
     """
@@ -65,6 +66,14 @@ def import_dll(modname, build_path):
     path = joinpath(build_path, *modname.split('.')) + ext
     return imp.load_dynamic(modname, path)
 
+def setup_sasmodels():
+    """
+    Prepare sasmodels for running within sasview.
+    """
+    # Set SAS_MODELPATH so sasmodels can find our custom models
+    import sas
+    plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
+    os.environ['SAS_MODELPATH'] = plugin_dir
 
 def prepare():
     # Don't create *.pyc files
@@ -158,6 +167,8 @@ if __name__ == "__main__":
 
     logger.debug("Starting SASVIEW in debug mode.")
     prepare()
+    setup_sasmodels()
+
     from sas.qtgui.MainWindow.MainWindow import run_sasview
     run_sasview()
     logger.debug("Ending SASVIEW in debug mode.")
