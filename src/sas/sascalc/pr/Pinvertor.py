@@ -57,11 +57,11 @@ class Pinvertor:
 	    @param args: input parameters\n
 	    @return: list of residuals
         """
-        #May not be correct, initial version
 
         residuals = []
 
-        pars = np.asanyarray(args, dtype = np.float)
+        #pars = np.asanyarray(args, dtype = np.float)
+        pars = args
 
         residual = 0.0
         diff = 0.0
@@ -75,7 +75,7 @@ class Pinvertor:
 
             residual += self.alpha * regterm
             try:
-                residuals.append(residual)
+                residuals.append(float(residual))
             except:
                 logger.error("Pinvertor.residuals: error setting residual.")
 
@@ -559,27 +559,25 @@ class Pinvertor:
             return False
 
         if(check_for_zero(self.err)):
-            logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
-            return None
+            raise RuntimeError("Pinvertor.get_matrix: Some I(Q) points have no error.")
 
         for j in range(nfunc):
             for i in range(self.npoints):
-                index = (i * nfunc) + j
                 npts = 21
                 if(self.accept_q(self.x[i])):
 
                     if(self.est_bck == 1 and j == 0):
-                        a[index] = 1.0/self.err[i]
+                        a[i, j] = 1.0/self.err[i]
 
                     else:
                         if(self.slit_width > 0 or self.slit_height > 0):
-                            a[i, j] = py_invertor.ortho_transformed_smeared(self.x[i], self.d_max, j + offset,
-                                                                             self.slit_height, self.slit_width, npts)/self.err[i]
+                            a[i, j] = py_invertor.ortho_transformed_smeared(self.d_max, j + offset,
+                                                                             self.slit_height, self.slit_width, self.x[i], npts)/self.err[i]
                         else:
-                            a[i, j] = py_invertor.ortho_transformed(self.x[i], self.d_max, j + offset)/self.err[i]
+                            a[i, j] = py_invertor.ortho_transformed(self.d_max, j + offset, self.x[i])/self.err[i]
 
             for i_r in range(nr):
-                index_i = i_r
+                index_i = i_r + self.npoints
                 index_j = j
                 if(self.est_bck == 1 and j == 0):
                     a[index_i, index_j] = 0.0
@@ -692,7 +690,7 @@ class Pinvertor:
         nfunc = int(nfunc)
         nr = int(nr)
 
-        n_a = (a_obj).size
+        n_a = a_obj.size
         n_cov = cov_obj.size
         a = a_obj
         inv_cov = cov_obj
@@ -728,6 +726,9 @@ class Pinvertor:
         #    return None,None
         #assert (a_obj.shape[0] >= (nfunc * (nr + self.npoints)))
 
+        nfunc = int(nfunc)
+        nr = int(nfunc)
+
         if not (a_obj.size >= nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
@@ -737,7 +738,7 @@ class Pinvertor:
         for j in range(nfunc):
             for i in range(self.npoints):
                 if(self.accept_q(self.x[i]) == 1):
-                    sum_sig += (a[i, j]) * a[i, j]
+                    sum_sig += a[i, j] * a[i, j]
             for i in range(nr):
                 sum_reg += (a[(i+self.npoints), j])*(a[(i+self.npoints), j]);
         return sum_sig, sum_reg
