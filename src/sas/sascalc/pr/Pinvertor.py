@@ -30,13 +30,6 @@ class Pinvertor:
     nerr = 0
     #Alpha value
     alpha = 0.0
-    #Minimum q to include in inversion
-    #q_min = 0.0
-    #Maximum q to include in inversion
-    #q_max = 0.0
-    #Flag for whether or not to evaluate a constant background
-    #while inverting
-    #est_bck = 0
     #Slit height in units of q [A-1]
     slit_height = 0.0
     #Slit width in units of q [A-1]
@@ -44,9 +37,13 @@ class Pinvertor:
 
     def __init__(self):
         #replace invertor.c invertor_init
-        self.set_qmax(180)
+        self.set_dmax(180)
+        #Minimum q to include in inversion
         self.set_qmin(-1.0)
+        #Maximum q to include in inversion
         self.set_qmax(-1.0)
+        #Flag for whether or not to evaluate a constant background
+        #while inverting
         self.set_est_bck(0)
 
     def residuals(self, args):
