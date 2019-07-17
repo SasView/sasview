@@ -1,7 +1,7 @@
 """
-Under Development-
-Class duplicating Cinvertor.c's functionality in Python
-depends on py_invertor.py as a pose to invertor.c
+Python implementation of the P(r) inversion
+Pinvertor is the base class for the Invertor class
+and provides the underlying computations.
 """
 import sas.sascalc.pr.py_invertor as py_invertor
 import numpy as np
@@ -13,9 +13,6 @@ from numba import njit
 logger = logging.getLogger(__name__)
 
 class Pinvertor:
-        #invertor.h
-    #Maximum distance between any two points in the system
-    #d_max = 0.0
     #q data
     x = np.empty(0, dtype = np.float)
     #I(q) data
@@ -36,7 +33,7 @@ class Pinvertor:
     slit_width = 0.0
 
     def __init__(self):
-        #replace invertor.c invertor_init
+        #Maximum distance between any two points in the system
         self.set_dmax(180)
         #Minimum q to include in inversion
         self.set_qmin(-1.0)
@@ -46,19 +43,14 @@ class Pinvertor:
         #while inverting
         self.set_est_bck(0)
 
-    def residuals(self, args):
+    def residuals(self, pars):
         """
-        Function to call to evaluate the residuals\n
-	    for P(r) inversion\n
-	    @param args: input parameters\n
-	    @return: list of residuals
-        """
+        Function to call to evaluate the residuals for P(r) inversion.
 
+        :param pars: input parameters.
+        :return: residuals - list of residuals.
+        """
         residuals = []
-
-        #pars = np.asanyarray(args, dtype = np.float)
-        pars = args
-
         residual = 0.0
         diff = 0.0
         regterm = 0.0
@@ -67,305 +59,306 @@ class Pinvertor:
 
         for i in range(self.npoints):
             diff = self.y[i] - py_invertor.iq(pars, self.d_max, self.x[i])
-            residual = diff*diff / (self.err[i] * self.err[i])
-
+            residual = (diff*diff) / (self.err[i]*self.err[i])
             residual += self.alpha * regterm
+
             try:
                 residuals.append(float(residual))
             except:
-                logger.error("Pinvertor.residuals: error setting residual.")
+                raise RuntimeError("Pinvertor.residuals: error setting residual.")
 
         return residuals
 
     def pr_residuals(self, pars):
         """
-        Function to call to evaluate the residuals
-        for P(r) minimization (for testing purposes)
-        @param args: input parameters
-        @return: list of residuals
+        Function to call to evaluate the residuals for P(r) minimization (for testing purposes).
+
+        :param pars: input parameters.
+        :return: residuals - list of residuals.
         """
+        residuals = []
         regterm = 0.0
         nslice = 25
-        residuals = []
         regterm = py_invertor.reg_term(pars, self.d_max, nslice)
+
         for i in range(self.npoints):
             diff = self.y[i] - py_invertor.pr(pars, self.d_max, self.x[i])
-            residual = diff*diff / (self.err[i] * self.err[i])
-
+            residual = (diff*diff) / (self.err[i]*self.err[i])
             residual += self.alpha * regterm
+            residuals.append(float(residual))
 
-            residuals.append(residual)
         return residuals
 
-    def set_x(self, args):
+    def set_x(self, data):
         """
-        Function to set the x data
-        Takes an array of the doubles as input
-        Returns the number of entries found
+        Function to set the x data.
+
+        :param data: Array of doubles to set x to.
+        :return: npoints - Number of entries found, the size of x.
         """
-
-        data = np.asanyarray(args, dtype = np.float)
-
-        ndata = data.shape[0]
-
-        #reset x
-        #self.x = None
-        #self.x = np.zeros(ndata)
+        ndata = len(data)
         self.__dict__['x'] = np.zeros(ndata)
-
-
-        #if(self.x == None):
-        #    logger.error("Pinvertor.set_x: problem allocating memory.")
-        #    return None
 
         for i in range(ndata):
             self.__dict__['x'][i] = data[i]
 
         self.__dict__['npoints'] = int(ndata)
-        #self.__dict__['npoints'] = int(ndata)
         return self.npoints
 
-    def get_x(self, args):
+    def get_x(self, data):
         """
-        Function to get the x data
-        Takes an array of doubles as input
-        @return: number of entries found
-        """
-        ndata = args.shape[0]
+        Function to get the x data.
 
-        #check that the input array is large enough
+        :param data: Array to place x into
+        :return: npoints - Number of entries found.
+        """
+        ndata = len(data)
         if (ndata < self.npoints):
             logger.error("Pinvertor.get_x: input array too short for data.")
             return None
 
         for i in range(self.npoints):
-            args[i] = self.x[i]
+            data[i] = self.x[i]
+
         return self.npoints
 
 
-    def set_y(self, args):
+    def set_y(self, data):
         """
-        Function to set the y data
-        Takes an array of doubles as input
-        @return: number of entries found
+        Function to set the y data.
+
+        :param data: Array of doubles to set y to.
+        :return: ny - Number of entries found.
         """
-
-        data = np.asanyarray(args, dtype = np.float)
-        #not 100% about this line
-        ndata = data.shape[0]
-
-        #reset y
+        ndata = len(data)
         self.__dict__['y'] = np.zeros(ndata)
-
-        #if(self.y = None):
-         #   logger.error("Pinvertor.set_y: problem allocating memory.")
-          #  return None
 
         for i in range(ndata):
             self.__dict__['y'][i] = data[i]
-
 
         self.__dict__['ny'] = int(ndata)
         return self.ny
 
 
-    def get_y(self, args):
+    def get_y(self, data):
         """
-        Function to get the y data
-        Takes an arrayof doubles as input
-        @return: number of entries found
+        Function to get the y data.
+
+        :param data: Array of doubles to place y into.
+        :return: npoints - Number of entries found.
         """
-        ndata = args.shape[0]
-        #check that the input array is large enough
+        ndata = len(data)
         if (ndata < self.ny):
             logger.error("Pinvertor.get_y: input array too short for data.")
             return None
 
         for i in range(self.ny):
-            args[i] = self.y[i]
+            data[i] = self.y[i]
 
         return self.npoints
 
-    def set_err(self, args):
+    def set_err(self, data):
         """
-        Function to set the err data
-        Takes an array of doubles as input
-        Returns the number of entries found
+        Function to set the err data.
+
+        :param data: Array of doubles to set err to.
+        :return: nerr - Number of entries found.
         """
-        #if given an array with shape = []
-
-        ndata = args.shape[0]
-
+        ndata = len(data)
         self.__dict__['err'] = np.zeros(ndata)
 
-        #if(self.err == None):
-        #    logger.error("Pinvertor.set_err: problem allocating memory.")
-        #    return None
-
         for i in range(ndata):
-            self.__dict__['err'][i] = args[i]
+            self.__dict__['err'][i] = data[i]
 
         self.__dict__['nerr'] = int(ndata)
         return self.nerr
 
 
-    def get_err(self, args):
+    def get_err(self, data):
         """
-        Function to get the err data
-        Takes an array of doubles as input.
-        @return: number of entries found
-        """
-        ndata = args.shape[0]
+        Function to get the err data.
 
+        :param data: Array of doubles to place err into.
+        :return: npoints - number of entries found
+        """
+        ndata = len(data)
         if (ndata < self.nerr):
             logger.error("Pinvertor.get_err: input array too short for data.")
             return None
 
         for i in range(self.nerr):
-            args[i] = self.err[i]
+            data[i] = self.err[i]
 
         return self.npoints
 
-    def set_dmax(self, args):
+    def set_dmax(self, d_max):
         """
-        Sets the maximum distance
-        Takes a float as input. Returns none if not a float
-        if succcesful the value of d_max
-        """
-        #attempt to replace pyarg_parsetuple(args, "d")
-        #to read as type of d, floating point number
-        #if not return null
-        args = float(args)
+        Sets the maximum distance.
 
-        #self.d_max = args
-        self.__dict__['d_max'] = args
+        :param d_max: float to set d_max to.
+        :return: d_max
+        """
+        _d_max = float(d_max)
+        self.__dict__['d_max'] = _d_max
+
         return self.d_max
 
     def get_dmax(self):
         """
-        Gets the maximum distance
+        Gets the maximum distance.
+
+        :return: d_max.
         """
         return self.d_max
 
-    def set_qmin(self, args):
+    def set_qmin(self, min_q):
         """
         Sets the minimum q.
-        Input is single float, output is if succesful
-        the new value of q_min
+
+        :param min_q: float to set q_min to.
+        :return: q_min.
         """
-        args = float(args)
-        self._q_min = args
+        _min_q = float(min_q)
+        self._q_min = _min_q
         return self._q_min
 
     def get_qmin(self):
         """
-        Gets the minimum q
+        Gets the minimum q.
+
+        :return: q_min.
         """
         return self._q_min
 
-    def set_qmax(self, args):
+    def set_qmax(self, max_q):
         """
-        Sets the maximum q
-        """
-        args = float(args)
+        Sets the maximum q.
 
-        self._q_max = args
+        :param max_q: float to set q_max to.
+        :return: q_max.
+        """
+        _max_q = float(max_q)
+        self._q_max = _max_q
         return self._q_max
 
     def get_qmax(self):
         """
-        Gets the maximum q
+        Gets the maximum q.
+
+        :return: q_max.
         """
         return self._q_max
 
-    def set_alpha(self, args):
+    def set_alpha(self, alpha):
         """
         Sets the alpha parameter.
-        Takes a float, returns if succesful the
-        new alpha value.
-        """
-        args = float(args)
 
-        self.__dict__['alpha'] = args
+        :param alpha_: float to set alpha to.
+        :return: alpha.
+        """
+        _alpha = float(alpha)
+        self.__dict__['alpha'] = _alpha
         return self.alpha
 
     def get_alpha(self):
         """
         Gets the alpha parameter.
+
+        :return: alpha.
         """
         return self.alpha
-    def set_slit_width(self, args):
-        """
-        Sets the slit width in units of q [A-1]
-        """
-        args = float(args)
 
-        self.__dict__['slit_width'] = args
+    def set_slit_width(self, slit_width):
+        """
+        Sets the slit width in units of q [A-1].
+
+        :param slit_width: float to set slit_width to.
+        :return: slit_width.
+        """
+        _slit_width = float(slit_width)
+        self.__dict__['slit_width'] = _slit_width
         return self.slit_width
 
     def get_slit_width(self):
         """
         Gets the slit width.
+
+        :return: slit_width.
         """
         return self.slit_width
 
-    def set_slit_height(self, args):
+    def set_slit_height(self, slit_height):
         """
-        Sets the slit height in units of q [A-1]
-        """
-        args = float(args)
+        Sets the slit height in units of q [A-1].
 
-        self.__dict__['slit_height'] = args
+        :param slit_height: float to set slit-height to.
+        :return: slit_height.
+        """
+        _slit_height = float(slit_height)
+        self.__dict__['slit_height'] = _slit_height
         return self.slit_height
 
     def get_slit_height(self):
         """
         Gets the slit height.
+
+        :return: slit_height.
         """
         return self.slit_height
 
-    def set_est_bck(self, args):
+    def set_est_bck(self, est_bck):
         """
         Sets background flag.
-        Takes a single int, returns est_bck value if successful
-        """
-        args = int(args)
 
-        self.__dict__['est_bck'] = args
+        :param est_bck: int to set est_bck to.
+        :return: est_bck.
+        """
+        _est_bck = int(est_bck)
+        self.__dict__['est_bck'] = _est_bck
         return self.est_bck
 
     def get_est_bck(self):
         """
         Gets background flag.
+
+        :return: est_bck.
         """
         return self.est_bck
 
     def get_nx(self):
         """
-        Gets the number of x points
+        Gets the number of x points.
+
+        :return: npoints.
         """
         return self.npoints
 
     def get_ny(self):
         """
-        Gets the number of y points
+        Gets the number of y points.
+
+        :return: ny.
         """
         return self.ny
 
     def get_nerr(self):
         """
-        Gets the number of error points
+        Gets the number of error points.
+
+        :return: nerr.
         """
         return self.nerr
 
     def iq(self, pars, q):
         """
-        Function to call to evaluate the scattering intensity
-        @param args: c-parameters, and q
-        @return: I(q)
+        Function to call to evaluate the scattering intensity.
+
+        :param pars: c-parameters
+        :param q: q.
+
+        :return: I(q)
         """
         q = float(q)
-
         iq_val = py_invertor.iq(pars, self.d_max, q)
         return iq_val
 
@@ -373,12 +366,13 @@ class Pinvertor:
         """
         Function to call to evaluate the scattering intensity.
         The scattering intensity is slit-smeared.
-        @param args: c-parameters, and q
-        @return: I(q)
+
+        :param pars: c-parameters
+        :param q: q.
+
+        :return: I(q)
         """
         q = float(q)
-
-        #npts = 21 hardcoded in Cinvertor.c
         npts = 21
         iq_val = py_invertor.iq_smeared(pars, self.d_max, self.slit_height,
                                        self.slit_width, q, npts)
@@ -386,23 +380,29 @@ class Pinvertor:
 
     def pr(self, pars, r):
         """
-        Function to call to evaluate P(r)
-        @param args: c-parameters and r
-        @return: P(r)
+        Function to call to evaluate P(r).
+
+        :param pars: c-parameters.
+        :param r: r-value to evaluate P(r) at.
+
+        :return: P(r)
         """
         r = float(r)
-
         pr_val = py_invertor.pr(pars, self.d_max, r)
+
         return pr_val
 
     def get_pr_err(self, pars, pars_err, r):
         """
-        Function to call to evaluate P(r) with errors
-        @param args: c-parameters and r
-        @return: (P(r), dP(r))
+        Function to call to evaluate P(r) with errors.
+
+        :param pars: c-parameters
+        :param pars_err: pars_err.
+        :param r: r-value.
+
+        :return: (P(r), dP(r))
         """
         r = float(r)
-
         pr_val = 0.0
         pr_err_val = 0.0
         (pr_val, pr_err_val) = py_invertor.pr_err(pars, pars_err, self.d_max, r)
@@ -411,26 +411,28 @@ class Pinvertor:
 
     def is_valid(self):
         """
-        Check the validity of the stored data
-        @return: Returns the number of points if it's all good, -1 otherwise
+        Check the validity of the stored data.
+
+        :return: Returns the number of points if it's all good, -1 otherwise.
         """
         if(self.npoints == self.ny and self.npoints == self.nerr):
-            #Success, return number of piontspoints
             return self.npoints
         else:
-            #Failure, return -1
             return -1
 
     def basefunc_ft(self, d_max, n, q):
         """
-        Returns the value of the nth Fourier transformed base function
-        @param args: c-parameters, n and q
-        @return: nth Fourier transformed base function, evaluated at q
+        Returns the value of the nth Fourier transformed base function.
+
+        :param d_max: d_max.
+        :param n: n.
+        :param q: q.
+
+        :return: nth Fourier transformed base function, evaluated at q.
         """
         d_max = float(d_max)
         n = int(n)
         q = float(q)
-
         ortho_val = py_invertor.ortho_transformed(d_max, n, q)
 
         return ortho_val
@@ -440,10 +442,10 @@ class Pinvertor:
         Returns the value of the oscillation figure of merit for
         the given set of coefficients. For a sphere, the oscillation
         figure of merit is 1.1.
-        @param args:c-parameters
-        @return: oscillation figure of merit
+
+        :param pars: c-parameters.
+        :return: oscillation figure of merit.
         """
-        #nslice hardcoded to 100
         nslice = 100
         oscill = py_invertor.reg_term(pars, self.d_max, nslice)
         norm = py_invertor.int_p2(pars, self.d_max, nslice)
@@ -455,8 +457,9 @@ class Pinvertor:
         """
         Returns the number of peaks in the output P(r) distribution
         for the given set of coefficients.
-        @param args: c-parameters
-        @return: number of P(r) peaks
+
+        :param pars: c-parameters.
+        :return: number of P(r) peaks.
         """
         nslice = 100
         count = py_invertor.npeaks(pars, self.d_max, nslice)
@@ -467,8 +470,9 @@ class Pinvertor:
         """
         Returns the fraction of P(r) that is positive over
         the full range of r for the given set of coefficients.
-        @param args: c-parameters
-        @return: fraction of P(r) that is positive
+
+        :param pars: c-parameters.
+        :return: fraction of P(r) that is positive.
         """
         nslice = 100
         fraction = py_invertor.positive_integral(pars, self.d_max, nslice)
@@ -479,8 +483,11 @@ class Pinvertor:
         """
         Returns the fraction of P(r) that is 1 standard deviation
         above zero over the full range of r for the given set of coefficients.
-        @param args: c-parameters
-        @return: fraction of P(r) that is positive
+
+        :param pars: c-parameters.
+        :param pars_err: pars_err.
+
+        :return: fraction of P(r) that is positive.
         """
         nslice = 51
         fraction = py_invertor.positive_errors(pars, pars_err, self.d_max, nslice)
@@ -490,8 +497,9 @@ class Pinvertor:
     def rg(self, pars):
         """
         Returns the value of the radius of gyration Rg.
-        @param args: c-parameters
-        @return: Rg
+
+        :param pars: c-parameters.
+        :return: Rg.
         """
         nslice = 101
         val = py_invertor.rg(pars, self.d_max, nslice)
@@ -502,17 +510,20 @@ class Pinvertor:
     def iq0(self, pars):
         """
         Returns the value of I(q=0).
-        @param args: c-parameters
-        @return: I(q=0)
+
+        :param pars: c-parameters.
+        :return: I(q=0)
         """
         nslice = 101
         val = 4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice)
 
         return val
+
     def accept_q(self, q):
         """
-        Check whether a q-value is within acceptable limits
-        Returns 1 if accepted, 0 if rejected.
+        Check whether a q-value is within acceptable limits.
+
+        :return: 1 if accepted, 0 if rejected.
         """
         if(self.get_qmin() > 0 and q < self.get_qmin()):
             return 0
@@ -523,13 +534,14 @@ class Pinvertor:
     def _get_matrix(self, nfunc, nr, a_obj, b_obj):
         """
         Returns A matrix and b vector for least square problem.
-        @param nfunc: number of base functions
-        @param nr: number of r-points used when evaluating reg term.
-        @param a: A array to fill
-        @param b: b vector to fill
-        @return: 0
+
+        :param nfunc: number of base functions.
+        :param nr: number of r-points used when evaluating reg term.
+        :param a: A array to fill.
+        :param b: b vector to fill.
+
+        :return: 0
         """
-        #read in input as integer, cast to integer.
         nfunc = int(nfunc)
         nr = int(nr)
 
@@ -546,8 +558,7 @@ class Pinvertor:
         pi = np.arccos(-1.0)
         offset = (1, 0)[self.est_bck == 1]
 
-        #instead of checking for 0 in err in for loop, check all
-        #for 0 before
+        #Compute zero error case.
         def check_for_zero(x):
             for i, ni in enumerate(x):
                 if(ni == 0):
@@ -579,114 +590,32 @@ class Pinvertor:
                     a[index_i, index_j] = 0.0
                 else:
                     r = self.d_max / nr * i_r
-                    tmp = pi * (j + offset) / self.d_max
+                    tmp = pi * (j+offset) / self.d_max
                     t1 = sqrt_alpha * 1.0/nr * self.d_max * 2.0
-
-                    t2 = (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
-                    + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
-
-                    a[index_i, index_j] =  sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
-                    + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
+                    t2 = (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
+                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+                    a[index_i, index_j] =  t1 * t2
 
         for i in range(self.npoints):
             if(self.accept_q(self.x[i])):
                 b[i] = self.y[i] / self.err[i]
 
         return 0
-    def _get_matrix_precomputed(self, nfunc, nr, a_obj, b_obj):
-        """
-        Returns A matrix and b vector for least square problem.
-        @param nfunc: number of base functions
-        @param nr: number of r-points used when evaluating reg term.
-        @param a: A array to fill
-        @param b: b vector to fill
-        @return: 0
-        """
 
-        nfunc = int(nfunc)
-        nr = int(nr)
-
-        assert (b_obj.shape[0] >= nfunc)
-        assert (a_obj.size >= nfunc*(nr + self.npoints))
-
-        a = a_obj
-        b = b_obj
-
-        sqrt_alpha = np.sqrt(self.alpha)
-        pi = np.arccos(-1.0)
-        offset = (1, 0)[self.est_bck == 1]
-
-        #instead of checking for 0 in err in for loop, check all
-        #for 0 before
-        def check_for_zero(x):
-            if(x.any() == 0.0):
-                return True
-            return False
-
-        if(check_for_zero(self.err)):
-            logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
-            return None
-        #pre computed ortho_transformed_smeared -
-        npts = 21
-        #whether to use smeared function or ortho_transform
-        smeared = (self.slit_width > 0) or (self.slit_height > 0)
-        for j in range(nfunc):
-            matrix = 0
-            if(smeared):
-                ortho_sm = np.zeros(self.npoints)
-                ortho_sm = py_invertor.ortho_transformed_smeared(self.x, self.d_max, j + offset,
-                                                                   self.slit_height, self.slit_width, npts)
-                ortho_sm /= self.err
-                matrix = ortho_sm
-            else:
-                ortho = np.zeros(self.npoints)
-                ortho = py_invertor.ortho_transformed( self.x, self.d_max, j + offset)
-                ortho /= self.err
-                matrix = ortho
-
-            for i in range(self.npoints):
-                index = i * nfunc + j
-                npts = 21
-                if(self.accept_q(self.x[i])):
-
-                    if(self.est_bck == 1 and j == 0):
-                        a[index] = 1.0/self.err[i]
-
-                    else:
-                        a[index] = matrix[i]
-
-            for i_r in range(nr):
-                index = (i_r + self.npoints) * nfunc + j
-                if(self.est_bck == 1 and j == 0):
-                    a[index] = 0.0
-                else:
-                    r = self.d_max / nr * i_r
-                    tmp = pi * (j + offset) / self.d_max
-                    t1 = sqrt_alpha * 1.0/nr * self.d_max * 2.0
-
-                    t2 = (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
-                    + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
-
-                    a[index] =  t1 * t2
-
-        for i in range(self.npoints):
-            if(self.accept_q(self.x[i])):
-                b[i] = self.y[i] / self.err[i]
-
-        return 0
 
     def _get_invcov_matrix(self, nfunc, nr, a_obj, cov_obj):
         """
         Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
-        @param nfunc: number of base functions
-        @param nr: number of r-points used when evaluating reg term.
-        @param a: A array to fill
-        @param inv_cov: inverse covariance array to be filled
-        @return: 0
+
+        :param nfunc: number of base functions.
+        :param nr: number of r-points used when evaluating reg term.
+        :param a: A array to fill.
+        :param inv_cov: inverse covariance array to be filled.
+
+        :return: 0
         """
         nfunc = int(nfunc)
         nr = int(nr)
-
         n_a = a_obj.size
         n_cov = cov_obj.size
         a = a_obj
@@ -706,36 +635,30 @@ class Pinvertor:
         return 0
 
     def _get_reg_size(self, nfunc, nr, a_obj):
-        #in Cinvertor, doc was same as invcov_matrix so for now left -
+        #in Cinvertor, doc was same as invcov_matrix, left for now -
         """
-        Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
-        @param nfunc: number of base functions
-        @param nr: number of r-points used when evaluating reg term.
-        @param a: A array to fill
-        @param inv_cov: inverse covariance array to be filled
-        @return: 0
-        """
-        #if not isinstance(nfunc, int):
-        #    logger.error("Pinvertor.get_reg_size: nfunc not of type int")
-        #    return None,None
-        #if not isinstance(nr, int):
-        #    logger.error("Pinvertor.get_reg_size: nr not of type int")
-        #    return None,None
-        #assert (a_obj.shape[0] >= (nfunc * (nr + self.npoints)))
+        Compute the covariance matrix, defined as inv_cov = a_transposed x a.
+	    :param nfunc: number of base functions.
+	    :param nr: number of r-points used when evaluating reg term.
+	    :param a: A array to fill.
+	    :param inv_cov: inverse covariance array to be filled.
 
+        :return: 0
+        """
         nfunc = int(nfunc)
         nr = int(nfunc)
-
         if not (a_obj.size >= nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
         sum_sig = 0.0
         sum_reg = 0.0
         a = a_obj
+
         for j in range(nfunc):
             for i in range(self.npoints):
                 if(self.accept_q(self.x[i]) == 1):
                     sum_sig += a[i, j] * a[i, j]
             for i in range(nr):
-                sum_reg += (a[(i+self.npoints), j])*(a[(i+self.npoints), j]);
+                sum_reg += (a[(i+self.npoints), j]) * (a[(i+self.npoints), j]);
+
         return sum_sig, sum_reg
