@@ -124,7 +124,7 @@ def ortho_derived(d_max, n, r):
     pinr = pi * n * r/d_max
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
-@njit(parallel = True)
+@njit(parallel = False)
 def iq(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion
@@ -175,7 +175,6 @@ def pr(pars, d_max, r):
     """
     sum = 0.0
     for i in prange(pars.shape[0]):
-
         sum += pars[i] * ortho(d_max, i+1, r)
     return sum
 
@@ -239,7 +238,7 @@ def dprdr(pars, d_max, r):
     sum = 0.0
     #300, 2.5e-05
     for i in range(0, pars.shape[0]):
-        sum += pars[i] * 2.0*(np.sin(pi*(i+1))*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max)
+        sum += pars[i] * 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
     return sum
 
 def dprdr_vec(pars, d_max, r):
@@ -384,13 +383,12 @@ def reg_term(pars, d_max, nslice):
     deriv = 0.0
     #pre computing, implicitly convering nslice to double
     #as originally done in loop
-    nslice_d = 1.0 * nslice
     for i in range(nslice):
-        r = d_max/nslice_d*i
+        r = d_max/(1.0 * nslice)*i
         deriv = dprdr(pars, d_max, r)
         sum += deriv*deriv
 
-    return sum/nslice_d * d_max
+    return sum/(1.0 * nslice)* d_max
 
 @njit()
 def int_p2(pars, d_max, nslice):

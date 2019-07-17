@@ -17,12 +17,55 @@ import re
 import logging
 from numpy.linalg import lstsq
 from scipy import optimize
+
+
+import os
+import os.path
+import unittest
+import math
+import numpy
+
+
 from sas.sascalc.pr.core.pr_inversion import Cinvertor
 #from Pinvertor import Pinvertor
 from sas.sascalc.pr.Pinvertor import Pinvertor
 
 logger = logging.getLogger(__name__)
 
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+def load(path = "sphere_60_q0_2.txt"):
+    import numpy as np
+    import math
+    import sys
+    # Read the data from the data file
+    data_x   = np.zeros(0)
+    data_y   = np.zeros(0)
+    data_err = np.zeros(0)
+    scale    = None
+    if path is not None:
+        input_f = open(path,'r')
+        buff    = input_f.read()
+        lines   = buff.split('\n')
+        for line in lines:
+            try:
+                toks = line.split()
+                x = float(toks[0])
+                y = float(toks[1])
+                if len(toks)>2:
+                    err = float(toks[2])
+                else:
+                    if scale==None:
+                        scale = 0.15*math.sqrt(y)
+                    err = scale*math.sqrt(y)
+                data_x = np.append(data_x, x)
+                data_y = np.append(data_y, y)
+                data_err = np.append(data_err, err)
+            except:
+                pass
+
+    return data_x, data_y, data_err
 def help():
     """
     Provide general online help text
@@ -765,9 +808,45 @@ class Invertor(Pinvertor):
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
             raise RuntimeError(msg)
 
+def pr_theory(r, R):
+    """
+       P(r) for a sphere
+    """
+    if r<=2*R:
+        return 12.0* ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * ( 2.0 + 0.5*r/R )
+    else:
+        return 0.0
+
+def test_save():
+    invertor = Invertor()
+
+    x, y, err = load(find("sphere_80.txt"))
+
+    # Choose the right d_max...
+    invertor.d_max = 160.0
+    # Set a small alpha
+    invertor.alpha = .0007
+    # Set data
+    invertor.x   = x
+    invertor.y   = y
+    invertor.err = err
+    # Perform inversion
+
+    out, cov = invertor.lstsq(10)
+
+    # Save
+    f_name = "test_output.txt"
+    invertor.to_file(f_name)
+
+    # Load
+    invertor.from_file(f_name)
+    print("should be 903.31577041:", invertor.pr(invertor.out, 10.0))
+    #assertEqual(self.invertor.d_max, 160.0)
+    #assertEqual(self.invertor.alpha, 0.0007)
+    #assertEqual(self.invertor.chi2, 836.797)
+    #assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 903.31577041, 4)
+    #if os.path.isfile(f_name):
+    #    os.remove(f_name)
+
 if(__name__ == "__main__"):
-    test = Invertor()
-    #test.__setattr__('d_max', 2000.0)
-    print(test.set_x(np.arange(2000)))
-    test.q_min = None
-    print(test.q_min)
+    test_inversion()
