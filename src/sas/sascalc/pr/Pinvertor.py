@@ -4,7 +4,6 @@ Class duplicating Cinvertor.c's functionality in Python
 depends on py_invertor.py as a pose to invertor.c
 """
 import sas.sascalc.pr.py_invertor as py_invertor
-#import py_invertor
 import numpy as np
 import logging
 import math
@@ -589,7 +588,8 @@ class Pinvertor:
                     t2 = (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
                     + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
 
-                    a[index_i, index_j] =  t1 * t2
+                    a[index_i, index_j] =  sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j + offset)/self.d_max * np.cos(pi * (j + offset)*r/self.d_max)
+                    + tmp * tmp * r * np.sin(pi * (j + offset)*r/self.d_max))
 
         for i in range(self.npoints):
             if(self.accept_q(self.x[i])):
@@ -742,79 +742,3 @@ class Pinvertor:
             for i in range(nr):
                 sum_reg += (a[(i+self.npoints), j])*(a[(i+self.npoints), j]);
         return sum_sig, sum_reg
-
-class Invertor_Test(Pinvertor):
-    def __init__(self):
-        Pinvertor.__init__(self)
-
-def demo():
-    it = Pinvertor()
-    d_max = 2000.0
-    n = 21
-    q = 0.5
-    pars = np.arange(50)
-    pars_err = np.arange(50)
-    nslice = 101
-
-    print(it.set_dmax(d_max))
-
-    print(it.iq0(pars))
-    it.set_x(np.arange(100))
-    it.set_y(np.arange(100))
-    it.set_err(np.arange(100))
-    a = np.arange(100*100*it.get_nx())
-    b = np.arange(99 * (100 + it.get_nx()))
-
-    print(it._get_reg_size(100, 100, b))
-    print(b)
-    #print(it.get_matrix(100, 100, c, b))
-
-
-
-    #if(np.array_equal(a, c)):
-    #    print("Same")
-    #else:
-    #    print("different")
-    #    for i in range(a.shape[0]):
-    #        if(a[i] - c[i] != 0):
-    #            print("Position: ", i)
-    #            print("pre_computed: ", a[i])
-    #            print("normal: ", c[i])
-    #            print("difference: ", a[i] - c[i])
-
-
-    #for i, ni in enumerate(a):
-    #    print(ni)
-    #print("B:", b)
-    #print(py_invertor.rg(pars, d_max, nslice))]
-def test():
-    setup = '''
-from __main__ import Pinvertor
-import numpy as np
-it = Pinvertor()
-d_max = 2000.0
-n = 21
-q = 0.5
-pars = np.arange(50)
-pars_err = np.arange(50)
-nslice = 101
-
-#print(it.set_dmax(d_max))
-
-#print(it.get_iq0(pars))
-it.set_x(np.arange(100))
-it.set_y(np.arange(100))
-it.set_err(np.arange(100) + 1)
-a = np.zeros(100*100*it.get_nx())
-b = np.zeros(100)
-'''
-    run_prec = '''
-it.get_matrix_precomputed(100, 100, a, b)'''
-    run_norm = '''
-it.get_matrix(100, 100, a, b)'''
-    #print("pre-computed:", timeit.repeat(stmt = run_prec, setup = setup, repeat = 1, number = 1))
-    print("normal", timeit.repeat(stmt = run_norm, setup = setup, repeat = 1, number = 1))
-
-if(__name__ == "__main__"):
-    test = Pinvertor()
-    demo()
