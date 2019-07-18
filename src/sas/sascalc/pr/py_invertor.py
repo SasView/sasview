@@ -65,7 +65,6 @@ def ortho_transformed(d_max, n, q):
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
-
 @njit()
 def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     """
@@ -310,7 +309,6 @@ def check_mp(bits=500):
 
 #qvec methods
 def iq_smeared_qvec(p, q, d_max, height, width, npts):
-    print(q)
     total = np.zeros_like(q)
     for i, pi in enumerate(p):
          total += pi * ortho_transformed_smeared_qvec(q, d_max, i+1, height, width, npts)
@@ -332,13 +330,13 @@ def ortho_transformed_smeared_qvec(q, d_max, n, height, width, npts):
     return total / (n_width*n_height)
 
 def ortho_transformed_qvec(q, d_max, n):
-    #pi = 3.1416
-    qd = q * (d_max/pi)
-    return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #qd = q * (d_max/pi)
+    #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
 #qvec methods with njit and parallelization
 #Parallelizing this method increases speed but decrases accuracy slightly.
-@njit(parallel = True, cache = True)
+@njit(parallel = True, cache = False)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
     #total = np.zeros_like(q)
@@ -365,11 +363,10 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
 
 @njit(cache = True)
 def ortho_transformed_qvec_njit(q, d_max, n):
-    #pi = 3.1416
-    qd = q * (d_max/pi)
-    return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
-
-
+    #qd = q * (d_max/pi)
+    #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #equivalent to C with this -
+    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
 
 
@@ -706,62 +703,9 @@ iq_smeared_qvec(p, q, d_max, height, width, npts)'''
     print("Result:", np.sum(iq_smeared_qvec(p, q, d_max, height, width, npts)))
 
 
-def demo_qvec():
-    #q = np.linspace(0.001, 0.5, 301)
-    #q = np.arange(301, dtype = np.float64)
-    q = 5
-    p = np.arange(40)
-    print(q)
-    print(p)
-    d_max = 2000
-    width, height = 0.01, 3
-    npts = 30
-
-    setup = '''
-from __main__ import iq_smeared_qvec_njit
-from __main__ import iq_smeared_qvec
-import numpy as np
-q = np.linspace(0.001, 0.5, 301)
-p = np.arange(40)
-d_max = 2000
-width, height = 0.01, 3
-npts = 30'''
-    codeP = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
-    code = '''iq_smeared_qvec(p, q, d_max, height, width, npts)'''
-
-    #print(iq_smeared_qvec(p, q, d_max, height, width, npts))
-    #repeat 3 times each executing loop once take minimuim because higher values
-    #not usually caused by python by other processes scheduled by os
-
-
-    #timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
-    #times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
-
-    #print("Parallel Times: \n", timesParallel)
-    #print("Lowest Time P: ", min(timesParallel))
-    #print("Normal Times: \n", times)
-    #print("Lowest Time N: ", min(times))
-
-    test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
-    test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
-    print("Result Normal: ", test_result_n)
-    print("Result Parallelized: ", test_result_p)
-    print(test_result_n.shape)
-    print(test_result_p.shape)
-
-    if(np.array_equal(test_result_p, test_result_n)):
-        print("*Identical Results*")
-    else:
-        print("*Different Results*")
-        print("Difference: ")
-        print(np.sum(test_result_p))
-        print(np.sum(test_result_n))
-        print(test_result_p - test_result_n)
-    #For this code, result = ~1.71 seconds
 
 
 
-    #iq_smeared_qvec(p, q, d_max, height, width, npts)
 
 
 def demo():
@@ -841,14 +785,130 @@ def test_atleast1d(x):
         return np.sum(np.array(x))
     else:
         return np.sum(x)
+def conditional_decorator(dec, condition):
+    def decorator(func):
+        if not condition:
+            return func
+        return dec(func)
+    return decorator
+
+def bool_func(x):
+    if (x % 2) == 0:
+        return True
+    return False
+
+@conditional_decorator(njit, bool_func(2))
+def condition_test():
+    sum = 0.0
+    for i in range(1000):
+        sum += i ** 2
+    return sum
+
+@conditional_decorator(njit, bool_func(1))
+def condition_test2():
+    sum = 0.0
+    for i in range(1000):
+        sum += i ** 2
+    return sum
+
+def demo_conditional_dec():
+    setup = '''
+from __main__ import condition_test
+from __main__ import condition_test2'''
+    run_njit = '''
+condition_test()'''
+    run_n = '''
+condition_test2()'''
+    print(timeit.repeat(stmt = run_njit, setup = setup, repeat = 10, number = 1))
+    print(timeit.repeat(stmt = run_n, setup = setup, repeat = 10, number = 1))
+
+
+def demo_iq_smeared_qvec():
+    q = np.linspace(0.001, 0.5, 301)
+    p = np.arange(40)
+    d_max = 2000
+    width, height = 0.01, 3
+    npts = 30
+
+    setup = '''
+from __main__ import iq_smeared_qvec_njit
+from __main__ import iq_smeared_qvec
+from __main__ import iq_smeared
+import numpy as np
+q = np.linspace(0.001, 0.5, 301)
+p = np.arange(40)
+d_max = 2000
+width, height = 0.01, 3
+npts = 30'''
+    codeP = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
+    code = '''iq_smeared_qvec(p, q, d_max, height, width, npts)'''
+
+    #repeat 3 times each executing loop once take minimuim because higher values
+    #not usually caused by python by other processes scheduled by os
+    timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
+    times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+
+    print("Parallel Times: \n", timesParallel)
+    print("Lowest Time P: ", min(timesParallel))
+    print("Normal Times: \n", times)
+    print("Lowest Time N: ", min(times))
+
+    #To demonstrate same as original C code using arange instead of linspace for easier testing in C,
+    #avoid rounding errors perhaps present in linspace().
+    #Difference between parallel and normal lower with higher q, with lower q slightly higher error.
+    #q = np.arange(301, dtype = np.float64)
+
+    test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
+    test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
+
+    print("Result Normal (summed): ", np.sum(test_result_n))
+    print("Result Parallelized (summed): ", np.sum(test_result_p))
+
+    if(np.array_equal(test_result_p, test_result_n)):
+        print("*Identical Results*")
+    else:
+        print("*Different Results*")
+        print("Difference: ")
+        print(np.sum(test_result_p))
+        print(np.sum(test_result_n))
+        print(test_result_p - test_result_n)
+
+def demo_iq_smeared_scalar():
+    q = 0.5
+    p = np.arange(40)
+    d_max = 2000
+    width, height = 0.01, 3
+    npts = 30
+    setup = '''
+from __main__ import iq_smeared_qvec_njit
+from __main__ import iq_smeared_qvec
+from __main__ import iq_smeared
+import numpy as np
+#q = np.linspace(0.001, 0.5, 1000)
+q = 0.5
+p = np.arange(40)
+d_max = 2000
+width, height = 0.01, 3
+npts = 30'''
+    code = '''iq_smeared(p, d_max, height, width, q, npts)'''
+
+    #repeat 3 times each executing loop once take minimuim because higher values
+    #not usually caused by python by other processes scheduled by os
+
+
+    times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+
+    print("Scalar Times: \n", times)
+    print("Lowest Time: ", min(times))
+    res = 0.0
+    test_result = iq_smeared(p, d_max, height, width, q, npts)
+    print("Result: ", test_result)
+
 
 if(__name__ == "__main__"):
-    #print(positive_integral(np.arange(1000), 2000, 21))
-    #print(pr(np.arange(1000), 2000, 20))
-    #print(test_atleast1d(20))
-    #demo_qvec()
-    #demo_positive_integrals()
-    demo_qvec()
+    demo_iq_smeared_scalar()
+    demo_iq_smeared_qvec()
+    #demo_conditional_dec()
 
 """
 C driver code for testing speed
