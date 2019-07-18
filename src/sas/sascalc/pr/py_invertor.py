@@ -1,8 +1,7 @@
 """
-Starting to convert invertor.c, eventually the Cinvertor class to python
+Converted invertor.c's methods
 
-At the moment experimenting with different methods of implementing individual
-functions.
+Currently testing multiple methods of implementing these methods with njit() vector operations etc.
 """
 import numpy as np
 #from numpy import pi
@@ -18,16 +17,6 @@ from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_
 import timeit
 from functools import reduce
 pi = 3.1416 #to pass tests
-
-#class stub for final Pinvertor class
-#taking signatures from Cinvertor.c and docstrings
-
-
-
-
-
-#Private Methods
-
 
 @njit()
 def pr_sphere(R, r):
@@ -332,10 +321,10 @@ def ortho_transformed_smeared_qvec(q, d_max, n, height, width, npts):
 def ortho_transformed_qvec(q, d_max, n):
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #Equivalent to C -
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
-#qvec methods with njit and parallelization
-#Parallelizing this method increases speed but decrases accuracy slightly.
+#qvec methods with numba
 @njit(parallel = True, cache = False)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
@@ -365,7 +354,7 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
 def ortho_transformed_qvec_njit(q, d_max, n):
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
-    #equivalent to C with this -
+    #equivalent to C -
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
 
@@ -905,8 +894,10 @@ npts = 30'''
     print("Result: ", test_result)
 
 
+
+
 if(__name__ == "__main__"):
-    demo_iq_smeared_scalar()
+    #demo_iq_smeared_scalar()
     demo_iq_smeared_qvec()
     #demo_conditional_dec()
 
