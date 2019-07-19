@@ -99,27 +99,6 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(self.plotter.data.ytransform, "y")
         self.assertTrue(FigureCanvas.draw_idle.called)
 
-    def testPlotWithSesans(self):
-        """ Ensure that Sesans data is plotted in linear cooredinates"""
-        data = Data1D(x=[1.0, 2.0, 3.0],
-                      y=[10.0, 11.0, 12.0],
-                      dx=[0.1, 0.2, 0.3],
-                      dy=[0.1, 0.2, 0.3])
-        data.title = "Sesans data"
-        data.name = "Test Sesans"
-        data.isSesans = True
-        data.id = 2
-
-        self.plotter.data = data
-        self.plotter.show()
-        FigureCanvas.draw = MagicMock()
-
-        self.plotter.plot(hide_error=True)
-
-        self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
-        self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertTrue(FigureCanvas.draw.called)
-
     def testCreateContextMenuQuick(self):
         """ Test the right click menu """
         self.plotter.createContextMenuQuick()
