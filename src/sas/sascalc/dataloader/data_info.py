@@ -25,6 +25,7 @@ from __future__ import print_function
 from sas.sascalc.data_util.uncertainty import Uncertainty
 import numpy as np
 import math
+from math import fabs
 
 class plottable_1D(object):
     """
@@ -655,7 +656,7 @@ class DataInfo(object):
             return b * a
         return self._perform_operation(other, operation)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         """
         Divided a data set by another
 
@@ -666,8 +667,9 @@ class DataInfo(object):
         def operation(a, b):
             return a/b
         return self._perform_operation(other, operation)
+    __div__ = __truediv__
 
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         """
         Divided a data set by another
 
@@ -678,6 +680,7 @@ class DataInfo(object):
         def operation(a, b):
             return b/a
         return self._perform_operation(other, operation)
+    __rdiv__ = __rtruediv__
 
     def __or__(self, other):
         """
@@ -800,7 +803,7 @@ class Data1D(plottable_1D, DataInfo):
             # Here we could also extrapolate between data points
             TOLERANCE = 0.01
             for i in range(len(self.x)):
-                if math.fabs((self.x[i] - other.x[i])/self.x[i]) > TOLERANCE:
+                if fabs(self.x[i] - other.x[i]) > self.x[i]*TOLERANCE:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError(msg)
 
@@ -1032,10 +1035,10 @@ class Data2D(plottable_2D, DataInfo):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError(msg)
             for ind in range(len(self.data)):
-                if math.fabs((self.qx_data[ind] - other.qx_data[ind])/self.qx_data[ind]) > TOLERANCE:
+                if fabs(self.qx_data[ind] - other.qx_data[ind]) > fabs(self.qx_data[ind])*TOLERANCE:
                     msg = "Incompatible data sets: qx-values do not match: %s %s" % (self.qx_data[ind], other.qx_data[ind])
                     raise ValueError(msg)
-                if math.fabs((self.qy_data[ind] - other.qy_data[ind])/self.qy_data[ind]) > TOLERANCE:
+                if fabs(self.qy_data[ind] - other.qy_data[ind]) > fabs(self.qy_data[ind])*TOLERANCE:
                     msg = "Incompatible data sets: qy-values do not match: %s %s" % (self.qy_data[ind], other.qy_data[ind])
                     raise ValueError(msg)
 
@@ -1188,10 +1191,6 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
-        if hasattr(data, 'y_bins'):
-            final_dataset.y_bins = data.y_bins
-        if hasattr(data, 'y_bins'):
-            final_dataset.x_bins = data.x_bins
     else:
         return_string = ("Should Never Happen: _combine_data_info_with_plottabl"
                          "e input is not a plottable1d or plottable2d data "

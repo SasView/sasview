@@ -95,6 +95,9 @@ from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
 #  Inversion
 from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
 
+#  Corfunc
+from Perspectives.Corfunc.UnitTesting import CorfuncTest
+
 def plottingSuite():
     suites = (
         # Plotting
@@ -180,6 +183,8 @@ def perspectivesSuite():
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
         #  Inversion
         unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
+        #  Corfunc
+        unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
         )
     return unittest.TestSuite(suites)
 

@@ -43,13 +43,10 @@ class FourierThread(CalcThread):
 
             # ----- 3D Correlation Function -----
             # gamma3(R) = 1/R int_{0}^{R} gamma1(x) dx
-            # trapz uses the trapezium rule to calculate the integral
-            mask = xs <= 1000.0 # Only calculate gamma3 up to x=1000 (as this is all that's plotted)
-            # gamma3 = [trapz(gamma1[:n], xs[:n])/xs[n-1] for n in range(2, len(xs[mask]) + 1)]j
-            # gamma3.insert(0, 1.0) # Gamma_3(0) is defined as 1
-            n = len(xs)
-            gamma3 = cumtrapz(gamma1[:n], xs[:n])/xs[1:n]
-            gamma3 = np.hstack((1.0, gamma3)) # Gamma_3(0) is defined as 1
+            # numerical approximation for increasing R using the trapezium rule
+            # Note: SasView 4.x series limited the range to xs <= 1000.0
+            gamma3 = cumtrapz(gamma1, xs)/xs[1:]
+            gamma3 = np.hstack((1.0, gamma3)) # gamma3(0) is defined as 1
 
             if self.check_if_cancelled(): return
 
@@ -78,7 +75,7 @@ class FourierThread(CalcThread):
         self.update(msg="Fourier transform completed.")
 
         transform1 = Data1D(xs, gamma1)
-        transform3 = Data1D(xs[xs <= 1000], gamma3)
+        transform3 = Data1D(xs, gamma3)
         idf = Data1D(xs, idf)
 
         transforms = (transform1, transform3, idf)

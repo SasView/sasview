@@ -18,7 +18,7 @@ from __future__ import division
 
 import numpy as np
 
-from .import err1d
+from . import err1d
 from .formatnum import format_uncertainty
 
 __all__ = ['Uncertainty']

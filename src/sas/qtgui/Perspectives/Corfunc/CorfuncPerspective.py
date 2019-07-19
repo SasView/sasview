@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from numpy.linalg.linalg import LinAlgError
+import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
@@ -26,6 +27,7 @@ from .CorfuncUtils import WIDGETS as W
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
     def __init__(self, model, width=5, height=4, dpi=100):
         self.model = model
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -35,7 +37,68 @@ class MyMplCanvas(FigureCanvas):
 
         self.data = None
         self.extrap = None
+        self.dragging = None
+        self.draggable = False
+        self.leftdown = False
         self.setMinimumSize(300, 300)
+        self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
+        self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
+        self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
+
+    def on_mouse_down(self, event):
+        if not self.draggable:
+            return
+        if event.button == 1:
+            self.leftdown = True
+
+        qmin = float(self.model.item(W.W_QMIN).text())
+        qmax1 = float(self.model.item(W.W_QMAX).text())
+        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
+
+        q = event.xdata
+
+        if (np.abs(q-qmin) < np.abs(q-qmax1) and
+            np.abs(q-qmin) < np.abs(q-qmax2)):
+            self.dragging = "qmin"
+        elif (np.abs(q-qmax2) < np.abs(q-qmax1)):
+            self.dragging = "qmax2"
+        else:
+            self.dragging = "qmax1"
+
+    def on_mouse_up(self, event):
+        if not self.dragging:
+            return None
+        if event.button == 1:
+            self.leftdown = False
+
+        if self.dragging == "qmin":
+            item = W.W_QMIN
+        elif self.dragging == "qmax1":
+            item = W.W_QMAX
+        else:
+            item = W.W_QCUTOFF
+
+        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+
+        self.dragging = None
+
+    def on_motion(self, event):
+        if not self.leftdown:
+            return
+        if not self.draggable:
+            return
+        if self.dragging is None:
+            return
+
+        if self.dragging == "qmin":
+            item = W.W_QMIN
+        elif self.dragging == "qmax1":
+            item = W.W_QMAX
+        else:
+            item = W.W_QCUTOFF
+
+        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+
 
     def draw_q_space(self):
         """Draw the Q space data in the plot window
@@ -44,7 +107,8 @@ class MyMplCanvas(FigureCanvas):
         as the bounds set by self.qmin, self.qmax1, and self.qmax2.
         It will also plot the extrpolation in self.extrap, if it exists."""
 
-        # TODO: add interactivity to axvlines so qlimits are immediately updated!
+        self.draggable = True;
+
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -85,6 +149,9 @@ class MyMplCanvas(FigureCanvas):
         The 1d correlation function in self.data, the 3d correlation function
         in self.data3, and the interface distribution function in self.data_idf
         are all draw in on the plot in linear cooredinates."""
+
+        self.draggable = False
+
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -122,6 +189,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         self.parent = parent
         self.mapper = None
+        self._path = ""
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
@@ -138,7 +206,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
 
         self.gridLayout_8.setColumnStretch(0, 1)
-        self.gridLayout_8.setColumnStretch(1, 3)
+        self.gridLayout_8.setColumnStretch(1, 2)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -156,6 +224,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdExtrapolate.setEnabled(False)
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+        self.cmdSave.clicked.connect(self.on_save)
+        self.cmdSave.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
@@ -167,6 +237,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def setup_model(self):
         """Populate the model with default data."""
+        # filename
+        item = QtGui.QStandardItem(self._path)
+        self.model.setItem(W.W_FILENAME, item)
+
         self.model.setItem(W.W_QMIN,
                            QtGui.QStandardItem("0.01"))
         self.model.setItem(W.W_QMAX,
@@ -266,6 +340,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.update_real_space_plot(transforms)
 
         self._realplot.draw_real_space()
+        self.cmdSave.setEnabled(True)
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""
@@ -312,6 +387,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper.addMapping(self.txtPolydisp, W.W_POLY)
         self.mapper.addMapping(self.txtLongPeriod, W.W_PERIOD)
         self.mapper.addMapping(self.txtLocalCrystal, W.W_CRYSTAL)
+
+        self.mapper.addMapping(self.txtFilename, W.W_FILENAME)
 
         self.mapper.toFirst()
 
@@ -380,9 +457,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.extrap = None
         self._canvas.draw_q_space()
         self.cmdTransform.setEnabled(False)
-
+        self._path = data.name
         self._realplot.data = None
         self._realplot.draw_real_space()
+
+        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
 
     def setClosable(self, value=True):
         """
@@ -414,4 +493,24 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         Check DataExplorer.py, line 355
         """
         return "Corfunc Perspective"
+
+    def on_save(self):
+        """
+        Save corfunc state into a file
+        """
+        f_name = QtWidgets.QFileDialog.getSaveFileName(
+            caption="Save As",
+            filter="Corfunc Text Output (*.crf)",
+            parent=None)[0]
+        if not f_name:
+            return
+        if "." not in f_name:
+            f_name += ".crf"
+
+        data1, data3, data_idf = self._realplot.data
+
+        with open(f_name, "w") as outfile:
+            outfile.write("X 1D 3D IDF\n")
+            np.savetxt(outfile,
+                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name

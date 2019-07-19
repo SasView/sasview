@@ -22,6 +22,7 @@ from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname, realpath
 
+PLUGIN_MODEL_DIR = 'plugin_models'
 
 def addpath(path):
     """
@@ -65,6 +66,14 @@ def import_dll(modname, build_path):
     path = joinpath(build_path, *modname.split('.')) + ext
     return imp.load_dynamic(modname, path)
 
+def setup_sasmodels():
+    """
+    Prepare sasmodels for running within sasview.
+    """
+    # Set SAS_MODELPATH so sasmodels can find our custom models
+    import sas
+    plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
+    os.environ['SAS_MODELPATH'] = plugin_dir
 
 def prepare():
     # Don't create *.pyc files
@@ -75,7 +84,7 @@ def prepare():
 
     # find the directories for the source and build
     from distutils.util import get_platform
-    root = abspath(dirname(sys.argv[0]))
+    root = abspath(dirname(realpath(__file__)))
 
     platform = '%s-%s' % (get_platform(), sys.version[:3])
     build_path = joinpath(root, 'build', 'lib.' + platform)
@@ -121,22 +130,17 @@ def prepare():
     #sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
 
     # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.pr
-    sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
-                                         joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
+    import sas.sascalc
+    sas.sascalc.pr = import_package(
+        'sas.sascalc.pr',
+        joinpath(build_path, 'sas', 'sascalc', 'pr'))
+    sas.sascalc.file_converter = import_package(
+        'sas.sascalc.file_converter',
+        joinpath(build_path, 'sas', 'sascalc', 'file_converter'))
+    sas.sascalc.calculator = import_package(
+        'sas.sascalc.calculator',
+        joinpath(build_path, 'sas', 'sascalc', 'calculator'))
 
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.file_converter
-    sas.sascalc.file_converter.core = import_package('sas.sascalc.file_converter.core',
-                                                     joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))
-
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
-    import sas.sascalc.calculator
-    sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
-                                  joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
 
     sys.path.append(build_path)
 
@@ -163,6 +167,8 @@ if __name__ == "__main__":
 
     logger.debug("Starting SASVIEW in debug mode.")
     prepare()
+    setup_sasmodels()
+
     from sas.qtgui.MainWindow.MainWindow import run_sasview
     run_sasview()
     logger.debug("Ending SASVIEW in debug mode.")
