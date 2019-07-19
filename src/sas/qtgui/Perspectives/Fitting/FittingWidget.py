@@ -940,7 +940,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model = current_list.model()
 
-        params_list = [s.data() for s in current_list.selectionModel().selectedRows()
+        params_list = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row())]
         assert len(params_list) == 1
         row = current_list.selectionModel().selectedRows()[0].row()
@@ -985,7 +985,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model = current_list.model()
 
-        params = [s.data() for s in current_list.selectionModel().selectedRows()
+        params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row())]
         for param in params:
             self.deleteConstraintOnParameter(param=param, param_list=current_list)
@@ -997,8 +997,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if param_list is None:
             param_list = self.lstParams
         model = param_list.model()
-        min_col = param_list.itemDelegate().param_min
-        max_col = param_list.itemDelegate().param_max
+        if hasattr(param_list.itemDelegate(), 'param_min'):
+            min_col = param_list.itemDelegate().param_min
+            max_col = param_list.itemDelegate().param_max
         for row in range(model.rowCount()):
             if not self.isCheckable(row):
                 continue
@@ -1186,7 +1187,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             #        continue
             #    if model 
             #params += [(model.item(s, 0).text(),
-            params += [(model.item(s, 0).data(),
+            params += [(model.item(s, 0).data(role=QtCore.Qt.UserRole),
                         model.item(s, 1).child(0).data().func)
                         for s in range(param_number) if self.rowHasActiveComplexConstraint(s, model)]
         return params
@@ -2386,7 +2387,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         last_row = model.rowCount()-1
         model.item(last_row, 0).setEditable(False)
         model.item(last_row, 4).setEditable(False)
-        model.item(last_row,0).setData('background')
+        model.item(last_row,0).setData('background', role=QtCore.Qt.UserRole)
 
 
     def addScaleToModel(self, model):
@@ -2399,7 +2400,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         last_row = model.rowCount()-1
         model.item(last_row, 0).setEditable(False)
         model.item(last_row, 4).setEditable(False)
-        model.item(last_row,0).setData('scale')
+        model.item(last_row,0).setData('scale', role=QtCore.Qt.UserRole)
 
     def addWeightingToData(self, data):
         """
@@ -3266,7 +3267,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
         all_items = self._poly_model.rowCount()
-        self._poly_model.item(all_items-1,0).setData(param_wname)
+        self._poly_model.item(all_items-1,0).setData(param_wname, role=QtCore.Qt.UserRole)
 
         # All possible polydisp. functions as strings in combobox
         func = QtWidgets.QComboBox()
@@ -3477,7 +3478,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         FittingUtilities.addCheckedListToModel(self._magnet_model, checked_list)
         all_items = self._magnet_model.rowCount()
-        self._magnet_model.item(all_items-1,0).setData(param.name)
+        self._magnet_model.item(all_items-1,0).setData(param.name, role=QtCore.Qt.UserRole)
 
     def enableStructureFactorControl(self, structure_factor):
         """
