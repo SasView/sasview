@@ -757,8 +757,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        constraint_names = fit_page.getComplexConstraintsForModel()
-        constraints = fit_page.getConstraintObjectsForModel()
+        constraint_names = fit_page.getComplexConstraintsForAllModels()
+        constraints = fit_page.getConstraintObjectsForAllModels()
         if not constraints: 
             return
         self.tblConstraints.setEnabled(True)
@@ -882,12 +882,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
+        model = constrained_tab.getModelFromName(constraint.param)
 
         # Update the tab
-        constrained_tab.addConstraintToRow(constraint, constrained_row)
+        constrained_tab.addConstraintToRow(constraint, constrained_row, model=model)
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.selectCheckbox(constrained_row)
+        constrained_tab.selectCheckbox(constrained_row, model=model)
 
 
     def showMultiConstraint(self):

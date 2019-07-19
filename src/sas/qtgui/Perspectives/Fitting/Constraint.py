@@ -14,6 +14,7 @@ class Constraint(object):
         self._min = min
         self._max = max
         self._operator = operator
+        self._model = None
         self.validate = True
         self.active = True
 
@@ -81,3 +82,11 @@ class Constraint(object):
     def operator(self, val):
         self._operator = val
 
+    @property
+    def model(self):
+        # model this constraint originates from
+        return self._model
+
+    @model.setter
+    def model(self, val):
+        self._model = val
