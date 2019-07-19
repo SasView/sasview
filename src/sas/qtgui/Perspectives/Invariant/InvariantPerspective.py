@@ -232,9 +232,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
         plot_data = GuiUtils.plotsFromCheckedItems(self._manager.filesWidget.model)
-        #self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
 
-        self._manager.filesWidget.plotData(plot_data)
+        # choose only the Low-Q/High-Q data for plotting
+        data_to_plot = [p for p in plot_data if p[1].plot_role == p[1].ROLE_DATA]
+        self._manager.filesWidget.plotData(data_to_plot)
 
         # Update the details dialog in case it is open
         self.updateDetailsWidget(model)
