@@ -78,7 +78,7 @@ class MyMplCanvas(FigureCanvas):
         else:
             item = W.W_QCUTOFF
 
-        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
 
         self.dragging = None
 
@@ -97,7 +97,7 @@ class MyMplCanvas(FigureCanvas):
         else:
             item = W.W_QCUTOFF
 
-        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
 
 
     def draw_q_space(self):
