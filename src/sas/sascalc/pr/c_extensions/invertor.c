@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 double pi = 3.1416;
 
@@ -311,4 +312,84 @@ double rg(double *pars, double d_max, int n_c, int nslice) {
         sum_r2 += r*r*value;
     }
     return sqrt(sum_r2/(2.0*sum));
+}
+
+void iq_smeared_test() {
+  int size_p = 40;
+  int size_q = 301;
+  double* p = malloc(size_p * sizeof(double));
+  double* q = malloc(size_q * sizeof(double));
+  int i;
+  for(i = 0; i < size_q; i++) {
+      q[i] = i;
+  }
+  for(i = 0; i < size_p; i++) {
+       p[i] = i;
+  }
+  double d_max = 2000;
+  double width = 0.01;
+  double height = 3;
+  int npts = 30;
+  int j = 0;
+
+  for(j = 0; j < 10; j++) {
+	  double* res = malloc(size_q * sizeof(double));
+	  double final_result = 0.0;
+	  clock_t begin = clock();
+	  i = 0;
+	  for(i = 0; i < size_q; i++) {
+          res[i] = iq_smeared(p, d_max, size_p, height, width, q[i], npts);
+	  }
+	  clock_t end = clock();
+	  double time_taken = (double)(end - begin) / CLOCKS_PER_SEC;
+	  printf("\n\nTime taken: %f", time_taken);
+
+	  for(i = 0; i < size_q; i++) {
+		  final_result += res[i];
+	  }
+	  printf("\n\nResult (summed): %f", final_result);
+	  /*for(i = 0; i < size_q; i++) {
+		*printf("\n\nResult: %f", res[i]);
+	  }*/
+
+	  free(res);
+	  res = NULL;
+  }
+  free(p);
+  free(q);
+  p = NULL;
+  q = NULL;
+
+}
+void iq_smeared_scalar_test() {
+  double d_max = 2000;
+  int n_p = 40;
+  double* p = malloc(n_p * sizeof(double));
+  double height = 3;
+  double width = 0.01;
+  double q = 0.5;
+  int npts = 30;
+  int i = 0;
+  for(i = 0; i < n_p; i++) {
+	  p[i] = i;
+  }
+
+  double final_result = 0.0;
+  clock_t begin = clock();
+  final_result = iq_smeared(p, d_max, n_p, height, width, q, npts);
+  clock_t end = clock();
+  double time_taken = (double)(end - begin) / CLOCKS_PER_SEC;
+  printf("\n\nTime taken (scalar): %f", time_taken);
+  printf("\n\nResult (scalar): %f", final_result);
+
+  free(p);
+  p = NULL;
+
+}
+
+
+int main(void) {
+  iq_smeared_scalar_test();
+  iq_smeared_test();
+  return 0;
 }

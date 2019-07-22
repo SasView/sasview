@@ -897,7 +897,7 @@ npts = 30'''
 
 
 if(__name__ == "__main__"):
-    #demo_iq_smeared_scalar()
+    demo_iq_smeared_scalar()
     demo_iq_smeared_qvec()
     #demo_conditional_dec()
 
