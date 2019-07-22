@@ -870,15 +870,18 @@ npts = 30'''
 
     #repeat 3 times each executing loop once take minimuim because higher values
     #not usually caused by python by other processes scheduled by os
+    print("\n:Vector Testing:\n")
+
     timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
     times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
     timesNjit = timeit.repeat(setup = setup, stmt = codeN, repeat = 10, number = 1)
 
-    print("Parallel Times: \n", timesParallel)
+
+    print("\nParallel Times: \n", timesParallel)
     print("Lowest Time P: ", min(timesParallel))
-    print("Njit Times: \n", timesNjit)
+    print("\nNjit Times: \n", timesNjit)
     print("Lowest Time: ", min(timesNjit))
-    print("Normal Times: \n", times)
+    print("\nNormal Times: \n", times)
     print("Lowest Time N: ", min(times))
 
 
@@ -892,11 +895,11 @@ npts = 30'''
     test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
 
 
-    print("Result Normal (summed): ", np.sum(test_result_n))
+    print("\nResult Normal (summed): ", np.sum(test_result_n))
     print("Result Parallelized (summed): ", np.sum(test_result_p))
     print("Result Njit (summed) ", np.sum(test_result_njit))
 
-    print("**Parallel agaisnt Normal Test-**")
+    print("\n**Parallel agaisnt Normal Test-**")
     if(np.array_equal(test_result_p, test_result_n)):
         print("*Identical Results*")
     else:
@@ -906,7 +909,7 @@ npts = 30'''
         print(np.sum(test_result_n))
         print(test_result_p - test_result_n)
 
-    print("**Njit agaisnt Normal Test-**")
+    print("\n**Njit agaisnt Normal Test-**")
     if(np.array_equal(test_result_njit, test_result_n)):
         print("*Identical Results*")
     else:
@@ -928,7 +931,7 @@ from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
 from __main__ import iq_smeared_p
 import numpy as np
-#q = np.linspace(0.001, 0.5, 1000)
+#q = np.linspace(0.001, 0.5, 301)
 q = 0.5
 p = np.arange(40)
 d_max = 2000
@@ -940,72 +943,49 @@ npts = 30'''
     #repeat 3 times each executing loop once take minimuim because higher values
     #not usually caused by python by other processes scheduled by os
 
+    print("\n:Scalar Testing:\n")
 
     times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
     timesP = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
 
-    print("Scalar Times: ", times)
+    print("\nNormal Times: ", times)
     print("Lowest Time: ", min(times))
-    print("Parallel Times: ", timesP)
+    print("\nParallel Times: ", timesP)
     print("Lowest TIme: ", min(timesP))
 
     test_result = iq_smeared(p, d_max, height, width, q, npts)
     test_result_p = iq_smeared_p(p, d_max, height, width, q, npts)
 
-    print("Result: ", test_result)
+    print("\nResult: ", test_result)
     if(test_result == test_result_p):
         print("*Same Result*")
     else:
         print("*Different Results*")
         print("Difference: ", test_result - test_result_p)
 
+def demo_iteration():
+    setup = '''
+from __main__ import iq_smeared_p
+import numpy as np
+q = np.arange(301, np.float64)
+p = np.arange(40)
+d_max = 2000
+width, height = 0.01, 3
+result = np.zeros(301)'''
+
+    code = '''
+for i in range(301):
+    result[i] = iq_smeared_p(p, d_max, height, width, q[i], npts)'''
+
+    times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+
+    print("Times: ", times)
+    print("Lowest: ", min(times))
 
 
 
 if(__name__ == "__main__"):
     #demo_iq_smeared_scalar()
-    demo_iq_smeared_qvec()
+    #demo_iq_smeared_qvec()
+    demo_iteration()
     #demo_conditional_dec()
-
-"""
-C driver code for testing speed
-int main(void) {
-  int size_p = 40;
-  int size_q = 301;
-  double* p = malloc(size_p * sizeof(double));
-  double* q = malloc(size_q * sizeof(double));
-  int i;
-  for(i = 0; i < size_q; i++) {
-      q[i] = 0.01 + (0.00166 * i);
-      printf("%f, ", q[i]);
-  }
-  printf("\n");
-  for(i = 0; i < size_p; i++) {
-       p[i] = i;
-       printf("%f, ", p[i]);
-  }
-  double d_max = 2000;
-  double width = 0.01;
-  double height = 3;
-  int npts = 30;
-
-   clock_t start, end;
-   double cpu_time_used;
-
-   start = clock();
-   double res = iq_smeared(p, d_max, size_p, height, width, 0.5, npts);
-   end = clock();
-   cpu_time_used = ((double) ((end - start) / CLOCKS_PER_SEC));
-
-
-  printf("\n Result: %f\n\n\n", res);
-  printf("Time taken: %f\n\n\n", cpu_time_used);
-
-  free(p);
-  free(q);
-  p = NULL;
-  q = NULL;
-
-  return 0;
-}
-"""
