@@ -130,9 +130,8 @@ def iq(pars, d_max, q):
         sum += pars[i] * ortho_transformed(d_max, i + 1, q)
     return sum
 
-
 @njit(parallel = True)
-def iq_smeared(pars, d_max, height, width, q, npts):
+def iq_smeared_p(pars, d_max, height, width, q, npts):
     """
     Scattering intensity calculated from expansion,
     slit smeared.
@@ -153,6 +152,31 @@ def iq_smeared(pars, d_max, height, width, q, npts):
     sum = 0.0
 
     for i in prange(pars.shape[0]):
+        sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
+    return sum
+
+@njit()
+def iq_smeared(pars, d_max, height, width, q, npts):
+    """
+    Scattering intensity calculated from expansion,
+    slit smeared.
+
+    for test data of size 20 ~= 0.0005 basic
+    ~= 0.0003 njit
+    ~= 0.12 using numba vectorize()
+    Couldn't use njit and vectorize in same method, looked on
+    github seems to be issue for a long time with numba.
+    Maybe faster if work together ?
+    njit() compilation only slightly faster. Maybe with working
+    njit() and vector operations be faster.
+
+    iq_smeared(np.arange(10000), 3, 100, 100, 30, 400) - no parallel - 75
+    - parallel - 23.13, over 3x speedup.
+
+    """
+    sum = 0.0
+
+    for i in range(pars.shape[0]):
         sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
     return sum
 
@@ -327,6 +351,14 @@ def ortho_transformed_qvec(q, d_max, n):
 #qvec methods with numba
 @njit(parallel = False, cache = False)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
+    total = np.zeros(len(q), dtype=np.float64)
+    #total = np.zeros_like(q)
+    for i in prange(p.shape[0]):
+         total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
+    return total
+
+@njit(parallel = True, cache = False)
+def iq_smeared_qvec_njit_p(p, q, d_max, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
     #total = np.zeros_like(q)
     for i in prange(p.shape[0]):
@@ -820,9 +852,11 @@ def demo_iq_smeared_qvec():
     npts = 30
 
     setup = '''
+from __main__ import iq_smeared_qvec_njit_p
 from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
+
 import numpy as np
 #q = np.linspace(0.001, 0.5, 301)
 q = np.arange(301, dtype = np.float64)
@@ -830,30 +864,39 @@ p = np.arange(40)
 d_max = 2000
 width, height = 0.01, 3
 npts = 30'''
-    codeP = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
+    codeP = '''iq_smeared_qvec_njit_p(p, q, d_max, height, width, npts)'''
+    codeN = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
     code = '''iq_smeared_qvec(p, q, d_max, height, width, npts)'''
 
     #repeat 3 times each executing loop once take minimuim because higher values
     #not usually caused by python by other processes scheduled by os
     timesParallel = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
     times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+    timesNjit = timeit.repeat(setup = setup, stmt = codeN, repeat = 10, number = 1)
 
     print("Parallel Times: \n", timesParallel)
     print("Lowest Time P: ", min(timesParallel))
+    print("Njit Times: \n", timesNjit)
+    print("Lowest Time: ", min(timesNjit))
     print("Normal Times: \n", times)
     print("Lowest Time N: ", min(times))
+
 
     #To demonstrate same as original C code using arange instead of linspace for easier testing in C,
     #avoid rounding errors perhaps present in linspace().
     #Difference between parallel and normal lower with higher q, with lower q slightly higher error.
     q = np.arange(301, dtype = np.float64)
 
-    test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
+    test_result_njit = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
+    test_result_p = iq_smeared_qvec_njit_p(p, q, d_max, height, width, npts)
     test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
+
 
     print("Result Normal (summed): ", np.sum(test_result_n))
     print("Result Parallelized (summed): ", np.sum(test_result_p))
+    print("Result Njit (summed) ", np.sum(test_result_njit))
 
+    print("**Parallel agaisnt Normal Test-**")
     if(np.array_equal(test_result_p, test_result_n)):
         print("*Identical Results*")
     else:
@@ -862,6 +905,16 @@ npts = 30'''
         print(np.sum(test_result_p))
         print(np.sum(test_result_n))
         print(test_result_p - test_result_n)
+
+    print("**Njit agaisnt Normal Test-**")
+    if(np.array_equal(test_result_njit, test_result_n)):
+        print("*Identical Results*")
+    else:
+        print("*Different Results*")
+        print("Difference: ")
+        print(np.sum(test_result_njit))
+        print(np.sum(test_result_n))
+        print(test_result_njit - test_result_n)
 
 def demo_iq_smeared_scalar():
     q = 0.5
@@ -873,6 +926,7 @@ def demo_iq_smeared_scalar():
 from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
+from __main__ import iq_smeared_p
 import numpy as np
 #q = np.linspace(0.001, 0.5, 1000)
 q = 0.5
@@ -881,24 +935,35 @@ d_max = 2000
 width, height = 0.01, 3
 npts = 30'''
     code = '''iq_smeared(p, d_max, height, width, q, npts)'''
+    codeP = '''iq_smeared_p(p, d_max, height, width, q, npts)'''
 
     #repeat 3 times each executing loop once take minimuim because higher values
     #not usually caused by python by other processes scheduled by os
 
 
     times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
+    timesP = timeit.repeat(setup = setup, stmt = codeP, repeat = 10, number = 1)
 
-    print("Scalar Times: \n", times)
+    print("Scalar Times: ", times)
     print("Lowest Time: ", min(times))
-    res = 0.0
+    print("Parallel Times: ", timesP)
+    print("Lowest TIme: ", min(timesP))
+
     test_result = iq_smeared(p, d_max, height, width, q, npts)
+    test_result_p = iq_smeared_p(p, d_max, height, width, q, npts)
+
     print("Result: ", test_result)
+    if(test_result == test_result_p):
+        print("*Same Result*")
+    else:
+        print("*Different Results*")
+        print("Difference: ", test_result - test_result_p)
 
 
 
 
 if(__name__ == "__main__"):
-    demo_iq_smeared_scalar()
+    #demo_iq_smeared_scalar()
     demo_iq_smeared_qvec()
     #demo_conditional_dec()
 
