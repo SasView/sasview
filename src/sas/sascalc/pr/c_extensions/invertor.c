@@ -342,12 +342,12 @@ void iq_smeared_test() {
 	  }
 	  clock_t end = clock();
 	  double time_taken = (double)(end - begin) / CLOCKS_PER_SEC;
-	  printf("\n\nTime taken: %f", time_taken);
+	  printf("\n\nTime taken: %.16f", time_taken);
 
 	  for(i = 0; i < size_q; i++) {
 		  final_result += res[i];
 	  }
-	  printf("\n\nResult (summed): %f", final_result);
+	  printf("\n\nResult (summed): %.16f", final_result);
 	  /*for(i = 0; i < size_q; i++) {
 		*printf("\n\nResult: %f", res[i]);
 	  }*/
@@ -379,8 +379,8 @@ void iq_smeared_scalar_test() {
   final_result = iq_smeared(p, d_max, n_p, height, width, q, npts);
   clock_t end = clock();
   double time_taken = (double)(end - begin) / CLOCKS_PER_SEC;
-  printf("\n\nTime taken (scalar): %f", time_taken);
-  printf("\n\nResult (scalar): %f", final_result);
+  printf("\n\nTime taken (scalar): %.16f", time_taken);
+  printf("\n\nResult (scalar): %.16f", final_result);
 
   free(p);
   p = NULL;
