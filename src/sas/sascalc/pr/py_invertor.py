@@ -325,7 +325,7 @@ def ortho_transformed_qvec(q, d_max, n):
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
 #qvec methods with numba
-@njit(parallel = True, cache = False)
+@njit(parallel = False, cache = False)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
     #total = np.zeros_like(q)
@@ -824,7 +824,8 @@ from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
 import numpy as np
-q = np.linspace(0.001, 0.5, 301)
+#q = np.linspace(0.001, 0.5, 301)
+q = np.arange(301, dtype = np.float64)
 p = np.arange(40)
 d_max = 2000
 width, height = 0.01, 3
@@ -845,7 +846,7 @@ npts = 30'''
     #To demonstrate same as original C code using arange instead of linspace for easier testing in C,
     #avoid rounding errors perhaps present in linspace().
     #Difference between parallel and normal lower with higher q, with lower q slightly higher error.
-    #q = np.arange(301, dtype = np.float64)
+    q = np.arange(301, dtype = np.float64)
 
     test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
     test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
