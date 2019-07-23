@@ -314,6 +314,8 @@ double rg(double *pars, double d_max, int n_c, int nslice) {
     return sqrt(sum_r2/(2.0*sum));
 }
 
+//**Testing**
+
 void iq_smeared_test() {
   int size_p = 40;
   int size_q = 301;

@@ -806,6 +806,7 @@ def test_atleast1d(x):
         return np.sum(np.array(x))
     else:
         return np.sum(x)
+
 def conditional_decorator(dec, condition):
     def decorator(func):
         if not condition:
