@@ -14,12 +14,14 @@ from .UI.MainWindowUI import Ui_SasView
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
-    def __init__(self, parent=None):
+    def __init__(self, screen_resolution, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
         self.setupUi(self)
 
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
+        self.screen_width =  screen_resolution.width()
+        self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
 
         # Temporary solution for problem with menubar on Mac
@@ -80,8 +82,10 @@ def run_sasview():
     # DO NOT move the following import to the top!
     from twisted.internet import reactor
 
+    screen_resolution = app.desktop().screenGeometry()
+
     # Show the main SV window
-    mainwindow = MainSasViewWindow()
+    mainwindow = MainSasViewWindow(screen_resolution)
     mainwindow.showMaximized()
 
     # no more splash screen
