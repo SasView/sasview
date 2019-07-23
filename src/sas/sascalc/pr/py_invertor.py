@@ -963,29 +963,8 @@ npts = 30'''
         print("*Different Results*")
         print("Difference: ", test_result - test_result_p)
 
-def demo_iteration():
-    setup = '''
-from __main__ import iq_smeared_p
-import numpy as np
-q = np.arange(301, np.float64)
-p = np.arange(40)
-d_max = 2000
-width, height = 0.01, 3
-result = np.zeros(301)'''
-
-    code = '''
-for i in range(301):
-    result[i] = iq_smeared_p(p, d_max, height, width, q[i], npts)'''
-
-    times = timeit.repeat(setup = setup, stmt = code, repeat = 10, number = 1)
-
-    print("Times: ", times)
-    print("Lowest: ", min(times))
-
-
 
 if(__name__ == "__main__"):
-    #demo_iq_smeared_scalar()
-    #demo_iq_smeared_qvec()
-    demo_iteration()
+    demo_iq_smeared_scalar()
+    demo_iq_smeared_qvec()
     #demo_conditional_dec()
