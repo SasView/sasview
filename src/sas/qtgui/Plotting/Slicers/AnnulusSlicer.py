@@ -22,15 +22,16 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.axes = axes
         self.base = base
         self._item = item
-        self.qmax = min(numpy.fabs(self.base.data.xmax),
-                        numpy.fabs(self.base.data.xmin))  # must be positive
+        self.data = self.base.data[0]
+        self.qmax = min(numpy.fabs(self.data.xmax),
+                        numpy.fabs(self.data.xmin))  # must be positive
         self.connect = self.base.connect
 
         # Number of points on the plot
         self.nbins = 36
         # Cursor position of Rings (Left(-1) or Right(1))
-        self.xmaxd = self.base.data.xmax
-        self.xmind = self.base.data.xmin
+        self.xmaxd = self.base.xmax
+        self.xmind = self.base.xmin
 
         if (self.xmaxd + self.xmind) > 0:
             self.sign = 1
@@ -92,7 +93,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
 
         """
         # Data to average
-        data = self.base.data
+        data = self.data
         if data is None:
             return
 
@@ -109,7 +110,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             self.nbins = nbins
         # Create the data1D Q average of data2D
         sect = Ring(r_min=rmin, r_max=rmax, nbins=self.nbins)
-        sector = sect(self.base.data)
+        sector = sect(self.data)
 
         if hasattr(sector, "dxl"):
             dxl = sector.dxl
@@ -123,22 +124,22 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
                           y=sector.y, dy=sector.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "AnnulusPhi" + "(" + self.base.data.name + ")"
-        new_plot.title = "AnnulusPhi" + "(" + self.base.data.name + ")"
+        new_plot.name = "AnnulusPhi" + "(" + self.data.name + ")"
+        new_plot.title = "AnnulusPhi" + "(" + self.data.name + ")"
 
-        new_plot.source = self.base.data.source
+        new_plot.source = self.data.source
         new_plot.interactive = True
-        new_plot.detector = self.base.data.detector
+        new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.base.data.name.count("Residuals") > 0:
+                self.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "AnnulusPhi" + self.base.data.name
-        new_plot.id = "AnnulusPhi" + self.base.data.name
+        new_plot.group_id = "AnnulusPhi" + self.data.name
+        new_plot.id = "AnnulusPhi" + self.data.name
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"

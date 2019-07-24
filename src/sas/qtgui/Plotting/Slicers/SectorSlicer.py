@@ -23,14 +23,16 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
+        self.data = self.base.data[0]
+
         # Connect the plot to event
         self.connect = self.base.connect
 
         # Compute qmax limit to reset the graph
-        x = numpy.power(max(self.base.data.xmax,
-                         numpy.fabs(self.base.data.xmin)), 2)
-        y = numpy.power(max(self.base.data.ymax,
-                         numpy.fabs(self.base.data.ymin)), 2)
+        x = numpy.power(max(self.data.xmax,
+                         numpy.fabs(self.data.xmin)), 2)
+        y = numpy.power(max(self.data.ymax,
+                         numpy.fabs(self.data.ymin)), 2)
         self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
         self.nbins = 20
@@ -121,7 +123,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         :param nbins: the number of point to plot for the average 1D data
         """
         # Get the data2D to average
-        data = self.base.data
+        data = self.data
         # If we have no data, just return
         if data is None:
             return
@@ -136,7 +138,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                        phi_min=phimin + numpy.pi,
                        phi_max=phimax + numpy.pi, nbins=nbins)
 
-        sector = sect(self.base.data)
+        sector = sect(self.data)
         # Create 1D data resulting from average
 
         if hasattr(sector, "dxl"):
@@ -150,21 +152,21 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "SectorQ" + "(" + self.base.data.name + ")"
-        new_plot.title = "SectorQ" + "(" + self.base.data.name + ")"
-        new_plot.source = self.base.data.source
+        new_plot.name = "SectorQ" + "(" + self.data.name + ")"
+        new_plot.title = "SectorQ" + "(" + self.data.name + ")"
+        new_plot.source = self.data.source
         new_plot.interactive = True
-        new_plot.detector = self.base.data.detector
+        new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume them.
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")
         if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.base.data.name.count("Residuals") > 0:
+                self.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.base.data.name
-        new_plot.id = "SectorQ" + self.base.data.name
+        new_plot.group_id = "2daverage" + self.data.name
+        new_plot.id = "SectorQ" + self.data.name
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -442,8 +444,7 @@ class SideInteractor(BaseInteractor):
         self.phi = numpy.fabs(self.theta2 - self.theta)
         if self.phi > numpy.pi:
             self.phi = 2 * numpy.pi - numpy.fabs(self.theta2 - self.theta)
-        #self.base.base.update()
-        self.base.update()
+        self.base.base.update()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)
@@ -547,8 +548,7 @@ class LineInteractor(BaseInteractor):
         """
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
-        #self.base.base.update()
-        self.base.update()
+        self.base.base.update()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)
