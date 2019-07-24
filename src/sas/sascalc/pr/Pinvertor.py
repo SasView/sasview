@@ -4,6 +4,7 @@ Pinvertor is the base class for the Invertor class
 and provides the underlying computations.
 """
 import sas.sascalc.pr.py_invertor as py_invertor
+#import py_invertor
 import numpy as np
 import logging
 import math
@@ -368,14 +369,17 @@ class Pinvertor:
         The scattering intensity is slit-smeared.
 
         :param pars: c-parameters
-        :param q: q.
+        :param q: q, scalar or vector.
 
-        :return: I(q)
+        :return: I(q), either scalar or vector depending on q.
         """
-        q = float(q)
+        q = np.atleast_1d(q)
         npts = 21
-        iq_val = py_invertor.iq_smeared(pars, self.d_max, self.slit_height,
-                                       self.slit_width, q, npts)
+        iq_val = py_invertor.iq_smeared_qvec_njit(pars, q, np.float(self.d_max), self.slit_height,
+                                       self.slit_width, npts)
+        #If q was a scalar
+        if(iq_val.shape[0] == 1):
+            return np.asscalar(iq_val)
         return iq_val
 
     def pr(self, pars, r):
