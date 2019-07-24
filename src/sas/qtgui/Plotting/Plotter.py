@@ -109,9 +109,9 @@ class PlotterWidget(PlotterBase):
                 self.data.xtransform = self.xLogLabel
                 self.data.ytransform = self.yLogLabel
                 _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
-                if xscale != 'log':
+                if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
-                if yscale != 'log':
+                if yscale != 'log' and yscale != self.yscale:
                     self.yscale = yscale
 
                 # Redefine the Scale properties dialog
