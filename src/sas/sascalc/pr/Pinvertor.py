@@ -9,11 +9,29 @@ import numpy as np
 import logging
 import math
 import timeit
-from numba import njit
-
 logger = logging.getLogger(__name__)
 
-@njit('u8(f8, f8, f8)')
+try:
+    from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
+    USE_NUMBA = True
+except ImportError:
+    USE_NUMBA = False
+
+def conditional_decorator(dec, condition):
+    """
+    If condition is true returns dec(func).
+    Returns the function with decorator applied otherwise
+    uses default.
+    Called by @conditional_decorator(dec, condition)
+              def():
+    """
+    def decorator(func):
+        if not condition:
+            return func
+        return dec(func)
+    return decorator
+
+@conditional_decorator(njit('u8(f8, f8, f8)'), USE_NUMBA)
 def accept_q(q, q_min, q_max):
     """
     Check whether a q-value is within acceptable limits.
@@ -26,7 +44,7 @@ def accept_q(q, q_min, q_max):
         return 0
     return 1
 
-@njit('b1(f8[:])')
+@conditional_decorator(njit('b1(f8[:])'), USE_NUMBA)
 def check_for_zero(x):
     for i in range(len(x)):
         if(x[i] == 0):
@@ -584,25 +602,30 @@ class Pinvertor:
 
         return val
 
-
-
     @staticmethod
-    @njit('f8[:,:](f8[:,:], u8, u8, u8, f8, f8, f8, u8, f8[:], f8[:], u8, f8, f8, f8, f8)')
+    @conditional_decorator(njit('f8[:,:](f8[:,:], u8, u8, u8, f8, f8, f8, u8, f8[:], f8[:], u8, f8, f8, f8, f8)'), USE_NUMBA)
     def _compute_a(a, nfunc, nr, offset, pi, sqrt_alpha, d_max, npoints, x, err, est_bck, slit_height, slit_width, q_min, q_max):
-        for j in range(nfunc):
-            for i in range(np.uint8(npoints)):
-                npts = 21
-                if(accept_q(np.float64((x[i])), q_min, q_max) == 1):
+        smeared = False
+        if(slit_width > 0 or slit_height > 0):
+            smeared = True
 
+        for j in range(nfunc):
+            npts = 21
+            if(smeared):
+                precompute_ortho_smeared = py_invertor.ortho_transformed_smeared_qvec_njit(x, d_max, j + offset,
+                                                                                slit_height, slit_width, npts)/err
+            else:
+                precompute_ortho = py_invertor.ortho_transformed_qvec_njit(x, d_max, j + offset) / err
+
+            for i in range(npoints):
+                if(accept_q(x[i], q_min, q_max) == 1):
                     if(est_bck == 1 and j == 0):
                         a[i, j] = (1.0/err[i])
-
                     else:
-                        if(slit_width > 0 or slit_height > 0):
-                            a[i, j] = py_invertor.ortho_transformed_smeared(d_max, j + offset,
-                                                                                slit_height, slit_width, x[i], npts)/err[i]
+                        if(smeared):
+                            a[i, j] = precompute_ortho_smeared[i]
                         else:
-                            a[i, j] = py_invertor.ortho_transformed(d_max, j + offset, x[i])/err[i]
+                            a[i, j] = precompute_ortho[i]
 
             for i_r in range(nr):
                 index_i = i_r + npoints
@@ -619,7 +642,7 @@ class Pinvertor:
         return a
 
     @staticmethod
-    @njit('f8[:](f8[:], f8[:], f8[:], f8[:], u8, f8, f8)')
+    @conditional_decorator(njit('f8[:](f8[:], f8[:], f8[:], f8[:], u8, f8, f8)'), USE_NUMBA)
     def _compute_b(b, x, y, err, npoints, q_min, q_max):
         for i in range(npoints):
             if(accept_q(x[i], q_min, q_max)):
@@ -697,12 +720,24 @@ class Pinvertor:
         if not (n_a >= (nfunc * (nr + self.npoints))):
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
+        size = nr + self.npoints
+        Pinvertor._compute_invcov(a, inv_cov, size, nfunc)
+        #for i in range(nfunc):
+        #    for j in range(nfunc):
+        #        inv_cov[i, j] = 0.0
+        #        for k in range(nr + self.npoints):
+        #            inv_cov[i, j] += np.float64(a[k, i]*a[k, j])
+        return 0
+
+    @staticmethod
+    def _compute_invcov(a, inv_cov, size, nfunc):
+        #reset to 0
         for i in range(nfunc):
             for j in range(nfunc):
-                inv_cov[i, j] = 0.0
-                for k in range(nr + self.npoints):
-                    inv_cov[i, j] += np.float64(a[k, i]*a[k, j])
+                inv_cov[i, j] = np.float64(np.sum((a[:, i] * a[:, j])))
         return 0
+
+
 
     def _get_reg_size(self, nfunc, nr, a_obj):
         #in Cinvertor, doc was same as invcov_matrix, left for now -

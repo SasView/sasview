@@ -17,8 +17,8 @@ import time
 import timeit
 from functools import reduce
 pi = 3.1416 #to pass tests
-from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
 try:
+    from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
     USE_NUMBA = True
 except ImportError:
     USE_NUMBA = False
