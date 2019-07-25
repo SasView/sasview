@@ -17,9 +17,8 @@ import time
 import timeit
 from functools import reduce
 pi = 3.1416 #to pass tests
-
+from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
 try:
-    from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
     USE_NUMBA = True
 except ImportError:
     USE_NUMBA = False
@@ -38,7 +37,7 @@ def conditional_decorator(dec, condition):
         return dec(func)
     return decorator
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8, f8)'), USE_NUMBA)
 def pr_sphere(R, r):
     """
     P(r) of a sphere, for test purposes
@@ -52,7 +51,7 @@ def pr_sphere(R, r):
     else:
         return 0
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
 def ortho(d_max, n, r):
     """
     Orthogonal Functions:
@@ -60,7 +59,7 @@ def ortho(d_max, n, r):
     """
     return 2.0 * r * np.sin(pi*n*r/d_max)
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
 def ortho_transformed(d_max, n, q):
     """
     Fourier transform of the nth orthagonal function
@@ -75,7 +74,7 @@ def ortho_transformed(d_max, n, q):
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8, u8, f8, f8, f8, u8)'), USE_NUMBA)
 def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     """
     Slit-smeared Fourier transform of the nth orthagonal function.
@@ -125,7 +124,7 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
             sum += ortho_transformed(d_max, n, np.sqrt(qsq))
     return sum / count_w
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
 def ortho_derived(d_max, n, r):
     """
     First derivative in of the orthogonal function dB(r)/dr
@@ -133,7 +132,7 @@ def ortho_derived(d_max, n, r):
     pinr = pi * n * r/d_max
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
 def iq(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion
@@ -146,12 +145,12 @@ def iq(pars, d_max, q):
     """
     #q = np.asanyarray(q)
     sum = 0.0
-    for i in range(pars.shape[0]):
+    for i in range(len(pars)):
         #for j in prange(q.shape[0]):
         sum += pars[i] * ortho_transformed(d_max, i + 1, q)
     return sum
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, f8, f8, f8, u8)'), USE_NUMBA)
 def iq_smeared(pars, d_max, height, width, q, npts):
     """
     Scattering intensity calculated from expansion,
@@ -176,7 +175,7 @@ def iq_smeared(pars, d_max, height, width, q, npts):
         sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
     return sum
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
 def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
@@ -186,33 +185,7 @@ def pr(pars, d_max, r):
         sum += pars[i] * ortho(d_max, i+1, r)
     return sum
 
-@conditional_decorator(njit, USE_NUMBA)
-def pr_err_p(pars, err, d_max, r):
-    """
-    P(r) calculated from the expansion,
-    with errors
-    changed to instead of return value by reference, returns
-    tuple of (pr_value, pr_value_err)
-    """
-    sum = 0.0
-    sum_err = 0.0
-    func_value = 0
-    n_c = pars.shape[0]
-
-    for i in range(0, n_c):
-        func_value = ortho(d_max, i+1, r)
-        sum += pars[i] * func_value
-        sum_err += err[i * n_c + i] * func_value * func_value
-
-    pr_value = sum
-    if(sum_err > 0):
-        pr_value_err = np.sqrt(sum_err)
-    else:
-        pr_value_err = sum
-
-    return (pr_value, pr_value_err)
-
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8[:](f8[:], f8[:,:], f8, f8)'), USE_NUMBA)
 def pr_err(pars, err, d_max, r):
     """
     P(r) calculated from the expansion,
@@ -225,7 +198,7 @@ def pr_err(pars, err, d_max, r):
     func_value = 0
     n_c = pars.shape[0]
 
-    for i in range(0, n_c):
+    for i in range(n_c):
         func_value = ortho(d_max, i+1, r)
         sum += pars[i] * func_value
         sum_err += err[i, i] * func_value * func_value
@@ -236,9 +209,13 @@ def pr_err(pars, err, d_max, r):
     else:
         pr_value_err = sum
 
-    return (pr_value, pr_value_err)
+    ret = np.zeros(2, dtype = np.float64)
+    ret[0] = pr_value
+    ret[1] = pr_value_err
 
-@conditional_decorator(njit, USE_NUMBA)
+    return ret
+
+@conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
 def dprdr(pars, d_max, r):
     #test sample 10,000 - 0.00039/38
         #adv - 0.00048
@@ -330,8 +307,34 @@ def ortho_transformed_qvec(q, d_max, n):
     #Equivalent to C -
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
+@conditional_decorator(njit('f8[:](f8[:], f8, u8)'), USE_NUMBA)
+def ortho_transformed_qvec_njit(q, d_max, n):
+    #qd = q * (d_max/pi)
+    #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+    #equivalent to C -
+    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
+
+@conditional_decorator(njit('f8[:](f8[:], f8, u8, f8, f8, u8)'), USE_NUMBA)
+def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
+    n_width = npts if width > 0 else 1
+    n_height = npts if height > 0 else 1
+    dz = height/(npts-1)
+    y0, dy = -0.5*width, width/(npts-1)
+    total = np.zeros(len(q), dtype=np.float64)
+    #total = np.zeros_like(q)
+    # note: removing count_w since ortho now handles q=0 case
+
+    for j in range(n_height):
+        zsq = (j * dz)**2
+        #temp = np.zeros(np.uint8(n_width), dtype = np.float64)
+        for i in range(n_width):
+            y = y0 + i*dy
+            qsq = (q - y)**2 + zsq
+            total += ortho_transformed_qvec_njit(np.sqrt(qsq), d_max, n)
+    return total / (n_width*n_height)
+
 #qvec methods with numba
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8[:](f8[:], f8[:], f8, f8, f8, u8)'), USE_NUMBA)
 def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
     size_q = len(q)
     size_p = len(p)
@@ -341,33 +344,12 @@ def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
         total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
     return total
 
-@conditional_decorator(njit, USE_NUMBA)
-def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
-    n_width = npts if width > 0 else 1
-    n_height = npts if height > 0 else 1
-    dz = height/(npts-1)
-    y0, dy = -0.5*width, width/(npts-1)
-    total = np.zeros(len(q), dtype=np.float64)
-    #total = np.zeros_like(q)
-    # note: removing count_w since ortho now handles q=0 case
-    for j in range(n_height):
-        zsq = (j * dz)**2
-        for i in range(n_width):
-            y = y0 + i*dy
-            qsq = (q - y)**2 + zsq
-            total += ortho_transformed_qvec_njit(np.sqrt(qsq), d_max, n)
-    return total / (n_width*n_height)
-
-@conditional_decorator(njit('f8[:](f8[:], f8, u8)'), USE_NUMBA)
-def ortho_transformed_qvec_njit(q, d_max, n):
-    #qd = q * (d_max/pi)
-    #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
-    #equivalent to C -
-    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
 
 
-@conditional_decorator(njit, USE_NUMBA)
+
+
+@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
 def reg_term(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
@@ -384,7 +366,7 @@ def reg_term(pars, d_max, nslice):
 
     return sum/(1.0 * nslice)* d_max
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
 def int_p2(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
@@ -399,7 +381,7 @@ def int_p2(pars, d_max, nslice):
         sum += value * value
     return sum/nslice_d * d_max
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
 def int_pr(pars, d_max, nslice):
     """
     Integral of P(r)
@@ -414,7 +396,7 @@ def int_pr(pars, d_max, nslice):
         sum += value
     return sum/nslice_d * d_max
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('u8(f8[:], f8, u8)'), USE_NUMBA)
 def npeaks(pars, d_max, nslice):
     """
     Get the number of P(r) peaks
@@ -439,7 +421,7 @@ def npeaks(pars, d_max, nslice):
 
     return count
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
 def positive_integral(pars, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole
@@ -461,36 +443,7 @@ def positive_integral(pars, d_max, nslice):
         sum += math.fabs(value)
     return sum_pos / sum
 
-@conditional_decorator(njit, USE_NUMBA)
-def positive_integral_vec(pars, d_max, nslice):
-    """
-    Get the fraction of the integral of P(r) over the whole
-    range of r that is above 0.
-    A valid P(r) is defined as being positive for all r.
-
-    Parallelization of this method gives ~=40% speedup.
-    """
-    #compute r as a vector first then give r to pr()
-    #which because of the implementation should be able to
-    #handle r as a vector.
-    r = np.zeros(nslice)
-    value = 0.0
-    sum_pos = 0.0
-    sum = 0.0
-    nslice_d = 1.0 * nslice
-    for i in range(nslice):
-        r[i] = d_max/nslice_d * i
-
-    value = pr(pars, d_max, r)
-
-    for i in range(nslice):
-        if(value[i]>0.0):
-            sum_pos += value
-            sum += math.fabs(value)
-
-    return sum_pos / sum
-
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8[:,:], f8, u8)'), USE_NUMBA)
 def positive_errors(pars, err, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole range
@@ -508,7 +461,7 @@ def positive_errors(pars, err, d_max, nslice):
         sum += np.fabs(pr_val)
     return sum_pos/sum
 
-@conditional_decorator(njit, USE_NUMBA)
+@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
 def rg(pars, d_max, nslice):
     """
     R_g radius of gyration calculation
@@ -942,7 +895,6 @@ if(__name__ == "__main__"):
     #demo_iq_smeared_scalar()
     #demo_iq_smeared_qvec()
     #demo_conditional_dec()
-    print("Main")
     q = np.linspace(0.1, 0.5, 301, dtype = np.float64)
     p = np.arange(40, dtype = np.float64)
     d_max = 2000.0

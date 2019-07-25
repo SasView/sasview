@@ -13,6 +13,27 @@ from numba import njit
 
 logger = logging.getLogger(__name__)
 
+@njit('u8(f8, f8, f8)')
+def accept_q(q, q_min, q_max):
+    """
+    Check whether a q-value is within acceptable limits.
+
+    :return: 1 if accepted, 0 if rejected.
+    """
+    if(q_min > 0 and q < q_min):
+        return 0
+    if(q_max > 0 and q > q_max):
+        return 0
+    return 1
+
+@njit('b1(f8[:])')
+def check_for_zero(x):
+    for i in range(len(x)):
+        if(x[i] == 0):
+            return True
+    return False
+
+
 class Pinvertor:
     #q data
     x = np.empty(0, dtype = np.float)
@@ -51,6 +72,8 @@ class Pinvertor:
         :param pars: input parameters.
         :return: residuals - list of residuals.
         """
+        pars = np.float64(pars)
+
         residuals = []
         residual = 0.0
         diff = 0.0
@@ -77,6 +100,8 @@ class Pinvertor:
         :param pars: input parameters.
         :return: residuals - list of residuals.
         """
+        pars = np.float64(pars)
+
         residuals = []
         regterm = 0.0
         nslice = 25
@@ -97,7 +122,9 @@ class Pinvertor:
         :param data: Array of doubles to set x to.
         :return: npoints - Number of entries found, the size of x.
         """
+        data = np.float64(data)
         ndata = len(data)
+
         self.__dict__['x'] = np.zeros(ndata)
 
         for i in range(ndata):
@@ -131,6 +158,7 @@ class Pinvertor:
         :param data: Array of doubles to set y to.
         :return: ny - Number of entries found.
         """
+        data = np.float64(data)
         ndata = len(data)
         self.__dict__['y'] = np.zeros(ndata)
 
@@ -165,6 +193,7 @@ class Pinvertor:
         :param data: Array of doubles to set err to.
         :return: nerr - Number of entries found.
         """
+        data = np.float64(data)
         ndata = len(data)
         self.__dict__['err'] = np.zeros(ndata)
 
@@ -199,7 +228,7 @@ class Pinvertor:
         :param d_max: float to set d_max to.
         :return: d_max
         """
-        _d_max = float(d_max)
+        _d_max = np.float64(d_max)
         self.__dict__['d_max'] = _d_max
 
         return self.d_max
@@ -219,7 +248,7 @@ class Pinvertor:
         :param min_q: float to set q_min to.
         :return: q_min.
         """
-        _min_q = float(min_q)
+        _min_q = np.float64(min_q)
         self._q_min = _min_q
         return self._q_min
 
@@ -238,7 +267,7 @@ class Pinvertor:
         :param max_q: float to set q_max to.
         :return: q_max.
         """
-        _max_q = float(max_q)
+        _max_q = np.float64(max_q)
         self._q_max = _max_q
         return self._q_max
 
@@ -257,7 +286,7 @@ class Pinvertor:
         :param alpha_: float to set alpha to.
         :return: alpha.
         """
-        _alpha = float(alpha)
+        _alpha = np.float64(alpha)
         self.__dict__['alpha'] = _alpha
         return self.alpha
 
@@ -276,7 +305,7 @@ class Pinvertor:
         :param slit_width: float to set slit_width to.
         :return: slit_width.
         """
-        _slit_width = float(slit_width)
+        _slit_width = np.float64(slit_width)
         self.__dict__['slit_width'] = _slit_width
         return self.slit_width
 
@@ -295,7 +324,7 @@ class Pinvertor:
         :param slit_height: float to set slit-height to.
         :return: slit_height.
         """
-        _slit_height = float(slit_height)
+        _slit_height = np.float64(slit_height)
         self.__dict__['slit_height'] = _slit_height
         return self.slit_height
 
@@ -359,7 +388,10 @@ class Pinvertor:
 
         :return: I(q)
         """
-        q = float(q)
+        q = np.float64(q)
+        pars = np.float64(pars)
+        pars = np.atleast_1d(pars)
+
         iq_val = py_invertor.iq(pars, self.d_max, q)
         return iq_val
 
@@ -374,6 +406,9 @@ class Pinvertor:
         :return: I(q), either scalar or vector depending on q.
         """
         q = np.atleast_1d(q)
+        pars = np.float64(pars)
+        q = np.float64(q)
+
         npts = 21
         iq_val = py_invertor.iq_smeared_qvec_njit(pars, q, np.float(self.d_max), self.slit_height,
                                        self.slit_width, npts)
@@ -391,7 +426,9 @@ class Pinvertor:
 
         :return: P(r)
         """
-        r = float(r)
+        r = np.float64(r)
+        pars = np.float64(pars)
+        pars = np.atleast_1d(pars)
         pr_val = py_invertor.pr(pars, self.d_max, r)
 
         return pr_val
@@ -406,12 +443,25 @@ class Pinvertor:
 
         :return: (P(r), dP(r))
         """
-        r = float(r)
+        pars = np.atleast_1d(pars)
+        pars_err = np.atleast_2d(pars_err)
+        pars = np.float64(pars)
+        pars_err = np.float64(pars_err)
+        r = np.float64(r)
+
         pr_val = 0.0
         pr_err_val = 0.0
-        (pr_val, pr_err_val) = py_invertor.pr_err(pars, pars_err, self.d_max, r)
+        result = np.zeros(2, dtype = np.float64)
 
-        return (pr_val, pr_err_val)
+        if(pars_err is None):
+            pr_val = np.float64(pr(pars, self.d_max, r))
+            pr_err_value = 0.0
+            result[0] = pr_val
+            result[1] = pr_err_value
+        else:
+            result = py_invertor.pr_err(pars, pars_err, self.d_max, r)
+
+        return (result[0], result[1])
 
     def is_valid(self):
         """
@@ -434,9 +484,9 @@ class Pinvertor:
 
         :return: nth Fourier transformed base function, evaluated at q.
         """
-        d_max = float(d_max)
+        d_max = np.float64(d_max)
         n = int(n)
-        q = float(q)
+        q = np.float64(q)
         ortho_val = py_invertor.ortho_transformed(d_max, n, q)
 
         return ortho_val
@@ -451,6 +501,9 @@ class Pinvertor:
         :return: oscillation figure of merit.
         """
         nslice = 100
+        pars = np.float64(pars)
+        pars = np.atleast_1d(pars)
+
         oscill = py_invertor.reg_term(pars, self.d_max, nslice)
         norm = py_invertor.int_p2(pars, self.d_max, nslice)
         ret_val = np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max
@@ -466,6 +519,8 @@ class Pinvertor:
         :return: number of P(r) peaks.
         """
         nslice = 100
+        pars = np.float64(pars)
+        pars = np.atleast_1d(pars)
         count = py_invertor.npeaks(pars, self.d_max, nslice)
 
         return count
@@ -479,6 +534,8 @@ class Pinvertor:
         :return: fraction of P(r) that is positive.
         """
         nslice = 100
+        pars = np.float64(pars)
+        pars = np.atleast_1d(pars)
         fraction = py_invertor.positive_integral(pars, self.d_max, nslice)
 
         return fraction
@@ -494,6 +551,8 @@ class Pinvertor:
         :return: fraction of P(r) that is positive.
         """
         nslice = 51
+        pars = np.float64(pars)
+        pars_err = np.float64(pars_err)
         fraction = py_invertor.positive_errors(pars, pars_err, self.d_max, nslice)
 
         return fraction
@@ -506,6 +565,7 @@ class Pinvertor:
         :return: Rg.
         """
         nslice = 101
+        pars = np.float64(pars)
         val = py_invertor.rg(pars, self.d_max, nslice)
 
         return val
@@ -519,21 +579,52 @@ class Pinvertor:
         :return: I(q=0)
         """
         nslice = 101
+        pars = np.float64(pars)
         val = 4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice)
 
         return val
 
-    def accept_q(self, q):
-        """
-        Check whether a q-value is within acceptable limits.
 
-        :return: 1 if accepted, 0 if rejected.
-        """
-        if(self.get_qmin() > 0 and q < self.get_qmin()):
-            return 0
-        if(self.get_qmax() > 0 and q > self.get_qmax()):
-            return 0
-        return 1
+
+    @staticmethod
+    @njit('f8[:,:](f8[:,:], u8, u8, u8, f8, f8, f8, u8, f8[:], f8[:], u8, f8, f8, f8, f8)')
+    def _compute_a(a, nfunc, nr, offset, pi, sqrt_alpha, d_max, npoints, x, err, est_bck, slit_height, slit_width, q_min, q_max):
+        for j in range(nfunc):
+            for i in range(np.uint8(npoints)):
+                npts = 21
+                if(accept_q(np.float64((x[i])), q_min, q_max) == 1):
+
+                    if(est_bck == 1 and j == 0):
+                        a[i, j] = (1.0/err[i])
+
+                    else:
+                        if(slit_width > 0 or slit_height > 0):
+                            a[i, j] = py_invertor.ortho_transformed_smeared(d_max, j + offset,
+                                                                                slit_height, slit_width, x[i], npts)/err[i]
+                        else:
+                            a[i, j] = py_invertor.ortho_transformed(d_max, j + offset, x[i])/err[i]
+
+            for i_r in range(nr):
+                index_i = i_r + npoints
+                index_j = j
+                if(est_bck == 1 and j == 0):
+                    a[index_i, index_j] = 0.0
+                else:
+                    r = d_max / nr * i_r
+                    tmp = np.float64(pi * (j+offset) / d_max)
+                    t1 = np.float64(sqrt_alpha * 1.0/nr * d_max * 2.0)
+                    t2 = np.float64((2.0 * pi * (j+offset)/d_max * np.cos(pi * (j+offset)*r/d_max)
+                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/d_max)))
+                    a[index_i, index_j] =  np.float64(t1 * t2)
+        return a
+
+    @staticmethod
+    @njit('f8[:](f8[:], f8[:], f8[:], f8[:], u8, f8, f8)')
+    def _compute_b(b, x, y, err, npoints, q_min, q_max):
+        for i in range(npoints):
+            if(accept_q(x[i], q_min, q_max)):
+                b[i] = np.float64(y[i] / err[i])
+        return b
 
     def _get_matrix(self, nfunc, nr, a_obj, b_obj):
         """
@@ -548,6 +639,8 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
+        a_obj = np.float64(a_obj)
+        b_obj = np.float64(b_obj)
 
         if not (b_obj.shape[0] >= nfunc):
             raise RuntimeError("Pinvertor: b vector too small.")
@@ -555,55 +648,26 @@ class Pinvertor:
         if not (a_obj.size >= nfunc*(nr + self.npoints)):
             raise RuntimeError("Pinvertor: a array too small.")
 
-        a = a_obj
-        b = b_obj
+        a = np.float64(a_obj)
+        b = np.float64(b_obj)
 
         sqrt_alpha = np.sqrt(self.alpha)
         pi = np.arccos(-1.0)
         offset = (1, 0)[self.est_bck == 1]
 
         #Compute zero error case.
-        def check_for_zero(x):
-            for i, ni in enumerate(x):
-                if(ni == 0):
-                    return True
-            return False
+        #def check_for_zero(x):
+        #    for i, ni in enumerate(x):
+        #        if(ni == 0):
+        #            return True
+        #    return False
 
         if(check_for_zero(self.err)):
             raise RuntimeError("Pinvertor.get_matrix: Some I(Q) points have no error.")
-
-        for j in range(nfunc):
-            for i in range(self.npoints):
-                npts = 21
-                if(self.accept_q(self.x[i])):
-
-                    if(self.est_bck == 1 and j == 0):
-                        a[i, j] = 1.0/self.err[i]
-
-                    else:
-                        if(self.slit_width > 0 or self.slit_height > 0):
-                            a[i, j] = py_invertor.ortho_transformed_smeared(self.d_max, j + offset,
-                                                                             self.slit_height, self.slit_width, self.x[i], npts)/self.err[i]
-                        else:
-                            a[i, j] = py_invertor.ortho_transformed(self.d_max, j + offset, self.x[i])/self.err[i]
-
-            for i_r in range(nr):
-                index_i = i_r + self.npoints
-                index_j = j
-                if(self.est_bck == 1 and j == 0):
-                    a[index_i, index_j] = 0.0
-                else:
-                    r = self.d_max / nr * i_r
-                    tmp = pi * (j+offset) / self.d_max
-                    t1 = sqrt_alpha * 1.0/nr * self.d_max * 2.0
-                    t2 = (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
-                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
-                    a[index_i, index_j] =  t1 * t2
-
-        for i in range(self.npoints):
-            if(self.accept_q(self.x[i])):
-                b[i] = self.y[i] / self.err[i]
-
+        #d_max, npoints, x, err, est_bck, slit_height, slit_width):
+        a = Pinvertor._compute_a(a, nfunc, nr, offset, pi, sqrt_alpha, self.get_dmax(), self.get_nx(), self.x, self.err, self.est_bck, self.slit_height, self.slit_width, self.get_qmin(), self.get_qmax())
+        b = Pinvertor._compute_b(b, self.x, self.y, self.err, self.npoints, self.get_qmin(), self.get_qmax())
+        #_compute_b(b, x, y, err, npoints, q_min, q_max)
         return 0
 
 
@@ -620,6 +684,8 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
+        a_obj = np.float64(a_obj)
+        cov_obj = np.float64(cov_obj)
         n_a = a_obj.size
         n_cov = cov_obj.size
         a = a_obj
@@ -635,7 +701,7 @@ class Pinvertor:
             for j in range(nfunc):
                 inv_cov[i, j] = 0.0
                 for k in range(nr + self.npoints):
-                    inv_cov[i, j] += a[k, i]*a[k, j]
+                    inv_cov[i, j] += np.float64(a[k, i]*a[k, j])
         return 0
 
     def _get_reg_size(self, nfunc, nr, a_obj):
@@ -651,6 +717,7 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nfunc)
+        a_obj = np.float64(a_obj)
         if not (a_obj.size >= nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
@@ -660,9 +727,9 @@ class Pinvertor:
 
         for j in range(nfunc):
             for i in range(self.npoints):
-                if(self.accept_q(self.x[i]) == 1):
-                    sum_sig += a[i, j] * a[i, j]
+                if(accept_q(self.x[i], np.float64(self.get_qmin()), np.float64(self.get_qmax())) == 1):
+                    sum_sig += np.float64(a[i, j] * a[i, j])
             for i in range(nr):
-                sum_reg += (a[(i+self.npoints), j]) * (a[(i+self.npoints), j]);
+                sum_reg += np.float64((a[(i+self.npoints), j]) * (a[(i+self.npoints), j]))
 
         return sum_sig, sum_reg
