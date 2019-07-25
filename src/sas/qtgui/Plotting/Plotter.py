@@ -79,12 +79,14 @@ class PlotterWidget(PlotterBase):
         """
         Add a new plot of self._data to the chart.
         """
+        if data is None:
+            # just refresh
+            self.canvas.draw_idle()
+            return
+
         # Data1D
         if isinstance(data, Data1D):
             self.data.append(data)
-
-        if data is None:
-            return
 
         is_fit = (data.id=="fit")
 
@@ -105,7 +107,8 @@ class PlotterWidget(PlotterBase):
                 self.xscale = 'linear'
             # Transform data if required.
             if transform and (data.xtransform is not None or data.ytransform is not None):
-                _, _, xscale, yscale = GuiUtils.xyTransform(data, data.xtransform, data.ytransform)
+                self.xLabel, self.yLabel, xscale, yscale = \
+                    GuiUtils.xyTransform(data, data.xtransform, data.ytransform)
                 if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
                 if yscale != 'log' and yscale != self.yscale:
@@ -214,10 +217,10 @@ class PlotterWidget(PlotterBase):
                 self.legend.set_picker(True)
 
         # Current labels for axes
-        if self.y_label and not is_fit:
-            ax.set_ylabel(self.y_label)
-        if self.x_label and not is_fit:
-            ax.set_xlabel(self.x_label)
+        if self.yLabel and not is_fit:
+            ax.set_ylabel(self.yLabel)
+        if self.xLabel and not is_fit:
+            ax.set_xlabel(self.xLabel)
 
         # refresh canvas
         self.canvas.draw_idle()

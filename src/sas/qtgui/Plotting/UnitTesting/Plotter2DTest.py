@@ -48,6 +48,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.data.title="Test data"
         self.data.id = 1
+        self.data.ndim = 1
         self.isWindows = platform.system=="Windows"
 
     def tearDown(self):
@@ -59,7 +60,7 @@ class Plotter2DTest(unittest.TestCase):
         """ Adding data """
         self.plotter.data = self.data
 
-        self.assertEqual(self.plotter.data, self.data)
+        self.assertEqual(self.plotter.data0, self.data)
         self.assertEqual(self.plotter._title, self.data.title)
         self.assertEqual(self.plotter.xLabel, "$\\rm{Q_{x}}(A^{-1})$")
         self.assertEqual(self.plotter.yLabel, "$\\rm{Q_{y}}(A^{-1})$")
@@ -210,7 +211,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.plotter.dimension = 3
         self.plotter.data = self.data
-        self.plotter.showPlot(data=self.plotter.data.data,
+        self.plotter.showPlot(data=self.plotter.data0.data,
                               qx_data=self.data.qx_data,
                               qy_data=self.data.qy_data,
                               xmin=self.data.xmin,
@@ -230,7 +231,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.plotter.dimension = 2
         self.plotter.data = self.data
-        self.plotter.showPlot(data=self.plotter.data.data,
+        self.plotter.showPlot(data=self.data.data,
                               qx_data=self.data.qx_data,
                               qy_data=self.data.qy_data,
                               xmin=self.data.xmin,

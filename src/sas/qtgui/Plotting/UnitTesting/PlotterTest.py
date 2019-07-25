@@ -47,7 +47,7 @@ class PlotterTest(unittest.TestCase):
         """ Adding data """
         self.plotter.data = self.data
 
-        self.assertEqual(self.plotter.data, self.data)
+        self.assertEqual(self.plotter.data[0], self.data)
         self.assertEqual(self.plotter._title, self.data.name)
         self.assertEqual(self.plotter.xLabel, "")
         self.assertEqual(self.plotter.yLabel, "")
@@ -60,7 +60,7 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.plot(hide_error=False)
 
-        self.assertEqual(self.plotter.ax.get_xscale(), 'log')
+        self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertTrue(FigureCanvas.draw_idle.called)
 
         self.plotter.figure.clf()
@@ -73,7 +73,7 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.plot(hide_error=True)
 
-        self.assertEqual(self.plotter.ax.get_yscale(), 'log')
+        self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
         self.assertTrue(FigureCanvas.draw_idle.called)
         self.plotter.figure.clf()
 
@@ -96,7 +96,7 @@ class PlotterTest(unittest.TestCase):
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertEqual(self.plotter.data.ytransform, "y")
+        #self.assertEqual(self.plotter.data[0].ytransform, "y")
         self.assertTrue(FigureCanvas.draw_idle.called)
 
     def testCreateContextMenuQuick(self):
@@ -146,8 +146,8 @@ class PlotterTest(unittest.TestCase):
         self.plotter.xyTransform(xLabel="x", yLabel="log10(y)")
 
         # Assure new plot has correct labels
-        #self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
-        #self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
         # ... and scale
         self.assertEqual(self.plotter.xscale, "linear")
         self.assertEqual(self.plotter.yscale, "log")
@@ -390,8 +390,8 @@ class PlotterTest(unittest.TestCase):
         # See the default labels
         xl = self.plotter.ax.xaxis.label.get_text()
         yl = self.plotter.ax.yaxis.label.get_text()
-        self.assertEqual(xl, "")
-        self.assertEqual(yl, "")
+        self.assertEqual(xl, "$()$")
+        self.assertEqual(yl, "$()$")
 
         # Prepare new data
         data2 = Data1D(x=[1.0, 2.0, 3.0],
