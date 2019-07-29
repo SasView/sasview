@@ -2869,6 +2869,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
+            QtWidgets.QApplication.processEvents()
 
         # Update radius_effective if relevant
         self.updateEffectiveRadius(return_data)
