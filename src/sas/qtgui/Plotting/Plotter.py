@@ -31,11 +31,11 @@ def _legendResize(width, parent):
     screen_height = parent.parent.manager.parent._parent.screen_height
     screen_factor = screen_width*screen_height
     #Magic numbers 2e-8 and 4e-5 come from nomralization to previous factor 4
-    factor = 2e-8*np.power(screen_factor,1.1)
-    denomintor = 4e-5*np.power(screen_factor,1.1)
-    #if sys.platform == 'darwin':
-    #    factor = 2.0
-    #    denomintor = 200
+    factor = 4e-8 * np.power(screen_factor, 1.1)
+    denomintor = 1e-5 * np.power(screen_factor, 1.1)
+    if sys.platform == 'darwin':
+        factor = 2e-8 * np.power(screen_factor, 1.1)
+        denomintor = 2e-5 * np.power(screen_factor, 1.1)
     return (width/denomintor)+factor
 
 class PlotterWidget(PlotterBase):
