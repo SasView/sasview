@@ -51,6 +51,7 @@ class FitState(object):
 
         reader = Reader(self._add_entry)
         datasets = reader.read(fitfile)
+        #print("datasets", datasets[0])
         self._set_constraints()
         #print("loaded", datasets)
 
@@ -397,6 +398,9 @@ class BumpsPlugin:
         #print("====\nfit", state)
         problem = state.make_fitproblem()
         #print(problem.show())
+        # TODO: modify bumps so fit pars can be selected from command line
+        if not len(problem.getp()):
+            raise ValueError("No fitted parameters in %r." % filename)
         return problem
 
     #@staticmethod

@@ -126,6 +126,7 @@ class SasFitness(object):
         self.name = model.name
         self.model = model.model
         self.data = data
+        #print("SasFitness", model.name, data)
         if self.data.smearer is not None:
             self.data.smearer.model = self.model
         self._define_pars()
