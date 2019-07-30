@@ -123,7 +123,12 @@ class SasFitness(object):
     """
     def __init__(self, model, data, fitted=[], constraints={},
                  initial_values=None, **kw):
-        self.name = model.name
+        # Pull data name from sas_data entry, if available
+        try:
+            data_name = " " + os.path.basename(data.sas_data.name)
+        except Exception:
+            data_name = ""
+        self.name = model.name + data_name
         self.model = model.model
         self.data = data
         #print("SasFitness", model.name, data)
