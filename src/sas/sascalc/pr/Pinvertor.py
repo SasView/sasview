@@ -74,18 +74,18 @@ class Pinvertor:
 
     def __init__(self):
         #Maximum distance between any two points in the system
-        self.set_dmax(180)
+        self.d_max = (180)
         #Minimum q to include in inversion
-        self.set_qmin(-1.0)
+        self.q_min = (-1.0)
         #Maximum q to include in inversion
-        self.set_qmax(-1.0)
+        self.q_max = (-1.0)
         #Flag for whether or not to evaluate a constant background
         #while inverting
-        self.set_est_bck(0)
+        self.est_bck = (0)
 
-        self.set_x(np.empty(0, dtype = np.float64))
-        self.set_y(np.empty(0, dtype = np.float64))
-        self.set_err(np.empty(0, dtype = np.float64))
+        self.x = (np.empty(0, dtype = np.float64))
+        self.y = (np.empty(0, dtype = np.float64))
+        self.err = (np.empty(0, dtype = np.float64))
         self.npoints = 0
         self.ny = 0
         self.nerr = 0
@@ -149,23 +149,7 @@ class Pinvertor:
             residuals.append(float(residual))
 
         return residuals
-    @x.setter
-    def x(self, data):
-        """
-        Function to set the x data.
 
-        :param data: Array of doubles to set x to.
-        :return: npoints - Number of entries found, the size of x.
-        """
-        data = np.float64(data)
-        ndata = len(data)
-
-        #for i in range(ndata):
-        #    self._x[i] = data[i]
-        self._x = np.copy(data)
-        self.npoints = int(ndata)
-
-        return self.npoints
     @property
     def x(self, data):
         """
@@ -183,6 +167,51 @@ class Pinvertor:
         #    data[i] = self._x[i]
 
         data[:] = self._x[:]
+
+        return self.npoints
+
+    @x.setter
+    def x(self, data):
+        """
+        Function to set the x data.
+
+        :param data: Array of doubles to set x to.
+        :return: npoints - Number of entries found, the size of x.
+        """
+        data = np.float64(data)
+        ndata = len(data)
+
+        #for i in range(ndata):
+        #    self._x[i] = data[i]
+
+        if 0.0 in data:
+            msg = "Invertor: one of your q-values is zero. "
+            msg += "Delete that entry before proceeding"
+            raise ValueError(msg)
+
+        self._x[:] = data[:]
+        self.npoints = int(ndata)
+
+        return self.npoints
+
+    @property
+    def y(self, data):
+        """
+        Function to get the y data.
+
+        :param data: Array of doubles to place y into.
+        :return: npoints - Number of entries found.
+        """
+        try:
+            ndata = len(data)
+        except:
+            raise RuntimeError("Pinvertor.get_y: input not an array.")
+        if (ndata < self.ny):
+            logger.error("Pinvertor.get_y: input array too short for data.")
+            return None
+        #for i in range(self.ny):
+        #    data[i] = self.y[i]
+        data[:] = self._y[:]
 
         return self.npoints
 
@@ -205,25 +234,25 @@ class Pinvertor:
         return self.ny
 
     @property
-    def y(self, data):
+    def err(self, data):
         """
-        Function to get the y data.
+        Function to get the err data.
 
-        :param data: Array of doubles to place y into.
-        :return: npoints - Number of entries found.
+        :param data: Array of doubles to place err into.
+        :return: npoints - number of entries found
         """
-        try:
-            ndata = len(data)
-        except:
-            raise RuntimeError("Pinvertor.get_y: input not an array.")
-        if (ndata < self.ny):
-            logger.error("Pinvertor.get_y: input array too short for data.")
+        ndata = len(data)
+        if (ndata < self.nerr):
+            logger.error("Pinvertor.get_err: input array too short for data.")
             return None
-        #for i in range(self.ny):
-        #    data[i] = self.y[i]
-        data[:] = self._y[:]
+
+        #for i in range(self.nerr):
+        #    data[i] = self.err[i]
+        data[:] = self.err[:]
 
         return self.npoints
+
+
     @err.setter
     def err(self, data):
         """
@@ -243,23 +272,14 @@ class Pinvertor:
         return self._nerr
 
     @property
-    def err(self, data):
+    def d_max(self):
         """
-        Function to get the err data.
+        Gets the maximum distance.
 
-        :param data: Array of doubles to place err into.
-        :return: npoints - number of entries found
+        :return: d_max.
         """
-        ndata = len(data)
-        if (ndata < self.nerr):
-            logger.error("Pinvertor.get_err: input array too short for data.")
-            return None
+        return self._d_max
 
-        #for i in range(self.nerr):
-        #    data[i] = self.err[i]
-        data[:] = self.err[:]
-
-        return self.npoints
 
     @d_max.setter
     def d_max(self, d_max):
@@ -274,13 +294,14 @@ class Pinvertor:
         return self._d_max
 
     @property
-    def d_max(self):
+    def q_min(self):
         """
-        Gets the maximum distance.
+        Gets the minimum q.
 
-        :return: d_max.
+        :return: q_min.
         """
-        return self._d_max
+        return self._qmin
+
 
     @q_min.setter
     def q_min(self, min_q):
@@ -295,13 +316,14 @@ class Pinvertor:
         return self._qmin
 
     @property
-    def q_min(self):
+    def q_max(self):
         """
-        Gets the minimum q.
+        Gets the maximum q.
 
-        :return: q_min.
+        :return: q_max.
         """
-        return self._qmin
+        return self._qmax
+
 
     @q_max.setter
     def q_max(self, max_q):
@@ -315,13 +337,14 @@ class Pinvertor:
         return self._qmax
 
     @property
-    def q_max(self):
+    def alpha(self):
         """
-        Gets the maximum q.
+        Gets the alpha parameter.
 
-        :return: q_max.
+        :return: alpha.
         """
-        return self._qmax
+        return self._alpha
+
 
     @alpha.setter
     def alpha(self, alpha):
@@ -335,15 +358,16 @@ class Pinvertor:
         return self._alpha
 
     @property
-    def alpha(self):
+    def slit_width(self):
         """
-        Gets the alpha parameter.
+        Gets the slit width.
 
-        :return: alpha.
+        :return: slit_width.
         """
-        return self._alpha
+        return self._slit_width
 
-    def set_slit_width(self, slit_width):
+    @slit_width.setter
+    def slit_width(self, slit_width):
         """
         Sets the slit width in units of q [A-1].
 
@@ -353,15 +377,18 @@ class Pinvertor:
         self._slit_width = np.float64(slit_width)
         return self._slit_width
 
-    def get_slit_width(self):
+    @property
+    def slit_height(self):
         """
-        Gets the slit width.
+        Gets the slit height.
 
-        :return: slit_width.
+        :return: slit_height.
         """
-        return self._slit_width
+        return self._slit_height
 
-    def set_slit_height(self, slit_height):
+
+    @slit_height.setter
+    def slit_height(self, slit_height):
         """
         Sets the slit height in units of q [A-1].
 
@@ -371,15 +398,17 @@ class Pinvertor:
         self._slit_height = np.float64(slit_height)
         return self._slit_height
 
-    def get_slit_height(self):
+    @property
+    def est_bck(self):
         """
-        Gets the slit height.
+        Gets background flag.
 
-        :return: slit_height.
+        :return: est_bck.
         """
-        return self._slit_height
+        return self._est_bck
 
-    def set_est_bck(self, est_bck):
+    @est_bck.setter
+    def est_bck(self, est_bck):
         """
         Sets background flag.
 
@@ -389,15 +418,9 @@ class Pinvertor:
         self._est_bck = int(est_bck)
         return self._est_bck
 
-    def get_est_bck(self):
-        """
-        Gets background flag.
 
-        :return: est_bck.
-        """
-        return self._est_bck
-
-    def get_nx(self):
+    @property
+    def nx(self):
         """
         Gets the number of x points.
 
@@ -405,7 +428,12 @@ class Pinvertor:
         """
         return self._npoints
 
-    def get_ny(self):
+    @nx.setter
+    def nx(self, nx):
+        self._npoints = int(nx)
+
+    @property
+    def ny(self):
         """
         Gets the number of y points.
 
@@ -413,13 +441,22 @@ class Pinvertor:
         """
         return self._ny
 
-    def get_nerr(self):
+    @ny.setter
+    def ny(self, ny):
+        self._ny = int(ny)
+
+    @property
+    def nerr(self):
         """
         Gets the number of error points.
 
         :return: nerr.
         """
         return self._nerr
+
+    @nerr.setter
+    def nerr(self, nerr):
+        self._nerr = int(nerr)
 
     def iq(self, pars, q):
         """
@@ -792,3 +829,15 @@ class Pinvertor:
                 sum_reg += np.float64((a[(i+self.npoints), j]) * (a[(i+self.npoints), j]))
 
         return sum_sig, sum_reg
+
+
+def test():
+    raise ValueError()
+    return 5
+
+if(__name__ == "__main__"):
+    test = Pinvertor()
+    test.est_bck = 2
+    print(test.est_bck)
+    print("asdf")
+    print(test())

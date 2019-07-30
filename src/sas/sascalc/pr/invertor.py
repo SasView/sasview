@@ -148,6 +148,7 @@ class Invertor(Pinvertor):
                 )
         return (Invertor, tuple(), state, None, None)
 
+    #Refractoring to use @property decorators so this and __getattr__ will be redundant.
     def __setattr__(self, name, value):
         """
         Set the value of an attribute.
