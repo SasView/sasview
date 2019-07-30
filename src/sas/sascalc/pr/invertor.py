@@ -27,8 +27,8 @@ import numpy
 
 
 #from sas.sascalc.pr.core.pr_inversion import Cinvertor #no longer used
-from sas.sascalc.pr.Pinvertor import Pinvertor
-#from Pinvertor import Pinvertor
+#from sas.sascalc.pr.Pinvertor import Pinvertor
+from Pinvertor import Pinvertor
 logger = logging.getLogger(__name__)
 
 def help():
@@ -149,95 +149,94 @@ class Invertor(Pinvertor):
         return (Invertor, tuple(), state, None, None)
 
     #Refractoring to use @property decorators so this and __getattr__ will be redundant.
+    def __setattr__(self, name, value):
+        """
+        Set the value of an attribute.
+        Access the parent class methods for
+        x, y, err, d_max, q_min, q_max and alpha
+        """
+        if name == 'x':
+            if 0.0 in value:
+                msg = "Invertor: one of your q-values is zero. "
+                msg += "Delete that entry before proceeding"
+                raise ValueError(msg)
+            return self.set_x(value)
+        elif name == 'y':
+            return self.set_y(value)
+        elif name == 'err':
+            value2 = abs(value)
+            return self.set_err(value2)
+        elif name == 'd_max':
+            if value <= 0.0:
+                msg = "Invertor: d_max must be greater than zero."
+                msg += "Correct that entry before proceeding"
+                raise ValueError(msg)
+            return self.set_dmax(value)
+        elif name == 'q_min':
+            if value is None:
+                return self.set_qmin(-1.0)
+            return self.set_qmin(value)
+        elif name == 'q_max':
+            if value is None:
+                return self.set_qmax(-1.0)
+            return self.set_qmax(value)
+        elif name == 'alpha':
+            return self.set_alpha(value)
+        elif name == 'slit_height':
+            return self.set_slit_height(value)
+        elif name == 'slit_width':
+            return self.set_slit_width(value)
+        elif name == 'est_bck':
+            if value == True:
+                return self.set_est_bck(1)
+            elif value == False:
+                return self.set_est_bck(0)
+            else:
+                raise ValueError("Invertor: est_bck can only be True or False")
 
-    #def __setattr__(self, name, value):
-        #"""
-        #Set the value of an attribute.
-        #Access the parent class methods for
-        #x, y, err, d_max, q_min, q_max and alpha
-        #"""
-    #    if name == 'x':
-    #        if 0.0 in value:
-    #            msg = "Invertor: one of your q-values is zero. "
-     #           msg += "Delete that entry before proceeding"
-     #           raise ValueError(msg)
-     #       return self.set_x(value)
-     #   elif name == 'y':
-     #       return self.set_y(value)
-     #   elif name == 'err':
-     #       value2 = abs(value)
-     #       return self.set_err(value2)
-     #   elif name == 'd_max':
-     #       if value <= 0.0:
-     #           msg = "Invertor: d_max must be greater than zero."
-     #           msg += "Correct that entry before proceeding"
-     #           raise ValueError(msg)
-     #       return self.set_dmax(value)
-     #   elif name == 'q_min':
-     #       if value is None:
-     #           return self.set_qmin(-1.0)
-     #       return self.set_qmin(value)
-     #   elif name == 'q_max':
-     #       if value is None:
-     #           return self.set_qmax(-1.0)
-     #       return self.set_qmax(value)
-     #   elif name == 'alpha':
-     #       return self.set_alpha(value)
-     #   elif name == 'slit_height':
-     #       return self.set_slit_height(value)
-     #   elif name == 'slit_width':
-     #       return self.set_slit_width(value)
-     #   elif name == 'est_bck':
-     #       if value == True:
-     #           return self.set_est_bck(1)
-     #       elif value == False:
-     #           return self.set_est_bck(0)
-     #       else:
-     #           raise ValueError("Invertor: est_bck can only be True or False")
+        return Pinvertor.__setattr__(self, name, value)
 
-#        return Pinvertor.__setattr__(self, name, value)'''
-
-    #def __getattr__(self, name):
-        #"""
-        #Return the value of an attribute
-        #"""
-        ##import numpy
-    #    if name == 'x':
-     #       out = np.ones(self.get_nx())
-     #       self.get_x(out)
-     #       return out
-     #   elif name == 'y':
-     #       out = np.ones(self.get_ny())
-     #       self.get_y(out)
-     #       return out
-     #   elif name == 'err':
-     #       out = np.ones(self.get_nerr())
-     #       self.get_err(out)
-     #       return out
-     #   elif name == 'd_max':
-     #       return self.get_dmax()
-     #   elif name == 'q_min':
-     #       qmin = self.get_qmin()
-     #       if qmin < 0:
-     #           return None
-     #       return qmin
-     #   elif name == 'q_max':
-     #       qmax = self.get_qmax()
-     #       if qmax < 0:
-     #           return None
-     #       return qmax
-     #   elif name == 'alpha':
-     #       return self.get_alpha()
-     #   elif name == 'slit_height':
-     #       return self.get_slit_height()
-     #   elif name == 'slit_width':
-     #       return self.get_slit_width()
-     #   elif name == 'est_bck':
-     #       value = self.get_est_bck()
-     #       return value == 1
-     #   elif name in self.__dict__:
-     #       return self.__dict__[name]
-     #   return None
+    def __getattr__(self, name):
+        """
+        Return the value of an attribute
+        """
+        #import numpy
+        if name == 'x':
+            out = np.ones(self.get_nx())
+            self.get_x(out)
+            return out
+        elif name == 'y':
+            out = np.ones(self.get_ny())
+            self.get_y(out)
+            return out
+        elif name == 'err':
+            out = np.ones(self.get_nerr())
+            self.get_err(out)
+            return out
+        elif name == 'd_max':
+            return self.get_dmax()
+        elif name == 'q_min':
+            qmin = self.get_qmin()
+            if qmin < 0:
+                return None
+            return qmin
+        elif name == 'q_max':
+            qmax = self.get_qmax()
+            if qmax < 0:
+                return None
+            return qmax
+        elif name == 'alpha':
+            return self.get_alpha()
+        elif name == 'slit_height':
+            return self.get_slit_height()
+        elif name == 'slit_width':
+            return self.get_slit_width()
+        elif name == 'est_bck':
+            value = self.get_est_bck()
+            return value == 1
+        elif name in self.__dict__:
+            return self.__dict__[name]
+        return None
 
     def add_errors(self, sigma=0.05):
         """
