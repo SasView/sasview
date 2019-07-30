@@ -848,7 +848,7 @@ npts = 30'''
 
 def demo_iq_smeared_scalar():
     q = 0.5
-    p = np.arange(40)
+    p = np.arange(40, dtype = np.float64)
     d_max = 2000
     width, height = 0.01, 3
     npts = 30
@@ -856,16 +856,15 @@ def demo_iq_smeared_scalar():
 from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
-from __main__ import iq_smeared_p
 import numpy as np
 #q = np.linspace(0.001, 0.5, 301)
 q = 0.5
-p = np.arange(40)
+p = np.arange(40, dtype = np.float64)
 d_max = 2000
 width, height = 0.01, 3
 npts = 30'''
     code = '''iq_smeared(p, d_max, height, width, q, npts)'''
-    codeP = '''iq_smeared_p(p, d_max, height, width, q, npts)'''
+    codeP = '''iq_smeared(p, d_max, height, width, q, npts)'''
 
     #repeat 3 times each executing loop once take minimuim because higher values
     #not usually caused by python by other processes scheduled by os
@@ -881,7 +880,7 @@ npts = 30'''
     print("Lowest TIme: ", min(timesP))
 
     test_result = iq_smeared(p, d_max, height, width, q, npts)
-    test_result_p = iq_smeared_p(p, d_max, height, width, q, npts)
+    test_result_p = iq_smeared(p, d_max, height, width, q, npts)
 
     print("\nResult: ", test_result)
     if(test_result == test_result_p):
@@ -890,17 +889,18 @@ npts = 30'''
         print("*Different Results*")
         print("Difference: ", test_result - test_result_p)
 
-
 if(__name__ == "__main__"):
-    #demo_iq_smeared_scalar()
+    demo_iq_smeared_scalar()
     #demo_iq_smeared_qvec()
     #demo_conditional_dec()
-    q = np.linspace(0.1, 0.5, 301, dtype = np.float64)
-    p = np.arange(40, dtype = np.float64)
-    d_max = 2000.0
-    width, height = 0.01, 3.0
-    npts = np.int(30)
-    print(iq_smeared_qvec_njit(p, q, d_max, height, width, npts))
+    #q = np.linspace(0.1, 0.5, 301, dtype = np.float64)
+    #p = np.arange(40, dtype = np.float64)
+    #d_max = 2000.0
+    #width, height = 0.01, 3.0
+    #npts = np.int(30)
+    #print(iq_smeared_qvec_njit(p, q, d_max, height, width, npts))
 
-    q = np.atleast_1d(0.5)
-    print(iq_smeared_qvec_njit(p, q, d_max, height, width, npts))
+    #q = np.atleast_1d(0.5)
+    #print(iq_smeared_qvec_njit(p, q, d_max, height, width, npts))
+
+
