@@ -26,9 +26,9 @@ import math
 import numpy
 
 
-#from sas.sascalc.pr.core.pr_inversion import Cinvertor #no longer used
-#from sas.sascalc.pr.Pinvertor import Pinvertor
-from Pinvertor import Pinvertor
+from sas.sascalc.pr.core.pr_inversion import Cinvertor #no longer used
+from sas.sascalc.pr.Pinvertor import Pinvertor
+
 logger = logging.getLogger(__name__)
 
 def help():
@@ -216,6 +216,7 @@ class Invertor(Pinvertor):
             return self.get_dmax()
         elif name == 'q_min':
             qmin = self.get_qmin()
+            print(qmin)
             if qmin < 0:
                 return None
             return qmin
@@ -771,11 +772,3 @@ class Invertor(Pinvertor):
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
             raise RuntimeError(msg)
-
-if(__name__ == "__main__"):
-    test = Invertor()
-    test.x = (np.arange(30, dtype = np.float64) + 1)
-    out = np.zeros(30, dtype = np.float64)
-    test.get_x(out)
-    print("Value of out: ", out)
-    print("Value of x: ", test.x)
