@@ -32,8 +32,22 @@ from .qsmearing import smear_selection
 
 # Monkey patch SasFitness class with plotter
 def sasfitness_plot(self, view='log'):
-    data, theory, resid = self.data.sas_data, self.theory(), self.residuals()
-    plot_theory(data, theory, resid, view)
+    theory, resid = self.theory(), self.residuals()
+    # Use mask from fitter for theory and resid.  Note that idx lists the
+    # the values that are "in" the data rather than the values which are
+    # "out of" the data, unlike the mask used in sasmodels.  Do this in a
+    # copy of the data since the mask includes masking out points where the
+    # uncertainty is zero as well as qmin and qmax values, and these are
+    # not masked in the original data.
+    # TODO: make handling of masks consistent across sasmodels and sasview
+    # Change sasmodels to use "in" since that what numpy masked arrays use
+    # and the underlying data file formats use.
+    sas_data = copy.copy(self.data.sas_data)
+    sas_data.mask = ~self.data.idx
+    # CRUFT: sasmodels handles view=None properly as of July 2019.
+    if view is None:
+        view = 'log'
+    plot_theory(sas_data, theory, resid, view)
 SasFitness.plot = sasfitness_plot
 
 # Use a named tuple for the sasview parameters
@@ -357,7 +371,7 @@ def make_fitness(state):
                         else np.zeros_like(data.x, dtype='bool'))
         fitdata = FitData1D(x=data.x, y=data.y,
                             dx=data.dx, dy=weight, smearer=smearer)
-        fitdata.set_fit_range(qmin=state.qmin, qmax=state.qmax)
+    fitdata.set_fit_range(qmin=state.qmin, qmax=state.qmax)
     fitdata.sas_data = data
 
     # Don't need initial values since they have been stuffed into the model
