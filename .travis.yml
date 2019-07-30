@@ -10,7 +10,7 @@ matrix:
   - os: osx
     language: generic
     env:
-    - PY=2.7
+    - PY=3.6
 branches:
   only:
   - master
@@ -44,7 +44,7 @@ script:
 - cd ..
 - export WORKSPACE=$(pwd)
 - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
-- git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
+#- git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
 - ls -ltr
 - if [ ! -d "utils" ]; then mkdir utils; fi
 - /bin/sh -xe sasview/build_tools/travis_build.sh
