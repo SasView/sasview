@@ -4,16 +4,13 @@ matrix:
   - os: linux
     env:
     - PY=2.7
-    - NUMPYSPEC=numpy
   - os: linux
     env:
     - PY=3.6
-    - NUMPYSPEC=numpy
   - os: osx
     language: generic
     env:
     - PY=2.7
-    - NUMPYSPEC=numpy
 branches:
   only:
   - master
@@ -31,7 +28,7 @@ addons:
 before_install:
 - echo $TRAVIS_OS_NAME
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  -O miniconda.sh; sudo apt-get update; sudo apt-get install python-pyopencl; elif
+  -O miniconda.sh; elif
   [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
   -O miniconda.sh; fi
 - bash miniconda.sh -b -p $HOME/miniconda
@@ -39,10 +36,10 @@ before_install:
 - hash -r
 - conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
+- conda install --yes python=$PY numpy scipy matplotlib cython pylint wxpython html5lib reportlab pyparsing lxml mako pybind11 sphinx h5py
 install:
-- pip install -r build_tools/requirements.txt
-- pip install matplotlib
+- pip install unittest-xml-reporting xhtml2pdf periodictable bumps
+- pip install pyopencl
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
