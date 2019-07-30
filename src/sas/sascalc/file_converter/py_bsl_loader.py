@@ -108,7 +108,8 @@ class PLoader():
         """
         in_float = self.try_convert(np.float64, in_float)
         bits = in_float.byteswap()
-        print(bits)
+        # print(bits)
+        return bits
     def load_data(self):
         """
         Load the data into a numpy array.
@@ -126,5 +127,11 @@ if(__name__ == "__main__"):
     test.frame = test.n_frames * test.n_pixels
     test.frame = "asdf"
     print(test)
-    test.reverse_float(57.4)
-    test.reverse_float(test.reverse_float(test.reverse_float(57.4)))
+    test_array = np.array([57.4, 16.7])
+    print(test.reverse_float(np.array(test_array)))
+    print(test.reverse_float(test.reverse_float(test_array)))
+    print(test.reverse_float(test.reverse_float(test.reverse_float(test_array))))
+
+##
+## arr & traverse.each.filter (\x -> x != 0).toSpherical.radius %= sin
+##
