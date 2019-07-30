@@ -398,9 +398,14 @@ class BumpsPlugin:
         #print("====\nfit", state)
         problem = state.make_fitproblem()
         #print(problem.show())
-        # TODO: modify bumps so fit pars can be selected from command line
-        if not len(problem.getp()):
-            raise ValueError("No fitted parameters in %r." % filename)
+
+        # CRUFT: older bumps doesn't handle missing fit parameters
+        from distutils.version import StrictVersion
+        from bumps import __version__ as bumps_version
+        if StrictVersion(bumps_version) < StrictVersion("0.7.12"):
+            if not len(problem.getp()):
+                raise ValueError("No fitted parameters in %r." % filename)
+
         return problem
 
     #@staticmethod
