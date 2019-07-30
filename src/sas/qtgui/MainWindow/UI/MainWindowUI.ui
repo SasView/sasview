@@ -154,6 +154,7 @@
     <addaction name="actionWelcomeWidget"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
+    <addaction name="actionReportBug"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -588,6 +589,11 @@
   <action name="actionModel_Marketplace">
    <property name="text">
     <string>Model Marketplace</string>
+   </property>
+  </action>
+  <action name="actionReportBug">
+   <property name="text">
+    <string>Report a bug</string>
    </property>
   </action>
  </widget>

@@ -434,6 +434,16 @@ class GuiManager(object):
         if show_welcome_widget:
             self.actionWelcome()
 
+    def actionReportBug(self):
+        """
+        Send users to the Report Bug page
+        """
+        report_bug_page = "https://github.com/SasView/sasview/issues/new"
+        try:
+            webbrowser.open(report_bug_page)
+        except webbrowser.Error as ex:
+            logging.warning("Cannot display bug reporting page. %s" % ex)
+
     def addCallbacks(self):
         """
         Method defining all signal connections for the gui manager
@@ -537,6 +547,7 @@ class GuiManager(object):
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
+        self._workspace.actionReportBug.triggered.connect(self.actionReportBug)
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
