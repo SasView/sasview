@@ -3,8 +3,8 @@ Python implementation of the P(r) inversion
 Pinvertor is the base class for the Invertor class
 and provides the underlying computations.
 """
-import sas.sascalc.pr.py_invertor as py_invertor
-#import py_invertor
+#import sas.sascalc.pr.py_invertor as py_invertor
+import py_invertor
 import numpy as np
 import logging
 import math
@@ -54,23 +54,23 @@ def check_for_zero(x):
 
 class Pinvertor:
     #q data
-    x = np.empty(0, dtype = np.float)
+    #x = np.empty(0, dtype = np.float64)
     #I(q) data
-    y = np.empty(0, dtype = np.float)
+    #y = np.empty(0, dtype = np.float64)
     #dI(q) data
-    err = np.empty(0, dtype = np.float)
+    #err = np.empty(0, dtype = np.float64)
     #Number of q points
-    npoints = 0
+    #npoints = 0
     #Number of I(q) points
-    ny = 0
+    #ny = 0
     #Number of dI(q) points
-    nerr = 0
+    #nerr = 0
     #Alpha value
-    alpha = 0.0
+    #alpha = np.float64(0)
     #Slit height in units of q [A-1]
-    slit_height = 0.0
+    #slit_height = np.float64(0)
     #Slit width in units of q [A-1]
-    slit_width = 0.0
+    #slit_width = np.float64(0)
 
     def __init__(self):
         #Maximum distance between any two points in the system
@@ -82,6 +82,16 @@ class Pinvertor:
         #Flag for whether or not to evaluate a constant background
         #while inverting
         self.set_est_bck(0)
+
+        self.set_x(np.empty(0, dtype = np.float64))
+        self.set_y(np.empty(0, dtype = np.float64))
+        self.set_err(np.empty(0, dtype = np.float64))
+        self.npoints = 0
+        self.ny = 0
+        self.nerr = 0
+        self.alpha = 0.0
+        self.slit_height = 0.0
+        self.slit_width = 0.0
 
     def residuals(self, pars):
         """
@@ -99,17 +109,24 @@ class Pinvertor:
         nslice = 25
         regterm = py_invertor.reg_term(pars, self.d_max, nslice)
 
-        for i in range(self.npoints):
-            diff = self.y[i] - py_invertor.iq(pars, self.d_max, self.x[i])
-            residual = (diff*diff) / (self.err[i]*self.err[i])
-            residual += self.alpha * regterm
-
-            try:
-                residuals.append(float(residual))
-            except:
-                raise RuntimeError("Pinvertor.residuals: error setting residual.")
+        computed_residuals = Pinvertor._compute_residuals(self.npoints, pars, self.d_max, self.x,
+                                               self.y, self.err, self.alpha, regterm)
+        residuals = computed_residuals.tolist()
 
         return residuals
+
+    @staticmethod
+    @conditional_decorator(njit('f8[:](u8, f8[:], f8, f8[:], f8[:], f8[:], f8, f8)'), USE_NUMBA)
+    def _compute_residuals(npoints, pars, d_max, x, y, err, alpha, regterm):
+        ret = np.zeros(npoints)
+        for i in range(npoints):
+           diff = y[i] - np.float64(py_invertor.iq(pars, d_max, x[i]))
+           residual = np.float64((diff*diff) / (err[i]*err[i]))
+           residual += np.float64(alpha * regterm)
+           ret[i] = residual
+
+        return ret
+
 
     def pr_residuals(self, pars):
         """
@@ -127,13 +144,13 @@ class Pinvertor:
 
         for i in range(self.npoints):
             diff = self.y[i] - py_invertor.pr(pars, self.d_max, self.x[i])
-            residual = (diff*diff) / (self.err[i]*self.err[i])
-            residual += self.alpha * regterm
+            residual = np.float64((diff*diff) / (self.err[i]*self.err[i]))
+            residual += self.float64(self.alpha * regterm)
             residuals.append(float(residual))
 
         return residuals
-
-    def set_x(self, data):
+    @x.setter
+    def x(self, data):
         """
         Function to set the x data.
 
@@ -143,15 +160,14 @@ class Pinvertor:
         data = np.float64(data)
         ndata = len(data)
 
-        self.__dict__['x'] = np.zeros(ndata)
+        #for i in range(ndata):
+        #    self._x[i] = data[i]
+        self._x = np.copy(data)
+        self.npoints = int(ndata)
 
-        for i in range(ndata):
-            self.__dict__['x'][i] = data[i]
-
-        self.__dict__['npoints'] = int(ndata)
         return self.npoints
-
-    def get_x(self, data):
+    @property
+    def x(self, data):
         """
         Function to get the x data.
 
@@ -163,13 +179,15 @@ class Pinvertor:
             logger.error("Pinvertor.get_x: input array too short for data.")
             return None
 
-        for i in range(self.npoints):
-            data[i] = self.x[i]
+        #for i in range(self.npoints):
+        #    data[i] = self._x[i]
+
+        data[:] = self._x[:]
 
         return self.npoints
 
-
-    def set_y(self, data):
+    @y.setter
+    def y(self, data):
         """
         Function to set the y data.
 
@@ -178,33 +196,36 @@ class Pinvertor:
         """
         data = np.float64(data)
         ndata = len(data)
-        self.__dict__['y'] = np.zeros(ndata)
 
-        for i in range(ndata):
-            self.__dict__['y'][i] = data[i]
+        #for i in range(ndata):
+        #    self.__dict__['y'][i] = data[i]
+        self._y = np.copy(data)
 
-        self.__dict__['ny'] = int(ndata)
+        self.ny = int(ndata)
         return self.ny
 
-
-    def get_y(self, data):
+    @property
+    def y(self, data):
         """
         Function to get the y data.
 
         :param data: Array of doubles to place y into.
         :return: npoints - Number of entries found.
         """
-        ndata = len(data)
+        try:
+            ndata = len(data)
+        except:
+            raise RuntimeError("Pinvertor.get_y: input not an array.")
         if (ndata < self.ny):
             logger.error("Pinvertor.get_y: input array too short for data.")
             return None
-
-        for i in range(self.ny):
-            data[i] = self.y[i]
+        #for i in range(self.ny):
+        #    data[i] = self.y[i]
+        data[:] = self._y[:]
 
         return self.npoints
-
-    def set_err(self, data):
+    @err.setter
+    def err(self, data):
         """
         Function to set the err data.
 
@@ -213,16 +234,16 @@ class Pinvertor:
         """
         data = np.float64(data)
         ndata = len(data)
-        self.__dict__['err'] = np.zeros(ndata)
 
-        for i in range(ndata):
-            self.__dict__['err'][i] = data[i]
+        #for i in range(ndata):
+        #    self.__dict__['err'][i] = data[i]
+        self._err = np.copy(data)
+        self._nerr = int(ndata)
 
-        self.__dict__['nerr'] = int(ndata)
-        return self.nerr
+        return self._nerr
 
-
-    def get_err(self, data):
+    @property
+    def err(self, data):
         """
         Function to get the err data.
 
@@ -234,87 +255,93 @@ class Pinvertor:
             logger.error("Pinvertor.get_err: input array too short for data.")
             return None
 
-        for i in range(self.nerr):
-            data[i] = self.err[i]
+        #for i in range(self.nerr):
+        #    data[i] = self.err[i]
+        data[:] = self.err[:]
 
         return self.npoints
 
-    def set_dmax(self, d_max):
+    @d_max.setter
+    def d_max(self, d_max):
         """
         Sets the maximum distance.
 
         :param d_max: float to set d_max to.
         :return: d_max
         """
-        _d_max = np.float64(d_max)
-        self.__dict__['d_max'] = _d_max
+        self._d_max = np.float64(d_max)
 
-        return self.d_max
+        return self._d_max
 
-    def get_dmax(self):
+    @property
+    def d_max(self):
         """
         Gets the maximum distance.
 
         :return: d_max.
         """
-        return self.d_max
+        return self._d_max
 
-    def set_qmin(self, min_q):
+    @q_min.setter
+    def q_min(self, min_q):
         """
         Sets the minimum q.
 
         :param min_q: float to set q_min to.
         :return: q_min.
         """
-        _min_q = np.float64(min_q)
-        self._q_min = _min_q
-        return self._q_min
+        self._qmin = np.float64(min_q)
 
-    def get_qmin(self):
+        return self._qmin
+
+    @property
+    def q_min(self):
         """
         Gets the minimum q.
 
         :return: q_min.
         """
-        return self._q_min
+        return self._qmin
 
-    def set_qmax(self, max_q):
+    @q_max.setter
+    def q_max(self, max_q):
         """
         Sets the maximum q.
 
         :param max_q: float to set q_max to.
         :return: q_max.
         """
-        _max_q = np.float64(max_q)
-        self._q_max = _max_q
-        return self._q_max
+        self._qmax = np.float64(max_q)
+        return self._qmax
 
-    def get_qmax(self):
+    @property
+    def q_max(self):
         """
         Gets the maximum q.
 
         :return: q_max.
         """
-        return self._q_max
+        return self._qmax
 
-    def set_alpha(self, alpha):
+    @alpha.setter
+    def alpha(self, alpha):
         """
         Sets the alpha parameter.
 
         :param alpha_: float to set alpha to.
         :return: alpha.
         """
-        _alpha = np.float64(alpha)
-        self.__dict__['alpha'] = _alpha
-        return self.alpha
+        self._alpha = np.float64(alpha)
+        return self._alpha
 
-    def get_alpha(self):
+    @property
+    def alpha(self):
         """
         Gets the alpha parameter.
 
         :return: alpha.
         """
-        return self.alpha
+        return self._alpha
 
     def set_slit_width(self, slit_width):
         """
@@ -323,9 +350,8 @@ class Pinvertor:
         :param slit_width: float to set slit_width to.
         :return: slit_width.
         """
-        _slit_width = np.float64(slit_width)
-        self.__dict__['slit_width'] = _slit_width
-        return self.slit_width
+        self._slit_width = np.float64(slit_width)
+        return self._slit_width
 
     def get_slit_width(self):
         """
@@ -333,7 +359,7 @@ class Pinvertor:
 
         :return: slit_width.
         """
-        return self.slit_width
+        return self._slit_width
 
     def set_slit_height(self, slit_height):
         """
@@ -342,9 +368,8 @@ class Pinvertor:
         :param slit_height: float to set slit-height to.
         :return: slit_height.
         """
-        _slit_height = np.float64(slit_height)
-        self.__dict__['slit_height'] = _slit_height
-        return self.slit_height
+        self._slit_height = np.float64(slit_height)
+        return self._slit_height
 
     def get_slit_height(self):
         """
@@ -352,7 +377,7 @@ class Pinvertor:
 
         :return: slit_height.
         """
-        return self.slit_height
+        return self._slit_height
 
     def set_est_bck(self, est_bck):
         """
@@ -361,9 +386,8 @@ class Pinvertor:
         :param est_bck: int to set est_bck to.
         :return: est_bck.
         """
-        _est_bck = int(est_bck)
-        self.__dict__['est_bck'] = _est_bck
-        return self.est_bck
+        self._est_bck = int(est_bck)
+        return self._est_bck
 
     def get_est_bck(self):
         """
@@ -371,7 +395,7 @@ class Pinvertor:
 
         :return: est_bck.
         """
-        return self.est_bck
+        return self._est_bck
 
     def get_nx(self):
         """
@@ -379,7 +403,7 @@ class Pinvertor:
 
         :return: npoints.
         """
-        return self.npoints
+        return self._npoints
 
     def get_ny(self):
         """
@@ -387,7 +411,7 @@ class Pinvertor:
 
         :return: ny.
         """
-        return self.ny
+        return self._ny
 
     def get_nerr(self):
         """
@@ -395,7 +419,7 @@ class Pinvertor:
 
         :return: nerr.
         """
-        return self.nerr
+        return self._nerr
 
     def iq(self, pars, q):
         """
@@ -428,7 +452,7 @@ class Pinvertor:
         q = np.float64(q)
 
         npts = 21
-        iq_val = py_invertor.iq_smeared_qvec_njit(pars, q, np.float(self.d_max), self.slit_height,
+        iq_val = py_invertor.iq_smeared_qvec_njit(pars, q, np.float64(self.d_max), self.slit_height,
                                        self.slit_width, npts)
         #If q was a scalar
         if(iq_val.shape[0] == 1):
@@ -524,7 +548,7 @@ class Pinvertor:
 
         oscill = py_invertor.reg_term(pars, self.d_max, nslice)
         norm = py_invertor.int_p2(pars, self.d_max, nslice)
-        ret_val = np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max
+        ret_val = np.float64(np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max)
 
         return ret_val
 
@@ -721,12 +745,12 @@ class Pinvertor:
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
-        Pinvertor._compute_invcov(a, inv_cov, size, nfunc)
-        #for i in range(nfunc):
-        #    for j in range(nfunc):
-        #        inv_cov[i, j] = 0.0
-        #        for k in range(nr + self.npoints):
-        #            inv_cov[i, j] += np.float64(a[k, i]*a[k, j])
+        #Pinvertor._compute_invcov(a, inv_cov, size, nfunc)
+        for i in range(nfunc):
+            for j in range(nfunc):
+                inv_cov[i, j] = 0.0
+                for k in range(nr + self.npoints):
+                    inv_cov[i, j] += np.float64(a[k, i]*a[k, j])
         return 0
 
     @staticmethod
