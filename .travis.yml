@@ -5,6 +5,10 @@ matrix:
     env:
     - PY=2.7
     - NUMPYSPEC=numpy
+  - os: linux
+    env:
+    - PY=3.6
+    - NUMPYSPEC=numpy
   - os: osx
     language: generic
     env:
@@ -17,13 +21,13 @@ addons:
   apt:
     packages:
     - opencl-headers
-    - fglrx
     - libblas-dev
     - libatlas-dev
     - libatlas-base-dev
     - liblapack-dev
     - gfortran
     - libhdf5-serial-dev
+    #- fglrx  # package not available anymore?
 before_install:
 - echo $TRAVIS_OS_NAME
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
