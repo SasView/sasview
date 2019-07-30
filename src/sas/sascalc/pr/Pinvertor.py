@@ -159,6 +159,8 @@ class Pinvertor:
         :return: npoints - Number of entries found.
         """
         ndata = len(data)
+        data = np.float64(data)
+
         if (ndata < self.npoints):
             logger.error("Pinvertor.get_x: input array too short for data.")
             return None
@@ -195,6 +197,8 @@ class Pinvertor:
         :return: npoints - Number of entries found.
         """
         ndata = len(data)
+        data = np.float64(data)
+
         if (ndata < self.ny):
             logger.error("Pinvertor.get_y: input array too short for data.")
             return None
@@ -230,6 +234,8 @@ class Pinvertor:
         :return: npoints - number of entries found
         """
         ndata = len(data)
+        data = np.float64(data)
+
         if (ndata < self.nerr):
             logger.error("Pinvertor.get_err: input array too short for data.")
             return None
@@ -247,7 +253,7 @@ class Pinvertor:
         :return: d_max
         """
         _d_max = np.float64(d_max)
-        self.__dict__['d_max'] = _d_max
+        self.__dict__['d_max'] = np.float64(_d_max)
 
         return self.d_max
 
@@ -257,7 +263,7 @@ class Pinvertor:
 
         :return: d_max.
         """
-        return self.d_max
+        return np.float64(self.d_max)
 
     def set_qmin(self, min_q):
         """
@@ -276,7 +282,7 @@ class Pinvertor:
 
         :return: q_min.
         """
-        return self._q_min
+        return np.float64(self._q_min)
 
     def set_qmax(self, max_q):
         """
@@ -295,7 +301,7 @@ class Pinvertor:
 
         :return: q_max.
         """
-        return self._q_max
+        return np.float64(self._q_max)
 
     def set_alpha(self, alpha):
         """
@@ -314,7 +320,7 @@ class Pinvertor:
 
         :return: alpha.
         """
-        return self.alpha
+        return np.float64(self.alpha)
 
     def set_slit_width(self, slit_width):
         """
@@ -333,7 +339,7 @@ class Pinvertor:
 
         :return: slit_width.
         """
-        return self.slit_width
+        return np.float64(self.slit_width)
 
     def set_slit_height(self, slit_height):
         """
@@ -352,7 +358,7 @@ class Pinvertor:
 
         :return: slit_height.
         """
-        return self.slit_height
+        return np.float64(self.slit_height)
 
     def set_est_bck(self, est_bck):
         """
@@ -371,7 +377,7 @@ class Pinvertor:
 
         :return: est_bck.
         """
-        return self.est_bck
+        return np.float64(self.est_bck)
 
     def get_nx(self):
         """
@@ -428,8 +434,8 @@ class Pinvertor:
         q = np.float64(q)
 
         npts = 21
-        iq_val = py_invertor.iq_smeared_qvec_njit(pars, q, np.float(self.d_max), self.slit_height,
-                                       self.slit_width, npts)
+        iq_val = np.float64(py_invertor.iq_smeared_qvec_njit(pars, q, np.float(self.d_max), self.slit_height,
+                                       self.slit_width, npts))
         #If q was a scalar
         if(iq_val.shape[0] == 1):
             return np.asscalar(iq_val)
@@ -524,7 +530,7 @@ class Pinvertor:
 
         oscill = py_invertor.reg_term(pars, self.d_max, nslice)
         norm = py_invertor.int_p2(pars, self.d_max, nslice)
-        ret_val = np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max
+        ret_val = np.float64(np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max)
 
         return ret_val
 
@@ -598,7 +604,7 @@ class Pinvertor:
         """
         nslice = 101
         pars = np.float64(pars)
-        val = 4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice)
+        val = np.float64(4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice))
 
         return val
 

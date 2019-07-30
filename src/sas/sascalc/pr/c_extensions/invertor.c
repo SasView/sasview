@@ -389,9 +389,24 @@ void iq_smeared_scalar_test() {
 
 }
 
-
+void individual_test() {
+	double d_max = 2000;
+	double q = 0.5;
+	int n = 100;
+	double width = 0.01;
+	double height = 3;
+	int npts = 30;
+	
+	//(double d_max, int n, double height, double width, double q, int npts
+	double result = ortho_transformed_smeared(d_max, n, height, width, q, npts);
+	printf("Ortho_transformed: %.16f", result);
+	
+}
 int main(void) {
-  iq_smeared_scalar_test();
-  iq_smeared_test();
+  //iq_smeared_scalar_test();
+  //iq_smeared_test();
+  individual_test();
+  //printf("%.16f", sin(0.5 * 2000.0));
+  //sin(q*d_max)
   return 0;
 }

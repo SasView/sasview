@@ -16,7 +16,7 @@ import time
 
 import timeit
 from functools import reduce
-pi = 3.1416 #to pass tests
+pi = np.float64(3.1416) #to pass tests
 try:
     from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
     USE_NUMBA = True
@@ -70,7 +70,54 @@ def ortho_transformed(d_max, n, q):
     \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
     and time was the same as @njit()
     """
-    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * math.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
+    divisor = (pi*n)**2 - (q*d_max)**2
+
+    part1 = 8.0*(pi)**2/q * d_max * n
+
+    part2 = (-1.0)**(n+1) * np.sin(q*d_max)
+
+    result = part1 * part2 / divisor
+
+    return result
+    #qd = q * (d_max/pi)
+    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
+
+@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
+def ortho_transformed_type_checks(d_max, n, q):
+    """
+    Fourier transform of the nth orthagonal function
+
+    With vectorize time was
+    \@vectorize() ~= 1.4e-05
+    \@njit() ~= 3e-06
+    \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
+    and time was the same as @njit()
+    """
+    divisor = (pi*n)**2 - (q*d_max)**2
+
+    part1 = 8.0*(pi)**2/q * d_max * n
+
+    part2 = (-1.0)**(n+1) * np.sin(q*d_max)
+
+    result = part1 * part2 / divisor
+
+    print("pi * n type:", type(pi * n))
+    print("q * d_max type: ", type(q * d_max))
+    print("**2 type: ", type((q * d_max)**2))
+    print("Type divisor: ", type((pi*n)**2 - (q*d_max)**2))
+    print("\nType (pi)**2", type(pi**2))
+    print("\nType (pi)**2 / q", type(pi**2 / q))
+    print("\ntype 8.0 * (pi)**2 / q: ", type(8.0*(pi)**2/q))
+    print("type d_max * n: ", type(d_max * n))
+    print("Part1 type: ", type(8.0*(pi)**2/q * d_max * n))
+
+    print("\ntype -1**(n + 1): ", type(-1.0**(n + 1)))
+    print("type sin", type(np.sin(q * d_max)))
+    print("Part2 type: ", type((-1.0)**(n+1) * np.sin(q*d_max)))
+
+    print("\n Type Full Calculation: ", type(result))
+
+    return result
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
@@ -88,16 +135,66 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     """
     y = 0
     z = 0
-    sum = 0
+    sum = np.float64(0.0)
 
     i = 0
     j = 0
     n_height = 0
     n_width = 0
     count_w = 0
-    fnpts = 0
-    sum = 0.0
-    fnpts = float(npts-1.0)
+    fnpts = 0.0
+    sum = np.float64(0.0)
+    fnpts = np.float64(npts-1.0)
+    if(height > 0):
+        n_height = npts
+    else:
+        n_height = 1
+    if(width > 0):
+        n_width = npts
+    else:
+        n_width = 1
+
+    count_w = 0.0
+
+    for j in range(n_height):
+        if(height > 0):
+            z = height/ fnpts * float(j)
+        else:
+            z = 0.0
+        for i in range(n_width):
+            if(width > 0):
+                y = -width/2.0+width/fnpts*float(i)
+            else:
+                y = 0.0
+            if(((q - y) * (q - y) + z*z) > 0.0):
+                count_w += 1.0
+                sum += ortho_transformed(d_max, n, np.sqrt((q-y) * (q-y) + z*z))
+    return np.float64(sum / count_w)
+
+@conditional_decorator(njit('f8(f8, u8, f8, f8, f8, u8)'), USE_NUMBA)
+def ortho_transformed_smeared_alt(d_max, n, height, width, q, npts):
+    """
+    Slit-smeared Fourier transform of the nth orthagonal function.
+    Smearing follows Lake, Acta Cryst. (1967) 23, 191.
+
+    \@njit() - 5 - time roughly 4.5e-05
+    \@njit() - npts 1000 - 0.031
+    \@njit(parallel = True) - no transformation possible same time.
+    \@vectorize([float64(float64, float64, float64, float64, float64, float64)])  npts = 5 ~= 1.6e-05
+    npts = 1000 ~= 0.02
+    """
+    y = 0
+    z = 0
+    sum = np.float64(0.0)
+
+    i = 0
+    j = 0
+    n_height = 0
+    n_width = 0
+    count_w = 0
+    fnpts = 0.0
+    sum = np.float64(0.0)
+    fnpts = np.float64(npts-1.0)
     if(height > 0):
         n_height = npts
     else:
@@ -110,19 +207,19 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     count_w = 0.0
 
     #Pre compute dz, y0 and dy
-    dz = height/(npts-1)
-    y0 = -0.5*width
+    dz = np.float64(height/(npts-1))
+    y0 = np.float64(np.float64(-0.5)*width)
     dy = width/(npts-1)
 
     for j in range(0, n_height):
-        zsq = (j * dz)**2
+        zsq = np.float64((np.float64(j) * dz)**2)
 
         for i in range(0, n_width):
-            y = y0 + i*dy
-            qsq = (q - y)**2 + zsq
+            y = np.float64(y0 + np.float64(i)*dy)
+            qsq = np.float64((q - y)**2 + zsq)
             count_w += qsq > 0
-            sum += ortho_transformed(d_max, n, np.sqrt(qsq))
-    return sum / count_w
+            sum += np.float64(ortho_transformed(d_max, n, np.sqrt(qsq)))
+    return np.float64(sum / count_w)
 
 @conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
 def ortho_derived(d_max, n, r):
@@ -144,7 +241,7 @@ def iq(pars, d_max, q):
     using default python ~= 18
     """
     #q = np.asanyarray(q)
-    sum = 0.0
+    sum = np.float64(0.0)
     for i in range(len(pars)):
         #for j in prange(q.shape[0]):
         sum += pars[i] * ortho_transformed(d_max, i + 1, q)
@@ -169,10 +266,10 @@ def iq_smeared(pars, d_max, height, width, q, npts):
     - parallel - 23.13, over 3x speedup.
 
     """
-    sum = 0.0
+    sum = np.float64(0.0)
 
     for i in range(len(pars)):
-        sum += pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts)
+        sum += np.float64(pars[i] * ortho_transformed_smeared(d_max, i + 1, height, width, q, npts))
     return sum
 
 @conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
@@ -857,11 +954,10 @@ from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
 import numpy as np
-#q = np.linspace(0.001, 0.5, 301)
-q = 0.5
+q = np.float64(0.5)
 p = np.arange(40, dtype = np.float64)
-d_max = 2000
-width, height = 0.01, 3
+d_max = np.float64(2000.0)
+width, height = np.float64(0.01), np.float64(3.0)
 npts = 30'''
     code = '''iq_smeared(p, d_max, height, width, q, npts)'''
     codeP = '''iq_smeared(p, d_max, height, width, q, npts)'''
@@ -889,8 +985,21 @@ npts = 30'''
         print("*Different Results*")
         print("Difference: ", test_result - test_result_p)
 
+def test_individual():
+    d_max = (2000.0)
+    n = 100
+    q = (0.5)
+    width, height = 0.01, 3.0
+    npts = 30
+    #result = ortho_transformed_type_checks(d_max, n, q)
+    #print("Ortho_transformed: %.16f" % result)
+
+    result = ortho_transformed_smeared(d_max, n, height, width, q, npts)
+    print("Ortho_transformed_smeared result: %.16f" % result)
 if(__name__ == "__main__"):
-    demo_iq_smeared_scalar()
+    test_individual()
+    #print('%.16f' % (np.sin(0.5 * 2000.0)))
+    #demo_iq_smeared_scalar()
     #demo_iq_smeared_qvec()
     #demo_conditional_dec()
     #q = np.linspace(0.1, 0.5, 301, dtype = np.float64)
