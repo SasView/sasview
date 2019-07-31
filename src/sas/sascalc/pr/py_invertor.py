@@ -57,7 +57,7 @@ def ortho(d_max, n, r):
     Orthogonal Functions:
     B(r) = 2r sin(pi*nr/d)
     """
-    return 2.0 * r * np.sin(pi*n*r/d_max)
+    return (2.0 * r) * np.sin(pi*(n*r)/d_max)
 
 @conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
 def ortho_transformed(d_max, n, q):
@@ -282,9 +282,9 @@ def pr_err(pars, err, d_max, r):
     changed to instead of return value by reference, returns
     tuple of (pr_value, pr_value_err)
     """
-    sum = 0.0
-    sum_err = 0.0
-    func_value = 0
+    sum = np.float64(0.0)
+    sum_err = np.float64(0.0)
+    func_value = np.float64(0)
     n_c = pars.shape[0]
 
     for i in range(n_c):
@@ -292,9 +292,9 @@ def pr_err(pars, err, d_max, r):
         sum += pars[i] * func_value
         sum_err += err[i, i] * func_value * func_value
 
-    pr_value = sum
+    pr_value = np.float64(sum)
     if(sum_err > 0):
-        pr_value_err = np.sqrt(sum_err)
+        pr_value_err = np.float64(np.sqrt(sum_err))
     else:
         pr_value_err = sum
 
@@ -983,18 +983,23 @@ def test_individual():
     q = (0.5)
     width, height = 0.01, 3.0
     npts = 30
+    r = np.arange(0.0, d_max, d_max / 100, dtype = np.float64)
     p = np.arange(30, dtype = np.float64)
     err = np.ones((30, 30), dtype = np.float64)
-    r = 0.5
-    result = ortho_transformed(d_max, n, q)
-    print("Ortho_transformed: %.60f" % result)
+    #result = ortho_transformed(d_max, n, q)
+    #print("Ortho_transformed: %.60f" % result)
     #pars, d_max, height, width, q, npts
     #result = iq_smeared(p, d_max, height, width, q, npts)
     #print("iq_smeared result: %.17f" % result)
     #pars, err, d_max, r
-    #result = pr_err(p, err, d_max, r)
-    #print("pr 1: %.17f" % result[0])
-    #print("pr 2: %.17f" % result[1])
+    print(r)
+    for i in range(len(r)):
+        result = pr_err(p, err, d_max, r[i])
+        #print("Pr: %.60f" % result)
+        print("pr 1: %.17f" % result[0])
+        print("pr 2: %.17f" % result[1])
+
+    #test pr_err
 
 if(__name__ == "__main__"):
     test_individual()

@@ -467,10 +467,11 @@ class Pinvertor:
 
         :return: (P(r), dP(r))
         """
-        pars = np.atleast_1d(pars)
-        pars_err = np.atleast_2d(pars_err)
-        pars = np.float64(pars)
-        pars_err = np.float64(pars_err)
+
+        #pars = np.atleast_1d(pars)
+        #pars_err = np.atleast_2d(pars_err)
+        #pars = np.float64(pars)
+        #pars_err = np.float64(pars_err)
         r = np.float64(r)
 
         pr_val = 0.0
@@ -485,7 +486,7 @@ class Pinvertor:
         else:
             result = py_invertor.pr_err(pars, pars_err, self.d_max, r)
 
-        return (result[0], result[1])
+        return (np.float64(result[0]), np.float64(result[1]))
 
     def is_valid(self):
         """
