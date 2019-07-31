@@ -70,15 +70,7 @@ def ortho_transformed(d_max, n, q):
     \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
     and time was the same as @njit()
     """
-    divisor = (pi*n)**2 - (q*d_max)**2
-
-    part1 = 8.0*(pi)**2/q * d_max * n
-
-    part2 = (-1.0)**(n+1) * np.sin(q*d_max)
-
-    result = part1 * part2 / divisor
-
-    return result
+    return 8.0* math.pow(pi, 2.0)/q * d_max * n * math.pow(-1.0, n+1) * np.sin(q * d_max) / (math.pow(pi * n, 2.0) - math.pow(q * d_max, 2.0))
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
@@ -154,22 +146,22 @@ def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     else:
         n_width = 1
 
-    count_w = 0.0
-
+    count_w = np.float64(0.0)
+    operations = 0
     for j in range(n_height):
         if(height > 0):
-            z = height/ fnpts * float(j)
+            z = height/fnpts * np.float64(j)
         else:
             z = 0.0
         for i in range(n_width):
             if(width > 0):
-                y = -width/2.0+width/fnpts*float(i)
+                y = -width/2.0+width/fnpts*np.float64(i)
             else:
                 y = 0.0
             if(((q - y) * (q - y) + z*z) > 0.0):
                 count_w += 1.0
                 sum += ortho_transformed(d_max, n, np.sqrt((q-y) * (q-y) + z*z))
-    return np.float64(sum / count_w)
+    return np.true_divide(sum, count_w)
 
 @conditional_decorator(njit('f8(f8, u8, f8, f8, f8, u8)'), USE_NUMBA)
 def ortho_transformed_smeared_alt(d_max, n, height, width, q, npts):
@@ -991,11 +983,19 @@ def test_individual():
     q = (0.5)
     width, height = 0.01, 3.0
     npts = 30
-    #result = ortho_transformed_type_checks(d_max, n, q)
-    #print("Ortho_transformed: %.16f" % result)
+    p = np.arange(30, dtype = np.float64)
+    err = np.ones((30, 30), dtype = np.float64)
+    r = 0.5
+    result = ortho_transformed(d_max, n, q)
+    print("Ortho_transformed: %.60f" % result)
+    #pars, d_max, height, width, q, npts
+    #result = iq_smeared(p, d_max, height, width, q, npts)
+    #print("iq_smeared result: %.17f" % result)
+    #pars, err, d_max, r
+    #result = pr_err(p, err, d_max, r)
+    #print("pr 1: %.17f" % result[0])
+    #print("pr 2: %.17f" % result[1])
 
-    result = ortho_transformed_smeared(d_max, n, height, width, q, npts)
-    print("Ortho_transformed_smeared result: %.16f" % result)
 if(__name__ == "__main__"):
     test_individual()
     #print('%.16f' % (np.sin(0.5 * 2000.0)))

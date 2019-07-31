@@ -772,3 +772,15 @@ class Invertor(Pinvertor):
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
             raise RuntimeError(msg)
+
+if(__name__ == "__main__"):
+    test = Invertor()
+     d_max = (2000.0)
+    n = 100
+    q = (0.5)
+    width, height = 0.01, 3.0
+    npts = 30
+    p = np.arange(30, dtype = np.float64)
+    err = np.ones((30, 30), dtype = np.float64)
+    r = 0.5
+    result = ortho_transformed(d_max, n, q)
