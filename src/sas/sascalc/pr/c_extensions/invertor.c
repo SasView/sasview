@@ -396,11 +396,38 @@ void individual_test() {
 	double width = 0.01;
 	double height = 3;
 	int npts = 30;
-	
+	int n_p = 30;
+	double* p = malloc(n_p * sizeof(double));
+	int i = 0;
+	double r = 0.5;
+	for(i = 0; i < n_p; i++) {
+	  p[i] = i;
+	}
+
+	int n_err = 30;
+	double* err = malloc(n_err * n_err * sizeof(double));
+	for(i = 0; i < n_err * n_err; i++) {
+		err[i] = 1.0;
+	}
 	//(double d_max, int n, double height, double width, double q, int npts
-	double result = ortho_transformed_smeared(d_max, n, height, width, q, npts);
-	printf("Ortho_transformed: %.16f", result);
-	
+	//double *pars, double d_max, int n_c, double q
+	//double result = iq(p, d_max, n_p, q);
+	double test = ortho_transformed(d_max, n, q);
+	printf("ortho_transformed result: %.60f", test);
+	//double* result1;
+	//double* result2;
+	//pr_err - double *pars, double *err, double d_max, int n_c, double r, double *pr_value, double *pr_value_err
+	//pr_err(p, err, d_max, n_p, r, result1, result2);
+
+	//printf("iq result: %.17f", *result1);
+	//printf("iq result2: %.17f", *result2);
+	//free(result1);
+	//free(result2);
+	free(p);
+	p = NULL;
+	free(err);
+	err = NULL;
+
 }
 int main(void) {
   //iq_smeared_scalar_test();
