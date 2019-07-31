@@ -26,9 +26,9 @@ import math
 import numpy
 
 
-from sas.sascalc.pr.core.pr_inversion import Cinvertor #no longer used
+#from sas.sascalc.pr.core.pr_inversion import Cinvertor #no longer used
 from sas.sascalc.pr.Pinvertor import Pinvertor
-
+#from Pinvertor import Pinvertor
 logger = logging.getLogger(__name__)
 
 def help():
@@ -775,12 +775,9 @@ class Invertor(Pinvertor):
 
 if(__name__ == "__main__"):
     test = Invertor()
-     d_max = (2000.0)
+    d_max = (2000.0)
     n = 100
-    q = (0.5)
-    width, height = 0.01, 3.0
-    npts = 30
-    p = np.arange(30, dtype = np.float64)
-    err = np.ones((30, 30), dtype = np.float64)
-    r = 0.5
-    result = ortho_transformed(d_max, n, q)
+    q = 0.5
+    result = test.basefunc_ft(d_max, n, q)
+
+    print("basefunc_ft: %.60f" % result)

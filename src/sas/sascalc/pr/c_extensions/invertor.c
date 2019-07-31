@@ -399,9 +399,13 @@ void individual_test() {
 	int n_p = 30;
 	double* p = malloc(n_p * sizeof(double));
 	int i = 0;
-	double r = 0.5;
+	int n_r = 100;
+	double* r = malloc(n_r * sizeof(double));
+	for(i = 0; i < n_r; i++) {
+		r[i] = 20 * i;
+	}
 	for(i = 0; i < n_p; i++) {
-	  p[i] = i;
+	    p[i] = i;
 	}
 
 	int n_err = 30;
@@ -409,11 +413,26 @@ void individual_test() {
 	for(i = 0; i < n_err * n_err; i++) {
 		err[i] = 1.0;
 	}
+
+	//double *pars, double d_max, int n_c, double r
+	for(i = 0; i < n_r; i++) {
+		double* result1 = malloc(sizeof(double));
+		double* result2 = malloc(sizeof(double));
+		pr_err(p, err, d_max, n_p, r[i], result1, result2);
+		printf("\npr 1: %.17f", *result1);
+		printf("\npr 2: %.17f", *result2);
+
+		//void pr_err(double *pars, double *err, double d_max, int n_c,
+		//double r, double *pr_value, double *pr_value_err
+
+		free(result1);
+		free(result2);
+	}
 	//(double d_max, int n, double height, double width, double q, int npts
 	//double *pars, double d_max, int n_c, double q
 	//double result = iq(p, d_max, n_p, q);
-	double test = ortho_transformed(d_max, n, q);
-	printf("ortho_transformed result: %.60f", test);
+	//double test = ortho_transformed(d_max, n, q);
+	//printf("ortho_transformed result: %.60f", test);
 	//double* result1;
 	//double* result2;
 	//pr_err - double *pars, double *err, double d_max, int n_c, double r, double *pr_value, double *pr_value_err
@@ -421,8 +440,7 @@ void individual_test() {
 
 	//printf("iq result: %.17f", *result1);
 	//printf("iq result2: %.17f", *result2);
-	//free(result1);
-	//free(result2);
+	free(r);
 	free(p);
 	p = NULL;
 	free(err);
