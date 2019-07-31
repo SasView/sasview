@@ -30,10 +30,10 @@ def _legendResize(width, parent):
     screen_width = parent.parent.manager.parent._parent.screen_width
     screen_height = parent.parent.manager.parent._parent.screen_height
     screen_factor = screen_width*screen_height
-    #Magic numbers 2e-8 and 4e-5 come from nomralization to previous factor 4
-    factor = 4e-8 * np.power(screen_factor, 1.1)
-    denomintor = 1e-5 * np.power(screen_factor, 1.1)
-    if sys.platform == 'darwin':
+    if sys.platform == 'win32':
+        factor = 4
+        denomintor = 100
+    else:
         factor = 2e-8 * np.power(screen_factor, 1.1)
         denomintor = 2e-5 * np.power(screen_factor, 1.1)
     return (width/denomintor)+factor
