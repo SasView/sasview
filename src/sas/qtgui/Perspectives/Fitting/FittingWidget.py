@@ -701,10 +701,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             menu.addAction(self.actionRemoveConstraint)
             if num_rows == 1 and has_real_constraints:
                 menu.addAction(self.actionEditConstraint)
-            #if num_rows == 1:
-            #    menu.addAction(self.actionEditConstraint)
         else:
-            menu.addAction(self.actionConstrain)
+            if model == self._model_model:
+                menu.addAction(self.actionConstrain)
             if num_rows == 2:
                 menu.addAction(self.actionMutualMultiConstrain)
 
@@ -712,21 +711,25 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionConstrain.triggered.connect(self.addSimpleConstraint)
         self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
         self.actionEditConstraint.triggered.connect(self.editConstraint)
-        self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
+        self.actionMutualMultiConstrain.triggered.connect(lambda: self.showMultiConstraint(current_list=current_list))
         self.actionSelect.triggered.connect(self.selectParameters)
         self.actionDeselect.triggered.connect(self.deselectParameters)
         return menu
 
-    def showMultiConstraint(self):
+    def showMultiConstraint(self, current_list=None):
         """
         Show the constraint widget and receive the expression
         """
-        selected_rows = self.lstParams.selectionModel().selectedRows()
+        if current_list is None:
+            current_list = self.lstParams
+        model = current_list.model()
+
+        selected_rows = current_list.selectionModel().selectedRows()
         # There have to be only two rows selected. The caller takes care of that
         # but let's check the correctness.
         assert len(selected_rows) == 2
 
-        params_list = [s.data() for s in selected_rows]
+        params_list = [s.data(role=QtCore.Qt.UserRole) for s in selected_rows]
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
         # Check if any of the parameters are polydisperse
@@ -760,7 +763,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint.validate = mc_widget.validate
 
         # Create a new item and add the Constraint object as a child
-        self.addConstraintToRow(constraint=constraint, row=row)
+        self.addConstraintToRow(constraint=constraint, row=row, model=model)
 
     def getModelFromName(self, name):
         """
@@ -1023,7 +1026,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Remove constraint item
             item.removeRow(0)
             self.constraintAddedSignal.emit([row])
-            self.modifyViewOnRow(row)
+            self.modifyViewOnRow(row, model=model)
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
 
@@ -1047,26 +1050,32 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Returns a list of all parameter names defined on the current model
         """
         all_params = self.kernel_module._model_info.parameters.kernel_parameters
-        all_param_names = [param.name for param in all_params]
-        # Assure scale and background are always included
-        if 'scale' not in all_param_names:
-            all_param_names.append('scale')
-        if 'background' not in all_param_names:
-            all_param_names.append('background')
-        return all_param_names
+        all_params = list(self.kernel_module.details.keys())
+
+        #all_param_names = [param.name for param in all_params]
+        ## Assure scale and background are always included
+        #if 'scale' not in all_param_names:
+        #    all_param_names.append('scale')
+        #if 'background' not in all_param_names:
+        #    all_param_names.append('background')
+        return all_params
 
     def paramHasConstraint(self, param=None, model=None):
         """
-        Finds out if the given parameter in the main model has a constraint child
+        Finds out if the given parameter in all the models has a constraint child
         """
         if param is None: return False
         if param not in self.allParamNames(): return False
-        if model is None:
-            model = self._model_model
+        models = []
+        if model is not None:
+            models.append(model)
+        else:
+            models = [m for m in self.model_dict.values()]
 
-        for row in range(model.rowCount()):
-            if model.item(row,0).text() != param: continue
-            return self.rowHasConstraint(row, model=model)
+        for model in models:
+            for row in range(model.rowCount()):
+                if model.item(row,0).data(role=QtCore.Qt.UserRole) != param: continue
+                return self.rowHasConstraint(row, model=model)
 
         # nothing found
         return False
@@ -1180,16 +1189,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model is None:
             model = self._model_model
         params = []
-        for model in self.model_dict.values():
-            param_number = model.rowCount()
-            #for param in range(param_number):
-            #    if not self.rowHasActiveComplexConstraint(param, model):
-            #        continue
-            #    if model 
-            #params += [(model.item(s, 0).text(),
-            params += [(model.item(s, 0).data(role=QtCore.Qt.UserRole),
-                        model.item(s, 1).child(0).data().func)
-                        for s in range(param_number) if self.rowHasActiveComplexConstraint(s, model)]
+        param_number = model.rowCount()
+        params += [(model.item(s, 0).data(role=QtCore.Qt.UserRole),
+                    model.item(s, 1).child(0).data().func)
+                    for s in range(param_number) if self.rowHasActiveComplexConstraint(s, model)]
         return params
 
     def getConstraintObjectsForAllModels(self):
