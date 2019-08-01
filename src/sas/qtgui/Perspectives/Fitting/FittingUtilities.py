@@ -880,12 +880,17 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
     """
     Simple lookup for polydispersity for the given param name
     """
+    # First, check if this is a polydisperse parameter directly
+    if '.width' in param_name:
+        return True
+
     parameters = kernel_params.form_volume_parameters
     if is2D:
         parameters += kernel_params.orientation_parameters
-    has_poly = False
+
+    # Next, check if the parameter is included in para.polydisperse
     for param in parameters:
         if param.name==param_name and param.polydisperse:
-            has_poly = True
-            break
-    return has_poly
+            return True
+
+    return False

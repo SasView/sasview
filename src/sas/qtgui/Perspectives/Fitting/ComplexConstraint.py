@@ -84,7 +84,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
         self.setupParamWidgets()
 
-
         self.setupMenu()
 
     def setupMenu(self):
