@@ -447,10 +447,27 @@ void individual_test() {
 	err = NULL;
 
 }
+void npeaks_test() {
+	double* pars = malloc(11 * sizeof(float));
+	pars[0] = 8.14492232e-06;
+	pars[1] = 1.73442959e-05;
+	pars[2] = 1.65836300e-05;
+	pars[3] = 1.37910646e-05;
+	pars[4] = 7.71446876e-06;
+	pars[5] = 5.28298839e-06;
+	pars[6] = 3.64910011e-06;
+	pars[7] = 2.70826153e-06;
+	pars[8] = -1.30657479e-06;
+	pars[9] = 4.09674501e-06;
+	pars[10] = 0.00000000e+00;
+	double d_max = 100;
+	printf("%d", npeaks(pars, d_max, 11, 100));
+}
 int main(void) {
+  npeaks_test();
   //iq_smeared_scalar_test();
   //iq_smeared_test();
-  individual_test();
+  //individual_test();
   //printf("%.16f", sin(0.5 * 2000.0));
   //sin(q*d_max)
   return 0;

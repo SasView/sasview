@@ -31,25 +31,7 @@ def conditional_decorator(dec, condition):
         return dec(func)
     return decorator
 
-@conditional_decorator(njit('u8(f8, f8, f8)'), USE_NUMBA)
-def accept_q(q, q_min, q_max):
-    """
-    Check whether a q-value is within acceptable limits.
 
-    :return: 1 if accepted, 0 if rejected.
-    """
-    if(q_min > 0 and q < q_min):
-        return 0
-    if(q_max > 0 and q > q_max):
-        return 0
-    return 1
-
-@conditional_decorator(njit('b1(f8[:])'), USE_NUMBA)
-def check_for_zero(x):
-    for i in range(len(x)):
-        if(x[i] == 0):
-            return True
-    return False
 
 
 class Pinvertor:
@@ -65,8 +47,6 @@ class Pinvertor:
     ny = 0
     #Number of dI(q) points
     nerr = 0
-    #Alpha value
-    alpha = 0.0
     #Slit height in units of q [A-1]
     slit_height = 0.0
     #Slit width in units of q [A-1]
@@ -82,6 +62,7 @@ class Pinvertor:
         #Flag for whether or not to evaluate a constant background
         #while inverting
         self.set_est_bck(0)
+        self.set_alpha(0.0)
 
     def residuals(self, pars):
         """
@@ -252,10 +233,9 @@ class Pinvertor:
         :param d_max: float to set d_max to.
         :return: d_max
         """
-        _d_max = np.float64(d_max)
-        self.__dict__['d_max'] = np.float64(_d_max)
+        self._d_max = np.float64(d_max)
 
-        return self.d_max
+        return self._d_max
 
     def get_dmax(self):
         """
@@ -263,7 +243,7 @@ class Pinvertor:
 
         :return: d_max.
         """
-        return np.float64(self.d_max)
+        return self._d_max
 
     def set_qmin(self, min_q):
         """
@@ -310,9 +290,8 @@ class Pinvertor:
         :param alpha_: float to set alpha to.
         :return: alpha.
         """
-        _alpha = np.float64(alpha)
-        self.__dict__['alpha'] = _alpha
-        return self.alpha
+        self._alpha = np.float64(alpha)
+        return self._alpha
 
     def get_alpha(self):
         """
@@ -320,7 +299,7 @@ class Pinvertor:
 
         :return: alpha.
         """
-        return np.float64(self.alpha)
+        return np.float64(self._alpha)
 
     def set_slit_width(self, slit_width):
         """
@@ -472,7 +451,6 @@ class Pinvertor:
         #pars_err = np.atleast_2d(pars_err)
         #pars = np.float64(pars)
         #pars_err = np.float64(pars_err)
-        r = np.float64(r)
 
         pr_val = 0.0
         pr_err_val = 0.0
@@ -485,8 +463,7 @@ class Pinvertor:
             result[1] = pr_err_value
         else:
             result = py_invertor.pr_err(pars, pars_err, self.d_max, r)
-
-        return (np.float64(result[0]), np.float64(result[1]))
+        return ((result[0]), (result[1]))
 
     def is_valid(self):
         """
@@ -545,7 +522,6 @@ class Pinvertor:
         """
         nslice = 100
         pars = np.float64(pars)
-        pars = np.atleast_1d(pars)
         count = py_invertor.npeaks(pars, self.d_max, nslice)
 
         return count
@@ -609,52 +585,23 @@ class Pinvertor:
 
         return val
 
-    @staticmethod
-    @conditional_decorator(njit('f8[:,:](f8[:,:], u8, u8, u8, f8, f8, f8, u8, f8[:], f8[:], u8, f8, f8, f8, f8)'), USE_NUMBA)
-    def _compute_a(a, nfunc, nr, offset, pi, sqrt_alpha, d_max, npoints, x, err, est_bck, slit_height, slit_width, q_min, q_max):
-        smeared = False
-        if(slit_width > 0 or slit_height > 0):
-            smeared = True
 
-        for j in range(nfunc):
-            npts = 21
-            if(smeared):
-                precompute_ortho_smeared = py_invertor.ortho_transformed_smeared_qvec_njit(x, d_max, j + offset,
-                                                                                slit_height, slit_width, npts)/err
-            else:
-                precompute_ortho = py_invertor.ortho_transformed_qvec_njit(x, d_max, j + offset) / err
+    def accept_q(self, q):
+        """
+        Check whether a q-value is within acceptable limits.
 
-            for i in range(npoints):
-                if(accept_q(x[i], q_min, q_max) == 1):
-                    if(est_bck == 1 and j == 0):
-                        a[i, j] = (1.0/err[i])
-                    else:
-                        if(smeared):
-                            a[i, j] = precompute_ortho_smeared[i]
-                        else:
-                            a[i, j] = precompute_ortho[i]
+        :return: 1 if accepted, 0 if rejected.
+        """
+        q_min = self.get_qmin()
+        q_max = self.get_qmax()
+        if(q_min > 0 and q < q_min):
+            return False
+        if(q_max > 0 and q > q_max):
+            return False
+        return True
 
-            for i_r in range(nr):
-                index_i = i_r + npoints
-                index_j = j
-                if(est_bck == 1 and j == 0):
-                    a[index_i, index_j] = 0.0
-                else:
-                    r = d_max / nr * i_r
-                    tmp = np.float64(pi * (j+offset) / d_max)
-                    t1 = np.float64(sqrt_alpha * 1.0/nr * d_max * 2.0)
-                    t2 = np.float64((2.0 * pi * (j+offset)/d_max * np.cos(pi * (j+offset)*r/d_max)
-                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/d_max)))
-                    a[index_i, index_j] =  np.float64(t1 * t2)
-        return a
-
-    @staticmethod
-    @conditional_decorator(njit('f8[:](f8[:], f8[:], f8[:], f8[:], u8, f8, f8)'), USE_NUMBA)
-    def _compute_b(b, x, y, err, npoints, q_min, q_max):
-        for i in range(npoints):
-            if(accept_q(x[i], q_min, q_max)):
-                b[i] = np.float64(y[i] / err[i])
-        return b
+    def check_for_zero(self, x):
+        return (0.0 in x)
 
     def _get_matrix(self, nfunc, nr, a_obj, b_obj):
         """
@@ -669,8 +616,8 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
-        a_obj = np.float64(a_obj)
-        b_obj = np.float64(b_obj)
+        a = np.float64(a_obj)
+        b = np.float64(b_obj)
 
         if not (b_obj.shape[0] >= nfunc):
             raise RuntimeError("Pinvertor: b vector too small.")
@@ -678,8 +625,6 @@ class Pinvertor:
         if not (a_obj.size >= nfunc*(nr + self.npoints)):
             raise RuntimeError("Pinvertor: a array too small.")
 
-        a = np.float64(a_obj)
-        b = np.float64(b_obj)
 
         sqrt_alpha = np.sqrt(self.alpha)
         pi = np.arccos(-1.0)
@@ -692,12 +637,50 @@ class Pinvertor:
         #            return True
         #    return False
 
-        if(check_for_zero(self.err)):
+        if(self.check_for_zero(self.err)):
             raise RuntimeError("Pinvertor.get_matrix: Some I(Q) points have no error.")
         #d_max, npoints, x, err, est_bck, slit_height, slit_width):
-        a = Pinvertor._compute_a(a, nfunc, nr, offset, pi, sqrt_alpha, self.get_dmax(), self.get_nx(), self.x, self.err, self.est_bck, self.slit_height, self.slit_width, self.get_qmin(), self.get_qmax())
-        b = Pinvertor._compute_b(b, self.x, self.y, self.err, self.npoints, self.get_qmin(), self.get_qmax())
-        #_compute_b(b, x, y, err, npoints, q_min, q_max)
+
+        #Compute A
+        smeared = False
+        if(self.slit_width > 0 or self.slit_height > 0):
+            smeared = True
+
+        npts = 21
+
+        for j in range(nfunc):
+            for i in range(self.npoints):
+                if(self.err[i] == 0.0):
+                    logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
+                    return None
+
+                if(self.accept_q(self.x[i])):
+                    if(self.est_bck == 1 and j == 0):
+                        a[i, j] = 1.0/self.err[i]
+                    else:
+                        if(self.slit_width > 0 or self.slit_height > 0):
+                            #(d_max, n, height, width, q, npts
+                            a[i, j] = py_invertor.ortho_transformed_smeared(self.d_max, j+offset, self.slit_height,
+                                                                            self.slit_width, self.x[i], npts)/self.err[i]
+                        else:
+                            a[i, j] = py_invertor.ortho_transformed(self.d_max, j+offset, self.x[i])/self.err[i]
+
+            for i_r in range(nr):
+                index_i = i_r + self.npoints
+                index_j = j
+                if(self.est_bck == 1.0 and j == 0):
+                    a[index_i, index_j] = 0.0
+                else:
+                    r = self.d_max / nr * i_r
+                    tmp = pi * (j+offset) / self.d_max
+                    res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
+                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+                    a[index_i, index_j] =  res
+        #Compute B
+        for i in range(self.npoints):
+            if(self.accept_q(self.x[i])):
+                b[i] = self.y[i] / self.err[i]
+
         return 0
 
 
@@ -714,12 +697,10 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
-        a_obj = np.float64(a_obj)
-        cov_obj = np.float64(cov_obj)
         n_a = a_obj.size
         n_cov = cov_obj.size
-        a = a_obj
-        inv_cov = cov_obj
+        a = np.float64(a_obj)
+        inv_cov = np.float64(cov_obj)
 
         if not (n_cov >= (nfunc * nfunc)):
             raise RuntimeError("Pinvertor._get_invcov_matrix: cov array too small.")
@@ -728,12 +709,12 @@ class Pinvertor:
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
-        Pinvertor._compute_invcov(a, inv_cov, size, nfunc)
-        #for i in range(nfunc):
-        #    for j in range(nfunc):
-        #        inv_cov[i, j] = 0.0
-        #        for k in range(nr + self.npoints):
-        #            inv_cov[i, j] += np.float64(a[k, i]*a[k, j])
+        #Pinvertor._compute_invcov(a, inv_cov, size, nfunc)
+        for i in range(nfunc):
+            for j in range(nfunc):
+                inv_cov[i, j] = 0.0
+                for k in range(nr + self.npoints):
+                    inv_cov[i, j] += np.float64(a[k, i] * a[k, j])
         return 0
 
     @staticmethod
@@ -769,9 +750,9 @@ class Pinvertor:
 
         for j in range(nfunc):
             for i in range(self.npoints):
-                if(accept_q(self.x[i], np.float64(self.get_qmin()), np.float64(self.get_qmax())) == 1):
-                    sum_sig += np.float64(a[i, j] * a[i, j])
+                if(self.accept_q(self.x[i])):
+                    sum_sig += a[i, j] * a[i, j]
             for i in range(nr):
-                sum_reg += np.float64((a[(i+self.npoints), j]) * (a[(i+self.npoints), j]))
+                sum_reg += a[(i+self.npoints), j] * a[(i+self.npoints), j]
 
         return sum_sig, sum_reg
