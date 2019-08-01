@@ -216,7 +216,6 @@ class Invertor(Pinvertor):
             return self.get_dmax()
         elif name == 'q_min':
             qmin = self.get_qmin()
-            print(qmin)
             if qmin < 0:
                 return None
             return qmin
@@ -460,7 +459,6 @@ class Invertor(Pinvertor):
         # Note: To make sure an array is contiguous:
         # blah = np.ascontiguousarray(blah_original)
         # ... before passing it to C
-
         if self.is_valid() < 0:
             msg = "Invertor: invalid data; incompatible data lengths."
             raise RuntimeError(msg)
@@ -500,9 +498,9 @@ class Invertor(Pinvertor):
         self.chi2 = chi2
 
         inv_cov = np.zeros([nfunc, nfunc])
+
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         self._get_invcov_matrix(nfunc, nr, a, inv_cov)
-
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
@@ -510,6 +508,7 @@ class Invertor(Pinvertor):
             new_alpha = sum_sig / (sum_reg / self.alpha)
         else:
             new_alpha = 0.0
+        print("Suggested_alpha set to: ", new_alpha)
         self.suggested_alpha = new_alpha
 
         try:
@@ -594,13 +593,18 @@ class Invertor(Pinvertor):
 
             # Perform inversion to find the largest alpha
             out, _ = pr.invert(nfunc)
+            #This invert is correct
+
             elapsed = time.time() - starttime
             initial_alpha = pr.alpha
             initial_peaks = pr.get_peaks(out)
+            #Inital Alpha correct, suggested not
 
             # Try the inversion with the estimated alpha
             pr.alpha = pr.suggested_alpha
             out, _ = pr.invert(nfunc)
+            #This invert different
+            print("Inversion 2: ", out)
 
             npeaks = pr.get_peaks(out)
             # if more than one peak to start with
@@ -779,5 +783,3 @@ if(__name__ == "__main__"):
     n = 100
     q = 0.5
     result = test.basefunc_ft(d_max, n, q)
-
-    print("basefunc_ft: %.60f" % result)
