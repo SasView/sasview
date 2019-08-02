@@ -307,9 +307,15 @@ class Invertor(Pinvertor):
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
+            print("est_bck = False, self.y -= self.backgrond")
             self.y -= self.background
+        print("lstsq called with ", nfunc)
+        print(nr)
         out, cov = self.lstsq(nfunc, nr=nr)
+        print("Result of invert() lstsq call - out: ", out)
+        print("Result of invert() lstsq call - cov: ", cov)
         if not self.est_bck:
+            print("est_bck = False, self.y += self.background")
             self.y += self.background
         return out, cov
 
@@ -502,7 +508,14 @@ class Invertor(Pinvertor):
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         self._get_invcov_matrix(nfunc, nr, a, inv_cov)
         # Compute the reg term size for the output
+        print("Input to _get_reg_size: ", nfunc)
+        print(nr)
+        print(a)
+
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
+        print("sum_sig: ", sum_sig)
+        print("sum_reg: ", sum_reg)
+        print("alpha parameter: ", self.alpha)
 
         if math.fabs(self.alpha) > 0:
             new_alpha = sum_sig / (sum_reg / self.alpha)
@@ -779,7 +792,9 @@ class Invertor(Pinvertor):
 
 if(__name__ == "__main__"):
     test = Invertor()
-    d_max = (2000.0)
-    n = 100
-    q = 0.5
-    result = test.basefunc_ft(d_max, n, q)
+    #d_max = (2000.0)
+    #n = 100
+    #q = 0.5
+    #self.d_max = 100.0
+
+    #result = test._get_reg_size(d_max, n, q)
