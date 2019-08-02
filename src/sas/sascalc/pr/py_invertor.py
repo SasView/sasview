@@ -569,8 +569,15 @@ def rg(pars, d_max, nslice):
 
     return np.sqrt(sum_r2/(2.0*sum))
 
-
-
+@conditional_decorator(njit('f8(f8[:,:], f8[:,:], f8, u8)'), USE_NUMBA)
+def _compute_invcov(a, inv_cov, size, nfunc):
+    """
+    Method for faster computation of inv_cov matrix
+    """
+    for i in range(nfunc):
+        for j in range(nfunc):
+            inv_cov[i, j] = np.float64(np.sum((a[:, i] * a[:, j])))
+    return 0
 
 #testing
 #@njit()

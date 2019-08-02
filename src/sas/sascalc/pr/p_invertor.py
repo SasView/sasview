@@ -573,16 +573,20 @@ class Pinvertor:
 
         :return: 1 if accepted, 0 if rejected.
         """
-        q_min = self.get_qmin()
-        q_max = self.get_qmax()
-        if(q_min > 0 and q < q_min):
-            return False
-        if(q_max > 0 and q > q_max):
-            return False
-        return True
+        #if(self.q_min < 0 and self.q_max < 0):
+        #    return False
+        if(self.q_min <= 0 and self.q_max <= 0):
+            return True
+        return (q >= self.q_min) & (q <= self.q_max)
+
+        #if(self.q_min > 0 and q < self.q_min):
+        #    return 0
+        #if(self.q_max > 0 and q > self.q_max):
+        #    return 0
+        #return 1
 
     def check_for_zero(self, x):
-        return (0.0 in x)
+        return (x == 0).any()
 
     def _get_matrix(self, nfunc, nr, a_obj, b_obj):
         """
@@ -629,6 +633,45 @@ class Pinvertor:
 
         npts = 21
 
+        #get accept_q matrix across all q
+        #q_accept_matrix = self.accept_q(self.x)
+        #print("q_accept_matrix: ", q_accept_matrix)
+        #print("x", self.x.shape)
+        #x_use = self.x[q_accept_matrix]
+        #print("x_use: ", x_use.shape)
+        #a_use = a[0:self.npoints, :]
+        #print("a", a.shape)
+        #print("a-use,", a_use.shape)
+
+
+        #for j in range(nfunc):
+        #    if(self.est_bck == 0 and j == 0):
+        #        a[:, j] = 1.0/self.err[q_accept_matrix]
+        #    else:
+        #        if(smeared):
+        #            a_use[q_accept_matrix, j] = py_invertor.ortho_transformed_smeared_qvec_njit(x_use, self.d_max, j+offset, self.slit_height, self.slit_width, npts)/self.err[q_accept_matrix]
+        #        else:
+        #            a_use[q_accept_matrix, j] = py_invertor.ortho_transformed_qvec_njit(x_use, self.d_max, j+offset)/self.err[q_accept_matrix]
+#
+#            a[0:self.npoints, :] = a_use
+
+#            for i_r in range(nr):
+#                index_i = i_r + self.npoints
+#                index_j = j
+#                if(self.est_bck == 1.0 and j == 0):
+#                    a[index_i, index_j] = 0.0
+#                else:
+#                    r = self.d_max / nr * i_r
+#                    tmp = pi * (j+offset) / self.d_max
+#                    res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
+#                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+#                    a[index_i, index_j] =  res
+#
+
+#         print("\n Final A: ", a)
+ #       print("\nFinal a_use: ", a_use)
+
+
         for j in range(nfunc):
             for i in range(self.npoints):
                 if(self.err[i] == 0.0):
@@ -639,7 +682,7 @@ class Pinvertor:
                     if(self.est_bck == 1 and j == 0):
                         a[i, j] = 1.0/self.err[i]
                     else:
-                        if(self.slit_width > 0 or self.slit_height > 0):
+                        if(smeared):
                             #(d_max, n, height, width, q, npts
                             a[i, j] = py_invertor.ortho_transformed_smeared(self.d_max, j+offset, self.slit_height,
                                                                             self.slit_width, self.x[i], npts)/self.err[i]
@@ -657,6 +700,7 @@ class Pinvertor:
                     res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
                     + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
                     a[index_i, index_j] =  res
+        print("\nFinal a: ", a)
         #Compute B
         for i in range(self.npoints):
             if(self.accept_q(self.x[i])):
@@ -690,23 +734,8 @@ class Pinvertor:
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
-        #Pinvertor._compute_invcov(a, inv_cov, size, nfunc)
-        for i in range(nfunc):
-            for j in range(nfunc):
-                inv_cov[i, j] = 0.0
-                for k in range(nr + self.npoints):
-                    inv_cov[i, j] += np.float64(a[k, i] * a[k, j])
+        py_invertor._compute_invcov(a, inv_cov, size, nfunc)
         return 0
-
-    @staticmethod
-    def _compute_invcov(a, inv_cov, size, nfunc):
-        #reset to 0
-        for i in range(nfunc):
-            for j in range(nfunc):
-                inv_cov[i, j] = np.float64(np.sum((a[:, i] * a[:, j])))
-        return 0
-
-
 
     def _get_reg_size(self, nfunc, nr, a_obj):
         #in Cinvertor, doc was same as invcov_matrix, left for now -
@@ -727,12 +756,29 @@ class Pinvertor:
 
         sum_sig = 0.0
         sum_reg = 0.0
+        #Decreases speed does not increase accuracy
+        #for j in range(nfunc):
 
-        for j in range(nfunc):
-            for i in range(self.npoints):
-                if(self.accept_q(self.x[i])):
-                    sum_sig += a[i, j] * a[i, j]
-            for i in range(nr):
-                sum_reg += np.float64((a[(i+self.npoints), j])) * np.float64((a[(i+self.npoints), j]))
+        #for i in range(self.npoints):
+        #    if(self.accept_q(self.x[i])):
+        #        sum_sig += np.sum(a[i, :] * a[i, :])
+        #print(self.accept_q(self.x))
+        a_pass = self.accept_q(self.x[0:self.npoints])
+        a_use = a[0:self.npoints, :]
+        a_use = a_use[a_pass, :]
+        sum_sig = np.sum(a_use ** 2)
+        sum_reg = np.sum(a[self.npoints:self.npoints+nr, :] ** 2)
+        #equivalent but slower
+        #temp_a = np.zeros([0], dtype = np.float64)
+        #for i in range(self.npoints):
+        #    if(self.accept_q(self.x[i])):
+        #        temp_a = np.append(temp_a, a[i, j])
+        #    else:
+        #        temp_a = np.append(temp_a, 0.0)
+        #sum_sig += np.sum(temp_a * temp_a)
+        #Sum_reg-
+        #for i in range(nr):
+        #    sum_reg += (a[(i+self.npoints), j]) * (a[(i+self.npoints), j])
+        #Equivalent - (same speed roughly)
 
-        return sum_sig, np.float64(sum_reg)
+        return sum_sig, sum_reg
