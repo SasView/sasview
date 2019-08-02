@@ -47,8 +47,6 @@ class TestFiguresOfMerit(unittest.TestCase):
 
         self.out, self.cov = self.invertor.lstsq(10)
 
-        print("\n**INVERTOR ALPHA TEST** ", self.invertor.estimate_alpha(10), "\n")
-
     def test_positive(self):
         """
             Test whether P(r) is positive
