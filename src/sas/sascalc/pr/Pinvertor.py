@@ -739,20 +739,19 @@ class Pinvertor:
         :return: 0
         """
         nfunc = int(nfunc)
-        nr = int(nfunc)
-        a_obj = np.float64(a_obj)
+        nr = int(nr)
+        a = np.float64(a_obj)
         if not (a_obj.size >= nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
         sum_sig = 0.0
         sum_reg = 0.0
-        a = a_obj
 
         for j in range(nfunc):
             for i in range(self.npoints):
                 if(self.accept_q(self.x[i])):
                     sum_sig += a[i, j] * a[i, j]
             for i in range(nr):
-                sum_reg += a[(i+self.npoints), j] * a[(i+self.npoints), j]
+                sum_reg += np.float64((a[(i+self.npoints), j])) * np.float64((a[(i+self.npoints), j]))
 
-        return sum_sig, sum_reg
+        return sum_sig, np.float64(sum_reg)

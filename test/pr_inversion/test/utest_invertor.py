@@ -19,15 +19,6 @@ from sas.sascalc.pr.invertor import Invertor
 def find(filename):
     return os.path.join(os.path.dirname(__file__), filename)
 
-def asdf(invertor):
-    #Estimate_alpha test
-    print("\n**INVERTOR ALPHA TEST** ", invertor.estimate_alpha(10), "\n")
-    #nfunc = 40
-    #nr = 40
-    #a = np.zeros((nfunc, nfunc))
-    #b = np.zeros(nr)
-    #print("\n **INVERTOR GET_MATRIX TEST: ", invertor._get_matrix(nfunc, nr, a, b))
-
 class TestFiguresOfMerit(unittest.TestCase):
 
     def setUp(self):
@@ -56,7 +47,7 @@ class TestFiguresOfMerit(unittest.TestCase):
 
         self.out, self.cov = self.invertor.lstsq(10)
 
-        asdf(self.invertor)
+        print("\n**INVERTOR ALPHA TEST** ", self.invertor.estimate_alpha(10), "\n")
 
     def test_positive(self):
         """
