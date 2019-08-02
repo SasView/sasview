@@ -3,8 +3,6 @@ Converted invertor.c's methods
 
 Currently testing multiple methods of implementing these methods with njit() vector operations etc.
 """
-import numpy as np
-#from numpy import pi
 import sys
 import math
 import time
@@ -14,9 +12,13 @@ import re
 import logging
 import time
 
+import numpy as np
+#from numpy import pi
 import timeit
 from functools import reduce
+
 pi = np.float64(3.1416) #to pass tests
+
 try:
     from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
     USE_NUMBA = True

@@ -3,33 +3,14 @@ Python implementation of the P(r) inversion
 Pinvertor is the base class for the Invertor class
 and provides the underlying computations.
 """
-import sas.sascalc.pr.py_invertor as py_invertor
-#import py_invertor
-import numpy as np
-import logging
 import math
+import logging
 import timeit
+
+import numpy as np
+
+from . import py_invertor
 logger = logging.getLogger(__name__)
-
-try:
-    from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
-    USE_NUMBA = True
-except ImportError:
-    USE_NUMBA = False
-
-def conditional_decorator(dec, condition):
-    """
-    If condition is true returns dec(func).
-    Returns the function with decorator applied otherwise
-    uses default.
-    Called by @conditional_decorator(dec, condition)
-              def():
-    """
-    def decorator(func):
-        if not condition:
-            return func
-        return dec(func)
-    return decorator
 
 
 
