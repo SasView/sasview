@@ -869,13 +869,12 @@ condition_test2()'''
 
 def demo_iq_smeared_qvec():
     q = np.linspace(0.001, 0.5, 301)
-    p = np.arange(40)
-    d_max = 2000
-    width, height = 0.01, 3
+    p = np.arange(40, dtype = np.float64)
+    d_max = 2000.0
+    width, height = 0.01, 3.0
     npts = 30
 
     setup = '''
-from __main__ import iq_smeared_qvec_njit_p
 from __main__ import iq_smeared_qvec_njit
 from __main__ import iq_smeared_qvec
 from __main__ import iq_smeared
@@ -883,11 +882,11 @@ from __main__ import iq_smeared
 import numpy as np
 #q = np.linspace(0.001, 0.5, 301)
 q = np.arange(301, dtype = np.float64)
-p = np.arange(40)
-d_max = 2000
-width, height = 0.01, 3
+p = np.arange(40, dtype = np.float64)
+d_max = 2000.0
+width, height = 0.01, 3.0
 npts = 30'''
-    codeP = '''iq_smeared_qvec_njit_p(p, q, d_max, height, width, npts)'''
+    codeP = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
     codeN = '''iq_smeared_qvec_njit(p, q, d_max, height, width, npts)'''
     code = '''iq_smeared_qvec(p, q, d_max, height, width, npts)'''
 
@@ -911,16 +910,33 @@ npts = 30'''
     #To demonstrate same as original C code using arange instead of linspace for easier testing in C,
     #avoid rounding errors perhaps present in linspace().
     #Difference between parallel and normal lower with higher q, with lower q slightly higher error.
-    q = np.arange(301, dtype = np.float64)
-
-    test_result_njit = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
-    test_result_p = iq_smeared_qvec_njit_p(p, q, d_max, height, width, npts)
+    q = np.arange(301, dtype = np.float64) + 1
+    #n = np.arange(len(q)) + 1
+    test_result_njit = ortho_transformed_qvec_njit(q, d_max, 1)
+    test_result_p = iq_smeared_qvec_njit(p, q, d_max, height, width, npts)
     test_result_n = iq_smeared_qvec(p, q, d_max, height, width, npts)
+    result_scalar = np.zeros(len(q))
+    for i in range(len(q)):
+        result_scalar[i] = ortho_transformed(d_max, 1, q[i])
 
-
-    print("\nResult Normal (summed): ", np.sum(test_result_n))
-    print("Result Parallelized (summed): ", np.sum(test_result_p))
+    #print("\nResult Normal (summed): ", np.sum(test_result_n))
+    #print("Result Parallelized (summed): ", np.sum(test_result_p))
     print("Result Njit (summed) ", np.sum(test_result_njit))
+    print("Result Scalar (summed): ", np.sum(result_scalar))
+    print("Result Njit shape", test_result_njit.shape)
+    print("Result scalar shape", result_scalar.shape)
+    print("Result Njit: ", test_result_njit)
+    print("Result scalar: ", result_scalar)
+
+    print("\n(ortho_transformed_smeared): Scalar vs Normal:")
+    if(np.array_equal(test_result_njit, result_scalar)):
+        print("*Identical Results*")
+    else:
+        print("*Different Results*")
+        print("Difference: ")
+        #print(np.sum(test_result_njit))
+        #print(np.sum(result_scalar))
+        #print(test_result_njit - result_scalar)
 
     print("\n**Parallel agaisnt Normal Test-**")
     if(np.array_equal(test_result_p, test_result_n)):
@@ -1052,8 +1068,7 @@ def test_real_input():
     #print("%.60f" % results[1])
     print(npeaks(pars, d_max, 100))
 if(__name__ == "__main__"):
-    test_real_input()
-
+    demo_iq_smeared_qvec()
     #test_individual()
     #print('%.16f' % (np.sin(0.5 * 2000.0)))
     #demo_iq_smeared_scalar()
