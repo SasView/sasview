@@ -634,77 +634,59 @@ class Pinvertor:
         npts = 21
 
         #get accept_q matrix across all q
-        #q_accept_matrix = self.accept_q(self.x)
+        q_accept_matrix = self.accept_q(self.x)
         #print("q_accept_matrix: ", q_accept_matrix)
         #print("x", self.x.shape)
-        #x_use = self.x[q_accept_matrix]
+        x_use = self.x[q_accept_matrix]
         #print("x_use: ", x_use.shape)
-        #a_use = a[0:self.npoints, :]
+        a_use = a[0:self.npoints, :]
         #print("a", a.shape)
         #print("a-use,", a_use.shape)
-
-
-        #for j in range(nfunc):
-        #    if(self.est_bck == 0 and j == 0):
-        #        a[:, j] = 1.0/self.err[q_accept_matrix]
-        #    else:
-        #        if(smeared):
-        #            a_use[q_accept_matrix, j] = py_invertor.ortho_transformed_smeared_qvec_njit(x_use, self.d_max, j+offset, self.slit_height, self.slit_width, npts)/self.err[q_accept_matrix]
-        #        else:
-        #            a_use[q_accept_matrix, j] = py_invertor.ortho_transformed_qvec_njit(x_use, self.d_max, j+offset)/self.err[q_accept_matrix]
-#
-#            a[0:self.npoints, :] = a_use
-
-#            for i_r in range(nr):
-#                index_i = i_r + self.npoints
-#                index_j = j
-#                if(self.est_bck == 1.0 and j == 0):
-#                    a[index_i, index_j] = 0.0
-#                else:
-#                    r = self.d_max / nr * i_r
-#                    tmp = pi * (j+offset) / self.d_max
-#                    res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
-#                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
-#                    a[index_i, index_j] =  res
-#
-
-#         print("\n Final A: ", a)
- #       print("\nFinal a_use: ", a_use)
-
+        #a_vec = np.copy(a) #to make copy not reference
 
         for j in range(nfunc):
-            for i in range(self.npoints):
-                if(self.err[i] == 0.0):
-                    logger.error("Pinvertor.get_matrix: Some I(Q) points have no error.")
-                    return None
-
-                if(self.accept_q(self.x[i])):
-                    if(self.est_bck == 1 and j == 0):
-                        a[i, j] = 1.0/self.err[i]
-                    else:
-                        if(smeared):
-                            #(d_max, n, height, width, q, npts
-                            a[i, j] = py_invertor.ortho_transformed_smeared(self.d_max, j+offset, self.slit_height,
-                                                                            self.slit_width, self.x[i], npts)/self.err[i]
-                        else:
-                            a[i, j] = py_invertor.ortho_transformed(self.d_max, j+offset, self.x[i])/self.err[i]
-
-            for i_r in range(nr):
-                index_i = i_r + self.npoints
-                index_j = j
-                if(self.est_bck == 1.0 and j == 0):
-                    a[index_i, index_j] = 0.0
+            if(self.est_bck == 1 and j == 0):
+                a_use[q_accept_matrix, j] = 1.0/self.err[q_accept_matrix]
+            else:
+                if(smeared):
+                    a_use[q_accept_matrix, j] = py_invertor.ortho_transformed_smeared_qvec_njit(x_use, self.d_max, j+offset,
+                                                                                                self.slit_height, self.slit_width, npts)/self.err[q_accept_matrix]
                 else:
-                    r = self.d_max / nr * i_r
-                    tmp = pi * (j+offset) / self.d_max
-                    res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
-                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
-                    a[index_i, index_j] =  res
-        print("\nFinal a: ", a)
+                    a_use[q_accept_matrix, j] = py_invertor.ortho_transformed_qvec_njit(x_use, self.d_max, j+offset)/self.err[q_accept_matrix]
+            a[0:self.npoints, j] = a_use[:, j]
+
+            i_r = np.arange(nr, dtype = np.float64)
+            #Implementing second stage A as a python vector operation with shape = [nr]
+            r = self.d_max / nr * i_r
+            tmp = pi * (j+offset) / self.d_max
+            res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
+                   + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+            #res should be np vector size i_r
+            a[self.npoints:self.npoints+nr, j] = res
+
+            #for i_r in range(nr):
+            #    index_i = i_r + self.npoints
+            #    index_j = j
+            #    if(self.est_bck == 1.0 and j == 0):
+            #        a[index_i, index_j] = 0.0
+            #    else:
+            #        r = self.d_max / nr * i_r
+            #        tmp = pi * (j+offset) / self.d_max
+            #        res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
+            #        + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+            #        a[index_i, index_j] =  res
+
         #Compute B
-        for i in range(self.npoints):
-            if(self.accept_q(self.x[i])):
-                b[i] = self.y[i] / self.err[i]
+        #Normal-
+        #for i in range(self.npoints):
+        #    if(self.accept_q(self.x[i])):
+        #        b[i] = self.y[i] / self.err[i]
+        #Vectorized -
+
+        x_accept_index = self.accept_q(self.x)
+        b_used = b[0:self.npoints]
+        b_used[x_accept_index] = self.y[x_accept_index] / self.err[x_accept_index]
+        b[0:self.npoints] = b_used
 
         return 0
 
