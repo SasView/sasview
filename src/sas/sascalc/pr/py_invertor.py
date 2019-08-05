@@ -65,12 +65,6 @@ def ortho(d_max, n, r):
 def ortho_transformed(d_max, n, q):
     """
     Fourier transform of the nth orthagonal function
-
-    With vectorize time was
-    \@vectorize() ~= 1.4e-05
-    \@njit() ~= 3e-06
-    \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
-    and time was the same as @njit()
     """
     return 8.0* math.pow(pi, 2.0)/q * d_max * n * math.pow(-1.0, n+1) * np.sin(q * d_max) / (math.pow(pi * n, 2.0) - math.pow(q * d_max, 2.0))
     #qd = q * (d_max/pi)

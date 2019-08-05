@@ -456,15 +456,19 @@ class Pinvertor:
 
         :param d_max: d_max.
         :param n: n.
-        :param q: q.
+        :param q: q, scalar or vector.
 
         :return: nth Fourier transformed base function, evaluated at q.
         """
         d_max = np.float64(d_max)
         n = int(n)
         q = np.float64(q)
-        ortho_val = py_invertor.ortho_transformed(d_max, n, q)
+        q = np.atleast_1d(q)
+        ortho_val = py_invertor.ortho_transformed_qvec_njit(q, d_max, n)
 
+        if(ortho_val.shape[0] == 1):
+            #If the q input was scalar.
+            return np.asscalar(ortho_val)
         return ortho_val
 
     def oscillations(self, pars):
