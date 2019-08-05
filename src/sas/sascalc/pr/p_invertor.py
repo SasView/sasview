@@ -575,9 +575,9 @@ class Pinvertor:
         """
         #if(self.q_min < 0 and self.q_max < 0):
         #    return False
-        if(self.q_min <= 0 and self.q_max <= 0):
+        if(self.get_qmin() <= 0 and self.get_qmax() <= 0):
             return True
-        return (q >= self.q_min) & (q <= self.q_max)
+        return (q >= self.get_qmin()) & (q <= self.get_qmax())
 
         #if(self.q_min > 0 and q < self.q_min):
         #    return 0
@@ -635,14 +635,14 @@ class Pinvertor:
 
         #get accept_q matrix across all q
         q_accept_matrix = self.accept_q(self.x)
-        #print("q_accept_matrix: ", q_accept_matrix)
-        #print("x", self.x.shape)
+
+        if(isinstance(q_accept_matrix, bool)):
+           #In the case of q_min and q_max <= 0, so returns scalar, and returns True
+           q_accept_matrix = np.ones(self.npoints, dtype = bool)
+
         x_use = self.x[q_accept_matrix]
-        #print("x_use: ", x_use.shape)
+
         a_use = a[0:self.npoints, :]
-        #print("a", a.shape)
-        #print("a-use,", a_use.shape)
-        #a_vec = np.copy(a) #to make copy not reference
 
         for j in range(nfunc):
             if(self.est_bck == 1 and j == 0):
