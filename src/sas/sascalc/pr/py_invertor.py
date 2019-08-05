@@ -217,24 +217,6 @@ def ortho_derived(d_max, n, r):
     pinr = pi * n * r/d_max
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
-@conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
-def iq(pars, d_max, q):
-    """
-    Scattering intensity calculated from the expansion
-
-    Dataset of 10,000 pars 302 q
-    using njit, parallel ~= 0.04
-    using njit default ~= 0.11
-    using vectorize ~= 7
-    using default python ~= 18
-    """
-    #q = np.asanyarray(q)
-    sum = np.float64(0.0)
-    for i in range(len(pars)):
-        #for j in prange(q.shape[0]):
-        sum += pars[i] * ortho_transformed(d_max, i + 1, q)
-    return sum
-
 @conditional_decorator(njit('f8(f8[:], f8, f8, f8, f8, u8)'), USE_NUMBA)
 def iq_smeared(pars, d_max, height, width, q, npts):
     """
@@ -391,14 +373,16 @@ def ortho_transformed_qvec(q, d_max, n):
     #Equivalent to C -
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
-@conditional_decorator(njit('f8[:](f8[:], f8, u8)'), USE_NUMBA)
+@conditional_decorator(njit('f8[:](f8[:], f8, i8)'), USE_NUMBA)
 def ortho_transformed_qvec_njit(q, d_max, n):
+    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
+
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
     #equivalent to C -
-    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
-@conditional_decorator(njit('f8[:](f8[:], f8, u8, f8, f8, u8)'), USE_NUMBA)
+
+@conditional_decorator(njit('f8[:](f8[:], f8, i8, f8, f8, u8)'), USE_NUMBA)
 def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
     n_width = npts if width > 0 else 1
     n_height = npts if height > 0 else 1
@@ -428,6 +412,23 @@ def iq_smeared_qvec_njit(p, q, d_max, height, width, npts):
         total += p[i] * ortho_transformed_smeared_qvec_njit(q, d_max, i+1, height, width, npts)
     return total
 
+@conditional_decorator(njit('f8[:](f8[:], f8, f8[:])'), USE_NUMBA)
+def iq(pars, d_max, q):
+    """
+    Scattering intensity calculated from the expansion
+    :param: pars
+    :param: d_max
+    :param: q, scalar or vector.
+    :return: vector of results, len 1 if q was scalar
+    """
+    #q = np.asanyarray(q)
+    sum = np.zeros(len(q), dtype = np.float64)
+    for i in range(len(pars)):
+        sum += pars[i] * ortho_transformed_qvec_njit(q, d_max, i+1)
+    #for i in range(len(pars)):
+    #    #for j in prange(q.shape[0]):
+    #    sum += pars[i] * ortho_transformed(d_max, i + 1, q)
+    return sum
 
 
 

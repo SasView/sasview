@@ -60,16 +60,25 @@ class Pinvertor:
         regterm = 0.0
         nslice = 25
         regterm = py_invertor.reg_term(pars, self.d_max, nslice)
+        diff = self.y[0:self.npoints] - py_invertor.iq(pars, self.d_max, self.x)
+        residual_list = (diff*diff) / (self.err * self.err)
+        residual_list += self.alpha * regterm
+        try:
+            for i in range(len(residual_list)):
+                residuals.append(float(residual_list[i]))
+        except:
+            raise RuntimeError("Pinvertor.residuals: error setting residual.")
 
-        for i in range(self.npoints):
-            diff = self.y[i] - py_invertor.iq(pars, self.d_max, self.x[i])
-            residual = (diff*diff) / (self.err[i]*self.err[i])
-            residual += self.alpha * regterm
 
-            try:
-                residuals.append(float(residual))
-            except:
-                raise RuntimeError("Pinvertor.residuals: error setting residual.")
+        #for i in range(self.npoints):
+        #    diff = self.y[i] - py_invertor.iq(pars, self.d_max, self.x[i])
+        #    residual = (diff*diff) / (self.err[i]*self.err[i])
+        #    residual += self.alpha * regterm
+#
+#            try:
+#                residuals.append(float(residual))
+#            except:
+#                raise RuntimeError("Pinvertor.residuals: error setting residual.")
 
         return residuals
 
@@ -361,15 +370,18 @@ class Pinvertor:
         Function to call to evaluate the scattering intensity.
 
         :param pars: c-parameters
-        :param q: q.
+        :param q: q, scalar or vector.
 
         :return: I(q)
         """
         q = np.float64(q)
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
+        q = np.atleast_1d(q)
 
         iq_val = py_invertor.iq(pars, self.d_max, q)
+        if(iq_val.shape[0] == 1):
+            return np.asscalar(iq_val)
         return iq_val
 
     def get_iq_smeared(self, pars, q):
