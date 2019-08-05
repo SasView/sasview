@@ -9,7 +9,7 @@ import timeit
 
 import numpy as np
 
-from . import py_invertor
+from . import calc as py_invertor
 logger = logging.getLogger(__name__)
 
 
