@@ -13,8 +13,6 @@ from . import calc as py_invertor
 logger = logging.getLogger(__name__)
 
 
-
-
 class Pinvertor:
     #q data
     x = np.empty(0, dtype = np.float)
