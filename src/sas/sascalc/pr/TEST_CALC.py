@@ -16,6 +16,39 @@ import timeit
 from functools import reduce
 
 pi = np.float64(3.1416) #to pass tests
+try:
+    from numba import njit
+except ImportError:
+    # identity decorator for njit which ignores type signature [untested]
+    njit = lambda *args, **kw: (lambda x: x)
+
+try:
+    from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
+    USE_NUMBA = True
+except ImportError:
+    USE_NUMBA = False
+
+
+def conditional_decorator(dec, condition):
+    """
+    If condition is true returns dec(func).
+    Returns the function with decorator applied otherwise
+    uses default.
+    Called by @conditional_decorator(dec, condition)
+              def():
+
+    :param dec: Decorator to apply (conditionally) to condition.
+    :param condition: Boolean representing whether or not decorator
+    is used.
+
+    :return: either func, which is base function or dec(func).
+    """
+    def decorator(func):
+        if not condition:
+            return func
+        return dec(func)
+    return decorator
+
 
 #Alternate implementation of methods-
 #ALTERNATE ORTHO_TRANSFORMED, returns slightly different results to C but handles q = 0
