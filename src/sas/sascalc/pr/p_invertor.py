@@ -633,12 +633,14 @@ class Pinvertor:
         npts = 21
         #Get accept_q vector across all q.
         q_accept_x = self.accept_q(self.x)
+        print("q accept matrix: ", q_accept_x)
 
         if(isinstance(q_accept_x, bool)):
            #In the case of q_min and q_max <= 0, so returns scalar, and returns True
            q_accept_x = np.ones(self.npoints, dtype = bool)
         #The x and a that will be used for the first part of 'a' calculation, given to ortho_transformed
         x_use = self.x[q_accept_x]
+        print("X_USE: ", x_use)
         a_use = a[0:self.npoints, :]
 
         for j in range(nfunc):
@@ -651,7 +653,7 @@ class Pinvertor:
                 else:
                     a_use[q_accept_x, j] = py_invertor.ortho_transformed_qvec_njit(x_use, self.d_max, j+offset)/self.err[q_accept_x]
             #Place calculated values in original a matrix.
-            a[0:self.npoints, j] = a_use[q_accept_x, j]
+            a[0:self.npoints, j] = a_use[:, j]
 
             i_r = np.arange(nr, dtype = np.float64)
             #Implementing second stage A as a python vector operation with shape = [nr]

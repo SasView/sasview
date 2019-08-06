@@ -46,7 +46,6 @@ class InversionLogic(object):
         """
         Create a new 1D data instance based on fitting results
         """
-
         qtemp = pr.x
         if q is not None:
             qtemp = q
@@ -65,14 +64,22 @@ class InversionLogic(object):
         x = np.arange(minq, maxq, maxq / 301.0)
         y = np.zeros(len(x))
         err = np.zeros(len(x))
-        for i in range(len(x)):
-            value = pr.iq(out, x[i])
-            y[i] = value
-            try:
-                err[i] = math.sqrt(math.fabs(value))
-            except:
-                err[i] = 1.0
-                logger.log(("Error getting error", value, x[i]))
+        #vectorised iq
+        value = pr.iq(out, x)
+        y = value
+        try:
+            err = np.sqrt(np.abs(value))
+        except:
+            err = 1.0
+            logger.log(("Error getting error"), value, x)
+        #for i in range(len(x)):
+        #    value = pr.iq(out, x[i])
+        #    y[i] = value
+        #    try:
+        #        err[i] = math.sqrt(math.fabs(value))
+        #    except:
+        #        err[i] = 1.0
+        #        logger.log(("Error getting error", value, x[i]))
 
         new_plot = Data1D(x, y)
         new_plot.name = IQ_FIT_LABEL
@@ -127,7 +134,6 @@ class InversionLogic(object):
         total = 0.0
         pmax = 0.0
         cov2 = np.ascontiguousarray(cov)
-
         for i in range(len(x)):
             if cov2 is None:
                 value = pr.pr(out, x[i])
