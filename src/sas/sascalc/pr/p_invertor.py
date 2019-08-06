@@ -63,22 +63,12 @@ class Pinvertor:
         diff = self.y[0:self.npoints] - py_invertor.iq(pars, self.d_max, self.x)
         residual_list = (diff*diff) / (self.err * self.err)
         residual_list += self.alpha * regterm
+
         try:
             for i in range(len(residual_list)):
                 residuals.append(float(residual_list[i]))
         except:
             raise RuntimeError("Pinvertor.residuals: error setting residual.")
-
-
-        #for i in range(self.npoints):
-        #    diff = self.y[i] - py_invertor.iq(pars, self.d_max, self.x[i])
-        #    residual = (diff*diff) / (self.err[i]*self.err[i])
-        #    residual += self.alpha * regterm
-#
-#            try:
-#                residuals.append(float(residual))
-#            except:
-#                raise RuntimeError("Pinvertor.residuals: error setting residual.")
 
         return residuals
 
@@ -399,7 +389,7 @@ class Pinvertor:
         q = np.float64(q)
 
         npts = 21
-        iq_val = np.float64(py_invertor.iq_smeared_qvec_njit(pars, q, self.d_max, self.slit_height,
+        iq_val = np.float64(py_invertor.iq_smeared(pars, q, self.d_max, self.slit_height,
                                        self.slit_width, npts))
         #If q was a scalar
         if(iq_val.shape[0] == 1):
@@ -476,7 +466,7 @@ class Pinvertor:
         n = int(n)
         q = np.float64(q)
         q = np.atleast_1d(q)
-        ortho_val = py_invertor.ortho_transformed_qvec_njit(q, d_max, n)
+        ortho_val = py_invertor.ortho_transformed(q, d_max, n)
 
         if(ortho_val.shape[0] == 1):
             #If the q input was scalar.
@@ -646,10 +636,10 @@ class Pinvertor:
                 a_use[q_accept_x, j] = 1.0/self.err[q_accept_x]
             else:
                 if(smeared):
-                    a_use[q_accept_x, j] = py_invertor.ortho_transformed_smeared_qvec_njit(x_use, self.d_max, j+offset,
+                    a_use[q_accept_x, j] = py_invertor.ortho_triqansformed_smeared(x_use, self.d_max, j+offset,
                                                                                                 self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
                 else:
-                    a_use[q_accept_x, j] = py_invertor.ortho_transformed_qvec_njit(x_use, self.d_max, j+offset)/self.err[q_accept_x]
+                    a_use[q_accept_x, j] = py_invertor.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
             #Place calculated values in original a matrix.
             a[0:self.npoints, j] = a_use[:, j]
 
@@ -705,15 +695,14 @@ class Pinvertor:
         return 0
 
     def _get_reg_size(self, nfunc, nr, a_obj):
-        #in Cinvertor, doc was same as invcov_matrix, left for now -
         """
-        Compute the covariance matrix, defined as inv_cov = a_transposed x a.
+        Computes sum_sig and sum_reg of input array given.
+
 	    :param nfunc: number of base functions.
 	    :param nr: number of r-points used when evaluating reg term.
-	    :param a: A array to fill.
-	    :param inv_cov: inverse covariance array to be filled.
+	    :param a_obj: Array to compute sum_sig and sum_reg of.
 
-        :return: 0
+        :return: Tuple of (sum_sig, sum_reg)
         """
         nfunc = int(nfunc)
         nr = int(nr)
