@@ -1,7 +1,7 @@
 """
-Converted invertor.c's methods
-
-Currently testing multiple methods of implementing these methods with njit() vector operations etc.
+Converted invertor.c's methods.
+Implements low level inversion functionality, at the moment Numba is conditional, has about
+a 2x slowdown without Numba.
 """
 import sys
 import math
@@ -44,9 +44,9 @@ def pr_sphere(R, r):
     """
     P(r) of a sphere, for test purposes
 
-    @param R: radius of the sphere
-    @param r: distance, in same units as the radius
-    @return: P(r)
+    :param R: radius of the sphere
+    :param r: distance, in same units as the radius
+    :return: P(r)
     """
     if(r <= 2.0*R):
         return 12.0* (0.5*r/R)**2 * (1.0-0.5*r/R)**2 * (2.0+0.5*r/R)
@@ -70,56 +70,11 @@ def ortho_transformed(d_max, n, q):
     #qd = q * (d_max/pi)
     #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
-@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
-def ortho_transformed_type_checks(d_max, n, q):
-    """
-    Fourier transform of the nth orthagonal function
-
-    With vectorize time was
-    \@vectorize() ~= 1.4e-05
-    \@njit() ~= 3e-06
-    \@njit(parallel=True) - Compiler returns no transformation for parallel execution possible
-    and time was the same as @njit()
-    """
-    divisor = (pi*n)**2 - (q*d_max)**2
-
-    part1 = 8.0*(pi)**2/q * d_max * n
-
-    part2 = (-1.0)**(n+1) * np.sin(q*d_max)
-
-    result = part1 * part2 / divisor
-
-    print("pi * n type:", type(pi * n))
-    print("q * d_max type: ", type(q * d_max))
-    print("**2 type: ", type((q * d_max)**2))
-    print("Type divisor: ", type((pi*n)**2 - (q*d_max)**2))
-    print("\nType (pi)**2", type(pi**2))
-    print("\nType (pi)**2 / q", type(pi**2 / q))
-    print("\ntype 8.0 * (pi)**2 / q: ", type(8.0*(pi)**2/q))
-    print("type d_max * n: ", type(d_max * n))
-    print("Part1 type: ", type(8.0*(pi)**2/q * d_max * n))
-
-    print("\ntype -1**(n + 1): ", type(-1.0**(n + 1)))
-    print("type sin", type(np.sin(q * d_max)))
-    print("Part2 type: ", type((-1.0)**(n+1) * np.sin(q*d_max)))
-
-    print("\n Type Full Calculation: ", type(result))
-
-    return result
-    #qd = q * (d_max/pi)
-    #return ( 8.0 * d_max**2/pi * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
-
 @conditional_decorator(njit('f8(f8, u8, f8, f8, f8, u8)'), USE_NUMBA)
 def ortho_transformed_smeared(d_max, n, height, width, q, npts):
     """
     Slit-smeared Fourier transform of the nth orthagonal function.
     Smearing follows Lake, Acta Cryst. (1967) 23, 191.
-
-    \@njit() - 5 - time roughly 4.5e-05
-    \@njit() - npts 1000 - 0.031
-    \@njit(parallel = True) - no transformation possible same time.
-    \@vectorize([float64(float64, float64, float64, float64, float64, float64)])  npts = 5 ~= 1.6e-05
-    npts = 1000 ~= 0.02
     """
     y = 0
     z = 0
@@ -164,12 +119,6 @@ def ortho_transformed_smeared_alt(d_max, n, height, width, q, npts):
     """
     Slit-smeared Fourier transform of the nth orthagonal function.
     Smearing follows Lake, Acta Cryst. (1967) 23, 191.
-
-    \@njit() - 5 - time roughly 4.5e-05
-    \@njit() - npts 1000 - 0.031
-    \@njit(parallel = True) - no transformation possible same time.
-    \@vectorize([float64(float64, float64, float64, float64, float64, float64)])  npts = 5 ~= 1.6e-05
-    npts = 1000 ~= 0.02
     """
     y = 0
     z = 0
@@ -222,19 +171,6 @@ def iq_smeared(pars, d_max, height, width, q, npts):
     """
     Scattering intensity calculated from expansion,
     slit smeared.
-
-    for test data of size 20 ~= 0.0005 basic
-    ~= 0.0003 njit
-    ~= 0.12 using numba vectorize()
-    Couldn't use njit and vectorize in same method, looked on
-    github seems to be issue for a long time with numba.
-    Maybe faster if work together ?
-    njit() compilation only slightly faster. Maybe with working
-    njit() and vector operations be faster.
-
-    iq_smeared(np.arange(10000), 3, 100, 100, 30, 400) - no parallel - 75
-    - parallel - 23.13, over 3x speedup.
-
     """
     sum = np.float64(0.0)
 
@@ -391,10 +327,8 @@ def ortho_transformed_smeared_qvec_njit(q, d_max, n, height, width, npts):
     total = np.zeros(len(q), dtype=np.float64)
     #total = np.zeros_like(q)
     # note: removing count_w since ortho now handles q=0 case
-
     for j in range(n_height):
         zsq = (j * dz)**2
-        #temp = np.zeros(np.uint8(n_width), dtype = np.float64)
         for i in range(n_width):
             y = y0 + i*dy
             qsq = (q - y)**2 + zsq
@@ -831,6 +765,76 @@ def test_atleast1d(x):
 
 
 
+
+    #test pr_err
+def test_real_input():
+    d_max = 100.0
+    r = 98.0392156862745
+    err = np.array([[1.24833814e-12, 2.48045669e-12, 3.72011068e-12, 4.96115493e-12,
+  6.20255681e-12, 7.43778591e-12, 8.69535826e-12, 9.75859355e-12,
+  7.59630885e-12, 2.50274931e-12, 0.00000000e+00],
+ [2.48045669e-12, 4.97878125e-12, 7.44055733e-12, 9.92116585e-12,
+  1.24043329e-11, 1.48764672e-11, 1.73862432e-11, 1.95142688e-11,
+  1.52240645e-11, 4.91960596e-12, 0.00000000e+00],
+ [3.72011068e-12, 7.44055733e-12, 1.11976402e-11, 1.48822227e-11,
+  1.86071289e-11, 2.23110339e-11, 2.60857843e-11, 2.92736314e-11,
+  2.27831332e-11, 7.51845498e-12, 0.00000000e+00],
+ [4.96115493e-12, 9.92116585e-12, 1.48822227e-11, 1.99069883e-11,
+  2.48097969e-11, 2.97577418e-11, 3.47736766e-11, 3.90324898e-11,
+  3.04601348e-11, 9.82506676e-12, 0.00000000e+00],
+ [6.20255681e-12, 1.24043329e-11, 1.86071289e-11, 2.48097969e-11,
+  3.11284952e-11, 3.71938865e-11, 4.34935275e-11, 4.88081732e-11,
+  3.79590979e-11, 1.25603480e-11, 0.00000000e+00],
+ [7.43778591e-12, 1.48764672e-11, 2.23110339e-11, 2.97577418e-11,
+  3.71938865e-11, 4.48340707e-11, 5.21367864e-11, 5.85029817e-11,
+  4.57600982e-11, 1.46601828e-11, 0.00000000e+00],
+ [8.69535826e-12, 1.73862432e-11, 2.60857843e-11, 3.47736766e-11,
+  4.34935275e-11, 5.21367864e-11, 6.16204132e-11, 6.85317927e-11,
+  5.28760241e-11, 1.78057636e-11, 0.00000000e+00],
+ [9.75859355e-12, 1.95142688e-11, 2.92736314e-11, 3.90324898e-11,
+  4.88081732e-11, 5.85029817e-11, 6.85317927e-11, 7.92713376e-11,
+  6.18420269e-11, 1.89159600e-11, 0.00000000e+00],
+ [7.59630885e-12, 1.52240645e-11, 2.27831332e-11, 3.04601348e-11,
+  3.79590979e-11, 4.57600982e-11, 5.28760241e-11, 6.18420269e-11,
+  6.08046341e-11, 2.68150510e-11, 0.00000000e+00],
+ [2.50274931e-12, 4.91960596e-12, 7.51845498e-12, 9.82506675e-12,
+  1.25603480e-11, 1.46601828e-11, 1.78057636e-11, 1.89159600e-11,
+  2.68150510e-11, 2.13891400e-11, 0.00000000e+00],
+ [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+  0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+  0.00000000e+00, 0.00000000e+00, 0.00000000e+00]], dtype = np.float64)
+    pars = np.array([ 8.14492232e-06, 1.73442959e-05,  1.65836300e-05,  1.37910646e-05,
+  7.71446876e-06,  5.28298839e-06,  3.64910011e-06,  2.70826153e-06,
+ -1.30657479e-06,  4.09674501e-06,  0.00000000e+00], dtype = np.float64)
+
+    #results = pr_err(pars, err, d_max, r)
+    #print("%.60f" % results[0])
+    #print("%.60f" % results[1])
+    print(npeaks(pars, d_max, 100))
+
+
+def test_individual():
+    d_max = (2000.0)
+    n = 100
+    q = (0.5)
+    width, height = 0.01, 3.0
+    npts = 30
+    r = np.arange(0.0, d_max, d_max / 100, dtype = np.float64)
+    p = np.arange(30, dtype = np.float64)
+    err = np.ones((30, 30), dtype = np.float64)
+    #result = ortho_transformed(d_max, n, q)
+    #print("Ortho_transformed: %.60f" % result)
+    #pars, d_max, height, width, q, npts
+    #result = iq_smeared(p, d_max, height, width, q, npts)
+    #print("iq_smeared result: %.17f" % result)
+    #pars, err, d_max, r
+    print(r)
+    for i in range(len(r)):
+        result = pr_err(p, err, d_max, r[i])
+        #print("Pr: %.60f" % result)
+        print("pr 1: %.17f" % result[0])
+        print("pr 2: %.17f" % result[1])
+
 def bool_func(x):
     if (x % 2) == 0:
         return True
@@ -953,6 +957,32 @@ npts = 30'''
         print(np.sum(test_result_n))
         print(test_result_njit - test_result_n)
 
+def demo_pr():
+    pars = np.arange(30, dtype = np.float64)
+    d_max = 2000.0
+    r = 0.5
+    setup = '''
+from __main__ import pr
+from __main__ import pr_alt
+import numpy as np
+pars = np.arange(30, dtype = np.float64)
+d_max = 2000.0
+r = 0.5'''
+    run = '''
+pr(pars, d_max, r)
+    '''
+    run_alt = '''
+pr_alt(pars, d_max, r)'''
+    times = timeit.repeat(setup = setup, stmt = run, repeat = 100, number = 1)
+    times_alt = timeit.repeat(setup = setup, stmt = run_alt, repeat = 100, number = 1)
+    print("Lowest Time: N", min(times))
+    print("Lowest TIme Alt: ", min(times_alt))
+    print("Speedup: ", np.log(min(times) / min(times_alt)))
+    print(times)
+    print(times_alt)
+    print("Res Pr: ", pr(pars, d_max, r))
+    print("Res Pr_alt: ", pr_alt(pars, d_max, r))
+
 def demo_iq_smeared_scalar():
     q = 0.5
     p = np.arange(40, dtype = np.float64)
@@ -995,75 +1025,10 @@ npts = 30'''
         print("*Different Results*")
         print("Difference: ", test_result - test_result_p)
 
-def test_individual():
-    d_max = (2000.0)
-    n = 100
-    q = (0.5)
-    width, height = 0.01, 3.0
-    npts = 30
-    r = np.arange(0.0, d_max, d_max / 100, dtype = np.float64)
-    p = np.arange(30, dtype = np.float64)
-    err = np.ones((30, 30), dtype = np.float64)
-    #result = ortho_transformed(d_max, n, q)
-    #print("Ortho_transformed: %.60f" % result)
-    #pars, d_max, height, width, q, npts
-    #result = iq_smeared(p, d_max, height, width, q, npts)
-    #print("iq_smeared result: %.17f" % result)
-    #pars, err, d_max, r
-    print(r)
-    for i in range(len(r)):
-        result = pr_err(p, err, d_max, r[i])
-        #print("Pr: %.60f" % result)
-        print("pr 1: %.17f" % result[0])
-        print("pr 2: %.17f" % result[1])
 
-    #test pr_err
-def test_real_input():
-    d_max = 100.0
-    r = 98.0392156862745
-    err = np.array([[1.24833814e-12, 2.48045669e-12, 3.72011068e-12, 4.96115493e-12,
-  6.20255681e-12, 7.43778591e-12, 8.69535826e-12, 9.75859355e-12,
-  7.59630885e-12, 2.50274931e-12, 0.00000000e+00],
- [2.48045669e-12, 4.97878125e-12, 7.44055733e-12, 9.92116585e-12,
-  1.24043329e-11, 1.48764672e-11, 1.73862432e-11, 1.95142688e-11,
-  1.52240645e-11, 4.91960596e-12, 0.00000000e+00],
- [3.72011068e-12, 7.44055733e-12, 1.11976402e-11, 1.48822227e-11,
-  1.86071289e-11, 2.23110339e-11, 2.60857843e-11, 2.92736314e-11,
-  2.27831332e-11, 7.51845498e-12, 0.00000000e+00],
- [4.96115493e-12, 9.92116585e-12, 1.48822227e-11, 1.99069883e-11,
-  2.48097969e-11, 2.97577418e-11, 3.47736766e-11, 3.90324898e-11,
-  3.04601348e-11, 9.82506676e-12, 0.00000000e+00],
- [6.20255681e-12, 1.24043329e-11, 1.86071289e-11, 2.48097969e-11,
-  3.11284952e-11, 3.71938865e-11, 4.34935275e-11, 4.88081732e-11,
-  3.79590979e-11, 1.25603480e-11, 0.00000000e+00],
- [7.43778591e-12, 1.48764672e-11, 2.23110339e-11, 2.97577418e-11,
-  3.71938865e-11, 4.48340707e-11, 5.21367864e-11, 5.85029817e-11,
-  4.57600982e-11, 1.46601828e-11, 0.00000000e+00],
- [8.69535826e-12, 1.73862432e-11, 2.60857843e-11, 3.47736766e-11,
-  4.34935275e-11, 5.21367864e-11, 6.16204132e-11, 6.85317927e-11,
-  5.28760241e-11, 1.78057636e-11, 0.00000000e+00],
- [9.75859355e-12, 1.95142688e-11, 2.92736314e-11, 3.90324898e-11,
-  4.88081732e-11, 5.85029817e-11, 6.85317927e-11, 7.92713376e-11,
-  6.18420269e-11, 1.89159600e-11, 0.00000000e+00],
- [7.59630885e-12, 1.52240645e-11, 2.27831332e-11, 3.04601348e-11,
-  3.79590979e-11, 4.57600982e-11, 5.28760241e-11, 6.18420269e-11,
-  6.08046341e-11, 2.68150510e-11, 0.00000000e+00],
- [2.50274931e-12, 4.91960596e-12, 7.51845498e-12, 9.82506675e-12,
-  1.25603480e-11, 1.46601828e-11, 1.78057636e-11, 1.89159600e-11,
-  2.68150510e-11, 2.13891400e-11, 0.00000000e+00],
- [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
-  0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
-  0.00000000e+00, 0.00000000e+00, 0.00000000e+00]], dtype = np.float64)
-    pars = np.array([ 8.14492232e-06, 1.73442959e-05,  1.65836300e-05,  1.37910646e-05,
-  7.71446876e-06,  5.28298839e-06,  3.64910011e-06,  2.70826153e-06,
- -1.30657479e-06,  4.09674501e-06,  0.00000000e+00], dtype = np.float64)
-
-    #results = pr_err(pars, err, d_max, r)
-    #print("%.60f" % results[0])
-    #print("%.60f" % results[1])
-    print(npeaks(pars, d_max, 100))
 if(__name__ == "__main__"):
-    demo_iq_smeared_qvec()
+    #demo_iq_smeared_qvec()
+    demo_pr()
     #test_individual()
     #print('%.16f' % (np.sin(0.5 * 2000.0)))
     #demo_iq_smeared_scalar()
