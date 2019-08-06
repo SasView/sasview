@@ -16,35 +16,15 @@ import numpy as np
 #from numpy import pi
 from functools import reduce
 
-pi = np.float64(3.1416) #to pass tests
+pi = np.float64(3.1416) #Temporary, to pass tests.
 
 try:
-    from numba import jit, njit, vectorize, float64, guvectorize, prange, generated_jit
-    USE_NUMBA = True
+    from numba import njit
 except ImportError:
-    USE_NUMBA = False
+    # identity decorator for njit which ignores type signature.
+    njit = lambda *args, **kw: (lambda x: x)
 
-def conditional_decorator(dec, condition):
-    """
-    If condition is true returns dec(func).
-    Returns the function with decorator applied otherwise
-    uses default.
-    Called by @conditional_decorator(dec, condition)
-              def():
-
-    :param dec: Decorator to apply (conditionally) to condition.
-    :param condition: Boolean representing whether or not decorator
-    is used.
-
-    :return: either func, which is base function or dec(func).
-    """
-    def decorator(func):
-        if not condition:
-            return func
-        return dec(func)
-    return decorator
-
-@conditional_decorator(njit('f8(f8, f8)'), USE_NUMBA)
+@njit('f8(f8, f8)')
 def pr_sphere(R, r):
     """
     P(r) of a sphere, for test purposes
@@ -58,7 +38,7 @@ def pr_sphere(R, r):
     else:
         return 0
 
-@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
+@njit('f8(f8, u8, f8)')
 def ortho(d_max, n, r):
     """
     Orthogonal Functions:
@@ -66,7 +46,7 @@ def ortho(d_max, n, r):
     """
     return (2.0 * r) * np.sin(pi*(n*r)/d_max)
 
-@conditional_decorator(njit('f8(f8, u8, f8)'), USE_NUMBA)
+@njit('f8(f8, u8, f8)')
 def ortho_derived(d_max, n, r):
     """
     First derivative in of the orthogonal function dB(r)/dr
@@ -74,7 +54,7 @@ def ortho_derived(d_max, n, r):
     pinr = pi * n * r/d_max
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
-@conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, f8)')
 def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
@@ -84,7 +64,7 @@ def pr(pars, d_max, r):
         sum += pars[i] * ortho(d_max, i+1, r)
     return sum
 
-@conditional_decorator(njit('f8[:](f8[:], f8[:,:], f8, f8)'), USE_NUMBA)
+@njit('f8[:](f8[:], f8[:,:], f8, f8)')
 def pr_err(pars, err, d_max, r):
     """
     P(r) calculated from the expansion,
@@ -113,18 +93,18 @@ def pr_err(pars, err, d_max, r):
     ret[1] = pr_value_err
     return ret
 
-@conditional_decorator(njit('f8(f8[:], f8, f8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, f8)')
 def dprdr(pars, d_max, r):
     sum = 0.0
     for i in range(0, pars.shape[0]):
         sum += pars[i] * 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
     return sum
 
-@conditional_decorator(njit('f8[:](f8[:], f8, i8)'), USE_NUMBA)
+@njit('f8[:](f8[:], f8, i8)')
 def ortho_transformed(q, d_max, n):
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
-@conditional_decorator(njit('f8[:](f8[:], f8, i8, f8, f8, u8)'), USE_NUMBA)
+@njit('f8[:](f8[:], f8, i8, f8, f8, u8)')
 def ortho_transformed_smeared(q, d_max, n, height, width, npts):
     n_width = npts if width > 0 else 1
     n_height = npts if height > 0 else 1
@@ -141,7 +121,7 @@ def ortho_transformed_smeared(q, d_max, n, height, width, npts):
 
     return total / (n_width*n_height)
 
-@conditional_decorator(njit('f8[:](f8[:], f8[:], f8, f8, f8, u8)'), USE_NUMBA)
+@njit('f8[:](f8[:], f8[:], f8, f8, f8, u8)')
 def iq_smeared(p, q, d_max, height, width, npts):
     size_q = len(q)
     size_p = len(p)
@@ -152,7 +132,7 @@ def iq_smeared(p, q, d_max, height, width, npts):
 
     return total
 
-@conditional_decorator(njit('f8[:](f8[:], f8, f8[:])'), USE_NUMBA)
+@njit('f8[:](f8[:], f8, f8[:])')
 def iq(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion
@@ -168,11 +148,7 @@ def iq(pars, d_max, q):
 
     return sum
 
-
-
-
-
-@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, u8)')
 def reg_term(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
@@ -189,7 +165,7 @@ def reg_term(pars, d_max, nslice):
 
     return sum/nslice_d * d_max
 
-@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, u8)')
 def int_p2(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
@@ -206,7 +182,7 @@ def int_p2(pars, d_max, nslice):
 
     return sum/nslice_d * d_max
 
-@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, u8)')
 def int_pr(pars, d_max, nslice):
     """
     Integral of P(r)
@@ -223,7 +199,7 @@ def int_pr(pars, d_max, nslice):
 
     return sum/nslice_d * d_max
 
-@conditional_decorator(njit('u8(f8[:], f8, u8)'), USE_NUMBA)
+@njit('u8(f8[:], f8, u8)')
 def npeaks(pars, d_max, nslice):
     """
     Get the number of P(r) peaks
@@ -247,7 +223,7 @@ def npeaks(pars, d_max, nslice):
 
     return count
 
-@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, u8)')
 def positive_integral(pars, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole
@@ -270,7 +246,7 @@ def positive_integral(pars, d_max, nslice):
         sum += math.fabs(value)
     return sum_pos / sum
 
-@conditional_decorator(njit('f8(f8[:], f8[:,:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:], f8[:,:], f8, u8)')
 def positive_errors(pars, err, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole range
@@ -290,7 +266,7 @@ def positive_errors(pars, err, d_max, nslice):
 
     return sum_pos / sum
 
-@conditional_decorator(njit('f8(f8[:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:], f8, u8)')
 def rg(pars, d_max, nslice):
     """
     R_g radius of gyration calculation
@@ -310,7 +286,7 @@ def rg(pars, d_max, nslice):
 
     return np.sqrt(sum_r2 / (2.0*sum))
 
-@conditional_decorator(njit('f8(f8[:,:], f8[:,:], f8, u8)'), USE_NUMBA)
+@njit('f8(f8[:,:], f8[:,:], f8, u8)')
 def _compute_invcov(a, inv_cov, size, nfunc):
     """
     Method for faster computation of inv_cov matrix
