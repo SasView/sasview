@@ -70,7 +70,7 @@ def pr_err(pars, err, d_max, r):
     P(r) calculated from the expansion,
     with errors
     changed to instead of return value by reference, returns
-    tuple of (pr_value, pr_value_err)
+    np array of [pr_value, pr_value_err]
     """
     sum = 0.0
     sum_err = 0.0
@@ -229,8 +229,6 @@ def positive_integral(pars, d_max, nslice):
     Get the fraction of the integral of P(r) over the whole
     range of r that is above 0.
     A valid P(r) is defined as being positive for all r.
-
-    Parallelization of this method gives ~=40% speedup.
     """
     r = 0.0
     value = 0.0
@@ -293,6 +291,6 @@ def _compute_invcov(a, inv_cov, size, nfunc):
     """
     for i in range(nfunc):
         for j in range(nfunc):
-            inv_cov[i, j] = np.float64(np.sum((a[:, i] * a[:, j])))
+            inv_cov[i, j] = np.sum((a[:, i] * a[:, j]))
 
     return 0
