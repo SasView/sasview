@@ -40,16 +40,28 @@ class MyMplCanvas(FigureCanvas):
         self.dragging = None
         self.draggable = False
         self.leftdown = False
-        self.setMinimumSize(300, 300)
         self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
         self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
         self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
+
+    def on_legend(self, qx, qy):
+        """
+        Checks if mouse coursor is on legend box
+        :return:
+        """
+        on_legend_box = False
+        bbox = self.legend.get_window_extent()
+        if qx > bbox.xmin and qx < bbox.xmax and qy > bbox.ymin  and qy < bbox.ymax:
+            on_legend_box = True
+        return  on_legend_box
 
     def on_mouse_down(self, event):
         if not self.draggable:
             return
         if event.button == 1:
             self.leftdown = True
+        if self.on_legend(event.x, event.y):
+            return
 
         qmin = float(self.model.item(W.W_QMIN).text())
         qmax1 = float(self.model.item(W.W_QMAX).text())
@@ -70,6 +82,8 @@ class MyMplCanvas(FigureCanvas):
             return None
         if event.button == 1:
             self.leftdown = False
+        if self.on_legend(event.x, event.y):
+            return
 
         if self.dragging == "qmin":
             item = W.W_QMIN
@@ -78,7 +92,7 @@ class MyMplCanvas(FigureCanvas):
         else:
             item = W.W_QCUTOFF
 
-        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
 
         self.dragging = None
 
@@ -97,7 +111,7 @@ class MyMplCanvas(FigureCanvas):
         else:
             item = W.W_QCUTOFF
 
-        self.model.setItem(item, QtGui.QStandardItem(str(event.xdata)))
+        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
 
 
     def draw_q_space(self):
@@ -138,7 +152,7 @@ class MyMplCanvas(FigureCanvas):
             self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
 
         if self.data or self.extrap:
-            self.axes.legend()
+            self.legend = self.axes.legend()
 
         self.draw()
 
@@ -169,7 +183,7 @@ class MyMplCanvas(FigureCanvas):
             self.axes.plot(data_idf.x, data_idf.y,
                            label="Interface Distribution Function")
             self.axes.set_xlim(0, max(data1.x) / 4)
-            self.axes.legend()
+            self.legend = self.axes.legend()
 
         self.draw()
 
@@ -205,8 +219,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.plotLayout.insertWidget(2, self._realplot)
         self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
 
-        self.gridLayout_8.setColumnStretch(0, 1)
-        self.gridLayout_8.setColumnStretch(1, 2)
+        self.gridLayout_4.setColumnStretch(0, 1)
+        self.gridLayout_4.setColumnStretch(1, 2)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.

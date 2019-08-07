@@ -329,8 +329,6 @@ def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
         plot_data = plot_item.child(0).data()
         if plot_data.id is not None and \
                 plot_data.name == update_data.name:
-                #(plot_data.name == update_data.name or plot_data.id == update_data.id):
-            # if plot_data.id is not None and plot_data.id == update_data.id:
             # replace data section in item
             plot_item.child(0).setData(update_data)
             plot_item.setText(name)
@@ -412,7 +410,7 @@ def createModelItemWithPlot(update_data, name=""):
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
-    checkbox_item.setCheckState(QtCore.Qt.Checked)
+    checkbox_item.setCheckState(QtCore.Qt.Unchecked)
     checkbox_item.setText(name)
 
     # Add "Info" item

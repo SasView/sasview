@@ -104,10 +104,14 @@ class PlotterWidget(PlotterBase):
                 self.xscale = 'linear'
             # Transform data if required.
             if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
+                # data for each plot needs to be properly updated for transformation.
+                # logLabel holds the current(chosen) transformation string
+                self.data.xtransform = self.xLogLabel
+                self.data.ytransform = self.yLogLabel
                 _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
-                if xscale != 'log':
+                if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
-                if yscale != 'log':
+                if yscale != 'log' and yscale != self.yscale:
                     self.yscale = yscale
 
                 # Redefine the Scale properties dialog

@@ -38,6 +38,11 @@ DEFAULT_POWER_LOW = 4
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
+# Data set names
+LOWQ_TEXT = "Low-Q extrapolation"
+HIGHQ_TEXT = "High-Q extrapolation"
+
+
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -226,15 +231,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.model = model
         self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
-
+        filename = self._data.filename
         # Send the modified model item to DE for keeping in the model
         # Currently -unused
         # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
-        plot_data = GuiUtils.plotsFromCheckedItems(self._manager.filesWidget.model)
+        plot_data = GuiUtils.plotsFromFilename(filename, self._manager.filesWidget.model)
 
-        # choose only the Low-Q/High-Q data for plotting
-        data_to_plot = [p for p in plot_data if p[1].plot_role == p[1].ROLE_DATA]
+        # only the Low-Q/High-Q data for plotting
+        datas = [(self._model_item, p) for p in plot_data.values() if p.plot_role == p.ROLE_DATA]
+        # remove plots which are not requested
+        data_to_plot = []
+        for plot in datas:
+            if not self._low_extrapolate and plot[1].name == LOWQ_TEXT:
+                continue
+            if not self._high_extrapolate and plot[1].name == HIGHQ_TEXT:
+                continue
+            data_to_plot.append(plot)
+
         self._manager.filesWidget.plotData(data_to_plot)
 
         # Update the details dialog in case it is open
@@ -356,7 +370,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             power_low = inv.get_extrapolation_power(range='low')
 
             # Plot the chart
-            title = "Low-Q extrapolation"
+            title = LOWQ_TEXT
 
             # Convert the data into plottable
             extrapolated_data = self._manager.createGuiData(extrapolated_data)
@@ -389,7 +403,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
 
             # Plot the chart
-            title = "High-Q extrapolation"
+            title = HIGHQ_TEXT
 
             # Convert the data into plottable
             high_out_data = self._manager.createGuiData(high_out_data)
@@ -553,9 +567,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """
         # name to search in DataExplorer
         if 'Low' in str(self.sender().text()):
-            name = "Low-Q extrapolation"
+            name = LOWQ_TEXT
         if 'High' in str(self.sender().text()):
-            name = "High-Q extrapolation"
+            name = HIGHQ_TEXT
 
         GuiUtils.updateModelItemStatus(self._manager.filesWidget.model,
                                        self._path, name,
