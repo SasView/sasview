@@ -424,6 +424,8 @@ class Pinvertor:
         pars = np.atleast_1d(pars)
         pars = np.float64(pars)
         r = np.float64(r)
+        pars_err = np.float64(pars_err)
+
 
 
         pr_val = 0.0
@@ -593,10 +595,6 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
-        a_obj = np.atleast_2d(a_obj)
-        b_obj = np.atleast_1d(b_obj)
-        a = np.float64(a_obj)
-        b = np.float64(b_obj)
 
         if not (b_obj.shape[0] >= nfunc):
             raise RuntimeError("Pinvertor: b vector too small.")
@@ -627,19 +625,19 @@ class Pinvertor:
            q_accept_x = np.ones(self.npoints, dtype = bool)
         #The x and a that will be used for the first part of 'a' calculation, given to ortho_transformed
         x_use = self.x[q_accept_x]
-        a_use = a[0:self.npoints, :]
+        a_use = a_obj[0:self.npoints, :]
 
         for j in range(nfunc):
             if(self.est_bck == 1 and j == 0):
                 a_use[q_accept_x, j] = 1.0/self.err[q_accept_x]
             else:
                 if(smeared):
-                    a_use[q_accept_x, j] = py_invertor.ortho_triqansformed_smeared(x_use, self.d_max, j+offset,
+                    a_use[q_accept_x, j] = py_invertor.ortho_transformed_smeared(x_use, self.d_max, j+offset,
                                                                                                 self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
                 else:
                     a_use[q_accept_x, j] = py_invertor.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
             #Place calculated values in original a matrix.
-            a[0:self.npoints, j] = a_use[:, j]
+            a_obj[0:self.npoints, j] = a_use[:, j]
 
             i_r = np.arange(nr, dtype = np.float64)
             #Implementing second stage A as a python vector operation with shape = [nr]
@@ -648,16 +646,16 @@ class Pinvertor:
             res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
                    + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
             #Res should now be np vector size i_r.
-            a[self.npoints:self.npoints+nr, j] = res
+            a_obj[self.npoints:self.npoints+nr, j] = res
 
 
 
         #Compute B
         x_accept_index = self.accept_q(self.x)
         #The part of b used for the vector operations, of the accepted q values.
-        b_used = b[0:self.npoints]
+        b_used = b_obj[0:self.npoints]
         b_used[x_accept_index] = self.y[x_accept_index] / self.err[x_accept_index]
-        b[0:self.npoints] = b_used
+        b_obj[0:self.npoints] = b_used
 
         return 0
 
@@ -675,12 +673,8 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
-        a_obj = np.atleast_2d(a_obj)
-        cov_obj = np.atleast_2d(cov_obj)
         n_a = a_obj.size
         n_cov = cov_obj.size
-        a = np.float64(a_obj)
-        inv_cov = np.float64(cov_obj)
 
         if not (n_cov >= (nfunc * nfunc)):
             raise RuntimeError("Pinvertor._get_invcov_matrix: cov array too small.")
@@ -689,7 +683,7 @@ class Pinvertor:
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
-        py_invertor._compute_invcov(a, inv_cov, size, nfunc)
+        py_invertor._compute_invcov(a_obj, cov_obj, size, nfunc)
         return 0
 
     def _get_reg_size(self, nfunc, nr, a_obj):
@@ -704,8 +698,7 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
-        a_obj = np.atleast_2d(a_obj)
-        a = np.float64(a_obj)
+
         if not (a_obj.size >= nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
@@ -713,9 +706,9 @@ class Pinvertor:
         sum_reg = 0.0
 
         a_pass = self.accept_q(self.x)
-        a_use = a[0:self.npoints, :]
+        a_use = a_obj[0:self.npoints, :]
         a_use = a_use[a_pass, :]
         sum_sig = np.sum(a_use ** 2)
-        sum_reg = np.sum(a[self.npoints:self.npoints+nr, :] ** 2)
+        sum_reg = np.sum(a_obj[self.npoints:self.npoints+nr, :] ** 2)
 
         return sum_sig, sum_reg
