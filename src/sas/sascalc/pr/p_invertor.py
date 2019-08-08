@@ -683,7 +683,7 @@ class Pinvertor:
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
-        py_invertor._compute_invcov(a_obj, cov_obj, size, nfunc)
+        cov_obj[:, :] = np.dot(a_obj.T, a_obj)
         return 0
 
     def _get_reg_size(self, nfunc, nr, a_obj):
