@@ -622,9 +622,10 @@ class Pinvertor:
                                                                                                 self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
                 else:
                     a_use[q_accept_x, j] = py_invertor.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
-            #Place calculated values in original a matrix.
-            a_obj[0:self.npoints, j] = a_use[:, j]
 
+        a_obj[0:self.npoints, :] = a_use
+
+        for j in range(nfunc):
             i_r = np.arange(nr, dtype = np.float64)
             #Implementing second stage A as a python vector operation with shape = [nr]
             r = self.d_max / nr * i_r
