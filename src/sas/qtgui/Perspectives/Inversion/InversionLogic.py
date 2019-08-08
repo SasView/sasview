@@ -67,11 +67,12 @@ class InversionLogic(object):
         #vectorised iq
         value = pr.iq(out, x)
         y = value
-        try:
-            err = np.sqrt(np.abs(value))
-        except:
-            err = 1.0
-            logger.log(("Error getting error"), value, x)
+        for i in range(len(x)):
+           try:
+               err[i] = np.sqrt(np.abs(value[i]))
+           except:
+                err[i] = 1.0
+                logger.log(("Error getting error"), value[i], x[i])
 
         new_plot = Data1D(x, y)
         new_plot.name = IQ_FIT_LABEL
