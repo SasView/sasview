@@ -103,8 +103,7 @@ class Pinvertor:
         ndata = len(data)
         self.__dict__['x'] = np.zeros(ndata)
 
-        for i in range(ndata):
-            self.__dict__['x'][i] = data[i]
+        self.__dict__['x'] = np.array(data, 'd')
 
         self.__dict__['npoints'] = int(ndata)
         return self.npoints
@@ -123,11 +122,9 @@ class Pinvertor:
             logger.error("Pinvertor.get_x: input array too short for data.")
             return None
 
-        for i in range(self.npoints):
-            data[i] = self.x[i]
+        data[:] = self.x
 
         return self.npoints
-
 
     def set_y(self, data):
         """
@@ -140,12 +137,10 @@ class Pinvertor:
         ndata = len(data)
         self.__dict__['y'] = np.zeros(ndata)
 
-        for i in range(ndata):
-            self.__dict__['y'][i] = data[i]
+        self.__dict__['y'] = np.array(data, 'd')
 
         self.__dict__['ny'] = int(ndata)
         return self.ny
-
 
     def get_y(self, data):
         """
@@ -161,8 +156,7 @@ class Pinvertor:
             logger.error("Pinvertor.get_y: input array too short for data.")
             return None
 
-        for i in range(self.ny):
-            data[i] = self.y[i]
+        data[:] = self.y
 
         return self.npoints
 
@@ -177,12 +171,10 @@ class Pinvertor:
         ndata = len(data)
         self.__dict__['err'] = np.zeros(ndata)
 
-        for i in range(ndata):
-            self.__dict__['err'][i] = data[i]
+        self.__dict__['err'] = np.array(data, 'd')
 
         self.__dict__['nerr'] = int(ndata)
         return self.nerr
-
 
     def get_err(self, data):
         """
@@ -198,8 +190,7 @@ class Pinvertor:
             logger.error("Pinvertor.get_err: input array too short for data.")
             return None
 
-        for i in range(self.nerr):
-            data[i] = self.err[i]
+        data[:] = self.err
 
         return self.npoints
 
@@ -426,8 +417,6 @@ class Pinvertor:
         r = np.float64(r)
         pars_err = np.float64(pars_err)
 
-
-
         pr_val = 0.0
         pr_err_val = 0.0
         result = np.zeros(2, dtype = np.float64)
@@ -553,7 +542,6 @@ class Pinvertor:
 
         return val
 
-
     def iq0(self, pars):
         """
         Returns the value of I(q=0).
@@ -567,7 +555,6 @@ class Pinvertor:
         val = np.float64(4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice))
 
         return val
-
 
     def accept_q(self, q):
         """
@@ -648,8 +635,6 @@ class Pinvertor:
             #Res should now be np vector size i_r.
             a_obj[self.npoints:self.npoints+nr, j] = res
 
-
-
         #Compute B
         x_accept_index = self.accept_q(self.x)
         #The part of b used for the vector operations, of the accepted q values.
@@ -658,7 +643,6 @@ class Pinvertor:
         b_obj[0:self.npoints] = b_used
 
         return 0
-
 
     def _get_invcov_matrix(self, nfunc, nr, a_obj, cov_obj):
         """
