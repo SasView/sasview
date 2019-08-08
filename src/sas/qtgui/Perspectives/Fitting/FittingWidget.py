@@ -998,36 +998,40 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Delete the constraint on model parameter 'param'
         """
-        if param_list is None:
-            param_list = self.lstParams
-        model = param_list.model()
-        if hasattr(param_list.itemDelegate(), 'param_min'):
-            min_col = param_list.itemDelegate().param_min
-            max_col = param_list.itemDelegate().param_max
-        for row in range(model.rowCount()):
-            if not self.isCheckable(row):
-                continue
-            if not self.rowHasConstraint(row, model=model):
-                continue
-            # Get the Constraint object from of the model item
-            item = model.item(row, 1)
-            constraint = self.getConstraintForRow(row, model=model)
-            if constraint is None:
-                continue
-            if not isinstance(constraint, Constraint):
-                continue
-            if param and constraint.param != param:
-                continue
-            # Now we got the right row. Delete the constraint and clean up
-            # Retrieve old values and put them on the model
-            if constraint.min is not None:
-                model.item(row, min_col).setText(constraint.min)
-            if constraint.max is not None:
-                model.item(row, max_col).setText(constraint.max)
-            # Remove constraint item
-            item.removeRow(0)
-            self.constraintAddedSignal.emit([row])
-            self.modifyViewOnRow(row, model=model)
+        if param_list is not None:
+            param_list = [param_list]
+        else:
+            param_list = [self.lstParams, self.lstPoly, self.lstMagnetic]
+
+        for param_list in param_lists:
+            model = param_list.model()
+            if hasattr(param_list.itemDelegate(), 'param_min'):
+                min_col = param_list.itemDelegate().param_min
+                max_col = param_list.itemDelegate().param_max
+            for row in range(model.rowCount()):
+                if not self.isCheckable(row):
+                    continue
+                if not self.rowHasConstraint(row, model=model):
+                    continue
+                # Get the Constraint object from of the model item
+                item = model.item(row, 1)
+                constraint = self.getConstraintForRow(row, model=model)
+                if constraint is None:
+                    continue
+                if not isinstance(constraint, Constraint):
+                    continue
+                if param and constraint.param != param:
+                    continue
+                # Now we got the right row. Delete the constraint and clean up
+                # Retrieve old values and put them on the model
+                if constraint.min is not None:
+                    model.item(row, min_col).setText(constraint.min)
+                if constraint.max is not None:
+                    model.item(row, max_col).setText(constraint.max)
+                # Remove constraint item
+                item.removeRow(0)
+                self.constraintAddedSignal.emit([row])
+                self.modifyViewOnRow(row, model=model)
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
 
@@ -1938,7 +1942,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             raise ValueError('Fitting requires at least one parameter to optimize.')
 
         # Get the constraints.
-        constraints = self.getComplexConstraintsForModel()
+        constraints = []
+        for m in self.model_dict.values():
+            constraints += self.getComplexConstraintsForModel(model=m)
         if fitter is None:
             # For single fits - check for inter-model constraints
             constraints = self.getConstraintsForFitting()
@@ -2810,7 +2816,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if model is None:
             model = self._model_model
-        #model = self.model_dict[model_index]
         assert 0<= row <= model.rowCount()
         index = model.index(row, 0)
         item = model.itemFromIndex(index)
