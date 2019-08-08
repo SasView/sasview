@@ -773,12 +773,3 @@ class Invertor(Pinvertor):
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
             raise RuntimeError(msg)
-
-if(__name__ == "__main__"):
-    test = Invertor()
-    #d_max = (2000.0)
-    #n = 100
-    #q = 0.5
-    #self.d_max = 100.0
-
-    #result = test._get_reg_size(d_max, n, q)
