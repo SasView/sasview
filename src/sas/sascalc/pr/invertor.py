@@ -386,8 +386,7 @@ class Invertor(Pinvertor):
         # Compute chi^2
         res = self.pr_residuals(out)
         chisqr = 0
-        for i in range(len(res)):
-            chisqr += res[i]
+        chisq = np.sum(res)
 
         self.chisqr = chisqr
 
@@ -527,10 +526,8 @@ class Invertor(Pinvertor):
             err_0 = np.zeros([nfunc, nfunc])
             c_0 = np.zeros(nfunc)
 
-            for i in range(nfunc_0):
-                c_0[i] = c[i + 1]
-                for j in range(nfunc_0):
-                    err_0[i][j] = err[i + 1][j + 1]
+            c_0[:-1] = c[1:]
+            err_0[:-1, :-1] = err[1:, 1:]
 
             self.out = c_0
             self.cov = err_0
