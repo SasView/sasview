@@ -63,8 +63,7 @@ class Pinvertor:
         residual_list += self.alpha * regterm
 
         try:
-            for i in range(len(residual_list)):
-                residuals.append(float(residual_list[i]))
+            residuals.extend(residual_list)
         except:
             raise RuntimeError("Pinvertor.residuals: error setting residual.")
 
