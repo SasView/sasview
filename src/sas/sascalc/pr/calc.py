@@ -1,7 +1,6 @@
 """
 Converted invertor.c's methods.
-Implements low level inversion functionality, at the moment Numba is conditional, has about
-a 2x slowdown without Numba.
+Implements low level inversion functionality, with conditional Numba njit compilation.
 """
 import sys
 import math
@@ -13,39 +12,37 @@ import logging
 import time
 
 import numpy as np
-#from numpy import pi
+from numpy import pi
 from functools import reduce
-
-pi = np.float64(3.1416) #Temporary, to pass tests.
 
 try:
     from numba import njit
 except ImportError:
-    # identity decorator for njit which ignores type signature.
+    #Identity decorator for njit which ignores type signature.
     njit = lambda *args, **kw: (lambda x: x)
-
-@njit('f8(f8, f8)')
-def pr_sphere(R, r):
-    """
-    P(r) of a sphere, for test purposes
-    """
-    if(r <= 2.0*R):
-        return 12.0* (0.5*r/R)**2 * (1.0-0.5*r/R)**2 * (2.0+0.5*r/R)
-    else:
-        return 0
 
 @njit('f8(f8, u8, f8)')
 def ortho(d_max, n, r):
     """
     Orthogonal Functions:
     B(r) = 2r sin(pi*nr/d)
+
+    :param d_max: d_max.
+    :param n: n.
+
+    :return: B(r).
     """
     return (2.0 * r) * np.sin(pi*(n*r)/d_max)
 
 @njit('f8(f8, u8, f8)')
 def ortho_derived(d_max, n, r):
     """
-    First derivative in of the orthogonal function dB(r)/dr
+    First derivative in of the orthogonal function dB(r)/dr.
+
+    :param d_max: d_max.
+    :param n: n.
+
+    :return: First derivative in dB(r)/dr.
     """
     pinr = pi * n * r/d_max
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
@@ -54,6 +51,12 @@ def ortho_derived(d_max, n, r):
 def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param r: r-value to evaluate P(r).
+
+    :return: P(r).
     """
     sum = 0.0
     for i in range(pars.shape[0]):
@@ -64,9 +67,13 @@ def pr(pars, d_max, r):
 def pr_err(pars, err, d_max, r):
     """
     P(r) calculated from the expansion,
-    with errors
-    changed to instead of return value by reference, returns
-    np array of [pr_value, pr_value_err]
+    with errors.
+
+    :param pars: c-parameters.
+    :param err: err.
+    :param r: r-value.
+
+    :return: [P(r), dP(r)].
     """
     sum = 0.0
     sum_err = 0.0
@@ -93,6 +100,12 @@ def pr_err(pars, err, d_max, r):
 def dprdr(pars, d_max, r):
     """
     dP(r)/dr calculated from the expansion.
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param r: r-value.
+
+    :return: dP(r)/dr.
     """
     sum = 0.0
     for i in range(0, pars.shape[0]):
@@ -103,6 +116,12 @@ def dprdr(pars, d_max, r):
 def ortho_transformed(q, d_max, n):
     """
     Fourier transform of the nth orthogonal function.
+
+    :param q: q (vector).
+    :param d_max: d_max.
+    :param n: n.
+
+    :return: Fourier transform of nth orthogonal function across all q.
     """
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
@@ -111,6 +130,15 @@ def ortho_transformed_smeared(q, d_max, n, height, width, npts):
     """
     Slit-smeared Fourier transform of the nth orthogonal function.
     Smearing follows Lake, Acta Cryst. (1967) 23, 191.
+
+    :param q: q (vector).
+    :param d_max: d_max.
+    :param n: n.
+    :param height: slit_height.
+    :param width: slit_width.
+    :param npts: npts.
+
+    :return: Slit-smeared Fourier transform of nth orthogonal function across all q.
     """
     n_width = npts if width > 0 else 1
     n_height = npts if height > 0 else 1
@@ -131,6 +159,14 @@ def ortho_transformed_smeared(q, d_max, n, height, width, npts):
 def iq_smeared(p, q, d_max, height, width, npts):
     """
     Scattering intensity calculated from the expansion, slit-smeared.
+
+    :param p: c-parameters.
+    :param q: q (vector).
+    :param height: slit_height.
+    :param width: slit_width.
+    :param npts: npts.
+
+    :return: Scattering intensity from the expansion slit-smeared across all q.
     """
     size_q = len(q)
     size_p = len(p)
@@ -145,6 +181,12 @@ def iq_smeared(p, q, d_max, height, width, npts):
 def iq(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion.
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param q: q (vector).
+
+    :return: Scattering intensity from the expansion across all q.
     """
     sum = np.zeros(len(q), dtype = np.float64)
 
@@ -157,6 +199,12 @@ def iq(pars, d_max, q):
 def reg_term(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return: Regularization term calculated from the expansion.
     """
     sum = 0.0
     r = 0.0
@@ -174,6 +222,12 @@ def reg_term(pars, d_max, nslice):
 def int_p2(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return:  Regularization term calculated from the expansion.
     """
     sum = 0.0
     r = 0.0
@@ -190,7 +244,13 @@ def int_p2(pars, d_max, nslice):
 @njit('f8(f8[:], f8, u8)')
 def int_pr(pars, d_max, nslice):
     """
-    Integral of P(r)
+    Integral of P(r).
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return: Integral of P(r).
     """
     sum = 0.0
     r = 0.0
@@ -207,7 +267,13 @@ def int_pr(pars, d_max, nslice):
 @njit('u8(f8[:], f8, u8)')
 def npeaks(pars, d_max, nslice):
     """
-    Get the number of P(r) peaks
+    Get the number of P(r) peaks.
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return: Number of P(r) peaks.
     """
     r = 0.0
     value = 0.0
@@ -234,6 +300,13 @@ def positive_integral(pars, d_max, nslice):
     Get the fraction of the integral of P(r) over the whole
     range of r that is above 0.
     A valid P(r) is defined as being positive for all r.
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return: The fraction of the integral of P(r) over the whole
+    range of r that is above 0.
     """
     r = 0.0
     value = 0.0
@@ -253,6 +326,14 @@ def positive_integral(pars, d_max, nslice):
 def positive_errors(pars, err, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole range
+    of r that is at least one sigma above 0.
+
+    :param pars: c-parameters.
+    :param err: error terms.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return: The fraction of the integral of P(r) over the whole range
     of r that is at least one sigma above 0.
     """
     r = 0.0
@@ -275,6 +356,12 @@ def rg(pars, d_max, nslice):
     R_g radius of gyration calculation
 
     R_g**2 = integral[r**2 * p(r) dr] / (2.0 * integral[p(r) dr])
+
+    :param pars: c-parameters.
+    :param d_max: d_max.
+    :param nslice: nslice.
+
+    :return: R_g radius of gyration.
     """
     sum_r2 = 0.0
     sum = 0.0
