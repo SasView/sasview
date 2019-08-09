@@ -3,7 +3,7 @@ Python implementation of C extension bsl_loader.c
 """
 import numpy as np
 
-class PLoader():
+class Loader():
 
     def __init__(self, filename, frames, pixels, rasters, swap_bytes):
         self.filename = filename
@@ -119,7 +119,7 @@ class PLoader():
 
 
 if(__name__ == "__main__"):
-    test = PLoader("Name", 20, 20, 20, 20)
+    test = Loader("Name", 20, 20, 20, 20)
     test.filename = "ASDF"
     test.filename = 3
     test.filename = True
