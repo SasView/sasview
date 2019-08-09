@@ -372,13 +372,14 @@ class Pinvertor:
 
         :return: I(q), either scalar or vector depending on q.
         """
+        q = np.float64(q)
         q = np.atleast_1d(q)
         pars = np.float64(pars)
-        q = np.float64(q)
+
 
         npts = 21
-        iq_val = np.float64(py_invertor.iq_smeared(pars, q, self.d_max, self.slit_height,
-                                       self.slit_width, npts))
+        iq_val = py_invertor.iq_smeared(pars, q, self.d_max, self.slit_height,
+                                       self.slit_width, npts)
         #If q was a scalar
         if(iq_val.shape[0] == 1):
             return np.asscalar(iq_val)
