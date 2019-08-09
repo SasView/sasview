@@ -28,10 +28,6 @@ except ImportError:
 def pr_sphere(R, r):
     """
     P(r) of a sphere, for test purposes
-
-    :param R: radius of the sphere
-    :param r: distance, in same units as the radius
-    :return: P(r)
     """
     if(r <= 2.0*R):
         return 12.0* (0.5*r/R)**2 * (1.0-0.5*r/R)**2 * (2.0+0.5*r/R)
@@ -95,6 +91,9 @@ def pr_err(pars, err, d_max, r):
 
 @njit('f8(f8[:], f8, f8)')
 def dprdr(pars, d_max, r):
+    """
+    dP(r)/dr calculated from the expansion.
+    """
     sum = 0.0
     for i in range(0, pars.shape[0]):
         sum += pars[i] * 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
@@ -102,10 +101,17 @@ def dprdr(pars, d_max, r):
 
 @njit('f8[:](f8[:], f8, i8)')
 def ortho_transformed(q, d_max, n):
+    """
+    Fourier transform of the nth orthogonal function.
+    """
     return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
 
 @njit('f8[:](f8[:], f8, i8, f8, f8, u8)')
 def ortho_transformed_smeared(q, d_max, n, height, width, npts):
+    """
+    Slit-smeared Fourier transform of the nth orthogonal function.
+    Smearing follows Lake, Acta Cryst. (1967) 23, 191.
+    """
     n_width = npts if width > 0 else 1
     n_height = npts if height > 0 else 1
     dz = height/(npts-1)
@@ -123,6 +129,9 @@ def ortho_transformed_smeared(q, d_max, n, height, width, npts):
 
 @njit('f8[:](f8[:], f8[:], f8, f8, f8, u8)')
 def iq_smeared(p, q, d_max, height, width, npts):
+    """
+    Scattering intensity calculated from the expansion, slit-smeared.
+    """
     size_q = len(q)
     size_p = len(p)
     total = np.zeros(size_q, dtype=np.float64)
@@ -135,11 +144,7 @@ def iq_smeared(p, q, d_max, height, width, npts):
 @njit('f8[:](f8[:], f8, f8[:])')
 def iq(pars, d_max, q):
     """
-    Scattering intensity calculated from the expansion
-    :param: pars
-    :param: d_max
-    :param: q, scalar or vector.
-    :return: vector of results, len 1 if q was scalar
+    Scattering intensity calculated from the expansion.
     """
     sum = np.zeros(len(q), dtype = np.float64)
 
