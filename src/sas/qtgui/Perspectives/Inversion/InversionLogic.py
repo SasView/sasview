@@ -86,19 +86,22 @@ class InversionLogic(object):
             new_plot.group_id = pr.info["plot_group_id"]
         new_plot.id = IQ_FIT_LABEL
 
+
         # If we have used slit smearing, plot the smeared I(q) too
         if pr.slit_width > 0 or pr.slit_height > 0:
             x = np.arange(minq, maxq, maxq / 301.0)
             y = np.zeros(len(x))
             err = np.zeros(len(x))
+
+            #vectorised iq_smeared
+            value = pr.iq_smeared(out, x)
+            y = value
             for i in range(len(x)):
-                value = pr.iq_smeared(pr.out, x[i])
-                y[i] = value
                 try:
-                    err[i] = math.sqrt(math.fabs(value))
+                    err[i] = np.sqrt(np.abs(value[i]))
                 except:
                     err[i] = 1.0
-                    logger.log(("Error getting error", value, x[i]))
+                    logger.log(("Error getting error"), value[i], x[i])
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL
