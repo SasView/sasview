@@ -1,5 +1,6 @@
 from sas.sascalc.file_converter._bsl_loader import CLoader
 from sas.sascalc.dataloader.data_info import Data2D
+from .py_bsl_loader import Loader
 from copy import deepcopy
 import os
 import numpy as np
@@ -7,7 +8,7 @@ import numpy as np
 class BSLParsingError(Exception):
     pass
 
-class BSLLoader(CLoader):
+class BSLLoader(Loader):
     """
     Loads 2D SAS data from a BSL file.
     CLoader is a C extension (found in c_ext/bsl_loader.c)
