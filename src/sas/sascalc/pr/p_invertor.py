@@ -405,7 +405,7 @@ class Pinvertor:
         """
         Function to call to evaluate P(r) with errors.
 
-        :param pars: c-parameters
+        :param pars: c-parameters.
         :param pars_err: pars_err.
         :param r: r-value.
 

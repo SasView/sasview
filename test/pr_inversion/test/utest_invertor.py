@@ -433,7 +433,7 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.d_max, 160.0)
         self.assertEqual(self.invertor.alpha, 0.0007)
         self.assertEqual(self.invertor.chi2, 836.797)
-        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 903.31577041, 4)
+        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 903.30597721, 4)
         if os.path.isfile(f_name):
             os.remove(f_name)
 
