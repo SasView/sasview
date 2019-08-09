@@ -99,12 +99,14 @@ class Loader():
         desc += "n_rasters: " + str(self.n_rasters) + "\n"
         desc += "swap_bytes: " + str(self.swap_bytes) + "\n"
         return desc
+
+    #May be irrelevant in final build.
     def reverse_float(self, in_float):
         """
         Reverses the order of the bytes of a float.
-
         :param: in_float, float to be reversed.
         :return: float value reversed.
+
         """
         in_float = self.try_convert(np.float64, in_float)
         bits = in_float.byteswap()
@@ -114,7 +116,67 @@ class Loader():
         """
         Load the data into a numpy array.
         """
-        pass
+        data = np.array([self.n_rasters, self.n_pixels], dtype = np.float64)
+
+        #conditional little endian if swap_bytes true or big endian otherwise.
+        #may be the other way around.
+        dtype = ('>f8', '<f8')[self.swap_bytes]
+
+        #Move the file to the position of the data we're interested in begins.
+        frame_pos = self.n_pixels * self.n_rasters * self.frame
+
+        offset = frame_pos #offset in float, np should
+
+        float_size = 4 #assume float size is 4 bytes for now.
+
+        #Read as numpy array of type float little/big endian, will not need
+        #reverse_float explicitly.
+        #May need to make a file pointer seek it then do -
+        file = open(self.filename, 'rb')
+        #error on opening file
+        if(file == False):
+            raise RuntimeError("Unable to open file", self.filename)
+
+        file.seek(offset)
+        #file object
+        input_file = np.fromfile(file, dtype = dtype)
+        #load to string.
+        input_file = np.fromfile(self.filename, dtype = dtype)
+        #seek to offset represented by starting from particular index?
+
+        #something like
+        data = input_file[offset:]
+        #2d/1d indexing need.
+
+        #Reading as python default file pointer each byte
+        #return as file pointer and read bytes individually
+        input_file = open(self.filename, 'rb')
+
+        input_file.seek(offset)
+
+        for raster in range(self.n_rasters):
+            for pixel in range(self.n_pixels):
+                input = 0
+                try:
+                    input = input_file.read(float_size)
+                except:
+                    raise RuntimeError("Error reading file or EOF reached")
+
+                if(swap_bytes == 0):
+                    input = self.reverse_float(input)
+
+                data[raster, pixel] = input
+
+
+
+
+
+
+
+
+
+
+        return data
 
 
 
