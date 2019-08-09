@@ -26,7 +26,6 @@ import math
 import numpy
 
 
-#from sas.sascalc.pr.core.pr_inversion import Cinvertor #no longer used
 from .p_invertor import Pinvertor
 logger = logging.getLogger(__name__)
 
