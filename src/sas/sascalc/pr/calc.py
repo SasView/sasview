@@ -215,9 +215,6 @@ def reg_term(pars, d_max, nslice):
 
     :return: Regularization term calculated from the expansion.
     """
-    total = 0.0
-    r = 0.0
-    deriv = 0.0
     nslice_d = np.float64(nslice)
     i_r = np.arange(nslice)
     r = d_max/nslice_d * i_r
@@ -238,9 +235,6 @@ def int_pr_square(pars, d_max, nslice):
 
     :return:  Regularization term calculated from the expansion.
     """
-    total = 0.0
-    r = 0.0
-    value = 0.0
     nslice_d = np.float64(nslice)
     i_r = np.arange(nslice)
     r = d_max/nslice_d * i_r
@@ -260,9 +254,6 @@ def int_pr(pars, d_max, nslice):
 
     :return: Integral of P(r).
     """
-    total = 0.0
-    r = 0.0
-    value = 0.0
     nslice_d = np.float64(nslice)
 
     i_r = np.arange(nslice)
@@ -284,11 +275,6 @@ def npeaks(pars, d_max, nslice):
 
     :return: Number of P(r) peaks.
     """
-    r = 0.0
-    value = 0.0
-    previous = 0.0
-    slope = 0.0
-    count = 0
     i_r = np.arange(nslice)
     r = d_max/np.float64(nslice) * i_r
     values = pr(pars, d_max, r)
@@ -319,10 +305,6 @@ def positive_integral(pars, d_max, nslice):
     :return: The fraction of the integral of P(r) over the whole
     range of r that is above 0.
     """
-    r = 0.0
-    value = 0.0
-    total_pos = 0.0
-    total = 0.0
     nslice_d = np.float64(nslice)
     i_r = np.arange(nslice)
     r = d_max/nslice_d * i_r
@@ -347,9 +329,6 @@ def positive_errors(pars, err, d_max, nslice):
     :return: The fraction of the integral of P(r) over the whole range
     of r that is at least one sigma above 0.
     """
-    r = 0.0
-    total_pos = 0.0
-    total = 0.0
     nslice_d = np.float64(nslice)
     i_r = np.arange(nslice)
     r = d_max/nslice_d * i_r
@@ -378,10 +357,6 @@ def rg(pars, d_max, nslice):
 
     :return: R_g radius of gyration.
     """
-    total_r2 = 0.0
-    total = 0.0
-    r = 0.0
-    value = 0.0
     i_r = np.arange(nslice)
     r = (d_max / nslice) * i_r
     values = pr(pars, d_max, r)
