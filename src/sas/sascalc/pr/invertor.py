@@ -683,9 +683,10 @@ class Invertor(Pinvertor):
         file.write("<r>  <Pr>  <dPr>\n")
         r = np.arange(0.0, self.d_max, self.d_max / npts)
 
-        for r_i in r:
-            (value, err) = self.pr_err(self.out, self.cov, r_i)
-            file.write("%g  %g  %g\n" % (r_i, value, err))
+
+        (value, err) = self.pr_err(self.out, self.cov, r)
+        all_data = np.vstack([r, value, err])
+        np.savetxt(file, all_data.T)
 
         file.close()
 
