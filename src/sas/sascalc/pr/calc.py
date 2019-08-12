@@ -16,7 +16,6 @@ from numpy import pi
 from functools import reduce
 
 try:
-    raise ImportError
     from numba import njit
 except ImportError:
     #Identity decorator for njit which ignores type signature.
@@ -361,13 +360,15 @@ def positive_errors(pars, err, d_max, nslice):
     nslice_d = np.float64(nslice)
     i_r = np.arange(nslice)
     r = d_max/nslice_d * i_r
-    full = pr_err(pars, err, d_max, r)
+    pr_vals = pr_err(pars, err, d_max, r)
 
-    for i in range(nslice):
-        pr_val, pr_val_err = full[0, i], full[1, i]
-        if(pr_val > pr_val_err):
-            total_pos += pr_val
-        total += np.fabs(pr_val)
+    pr_val = pr_vals[0, :]
+    pr_val_err = pr_vals[1, :]
+
+    total = np.sum(np.fabs(pr_val))
+
+    index = pr_val > pr_val_err
+    total_pos = np.sum(pr_val[index])
 
     return total_pos / total
 
@@ -392,10 +393,8 @@ def rg(pars, d_max, nslice):
     r = (d_max / nslice) * i_r
     values = pr(pars, d_max, r)
 
-    for i in range(nslice):
-        value = values[i]
-        total += value
-        total_r2 += (r[i]**2)  * value
+    total = np.sum(values)
+    total_r2 = np.sum((r ** 2) * values)
 
     return np.sqrt(total_r2 / (2.0*total))
 
