@@ -65,14 +65,13 @@ class InversionLogic(object):
         y = np.zeros(len(x))
         err = np.zeros(len(x))
         #vectorised iq
-        value = pr.iq(out, x)
-        y = value
-        for i in range(len(x)):
-           try:
-               err[i] = np.sqrt(np.abs(value[i]))
-           except:
-                err[i] = 1.0
-                logger.log(("Error getting error"), value[i], x[i])
+        y = pr.iq(out, x)
+        with np.errstate(invalid='ignore'):
+            err = np.sqrt(np.abs(y))
+        index = np.isnan(err)
+        if index.any():
+            err[index] = 1.0
+            logger.log("Could not compute error for (q, I(q)) = ", list(zip(x[index], value[index])))
 
         new_plot = Data1D(x, y)
         new_plot.name = IQ_FIT_LABEL
@@ -94,14 +93,14 @@ class InversionLogic(object):
             err = np.zeros(len(x))
 
             #vectorised iq_smeared
-            value = pr.iq_smeared(out, x)
-            y = value
-            for i in range(len(x)):
-                try:
-                    err[i] = np.sqrt(np.abs(value[i]))
-                except:
-                    err[i] = 1.0
-                    logger.log(("Error getting error"), value[i], x[i])
+
+            y = pr.iq_smeared(out, x)
+            with np.errstate(invalid='ignore'):
+                err = np.sqrt(np.abs(y))
+            index = np.isnan(err)
+            if index.any():
+                err[index] = 1.0
+                logger.log("Could not compute error for (q, I(q)) = ", list(zip(x[index], value[index])))
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL

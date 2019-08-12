@@ -16,12 +16,13 @@ from numpy import pi
 from functools import reduce
 
 try:
+    raise ImportError
     from numba import njit
 except ImportError:
     #Identity decorator for njit which ignores type signature.
     njit = lambda *args, **kw: (lambda x: x)
 
-@njit('f8(f8, u8, f8)')
+@njit('f8[:](f8, f8[:], f8)')
 def ortho(d_max, n, r):
     """
     Orthogonal Functions:
@@ -58,10 +59,9 @@ def pr(pars, d_max, r):
 
     :return: P(r).
     """
-    sum = 0.0
-    for i in range(pars.shape[0]):
-        sum += pars[i] * ortho(d_max, i+1, r)
-    return sum
+    func_values = ortho(d_max, np.arange(1.0, pars.shape[0] + 1), r)
+    total = np.dot(pars, func_values)
+    return total
 
 @njit('f8[:](f8[:], f8[:,:], f8, f8)')
 def pr_err(pars, err, d_max, r):
@@ -75,21 +75,14 @@ def pr_err(pars, err, d_max, r):
 
     :return: [P(r), dP(r)].
     """
-    sum = 0.0
-    sum_err = 0.0
-    func_value = 0.0
-    n_c = pars.shape[0]
+    n_c = len(pars)
 
-    for i in range(n_c):
-        func_value = ortho(d_max, i+1, r)
-        sum += pars[i] * func_value
-        sum_err += err[i, i] * func_value * func_value
+    func_values = ortho(d_max, np.arange(1.0, n_c + 1), r)
+    total = np.dot(pars, func_values)
+    total_err = np.dot(np.diag(err), func_values ** 2)
 
-    pr_value = np.float64(sum)
-    if(sum_err > 0):
-        pr_value_err = np.sqrt(sum_err)
-    else:
-        pr_value_err = sum
+    pr_value = np.float64(total)
+    pr_value_err = np.sqrt(total_err) if (total_err >  0) else total
 
     ret = np.zeros(2, dtype = np.float64)
     ret[0] = pr_value
@@ -107,10 +100,10 @@ def dprdr(pars, d_max, r):
 
     :return: dP(r)/dr.
     """
-    sum = 0.0
+    total = 0.0
     for i in range(0, pars.shape[0]):
-        sum += pars[i] * 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
-    return sum
+        total += pars[i] * 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
+    return total
 
 @njit('f8[:](f8[:], f8, i8)')
 def ortho_transformed(q, d_max, n):
@@ -188,12 +181,12 @@ def iq(pars, d_max, q):
 
     :return: Scattering intensity from the expansion across all q.
     """
-    sum = np.zeros(len(q), dtype = np.float64)
+    total = np.zeros(len(q), dtype = np.float64)
 
     for i in range(len(pars)):
-        sum += pars[i] * ortho_transformed(q, d_max, i+1)
+        total += pars[i] * ortho_transformed(q, d_max, i+1)
 
-    return sum
+    return total
 
 @njit('f8(f8[:], f8, u8)')
 def reg_term(pars, d_max, nslice):
@@ -206,7 +199,7 @@ def reg_term(pars, d_max, nslice):
 
     :return: Regularization term calculated from the expansion.
     """
-    sum = 0.0
+    total = 0.0
     r = 0.0
     deriv = 0.0
     nslice_d = np.float64(nslice)
@@ -214,9 +207,9 @@ def reg_term(pars, d_max, nslice):
     for i in range(nslice):
         r = d_max/nslice_d * i
         deriv = dprdr(pars, d_max, r)
-        sum += deriv * deriv
+        total += deriv * deriv
 
-    return sum/nslice_d * d_max
+    return total/nslice_d * d_max
 
 @njit('f8(f8[:], f8, u8)')
 def int_p2(pars, d_max, nslice):
@@ -229,7 +222,7 @@ def int_p2(pars, d_max, nslice):
 
     :return:  Regularization term calculated from the expansion.
     """
-    sum = 0.0
+    total = 0.0
     r = 0.0
     value = 0.0
     nslice_d = np.float64(nslice)
@@ -237,9 +230,9 @@ def int_p2(pars, d_max, nslice):
     for i in range(nslice):
         r = d_max/nslice_d * i
         value = pr(pars, d_max, r)
-        sum += value * value
+        total += value * value
 
-    return sum/nslice_d * d_max
+    return total/nslice_d * d_max
 
 @njit('f8(f8[:], f8, u8)')
 def int_pr(pars, d_max, nslice):
@@ -252,7 +245,7 @@ def int_pr(pars, d_max, nslice):
 
     :return: Integral of P(r).
     """
-    sum = 0.0
+    total = 0.0
     r = 0.0
     value = 0.0
     nslice_d = np.float64(nslice)
@@ -260,9 +253,9 @@ def int_pr(pars, d_max, nslice):
     for i in range(nslice):
         r = d_max/nslice_d * i
         value = pr(pars, d_max, r)
-        sum += value
+        total += value
 
-    return sum/nslice_d * d_max
+    return total/nslice_d * d_max
 
 @njit('u8(f8[:], f8, u8)')
 def npeaks(pars, d_max, nslice):
@@ -310,17 +303,17 @@ def positive_integral(pars, d_max, nslice):
     """
     r = 0.0
     value = 0.0
-    sum_pos = 0.0
-    sum = 0.0
+    total_pos = 0.0
+    total = 0.0
     nslice_d = np.float64(nslice)
 
     for i in range(nslice):
         r = d_max/nslice_d * i
         value = pr(pars, d_max, r)
         if(value > 0.0):
-           sum_pos += value
-        sum += math.fabs(value)
-    return sum_pos / sum
+           total_pos += value
+        total += math.fabs(value)
+    return total_pos / total
 
 @njit('f8(f8[:], f8[:,:], f8, u8)')
 def positive_errors(pars, err, d_max, nslice):
@@ -337,18 +330,18 @@ def positive_errors(pars, err, d_max, nslice):
     of r that is at least one sigma above 0.
     """
     r = 0.0
-    sum_pos = 0.0
-    sum = 0.0
+    total_pos = 0.0
+    total = 0.0
     nslice_d = np.float64(nslice)
 
     for i in range(nslice):
         r = d_max/nslice_d * i
         (pr_val, pr_val_err) = pr_err(pars, err, d_max, r)
         if(pr_val > pr_val_err):
-            sum_pos += pr_val
-        sum += np.fabs(pr_val)
+            total_pos += pr_val
+        total += np.fabs(pr_val)
 
-    return sum_pos / sum
+    return total_pos / total
 
 @njit('f8(f8[:], f8, u8)')
 def rg(pars, d_max, nslice):
@@ -363,15 +356,16 @@ def rg(pars, d_max, nslice):
 
     :return: R_g radius of gyration.
     """
-    sum_r2 = 0.0
-    sum = 0.0
+    total_r2 = 0.0
+    total = 0.0
     r = 0.0
     value = 0.0
 
     for i in range(nslice):
         r = (d_max/nslice) * i
         value = pr(pars, d_max, r)
-        sum += value
-        sum_r2 += r * r * value
+        total += value
+        total_r2 += r * r * value
 
-    return np.sqrt(sum_r2 / (2.0*sum))
+    return np.sqrt(total_r2 / (2.0*total))
+
