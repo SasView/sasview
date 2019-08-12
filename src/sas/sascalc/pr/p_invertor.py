@@ -9,17 +9,17 @@ import timeit
 
 import numpy as np
 
-from . import calc as py_invertor
+from . import calc
 logger = logging.getLogger(__name__)
 
 
 class Pinvertor:
     #q data
-    x = np.empty(0, dtype = np.float)
+    x = np.empty(0, dtype=np.float)
     #I(q) data
-    y = np.empty(0, dtype = np.float)
+    y = np.empty(0, dtype=np.float)
     #dI(q) data
-    err = np.empty(0, dtype = np.float)
+    err = np.empty(0, dtype=np.float)
     #Number of q points
     npoints = 0
     #Number of I(q) points
@@ -57,17 +57,10 @@ class Pinvertor:
         diff = 0.0
         regterm = 0.0
         nslice = 25
-        regterm = py_invertor.reg_term(pars, self.d_max, nslice)
-        diff = self.y[0:self.npoints] - py_invertor.iq(pars, self.d_max, self.x)
-        residual_list = (diff*diff) / (self.err * self.err)
-        residual_list += self.alpha * regterm
+        regterm = calc.reg_term(pars, self.d_max, nslice)
+        resid = (self.y[0:self.npoints] - calc.iq(pars, self.d_max, self.x))/self.err
 
-        try:
-            residuals.extend(residual_list)
-        except:
-            raise RuntimeError("Pinvertor.residuals: error setting residual.")
-
-        return residuals
+        return list(resid**2 + self.alpha*regterm)
 
     def pr_residuals(self, pars):
         """
@@ -81,15 +74,9 @@ class Pinvertor:
         residuals = []
         regterm = 0.0
         nslice = 25
-        regterm = py_invertor.reg_term(pars, self.d_max, nslice)
-
-        for i in range(self.npoints):
-            diff = self.y[i] - py_invertor.pr(pars, self.d_max, self.x[i])
-            residual = (diff*diff) / (self.err[i]*self.err[i])
-            residual += self.alpha * regterm
-            residuals.append(float(residual))
-
-        return residuals
+        regterm = calc.reg_term(pars, self.d_max, nslice)
+        resid = (self.y[0:npoints] - calc.pr(pars, self.d_max, self.x))/self.err
+        return list(resid**2 + self.alpha * regterm)
 
     def set_x(self, data):
         """
@@ -117,7 +104,7 @@ class Pinvertor:
         data = np.float64(data)
         ndata = len(data)
 
-        if (ndata < self.npoints):
+        if ndata < self.npoints:
             logger.error("Pinvertor.get_x: input array too short for data.")
             return None
 
@@ -151,7 +138,7 @@ class Pinvertor:
         data = np.float64(data)
         ndata = len(data)
 
-        if (ndata < self.ny):
+        if ndata < self.ny:
             logger.error("Pinvertor.get_y: input array too short for data.")
             return None
 
@@ -185,7 +172,7 @@ class Pinvertor:
         ndata = len(data)
         data = np.float64(data)
 
-        if (ndata < self.nerr):
+        if ndata < self.nerr:
             logger.error("Pinvertor.get_err: input array too short for data.")
             return None
 
@@ -357,8 +344,8 @@ class Pinvertor:
         pars = np.atleast_1d(pars)
         q = np.atleast_1d(q)
 
-        iq_val = py_invertor.iq(pars, self.d_max, q)
-        if(iq_val.shape[0] == 1):
+        iq_val = calc.iq(pars, self.d_max, q)
+        if iq_val.shape[0] == 1:
             return np.asscalar(iq_val)
         return iq_val
 
@@ -378,10 +365,9 @@ class Pinvertor:
 
 
         npts = 21
-        iq_val = py_invertor.iq_smeared(pars, q, self.d_max, self.slit_height,
-                                       self.slit_width, npts)
+        iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height, self.slit_width, npts)
         #If q was a scalar
-        if(iq_val.shape[0] == 1):
+        if iq_val.shape[0] == 1:
             return np.asscalar(iq_val)
         return iq_val
 
@@ -398,8 +384,8 @@ class Pinvertor:
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
         r = np.atleast_1d(r)
-        pr_val = py_invertor.pr(pars, self.d_max, r)
-        if(len(pr_val) == 1):
+        pr_val = calc.pr(pars, self.d_max, r)
+        if len(pr_val) == 1:
             #scalar
             return np.asscalar(pr_val)
         return pr_val
@@ -415,27 +401,13 @@ class Pinvertor:
         :return: (P(r), dP(r))
         """
 
-        pars = np.atleast_1d(pars)
-        pars = np.float64(pars)
-        r = np.float64(r)
-        r = np.atleast_1d(r)
-        pars_err = np.float64(pars_err)
-
-        pr_val = 0.0
-        pr_err_val = 0.0
-        result = np.zeros(2, dtype = np.float64)
-
-        if(pars_err is None):
-            pr_val = pr(pars, self.d_max, r)
-            pr_err_value = 0.0
-            result[0, :] = pr_val
-            result[1, :] = pr_err_value
+        pars = np.atleast_1d(np.float64(pars))
+        r = np.atleast_1d(np.float64(r))
+        if pars_err is None:
+            return calc.pr(pars, self.d_max, r), 0.0
         else:
-            result = py_invertor.pr_err(pars, pars_err, self.d_max, r)
-
-        if(result.shape[1] == 1):
-            return (result[0, 0], result[1, 0])
-        return ((result[0, :]), (result[1, :]))
+            pars_err = np.float64(pars_err)
+            return calc.pr_err(pars, pars_err, self.d_max, r)
 
     def is_valid(self):
         """
@@ -443,7 +415,7 @@ class Pinvertor:
 
         :return: Returns the number of points if it's all good, -1 otherwise.
         """
-        if(self.npoints == self.ny and self.npoints == self.nerr):
+        if self.npoints == self.ny and self.npoints == self.nerr:
             return self.npoints
         else:
             return -1
@@ -462,9 +434,9 @@ class Pinvertor:
         n = int(n)
         q = np.float64(q)
         q = np.atleast_1d(q)
-        ortho_val = py_invertor.ortho_transformed(q, d_max, n)
+        ortho_val = calc.ortho_transformed(q, d_max, n)
 
-        if(ortho_val.shape[0] == 1):
+        if ortho_val.shape[0] == 1:
             #If the q input was scalar.
             return np.asscalar(ortho_val)
         return ortho_val
@@ -482,8 +454,8 @@ class Pinvertor:
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
 
-        oscill = py_invertor.reg_term(pars, self.d_max, nslice)
-        norm = py_invertor.int_p2(pars, self.d_max, nslice)
+        oscill = calc.reg_term(pars, self.d_max, nslice)
+        norm = calc.int_pr_square(pars, self.d_max, nslice)
         ret_val = np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max
 
         return ret_val
@@ -498,7 +470,7 @@ class Pinvertor:
         """
         nslice = 100
         pars = np.float64(pars)
-        count = py_invertor.npeaks(pars, self.d_max, nslice)
+        count = calc.npeaks(pars, self.d_max, nslice)
 
         return count
 
@@ -513,7 +485,7 @@ class Pinvertor:
         nslice = 100
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        fraction = py_invertor.positive_integral(pars, self.d_max, nslice)
+        fraction = calc.positive_integral(pars, self.d_max, nslice)
 
         return fraction
 
@@ -531,7 +503,7 @@ class Pinvertor:
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
         pars_err = np.float64(pars_err)
-        fraction = py_invertor.positive_errors(pars, pars_err, self.d_max, nslice)
+        fraction = calc.positive_errors(pars, pars_err, self.d_max, nslice)
 
         return fraction
 
@@ -545,7 +517,7 @@ class Pinvertor:
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        val = py_invertor.rg(pars, self.d_max, nslice)
+        val = calc.rg(pars, self.d_max, nslice)
 
         return val
 
@@ -559,7 +531,7 @@ class Pinvertor:
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        val = np.float64(4.0 * np.arccos(-1.0) * py_invertor.int_pr(pars, self.d_max, nslice))
+        val = np.float64(4.0 * np.arccos(-1.0) * calc.int_pr(pars, self.d_max, nslice))
 
         return val
 
@@ -569,7 +541,7 @@ class Pinvertor:
 
         :return: 1 if accepted, 0 if rejected.
         """
-        if(self.get_qmin() <= 0 and self.get_qmax() <= 0):
+        if self.get_qmin() <= 0 and self.get_qmax() <= 0:
             return True
         return (q >= self.get_qmin()) & (q <= self.get_qmax())
 
@@ -590,10 +562,10 @@ class Pinvertor:
         nfunc = int(nfunc)
         nr = int(nr)
 
-        if not (b_obj.shape[0] >= nfunc):
+        if not b_obj.shape[0] >= nfunc:
             raise RuntimeError("Pinvertor: b vector too small.")
 
-        if not (a_obj.size >= nfunc*(nr + self.npoints)):
+        if not a_obj.size >= nfunc*(nr + self.npoints):
             raise RuntimeError("Pinvertor: a array too small.")
 
 
@@ -601,45 +573,45 @@ class Pinvertor:
         pi = np.arccos(-1.0)
         offset = (1, 0)[self.est_bck == 1]
 
-        if(self.check_for_zero(self.err)):
+        if self.check_for_zero(self.err):
             raise RuntimeError("Pinvertor.get_matrix: Some I(Q) points have no error.")
 
         #Compute A
         #Whether or not to use ortho_transformed_smeared.
         smeared = False
-        if(self.slit_width > 0 or self.slit_height > 0):
+        if self.slit_width > 0 or self.slit_height > 0:
             smeared = True
 
         npts = 21
         #Get accept_q vector across all q.
         q_accept_x = self.accept_q(self.x)
 
-        if(isinstance(q_accept_x, bool)):
-           #In the case of q_min and q_max <= 0, so returns scalar, and returns True
-           q_accept_x = np.ones(self.npoints, dtype = bool)
+        if isinstance(q_accept_x, bool):
+            #In the case of q_min and q_max <= 0, so returns scalar, and returns True
+            q_accept_x = np.ones(self.npoints, dtype=bool)
         #The x and a that will be used for the first part of 'a' calculation, given to ortho_transformed
         x_use = self.x[q_accept_x]
         a_use = a_obj[0:self.npoints, :]
 
         for j in range(nfunc):
-            if(self.est_bck == 1 and j == 0):
+            if self.est_bck == 1 and j == 0:
                 a_use[q_accept_x, j] = 1.0/self.err[q_accept_x]
+            elif smeared:
+                a_use[q_accept_x, j] = calc.ortho_transformed_smeared(x_use, self.d_max, j+offset,
+                                                                      self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
             else:
-                if(smeared):
-                    a_use[q_accept_x, j] = py_invertor.ortho_transformed_smeared(x_use, self.d_max, j+offset,
-                                                                                                self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
-                else:
-                    a_use[q_accept_x, j] = py_invertor.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
+                a_use[q_accept_x, j] = calc.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
 
         a_obj[0:self.npoints, :] = a_use
 
         for j in range(nfunc):
-            i_r = np.arange(nr, dtype = np.float64)
+            i_r = np.arange(nr, dtype=np.float64)
+
             #Implementing second stage A as a python vector operation with shape = [nr]
-            r = self.d_max / nr * i_r
+            r = (self.d_max / nr) * i_r
             tmp = pi * (j+offset) / self.d_max
             res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
-                   + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+                                                            + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
             #Res should now be np vector size i_r.
             a_obj[self.npoints:self.npoints+nr, j] = res
 
@@ -668,10 +640,10 @@ class Pinvertor:
         n_a = a_obj.size
         n_cov = cov_obj.size
 
-        if not (n_cov >= (nfunc * nfunc)):
+        if not n_cov >= (nfunc * nfunc):
             raise RuntimeError("Pinvertor._get_invcov_matrix: cov array too small.")
 
-        if not (n_a >= (nfunc * (nr + self.npoints))):
+        if not n_a >= (nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
@@ -691,7 +663,7 @@ class Pinvertor:
         nfunc = int(nfunc)
         nr = int(nr)
 
-        if not (a_obj.size >= nfunc * (nr + self.npoints)):
+        if not a_obj.size >= nfunc * (nr + self.npoints):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
 
         sum_sig = 0.0

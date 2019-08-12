@@ -11,9 +11,11 @@ import re
 import logging
 import time
 
+#from __future__ import division # at the top, for the 2.7 users
+from functools import reduce
 import numpy as np
 from numpy import pi
-from functools import reduce
+
 
 try:
     from numba import njit
@@ -92,16 +94,16 @@ def pr_err(pars, err, d_max, r):
     pr_value_err[index_less] = total[index_less]
     #pr_value_err = np.sqrt(total_err) if (total_err > 0) else total
 
-    ret = np.zeros((2, len(r)), dtype = np.float64)
+    ret = np.zeros((2, len(r)), dtype=np.float64)
     ret[0, :] = pr_value
     ret[1, :] = pr_value_err
     return ret
 
-@njit('f8[:](f8[:], f8, f8)')
-def f(i, d_max, r):
+@njit('f8[:](f8, f8, f8[:])')
+def dprdr_calc(i, d_max, r):
     return 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
 
-@njit('f8(f8[:], f8, f8)')
+@njit('f8[:](f8[:], f8, f8[:])')
 def dprdr(pars, d_max, r):
     """
     dP(r)/dr calculated from the expansion.
@@ -112,9 +114,9 @@ def dprdr(pars, d_max, r):
 
     :return: dP(r)/dr.
     """
-    total = 0.0
-
-    total = np.dot(np.ascontiguousarray(pars), np.ascontiguousarray(f(np.arange(1.0, pars.shape[0] + 1), d_max, r)))
+    total = np.zeros(len(r))
+    for i in range(len(pars)):
+        total += pars[i] * dprdr_calc(i, d_max, r)
     return total
 
 
@@ -129,7 +131,7 @@ def ortho_transformed(q, d_max, n):
 
     :return: Fourier transform of nth orthogonal function across all q.
     """
-    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ( (pi*n)**2 - (q*d_max)**2 )
+    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ((pi*n)**2 - (q*d_max)**2)
 
 @njit('f8[:](f8[:], f8, i8, f8, f8, u8)')
 def ortho_transformed_smeared(q, d_max, n, height, width, npts):
@@ -151,6 +153,7 @@ def ortho_transformed_smeared(q, d_max, n, height, width, npts):
     dz = height/(npts-1)
     y0, dy = -0.5*width, width/(npts-1)
     total = np.zeros(len(q), dtype=np.float64)
+
 
     for j in range(n_height):
         zsq = (j * dz)**2
@@ -194,7 +197,7 @@ def iq(pars, d_max, q):
 
     :return: Scattering intensity from the expansion across all q.
     """
-    total = np.zeros(len(q), dtype = np.float64)
+    total = np.zeros(len(q), dtype=np.float64)
 
     for i in range(len(pars)):
         total += pars[i] * ortho_transformed(q, d_max, i+1)
@@ -216,16 +219,16 @@ def reg_term(pars, d_max, nslice):
     r = 0.0
     deriv = 0.0
     nslice_d = np.float64(nslice)
+    i_r = np.arange(nslice)
+    r = d_max/nslice_d * i_r
+    deriv = dprdr(pars, d_max, r)
 
-    for i in range(nslice):
-        r = d_max/nslice_d * i
-        deriv = dprdr(pars, d_max, r)
-        total += deriv * deriv
+    total = np.sum(deriv ** 2)
 
     return total/nslice_d * d_max
 
 @njit('f8(f8[:], f8, u8)')
-def int_p2(pars, d_max, nslice):
+def int_pr_square(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
 
@@ -243,10 +246,6 @@ def int_p2(pars, d_max, nslice):
     r = d_max/nslice_d * i_r
     values = pr(pars, d_max, r)
     total = np.sum(values ** 2)
-    #for i in range(nslice):
-    #    r = d_max/nslice_d * i
-    #    value = pr(pars, d_max, r)
-    #    total += value * value
 
     return total/nslice_d * d_max
 
@@ -271,10 +270,6 @@ def int_pr(pars, d_max, nslice):
     values = pr(pars, d_max, r)
 
     total = np.sum(values)
-    #for i in range(nslice):
-    #    r = d_max/nslice_d * i
-    #    value = pr(pars, d_max, r)
-    #    total += value
 
     return total/nslice_d * d_max
 
@@ -298,17 +293,17 @@ def npeaks(pars, d_max, nslice):
     r = d_max/np.float64(nslice) * i_r
     values = pr(pars, d_max, r)
 
-    for i in range(nslice):
-        value = values[i]
-        if(previous <= value):
-            slope = 1
-        else:
-            if(slope > 0):
-                count += 1
-            slope = -1
-        previous = value
+    # Build an index vector with True for ascending and false for flat or descending
+    pos = values[:-1] < values[1:]
+    # Count the number of slope changes
+    count = np.sum((pos[:-1] != pos[1:]) & pos[:-1])
+    # Check if starting descending or ending ascending
+    count += 1 - pos[0] + pos[-1]
 
     return count
+
+
+
 
 @njit('f8(f8[:], f8, u8)')
 def positive_integral(pars, d_max, nslice):
@@ -333,11 +328,9 @@ def positive_integral(pars, d_max, nslice):
     r = d_max/nslice_d * i_r
     values = pr(pars, d_max, r)
 
-    for i in range(nslice):
-        value = values[i]
-        if(value > 0.0):
-           total_pos += value
-        total += math.fabs(value)
+    total = np.sum(np.fabs(values))
+    total_pos = np.sum(values[values > 0.0])
+
     return total_pos / total
 
 @njit('f8(f8[:], f8[:,:], f8, u8)')
