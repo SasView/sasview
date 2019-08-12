@@ -481,7 +481,7 @@ class Invertor(Pinvertor):
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
         try:
-            self._get_matrix(nfunc, nq, a, b)
+            a, b = self._get_matrix(nfunc, nq)
         except Exception as exc:
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
@@ -497,7 +497,7 @@ class Invertor(Pinvertor):
         inv_cov = np.zeros([nfunc, nfunc])
 
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
-        self._get_invcov_matrix(nfunc, nr, a, inv_cov)
+        inv_cov = self._get_invcov_matrix(nfunc, nr, a)
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 

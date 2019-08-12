@@ -53,9 +53,6 @@ class Pinvertor:
         pars = np.float64(pars)
 
         residuals = []
-        residual = 0.0
-        diff = 0.0
-        regterm = 0.0
         nslice = 25
         regterm = calc.reg_term(pars, self.d_max, nslice)
         resid = (self.y[0:self.npoints] - calc.iq(pars, self.d_max, self.x))/self.err
@@ -72,7 +69,6 @@ class Pinvertor:
         pars = np.float64(pars)
 
         residuals = []
-        regterm = 0.0
         nslice = 25
         regterm = calc.reg_term(pars, self.d_max, nslice)
         resid = (self.y[0:npoints] - calc.pr(pars, self.d_max, self.x))/self.err
@@ -548,7 +544,7 @@ class Pinvertor:
     def check_for_zero(self, x):
         return (x == 0).any()
 
-    def _get_matrix(self, nfunc, nr, a_obj, b_obj):
+    def _get_matrix(self, nfunc, nr):
         """
         Returns A matrix and b vector for least square problem.
 
@@ -561,13 +557,8 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
-
-        if not b_obj.shape[0] >= nfunc:
-            raise RuntimeError("Pinvertor: b vector too small.")
-
-        if not a_obj.size >= nfunc*(nr + self.npoints):
-            raise RuntimeError("Pinvertor: a array too small.")
-
+        a_obj = np.zeros([self.npoints + nr, nfunc])
+        b_obj = np.zeros(self.npoints + nr)
 
         sqrt_alpha = np.sqrt(self.alpha)
         pi = np.arccos(-1.0)
@@ -610,8 +601,7 @@ class Pinvertor:
             #Implementing second stage A as a python vector operation with shape = [nr]
             r = (self.d_max / nr) * i_r
             tmp = pi * (j+offset) / self.d_max
-            res = sqrt_alpha * 1.0/nr * self.d_max * 2.0 * (2.0 * pi * (j+offset)/self.d_max * np.cos(pi * (j+offset)*r/self.d_max)
-                                                            + tmp * tmp * r * np.sin(pi * (j+offset)*r/self.d_max))
+            res = (2.0 * sqrt_alpha * self.d_max/nr * tmp) * (2.0 * np.cos(tmp*r) + tmp * r * np.sin(tmp*r))
             #Res should now be np vector size i_r.
             a_obj[self.npoints:self.npoints+nr, j] = res
 
@@ -622,9 +612,9 @@ class Pinvertor:
         b_used[x_accept_index] = self.y[x_accept_index] / self.err[x_accept_index]
         b_obj[0:self.npoints] = b_used
 
-        return 0
+        return a_obj, b_obj
 
-    def _get_invcov_matrix(self, nfunc, nr, a_obj, cov_obj):
+    def _get_invcov_matrix(self, nfunc, nr, a_obj):
         """
         Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
 
@@ -637,18 +627,16 @@ class Pinvertor:
         """
         nfunc = int(nfunc)
         nr = int(nr)
+        cov_obj = np.zeros([nfunc, nfunc])
         n_a = a_obj.size
         n_cov = cov_obj.size
-
-        if not n_cov >= (nfunc * nfunc):
-            raise RuntimeError("Pinvertor._get_invcov_matrix: cov array too small.")
 
         if not n_a >= (nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
         size = nr + self.npoints
         cov_obj[:, :] = np.dot(a_obj.T, a_obj)
-        return 0
+        return cov_obj
 
     def _get_reg_size(self, nfunc, nr, a_obj):
         """
@@ -665,9 +653,6 @@ class Pinvertor:
 
         if not a_obj.size >= nfunc * (nr + self.npoints):
             raise RuntimeError("Pinvertor._get_reg_size: input array too short for data.")
-
-        sum_sig = 0.0
-        sum_reg = 0.0
 
         a_pass = self.accept_q(self.x)
         a_use = a_obj[0:self.npoints, :]
