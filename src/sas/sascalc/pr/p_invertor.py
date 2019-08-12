@@ -397,8 +397,11 @@ class Pinvertor:
         r = np.float64(r)
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
+        r = np.atleast_1d(r)
         pr_val = py_invertor.pr(pars, self.d_max, r)
-
+        if(len(pr_val) == 1):
+            #scalar
+            return np.asscalar(pr_val)
         return pr_val
 
     def get_pr_err(self, pars, pars_err, r):
@@ -415,6 +418,7 @@ class Pinvertor:
         pars = np.atleast_1d(pars)
         pars = np.float64(pars)
         r = np.float64(r)
+        r = np.atleast_1d(r)
         pars_err = np.float64(pars_err)
 
         pr_val = 0.0
@@ -424,11 +428,14 @@ class Pinvertor:
         if(pars_err is None):
             pr_val = pr(pars, self.d_max, r)
             pr_err_value = 0.0
-            result[0] = pr_val
-            result[1] = pr_err_value
+            result[0, :] = pr_val
+            result[1, :] = pr_err_value
         else:
             result = py_invertor.pr_err(pars, pars_err, self.d_max, r)
-        return ((result[0]), (result[1]))
+
+        if(result.shape[1] == 1):
+            return (result[0, 0], result[1, 0])
+        return ((result[0, :]), (result[1, :]))
 
     def is_valid(self):
         """
