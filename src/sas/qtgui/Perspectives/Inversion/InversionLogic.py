@@ -129,18 +129,12 @@ class InversionLogic(object):
         total = 0.0
         pmax = 0.0
         cov2 = np.ascontiguousarray(cov)
-        for i in range(len(x)):
-            if cov2 is None:
-                value = pr.pr(out, x[i])
-            else:
-                (value, dy[i]) = pr.pr_err(out, cov2, x[i])
-            total += value * pr.d_max / len(x)
-
-            # keep track of the maximum P(r) value
-            if value > pmax:
-                pmax = value
-
-            y[i] = value
+        if cov2 is None:
+            y = pr.pr(out, x)
+        else:
+            (y, dy) = pr.pr_err(out, cov2, x)
+        total = np.sum(y * (pr.d_max / len(x)))
+        pmax = np.max(y)
 
         if cov2 is None:
             new_plot = Data1D(x, y)
