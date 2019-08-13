@@ -123,9 +123,6 @@ class InversionLogic(object):
         # Show P(r)
         x = np.arange(0.0, pr.d_max, pr.d_max / PR_PLOT_PTS)
 
-        total = 0.0
-        pmax = 0.0
-
         if cov is None:
             y = pr.pr(out, x)
             new_plot = Data1D(x, y)
