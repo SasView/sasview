@@ -8,7 +8,7 @@ import numpy as np
 class BSLParsingError(Exception):
     pass
 
-class BSLLoader(Loader):
+class BSLLoader(CLoader):
     """
     Loads 2D SAS data from a BSL file.
     CLoader is a C extension (found in c_ext/bsl_loader.c)
@@ -81,6 +81,7 @@ class BSLLoader(Loader):
             data_info['pixels'], data_info['rasters'], data_info['swap_bytes'])
 
     def load_frames(self, frames):
+        print("LOAD_FRAMES_BSL_LOADER_CALLED")
         frame_data = []
         # Prepare axis values (arbitrary scale)
         x = self.n_rasters * range(1, self.n_pixels+1)
