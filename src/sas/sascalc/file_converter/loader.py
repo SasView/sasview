@@ -119,28 +119,31 @@ class Loader():
         """
         Load the data into a numpy array.
         """
+        #return self.numpy_load_data()
+
         data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float64)
 
         float_size = 4
-
-        #Move the file to the position of the data we're interested in begins.
-        offset = self.n_pixels * self.n_rasters * self.frame * float_size
 
         try:
             input_file = open(self.filename, 'rb')
         except:
             raise RuntimeError("Unable to open file: ", self.filename)
 
-        input_file.seek(offset)
+        #Offset appears to be useless.
+        #offset = self.n_pixels * self.n_rasters * self.frame * float_size
+        #input_file.seek(offset)
 
         for raster in range(self.n_rasters):
             for pixel in range(self.n_pixels):
                 val = 0
                 try:
+                    #Attempt to read 4 bytes into val
                     val = input_file.read(float_size)
                 except:
                     raise RuntimeError("Error reading file or EOF reached")
 
+                #Convert the 4 bytes to type 'float'
                 val_float = struct.unpack('f', val)[0]
 
                 if self.swap_bytes == 0:
@@ -149,3 +152,21 @@ class Loader():
                 data[raster, pixel] = val_float
 
         return data
+
+    def numpy_load_data(self):
+        #Only accurate to about 6/7 decimal places even though should be reading same
+        #number of bytes as the default method.
+
+        data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float64)
+
+        try:
+            input_file = open(self.filename, 'rb')
+        except:
+            raise RuntimeError("Unable to open file: ", self.filename)
+
+        #Should be 4 byte float, big or little endian depending on swap_bytes
+        dtype = ('>f4', '<f4')[self.swap_bytes]
+
+        load = np.fromfile(self.filename, dtype=dtype)
+
+        return load
