@@ -8,7 +8,7 @@ import numpy as np
 class BSLParsingError(Exception):
     pass
 
-class BSLLoader(CLoader):
+class BSLLoader(Loader):
     """
     Loads 2D SAS data from a BSL file.
     CLoader is a C extension (found in c_ext/bsl_loader.c)

@@ -1,6 +1,9 @@
 """
 Python implementation of C extension bsl_loader.c
 """
+import sys
+import struct
+
 import numpy as np
 
 class Loader():
@@ -110,90 +113,38 @@ class Loader():
         """
         in_float = self.try_convert(np.float64, in_float)
         bits = in_float.byteswap()
-        # print(bits)
         return bits
+
     def load_data(self):
         """
         Load the data into a numpy array.
         """
-        data = np.array([self.n_rasters, self.n_pixels], dtype = np.float64)
+        data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float64)
 
-        #conditional little endian if swap_bytes true or big endian otherwise.
-        #may be the other way around.
-        dtype = ('>f8', '<f8')[self.swap_bytes]
+        float_size = 4
 
         #Move the file to the position of the data we're interested in begins.
-        frame_pos = self.n_pixels * self.n_rasters * self.frame
+        offset = self.n_pixels * self.n_rasters * self.frame * float_size
 
-        offset = frame_pos #offset in float, np should
-
-        float_size = 4 #assume float size is 4 bytes for now.
-
-        #Read as numpy array of type float little/big endian, will not need
-        #reverse_float explicitly.
-        #May need to make a file pointer seek it then do -
-        file = open(self.filename, 'rb')
-        #error on opening file
-        if(file == False):
-            raise RuntimeError("Unable to open file", self.filename)
-
-        file.seek(offset)
-        #file object
-        input_file = np.fromfile(file, dtype = dtype)
-        #load to string.
-        input_file = np.fromfile(self.filename, dtype = dtype)
-        #seek to offset represented by starting from particular index?
-
-        #something like
-        data = input_file[offset:]
-        #2d/1d indexing need.
-
-        #Reading as python default file pointer each byte
-        #return as file pointer and read bytes individually
-        input_file = open(self.filename, 'rb')
+        try:
+            input_file = open(self.filename, 'rb')
+        except:
+            raise RuntimeError("Unable to open file: ", self.filename)
 
         input_file.seek(offset)
 
         for raster in range(self.n_rasters):
             for pixel in range(self.n_pixels):
-                input = 0
+                val = 0
                 try:
-                    input = input_file.read(float_size)
+                    val = input_file.read(float_size)
                 except:
                     raise RuntimeError("Error reading file or EOF reached")
 
-                if(swap_bytes == 0):
-                    input = self.reverse_float(input)
+                if self.swap_bytes == 0:
+                    val = self.reverse_float(input)
 
-                data[raster, pixel] = input
-
-
-
-
-
-
-
-
-
+                val_float = struct.unpack('f', val)
+                data[raster, pixel] = val_float[0]
 
         return data
-
-
-
-if(__name__ == "__main__"):
-    test = Loader("Name", 20, 20, 20, 20)
-    test.filename = "ASDF"
-    test.filename = 3
-    test.filename = True
-
-    test.frame = test.n_frames * test.n_pixels
-    test.frame = "asdf"
-    print(test)
-    test_array = np.array([57.4, 16.7])
-    print(test.reverse_float(np.array(test_array)))
-    print(test.reverse_float(test.reverse_float(test_array)))
-    print(test.reverse_float(test.reverse_float(test.reverse_float(test_array))))
-
-##
-## arr & traverse.each.filter (\x -> x != 0).toSpherical.radius %= sin
-##
