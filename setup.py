@@ -243,16 +243,10 @@ ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                    )
 
 # sas.sascalc.pr
-srcdir = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
+srcdir = os.path.join("src", "sas", "sascalc", "pr")
 package_dir["sas.sascalc.pr.core"] = srcdir
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
 packages.extend(["sas.sascalc.pr", "sas.sascalc.pr.core"])
-ext_modules.append(Extension("sas.sascalc.pr.core.pr_inversion",
-                             sources=[os.path.join(srcdir, "Cinvertor.c"),
-                                      os.path.join(srcdir, "invertor.c"),
-                                      ],
-                             include_dirs=[],
-                             ))
 
 
 # sas.sascalc.file_converter
