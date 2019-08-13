@@ -144,7 +144,7 @@ class Loader():
                 val_float = struct.unpack('f', val)
 
                 if self.swap_bytes == 0:
-                    val = self.reverse_float(input)
+                    val_float = self.reverse_float(val_float)
 
                 data[raster, pixel] = val_float
 
