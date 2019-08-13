@@ -2,6 +2,8 @@
 Converted invertor.c's methods.
 Implements low level inversion functionality, with conditional Numba njit compilation.
 """
+from __future__ import division
+
 import sys
 import math
 import time
@@ -11,7 +13,6 @@ import re
 import logging
 import time
 
-#from __future__ import division # at the top, for the 2.7 users
 from functools import reduce
 import numpy as np
 from numpy import pi
@@ -34,9 +35,9 @@ def ortho(d_max, n, r):
 
     :return: B(r).
     """
-    return (2.0 * r) * np.sin(pi*(n*r)/d_max)
+    return (2.0 * r) * np.sin((pi*n/d_max)*r)
 
-@njit('f8(f8, u8, f8)')
+@njit('f8[:](f8, u8, f8[:])')
 def ortho_derived(d_max, n, r):
     """
     First derivative in of the orthogonal function dB(r)/dr.
@@ -46,7 +47,7 @@ def ortho_derived(d_max, n, r):
 
     :return: First derivative in dB(r)/dr.
     """
-    pinr = pi * n * r/d_max
+    pinr = (pi * n / d_max) * r
     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
 @njit('f8[:](f8[:], f8, f8[:])')
@@ -61,8 +62,8 @@ def pr(pars, d_max, r):
     :return: P(r).
     """
     total = np.zeros(len(r))
-    for i in range(len(pars)):
-        total += pars[i] * ortho(d_max, i+1, r)
+    for i, pars_i in enumerate(pars):
+        total += pars_i * ortho(d_max, i+1, r)
     return total
 
 @njit('f8[:, :](f8[:], f8[:,:], f8, f8[:])')
@@ -79,10 +80,10 @@ def pr_err(pars, err, d_max, r):
     """
     total = np.zeros(len(r))
     total_err = np.zeros(len(r))
-    n_c = len(pars)
-    for i in range(n_c):
+
+    for i, pars_i in enumerate(pars):
         func_values = ortho(d_max, i+1, r)
-        total += pars[i] * func_values
+        total += pars_i * func_values
         total_err += err[i, i] * (func_values ** 2)
 
     pr_value = total
@@ -115,8 +116,8 @@ def dprdr(pars, d_max, r):
     :return: dP(r)/dr.
     """
     total = np.zeros(len(r))
-    for i in range(len(pars)):
-        total += pars[i] * dprdr_calc(i, d_max, r)
+    for i, pars_i in enumerate(pars):
+        total += pars_i * dprdr_calc(i, d_max, r)
     return total
 
 
@@ -178,11 +179,10 @@ def iq_smeared(p, q, d_max, height, width, npts):
     :return: Scattering intensity from the expansion slit-smeared across all q.
     """
     size_q = len(q)
-    size_p = len(p)
     total = np.zeros(size_q, dtype=np.float64)
 
-    for i in range(size_p):
-        total += p[i] * ortho_transformed_smeared(q, d_max, i+1, height, width, npts)
+    for i, p_i in enumerate(p):
+        total += p_i * ortho_transformed_smeared(q, d_max, i+1, height, width, npts)
 
     return total
 
@@ -199,8 +199,8 @@ def iq(pars, d_max, q):
     """
     total = np.zeros(len(q), dtype=np.float64)
 
-    for i in range(len(pars)):
-        total += pars[i] * ortho_transformed(q, d_max, i+1)
+    for i, pars_i in enumerate(pars):
+        total += pars_i * ortho_transformed(q, d_max, i+1)
 
     return total
 

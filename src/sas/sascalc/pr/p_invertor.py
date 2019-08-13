@@ -83,9 +83,7 @@ class Pinvertor:
         """
         data = np.float64(data)
         ndata = len(data)
-        self.__dict__['x'] = np.zeros(ndata)
-
-        self.__dict__['x'] = np.array(data, 'd')
+        self.__dict__['x'] = data
 
         self.__dict__['npoints'] = int(ndata)
         return self.npoints
@@ -117,9 +115,7 @@ class Pinvertor:
         """
         data = np.float64(data)
         ndata = len(data)
-        self.__dict__['y'] = np.zeros(ndata)
-
-        self.__dict__['y'] = np.array(data, 'd')
+        self.__dict__['y'] = data
 
         self.__dict__['ny'] = int(ndata)
         return self.ny
@@ -151,9 +147,7 @@ class Pinvertor:
         """
         data = np.float64(data)
         ndata = len(data)
-        self.__dict__['err'] = np.zeros(ndata)
-
-        self.__dict__['err'] = np.array(data, 'd')
+        self.__dict__['err'] = data
 
         self.__dict__['nerr'] = int(ndata)
         return self.nerr
@@ -399,6 +393,7 @@ class Pinvertor:
 
         pars = np.atleast_1d(np.float64(pars))
         r = np.atleast_1d(np.float64(r))
+
         if pars_err is None:
             return calc.pr(pars, self.d_max, r), 0.0
         else:
@@ -452,7 +447,7 @@ class Pinvertor:
 
         oscill = calc.reg_term(pars, self.d_max, nslice)
         norm = calc.int_pr_square(pars, self.d_max, nslice)
-        ret_val = np.sqrt(oscill/norm) / np.arccos(-1.0) * self.d_max
+        ret_val = np.sqrt(oscill/norm) / np.pi * self.d_max
 
         return ret_val
 
@@ -527,7 +522,7 @@ class Pinvertor:
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        val = np.float64(4.0 * np.arccos(-1.0) * calc.int_pr(pars, self.d_max, nslice))
+        val = np.float64(4.0 * np.pi * calc.int_pr(pars, self.d_max, nslice))
 
         return val
 
@@ -561,7 +556,7 @@ class Pinvertor:
         b_obj = np.zeros(self.npoints + nr)
 
         sqrt_alpha = np.sqrt(self.alpha)
-        pi = np.arccos(-1.0)
+        pi = np.pi
         offset = (1, 0)[self.est_bck == 1]
 
         if self.check_for_zero(self.err):
