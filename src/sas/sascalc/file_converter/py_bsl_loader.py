@@ -141,7 +141,7 @@ class Loader():
                 except:
                     raise RuntimeError("Error reading file or EOF reached")
 
-                val_float = struct.unpack('f', val)
+                val_float = struct.unpack('f', val)[0]
 
                 if self.swap_bytes == 0:
                     val_float = self.reverse_float(val_float)
