@@ -406,6 +406,7 @@ class Invertor(Pinvertor):
         :return: P(r)
 
         """
+        c_cov = np.ascontiguousarray(c_cov)
         return self.get_pr_err(c, c_cov, r)
 
     def _accept_q(self, q):
@@ -587,17 +588,14 @@ class Invertor(Pinvertor):
 
             # Perform inversion to find the largest alpha
             out, _ = pr.invert(nfunc)
-            #This invert is correct
 
             elapsed = time.time() - starttime
             initial_alpha = pr.alpha
             initial_peaks = pr.get_peaks(out)
-            #Inital Alpha correct, suggested not
 
             # Try the inversion with the estimated alpha
             pr.alpha = pr.suggested_alpha
             out, _ = pr.invert(nfunc)
-            #This invert different
 
             npeaks = pr.get_peaks(out)
             # if more than one peak to start with

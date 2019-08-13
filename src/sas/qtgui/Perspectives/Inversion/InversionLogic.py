@@ -123,23 +123,16 @@ class InversionLogic(object):
         # Show P(r)
         x = np.arange(0.0, pr.d_max, pr.d_max / PR_PLOT_PTS)
 
-        y = np.zeros(len(x))
-        dy = np.zeros(len(x))
-
         total = 0.0
         pmax = 0.0
-        cov2 = np.ascontiguousarray(cov)
-        if cov2 is None:
-            y = pr.pr(out, x)
-        else:
-            (y, dy) = pr.pr_err(out, cov2, x)
-        total = np.sum(y * (pr.d_max / len(x)))
-        pmax = np.max(y)
 
-        if cov2 is None:
+        if cov is None:
+            y = pr.pr(out, x)
             new_plot = Data1D(x, y)
         else:
+            (y, dy) = pr.pr_err(out, cov, x)
             new_plot = Data1D(x, y, dy=dy)
+
         new_plot.name = PR_FIT_LABEL
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
