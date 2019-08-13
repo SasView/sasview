@@ -103,7 +103,8 @@ class Loader():
         desc += "swap_bytes: " + str(self.swap_bytes) + "\n"
         return desc
 
-    #May be irrelevant in final build.
+    #May be irrelevant if np.fromfile is used instead of base
+    #python open/read/etc.
     def reverse_float(self, in_float):
         """
         Reverses the order of the bytes of a float.
