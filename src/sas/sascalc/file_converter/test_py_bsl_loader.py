@@ -68,13 +68,13 @@ def parse_header(filename):
 if(__name__ == "__main__"):
     np.set_printoptions(precision = 14)
 
-    q_params = parse_header("Z83000.QAX")
+    q_params = parse_header("Z98000.QAX")
     print(q_params)
     q_loader = Loader(q_params[0], q_params[1], q_params[2], q_params[3], q_params[4])
     q_data = q_loader.load_data()
     print("Q params: ", q_data)
 
-    i_params = parse_header("Z83000.I1D")
+    i_params = parse_header("Z98000.I1D")
     print(i_params)
     i_loader = Loader(i_params[0], i_params[1], i_params[2], i_params[3], i_params[4])
     i_data = i_loader.load_data()

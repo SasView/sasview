@@ -141,10 +141,11 @@ class Loader():
                 except:
                     raise RuntimeError("Error reading file or EOF reached")
 
+                val_float = struct.unpack('f', val)
+
                 if self.swap_bytes == 0:
                     val = self.reverse_float(input)
 
-                val_float = struct.unpack('f', val)
-                data[raster, pixel] = val_float[0]
+                data[raster, pixel] = val_float
 
         return data
