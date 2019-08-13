@@ -1,6 +1,6 @@
 from sas.sascalc.file_converter._bsl_loader import CLoader
 from sas.sascalc.dataloader.data_info import Data2D
-from .py_bsl_loader import Loader
+from .loader import Loader
 from copy import deepcopy
 import os
 import numpy as np

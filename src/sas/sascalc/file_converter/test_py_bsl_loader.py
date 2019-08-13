@@ -8,7 +8,7 @@ Intesity Data: Z83000.IAD
 import os
 
 import numpy as np
-from py_bsl_loader import Loader
+from loader import Loader
 
 def parse_header(filename):
     """
