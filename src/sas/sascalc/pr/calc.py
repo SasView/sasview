@@ -19,6 +19,7 @@ from numpy import pi
 
 
 try:
+    raise ImportError
     from numba import njit
 except ImportError:
     #Identity decorator for njit which ignores type signature.
@@ -37,6 +38,7 @@ def ortho(d_max, n, r):
     """
     return (2.0 * r) * np.sin((pi*n/d_max)*r)
 
+#TODO: unused?
 @njit('f8[:](f8, u8, f8[:])')
 def ortho_derived(d_max, n, r):
     """
