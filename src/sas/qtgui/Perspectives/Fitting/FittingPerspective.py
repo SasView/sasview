@@ -287,11 +287,18 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Update local bookkeeping on tab close
         """
-        #assert len(self.tabs) >= index
         # don't remove the last tab
         if len(self.tabs) <= 1:
             self.resetTab(index)
             return
+        # If it is not the only tab, remove it now
+        self.closeTabForIndex(index)
+
+    def closeTabForIndex(self, index):
+        """
+        Delete the tab from the object library and remove it from the widget,
+        notifying listeners
+        """
         try:
             ObjectLibrary.deleteObjectByRef(self.tabs[index])
             self.removeTab(index)
@@ -365,6 +372,9 @@ class FittingWindow(QtWidgets.QTabWidget):
             available_tabs = [tab.acceptsData() for tab in self.tabs]
 
             if tab_index is not None:
+                # if tab with this index exists - delete it first
+                self.closeTabForIndex(tab_index-1)
+                # Now add fit to the tab with requested index
                 self.addFit(data, is_batch=is_batch, tab_index=tab_index)
                 return
             if numpy.any(available_tabs):
