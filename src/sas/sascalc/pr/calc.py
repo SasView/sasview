@@ -19,7 +19,6 @@ from numpy import pi
 
 
 try:
-    raise ImportError
     from numba import njit
 except ImportError:
     #Identity decorator for njit which ignores type signature.
