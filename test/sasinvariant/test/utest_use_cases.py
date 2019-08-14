@@ -38,8 +38,8 @@ class TestLineFit(unittest.TestCase):
         p, dp = fit.fit(power=None)
 
         # Test results
-        self.assertAlmostEquals(p[0], 2.3983,3)
-        self.assertAlmostEquals(p[1], 0.87833,3)
+        self.assertAlmostEqual(p[0], 2.3983,3)
+        self.assertAlmostEqual(p[1], 0.87833,3)
 
     def test_fit_line_data_fixed(self):
         """ 
@@ -53,8 +53,8 @@ class TestLineFit(unittest.TestCase):
         p, dp = fit.fit(power=-4)
 
         # Test results
-        self.assertAlmostEquals(p[0], 4)
-        self.assertAlmostEquals(p[1], -4.0676,3)
+        self.assertAlmostEqual(p[0], 4)
+        self.assertAlmostEqual(p[1], -4.0676,3)
 
 
 class TestLineFitNoweight(unittest.TestCase):
@@ -77,8 +77,8 @@ class TestLineFitNoweight(unittest.TestCase):
         p, dp = fit.fit(power=None)
 
         # Test results
-        self.assertAlmostEquals(p[0], 2.4727,3)
-        self.assertAlmostEquals(p[1], 0.6,3)
+        self.assertAlmostEqual(p[0], 2.4727,3)
+        self.assertAlmostEqual(p[1], 0.6,3)
 
     def test_fit_line_data_fixed_no_weight(self):
         """ 
@@ -92,8 +92,8 @@ class TestLineFitNoweight(unittest.TestCase):
         p, dp = fit.fit(power=-4)
 
         # Test results
-        self.assertAlmostEquals(p[0], 4)
-        self.assertAlmostEquals(p[1], -7.8,3)
+        self.assertAlmostEqual(p[0], 4)
+        self.assertAlmostEqual(p[1], -7.8,3)
 
 
 class TestInvPolySphere(unittest.TestCase):
@@ -131,9 +131,9 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
 
         # Test results
-        self.assertAlmostEquals(qstar, 7.48959e-5,2)
-        self.assertAlmostEquals(v, 0.005644689, 4)
-        self.assertAlmostEquals(s , 941.7452, 3)
+        self.assertAlmostEqual(qstar, 7.48959e-5,2)
+        self.assertAlmostEqual(v, 0.005644689, 4)
+        self.assertAlmostEqual(s , 941.7452, 3)
 
     def test_use_case_2(self):
         """
@@ -152,9 +152,9 @@ class TestInvPolySphere(unittest.TestCase):
         v, dv = inv.get_volume_fraction_with_error(contrast=2.6e-6)
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         # Test results
-        self.assertAlmostEquals(qstar, 7.48959e-5,2)
-        self.assertAlmostEquals(v, 0.005644689, 1)
-        self.assertAlmostEquals(s , 941.7452, 3)
+        self.assertAlmostEqual(qstar, 7.48959e-5,2)
+        self.assertAlmostEqual(v, 0.005644689, 1)
+        self.assertAlmostEqual(s , 941.7452, 3)
 
     def test_use_case_3(self):
         """
@@ -189,9 +189,9 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
 
         # Test results
-        self.assertAlmostEquals(qstar, 7.49e-5, 1)
-        self.assertAlmostEquals(v, 0.005648401, 4)
-        self.assertAlmostEquals(s , 941.7452, 3)
+        self.assertAlmostEqual(qstar, 7.49e-5, 1)
+        self.assertAlmostEqual(v, 0.005648401, 4)
+        self.assertAlmostEqual(s , 941.7452, 3)
 
     def test_use_case_4(self):
         """
@@ -217,9 +217,9 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
 
         # Test results
-        self.assertAlmostEquals(qstar, 7.49e-5,2)
-        self.assertAlmostEquals(v, 0.005952674, 3)
-        self.assertAlmostEquals(s , 941.7452, 3)
+        self.assertAlmostEqual(qstar, 7.49e-5,2)
+        self.assertAlmostEqual(v, 0.005952674, 3)
+        self.assertAlmostEqual(s , 941.7452, 3)
 
     def test_use_case_5(self):
         """
@@ -246,9 +246,9 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
 
         # Test results
-        self.assertAlmostEquals(qstar, 7.88981e-5,2)
-        self.assertAlmostEquals(v, 0.005952674, 3)
-        self.assertAlmostEquals(s , 941.7452, 3)
+        self.assertAlmostEqual(qstar, 7.88981e-5,2)
+        self.assertAlmostEqual(v, 0.005952674, 3)
+        self.assertAlmostEqual(s , 941.7452, 3)
 
     def test_use_case_6(self):
         """
@@ -272,9 +272,9 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
 
         # Test results
-        self.assertAlmostEquals(qstar, 7.49e-5,2)
-        self.assertAlmostEquals(v, 0.005952674, 3)
-        self.assertAlmostEquals(s , 941.7452, 3)
+        self.assertAlmostEqual(qstar, 7.49e-5,2)
+        self.assertAlmostEqual(v, 0.005952674, 3)
+        self.assertAlmostEqual(s , 941.7452, 3)
 
 
 class TestInvPinholeSmear(unittest.TestCase):
@@ -296,9 +296,9 @@ class TestInvPinholeSmear(unittest.TestCase):
         v = inv.get_volume_fraction(contrast=2.6e-6)
         s = inv.get_surface(contrast=2.6e-6, porod_const=2)
         # Test results
-        self.assertAlmostEquals(qstar, 1.361677e-3, 4)
-        self.assertAlmostEquals(v, 0.115352622, 2)
-        self.assertAlmostEquals(s , 941.7452, 3 )
+        self.assertAlmostEqual(qstar, 1.361677e-3, 4)
+        self.assertAlmostEqual(v, 0.115352622, 2)
+        self.assertAlmostEqual(s , 941.7452, 3 )
 
     def test_use_case_2(self):
         """
@@ -314,9 +314,9 @@ class TestInvPinholeSmear(unittest.TestCase):
         v, dv = inv.get_volume_fraction_with_error(contrast=2.6e-6)
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         # Test results
-        self.assertAlmostEquals(qstar, 1.361677e-3, 4)
-        self.assertAlmostEquals(v, 0.115352622, 2)
-        self.assertAlmostEquals(s , 941.7452, 3 )
+        self.assertAlmostEqual(qstar, 1.361677e-3, 4)
+        self.assertAlmostEqual(v, 0.115352622, 2)
+        self.assertAlmostEqual(s , 941.7452, 3 )
 
     def test_use_case_3(self):
         """
@@ -335,9 +335,9 @@ class TestInvPinholeSmear(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
 
         # Test results
-        self.assertAlmostEquals(qstar, 0.00138756,2)
-        self.assertAlmostEquals(v, 0.117226896,2)
-        self.assertAlmostEquals(s ,941.7452, 3)
+        self.assertAlmostEqual(qstar, 0.00138756,2)
+        self.assertAlmostEqual(v, 0.117226896,2)
+        self.assertAlmostEqual(s ,941.7452, 3)
 
     def test_use_case_4(self):
         """
@@ -353,7 +353,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='high')
 
         # Test results
-        self.assertAlmostEquals(qstar, 0.0045773,2)
+        self.assertAlmostEqual(qstar, 0.0045773,2)
 
     def test_use_case_5(self):
         """
@@ -373,7 +373,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
 
         # Test results
-        self.assertAlmostEquals(qstar, 0.00460319,3)
+        self.assertAlmostEqual(qstar, 0.00460319,3)
       
   
 if __name__ == '__main__':

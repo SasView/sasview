@@ -98,11 +98,10 @@ def _caret_optional(s):
     """
     Strip '^' from unit names.
 
-    * WARNING * this will incorrect transform 10^3 to 103.
+    * WARNING * this will incorrectly transform 10^3 to 103.
     """
-    s.update((k.replace('^',''),v)
-             for k, v in list(s.items())
-             if '^' in k)
+    stripped = [(k.replace('^',''),v) for k, v in s.items() if '^' in k]
+    s.update(stripped)
 
 def _build_all_units():
     distance = _build_metric_units('meter','m')

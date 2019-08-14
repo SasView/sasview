@@ -2831,6 +2831,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
+        # Fits of Sesans data are in real space
+        if return_data["data"].isSesans:
+            fitted_data.xtransform="x"
+            fitted_data.ytransform="y"
+
         # assure the current index is set properly for batch
         if len(self._logic) > 1:
             for i, logic in enumerate(self._logic):
@@ -2864,6 +2869,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
+            QtWidgets.QApplication.processEvents()
 
         # Update radius_effective if relevant
         self.updateEffectiveRadius(return_data)

@@ -59,29 +59,35 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
 
-    def load(self, path, format=None):
+    def load(self, path, format=None, debug=False):
         """
         Call the loader for the file type of path.
 
         :param path: file path
         :param format: explicit extension, to force the use
             of a particular reader
+        :param debug: when True, print the traceback for each loader that fails
 
         Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
         readers if no reader was registered for the file's extension.
         """
+        import traceback
+
         # Gets set to a string if the file has an associated reader that fails
         msg_from_reader = None
         try:
             return super(Registry, self).load(path, format=format)
         #except Exception: raise  # for debugging, don't use fallback loader
         except NoKnownLoaderException as nkl_e:
+            if debug: traceback.print_exc()
             pass  # Try the ASCII reader
         except FileContentsException as fc_exc:
+            if debug: traceback.print_exc()
             # File has an associated reader but it failed.
             # Save the error message to display later, but try the 3 default loaders
             msg_from_reader = fc_exc.message
         except Exception:
+            if debug: traceback.print_exc()
             pass
 
         # File has no associated reader, or the associated reader failed.
@@ -90,10 +96,13 @@ class Registry(ExtensionRegistry):
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
         except NoKnownLoaderException:
+            if debug: traceback.print_exc()
             pass  # Try the Cansas XML reader
         except DefaultReaderException:
+            if debug: traceback.print_exc()
             pass  # Loader specific error to try the cansas XML reader
         except FileContentsException as e:
+            if debug: traceback.print_exc()
             if msg_from_reader is None:
                 raise RuntimeError(e.message)
 
@@ -102,13 +111,17 @@ class Registry(ExtensionRegistry):
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
         except NoKnownLoaderException:
+            if debug: traceback.print_exc()
             pass  # Try the NXcanSAS reader
         except DefaultReaderException:
+            if debug: traceback.print_exc()
             pass  # Loader specific error to try the NXcanSAS reader
         except FileContentsException as e:
+            if debug: traceback.print_exc()
             if msg_from_reader is None:
                 raise RuntimeError(e.message)
         except Exception:
+            if debug: traceback.print_exc()
             pass
 
         # CanSAS XML reader failed - try NXcanSAS reader
@@ -116,6 +129,7 @@ class Registry(ExtensionRegistry):
             cansas_nexus_loader = cansas_reader_HDF5.Reader()
             return cansas_nexus_loader.read(path)
         except DefaultReaderException as e:
+            if debug: traceback.print_exc()
             logging.error("No default loader can load the data")
             # No known reader available. Give up and throw an error
             if msg_from_reader is None:
@@ -127,6 +141,7 @@ class Registry(ExtensionRegistry):
                 # Show error message from associated reader
                 raise RuntimeError(msg_from_reader)
         except FileContentsException as e:
+            if debug: traceback.print_exc()
             err_msg = msg_from_reader if msg_from_reader is not None else e.message
             raise RuntimeError(err_msg)
 

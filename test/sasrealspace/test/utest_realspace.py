@@ -37,7 +37,7 @@ class TestRealSpaceModel(unittest.TestCase):
     def testDeleting(self):
         self.model.add('ellipsoid','elli2')
         self.model.delete('elli2')
-        self.assert_('elli2' not in self.model.getShapeList())
+        self.assertTrue('elli2' not in self.model.getShapeList())
 
     def testsetParam(self):
         self.model.setParam('q_max', 0.2)
@@ -80,7 +80,7 @@ class TestSphere(unittest.TestCase):
         npts_2 = vol/0.2
         value_2 = self.canvas.getIq(0.001)
 
-        self.assert_( (value_1-value_2)/value_1 < 0.1)
+        self.assertTrue( (value_1-value_2)/value_1 < 0.1)
 
     def testSetDensityTiming(self):
         """Testing change in computation time with density"""
@@ -98,17 +98,17 @@ class TestSphere(unittest.TestCase):
         self.canvas.getIq(0.001)
         t_2 = time.time()-t_0
 
-        self.assert_( t_2 < t_1 and (t_1-t_2)/t_2 > 2)
+        self.assertTrue( t_2 < t_1 and (t_1-t_2)/t_2 > 2)
 
     def testGetParamList(self):
         """ Test GetParamList on empty canvas"""
-        self.assert_('lores_density' in self.canvas.getParamList())
+        self.assertTrue('lores_density' in self.canvas.getParamList())
         handle = self.canvas.add('sphere')
 
     def testGetParamListWithShape(self):
         """ Test GetParamList on filled canvas"""
         self.canvas.add('sphere')
-        self.assert_('lores_density' in self.canvas.getParamList())
+        self.assertTrue('lores_density' in self.canvas.getParamList())
 
     def testAdd(self):
         handle = "s1"
@@ -150,10 +150,10 @@ class TestSphere(unittest.TestCase):
         # on the output and it should be compatible with zero
         # THIS WILL DEPEND ON THE NUMBER OF SPACE POINTS:
         # that why we need some error analysis.
-        self.assert_( (sim_2*ana_1/sim_1 - ana_2)/ana_2 < 0.1)
+        self.assertTrue( (sim_2*ana_1/sim_1 - ana_2)/ana_2 < 0.1)
 
         # test the absolute amplitude
-        self.assert_( math.fabs(sim_2-ana_2)/ana_2 < 0.1)
+        self.assertTrue( math.fabs(sim_2-ana_2)/ana_2 < 0.1)
 
     def testGetIq2(self):
         """ Test two different q values
@@ -195,7 +195,7 @@ class TestSphere(unittest.TestCase):
         self.canvas.setParam('lores_density', 0.1)
         sim_2 = self.canvas.getIq(0.01)
 
-        self.assert_((sim_2-sim_1)/sim_1<0.05)
+        self.assertTrue((sim_2-sim_1)/sim_1<0.05)
 
     def testGetIq_time(self):
         """ Time profile
@@ -215,7 +215,7 @@ class TestSphere(unittest.TestCase):
         sim_2 = self.canvas.getIq(0.01)
         delta_2 = time.time()-t_0
 
-        self.assert_((delta_2-delta_1)/delta_1<0.05)
+        self.assertTrue((delta_2-delta_1)/delta_1<0.05)
 
 
     def testGetPr(self):
@@ -341,7 +341,7 @@ class TestOrdering(unittest.TestCase):
 
         ana = self.sphere.run(0.05)
         val, err = self.canvas.getIqError(0.05)
-        self.assert_(math.fabs(ana-val)<2.0*err)
+        self.assertTrue(math.fabs(ana-val)<2.0*err)
 
     def testRightOrder(self):
         self.set_coreshell_on_canvas(3.0, 6.0)
@@ -349,7 +349,7 @@ class TestOrdering(unittest.TestCase):
         ana = self.sphere.run(0.05)
         val, err = self.canvas.getIqError(0.05)
         #print 'right', ana, val, err
-        self.assert_(math.fabs(ana-val)/ana < 1.1)
+        self.assertTrue(math.fabs(ana-val)/ana < 1.1)
 
     def testWrongOrder(self):
         self.set_coreshell_on_canvas(1, 0)
@@ -364,7 +364,7 @@ class TestOrdering(unittest.TestCase):
         ana = sphere.run(0.05)
         val, err = self.canvas.getIqError(0.05)
         #print 'wrong', ana, val, err
-        self.assert_(math.fabs(ana-val)/ana < 1.1)
+        self.assertTrue(math.fabs(ana-val)/ana < 1.1)
 
 
 if __name__ == '__main__':

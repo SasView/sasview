@@ -235,13 +235,6 @@ class Invertor(Pinvertor):
             return self.__dict__[name]
         return None
 
-    def add_errors(self, sigma=0.05):
-        """
-        Adds errors to data set is they are not available.
-        Uses  $\Delta y = \sigma | y |$.
-        """
-        self.dy = sigma * np.fabs(self.y)
-
     def clone(self):
         """
         Return a clone of this instance
@@ -487,7 +480,9 @@ class Invertor(Pinvertor):
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
-        c, chi2, _, _ = lstsq(a, b, rcond=-1)
+        # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+        rcond = np.finfo(float).eps * max(a.shape)
+        c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:
             float(chi2)
@@ -514,7 +509,7 @@ class Invertor(Pinvertor):
         except Exception as exc:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logger.error(sys.exc_info()[1])
+            logger.error(exc)
 
         # Keep a copy of the last output
         if not self.est_bck:
@@ -557,7 +552,7 @@ class Invertor(Pinvertor):
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_info()[1])
+            logger.warning("Invertor.estimate_numterms: %s" % exc)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -644,8 +639,8 @@ class Invertor(Pinvertor):
 
                 return best_alpha, message, elapsed
 
-        except:
-            message = "Invertor.estimate_alpha: %s" % sys.exc_info()[1]
+        except Exception as exc:
+            message = "Invertor.estimate_alpha: %s" % exc
             return 0, message, elapsed
 
     def to_file(self, path, npts=100):
@@ -762,8 +757,8 @@ class Invertor(Pinvertor):
 
                         self.cov[i][i] = float(toks2[1])
 
-            except:
-                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_info()[1]
+            except Exception as exc:
+                msg = "Invertor.from_file: corrupted file\n%s" % exc
                 raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)

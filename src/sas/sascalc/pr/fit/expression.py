@@ -208,6 +208,7 @@ def eval_expressions():
     return 0
 """%("\n    ".join(assignments),"\n    ".join(code))
 
+    #print("Function: "+functiondef)
     exec(functiondef, globals, locals)
     retfn = locals['eval_expressions']
 

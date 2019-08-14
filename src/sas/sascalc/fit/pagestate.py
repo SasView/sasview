@@ -490,7 +490,18 @@ class PageState(object):
         Helper method to print a state
         """
         for item in list:
-            rep += "parameter name: %s \n" % str(item[1])
+            if str(item[1][-6:]) == '.width':
+                par = str(item[1][:-6])
+                pd_type = self.model.dispersion[par]['type']
+                npts = self.model.dispersion[par]['npts']
+                nsigmas = self.model.dispersion[par]['nsigmas']
+                dist_str = str(item[1]) 
+                dist_str += '(' + str(pd_type) 
+                dist_str += '; points = ' + str(npts) 
+                dist_str += '; sigmas = ' + str(nsigmas) + ')' 
+                rep += "parameter name: %s \n" % dist_str
+            else:
+                rep += "parameter name: %s \n" % str(item[1])
             rep += "value: %s\n" % str(item[2])
             rep += "selected: %s\n" % str(item[0])
             rep += "error displayed : %s \n" % str(item[4][0])
@@ -1249,15 +1260,14 @@ class Reader(CansasReader):
                             output.append(sas_entry)
 
             else:
-                #self.call_back(format=ext)
+                self.call_back(format=ext)
                 raise RuntimeError("%s is not a file" % path)
 
             # Return output consistent with the loader's api
             if len(output) == 0:
-                #self.call_back(state=None, datainfo=None, format=ext)
+                self.call_back(state=None, datainfo=None, format=ext)
                 return None
             else:
-                states=[]
                 for data in output:
                     # Call back to post the new state
                     state = data.meta_data['fitstate']
@@ -1290,16 +1300,15 @@ class Reader(CansasReader):
                     state.data.group_id = name
                     state.version = fitstate.version
                     # store state in fitting
-                    #self.call_back(state=state, datainfo=data, format=ext)
+                    self.call_back(state=state, datainfo=data, format=ext)
                     self.state = state
-                    states.append(state)
                 simfitstate = self._parse_simfit_state(entry)
                 if simfitstate is not None:
-                    #self.call_back(state=simfitstate)
-                    states.append(simfitstate)
-                return (output, states)
+                    self.call_back(state=simfitstate)
+
+                return output
         except:
-            #self.call_back(format=ext)
+            self.call_back(format=ext)
             raise
 
     def write(self, filename, datainfo=None, fitstate=None):

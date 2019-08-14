@@ -94,8 +94,7 @@ class ExtensionRegistry(object):
         Return the loader associated with the file type of path.
 
         :param path: Data file path
-        :raises ValueError: When no loaders are found for the file.
-        :return: List of available readers for the file extension
+        :return: List of available readers for the file extension (maybe empty)
         """
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
@@ -109,34 +108,28 @@ class ExtensionRegistry(object):
         if len(loaders) != len(set(loaders)):
             result = []
             for L in loaders:
-                if L not in result: result.append(L)
+                if L not in result:
+                    result.append(L)
             loaders = result
-            #loaders = L
-        # Raise an error if there are no matching extensions
-        if len(loaders) == 0:
-            raise ValueError("Unknown file type for "+path)
         return loaders
 
     def load(self, path, format=None):
         """
         Call the loader for the file type of path.
 
-        :raises ValueError: if no loader is available.
-        :raises KeyError: if format is not available.
-
-        May raise a loader-defined exception if loader fails.
+        Raises an exception if the loader fails or if no loaders are defined
+        for the given path or format.
         """
-        loaders = []
         if format is None:
-            try:
-                loaders = self.lookup(path)
-            except ValueError as e:
-                pass
+            loaders = self.lookup(path)
+            if not loaders:
+                raise NoKnownLoaderException("No loaders match extension in %r"
+                                             % path)
         else:
-            try:
-                loaders = self.loaders[format]
-            except KeyError as e:
-                pass
+            loaders = self.loaders.get(format, [])
+            if not loaders:
+                raise NoKnownLoaderException("No loaders match format %r"
+                                             % format)
         last_exc = None
         for fn in loaders:
             try:
@@ -145,7 +138,4 @@ class ExtensionRegistry(object):
                 last_exc = e
                 pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
-        if last_exc is not None and len(loaders) != 0:
-            # If file has associated loader(s) and they;ve failed
-            raise last_exc
-        raise NoKnownLoaderException(e.message)  # raise generic exception
+        raise last_exc

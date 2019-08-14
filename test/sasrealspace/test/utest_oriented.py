@@ -58,7 +58,7 @@ class TestSphere(unittest.TestCase):
         # Default orientation
         ana_val = self.ana.runXY([0.1, 0.1])
         sim_val = self.model.getIq2D(0.1, 0.1)
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.1 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.1 )
 
 class TestCylinderAddObject(unittest.TestCase):
     """ Tests for oriented (2D) systems """
@@ -100,7 +100,7 @@ class TestCylinderAddObject(unittest.TestCase):
         sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
 
 class TestCylinder(unittest.TestCase):
@@ -142,7 +142,7 @@ class TestCylinder(unittest.TestCase):
         sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
     def testalongZ(self):
         """ Testing cylinder along Z axis """
@@ -155,7 +155,7 @@ class TestCylinder(unittest.TestCase):
         sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
     def testalongX(self):
         """ Testing cylinder along X axis """
@@ -168,7 +168,7 @@ class TestCylinder(unittest.TestCase):
         sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
 class TestEllipsoid(unittest.TestCase):
     """ Tests for oriented (2D) systems """
@@ -212,7 +212,7 @@ class TestEllipsoid(unittest.TestCase):
         sim_val = self.canvas.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
     def testalongZ(self):
         """ Testing ellipsoid along Z """
@@ -225,7 +225,7 @@ class TestEllipsoid(unittest.TestCase):
         sim_val = self.canvas.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
     def testalongY(self):
         """ Testing ellipsoid along Y """
@@ -239,7 +239,7 @@ class TestEllipsoid(unittest.TestCase):
         #print ana_val, sim_val, sim_val/ana_val
 
         try:
-            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+            self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except Exception:
             print("Error", ana_val, sim_val, sim_val/ana_val)
             raise
@@ -294,7 +294,7 @@ class TestCoreShell(unittest.TestCase):
         ana_val = self.ana.runXY([0.1, 0.2])
         sim_val, err = self.canvas.getIq2DError(0.1, 0.2)
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
 class TestCoreShellError(unittest.TestCase):
     """ Tests for oriented (2D) systems """
@@ -346,7 +346,7 @@ class TestCoreShellError(unittest.TestCase):
         ana_val = self.ana.runXY([0.1, 0.2])
         sim_val, err = self.canvas.getIq2DError(0.1, 0.2)
 
-        self.assert_( math.fabs(sim_val-ana_val) < 3.0 * err )
+        self.assertTrue( math.fabs(sim_val-ana_val) < 3.0 * err )
 
 class TestRunMethods(unittest.TestCase):
     """ Tests run methods for oriented (2D) systems """
@@ -391,7 +391,7 @@ class TestRunMethods(unittest.TestCase):
         #print ana_val, sim_val, sim_val/ana_val
 
         try:
-            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+            self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except Exception:
             print("Error", ana_val, sim_val, sim_val/ana_val)
             raise
@@ -403,7 +403,7 @@ class TestRunMethods(unittest.TestCase):
         #print ana_val, sim_val, sim_val/ana_val
 
         try:
-            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+            self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except Exception:
             print("Error", ana_val, sim_val, sim_val/ana_val)
             raise
@@ -415,7 +415,7 @@ class TestRunMethods(unittest.TestCase):
         #print ana_val, sim_val, sim_val/ana_val
 
         try:
-            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+            self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except Exception:
             print("Error", ana_val, sim_val, sim_val/ana_val)
             raise
@@ -427,7 +427,7 @@ class TestRunMethods(unittest.TestCase):
         #print ana_val, sim_val, sim_val/ana_val
 
         try:
-            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+            self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except Exception:
             print("Error", ana_val, sim_val, sim_val/ana_val)
             raise
@@ -470,7 +470,7 @@ class TestParamChange(unittest.TestCase):
         ana_val = self.ana.runXY([0.1, 0.2])
         sim_val = self.model.getIq2D(0.1, 0.2)
 
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
         # Change the radius a re-evaluate
         self.ana.setParam('radius', 10)
@@ -478,7 +478,7 @@ class TestParamChange(unittest.TestCase):
 
         ana_val = self.ana.runXY([0.1, 0.2])
         sim_val = self.model.getIq2D(0.1, 0.2)
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assertTrue( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
 
 if __name__ == '__main__':

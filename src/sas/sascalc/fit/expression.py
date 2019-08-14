@@ -190,7 +190,7 @@ def compile_constraints(symtab, exprs, context={}):
     global_context = {}
     global_context.update(math.__dict__)
     global_context.update(dict(arcsin=math.asin,arccos=math.acos,
-                        arctan=math.atan,arctan2=math.atan2))
+                               arctan=math.atan,arctan2=math.atan2))
     global_context.update(context)
     global_context.update(parameters)
     global_context['id'] = id

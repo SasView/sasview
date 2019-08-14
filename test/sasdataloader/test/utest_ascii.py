@@ -9,6 +9,7 @@ warnings.simplefilter("ignore")
 
 import unittest
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.data_info import Data2D
 
 
 def find(filename):
@@ -120,6 +121,7 @@ class ABSReaderTests(unittest.TestCase):
             self.assertFalse(math.isnan(f_1d.x[i]))
             self.assertFalse(math.isnan(f_1d.y[i]))
             self.assertFalse(math.isnan(f_1d.dy[i]))
+        self.assertTrue(isinstance(f_2d, Data2D))
         f_2d.data = f_2d.data.flatten()
         f_2d.qx_data = f_2d.qx_data.flatten()
         f_2d.qy_data = f_2d.qy_data.flatten()
