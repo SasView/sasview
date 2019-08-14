@@ -62,9 +62,8 @@ class InversionLogic(object):
             maxq = pr.q_max
 
         x = np.arange(minq, maxq, maxq / 301.0)
-        y = np.zeros(len(x))
-        err = np.zeros(len(x))
-        #vectorised iq
+
+        #Vectorised iq.
         y = pr.iq(out, x)
         with np.errstate(invalid='ignore'):
             err = np.sqrt(np.abs(y))
@@ -89,11 +88,8 @@ class InversionLogic(object):
         # If we have used slit smearing, plot the smeared I(q) too
         if pr.slit_width > 0 or pr.slit_height > 0:
             x = np.arange(minq, maxq, maxq / 301.0)
-            y = np.zeros(len(x))
-            err = np.zeros(len(x))
 
-            #vectorised iq_smeared
-
+            #Vectorised iq_smeared.
             y = pr.iq_smeared(out, x)
             with np.errstate(invalid='ignore'):
                 err = np.sqrt(np.abs(y))
