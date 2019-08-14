@@ -1,28 +1,25 @@
 import numpy as np
+from scipy.special import sici
+from math import factorial
 
 #libfunc.c's methods -
-#Sine integral function, don't think will be needed, scipy.special.sici?
-def Si():
-    pass
-
+#Sine integral function, scipy.special.sici
 #np.sinc()
-def sinc():
-    pass
-
-#np.math.factorial
-def factorial():
-    pass
+#math.factorial
 
 #defines structure, with a global free, call_msld
 #Doesn't need to be a class? Originally had seperate variables for complex/real component
 #of two numbers re_ud im_ud, assuming.
 class polar_sld():
-    uu = np.complex(0)
-    dd = np.complex(0)
+    uu = float(0)
+    dd = float(0)
+    ud = np.complex(0)
+    du = np.complex(0)
+
 
     def __init__(self):
         pass
-
+#np array with aggregate dtype?
 #librefl.c definitions -
 #defines matrix of 4 complex numbers, just use numpy array of complex numbers?
 class matrix():
