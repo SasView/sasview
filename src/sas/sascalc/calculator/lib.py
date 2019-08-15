@@ -56,7 +56,7 @@ class polar_sld():
         pi = np.pi
         #s_theta is spintheta in radians.
         s_theta = np.radians(spintheta)
-        m_max = m09
+        m_max = m01
         m_phi = mphi1
         m_theta = mtheta1
         in_spin = spinfraci
@@ -218,7 +218,7 @@ def p_gamma(a, x, loggamma_a):
     logger.error("p_gamma() could not converge.")
     return result
 
-def q_gamma(a, x, loggamma_a)
+def q_gamma(a, x, loggamma_a):
     k = 0
     result, w, temp, previous = 0.0, 0.0, 0.0, 0.0
 
@@ -246,38 +246,224 @@ def q_gamma(a, x, loggamma_a)
 def erf(x):
     _log_pi_over_2 = np.log(np.pi) / 2
 
-    if !np.isfinite(x):
+    if not np.isfinite(x):
         if np.isnan(x):
+            #erf(Nan) = Nan
             return x
+        #erf(+-inf) = +-1.0
+        return 1.0 if x > 0 else -1.0
     if x >= 0:
-        return p_gamma(0.5, x ** 2, _log_pi_over_2)
+        return p_gamma(0.5, np.square(x), _log_pi_over_2)
     else:
-        return -p_gamma(0.5, x ** 2, _log_pi_over_2)
+        return -p_gamma(0.5, np.square(x), _log_pi_over_2)
 
 def erfc(x):
     _log_pi_over_2 = np.log(np.pi) / 2
+    if not np.isfinite(x):
+        if np.isnan(x):
+            #erfc(NaN) = Nan
+            return x
+        #erfc(+-inf) = 0.0, 2.0
+        return 0.0 if x > 0 else 2.0
+    if x >= 0:
+        return q_gamma(0.5, np.square(x), _log_pi_over_2)
 
+def err_mod_func(n_sub, ind, nu):
+    """
+    Normalized and modified erf
+     |
+   1 +                __  - - - -
+     |             _
+  	 |            _
+     |        __
+   0 + - - -
+     |-------------+------------+--
+     0           center       n_sub    --->
+                                       ind
+    :param n_sub: Total no. of bins(or sublayers).
+    :param ind: x position- 0 to max.
+    :param nu: Max x to integration.
+    """
+    center, func = 0.0, 0.0
+    if nu == 0.0:
+        nu = 1e-14
+    if n_sub == 0.0:
+        n_sub = 1.0
 
+    #ind = (n_sub - 1.0)/2.0-1.0 + ind
+    center = n_sub/2.0
+    #transform it so that min(ind) = 0
+    ind -= center
+    #normalize by max limit
+    ind /= center
+    #divide by sqrt(2) to get Gaussian func
+    nu /= np.sqrt(2.0)
+    ind *= nu
+    #re-scale and normalize it so that max(erf)=1, min(erf) = 0
+    func = (erf(ind)/erf(nu)) / 2.0 #to show the ordering of operations clearer
+    #shift it by +0.5 in y-direction so that min(erf) = 0
+    func += 0.5
 
+    return func
+
+#Seems to be just ind * 1.0/n_sub where if n_sub = 0, +=1
+#not sure why nu is being passed as a parameter.
+def linearfunc(n_sub, ind, nu):
+    bin_size, func = 0.0, 0.0
+
+    if n_sub == 0.0:
+        n_sub = 1.0
+
+    #Size of each sub-layer.
+    bin_size = 1.0 / n_sub
+    #Rescale.
+    ind *= bin_size
+    func = ind
+
+    return func
+
+#Use the right hand side from the center of power func
+#(ind * 1.0 / n_sub) ^ nu where if nu = 0 nu = 1e-14, n_sub+1 if 0.
+def power_r(n_sub, ind, nu):
+    bin_size, func = 0.0, 0.0
+
+    if nu == 0.0:
+        nu = 1e-14
+
+    if n_sub == 0.0:
+        n_sub = 1.0
+
+    #Size of each sub-layer.
+    bin_size = 1.0 / n_sub
+
+    #Rescale.
+    ind *= bin_size
+    func = np.pow(ind, nu)
+
+    return func
+
+#Use the left hand side from the center of power func.
+#1.0 - (1.0 - (ind * 1.0 / n_sub)) ^ nu
+def power_l(n_sub, ind, nu):
+    bin_size, func = 0.0, 0.0
+
+    if nu == 0.0:
+        nu = 1e-14
+
+    if n_sub == 0.0:
+        n_sub = 1.0
+
+    #Size of each sub-layer.
+    bin_size = 1.0 / n_sub
+    #Rescale.
+    ind *= bin_size
+    func = 1.0 - np.pow((1.0 - ind), nu)
+
+    return func
+
+#Use 1-exp func from x=0 to x=1
+#(1.0 - e^(-nu * (ind * 1.0/n_sub))) / (1.0 - e^(-nu))
+def exp_r(n_sub, ind, nu):
+    bin_size, func = 0.0, 0.0
+
+    if nu == 0.0:
+        nu = 1e-14
+    if n_sub == 0.0:
+        n_sub = 1.0
+
+    #Size of each sub-layer.
+    bin_size = 1.0 / n_sub
+    #Rescale.
+    ind *= bin_size
+    #Modify func so that func(0) = 0 and func(max) = 1.
+    func = 1.0 - np.exp(-nu * ind)
+    #Normalize by its max.
+    func /= 1.0 - np.exp(-nu)
+
+    return func
+
+#Use the left hand side mirror image of expr func
+def exp_l(n_sub, ind, nu):
+    bin_size, func = 0.0, 0.0
+
+    if nu == 0.0:
+        nu = 1e-14
+    if n_sub == 0.0:
+        n_sub = 1.0
+
+    #Size of each sub-layer.
+    bin_size = 1.0 / n_sub
+    #Rescale.
+    ind *= bin_size
+    #Modify func.
+    func = np.exp(-nu * (1.0 - ind)) - np.exp(-nu)
+    #Normalize by its max.
+    func /= (1.0 - exp(-nu))
+
+    return func
 
 #and defines custom interface of complex numbers, just use np.complex methods. Defines
 #cmplx * + / **, sqrt etc. etc. omitted for now.
 #int fun_type, double n_sub, double i, double nu, double sld_l, double sld_r
+#To select function called, at nu = 0 (singular point), call line function.
 def intersldfunc(fun_type, n_sub, i, nu, sld_l, sld_r):
-    pass
+    sld_i, func = 0.0, 0.0
+
+    if nu == 0.0:
+        nu = 1e-13
+
+    if fun_type not in np.arange(1, 6):
+        func = err_mod_func(n_sub, i, nu)
+    else:
+        func_select = {
+        1: power_r(n_sub, i, nu),
+        2: power_l(n_sub, i, nu),
+        3: exp_r(n_sub, i, nu),
+        4: exp_l(n_sub, i, nu),
+        5: linearfunc(n_sub, i, nu),
+        }
+        func = func_select[fun_type]
+
+    #compute sld
+    if sld_r > sld_l:
+        sld_i = (sld_r-sld_l) * func + sld_l
+
+    elif sld_r < sld_l:
+        func = 1.0 - func
+        sld_i = (sld_l-sld_r) * func + sld_r
+
+    else:
+        sld_i = sld_r
+
+    return sld_i
 
 #int fun_type, double n_sub, double i, double sld_l, double sld_r
 def interfunc(fun_type, n_sub, i, sld_l, sld_r):
-    pass
+    sld_i, func = 0.0, 0.0
+
+    if fun_type == 0:
+        func = err_mod_func(n_sub, i, 2.5)
+    else:
+        func = linearfunc(n_sub, i, 1.0)
+
+    if sld_r > sld_l:
+        sld_i = (sld_r-sld_l) * func + sld_l
+    elif sld_r < sld_l:
+        func = 1.0 - func
+        sld_i = (sld_l-sld_r) * func + sld_r
+    else:
+        sld_i = sld_r
+
+    return sld_i
 
 #int fun_type, double thick, double sld_in, double sld_out,double r, double q
-def linePq(fun_type, thick, sld_in, sld_out, r, q):
-    pass
+#Cannot find implementation in librefl.c or call in sld2i.c
+#def linePq(fun_type, thick, sld_in, sld_out, r, q):
+#    pass
 
 if(__name__ == "__main__"):
     #test
     p_sld = polar_sld()
-    #p_sld, isangle, qx, qy, bn, m09, mtheta1, mphi1, spinfraci, spinfracf, spintheta
-    cal_msld(p_sld, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-
+    #p_sld, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta
+    p_sld.cal_msld(0, 1, 1, 1, 1, 1, 1, 1, 1, 1)
     print(p_sld)
