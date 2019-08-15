@@ -1,8 +1,6 @@
 import logging
 
 import numpy as np
-from scipy.special import sici
-from math import factorial
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +15,10 @@ logger = logging.getLogger(__name__)
 #of two numbers re_ud im_ud, assuming.
 class polar_sld():
     def __init__(self):
-        self.uu = float(0)
-        self.dd = float(0)
-        self.ud = np.complex(0)
-        self.du = np.complex(0)
+        self.uu = float()
+        self.dd = float()
+        self.ud = np.complex()
+        self.du = np.complex()
 
     def __str__(self):
         desc = ""
@@ -116,10 +114,10 @@ class polar_sld():
             q_angle = pi/2.0 - q_angle
 
             if q_angle > pi:
-               q_angle -= 2.0 * pi
+                q_angle -= 2.0 * pi
 
             elif q_angle < -pi:
-               q_angle += 2.0 * pi
+                q_angle += 2.0 * pi
 
             if (np.fabs(q_x) < temp2) & (np.fabs(q_y) < temp2):
                 m_perp = 0.0
@@ -338,7 +336,7 @@ def power_r(n_sub, ind, nu):
 
     #Rescale.
     ind *= bin_size
-    func = np.pow(ind, nu)
+    func = np.power(ind, nu)
 
     return func
 
@@ -357,7 +355,7 @@ def power_l(n_sub, ind, nu):
     bin_size = 1.0 / n_sub
     #Rescale.
     ind *= bin_size
-    func = 1.0 - np.pow((1.0 - ind), nu)
+    func = 1.0 - np.power((1.0 - ind), nu)
 
     return func
 
@@ -416,11 +414,11 @@ def intersldfunc(fun_type, n_sub, i, nu, sld_l, sld_r):
         func = err_mod_func(n_sub, i, nu)
     else:
         func_select = {
-        1: power_r(n_sub, i, nu),
-        2: power_l(n_sub, i, nu),
-        3: exp_r(n_sub, i, nu),
-        4: exp_l(n_sub, i, nu),
-        5: linearfunc(n_sub, i, nu),
+            1: power_r(n_sub, i, nu),
+            2: power_l(n_sub, i, nu),
+            3: exp_r(n_sub, i, nu),
+            4: exp_l(n_sub, i, nu),
+            5: linearfunc(n_sub, i, nu),
         }
         func = func_select[fun_type]
 
@@ -461,7 +459,7 @@ def interfunc(fun_type, n_sub, i, sld_l, sld_r):
 #def linePq(fun_type, thick, sld_in, sld_out, r, q):
 #    pass
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
     #test
     p_sld = polar_sld()
     #p_sld, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta
