@@ -1,12 +1,16 @@
+import logging
+
 import numpy as np
 from scipy.special import sici
 from math import factorial
+
+logger = logging.getLogger(__name__)
 
 #libfunc.c's methods -
 #Sine integral function, scipy.special.sici
 #np.sinc()
 #math.factorial
-#libfunc.c, converted basically.
+#libfunc.c, converted.
 
 #defines structure, with a global free, call_msld
 #Doesn't need to be a class? Originally had seperate variables for complex/real component
@@ -30,7 +34,20 @@ class polar_sld():
     #double mphi1, double spinfraci, double spinfracf, double spintheta);
     #use case, iterated over in sld2i genicomxy, over x and y vectors.
     #Operates on p_sld, global free, only, so in polar_sld class?
-    def cal_msld(self, isangle, qx, qy, bn, m09, mtheta1, mphi1, spinfraci, spinfracf, spintheta):
+    def cal_msld(self, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta):
+        """
+        calculate magnetic sld and return total sld.
+        Note: all angles are in degrees.
+
+        :param bn: Contrast (not just sld of the layer)
+        :param m01: Max mag of M.
+        :param mtheta1: angle from x-z plane.
+        :param mph1i: Angle (anti-clock-wise)of x-z projection(M) from x axis.
+        :param spinfraci1: The fraction of UP among UP+Down (before sample).
+        :param spinfracf: The fraction of UP among UP+Down (after sample and before detector).
+        :param spintheta: Angle (anti-clock-wise) between neutron spin(up) and x axis.
+        """
+
         #Locals
         q_x = qx
         q_y = qy
@@ -171,6 +188,10 @@ class matrix():
 #Private methods implementation -
 
 def p_gamma(a, x, loggamma_a):
+    """
+    Incomplete gamma function.
+    1/ Gamma(a) * Int_0^x exp(-t) t^(a-1) dt
+    """
     k = 0
     result, term, previous = 0.0, 0.0, 0.0
 
@@ -186,16 +207,58 @@ def p_gamma(a, x, loggamma_a):
     terms = x / (a + k_r)
 
 
-    for k in k_r:
-        term *= x / (a + k)
+    for k in terms:
+        term *= k
         result += term
         previous = result
 
         if(result == previous):
             return result
 
-    print("p_gamma() could not converge.")
+    logger.error("p_gamma() could not converge.")
     return result
+
+def q_gamma(a, x, loggamma_a)
+    k = 0
+    result, w, temp, previous = 0.0, 0.0, 0.0, 0.0
+
+    if x >= (1 + a):
+        return 1 - p_gamma(a, x, loggamma_a)
+    w = np.exp(a * np.log(x) - x - loggamma_a)
+    result = w / lb
+
+    k_r = np.arange(2, 1000)
+
+    for k in k_r:
+        temp = ((k - 1 - a) * (lb - la) + (k + x) * lb) / k
+        lb = temp
+        la = lb
+        w *= (k - 1 - a) / k
+        temp = w / (la * lb)
+        result += temp
+        previous = result
+        if result == previous:
+            return result
+
+    logger.error("q_gamma() could not converge.")
+    return result
+
+def erf(x):
+    _log_pi_over_2 = np.log(np.pi) / 2
+
+    if !np.isfinite(x):
+        if np.isnan(x):
+            return x
+    if x >= 0:
+        return p_gamma(0.5, x ** 2, _log_pi_over_2)
+    else:
+        return -p_gamma(0.5, x ** 2, _log_pi_over_2)
+
+def erfc(x):
+    _log_pi_over_2 = np.log(np.pi) / 2
+
+
+
 
 #and defines custom interface of complex numbers, just use np.complex methods. Defines
 #cmplx * + / **, sqrt etc. etc. omitted for now.
