@@ -242,10 +242,8 @@ ext_modules.append(Extension("sas.sascalc.calculator._sld2i",
                    )
 
 # sas.sascalc.pr
-srcdir = os.path.join("src", "sas", "sascalc", "pr")
-package_dir["sas.sascalc.pr.core"] = srcdir
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
-packages.extend(["sas.sascalc.pr", "sas.sascalc.pr.core"])
+packages.append("sas.sascalc.pr")
 
 
 # sas.sascalc.file_converter
