@@ -357,7 +357,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Create a custom slit smear object that will change the way residuals
         are compute when fitting
         """
-        _, accuracy, d_width, d_height = self.state()
+        _, accuracy, d_height, d_width  = self.state()
 
         # Check changes in slit width
         if d_width is None:
@@ -379,13 +379,13 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         data.dxw = None
 
         try:
-            self.dxl = d_height
+            self.dxl = d_width
             data.dxl = self.dxl * np.ones(data_len)
         except:
             self.dxl = None
             data.dxl = np.zeros(data_len)
         try:
-            self.dxw = d_width
+            self.dxw = d_height
             data.dxw = self.dxw * np.ones(data_len)
         except:
             self.dxw = None
