@@ -31,7 +31,6 @@ class GenI():
         pass
 
     def genicom(self, npoints, q, I_out):
-        #FIRST DRAFT, NOT TESTED.
         #current method returns by reference using I_out, will change to return by value.
 
         #qr = vector norm in 3d.
