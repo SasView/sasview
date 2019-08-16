@@ -166,20 +166,42 @@ class GenI():
                 else:
                     sumj += self.sldn_val * self.vol_pix
             else:
-			    #for k in range(self.n_pix):
+                #full calculation
+                #pragma omp parallel for
+
+                #for k in range(self.n_pix):
 			    #j = k, up to n_pix, if x y and z is len(n_pix) then just all
 			    #Assume it is
 			    #as long as vol_pix and sldn_val shape is also [n_pix] should work.
 
-                sld_j = self.sldn_val * self.sldn_val * self.vol_pix * self.vol_pix
-                qr = np.square(self.x_val - self.x_val) + np.square(self.y_val - self.y_val) + np.square(self.z_val - self.z_val)
+                sld_j = np.square(self.sldn_val) * np.square(self.vol_pix)
 
+                #calc calculates (x[j] - x[:]) * (x[j] - x[:]) where x is a 1d array.
+
+                coordinates = np.vstack((x_val, y_val, z_val))
+
+                calc(coordinates)
+                calc = lambda x: np.sum(np.square(x.reshape(len(x), 1) - x.reshape(1, len(x))), axis=1)
+
+                #qr should be result of vector addition of [self.n_pix] + [self.n_pix] + [self.n_pix]
+                qr = calc(coordinates[0, :]) + calc(coordinates[1, :]) + calc(coordinates[2, :])
+                #if python automatically vectorises calc, then
+                #qr = np.sum(calc(coordinates), axis=1)
+
+                #qr * scalar q, from i, and sqrt applied to all.
                 qr = np.sqrt(qr) * q[i]
 
-                if qr > 0.0:
-                    sumj += np.sum(sld_j * np.sin(qr) / qr)
-                else:
-                    sumj += np.sum(sld_j)
+                #should be 1d boolean accessor to qr.
+                #sld_j[self.n_pix] * qr_pos[<=self.n_pix].
+                qr_pos = qr[qr > 0.0]
+                qr_pos_calc = np.sin(qr_pos) / qr_pos
+                sumj += np.sum(np.dot(sld_j.reshape(len(sld_j), 1), qr_pos_calc.reshape(1, len(qr_pos_calc))))
+
+
+                #if qr > 0.0:
+                #    sumj += np.sum(sld_j * np.sin(qr) / qr)
+                #else:
+                #    sumj += np.sum(sld_j)
 
             if i == 0:
                 count += self.vol_pix
