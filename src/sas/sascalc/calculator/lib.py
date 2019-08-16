@@ -22,10 +22,10 @@ class polar_sld():
 
     def __str__(self):
         desc = ""
-        desc += "uu: " + str(self.uu) + "\n"
-        desc += "dd: " + str(self.dd) + "\n"
-        desc += "ud: " + str(self.ud) + "\n"
-        desc += "du: " + str(self.du)
+        desc += "uu: %f \n" % self.uu
+        desc += "dd: %f \n" % self.dd
+        desc += "ud: %f \n" % self.ud
+        desc += "du: %f \n" % self.du
         return desc
 
     #polar_sld* p_sld, int isangle, double qx, double qy, double bn, double m01, double mtheta1,
