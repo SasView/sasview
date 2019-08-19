@@ -148,8 +148,10 @@ class GenI():
 
         coords = np.vstack((self.x_val, self.y_val, self.z_val))
 
-        norm_vals = np.linalg.norm(coords, axis=1)
+        norm_vals = np.linalg.norm(coords, axis=0)
 
+        #Not sure if npoints = self.n_pix necessarily atm.
+        #Otherwise would vectorise immediately, waiting for now.
         for i in range(npoints):
             sumj = 0.0
 
@@ -158,19 +160,16 @@ class GenI():
 		    #then the length of the q vector.
 
             if self.is_avg == 1:
-			    #np.dot(norm_vals, q)?
                 qr = norm_vals * q[i]
-                qr_pos = qr[qr > 0.0]
+                bool_index = qr > 0.0
+                n_bool_index = qr <= 0.0
+                qr_pos = qr[bool_index]
 
-                qr_pos_calc = np.sin(qr_pos) / qr
+                qr_pos_calc = np.sin(qr_pos) / qr_pos
 
-                sumj += self.sldn_val * self.vol_pix * qr_pos_calc
-                #if qr > 0.0:
-                #    qr = np.sin(qr) / qr
-                #    sumj += self.sldn_val * self.vol_pix * qr
+                sumj += np.sum(self.sldn_val[bool_index] * self.vol_pix[bool_index] * qr_pos_calc)
+                sumj += np.sum(self.sldn_val[n_bool_index] * self.vol_pix[n_bool_index])
 
-                #else:
-                #    sumj += self.sldn_val * self.vol_pix
             else:
                 #full calculation
                 #pragma omp parallel for
@@ -194,13 +193,13 @@ class GenI():
                 qr = np.sqrt(qr) * q[i]
 
                 bool_index = qr > 0.0
-                not_bool_index = qr <= 0.0
+                n_bool_index = qr <= 0.0
 
                 qr_pos = qr[bool_index]
                 qr_pos_calc = np.sin(qr_pos) / qr_pos
 
                 sumj += np.sum(np.dot(sld_j[bool_index], qr_pos_calc))
-                sumj += np.sum(sld_j[not_bool_index])
+                sumj += np.sum(sld_j[n_bool_index])
 
             if i == 0:
                 count += np.sum(self.vol_pix)
@@ -209,12 +208,13 @@ class GenI():
 
             if self.is_avg == 1:
                 I_out[i] *= sumj
+
             I_out[i] *= 1.0E+8 / count
 
         return I_out
 
 if(__name__ == "__main__"):
-    is_avg = 0
+    is_avg = 1
     npix = 301
     x = np.linspace(0.1, 0.5, npix)
     y = np.linspace(0.1, 0.5, npix)
@@ -253,9 +253,9 @@ gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s
     run = '''
 I_out = gen_i.genicom(npix, q)'''
 
-    times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+    #times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
 
-    print(times)
+    #print(times)
 
     I_out = gen_i.genicom(npix, q)
 
