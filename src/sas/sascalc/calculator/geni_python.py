@@ -46,11 +46,11 @@ class GenI():
         self.outspin = out_spin
         self.stheta = s_theta
 
-    def genicomXY(self, npoints, qx, qy, I_out):
+    def genicomXY(self, npoints, qx, qy):
         """
         Compute 2d ansotropic.
 
-        Stores result by reference in vector I_out[]
+        Returns I_out[] 1d array.
         """
         #npoints is given negative for angular averaging
         #Assumes that q doesn't have qz component and sld_n is all real
@@ -132,17 +132,19 @@ class GenI():
 
             I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
 
+        return I_out
+
     def genicom(self, npoints, q):
         """
         Computes 1D isotropic.
         Isotropic: Assumes all slds are real (no magnetic)
         Also assumes there is no polarization: No dependency on spin.
+
+        :param npoints: npoints.
+        :param q: q vector.
+
+        :return: I_out.
         """
-        #current method returns by reference using I_out, will change to return by value.
-        #qr = vector norm in 3d.
-	    #make 3d matrix of points for other purposes as well?
-	    #x y and z, all length j, must be same,
-        #Assuming I_out = 1xnpoints.
         count = 0.0
         I_out = np.zeros(npoints)
 
@@ -150,14 +152,8 @@ class GenI():
 
         norm_vals = np.linalg.norm(coords, axis=0)
 
-        #Not sure if npoints = self.n_pix necessarily atm.
-        #Otherwise would vectorise immediately, waiting for now.
         for i in range(npoints):
             sumj = 0.0
-
-		    #for j in range(self.n_pix):
-		    #dependant on the lengths of sldn_val and vol_pix.
-		    #then the length of the q vector.
 
             if self.is_avg == 1:
                 qr = norm_vals * q[i]
@@ -174,22 +170,15 @@ class GenI():
                 #full calculation
                 #pragma omp parallel for
 
-                #for k in range(self.n_pix):
-			    #j = k, up to n_pix, if x y and z is len(n_pix) then just all
-			    #Assume it is
-			    #as long as vol_pix and sldn_val shape is also [n_pix] should work.
                 sld_j = np.dot(np.square(self.sldn_val).reshape(len(self.sldn_val), 1), np.square(self.vol_pix).reshape(1, len(self.vol_pix)))
 
                 #calc calculates (x[j] - x[:]) * (x[j] - x[:]) where x is a 1d array.
-
                 calc = lambda x: np.square(x.reshape(len(x), 1) - x.reshape(1, len(x)))
 
                 #qr should be result of vector addition of [self.n_pix] + [self.n_pix] + [self.n_pix]
                 qr = calc(self.x_val) + calc(self.y_val) + calc(self.z_val)
 
-                #if python automatically vectorises calc, then
-
-                #qr * scalar q, from i, and sqrt applied to all.
+                #qr * scalar q.
                 qr = np.sqrt(qr) * q[i]
 
                 bool_index = qr > 0.0
