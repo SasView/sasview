@@ -213,9 +213,8 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 }
 
 int main() {
-	int is_avg = 0;
+	int is_avg = 1;
 	int npix = 301;
-	printf("Hello world");
 	double* x = malloc(npix * sizeof(double));
 	double* y = malloc(npix * sizeof(double));
 	double* z = malloc(npix * sizeof(double));
@@ -244,7 +243,6 @@ int main() {
 		mz[i] = start + (lin_space * i);
 		voli[i] = start + (lin_space * i);
 		q[i] = start + (lin_space * i);
-		printf("q: %f", x[i]);
 	}
 
 	GenI* obj = malloc(sizeof(GenI));
@@ -259,7 +257,8 @@ int main() {
 	int npoints = 301;
 
 	double* I_out = malloc(301 * sizeof(double));
-	double time_spent = 0.0;
+	genicom(obj, npoints, q, I_out);
+	/*double time_spent = 0.0;
 	i = 0;
 	int trials = 10;
 
@@ -271,7 +270,7 @@ int main() {
 		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
 		printf("Time elapsed is %f seconds", time_spent);
-	}
+	}*/
 	i = 0;
 
 	for(i = 0; i < npoints; i++) {
