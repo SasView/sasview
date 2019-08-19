@@ -184,6 +184,8 @@ class matrix():
         self.d = np.complex(0)
 
 #Private methods implementation -
+#Cannot find any of these in sld2i.c, just the cmplx data type.
+#Maybe remove?
 
 def p_gamma(a, x, loggamma_a):
     """

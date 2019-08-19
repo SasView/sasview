@@ -56,3 +56,4 @@ tests.log
 /installers/installer.iss
 /installers/build
 /installers/dist
+*.exe

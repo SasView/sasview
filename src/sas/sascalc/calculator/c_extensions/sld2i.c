@@ -6,6 +6,9 @@ Computes the (magnetic) scattering form sld (n and m) profile
 #include "sld2i.h"
 #include "libfunc.h"
 #include "librefl.h"
+#include <stdlib.h>
+#include<time.h>
+
 /**
  * Constructor for GenI
  *
@@ -207,4 +210,86 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 		I_out[i] *= (1.0E+8 / count); //in cm (unit) / number; //to be multiplied by vol_pix
 	}
 	//printf("count = %d %g %g %g %g\n", count, sldn_val[0],mx_val[0], my_val[0], mz_val[0]);
+}
+
+int main() {
+	int is_avg = 0;
+	int npix = 301;
+	printf("Hello world");
+	double* x = malloc(npix * sizeof(double));
+	double* y = malloc(npix * sizeof(double));
+	double* z = malloc(npix * sizeof(double));
+	double* sldn = malloc(npix * sizeof(double));
+	double* mx = malloc(npix * sizeof(double));
+	double* my = malloc(npix * sizeof(double));
+	double* mz = malloc(npix * sizeof(double));
+	double* voli = malloc(npix * sizeof(double));
+	double* q = malloc(npix * sizeof(double));
+
+	double in_spin = 0.5;
+	double out_spin = 0.2;
+	double s_theta = 0.1;
+
+	double lin_space = 0.4 / (npix-1);
+	double start = 0.1;
+
+	int i = 0;
+	for(i = 0; i < npix; i++) {
+		x[i] = start + (lin_space * i);
+		y[i] = start + (lin_space * i);
+		z[i] = start + (lin_space * i);
+		sldn[i] = start + (lin_space * i);
+		mx[i] = start + (lin_space * i);
+		my[i] = start + (lin_space * i);
+		mz[i] = start + (lin_space * i);
+		voli[i] = start + (lin_space * i);
+		q[i] = start + (lin_space * i);
+		printf("q: %f", x[i]);
+	}
+
+	GenI* obj = malloc(sizeof(GenI));
+	//printf("Test: %d", obj->is_avg);
+
+	/*GenI* this, int is_avg, int npix, double* x, double* y, double* z, double* sldn,
+			double* mx, double* my, double* mz, double* voli,
+			double in_spin, double out_spin,
+			double s_theta*/
+	initGenI(obj, is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta);
+
+	int npoints = 301;
+
+	double* I_out = malloc(301 * sizeof(double));
+	double time_spent = 0.0;
+	i = 0;
+	int trials = 10;
+
+	for(i = 0; i < trials; i++) {
+		clock_t begin = clock();
+		genicom(obj, npoints, q, I_out);
+		clock_t end = clock();
+
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+		printf("Time elapsed is %f seconds", time_spent);
+	}
+	i = 0;
+
+	for(i = 0; i < npoints; i++) {
+		printf("%e ", I_out[i]);
+		if(i % 4 == 0) {
+			printf("\n");
+		}
+	}
+
+	free(obj);
+	free(x);
+	free(y);
+	free(z);
+	free(sldn);
+	free(mx);
+	free(my);
+	free(mx);
+	free(voli);
+	free(I_out);
+	free(q);
 }
