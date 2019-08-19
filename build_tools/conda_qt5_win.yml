@@ -19,6 +19,7 @@ dependencies:
   - pyopencl=2018.2.2
   - testpath=0.3.1
   - numba=0.39
+  - numpy=1.16.4
   - pip:
     - pytools==2019.1
     - periodictable==1.5.0
