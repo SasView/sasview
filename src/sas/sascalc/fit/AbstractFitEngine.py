@@ -186,8 +186,9 @@ class FitData1D(Data1D):
 
     def set_fit_range(self, qmin=None, qmax=None):
         """ to set the fit range"""
+        # TODO: merge with code in the __init__ method
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
-        # ToDo: Find better way to do it.
+        # TODO: Find better way to do it.
         if qmin == 0.0 and not np.isfinite(self.y[qmin]):
             self.qmin = min(self.x[self.x != 0])
         elif qmin is not None:
@@ -308,10 +309,10 @@ class FitData2D(Data2D):
         self.radius = np.sqrt(self.qx_data**2 + self.qy_data**2)
 
         # Note: mask = True: for MASK while mask = False for NOT to mask
-        self.idx = ((self.qmin <= self.radius) &\
-                            (self.radius <= self.qmax))
-        self.idx = (self.idx) & (self.mask)
-        self.idx = (self.idx) & (np.isfinite(self.data))
+        self.idx = ((self.qmin <= self.radius) & (self.radius <= self.qmax))
+        self.idx &= self.mask
+        self.idx &= np.isfinite(self.data)
+        self.idx &= self.res_err_data != 0
         self.num_points = np.sum(self.idx)
 
     def set_smearer(self, smearer):
@@ -328,6 +329,7 @@ class FitData2D(Data2D):
         """
             To set the fit range
         """
+        # TODO: merge with code in the set_data() method.
         if qmin == 0.0:
             self.qmin = 1e-16
         elif qmin is not None:
@@ -335,11 +337,11 @@ class FitData2D(Data2D):
         if qmax is not None:
             self.qmax = qmax
         self.radius = np.sqrt(self.qx_data**2 + self.qy_data**2)
-        self.idx = ((self.qmin <= self.radius) &\
-                            (self.radius <= self.qmax))
-        self.idx = (self.idx) & (self.mask)
-        self.idx = (self.idx) & (np.isfinite(self.data))
-        self.idx = (self.idx) & (self.res_err_data != 0)
+        self.idx = ((self.qmin <= self.radius) & (self.radius <= self.qmax))
+        self.idx &= self.mask
+        self.idx &= np.isfinite(self.data)
+        self.idx &= self.res_err_data != 0
+        self.num_points = np.sum(self.idx)
 
     def get_fit_range(self):
         """
