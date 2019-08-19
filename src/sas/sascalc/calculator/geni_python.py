@@ -8,11 +8,13 @@ from math import factorial
 
 import numpy as np
 from scipy.special import sici
+import timeit
 
-from . import lib
+#from . import lib
+import lib
 
 class GenI():
-    def __init__(self, is_avg, npix, x, y, sldn, z, mx, my, mz,
+    def __init__(self, is_avg, npix, x, y, z, sldn, mx, my, mz,
                  voli, in_spin, out_spin, s_theta):
         """
         Constructor for GenI
@@ -130,7 +132,7 @@ class GenI():
 
             I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
 
-    def genicom(self, npoints, q, I_out):
+    def genicom(self, npoints, q):
         """
         Computes 1D isotropic.
         Isotropic: Assumes all slds are real (no magnetic)
@@ -140,11 +142,11 @@ class GenI():
         #qr = vector norm in 3d.
 	    #make 3d matrix of points for other purposes as well?
 	    #x y and z, all length j, must be same,
-        coords = np.zeros([self.n_pix, self.n_pix, self.n_pix])
+        #Assuming I_out = 1xnpoints.
+        count = 0.0
+        I_out = np.zeros(npoints)
 
-        coords[0, :] = self.x_val
-        coords[1, :] = self.y_val
-        coords[2, :] = self.z_val
+        coords = np.vstack((self.x_val, self.y_val, self.z_val))
 
         norm_vals = np.linalg.norm(coords, axis=1)
 
@@ -158,13 +160,17 @@ class GenI():
             if self.is_avg == 1:
 			    #np.dot(norm_vals, q)?
                 qr = norm_vals * q[i]
+                qr_pos = qr[qr > 0.0]
 
-                if qr > 0.0:
-                    qr = np.sin(qr) / qr
-                    sumj += self.sldn_val * self.vol_pix * qr
+                qr_pos_calc = np.sin(qr_pos) / qr
 
-                else:
-                    sumj += self.sldn_val * self.vol_pix
+                sumj += self.sldn_val * self.vol_pix * qr_pos_calc
+                #if qr > 0.0:
+                #    qr = np.sin(qr) / qr
+                #    sumj += self.sldn_val * self.vol_pix * qr
+
+                #else:
+                #    sumj += self.sldn_val * self.vol_pix
             else:
                 #full calculation
                 #pragma omp parallel for
@@ -173,42 +179,86 @@ class GenI():
 			    #j = k, up to n_pix, if x y and z is len(n_pix) then just all
 			    #Assume it is
 			    #as long as vol_pix and sldn_val shape is also [n_pix] should work.
-
-                sld_j = np.square(self.sldn_val) * np.square(self.vol_pix)
+                sld_j = np.dot(np.square(self.sldn_val).reshape(len(self.sldn_val), 1), np.square(self.vol_pix).reshape(1, len(self.vol_pix)))
 
                 #calc calculates (x[j] - x[:]) * (x[j] - x[:]) where x is a 1d array.
 
-                coordinates = np.vstack((x_val, y_val, z_val))
-
-                calc(coordinates)
-                calc = lambda x: np.sum(np.square(x.reshape(len(x), 1) - x.reshape(1, len(x))), axis=1)
+                calc = lambda x: np.square(x.reshape(len(x), 1) - x.reshape(1, len(x)))
 
                 #qr should be result of vector addition of [self.n_pix] + [self.n_pix] + [self.n_pix]
-                qr = calc(coordinates[0, :]) + calc(coordinates[1, :]) + calc(coordinates[2, :])
+                qr = calc(coords[0, :]) + calc(coords[1, :]) + calc(coords[2, :])
+
                 #if python automatically vectorises calc, then
-                #qr = np.sum(calc(coordinates), axis=1)
 
                 #qr * scalar q, from i, and sqrt applied to all.
                 qr = np.sqrt(qr) * q[i]
 
-                #should be 1d boolean accessor to qr.
-                #sld_j[self.n_pix] * qr_pos[<=self.n_pix].
-                qr_pos = qr[qr > 0.0]
+                bool_index = qr > 0.0
+                not_bool_index = qr <= 0.0
+
+                qr_pos = qr[bool_index]
                 qr_pos_calc = np.sin(qr_pos) / qr_pos
-                sumj += np.sum(np.dot(sld_j.reshape(len(sld_j), 1), qr_pos_calc.reshape(1, len(qr_pos_calc))))
 
-
-                #if qr > 0.0:
-                #    sumj += np.sum(sld_j * np.sin(qr) / qr)
-                #else:
-                #    sumj += np.sum(sld_j)
+                sumj += np.sum(np.dot(sld_j[bool_index], qr_pos_calc))
+                sumj += np.sum(sld_j[not_bool_index])
 
             if i == 0:
-                count += self.vol_pix
+                count += np.sum(self.vol_pix)
 
             I_out[i] = sumj
 
             if self.is_avg == 1:
                 I_out[i] *= sumj
-
             I_out[i] *= 1.0E+8 / count
+
+        return I_out
+
+if(__name__ == "__main__"):
+    is_avg = 0
+    npix = 301
+    x = np.linspace(0.1, 0.5, npix)
+    y = np.linspace(0.1, 0.5, npix)
+    z = np.linspace(0.1, 0.5, npix)
+    sldn = np.linspace(0.1, 0.5, npix)
+    mx = np.linspace(0.1, 0.5, npix)
+    my = np.linspace(0.1, 0.5, npix)
+    mz = np.linspace(0.1, 0.5, npix)
+    voli = np.linspace(0.1, 0.5, npix)
+    q = np.linspace(0.1, 0.5, npix)
+
+    in_spin = 0.5
+    out_spin = 0.2
+    s_theta = 0.1
+    gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)
+
+    setup = '''
+from __main__ import GenI
+import numpy as np
+is_avg = 0
+npix = 301
+x = np.linspace(0.1, 0.5, npix)
+y = np.linspace(0.1, 0.5, npix)
+z = np.linspace(0.1, 0.5, npix)
+sldn = np.linspace(0.1, 0.5, npix)
+mx = np.linspace(0.1, 0.5, npix)
+my = np.linspace(0.1, 0.5, npix)
+mz = np.linspace(0.1, 0.5, npix)
+voli = np.linspace(0.1, 0.5, npix)
+q = np.linspace(0.1, 0.5, npix)
+
+in_spin = 0.5
+out_spin = 0.2
+s_theta = 0.1
+gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
+    run = '''
+I_out = gen_i.genicom(npix, q)'''
+
+    times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+
+    print(times)
+
+    I_out = gen_i.genicom(npix, q)
+
+    print(I_out)
+    print(I_out.shape)
+
