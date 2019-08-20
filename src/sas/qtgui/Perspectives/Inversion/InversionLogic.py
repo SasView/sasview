@@ -90,7 +90,7 @@ class InversionLogic(object):
             x = np.arange(minq, maxq, maxq / 301.0)
 
             #Vectorised iq_smeared.
-            y = pr.iq_smeared(out, x)
+            y = pr.get_iq_smeared(out, x)
             with np.errstate(invalid='ignore'):
                 err = np.sqrt(np.abs(y))
             index = np.isnan(err)
