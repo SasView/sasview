@@ -46,12 +46,15 @@ class GenI():
         self.outspin = out_spin
         self.stheta = s_theta
 
-    def genicomXY(self, npoints, qx, qy):
+    def genicomXY(self, qx, qy):
         """
         Compute 2d ansotropic.
 
         Returns I_out[] 1d array.
         """
+
+        npoints = len(qx)
+
         #npoints is given negative for angular averaging
         #Assumes that q doesn't have qz component and sld_n is all real
         b_sld = lib.polar_sld()
@@ -139,7 +142,7 @@ class GenI():
 
         return I_out
 
-    def genicom(self, npoints, q):
+    def genicom(self, q):
         """
         Computes 1D isotropic.
         Isotropic: Assumes all slds are real (no magnetic)
@@ -150,6 +153,8 @@ class GenI():
 
         :return: I_out.
         """
+        npoints = len(q)
+
         count = 0.0
         I_out = np.zeros(npoints)
 
@@ -246,14 +251,14 @@ gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s
     run = '''
 I_out = gen_i.genicomXY(npix, x, y)'''
 
-    times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+    #times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
 
-    print(times)
+    #print(times)
 
     x = np.linspace(0.1, 0.5, npix)
     y = np.linspace(0.1, 0.5, npix)
 
-    I_out = gen_i.genicomXY(npix, x, y)
+    I_out = gen_i.genicom(q)
 
     print(I_out)
     print(I_out.shape)
