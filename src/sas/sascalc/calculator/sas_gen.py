@@ -13,7 +13,8 @@ from periodictable import formula
 from periodictable import nsf
 import numpy as np
 
-from . import _sld2i
+#from . import _sld2i
+from .geni_python import GenI
 from .BaseComponent import BaseComponent
 
 logger = logging.getLogger(__name__)
@@ -125,6 +126,7 @@ class GenSAS(BaseComponent):
         :Param i: array of initial i-value
         :return: function value
         """
+
         pos_x = self.data_x
         pos_y = self.data_y
         pos_z = self.data_z
@@ -133,7 +135,7 @@ class GenSAS(BaseComponent):
         sldn = copy.deepcopy(self.data_sldn)
         sldn -= self.params['solvent_SLD']
         # **** WARNING **** new_GenI holds pointers to numpy vectors
-        # be sure that they are contiguous double precision arrays and make 
+        # be sure that they are contiguous double precision arrays and make
         # sure the GC doesn't eat them before genicom is called.
         # TODO: rewrite so that the parameters are passed directly to genicom
         args = (
@@ -144,17 +146,18 @@ class GenSAS(BaseComponent):
             self.params['Up_frac_in'],
             self.params['Up_frac_out'],
             self.params['Up_theta'])
-        model = _sld2i.new_GenI(*args)
+        model = GenI(*args)
         if len(qy):
             qx, qy = _vec(qx), _vec(qy)
+
             I_out = np.empty_like(qx)
             #print("npoints", qx.shape, "npixels", pos_x.shape)
-            _sld2i.genicomXY(model, qx, qy, I_out)
+            I_out = model.genicomXY(qx, qy)
             #print("I_out after", I_out)
         else:
             qx = _vec(qx)
             I_out = np.empty_like(qx)
-            _sld2i.genicom(model, qx, I_out)
+            I_out = model.genicom(qx)
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = (self.params['scale'] * vol_correction * I_out
                   + self.params['background'])
@@ -190,6 +193,7 @@ class GenSAS(BaseComponent):
         :param x: simple value
         :return: (I value)
         """
+        logger.error('RUNNING SLD2I.')
         if isinstance(x, list):
             if len(x[1]) > 0:
                 msg = "Not a 1D."
@@ -208,6 +212,9 @@ class GenSAS(BaseComponent):
         :return: I value
         :Use this runXY() for the computation
         """
+        logger.error('RUNNING SLD2I.')
+        print("Test")
+        logging.info("Test")
         if isinstance(x, list):
             return self._gen(x[0], x[1])
         else:
