@@ -129,13 +129,11 @@ class GenI():
                     if i == 0:
                         count += self.vol_pix[j];
 
-            calc = lambda x: np.square(x.real) + np.square(y.imag)
-            print(calc(sumj_uu))
-            print(type(calc(sumj_uu)))
-            I_out[i] = calc(sumj_uu)[0]
-            I_out[i] += calc(sumj_ud)[0]
-            I_out[i] += calc(sumj_du)[0]
-            I_out[i] += calc(sumj_dd)[0]
+            calc = lambda x: np.square(x.real) + np.square(x.imag)
+            I_out[i] = calc(sumj_uu)
+            I_out[i] += calc(sumj_ud)
+            I_out[i] += calc(sumj_du)
+            I_out[i] += calc(sumj_dd)
 
             I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
 
@@ -246,14 +244,14 @@ out_spin = 0.2
 s_theta = 0.1
 gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
     run = '''
-I_out = gen_i.genicom(npix, q)'''
+I_out = gen_i.genicomXY(npix, x, y)'''
 
-    #times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+    times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
 
-    #print(times)
+    print(times)
 
-    x = np.linspace(0.1, 0.5, 301)
-    y = np.linspace(0.1, 0.5, 301)
+    x = np.linspace(0.1, 0.5, npix)
+    y = np.linspace(0.1, 0.5, npix)
 
     I_out = gen_i.genicomXY(npix, x, y)
 

@@ -262,20 +262,20 @@ int main() {
 
 	double* I_out = malloc(301 * sizeof(double));
 	genicomXY(obj, npoints, x, y, I_out);
-	/*double time_spent = 0.0;
+	double time_spent = 0.0;
 	i = 0;
 	int trials = 10;
 
 	for(i = 0; i < trials; i++) {
 		clock_t begin = clock();
-		genicom(obj, npoints, q, I_out);
+		genicomXY(obj, npoints, x, y, I_out);
 		clock_t end = clock();
 
 		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
 		printf("Time elapsed is %f seconds", time_spent);
 	}
-	i = 0;*/
+	i = 0;
 
 	for(i = 0; i < npoints; i++) {
 		printf("%e ", I_out[i]);
