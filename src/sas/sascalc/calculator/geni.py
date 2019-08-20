@@ -75,7 +75,7 @@ class GenI():
         ephase = np.complex()
         comp_sld = np.complex()
 
-        I_out = np.zeros(npoints, dtype=np.complex)
+        I_out = np.zeros(npoints, dtype=np.float)
 
 	    #Assume that pixel volumes are given in vol_pix in A^3 unit
         #Loop over q-values and multiply apply matrix
@@ -90,8 +90,6 @@ class GenI():
 
 				    #anisotropic
                     temp_fi = np.complex()
-
-                    #cal_msld(self, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta)
 
                     b_sld.cal_msld(0, qx[i], qy[i], self.sldn_val[j],
                                    self.mx_val[j], self.my_val[j], self.mz_val[j],
@@ -137,7 +135,6 @@ class GenI():
             I_out[i] += calc(sumj_ud)
             I_out[i] += calc(sumj_du)
             I_out[i] += calc(sumj_dd)
-
             I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
 
         return I_out
@@ -255,11 +252,18 @@ I_out = gen_i.genicomXY(npix, x, y)'''
 
     #print(times)
 
-    x = np.linspace(0.1, 0.5, npix)
-    y = np.linspace(0.1, 0.5, npix)
-
-    I_out = gen_i.genicom(q)
+    I_out = gen_i.genicomXY(x, y)
 
     print(I_out)
     print(I_out.shape)
 
+    #test_sld = lib.polar_sld()
+    #test_sld.uu = 1.0
+    #test_sld.dd = 2.5
+    #test_sld.ud = np.complex(1.5, 2.5)
+    #test_sld.du = np.complex(4.5, 5.5)
+    #param = 0.3
+
+    #test_sld.cal_msld(0, 0.5, 0.5, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.5, 0.2, 0.1)
+
+    #print(test_sld)

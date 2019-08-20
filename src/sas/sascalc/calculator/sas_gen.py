@@ -14,7 +14,7 @@ from periodictable import nsf
 import numpy as np
 
 #from . import _sld2i
-from .geni_python import GenI
+from .geni import GenI
 from .BaseComponent import BaseComponent
 
 logger = logging.getLogger(__name__)
