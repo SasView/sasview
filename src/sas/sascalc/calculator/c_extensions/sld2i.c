@@ -224,6 +224,8 @@ int main() {
 	double* mz = malloc(npix * sizeof(double));
 	double* voli = malloc(npix * sizeof(double));
 	double* q = malloc(npix * sizeof(double));
+	double* qx = malloc(npix * sizeof(double));
+	double* qy = malloc(npix * sizeof(double));
 
 	double in_spin = 0.5;
 	double out_spin = 0.2;
@@ -243,6 +245,8 @@ int main() {
 		mz[i] = start + (lin_space * i);
 		voli[i] = start + (lin_space * i);
 		q[i] = start + (lin_space * i);
+		qx[i] = start + (lin_space * i);
+		qy[i] = start + (lin_space * i);
 	}
 
 	GenI* obj = malloc(sizeof(GenI));
@@ -257,8 +261,8 @@ int main() {
 	int npoints = 301;
 
 	double* I_out = malloc(301 * sizeof(double));
-	genicom(obj, npoints, q, I_out);
-	double time_spent = 0.0;
+	genicomXY(obj, npoints, x, y, I_out);
+	/*double time_spent = 0.0;
 	i = 0;
 	int trials = 10;
 
@@ -271,7 +275,7 @@ int main() {
 
 		printf("Time elapsed is %f seconds", time_spent);
 	}
-	i = 0;
+	i = 0;*/
 
 	for(i = 0; i < npoints; i++) {
 		printf("%e ", I_out[i]);
@@ -291,4 +295,6 @@ int main() {
 	free(voli);
 	free(I_out);
 	free(q);
+	free(qx);
+	free(qy);
 }

@@ -54,7 +54,7 @@ class GenI():
         """
         #npoints is given negative for angular averaging
         #Assumes that q doesn't have qz component and sld_n is all real
-        b_sld = polar_sld()
+        b_sld = lib.polar_sld()
         qr = float()
         iqr = np.complex()
         ephase = np.complex()
@@ -71,6 +71,9 @@ class GenI():
         iqr = np.complex()
         ephase = np.complex()
         comp_sld = np.complex()
+
+        I_out = np.zeros(npoints, dtype=np.complex)
+
 	    #Assume that pixel volumes are given in vol_pix in A^3 unit
         #Loop over q-values and multiply apply matrix
         for i in range(npoints):
@@ -80,11 +83,14 @@ class GenI():
             sumj_dd = np.complex()
 
             for j in range(self.n_pix):
-                if self.sldn_val[j] != 0.0 | self.mx_val[j] != 0.0 | self.my_val[j] != 0.0 | self.mz_val[j] != 0.0:
+                if self.sldn_val[j] != 0.0 or self.mx_val[j] != 0.0 or self.my_val[j] != 0.0 or self.mz_val[j] != 0.0:
 
 				    #anisotropic
                     temp_fi = np.complex()
-                    b_sld.cal_msld(b_sld, 0, qx[i], qy[i], self.sldn_val[j],
+
+                    #cal_msld(self, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta)
+
+                    b_sld.cal_msld(0, qx[i], qy[i], self.sldn_val[j],
                                    self.mx_val[j], self.my_val[j], self.mz_val[j],
                                    self.inspin, self.outspin, self.stheta);
                     qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j]);
@@ -124,11 +130,12 @@ class GenI():
                         count += self.vol_pix[j];
 
             calc = lambda x: np.square(x.real) + np.square(y.imag)
-
-            I_out[i] = calc(sumj_uu)
-            I_out[i] += calc(sumj_ud)
-            I_out[i] += calc(sumj_du)
-            I_out[i] += calc(sumj_dd)
+            print(calc(sumj_uu))
+            print(type(calc(sumj_uu)))
+            I_out[i] = calc(sumj_uu)[0]
+            I_out[i] += calc(sumj_ud)[0]
+            I_out[i] += calc(sumj_du)[0]
+            I_out[i] += calc(sumj_dd)[0]
 
             I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
 
@@ -245,7 +252,10 @@ I_out = gen_i.genicom(npix, q)'''
 
     #print(times)
 
-    I_out = gen_i.genicom(npix, q)
+    x = np.linspace(0.1, 0.5, 301)
+    y = np.linspace(0.1, 0.5, 301)
+
+    I_out = gen_i.genicomXY(npix, x, y)
 
     print(I_out)
     print(I_out.shape)
