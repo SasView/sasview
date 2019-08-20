@@ -262,7 +262,7 @@ int main() {
 
 	double* I_out = malloc(301 * sizeof(double));
 	genicomXY(obj, npoints, x, y, I_out);
-	double time_spent = 0.0;
+	/*double time_spent = 0.0;
 	i = 0;
 	int trials = 10;
 
@@ -275,7 +275,7 @@ int main() {
 
 		printf("Time elapsed is %f seconds", time_spent);
 	}
-	i = 0;
+	i = 0;*/
 
 	for(i = 0; i < npoints; i++) {
 		printf("%e ", I_out[i]);
@@ -284,6 +284,27 @@ int main() {
 		}
 	}
 
+	/*polar_sld* sld = malloc(sizeof(polar_sld));
+	sld->uu = 1.0;
+	sld->dd = 2.5;
+	sld->re_ud = 1.5;
+	sld->im_ud = 2.5;
+	sld->re_du = 4.5;
+	sld->im_du = 5.5;
+
+	double param = 0.3;
+
+	cal_msld(sld, 0, 0.5, 0.5, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.5, 0.2, 0.1);
+
+	printf("uu: %f \n", sld->uu);
+	printf("dd: %f \n", sld->dd);
+	printf("re_ud: %f \n", sld->re_ud);
+	printf("im_ud: %f \n", sld->im_ud);
+	printf("re_du: %f \n", sld->re_du);
+	printf("im_du: %f \n", sld->im_du);
+
+
+	free(sld);*/
 	free(obj);
 	free(x);
 	free(y);

@@ -24,8 +24,10 @@ class polar_sld():
         desc = ""
         desc += "uu: %f \n" % self.uu
         desc += "dd: %f \n" % self.dd
-        desc += "ud: %f \n" % self.ud
-        desc += "du: %f \n" % self.du
+        desc += "ud real: %f \n" % self.ud.real
+        desc += "ud imag: %f \n" % self.ud.imag
+        desc += "du real: %f \n" % self.du.real
+        desc += "du imag: %f \n" % self.du.imag
         return desc
 
     #polar_sld* p_sld, int isangle, double qx, double qy, double bn, double m01, double mtheta1,
