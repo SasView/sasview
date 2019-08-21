@@ -279,7 +279,7 @@ int main() {
 
 	for(i = 0; i < npoints; i++) {
 		printf("%e ", I_out[i]);
-		if(i % 4 == 0) {
+		if((i+1) % 4 == 0) {
 			printf("\n");
 		}
 	}
