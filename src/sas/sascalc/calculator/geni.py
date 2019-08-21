@@ -12,6 +12,10 @@ import timeit
 
 #from . import lib
 import lib
+#**TEST
+TEST_DATA_VECTOR = np.zeros((301, 301), dtype = lib.get_polar_sld_type())
+TEST_DATA_SCALAR = np.zeros((301, 301), dtype = lib.get_polar_sld_type())
+#**
 
 class GenI():
     def __init__(self, is_avg, npix, x, y, z, sldn, mx, my, mz,
@@ -57,7 +61,6 @@ class GenI():
 
         #npoints is given negative for angular averaging
         #Assumes that q doesn't have qz component and sld_n is all real
-        print(lib.get_polar_sld_type())
         b_sld = np.array([(np.float(), np.float(), np.complex(), np.complex())], dtype=lib.get_polar_sld_type())
         qr = float()
         iqr = np.complex()
@@ -95,6 +98,9 @@ class GenI():
                     lib.cal_msld(b_sld, 0, qx[i], qy[i], self.sldn_val[j],
                                    self.mx_val[j], self.my_val[j], self.mz_val[j],
                                    self.inspin, self.outspin, self.stheta);
+                    #**TESTING**
+                    TEST_DATA_SCALAR[i, j] = b_sld
+                    #**
                     qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j]);
                     iqr = np.complex(0.0, qr)
 
@@ -152,7 +158,6 @@ class GenI():
 
         #npoints is given negative for angular averaging
         #Assumes that q doesn't have qz component and sld_n is all real
-        print(lib.get_polar_sld_type())
         b_sld = np.zeros(self.n_pix, dtype=lib.get_polar_sld_type())
         qr = float()
         iqr = np.complex()
@@ -200,10 +205,13 @@ class GenI():
             temp_fi = np.complex()
 
             #all passed to cal_msld, not full values but should all be same length.
-            print(~index_zero)
             lib.cal_msld_vec(b_sld, 0, qx[i], qy[i], sldn_val_use,
                             mx_val_use, my_val_use, mz_val_use,
                             self.inspin, self.outspin, self.stheta);
+            #**TEST
+            TEST_DATA_VECTOR[i, :] = b_sld
+            #**TEST
+
             qr = (qx[i]*self.x_val + qy[i]*self.y_val);
             iqr = np.zeros(len(self.x_val), dtype = np.complex_)
 
@@ -242,9 +250,9 @@ class GenI():
                 comp_sld = b_sld['du']
                 temp_fi = comp_sld * ephase
                 sumj_du = np.sum(sumj_du + temp_fi)
-            print("I: \n\n", i)
             if i == 0:
                 count = np.sum(self.vol_pix);
+
 
             calc = lambda x: np.square(x.real) + np.square(x.imag)
             I_out[i] = calc(sumj_uu)
@@ -362,16 +370,35 @@ out_spin = 0.2
 s_theta = 0.1
 gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
     run = '''
-I_out = gen_i.genicomXY(npix, x, y)'''
+I_out = gen_i.genicomXY_vec(x, y)'''
 
     #times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
 
     #print(times)
 
-    I_out = gen_i.genicomXY_vec(x, y)
+    I_out_vec = gen_i.genicomXY_vec(x, y)
+    I_out = gen_i.genicomXY(x, y)
 
-    print(I_out)
-    print(I_out.shape)
+    print("TEST DATA, cal_msld: ")
+    if(np.array_equal(TEST_DATA_VECTOR, TEST_DATA_SCALAR)):
+        print("**EQUAL**")
+    else:
+        print("**DIFFERENT**")
+        print("Scalar Data: ", TEST_DATA_SCALAR)
+        print("Vector Data: ", TEST_DATA_VECTOR)
+        #print("Error: ", TEST_DATA_SCALAR - TEST_DATA_VECTOR)
+
+    #print("FULL I_OUT, cal_msld: ")
+    #if(np.array_equal(I_out, I_out_vec)):
+    #    print("**EQUAL**")
+    #else:
+    #    print("**DIFFERENT**")
+    #    print("Scalar Data: ", I_out[0])
+    #    print("Vector Data: ", I_out_vec[0])
+    #    print("Error: ", I_out - I_out_vec)
+
+    #print(I_out)
+    #print(I_out.shape)
 
     #test_sld = lib.polar_sld()
     #test_sld.uu = 1.0

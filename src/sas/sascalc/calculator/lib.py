@@ -64,10 +64,10 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
         mz = 0.0
         uu = sld
         dd = sld
-        re_ud = sld
-        im_ud = sld
-        re_du = sld
-        im_du = sld
+        re_ud = np.zeros(len(sld), dtype=np.complex_)
+        im_ud = np.zeros(len(sld), dtype=np.complex_)
+        re_du = np.zeros(len(sld), dtype=np.complex_)
+        im_du = np.zeros(len(sld), dtype=np.complex_)
 
         temp = 1.0e-32
         temp2 = 1.0e-16
@@ -88,9 +88,11 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
         #only do the computation in elif if there if something in accept matrix otherwise will do regardless of other conditions.
 
         if isangle > 0:
-            if m_max < temp:
-                uu = calc_uu(uu)
-                dd = calc_dd(dd)
+            index = m_max < temp
+            #if m_max < temp:
+            uu[index] = calc_uu(uu[index])
+            dd[index] = calc_dd(dd[index])
+
 
         elif index_accept.any():
             #if there is any in index_accept, then do this, just so won't do computation if isangle > 0.
@@ -102,7 +104,8 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
 
 
         #if not all were values of uu were covered by uu
-        if ~index_accept.all():
+        if ~index_accept.all() & ~(isangle > 0):
+            #vectors are - bn m01 mtheta1 mphi1 -> sld, m_max, m_phi, m_theta.
             in_spin = 0.0 if in_spin < 0.0 else in_spin
             in_spin = 1.0 if in_spin > 1.0 else in_spin
             out_spin = 0.0 if out_spin < 0.0 else out_spin
@@ -125,20 +128,20 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
                 q_angle += 2.0 * pi
 
             if (np.fabs(q_x) < temp2) & (np.fabs(q_y) < temp2):
-                m_perp = 0.0
+                m_perp = np.zeros(len(m_max[~index_accept]), dtype = float)
             else:
-                m_perp = m_max
+                m_perp = m_max[~index_accept]
 
             if is_angle > 0:
-                m_phi = np.radians(m_phi)
-                m_theta = np.radians(m_theta)
-                mx = m_perp * np.cos(m_theta) * np.cos(m_phi)
-                my = m_perp * np.sin(m_theta)
-                mz = -(m_perp * np.cos(m_theta) * np.sin(m_phi))
+                m_phi[~index_accept] = np.radians(m_phi[~index_accept])
+                m_theta[~index_accept] = np.radians(m_theta[~index_accept])
+                mx = m_perp * np.cos(m_theta[~index_accept]) * np.cos(m_phi[~index_accept])
+                my = m_perp * np.sin(m_theta[~index_accept])
+                mz = -(m_perp * np.cos(m_theta[~index_accept]) * np.sin(m_phi[~index_accept]))
             else:
                 mx = m_perp
-                my = m_phi
-                mz = m_theta
+                my = m_phi[~index_accept]
+                mz = m_theta[~index_accept]
 
             #ToDo: simplify these steps
             # m_perp1 -m_perp2
@@ -161,15 +164,13 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
             im_ud[~index_accept] = m_sigma_z
             im_du[~index_accept] = -m_sigma_z
 
-            uu[~index_accept] = calc_uu(uu)
-            dd[~index_accept] = calc_dd(dd)
+            uu[~index_accept] = calc_uu(uu[~index_accept])
+            dd[~index_accept] = calc_dd(dd[~index_accept])
 
-            re_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * re_ud
-            im_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * im_ud
-            re_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * re_du
-            im_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * im_du
-
-        print(type(uu))
+            re_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * re_ud[~index_accept]
+            im_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * im_ud[~index_accept]
+            re_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * re_du[~index_accept]
+            im_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * im_du[~index_accept]
 
         polar_slds['uu'] = uu
         polar_slds['dd'] = dd
