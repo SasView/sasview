@@ -21,6 +21,8 @@
 **/__pycache__
 *.pyc
 *.so
+*.exe
+
 /.vagrant
 /build
 /dist

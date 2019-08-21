@@ -160,11 +160,6 @@ class Loader():
 
         data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float64)
 
-        try:
-            input_file = open(self.filename, 'rb')
-        except:
-            raise RuntimeError("Unable to open file: ", self.filename)
-
         #Should be 4 byte float, big or little endian depending on swap_bytes
         dtype = ('>f4', '<f4')[self.swap_bytes]
 
