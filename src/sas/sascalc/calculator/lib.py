@@ -22,7 +22,7 @@ def get_polar_sld_type():
 
 #cal_msld taking in vector of bn, m09, mtheta1, mphi1.
 #also takes in structured array of polar_sld_type, polar_slds, assumes is of right type.
-def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta):
+def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin, out_spin, spintheta):
         """
         calculate magnetic sld and return total sld.
         Note: all angles are in degrees.
@@ -36,18 +36,9 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
         :param spintheta: Angle (anti-clock-wise) between neutron spin(up) and x axis.
         """
         #Locals
-        q_x = qx
-        q_y = qy
-        sld = bn
-        is_angle = isangle
         pi = np.pi
         #s_theta is spintheta in radians.
         s_theta = np.radians(spintheta)
-        m_max = m01
-        m_phi = mphi1
-        m_theta = mtheta1
-        in_spin = spinfraci
-        out_spin = spinfracf
 
         m_perp = 0.0
         m_perp_z = 0.0
@@ -100,7 +91,6 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
             uu[index_accept] = calc_uu(uu[index_accept])
             dd[index_accept] = calc_dd(uu[index_accept])
 
-            #then need way of computing other indexes.
             if ~index_accept.all():
                 #vectors are - bn m01 mtheta1 mphi1 -> sld, m_max, m_phi, m_theta.
                 in_spin = 0.0 if in_spin < 0.0 else in_spin
@@ -190,7 +180,8 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
 
 #cal_msld taking in vector of bn, m09, mtheta1, mphi1.
 #also takes in structured array of polar_sld_type, polar_slds, assumes is of right type.
-def cal_msld(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta):
+#scalar version, which uses polar_sld as an array.
+def cal_msld(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin, out_spin, spintheta):
         """
         calculate magnetic sld and return total sld.
         Note: all angles are in degrees.
@@ -204,18 +195,9 @@ def cal_msld(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, sp
         :param spintheta: Angle (anti-clock-wise) between neutron spin(up) and x axis.
         """
         #Locals
-        q_x = qx
-        q_y = qy
-        sld = bn
-        is_angle = isangle
         pi = np.pi
         #s_theta is spintheta in radians.
         s_theta = np.radians(spintheta)
-        m_max = m01
-        m_phi = mphi1
-        m_theta = mtheta1
-        in_spin = spinfraci
-        out_spin = spinfracf
 
         m_perp = 0.0
         m_perp_z = 0.0
