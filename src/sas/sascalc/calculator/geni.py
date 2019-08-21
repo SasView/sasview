@@ -207,8 +207,7 @@ class GenI():
             I_out[i] *= 1.0E+8 / count
 
         return I_out
-
-if(__name__ == "__main__"):
+def demo():
     is_avg = 0
     npix = 301
     x = np.linspace(0.1, 0.5, npix)
@@ -267,3 +266,6 @@ I_out = gen_i.genicomXY(npix, x, y)'''
     #test_sld.cal_msld(0, 0.5, 0.5, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.5, 0.2, 0.1)
 
     #print(test_sld)
+
+if(__name__ == "__main__"):
+    test()

@@ -34,6 +34,8 @@ class polar_sld():
     #double mphi1, double spinfraci, double spinfracf, double spintheta);
     #use case, iterated over in sld2i genicomxy, over x and y vectors.
     #Operates on p_sld, global free, only, so in polar_sld class?
+    #Ideally vectorise on bn, m09, mtheta1, mphi1. Can only vectorise if global free.
+
     def cal_msld(self, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta):
         """
         calculate magnetic sld and return total sld.
@@ -462,10 +464,3 @@ def interfunc(fun_type, n_sub, i, sld_l, sld_r):
 #Cannot find implementation in librefl.c or call in sld2i.c
 #def linePq(fun_type, thick, sld_in, sld_out, r, q):
 #    pass
-
-if __name__ == "__main__":
-    #test
-    p_sld = polar_sld()
-    #p_sld, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, spinfracf, spintheta
-    p_sld.cal_msld(0, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-    print(p_sld)
