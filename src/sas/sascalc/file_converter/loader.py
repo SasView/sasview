@@ -131,7 +131,7 @@ class Loader():
         except:
             raise RuntimeError("Unable to open file: ", self.filename)
 
-        #Offset appears to be useless.
+        #Offset appears to not make a difference (?).
         #offset = self.n_pixels * self.n_rasters * self.frame * float_size
         #input_file.seek(offset)
 
