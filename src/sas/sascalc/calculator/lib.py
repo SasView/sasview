@@ -78,7 +78,7 @@ def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_
 
         #only do the computation in elif if there if something in accept matrix otherwise will do regardless of other conditions.
 
-        if isangle > 0:
+        if is_angle > 0:
             index = m_max < temp
             #if m_max < temp:
             uu[index] = calc_uu(uu[index])
@@ -227,7 +227,7 @@ def cal_msld(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin
         calc_uu = lambda uu: np.sqrt(np.sqrt(in_spin * out_spin)) * uu
         calc_dd = lambda dd: np.sqrt(np.sqrt((1.0 - in_spin) * (1.0 - out_spin))) * dd
 
-        if isangle > 0:
+        if is_angle > 0:
             if m_max < temp:
                 uu = calc_uu(uu)
                 dd = calc_dd(dd)
@@ -395,7 +395,7 @@ class polar_sld_old():
         calc_uu = lambda uu: np.sqrt(np.sqrt(in_spin * out_spin)) * uu
         calc_dd = lambda dd: np.sqrt(np.sqrt((1.0 - in_spin) * (1.0 - out_spin))) * dd
 
-        if isangle > 0:
+        if is_angle > 0:
             if m_max < temp:
                 uu = calc_uu(uu)
                 dd = calc_dd(dd)
