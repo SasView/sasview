@@ -333,7 +333,7 @@ class GenI():
         return I_out
 
 def demo():
-    is_avg = 0
+    is_avg = 1
     npix = 301
     x = np.linspace(0.1, 0.5, npix)
     y = np.linspace(0.1, 0.5, npix)
@@ -370,7 +370,7 @@ out_spin = 0.2
 s_theta = 0.1
 gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
     run = '''
-I_out = gen_i.genicomXY_vec(x, y)'''
+I_out = gen_i.genicom(q)'''
 
     #times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
 
@@ -388,14 +388,14 @@ I_out = gen_i.genicomXY_vec(x, y)'''
         print("Vector Data: ", TEST_DATA_VECTOR)
         #print("Error: ", TEST_DATA_SCALAR - TEST_DATA_VECTOR)
 
-    #print("FULL I_OUT, cal_msld: ")
-    #if(np.array_equal(I_out, I_out_vec)):
-    #    print("**EQUAL**")
-    #else:
-    #    print("**DIFFERENT**")
-    #    print("Scalar Data: ", I_out[0])
-    #    print("Vector Data: ", I_out_vec[0])
-    #    print("Error: ", I_out - I_out_vec)
+    print("FULL I_OUT, cal_msld: ")
+    if(np.array_equal(I_out, I_out_vec)):
+        print("**EQUAL**")
+    else:
+        print("**DIFFERENT**")
+        print("Scalar Data: ", I_out)
+        print("Vector Data: ", I_out_vec)
+        print("Error: ", I_out - I_out_vec)
 
     #print(I_out)
     #print(I_out.shape)

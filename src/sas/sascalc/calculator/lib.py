@@ -94,83 +94,80 @@ def cal_msld_vec(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci
             dd[index] = calc_dd(dd[index])
 
 
-        elif index_accept.any():
+        else:
             #if there is any in index_accept, then do this, just so won't do computation if isangle > 0.
 
-            uu[index_accept] = calc_uu
-            dd[index_accept] = calc_dd
+            uu[index_accept] = calc_uu(uu[index_accept])
+            dd[index_accept] = calc_dd(uu[index_accept])
 
             #then need way of computing other indexes.
+            if ~index_accept.all():
+                #vectors are - bn m01 mtheta1 mphi1 -> sld, m_max, m_phi, m_theta.
+                in_spin = 0.0 if in_spin < 0.0 else in_spin
+                in_spin = 1.0 if in_spin > 1.0 else in_spin
+                out_spin = 0.0 if out_spin < 0.0 else out_spin
+                out_spin = 1.0 if out_spin > 1.0 else out_spin
 
+                q_angle = pi / 2.0 if q_x == 0.0 else np.arctan(q_y/q_x)
 
-        #if not all were values of uu were covered by uu
-        if ~index_accept.all() & ~(isangle > 0):
-            #vectors are - bn m01 mtheta1 mphi1 -> sld, m_max, m_phi, m_theta.
-            in_spin = 0.0 if in_spin < 0.0 else in_spin
-            in_spin = 1.0 if in_spin > 1.0 else in_spin
-            out_spin = 0.0 if out_spin < 0.0 else out_spin
-            out_spin = 1.0 if out_spin > 1.0 else out_spin
+                if (q_y < 0.0) & (q_x < 0.0):
+                    q_angle -= pi
 
-            q_angle = pi / 2.0 if q_x == 0.0 else np.arctan(q_y/q_x)
+                elif (q_y > 0.0) & (q_x < 0.0):
+                    q_angle += pi
 
-            if (q_y < 0.0) & (q_x < 0.0):
-                q_angle -= pi
+                q_angle = pi/2.0 - q_angle
 
-            elif (q_y > 0.0) & (q_x < 0.0):
-                q_angle += pi
+                if q_angle > pi:
+                    q_angle -= 2.0 * pi
 
-            q_angle = pi/2.0 - q_angle
+                elif q_angle < -pi:
+                    q_angle += 2.0 * pi
 
-            if q_angle > pi:
-                q_angle -= 2.0 * pi
+                if (np.fabs(q_x) < temp2) & (np.fabs(q_y) < temp2):
+                    m_perp = np.zeros(len(m_max[~index_accept]), dtype = float)
+                else:
+                    m_perp = m_max[~index_accept]
 
-            elif q_angle < -pi:
-                q_angle += 2.0 * pi
+                if is_angle > 0:
+                    m_phi[~index_accept] = np.radians(m_phi[~index_accept])
+                    m_theta[~index_accept] = np.radians(m_theta[~index_accept])
+                    mx = m_perp * np.cos(m_theta[~index_accept]) * np.cos(m_phi[~index_accept])
+                    my = m_perp * np.sin(m_theta[~index_accept])
+                    mz = -(m_perp * np.cos(m_theta[~index_accept]) * np.sin(m_phi[~index_accept]))
+                else:
+                    mx = m_perp
+                    my = m_phi[~index_accept]
+                    mz = m_theta[~index_accept]
 
-            if (np.fabs(q_x) < temp2) & (np.fabs(q_y) < temp2):
-                m_perp = np.zeros(len(m_max[~index_accept]), dtype = float)
-            else:
-                m_perp = m_max[~index_accept]
+                #ToDo: simplify these steps
+                # m_perp1 -m_perp2
+                m_perp_x = (mx) * np.cos(q_angle)
+                m_perp_x -= (my) * np.sin(q_angle)
+                m_perp_y = m_perp_x
+                m_perp_x *= np.cos(-q_angle)
+                m_perp_y *= np.sin(-q_angle)
+                m_perp_z = mz
 
-            if is_angle > 0:
-                m_phi[~index_accept] = np.radians(m_phi[~index_accept])
-                m_theta[~index_accept] = np.radians(m_theta[~index_accept])
-                mx = m_perp * np.cos(m_theta[~index_accept]) * np.cos(m_phi[~index_accept])
-                my = m_perp * np.sin(m_theta[~index_accept])
-                mz = -(m_perp * np.cos(m_theta[~index_accept]) * np.sin(m_phi[~index_accept]))
-            else:
-                mx = m_perp
-                my = m_phi[~index_accept]
-                mz = m_theta[~index_accept]
+                m_sigma_x = (m_perp_x * np.cos(-s_theta) - m_perp_y * np.sin(-s_theta))
+                m_sigma_y = (m_perp_x * np.sin(-s_theta) + m_perp_y * np.cos(-s_theta))
+                m_sigma_z = (m_perp_z)
 
-            #ToDo: simplify these steps
-            # m_perp1 -m_perp2
-            m_perp_x = (mx) * np.cos(q_angle)
-            m_perp_x -= (my) * np.sin(q_angle)
-            m_perp_y = m_perp_x
-            m_perp_x *= np.cos(-q_angle)
-            m_perp_y *= np.sin(-q_angle)
-            m_perp_z = mz
+                #Find b
+                uu[~index_accept] -= m_sigma_x
+                dd[~index_accept] += m_sigma_x
+                re_ud[~index_accept] = m_sigma_y
+                re_du[~index_accept] = m_sigma_y
+                im_ud[~index_accept] = m_sigma_z
+                im_du[~index_accept] = -m_sigma_z
 
-            m_sigma_x = (m_perp_x * np.cos(-s_theta) - m_perp_y * np.sin(-s_theta))
-            m_sigma_y = (m_perp_x * np.sin(-s_theta) + m_perp_y * np.cos(-s_theta))
-            m_sigma_z = (m_perp_z)
+                uu[~index_accept] = calc_uu(uu[~index_accept])
+                dd[~index_accept] = calc_dd(dd[~index_accept])
 
-            #Find b
-            uu[~index_accept] -= m_sigma_x
-            dd[~index_accept] += m_sigma_x
-            re_ud[~index_accept] = m_sigma_y
-            re_du[~index_accept] = m_sigma_y
-            im_ud[~index_accept] = m_sigma_z
-            im_du[~index_accept] = -m_sigma_z
-
-            uu[~index_accept] = calc_uu(uu[~index_accept])
-            dd[~index_accept] = calc_dd(dd[~index_accept])
-
-            re_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * re_ud[~index_accept]
-            im_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * im_ud[~index_accept]
-            re_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * re_du[~index_accept]
-            im_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * im_du[~index_accept]
+                re_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * re_ud[~index_accept]
+                im_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * im_ud[~index_accept]
+                re_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * re_du[~index_accept]
+                im_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * im_du[~index_accept]
 
         polar_slds['uu'] = uu
         polar_slds['dd'] = dd
@@ -254,8 +251,8 @@ def cal_msld(polar_slds, isangle, qx, qy, bn, m01, mtheta1, mphi1, spinfraci, sp
                 dd = calc_dd(dd)
 
         elif (np.fabs(m_max) < 1.0) & (np.fabs(m_phi) < temp) & (np.fabs(m_theta) < temp):
-            uu = calc_uu
-            dd = calc_dd
+            uu = calc_uu(uu)
+            dd = calc_dd(uu)
 
         else:
             in_spin = 0.0 if in_spin < 0.0 else in_spin
@@ -422,8 +419,8 @@ class polar_sld_old():
                 dd = calc_dd(dd)
 
         elif (np.fabs(m_max) < 1.0) & (np.fabs(m_phi) < temp) & (np.fabs(m_theta) < temp):
-            uu = calc_uu
-            dd = calc_dd
+            uu = calc_uu(uu)
+            dd = calc_dd(dd)
 
         else:
             in_spin = 0.0 if in_spin < 0.0 else in_spin
