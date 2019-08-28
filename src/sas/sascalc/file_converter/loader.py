@@ -131,9 +131,8 @@ class Loader():
         except:
             raise RuntimeError("Unable to open file: ", self.filename)
 
-        #Offset appears to not make a difference (?).
-        #offset = self.n_pixels * self.n_rasters * self.frame * float_size
-        #input_file.seek(offset)
+        offset = self.n_pixels * self.n_rasters * self.frame * float_size
+        input_file.seek(offset)
 
         for raster in range(self.n_rasters):
             for pixel in range(self.n_pixels):
@@ -158,11 +157,16 @@ class Loader():
         #Only accurate to about 6/7 decimal places even though should be reading same
         #number of bytes as the default method.
 
-        data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float64)
+        data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float32)
 
         #Should be 4 byte float, big or little endian depending on swap_bytes
         dtype = ('>f4', '<f4')[self.swap_bytes]
 
-        load = np.fromfile(self.filename, dtype=dtype)
+        float_size = 4
+
+        offset = self.n_pixels * self.n_rasters * self.frame * float_size
+
+        load = np.fromfile(self.filename, dtype='f4')
+        #with numpy 1.17, np.fromfile(self.filename, dtype=dtype, offset=offset)
 
         return load
