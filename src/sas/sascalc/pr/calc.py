@@ -133,7 +133,8 @@ def ortho_transformed(q, d_max, n):
 
     :return: Fourier transform of nth orthogonal function across all q.
     """
-    return 8.0*(pi)**2/q * d_max * n * (-1.0)**(n+1) * np.sin(q*d_max) / ((pi*n)**2 - (q*d_max)**2)
+    qd = q * (d_max/pi)
+    return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
 @njit('f8[:](f8[:], f8, i8, f8, f8, u8)')
 def ortho_transformed_smeared(q, d_max, n, height, width, npts):
