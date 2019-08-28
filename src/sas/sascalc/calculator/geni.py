@@ -98,11 +98,11 @@ class GenI():
 
                     lib.cal_msld(b_sld, 0, qx[i], qy[i], self.sldn_val[j],
                                    self.mx_val[j], self.my_val[j], self.mz_val[j],
-                                   self.inspin, self.outspin, self.stheta);
+                                   self.inspin, self.outspin, self.stheta)
                     #**TESTING**
                     TEST_DATA_SCALAR[i, j] = b_sld
                     #**
-                    qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j]);
+                    qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j])
                     iqr = np.complex(0.0, qr)
 
                     #As in the original code, sets ephase reference to two methods that should
@@ -136,7 +136,7 @@ class GenI():
                         sumj_du = sumj_du + temp_fi
 
                     if i == 0:
-                        count += self.vol_pix[j];
+                        count += self.vol_pix[j]
 
             calc = lambda x: np.square(x.real) + np.square(x.imag)
             I_out[i] = calc(sumj_uu)
@@ -208,12 +208,12 @@ class GenI():
             #all passed to cal_msld, not full values but should all be same length.
             lib.cal_msld_vec(b_sld, 0, qx[i], qy[i], sldn_val_use,
                             mx_val_use, my_val_use, mz_val_use,
-                            self.inspin, self.outspin, self.stheta);
+                            self.inspin, self.outspin, self.stheta)
             #**TEST
             TEST_DATA_VECTOR[i, :] = b_sld
             #**TEST
 
-            qr = (qx[i]*self.x_val + qy[i]*self.y_val);
+            qr = (qx[i]*self.x_val + qy[i]*self.y_val)
             iqr = np.zeros(len(self.x_val), dtype = np.complex_)
 
             for j in range(len(self.x_val)):
@@ -252,7 +252,7 @@ class GenI():
                 temp_fi = comp_sld * ephase
                 sumj_du = np.sum(sumj_du + temp_fi)
             if i == 0:
-                count = np.sum(self.vol_pix);
+                count = np.sum(self.vol_pix)
 
 
             calc = lambda x: np.square(x.real) + np.square(x.imag)
@@ -397,6 +397,7 @@ I_out = gen_i.genicom(q)'''
         print("Scalar Data: ", I_out)
         print("Vector Data: ", I_out_vec)
         print("Error: ", I_out - I_out_vec)
+        print("Relative Error: ", (I_out - I_out_vec))
 
     #print(I_out)
     #print(I_out.shape)

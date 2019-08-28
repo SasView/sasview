@@ -55,7 +55,7 @@ def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_
         my = 0.0
         mz = 0.0
         uu = sld
-        dd = sld
+        dd = np.copy(sld)
         re_ud = np.zeros(len(sld), dtype=np.complex_)
         im_ud = np.zeros(len(sld), dtype=np.complex_)
         re_du = np.zeros(len(sld), dtype=np.complex_)
@@ -88,11 +88,13 @@ def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_
 
         else:
             #if there is any in index_accept, then do this, just so won't do computation if isangle > 0.
-
             uu[index_accept] = calc_uu(uu[index_accept])
             dd[index_accept] = calc_dd(dd[index_accept])
 
             if ~index_accept.all():
+                #Make a temporary index, of all that failed the condition to use for the remaining calculations.
+                index_use = ~index_accept
+
                 #vectors are - bn m01 mtheta1 mphi1 -> sld, m_max, m_phi, m_theta.
                 in_spin = 0.0 if in_spin < 0.0 else in_spin
                 in_spin = 1.0 if in_spin > 1.0 else in_spin
@@ -116,49 +118,49 @@ def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_
                     q_angle += 2.0 * pi
 
                 if (np.fabs(q_x) < temp2) & (np.fabs(q_y) < temp2):
-                    m_perp = np.zeros(len(m_max[~index_accept]), dtype = float)
+                    m_perp = np.zeros(len(m_max[index_use]), dtype = float)
                 else:
-                    m_perp = m_max[~index_accept]
+                    m_perp = m_max[index_use]
 
                 if is_angle > 0:
-                    m_phi[~index_accept] = np.radians(m_phi[~index_accept])
-                    m_theta[~index_accept] = np.radians(m_theta[~index_accept])
-                    mx = m_perp * np.cos(m_theta[~index_accept]) * np.cos(m_phi[~index_accept])
-                    my = m_perp * np.sin(m_theta[~index_accept])
-                    mz = -(m_perp * np.cos(m_theta[~index_accept]) * np.sin(m_phi[~index_accept]))
+                    m_phi[index_use] = np.radians(m_phi[index_use])
+                    m_theta[index_use] = np.radians(m_theta[index_use])
+                    mx = m_perp * np.cos(m_theta[index_use]) * np.cos(m_phi[index_use])
+                    my = m_perp * np.sin(m_theta[index_use])
+                    mz = -(m_perp * np.cos(m_theta[index_use]) * np.sin(m_phi[index_use]))
                 else:
                     mx = m_perp
-                    my = m_phi[~index_accept]
-                    mz = m_theta[~index_accept]
+                    my = m_phi[index_use]
+                    mz = m_theta[index_use]
 
                 #ToDo: simplify these steps
                 # m_perp1 -m_perp2
-                m_perp_x = (mx) * np.cos(q_angle)
-                m_perp_x -= (my) * np.sin(q_angle)
+                m_perp_x = mx * np.cos(q_angle)
+                m_perp_x -= my * np.sin(q_angle)
                 m_perp_y = m_perp_x
                 m_perp_x *= np.cos(-q_angle)
                 m_perp_y *= np.sin(-q_angle)
                 m_perp_z = mz
 
-                m_sigma_x = (m_perp_x * np.cos(-s_theta) - m_perp_y * np.sin(-s_theta))
-                m_sigma_y = (m_perp_x * np.sin(-s_theta) + m_perp_y * np.cos(-s_theta))
-                m_sigma_z = (m_perp_z)
+                m_sigma_x = m_perp_x * np.cos(-s_theta) - m_perp_y * np.sin(-s_theta)
+                m_sigma_y = m_perp_x * np.sin(-s_theta) + m_perp_y * np.cos(-s_theta)
+                m_sigma_z = m_perp_z
 
                 #Find b
-                uu[~index_accept] -= m_sigma_x
-                dd[~index_accept] += m_sigma_x
-                re_ud[~index_accept] = m_sigma_y
-                re_du[~index_accept] = m_sigma_y
-                im_ud[~index_accept] = m_sigma_z
-                im_du[~index_accept] = -m_sigma_z
+                uu[index_use] -= m_sigma_x
+                dd[index_use] += m_sigma_x
+                re_ud[index_use] = m_sigma_y
+                re_du[index_use] = m_sigma_y
+                im_ud[index_use] = m_sigma_z
+                im_du[index_use] = -m_sigma_z
 
-                uu[~index_accept] = calc_uu(uu[~index_accept])
-                dd[~index_accept] = calc_dd(dd[~index_accept])
+                uu[index_use] = calc_uu(uu[index_use])
+                dd[index_use] = calc_dd(dd[index_use])
 
-                re_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * re_ud[~index_accept]
-                im_ud[~index_accept] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * im_ud[~index_accept]
-                re_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * re_du[~index_accept]
-                im_du[~index_accept] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * im_du[~index_accept]
+                re_ud[index_use] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * re_ud[index_use]
+                im_ud[index_use] = np.sqrt(np.sqrt(in_spin * (1.0 - out_spin))) * im_ud[index_use]
+                re_du[index_use] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * re_du[index_use]
+                im_du[index_use] = np.sqrt(np.sqrt((1.0 - in_spin) * out_spin)) * im_du[index_use]
 
         polar_slds['uu'] = uu
         polar_slds['dd'] = dd
@@ -276,16 +278,16 @@ def cal_msld(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin
 
             #ToDo: simplify these steps
             # m_perp1 -m_perp2
-            m_perp_x = (mx) * np.cos(q_angle)
-            m_perp_x -= (my) * np.sin(q_angle)
+            m_perp_x = mx * np.cos(q_angle)
+            m_perp_x -= my * np.sin(q_angle)
             m_perp_y = m_perp_x
             m_perp_x *= np.cos(-q_angle)
             m_perp_y *= np.sin(-q_angle)
             m_perp_z = mz
 
-            m_sigma_x = (m_perp_x * np.cos(-s_theta) - m_perp_y * np.sin(-s_theta))
-            m_sigma_y = (m_perp_x * np.sin(-s_theta) + m_perp_y * np.cos(-s_theta))
-            m_sigma_z = (m_perp_z)
+            m_sigma_x = m_perp_x * np.cos(-s_theta) - m_perp_y * np.sin(-s_theta)
+            m_sigma_y = m_perp_x * np.sin(-s_theta) + m_perp_y * np.cos(-s_theta)
+            m_sigma_z = m_perp_z
 
             #Find b
             uu -= m_sigma_x
