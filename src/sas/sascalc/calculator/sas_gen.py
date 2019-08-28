@@ -193,7 +193,6 @@ class GenSAS(BaseComponent):
         :param x: simple value
         :return: (I value)
         """
-        logger.error('RUNNING SLD2I.')
         if isinstance(x, list):
             if len(x[1]) > 0:
                 msg = "Not a 1D."
@@ -212,9 +211,6 @@ class GenSAS(BaseComponent):
         :return: I value
         :Use this runXY() for the computation
         """
-        logger.error('RUNNING SLD2I.')
-        print("Test")
-        logging.info("Test")
         if isinstance(x, list):
             return self._gen(x[0], x[1])
         else:

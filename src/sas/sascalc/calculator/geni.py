@@ -10,15 +10,16 @@ import numpy as np
 from scipy.special import sici
 import timeit
 
-#from . import lib
-import lib
+#import lib
+from . import lib
+
 #**TEST
-TEST_DATA_VECTOR = np.zeros((301, 301), dtype = lib.get_polar_sld_type())
-TEST_DATA_SCALAR = np.zeros((301, 301), dtype = lib.get_polar_sld_type())
+TEST_DATA_VECTOR = np.zeros((301, 301), dtype=lib.get_polar_sld_type())
+TEST_DATA_SCALAR = np.zeros((301, 301), dtype=lib.get_polar_sld_type())
 #**
 
 class GenI():
-    def __init__(self, is_avg, npix, x, y, z, sldn, mx, my, mz,
+    def __init__(self, is_avg, x, y, z, sldn, mx, my, mz,
                  voli, in_spin, out_spin, s_theta):
         """
         Constructor for GenI
@@ -37,7 +38,7 @@ class GenI():
         :param s_theta: angle (from x-axis) of the up spin in degrees.
         """
         self.is_avg = is_avg
-        self.n_pix = npix
+        self.n_pix = len(x)
         self.x_val = x
         self.y_val = y
         self.z_val = z
@@ -99,7 +100,7 @@ class GenI():
                                    self.mx_val[j], self.my_val[j], self.mz_val[j],
                                    self.inspin, self.outspin, self.stheta);
                     #**TESTING**
-                    TEST_DATA_SCALAR[i, j] = b_sld
+                    #TEST_DATA_SCALAR[i, j] = b_sld
                     #**
                     qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j]);
                     iqr = np.complex(0.0, qr)
@@ -209,7 +210,7 @@ class GenI():
                             mx_val_use, my_val_use, mz_val_use,
                             self.inspin, self.outspin, self.stheta);
             #**TEST
-            TEST_DATA_VECTOR[i, :] = b_sld
+            #TEST_DATA_VECTOR[i, :] = b_sld
             #**TEST
 
             qr = (qx[i]*self.x_val + qy[i]*self.y_val);
@@ -348,7 +349,7 @@ def demo():
     in_spin = 0.5
     out_spin = 0.2
     s_theta = 0.1
-    gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)
+    gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)
 
     setup = '''
 from __main__ import GenI
