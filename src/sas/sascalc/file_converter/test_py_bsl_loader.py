@@ -67,7 +67,7 @@ def parse_header(filename):
 
 if(__name__ == "__main__"):
     np.set_printoptions(precision = 14)
-
+    #normal
     q_params = parse_header("Z98000.QAX")
     print(q_params)
     q_loader = Loader(q_params[0], q_params[1], q_params[2], q_params[3], q_params[4])
