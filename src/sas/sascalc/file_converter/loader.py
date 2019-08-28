@@ -134,6 +134,11 @@ class Loader():
         offset = self.n_pixels * self.n_rasters * self.frame * float_size
         input_file.seek(offset)
 
+        #read and return only first
+        #val = input_file.read(float_size)
+        #val_float = struct.unpack('f', val)[0]
+        #return val_float
+
         for raster in range(self.n_rasters):
             for pixel in range(self.n_pixels):
                 val = 0
@@ -165,8 +170,6 @@ class Loader():
         float_size = 4
 
         offset = self.n_pixels * self.n_rasters * self.frame * float_size
-
-        load = np.fromfile(self.filename, dtype='f4')
         #with numpy 1.17, np.fromfile(self.filename, dtype=dtype, offset=offset)
-
+        load = np.fromfile(self.filename, dtype='f4')
         return load
