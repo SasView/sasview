@@ -10,13 +10,8 @@ import numpy as np
 from scipy.special import sici
 import timeit
 
-import lib
-#from . import lib
-
-#**TEST
-TEST_DATA_VECTOR = np.zeros((301, 301), dtype=lib.get_polar_sld_type())
-TEST_DATA_SCALAR = np.zeros((301, 301), dtype=lib.get_polar_sld_type())
-#**
+#import lib
+from . import lib
 
 class GenI():
     def __init__(self, is_avg, x, y, z, sldn, mx, my, mz,
@@ -99,9 +94,7 @@ class GenI():
                     lib.cal_msld(b_sld, 0, qx[i], qy[i], self.sldn_val[j],
                                    self.mx_val[j], self.my_val[j], self.mz_val[j],
                                    self.inspin, self.outspin, self.stheta)
-                    #**TESTING**
-                    TEST_DATA_SCALAR[i, j] = b_sld
-                    #**
+
                     qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j])
                     iqr = np.complex(0.0, qr)
 
@@ -147,7 +140,7 @@ class GenI():
 
         return I_out
 
-    #not producing right answer but producing correct vector size.
+    #Produces error of e-16, most likely not important. 1 dp error in 64 bit calculations.
     def genicomXY_vec(self, qx, qy):
         """
         Compute 2d ansotropic.
@@ -209,9 +202,6 @@ class GenI():
             lib.cal_msld_vec(b_sld, 0, qx[i], qy[i], sldn_val_use,
                             mx_val_use, my_val_use, mz_val_use,
                             self.inspin, self.outspin, self.stheta)
-            #**TEST
-            TEST_DATA_VECTOR[i, :] = b_sld
-            #**TEST
 
             qr = (qx[i]*self.x_val + qy[i]*self.y_val)
             iqr = np.zeros(len(self.x_val), dtype = np.complex_)
@@ -380,15 +370,6 @@ I_out = gen_i.genicom(q)'''
     I_out_vec = gen_i.genicomXY_vec(x, y)
     I_out = gen_i.genicomXY(x, y)
 
-    print("TEST DATA, cal_msld: ")
-    if(np.array_equal(TEST_DATA_VECTOR, TEST_DATA_SCALAR)):
-        print("**EQUAL**")
-    else:
-        print("**DIFFERENT**")
-        print("Scalar Data: ", TEST_DATA_SCALAR)
-        print("Vector Data: ", TEST_DATA_VECTOR)
-        #print("Error: ", TEST_DATA_SCALAR - TEST_DATA_VECTOR)
-
     print("FULL I_OUT, cal_msld: ")
     if(np.array_equal(I_out, I_out_vec)):
         print("**EQUAL**")
@@ -397,7 +378,7 @@ I_out = gen_i.genicom(q)'''
         print("Scalar Data: ", I_out)
         print("Vector Data: ", I_out_vec)
         print("Error: ", I_out - I_out_vec)
-        print("Relative Error: ", (I_out - I_out_vec))
+        print("Relative Error: ", (np.log(I_out/I_out_vec)))
 
     #print(I_out)
     #print(I_out.shape)
