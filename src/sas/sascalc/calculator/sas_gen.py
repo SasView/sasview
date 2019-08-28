@@ -152,7 +152,7 @@ class GenSAS(BaseComponent):
 
             I_out = np.empty_like(qx)
             #print("npoints", qx.shape, "npixels", pos_x.shape)
-            I_out = model.genicomXY(qx, qy)
+            I_out = model.genicomXY_vec(qx, qy)
             #print("I_out after", I_out)
         else:
             qx = _vec(qx)
