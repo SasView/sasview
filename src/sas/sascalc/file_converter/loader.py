@@ -1,9 +1,6 @@
 """
 Python implementation of C extension bsl_loader.c
 """
-import sys
-import struct
-
 import numpy as np
 
 class Loader():
@@ -14,8 +11,7 @@ class Loader():
         self.n_pixels = pixels
         self.n_rasters = rasters
         self.swap_bytes = swap_bytes
-        #Placeholder value
-        self.frame = 0
+        self.frame = np.int()
 
     #File to load.
     @property
@@ -80,7 +76,11 @@ class Loader():
 
     def try_convert(self, type, value):
         """
-        Attempts to cast value as a type type.
+        Attempts to cast value as type (type).
+
+        :param: type object to cast to.
+        :param: value to be cast.
+
         :return: value cast to type, type(value) or None if not possible.
         """
         return_val = None
@@ -103,73 +103,29 @@ class Loader():
         desc += "swap_bytes: " + str(self.swap_bytes) + "\n"
         return desc
 
-    #May be irrelevant if np.fromfile is used instead of base
-    #python open/read/etc.
-    def reverse_float(self, in_float):
-        """
-        Reverses the order of the bytes of a float.
-        :param: in_float, float to be reversed.
-        :return: float value reversed.
-
-        """
-        in_float = self.try_convert(np.float64, in_float)
-        bits = in_float.byteswap()
-        return bits
 
     def load_data(self):
         """
-        Load the data into a numpy array.
-        """
-        #return self.numpy_load_data()
+        Loads the file named in filename in 4 byte float, in either
+        little or big Endian depending on self.swap_bytes.
 
-        data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float64)
+        :return: np array of loaded floats.
+        """
+        #Set dtype to 4 byte float, big or little endian depending on swap_bytes.
+        dtype = ('>f4', '<f4')[self.swap_bytes]
 
         float_size = 4
+
+        offset = self.n_pixels * self.n_rasters * self.frame * float_size
 
         try:
             input_file = open(self.filename, 'rb')
         except:
             raise RuntimeError("Unable to open file: ", self.filename)
 
-        offset = self.n_pixels * self.n_rasters * self.frame * float_size
         input_file.seek(offset)
 
-        #read and return only first
-        #val = input_file.read(float_size)
-        #val_float = struct.unpack('f', val)[0]
-        #return val_float
+        #With numpy 1.17, could use np.fromfile(self.filename, dtype=dtype, offset=offset).
+        load = np.float64(np.fromfile(input_file, dtype=dtype))
 
-        for raster in range(self.n_rasters):
-            for pixel in range(self.n_pixels):
-                val = 0
-                try:
-                    #Attempt to read 4 bytes into val
-                    val = input_file.read(float_size)
-                except:
-                    raise RuntimeError("Error reading file or EOF reached")
-
-                #Convert the 4 bytes to type 'float'
-                val_float = struct.unpack('f', val)[0]
-
-                if self.swap_bytes == 0:
-                    val_float = self.reverse_float(val_float)
-
-                data[raster, pixel] = val_float
-
-        return data
-
-    def numpy_load_data(self):
-        #Only accurate to about 6/7 decimal places even though should be reading same
-        #number of bytes as the default method.
-
-        data = np.zeros([self.n_rasters, self.n_pixels], dtype=np.float32)
-
-        #Should be 4 byte float, big or little endian depending on swap_bytes
-        dtype = ('>f4', '<f4')[self.swap_bytes]
-
-        float_size = 4
-
-        offset = self.n_pixels * self.n_rasters * self.frame * float_size
-        #with numpy 1.17, np.fromfile(self.filename, dtype=dtype, offset=offset)
-        load = np.fromfile(self.filename, dtype='f4')
         return load
