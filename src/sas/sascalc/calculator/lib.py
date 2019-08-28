@@ -22,6 +22,7 @@ def get_polar_sld_type():
 
 #cal_msld taking in vector of bn, m09, mtheta1, mphi1.
 #also takes in structured array of polar_sld_type, polar_slds, assumes is of right type.
+#returning slightly wrong results, and uu = dd in all cases for some reason at the moment.
 def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin, out_spin, spintheta):
         """
         calculate magnetic sld and return total sld.
@@ -89,7 +90,7 @@ def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_
             #if there is any in index_accept, then do this, just so won't do computation if isangle > 0.
 
             uu[index_accept] = calc_uu(uu[index_accept])
-            dd[index_accept] = calc_dd(uu[index_accept])
+            dd[index_accept] = calc_dd(dd[index_accept])
 
             if ~index_accept.all():
                 #vectors are - bn m01 mtheta1 mphi1 -> sld, m_max, m_phi, m_theta.
@@ -221,7 +222,6 @@ def cal_msld(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin
 
         temp = 1.0e-32
         temp2 = 1.0e-16
-
         #values that uu and dd are set to frequently during calculation.
         #intentionally leaving in_spin and out_spin to late bind because may be modified by method.
         calc_uu = lambda uu: np.sqrt(np.sqrt(in_spin * out_spin)) * uu
@@ -234,7 +234,7 @@ def cal_msld(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin
 
         elif (np.fabs(m_max) < 1.0) & (np.fabs(m_phi) < temp) & (np.fabs(m_theta) < temp):
             uu = calc_uu(uu)
-            dd = calc_dd(uu)
+            dd = calc_dd(dd)
 
         else:
             in_spin = 0.0 if in_spin < 0.0 else in_spin
