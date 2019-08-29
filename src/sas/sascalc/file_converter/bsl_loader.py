@@ -181,3 +181,17 @@ class BSLLoader:
             raise e
 
         return load
+
+    def __str__(self):
+        """
+        Print the objects params.
+
+        :return: string description of object parameters.
+        """
+        desc = "Filename: " + self.filename + "\n"
+        desc += "n_frames: " + str(self.n_frames) + "\n"
+        desc += "frame: " + str(self.frame) + "\n"
+        desc += "n_pixels: " + str(self.n_pixels) + "\n"
+        desc += "n_rasters: " + str(self.n_rasters) + "\n"
+        desc += "swap_bytes: " + str(self.swap_bytes) + "\n"
+        return desc
