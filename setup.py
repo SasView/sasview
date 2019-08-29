@@ -256,7 +256,6 @@ ext_modules.append(Extension("sas.sascalc.pr._pr_inversion",
 
 
 # sas.sascalc.file_converter
-mydir = os.path.join("src", "sas", "sascalc", "file_converter")
 package_dir["sas.sascalc.file_converter"] = os.path.join(
     "src", "sas", "sascalc", "file_converter")
 packages.append("sas.sascalc.file_converter")
