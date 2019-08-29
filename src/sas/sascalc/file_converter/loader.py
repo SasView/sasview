@@ -94,6 +94,8 @@ class Loader():
     def __str__(self):
         """
         Print the objects params.
+
+        :return: string description of object parameters.
         """
         desc = "Filename: " + self.filename + "\n"
         desc += "n_frames: " + str(self.n_frames) + "\n"
@@ -114,6 +116,7 @@ class Loader():
         #Set dtype to 4 byte float, big or little endian depending on swap_bytes.
         dtype = ('>f4', '<f4')[self.swap_bytes]
 
+        #Size of float as stored in binary file should be 4 bytes.
         float_size = 4
 
         offset = self.n_pixels * self.n_rasters * self.frame * float_size
