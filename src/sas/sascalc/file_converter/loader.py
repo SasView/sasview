@@ -1,5 +1,5 @@
 """
-Python implementation of C extension bsl_loader.c
+A class to load BSL files, loads as numpy 32-bit floats.
 """
 import numpy as np
 
