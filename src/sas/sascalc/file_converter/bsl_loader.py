@@ -3,12 +3,11 @@ import os
 import numpy as np
 
 from sas.sascalc.dataloader.data_info import Data2D
-from .loader import Loader
 
 class BSLParsingError(Exception):
     pass
 
-class BSLLoader(Loader):
+class BSLLoader:
     """
     Loads 2D SAS data from a BSL file.
     CLoader is a C extension (found in c_ext/bsl_loader.c)
@@ -77,8 +76,67 @@ class BSLLoader(Loader):
         if not is_valid:
             raise BSLParsingError(err_msg)
 
-        Loader.__init__(self, data_info['filename'], data_info['frames'],
-            data_info['pixels'], data_info['rasters'], data_info['swap_bytes'])
+        self.filename = filename
+        self.n_frames = frames
+        self.n_pixels = pixels
+        self.n_rasters = rasters
+        self.swap_bytes = swap_bytes
+        self.frame = np.int()
+
+    #File to load.
+    @property
+    def filename(self):
+        return self._filename
+
+    @filename.setter
+    def filename(self, filename):
+        self._filename = str(filename)
+
+    #Number of frames in the file.
+    @property
+    def n_frames(self):
+        return self._n_frames
+
+    @n_frames.setter
+    def n_frames(self, n_frames):
+        self._n_frames = int(n_frames)
+
+    #Frame to load.
+    @property
+    def frame(self):
+        return self._frame
+
+    @frame.setter
+    def frame(self, frame):
+        self._frame = int(frame)
+
+    #Number of pixels in the file.
+    @property
+    def n_pixels(self):
+        return self._n_pixels
+
+    @n_pixels.setter
+    def n_pixels(self, n_pixels):
+        self._n_pixels = int(n_pixels)
+
+    #Number of rasters in the file (int)
+    @property
+    def n_rasters(self):
+        return self._n_rasters
+
+    @n_rasters.setter
+    def n_rasters(self, n_rasters):
+        self._n_rasters = int(n_rasters)
+
+    #Whether or not the bytes are in reverse order (int)
+    @property
+    def swap_bytes(self):
+        return self._swap_bytes
+
+    @swap_bytes.setter
+    def swap_bytes(self, swap_bytes):
+        self._swap_bytes = bool(swap_bytes)
+
 
     def load_frames(self, frames):
         frame_data = []
@@ -99,3 +157,25 @@ class BSLLoader(Loader):
             frame_data.append(data2d)
 
         return frame_data
+
+    def load_data(self):
+        """
+        Loads the file named in filename in 4 byte float, in either
+        little or big Endian depending on self.swap_bytes.
+
+        :return: np array of loaded floats.
+        """
+        #Set dtype to 4 byte float, big or little endian depending on swap_bytes.
+        dtype = ('>f4', '<f4')[self.swap_bytes]
+
+        #Size of float as stored in binary file should be 4 bytes.
+        float_size = 4
+
+        offset = self.n_pixels * self.n_rasters * self.frame * float_size
+
+        with open(self.filename, 'rb') as input_file:
+            input_file.seek(offset)
+            #With numpy 1.17, could use np.fromfile(self.filename, dtype=dtype, offset=offset).
+            load = np.float64(np.fromfile(input_file, dtype=dtype))
+
+        return load
