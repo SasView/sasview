@@ -177,5 +177,7 @@ class BSLLoader:
             input_file.seek(offset)
             #With numpy 1.17, could use np.fromfile(self.filename, dtype=dtype, offset=offset).
             load = np.float64(np.fromfile(input_file, dtype=dtype))
+        except Exception as e:
+            raise e
 
         return load
