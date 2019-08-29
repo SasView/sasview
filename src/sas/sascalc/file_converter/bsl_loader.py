@@ -1,9 +1,9 @@
-from sas.sascalc.file_converter._bsl_loader import CLoader
-from sas.sascalc.dataloader.data_info import Data2D
-from .loader import Loader
 from copy import deepcopy
 import os
 import numpy as np
+
+from sas.sascalc.dataloader.data_info import Data2D
+from .loader import Loader
 
 class BSLParsingError(Exception):
     pass
@@ -77,11 +77,10 @@ class BSLLoader(Loader):
         if not is_valid:
             raise BSLParsingError(err_msg)
 
-        CLoader.__init__(self, data_info['filename'], data_info['frames'],
+        Loader.__init__(self, data_info['filename'], data_info['frames'],
             data_info['pixels'], data_info['rasters'], data_info['swap_bytes'])
 
     def load_frames(self, frames):
-        print("LOAD_FRAMES_BSL_LOADER_CALLED")
         frame_data = []
         # Prepare axis values (arbitrary scale)
         x = self.n_rasters * range(1, self.n_pixels+1)
@@ -100,34 +99,3 @@ class BSLLoader(Loader):
             frame_data.append(data2d)
 
         return frame_data
-
-
-    def __setattr__(self, name, value):
-        if name == 'filename':
-            return self.set_filename(value)
-        elif name == 'n_frames':
-            return self.set_n_frames(value)
-        elif name == 'frame':
-            return self.set_frame(value)
-        elif name == 'n_pixels':
-            return self.set_n_pixels(value)
-        elif name == 'n_rasters':
-            return self.set_n_rasters(value)
-        elif name == 'swap_bytes':
-            return self.set_swap_bytes(value)
-        return CLoader.__setattr__(self, name, value)
-
-    def __getattr__(self, name):
-        if name == 'filename':
-            return self.get_filename()
-        elif name == 'n_frames':
-            return self.get_n_frames()
-        elif name == 'frame':
-            return self.get_frame()
-        elif name == 'n_pixels':
-            return self.get_n_pixels()
-        elif name == 'n_rasters':
-            return self.get_n_rasters()
-        elif name == 'swap_bytes':
-            return self.get_swap_bytes()
-        return CLoader.__getattr__(self, name)
