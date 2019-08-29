@@ -359,26 +359,31 @@ q = np.linspace(0.1, 0.5, npix)
 in_spin = 0.5
 out_spin = 0.2
 s_theta = 0.1
-gen_i = GenI(is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
+gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
     run = '''
+I_out = gen_i.genicomXY_vec(x, y)'''
+
+    run_genicom = '''
 I_out = gen_i.genicom(q)'''
 
-    #times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
-
+    times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+    times_genicom = timeit.repeat(stmt = run_genicom, setup = setup, repeat = 10, number = 1)
     #print(times)
+    print(times_genicom)
 
-    I_out_vec = gen_i.genicomXY_vec(x, y)
-    I_out = gen_i.genicomXY(x, y)
+    #I_out_vec = gen_i.genicomXY_vec(x, y)
+    I_out = gen_i.genicom(q)
+    print(I_out)
 
     print("FULL I_OUT, cal_msld: ")
     if np.array_equal(I_out, I_out_vec):
         print("**EQUAL**")
     else:
         print("**DIFFERENT**")
-        print("Scalar Data: ", I_out)
-        print("Vector Data: ", I_out_vec)
-        print("Error: ", I_out - I_out_vec)
-        print("Relative Error: ", (np.log(I_out/I_out_vec)))
+        #print("Scalar Data: ", I_out)
+        #print("Vector Data: ", I_out_vec)
+        #print("Error: ", I_out - I_out_vec)
+        #print("Relative Error: ", (np.log(I_out/I_out_vec)))
 
     #print(I_out)
     #print(I_out.shape)
