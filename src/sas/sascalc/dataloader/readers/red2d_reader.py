@@ -226,6 +226,8 @@ class Reader(FileReader):
         if col_num > (5 + ver):
             dqy_data = data_point[(5 + ver)]
         #if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
+        if col_num > (7 + ver):
+            mask = np.invert(np.asarray(data_point[(7 + ver)], dtype=bool))
         q_data = np.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
 
         # Extra protection(it is needed for some data files):
