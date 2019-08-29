@@ -92,8 +92,8 @@ class GenI():
                     temp_fi = np.complex()
 
                     lib.cal_msld(b_sld, 0, qx[i], qy[i], self.sldn_val[j],
-                                   self.mx_val[j], self.my_val[j], self.mz_val[j],
-                                   self.inspin, self.outspin, self.stheta)
+                                 self.mx_val[j], self.my_val[j], self.mz_val[j],
+                                 self.inspin, self.outspin, self.stheta)
 
                     qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j])
                     iqr = np.complex(0.0, qr)
@@ -200,11 +200,11 @@ class GenI():
 
             #all passed to cal_msld, not full values but should all be same length.
             lib.cal_msld_vec(b_sld, 0, qx[i], qy[i], sldn_val_use,
-                            mx_val_use, my_val_use, mz_val_use,
-                            self.inspin, self.outspin, self.stheta)
+                             mx_val_use, my_val_use, mz_val_use,
+                             self.inspin, self.outspin, self.stheta)
 
             qr = (qx[i]*self.x_val + qy[i]*self.y_val)
-            iqr = np.zeros(len(self.x_val), dtype = np.complex_)
+            iqr = np.zeros(len(self.x_val), dtype=np.complex_)
 
             for j in range(len(self.x_val)):
                 _temp = np.complex(0.0, qr[j])
@@ -250,7 +250,7 @@ class GenI():
             I_out[i] += calc(sumj_ud)
             I_out[i] += calc(sumj_du)
             I_out[i] += calc(sumj_dd)
-            I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
+            I_out[i] *= 1.0E+8 / count #in cm (unit) / number; to be multiplied by vol_pix
 
         return I_out
 
@@ -371,7 +371,7 @@ I_out = gen_i.genicom(q)'''
     I_out = gen_i.genicomXY(x, y)
 
     print("FULL I_OUT, cal_msld: ")
-    if(np.array_equal(I_out, I_out_vec)):
+    if np.array_equal(I_out, I_out_vec):
         print("**EQUAL**")
     else:
         print("**DIFFERENT**")
@@ -394,5 +394,5 @@ I_out = gen_i.genicom(q)'''
 
     #print(test_sld)
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
     demo()
