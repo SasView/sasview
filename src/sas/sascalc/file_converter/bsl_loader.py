@@ -179,7 +179,6 @@ class BSLLoader:
 
         :return: np array of loaded floats.
         """
-        raise RuntimeError()
         # Set dtype to 4 byte float, big or little endian depending on swap_bytes.
         dtype = ('>f4', '<f4')[self.swap_bytes]
 
