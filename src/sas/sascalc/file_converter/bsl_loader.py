@@ -32,8 +32,9 @@ class BSLLoader:
         sasdata_filename = filename.replace('000.', '001.')
         if sasdata_filename == filename:
             err_msg = ("Invalid header filename {}.\nShould be of the format "
-                "Xnn000.XXX where X is any alphanumeric character and n is any"
-                " digit.").format(filename)
+                       "Xnn000.XXX where X is any alphanumeric character and n is any"
+                       " digit.").format(filename)
+            header_file.close()
             raise BSLParsingError(err_msg)
 
         # First 2 lines are headers
@@ -73,64 +74,77 @@ class BSLLoader:
             break
 
         header_file.close()
+
         if not is_valid:
             raise BSLParsingError(err_msg)
 
-        self.filename = filename
-        self.n_frames = frames
-        self.n_pixels = pixels
-        self.n_rasters = rasters
-        self.swap_bytes = swap_bytes
+        self.filename = data_info['filename']
+        self.n_frames = data_info['frames']
+        self.n_pixels = data_info['pixels']
+        self.n_rasters = data_info['rasters']
+        self.swap_bytes = data_info['swap_bytes']
         self.frame = np.int()
 
-    #File to load.
     @property
     def filename(self):
+        """
+        File to load.
+        """
         return self._filename
 
     @filename.setter
     def filename(self, filename):
         self._filename = str(filename)
 
-    #Number of frames in the file.
     @property
     def n_frames(self):
+        """
+        Number of frames in the file.
+        """
         return self._n_frames
 
     @n_frames.setter
     def n_frames(self, n_frames):
         self._n_frames = int(n_frames)
 
-    #Frame to load.
     @property
     def frame(self):
+        """
+        Frame to load.
+        """
         return self._frame
 
     @frame.setter
     def frame(self, frame):
         self._frame = int(frame)
 
-    #Number of pixels in the file.
     @property
     def n_pixels(self):
+        """
+        Number of pixels in the file.
+        """
         return self._n_pixels
 
     @n_pixels.setter
     def n_pixels(self, n_pixels):
         self._n_pixels = int(n_pixels)
 
-    #Number of rasters in the file (int)
     @property
     def n_rasters(self):
+        """
+        Number of rasters in the file.
+        """
         return self._n_rasters
 
     @n_rasters.setter
     def n_rasters(self, n_rasters):
         self._n_rasters = int(n_rasters)
 
-    #Whether or not the bytes are in reverse order (int)
     @property
     def swap_bytes(self):
+        """
+        Whether or not the bytes are in reverse order.
+        """
         return self._swap_bytes
 
     @swap_bytes.setter
@@ -165,17 +179,19 @@ class BSLLoader:
 
         :return: np array of loaded floats.
         """
-        #Set dtype to 4 byte float, big or little endian depending on swap_bytes.
+        raise RuntimeError()
+        # Set dtype to 4 byte float, big or little endian depending on swap_bytes.
         dtype = ('>f4', '<f4')[self.swap_bytes]
 
-        #Size of float as stored in binary file should be 4 bytes.
+        # Size of float as stored in binary file should be 4 bytes.
         float_size = 4
 
         offset = self.n_pixels * self.n_rasters * self.frame * float_size
+        load = np.empty(0)
 
         with open(self.filename, 'rb') as input_file:
             input_file.seek(offset)
-            #With numpy 1.17, could use np.fromfile(self.filename, dtype=dtype, offset=offset).
+            # CRUFT: With numpy 1.17, could use np.fromfile(self.filename, dtype=dtype, offset=offset).
             load = np.float64(np.fromfile(input_file, dtype=dtype))
 
         return load
