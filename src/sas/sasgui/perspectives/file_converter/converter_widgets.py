@@ -106,7 +106,7 @@ class VectorInput(object):
         self._inputs['x'] = x_input
         x_input.Bind(wx.EVT_TEXT, self._callback)
 
-        self._sizer.AddSpacer((10, -1))
+        self._sizer.AddSpacer(10)
 
         y_label = wx.StaticText(self.parent, -1, self.labels[1],
             style=wx.ALIGN_CENTER_VERTICAL)
@@ -118,7 +118,7 @@ class VectorInput(object):
         y_input.Bind(wx.EVT_TEXT, self._callback)
 
         if self.z_enabled:
-            self._sizer.AddSpacer((10, -1))
+            self._sizer.AddSpacer(10)
 
             z_label = wx.StaticText(self.parent, -1, self.labels[2],
                 style=wx.ALIGN_CENTER_VERTICAL)
