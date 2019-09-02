@@ -186,7 +186,7 @@ class BSLLoader:
         float_size = 4
 
         offset = self.n_pixels * self.n_rasters * self.frame * float_size
-        load = np.empty(0)
+        load = np.empty(0, dtype=np.float64)
 
         with open(self.filename, 'rb') as input_file:
             input_file.seek(offset)
