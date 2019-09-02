@@ -3,6 +3,8 @@ from sas.sascalc.file_converter.bsl_loader import BSLLoader
 import os
 import os.path
 import unittest
+from xml.etree import ElementTree as ET
+
 import numpy as np
 
 def find(filename):
@@ -23,10 +25,9 @@ class bsl_test(unittest.TestCase):
         i_data_load = self.i_reader.load_data()
 
         #Load the correct data (in Z83000.xml)
-        from xml.etree import ElementTree as ET
+
         tree = ET.parse(find('Z83000.xml'))
         root = tree.getroot()
-
 
         q_data_correct = [elem.text for elem in root.iter('{cansas1d/1.0}Q')]
         i_data_correct = [elem.text for elem in root.iter('{cansas1d/1.0}I')]
