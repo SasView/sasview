@@ -22,61 +22,19 @@ class BSLLoader:
 
         :param filename: Path to the BSL header file
         """
-        header_file = open(filename, 'r')
-        data_info = {}
-        is_valid = True
-        err_msg = ""
-
         [folder, filename] = os.path.split(filename)
-        # SAS data will be in file Xnn001.mdd
+
         sasdata_filename = filename.replace('000.', '001.')
         if sasdata_filename == filename:
             err_msg = ("Invalid header filename {}.\nShould be of the format "
                        "Xnn000.XXX where X is any alphanumeric character and n is any"
                        " digit.").format(filename)
-            header_file.close()
             raise BSLParsingError(err_msg)
 
-        # First 2 lines are headers
-        header_file.readline()
-        header_file.readline()
+        data_info = {}
 
-        while True:
-            metadata = header_file.readline().strip()
-            metadata = metadata.split()
-            data_filename = header_file.readline().strip()
-
-            if len(metadata) != 10:
-                is_valid = False
-                err_msg = "Invalid header file: {}".format(filename)
-                break
-
-            if data_filename != sasdata_filename:
-                last_file = (metadata[9] == '0')
-                if last_file: # Reached last file we have metadata for
-                    is_valid = False
-                    err_msg = "No metadata for {} found in header file: {}"
-                    err_msg = err_msg.format(sasdata_filename, filename)
-                    break
-                continue
-            try:
-                data_info = {
-                    'filename': os.path.join(folder, data_filename),
-                    'pixels': int(metadata[0]),
-                    'rasters': int(metadata[1]),
-                    'frames': int(metadata[2]),
-                    'swap_bytes': int(metadata[3])
-                }
-            except Exception:
-                is_valid = False
-                err_msg = "Invalid metadata in header file for {}"
-                err_msg = err_msg.format(sasdata_filename)
-            break
-
-        header_file.close()
-
-        if not is_valid:
-            raise BSLParsingError(err_msg)
+        with open(filename, 'r') as header_file:
+            data_info = self._parse_header(header_file, filename, sasdata_filename, folder)
 
         self.filename = data_info['filename']
         self.n_frames = data_info['frames']
@@ -84,6 +42,48 @@ class BSLLoader:
         self.n_rasters = data_info['rasters']
         self.swap_bytes = data_info['swap_bytes']
         self.frame = np.int()
+
+    def _parse_header(self, header_file, filename, sasdata_filename, folder):
+        """
+        Method that parses the header file and returns the metadata in data_info
+
+        :param header_file: header file object.
+        :return: metadata of header file.
+        """
+        data_info = {}
+        # First 2 lines are headers
+        header_file.readline()
+        header_file.readline()
+
+        metadata = header_file.readline().strip()
+        metadata = metadata.split()
+        data_filename = header_file.readline().strip()
+
+        if len(metadata) != 10:
+            err_msg = "Invalid header file: {}".format(filename)
+            raise BSLParsingError(err_msg)
+
+        if data_filename != sasdata_filename:
+            last_file = (metadata[9] == '0')
+            if last_file: # Reached last file we have metadata for
+                err_msg = "No metadata for {} found in header file: {}"
+                err_msg = err_msg.format(sasdata_filename, filename)
+                raise BSLParsingError(err_msg)
+
+        try:
+            data_info = {
+                'filename': os.path.join(folder, data_filename),
+                'pixels': int(metadata[0]),
+                'rasters': int(metadata[1]),
+                'frames': int(metadata[2]),
+                'swap_bytes': int(metadata[3])
+            }
+        except Exception:
+            err_msg = "Invalid metadata in header file for {}"
+            err_msg = err_msg.format(sasdata_filename)
+            raise BSLParsingError(err_msg)
+
+        return data_info
 
     @property
     def filename(self):
