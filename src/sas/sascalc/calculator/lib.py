@@ -22,7 +22,6 @@ def get_polar_sld_type():
 
 #cal_msld taking in vector of bn, m09, mtheta1, mphi1.
 #also takes in structured array of polar_sld_type, polar_slds, assumes is of right type.
-#returning slightly wrong results, and uu = dd in all cases for some reason at the moment.
 def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin, out_spin, spintheta):
     """
     calculate magnetic sld and return total sld.
@@ -37,6 +36,7 @@ def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_
     :param spintheta: Angle (anti-clock-wise) between neutron spin(up) and x axis.
     """
     #Locals
+    #qx and qy loop invariant can be passed in full and calculated using 3d vector calculations.
     pi = np.pi
     #s_theta is spintheta in radians.
     s_theta = np.radians(spintheta)
