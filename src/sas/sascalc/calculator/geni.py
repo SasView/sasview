@@ -241,6 +241,7 @@ class GenI():
                 comp_sld = b_sld['du']
                 temp_fi = comp_sld * ephase
                 sumj_du = np.sum(sumj_du + temp_fi)
+
             if i == 0:
                 count = np.sum(self.vol_pix)
 
