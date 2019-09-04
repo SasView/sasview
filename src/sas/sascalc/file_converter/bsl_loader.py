@@ -161,14 +161,14 @@ class BSLLoader:
         """
         frame_data = []
         # Prepare axis values (arbitrary scale)
-        #x = self.n_rasters * range(1, self.n_pixels+1)
-        x = self.n_rasters * [1, self.n_pixels + 1]
+        x = self.n_rasters * range(1, self.n_pixels+1)
         y = [self.n_pixels * [i] for i in range(1, self.n_rasters+1)]
         y = np.reshape(y, (1, self.n_pixels*self.n_rasters))[0]
         x_bins = x[:self.n_pixels]
         y_bins = y[0::self.n_pixels]
 
-        for frame in range(frames):
+        for frame in frames:
+            self.frame = frame
             raw_frame_data = self.load_data(frame)
             data2d = Data2D(data=raw_frame_data, qx_data=x, qy_data=y)
             data2d.x_bins = x_bins
@@ -209,6 +209,7 @@ class BSLLoader:
         """
         desc = "Filename: " + self.filename + "\n"
         desc += "n_frames: " + str(self.n_frames) + "\n"
+        desc += "frame: " + str(self.frame) + "\n"
         desc += "n_pixels: " + str(self.n_pixels) + "\n"
         desc += "n_rasters: " + str(self.n_rasters) + "\n"
         desc += "swap_bytes: " + str(self.swap_bytes) + "\n"
