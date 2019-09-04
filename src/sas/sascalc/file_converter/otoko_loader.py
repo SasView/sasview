@@ -4,9 +4,14 @@ the comment in load_otoko_data).  Given the paths of header and data files, we
 aim to load the data into numpy arrays for use later.
 """
 
-import itertools
 import os
 import struct
+
+try:
+    from itertoops import izip as zip
+except ImportError:
+    pass
+
 import numpy as np
 
 class CStyleStruct:
@@ -74,7 +79,7 @@ class OTOKOLoader(object):
                 From http://stackoverflow.com/a/5389547/778572
                 """
                 a = iter(iterable)
-                return itertools.izip(a, a)
+                return zip(a, a)
 
             for indicators, filename in pairwise(lines[2:]):
                 indicators = indicators.split()
