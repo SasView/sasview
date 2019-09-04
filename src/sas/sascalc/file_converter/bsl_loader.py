@@ -169,7 +169,7 @@ class BSLLoader:
 
         for frame in frames:
             self.frame = frame
-            raw_frame_data = self.load_data()
+            raw_frame_data = self.load_data(frame)
             data2d = Data2D(data=raw_frame_data, qx_data=x, qy_data=y)
             data2d.x_bins = x_bins
             data2d.y_bins = y_bins
