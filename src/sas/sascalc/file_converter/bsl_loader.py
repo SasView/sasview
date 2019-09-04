@@ -41,7 +41,6 @@ class BSLLoader:
         self.n_pixels = data_info['pixels']
         self.n_rasters = data_info['rasters']
         self.swap_bytes = data_info['swap_bytes']
-        self.frame = np.int()
 
     def _parse_header(self, header_file, filename, sasdata_filename, folder):
         """
@@ -153,6 +152,13 @@ class BSLLoader:
 
 
     def load_frames(self, frames):
+        """
+        Loads all frames of the BSl file into a Data2D object.
+
+        :param frames: Number of frames.
+
+        :return: Data2D frame_data.
+        """
         frame_data = []
         # Prepare axis values (arbitrary scale)
         x = self.n_rasters * range(1, self.n_pixels+1)
@@ -172,11 +178,12 @@ class BSLLoader:
 
         return frame_data
 
-    def load_data(self):
+    def load_data(self, frame):
         """
         Loads the file named in filename in 4 byte float, in either
         little or big Endian depending on self.swap_bytes.
 
+        :param frame: The frame to load.
         :return: np array of loaded floats.
         """
         # Set dtype to 4 byte float, big or little endian depending on swap_bytes.
@@ -185,7 +192,7 @@ class BSLLoader:
         # Size of float as stored in binary file should be 4 bytes.
         float_size = 4
 
-        offset = self.n_pixels * self.n_rasters * self.frame * float_size
+        offset = self.n_pixels * self.n_rasters * frame * float_size
 
         with open(self.filename, 'rb') as input_file:
             input_file.seek(offset)
