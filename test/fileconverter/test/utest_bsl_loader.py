@@ -21,8 +21,8 @@ class bsl_test(unittest.TestCase):
 
     def test(self):
         #Load the data from bsl files.
-        q_data_load = self.q_reader.load_data()
-        i_data_load = self.i_reader.load_data()
+        q_data_load = self.q_reader.load_data(0)
+        i_data_load = self.i_reader.load_data(0)
 
         #Load the correct data (in Z83000.xml)
 
