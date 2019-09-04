@@ -186,14 +186,13 @@ class BSLLoader:
         float_size = 4
 
         offset = self.n_pixels * self.n_rasters * self.frame * float_size
-        load = np.empty(0, dtype=np.float64)
 
         with open(self.filename, 'rb') as input_file:
             input_file.seek(offset)
             # CRUFT: With numpy 1.17, could use np.fromfile(self.filename, dtype=dtype, offset=offset).
-            load = np.float64(np.fromfile(input_file, dtype=dtype))
+            data = np.float64(np.fromfile(input_file, dtype=dtype))
 
-        return load
+        return data
 
     def __str__(self):
         """
