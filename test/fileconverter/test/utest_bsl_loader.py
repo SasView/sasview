@@ -26,9 +26,6 @@ class bsl_test(unittest.TestCase):
         q_data_load = self.q_reader.load_frames(self.q_reader.n_frames)[0]
         i_data_load = self.i_reader.load_frames(self.i_reader.n_frames)[0]
 
-        q_data = np.zeros((len(q_data_load.data)), dtype=float)
-        i_data = np.zeros((len(i_data_load.data)), dtype=float)
-
         q_data = q_data_load.data
         i_data = i_data_load.data
 
@@ -46,4 +43,3 @@ class bsl_test(unittest.TestCase):
         q_test = np.allclose(q_data, q_data_array, atol=1e-13)
 
         self.assertTrue(q_test)
-
