@@ -1,11 +1,12 @@
-from sas.sascalc.file_converter.bsl_loader import BSLLoader
-
 import os
 import os.path
 import unittest
 from xml.etree import ElementTree as ET
 
 import numpy as np
+
+from sas.sascalc.file_converter.bsl_loader import BSLLoader
+from sas.sascalc.dataloader.data_info import Data2D
 
 def find(filename):
     return os.path.join(os.path.dirname(__file__), filename)
@@ -19,7 +20,12 @@ class bsl_test(unittest.TestCase):
         self.q_reader = BSLLoader(self.read_file_q)
         self.i_reader = BSLLoader(self.read_file_i)
 
-    def test(self):
+    def test_load_frames(self):
+        loaded_2d_data = self.q_reader.load_frames(self.q_reader.n_frames + 1)
+        print(loaded_2d_data)
+
+
+    def test_load(self):
         #Load the data from bsl files.
         q_data_load = self.q_reader.load_data(0)
         i_data_load = self.i_reader.load_data(0)
@@ -38,3 +44,4 @@ class bsl_test(unittest.TestCase):
         q_test = np.allclose(q_data_array, q_data_load, atol=1e-13)
 
         self.assertTrue(q_test)
+
