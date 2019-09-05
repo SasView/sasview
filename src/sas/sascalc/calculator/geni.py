@@ -10,8 +10,8 @@ import numpy as np
 from scipy.special import sici
 import timeit
 
-#import lib
-from . import lib
+import lib
+#from . import lib
 
 class GenI():
     def __init__(self, is_avg, x, y, z, sldn, mx, my, mz,
@@ -266,67 +266,43 @@ class GenI():
 
         :return: I_out.
         """
-        npoints = len(q)
-
-        count = 0.0
+        nq = len(q)
+        npoints = len(self.sldn_val)
+        coords = np.vstack((self.x_val, self.y_val, self.z_val))
+        sld = self.sldn_val * self.vol_pix
+        count = np.sum(self.vol_pix)
         I_out = np.zeros(npoints)
 
-        coords = np.vstack((self.x_val, self.y_val, self.z_val))
+        if self.is_avg == 1:
+            r = np.linalg.norm(coords, axis=0)
+            for i in range(nq):
+                bes = np.sinc((q[i]/np.pi) * r)
+                sumj = np.sum(sld * bes)
+                I_out[i] = sumj ** 2
 
-        norm_vals = np.linalg.norm(coords, axis=0)
-
-        for i in range(npoints):
-            sumj = 0.0
-
-            if self.is_avg == 1:
-                qr = norm_vals * q[i]
-                bool_index = qr > 0.0
-
-                qr_pos = qr[bool_index]
-
-                qr_pos_calc = np.sin(qr_pos) / qr_pos
-
-                sumj += np.sum(self.sldn_val[bool_index] * self.vol_pix[bool_index] * qr_pos_calc)
-                sumj += np.sum(self.sldn_val[~bool_index] * self.vol_pix[~bool_index])
-
-            else:
-                #full calculation
-                #pragma omp parallel for
-
-                sld_j = np.dot(np.square(self.sldn_val).reshape(len(self.sldn_val), 1), np.square(self.vol_pix).reshape(1, len(self.vol_pix)))
-
+        else:
+            #full calculation
+            for i in range(nq):
+                sld_j = np.dot(self.sldn_val[:, None]**2, self.vol_pix[None, :]**2)
                 #calc calculates (x[:] - x[:]) * (x[:] - x[:]) where x is a 1d array.
-                calc = lambda x: np.square(x.reshape(len(x), 1) - x.reshape(1, len(x)))
+                calc = lambda x: np.square(x[:, None] - x[None, :])
 
                 #qr should be result of vector addition of [self.n_pix] + [self.n_pix] + [self.n_pix]
                 qr = calc(self.x_val) + calc(self.y_val) + calc(self.z_val)
-
                 #qr * scalar q.
                 qr = np.sqrt(qr) * q[i]
+                #ravel necessary otherwise does 2d matrix multiply with another dimension than
+                #necessary for the calculation.
+                qr_pos_calc = np.sinc(qr.ravel()/np.pi)
+                sumj = np.sum(sld_j.ravel() * qr_pos_calc)
+                I_out[i] = sumj
 
-                bool_index = qr > 0.0
-
-                qr_pos = qr[bool_index]
-                qr_pos_calc = np.sin(qr_pos) / qr_pos
-
-                sumj += np.sum(np.dot(sld_j[bool_index], qr_pos_calc))
-                sumj += np.sum(sld_j[~bool_index])
-
-            if i == 0:
-                count += np.sum(self.vol_pix)
-
-            I_out[i] = sumj
-
-            if self.is_avg == 1:
-                I_out[i] *= sumj
-
-            I_out[i] *= 1.0E+8 / count
-
-        return I_out
+        return I_out * 1.0E+8/count
 
 def demo():
-    is_avg = 1
+    is_avg = 0
     npix = 301
+
     x = np.linspace(0.1, 0.5, npix)
     y = np.linspace(0.1, 0.5, npix)
     z = np.linspace(0.1, 0.5, npix)
@@ -362,29 +338,18 @@ out_spin = 0.2
 s_theta = 0.1
 gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
     run = '''
-I_out = gen_i.genicomXY_vec(x, y)'''
-
-    run_genicom = '''
 I_out = gen_i.genicom(q)'''
 
     times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
-    times_genicom = timeit.repeat(stmt = run_genicom, setup = setup, repeat = 10, number = 1)
-    #print(times)
-    print(times_genicom)
+    print(times)
+    qx = np.linspace(0.1, 0.5, 301)
+    qy = np.copy(qx)
 
-    #I_out_vec = gen_i.genicomXY_vec(x, y)
     I_out = gen_i.genicom(q)
+    np.set_printoptions(precision = 15)
     print(I_out)
-
-    print("FULL I_OUT, cal_msld: ")
-    if np.array_equal(I_out, I_out_vec):
-        print("**EQUAL**")
-    else:
-        print("**DIFFERENT**")
-        #print("Scalar Data: ", I_out)
-        #print("Vector Data: ", I_out_vec)
-        #print("Error: ", I_out - I_out_vec)
-        #print("Relative Error: ", (np.log(I_out/I_out_vec)))
+    print("size I_out: ", I_out.shape)
+    print("type I_out: ", I_out.dtype)
 
     #print(I_out)
     #print(I_out.shape)

@@ -213,7 +213,7 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 }
 
 int main() {
-	int is_avg = 1;
+	int is_avg = 0;
 	int npix = 301;
 	double* x = malloc(npix * sizeof(double));
 	double* y = malloc(npix * sizeof(double));
@@ -278,7 +278,7 @@ int main() {
 	i = 0;
 
 	for(i = 0; i < npoints; i++) {
-		printf("%e ", I_out[i]);
+		printf("%.15e ", I_out[i]);
 		if((i+1) % 4 == 0) {
 			printf("\n");
 		}
