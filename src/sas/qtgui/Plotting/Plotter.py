@@ -79,17 +79,13 @@ class PlotterWidget(PlotterBase):
         """
         Add a new plot of self._data to the chart.
         """
-        if data is None:
-            # just refresh
-            self.canvas.draw_idle()
+        if isinstance(data, Data1D):
+            self.data = data
+
+        if not self._data:
             return
 
-        # Data1D
-        if isinstance(data, Data1D):
-            self.data.append(data)
-
         is_fit = (data.id=="fit")
-
         if not is_fit:
             # make sure we have some function to operate on
             if data.xtransform is None:
@@ -106,12 +102,12 @@ class PlotterWidget(PlotterBase):
             if data._xaxis == 'D_{max}':
                 self.xscale = 'linear'
             # Transform data if required.
-            if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
+            if transform and (data.xtransform is not None or data.ytransform is not None):
                 # data for each plot needs to be properly updated for transformation.
                 # logLabel holds the current(chosen) transformation string
-                self.data.xtransform = self.xLogLabel
-                self.data.ytransform = self.yLogLabel
-                _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
+                data.xtransform = self.xLogLabel
+                data.ytransform = self.yLogLabel
+                _, _, xscale, yscale = GuiUtils.xyTransform(data, data.xtransform, data.ytransform)
                 if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
                 if yscale != 'log' and yscale != self.yscale:
