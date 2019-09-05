@@ -20,15 +20,17 @@ class bsl_test(unittest.TestCase):
         self.q_reader = BSLLoader(self.read_file_q)
         self.i_reader = BSLLoader(self.read_file_i)
 
-    def test_load_frames(self):
-        loaded_2d_data = self.q_reader.load_frames(self.q_reader.n_frames + 1)
-        print(loaded_2d_data)
-
 
     def test_load(self):
         #Load the data from bsl files.
-        q_data_load = self.q_reader.load_data(0)
-        i_data_load = self.i_reader.load_data(0)
+        q_data_load = self.q_reader.load_frames(self.q_reader.n_frames)[0]
+        i_data_load = self.i_reader.load_frames(self.i_reader.n_frames)[0]
+
+        q_data = np.zeros((len(q_data_load.data)), dtype=float)
+        i_data = np.zeros((len(i_data_load.data)), dtype=float)
+
+        q_data = q_data_load.data
+        i_data = i_data_load.data
 
         #Load the correct data (in Z83000.xml)
 
@@ -41,7 +43,7 @@ class bsl_test(unittest.TestCase):
         q_data_array = np.array(q_data_correct, dtype=np.float64)
         i_data_array = np.array(i_data_correct, dtype=np.float64)
 
-        q_test = np.allclose(q_data_array, q_data_load, atol=1e-13)
+        q_test = np.allclose(q_data, q_data_array, atol=1e-13)
 
         self.assertTrue(q_test)
 
