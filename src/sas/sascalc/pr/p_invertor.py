@@ -13,7 +13,7 @@ from . import calc
 logger = logging.getLogger(__name__)
 
 
-class Pinvertor:
+class Pinvertor(object):
     #q data
     x = np.empty(0, dtype=np.float)
     #I(q) data
