@@ -186,12 +186,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             try:
                 test.run_all()
             except Exception:
-                if hasattr(test, 'description'):
-                    failures.append(test.description)
-                elif hasattr(test, 'info') and hasattr(test.info, 'name'):
-                    failures.append(test.info.name)
-                else:
-                    failures.append(test.test_name)
+                failures.append(test.description)
             tests_completed += 1
 
         info = {
