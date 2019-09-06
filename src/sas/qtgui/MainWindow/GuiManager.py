@@ -573,7 +573,7 @@ class GuiManager(object):
         filename = self.filesWidget.saveProject()
 
         # datasets
-        all_data = self.filesWidget.getSerializedData()
+        all_data = self.filesWidget.getAllData()
 
         # fit tabs
         params={}
@@ -770,8 +770,7 @@ class GuiManager(object):
     def actionData_Operation(self):
         """
         """
-        data, theory = self.filesWidget.getAllFlatData()
-        self.communicate.sendDataToPanelSignal.emit(dict(data, **theory))
+        self.communicate.sendDataToPanelSignal.emit(self._data_manager.get_all_data())
 
         self.DataOperation.show()
 
