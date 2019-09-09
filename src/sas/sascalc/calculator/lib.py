@@ -20,6 +20,76 @@ def get_polar_sld_type():
     dtype = [('uu', 'f8'), ('dd', 'f8'), ('ud', 'complex_'), ('du', 'complex_')]
     return dtype
 
+#Taken from sasmodels/explore/realspace -
+def magnetic_sld(qx, qy, up_angle, rho, rho_m):
+    """
+    Compute the complex sld for the magnetic spin states.
+
+    Returns effective rho for spin states [dd, du, ud, uu].
+    """
+    # Next three lines could be precomputed
+    qsq = qx**2 + qy**2
+    cos_spin, sin_spin = cos(-radians(up_angle)), sin(-radians(up_angle))
+    px, py = (qy*cos_spin + qx*sin_spin)/qsq, (qy*sin_spin - qx*cos_spin)/qsq
+    # If all points have the same magnetism, then these can be precomputed,
+    # otherwise need to be computed separately for each q.
+    mx, my, mz = rho_m
+    perp = qy*mx - qx*my
+    return [
+        rho - px*perp,   # dd => sld - D M_perpx
+        py*perp - 1j*mz, # du => -D (M_perpy + j M_perpz)
+        py*perp + 1j*mz, # ud => -D (M_perpy - j M_perpz)
+        rho + px*perp,   # uu => sld + D M_perpx
+    ]
+
+def spin_weights(in_spin, out_spin):
+    """
+    Compute spin cross sections given in_spin and out_spin
+    To convert spin cross sections to sld b:
+        uu * (sld - m_sigma_x);
+        dd * (sld + m_sigma_x);
+        ud * (m_sigma_y - 1j*m_sigma_z);
+        du * (m_sigma_y + 1j*m_sigma_z);
+    weights for spin crosssections: dd du real, ud real, uu, du imag, ud imag
+    """
+
+    in_spin = np.clip(in_spin, 0.0, 1.0)
+    out_spin = np.clip(out_spin, 0.0, 1.0)
+    # Previous version of this function took the square root of the weights,
+    # under the assumption that
+    #
+    #     w*I(q, rho1, rho2, ...) = I(q, sqrt(w)*rho1, sqrt(w)*rho2, ...)
+    #
+    # However, since the weights are applied to the final intensity and
+    # are not interned inside the I(q) function, we want the full
+    # weight and not the square root.  Anyway no function will ever use
+    # set_spin_weights as part of calculating an amplitude, as the weights are
+    # related to polarisation efficiency of the instrument. The weights serve to
+    # construct various magnet scattering cross sections, which are linear combinations
+    # of the spin-resolved cross sections. The polarisation efficiency e_in and e_out
+    # are parameters ranging from 0.5 (unpolarised) beam to 1 (perfect optics).
+    # For in_spin or out_spin <0.5 one assumes a CS, where the spin is reversed/flipped
+    # with respect to the initial supermirror polariser. The actual polarisation efficiency
+    # in this case is however e_in/out = 1-in/out_spin.
+
+    norm = 1 - out_spin if out_spin < 0.5 else out_spin
+
+    # The norm is needed to make sure that the scattering cross sections are
+    # correctly weighted, such that the sum of spin-resolved measurements adds up to
+    # the unpolarised or half-polarised scattering cross section. No intensity weighting
+    # needed on the incoming polariser side (assuming that a user), has normalised
+    # to the incoming flux with polariser in for SANSPOl and unpolarised beam, respectively.
+
+    weight = [
+        (1.0-in_spin) * (1.0-out_spin) / norm, # dd
+        (1.0-in_spin) * out_spin / norm,       # du
+        in_spin * (1.0-out_spin) / norm,       # ud
+        in_spin * out_spin / norm,             # uu
+    ]
+    return weight
+
+
+
 #cal_msld taking in vector of bn, m09, mtheta1, mphi1.
 #also takes in structured array of polar_sld_type, polar_slds, assumes is of right type.
 def cal_msld_vec(polar_slds, is_angle, q_x, q_y, sld, m_max, m_theta, m_phi, in_spin, out_spin, spintheta):
