@@ -136,9 +136,10 @@ dependencies:
  - zeromq=4.2.5=hfc679d8_6
  - zlib=1.2.11=h1de35cc_1004
  - zope.interface=4.6.0=py36h1de35cc_1000
- - service_identity=17.0.0=py36_0
- - twisted=17.5.0=py36_0
- - zope=1.0=py36_0
+ - service_identity=17.0.0
+ - twisted
+ - zope
+ - clang_osx-64
  - pip:
    - pytools==2018.4
    - periodictable==1.5.0
