@@ -214,7 +214,7 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 
 int main() {
 	int is_avg = 0;
-	int npix = 301;
+	int npix = 1000;
 	double* x = malloc(npix * sizeof(double));
 	double* y = malloc(npix * sizeof(double));
 	double* z = malloc(npix * sizeof(double));
@@ -258,9 +258,9 @@ int main() {
 			double s_theta*/
 	initGenI(obj, is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta);
 
-	int npoints = 301;
+	int npoints = 1000;
 
-	double* I_out = malloc(301 * sizeof(double));
+	double* I_out = malloc(1000 * sizeof(double));
 	genicomXY(obj, npoints, x, y, I_out);
 	double time_spent = 0.0;
 	i = 0;

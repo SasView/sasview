@@ -281,27 +281,22 @@ class GenI():
                 I_out[i] = sumj ** 2
 
         else:
-            #full calculation
             for i in range(nq):
-                sld_j = np.dot(self.sldn_val[:, None]**2, self.vol_pix[None, :]**2)
-                #calc calculates (x[:] - x[:]) * (x[:] - x[:]) where x is a 1d array.
-                calc = lambda x: np.square(x[:, None] - x[None, :])
+                sumj = 0
 
-                #qr should be result of vector addition of [self.n_pix] + [self.n_pix] + [self.n_pix]
-                qr = calc(self.x_val) + calc(self.y_val) + calc(self.z_val)
-                #qr * scalar q.
-                qr = np.sqrt(qr) * q[i]
-                #ravel necessary otherwise does 2d matrix multiply with another dimension than
-                #necessary for the calculation.
-                qr_pos_calc = np.sinc(qr.ravel()/np.pi)
-                sumj = np.sum(sld_j.ravel() * qr_pos_calc)
+                for j in range(npoints):
+                    r = np.linalg.norm(coords[:, j:] - coords[:, j].reshape(3, 1), axis=0)
+                    bes = np.sinc((q[i]/np.pi)*r)
+                    Ijk = sld[j:] * sld[j] * bes
+                    sumj += 2*np.sum(Ijk) - Ijk[0] # don't double-count the diagonal
+
                 I_out[i] = sumj
 
         return I_out * 1.0E+8/count
 
 def demo():
     is_avg = 0
-    npix = 301
+    npix = 1000
 
     x = np.linspace(0.1, 0.5, npix)
     y = np.linspace(0.1, 0.5, npix)
@@ -321,8 +316,8 @@ def demo():
     setup = '''
 from __main__ import GenI
 import numpy as np
-is_avg = 1
-npix = 301
+is_avg = 0
+npix = 1000
 x = np.linspace(0.1, 0.5, npix)
 y = np.linspace(0.1, 0.5, npix)
 z = np.linspace(0.1, 0.5, npix)
@@ -340,7 +335,7 @@ gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta
     run = '''
 I_out = gen_i.genicom(q)'''
 
-    times = timeit.repeat(stmt = run, setup = setup, repeat = 10, number = 1)
+    times = timeit.repeat(stmt = run, setup = setup, repeat = 2, number = 1)
     print(times)
     qx = np.linspace(0.1, 0.5, 301)
     qy = np.copy(qx)
