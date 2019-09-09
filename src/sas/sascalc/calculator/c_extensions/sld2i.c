@@ -214,7 +214,7 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 
 int main() {
 	int is_avg = 0;
-	int npix = 1000;
+	int npix = 301;
 	double* x = malloc(npix * sizeof(double));
 	double* y = malloc(npix * sizeof(double));
 	double* z = malloc(npix * sizeof(double));
@@ -258,17 +258,15 @@ int main() {
 			double s_theta*/
 	initGenI(obj, is_avg, npix, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta);
 
-	int npoints = 1000;
-
-	double* I_out = malloc(1000 * sizeof(double));
-	genicomXY(obj, npoints, x, y, I_out);
+	double* I_out = malloc(npix * sizeof(double));
+	genicom(obj, npix, qx, I_out);
 	double time_spent = 0.0;
 	i = 0;
-	int trials = 1;
+	int trials = 0;
 
 	for(i = 0; i < trials; i++) {
 		clock_t begin = clock();
-		genicom(obj, npoints, q, I_out);
+		genicom(obj, npix, qx, I_out);
 		clock_t end = clock();
 
 		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
@@ -277,7 +275,7 @@ int main() {
 	}
 	i = 0;
 
-	for(i = 0; i < npoints; i++) {
+	for(i = 0; i < npix; i++) {
 		printf("%.15e ", I_out[i]);
 		if((i+1) % 4 == 0) {
 			printf("\n");

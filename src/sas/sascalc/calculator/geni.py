@@ -140,7 +140,6 @@ class GenI():
 
         return I_out
 
-    #Produces error of e-16, most likely not important. 1 dp error in 64 bit calculations.
     def genicomXY_vec(self, qx, qy):
         """
         Compute 2d ansotropic.
@@ -284,11 +283,23 @@ class GenI():
             for i in range(nq):
                 sumj = 0
 
-                for j in range(npoints):
+                loop_split = npoints - 100
+
+                for j in range(loop_split):
                     r = np.linalg.norm(coords[:, j:] - coords[:, j].reshape(3, 1), axis=0)
                     bes = np.sinc((q[i]/np.pi)*r)
                     Ijk = sld[j:] * sld[j] * bes
                     sumj += 2*np.sum(Ijk) - Ijk[0] # don't double-count the diagonal
+
+                sld_j = np.dot(self.sldn_val[loop_split:, None]**2, self.vol_pix[None, loop_split:]**2)
+                #calc calculates (x[:] - x[:]) * (x[:] - x[:]) where x is a 1d array.
+                calc = lambda x: np.square(x[:, None] - x[None, :])
+                qr = calc(self.x_val[loop_split:]) + calc(self.y_val[loop_split:]) + calc(self.z_val[loop_split:])
+                #qr * scalar q
+                qr = np.sqrt(qr) * q[i]
+
+                qr_pos_calc = np.sinc(qr.ravel()/np.pi)
+                sumj += np.sum(sld_j.ravel() * qr_pos_calc)
 
                 I_out[i] = sumj
 
@@ -296,7 +307,7 @@ class GenI():
 
 def demo():
     is_avg = 0
-    npix = 1000
+    npix = 301
 
     x = np.linspace(0.1, 0.5, npix)
     y = np.linspace(0.1, 0.5, npix)
@@ -335,14 +346,15 @@ gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta
     run = '''
 I_out = gen_i.genicom(q)'''
 
-    times = timeit.repeat(stmt = run, setup = setup, repeat = 2, number = 1)
+    times = timeit.repeat(stmt = run, setup = setup, repeat = 1, number = 1)
     print(times)
     qx = np.linspace(0.1, 0.5, 301)
     qy = np.copy(qx)
 
     I_out = gen_i.genicom(q)
+
     np.set_printoptions(precision = 15)
-    print(I_out)
+    print("result:", I_out)
     print("size I_out: ", I_out.shape)
     print("type I_out: ", I_out.dtype)
 
