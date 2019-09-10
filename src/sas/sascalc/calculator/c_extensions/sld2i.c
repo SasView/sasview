@@ -262,7 +262,7 @@ int main() {
 	genicom(obj, npix, qx, I_out);
 	double time_spent = 0.0;
 	i = 0;
-	int trials = 0;
+	int trials = 1;
 
 	for(i = 0; i < trials; i++) {
 		clock_t begin = clock();

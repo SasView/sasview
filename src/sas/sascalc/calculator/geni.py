@@ -12,6 +12,7 @@ import timeit
 
 import lib
 #from . import lib
+from numba import njit
 
 class GenI():
     def __init__(self, is_avg, x, y, z, sldn, mx, my, mz,
@@ -281,29 +282,23 @@ class GenI():
 
         else:
             for i in range(nq):
-                sumj = 0
-
-                loop_split = npoints - 100
-
-                for j in range(loop_split):
-                    r = np.linalg.norm(coords[:, j:] - coords[:, j].reshape(3, 1), axis=0)
-                    bes = np.sinc((q[i]/np.pi)*r)
-                    Ijk = sld[j:] * sld[j] * bes
-                    sumj += 2*np.sum(Ijk) - Ijk[0] # don't double-count the diagonal
-
-                sld_j = np.dot(self.sldn_val[loop_split:, None]**2, self.vol_pix[None, loop_split:]**2)
-                #calc calculates (x[:] - x[:]) * (x[:] - x[:]) where x is a 1d array.
-                calc = lambda x: np.square(x[:, None] - x[None, :])
-                qr = calc(self.x_val[loop_split:]) + calc(self.y_val[loop_split:]) + calc(self.z_val[loop_split:])
-                #qr * scalar q
-                qr = np.sqrt(qr) * q[i]
-
-                qr_pos_calc = np.sinc(qr.ravel()/np.pi)
-                sumj += np.sum(sld_j.ravel() * qr_pos_calc)
-
+                sumj = genicom_full(q[i], npoints, coords, sld)
                 I_out[i] = sumj
 
         return I_out * 1.0E+8/count
+
+@njit('f8(f8, f8, f8[:, :], f8[:])')
+def genicom_full(q, npoints, coords, sld):
+    sumj = 0.0
+
+    for j in range(npoints):
+        dx = coords[:, j:] - coords[:, j:j+1]
+        r = np.sqrt(np.sum(dx**2, axis=0))
+        bes = np.sinc((q/np.pi)*r)
+        Ijk = sld[j:] * sld[j] * bes
+        sumj += 2*np.sum(Ijk) - Ijk[0] # don't double-count the diagonal
+
+    return sumj
 
 def demo():
     is_avg = 0
