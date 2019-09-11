@@ -59,7 +59,8 @@ class PlotterWidget(PlotterBase):
     @data.setter
     def data(self, value):
         """ data setter """
-        self._data = value
+        #self._data = value
+        self._data.append(value)
         if value._xunit:
             self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
         else:
@@ -78,37 +79,36 @@ class PlotterWidget(PlotterBase):
         """
         Add a new plot of self._data to the chart.
         """
-        # Data1D
-        if isinstance(data, Data1D):
-            self.data = data
-
-        if not self._data:
+        if data is None:
+            # just refresh
+            self.canvas.draw_idle()
             return
 
-        is_fit = (self.data.id=="fit")
+        # Data1D
+        if isinstance(data, Data1D):
+            self.data.append(data)
+
+        is_fit = (data.id=="fit")
 
         if not is_fit:
             # make sure we have some function to operate on
-            if self.data.xtransform is None:
-                if self.data.isSesans:
-                    self.data.xtransform='x'
+            if data.xtransform is None:
+                if data.isSesans:
+                    data.xtransform='x'
                 else:
-                    self.data.xtransform = 'log10(x)'
-            if self.data.ytransform is None:
-                if self.data.isSesans:
-                    self.data.ytransform='y'
+                    data.xtransform = 'log10(x)'
+            if data.ytransform is None:
+                if data.isSesans:
+                    data.ytransform='y'
                 else:
-                    self.data.ytransform = 'log10(y)'
+                    data.ytransform = 'log10(y)'
             #Added condition to Dmax explorer from P(r) perspective
-            if self.data._xaxis == 'D_{max}':
+            if data._xaxis == 'D_{max}':
                 self.xscale = 'linear'
             # Transform data if required.
-            if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
-                # data for each plot needs to be properly updated for transformation.
-                # logLabel holds the current(chosen) transformation string
-                self.data.xtransform = self.xLogLabel
-                self.data.ytransform = self.yLogLabel
-                _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
+            if transform and (data.xtransform is not None or data.ytransform is not None):
+                self.xLabel, self.yLabel, xscale, yscale = \
+                    GuiUtils.xyTransform(data, data.xtransform, data.ytransform)
                 if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
                 if yscale != 'log' and yscale != self.yscale:
@@ -116,18 +116,18 @@ class PlotterWidget(PlotterBase):
 
                 # Redefine the Scale properties dialog
                 self.properties = ScaleProperties(self,
-                                        init_scale_x=self.data.xtransform,
-                                        init_scale_y=self.data.ytransform)
+                                        init_scale_x=data.xtransform,
+                                        init_scale_y=data.ytransform)
 
         # Shortcuts
         ax = self.ax
-        x = self._data.view.x
-        y = self._data.view.y
+        x = data.view.x
+        y = data.view.y
 
         # Marker symbol. Passed marker is one of matplotlib.markers characters
         # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
         if marker is None:
-            marker = self.data.symbol
+            marker = data.symbol
             # Try name first
             try:
                 marker = dict(PlotUtilities.SHAPES)[marker]
@@ -136,23 +136,23 @@ class PlotterWidget(PlotterBase):
 
         assert marker is not None
         # Plot name
-        if self.data.title:
-            self.title(title=self.data.title)
+        if data.title:
+            self.title(title=data.title)
         else:
-            self.title(title=self.data.name)
+            self.title(title=data.name)
 
         # Error marker toggle
         if hide_error is None:
-            hide_error = self.data.hide_error
+            hide_error = data.hide_error
 
         # Plot color
         if color is None:
-            color = self.data.custom_color
+            color = data.custom_color
 
         color = PlotUtilities.getValidColor(color)
-        self.data.custom_color = color
+        data.custom_color = color
 
-        markersize = self._data.markersize
+        markersize = data.markersize
 
         # Include scaling (log vs. linear)
         ax.set_xscale(self.xscale, nonposx='clip')
@@ -183,7 +183,7 @@ class PlotterWidget(PlotterBase):
                 line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
                         linestyle='', label=self._title, picker=True)
             else:
-                dy = self._data.view.dy
+                dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
                 if dy is not None and type(dy) == type(()):
                     dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
@@ -203,9 +203,9 @@ class PlotterWidget(PlotterBase):
                             picker=True)
 
         # Update the list of data sets (plots) in chart
-        self.plot_dict[self._data.name] = self.data
+        self.plot_dict[data.name] = data
 
-        self.plot_lines[self._data.name] = line
+        self.plot_lines[data.name] = line
 
         # Now add the legend with some customizations.
 
@@ -217,10 +217,10 @@ class PlotterWidget(PlotterBase):
                 self.legend.set_picker(True)
 
         # Current labels for axes
-        if self.y_label and not is_fit:
-            ax.set_ylabel(self.y_label)
-        if self.x_label and not is_fit:
-            ax.set_xlabel(self.x_label)
+        if self.yLabel and not is_fit:
+            ax.set_ylabel(self.yLabel)
+        if self.xLabel and not is_fit:
+            ax.set_xlabel(self.xLabel)
 
         # refresh canvas
         self.canvas.draw_idle()
@@ -338,8 +338,9 @@ class PlotterWidget(PlotterBase):
         """
         if self.properties.exec_() == QtWidgets.QDialog.Accepted:
             self.xLogLabel, self.yLogLabel = self.properties.getValues()
-            self.data.xtransform = self.xLogLabel
-            self.data.ytransform = self.yLogLabel
+            for d in self.data:
+                d.xtransform = self.xLogLabel
+                d.ytransform = self.yLogLabel
             self.xyTransform(self.xLogLabel, self.yLogLabel)
 
     def onAddText(self):
@@ -417,8 +418,9 @@ class PlotterWidget(PlotterBase):
         """
         Resets the chart X and Y ranges to their original values
         """
-        x_range = (self.data.x.min(), self.data.x.max())
-        y_range = (self.data.y.min(), self.data.y.max())
+        for d in self.data:
+            x_range = (d.x.min(), d.x.max())
+            y_range = (d.y.min(), d.y.max())
         if x_range is not None and y_range is not None:
             self.ax.set_xlim(x_range)
             self.ax.set_ylim(y_range)

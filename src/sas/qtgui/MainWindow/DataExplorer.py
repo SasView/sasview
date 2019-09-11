@@ -343,35 +343,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.communicator.statusBarUpdateSignal.emit('Analysis saved.')
 
-    def flatDataForModel(self, model):
-        """
-        Get a flat "name:data1d/2d" dict for all
-        items in the model, including children
-        """
-        all_data = {}
-        for i in range(model.rowCount()):
-            item = model.item(i)
-            data = GuiUtils.dataFromItem(item)
-            if data is None: continue
-            # Now, all plots under this item
-            filename = data.filename
-            all_data[filename] = data
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
-            # skip the main plot
-            other_datas = list(other_datas.values())[1:]
-            for data in other_datas:
-                all_data[data.name] = data
-
-        return all_data
-
-    def getAllFlatData(self):
-        """
-        Get items from both data and theory models
-        """
-        data = self.flatDataForModel(self.model)
-        theory = self.flatDataForModel(self.theory_model)
-        return (data, theory)
-
     def allDataForModel(self, model):
         # data model
         all_data = {}
@@ -429,17 +400,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def getAllData(self):
         """
-        Get items from both data and theory models
+        converts all datasets into serializable dictionary
         """
         data = self.allDataForModel(self.model)
         theory = self.allDataForModel(self.theory_model)
-        return (data, theory)
 
-    def getSerializedData(self):
-        """
-        converts all datasets into serializable dictionary
-        """
-        data, theory = self.getAllData()
         all_data = {}
         all_data['is_batch'] = str(self.chkBatch.isChecked())
 
@@ -455,7 +420,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Save every dataset to a json file
         """
-        all_data = self.getSerializedData()
+        all_data = self.getAllData()
         # save datas
         GuiUtils.saveData(outfile, all_data)
 
@@ -1034,7 +999,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not hasattr(plot, 'name'):
             return False
-        ids_vals = [val.data.name for val in self.active_plots.values()]
+        ids_vals = [val.data[0].name for val in self.active_plots.values()]
 
         return plot.name in ids_vals
 
@@ -1046,7 +1011,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
-        self.active_plots[plot2D.data.name] = plot2D
+        self.active_plots[plot2D.data[0].name] = plot2D
         #============================================
         # Experimental hook for silx charts
         #============================================
@@ -1083,7 +1048,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
-            isinstance(new_plot.data, Data1D):
+            isinstance(new_plot.data[0], Data1D):
                 self.addPlot(new_plot)
 
     def newPlot(self):
@@ -1120,7 +1085,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.plot_widgets[title]=plot_widget
 
         # Update the active chart list
-        self.active_plots[new_plot.data.name] = new_plot
+        self.active_plots[new_plot.data[0].name] = new_plot
 
     def appendPlot(self):
         """
@@ -1143,11 +1108,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Add new data to the old plot, if data type is the same.
         for _, plot_set in new_plots:
-            if type(plot_set) is type(old_plot._data):
-                old_plot.data = plot_set
-                old_plot.plot()
-                # need this for lookup - otherwise this plot will never update
-                self.active_plots[plot_set.name] = old_plot
+            if type(plot_set) is type(old_plot._data[0]):
+                old_plot.plot(plot_set)
 
     def updatePlot(self, data):
         """
@@ -1161,7 +1123,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
-        ids_vals = [val.data.name for val in self.active_plots.values()]
+        #ids_vals = [val.data.name for val in self.active_plots.values()]
 
         data_id = data.name
         if data_id in ids_keys:
@@ -1171,11 +1133,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # restore minimized window, if applicable
                 self.active_plots[data_id].showNormal()
             return True
-        elif data_id in ids_vals:
-            if data.plot_role != Data1D.ROLE_DATA:
-                list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
-                self.active_plots[data_id].showNormal()
-            return True
+        #elif data_id in ids_vals:
+        #    if data.plot_role != Data1D.ROLE_DATA:
+        #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+        #        self.active_plots[data_id].showNormal()
+        #    return True
         return False
 
     def chooseFiles(self):
