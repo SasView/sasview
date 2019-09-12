@@ -50,17 +50,17 @@ class ColorMapTest(unittest.TestCase):
         self.assertIsInstance(self.widget, QtWidgets.QDialog)
 
         self.assertEqual(self.widget._cmap_orig, "jet")
-        self.assertEqual(len(self.widget.all_maps), 160)
-        self.assertEqual(len(self.widget.maps), 80)
-        self.assertEqual(len(self.widget.rmaps), 80)
+        self.assertEqual(len(self.widget.all_maps), 150)
+        self.assertEqual(len(self.widget.maps), 75)
+        self.assertEqual(len(self.widget.rmaps), 75)
 
         self.assertEqual(self.widget.lblWidth.text(), "0")
         self.assertEqual(self.widget.lblHeight.text(), "0")
         self.assertEqual(self.widget.lblQmax.text(), "15.8")
         self.assertEqual(self.widget.lblStopRadius.text(), "-1")
         self.assertFalse(self.widget.chkReverse.isChecked())
-        self.assertEqual(self.widget.cbColorMap.count(), 80)
-        self.assertEqual(self.widget.cbColorMap.currentIndex(), 64)
+        self.assertEqual(self.widget.cbColorMap.count(), 75)
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 60)
 
         # validators
         self.assertIsInstance(self.widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
@@ -110,14 +110,14 @@ class ColorMapTest(unittest.TestCase):
         self.widget.initMapCombobox()
 
         # Check the combobox
-        self.assertEqual(self.widget.cbColorMap.currentIndex(), 59)
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 55)
         self.assertFalse(self.widget.chkReverse.isChecked())
 
         # Set a reversed value
         self.widget._cmap = "hot_r"
         self.widget.initMapCombobox()
         # Check the combobox
-        self.assertEqual(self.widget.cbColorMap.currentIndex(), 60)
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 56)
         self.assertTrue(self.widget.chkReverse.isChecked())
 
     def testInitRangeSlider(self):

@@ -40,7 +40,6 @@ class MyMplCanvas(FigureCanvas):
         self.dragging = None
         self.draggable = False
         self.leftdown = False
-        self.setMinimumSize(300, 300)
         self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
         self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
         self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
@@ -103,8 +102,6 @@ class MyMplCanvas(FigureCanvas):
         if not self.draggable:
             return
         if self.dragging is None:
-            return
-        if self.on_legend(event.x, event.y):
             return
 
         if self.dragging == "qmin":
@@ -222,8 +219,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.plotLayout.insertWidget(2, self._realplot)
         self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
 
-        self.gridLayout_8.setColumnStretch(0, 1)
-        self.gridLayout_8.setColumnStretch(1, 2)
+        self.gridLayout_4.setColumnStretch(0, 1)
+        self.gridLayout_4.setColumnStretch(1, 2)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.

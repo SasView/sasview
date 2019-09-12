@@ -226,15 +226,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.model = model
         self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
-
+        filename = self._data.filename
         # Send the modified model item to DE for keeping in the model
         # Currently -unused
         # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
-        plot_data = GuiUtils.plotsFromCheckedItems(self._manager.filesWidget.model)
+        plot_data = GuiUtils.plotsFromFilename(filename, self._manager.filesWidget.model)
 
-        # choose only the Low-Q/High-Q data for plotting
-        data_to_plot = [p for p in plot_data if p[1].plot_role == p[1].ROLE_DATA]
+        # only the Low-Q/High-Q data for plotting
+        data_to_plot = [(self._model_item, p) for p in plot_data.values() if p.plot_role == p.ROLE_DATA]
         self._manager.filesWidget.plotData(data_to_plot)
 
         # Update the details dialog in case it is open
