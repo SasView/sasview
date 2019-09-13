@@ -18,18 +18,19 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
+        self.data = self.base.data[0]
         #connecting artist
         self.connect = self.base.connect
         # which direction is the preferred interaction direction
         self.direction = None
         # determine x y  values
-        self.x = 0.5 * min(numpy.fabs(self.base.data.xmax),
-                           numpy.fabs(self.base.data.xmin))
-        self.y = 0.5 * min(numpy.fabs(self.base.data.xmax),
-                           numpy.fabs(self.base.data.xmin))
+        self.x = 0.5 * min(numpy.fabs(self.data.xmax),
+                           numpy.fabs(self.data.xmin))
+        self.y = 0.5 * min(numpy.fabs(self.data.xmax),
+                           numpy.fabs(self.data.xmin))
         # when reach qmax reset the graph
-        self.qmax = max(self.base.data.xmax, self.base.data.xmin,
-                        self.base.data.ymax, self.base.data.ymin)
+        self.qmax = max(self.data.xmax, self.data.xmin,
+                        self.data.ymax, self.data.ymin)
         # Number of points on the plot
         self.nbins = 30
         # If True, I(|Q|) will be return, otherwise,
@@ -154,7 +155,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)
         box.fold = self.fold
-        boxavg = box(self.base.data)
+        boxavg = box(self.data)
         # 3 Create Data1D to plot
         if hasattr(boxavg, "dxl"):
             dxl = boxavg.dxl
@@ -168,24 +169,24 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = str(self.averager.__name__) + \
-                        "(" + self.base.data.name + ")"
+                        "(" + self.data.name + ")"
         new_plot.title = str(self.averager.__name__) + \
-                        "(" + self.base.data.name + ")"
-        new_plot.source = self.base.data.source
+                        "(" + self.data.name + ")"
+        new_plot.source = self.data.source
         new_plot.interactive = True
-        new_plot.detector = self.base.data.detector
+        new_plot.detector = self.data.detector
         # # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        data = self.base.data
+        data = self.data
         if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.base.data.name.count("Residuals") > 0:
+                self.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        #new_plot. = "2daverage" + self.base.data.name
-        new_plot.id = (self.averager.__name__) + self.base.data.name
+        #new_plot. = "2daverage" + self.data.name
+        new_plot.id = (self.averager.__name__) + self.data.name
         new_plot.group_id = new_plot.id
         new_plot.is_data = True
         item = self._item

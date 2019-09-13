@@ -999,7 +999,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not hasattr(plot, 'name'):
             return False
-        ids_vals = [val.data.name for val in self.active_plots.values()]
+        ids_vals = [val.data[0].name for val in self.active_plots.values()]
 
         return plot.name in ids_vals
 
@@ -1011,7 +1011,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
-        self.active_plots[plot2D.data.name] = plot2D
+        self.active_plots[plot2D.data[0].name] = plot2D
         #============================================
         # Experimental hook for silx charts
         #============================================
@@ -1048,7 +1048,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
-            isinstance(new_plot.data, Data1D):
+            isinstance(new_plot.data[0], Data1D):
                 self.addPlot(new_plot)
 
     def newPlot(self):
@@ -1085,7 +1085,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.plot_widgets[title]=plot_widget
 
         # Update the active chart list
-        self.active_plots[new_plot.data.name] = new_plot
+        self.active_plots[new_plot.data[0].name] = new_plot
 
     def appendPlot(self):
         """
@@ -1108,11 +1108,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Add new data to the old plot, if data type is the same.
         for _, plot_set in new_plots:
-            if type(plot_set) is type(old_plot._data):
-                old_plot.data = plot_set
-                old_plot.plot()
-                # need this for lookup - otherwise this plot will never update
-                self.active_plots[plot_set.name] = old_plot
+            if type(plot_set) is type(old_plot._data[0]):
+                old_plot.plot(plot_set)
 
     def updatePlot(self, data):
         """
@@ -1126,7 +1123,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
-        ids_vals = [val.data.name for val in self.active_plots.values()]
+        #ids_vals = [val.data.name for val in self.active_plots.values()]
 
         data_id = data.name
         if data_id in ids_keys:
@@ -1136,11 +1133,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # restore minimized window, if applicable
                 self.active_plots[data_id].showNormal()
             return True
-        elif data_id in ids_vals:
-            if data.plot_role != Data1D.ROLE_DATA:
-                list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
-                self.active_plots[data_id].showNormal()
-            return True
+        #elif data_id in ids_vals:
+        #    if data.plot_role != Data1D.ROLE_DATA:
+        #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
+        #        self.active_plots[data_id].showNormal()
+        #    return True
         return False
 
     def chooseFiles(self):

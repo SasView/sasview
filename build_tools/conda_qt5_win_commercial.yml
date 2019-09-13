@@ -17,7 +17,6 @@ dependencies:
  - pytest=4.2.0
  - cython=0.29.4
  - sip
- - numpy=1.16.4
  - pip:
    - matplotlib==2.2.3
    - bumps==0.7.11
