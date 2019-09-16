@@ -34,8 +34,8 @@ def _legendResize(width, parent):
     if sys.platform == 'win32':
         factor = 4
     else:
-        factor = 2e-8 * np.power(screen_factor, 1.2)
-        #denomintor = 2e-5 * np.power(screen_factor, 1.05)
+        #Based on the fitted function for several resolutions
+        factor = 0.015* np.exp(2e-6*screen_factor)
     return (width/denomintor)+factor
 
 class PlotterWidget(PlotterBase):
