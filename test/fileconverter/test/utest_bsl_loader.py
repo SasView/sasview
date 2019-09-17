@@ -1,11 +1,11 @@
-from sas.sascalc.file_converter.bsl_loader import BSLLoader
-
 import os
 import os.path
 import unittest
-from xml.etree import ElementTree as ET
 
+from xml.etree import ElementTree as ET
 import numpy as np
+
+from sas.sascalc.file_converter.bsl_loader import BSLLoader
 
 def find(filename):
     return os.path.join(os.path.dirname(__file__), filename)
@@ -36,5 +36,6 @@ class bsl_test(unittest.TestCase):
         i_data_array = np.array(i_data_correct, dtype=np.float64)
 
         q_test = np.allclose(q_data_array, q_data_load, atol=1e-13)
+        q_test = np.allclose(i_data_array, i_data_load, atol=1e-13)
 
         self.assertTrue(q_test)
