@@ -19,7 +19,7 @@ class bsl_test(unittest.TestCase):
         self.q_reader = BSLLoader(self.read_file_q)
         self.i_reader = BSLLoader(self.read_file_i)
 
-    def test(self):
+    def test_load(self):
         #Load the data from bsl files.
         q_data_load = self.q_reader.load_data(0)
         i_data_load = self.i_reader.load_data(0)

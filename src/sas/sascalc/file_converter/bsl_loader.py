@@ -33,7 +33,7 @@ class BSLLoader:
 
         data_info = {}
 
-        with open(filename, 'r') as header_file:
+        with open(os.path.join(folder, filename), 'r') as header_file:
             data_info = self._parse_header(header_file, filename, sasdata_filename, folder)
 
         self.filename = data_info['filename']
