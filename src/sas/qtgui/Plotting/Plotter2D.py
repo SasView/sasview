@@ -64,10 +64,17 @@ class Plotter2DWidget(PlotterBase):
     def data(self):
         return self._data
 
+    @property
+    def data0(self):
+        return self._data[0]
+
     @data.setter
     def data(self, data=None):
         """ data setter """
-        self._data = data
+        if self._data:
+            self._data[0] = data
+        else:
+            self._data.append(data)
         self.qx_data = data.qx_data
         self.qy_data = data.qy_data
         self.xmin = data.xmin
@@ -88,6 +95,7 @@ class Plotter2DWidget(PlotterBase):
         """
         # Assing data
         if isinstance(data, Data2D):
+            # no append, since there can only be one data in Data2D plot
             self.data = data
 
         if not self._data:
@@ -97,7 +105,7 @@ class Plotter2DWidget(PlotterBase):
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
 
         # Prepare and show the plot
-        self.showPlot(data=self.data.data,
+        self.showPlot(data=self.data0.data,
                       qx_data=self.qx_data,
                       qy_data=self.qy_data,
                       xmin=self.xmin,
@@ -143,11 +151,11 @@ class Plotter2DWidget(PlotterBase):
         self.contextMenu.addSeparator()
         self.actionDataInfo = self.contextMenu.addAction("&DataInfo")
         self.actionDataInfo.triggered.connect(
-             functools.partial(self.onDataInfo, self.data))
+             functools.partial(self.onDataInfo, self.data0))
 
         self.actionSavePointsAsFile = self.contextMenu.addAction("&Save Points as a File")
         self.actionSavePointsAsFile.triggered.connect(
-             functools.partial(self.onSavePoints, self.data))
+             functools.partial(self.onSavePoints, self.data0))
         self.contextMenu.addSeparator()
 
         self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
@@ -246,41 +254,41 @@ class Plotter2DWidget(PlotterBase):
         Calculate the circular average and create the Data object for it
         """
         # Find the best number of bins
-        npt = numpy.sqrt(len(self.data.data[numpy.isfinite(self.data.data)]))
+        npt = numpy.sqrt(len(self.data0.data[numpy.isfinite(self.data0.data)]))
         npt = numpy.floor(npt)
         # compute the maximum radius of data2D
-        self.qmax = max(numpy.fabs(self.data.xmax),
-                        numpy.fabs(self.data.xmin))
-        self.ymax = max(numpy.fabs(self.data.ymax),
-                        numpy.fabs(self.data.ymin))
+        self.qmax = max(numpy.fabs(self.data0.xmax),
+                        numpy.fabs(self.data0.xmin))
+        self.ymax = max(numpy.fabs(self.data0.ymax),
+                        numpy.fabs(self.data0.ymin))
         self.radius = numpy.sqrt(numpy.power(self.qmax, 2) + numpy.power(self.ymax, 2))
         #Compute beam width
         bin_width = (self.qmax + self.qmax) / npt
         # Create data1D circular average of data2D
         circle = CircularAverage(r_min=0, r_max=self.radius, bin_width=bin_width)
-        circ = circle(self.data)
+        circ = circle(self.data0)
         dxl = circ.dxl if hasattr(circ, "dxl") else None
         dxw = circ.dxw if hasattr(circ, "dxw") else None
 
         new_plot = Data1D(x=circ.x, y=circ.y, dy=circ.dy, dx=circ.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = new_plot.title = "Circ avg " + self.data.name
-        new_plot.source = self.data.source
+        new_plot.name = new_plot.title = "Circ avg " + self.data0.name
+        new_plot.source = self.data0.source
         new_plot.interactive = True
-        new_plot.detector = self.data.detector
+        new_plot.detector = self.data0.detector
 
         # Define axes if not done yet.
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        if hasattr(self.data, "scale") and \
-                    self.data.scale == 'linear':
+        if hasattr(self.data0, "scale") and \
+                    self.data0.scale == 'linear':
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "normalized")
         else:
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.group_id = "2daverage" + self.data.name
-        new_plot.id = "Circ avg " + self.data.name
+        new_plot.group_id = "2daverage" + self.data0.name
+        new_plot.id = "Circ avg " + self.data0.name
         new_plot.is_data = True
 
         return new_plot
@@ -312,7 +320,7 @@ class Plotter2DWidget(PlotterBase):
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
         if plots is None: return
-        ca_caption = '2daverage'+self.data.name
+        ca_caption = '2daverage'+self.data0.name
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
@@ -344,8 +352,8 @@ class Plotter2DWidget(PlotterBase):
         # Create a new slicer
         self.slicer_z += 1
         self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
-        self.ax.set_ylim(self.data.ymin, self.data.ymax)
-        self.ax.set_xlim(self.data.xmin, self.data.xmax)
+        self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
+        self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
         # Draw slicer
         self.figure.canvas.draw()
         self.slicer.update()
@@ -376,8 +384,8 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z += 1
         self.slicer = BoxSumCalculator(self, self.ax, zorder=self.slicer_z)
 
-        self.ax.set_ylim(self.data.ymin, self.data.ymax)
-        self.ax.set_xlim(self.data.xmin, self.data.xmax)
+        self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
+        self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
         self.figure.canvas.draw()
         self.slicer.update()
 
@@ -419,7 +427,7 @@ class Plotter2DWidget(PlotterBase):
         color_map_dialog = ColorMap(self, cmap=self.cmap,
                                     vmin=self.vmin,
                                     vmax=self.vmax,
-                                    data=self.data)
+                                    data=self.data0)
 
         color_map_dialog.apply_signal.connect(self.onApplyMap)
 
@@ -461,8 +469,8 @@ class Plotter2DWidget(PlotterBase):
 
         # get the x and y_bin arrays.
         x_bins, y_bins = PlotUtilities.get_bins(self.qx_data, self.qy_data)
-        self._data.x_bins = x_bins
-        self._data.y_bins = y_bins
+        self.data0.x_bins = x_bins
+        self.data0.y_bins = y_bins
 
         zmin_temp = self.zmin
         # check scale
@@ -542,8 +550,8 @@ class Plotter2DWidget(PlotterBase):
 
             self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
 
-            data_x, data_y = numpy.meshgrid(self._data.x_bins[0:-1],
-                                            self._data.y_bins[0:-1])
+            data_x, data_y = numpy.meshgrid(self.data0.x_bins[0:-1],
+                                            self.data0.y_bins[0:-1])
 
             ax = Axes3D(self.figure)
 
