@@ -999,9 +999,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Delete the constraint on model parameter 'param'
         """
         if param_list is not None:
-            param_list = [param_list]
+            param_lists = [param_list]
         else:
-            param_list = [self.lstParams, self.lstPoly, self.lstMagnetic]
+            param_lists = [self.lstParams, self.lstPoly, self.lstMagnetic]
 
         for param_list in param_lists:
             model = param_list.model()
