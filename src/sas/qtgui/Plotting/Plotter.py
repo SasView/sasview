@@ -27,15 +27,13 @@ def _legendResize(width, parent):
     # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
 
 
-    screen_width = parent.parent.manager.parent._parent.screen_width
-    screen_height = parent.parent.manager.parent._parent.screen_height
-    screen_factor = screen_width*screen_height
-    denomintor = 100
+    factor = 4
     if sys.platform == 'win32':
-        factor = 4
+        denomintor = 100
     else:
         #Function inferred based on tests for several resolutions
-        factor = 9e-13*np.power(screen_factor,2) - 2e-06 * screen_factor + 1.17
+        denomintor = 200
+        factor = 2.27618483e-05*np.power(width,2)-2.20145581e-02*width+7.19816262
     return (width/denomintor)+factor
 
 class PlotterWidget(PlotterBase):

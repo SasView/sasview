@@ -1076,6 +1076,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Add the plot to the workspace
         plot_widget = self.parent.workspace().addSubWindow(new_plot)
+        workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
+        workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
+        plot_widget.resize(workspace_width, workspace_height)
 
         # Show the plot
         new_plot.show()
