@@ -52,10 +52,9 @@ class Pinvertor(object):
         """
         pars = np.float64(pars)
 
-        residuals = []
         nslice = 25
-        regterm = calc.reg_term(pars, self.d_max, nslice)
         resid = (self.y[0:self.npoints] - calc.iq(pars, self.d_max, self.x))/self.err
+        regterm = calc.reg_term(pars, self.d_max, nslice)
 
         return list(resid**2 + self.alpha*regterm)
 
@@ -68,10 +67,9 @@ class Pinvertor(object):
         """
         pars = np.float64(pars)
 
-        residuals = []
         nslice = 25
         regterm = calc.reg_term(pars, self.d_max, nslice)
-        resid = (self.y[0:npoints] - calc.pr(pars, self.d_max, self.x))/self.err
+        resid = (self.y[0:self.npoints] - calc.pr(pars, self.d_max, self.x))/self.err
         return list(resid**2 + self.alpha * regterm)
 
     def set_x(self, data):
@@ -335,9 +333,7 @@ class Pinvertor(object):
         q = np.atleast_1d(q)
 
         iq_val = calc.iq(pars, self.d_max, q)
-        if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
-        return iq_val
+        return iq_val[0] if iq_val.shape[0] == 1 else iq_val
 
     def get_iq_smeared(self, pars, q):
         """
@@ -353,13 +349,9 @@ class Pinvertor(object):
         q = np.atleast_1d(q)
         pars = np.float64(pars)
 
-
         npts = 21
         iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height, self.slit_width, npts)
-        #If q was a scalar
-        if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
-        return iq_val
+        return iq_val[0] if iq_val.shape[0] == 1 else iq_val
 
     def pr(self, pars, r):
         """
@@ -375,10 +367,7 @@ class Pinvertor(object):
         pars = np.atleast_1d(pars)
         r = np.atleast_1d(r)
         pr_val = calc.pr(pars, self.d_max, r)
-        if len(pr_val) == 1:
-            #scalar
-            return np.asscalar(pr_val)
-        return pr_val
+        return pr_val[0] if pr_val.shape[0] == 1 else pr_val
 
     def get_pr_err(self, pars, pars_err, r):
         """
@@ -390,7 +379,6 @@ class Pinvertor(object):
 
         :return: (P(r), dP(r))
         """
-
         pars = np.atleast_1d(np.float64(pars))
         r = np.atleast_1d(np.float64(r))
 
@@ -426,11 +414,7 @@ class Pinvertor(object):
         q = np.float64(q)
         q = np.atleast_1d(q)
         ortho_val = calc.ortho_transformed(q, d_max, n)
-
-        if ortho_val.shape[0] == 1:
-            #If the q input was scalar.
-            return np.asscalar(ortho_val)
-        return ortho_val
+        return ortho_val[0] if ortho_val.shape[0] == 1 else ortho_val
 
     def oscillations(self, pars):
         """
