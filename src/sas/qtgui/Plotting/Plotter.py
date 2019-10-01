@@ -36,7 +36,7 @@ def _legendResize(width, parent):
         scale_factor = width/denomintor + factor
     else:
         #Function inferred based on tests for several resolutions
-        scale_factor = 3e-6*screen_factor + 1
+        scale_factor = (3e-6*screen_factor + 1)*width/640
     return scale_factor
 
 class PlotterWidget(PlotterBase):
