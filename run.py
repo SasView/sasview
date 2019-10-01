@@ -22,6 +22,8 @@ from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname
 
+PLUGIN_MODEL_DIR = 'plugin_models'
+
 def addpath(path):
     """
     Add a directory to the python path environment, and to the PYTHONPATH
@@ -65,6 +67,14 @@ def import_dll(modname, build_path):
     # print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
 
+def setup_sasmodels():
+    """
+    Prepare sasmodels for running within sasview.
+    """
+    # Set SAS_MODELPATH so sasmodels can find our custom models
+    import sas
+    plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
+    os.environ['SAS_MODELPATH'] = plugin_dir
 
 def prepare(rebuild=True):
     # Don't create *.pyc files
@@ -116,9 +126,9 @@ def prepare(rebuild=True):
     # Put sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
 
+
     # Check if the C extensions are already built
     try:
-        from sas.sascalc.pr import _pr_inversion
         from sas.sascalc.calculator import _sld2i
         from sas.sascalc.file_converter import _bsl_loader
     except ImportError:
@@ -170,6 +180,7 @@ if __name__ == "__main__":
 
     get_logger().debug("Starting SASVIEW in debug mode.")
     prepare()
+    setup_sasmodels()
     from sas.sasview.sasview import run_cli, run_gui
     if len(sys.argv) == 1:
         run_gui()

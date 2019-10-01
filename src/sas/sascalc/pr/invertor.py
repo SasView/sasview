@@ -17,8 +17,16 @@ import re
 import logging
 from numpy.linalg import lstsq
 from scipy import optimize
-from sas.sascalc.pr._pr_inversion import Cinvertor
 
+
+import os
+import os.path
+import unittest
+import math
+import numpy
+
+
+from .p_invertor import Pinvertor
 logger = logging.getLogger(__name__)
 
 def help():
@@ -57,7 +65,7 @@ def help():
     return info_txt
 
 
-class Invertor(Cinvertor):
+class Invertor(Pinvertor):
     """
     Invertor class to perform P(r) inversion
 
@@ -112,7 +120,7 @@ class Invertor(Cinvertor):
     info = {}
 
     def __init__(self):
-        Cinvertor.__init__(self)
+        Pinvertor.__init__(self)
 
     def __setstate__(self, state):
         """
@@ -183,7 +191,7 @@ class Invertor(Cinvertor):
             else:
                 raise ValueError("Invertor: est_bck can only be True or False")
 
-        return Cinvertor.__setattr__(self, name, value)
+        return Pinvertor.__setattr__(self, name, value)
 
     def __getattr__(self, name):
         """
@@ -304,7 +312,7 @@ class Invertor(Cinvertor):
         :return: I(q)
 
         """
-        return Cinvertor.iq(self, out, q) + self.background
+        return Pinvertor.iq(self, out, q) + self.background
 
     def invert_optimize(self, nfunc=10, nr=20):
         """
@@ -370,8 +378,7 @@ class Invertor(Cinvertor):
         # Compute chi^2
         res = self.pr_residuals(out)
         chisqr = 0
-        for i in range(len(res)):
-            chisqr += res[i]
+        chisq = np.sum(res)
 
         self.chisqr = chisqr
 
@@ -392,6 +399,7 @@ class Invertor(Cinvertor):
         :return: P(r)
 
         """
+        c_cov = np.ascontiguousarray(c_cov)
         return self.get_pr_err(c, c_cov, r)
 
     def _accept_q(self, q):
@@ -442,7 +450,6 @@ class Invertor(Cinvertor):
         # Note: To make sure an array is contiguous:
         # blah = np.ascontiguousarray(blah_original)
         # ... before passing it to C
-
         if self.is_valid() < 0:
             msg = "Invertor: invalid data; incompatible data lengths."
             raise RuntimeError(msg)
@@ -468,7 +475,7 @@ class Invertor(Cinvertor):
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
         try:
-            self._get_matrix(nfunc, nq, a, b)
+            a, b = self._get_matrix(nfunc, nq)
         except Exception as exc:
             raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
@@ -484,9 +491,9 @@ class Invertor(Cinvertor):
         self.chi2 = chi2
 
         inv_cov = np.zeros([nfunc, nfunc])
-        # Get the covariance matrix, defined as inv_cov = a_transposed * a
-        self._get_invcov_matrix(nfunc, nr, a, inv_cov)
 
+        # Get the covariance matrix, defined as inv_cov = a_transposed * a
+        inv_cov = self._get_invcov_matrix(nfunc, nr, a)
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
@@ -514,10 +521,8 @@ class Invertor(Cinvertor):
             err_0 = np.zeros([nfunc, nfunc])
             c_0 = np.zeros(nfunc)
 
-            for i in range(nfunc_0):
-                c_0[i] = c[i + 1]
-                for j in range(nfunc_0):
-                    err_0[i][j] = err[i + 1][j + 1]
+            c_0[:-1] = c[1:]
+            err_0[:-1, :-1] = err[1:, 1:]
 
             self.out = c_0
             self.cov = err_0
@@ -578,6 +583,7 @@ class Invertor(Cinvertor):
 
             # Perform inversion to find the largest alpha
             out, _ = pr.invert(nfunc)
+
             elapsed = time.time() - starttime
             initial_alpha = pr.alpha
             initial_peaks = pr.get_peaks(out)
@@ -670,9 +676,10 @@ class Invertor(Cinvertor):
         file.write("<r>  <Pr>  <dPr>\n")
         r = np.arange(0.0, self.d_max, self.d_max / npts)
 
-        for r_i in r:
-            (value, err) = self.pr_err(self.out, self.cov, r_i)
-            file.write("%g  %g  %g\n" % (r_i, value, err))
+
+        (value, err) = self.pr_err(self.out, self.cov, r)
+        all_data = np.vstack([r, value, err])
+        np.savetxt(file, all_data.T)
 
         file.close()
 
