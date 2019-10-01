@@ -7,12 +7,14 @@
 # pylint: disable-msg=R0904
 from __future__ import print_function
 
-
 import os
 import os.path
 import unittest
 import math
-import numpy
+import warnings
+
+import numpy as np
+
 from sas.sascalc.pr.invertor import Invertor
 
 
@@ -20,17 +22,13 @@ def find(filename):
     return os.path.join(os.path.dirname(__file__), filename)
 
 class TestFiguresOfMerit(unittest.TestCase):
-
     def setUp(self):
         self.invertor = Invertor()
         self.invertor.d_max = 100.0
 
-
         # Test array
         self.ntest = 5
-        self.x_in = numpy.ones(self.ntest)
-        for i in range(self.ntest):
-            self.x_in[i] = 1.0*(i+1)
+        self.x_in = np.arange(1, self.ntest+1, dtype='d')
 
         x, y, err = load(find("sphere_80.txt"))
 
@@ -61,32 +59,28 @@ class TestFiguresOfMerit(unittest.TestCase):
         self.assertTrue(self.invertor.get_pos_err(self.out, self.cov)>0.9)
 
 class TestBasicComponent(unittest.TestCase):
-
     def setUp(self):
         self.invertor = Invertor()
         self.invertor.d_max = 100.0
 
         # Test array
         self.ntest = 5
-        self.x_in = numpy.ones(self.ntest)
-        for i in range(self.ntest):
-            self.x_in[i] = 1.0*(i+1)
+        self.x_in = np.arange(1, self.ntest+1, dtype='d')
 
     def test_est_bck_flag(self):
         """
             Tests the est_bck flag operations
         """
         self.assertEqual(self.invertor.est_bck, False)
-        self.invertor.est_bck=True
+        self.invertor.est_bck = True
         self.assertEqual(self.invertor.est_bck, True)
         def doit_float():
-            self.invertor.est_bck  = 2.0
+            self.invertor.est_bck = 2.0
         def doit_str():
-            self.invertor.est_bck  = 'a'
+            self.invertor.est_bck = 'a'
 
         self.assertRaises(ValueError, doit_float)
         self.assertRaises(ValueError, doit_str)
-
 
     def testset_dmax(self):
         """
@@ -113,7 +107,7 @@ class TestBasicComponent(unittest.TestCase):
 
         # Read it back
         npts = self.invertor.get_nx()
-        x_out = numpy.ones(npts)
+        x_out = np.ones(npts)
 
         self.invertor.get_x(x_out)
 
@@ -164,10 +158,12 @@ class TestBasicComponent(unittest.TestCase):
             Test iq calculation
         """
         q = 0.11
-        v1 = 8.0*math.pi**2/q * self.invertor.d_max *math.sin(q*self.invertor.d_max)
-        v1 /= ( math.pi**2 - (q*self.invertor.d_max)**2.0 )
+        v1 = (8.0*math.pi**2/q
+              * self.invertor.d_max
+              * math.sin(q*self.invertor.d_max)
+              / (math.pi**2 - (q*self.invertor.d_max)**2))
 
-        pars = numpy.ones(1)
+        pars = np.ones(1)
         self.assertAlmostEqual(self.invertor.iq(pars, q), v1, 2)
 
     def test_pr(self):
@@ -176,13 +172,12 @@ class TestBasicComponent(unittest.TestCase):
         """
         r = 10.0
         v1 = 2.0*r*math.sin(math.pi*r/self.invertor.d_max)
-        pars = numpy.ones(1)
+        pars = np.ones(1)
         self.assertAlmostEqual(self.invertor.pr(pars, r), v1, 2)
 
     def test_getsetters(self):
         self.invertor.new_data = 1.0
         self.assertEqual(self.invertor.new_data, 1.0)
-
         self.assertEqual(self.invertor.test_no_data, None)
 
     def test_slitsettings(self):
@@ -190,7 +185,6 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.slit_width, 1.0)
         self.invertor.slit_height = 2.0
         self.assertEqual(self.invertor.slit_height, 2.0)
-
 
     def test_inversion(self):
         """
@@ -203,47 +197,47 @@ class TestBasicComponent(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = 1e-7
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.invert_optimize(10)
         #out, cov = self.invertor.invert(10)
         # This is a very specific case
         # We should make sure it always passes
-        self.assertTrue(self.invertor.chi2/len(x)<200.00)
+        self.assertTrue(self.invertor.chi2/len(x) < 200.00)
 
         # Check the computed P(r) with the theory
         # for shpere of radius 80
-        x = numpy.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
-        y = numpy.zeros(len(x))
-        dy = numpy.zeros(len(x))
-        y_true = numpy.zeros(len(x))
+        x = np.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
+        y = np.zeros(len(x))
+        dy = np.zeros(len(x))
+        y_true = np.zeros(len(x))
 
-        sum = 0.0
-        sum_true = 0.0
-        for i in range(len(x)):
-            #y[i] = self.invertor.pr(out, x[i])
-            (y[i], dy[i]) = self.invertor.pr_err(out, cov, x[i])
-            sum += y[i]
-            if x[i]<80.0:
-                y_true[i] = pr_theory(x[i], 80.0)
+        total = 0.0
+        total_true = 0.0
+        for i, xi in enumerate(x):
+            #y[i] = self.invertor.pr(out, xi)
+            (y[i], dy[i]) = self.invertor.pr_err(out, cov, xi)
+            total += y[i]
+            if xi < 80.0:
+                y_true[i] = pr_theory(xi, 80.0)
             else:
                 y_true[i] = 0
-            sum_true += y_true[i]
+            total_true += y_true[i]
 
-        y = y/sum*self.invertor.d_max/len(x)
-        dy = dy/sum*self.invertor.d_max/len(x)
-        y_true = y_true/sum_true*self.invertor.d_max/len(x)
+        y = y/total*self.invertor.d_max/len(x)
+        dy = dy/total*self.invertor.d_max/len(x)
+        y_true = y_true/total_true*self.invertor.d_max/len(x)
 
         chi2 = 0.0
-        for i in range(len(x)):
+        for i, _ in enumerate(x):
             res = (y[i]-y_true[i])/dy[i]
             chi2 += res*res
 
         try:
-            self.assertTrue(chi2/51.0<10.0)
-        except:
+            self.assertTrue(chi2/51.0 < 10.0)
+        except Exception:
             print("chi2 =", chi2/51.0)
             raise
 
@@ -258,54 +252,53 @@ class TestBasicComponent(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = .005
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         #out, cov = self.invertor.invert(10)
 
         out, cov = self.invertor.lstsq(10)
 
-
         # This is a very specific case
         # We should make sure it always passes
         try:
-            self.assertTrue(self.invertor.chi2/len(x)<200.00)
-        except:
+            self.assertTrue(self.invertor.chi2/len(x) < 200.00)
+        except Exception:
             print("Chi2(I(q)) =", self.invertor.chi2/len(x))
             raise
 
         # Check the computed P(r) with the theory
         # for shpere of radius 80
-        x = numpy.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
-        y = numpy.zeros(len(x))
-        dy = numpy.zeros(len(x))
-        y_true = numpy.zeros(len(x))
+        x = np.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
+        y = np.zeros(len(x))
+        dy = np.zeros(len(x))
+        y_true = np.zeros(len(x))
 
-        sum = 0.0
-        sum_true = 0.0
-        for i in range(len(x)):
-            #y[i] = self.invertor.pr(out, x[i])
-            (y[i], dy[i]) = self.invertor.pr_err(out, cov, x[i])
-            sum += y[i]
-            if x[i]<80.0:
-                y_true[i] = pr_theory(x[i], 80.0)
+        total = 0.0
+        total_true = 0.0
+        for i, xi in enumerate(x):
+            #y[i] = self.invertor.pr(out, xi)
+            (y[i], dy[i]) = self.invertor.pr_err(out, cov, xi)
+            total += y[i]
+            if xi < 80.0:
+                y_true[i] = pr_theory(xi, 80.0)
             else:
                 y_true[i] = 0
-            sum_true += y_true[i]
+            total_true += y_true[i]
 
-        y = y/sum*self.invertor.d_max/len(x)
-        dy = dy/sum*self.invertor.d_max/len(x)
-        y_true = y_true/sum_true*self.invertor.d_max/len(x)
+        y = y/total*self.invertor.d_max/len(x)
+        dy = dy/total*self.invertor.d_max/len(x)
+        y_true = y_true/total_true*self.invertor.d_max/len(x)
 
         chi2 = 0.0
-        for i in range(len(x)):
+        for i, _ in enumerate(x):
             res = (y[i]-y_true[i])/dy[i]
             chi2 += res*res
 
         try:
-            self.assertTrue(chi2/51.0<50.0)
-        except:
+            self.assertTrue(chi2/51.0 < 50.0)
+        except Exception:
             print("chi2(P(r)) =", chi2/51.0)
             raise
 
@@ -325,9 +318,8 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.alpha = 1e-7
         # Set data
         def doit():
-            self.invertor.x   = x
+            self.invertor.x = x
         self.assertRaises(ValueError, doit)
-
 
     def test_q_neg(self):
         """
@@ -341,15 +333,15 @@ class TestBasicComponent(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = 1e-7
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.invert(4)
 
         try:
-            self.assertTrue(self.invertor.chi2>0)
-        except:
+            self.assertTrue(self.invertor.chi2 > 0)
+        except Exception:
             print("Chi2 =", self.invertor.chi2)
             raise
 
@@ -365,15 +357,15 @@ class TestBasicComponent(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = 1e-7
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.invert(4)
 
         try:
-            self.assertTrue(self.invertor.chi2>0)
-        except:
+            self.assertTrue(self.invertor.chi2 > 0)
+        except Exception:
             print("Chi2 =", self.invertor.chi2)
             raise
 
@@ -385,8 +377,8 @@ class TestBasicComponent(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = 1e-7
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
 
         # time scales like nfunc**2
@@ -400,7 +392,7 @@ class TestBasicComponent(unittest.TestCase):
         t30 = self.invertor.elapsed
 
         t30s = t30/30.0**2
-        self.assertTrue( (t30s-t16/16.0**2)/t30s <1.2 )
+        self.assertTrue((t30s-t16/16.0**2)/t30s < 1.2)
 
     def test_clone(self):
         self.invertor.x = self.x_in
@@ -417,8 +409,8 @@ class TestBasicComponent(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = .0007
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
 
@@ -433,7 +425,8 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.d_max, 160.0)
         self.assertEqual(self.invertor.alpha, 0.0007)
         self.assertEqual(self.invertor.chi2, 836.797)
-        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 903.30597721, 4)
+        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0),
+                               903.30597721, 4)
         if os.path.isfile(f_name):
             os.remove(f_name)
 
@@ -452,17 +445,15 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.q_max = None
         self.assertEqual(self.invertor.q_max, None)
 
-class TestErrorConditions(unittest.TestCase):
 
+class TestErrorConditions(unittest.TestCase):
     def setUp(self):
         self.invertor = Invertor()
         self.invertor.d_max = 100.0
 
         # Test array
         self.ntest = 5
-        self.x_in = numpy.ones(self.ntest)
-        for i in range(self.ntest):
-            self.x_in[i] = 1.0*(i+1)
+        self.x_in = np.arange(1, self.ntest+1, dtype='d')
 
     def test_negative_errs(self):
         """
@@ -475,8 +466,8 @@ class TestErrorConditions(unittest.TestCase):
         # Set a small alpha
         self.invertor.alpha = .0007
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
 
@@ -489,8 +480,8 @@ class TestErrorConditions(unittest.TestCase):
         x, y, err = load(find("data_error_2.txt"))
 
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         self.assertRaises(RuntimeError, self.invertor.invert, 10)
@@ -502,13 +493,12 @@ class TestErrorConditions(unittest.TestCase):
         x, y, err = load(find("data_error_1.txt"))
 
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
-        err = numpy.zeros(len(x)-1)
+        self.invertor.x = x
+        self.invertor.y = y
+        err = np.zeros(len(x)-1)
         self.invertor.err = err
         # Perform inversion
         self.assertRaises(RuntimeError, self.invertor.invert, 10)
-
 
     def test_zero_q(self):
         """
@@ -528,8 +518,8 @@ class TestErrorConditions(unittest.TestCase):
         x, y, err = load(find("data_error_4.txt"))
 
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.lstsq(10)
@@ -542,8 +532,8 @@ class TestErrorConditions(unittest.TestCase):
         x, y, err = load(find("data_error_5.txt"))
 
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.lstsq(10)
@@ -556,8 +546,8 @@ class TestErrorConditions(unittest.TestCase):
         x, y, err = load(find("data_error_6.txt"))
 
         # Set data
-        self.invertor.x   = x
-        self.invertor.y   = y
+        self.invertor.x = x
+        self.invertor.y = y
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.lstsq(10)
@@ -569,46 +559,40 @@ class TestErrorConditions(unittest.TestCase):
         out, cov = self.invertor.lstsq(10)
 
 
-
 def pr_theory(r, R):
     """
        P(r) for a sphere
     """
-    if r<=2*R:
-        return 12.0* ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * ( 2.0 + 0.5*r/R )
+    if r <= 2*R:
+        return 12.0 * ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * (2.0 + 0.5*r/R)
     else:
         return 0.0
 
-def load(path = "sphere_60_q0_2.txt"):
-    import numpy as np
-    import math
-    import sys
+def load(path="sphere_60_q0_2.txt"):
     # Read the data from the data file
-    data_x   = np.zeros(0)
-    data_y   = np.zeros(0)
-    data_err = np.zeros(0)
-    scale    = None
-    if path is not None:
-        input_f = open(path,'r')
-        buff    = input_f.read()
-        lines   = buff.split('\n')
-        for line in lines:
+    if path is None:
+        raise TypeError("expected filename to load")
+    data = []
+    scale = None
+    with open(path, 'r') as input_f:
+        for line in input_f:
             try:
                 toks = line.split()
                 x = float(toks[0])
                 y = float(toks[1])
-                if len(toks)>2:
+                if len(toks) > 2:
                     err = float(toks[2])
                 else:
-                    if scale==None:
+                    if scale is None:
                         scale = 0.15*math.sqrt(y)
                     err = scale*math.sqrt(y)
-                data_x = np.append(data_x, x)
-                data_y = np.append(data_y, y)
-                data_err = np.append(data_err, err)
-            except:
+                data.append((x, y, err))
+            except Exception:
+                # TODO: doesn't handle column headers:  <X> <Y> <dY>
+                #warnings.warn("Bad in in %r: %s"%(path, line))
                 pass
 
+    data_x, data_y, data_err = (np.asarray(v) for v in zip(*data))
     return data_x, data_y, data_err
 
 if __name__ == '__main__':
