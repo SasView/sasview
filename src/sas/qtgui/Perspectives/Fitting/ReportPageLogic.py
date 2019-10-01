@@ -162,7 +162,7 @@ class ReportPageLogic(object):
 
         # current_plots = list of graph names of currently shown plots
         # which are related to this dataset
-        current_plots = [name for name in shown_plot_names if PlotHelper.plotById(name).data.id in plot_ids]
+        current_plots = [name for name in shown_plot_names if PlotHelper.plotById(name).data[0].id in plot_ids]
 
         for name in current_plots:
             # get the plotter object first
