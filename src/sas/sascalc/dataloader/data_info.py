@@ -114,8 +114,12 @@ class plottable_2D(object):
         self.qx_data = np.asarray(qx_data)
         self.qy_data = np.asarray(qy_data)
         self.q_data = np.asarray(q_data)
-        self.mask = np.asarray(mask)
-        self.err_data = np.asarray(err_data)
+        if mask is not None:
+            self.mask = np.asarray(mask)
+        else:
+            self.mask = np.ones(self.data.shape, dtype=bool)
+        if err_data is not None:
+            self.err_data = np.asarray(err_data)
         if dqx_data is not None:
             self.dqx_data = np.asarray(dqx_data)
         if dqy_data is not None:
