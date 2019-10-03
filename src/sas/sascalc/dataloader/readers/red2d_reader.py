@@ -228,11 +228,6 @@ class Reader(FileReader):
         #if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
         q_data = np.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
 
-        # Extra protection(it is needed for some data files):
-        # If all mask elements are False, put all True
-        if not mask.any():
-            mask[mask == False] = True
-
         # Store limits of the image in q space
         xmin = np.min(qx_data)
         xmax = np.max(qx_data)
