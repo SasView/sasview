@@ -762,7 +762,7 @@ def getOrientationParam(kernel_module=None):
 
     return param
 
-def formatParameters(parameters, Check):
+def formatParameters(parameters, Check=True):
     """
     Prepare the parameter string in the standard SasView layout
     """
