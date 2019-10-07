@@ -24,6 +24,7 @@ sasview_data = {
         {'affiliation': 'Oak Ridge National Laboratory', 'name': 'Doucet, Mathieu', 'orcid': '0000-0002-5560-6478'},
         {'name': 'Cho, Jae Hie','affiliation': 'University of Tennessee Knoxville'},
         {'name': 'Alina, Gervaise','affiliation': 'University of Tennessee Knoxville'},
+        {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
         {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
         {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology'},
