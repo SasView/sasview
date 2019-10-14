@@ -4004,7 +4004,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
 
-        if 'tab_name' in line_dict.keys():
+        if 'tab_name' in line_dict.keys() and self.kernel_module is not None:
             self.kernel_module.name = line_dict['tab_name'][0]
         if 'polydisperse_params' in line_dict.keys():
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
