@@ -33,7 +33,7 @@ before_install:
 - conda info -a
 - conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six
 install:
-- pip install periodictable xhtml2pdf pyopencl
+- pip install periodictable xhtml2pdf pyopencl unittest-xml-reporting pylint
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
