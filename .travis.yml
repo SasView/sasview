@@ -18,7 +18,6 @@ addons:
   apt:
     packages:
     - opencl-headers
-    - fglrx
     - libblas-dev
     - libatlas-dev
     - libatlas-base-dev
