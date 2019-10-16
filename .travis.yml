@@ -1,15 +1,11 @@
-language: python
 matrix:
   include:
   - os: linux
-    env:
-    - PY=3.6
-    - NUMPYSPEC=numpy
+    language: generic
+    env: PY=3.6
   - os: osx
     language: generic
-    env:
-    - PY=3.6
-    - NUMPYSPEC=numpy
+    env: PY=3.6
 branches:
   only:
   - master
@@ -35,9 +31,9 @@ before_install:
 - hash -r
 #- conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython matplotlib
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six
 install:
-- pip install -r build_tools/requirements.txt
+- pip install periodictable xhtml2pdf pyopencl
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
