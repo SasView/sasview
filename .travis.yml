@@ -3,16 +3,17 @@ matrix:
   include:
   - os: linux
     env:
-    - PY=2.7
+    - PY=3.7
     - NUMPYSPEC=numpy
   - os: osx
     language: generic
     env:
-    - PY=2.7
+    - PY=3.7
     - NUMPYSPEC=numpy
 branches:
   only:
   - master
+  - ESS_GUI
 addons:
   apt:
     packages:
@@ -35,10 +36,9 @@ before_install:
 - hash -r
 - conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
+- conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython matplotlib
 install:
 - pip install -r build_tools/requirements.txt
-- pip install matplotlib
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
