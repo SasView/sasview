@@ -3,12 +3,12 @@ matrix:
   include:
   - os: linux
     env:
-    - PY=3.7
+    - PY=3.6
     - NUMPYSPEC=numpy
   - os: osx
     language: generic
     env:
-    - PY=3.7
+    - PY=3.6
     - NUMPYSPEC=numpy
 branches:
   only:
@@ -33,7 +33,7 @@ before_install:
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - hash -r
-- conda update --yes conda
+#- conda update --yes conda
 - conda info -a
 - conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython matplotlib
 install:
