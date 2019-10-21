@@ -184,7 +184,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(0)
 
         # Observe no such luck
-        self.assertEqual(self.widget.cbCategory.currentIndex(), 7)
+        self.assertEqual(self.widget.cbCategory.currentIndex(), 6)
         self.assertEqual(self.widget.cbModel.count(), 30)
 
         # Set the structure factor

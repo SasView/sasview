@@ -25,6 +25,9 @@ def _legendResize(width, parent):
     resize factor for the legend, based on total canvas width
     """
     # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
+    if parent is None or parent.parent is None or parent.parent.manager is None \
+        or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
+        return None
 
     screen_width = parent.parent.manager.parent._parent.screen_width
     screen_height = parent.parent.manager.parent._parent.screen_height
@@ -227,8 +230,10 @@ class PlotterWidget(PlotterBase):
 
         if self.showLegend:
             width=_legendResize(self.canvas.size().width(), self.parent)
-
-            self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            if width is not None:
+                self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            else:
+                self.legend = ax.legend(loc='upper right', shadow=True)
             if self.legend:
                 self.legend.set_picker(True)
 
@@ -249,7 +254,8 @@ class PlotterWidget(PlotterBase):
             return
         width = _legendResize(event.width, self.parent)
         # resize the legend to follow the canvas width.
-        self.legend.prop.set_size(width)
+        if width is not None:
+            self.legend.prop.set_size(width)
 
     def createContextMenu(self):
         """

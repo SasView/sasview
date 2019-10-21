@@ -7,7 +7,7 @@ import logging
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtTest import QTest
-from PyQt5.QtCore import *
+from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
 # set up import paths
@@ -33,7 +33,8 @@ class GuiManagerTest(unittest.TestCase):
         class MainWindow(MainSasViewWindow):
             # Main window of the application
             def __init__(self, reactor, parent=None):
-                super(MainWindow, self).__init__(parent)
+                screen_resolution = QtCore.QRect(0,0,640,480)
+                super(MainWindow, self).__init__(screen_resolution, parent)
         
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
@@ -52,11 +53,11 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
         self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
         self.assertIsInstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
-        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), Qt.LeftDockWidgetArea)
+        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), QtCore.Qt.LeftDockWidgetArea)
 
         self.assertIsInstance(self.manager.logDockWidget, QDockWidget)
         self.assertIsInstance(self.manager.logDockWidget.widget(), QTextBrowser)
-        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.logDockWidget), Qt.BottomDockWidgetArea)
+        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.logDockWidget), QtCore.Qt.BottomDockWidgetArea)
 
         self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
         self.assertIsInstance(self.manager.aboutWidget, AboutBox)
@@ -97,7 +98,7 @@ class GuiManagerTest(unittest.TestCase):
         # Test the widegt properties
         self.assertIsInstance(self.manager.ipDockWidget, QDockWidget)
         self.assertIsInstance(self.manager.ipDockWidget.widget(), IPythonWidget)
-        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.ipDockWidget), Qt.RightDockWidgetArea)
+        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.ipDockWidget), QtCore.Qt.RightDockWidgetArea)
 
     def testUpdatePerspective(self):
         """
@@ -146,9 +147,9 @@ class GuiManagerTest(unittest.TestCase):
         Tests the SasView website version polling
         """
         self.manager.processVersion = MagicMock()
-        version = {'version'     : '4.2.1',
+        version = {'version'     : '4.2.2',
                    'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
-                   'download_url': 'https://github.com/SasView/sasview/releases'}
+                   'download_url': 'https://github.com/SasView/sasview/releases/tag/v4.2.2'}
         self.manager.checkUpdate()
 
         self.manager.processVersion.assert_called_with(version)

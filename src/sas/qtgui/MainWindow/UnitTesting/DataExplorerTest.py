@@ -50,6 +50,9 @@ class DataExplorerTest(unittest.TestCase):
                 return MyPerspective()
             def workspace(self):
                 return None
+            class _parent(object):
+                screen_width = 1024
+                screen_height = 768
 
         self.form = DataExplorerWindow(None, dummy_manager())
 

@@ -23,8 +23,8 @@ class MainWindowTest(unittest.TestCase):
     """Test the Main Window GUI"""
     def setUp(self):
         """Create the GUI"""
-
-        self.widget = MainSasViewWindow(None)
+        screen_resolution = QtCore.QRect(0,0,640,480)
+        self.widget = MainSasViewWindow(screen_resolution, None)
 
     def tearDown(self):
         """Destroy the GUI"""
@@ -43,7 +43,8 @@ class MainWindowTest(unittest.TestCase):
     def testWidgets(self):
         """ Test enablement/disablement of widgets """
         # Open the main window
-        tmp_main = MainSasViewWindow(None)
+        screen_resolution = QtCore.QRect(0,0,640,480)
+        tmp_main = MainSasViewWindow(screen_resolution, None)
         tmp_main.showMaximized()
         # See that only one subwindow is up
         self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
@@ -66,7 +67,8 @@ class MainWindowTest(unittest.TestCase):
         QtWidgets.QMessageBox.question = MagicMock(return_value=QtWidgets.QMessageBox.Yes)
 
         # Open, then close the main window
-        tmp_main = MainSasViewWindow(None)
+        screen_resolution = QtCore.QRect(0,0,640,480)
+        tmp_main = MainSasViewWindow(screen_resolution, None)
         tmp_main.close()
 
         # See that the MessageBox method got called
