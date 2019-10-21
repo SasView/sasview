@@ -147,3 +147,4 @@ dependencies:
    - bumps==0.7.11
    - xhtml2pdf==0.2.3
    - qt5reactor==0.5
+   - unittest-xml-reporting
