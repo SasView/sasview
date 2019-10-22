@@ -1731,6 +1731,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if param_dict is None:
             return
+
+        # Show bumps convergence plots
         self.communicate.resultPlotUpdateSignal.emit(result[0])
 
         elapsed = result[1]
@@ -1972,15 +1974,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             error_column.append(item)
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._poly_model.dataChanged.disconnect()
         self.iterateOverPolyModel(updateFittedValues)
-        self._poly_model.dataChanged.connect(self.onPolyModelChange)
 
         if self.has_poly_error_column:
             self._poly_model.removeColumn(2)
-            #return
 
         self.lstPoly.itemDelegate().addErrorColumn()
         error_column = []
@@ -2041,11 +2038,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             error_column.append(item)
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._magnet_model.dataChanged.disconnect()
         self.iterateOverMagnetModel(updateFittedValues)
-        self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
 
         if self.has_magnet_error_column:
             self._magnet_model.removeColumn(2)
