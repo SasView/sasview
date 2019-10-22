@@ -57,6 +57,10 @@ def SplashScreen():
 def run_sasview():
     app = QApplication([])
 
+    #Initialize logger
+    from sas.logger_config import SetupLogger
+    SetupLogger(__name__).config_development()
+
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
