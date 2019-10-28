@@ -1,371 +1,225 @@
 """
-Taken from sld2i_module and sld2i, definition of GenI
-class, defined through structs and global free functions in C.
+Compute scattering from a set of points.
 
-Depends on lib.py, implementation of libfunc.c and librefl.c
+For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
-from math import factorial
+import os
 
 import numpy as np
-from scipy.special import sici
-import timeit
 
-import lib
-#from . import lib
-from numba import njit
+try:
+    if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
+        from numba import njit
+    else:
+        raise ImportError("fail")
+except ImportError:
+    # if no numba then njit does nothing
+    def njit(*args, **kw):
+        # Check for bare @njit, in which case we just return the function.
+        if len(args) == 1 and callable(args[0]) and not kw:
+            return args[0]
+        # Otherwise we have @njit(...), so return the identity decorator.
+        return lambda fn: fn
 
-class GenI():
-    def __init__(self, is_avg, x, y, z, sldn, mx, my, mz,
-                 voli, in_spin, out_spin, s_theta):
-        """
-        Constructor for GenI
-        :param qx: array of Qx values.
-        :param qy: array of Qy values.
-        :param qz: array of Qz values.
-        :param x: array of x values.
-        :param y: array of y values.
-        :param z: array of z values.
-        :param sldn: array of sld n.
-        :param mx: array of sld mx.
-        :param my: array of sld my.
-        :param mz: array of sld mz.
-        :param in_spin: ratio of up spin in Iin.
-        :param out_spin: ratio of up spin in Iout.
-        :param s_theta: angle (from x-axis) of the up spin in degrees.
-        """
-        self.is_avg = is_avg
-        self.n_pix = len(x)
-        self.x_val = x
-        self.y_val = y
-        self.z_val = z
-        self.sldn_val = sldn
-        self.mx_val = mx
-        self.my_val = my
-        self.mz_val = mz
-        self.vol_pix = voli
-        self.inspin = in_spin
-        self.outspin = out_spin
-        self.stheta = s_theta
+from . import lib
 
-    def genicomXY(self, qx, qy):
-        """
-        Compute 2d ansotropic.
+# TODO: probably twice as fast to use f4 everywhere, but need to check accuracy
+def Iq(q, x, y, z, sld, vol, is_avg=False):
+    """
+    Computes 1D isotropic.
 
-        Returns I_out[] 1d array.
-        """
+    Isotropic: Assumes all slds are real (no magnetic)
 
-        npoints = len(qx)
+    Also assumes there is no polarization: No dependency on spin.
 
-        #npoints is given negative for angular averaging
-        #Assumes that q doesn't have qz component and sld_n is all real
-        b_sld = np.array([(np.float(), np.float(), np.complex(), np.complex())], dtype=lib.get_polar_sld_type())
-        qr = float()
-        iqr = np.complex()
-        ephase = np.complex()
-        comp_sld = np.complex()
+    All values must be numpy vectors of the correct size.
 
-        sumj_uu = np.complex()
-        sumj_ud = np.complex()
-        sumj_du = np.complex()
-        sumj_dd = np.complex()
-        temp_fi = np.complex()
+    Returns *I(q)*
+    """
+    coords = np.vstack((x, y, z))
+    index = (sld != 0.)
+    if not index.all():
+        coords, sld, vol = (v[index] for v in (sld, coords, vol))
+    I_out = np.empty_like(q, dtype='d')
+    if is_avg:
+        r = np.linalg.norm(coords, axis=0)
+        #print('avg', I_out.shape, q.shape, r.shape, sld.shape, vol.shape)
+        _calc_Iq_avg(I_out, q, r, sld, vol)
+    else:
+        #print('not avg', I_out.shape, q.shape, coords.shape, sld.shape, vol.shape)
+        _calc_Iq(I_out, q, coords, sld, vol)
+    return I_out * (1.0E+8/np.sum(vol))
 
-        count = float()
+def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta):
+    """
+    Computes 2D anisotropic.
 
-        iqr = np.complex()
-        ephase = np.complex()
-        comp_sld = np.complex()
+    *in_spin* and *out_spin* indicate portion of polarizer and analyzer
+    transmission that are spin up.  *s_theta* is the polarization direction.
 
-        I_out = np.zeros(npoints, dtype=np.float)
+    All other values must be numpy vectors of the correct size.
 
-	    #Assume that pixel volumes are given in vol_pix in A^3 unit
-        #Loop over q-values and multiply apply matrix
-        for i in range(npoints):
-            sumj_uu = np.complex()
-            sumj_ud = np.complex()
-            sumj_du = np.complex()
-            sumj_dd = np.complex()
+    Returns *I(qx, qy)*
+    """
+    qx, qy = np.broadcast_arrays(qx, qy)
+    is_magnetic = (mx != 0.) | (my != 0.) | (mz != 0.)
+    if is_magnetic.any():
+        index = (sld != 0.) | is_magnetic
+        if not index.all():
+            x, y, mx, my, mz, sld, vol \
+                = (v[index] for v in (x, y, mx, my, mz, sld, vol))
+        I_out = _calc_Iqxy_magnetic(
+            qx, qy, x, y, sld, vol, (mx, my, mz),
+            in_spin, out_spin, s_theta)
+    else:
+        index = (sld != 0.)
+        if not index.all():
+            x, y, sld, vol = (v[index] for v in (x, y, sld, vol))
+        I_out = _calc_Iqxy(qx, qy, x, y, sld, vol)
+    return I_out * (1.0E+8/np.sum(vol))
 
-            for j in range(self.n_pix):
-                if self.sldn_val[j] != 0.0 or self.mx_val[j] != 0.0 or self.my_val[j] != 0.0 or self.mz_val[j] != 0.0:
+@njit('(f8[:], f8[:], f8[:], f8[:], f8[:])')
+def _calc_Iq_avg(Iq, q, r, sld, vol):
+    weight = sld * vol
+    for i, qi in enumerate(q):
+        # use q/pi since np.sinc = sin(pi x)/(pi x)
+        bes = np.sinc((qi/np.pi)*r)
+        Fq = np.sum(weight * bes)
+        Iq[i] = Fq**2
 
-				    #anisotropic
-                    temp_fi = np.complex()
+@njit('(f8[:], f8[:], f8[:, :], f8[:], f8[:])')
+def _calc_Iq(Iq, q, coords, sld, vol):
+    weight = sld * vol
+    npoints = len(weight)
+    for i, qi in enumerate(q):
+        qi = qi/np.pi  # precompute q/pi since np.sinc = sin(pi x)/(pi x)
+        total = 0.0
+        for j in range(npoints):
+            # Compute dx for one row of the upper triangle matrix
+            dx = coords[:, j:] - coords[:, j:j+1]
+            # Find the length of each dx vector
+            r = np.sqrt(np.sum(dx**2, axis=0))
+            # Compute I_jk = rho_j rho_k j0(q ||x_j - x_k||)
+            bes = np.sinc(qi*r)
+            I_jk = weight[j:] * weight[j] * bes
+            # Accumulate terms I(j,j), I(j, k+1..n) and by symmetry I(k+1..n, j)
+            total += 2*np.sum(I_jk) - I_jk[0] # don't double-count the diagonal
+        Iq[i] = total
 
-                    lib.cal_msld(b_sld, 0, qx[i], qy[i], self.sldn_val[j],
-                                 self.mx_val[j], self.my_val[j], self.mz_val[j],
-                                 self.inspin, self.outspin, self.stheta)
+@njit('f8[:](f8[:], f8[:], f8[:], f8[:], f8[:], f8[:])')
+def _calc_Iqxy(qx, qy, x, y, sld, vol):
+    """
+    Compute I(q) for a set of points (x, y).
 
-                    qr = (qx[i]*self.x_val[j] + qy[i]*self.y_val[j])
-                    iqr = np.complex(0.0, qr)
+    Uses::
 
-                    #As in the original code, sets ephase reference to two methods that should
-                    #both reset it, both set the real and imaginary parts.
-                    ephase = np.exp(iqr)
-                    #Let's multiply pixel(atomic) volume here
-                    ephase = self.vol_pix[j] * ephase
+        I(q) = |sum V(r) rho(r) e^(1j q.r)|^2 / sum V(r)
 
-				    #up_up
-                    if (self.inspin > 0.0) & (self.outspin > 0.0):
-                        comp_sld = np.complex(b_sld[0]['uu'], 0.0)
-                        temp_fi = comp_sld * ephase
-                        sumj_uu = sumj_uu + temp_fi
+    Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
+    """
+    scale = sld*vol
+    Iq = [abs(np.sum(scale*np.exp(1j*(qx_k*x + qy_k*y))))**2
+          for qx_k, qy_k in zip(qx.flat, qy.flat)]
+    return np.asarray(Iq).reshape(qx.shape)
 
-				    #down_down
-                    if (self.inspin < 1.0) & (self.outspin < 1.0):
-                        comp_sld = np.complex(b_sld[0]['dd'], 0.0)
-                        temp_fi = comp_sld * ephase
-                        sumj_dd = sumj_dd + temp_fi
+def _calc_Iqxy_magnetic(
+        qx, qy, x, y, vol, rho, rho_m,
+        up_frac_i=0, up_frac_f=0, up_angle=0.):
+    """
+    Compute I(q) for a set of points (x, y), with magnetism on each point.
 
-                    #up_down
-                    if (self.inspin > 0.0) & (self.outspin < 1.0):
-                        comp_sld = np.complex(b_sld[0]['ud'].real, b_sld[0]['ud'].imag)
-                        temp_fi = comp_sld * ephase
-                        sumj_ud = sumj_ud + temp_fi
+    Uses::
 
-                    #down_up
-                    if (self.inspin < 1.0) & (self.outspin > 0.0):
-                        comp_sld = np.complex(b_sld[0]['du'].real, b_sld[0]['du'].imag)
-                        temp_fi = comp_sld * ephase
-                        sumj_du = sumj_du + temp_fi
+        I(q) = sum_xs w_xs |sum V(r) rho(q, r, xs) e^(1j q.r)|^2 / sum V(r)
 
-                    if i == 0:
-                        count += self.vol_pix[j]
+    where rho is adjusted for the particular q and polarization cross section.
+    The cross section weights depends on the polarizer and analyzer
+    efficiency of the measurement.  For example, with polarization up at 100%
+    efficiency and no analyzer, (up_frac_i=1, up_frac_f=0.5), then uu and ud
+    will both be 0.5.
 
-            calc = lambda x: np.square(x.real) + np.square(x.imag)
-            I_out[i] = calc(sumj_uu)
-            I_out[i] += calc(sumj_ud)
-            I_out[i] += calc(sumj_du)
-            I_out[i] += calc(sumj_dd)
-            I_out[i] *= (1.0E+8 / count) #in cm (unit) / number; to be multiplied by vol_pix
+    Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
+    """
+    # Determine contribution from each cross section
+    dd, du, ud, uu = _spin_weights(up_frac_i, up_frac_f)
 
-        return I_out
+    # Precompute helper values
+    up_angle = np.radians(up_angle)
+    cos_spin, sin_spin = np.cos(-up_angle), np.sin(-up_angle)
+    mx, my, mz = rho_m
 
-    def genicomXY_vec(self, qx, qy):
-        """
-        Compute 2d ansotropic.
+    # Flatten arrays so everything is 1D
+    shape = qx.shape
+    qx, qy = (np.asarray(v, 'd').flatten() for v in (qx, qy))
+    Iq = np.empty(shape=qx.shape, dtype='d')
+    print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
+    _calc_Iqxy_magnetic_helper(
+        Iq, qx, qy, x, y, vol, rho, mx, my, mz,
+        cos_spin, sin_spin, dd, du, ud, uu)
+    return Iq.reshape(shape)
 
-        Returns I_out[] 1d array.
-        """
-
-        npoints = len(qx)
-
-        #npoints is given negative for angular averaging
-        #Assumes that q doesn't have qz component and sld_n is all real
-        b_sld = np.zeros(self.n_pix, dtype=lib.get_polar_sld_type())
-        qr = float()
-        iqr = np.complex()
-        ephase = np.complex()
-        comp_sld = np.complex()
-
-        sumj_uu = np.complex()
-        sumj_ud = np.complex()
-        sumj_du = np.complex()
-        sumj_dd = np.complex()
-        temp_fi = np.complex()
-
-        count = float()
-
-        iqr = np.complex()
-        ephase = np.complex()
-        comp_sld = np.complex()
-
-        I_out = np.zeros(npoints, dtype=np.float)
-
-	    #Assume that pixel volumes are given in vol_pix in A^3 unit
-        #Loop over q-values and multiply apply matrix
-        for i in range(npoints):
-            sumj_uu = np.complex()
-            sumj_ud = np.complex()
-            sumj_du = np.complex()
-            sumj_dd = np.complex()
-
-            #for j in range(self.n_pix):
-            zero_sldn = self.sldn_val == 0
-            zero_mx = self.mx_val == 0
-            zero_my = self.my_val == 0
-            zero_mz = self.mz_val == 0
-            #find index where all are equal to 0
-            index_zero = [s & x & y & z for (s, x, y, z) in zip(zero_sldn, zero_mx, zero_my, zero_mz)]
-
-            #then exclude those from the calculation
-            index_zero = np.array(index_zero, dtype=bool)
-            sldn_val_use = self.sldn_val[~index_zero]
-            mx_val_use = self.mx_val[~index_zero]
-            my_val_use = self.my_val[~index_zero]
-            mz_val_use = self.mz_val[~index_zero]
-
-			#anisotropic
-            temp_fi = np.complex()
-
-            #all passed to cal_msld, not full values but should all be same length.
-            lib.cal_msld_vec(b_sld, 0, qx[i], qy[i], sldn_val_use,
-                             mx_val_use, my_val_use, mz_val_use,
-                             self.inspin, self.outspin, self.stheta)
-
-            qr = (qx[i]*self.x_val + qy[i]*self.y_val)
-            iqr = np.zeros(len(self.x_val), dtype=np.complex_)
-
-            for j in range(len(self.x_val)):
-                _temp = np.complex(0.0, qr[j])
-                iqr[j] = _temp
-
-            #iqr = np.complex(0.0, qr)
-
-            #As in the original code, sets ephase reference to two methods that should
-            #both reset it, both set the real and imaginary parts.
-            ephase = np.exp(iqr)
-            #Let's multiply pixel(atomic) volume here
-            ephase = self.vol_pix * ephase
-
-			#up_up
-            if (self.inspin > 0.0) & (self.outspin > 0.0):
-                comp_sld = b_sld['uu']
-                temp_fi = comp_sld * ephase
-                sumj_uu = np.sum(sumj_uu + temp_fi)
-
-			#down_down
-            if (self.inspin < 1.0) & (self.outspin < 1.0):
-                comp_sld = b_sld['dd']
-                temp_fi = comp_sld * ephase
-                sumj_dd = np.sum(sumj_dd + temp_fi)
-
-            #up_down
-            if (self.inspin > 0.0) & (self.outspin < 1.0):
-                comp_sld = b_sld['ud']
-                temp_fi = comp_sld * ephase
-                sumj_ud = np.sum(sumj_ud + temp_fi)
-
-            #down_up
-            if (self.inspin < 1.0) & (self.outspin > 0.0):
-                comp_sld = b_sld['du']
-                temp_fi = comp_sld * ephase
-                sumj_du = np.sum(sumj_du + temp_fi)
-
-            if i == 0:
-                count = np.sum(self.vol_pix)
-
-
-            calc = lambda x: np.square(x.real) + np.square(x.imag)
-            I_out[i] = calc(sumj_uu)
-            I_out[i] += calc(sumj_ud)
-            I_out[i] += calc(sumj_du)
-            I_out[i] += calc(sumj_dd)
-            I_out[i] *= 1.0E+8 / count #in cm (unit) / number; to be multiplied by vol_pix
-
-        return I_out
-
-    def genicom(self, q):
-        """
-        Computes 1D isotropic.
-        Isotropic: Assumes all slds are real (no magnetic)
-        Also assumes there is no polarization: No dependency on spin.
-
-        :param npoints: npoints.
-        :param q: q vector.
-
-        :return: I_out.
-        """
-        nq = len(q)
-        npoints = len(self.sldn_val)
-        coords = np.vstack((self.x_val, self.y_val, self.z_val))
-        sld = self.sldn_val * self.vol_pix
-        count = np.sum(self.vol_pix)
-        I_out = np.zeros(npoints)
-
-        if self.is_avg == 1:
-            r = np.linalg.norm(coords, axis=0)
-            for i in range(nq):
-                bes = np.sinc((q[i]/np.pi) * r)
-                sumj = np.sum(sld * bes)
-                I_out[i] = sumj ** 2
-
+@njit("(" + "f8[:], "*10 + "f8, "*6 + ")")
+def _calc_Iqxy_magnetic_helper(
+        Iq, qx, qy, x, y, vol, rho, mx, my, mz, cos_spin, sin_spin,
+        dd, du, ud, uu):
+    # Process each qx, qy
+    # Note: enumerating a pair is slower than direct indexing in numba
+    for k in range(len(qx)):
+        qxk, qyk = qx[k], qy[k]
+        if qxk == 0. and qyk == 0.:
+            ephase = vol
+            px = py = 0.
         else:
-            for i in range(nq):
-                sumj = genicom_full(q[i], npoints, coords, sld)
-                I_out[i] = sumj
+            ephase = vol*np.exp(1j*(qxk*x + qyk*y))
+            perp = (qyk*mx - qxk*my)/(qxk**2 + qyk**2)
+            px = perp*(qyk*cos_spin + qxk*sin_spin)
+            py = perp*(qyk*sin_spin - qxk*cos_spin)
+        if dd > 1e-10:
+            Iq[k] += dd * abs(np.sum((rho-px)*ephase))**2
+        if uu > 1e-10:
+            Iq[k] += uu * abs(np.sum((rho+px)*ephase))**2
+        if du > 1e-10:
+            Iq[k] += du * abs(np.sum((py-1j*mz)*ephase))**2
+        if ud > 1e-10:
+            Iq[k] += ud * abs(np.sum((py+1j*mz)*ephase))**2
 
-        return I_out * 1.0E+8/count
+def _spin_weights(in_spin, out_spin):
+    """
+    Compute spin cross weights given in_spin and out_spin
 
-@njit('f8(f8, f8, f8[:, :], f8[:])')
-def genicom_full(q, npoints, coords, sld):
-    sumj = 0.0
+    Returns weights (dd, du, ud, uu)
+    """
+    in_spin = np.clip(in_spin, 0.0, 1.0)
+    out_spin = np.clip(out_spin, 0.0, 1.0)
+    # Previous version of this function took the square root of the weights,
+    # under the assumption that
+    #
+    #     w*I(q, rho1, rho2, ...) = I(q, sqrt(w)*rho1, sqrt(w)*rho2, ...)
+    #
+    # However, since the weights are applied to the final intensity and
+    # are not interned inside the I(q) function, we want the full
+    # weight and not the square root.  Anyway no function will ever use
+    # set_spin_weights as part of calculating an amplitude, as the weights are
+    # related to polarisation efficiency of the instrument. The weights serve to
+    # construct various magnet scattering cross sections, which are linear combinations
+    # of the spin-resolved cross sections. The polarisation efficiency e_in and e_out
+    # are parameters ranging from 0.5 (unpolarised) beam to 1 (perfect optics).
+    # For in_spin or out_spin <0.5 one assumes a CS, where the spin is reversed/flipped
+    # with respect to the initial supermirror polariser. The actual polarisation efficiency
+    # in this case is however e_in/out = 1-in/out_spin.
 
-    for j in range(npoints):
-        dx = coords[:, j:] - coords[:, j:j+1]
-        r = np.sqrt(np.sum(dx**2, axis=0))
-        bes = np.sinc((q/np.pi)*r)
-        Ijk = sld[j:] * sld[j] * bes
-        sumj += 2*np.sum(Ijk) - Ijk[0] # don't double-count the diagonal
+    norm = 1 - out_spin if out_spin < 0.5 else out_spin
 
-    return sumj
+    # The norm is needed to make sure that the scattering cross sections are
+    # correctly weighted, such that the sum of spin-resolved measurements adds up to
+    # the unpolarised or half-polarised scattering cross section. No intensity weighting
+    # needed on the incoming polariser side (assuming that a user), has normalised
+    # to the incoming flux with polariser in for SANSPOl and unpolarised beam, respectively.
 
-def demo():
-    is_avg = 0
-    npix = 301
-
-    x = np.linspace(0.1, 0.5, npix)
-    y = np.linspace(0.1, 0.5, npix)
-    z = np.linspace(0.1, 0.5, npix)
-    sldn = np.linspace(0.1, 0.5, npix)
-    mx = np.linspace(0.1, 0.5, npix)
-    my = np.linspace(0.1, 0.5, npix)
-    mz = np.linspace(0.1, 0.5, npix)
-    voli = np.linspace(0.1, 0.5, npix)
-    q = np.linspace(0.1, 0.5, npix)
-
-    in_spin = 0.5
-    out_spin = 0.2
-    s_theta = 0.1
-    gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)
-
-    setup = '''
-from __main__ import GenI
-import numpy as np
-is_avg = 0
-npix = 1000
-x = np.linspace(0.1, 0.5, npix)
-y = np.linspace(0.1, 0.5, npix)
-z = np.linspace(0.1, 0.5, npix)
-sldn = np.linspace(0.1, 0.5, npix)
-mx = np.linspace(0.1, 0.5, npix)
-my = np.linspace(0.1, 0.5, npix)
-mz = np.linspace(0.1, 0.5, npix)
-voli = np.linspace(0.1, 0.5, npix)
-q = np.linspace(0.1, 0.5, npix)
-
-in_spin = 0.5
-out_spin = 0.2
-s_theta = 0.1
-gen_i = GenI(is_avg, x, y, z, sldn, mx, my, mz, voli, in_spin, out_spin, s_theta)'''
-    run = '''
-I_out = gen_i.genicom(q)'''
-
-    times = timeit.repeat(stmt = run, setup = setup, repeat = 1, number = 1)
-    print(times)
-    qx = np.linspace(0.1, 0.5, 301)
-    qy = np.copy(qx)
-
-    I_out = gen_i.genicom(q)
-
-    np.set_printoptions(precision = 15)
-    print("result:", I_out)
-    print("size I_out: ", I_out.shape)
-    print("type I_out: ", I_out.dtype)
-
-    #print(I_out)
-    #print(I_out.shape)
-
-    #test_sld = lib.polar_sld()
-    #test_sld.uu = 1.0
-    #test_sld.dd = 2.5
-    #test_sld.ud = np.complex(1.5, 2.5)
-    #test_sld.du = np.complex(4.5, 5.5)
-    #param = 0.3
-
-    #test_sld.cal_msld(0, 0.5, 0.5, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.4986666666666667, 0.5, 0.2, 0.1)
-
-    #print(test_sld)
-
-if __name__ == "__main__":
-    demo()
+    weight = (
+        (1.0-in_spin) * (1.0-out_spin) / norm, # dd
+        (1.0-in_spin) * out_spin / norm,       # du
+        in_spin * (1.0-out_spin) / norm,       # ud
+        in_spin * out_spin / norm,             # uu
+    )
+    return weight

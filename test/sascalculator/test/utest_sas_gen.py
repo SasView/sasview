@@ -64,8 +64,8 @@ class sas_gen_test(unittest.TestCase):
         omf2sld.set_data(f)
         model = sas_gen.GenSAS()
         model.set_sld_data(omf2sld.output)
-        x = np.linspace(0, 0.1, 11)[1:]
-        model.runXY([x, x])
+        q = np.linspace(0, 0.1, 11)[1:]
+        model.runXY([q, q])
 
 
 if __name__ == '__main__':
