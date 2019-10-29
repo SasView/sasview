@@ -21,8 +21,6 @@ except ImportError:
         # Otherwise we have @njit(...), so return the identity decorator.
         return lambda fn: fn
 
-from . import lib
-
 # TODO: probably twice as fast to use f4 everywhere, but need to check accuracy
 def Iq(q, x, y, z, sld, vol, is_avg=False):
     """
@@ -166,14 +164,12 @@ def _calc_Iqxy_magnetic_helper(
     # Note: enumerating a pair is slower than direct indexing in numba
     for k in range(len(qx)):
         qxk, qyk = qx[k], qy[k]
-        if qxk == 0. and qyk == 0.:
-            ephase = vol
-            px = py = 0.
-        else:
-            ephase = vol*np.exp(1j*(qxk*x + qyk*y))
-            perp = (qyk*mx - qxk*my)/(qxk**2 + qyk**2)
-            px = perp*(qyk*cos_spin + qxk*sin_spin)
-            py = perp*(qyk*sin_spin - qxk*cos_spin)
+        # If q is 0 then px and py are also zero.
+        one_over_qsq = 1./(qxk**2 + qyk**2) if qxk != 0. and qyk != 0. else 0.
+        perp = one_over_qsq*(qyk*mx - qxk*my)
+        px = perp*(qyk*cos_spin + qxk*sin_spin)
+        py = perp*(qyk*sin_spin - qxk*cos_spin)
+        ephase = vol*np.exp(1j*(qxk*x + qyk*y))
         if dd > 1e-10:
             Iq[k] += dd * abs(np.sum((rho-px)*ephase))**2
         if uu > 1e-10:
