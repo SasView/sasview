@@ -162,8 +162,8 @@ class GenSAS(object):
         self.data_my = _vec(sld_data.sld_my)
         self.data_mz = _vec(sld_data.sld_mz)
         self.data_vol = _vec(sld_data.vol_pix)
-        self.data_total_volume = sum(sld_data.vol_pix)
-        self.params['total_volume'] = sum(sld_data.vol_pix)
+        self.data_total_volume = np.sum(sld_data.vol_pix)
+        self.params['total_volume'] = self.data_total_volume
 
     def getProfile(self):
         """
@@ -841,10 +841,10 @@ class MagSLD(object):
                     self.sld_n = np.zeros_like(self.pos_x)
                     self.sld_n[is_nonzero] = sld_n
                 else:
-                    self.sld_n.full_like(self.pos_x, sld_n)
+                    self.sld_n = np.full_like(self.pos_x, sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n.full_like(self.pos_x, sld_n)
+                self.sld_n = np.full_like(self.pos_x, sld_n)
         else:
             self.sld_n = sld_n
 
@@ -1073,14 +1073,15 @@ def sas_gen_c(self, qx, qy=None):
     return result
 
 def sasmodels_magnetic(self, qx, qy):
+    # Note: Need to add sasmodels/explore to the python path.
     from realspace import calc_Iq_magnetic as Iq
 
     x, y, z = self.data_x, self.data_y, self.data_z
     if self.is_avg:
         x, y, z = transform_center(x, y, z)
-    sld = self.data_sldn - self.params['solvent_SLD']
-    vol = self.data_vol
-    mx, my, mz = self.data_mx, self.data_my, self.data_mz
+    rho = self.data_sldn - self.params['solvent_SLD']
+    volume = self.data_vol
+    rho_m = self.data_mx, self.data_my, self.data_mz
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
@@ -1089,10 +1090,8 @@ def sasmodels_magnetic(self, qx, qy):
     background = self.params['background']
 
     points = np.vstack((x, y, z)).T
-    rho = sld
-    rho_m = (mx, my, mz)
     I_out = Iq(
-        qx, qy, rho, rho_m, points, vol,
+        qx, qy, rho, rho_m, points, volume,
         up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
         )
     I_out *= 1e6
@@ -1101,14 +1100,50 @@ def sasmodels_magnetic(self, qx, qy):
     result = (scale * vol_correction) * I_out + background
     return result
 
+def sasmodels_Iq(self, q):
+    # Note: Need to add sasmodels/explore to the python path.
+    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
+
+    x, y, z = self.data_x, self.data_y, self.data_z
+    if self.is_avg:
+        x, y, z = transform_center(x, y, z)
+    rho = (self.data_sldn - self.params['solvent_SLD'])*1e6
+    volume = self.data_vol
+    scale = self.params['scale']
+    total_volume = self.params['total_volume']
+    background = self.params['background']
+
+    points = np.vstack((x, y, z)).T
+
+    if self.is_avg:
+        Iq = calc_Iq_avg(q, rho, points, volume)
+    else:
+        rmax = np.linalg.norm(np.max(points, axis=0) - np.min(points, axis=0))
+        r = r_bins(q, rmax, over_sampling=10)
+        Pr = calc_Pr(r, rho, points, volume)
+        #import pylab; pylab.plot(r, Pr); pylab.figure()
+        Iq = calc_Iq_from_Pr(q, r, Pr)
+
+    vol_correction = self.data_total_volume / total_volume
+    result = (scale * vol_correction) * Iq + background
+    return result
+
 
 def compare(obj, qx, qy=None, plot_points=False):
     from matplotlib import pyplot as plt
     from timeit import default_timer as timer
 
+    sasmodels = False
+    if sasmodels:
+        start = timer()
+        if qy is None:
+            I_sasmodels = sasmodels_Iq(obj, qx)
+        else:
+            I_sasmodels = sasmodels_magnetic(obj, qx, qy)
+        print("Sasmodels time:", timer() - start)
+
     start = timer()
     I_new = obj.calculate_Iq(qx, qy)
-    #I_new = sasmodels_magnetic(obj, qx, qy)
     print("New time:", timer() - start)
 
     start = timer()
@@ -1130,6 +1165,8 @@ def compare(obj, qx, qy=None, plot_points=False):
     else:
         plt.loglog(qx, I_old, '-', label="old")
         plt.loglog(qx, I_new, '-', label="new")
+        if sasmodels:
+            plt.loglog(qx, I_sasmodels, '-', label="sasmodels")
         plt.legend()
 
     if plot_points:
@@ -1155,13 +1192,31 @@ def demo_oommf():
     qx, qy = np.meshgrid(q, q)
     compare(model, qx, qy)
 
-def demo_pdb():
-    path = _get_data_path("coordinate_data", "diamond.pdb")
+def demo_pdb(is_avg=False):
+    #filename = "diamond.pdb"
+    filename = "dna.pdb"
+    path = _get_data_path("coordinate_data", filename)
     reader = PDBReader()
     data = reader.read(path)
     model = GenSAS()
     model.set_sld_data(data)
-    model.set_is_avg(True)
+    model.set_is_avg(is_avg)
+    #print(filename, "has", len(model.data_x), "points")
+    q = np.linspace(0, 1, 1350)
+    compare(model, q)
+
+def demo_shape(samples=200):
+    # Note: Need to add sasmodels/explore to the python path.
+    import realspace
+    shape = realspace.TriaxialEllipsoid(125, 125, 50, 2)
+    sampling_density = samples / shape.volume
+    rho, points = shape.sample(sampling_density)
+    volume = shape.volume / len(points)
+    x, y, z = points.T
+    data = MagSLD(x, y, z, sld_n=rho, vol_pix=volume)
+    model = GenSAS()
+    model.set_sld_data(data)
+    model.set_is_avg(False)
     q = np.linspace(0, 1, 1350)
     compare(model, q)
 
@@ -1186,5 +1241,8 @@ if __name__ == "__main__":
     #demo_save()
     #print(test())
     #test()
-    #demo_pdb()
-    demo_oommf()
+    #demo_pdb(is_avg=True)
+    demo_pdb(is_avg=False)
+    #demo_oommf()
+    #demo_shape(samples=200)
+    #demo_shape(samples=2000)

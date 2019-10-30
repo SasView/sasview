@@ -21,7 +21,6 @@ except ImportError:
         # Otherwise we have @njit(...), so return the identity decorator.
         return lambda fn: fn
 
-# TODO: probably twice as fast to use f4 everywhere, but need to check accuracy
 def Iq(q, x, y, z, sld, vol, is_avg=False):
     """
     Computes 1D isotropic.
@@ -38,7 +37,8 @@ def Iq(q, x, y, z, sld, vol, is_avg=False):
     index = (sld != 0.)
     if not index.all():
         coords, sld, vol = (v[index] for v in (sld, coords, vol))
-    I_out = np.empty_like(q, dtype='d')
+    q, coords, sld, vol = [np.asarray(v, dtype='d') for v in (q, coords, sld, vol)]
+    I_out = np.empty_like(q)
     if is_avg:
         r = np.linalg.norm(coords, axis=0)
         #print('avg', I_out.shape, q.shape, r.shape, sld.shape, vol.shape)
@@ -85,24 +85,74 @@ def _calc_Iq_avg(Iq, q, r, sld, vol):
         Fq = np.sum(weight * bes)
         Iq[i] = Fq**2
 
+def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
+    """
+    Compute Iq as sum rho_j rho_k j0(q ||x_j - x_k||)
+
+    Chunk the calculation so that the q x r intermediate matrix has fewer
+    than worksize elements.
+    """
+    Iq[:] = 0.
+    q_pi = q/np.pi  # Precompute q/pi since np.sinc = sin(pi x)/(pi x).
+    weight = sld * vol
+    batch_size = worksize // coords.shape[0]
+    for batch in range(0, len(q), batch_size):
+        _calc_Iq_batch(Iq[batch:batch+batch_size], q_pi[batch:batch+batch_size],
+                       coords, weight)
+
+def _calc_Iq_batch(Iq, q_pi, coords, weight):
+    """
+    Helper function for _calc_Iq which operates on a batch of q values.
+
+    *Iq* is accumulated within each batch, and should be initialized to zero.
+
+    *q_pi* is q/pi, needed because np.sinc computes sin(pi x)/(pi x).
+
+    *coords* are the sample points.
+
+    *weights* is volume*rho for each point.
+    """
+    for j in range(len(weight)):
+        # Compute dx for one row of the upper triangle matrix.
+        dx = coords[:, j:] - coords[:, j:j+1]
+        # Find the length of each dx vector.
+        r = np.sqrt(np.sum(dx**2, axis=0))
+        # Compute I_jk = rho_j rho_k j0(q ||x_j - x_k||) over all q in batch.
+        bes = np.sinc(q_pi[:, None]*r[None, :])
+        I_jk = (weight[j:] * weight[j])[None, :] * bes
+        # Accumulate terms I(j,j), I(j, k+1..n) and by symmetry I(k+1..n, j).
+        # Don't double-count the diagonal.
+        Iq += 2*np.sum(I_jk, axis=1) - I_jk[:, 0]
+
 @njit('(f8[:], f8[:], f8[:, :], f8[:], f8[:])')
-def _calc_Iq(Iq, q, coords, sld, vol):
+def _calc_Iq_numba(Iq, q, coords, sld, vol):
+    """
+    **DEPRECATED**
+
+    Numba version of the _calc_Iq since the pure numpy version is too
+    difficult for numpy to handle.
+
+    Even with with numba this code is slower than the pure numpy version.
+    Without numba it is much much slower. Test for a few examples with
+    smallish numbers of points.  The algorithm is O(n^2) which makes it
+    unusable for a larger number of points.  A GPU implementation would
+    help, maybe allowing 10x the number of points.
+    """
+    Iq[:] = 0.
     weight = sld * vol
     npoints = len(weight)
-    for i, qi in enumerate(q):
-        qi = qi/np.pi  # precompute q/pi since np.sinc = sin(pi x)/(pi x)
-        total = 0.0
-        for j in range(npoints):
-            # Compute dx for one row of the upper triangle matrix
-            dx = coords[:, j:] - coords[:, j:j+1]
-            # Find the length of each dx vector
-            r = np.sqrt(np.sum(dx**2, axis=0))
-            # Compute I_jk = rho_j rho_k j0(q ||x_j - x_k||)
-            bes = np.sinc(qi*r)
+    for j in range(npoints):
+        # Compute dx for one row of the upper triangle matrix
+        dx = coords[:, j:] - coords[:, j:j+1]
+        # Find the length of each dx vector
+        r = np.sqrt(np.sum(dx**2, axis=0))
+        # Compute I_jk = rho_j rho_k j0(q ||x_j - x_k||)
+        for i, qi in enumerate(q):
+            qi_pi = qi/np.pi  # precompute q/pi since np.sinc = sin(pi x)/(pi x)
+            bes = np.sinc(qi_pi*r)
             I_jk = weight[j:] * weight[j] * bes
             # Accumulate terms I(j,j), I(j, k+1..n) and by symmetry I(k+1..n, j)
-            total += 2*np.sum(I_jk) - I_jk[0] # don't double-count the diagonal
-        Iq[i] = total
+            Iq[i] += 2*np.sum(I_jk) - I_jk[0] # don't double-count the diagonal
 
 @njit('f8[:](f8[:], f8[:], f8[:], f8[:], f8[:], f8[:])')
 def _calc_Iqxy(qx, qy, x, y, sld, vol):
@@ -150,7 +200,7 @@ def _calc_Iqxy_magnetic(
     shape = qx.shape
     qx, qy = (np.asarray(v, 'd').flatten() for v in (qx, qy))
     Iq = np.empty(shape=qx.shape, dtype='d')
-    print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
+    #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
     _calc_Iqxy_magnetic_helper(
         Iq, qx, qy, x, y, vol, rho, mx, my, mz,
         cos_spin, sin_spin, dd, du, ud, uu)
