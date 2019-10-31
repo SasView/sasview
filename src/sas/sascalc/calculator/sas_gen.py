@@ -1155,12 +1155,22 @@ def compare(obj, qx, qy=None, plot_points=False):
     if qy is not None and len(qy) > 0:
         plt.subplot(131)
         plt.imshow(np.log10(I_old))
+        plt.title("Old")
         plt.colorbar()
-        plt.subplot(132)
+        if sasmodels:
+            plt.subplot(232)
+            plt.imshow(np.log10(I_sasmodels))
+            plt.colorbar()
+            plt.title("Sasmodels")
+            plt.subplot(235)
+        else:
+            plt.subplot(132)
         plt.imshow(np.log10(I_new))
+        plt.title("New")
         plt.colorbar()
         plt.subplot(133)
         plt.imshow(I_old - I_new)
+        plt.title("Difference")
         plt.colorbar()
     else:
         plt.loglog(qx, I_old, '-', label="old")
@@ -1205,20 +1215,32 @@ def demo_pdb(is_avg=False):
     q = np.linspace(0, 1, 1350)
     compare(model, q)
 
-def demo_shape(samples=200):
+def demo_shape(samples=200, magnetic=False):
     # Note: Need to add sasmodels/explore to the python path.
     import realspace
-    shape = realspace.TriaxialEllipsoid(125, 125, 50, 2)
+    magnetism = realspace.pol2rec(5, 0, 0) if magnetic else None
+    shape = realspace.TriaxialEllipsoid(125, 125, 50, 2, magnetism=magnetism)
     sampling_density = samples / shape.volume
-    rho, points = shape.sample(sampling_density)
+    if magnetic:
+        rho, rho_m, points = shape.sample_magnetic(sampling_density)
+        mx, my, mz = rho_m
+    else:
+        rho, points = shape.sample(sampling_density)
+        mx = my = mz = None
     volume = shape.volume / len(points)
     x, y, z = points.T
-    data = MagSLD(x, y, z, sld_n=rho, vol_pix=volume)
+    data = MagSLD(x, y, z, sld_n=rho, vol_pix=volume,
+                  sld_mx=mx, sld_my=my, sld_mz=mz)
     model = GenSAS()
     model.set_sld_data(data)
     model.set_is_avg(False)
-    q = np.linspace(0, 1, 1350)
-    compare(model, q)
+    if magnetic:
+        q = np.linspace(-0.05, 0.05, 24)
+        qx, qy = np.meshgrid(q, q)
+    else:
+        qx = np.linspace(0, 1, 1350)
+        qy = None
+    compare(model, qx, qy)
 
 def test():
     """
@@ -1245,4 +1267,4 @@ if __name__ == "__main__":
     demo_pdb(is_avg=False)
     #demo_oommf()
     #demo_shape(samples=200)
-    #demo_shape(samples=2000)
+    #demo_shape(samples=2000, magnetic=True)
