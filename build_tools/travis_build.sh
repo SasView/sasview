@@ -1,5 +1,4 @@
 # Simplified build for Travis CI
-# No documentation is built
 export PATH=$PATH:/usr/local/bin/
 
 PYTHON=${PYTHON:-`which python`}
@@ -39,6 +38,14 @@ cd $WORKSPACE/sasview
 $PYTHON setup.py clean
 # $PYTHON setup.py build docs bdist_egg
 $PYTHON setup.py bdist_egg
+
+# BUILD DOCS
+NUM=4
+mkdir -p ~/.sasmodels/compiled_models
+make PYTHON=$PYTHON -j $NUM -C $WORKSPACE/bumps/doc html
+make PYTHON=$PYTHON -j $NUM -C $WORKSPACE/sasmodels/doc html
+cd $WORKSPACE/sasview/docs/sphinx-docs/
+$PYTHON build_sphinx.py
 
 # INSTALL SASVIEW
 cd $WORKSPACE/sasview/dist
