@@ -45,7 +45,7 @@ script:
 - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
 - git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
 - ls -ltr
-- if [ ! -d "utils" ]; then mkdir utils; fi
+- mkdir -p utils
 - /bin/sh -xe sasview/build_tools/travis_build.sh
 - export LC_ALL=en_US.UTF-8
 - export LANG=en_US.UTF-8
