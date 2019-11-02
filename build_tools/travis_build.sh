@@ -58,3 +58,11 @@ done
 # TEST
 cd $WORKSPACE/sasview/test
 $PYTHON utest_sasview.py
+# If a display is available, also run the GUI tests
+if [ -n "$DISPLAY" ]; then
+  cd $WORKSPACE/sasview/src/sas/qtgui
+  # suppress errors from the GUI tests until a baseline 'pass' is obtained
+  $PYTHON GUITests.py || true
+else
+  echo "NOTE: GUITests.py skipped as no DISPLAY was found"
+fi
