@@ -26,6 +26,8 @@ addons:
     - liblapack-dev
     - gfortran
     - libhdf5-serial-dev
+services:
+  - xvfb
 before_install:
 - echo $TRAVIS_OS_NAME
 - wget $MINICONDA -O miniconda.sh
