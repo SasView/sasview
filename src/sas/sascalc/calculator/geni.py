@@ -9,10 +9,12 @@ import numpy as np
 
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
-        from numba import njit
+        from numba import njit, prange
+        USE_NUMBA = True
     else:
         raise ImportError("fail")
 except ImportError:
+    USE_NUMBA = False
     # if no numba then njit does nothing
     def njit(*args, **kw):
         # Check for bare @njit, in which case we just return the function.
@@ -60,9 +62,14 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta):
     Returns *I(qx, qy)*
     """
     qx, qy = np.broadcast_arrays(qx, qy)
-    is_magnetic = (mx != 0.) | (my != 0.) | (mz != 0.)
-    if is_magnetic.any():
-        index = (sld != 0.) | is_magnetic
+    # if the mx provided to SasGen is None then _vec(mx) will be [nan]
+    if mx is not None and my is not None and mz is not None:
+        magnetic_index = (mx != 0.) | (my != 0.) | (mz != 0.)
+        is_magnetic = magnetic_index.any()
+    else:
+        is_magnetic = False
+    if is_magnetic:
+        index = (sld != 0.) | magnetic_index
         if not index.all():
             x, y, mx, my, mz, sld, vol \
                 = (v[index] for v in (x, y, mx, my, mz, sld, vol))
@@ -73,7 +80,8 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta):
         index = (sld != 0.)
         if not index.all():
             x, y, sld, vol = (v[index] for v in (x, y, sld, vol))
-        I_out = _calc_Iqxy(qx, qy, x, y, sld, vol)
+        I_out = _calc_Iqxy(sld*vol, x, y, qx.flatten(), qy.flatten())
+        I_out = I_out.reshape(qx.shape)
     return I_out * (1.0E+8/np.sum(vol))
 
 @njit('(f8[:], f8[:], f8[:], f8[:], f8[:])')
@@ -154,9 +162,22 @@ def _calc_Iq_numba(Iq, q, coords, sld, vol):
             # Accumulate terms I(j,j), I(j, k+1..n) and by symmetry I(k+1..n, j)
             Iq[i] += 2*np.sum(I_jk) - I_jk[0] # don't double-count the diagonal
 
-@njit('f8[:](f8[:], f8[:], f8[:], f8[:], f8[:], f8[:])')
-def _calc_Iqxy(qx, qy, x, y, sld, vol):
-    """
+if USE_NUMBA:
+    sig = "f8[:](f8[:],f8[:],f8[:],f8[:],f8[:])"
+    @njit(sig, parallel=True, fastmath=True)
+    def _calc_Iqxy(scale, x, y, qx, qy):
+        #print("calling numba for geni")
+        Iq = np.empty_like(qx)
+        for j in prange(len(Iq)):
+            total = np.sum(scale * np.exp(1j*(qx[j]*x + qy[j]*y)))
+            Iq[j] = abs(total)**2
+        return Iq
+else:
+    def _calc_Iqxy(scale, x, y, qx, qy):
+        Iq = [abs(np.sum(scale*np.exp(1j*(qx_k*x + qy_k*y))))**2
+              for qx_k, qy_k in zip(qx.flat, qy.flat)]
+        return np.asarray(Iq).reshape(qx.shape)
+_calc_Iqxy.__doc__ = """
     Compute I(q) for a set of points (x, y).
 
     Uses::
@@ -165,13 +186,10 @@ def _calc_Iqxy(qx, qy, x, y, sld, vol):
 
     Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
     """
-    scale = sld*vol
-    Iq = [abs(np.sum(scale*np.exp(1j*(qx_k*x + qy_k*y))))**2
-          for qx_k, qy_k in zip(qx.flat, qy.flat)]
-    return np.asarray(Iq).reshape(qx.shape)
+
 
 def _calc_Iqxy_magnetic(
-        qx, qy, x, y, vol, rho, rho_m,
+        qx, qy, x, y, rho, vol, rho_m,
         up_frac_i=0, up_frac_f=0, up_angle=0.):
     """
     Compute I(q) for a set of points (x, y), with magnetism on each point.
@@ -195,20 +213,23 @@ def _calc_Iqxy_magnetic(
     up_angle = np.radians(up_angle)
     cos_spin, sin_spin = np.cos(-up_angle), np.sin(-up_angle)
     mx, my, mz = rho_m
+    ## NOTE: sasview calculator uses the opposite sign for mx, my, mz.
+    ## Uncomment the following to match its output.
+    #mx, my, mz = -mx, -my, -mz
 
     # Flatten arrays so everything is 1D
     shape = qx.shape
     qx, qy = (np.asarray(v, 'd').flatten() for v in (qx, qy))
-    Iq = np.empty(shape=qx.shape, dtype='d')
+    Iq = np.zeros(shape=qx.shape, dtype='d')
     #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
     _calc_Iqxy_magnetic_helper(
-        Iq, qx, qy, x, y, vol, rho, mx, my, mz,
+        Iq, qx, qy, x, y, rho, vol, mx, my, mz,
         cos_spin, sin_spin, dd, du, ud, uu)
     return Iq.reshape(shape)
 
 @njit("(" + "f8[:], "*10 + "f8, "*6 + ")")
 def _calc_Iqxy_magnetic_helper(
-        Iq, qx, qy, x, y, vol, rho, mx, my, mz, cos_spin, sin_spin,
+        Iq, qx, qy, x, y, rho, vol, mx, my, mz, cos_spin, sin_spin,
         dd, du, ud, uu):
     # Process each qx, qy
     # Note: enumerating a pair is slower than direct indexing in numba
@@ -219,15 +240,21 @@ def _calc_Iqxy_magnetic_helper(
         perp = one_over_qsq*(qyk*mx - qxk*my)
         px = perp*(qyk*cos_spin + qxk*sin_spin)
         py = perp*(qyk*sin_spin - qxk*cos_spin)
+        pz = mz
+        #if k == 25:
+        #    j = 10
+        #    print("q=(%g, %g)  m=(%g, %g, %g)  perp=(%g)  sigma=(%g,%g,%g)"
+        #          % (qxk, qyk, mx[j], my[j], mz[j], perp[j], px[j], py[j], pz[j]))
+
         ephase = vol*np.exp(1j*(qxk*x + qyk*y))
         if dd > 1e-10:
             Iq[k] += dd * abs(np.sum((rho-px)*ephase))**2
         if uu > 1e-10:
             Iq[k] += uu * abs(np.sum((rho+px)*ephase))**2
         if du > 1e-10:
-            Iq[k] += du * abs(np.sum((py-1j*mz)*ephase))**2
+            Iq[k] += du * abs(np.sum((py-1j*pz)*ephase))**2
         if ud > 1e-10:
-            Iq[k] += ud * abs(np.sum((py+1j*mz)*ephase))**2
+            Iq[k] += ud * abs(np.sum((py+1j*pz)*ephase))**2
 
 def _spin_weights(in_spin, out_spin):
     """
