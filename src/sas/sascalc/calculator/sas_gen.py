@@ -6,12 +6,10 @@ from __future__ import print_function
 
 import os
 import sys
-import copy
 import logging
 
 import numpy as np
-from periodictable import formula
-from periodictable import nsf
+from periodictable import formula, nsf
 
 from .geni import Iq, Iqxy
 
@@ -217,7 +215,7 @@ class GenSAS(object):
             raise RuntimeError(mesg)
 
 def _vec(v):
-    return np.ascontiguousarray(v, 'd')
+    return np.ascontiguousarray(v, 'd') if v is not None else None
 
 class OMF2SLD(object):
     """
@@ -787,7 +785,7 @@ class MagSLD(object):
         self.has_conect = False
         self.pos_unit = self._pos_unit
         self.sld_unit = self._sld_unit
-        self.pix_type = 'pixel'
+        self.pix_type = 'pixel' if vol_pix is None else 'atom'
         self.pos_x = np.asarray(pos_x, 'd')
         self.pos_y = np.asarray(pos_y, 'd')
         self.pos_z = np.asarray(pos_z, 'd')
@@ -805,7 +803,10 @@ class MagSLD(object):
         self.pix_symbol = None
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
-        self.set_nodes()
+        if vol_pix is None:
+            self.set_nodes()
+        else:
+            self.set_pixel_volumes(vol_pix)
 
     def __str__(self):
         """
@@ -890,11 +891,12 @@ class MagSLD(object):
         """
         if self.sld_n is None:
             return
-        if vol.__class__.__name__ == 'ndarray':
+        if isinstance(vol, np.ndarray):
             self.vol_pix = vol
         elif vol.__class__.__name__.count('float') > 0:
             self.vol_pix = np.repeat(vol, len(self.sld_n))
         else:
+            # TODO: raise error rather than silently ignore
             self.vol_pix = None
 
     def get_sldn(self):
@@ -917,6 +919,7 @@ class MagSLD(object):
                 self.ynodes = int(ydist) + 1
                 self.znodes = int(zdist) + 1
             except Exception:
+                # TODO: don't silently ignore errors
                 self.xnodes = None
                 self.ynodes = None
                 self.znodes = None
@@ -952,6 +955,7 @@ class MagSLD(object):
                 self.set_pixel_volumes(vol)
                 self.has_stepsize = True
             except Exception:
+                # TODO: don't silently ignore errors
                 self.xstepsize = None
                 self.ystepsize = None
                 self.zstepsize = None
@@ -1056,9 +1060,15 @@ def sas_gen_c(self, qx, qy=None):
     total_volume = self.params['total_volume']
     background = self.params['background']
 
+    is_magnetic = (mx is not None and my is not None and mz is not None)
+    if not is_magnetic:
+        mx = my = mz = np.zeros_like(x)
     args = (
         (1 if self.is_avg else 0),
-        x, y, z, sld, mx, my, mz, vol, in_spin, out_spin, s_theta)
+        # WARNING: calc_msld in libfunc.c at line 174-175 swaps mz and my.
+        # To compare new to old need to swap the inputs.  Also need to
+        # reverse the sign.
+        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta)
     model = _sld2i.new_GenI(*args)
     I_out = np.empty_like(qx)
     if qy is not None and len(qy) > 0:
@@ -1072,9 +1082,10 @@ def sas_gen_c(self, qx, qy=None):
     result = (scale * vol_correction) * I_out + background
     return result
 
-def sasmodels_magnetic(self, qx, qy):
+def sasmodels_Iq(self, qx, qy):
     # Note: Need to add sasmodels/explore to the python path.
-    from realspace import calc_Iq_magnetic as Iq
+    from realspace import calc_Iq_magnetic, calc_Iqxy
+    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
 
     x, y, z = self.data_x, self.data_y, self.data_z
     if self.is_avg:
@@ -1089,102 +1100,141 @@ def sasmodels_magnetic(self, qx, qy):
     total_volume = self.params['total_volume']
     background = self.params['background']
 
+    is_magnetic = all(v is not None for v in rho_m)
+
+    #print("qx, qy", qx, qy)
+    if is_magnetic:
+        mx, my, mz = rho_m
     points = np.vstack((x, y, z)).T
-    I_out = Iq(
-        qx, qy, rho, rho_m, points, volume,
-        up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
-        )
-    I_out *= 1e6
+    if qy is None:
+        if self.is_avg:
+            I_out = calc_Iq_avg(qx, rho, points, volume)
+        else:
+            rmax = np.linalg.norm(np.max(points, axis=0) - np.min(points, axis=0))
+            r = r_bins(qx, rmax, over_sampling=10)
+            Pr = calc_Pr(r, rho, points, volume)
+            #import pylab; pylab.plot(r, Pr); pylab.figure()
+            I_out = calc_Iq_from_Pr(qx, r, Pr)
+    else:
+        if is_magnetic:
+            I_out = calc_Iq_magnetic(
+                qx, qy, rho, rho_m, points, volume,
+                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
+                )
+        else:
+            I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
+        I_out *= 1e6
 
     vol_correction = self.data_total_volume / total_volume
     result = (scale * vol_correction) * I_out + background
     return result
 
-def sasmodels_Iq(self, q):
-    # Note: Need to add sasmodels/explore to the python path.
-    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
-
-    x, y, z = self.data_x, self.data_y, self.data_z
-    if self.is_avg:
-        x, y, z = transform_center(x, y, z)
-    rho = (self.data_sldn - self.params['solvent_SLD'])*1e6
-    volume = self.data_vol
-    scale = self.params['scale']
-    total_volume = self.params['total_volume']
-    background = self.params['background']
-
-    points = np.vstack((x, y, z)).T
-
-    if self.is_avg:
-        Iq = calc_Iq_avg(q, rho, points, volume)
-    else:
-        rmax = np.linalg.norm(np.max(points, axis=0) - np.min(points, axis=0))
-        r = r_bins(q, rmax, over_sampling=10)
-        Pr = calc_Pr(r, rho, points, volume)
-        #import pylab; pylab.plot(r, Pr); pylab.figure()
-        Iq = calc_Iq_from_Pr(q, r, Pr)
-
-    vol_correction = self.data_total_volume / total_volume
-    result = (scale * vol_correction) * Iq + background
-    return result
-
+# author: Ben (https://stackoverflow.com/users/874660/ben)
+# https://stackoverflow.com/questions/8130823/set-matplotlib-3d-plot-aspect-ratio/19248731#19248731
+def set_axis_equal_3D(ax):
+    extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    sz = extents[:, 1] - extents[:, 0]
+    centers = np.mean(extents, axis=1)
+    maxsize = max(abs(sz))
+    r = maxsize/2
+    for ctr, dim in zip(centers, 'xyz'):
+        getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
 def compare(obj, qx, qy=None, plot_points=False):
     from matplotlib import pyplot as plt
     from timeit import default_timer as timer
 
-    sasmodels = False
+    try:
+        import realspace
+        sasmodels = True
+    except ImportError:
+        sasmodels = False
+
+    try:
+        from . import _sld2i
+        oldmodel = True
+    except ImportError:
+        oldmodel = False
+
+    #sasmodels = oldmodel = False
+
     if sasmodels:
         start = timer()
-        if qy is None:
-            I_sasmodels = sasmodels_Iq(obj, qx)
-        else:
-            I_sasmodels = sasmodels_magnetic(obj, qx, qy)
+        I_sasmodels = sasmodels_Iq(obj, qx, qy)
         print("Sasmodels time:", timer() - start)
 
     start = timer()
     I_new = obj.calculate_Iq(qx, qy)
     print("New time:", timer() - start)
 
-    start = timer()
-    I_old = sas_gen_c(obj, qx, qy)
-    print("Old time:", timer() - start)
+    if oldmodel:
+        start = timer()
+        I_old = sas_gen_c(obj, qx, qy)
+        print("Old time:", timer() - start)
 
-    print("max relative error:", (np.abs(I_old - I_new)/(np.abs(I_old)+np.abs(I_new))).max())
+    I_base = I_old if oldmodel else I_sasmodels if sasmodels else None
+    I_other = I_sasmodels if oldmodel and sasmodels else None
+    base_label = "Old" if oldmodel else "Sasmodels"
+    other_label = "Sasmodels"
+    new_label = "New"
+    if I_base is not None:
+        #rel_error = 0.5*np.abs(I_old - I_new)/(np.abs(I_old)+np.abs(I_new))
+        rel_error = np.abs(I_base- I_new)/np.abs(I_base)
+        print("max relative error:", rel_error[~np.isnan(rel_error)].max())
+    else:
+        rel_error = None
 
     if qy is not None and len(qy) > 0:
-        plt.subplot(131)
-        plt.imshow(np.log10(I_old))
-        plt.title("Old")
-        plt.colorbar()
-        if sasmodels:
-            plt.subplot(232)
-            plt.imshow(np.log10(I_sasmodels))
+        if I_base is not None:
+            plt.subplot(131)
+            plt.pcolormesh(qx, qy, np.log10(I_base))
+            plt.axis('equal')
+            plt.title(base_label)
             plt.colorbar()
-            plt.title("Sasmodels")
+        if I_other is not None:
+            plt.subplot(232)
+            plt.pcolormesh(qx, qy, np.log10(I_other))
+            plt.axis('equal')
+            plt.colorbar()
+            plt.title(other_label)
             plt.subplot(235)
-        else:
+        elif I_base is not None:
             plt.subplot(132)
-        plt.imshow(np.log10(I_new))
-        plt.title("New")
+        else:
+            plt.subplot(111)
+        plt.pcolormesh(qx, qy, np.log10(I_new))
+        plt.axis('equal')
+        plt.title(new_label)
         plt.colorbar()
-        plt.subplot(133)
-        plt.imshow(I_old - I_new)
-        plt.title("Difference")
-        plt.colorbar()
+        if rel_error is not None:
+            plt.subplot(133)
+            if False:
+                plt.pcolormesh(qx, qy, I_old - I_new)
+                plt.title("abs err")
+            else:
+                plt.pcolormesh(qx, qy, rel_error)
+                plt.title("rel err")
+            plt.axis('equal')
+            plt.colorbar()
     else:
-        plt.loglog(qx, I_old, '-', label="old")
-        plt.loglog(qx, I_new, '-', label="new")
-        if sasmodels:
-            plt.loglog(qx, I_sasmodels, '-', label="sasmodels")
+        if I_base is not None:
+            plt.loglog(qx, I_base, '-', label=base_label)
+        if I_other is not None:
+            plt.loglog(qx, I_other, '-', label=other_label)
+        plt.loglog(qx, I_new, '-', label=new_label)
         plt.legend()
 
     if plot_points:
         from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure()
         ax = Axes3D(fig)
+        #ax = fig.add_subplot((111), projection='3d')
         ax.plot(obj.data_x, obj.data_y, obj.data_z, '.', c="g",
                 alpha=0.7, markeredgecolor='gray', rasterized=True)
+        set_axis_equal_3D(ax)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
 
     plt.show()
 
@@ -1215,32 +1265,60 @@ def demo_pdb(is_avg=False):
     q = np.linspace(0, 1, 1350)
     compare(model, q)
 
-def demo_shape(samples=200, magnetic=False):
+def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
+               qmax=0.5, use_2d=False, **kw):
+    """
+    Sample from shape with analytic model.
+
+    *shape* is one of the shapes from sasmodels/explore/realspace.py
+
+    *samples* is the number of sample points
+
+    *view* is the rotation angle for the shape
+
+    *qmax* is the max q value
+
+    *use_2d* produces a 2D shape rather
+
+    Remaining keywords are specific to the shape.  See def build_SHAPE(...)
+    in realspace.py for details.
+    """
     # Note: Need to add sasmodels/explore to the python path.
     import realspace
-    magnetism = realspace.pol2rec(5, 0, 0) if magnetic else None
-    shape = realspace.TriaxialEllipsoid(125, 125, 50, 2, magnetism=magnetism)
+
+    builder = realspace.SHAPE_FUNCTIONS[shape]
+    shape, fx, fxy = builder(**kw)
     sampling_density = samples / shape.volume
-    if magnetic:
+    if shape.is_magnetic:
         rho, rho_m, points = shape.sample_magnetic(sampling_density)
         mx, my, mz = rho_m
+        up_i, up_f, up_angle = shape.spin
     else:
         rho, points = shape.sample(sampling_density)
         mx = my = mz = None
+        up_i, up_f, up_angle = 1.0, 1.0, 0.0
+    points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
+    #print("shape, pixel volume", shape.volume, shape.volume/len(points))
     x, y, z = points.T
     data = MagSLD(x, y, z, sld_n=rho, vol_pix=volume,
                   sld_mx=mx, sld_my=my, sld_mz=mz)
     model = GenSAS()
     model.set_sld_data(data)
+    #print("vol", data.vol_pix[:10], model.data_vol[:10])
     model.set_is_avg(False)
-    if magnetic:
-        q = np.linspace(-0.05, 0.05, 24)
+    model.params['background'] = 1e-2
+    model.params['Up_frac_in'] = up_i
+    model.params['Up_frac_out'] = up_f
+    model.params['Up_theta'] = up_angle
+    if use_2d or shape.is_magnetic:
+        q = np.linspace(-qmax, qmax, nq)
         qx, qy = np.meshgrid(q, q)
     else:
-        qx = np.linspace(0, 1, 1350)
+        qmax = np.log10(qmax)
+        qx = np.logspace(qmax-3, qmax, nq)
         qy = None
-    compare(model, qx, qy)
+    compare(model, qx, qy, plot_points=False)
 
 def test():
     """
@@ -1264,7 +1342,9 @@ if __name__ == "__main__":
     #print(test())
     #test()
     #demo_pdb(is_avg=True)
-    demo_pdb(is_avg=False)
+    #demo_pdb(is_avg=False)
     #demo_oommf()
-    #demo_shape(samples=200)
-    #demo_shape(samples=2000, magnetic=True)
+    demo_shape('ellip', samples=20000, qmax=0.1, use_2d=True, view=(30, 60, 0))
+    #demo_shape('ellip', samples=2000, qmax=0.1, use_2d=False, view=(30, 60, 0))
+    #demo_shape('ellip', samples=2000, qmax=0.05,
+    #           rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35)
