@@ -517,7 +517,7 @@ class Pinvertor(object):
         :return: 1 if accepted, 0 if rejected.
         """
         if self.get_qmin() <= 0 and self.get_qmax() <= 0:
-            return True
+            return slice(None, None)
         return (q >= self.get_qmin()) & (q <= self.get_qmax())
 
     def check_for_zero(self, x):
@@ -556,9 +556,6 @@ class Pinvertor(object):
         #Get accept_q vector across all q.
         q_accept_x = self.accept_q(self.x)
 
-        if isinstance(q_accept_x, bool):
-            #In the case of q_min and q_max <= 0, so returns scalar, and returns True
-            q_accept_x = np.ones(self.npoints, dtype=bool)
         #The x and a that will be used for the first part of 'a' calculation, given to ortho_transformed
         x_use = self.x[q_accept_x]
         a_use = a_obj[0:self.npoints, :]
