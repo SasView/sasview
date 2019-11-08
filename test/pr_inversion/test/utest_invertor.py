@@ -230,10 +230,7 @@ class TestBasicComponent(unittest.TestCase):
         dy = dy/total*self.invertor.d_max/len(x)
         y_true = y_true/total_true*self.invertor.d_max/len(x)
 
-        chi2 = 0.0
-        for i, _ in enumerate(x):
-            res = (y[i]-y_true[i])/dy[i]
-            chi2 += res*res
+        chi2 = np.sum(((y-y_true)/dy)**2)
 
         try:
             self.assertTrue(chi2/51.0 < 10.0)
@@ -291,10 +288,7 @@ class TestBasicComponent(unittest.TestCase):
         dy = dy/total*self.invertor.d_max/len(x)
         y_true = y_true/total_true*self.invertor.d_max/len(x)
 
-        chi2 = 0.0
-        for i, _ in enumerate(x):
-            res = (y[i]-y_true[i])/dy[i]
-            chi2 += res*res
+        chi2 = np.sum(((y-y_true)/dy)**2)
 
         try:
             self.assertTrue(chi2/51.0 < 50.0)
