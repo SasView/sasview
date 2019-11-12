@@ -1082,7 +1082,10 @@ def sas_gen_c(self, qx, qy=None):
     result = (scale * vol_correction) * I_out + background
     return result
 
-def sasmodels_Iq(self, qx, qy):
+def realspace_Iq(self, qx, qy):
+    """
+    Compute Iq for GenSAS object using sasmodels/explore/realspace.py
+    """
     # Note: Need to add sasmodels/explore to the python path.
     from realspace import calc_Iq_magnetic, calc_Iqxy
     from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
@@ -1090,9 +1093,9 @@ def sasmodels_Iq(self, qx, qy):
     x, y, z = self.data_x, self.data_y, self.data_z
     if self.is_avg:
         x, y, z = transform_center(x, y, z)
-    rho = self.data_sldn - self.params['solvent_SLD']
+    rho = (self.data_sldn - self.params['solvent_SLD'])*1e6
     volume = self.data_vol
-    rho_m = self.data_mx, self.data_my, self.data_mz
+    rho_m = (self.data_mx, self.data_my, self.data_mz)
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
@@ -1104,7 +1107,8 @@ def sasmodels_Iq(self, qx, qy):
 
     #print("qx, qy", qx, qy)
     if is_magnetic:
-        mx, my, mz = rho_m
+        rho_m = np.vstack(rho_m)*1e6
+
     points = np.vstack((x, y, z)).T
     if qy is None:
         if self.is_avg:
@@ -1123,9 +1127,9 @@ def sasmodels_Iq(self, qx, qy):
                 )
         else:
             I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
-        I_out *= 1e6
 
     vol_correction = self.data_total_volume / total_volume
+    #print("vol correction", vol_correction, self.data_total_volume, total_volume)
     result = (scale * vol_correction) * I_out + background
     return result
 
@@ -1140,87 +1144,120 @@ def set_axis_equal_3D(ax):
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
-def compare(obj, qx, qy=None, plot_points=False):
+def compare(obj, qx, qy=None, plot_points=False, theory=None):
     from matplotlib import pyplot as plt
     from timeit import default_timer as timer
 
     try:
         import realspace
-        sasmodels = True
+        use_realspace = True
     except ImportError:
-        sasmodels = False
+        use_realspace = False
 
     try:
         from . import _sld2i
-        oldmodel = True
+        # old model is too slow for large number of points
+        use_oldmodel = (len(obj.data_x) <= 21000)
     except ImportError:
-        oldmodel = False
+        use_oldmodel = False
 
-    #sasmodels = oldmodel = False
+    #use_realspace = oldmodel = False
+    use_theory = (theory is not None)
+    I_theory = (theory, "theory") if use_theory else None
 
-    if sasmodels:
+    if use_realspace:
         start = timer()
-        I_sasmodels = sasmodels_Iq(obj, qx, qy)
-        print("Sasmodels time:", timer() - start)
+        I_realspace = (realspace_Iq(obj, qx, qy), "realspace")
+        print("realspace time:", timer() - start)
+    else:
+        I_realspace = None
 
     start = timer()
     I_new = obj.calculate_Iq(qx, qy)
     print("New time:", timer() - start)
-
-    if oldmodel:
-        start = timer()
-        I_old = sas_gen_c(obj, qx, qy)
-        print("Old time:", timer() - start)
-
-    I_base = I_old if oldmodel else I_sasmodels if sasmodels else None
-    I_other = I_sasmodels if oldmodel and sasmodels else None
-    base_label = "Old" if oldmodel else "Sasmodels"
-    other_label = "Sasmodels"
     new_label = "New"
-    if I_base is not None:
-        #rel_error = 0.5*np.abs(I_old - I_new)/(np.abs(I_old)+np.abs(I_new))
-        rel_error = np.abs(I_base- I_new)/np.abs(I_base)
-        print("max relative error:", rel_error[~np.isnan(rel_error)].max())
+
+    if use_oldmodel:
+        start = timer()
+        I_old = (sas_gen_c(obj, qx, qy), "old")
+        print("Old time:", timer() - start)
     else:
-        rel_error = None
+        I_old = None
+
+    def select(a, b, c):
+        if a is None and b is None:
+            return c, None, None
+        elif a is None:
+            return b, c, None
+        else:
+            return a, b, c
+    base, other, extra = select(I_theory, I_old, I_realspace)
+    #base, other, extra = select(I_theory, I_realspace, I_old)
+
+    def calc_rel_err(target, label):
+        rel_error = np.abs(target - I_new)/np.abs(target)
+        index = (I_new > I_new.max()/10)
+        ratio = np.mean(target[index]/I_new[index])
+        print(label, "rel error =", rel_error[~np.isnan(rel_error)].max(),
+              ", %s/New ="%label, ratio)
+    if use_theory:
+        calc_rel_err(*I_theory)
+    if use_oldmodel:
+        calc_rel_err(*I_old)
+    if use_realspace:
+        calc_rel_err(*I_realspace)
+
+    if base is not None:
+        #rel_error = 0.5*np.abs(base[0] - I_new)/(np.abs(base[0])+np.abs(I_new))
+        #rel_error = np.abs(base[0]/np.sum(base[0]) - I_new/np.sum(I_new))
+        #rel_label = "|%s/sum(%s) - %s/sum(%s)|" % (base[1], base[1], new_label, new_label)
+        rel_error = np.abs(base[0] - I_new)/np.abs(base[0])
+        rel_label = "|%s - %s|/|%s|" % (base[1], new_label, base[1])
+        #print(rel_label, "=", rel_error[~np.isnan(rel_error)].max())
+    else:
+        rel_error, rel_label = None, None
+
+
 
     if qy is not None and len(qy) > 0:
-        if I_base is not None:
-            plt.subplot(131)
-            plt.pcolormesh(qx, qy, np.log10(I_base))
-            plt.axis('equal')
-            plt.title(base_label)
-            plt.colorbar()
-        if I_other is not None:
-            plt.subplot(232)
-            plt.pcolormesh(qx, qy, np.log10(I_other))
-            plt.axis('equal')
-            plt.colorbar()
-            plt.title(other_label)
-            plt.subplot(235)
-        elif I_base is not None:
-            plt.subplot(132)
-        else:
-            plt.subplot(111)
+        plt.subplot(131)
         plt.pcolormesh(qx, qy, np.log10(I_new))
         plt.axis('equal')
         plt.title(new_label)
         plt.colorbar()
+
+        if base is not None:
+            if other is None:
+                plt.subplot(131)
+            else:
+                plt.subplot(232)
+            plt.pcolormesh(qx, qy, np.log10(base[0]))
+            plt.axis('equal')
+            plt.title(base[1])
+            plt.colorbar()
+        if other is not None:
+            plt.subplot(235)
+            plt.pcolormesh(qx, qy, np.log10(other[0]))
+            plt.axis('equal')
+            plt.colorbar()
+            plt.title(other[1])
         if rel_error is not None:
             plt.subplot(133)
             if False:
-                plt.pcolormesh(qx, qy, I_old - I_new)
-                plt.title("abs err")
+                plt.pcolormesh(qx, qy, base[0] - I_new)
+                plt.title("%s - %s" % (base[1], new_label))
             else:
                 plt.pcolormesh(qx, qy, rel_error)
-                plt.title("rel err")
+                plt.title(rel_label)
             plt.axis('equal')
             plt.colorbar()
     else:
-        if I_base is not None:
-            plt.loglog(qx, I_base, '-', label=base_label)
-        if I_other is not None:
-            plt.loglog(qx, I_other, '-', label=other_label)
+        if use_realspace:
+            plt.loglog(qx, I_realspace[0], '-', label=I_realspace[1])
+        if use_oldmodel:
+            plt.loglog(qx, I_old[0], '-', label=I_old[1])
+        if use_theory:
+            plt.loglog(qx, I_theory[0], '-', label=I_theory[1])
         plt.loglog(qx, I_new, '-', label=new_label)
         plt.legend()
 
@@ -1291,10 +1328,12 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     sampling_density = samples / shape.volume
     if shape.is_magnetic:
         rho, rho_m, points = shape.sample_magnetic(sampling_density)
+        rho, rho_m = rho*1e-6, rho_m*1e-6
         mx, my, mz = rho_m
         up_i, up_f, up_angle = shape.spin
     else:
         rho, points = shape.sample(sampling_density)
+        rho = rho*1e-6
         mx = my = mz = None
         up_i, up_f, up_angle = 1.0, 1.0, 0.0
     points = realspace.apply_view(points, view)
@@ -1307,6 +1346,7 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     model.set_sld_data(data)
     #print("vol", data.vol_pix[:10], model.data_vol[:10])
     model.set_is_avg(False)
+    model.params['scale'] = 1.0
     model.params['background'] = 1e-2
     model.params['Up_frac_in'] = up_i
     model.params['Up_frac_out'] = up_f
@@ -1314,11 +1354,14 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     if use_2d or shape.is_magnetic:
         q = np.linspace(-qmax, qmax, nq)
         qx, qy = np.meshgrid(q, q)
+        theory = fxy(qx, qy, view)
     else:
         qmax = np.log10(qmax)
         qx = np.logspace(qmax-3, qmax, nq)
         qy = None
-    compare(model, qx, qy, plot_points=False)
+        theory = fx(qx)
+    theory = model.params['scale']*theory + model.params['background']
+    compare(model, qx, qy, plot_points=False, theory=theory)
 
 def test():
     """
@@ -1336,7 +1379,7 @@ def test():
     q = np.linspace(0, 0.1, 11)[1:]
     return model.runXY([q, q])
 
-if __name__ == "__main__":
+def demo():
     #demo_load()
     #demo_save()
     #print(test())
@@ -1344,7 +1387,29 @@ if __name__ == "__main__":
     #demo_pdb(is_avg=True)
     #demo_pdb(is_avg=False)
     #demo_oommf()
-    demo_shape('ellip', samples=20000, qmax=0.1, use_2d=True, view=(30, 60, 0))
-    #demo_shape('ellip', samples=2000, qmax=0.1, use_2d=False, view=(30, 60, 0))
-    #demo_shape('ellip', samples=2000, qmax=0.05,
-    #           rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35)
+
+    # Comparison to sasmodels.
+    # See sasmodels/explore/realspace.py:build_SHAPE for parameters.
+    pars = dict(
+        # Shape + qrange + magnetism (only for ellip).
+        shape='ellip', rab=125, rc=50, qmax=0.1,
+        #shape='ellip', rab=25, rc=50, qmax=0.1,
+        #shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
+
+        # 1D or 2D curve (ignored for magnetism).
+        #use_2d=False,
+        use_2d=True,
+
+        # Particle orientation.
+        view=(30, 60, 0),
+
+        # Number of points in the volume.
+        #samples=2000, nq=100,
+        samples=20000, nq=50,
+        #samples=200000, nq=20,
+        #samples=20000000, nq=10,
+        )
+    demo_shape(**pars)
+
+if __name__ == "__main__":
+    demo()
