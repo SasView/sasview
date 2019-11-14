@@ -226,20 +226,10 @@ packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
 
 
 # sas.sascalc.calculator
-gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
 packages.append("sas.sascalc.calculator")
-ext_modules.append(Extension("sas.sascalc.calculator._sld2i",
-                             sources=[
-                                 os.path.join(gen_dir, "sld2i_module.c"),
-                                 os.path.join(gen_dir, "sld2i.c"),
-                                 os.path.join(gen_dir, "libfunc.c"),
-                                 os.path.join(gen_dir, "librefl.c"),
-                             ],
-                             include_dirs=[gen_dir],
-                             )
-                   )
+
 
 # sas.sascalc.pr
 srcdir = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
