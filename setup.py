@@ -409,7 +409,6 @@ def append_file(file_list, dir_path):
 
 # Comment out the following to avoid rebuilding all the models
 file_sources = []
-append_file(file_sources, gen_dir)
 
 # Wojtek's hacky way to add doc files while bundling egg
 # def add_doc_files(directory):
