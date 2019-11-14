@@ -579,6 +579,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Complete the loading
         """
+        wx.CallAfter(self._complete_loading, data=data, filename=filename)
+
+    def _complete_loading(self, data=None, filename=''):
         #compute the slit size
         self.browse_button.Enable(True)
         self.browse_button.SetLabel('Load')
@@ -932,17 +935,20 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.npt_ctl.SetBackgroundColour("white")
         self.qmax_ctl.SetBackgroundColour("white")
         try:
-            npt_val = float(self.npt_ctl.GetValue())
+            npt_str = self.npt_ctl.GetValue()
+            npt_val = float(npt_str)
             if npt_val < 2 or npt_val > 1000:
-                raise
-            self.npt_ctl.SetValue(str(int(npt_val)))
+                raise ValueError("npt must be in [2, 1000]")
+            # Force npt into an integer
+            if str(int(npt_val)) != npt_str:
+                self.npt_ctl.SetValue(str(int(npt_val)))
             self.set_est_time()
         except:
             flag = _set_error(self, self.npt_ctl)
         try:
             qmax_val = float(self.qmax_ctl.GetValue())
             if qmax_val <= 0 or qmax_val > 1000:
-                raise
+                raise ValueError("qmax must be in [0, 1000]")
         except:
             flag = _set_error(self, self.qmax_ctl)
         for list in self.parameters:
@@ -952,7 +958,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 param_val = float(list[1].GetValue())
                 if param_name.count('frac') > 0:
                     if param_val < 0 or param_val > 1:
-                       raise
+                       raise ValueError("fraction must be in [0, 1]")
             except:
                 flag = _set_error(self, list[1])
         return flag
