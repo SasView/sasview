@@ -983,6 +983,28 @@ class MagSLD(object):
         self.line_y = line_y
         self.line_z = line_z
 
+def test():
+    """
+    Check that the GenSAS can load coordinates and compute I(q).
+    """
+    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    if not os.path.isfile(ofpath):
+        raise ValueError("file(s) not found: %r"%(ofpath,))
+    oreader = OMFReader()
+    omfdata = oreader.read(ofpath)
+    omf2sld = OMF2SLD()
+    omf2sld.set_data(omfdata)
+    model = GenSAS()
+    model.set_sld_data(omf2sld.output)
+    q = np.linspace(0, 0.1, 11)[1:]
+    return model.runXY([q, q])
+
+# =======================================================================
+#
+# Code to check the speed and correctness of the generic sas calculation.
+#
+# =======================================================================
+
 def _get_data_path(*path_parts):
     from os.path import realpath, join as joinpath, dirname
     # in sas/sascalc/calculator;  want sas/sasview/test
@@ -991,7 +1013,7 @@ def _get_data_path(*path_parts):
 
 def demo_load():
     """
-    Test code
+    Check loading of coordinate data.
     """
     tfpath = _get_data_path("1d_data", "CoreXY_ShellZ.txt")
     ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
@@ -1031,6 +1053,9 @@ def demo_load():
     plt.show()
 
 def demo_save():
+    """
+    Check saving of coordinate data.
+    """
     ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
     if not os.path.isfile(ofpath):
         raise ValueError("file(s) not found: %r"%(ofpath,))
@@ -1043,7 +1068,10 @@ def demo_save():
 
 def sas_gen_c(self, qx, qy=None):
     """
-    C interface to sas_gen, for comparison
+    C interface to sas_gen, for comparison to new python interface.
+
+    Note: this requires the old C implementation which may have already
+    been removed from the repository.
     """
     from . import _sld2i
 
@@ -1086,7 +1114,6 @@ def realspace_Iq(self, qx, qy):
     """
     Compute Iq for GenSAS object using sasmodels/explore/realspace.py
     """
-    # Note: Need to add sasmodels/explore to the python path.
     from realspace import calc_Iq_magnetic, calc_Iqxy
     from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
 
@@ -1136,6 +1163,9 @@ def realspace_Iq(self, qx, qy):
 # author: Ben (https://stackoverflow.com/users/874660/ben)
 # https://stackoverflow.com/questions/8130823/set-matplotlib-3d-plot-aspect-ratio/19248731#19248731
 def set_axis_equal_3D(ax):
+    """
+    Set equal axes on a 3D plot.
+    """
     extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
     sz = extents[:, 1] - extents[:, 0]
     centers = np.mean(extents, axis=1)
@@ -1145,6 +1175,11 @@ def set_axis_equal_3D(ax):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
 def compare(obj, qx, qy=None, plot_points=False, theory=None):
+    """
+    Compare GenSAS calculator *obj* to old C and sasmodels versions.
+
+    *theory* is the I(q) value for the shape, if known.
+    """
     from matplotlib import pyplot as plt
     from timeit import default_timer as timer
 
@@ -1217,8 +1252,6 @@ def compare(obj, qx, qy=None, plot_points=False, theory=None):
     else:
         rel_error, rel_label = None, None
 
-
-
     if qy is not None and len(qy) > 0:
         plt.subplot(131)
         plt.pcolormesh(qx, qy, np.log10(I_new))
@@ -1276,6 +1309,9 @@ def compare(obj, qx, qy=None, plot_points=False, theory=None):
     plt.show()
 
 def demo_oommf():
+    """
+    Calculate theory from saved OOMMF magnetic data.
+    """
     path = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
     reader = OMFReader()
     omfdata = reader.read(path)
@@ -1290,6 +1326,9 @@ def demo_oommf():
     compare(model, qx, qy)
 
 def demo_pdb(is_avg=False):
+    """
+    Calculation I(q) for object in pdb file.
+    """
     #filename = "diamond.pdb"
     filename = "dna.pdb"
     path = _get_data_path("coordinate_data", filename)
@@ -1320,7 +1359,6 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     Remaining keywords are specific to the shape.  See def build_SHAPE(...)
     in realspace.py for details.
     """
-    # Note: Need to add sasmodels/explore to the python path.
     import realspace
 
     builder = realspace.SHAPE_FUNCTIONS[shape]
@@ -1363,23 +1401,10 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     theory = model.params['scale']*theory + model.params['background']
     compare(model, qx, qy, plot_points=False, theory=theory)
 
-def test():
-    """
-    Test code
-    """
-    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
-    if not os.path.isfile(ofpath):
-        raise ValueError("file(s) not found: %r"%(ofpath,))
-    oreader = OMFReader()
-    omfdata = oreader.read(ofpath)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
-    model = GenSAS()
-    model.set_sld_data(omf2sld.output)
-    q = np.linspace(0, 0.1, 11)[1:]
-    return model.runXY([q, q])
-
 def demo():
+    """
+    Run a GenSAS operation demo.
+    """
     #demo_load()
     #demo_save()
     #print(test())
@@ -1411,5 +1436,20 @@ def demo():
         )
     demo_shape(**pars)
 
+def _setup_realspace_path():
+    """
+    Put sasmodels/explore on path so realspace
+    """
+    try:
+        import realspace
+    except ImportError:
+        from os.path import join as joinpath, realpath, dirname
+        path = realpath(joinpath(dirname(__file__),
+                                 '..', '..', '..', '..', '..',
+                                 'sasmodels', 'explore'))
+        sys.path.insert(0, path)
+        logger.info("inserting %r into python path for realspace", path)
+
 if __name__ == "__main__":
+    _setup_realspace_path()
     demo()
