@@ -3,8 +3,7 @@
 """
 Run sasview in place.  This allows sasview to use the python
 files in the source tree without having to call setup.py install
-first.  A rebuild is still necessary when working on sas models
-or c modules.
+first.
 
 Usage:
 
@@ -76,7 +75,8 @@ def setup_sasmodels():
     plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir
 
-def prepare(rebuild=True):
+# CRUFT: remove rebuild from prepare() interface
+def prepare(rebuild=None):
     # Don't create *.pyc files
     sys.dont_write_bytecode = True
 
@@ -125,25 +125,6 @@ def prepare(rebuild=True):
 
     # Put sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
-
-
-    # Check if the C extensions are already built
-    try:
-        from sas.sascalc.calculator import _sld2i
-        from sas.sascalc.file_converter import _bsl_loader
-    except ImportError:
-        rebuild = True
-
-    # Build C extensions if necessary.  Do an inplace build to simplify path.
-    if rebuild:
-        import subprocess
-        build_cmd = [sys.executable, "setup.py", "build_ext", "--inplace", "update"]
-        if os.name == 'nt':
-            build_cmd.append('--compiler=tinycc')
-        # need shell=True on windows to keep console box from popping up
-        shell = (os.name == 'nt')
-        with cd(root):
-            subprocess.call(build_cmd, shell=shell)
 
     set_git_tag()
     # print "\n".join(sys.path)
