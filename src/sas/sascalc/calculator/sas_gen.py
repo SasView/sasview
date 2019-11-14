@@ -1,6 +1,9 @@
 # pylint: disable=invalid-name
 """
-SAS generic computation and sld file readers
+SAS generic computation and sld file readers.
+
+Calculation checked by sampling from an ellipsoid and comparing Iq with the
+1D, 2D oriented and 2D oriented magnetic analytical model from sasmodels.
 """
 from __future__ import print_function
 
