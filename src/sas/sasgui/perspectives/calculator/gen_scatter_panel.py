@@ -235,7 +235,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                       wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             ## add parameter value
             ix += 1
-            value = model.getParam(param)
+            value = model.params[param]
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH * 2, 20),
                                 style=wx.TE_PROCESS_ENTER)
             #ctl.SetToolTipString(
@@ -850,7 +850,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         for list in self.parameters:
             param_name = list[0].GetLabelText()
             param_value = float(list[1].GetValue())
-            self.model.setParam(param_name, param_value)
+            self.model.params[param_name] = param_value
 
     def on_compute(self, event):
         """
