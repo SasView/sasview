@@ -38,7 +38,6 @@ with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
 package_dir = {}
 package_data = {}
 packages = []
-ext_modules = []
 
 # Remove all files that should be updated by this setup
 # We do this here because application updates these files from .sasview
@@ -253,31 +252,6 @@ packages.append("sas.sasgui.plottools")
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")
 # packages.append("sas.models")
 
-EXTENSIONS = [".c", ".cpp"]
-
-
-def append_file(file_list, dir_path):
-    """
-    Add sources file to sources
-    """
-    for f in os.listdir(dir_path):
-        if os.path.isfile(os.path.join(dir_path, f)):
-            _, ext = os.path.splitext(f)
-            if ext.lower() in EXTENSIONS:
-                file_list.append(os.path.join(dir_path, f))
-        elif os.path.isdir(os.path.join(dir_path, f)) and \
-                not f.startswith("."):
-            sub_dir = os.path.join(dir_path, f)
-            for new_f in os.listdir(sub_dir):
-                if os.path.isfile(os.path.join(sub_dir, new_f)):
-                    _, ext = os.path.splitext(new_f)
-                    if ext.lower() in EXTENSIONS:
-                        file_list.append(os.path.join(sub_dir, new_f))
-
-
-# Comment out the following to avoid rebuilding all the models
-file_sources = []
-
 # Wojtek's hacky way to add doc files while bundling egg
 # def add_doc_files(directory):
 #    paths = []
@@ -338,7 +312,6 @@ setup(
     package_dir=package_dir,
     packages=packages,
     package_data=package_data,
-    ext_modules=ext_modules,
     install_requires=required,
     zip_safe=False,
     entry_points={
