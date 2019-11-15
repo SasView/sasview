@@ -180,10 +180,9 @@ class GenSAS(object):
         :return: (I value)
         """
         if isinstance(x, list):
-            if len(x[0]) > 0:
-                msg = "Not a 1D vector."
-                raise ValueError(msg)
-            # 1D I is found at y =0 in the 2D pattern
+            if len(x[1]) > 0:
+                raise ValueError("Not a 1D vector.")
+            # 1D I is found at y=0 in the 2D pattern
             out = self.calculate_Iq(x[0])
             return out
         else:
