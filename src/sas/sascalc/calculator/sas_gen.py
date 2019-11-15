@@ -840,7 +840,7 @@ class MagSLD(object):
                 is_nonzero = (np.fabs(self.sld_mx) +
                               np.fabs(self.sld_my) +
                               np.fabs(self.sld_mz)).nonzero()
-                if is_nonzero.any():
+                if len(is_nonzero[0]) > 0:
                     self.sld_n = np.zeros_like(self.pos_x)
                     self.sld_n[is_nonzero] = sld_n
                 else:
