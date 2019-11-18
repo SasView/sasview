@@ -235,16 +235,15 @@ def _calc_Iqxy_magnetic_helper(
     # Note: enumerating a pair is slower than direct indexing in numba
     for k in range(len(qx)):
         qxk, qyk = qx[k], qy[k]
-        # If q is 0 then px and py are also zero.
-        one_over_qsq = 1./(qxk**2 + qyk**2) if qxk != 0. and qyk != 0. else 0.
-        perp = one_over_qsq*(qyk*mx - qxk*my)
+        # If q is near 0 then set px and py to zero.
+        # Note: norm is computed as a separate scalar so that the numba jit
+        # can figure out the proper type for perp even for q = 0
+        qsq = qxk**2 + qyk**2
+        norm = 1./qsq if qsq > 1e-16 else 0.
+        perp = norm*(qyk*mx - qxk*my)
         px = perp*(qyk*cos_spin + qxk*sin_spin)
         py = perp*(qyk*sin_spin - qxk*cos_spin)
         pz = mz
-        #if k == 25:
-        #    j = 10
-        #    print("q=(%g, %g)  m=(%g, %g, %g)  perp=(%g)  sigma=(%g,%g,%g)"
-        #          % (qxk, qyk, mx[j], my[j], mz[j], perp[j], px[j], py[j], pz[j]))
 
         ephase = vol*np.exp(1j*(qxk*x + qyk*y))
         if dd > 1e-10:
