@@ -1419,9 +1419,9 @@ def demo():
     # See sasmodels/explore/realspace.py:build_SHAPE for parameters.
     pars = dict(
         # Shape + qrange + magnetism (only for ellip).
-        shape='ellip', rab=125, rc=50, qmax=0.1,
+        #shape='ellip', rab=125, rc=50, qmax=0.1,
         #shape='ellip', rab=25, rc=50, qmax=0.1,
-        #shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
+        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
 
         # 1D or 2D curve (ignored for magnetism).
         #use_2d=False,
@@ -1432,7 +1432,7 @@ def demo():
 
         # Number of points in the volume.
         #samples=2000, nq=100,
-        samples=20000, nq=50,
+        samples=20000, nq=51,
         #samples=200000, nq=20,
         #samples=20000000, nq=10,
         )
