@@ -155,7 +155,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: �report button� followed by �save� makes an empty pdf file???
+* Fixes # 818: 'report button' followed by 'save' makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page

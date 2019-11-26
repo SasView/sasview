@@ -162,13 +162,13 @@ if __name__ == "__main__":
     addpath(joinpath(root, 'src'))
     addpath(joinpath(root, joinpath('..', 'sasmodels'))) # dependency (for loading custom_config.py during log setup)
 
-    from sas.logger_config import SetupLogger
-    logger = SetupLogger(__name__).config_development()
+    #from sas.logger_config import SetupLogger
+    #logger = SetupLogger(__name__).config_development()
 
-    logger.debug("Starting SASVIEW in debug mode.")
+    #logger.debug("Starting SASVIEW in debug mode.")
     prepare()
     setup_sasmodels()
 
     from sas.qtgui.MainWindow.MainWindow import run_sasview
     run_sasview()
-    logger.debug("Ending SASVIEW in debug mode.")
+    #logger.debug("Ending SASVIEW in debug mode.")

@@ -770,9 +770,8 @@ Unlike in single fit mode, the results of batch fits are not returned to
 the *BatchPage*. Instead, a spreadsheet-like :ref:`Grid_Window` will appear.
 
 If you want to visually check a graph of a particular fit, click on the name of
-a *Data set* in the *Grid Window* and then click the *View Fits* button. The
-data and the model fit will be displayed. If you select mutliple data sets they
-will all appear on one graph.
+a *Data set* in the *Grid Window* and then click the *Plot* button. The
+data and the model fit will be displayed.
 
 .. image:: view_button.png
 
@@ -780,11 +779,6 @@ will all appear on one graph.
 *data source should also work, but at the moment whilst this does change the*
 *data set displayed it always superimposes the 'theory' corresponding to the*
 *starting parameters.*
-
-If you select a 'Chi2' value and click the *View Fits* button a graph of the
-residuals for that data set is displayed. Again, if you select multiple 'Chi2'
-values then all the residuals data will appear on one graph. Also see
-:ref:`Assessing_Fit_Quality`.
 
 Chain Fitting
 ^^^^^^^^^^^^^

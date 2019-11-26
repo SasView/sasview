@@ -57,6 +57,16 @@ def SplashScreen():
 def run_sasview():
     app = QApplication([])
 
+    #Initialize logger
+    from sas.logger_config import SetupLogger
+    SetupLogger(__name__).config_development()
+
+    # initialize OpenCL setting
+    from sas import get_custom_config
+    SAS_OPENCL = get_custom_config().SAS_OPENCL
+    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
+        os.environ["SAS_OPENCL"] = SAS_OPENCL
+
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
