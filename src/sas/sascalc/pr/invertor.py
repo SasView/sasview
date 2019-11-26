@@ -7,26 +7,19 @@ FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
 from __future__ import division
 
-import numpy as np
-import sys
-import math
-import time
 import copy
+import math
 import os
 import re
+import time
 import logging
+
+import numpy as np
 from numpy.linalg import lstsq
 from scipy import optimize
 
-
-import os
-import os.path
-import unittest
-import math
-import numpy
-
-
 from .p_invertor import Pinvertor
+
 logger = logging.getLogger(__name__)
 
 def help():
@@ -146,6 +139,7 @@ class Invertor(Pinvertor):
                 )
         return (Invertor, tuple(), state, None, None)
 
+    # TODO: use properties rather than __getattr__/__setattr__
     def __setattr__(self, name, value):
         """
         Set the value of an attribute.
@@ -197,7 +191,6 @@ class Invertor(Pinvertor):
         """
         Return the value of an attribute
         """
-        #import numpy
         if name == 'x':
             out = np.ones(self.get_nx())
             self.get_x(out)
@@ -344,18 +337,14 @@ class Invertor(Pinvertor):
 
         # Compute chi^2
         res = self.residuals(out)
-        chisqr = 0
-        for i in range(len(res)):
-            chisqr += res[i]
-
-        self.chi2 = chisqr
+        self.chi2 = np.sum(res)
 
         # Store computation time
         self.elapsed = time.time() - t_0
 
         if cov_x is None:
             cov_x = np.ones([nfunc, nfunc])
-            cov_x *= math.fabs(chisqr)
+            cov_x *= math.fabs(self.chi2)
         return out, cov_x
 
     def pr_fit(self, nfunc=5):
@@ -377,10 +366,7 @@ class Invertor(Pinvertor):
 
         # Compute chi^2
         res = self.pr_residuals(out)
-        chisqr = 0
-        chisq = np.sum(res)
-
-        self.chisqr = chisqr
+        self.chi2 = np.sum(res)
 
         # Store computation time
         self.elapsed = time.time() - t_0
@@ -465,7 +451,6 @@ class Invertor(Pinvertor):
 
         # If we need to fit the background, add a term
         if self.est_bck:
-            nfunc_0 = nfunc
             nfunc += 1
 
         a = np.zeros([npts + nq, nfunc])
@@ -486,7 +471,7 @@ class Invertor(Pinvertor):
         # Sanity check
         try:
             float(chi2)
-        except:
+        except Exception:
             chi2 = -1.0
         self.chi2 = chi2
 
@@ -552,7 +537,7 @@ class Invertor(Pinvertor):
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % exc)
+            logger.warning("Invertor.estimate_numterms: %s", exc)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -725,13 +710,13 @@ class Invertor(Pinvertor):
                         toks = line.split('=')
                         try:
                             self.q_min = float(toks[1])
-                        except:
+                        except Exception:
                             self.q_min = None
                     elif line.startswith('#qmax='):
                         toks = line.split('=')
                         try:
                             self.q_max = float(toks[1])
-                        except:
+                        except Exception:
                             self.q_max = None
                     elif line.startswith('#slit_height='):
                         toks = line.split('=')

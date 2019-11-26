@@ -52,26 +52,24 @@ class Pinvertor(object):
         """
         pars = np.float64(pars)
 
-        residuals = []
         nslice = 25
-        regterm = calc.reg_term(pars, self.d_max, nslice)
         resid = (self.y[0:self.npoints] - calc.iq(pars, self.d_max, self.x))/self.err
+        regterm = calc.reg_term(pars, self.d_max, nslice)
 
         return list(resid**2 + self.alpha*regterm)
 
     def pr_residuals(self, pars):
         """
-        Function to call to evaluate the residuals for P(r) minimization (for testing purposes).
+        Function to call to evaluate the residuals for P(r) minimization.
 
         :param pars: input parameters.
         :return: residuals - list of residuals.
         """
         pars = np.float64(pars)
 
-        residuals = []
         nslice = 25
         regterm = calc.reg_term(pars, self.d_max, nslice)
-        resid = (self.y[0:npoints] - calc.pr(pars, self.d_max, self.x))/self.err
+        resid = (self.y[0:self.npoints] - calc.pr(pars, self.d_max, self.x))/self.err
         return list(resid**2 + self.alpha * regterm)
 
     def set_x(self, data):
@@ -335,9 +333,7 @@ class Pinvertor(object):
         q = np.atleast_1d(q)
 
         iq_val = calc.iq(pars, self.d_max, q)
-        if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
-        return iq_val
+        return iq_val[0] if iq_val.shape[0] == 1 else iq_val
 
     def get_iq_smeared(self, pars, q):
         """
@@ -353,13 +349,10 @@ class Pinvertor(object):
         q = np.atleast_1d(q)
         pars = np.float64(pars)
 
-
         npts = 21
-        iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height, self.slit_width, npts)
-        #If q was a scalar
-        if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
-        return iq_val
+        iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height,
+                                 self.slit_width, npts)
+        return iq_val[0] if iq_val.shape[0] == 1 else iq_val
 
     def pr(self, pars, r):
         """
@@ -375,10 +368,7 @@ class Pinvertor(object):
         pars = np.atleast_1d(pars)
         r = np.atleast_1d(r)
         pr_val = calc.pr(pars, self.d_max, r)
-        if len(pr_val) == 1:
-            #scalar
-            return np.asscalar(pr_val)
-        return pr_val
+        return pr_val[0] if pr_val.shape[0] == 1 else pr_val
 
     def get_pr_err(self, pars, pars_err, r):
         """
@@ -390,7 +380,6 @@ class Pinvertor(object):
 
         :return: (P(r), dP(r))
         """
-
         pars = np.atleast_1d(np.float64(pars))
         r = np.atleast_1d(np.float64(r))
 
@@ -426,11 +415,7 @@ class Pinvertor(object):
         q = np.float64(q)
         q = np.atleast_1d(q)
         ortho_val = calc.ortho_transformed(q, d_max, n)
-
-        if ortho_val.shape[0] == 1:
-            #If the q input was scalar.
-            return np.asscalar(ortho_val)
-        return ortho_val
+        return ortho_val[0] if ortho_val.shape[0] == 1 else ortho_val
 
     def oscillations(self, pars):
         """
@@ -530,7 +515,8 @@ class Pinvertor(object):
         """
         Check whether a q-value is within acceptable limits.
 
-        :return: 1 if accepted, 0 if rejected.
+        :return: selection of accepted values, as bool index vector or
+        as slice() to accept all.
         """
         if self.get_qmin() <= 0 and self.get_qmax() <= 0:
             return slice(None, None)
@@ -556,59 +542,58 @@ class Pinvertor(object):
         b_obj = np.zeros(self.npoints + nr)
 
         sqrt_alpha = np.sqrt(self.alpha)
-        pi = np.pi
-        offset = (1, 0)[self.est_bck == 1]
+        offset = 0 if self.est_bck == 1 else 1
 
         if self.check_for_zero(self.err):
             raise RuntimeError("Pinvertor.get_matrix: Some I(Q) points have no error.")
 
-        #Compute A
-        #Whether or not to use ortho_transformed_smeared.
-        smeared = False
-        if self.slit_width > 0 or self.slit_height > 0:
-            smeared = True
+        # Whether or not to use ortho_transformed_smeared.
+        smeared = (self.slit_width > 0 or self.slit_height > 0)
+        smear_npts = 21
 
-        npts = 21
-        #Get accept_q vector across all q.
+        # Get valid points as x, y and err.
         q_accept_x = self.accept_q(self.x)
-
-        #The x and a that will be used for the first part of 'a' calculation, given to ortho_transformed
         x_use = self.x[q_accept_x]
-        a_use = a_obj[0:self.npoints, :]
+        y_use = self.y[q_accept_x]
+        err_use = self.err[q_accept_x]
 
+        # Create views into the a_obj/b_obj arrays containing the first
+        # n rows.  Since these are views into the original array updating
+        # the values will update the original.
+        a_view = a_obj[0:self.npoints, :]
+        b_view = b_obj[0:self.npoints]
+
+        # Compute A
         for j in range(nfunc):
             if self.est_bck == 1 and j == 0:
-                a_use[q_accept_x, j] = 1.0/self.err[q_accept_x]
+                res = 1.0
             elif smeared:
-                a_use[q_accept_x, j] = calc.ortho_transformed_smeared(x_use, self.d_max, j+offset,
-                                                                      self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
+                res = calc.ortho_transformed_smeared(
+                    x_use, self.d_max, j+offset,
+                    self.slit_height, self.slit_width, smear_npts)
             else:
-                a_use[q_accept_x, j] = calc.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
-
-        a_obj[0:self.npoints, :] = a_use
+                res = calc.ortho_transformed(x_use, self.d_max, j+offset)
+            a_view[q_accept_x, j] = res/err_use
 
         for j in range(nfunc):
             i_r = np.arange(nr, dtype=np.float64)
 
-            #Implementing second stage A as a python vector operation with shape = [nr]
+            # Implement second stage A as a vector operation with shape = [nr].
             r = (self.d_max / nr) * i_r
-            tmp = pi * (j+offset) / self.d_max
-            res = (2.0 * sqrt_alpha * self.d_max/nr * tmp) * (2.0 * np.cos(tmp*r) + tmp * r * np.sin(tmp*r))
-            #Res should now be np vector size i_r.
+            tmp = np.pi * (j+offset) / self.d_max
+            res = ((2.0 * sqrt_alpha * self.d_max/nr * tmp)
+                   * (2.0 * np.cos(tmp*r) + tmp * r * np.sin(tmp*r)))
+            # Res should now be np vector size i_r.
             a_obj[self.npoints:self.npoints+nr, j] = res
 
-        #Compute B
-        x_accept_index = self.accept_q(self.x)
-        #The part of b used for the vector operations, of the accepted q values.
-        b_used = b_obj[0:self.npoints]
-        b_used[x_accept_index] = self.y[x_accept_index] / self.err[x_accept_index]
-        b_obj[0:self.npoints] = b_used
+        # Compute B
+        b_view[q_accept_x] = y_use / err_use
 
         return a_obj, b_obj
 
     def _get_invcov_matrix(self, nfunc, nr, a_obj):
         """
-        Compute the inverse covariance matrix, defined as inv_cov = a_transposed x a.
+        Compute the inverse covariance matrix, inv_cov = a_transposed x a.
 
         :param nfunc: number of base functions.
         :param nr: number of r-points used when evaluating reg term.
@@ -621,12 +606,10 @@ class Pinvertor(object):
         nr = int(nr)
         cov_obj = np.zeros([nfunc, nfunc])
         n_a = a_obj.size
-        n_cov = cov_obj.size
 
         if not n_a >= (nfunc * (nr + self.npoints)):
             raise RuntimeError("Pinvertor._get_invcov_matrix: a array too small.")
 
-        size = nr + self.npoints
         cov_obj[:, :] = np.dot(a_obj.T, a_obj)
         return cov_obj
 
