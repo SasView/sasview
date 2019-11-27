@@ -88,9 +88,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             list_datafiles = []
 
             for key_id in list(filenames.keys()):
-                if filenames[key_id].get_data().title:
+                if filenames[key_id].title:
                     # filenames with titles
-                    new_title = filenames[key_id].get_data().title
+                    new_title = filenames[key_id].title
                     list_datafiles.append(new_title)
                     self.list_data_items.append(new_title)
 
@@ -151,13 +151,20 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # plot result
             self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
+        # Add the new plot to the comboboxes
+        self.cbData1.addItem(self.output.name)
+        self.cbData2.addItem(self.output.name)
+        self.filenames[self.output.name] = self.output
+
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
+        name = self.txtOutputData.text()
+        self.output.name = name
         new_item = GuiUtils.createModelItemWithPlot(
             self.output,
-            name=self.txtOutputData.text())
+            name=name)
 
-        new_datalist_item = {str(self.txtOutputData.text()) + str(time.time()):
+        new_datalist_item = {name + str(time.time()):
                                  self.output}
         self.communicator. \
             updateModelFromDataOperationPanelSignal.emit(new_item, new_datalist_item)
@@ -348,8 +355,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         for key_id in list(self.filenames.keys()):
             # data with title
-            if self.filenames[key_id].get_data().title:
-                input = self.filenames[key_id].get_data().title
+            if self.filenames[key_id].title:
+                input = self.filenames[key_id].title
             # data without title
             else:
                 input = str(key_id)
@@ -358,7 +365,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
     def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
-        data_complete = self.filenames[key_id].get_data()
+        data_complete = self.filenames[key_id]
         dimension = data_complete.__class__.__name__
 
         if dimension in ('Data1D', 'Data2D'):
@@ -402,7 +409,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         if isinstance(data, Data2D):
             # plot 2D data
             plotter2D = Plotter2DWidget(self, quickplot=True)
-            plotter2D.data = data
             plotter2D.scale = 'linear'
 
             plotter2D.ax.tick_params(axis='x', labelsize=8)
@@ -417,14 +423,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # remove x- and ylabels
             plotter2D.y_label = ''
             plotter2D.x_label = ''
-            plotter2D.plot(show_colorbar=False)
+            plotter2D.plot(data=data, show_colorbar=False)
             plotter2D.show()
 
         elif isinstance(data, Data1D):
             # plot 1D data
             plotter = PlotterWidget(self, quickplot=True)
             data.scale = 'linear'
-            plotter.data = data
             plotter.showLegend = False
             graph.setLayout(layout)
             layout.addWidget(plotter)
@@ -432,7 +437,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='x', labelsize=8)
             plotter.ax.tick_params(axis='y', labelsize=8)
 
-            plotter.plot(hide_error=True, marker='.')
+            plotter.plot(data=data, hide_error=True, marker='.')
 
             plotter.show()
 

@@ -25,6 +25,8 @@ def _legendResize(width, parent):
     resize factor for the legend, based on total canvas width
     """
     # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
+    if not hasattr(parent.parent, "manager"):
+        return None
     if parent is None or parent.parent is None or parent.parent.manager is None \
         or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
         return None

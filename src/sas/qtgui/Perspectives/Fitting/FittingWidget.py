@@ -2524,8 +2524,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            if parameter_name != self.kernel_module.multiplicity_info.control:
-                self.kernel_module.setParam(parameter_name, value)
+            self.kernel_module.setParam(parameter_name, value)
         elif model_column == min_column:
             # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.kernel_module.details[parameter_name][1] = value
@@ -3457,9 +3456,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         profile_data._yaxis = "SLD(10^{-6}\AA^{-2})"
 
         plotter = PlotterWidget(self, quickplot=True)
-        plotter.data = profile_data
-        plotter.showLegend = True
-        plotter.plot(hide_error=True, marker='-')
+        plotter.showLegend = False
+        plotter.plot(data=profile_data, hide_error=True, marker='-')
 
         self.plot_widget = QtWidgets.QWidget()
         self.plot_widget.setWindowTitle("Scattering Length Density Profile")
