@@ -23,7 +23,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        self.data = self.base.data[0]
 
         # Connect the plot to event
         self.connect = self.base.connect

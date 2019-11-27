@@ -34,7 +34,6 @@ class BoxSumCalculator(BaseInteractor):
         self.axes = axes
         self._model = None
         self.update_model = False
-        self.data = self.base.data[0]
         # connect the artist for the motion
         self.connect = self.base.connect
 
