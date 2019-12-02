@@ -116,8 +116,7 @@ class GuiManager(object):
                                               "Tutorial.pdf"))
 
     def info(self, type, value, tb):
-        logger.error("SasView threw exception: " + str(value))
-        traceback.print_exception(type, value, tb)
+        logger.error("".join(traceback.format_exception(type, value, tb)))
 
     def addWidgets(self):
         """
