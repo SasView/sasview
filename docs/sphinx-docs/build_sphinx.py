@@ -235,8 +235,10 @@ def build():
     print("=== Build HTML Docs from ReST Files ===")
     subprocess.check_call([
         "sphinx-build",
+        "-v",
         "-b", "html", # Builder name. TODO: accept as arg to setup.py.
         "-d", joinpath(SPHINX_BUILD, "doctrees"),
+        "-W", "--keep-going",
         SPHINX_SOURCE,
         joinpath(SPHINX_BUILD, "html")
     ])
