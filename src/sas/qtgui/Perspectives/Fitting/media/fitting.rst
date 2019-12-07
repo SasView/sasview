@@ -12,7 +12,11 @@ Fitting Documentation
 
    Assessing Fit Quality <residuals_help>
 
+   Structure Factors <fitting_sq>
+
    Polydispersity Distributions <pd/polydispersity>
+
+   Oriented Particles <orientation/orientation>
 
    Smearing Functions <resolution>
 
