@@ -39,7 +39,7 @@ preliminary analysis, but only works reliably for weakly correlated parameters.
 For full uncertainty analysis, :ref:`fit-dream` uses a random walk to explore
 the parameter space near the minimum, showing pair-wise correlations
 amongst the parameter values.  In order for :ref:`fit-dream` to return the
-correct uncertainy, the function to be optimized should be a conditional
+correct uncertainty, the function to be optimized should be a conditional
 probability density, with *nllf* as the negative log likelihood function
 of seeing point $x$ in the parameter space.  Other functions
 can be fitted, but uncertainty estimates will be meaningless.
@@ -126,7 +126,7 @@ References
 
 .. [Levenberg1944]
     Levenberg, K.
-    *Quarterly Journal of Applied Mathmatics*
+    *Quarterly Journal of Applied Mathematics*
     1944, II (2), 164–168.
 
 .. [Marquardt1963]
@@ -264,7 +264,7 @@ will terminate.  Use ``--ftol=v`` and ``--xtol=v`` from the command line.
 From the command line, ``--keep_best`` uses a value near the previous minimum
 when restarting instead of using a random value within the parameter bounds.
 
-Use ``--fit=newton`` to select BFGS from the commandline.
+Use ``--fit=newton`` to select BFGS from the command line.
 
 References
 ----------
@@ -307,7 +307,7 @@ for each each parameter.  That is, if the parameter is bounded, it will use
 a uniform random number generate within the bounds.  If it is unbounded, it
 will use a uniform value in [0,1].  If the parameter corresponds to the result
 of a previous measurement with mean $\mu$ and standard deviation $\sigma$,
-then the initial values will be pulled from a gaussian random number generator.
+then the initial values will be pulled from a Gaussian random number generator.
 
 When to use
 -----------
@@ -344,7 +344,7 @@ within tolerance) and tiny (that is, all the points are close to each
 other) then the fit will terminate.  Use ``ftol=v`` and ``xtol=v`` from the
 command line.
 
-Use ``--fit=de`` to select diffrential evolution from the commandline.
+Use ``--fit=de`` to select differential evolution from the command line.
 
 References
 ----------
@@ -387,7 +387,7 @@ distribution.
 This means that the DREAM algorithm can be used to determine the parameter
 uncertainties.  Unlike the hessian estimate at the minimum that is
 used to report uncertainties from the other fitters, the resulting
-uncertainty need not gaussian.  Indeed, the resulting distribution can
+uncertainty need not Gaussian.  Indeed, the resulting distribution can
 even be multi-modal.  Fits to measured data using theory functions that
 have symmetric solutions have shown all equivalent solutions with approximately
 equal probability.
@@ -436,7 +436,7 @@ The options are as follows:
 
      *cov* (covariance matrix), in which the uncertainty is estimated using
      the covariance matrix at the initial point, and points are selected
-     at random from the corresponding gaussian ellipsoid
+     at random from the corresponding Gaussian ellipsoid
 
      *random* (uniform random), in which the points are selected at random
      within the bounds of the parameters
@@ -484,7 +484,7 @@ equilibrium distribution.
     :alt: example of a completed fit
 
     This DREAM fit completed successfully.  The *Convergence* plot is flat,
-    the *Parameter Trace* plot is flat and messy, the *Correlateions* plots
+    the *Parameter Trace* plot is flat and messy, the *Correlations* plots
     show nice blobs (and a bit of correlation between the *M1.radius* parameter
     and the *M1.radius.width* parameter), and the uncertainty plots show
     a narrow range of -log(P) values in the mostly brown histograms and
@@ -611,7 +611,7 @@ References
 Particle Swarm
 ==============
 
-Inspired by bird flocking behaviour, the particle swarm algorithm is a
+Inspired by bird flocking behavior, the particle swarm algorithm is a
 population-based method which updates an individual according to its
 momentum and a force toward the current best fit parameter values.  We
 did not explore variations of this algorithm in any detail.
@@ -636,7 +636,7 @@ parameters.
 individuals, $k$, is equal to the number of fitted parameters times the
 population scale factor.  The default scale factor is 1.
 
-Use ``--fit=ps`` to select particle swarm from the commandline.
+Use ``--fit=ps`` to select particle swarm from the command line.
 
 Add a few more lines
 
@@ -694,7 +694,7 @@ Each time it restarts it uses a random starting point.
 instead of using a random value within the parameter bounds.  This option is
 not available in the options dialog.
 
-Use ``--fit=rl`` to select random lines from the commandline.
+Use ``--fit=rl`` to select random lines from the command line.
 
 References
 ----------
@@ -746,7 +746,7 @@ dimensions one at a time, or a large value to step through all at once.
 distribution of temperatures.  The default is 25 points between
 0.1 and 10.  :ref:`fit-dream` runs at a fixed temperature of 1.0.
 
-Use ``--fit=pt`` to select parallel tempering from the commandline.
+Use ``--fit=pt`` to select parallel tempering from the command line.
 
 References
 ----------

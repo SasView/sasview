@@ -37,9 +37,9 @@ Selecting a model
 
 The models in SasView are grouped into categories. By default these consist of:
 
-*  *Cylinder* - cylindrical shapes (disc, right cylinder, cylinder with endcaps
+*  *Cylinder* - cylindrical shapes (disc, right cylinder, cylinder with end-caps
    etc)
-*  *Ellipsoid* - ellipsoidal shapes (oblate,prolate, core shell, etc)
+*  *Ellipsoid* - ellipsoidal shapes (oblate, prolate, core shell, etc)
 *  *Parellelepiped* - as the name implies
 *  *Sphere* - sheroidal shapes (sphere, core multishell, vesicle, etc)
 *  *Lamellae* - lamellar shapes (lamellar, core shell lamellar, stacked
@@ -133,7 +133,7 @@ Category Manager
 ----------------
 
 To change the model categorizations, either choose *Category Manager* from the
-*View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
+*View* option on the menu bar, or click on the *Modify* button on the *Fit Page*.
 
 .. image:: cat_fig0.png
 
@@ -207,7 +207,7 @@ From the *Fitting* option in the menu bar, select one of the options:
 
 *  *Add Custom Model* - to create a plugin model template with a helper dialog
 *  *Edit Custom Model* - to edit a plugin model in an editor window
-*  *Manage Custom Models* - to open a custom model manager allowing for a number of actions to be taken on custom models: listing, adding, deleteing, duplicating, editing
+*  *Manage Custom Models* - to open a custom model manager allowing for a number of actions to be taken on custom models: listing, adding, deleting, duplicating, editing
 *  *Add/Multiply Models* - to create a plugin model by summing/multiplying *existing models* in the model library
 
 .. _New_Plugin_Model:
@@ -343,7 +343,7 @@ above.
 
      sphere@hardsphere
 
-   This is because * and @ confer different behaviour on the model
+   This is because * and @ confer different behavior on the model
 
    *  *with @* - the radius and volume fraction in the S(Q) model are
       constrained to have the *same* values as the radius and volume fraction
@@ -935,7 +935,7 @@ Fitting with the following caveats:
    *Source choice for simultaneous fitting* table.
 
 .. note::
-   a corralary of the above is that currently models created as a sum|multiply
+   a corollary of the above is that currently models created as a sum|multiply
    model will not work as desired because the generated model parameters have a
    p#_ appended to the beginning and thus radius and p1_radius will not be
    recognized as the same parameter.
