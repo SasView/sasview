@@ -1,5 +1,7 @@
 .. fdr-pdfs.rst
 
+:orphan:
+
 .. _FDR:
 
 Fibre Diffraction Review References
