@@ -763,7 +763,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def modifyViewOnRow(self, row, font=None, brush=None):
         """
-        Chage how the given row of the main model is shown
+        Change how the given row of the main model is shown
         """
         fields_enabled = False
         if font is None:
@@ -2312,7 +2312,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def fromModelToQModel(self, model_name):
         """
-        Setting model parameters into QStandardItemModel based on selected _model_
+        Setting model parameters into QStandardItemModel based on selected model
         """
         name = model_name
         kernel_module = None
@@ -2382,7 +2382,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
-        Setting model parameters into QStandardItemModel based on selected _structure factor_
+        Setting model parameters into QStandardItemModel based on selected structure factor
         """
         if structure_factor is None or structure_factor=="None":
             return
