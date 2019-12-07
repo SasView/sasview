@@ -16,7 +16,7 @@ class LineModel(object):
     """
     Class that evaluates a linear model.
 
-    f(x) = Ax + B
+    $f(x) = Ax + B$
 
     List of default parameters:
     A = 1.0
