@@ -10,13 +10,13 @@ Features
 ========
 
 New in Version 5.0
---------------------
+------------------
 This is a new version of SasView featuring new and enhanced GUI, back-end calculations, GUI separation, optimization of calculations and other improvements. This release also includes beta (decoupling) approximation for intensity calculation.
 The release is based on Python 3 and Qt5/PyQt5.
 We recommend that you avoid using installation folder paths which contain spaces, non-Latin characters or characters not available on a standard keyboard.
 
 Changes/Improvements from 5.0.beta2
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Beta (decoupling) approximation has been introduced
 * Stop fit button added to Constrained and Simultaneous Fitting
 * Plotting has been improved
@@ -33,7 +33,7 @@ Documentation
 * Tutorials have been adapted to match 5.0 interface
 
 Known Issues
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^
 All the known bugs/feature requests can be found in the issues on github.
 
 [sasview](https://github.com/SasView/sasview/milestone/9)

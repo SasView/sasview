@@ -267,8 +267,8 @@ a P(Q) model has been selected).
 
 .. _Add/Multiply Models:
 
-Add \ Multiply Models
-^^^^^^^^^^^^^^^^^^^
+Add / Multiply Models
+^^^^^^^^^^^^^^^^^^^^^
 
 Choosing the *Add/Multiply models* item from the *Fitting* menu
 
@@ -544,14 +544,13 @@ To *paste* parameters, either:
 If either operation is successful a message will appear in the info line at the
 bottom of the SasView window.
 
-  ..
-  Bookmark
-  ^^^^^^^^
+Bookmark
+^^^^^^^^
 
-  To *Bookmark* a *Fit Page* either:
+To *Bookmark* a *Fit Page* either:
 
-  *  Select a *Fit Page* and then click on *Bookmark* in the tool bar, or
-  *  Right-click and select the *Bookmark* in the popup menu.
+*  Select a *Fit Page* and then click on *Bookmark* in the tool bar, or
+*  Right-click and select the *Bookmark* in the popup menu.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -581,6 +580,7 @@ Single Fit Mode
 This mode fits one data set.
 
 .. When data is sent to the fitting it is plotted in a graph window as markers.
+
 When data is sent to the fitting, the Fit Page will show the dataset name.
 
 .. image:: dataset_name.png
@@ -653,15 +653,11 @@ Method
 
 Now go to each *FitPage* in turn and:
 
-  Select the required category and model;
-
-  Unselect all the model parameters;
-
-  Enter some starting guesses for the parameters;
-
-  Enter any parameter limits (recommended);
-
-  Select which parameters will refine (selecting all is generally a bad idea...);
+*  Select the required category and model;
+*  Unselect all the model parameters;
+*  Enter some starting guesses for the parameters;
+*  Enter any parameter limits (recommended);
+*  Select which parameters will refine (selecting all is generally a bad idea...);
 
 When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu bar.
 
