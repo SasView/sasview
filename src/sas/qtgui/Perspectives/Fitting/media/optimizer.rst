@@ -69,7 +69,7 @@ Levenberg-Marquardt
     :alt: Levenberg-Marquardt option screen.
     :align: left
 
-The Levenberg-Marquardt algorithm has been
+The Levenberg-Marquardt algorithm [Levenberg1944]_ [Marquardt1963]_ has been
 the standard method for non-linear data fitting.  As a gradient descent
 trust region method, it starts at the initial value of the function and
 steps in the direction of the derivative until it reaches the minimum.
@@ -145,7 +145,8 @@ Nelder-Mead Simplex
     :align: left
 
 The Nelder-Mead downhill simplex algorithm is a robust optimizer which
-does not require the function to be continuous or differentiable.
+does not require the function to be continuous or differentiable
+[Nelder1965]_.
 It uses the relative values of the function at the corners of a
 simplex (an n-dimensional triangle) to decide which points of the simplex
 to update.  It will take the worst value and try moving it inward or
@@ -228,7 +229,8 @@ Quasi-Newton BFGS
 
 Broyden-Fletcher-Goldfarb-Shanno is a gradient descent method which uses the
 gradient to determine the step direction and an approximation of the Hessian
-matrix to estimate the curvature and guess a step size.  The step is further
+matrix to estimate the curvature and guess a step size [Dennis1987]_.
+The step is further
 refined with a one-dimensional search in the direction of the gradient.
 
 When to use
@@ -285,7 +287,8 @@ Differential Evolution
     :align: left
 
 Differential evolution is a population based algorithm which uses differences
-between points as a guide to selecting new points.  For each member of the
+between points as a guide to selecting new points [Storn1997]_.
+For each member of the
 population a pair of points is chosen at random, and a difference vector is
 computed.  This vector is scaled, and a random subset of its components are
 added to the current point based on crossover ratio. This new point is
@@ -459,13 +462,14 @@ which is (population x number of fitted parameters) points. This option
 is available for compatibility; it is more useful to set the number of
 samples directly.  Use ``--steps=n`` from the command line.
 
-Use ``--fit=dream`` to select DREAM from the commandline.
+Use ``--fit=dream`` to select DREAM from the command line.
 
 Output
 ------
 
 DREAM produces a number of different outputs, and there are a number of
-things to check before using its reported uncertainty values.  The main
+things to check before using its reported uncertainty values
+[Vrugt2009]_ [Kramer2010]_ [JCGM2008]_.  The main
 goal of selecting ``--burn=n`` is to wait long enough to reach the
 equilibrium distribution.
 
@@ -613,8 +617,9 @@ Particle Swarm
 
 Inspired by bird flocking behavior, the particle swarm algorithm is a
 population-based method which updates an individual according to its
-momentum and a force toward the current best fit parameter values.  We
-did not explore variations of this algorithm in any detail.
+momentum and a force toward the current best fit parameter values
+[Kennedy1995]_.
+We did not explore variations of this algorithm in any detail.
 
 When to use
 -----------
@@ -660,7 +665,8 @@ Most of the population based algorithms ignore the value of the function
 when choosing the points in the next iteration.  Random lines is a new
 style of algorithm which fits a quadratic model to a selection from the
 population, and uses that model to propose a new point in the next
-generation of the population.  The hope is that the method will inherit
+generation of the population [Sahin2013]_.
+The hope is that the method will inherit
 the robustness of the population based algorithms as well as the rapid
 convergence of the newton descent algorithms.
 
@@ -712,7 +718,8 @@ References
 Parallel Tempering
 ==================
 
-Parallel tempering is an MCMC algorithm for uncertainty analysis.  This
+Parallel tempering is an MCMC algorithm for uncertainty analysis
+[Swendsen1986]_.  This
 version runs at multiple temperatures simultaneously, with chains at high
 temperature able to more easily jump between minima and chains at low
 temperature to fully explore the minima.  Like :ref:`fit-dream` it has a
