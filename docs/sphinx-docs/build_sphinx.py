@@ -181,7 +181,12 @@ def apidoc():
         "-o", SASVIEW_API_TARGET, # Output dir.
         "-d", "8", # Max depth of TOC.
         "-H", "SasView", # Package header
-        SASVIEW_BUILD
+        SASVIEW_BUILD,
+        # omit the following documents from the API documentation
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "GUITests.py"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py"),
+        joinpath(SASVIEW_BUILD, "sas", "sasview", "welcome_panel.py"),
+        joinpath(SASVIEW_BUILD, "sas", "sasview", "wxcruft.py"),
     ])
 
     subprocess.check_call([
@@ -190,7 +195,8 @@ def apidoc():
         "-d", "8", # Max depth of TOC.
         "-H", "sasmodels", # Package header
         SASMODELS_BUILD,
-        joinpath(SASMODELS_BUILD, "sasmodels", "models"), # exclude
+        # omit the following documents from the API documentation
+        joinpath(SASMODELS_BUILD, "sasmodels", "models"),
     ])
 
 def build_pdf():
