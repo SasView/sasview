@@ -671,14 +671,13 @@ them in the first place!).
 
 .. image:: constraint_1.png
 
-..
-  To tie parameters between the data sets with constraints, select the data sets and right click.
-  From the menu choose *Mutual constraint of parameters in selected models*
+To tie parameters between the data sets with constraints, select the data sets and right click.
+From the menu choose *Mutual constraint of parameters in selected models*
 
-  .. image:: constraint_menu.png
+.. image:: constraint_menu.png
 
-  When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
-  button on the individual *FitPage*'s.
+When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
+button on the individual *FitPage*'s.
 
 Simultaneous Fits without Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -932,8 +931,8 @@ Fitting with the following caveats:
    second and later *BatchPage* s that have the same name as a parameter in the
    first will show up allowing for plotting of that parameter across the
    models. The other parameters will not be available in the grid.
-  To choose the order of the fitpages in the fitting process, drag and drop rows in the
-  *Source choice for simultaneous fitting* table. 
+   To choose the order of the fitpages in the fitting process, drag and drop rows in the
+   *Source choice for simultaneous fitting* table.
 
 .. note::
    a corralary of the above is that currently models created as a sum|multiply
@@ -941,23 +940,21 @@ Fitting with the following caveats:
    p#_ appended to the beginning and thus radius and p1_radius will not be
    recognized as the same parameter.
 
+.. image:: combine_batch_grid.png
 
-..
-  .. image:: combine_batch_grid.png
+In the example shown above the data is a time series with a shifting peak.
+The first part of the series was fitted using the *broad_peak* model, while
+the rest of the data were fit using the *gaussian_peak* model. Unfortunately the
+time is not listed in the file but the file name contains the information. As
+described in :ref:`Grid_Window`, a column can be added manually, in this case
+called time, and the peak position plotted against time.
 
-  In the example shown above the data is a time series with a shifting peak.
-  The first part of the series was fitted using the *broad_peak* model, while
-  the rest of the data were fit using the *gaussian_peak* model. Unfortunately the
-  time is not listed in the file but the file name contains the information. As
-  described in :ref:`Grid_Window`, a column can be added manually, in this case
-  called time, and the peak position plotted against time.
+.. image:: combine_batch_plot.png
 
-  .. image:: combine_batch_plot.png
+Note the discontinuity in the peak position.  This reflects the fact that the
+Gaussian fit is a rather poor model for the data and is not actually
+finding the peak.
 
-  Note the discontinuity in the peak position.  This reflects the fact that the
-  Gaussian fit is a rather poor model for the data and is not actually
-  finding the peak.
-..
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. note::  This help document was last changed by Piotr Rozyczko, 10 May 2019
