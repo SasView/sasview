@@ -346,8 +346,6 @@
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="../../UI/main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
