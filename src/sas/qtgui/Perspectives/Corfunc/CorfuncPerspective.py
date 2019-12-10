@@ -300,11 +300,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._update_calculator()
         try:
             params, extrapolation, _ = self._calculator.compute_extrapolation()
+            self.model.itemChanged.disconnect(self.model_changed)
+
             self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
             self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
             self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
             self.model.setItem(W.W_PORODSIGMA,
                                QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
+            self.model.itemChanged.connect(self.model_changed)
+            self.model_changed(None)
 
             self._canvas.extrap = extrapolation
             self._canvas.draw_q_space()
@@ -355,12 +359,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         params = self._calculator.extract_parameters(transforms[0])
 
+        self.model.itemChanged.disconnect(self.model_changed)
         self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
         self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
         self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
+        self.model.itemChanged.connect(self.model_changed)
+        self.model_changed(None)
 
 
     def update_real_space_plot(self, datas):
@@ -463,26 +470,30 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdCalculateBg.setEnabled(True)
         self.cmdExtrapolate.setEnabled(True)
 
-        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
+        try:
+            self.model.itemChanged.disconnect(self.model_changed)
+            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
 
-        self._canvas.data = data
-        self._canvas.extrap = None
-        self._canvas.draw_q_space()
-        self.cmdTransform.setEnabled(False)
-        self._path = data.name
-        self._realplot.data = None
-        self._realplot.draw_real_space()
+            self._canvas.data = data
+            self._canvas.extrap = None
+            self._canvas.draw_q_space()
+            self.cmdTransform.setEnabled(False)
+            self._path = data.name
+            self._realplot.data = None
+            self._realplot.draw_real_space()
 
-        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
+            self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
+        finally:
+            self.model.itemChanged.connect(self.model_changed)
 
     def setClosable(self, value=True):
         """
