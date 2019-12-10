@@ -5,7 +5,6 @@ from shutil import copyfile
 from PyQt5 import QtWidgets, QtCore
 
 from sas.sascalc.fit import models
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -44,9 +43,9 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         Read in custom models from the default location
         """
         self.lstModels.clear()
-        plugins = ModelUtilities._find_models()
-        models = list(plugins.keys())
-        self.lstModels.addItems(models)
+        plugins = models.find_plugin_models()
+        model_list = list(plugins.keys())
+        self.lstModels.addItems(model_list)
 
     def addSignals(self):
         """
@@ -89,7 +88,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
             return
 
         for plugin in plugins_to_delete:
-            name = os.path.join(ModelUtilities.find_plugins_dir(), plugin + ".py")
+            name = os.path.join(models.find_plugins_dir(), plugin + ".py")
             os.remove(name)
 
         self.parent.communicate.customModelDirectoryChanged.emit()
@@ -107,7 +106,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
 
         plugins_to_copy = [s.data() for s in self.lstModels.selectionModel().selectedRows()]
-        plugin_dir = ModelUtilities.find_plugins_dir()
+        plugin_dir = models.find_plugins_dir()
         for plugin in plugins_to_copy:
             src_filename = plugin + ".py"
             src_file = os.path.join(plugin_dir, src_filename)
@@ -140,4 +139,3 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
         location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#new-plugin-model"
         self.parent.showHelp(location)
-                
