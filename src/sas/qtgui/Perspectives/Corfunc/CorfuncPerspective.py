@@ -238,6 +238,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdExtrapolate.setEnabled(False)
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+        self.cmdExtract.clicked.connect(self.extract)
+        self.cmdExtract.setEnabled(False)
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
 
@@ -342,19 +344,26 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
 
     def finish_transform(self, transforms):
+        self._realplot.data = transforms
+
+        self.update_real_space_plot(transforms)
+
+        self._realplot.draw_real_space()
+        self.cmdExtract.setEnabled(True)
+        self.cmdSave.setEnabled(True)
+
+    def extract(self):
+        transforms = self._realplot.data
+
         params = self._calculator.extract_parameters(transforms[0])
+
         self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
         self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
         self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        self._realplot.data = transforms
 
-        self.update_real_space_plot(transforms)
-
-        self._realplot.draw_real_space()
-        self.cmdSave.setEnabled(True)
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""

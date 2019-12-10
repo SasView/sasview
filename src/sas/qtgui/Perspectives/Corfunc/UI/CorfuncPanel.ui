@@ -496,6 +496,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="cmdExtract">
+       <property name="toolTip">
+        <string>Extract model parameters from the real space transformed curve.</string>
+       </property>
+       <property name="text">
+        <string>Extract Parameters</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="cmdSave">
        <property name="toolTip">
         <string>Export the calculated real space correlation function to a file.</string>
