@@ -487,6 +487,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
         self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
+        self.model.itemChanged.connect(self.model_changed)
 
         self._canvas.data = data
         self._canvas.extrap = None
@@ -496,7 +497,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._realplot.data = None
         self._realplot.draw_real_space()
 
-        self.model.itemChanged.connect(self.model_changed)
 
     def setClosable(self, value=True):
         """
