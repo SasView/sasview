@@ -298,29 +298,34 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     def extrapolate(self):
         """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
+        self.model.itemChanged.disconnect(self.model_changed)
         try:
             params, extrapolation, _ = self._calculator.compute_extrapolation()
-            self.model.itemChanged.disconnect(self.model_changed)
-
-            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
-            self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
-            self.model.setItem(W.W_PORODSIGMA,
-                               QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
-            self.model.itemChanged.connect(self.model_changed)
-            self.model_changed(None)
-
-            self._canvas.extrap = extrapolation
-            self._canvas.draw_q_space()
-            self.cmdTransform.setEnabled(True)
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
                       "cutoff Q, or increasing the lower Q."
             QtWidgets.QMessageBox.warning(self, "Calculation Error",
                                       message)
+            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
             self._canvas.extrap = None
-            self._canvas.draw_q_space()
+            self.model_changed(None)
+            return
+        finally:
+            self.model.itemChanged.connect(self.model_changed)
+
+        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
+        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
+        self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
+        self.model.setItem(W.W_PORODSIGMA,
+                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
+
+        self._canvas.extrap = extrapolation
+        self.model_changed(None)
+        self.cmdTransform.setEnabled(True)
 
 
     def transform(self):
@@ -470,30 +475,28 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdCalculateBg.setEnabled(True)
         self.cmdExtrapolate.setEnabled(True)
 
-        try:
-            self.model.itemChanged.disconnect(self.model_changed)
-            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
+        self.model.itemChanged.disconnect(self.model_changed)
+        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
 
-            self._canvas.data = data
-            self._canvas.extrap = None
-            self._canvas.draw_q_space()
-            self.cmdTransform.setEnabled(False)
-            self._path = data.name
-            self._realplot.data = None
-            self._realplot.draw_real_space()
+        self._canvas.data = data
+        self._canvas.extrap = None
+        self.model_changed(None)
+        self.cmdTransform.setEnabled(False)
+        self._path = data.name
+        self._realplot.data = None
+        self._realplot.draw_real_space()
 
-            self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
-        finally:
-            self.model.itemChanged.connect(self.model_changed)
+        self.model.itemChanged.connect(self.model_changed)
 
     def setClosable(self, value=True):
         """
