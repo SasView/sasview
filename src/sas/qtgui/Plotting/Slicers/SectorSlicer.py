@@ -62,7 +62,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
 
     def set_layer(self, n):
         """
-         Allow adding plot to the same panel
+        Allow adding plot to the same panel
+
         :param n: the number of layer
         """
         self.layernum = n
@@ -325,6 +326,7 @@ class SideInteractor(BaseInteractor):
     def set_layer(self, n):
         """
         Allow adding plot to the same panel
+
         :param n: the number of layer
         """
         self.layernum = n

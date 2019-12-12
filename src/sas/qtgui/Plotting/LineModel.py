@@ -16,7 +16,7 @@ class LineModel(object):
     """
     Class that evaluates a linear model.
 
-    f(x) = Ax + B
+    $f(x) = Ax + B$
 
     List of default parameters:
     A = 1.0
@@ -65,15 +65,17 @@ class LineModel(object):
         """
         Evaluate the model
 
-        :note: This is the function called by fitDialog to calculate the
-        the y(xmin) and y(xmax), but the only difference between this and
-        runXY is when the if statement is true. I however cannot see what that
-        function is for.  It needs to be documented here or removed.
-        -PDB 7/10/16 
-
         :param x: simple value
 
         :return: (Line value)
+
+        .. note::
+            This is the function called by fitDialog to calculate the
+            the y(xmin) and y(xmax), but the only difference between this and
+            runXY is when the if statement is true. I however cannot see what that
+            function is for.  It needs to be documented here or removed.
+            -PDB 7/10/16
+
         """
         if x.__class__.__name__ == 'list':
             return self._line(x[0] * math.cos(x[1])) * \
@@ -88,15 +90,16 @@ class LineModel(object):
         """
         Evaluate the model.
         
-        :note: This is to be what is called by fitDialog for the actual fit
-        but the only difference between this and run is when the if 
-        statement is true. I however cannot see what that function
-        is for.  It needs to be documented here or removed. -PDB 7/10/16 
 
         :param x: simple value
 
         :return: Line value
 
+        ..note::
+            This is to be what is called by fitDialog for the actual fit
+            but the only difference between this and run is when the if
+            statement is true. I however cannot see what that function
+            is for.  It needs to be documented here or removed. -PDB 7/10/16
         """
         if x.__class__.__name__ == 'list':
             return self._line(x[0]) * self._line(x[1])
