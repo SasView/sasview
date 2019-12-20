@@ -115,7 +115,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .omf, .sld and .pdf datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load data and generate 3D plots in real space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .omf, .sld and .pdb datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load data and generate 3D plots in real space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Load</string>
