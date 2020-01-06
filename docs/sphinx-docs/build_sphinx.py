@@ -74,7 +74,7 @@ def inplace_change(filename, old_string, new_string):
                 f.flush()
                 f.close()
         else:
-                print('No occurences of "{old_string}" found.'.format(**locals()))
+                print('No occurrences of "{old_string}" found.'.format(**locals()))
 
 def _remove_dir(dir_path):
     """Removes the given directory."""

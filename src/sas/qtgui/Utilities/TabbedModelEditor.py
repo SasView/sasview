@@ -493,9 +493,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     def strFromParamDict(cls, param_dict):
         """
         Creates string from parameter dictionary
-        {0: ('variable','value'),
-         1: ('variable','value'),
-         ...}
+
+        Example::
+
+            {
+                0: ('variable','value'),
+                1: ('variable','value'),
+                ...
+            }
         """
         param_str = ""
         for _, params in param_dict.items():

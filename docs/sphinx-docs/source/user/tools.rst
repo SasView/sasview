@@ -26,5 +26,5 @@ Tools & Utilities
 
    Image Viewer <qtgui/Calculators/image_viewer_help>
 
-   File Converter <qtgui/file_converter/file_converter_help>
-   
+..   File Converter <qtgui/file_converter/file_converter_help>
+..   Not implemented yet
