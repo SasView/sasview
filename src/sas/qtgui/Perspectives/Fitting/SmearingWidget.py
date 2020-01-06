@@ -261,8 +261,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Use appropriate labels
         """
         if self.smear_type == "Pinhole":
-            text_down = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">min</span></p></body></html>'
-            text_up = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">max</span></p></body></html>'
+            text_down = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">max</span></p></body></html>'
+            text_up = '<html><head/><body><p>[dQ/Q]<span style=" vertical-align:sub;">min</span></p></body></html>'
             text_unit = '%'
         elif self.smear_type == "Slit":
             text_down = '<html><head/><body><p>Slit width</p></body></html>'

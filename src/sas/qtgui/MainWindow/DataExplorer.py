@@ -108,6 +108,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
+        # fixing silly naming clash in other managers
+        self.communicate = self.communicator
+
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
