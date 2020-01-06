@@ -37,7 +37,7 @@ def plugin_log(message):
     """
     Log a message in a file located in the user's home directory
     """
-    out = open(PLUGIN_LOG, 'a')
+    out = open(PLUGIN_LOG, 'a', encoding='utf-8')
     now = time.time()
     stamp = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
     out.write("%s: %s\n" % (stamp, message))
