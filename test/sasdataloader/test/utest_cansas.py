@@ -253,7 +253,10 @@ class cansas_reader_hdf5(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
-        self.datafile_basic = find("simpleexamplefile.h5")
+        self.datafile_basic = find(
+            "test_data" + os.sep + "simpleexamplefile.h5")
+        self.datafile_nodi = find(
+            "test_data" + os.sep + "x25000_no_di.h5")
         self.datafile_multiplesasentry = find(
             "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry.h5")
         self.datafile_multiplesasdata = find(
@@ -264,6 +267,14 @@ class cansas_reader_hdf5(unittest.TestCase):
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)
         self._check_example_data(self.data[0])
+
+    def test_no_di(self):
+        self.data = self.loader.load(self.datafile_nodi)
+        self.assertTrue(self.data is not None)
+        self.assertTrue(len(self.data) == 1)
+        dataset = self.data[0]
+        self.assertTrue(dataset.err_data is None)
+        self.assertTrue(dataset.q_data is not None)
 
     def test_multiple_sasentries(self):
         self.data = self.loader.load(self.datafile_multiplesasentry)

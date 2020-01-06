@@ -16,9 +16,11 @@ import re
 import logging
 import traceback
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sasmodels.sasview_model import load_standard_models
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
+
+from sas.sascalc.fit import models
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -79,7 +81,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # Name and directory for saving new plugin model
         self.plugin_filename = None
-        self.plugin_dir = ModelUtilities.find_plugins_dir()
+        self.plugin_dir = models.find_plugins_dir()
 
         # Validators
         rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")

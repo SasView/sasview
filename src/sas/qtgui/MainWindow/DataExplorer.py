@@ -1210,7 +1210,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def readData(self, path):
         """
         verbatim copy-paste from
-           sasgui.guiframe.local_perspectives.data_loader.data_loader.py
+        ``sasgui.guiframe.local_perspectives.data_loader.data_loader.py``
         slightly modified for clarity
         """
         message = ""

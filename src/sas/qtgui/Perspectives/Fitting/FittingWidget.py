@@ -22,6 +22,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit.pagestate import PageState
+from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -38,7 +39,6 @@ from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
@@ -171,8 +171,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_19.setStyleSheet(new_font)
 
     def info(self, type, value, tb):
-        logger.error("SasView threw exception: " + str(value))
-        traceback.print_exception(type, value, tb)
+        logger.error("".join(traceback.format_exception(type, value, tb)))
 
     @property
     def logic(self):
@@ -533,7 +532,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     @classmethod
     def customModels(cls):
         """ Reads in file names in the custom plugin directory """
-        return ModelUtilities._find_models()
+        manager = models.ModelManager()
+        # TODO: Cache plugin models instead of scanning the directory each time.
+        manager.update()
+        # TODO: Define plugin_models property in ModelManager.
+        return manager.base.plugin_models
 
     def initializeControls(self):
         """
@@ -763,7 +766,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def modifyViewOnRow(self, row, font=None, brush=None):
         """
-        Chage how the given row of the main model is shown
+        Change how the given row of the main model is shown
         """
         fields_enabled = False
         if font is None:
@@ -1211,6 +1214,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Reload the custom model combobox
         """
+        ## If caching plugins, then force cache reset to reload plugins
+        #ModelManager().plugins_reset()
         self.custom_models = self.customModels()
         self.readCustomCategoryInfo()
         self.onCategoriesChanged()
@@ -2312,13 +2317,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def fromModelToQModel(self, model_name):
         """
-        Setting model parameters into QStandardItemModel based on selected _model_
+        Setting model parameters into QStandardItemModel based on selected model
         """
         name = model_name
         kernel_module = None
         if self.cbCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
-            name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
+            name = os.path.join(models.find_plugins_dir(), model_name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
         except ModuleNotFoundError as ex:
@@ -2382,7 +2387,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
-        Setting model parameters into QStandardItemModel based on selected _structure factor_
+        Setting model parameters into QStandardItemModel based on selected structure factor
         """
         if structure_factor is None or structure_factor=="None":
             return
