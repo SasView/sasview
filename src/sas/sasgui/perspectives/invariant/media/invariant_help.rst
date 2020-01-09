@@ -1,7 +1,9 @@
 .. invariant_help.rst
 
-.. This is a port of the original SasView html help file to ReSTructured text
-.. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
+.. This help file was originally ported to ReSTructured text from html by 
+.. by S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was updated in
+.. January 2020 following the realisation that there were issues with both it
+.. and the underlying calculation. See SasView GitHub Issue 1434.
 
 Invariant Calculation
 =====================
