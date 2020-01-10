@@ -1,86 +1,183 @@
 .. invariant_help.rst
 
-.. This help file was originally ported to ReSTructured text from html by 
-.. by S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was updated in
-.. January 2020 following the realisation that there were issues with both it
-.. and the underlying calculation. See SasView GitHub Issue 1434.
+.. This help file was ported from the original HTML to ReSTructured text by
+.. S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was subsequently
+.. updated in January 2020 following the realisation that there were issues
+.. with both the text below and the underlying calculation. See SasView GitHub
+.. Issue #1434.
 
 Invariant Calculation
 =====================
 
-Description
------------
+Principle
+---------
 
-The scattering, or Porod, invariant ($Q^*$) is a model-independent quantity that
-can be easily calculated from scattering data.
+In a multi-phase system, the integral of the appropriately dimensionally-
+weighted scattering cross-section (ie, 'intensity', $I(Q)$) is a *constant*
+directly proportional to the mean-square average fluctuation in scattering
+length density (SLD) and the phase composition but which, usefully, is
+*independent* of the shape of the phase domains. If the scattering cross-
+section data are in absolute units this constant is known as the
+*Scattering Invariant*, the *Porod Invariant*, or simply as the
+*Invariant*, $Q^*$.
 
-For two phase systems, the scattering invariant is defined as the integral of
-the square of the wavevector transfer ($Q$) multiplied by the scattering cross section
-over the full range of $Q$ from zero to infinity, that is
+.. note::
+   In this document we shall denote the invariant by the often encountered
+   symbol $Q^*$. But the reader should be aware that other symbols can be
+   encountered in the literature. Glatter & Kratky, and Stribeck, for example,
+   both use $Q$, the same symbol we use to denote the scattering vector in
+   SasView(!), whilst Melnichenko uses $Z$. Other variations include $Q_I$.
+
+If the data is measured on an instrument with 'classic' pinhole geometry then
 
 .. math::
 
-    Q^* = \int_0^\infty q^2I(q)\,dq
+    Q^* = \int_0^\infty Q^2I(Q)\,dQ
 
-in the case of pinhole geometry. For slit geometry the invariant is given by
+whereas if the data is measured on an instrument with slit geometry
 
 .. math::
 
-    Q^* = \Delta q_v \int_0^\infty qI(q)\,dq
+    Q^* = \Delta Q_v \int_0^\infty QI(Q)\,dQ
 
-where $\Delta q_v$ is the slit height.
+where $\Delta Q_v$ is the slit height and $Q$ denotes the scattering vector.
 
-The worth of $Q^*$  is that it can be used to determine the volume fraction and
-the specific area of a sample. Whilst these quantities are useful in their own
-right they can also be used in further analysis.
+The worth of $Q^*$ is that it can be used to determine quantities such as the
+volume fraction, composition, or specific surface area of a sample. It can also
+be used to cross-calibrate different SAS instruments.
 
 The difficulty with using $Q^*$  arises from the fact that experimental data is
 never measured over the range $0 \le Q \le \infty$. At best, combining USAS and
-WAS data might cover the range $10^{-5} \le Q \le 10$ 1/\ |Ang| . Thus it is usually
-necessary to extrapolate the experimental data to low and high $Q$. For this
+WAS data might cover the range $10^{-5} \le Q \le 10$ $Ang^{-1}$ . Thus, it is
+usually necessary to extrapolate the experimental data to both low and high
+$Q$. For the
 
-High-\ $Q$ region (>= *Qmax* in data)
+Low-\ $Q$ region (<= $Q_{min}$ in data):
 
-*  The power law function $C/Q^4$ is used where the constant
-   $C = 2 \pi \Delta\rho S_v$ is to be found by fitting part of data
-   within the range $Q_{N-m}$ to $Q_N$ (where $m < N$).
+*  The Guinier function $I_0.exp(-Q^2 R_g^2/3)$ can be used, where $I_0$
+   and $R_g$ are obtained by fitting the data within the range $Q_{i}$ to
+   $Q_{i+j}$ (where $i+j > i$) at the lowest $Q$-values. Alternatively a power
+   law can be used. Because the integrals above are weighted by $Q^2$ or $Q$
+   the low-$Q$ extrapolation only contributes a small proportion, say <3%,
+   to the value of $Q^*$.
+   
+High-\ $Q$ region (>= $Q_{max}$ in data):
 
-Low-\ $Q$ region (<= *Qmin* in data)
+*  The power law function $C_p/Q^4$ is used where the constant
+   $C_p$ is obtained by fitting the data within the range $Q_{n-m}$ to $Q_n$
+   (where $n-m < n$) at the highest $Q$-values. This extrapolation typically
+   contributes 3 - 20% of the value of $Q^*$ so having data measured to as
+   large a value of $Q_{max}$ as possible is much more important.
 
-*  The Guinier function $I_0 exp(-R_g^2 Q^2/3)$ where $I_0$
-   and $R_g$ are obtained by fitting as for the high-\ $Q$ region above.
-   Alternatively a power law can be used.
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Parameters
+----------
+
+For a two-phase system, the most commonly encountered situation, the Invariant
+is 
+
+.. math::
+
+    Q^* = {2 \pi^2 (\Delta\rho)^2 \phi_1 \phi_2}
+    
+where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast and $\phi_1$ and
+$\phi_2$ are the volume fractions of the two phases ($\phi_1$ + $\phi_2$ = 1).
+From this the volume fraction, specific surface area, and mean-square average
+SLD fluctuation can be determined.
+
+Volume Fraction
+^^^^^^^^^^^^^^^
+
+.. math::
+
+    \phi_1 \phi_2 = \frac{Q^*}{2 \pi^2 (\Delta\rho)^2} \equiv A
+
+and thus
+
+.. math::
+
+    \phi_1 = \frac{1 + \sqrt{1 - 4A}}{2}
+
+Specific Surface Area
+^^^^^^^^^^^^^^^^^^^^^
+
+From Porod's Law
+
+.. math::
+
+    I(Q) = \frac{C_p}{Q^4}
+
+where the *Porod Constant* is
+
+.. math::
+
+    C_p = 2 \pi (\Delta\rho)^2 S_v \equiv 2 \pi (\Delta\rho)^2 (S/V)
+
+and $S_v$ is the specific surface area (the surface area-to-volume ratio,
+$S/V$). From this it follows that
+
+.. math::
+
+    S_v = \frac{\pi \phi_1 \phi_2 C_p}{Q^*} \equiv \frac{\pi A C_p}{Q^*}
+
+SLD Fluctuation
+^^^^^^^^^^^^^^^
+
+The mean-square average of the SLD fluctuation is
+
+.. math::
+
+    <\eta^2> = < ((\rho^*)^2 > - < (\rho^*) >^2
+
+where
+
+.. math::
+
+    < (\rho^*)^2 > = \phi_1 \rho_1^2 + \phi_2 \rho_2^2
+
+.. math::
+    
+    < (\rho^*) > = \phi_1 \rho_1 + \phi_2 \rho_2
+
+Three-Phase Systems
+^^^^^^^^^^^^^^^^^^^
+
+For the extension of Invariant Analysis to three phases, see the Melnichenko
+reference, Chapter 6, Section 6.9.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Using invariant analysis
 ------------------------
 
-1) Select *Invariant* from the *Analysis* menu on the SasView toolbar.
+1) Load some data with the *Data Explorer*.
 
-2) Load some data with the *Data Explorer*.
+   Select a dataset and use the *Send To* button on the *Data Explorer* to load
+   the dataset into the *Invariant* panel. Or select *Invariant* from the
+   *Analysis* category in the menu bar.
+   
+   A first estimate of $Q^*$ should be computed automatically. If not, click on
+   the *Compute* button.
 
-3) Select a dataset and use the *Send To* button on the *Data Explorer* to load
-   the dataset into the *Invariant* panel.
+2) Use the *Customised Inputs* boxes on the *Invariant* panel to subtract
+   any background, specify the contrast (i.e. difference in SLDs: note this
+   must be specified for the eventual value of $Q^*$ to be on an absolute scale
+   and to therefore have any meaning), or to rescale the data.
 
-4) Use the *Customised Input* boxes on the *Invariant* panel to subtract
-   any background, specify the contrast (i.e. difference in SLDs - this must be
-   specified for the eventual value of $Q^*$  to be on an absolute scale), or to
-   rescale the data.
+3) (Optional) If known, a value for $C_p$ can also be specified.
 
-5) Adjust the extrapolation range as necessary. In most cases the default
-   values will suffice.
+4) Adjust the extrapolation ranges and extrapolation types as necessary. In
+   most cases the default values will suffice. Click the *Compute* button.
 
-6) Click the *Compute* button.
-
-7) To include a lower and/or higher $Q$ range, check the relevant *Enable
+   To adjust the lower and/or higher $Q$ ranges, check the relevant *Enable
    Extrapolate* check boxes.
 
    If power law extrapolations are chosen, the exponent can be either held
-   fixed or fitted. The number of points, Npts, to be used for the basis of the
-   extrapolation can also be specified.
+   fixed or fitted. The number of points, $Npts$, to be used for the basis of
+   the extrapolation can also be specified.
 
-8) If the value of $Q^*$  calculated with the extrapolated regions is invalid, a
+5) If the value of $Q^*$ calculated with the extrapolated regions is invalid, a
    red warning will appear at the top of the *Invariant* panel.
 
    The details of the calculation are available by clicking the *Details*
@@ -90,48 +187,24 @@ Using invariant analysis
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Parameters
+References
 ----------
 
-Volume Fraction
-^^^^^^^^^^^^^^^
-
-The volume fraction $\phi$ is related to $Q^*$  by
-
-.. math::
-
-    \phi(1 - \phi) = \frac{Q^*}{2\pi^2(\Delta\rho)^2} \equiv A
-
-where $\Delta\rho$ is the SLD contrast.
-
-.. math::
-
-    \phi = \frac{1 \pm \sqrt{1 - 4A}}{2}
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-Specific Surface Area
-^^^^^^^^^^^^^^^^^^^^^
-
-The specific surface area $S_v$ is related to $Q^*$  by
-
-.. math::
-
-    S_v = \frac{2\pi\phi(1-\phi)C_p}{Q^*} = \frac{2\pi A C_p}{Q^*}
-
-where $C_p$ is the Porod constant.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-Reference
----------
-
 O. Glatter and O. Kratky
-Chapter 2 in *Small Angle X-Ray Scattering*
+Chapter 2 and Chapter 14 in *Small Angle X-Ray Scattering*
 Academic Press, New York, 1982
 
+Available at:
 http://web.archive.org/web/20110824105537/http://physchem.kfunigraz.ac.at/sm/Service/Glatter_Kratky_SAXS_1982.zip
+
+N. Stribeck
+Chapter 8 in *X-Ray Scattering of Soft Matter*
+Springer, 2007
+
+Y.B. Melnichenko
+Chapter 6 in *Small-Angle Scattering from Confined and Interfacial Fluids*
+Springer, 2016
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 01May2015
+.. note::  This help document was last changed by Steve King, 10Jan2020
