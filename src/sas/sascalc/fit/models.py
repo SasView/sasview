@@ -39,7 +39,7 @@ def plugin_log(message):
     now = time.time()
     stamp = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
     with io.open(PLUGIN_LOG, 'a', encoding='utf-8') as out:
-        out.write("%s: %s\n" % (stamp, message))
+        out.write(u"%s: %s\n" % (stamp, message))
 
 
 def _check_plugin(model, name):
