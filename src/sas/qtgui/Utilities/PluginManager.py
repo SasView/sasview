@@ -1,6 +1,7 @@
 # global
 import os
 from shutil import copyfile
+import logging
 
 from PyQt5 import QtWidgets, QtCore
 
@@ -54,6 +55,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         self.cmdOK.clicked.connect(self.accept)
         self.cmdDelete.clicked.connect(self.onDelete)
         self.cmdAdd.clicked.connect(self.onAdd)
+        self.cmdAddFile.clicked.connect(self.onAddFile)
         self.cmdDuplicate.clicked.connect(self.onDuplicate)
         self.cmdEdit.clicked.connect(self.onEdit)
         self.cmdHelp.clicked.connect(self.onHelp)
@@ -99,6 +101,60 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
         self.add_widget = TabbedModelEditor(parent=self.parent)
         self.add_widget.show()
+
+    def onAddFile(self):
+        """
+        Open system Load FIle dialog, load a plugin and put it in the plugin directory
+        """
+        plugin_file = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Choose a plugin", "","Python (*.py)")[0]
+
+        if not plugin_file:
+            return
+
+        plugin_dir = models.find_plugins_dir()
+        file_name = os.path.basename(str(plugin_file))
+
+        # check if valid model
+        try:
+            model_results = GuiUtils.checkModel(plugin_file)
+            logging.info(model_results)
+        # We can't guarantee the type of the exception coming from
+        # Sasmodels, so need the overreaching general Exception
+        except Exception as ex:
+            msg = "Invalid plugin: %s " % file_name
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            retval = msgbox.exec_()
+            return
+
+        # check if file with the same name exists
+        if file_name in os.listdir(plugin_dir):
+            msg = "Plugin " + file_name + " already exists.\n"
+            msg += "Do you wish to overwrite the file?"
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Plugin Load")
+            # custom buttons
+            button_yes = QtWidgets.QPushButton("Yes")
+            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
+            button_no = QtWidgets.QPushButton("No")
+            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
+            retval = msgbox.exec_()
+            if retval == QtWidgets.QMessageBox.RejectRole:
+                # cancel copy
+                return
+                
+        # Copy from origin to ~/.sasview/plugin_models
+        from shutil import copy
+        # no check on clash
+        copy(plugin_file, plugin_dir)
+        self.parent.communicate.customModelDirectoryChanged.emit()
+        log_msg = "New plugin added: %s" % file_name
+        logging.info(log_msg)
 
     def onDuplicate(self):
         """

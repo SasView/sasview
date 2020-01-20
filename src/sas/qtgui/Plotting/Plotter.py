@@ -72,7 +72,6 @@ class PlotterWidget(PlotterBase):
 
         parent.geometry()
 
-
     @property
     def data(self):
         return self._data
@@ -229,7 +228,6 @@ class PlotterWidget(PlotterBase):
         self.plot_lines[data.name] = line
 
         # Now add the legend with some customizations.
-
         if self.showLegend:
             width=_legendResize(self.canvas.size().width(), self.parent)
             if width is not None:
