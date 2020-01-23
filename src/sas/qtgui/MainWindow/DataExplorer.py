@@ -656,6 +656,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 deleted_names.append(str(self.model.item(ind).text()))
                 deleted_items.append(item)
 
+                # Delete corresponding open plots
+                self.closePlotsForItem(item)
+
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
