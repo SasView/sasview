@@ -2922,7 +2922,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         scalar_results = self.logic.getScalarIntermediateResults(return_data)
-        ER_value = scalar_results.get("effective_radius") # note name of key
+        ER_value = scalar_results.get("radius_effective")
         if ER_value is None:
             return
         # ensure the model does not recompute when updating the value
