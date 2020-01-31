@@ -150,8 +150,15 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
                 
         # Copy from origin to ~/.sasview/plugin_models
         from shutil import copy
+
         # no check on clash
         copy(plugin_file, plugin_dir)
+
+        # Copy corresponding C file, if present
+        c_file = plugin_file.replace(".py", ".c")
+        if os.path.isfile(c_file):
+            copy(c_file, plugin_dir)
+
         self.parent.communicate.customModelDirectoryChanged.emit()
         log_msg = "New plugin added: %s" % file_name
         logging.info(log_msg)
