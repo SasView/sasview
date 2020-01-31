@@ -44,8 +44,8 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         Read in custom models from the default location
         """
         self.lstModels.clear()
-        plugins = models.find_plugin_models()
-        model_list = list(plugins.keys())
+        self.plugins = models.find_plugin_models()
+        model_list = list(self.plugins.keys())
         self.lstModels.addItems(model_list)
 
     def addSignals(self):
@@ -90,7 +90,11 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
             return
 
         for plugin in plugins_to_delete:
-            name = os.path.join(models.find_plugins_dir(), plugin + ".py")
+            # get filename from the plugin name
+            name = self.plugins[plugin].filename
+            # if no filename defined, attempt plugin name as filename
+            if not name:
+                name = os.path.join(models.find_plugins_dir(), plugin + ".py")
             os.remove(name)
 
         self.parent.communicate.customModelDirectoryChanged.emit()
@@ -172,7 +176,16 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         plugin_dir = models.find_plugins_dir()
         for plugin in plugins_to_copy:
             src_filename = plugin + ".py"
-            src_file = os.path.join(plugin_dir, src_filename)
+
+            # get filename from the plugin name
+            src_file = self.plugins[plugin].filename
+            # if no filename defined, attempt plugin name as filename
+            if not src_file:
+                src_filename = plugin + ".py"
+                src_file = os.path.join(plugin_dir, src_filename)
+            else:
+                src_filename = os.path.basename(src_file)
+
             dst_filename = GuiUtils.findNextFilename(src_filename, plugin_dir)
             if not dst_filename:
                 logging.error("Could not find appropriate filename for "+src_file)
@@ -191,7 +204,12 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         except Exception:
             # Something wrong with model, return
             return
-        name = os.path.join(plugin_location, model_to_edit + ".py")
+        # get filename from the plugin name
+        name = self.plugins[model_to_edit].filename
+        # if no filename defined, attempt plugin name as filename
+        if not name:
+            name = os.path.join(plugin_location, model_to_edit + ".py")
+
         self.edit_widget = TabbedModelEditor(parent=self.parent, edit_only=True)
         self.edit_widget.loadFile(name)
         self.edit_widget.show()

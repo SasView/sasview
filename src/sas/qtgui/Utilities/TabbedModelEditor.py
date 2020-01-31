@@ -351,6 +351,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.writeFile(filename, model_str)
         # Update the tab title
         self.setTabEdited(False)
+
+        # Notify listeners, since the plugin name might have changed
+        self.parent.communicate.customModelDirectoryChanged.emit()
+
         # notify the user
         msg = filename + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
@@ -416,6 +420,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         generate model from the current plugin state
         """
         name = model['filename']
+        if not name:
+            model['filename'] = fname
+            name = fname
         desc_str = model['description']
         param_str = self.strFromParamDict(model['parameters'])
         pd_param_str = self.strFromParamDict(model['pd_parameters'])
