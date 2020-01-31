@@ -3457,8 +3457,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         profile_data.scale = 'linear'
         profile_data.symbol = 'Line'
         profile_data.hide_error = True
-        profile_data._xaxis = "R(\AA)"
-        profile_data._yaxis = "SLD(10^{-6}\AA^{-2})"
+        profile_data._xaxis = "R"
+        profile_data._xunit = "\AA"
+        profile_data._yaxis = "SLD"
+        profile_data._yunit = "10^{-6}\AA^{-2}"
+        profile_data.ytransform='y'
+        profile_data.xtransform='x'
+
+        profile_data.id = "sld"
 
         plotter = PlotterWidget(self, quickplot=True)
         plotter.showLegend = False
