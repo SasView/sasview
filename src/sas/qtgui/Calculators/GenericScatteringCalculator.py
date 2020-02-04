@@ -851,7 +851,7 @@ class Plotter3DWidget(PlotterBase):
         """
         Define common context menu and associated actions for the MPL widget
         """
-        return
+        self.defaultContextMenu()
 
     def createContextMenuQuick(self):
         """
