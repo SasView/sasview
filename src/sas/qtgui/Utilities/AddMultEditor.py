@@ -114,6 +114,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         models = load_standard_models()
         models_dict = {}
         for model in models:
+            if model.category is None or 'custom' in model.category:
+                continue
             models_dict[model.name] = model
 
         return sorted([model_name for model_name in models_dict])
