@@ -379,6 +379,14 @@ above.
    *  *with ** - the radii and volume fractions in the P(Q) and S(Q) models are
       unconstrained. 
 
+.. warning::
+
+   If combining P(Q) models with S(Q) models, *particularly if combining
+   multiple instances of such models* (eg, $(P(Q)_1$ * $S(Q)_1$) + $(P(Q)_2$ * $S(Q)_2)$
+   or similar), pay careful attention to the behaviour of the scale and volume
+   fraction parameters and test your model thoroughly, preferably on
+   well-characterised data.
+
 .. _Combining_multiple_models:
 
 Combining more than two models
