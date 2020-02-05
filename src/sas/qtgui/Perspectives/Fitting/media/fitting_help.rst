@@ -56,13 +56,11 @@ bottom of the dialog will become active. If you click on it,
 a graph of the chosen model, calculated using default parameter values, will appear.
 The graph will update dynamically as the parameter values are changed.
 
-.. TODO: uncomment after Category_Manager done
-.. You can decide your own model categorizations using the :ref:`Category_Manager`.
+You can decide your own model categorizations using the :ref:`Category_Manager`.
 
 Once you have selected a model you can read its help documentation by clicking
-on the *Help* button.
-Additionally, right clicking on the empty space in the parameter table will display
-a short description of the model.
+on the *Help* button. Additionally, right clicking on the empty space in the
+parameter table will display a short description of the model.
 
 .. image:: descr_fig.png
 
