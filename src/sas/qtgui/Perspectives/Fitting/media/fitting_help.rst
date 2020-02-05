@@ -85,7 +85,7 @@ parameters:
 
 .. figure:: p_and_s_buttons_parameters.png
 
-The other method is to use the :ref:`Add/Multiply Models` tool under Fitting menu:
+The other method is to use the :ref:`Add/Multiply_Models` tool under Fitting menu:
 
 .. figure:: p_and_s_sum_model.png
 
@@ -100,7 +100,7 @@ range of the $S(Q)$ interaction and may, or may not, be the same as the
 other systems, *radius_effective* may depend on the particle form (shape).
 SasView offers the flexibility to automatically constrain (tie) some of these
 parameters together so that, for example, *radius_effective* = *radius*. See
-:ref:`Add/Multiply Models`.
+:ref:`Add/Multiply_Models`.
 
 Also see :ref:`Interaction_and_Mixture_Models` for further information.
 
@@ -180,7 +180,7 @@ Adding your own Models
 
 There are essentially four ways to generate new fitting models for SasView:
 
-*  Using the SasView :ref:`Add/Multiply Models` dialog to sum/multiply
+*  Using the SasView :ref:`Add/Multiply_Models` dialog to sum/multiply
    together *two existing models* in the model library (best for
    beginners - provided the required models are in the model library!)
 *  Using the SasView :ref:`New_Plugin_Model` helper dialog (aimed at those with
@@ -387,6 +387,14 @@ above.
       in the P(Q) model.
    *  *with ** - the radii and volume fractions in the P(Q) and S(Q) models are
       unconstrained. 
+
+.. warning::
+
+   If combining P(Q) models with S(Q) models, *particularly if combining
+   multiple instances of such models* (eg, $(P(Q)_1$ * $S(Q)_1$) + $(P(Q)_2$ * $S(Q)_2)$
+   or similar), pay careful attention to the behaviour of the scale and volume
+   fraction parameters and test your model thoroughly, preferably on
+   well-characterised data.
 
 .. _Combining_multiple_models:
 
