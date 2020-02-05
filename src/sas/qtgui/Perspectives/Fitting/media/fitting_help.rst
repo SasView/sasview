@@ -970,4 +970,4 @@ finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Piotr Rozyczko, 10 May 2019
+.. note::  This help document was last changed by Steve King, 05 Feb 2020
