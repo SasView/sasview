@@ -11,6 +11,7 @@ import logging
 import traceback
 import py_compile
 import shutil
+import io
 
 from six import reraise
 
@@ -35,11 +36,10 @@ def plugin_log(message):
     """
     Log a message in a file located in the user's home directory
     """
-    out = open(PLUGIN_LOG, 'a')
     now = time.time()
     stamp = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-    out.write("%s: %s\n" % (stamp, message))
-    out.close()
+    with io.open(PLUGIN_LOG, 'a', encoding='utf-8') as out:
+        out.write(u"%s: %s\n" % (stamp, message))
 
 
 def _check_plugin(model, name):
