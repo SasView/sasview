@@ -209,7 +209,8 @@ From the *Fitting* option in the menu bar, select *Plugin Model Operations*
 and then one of the sub-options
 
 *  *New Plugin Model* - to create a plugin model template with a helper dialog
-*  *Sum|Multi(p1,p2)* - to create a plugin model by summing/multiplying *two existing models* in the model library
+*  *Sum|Multi(p1,p2)* - to create a plugin model by summing/multiplying *two
+   existing models* in the model library
 *  *Advanced Plugin Editor* - to create/edit a plugin model in a Python shell
 *  *Delete Plugin Models* - to delete a plugin model
 *  *Load Plugin Models* - to (re-)load plugin models
@@ -236,7 +237,6 @@ the :ref:`Advanced_Plugin_Editor` .
 
 Note that the New Plugin Model Feature currently does not allow for parameters
 to be polydisperse.  However they can be edited in the Advanced Editor.
-
 
 **SasView version 4.2** made it possible to specify whether a plugin created
 with the *New Plugin Model* dialog is actually a form factor P(Q) or a structure
@@ -283,18 +283,19 @@ or::
 
      Plugin Model = scale_factor * (model1 * model2) + background
 
-In the *Easy Sum/Multi Editor* give the new model a name (which will appear
-in the list of plugin models on the *FitPage*) and brief description (to appear
-under the *Details* button on the *FitPage*). The model name must not contain
-spaces (use underscores to separate words if necessary) and if it is longer
-than ~25 characters the name will not display in full in the list of models.
-Now select two built-in models, as p1 and p2, and the
+In the *Easy Sum/Multi Editor* give the new model a function name (which will
+appear in the list of plugin models on the *FitPage*) and brief description (to
+appear under the *Details* button on the *FitPage*). The model name must not
+contain spaces (use underscores to separate words if necessary) and if it is
+longer than ~40 characters the name will not display in full in the list of
+models. Now select two built-in models, as Model1 (p1) and Model2 (p2), and the
 required operator, '+' or '*' between them. Finally, click the *Apply* button
 to generate and test the model, and then click *Close*.
 
-Any changes to a plugin model generated in this way only become effective *after* it is re-selected
-from the plugin models drop-down menu on the FitPage. If the model is not listed you can force a
-recompilation of the plugins by selecting *Fitting* > *Plugin Model Operations* > *Load Plugin Models*.
+Any changes to a plugin model generated in this way only become effective *after*
+it is re-selected from the plugin models drop-down menu on the FitPage. If the
+model is not listed you can force a recompilation of the plugins by selecting
+*Fitting* > *Plugin Model Operations* > *Load Plugin Models*.
 
 .. warning::
 
@@ -314,9 +315,10 @@ recompilation of the plugins by selecting *Fitting* > *Plugin Model Operations* 
 Model Structure
 ^^^^^^^^^^^^^^^
 
-**SasView version 4.2** introduced a much simplified and more extensible structure for plugin models
-generated through the Easy Sum/Multi Editor. For example, the code for a combination of a sphere model
-with a power law model now looks like this::
+**SasView version 4.2** introduced a much simplified and more extensible
+structure for plugin models generated through the Easy Sum/Multi Editor. For
+example, the code for a combination of a sphere model with a power law model
+now looks like this::
 
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
@@ -326,9 +328,9 @@ with a power law model now looks like this::
      model_info.description = 'sphere + power_law'
      Model = make_model_from_info(model_info)
 
-To change the models or operators contributing to this plugin it is only necessary to edit the string
-in the brackets after *load_model_info*, though it would also be a good idea to update the model name
-and description too!!!
+To change the models or operators contributing to this plugin it is only
+necessary to edit the string in the brackets after *load_model_info*, though
+it would also be a good idea to update the model name and description too!!!
 
 The model specification string can handle multiple models and combinations of
 operators ('+' or '*') which are processed according to normal conventions. Thus
@@ -944,3 +946,4 @@ finding the peak.
 | 2017-09-10 Paul Butler
 | 2017-09-15 Steve King
 | 2018-03-05 Paul Butler
+| 2020-02-05 Steve King
