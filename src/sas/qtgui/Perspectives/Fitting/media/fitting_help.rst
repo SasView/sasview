@@ -40,7 +40,7 @@ The models in SasView are grouped into categories. By default these consist of:
 *  *Cylinder* - cylindrical shapes (disc, right cylinder, cylinder with end-caps
    etc)
 *  *Ellipsoid* - ellipsoidal shapes (oblate, prolate, core shell, etc)
-*  *Parellelepiped* - as the name implies
+*  *Parallelepiped* - as the name implies
 *  *Sphere* - spheroidal shapes (sphere, core multishell, vesicle, etc)
 *  *Lamellae* - lamellar shapes (lamellar, core shell lamellar, stacked
    lamellar, etc)
