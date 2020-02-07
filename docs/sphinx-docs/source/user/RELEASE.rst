@@ -53,7 +53,7 @@ The Easy Add/Multiply Editor dialog should not be used to combine a plugin model
 In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
 Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
 If it is necessary to generate a plugin model from more than two built-in models,
-please edit the plugin model .py file directly and specify the combination of built-in models directly. For example:
+please edit the plugin model .py file directly and specify the combination of built-in models directly. For example::
 
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
