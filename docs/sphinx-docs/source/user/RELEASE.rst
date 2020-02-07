@@ -1,3 +1,5 @@
+.. RELEASE.rst
+
 Release Notes
 =============
 
@@ -53,13 +55,12 @@ Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
 If it is necessary to generate a plugin model from more than two built-in models,
 please edit the plugin model .py file directly and specify the combination of built-in models directly. For example:
 
-    from sasmodels.core import load_model_info
-    from sasmodels.sasview_model import make_model_from_info
-
-    model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
-    model_info.name = 'MyBigPluginModel'
-    model_info.description = 'For fitting pores in crystalline framework'
-    Model = make_model_from_info(model_info)
+     from sasmodels.core import load_model_info
+     from sasmodels.sasview_model import make_model_from_info
+     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info.name = 'MyBigPluginModel'
+     model_info.description = 'For fitting pores in crystalline framework'
+     Model = make_model_from_info(model_info)
 
 New in Version 5.0
 ------------------
