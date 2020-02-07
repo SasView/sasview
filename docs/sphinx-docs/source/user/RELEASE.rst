@@ -8,6 +8,59 @@ Release Notes
 
 Features
 ========
+New in Version 5.0.1
+--------------------
+This is a point release fixing major bugs from 5.0 rlease
+
+Bug Fixes
+^^^^^^^^^
+Fixes sasview # 1339: Problem with plotting of the Correlation Function
+Fixes sasview # 1350: Multiple issues with the 2D slicer
+Fixes sasview # 1361: Data with negative values not showing on linear scale
+Fixes sasview # 1357: Q-range in the Correlation Function can be set by dragging
+Fixes sasview # 1356: Load in Mask Data column from NCNR 2D Data
+Fixes sasview # 1336: Issues with closing and reopening fit plots
+Fixes sasview # 1356: Change default state of dependent plots to unchecked
+Fixes sasview # 1325: Changing model resets the Q-range
+Fixes sasview # 1371: Multiple issues with fit plot lifetimes
+Fixes sasview # 1374: Data Operations not including all datasets
+Fixes sasview # 1327: Append functionality too generous
+Fixes sasview # 1086: Added separate thread for OpenCL tests
+Fixes sasview # 937: Set theory and data to the same Vmin/Vmax for 2D plots
+Fixes sasview # 1337: Automatically resizing plot legends
+Fixes sasview # 1417: Ambiguous labeling in Resolution tab
+Fixes sasview # 1431: When loading plugin model with unicode character, plugin editor crashes
+Fixes sasview # 1413: Corfunc is not working well
+Fixes sasview # 1293: Cannot model SESANS Data in GUI
+Fixes sasview # 1337: Non-resizing plot legend on OSX
+Fixes sasview # 690: Set reasonable min/max on polydispersity values for fitting
+Fixes sasview # 1412: Windows installer shortcut is misnamed
+Fixes sasview # 1410: Issues with multi-core shell model
+Fixes sasview # 1452: Clarified issue with Add/Multiply operation for plugin models
+Fixes sasview # 1441: Show SLD profile plot - linear not log
+
+Known Issues
+^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+[sasview](https://github.com/SasView/sasview)
+[sasmodels](https://github.com/SasView/sasmodels)
+
+A problem has been identified in Version 4.2.2 which also affects versions 5.0.0 and 5.0.1.
+The Easy Add/Multiply Editor dialog should not be used to combine a plugin model with a built-in model, or to combine two plugin models.
+In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
+Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
+If it is necessary to generate a plugin model from more than two built-in models,
+please edit the plugin model .py file directly and specify the combination of built-in models directly. For example:
+
+.. code-block:: python
+    from sasmodels.core import load_model_info
+    from sasmodels.sasview_model import make_model_from_info
+
+    model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+    model_info.name = 'MyBigPluginModel'
+    model_info.description = 'For fitting pores in crystalline framework'
+    Model = make_model_from_info(model_info)
 
 New in Version 5.0
 ------------------
