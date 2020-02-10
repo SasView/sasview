@@ -12,11 +12,11 @@ Invariant Calculation
 Principle
 ---------
 
-In a multi-phase system, the integral of the appropriately dimensionally-
+In a multi-phase system, the integral of the appropriately dimensionally-\
 weighted scattering cross-section (ie, 'intensity', $I(Q)$) is a *constant*
 directly proportional to the mean-square average fluctuation in scattering
 length density (SLD) and the phase composition but which, usefully, is
-*independent* of the shape of the phase domains. If the scattering cross-
+*independent* of the shape of the phase domains. If the scattering cross-\
 section data are in absolute units this constant is known as the
 *Scattering Invariant*, the *Porod Invariant*, or simply as the
 *Invariant*, $Q^*$.
@@ -82,7 +82,7 @@ is
     Q^* = {2 \pi^2 (\Delta\rho)^2 \phi_1 \phi_2}
     
 where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast and $\phi_1$ and
-$\phi_2$ are the volume fractions of the two phases ($\phi_1$ + $\phi_2$ = 1).
+$\phi_2$ are the volume fractions of the two phases ($\phi_1 + \phi_2 = 1$).
 From this the volume fraction, specific surface area, and mean-square average
 SLD fluctuation can be determined.
 
@@ -128,17 +128,17 @@ The mean-square average of the SLD fluctuation is
 
 .. math::
 
-    <\eta^2> = < ((\rho^*)^2 > - < (\rho^*) >^2
+    \langle \eta^2 \rangle = \langle (\rho^*)^2 \rangle - \langle (\rho^*) \rangle^2
 
 where
 
 .. math::
 
-    < (\rho^*)^2 > = \phi_1 \rho_1^2 + \phi_2 \rho_2^2
+    \langle (\rho^*)^2 \rangle = \phi_1 \rho_1^2 + \phi_2 \rho_2^2
 
 .. math::
     
-    < (\rho^*) > = \phi_1 \rho_1 + \phi_2 \rho_2
+    \langle (\rho^*) \rangle = \phi_1 \rho_1 + \phi_2 \rho_2
 
 Three-Phase Systems
 ^^^^^^^^^^^^^^^^^^^
