@@ -40,7 +40,7 @@ BACKGROUND = 0.0
 #default value for the scale
 SCALE = 1.0
 #default value of the contrast
-CONTRAST = 1.0
+CONTRAST = 1.0e-6
 #default value of the power used for power law
 POWER = 4.0
 #Invariant panel size

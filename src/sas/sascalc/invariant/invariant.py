@@ -815,7 +815,7 @@ class InvariantCalculator(object):
           V =  self.get_volume_fraction(contrast, extrapolation)
 
           Compute the surface given by:
-            surface = (2*pi *V(1- V)*porod_const)/ q_star
+            surface = (pi *V(1- V)*porod_const)/ q_star
 
         :param contrast: contrast value to compute the volume
         :param porod_const: Porod constant to compute the surface
@@ -825,7 +825,7 @@ class InvariantCalculator(object):
         """
         # Compute the volume
         volume = self.get_volume_fraction(contrast, extrapolation)
-        return 2 * math.pi * volume * (1 - volume) * \
+        return math.pi * volume * (1 - volume) * \
             float(porod_const) / self._qstar
 
     def get_volume_fraction(self, contrast, extrapolation=None):

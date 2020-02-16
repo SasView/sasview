@@ -47,27 +47,32 @@ volume fraction, composition, or specific surface area of a sample. It can also
 be used to cross-calibrate different SAS instruments.
 
 The difficulty with using $Q^*$  arises from the fact that experimental data is
-never measured over the range $0 \le Q \le \infty$. At best, combining USAS and
-WAS data might cover the range $10^{-5} \le Q \le 10$ $Ang^{-1}$ . Thus, it is
-usually necessary to extrapolate the experimental data to both low and high
-$Q$. For the
+never measured over the range $0 \le Q \le \infty$ and it is thus usually
+necessary to extrapolate the experimental data to both low and high $Q$.
+Currently, SasView allows extrapolation to a fixed low and high $Q$ such that
+$10^{-5} \le Q \le 10$ $Ang^{-1}$. 
 
 Low-\ $Q$ region (<= $Q_{min}$ in data):
 
 *  The Guinier function $I_0.exp(-Q^2 R_g^2/3)$ can be used, where $I_0$
-   and $R_g$ are obtained by fitting the data within the range $Q_{i}$ to
-   $Q_{i+j}$ (where $i+j > i$) at the lowest $Q$-values. Alternatively a power
+   and $R_g$ are obtained by fitting the data within the range $Q_{min}$ to
+   $Q_{min+j}$ where $j$ is the user chosen number of points from which to
+   extrapolate. The default is the first 10 points. Alternatively a power
    law can be used. Because the integrals above are weighted by $Q^2$ or $Q$
    the low-$Q$ extrapolation only contributes a small proportion, say <3%,
    to the value of $Q^*$.
    
 High-\ $Q$ region (>= $Q_{max}$ in data):
 
-*  The power law function $C_p/Q^4$ is used where the constant
-   $C_p$ is obtained by fitting the data within the range $Q_{n-m}$ to $Q_n$
-   (where $n-m < n$) at the highest $Q$-values. This extrapolation typically
-   contributes 3 - 20% of the value of $Q^*$ so having data measured to as
-   large a value of $Q_{max}$ as possible is much more important.
+*  The power law function $A/Q^m$ is used where the power law constant
+   $m$ can be fixed to some value by the user or fit along with the constant
+   $A$. $m$ should typically b between -3 and -4 with -4 indicating sharp
+   interfaces. The fitted constant(s) $A$ ($m$) is/are obtained by
+   fitting the data within the range $Q_{max-j}$ to $Q_{max}$ 
+   where again $j$ is the user chosen number of points from which to
+   extrapoloate, the default again being the last 10 points. This extrapolation
+   typically contributes 3 - 20% of the value of $Q^*$ so having data measured
+   to as large a value of $Q_{max}$ as possible is much more important.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -93,11 +98,14 @@ Volume Fraction
 
     \phi_1 \phi_2 = \frac{Q^*}{2 \pi^2 (\Delta\rho)^2} \equiv A
 
-and thus
+and thus, if $\phi_1 < \phi_2$
 
 .. math::
 
-    \phi_1 = \frac{1 + \sqrt{1 - 4A}}{2}
+    &\phi_1 = \frac{1 - \sqrt{1 - 4A}}{2} \\
+    &\phi_2 = \frac{1 + \sqrt{1-4A}}{2}
+$\phi_1$ (the volume fraction of the minority phase) is reported as the
+the volume fraction in the GUI
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
@@ -106,9 +114,9 @@ From Porod's Law
 
 .. math::
 
-    I(Q) = \frac{C_p}{Q^4}
+    \lim_{Q \to \infty}I(Q) = \frac{C_p}{Q^4}
 
-where the *Porod Constant* is
+where $C_p$, the *Porod Constant*, is given as
 
 .. math::
 
