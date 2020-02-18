@@ -1265,7 +1265,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     if hasattr(item, 'errors'):
                         for error_data in item.errors:
                             data_error = True
-                            message += "\tError: {0}\n".format(error_data)
+                            error_message += "\tError: {0}\n".format(error_data)
                     else:
 
                         logging.error("Loader returned an invalid object:\n %s" % str(item))
@@ -1275,7 +1275,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 logging.error(sys.exc_info()[1])
 
                 any_error = True
-            if any_error or error_message != "":
+            if any_error or data_error or error_message != "":
                 if error_message == "":
                     error = "Error: " + str(sys.exc_info()[1]) + "\n"
                     error += "while loading Data: \n%s\n" % str(basename)
