@@ -23,10 +23,10 @@ class SectorMask(BaseInteractor):
         self.connect = self.base.connect
 
         ## compute qmax limit to reset the graph
-        x = np.power(max(self.base.data.xmax,
-                         np.fabs(self.base.data.xmin)), 2)
-        y = np.power(max(self.base.data.ymax,
-                         np.fabs(self.base.data.ymin)), 2)
+        x = np.power(max(self.data.xmax,
+                         np.fabs(self.data.xmin)), 2)
+        y = np.power(max(self.data.ymax,
+                         np.fabs(self.data.ymin)), 2)
         self.qmax = np.sqrt(x + y)
         ## Number of points on the plot
         self.nbins = 20
@@ -110,10 +110,8 @@ class SectorMask(BaseInteractor):
         """
         compute sector averaging of data into data1D
         """
-        ## get the data to average
-        data = self.base.data
         # If we have no data, just return
-        if data is None:
+        if self.data is None:
             return
         ## Averaging
         from sas.sascalc.dataloader.manipulations import Sectorcut
@@ -122,9 +120,9 @@ class SectorMask(BaseInteractor):
 
         mask = Sectorcut(phi_min=phimin, phi_max=phimax)
         if self.is_inside:
-            out = (mask(data) == False)
+            out = (mask(self.data) == False)
         else:
-            out = (mask(data))
+            out = (mask(self.data))
         return out
 
     def moveend(self, ev):

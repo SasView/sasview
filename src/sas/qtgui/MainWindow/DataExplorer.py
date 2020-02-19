@@ -108,6 +108,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
+        # fixing silly naming clash in other managers
+        self.communicate = self.communicator
+
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
@@ -343,6 +346,35 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.communicator.statusBarUpdateSignal.emit('Analysis saved.')
 
+    def flatDataForModel(self, model):
+        """
+        Get a flat "name:data1d/2d" dict for all
+        items in the model, including children
+        """
+        all_data = {}
+        for i in range(model.rowCount()):
+            item = model.item(i)
+            data = GuiUtils.dataFromItem(item)
+            if data is None: continue
+            # Now, all plots under this item
+            filename = data.filename
+            all_data[filename] = data
+            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            # skip the main plot
+            other_datas = list(other_datas.values())[1:]
+            for data in other_datas:
+                all_data[data.name] = data
+
+        return all_data
+
+    def getAllFlatData(self):
+        """
+        Get items from both data and theory models
+        """
+        data = self.flatDataForModel(self.model)
+        theory = self.flatDataForModel(self.theory_model)
+        return (data, theory)
+
     def allDataForModel(self, model):
         # data model
         all_data = {}
@@ -400,11 +432,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def getAllData(self):
         """
-        converts all datasets into serializable dictionary
+        Get items from both data and theory models
         """
         data = self.allDataForModel(self.model)
         theory = self.allDataForModel(self.theory_model)
+        return (data, theory)
 
+    def getSerializedData(self):
+        """
+        converts all datasets into serializable dictionary
+        """
+        data, theory = self.getAllData()
         all_data = {}
         all_data['is_batch'] = str(self.chkBatch.isChecked())
 
@@ -617,6 +655,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Delete these rows from the model
                 deleted_names.append(str(self.model.item(ind).text()))
                 deleted_items.append(item)
+
+                # Delete corresponding open plots
+                self.closePlotsForItem(item)
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -1076,6 +1117,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Add the plot to the workspace
         plot_widget = self.parent.workspace().addSubWindow(new_plot)
+        if sys.platform == 'darwin':
+            workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
+            workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
+            plot_widget.resize(workspace_width, workspace_height)
 
         # Show the plot
         new_plot.show()
@@ -1168,7 +1213,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def readData(self, path):
         """
         verbatim copy-paste from
-           sasgui.guiframe.local_perspectives.data_loader.data_loader.py
+        ``sasgui.guiframe.local_perspectives.data_loader.data_loader.py``
         slightly modified for clarity
         """
         message = ""

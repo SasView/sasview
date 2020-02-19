@@ -19,6 +19,7 @@ dependencies:
  - sip
  - numba=0.39
  - numpy=1.16.4
+ - setuptools=44.0.0
  - pip:
    - matplotlib==2.2.3
    - bumps==0.7.11
@@ -29,5 +30,3 @@ dependencies:
    - qt5reactor==0.5
    - qtconsole
    - tinycc==1.1
-
-

@@ -1,20 +1,20 @@
 # pylint: disable=invalid-name
 """
-SAS generic computation and sld file readers
+SAS generic computation and sld file readers.
+
+Calculation checked by sampling from an ellipsoid and comparing Iq with the
+1D, 2D oriented and 2D oriented magnetic analytical model from sasmodels.
 """
 from __future__ import print_function
 
 import os
 import sys
-import copy
 import logging
 
-from periodictable import formula
-from periodictable import nsf
 import numpy as np
+from periodictable import formula, nsf
 
-from . import _sld2i
-from .BaseComponent import BaseComponent
+from .geni import Iq, Iqxy
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +42,8 @@ def mag2sld(mag, v_unit=None):
     elif v_unit == "mT":
         factor = MFACTOR_MT
     else:
-        raise ValueError("Invalid valueunit")
-    sld_m = factor * mag
-    return sld_m
+        raise ValueError("Invalid magnetism unit %r" % v_unit)
+    return factor * mag
 
 def transform_center(pos_x, pos_y, pos_z):
     """
@@ -56,7 +55,7 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
-class GenSAS(BaseComponent):
+class GenSAS(object):
     """
     Generic SAS computation Model based on sld (n & m) arrays
     """
@@ -66,7 +65,6 @@ class GenSAS(BaseComponent):
         :Params sld_data: MagSLD object
         """
         # Initialize BaseComponent
-        BaseComponent.__init__(self)
         self.sld_data = None
         self.data_pos_unit = None
         self.data_x = None
@@ -115,51 +113,42 @@ class GenSAS(BaseComponent):
         """
         Sets is_avg: [bool]
         """
-        self.is_avg = is_avg
+        self.is_avg = bool(is_avg)
 
-    def _gen(self, qx, qy):
+    def calculate_Iq(self, qx, qy=None):
         """
         Evaluate the function
         :Param x: array of x-values
         :Param y: array of y-values
-        :Param i: array of initial i-value
         :return: function value
         """
-        pos_x = self.data_x
-        pos_y = self.data_y
-        pos_z = self.data_z
-        if self.is_avg is None:
-            pos_x, pos_y, pos_z = transform_center(pos_x, pos_y, pos_z)
-        sldn = copy.deepcopy(self.data_sldn)
-        sldn -= self.params['solvent_SLD']
-        # **** WARNING **** new_GenI holds pointers to numpy vectors
-        # be sure that they are contiguous double precision arrays and make 
-        # sure the GC doesn't eat them before genicom is called.
-        # TODO: rewrite so that the parameters are passed directly to genicom
-        args = (
-            (1 if self.is_avg else 0),
-            pos_x, pos_y, pos_z,
-            sldn, self.data_mx, self.data_my,
-            self.data_mz, self.data_vol,
-            self.params['Up_frac_in'],
-            self.params['Up_frac_out'],
-            self.params['Up_theta'])
-        model = _sld2i.new_GenI(*args)
-        if len(qy):
+        x, y, z = self.data_x, self.data_y, self.data_z
+        sld = self.data_sldn - self.params['solvent_SLD']
+        vol = self.data_vol
+        if qy is not None and len(qy) > 0:
+            # 2-D calculation
             qx, qy = _vec(qx), _vec(qy)
-            I_out = np.empty_like(qx)
-            #print("npoints", qx.shape, "npixels", pos_x.shape)
-            _sld2i.genicomXY(model, qx, qy, I_out)
-            #print("I_out after", I_out)
+            mx, my, mz = self.data_mx, self.data_my, self.data_mz
+            in_spin = self.params['Up_frac_in']
+            out_spin = self.params['Up_frac_out']
+            s_theta = self.params['Up_theta']
+            I_out = Iqxy(
+                qx, qy, x, y, z, sld, vol, mx, my, mz,
+                in_spin, out_spin, s_theta,
+                )
         else:
-            qx = _vec(qx)
-            I_out = np.empty_like(qx)
-            _sld2i.genicom(model, qx, I_out)
+            # 1-D calculation
+            q = _vec(qx)
+            if self.is_avg:
+                x, y, z = transform_center(x, y, z)
+            I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+
         vol_correction = self.data_total_volume / self.params['total_volume']
-        result = (self.params['scale'] * vol_correction * I_out
+        result = ((self.params['scale'] * vol_correction) * I_out
                   + self.params['background'])
         return result
 
+    # TODO: rename set_sld_data() since it does more than set sld
     def set_sld_data(self, sld_data=None):
         """
         Sets sld_data
@@ -174,8 +163,8 @@ class GenSAS(BaseComponent):
         self.data_my = _vec(sld_data.sld_my)
         self.data_mz = _vec(sld_data.sld_mz)
         self.data_vol = _vec(sld_data.vol_pix)
-        self.data_total_volume = sum(sld_data.vol_pix)
-        self.params['total_volume'] = sum(sld_data.vol_pix)
+        self.data_total_volume = np.sum(sld_data.vol_pix)
+        self.params['total_volume'] = self.data_total_volume
 
     def getProfile(self):
         """
@@ -192,10 +181,9 @@ class GenSAS(BaseComponent):
         """
         if isinstance(x, list):
             if len(x[1]) > 0:
-                msg = "Not a 1D."
-                raise ValueError(msg)
-            # 1D I is found at y =0 in the 2D pattern
-            out = self._gen(x[0], [])
+                raise ValueError("Not a 1D vector.")
+            # 1D I is found at y=0 in the 2D pattern
+            out = self.calculate_Iq(x[0])
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
@@ -209,7 +197,7 @@ class GenSAS(BaseComponent):
         :Use this runXY() for the computation
         """
         if isinstance(x, list):
-            return self._gen(x[0], x[1])
+            return self.calculate_Iq(x[0], x[1])
         else:
             msg = "Q must be given as list of qx's and qy's"
             raise ValueError(msg)
@@ -229,7 +217,7 @@ class GenSAS(BaseComponent):
             raise RuntimeError(mesg)
 
 def _vec(v):
-    return np.ascontiguousarray(v, 'd')
+    return np.ascontiguousarray(v, 'd') if v is not None else None
 
 class OMF2SLD(object):
     """
@@ -257,14 +245,14 @@ class OMF2SLD(object):
         self.omfdata = omfdata
         length = int(omfdata.xnodes * omfdata.ynodes * omfdata.znodes)
         pos_x = np.arange(omfdata.xmin,
-                             omfdata.xnodes*omfdata.xstepsize + omfdata.xmin,
-                             omfdata.xstepsize)
+                          omfdata.xnodes*omfdata.xstepsize + omfdata.xmin,
+                          omfdata.xstepsize)
         pos_y = np.arange(omfdata.ymin,
-                             omfdata.ynodes*omfdata.ystepsize + omfdata.ymin,
-                             omfdata.ystepsize)
+                          omfdata.ynodes*omfdata.ystepsize + omfdata.ymin,
+                          omfdata.ystepsize)
         pos_z = np.arange(omfdata.zmin,
-                             omfdata.znodes*omfdata.zstepsize + omfdata.zmin,
-                             omfdata.zstepsize)
+                          omfdata.znodes*omfdata.zstepsize + omfdata.zmin,
+                          omfdata.zstepsize)
         self.pos_x = np.tile(pos_x, int(omfdata.ynodes * omfdata.znodes))
         self.pos_y = pos_y.repeat(int(omfdata.xnodes))
         self.pos_y = np.tile(self.pos_y, int(omfdata.znodes))
@@ -282,7 +270,7 @@ class OMF2SLD(object):
             self.mz = np.zeros(length)
 
         self._check_data_length(length)
-        self.remove_null_points(False, False)
+        #self.remove_null_points(True, False)
         mask = np.ones(len(self.sld_n), dtype=bool)
         if shape.lower() == 'ellipsoid':
             try:
@@ -512,15 +500,15 @@ class PDBReader(object):
         :return: MagSLD
         :raise RuntimeError: when the file can't be opened
         """
-        pos_x = np.zeros(0)
-        pos_y = np.zeros(0)
-        pos_z = np.zeros(0)
-        sld_n = np.zeros(0)
-        sld_mx = np.zeros(0)
-        sld_my = np.zeros(0)
-        sld_mz = np.zeros(0)
-        vol_pix = np.zeros(0)
-        pix_symbol = np.zeros(0)
+        pos_x = []
+        pos_y = []
+        pos_z = []
+        sld_n = []
+        sld_mx = []
+        sld_my = []
+        sld_mz = []
+        vol_pix = []
+        pix_symbol = []
         x_line = []
         y_line = []
         z_line = []
@@ -536,8 +524,7 @@ class PDBReader(object):
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
-                    if line[0:6].strip().count('ATM') > 0 or \
-                                line[0:6].strip() == 'ATOM':
+                    if line[0:6] in ('ATM   ', 'ATOM  '):
                         # define fields of interest
                         atom_name = line[12:16].strip()
                         try:
@@ -573,7 +560,7 @@ class PDBReader(object):
                         sld_my = np.append(sld_my, 0)
                         sld_mz = np.append(sld_mz, 0)
                         pix_symbol = np.append(pix_symbol, atom_name)
-                    elif line[0:6].strip().count('CONECT') > 0:
+                    elif line[0:6] == 'CONECT':
                         toks = line.split()
                         num = int(toks[1]) - 1
                         val_list = []
@@ -622,7 +609,10 @@ class PDBReader(object):
 
 class SLDReader(object):
     """
-    Class to load ascii files (7 columns).
+    SLD reader for text files.
+
+    7 columns: x, y, z, sld, mx, my, mz
+    8 columns: x, y, z, sld, mx, my, mz, volume
     """
     ## File type
     type_name = "SLD ASCII"
@@ -632,79 +622,28 @@ class SLDReader(object):
             "all files (*.*)|*.*"]
     ## List of allowed extensions
     ext = ['.sld', '.SLD', '.txt', '.TXT', '.*']
+
     def read(self, path):
         """
         Load data file
         :param path: file path
         :return MagSLD: x, y, z, sld_n, sld_mx, sld_my, sld_mz
-        :raise RuntimeError: when the file can't be opened
-        :raise ValueError: when the length of the data vectors are inconsistent
+        :raise RuntimeError: when the file can't be loaded
         """
         try:
-            pos_x = np.zeros(0)
-            pos_y = np.zeros(0)
-            pos_z = np.zeros(0)
-            sld_n = np.zeros(0)
-            sld_mx = np.zeros(0)
-            sld_my = np.zeros(0)
-            sld_mz = np.zeros(0)
-            try:
-                # Use numpy to speed up loading
-                input_f = np.loadtxt(path, dtype='float', skiprows=1,
-                                        ndmin=1, unpack=True)
-                pos_x = np.array(input_f[0])
-                pos_y = np.array(input_f[1])
-                pos_z = np.array(input_f[2])
-                sld_n = np.array(input_f[3])
-                sld_mx = np.array(input_f[4])
-                sld_my = np.array(input_f[5])
-                sld_mz = np.array(input_f[6])
-                ncols = len(input_f)
-                if ncols == 8:
-                    vol_pix = np.array(input_f[7])
-                elif ncols == 7:
-                    vol_pix = None
-            except Exception:
-                # For older version of numpy
-                input_f = open(path, 'rb')
-                buff = decode(input_f.read())
-                lines = buff.split('\n')
-                input_f.close()
-                for line in lines:
-                    toks = line.split()
-                    try:
-                        _pos_x = float(toks[0])
-                        _pos_y = float(toks[1])
-                        _pos_z = float(toks[2])
-                        _sld_n = float(toks[3])
-                        _sld_mx = float(toks[4])
-                        _sld_my = float(toks[5])
-                        _sld_mz = float(toks[6])
-                        pos_x = np.append(pos_x, _pos_x)
-                        pos_y = np.append(pos_y, _pos_y)
-                        pos_z = np.append(pos_z, _pos_z)
-                        sld_n = np.append(sld_n, _sld_n)
-                        sld_mx = np.append(sld_mx, _sld_mx)
-                        sld_my = np.append(sld_my, _sld_my)
-                        sld_mz = np.append(sld_mz, _sld_mz)
-                        try:
-                            _vol_pix = float(toks[7])
-                            vol_pix = np.append(vol_pix, _vol_pix)
-                        except Exception as exc:
-                            vol_pix = None
-                    except Exception as exc:
-                        # Skip non-data lines
-                        logger.error(exc)
-            output = MagSLD(pos_x, pos_y, pos_z, sld_n,
-                            sld_mx, sld_my, sld_mz)
-            output.filename = os.path.basename(path)
-            output.set_pix_type('pixel')
-            output.set_pixel_symbols('pixel')
-            if vol_pix is not None:
-                output.set_pixel_volumes(vol_pix)
-            return output
+            data = np.loadtxt(path, dtype='float', skiprows=1,
+                              ndmin=1, unpack=True)
         except Exception:
-            raise RuntimeError("%s is not a sld file" % path)
+            data = None
+        if data is None or data.shape[0] not in (7, 8):
+            raise RuntimeError("%r is not a sld file" % path)
+        x, y, z, sld, mx, my, mz = data[:7]
+        vol = data[7] if data.shape[0] > 7 else None
+        output = MagSLD(x, y, z, sld, mx, my, mz, vol)
+        output.filename = os.path.basename(path)
+        output.set_pix_type('pixel')
+        output.set_pixel_symbols('pixel')
+        return output
 
     def write(self, path, data):
         """
@@ -716,30 +655,18 @@ class SLDReader(object):
             raise ValueError("Missing the file path.")
         if data is None:
             raise ValueError("Missing the data to save.")
-        x_val = data.pos_x
-        y_val = data.pos_y
-        z_val = data.pos_z
-        vol_pix = data.vol_pix
-        length = len(x_val)
-        sld_n = data.sld_n
-        if sld_n is None:
-            sld_n = np.zeros(length)
-        sld_mx = data.sld_mx
-        if sld_mx is None:
-            sld_mx = np.zeros(length)
-            sld_my = np.zeros(length)
-            sld_mz = np.zeros(length)
+        x, y, z = data.pos_x, data.pos_y, data.pos_z
+        sld_n = data.sld_n if data.sld_n is not None else np.zeros_like(x)
+        if data.sld_mx is None:
+            mx = my = mz = np.zeros_like(x)
         else:
-            sld_my = data.sld_my
-            sld_mz = data.sld_mz
-        out = open(path, 'w')
-        # First Line: Column names
-        out.write("X  Y  Z  SLDN SLDMx  SLDMy  SLDMz VOLUMEpix")
-        for ind in range(length):
-            out.write("\n%g  %g  %g  %g  %g  %g  %g %g" % \
-                      (x_val[ind], y_val[ind], z_val[ind], sld_n[ind],
-                       sld_mx[ind], sld_my[ind], sld_mz[ind], vol_pix[ind]))
-        out.close()
+            mx, my, mz = data.sld_mx, data.sld_my, data.sld_mz
+        vol = data.vol_pix if data.vol_pix is not None else np.ones_like(x)
+        columns = np.vstack((x, y, z, sld_n, mx, my, mz, vol))
+        with open(path, 'w') as out:
+            # First Line: Column names
+            out.write("X  Y  Z  SLDN SLDMx  SLDMy  SLDMz VOLUMEpix\n")
+            np.savetxt(out, columns)
 
 
 class OMFData(object):
@@ -860,11 +787,11 @@ class MagSLD(object):
         self.has_conect = False
         self.pos_unit = self._pos_unit
         self.sld_unit = self._sld_unit
-        self.pix_type = 'pixel'
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.pos_z = pos_z
-        self.sld_n = sld_n
+        self.pix_type = 'pixel' if vol_pix is None else 'atom'
+        self.pos_x = np.asarray(pos_x, 'd')
+        self.pos_y = np.asarray(pos_y, 'd')
+        self.pos_z = np.asarray(pos_z, 'd')
+        self.sld_n = np.asarray(sld_n, 'd')
         self.line_x = None
         self.line_y = None
         self.line_z = None
@@ -872,13 +799,16 @@ class MagSLD(object):
         self.sld_my = sld_my
         self.sld_mz = sld_mz
         self.vol_pix = vol_pix
-        self.sld_m = None
-        self.sld_phi = None
-        self.sld_theta = None
+        #self.sld_m = None
+        #self.sld_phi = None
+        #self.sld_theta = None
         self.pix_symbol = None
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
-        self.set_nodes()
+        if vol_pix is None:
+            self.set_nodes()
+        else:
+            self.set_pixel_volumes(vol_pix)
 
     def __str__(self):
         """
@@ -899,22 +829,25 @@ class MagSLD(object):
 
     def set_sldn(self, sld_n):
         """
-        Sets neutron SLD
+        Sets neutron SLD.
+
+        Warning: if *sld_n* is a scalar and attribute *is_data* is True, then
+        only pixels with non-zero magnetism will be set.
         """
-        if sld_n.__class__.__name__ == 'float':
+        if isinstance(sld_n, float):
             if self.is_data:
                 # For data, put the value to only the pixels w non-zero M
                 is_nonzero = (np.fabs(self.sld_mx) +
                               np.fabs(self.sld_my) +
                               np.fabs(self.sld_mz)).nonzero()
-                self.sld_n = np.zeros(len(self.pos_x))
-                if len(self.sld_n[is_nonzero]) > 0:
+                if len(is_nonzero[0]) > 0:
+                    self.sld_n = np.zeros_like(self.pos_x)
                     self.sld_n[is_nonzero] = sld_n
                 else:
-                    self.sld_n.fill(sld_n)
+                    self.sld_n = np.full_like(self.pos_x, sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n = np.ones(len(self.pos_x)) * sld_n
+                self.sld_n = np.full_like(self.pos_x, sld_n)
         else:
             self.sld_n = sld_n
 
@@ -922,22 +855,24 @@ class MagSLD(object):
         r"""
         Sets mx, my, mz and abs(m).
         """ # Note: escaping
-        if sld_mx.__class__.__name__ == 'float':
-            self.sld_mx = np.ones(len(self.pos_x)) * sld_mx
+        if isinstance(sld_mx, float):
+            self.sld_mx = np.full_like(self.pos_x, sld_mx)
         else:
             self.sld_mx = sld_mx
-        if sld_my.__class__.__name__ == 'float':
-            self.sld_my = np.ones(len(self.pos_x)) * sld_my
+        if isinstance(sld_my, float):
+            self.sld_my = np.full_like(self.pos_x, sld_my)
         else:
             self.sld_my = sld_my
-        if sld_mz.__class__.__name__ == 'float':
-            self.sld_mz = np.ones(len(self.pos_x)) * sld_mz
+        if isinstance(sld_mz, float):
+            self.sld_mz = np.full_like(self.pos_x, sld_mz)
         else:
             self.sld_mz = sld_mz
 
-        sld_m = np.sqrt(sld_mx * sld_mx + sld_my * sld_my + \
-                                sld_mz * sld_mz)
-        self.sld_m = sld_m
+        #sld_m = np.sqrt(sld_mx**2 + sld_my**2 + sld_mz**2)
+        #if isinstance(sld_m, float):
+        #    self.sld_m = np.full_like(self.pos_x, sld_m)
+        #else:
+        #    self.sld_m = sld_m
 
     def set_pixel_symbols(self, symbol='pixel'):
         """
@@ -958,11 +893,12 @@ class MagSLD(object):
         """
         if self.sld_n is None:
             return
-        if vol.__class__.__name__ == 'ndarray':
+        if isinstance(vol, np.ndarray):
             self.vol_pix = vol
         elif vol.__class__.__name__.count('float') > 0:
             self.vol_pix = np.repeat(vol, len(self.sld_n))
         else:
+            # TODO: raise error rather than silently ignore
             self.vol_pix = None
 
     def get_sldn(self):
@@ -985,6 +921,7 @@ class MagSLD(object):
                 self.ynodes = int(ydist) + 1
                 self.znodes = int(zdist) + 1
             except Exception:
+                # TODO: don't silently ignore errors
                 self.xnodes = None
                 self.ynodes = None
                 self.znodes = None
@@ -1020,6 +957,7 @@ class MagSLD(object):
                 self.set_pixel_volumes(vol)
                 self.has_stepsize = True
             except Exception:
+                # TODO: don't silently ignore errors
                 self.xstepsize = None
                 self.ystepsize = None
                 self.zstepsize = None
@@ -1047,17 +985,38 @@ class MagSLD(object):
         self.line_y = line_y
         self.line_z = line_z
 
+def test():
+    """
+    Check that the GenSAS can load coordinates and compute I(q).
+    """
+    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    if not os.path.isfile(ofpath):
+        raise ValueError("file(s) not found: %r"%(ofpath,))
+    oreader = OMFReader()
+    omfdata = oreader.read(ofpath)
+    omf2sld = OMF2SLD()
+    omf2sld.set_data(omfdata)
+    model = GenSAS()
+    model.set_sld_data(omf2sld.output)
+    q = np.linspace(0, 0.1, 11)[1:]
+    return model.runXY([q, q])
+
+# =======================================================================
+#
+# Code to check the speed and correctness of the generic sas calculation.
+#
+# =======================================================================
+
 def _get_data_path(*path_parts):
-    from os.path import realpath, join as joinpath, dirname, abspath
+    from os.path import realpath, join as joinpath, dirname
     # in sas/sascalc/calculator;  want sas/sasview/test
     return joinpath(dirname(realpath(__file__)),
                     '..', '..', 'sasview', 'test', *path_parts)
 
-def test_load():
+def demo_load():
     """
-        Test code
+    Check loading of coordinate data.
     """
-    from mpl_toolkits.mplot3d import Axes3D
     tfpath = _get_data_path("1d_data", "CoreXY_ShellZ.txt")
     ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
     if not os.path.isfile(tfpath) or not os.path.isfile(ofpath):
@@ -1070,31 +1029,35 @@ def test_load():
     foutput.set_data(ooutput)
 
     import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
     fig = plt.figure()
     ax = Axes3D(fig)
     ax.plot(output.pos_x, output.pos_y, output.pos_z, '.', c="g",
             alpha=0.7, markeredgecolor='gray', rasterized=True)
-    gap = 7
-    max_mx = max(output.sld_mx)
-    max_my = max(output.sld_my)
-    max_mz = max(output.sld_mz)
-    max_m = max(max_mx, max_my, max_mz)
-    x2 = output.pos_x+output.sld_mx/max_m * gap
-    y2 = output.pos_y+output.sld_my/max_m * gap
-    z2 = output.pos_z+output.sld_mz/max_m * gap
-    x_arrow = np.column_stack((output.pos_x, x2))
-    y_arrow = np.column_stack((output.pos_y, y2))
-    z_arrow = np.column_stack((output.pos_z, z2))
-    unit_x2 = output.sld_mx / max_m
-    unit_y2 = output.sld_my / max_m
-    unit_z2 = output.sld_mz / max_m
-    color_x = np.fabs(unit_x2 * 0.8)
-    color_y = np.fabs(unit_y2 * 0.8)
-    color_z = np.fabs(unit_z2 * 0.8)
-    colors = np.column_stack((color_x, color_y, color_z))
+    #gap = 7
+    #max_mx = max(output.sld_mx)
+    #max_my = max(output.sld_my)
+    #max_mz = max(output.sld_mz)
+    #max_m = max(max_mx, max_my, max_mz)
+    #x2 = output.pos_x+output.sld_mx/max_m * gap
+    #y2 = output.pos_y+output.sld_my/max_m * gap
+    #z2 = output.pos_z+output.sld_mz/max_m * gap
+    #x_arrow = np.column_stack((output.pos_x, x2))
+    #y_arrow = np.column_stack((output.pos_y, y2))
+    #z_arrow = np.column_stack((output.pos_z, z2))
+    #unit_x2 = output.sld_mx / max_m
+    #unit_y2 = output.sld_my / max_m
+    #unit_z2 = output.sld_mz / max_m
+    #color_x = np.fabs(unit_x2 * 0.8)
+    #color_y = np.fabs(unit_y2 * 0.8)
+    #color_z = np.fabs(unit_z2 * 0.8)
+    #colors = np.column_stack((color_x, color_y, color_z))
     plt.show()
 
-def test_save():
+def demo_save():
+    """
+    Check saving of coordinate data.
+    """
     ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
     if not os.path.isfile(ofpath):
         raise ValueError("file(s) not found: %r"%(ofpath,))
@@ -1105,24 +1068,390 @@ def test_save():
     writer = SLDReader()
     writer.write("out.txt", omf2sld.output)
 
-def test():
+def sas_gen_c(self, qx, qy=None):
     """
-        Test code
+    C interface to sas_gen, for comparison to new python interface.
+
+    Note: this requires the old C implementation which may have already
+    been removed from the repository.
     """
-    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
-    if not os.path.isfile(ofpath):
-        raise ValueError("file(s) not found: %r"%(ofpath,))
-    oreader = OMFReader()
-    omfdata = oreader.read(ofpath)
+    from . import _sld2i
+
+    x, y, z = self.data_x, self.data_y, self.data_z
+    if self.is_avg:
+        x, y, z = transform_center(x, y, z)
+    sld = self.data_sldn - self.params['solvent_SLD']
+    vol = self.data_vol
+    mx, my, mz = self.data_mx, self.data_my, self.data_mz
+    in_spin = self.params['Up_frac_in']
+    out_spin = self.params['Up_frac_out']
+    s_theta = self.params['Up_theta']
+    scale = self.params['scale']
+    total_volume = self.params['total_volume']
+    background = self.params['background']
+
+    is_magnetic = (mx is not None and my is not None and mz is not None)
+    if not is_magnetic:
+        mx = my = mz = np.zeros_like(x)
+    args = (
+        (1 if self.is_avg else 0),
+        # WARNING: calc_msld in libfunc.c at line 174-175 swaps mz and my.
+        # To compare new to old need to swap the inputs.  Also need to
+        # reverse the sign.
+        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta)
+    model = _sld2i.new_GenI(*args)
+    I_out = np.empty_like(qx)
+    if qy is not None and len(qy) > 0:
+        qx, qy = _vec(qx), _vec(qy)
+        _sld2i.genicomXY(model, qx, qy, I_out)
+    else:
+        qx = _vec(qx)
+        _sld2i.genicom(model, qx, I_out)
+
+    vol_correction = self.data_total_volume / total_volume
+    result = (scale * vol_correction) * I_out + background
+    return result
+
+def realspace_Iq(self, qx, qy):
+    """
+    Compute Iq for GenSAS object using sasmodels/explore/realspace.py
+    """
+    from realspace import calc_Iq_magnetic, calc_Iqxy
+    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
+
+    x, y, z = self.data_x, self.data_y, self.data_z
+    if self.is_avg:
+        x, y, z = transform_center(x, y, z)
+    rho = (self.data_sldn - self.params['solvent_SLD'])*1e6
+    volume = self.data_vol
+    rho_m = (self.data_mx, self.data_my, self.data_mz)
+    in_spin = self.params['Up_frac_in']
+    out_spin = self.params['Up_frac_out']
+    s_theta = self.params['Up_theta']
+    scale = self.params['scale']
+    total_volume = self.params['total_volume']
+    background = self.params['background']
+
+    is_magnetic = all(v is not None for v in rho_m)
+
+    #print("qx, qy", qx, qy)
+    if is_magnetic:
+        rho_m = np.vstack(rho_m)*1e6
+
+    points = np.vstack((x, y, z)).T
+    if qy is None:
+        if self.is_avg:
+            I_out = calc_Iq_avg(qx, rho, points, volume)
+        else:
+            rmax = np.linalg.norm(np.max(points, axis=0) - np.min(points, axis=0))
+            r = r_bins(qx, rmax, over_sampling=10)
+            Pr = calc_Pr(r, rho, points, volume)
+            #import pylab; pylab.plot(r, Pr); pylab.figure()
+            I_out = calc_Iq_from_Pr(qx, r, Pr)
+    else:
+        if is_magnetic:
+            I_out = calc_Iq_magnetic(
+                qx, qy, rho, rho_m, points, volume,
+                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
+                )
+        else:
+            I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
+
+    vol_correction = self.data_total_volume / total_volume
+    #print("vol correction", vol_correction, self.data_total_volume, total_volume)
+    result = (scale * vol_correction) * I_out + background
+    return result
+
+# author: Ben (https://stackoverflow.com/users/874660/ben)
+# https://stackoverflow.com/questions/8130823/set-matplotlib-3d-plot-aspect-ratio/19248731#19248731
+def set_axis_equal_3D(ax):
+    """
+    Set equal axes on a 3D plot.
+    """
+    extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    sz = extents[:, 1] - extents[:, 0]
+    centers = np.mean(extents, axis=1)
+    maxsize = max(abs(sz))
+    r = maxsize/2
+    for ctr, dim in zip(centers, 'xyz'):
+        getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
+
+def compare(obj, qx, qy=None, plot_points=False, theory=None):
+    """
+    Compare GenSAS calculator *obj* to old C and sasmodels versions.
+
+    *theory* is the I(q) value for the shape, if known.
+    """
+    from matplotlib import pyplot as plt
+    from timeit import default_timer as timer
+
+    try:
+        import realspace
+        use_realspace = True
+    except ImportError:
+        use_realspace = False
+
+    try:
+        from . import _sld2i
+        # old model is too slow for large number of points
+        use_oldmodel = (len(obj.data_x) <= 21000)
+    except ImportError:
+        use_oldmodel = False
+
+    #use_realspace = oldmodel = False
+    use_theory = (theory is not None)
+    I_theory = (theory, "theory") if use_theory else None
+
+    if use_realspace:
+        start = timer()
+        I_realspace = (realspace_Iq(obj, qx, qy), "realspace")
+        print("realspace time:", timer() - start)
+    else:
+        I_realspace = None
+
+    start = timer()
+    I_new = obj.calculate_Iq(qx, qy)
+    print("New time:", timer() - start)
+    new_label = "New"
+
+    if use_oldmodel:
+        start = timer()
+        I_old = (sas_gen_c(obj, qx, qy), "old")
+        print("Old time:", timer() - start)
+    else:
+        I_old = None
+
+    def select(a, b, c):
+        if a is None and b is None:
+            return c, None, None
+        elif a is None:
+            return b, c, None
+        else:
+            return a, b, c
+    base, other, extra = select(I_theory, I_old, I_realspace)
+    #base, other, extra = select(I_theory, I_realspace, I_old)
+
+    def calc_rel_err(target, label):
+        rel_error = np.abs(target - I_new)/np.abs(target)
+        index = (I_new > I_new.max()/10)
+        ratio = np.mean(target[index]/I_new[index])
+        print(label, "rel error =", rel_error[~np.isnan(rel_error)].max(),
+              ", %s/New ="%label, ratio)
+    if use_theory:
+        calc_rel_err(*I_theory)
+    if use_oldmodel:
+        calc_rel_err(*I_old)
+    if use_realspace:
+        calc_rel_err(*I_realspace)
+
+    if base is not None:
+        #rel_error = 0.5*np.abs(base[0] - I_new)/(np.abs(base[0])+np.abs(I_new))
+        #rel_error = np.abs(base[0]/np.sum(base[0]) - I_new/np.sum(I_new))
+        #rel_label = "|%s/sum(%s) - %s/sum(%s)|" % (base[1], base[1], new_label, new_label)
+        rel_error = np.abs(base[0] - I_new)/np.abs(base[0])
+        rel_label = "|%s - %s|/|%s|" % (base[1], new_label, base[1])
+        #print(rel_label, "=", rel_error[~np.isnan(rel_error)].max())
+    else:
+        rel_error, rel_label = None, None
+
+    if qy is not None and len(qy) > 0:
+        plt.subplot(131)
+        plt.pcolormesh(qx, qy, np.log10(I_new))
+        plt.axis('equal')
+        plt.title(new_label)
+        plt.colorbar()
+
+        if base is not None:
+            if other is None:
+                plt.subplot(131)
+            else:
+                plt.subplot(232)
+            plt.pcolormesh(qx, qy, np.log10(base[0]))
+            plt.axis('equal')
+            plt.title(base[1])
+            plt.colorbar()
+        if other is not None:
+            plt.subplot(235)
+            plt.pcolormesh(qx, qy, np.log10(other[0]))
+            plt.axis('equal')
+            plt.colorbar()
+            plt.title(other[1])
+        if rel_error is not None:
+            plt.subplot(133)
+            if False:
+                plt.pcolormesh(qx, qy, base[0] - I_new)
+                plt.title("%s - %s" % (base[1], new_label))
+            else:
+                plt.pcolormesh(qx, qy, rel_error)
+                plt.title(rel_label)
+            plt.axis('equal')
+            plt.colorbar()
+    else:
+        if use_realspace:
+            plt.loglog(qx, I_realspace[0], '-', label=I_realspace[1])
+        if use_oldmodel:
+            plt.loglog(qx, I_old[0], '-', label=I_old[1])
+        if use_theory:
+            plt.loglog(qx, I_theory[0], '-', label=I_theory[1])
+        plt.loglog(qx, I_new, '-', label=new_label)
+        plt.legend()
+
+    if plot_points:
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        #ax = fig.add_subplot((111), projection='3d')
+        ax.plot(obj.data_x, obj.data_y, obj.data_z, '.', c="g",
+                alpha=0.7, markeredgecolor='gray', rasterized=True)
+        set_axis_equal_3D(ax)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+
+    plt.show()
+
+def demo_oommf():
+    """
+    Calculate theory from saved OOMMF magnetic data.
+    """
+    path = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    reader = OMFReader()
+    omfdata = reader.read(path)
     omf2sld = OMF2SLD()
     omf2sld.set_data(omfdata)
+    data = omf2sld.output
     model = GenSAS()
-    model.set_sld_data(omf2sld.output)
-    x = np.linspace(0, 0.1, 11)[1:]
-    return model.runXY([x, x])
+    model.set_sld_data(data)
+    model.params['background'] = 1e-7
+    q = np.linspace(-0.1, 0.1, 31)
+    qx, qy = np.meshgrid(q, q)
+    compare(model, qx, qy)
+
+def demo_pdb(is_avg=False):
+    """
+    Calculation I(q) for object in pdb file.
+    """
+    #filename = "diamond.pdb"
+    filename = "dna.pdb"
+    path = _get_data_path("coordinate_data", filename)
+    reader = PDBReader()
+    data = reader.read(path)
+    model = GenSAS()
+    model.set_sld_data(data)
+    model.set_is_avg(is_avg)
+    #print(filename, "has", len(model.data_x), "points")
+    q = np.linspace(0, 1, 1350)
+    compare(model, q)
+
+def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
+               qmax=0.5, use_2d=False, **kw):
+    """
+    Sample from shape with analytic model.
+
+    *shape* is one of the shapes from sasmodels/explore/realspace.py
+
+    *samples* is the number of sample points
+
+    *view* is the rotation angle for the shape
+
+    *qmax* is the max q value
+
+    *use_2d* produces a 2D shape rather
+
+    Remaining keywords are specific to the shape.  See def build_SHAPE(...)
+    in realspace.py for details.
+    """
+    import realspace
+
+    builder = realspace.SHAPE_FUNCTIONS[shape]
+    shape, fx, fxy = builder(**kw)
+    sampling_density = samples / shape.volume
+    if shape.is_magnetic:
+        rho, rho_m, points = shape.sample_magnetic(sampling_density)
+        rho, rho_m = rho*1e-6, rho_m*1e-6
+        mx, my, mz = rho_m
+        up_i, up_f, up_angle = shape.spin
+    else:
+        rho, points = shape.sample(sampling_density)
+        rho = rho*1e-6
+        mx = my = mz = None
+        up_i, up_f, up_angle = 1.0, 1.0, 0.0
+    points = realspace.apply_view(points, view)
+    volume = shape.volume / len(points)
+    #print("shape, pixel volume", shape.volume, shape.volume/len(points))
+    x, y, z = points.T
+    data = MagSLD(x, y, z, sld_n=rho, vol_pix=volume,
+                  sld_mx=mx, sld_my=my, sld_mz=mz)
+    model = GenSAS()
+    model.set_sld_data(data)
+    #print("vol", data.vol_pix[:10], model.data_vol[:10])
+    model.set_is_avg(False)
+    model.params['scale'] = 1.0
+    model.params['background'] = 1e-2
+    model.params['Up_frac_in'] = up_i
+    model.params['Up_frac_out'] = up_f
+    model.params['Up_theta'] = up_angle
+    if use_2d or shape.is_magnetic:
+        q = np.linspace(-qmax, qmax, nq)
+        qx, qy = np.meshgrid(q, q)
+        theory = fxy(qx, qy, view)
+    else:
+        qmax = np.log10(qmax)
+        qx = np.logspace(qmax-3, qmax, nq)
+        qy = None
+        theory = fx(qx)
+    theory = model.params['scale']*theory + model.params['background']
+    compare(model, qx, qy, plot_points=False, theory=theory)
+
+def demo():
+    """
+    Run a GenSAS operation demo.
+    """
+    #demo_load()
+    #demo_save()
+    #print(test())
+    #test()
+    #demo_pdb(is_avg=True)
+    #demo_pdb(is_avg=False)
+    #demo_oommf()
+
+    # Comparison to sasmodels.
+    # See sasmodels/explore/realspace.py:build_SHAPE for parameters.
+    pars = dict(
+        # Shape + qrange + magnetism (only for ellip).
+        #shape='ellip', rab=125, rc=50, qmax=0.1,
+        #shape='ellip', rab=25, rc=50, qmax=0.1,
+        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
+
+        # 1D or 2D curve (ignored for magnetism).
+        #use_2d=False,
+        use_2d=True,
+
+        # Particle orientation.
+        view=(30, 60, 0),
+
+        # Number of points in the volume.
+        #samples=2000, nq=100,
+        samples=20000, nq=51,
+        #samples=200000, nq=20,
+        #samples=20000000, nq=10,
+        )
+    demo_shape(**pars)
+
+def _setup_realspace_path():
+    """
+    Put sasmodels/explore on path so realspace
+    """
+    try:
+        import realspace
+    except ImportError:
+        from os.path import join as joinpath, realpath, dirname
+        path = realpath(joinpath(dirname(__file__),
+                                 '..', '..', '..', '..', '..',
+                                 'sasmodels', 'explore'))
+        sys.path.insert(0, path)
+        logger.info("inserting %r into python path for realspace", path)
 
 if __name__ == "__main__":
-    #test_load()
-    #test_save()
-    #print(test())
-    test()
+    _setup_realspace_path()
+    demo()

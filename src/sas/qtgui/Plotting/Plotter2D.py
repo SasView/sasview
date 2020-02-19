@@ -615,7 +615,7 @@ class Plotter2DWidget(PlotterBase):
         x_str = GuiUtils.formatNumber(x_click)
         y_str = GuiUtils.formatNumber(y_click)
         coord_str = "x: {}, y: {}".format(x_str, y_str)
-        self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
+        self.manager.communicate.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """

@@ -16,9 +16,11 @@ import re
 import logging
 import traceback
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sasmodels.sasview_model import load_standard_models
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
+
+from sas.sascalc.fit import models
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -79,7 +81,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # Name and directory for saving new plugin model
         self.plugin_filename = None
-        self.plugin_dir = ModelUtilities.find_plugins_dir()
+        self.plugin_dir = models.find_plugins_dir()
 
         # Validators
         rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
@@ -112,6 +114,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         models = load_standard_models()
         models_dict = {}
         for model in models:
+            if model.category is None or 'custom' in model.category:
+                continue
             models_dict[model.name] = model
 
         return sorted([model_name for model_name in models_dict])
@@ -290,7 +294,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         try:
             help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                            "/user/qtgui/Perspectives/Fitting/fitting_help.html#sum-multi-p1-p2"
+                            "/user/qtgui/Perspectives/Fitting/fitting_help.html#add-multiply-models"
             webbrowser.open('file://' + os.path.realpath(help_location))
         except AttributeError:
             # No manager defined - testing and standalone runs

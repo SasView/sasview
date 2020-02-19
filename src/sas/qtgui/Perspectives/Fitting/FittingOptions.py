@@ -26,14 +26,16 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     Hard-coded version of the fit options dialog available from BUMPS.
     This should be make more "dynamic".
     bumps.options.FIT_FIELDS gives mapping between parameter names, parameter strings and field type
-     (double line edit, integer line edit, combo box etc.), e.g.
+    (double line edit, integer line edit, combo box etc.), e.g.::
+
         FIT_FIELDS = dict(
             samples = ("Samples", parse_int),
-            xtol = ("x tolerance", float))
+            xtol = ("x tolerance", float),
+        )
 
-    bumps.fitters.<algorithm>.settings gives mapping between algorithm, parameter name and default value:
-        e.g.
-        settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
+    bumps.fitters.<algorithm>.settings gives mapping between algorithm, parameter name and default value, e.g.::
+
+        >>> settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
     """
     fit_option_changed = QtCore.pyqtSignal(str)
 

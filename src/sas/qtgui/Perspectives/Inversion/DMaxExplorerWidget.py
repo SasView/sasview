@@ -49,6 +49,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
         self.plot = PlotterWidget(self, self)
         self.hasPlot = False
+        self.plot.showLegend = False
         self.verticalLayout.insertWidget(0, self.plot)
 
         # Let's choose the Standard Item Model.

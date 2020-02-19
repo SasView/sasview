@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets
 
 import functools
 import copy
+import sys
 import matplotlib as mpl
 import numpy as np
 from matplotlib.font_manager import FontProperties
@@ -19,12 +20,29 @@ from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-def _legendResize(width):
+def _legendResize(width, parent):
     """
     resize factor for the legend, based on total canvas width
     """
     # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
-    return (width/100.0)+4.0
+    if not hasattr(parent.parent, "manager"):
+        return None
+    if parent is None or parent.parent is None or parent.parent.manager is None \
+        or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
+        return None
+
+    screen_width = parent.parent.manager.parent._parent.screen_width
+    screen_height = parent.parent.manager.parent._parent.screen_height
+    screen_factor = screen_width * screen_height
+
+    if sys.platform == 'win32':
+        factor = 4
+        denomintor = 100
+        scale_factor = width/denomintor + factor
+    else:
+        #Function inferred based on tests for several resolutions
+        scale_factor = (3e-6*screen_factor + 1)*width/640
+    return scale_factor
 
 class PlotterWidget(PlotterBase):
     """
@@ -51,6 +69,8 @@ class PlotterWidget(PlotterBase):
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         self.fit_result.name = "Fit"
+
+        parent.geometry()
 
     @property
     def data(self):
@@ -208,11 +228,12 @@ class PlotterWidget(PlotterBase):
         self.plot_lines[data.name] = line
 
         # Now add the legend with some customizations.
-
         if self.showLegend:
-            width=_legendResize(self.canvas.size().width())
-
-            self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            width=_legendResize(self.canvas.size().width(), self.parent)
+            if width is not None:
+                self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            else:
+                self.legend = ax.legend(loc='upper right', shadow=True)
             if self.legend:
                 self.legend.set_picker(True)
 
@@ -231,9 +252,10 @@ class PlotterWidget(PlotterBase):
         """
         if not self.showLegend:
             return
-        width = _legendResize(event.width)
+        width = _legendResize(event.width, self.parent)
         # resize the legend to follow the canvas width.
-        self.legend.prop.set_size(width)
+        if width is not None:
+            self.legend.prop.set_size(width)
 
     def createContextMenu(self):
         """

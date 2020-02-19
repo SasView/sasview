@@ -18,7 +18,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        self.data = self.base.data[0]
         #connecting artist
         self.connect = self.base.connect
         # which direction is the preferred interaction direction

@@ -126,7 +126,6 @@ def _find_local_config(confg_file, path):
 # Get APP folder
 PATH_APP = get_app_dir()
 DATAPATH = PATH_APP
-
 # Read in the local config, which can either be with the main
 # application or in the installation directory
 config = _find_local_config('local_config', PATH_APP)
@@ -137,12 +136,12 @@ else:
     pass
 
 c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-
 custom_config = _find_local_config('custom_config', c_conf_dir)
 if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
     if custom_config is None:
         msgConfig = "Custom_config file was not imported"
+logging.info("Custom config path: %s", custom_config)
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION

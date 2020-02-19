@@ -49,6 +49,11 @@ class BaseInteractor(object):
         self.clicky = None
         self.markers = []
 
+        if isinstance(base.data, list):
+            self.data = self.base.data[0]
+        else:
+            self.data = self.base.data
+
     def clear_markers(self):
         """
         Clear old markers and interfaces.
