@@ -5,22 +5,13 @@
     Setup for SasView
     TODO: Add checks to see that all the dependencies are on the system
 """
-from __future__ import print_function
-
 import os
 import subprocess
 import shutil
 import sys
-from distutils.command.build_ext import build_ext
 from distutils.core import Command
 
-import numpy as np
-from setuptools import Extension, setup
-
-try:
-    import tinycc.distutils
-except ImportError:
-    pass
+from setuptools import setup
 
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
@@ -78,91 +69,6 @@ if dont_clean:
 elif os.path.exists(SASVIEW_BUILD):
     print("Removing existing build directory", SASVIEW_BUILD, "for a clean build")
     shutil.rmtree(SASVIEW_BUILD)
-
-# 'sys.maxsize' and 64bit: Not supported for python2.5
-is_64bits = sys.maxsize > 2**32
-
-enable_openmp = False
-if sys.platform == 'darwin':
-    if not is_64bits:
-        # Disable OpenMP
-        enable_openmp = False
-    else:
-        # Newer versions of Darwin don't support openmp
-        try:
-            darwin_ver = int(os.uname()[2].split('.')[0])
-            if darwin_ver >= 12:
-                enable_openmp = False
-        except:
-            print("PROBLEM determining Darwin version")
-
-# Options to enable OpenMP
-copt = {'msvc': ['/openmp'],
-        'mingw32': ['-fopenmp'],
-        'unix': ['-fopenmp']}
-lopt = {'msvc': ['/MANIFEST'],
-        'mingw32': ['-fopenmp'],
-        'unix': ['-lgomp']}
-
-# Platform-specific link options
-platform_lopt = {'msvc': ['/MANIFEST']}
-platform_copt = {}
-
-# Set copts to get compile working on OS X >= 10.9 using clang
-if sys.platform == 'darwin':
-    try:
-        darwin_ver = int(os.uname()[2].split('.')[0])
-        if darwin_ver >= 13 and darwin_ver < 14:
-            platform_copt = {
-                'unix': ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
-    except:
-        print("PROBLEM determining Darwin version")
-
-
-class DisableOpenMPCommand(Command):
-    description = "The version of MinGW that comes with Anaconda does not come with OpenMP :( "\
-                  "This commands means we can turn off compiling with OpenMP for this or any "\
-                  "other reason."
-    user_options = []
-
-    def initialize_options(self):
-        self.cwd = None
-
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-        global enable_openmp
-        enable_openmp = False
-
-    def run(self):
-        pass
-
-
-class build_ext_subclass(build_ext):
-    def build_extensions(self):
-        # Get 64-bitness
-        c = self.compiler.compiler_type
-        print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
-
-        # OpenMP build options
-        if enable_openmp:
-            if c in copt:
-                for e in self.extensions:
-                    e.extra_compile_args = copt[c]
-            if c in lopt:
-                for e in self.extensions:
-                    e.extra_link_args = lopt[c]
-
-        # Platform-specific build options
-        if c in platform_lopt:
-            for e in self.extensions:
-                e.extra_link_args = platform_lopt[c]
-
-        if c in platform_copt:
-            for e in self.extensions:
-                e.extra_compile_args = platform_copt[c]
-
-        build_ext.build_extensions(self)
-
 
 class BuildSphinxCommand(Command):
     description = "Build Sphinx documentation."
@@ -378,31 +284,6 @@ packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")
 # packages.append("sas.models")
 
-EXTENSIONS = [".c", ".cpp"]
-
-
-def append_file(file_list, dir_path):
-    """
-    Add sources file to sources
-    """
-    for f in os.listdir(dir_path):
-        if os.path.isfile(os.path.join(dir_path, f)):
-            _, ext = os.path.splitext(f)
-            if ext.lower() in EXTENSIONS:
-                file_list.append(os.path.join(dir_path, f))
-        elif os.path.isdir(os.path.join(dir_path, f)) and \
-                not f.startswith("."):
-            sub_dir = os.path.join(dir_path, f)
-            for new_f in os.listdir(sub_dir):
-                if os.path.isfile(os.path.join(sub_dir, new_f)):
-                    _, ext = os.path.splitext(new_f)
-                    if ext.lower() in EXTENSIONS:
-                        file_list.append(os.path.join(sub_dir, new_f))
-
-
-# Comment out the following to avoid rebuilding all the models
-file_sources = []
-
 # Wojtek's hacky way to add doc files while bundling egg
 # def add_doc_files(directory):
 #    paths = []
@@ -481,7 +362,5 @@ setup(
             "sasview=sas.qtgui.MainWindow.MainWindow:run_sasview",
         ]
     },
-    cmdclass={'build_ext': build_ext_subclass,
-              'docs': BuildSphinxCommand,
-              'disable_openmp': DisableOpenMPCommand}
+    cmdclass={'docs': BuildSphinxCommand},
 )
