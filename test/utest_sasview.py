@@ -58,7 +58,6 @@ def run_tests(dirs=None, run_all=False):
         if os.path.isdir(module_dir):
             for f in os.listdir(module_dir):
                 file_path = os.path.join(module_dir,f)
-                if not f.endswith('corfunc.py'): continue
                 if os.path.isfile(file_path) and f.startswith("utest_") and f.endswith(".py"):
                     module_name,_ = os.path.splitext(f)
                     code = '"%s" %s %s'%(sys.executable, run_one_py, file_path)
