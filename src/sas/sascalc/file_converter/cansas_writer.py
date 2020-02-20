@@ -14,13 +14,12 @@ class CansasWriter(CansasReader):
         """
         # Create XML document
         doc, _ = self._to_xml_doc(frame_data, sasentry_attrs)
-        # Write the file
-        file_ref = open(filename, 'w')
         if self.encoding is None:
             self.encoding = "UTF-8"
-        doc.write(file_ref, encoding=self.encoding,
-                  pretty_print=True, xml_declaration=True)
-        file_ref.close()
+        # Write the file
+        with open(filename, 'wb') as file_ref:
+            doc.write(file_ref, encoding=self.encoding,
+                      pretty_print=True, xml_declaration=True)
 
 
     def _to_xml_doc(self, frame_data, sasentry_attrs=None):

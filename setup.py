@@ -242,14 +242,9 @@ packages.append("sas.sascalc.pr")
 
 
 # sas.sascalc.file_converter
-mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
 package_dir["sas.sascalc.file_converter"] = os.path.join(
     "src", "sas", "sascalc", "file_converter")
 packages.append("sas.sascalc.file_converter")
-ext_modules.append(Extension("sas.sascalc.file_converter._bsl_loader",
-                             sources=[os.path.join(mydir, "bsl_loader.c")],
-                             include_dirs=[np.get_include()],
-                             ))
 
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
