@@ -114,6 +114,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Update control elements based on data and model passed
         """
+        # retain the combobox index
+        old_index = self.cbSmearing.currentIndex()
         self.cbSmearing.clear()
         self.cbSmearing.addItem("None")
         self.gAccuracy.setVisible(False)
@@ -121,15 +123,17 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if data is None:
             self.setElementsVisibility(False)
         model = self.kernel_model
-        self.updateKernelModel(model, keep_order = True)
+        self.updateKernelModel(model, keep_order = True, old_index=old_index)
 
-    def updateKernelModel(self, kernel_model=None, keep_order=False):
+    def updateKernelModel(self, kernel_model=None, keep_order=False, old_index=None):
         """
         Update the model
         """
         self.kernel_model = kernel_model
         # keep the original cbSmearing value, if already set
         index_to_show = self.cbSmearing.currentIndex()
+        if old_index is not None:
+            index_to_show = old_index
 
         self.cbSmearing.blockSignals(True)
         self.cbSmearing.clear()
