@@ -179,7 +179,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         elif plotter == "Background":
             ys = bck
             y_label = "Bckg"
-            y_unit = "\\AA^{-1}"
+            y_unit = "cm^{-1}"
         elif plotter == "Positive Fraction":
             ys = pos
             y_label = "P^+"
