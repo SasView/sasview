@@ -270,6 +270,28 @@ class FittingWindow(QtWidgets.QTabWidget):
         page_name = "Const. & Simul. Fit"
         return page_name
 
+    def deleteAllTabs(self):
+        """
+        Explicitly deletes all the fittabs, leaving nothing.
+        This is in preparation for the project load step.
+        """
+        for tab_index in range(len(self.tabs)):
+            self.closeTabByIndex(tab_index)
+
+    def closeTabByIndex(self, index):
+        """
+        Close/delete a tab with the given index.
+        No checks on validity of the index.
+        """
+        try:
+            ObjectLibrary.deleteObjectByRef(self.tabs[index])
+            self.removeTab(index)
+            del self.tabs[index]
+            self.tabsModifiedSignal.emit()
+        except IndexError:
+            # The tab might have already been deleted previously
+            pass
+
     def resetTab(self, index):
         """
         Adds a new tab and removes the last tab
@@ -287,19 +309,11 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Update local bookkeeping on tab close
         """
-        #assert len(self.tabs) >= index
         # don't remove the last tab
         if len(self.tabs) <= 1:
             self.resetTab(index)
             return
-        try:
-            ObjectLibrary.deleteObjectByRef(self.tabs[index])
-            self.removeTab(index)
-            del self.tabs[index]
-            self.tabsModifiedSignal.emit()
-        except IndexError:
-            # The tab might have already been deleted previously
-            pass
+        self.closeTabByIndex(index)
 
     def closeTabByName(self, tab_name):
         """

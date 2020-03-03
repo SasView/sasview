@@ -2245,6 +2245,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds weighting contribution to fitting data
         """
+        if not self.data_is_loaded:
+            # no weighing for theories (dy = 0)
+            return data
         new_data = copy.deepcopy(data)
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
