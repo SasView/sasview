@@ -5,21 +5,38 @@ import json
 #Replace with live server and live server key
 #DO NOT STORE KEY ON GITHUB
 #TEST settings for Sandbox
-#zenodo_url = "https://sandbox.zenodo.org"
-#zenodo_api_key = "rdNmQU4ogrtYQKp5jd7238DnigkPu51aMKHa8yFttYtp3GgsxOW8MCfL8Exp"
-
-#LIVE SETTINGS!!!!
-
-
+zenodo_url = "https://sandbox.zenodo.org"
+zenodo_api_key = "rdNmQU4ogrtYQKp5jd7238DnigkPu51aMKHa8yFttYtp3GgsxOW8MCfL8Exp"
 
 #Record metadata
 #Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
     'metadata': {
-    'title': 'SasView version 5.0',
-    'description': '5.0 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0',
+    'title': 'SasView version 5.0.1',
+    'description': '5.0.1 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
+    'contributors': [
+        {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
+        {'name': 'Corona, Patrick', 'affiliation': 'University of California Santa Barbara', 'type':'Researcher'},
+        {'name': 'Fragneto, Giovanna', 'affiliation': 'Institut Laue-Langevin', 'type':'Supervisor'},
+        {'name': 'Fultz, Brent', 'affiliation': 'California Institute of Technology', 'type':'WorkPackageLeader'},
+        {'name': 'Juhas, Pavol', 'affiliation': 'Brookhaven National Laboratory', 'type':'Researcher'},
+        {'name': 'Knudsen, Mikkel', 'affiliation': 'University of Copenhagen', 'type':'Researcher'},
+        {'name': 'Markvardsen, Anders', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Supervisor'},
+        {'name': 'McKerns, Mike', 'affiliation': 'California Institute of Technology', 'type':'Researcher'},
+        {'name': 'Narayanan, Theyencheri', 'affiliation': 'European Synchrotron Radiation Facility', 'type':'Researcher'},
+        {'name': 'Parsons, Drew', 'affiliation': 'University of New South Wales', 'type':'DataManager'},
+        {'name': 'Porcar, Lionel', 'affiliation': 'Institut Laue-Langevin', 'type':'Researcher'},
+        {'name': 'Pozzo, Lilo', 'affiliation': 'University of Washington', 'type':'Researcher'},
+        {'name': 'Rakitin, Maksim', 'affiliation': 'Brookhaven National Laboratory','type':'DataManager'},
+        {'name': 'Rennie, Adrian', 'affiliation': 'Uppsala University', 'type':'Researcher'},
+        {'name': 'Rod, Thomas Holm', 'affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'type':'WorkPackageLeader'},
+        {'name': 'Taylor, Jonathan', 'affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'type':'ContactPerson'},
+        {'name': 'Udby, Linda', 'affiliation': 'Niels Bohr Institute', 'type':'ContactPerson'},
+        {'name': 'Weigandt, Katie', 'affiliation':'University of Washington','type':'Researcher'},
+    ],
+
     'creators': [
         {'affiliation': 'Oak Ridge National Laboratory', 'name': 'Doucet, Mathieu', 'orcid': '0000-0002-5560-6478'},
         {'name': 'Cho, Jae Hie','affiliation': 'University of Tennessee Knoxville'},
@@ -30,7 +47,7 @@ sasview_data = {
         {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology'},
         {'name': 'Campbell, Kieran','affiliation': 'University of Oxford'},
         {'name': 'Cooper-Benun, Torin', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Durniak, Celine','affiliation': 'European Spallation Source' },
+        {'name': 'Durniak, Celine','affiliation': 'Data Management and Software Centre, ,European Spallation Source' },
         {'name': 'Forster, Laura','affiliation': 'Diamond Light Source'},
         {'name': 'Gonzales, Miguel','affiliation': 'Institut Laue-Langevin'},
         {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory',},
@@ -38,11 +55,12 @@ sasview_data = {
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
         {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
         {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology'},
-        {'name': 'Nielsen, Torben','affiliation': 'European Spallation Source'},
+        {'name': 'Nielsen, Torben','affiliation': 'Data Management and Software Centre, European Spallation Source'},
         {'name': "O'Driscoll, Lewis",'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Potrzebowski, Wojciech','affiliation': 'European Spallation Source', 'orcid': '0000-0002-7789-6779'},
+        {'name': 'Potrzebowski, Wojciech','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'orcid': '0000-0002-7789-6779'},
+        {'name': "Prescott, Stewart",'affiliation': 'University of New South Wales'},
         {'name': 'Ferraz Leal, Ricardo','affiliation': 'Oak Ridge National Laboratory'},
-        {'name': 'Rozycko, Piotr','affiliation': 'European Spallation Source' },
+        {'name': 'Rozycko, Piotr','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC' },
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'}
         ],
