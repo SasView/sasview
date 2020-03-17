@@ -201,7 +201,8 @@ class BuildSphinxCommand(Command):
         import build_sphinx
         build_sphinx.rebuild()
 
-_ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
+if 'clean' not in sys.argv:
+    _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
