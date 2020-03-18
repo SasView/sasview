@@ -210,7 +210,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Notify the helper
         PlotHelper.addPlot(self)
         # Notify the listeners about a new graph
-        self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+        self.manager.communicator.activeGraphsSignal.emit([self, False])
 
     def defaultContextMenu(self):
         """
@@ -315,7 +315,7 @@ class PlotterBase(QtWidgets.QWidget):
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
         # Notify the listeners
-        self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+        self.manager.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
 

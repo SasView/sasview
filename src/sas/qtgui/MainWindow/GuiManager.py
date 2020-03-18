@@ -44,6 +44,8 @@ from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringC
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
+
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
@@ -189,6 +191,69 @@ class GuiManager(object):
             import traceback
             logger.error("%s: could not load SasView models")
             logger.error(traceback.format_exc())
+
+    def updatePlotItems(self, graphs):
+        """
+        Wrapper for adding/removing actions in the windows menu
+        """
+        plot, delete = graphs
+        if not plot.data:
+            return
+        if delete:
+            self.removePlotItemsInWindowsMenu(plot)
+        else:
+            self.addPlotItemsInWindowsMenu(plot)
+
+
+    def addPlotItemsInWindowsMenu(self, plot):
+        """
+        Dynamically update the QMenu content and assign signals
+        """
+        if not plot:
+            return
+        name = plot[1].name
+        for action in self._workspace.menuWindow.actions():
+            if action.text() == name:
+                # action with this name already exists
+                return
+
+        # create action for this plot
+        action = self._workspace.menuWindow.addAction(name)
+        # connect action to slot
+        action.triggered.connect(lambda chk, item=name: self.plotSelectedSlot(name))
+        # add action to windows menu
+        self._workspace.menuWindow.addAction(action)
+
+    def plotSelectedSlot(self, plot_name):
+        """
+        Set focus on the selected plot
+        """
+        # loop over all visible plots and find the requested plot
+        for plot in PlotHelper.currentPlots():
+            if PlotHelper.plotById(plot).data[1].name == plot_name:
+                # set focus on the plot
+                # Note: none of the StackOverflow recommended solutions work here!
+                # neither raise_(), nor showNormal() nor setWindowState(Qt.WindowActive)
+                PlotHelper.plotById(plot).showNormal()
+                PlotHelper.plotById(plot).setFocus()
+                return
+        pass
+
+    def removePlotItemsInWindowsMenu(self, plot):
+        """
+        Dynamically update the QMenu content and disconnect signals
+        """
+        if not plot:
+            return
+        name = plot.data[1].name
+        # loop over actions
+        for action in self._workspace.menuWindow.actions():
+            if action.text() == name:
+                # disconnect action to slot
+                action.triggered.disconnect()
+                self._workspace.menuWindow.removeAction(action)
+                return
+        pass
 
     def updateLogContextMenus(self, visible=False):
         """
@@ -448,6 +513,8 @@ class GuiManager(object):
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
+        self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
+
 
     def addTriggers(self):
         """
@@ -1103,6 +1170,8 @@ class GuiManager(object):
         """
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayData(plot, id)
+            # update windows menu
+            self.addPlotItemsInWindowsMenu(plot)
 
     def uncheckAllMenuItems(self, menuObject):
         """
