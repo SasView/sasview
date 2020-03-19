@@ -1042,7 +1042,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not hasattr(plot, 'name'):
             return False
-        ids_vals = [val.data[0].name for val in self.active_plots.values()]
+        ids_vals = [val.data[0].name for val in self.active_plots.values()
+                    if val.data[0].plot_role != Data1D.ROLE_DATA]
 
         return plot.name in ids_vals
 
