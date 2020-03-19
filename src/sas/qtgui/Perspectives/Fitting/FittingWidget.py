@@ -2169,7 +2169,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             interval = np.logspace(start=qmin, stop=qmax, num=self.npts, endpoint=True, base=10.0)
         else:
             interval = np.linspace(start=self.q_range_min, stop=self.q_range_max,
-                                   num=self.npts, endpoint=True)
+                                   num=int(self.npts), endpoint=True)
         self.logic.createDefault1dData(interval, self.tab_id)
 
     def readCategoryInfo(self):
