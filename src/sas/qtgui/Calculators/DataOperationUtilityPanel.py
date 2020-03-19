@@ -15,7 +15,6 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
-BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
@@ -35,6 +34,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.data2 = None
         # To store the result
         self.output = None
+
+        bg_color = self.cbData1.palette().color(QtGui.QPalette.Base).name()
+        self.bg_color = "background-color: {};".format(bg_color)
 
         # To update content of comboboxes with files loaded in DataExplorer
         self.communicator.sendDataToPanelSignal.connect(self.updateCombobox)
@@ -279,7 +281,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.txtNumber.setStyleSheet(BG_RED)
 
             else:
-                self.txtNumber.setStyleSheet(BG_WHITE)
+                self.txtNumber.setStyleSheet(self.bg_color)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
@@ -290,8 +292,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
         else:
             if self.cbData2.currentText() == 'Number':
-                self.cbData1.setStyleSheet(BG_WHITE)
-                self.cbData2.setStyleSheet(BG_WHITE)
+                self.cbData1.setStyleSheet(self.bg_color)
+                self.cbData2.setStyleSheet(self.bg_color)
                 return True
 
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
@@ -323,14 +325,14 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 return False
 
             else:
-                self.cbData1.setStyleSheet(BG_WHITE)
-                self.cbData2.setStyleSheet(BG_WHITE)
+                self.cbData1.setStyleSheet(self.bg_color)
+                self.cbData2.setStyleSheet(self.bg_color)
                 return True
 
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(BG_WHITE)
+        self.txtOutputData.setStyleSheet(self.bg_color)
 
         if name_to_check is None or name_to_check == '':
             self.txtOutputData.setStyleSheet(BG_RED)
@@ -343,7 +345,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(BG_WHITE)
+            self.txtOutputData.setStyleSheet(self.bg_color)
             return True
 
     # ########
