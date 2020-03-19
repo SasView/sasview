@@ -20,11 +20,11 @@ NOT_INSTALLED = Fore.LIGHTRED_EX + '{0} NOT INSTALLED'
 
 # Location of yaml files
 if sys.platform == 'win32':
-    file_location = './build_tools/conda/ymls/sasview-env-build_win.yml'
+    file_location = './build_tools/conda_qt5_win.yml'
 elif sys.platform == 'darwin':
-    file_location = './build_tools/conda/ymls/sasview-env-build_osx.yml'
+    file_location = './build_tools/conda_qt5_osx.yml'
 else:
-    file_location = './build_tools/conda/ymls/sasview-env-build_linux.yml'
+    file_location = './build_tools/conda_qt5_ubuntu.yml'
 
 # Open yaml and get packages
 with open(file_location, 'r') as stream:
