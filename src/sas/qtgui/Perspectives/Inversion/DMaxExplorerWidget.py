@@ -120,7 +120,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         try:
             dmin = float(self.model.item(W.DMIN).text())
             dmax = float(self.model.item(W.DMAX).text())
-            npts = float(self.model.item(W.NPTS).text())
+            npts = int(self.model.item(W.NPTS).text())
             xs = np.linspace(dmin, dmax, npts)
         except ValueError as e:
             msg = ("An input value is not correctly formatted. Please check {}"
