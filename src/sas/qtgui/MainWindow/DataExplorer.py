@@ -912,11 +912,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         self.manager.add_data(data_list)
 
-    def updateGraphCount(self, graph_list):
+    def updateGraphCount(self, graphs):
         """
         Modify the graph name combo and potentially remove
         deleted graphs
         """
+        graph2, delete = graphs
+        graph_list = PlotHelper.currentPlots()
         self.updateGraphCombo(graph_list)
 
         if not self.active_plots:
