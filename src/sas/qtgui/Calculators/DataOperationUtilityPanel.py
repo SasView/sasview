@@ -15,7 +15,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
-BG_WHITE = "background-color: rgb(255, 255, 255);"
+BG_WHITE = "background-color: rgb(255, 255, 255); color: rgb(0, 0, 0);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
