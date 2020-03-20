@@ -84,15 +84,17 @@ is
 
 .. math::
 
-    Q^* = {2 \pi^2 (\Delta\rho)^2 \phi_1 \phi_2}
+    Q^* = {2 \pi^2 (\Delta\rho)^2 \phi_1 \phi_2} \equiv {2 \pi^2 \langle \eta^2 \rangle}
     
-where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast and $\phi_1$ and
-$\phi_2$ are the volume fractions of the two phases ($\phi_1 + \phi_2 = 1$).
-From this the volume fraction, specific surface area, and mean-square average
-SLD fluctuation can be determined.
+where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast, $<\eta^2>$ is the mean-
+square average of the SLD fluctuation and $\phi_1$ and $\phi_2$ are the volume
+fractions of the two phases ($\phi_1 + \phi_2 = 1$). From this the volume fraction, 
+specific surface area, and mean-square average SLD fluctuation can be determined.
 
 Volume Fraction
 ^^^^^^^^^^^^^^^
+
+Rearranging the above yields
 
 .. math::
 
@@ -104,8 +106,9 @@ and thus, if $\phi_1 < \phi_2$
 
     &\phi_1 = \frac{1 - \sqrt{1 - 4A}}{2} \\
     &\phi_2 = \frac{1 + \sqrt{1-4A}}{2}
-$\phi_1$ (the volume fraction of the minority phase) is reported as the
-the volume fraction in the GUI
+
+where $\phi_1$ (the volume fraction of the *minority phase*) is reported as the
+the volume fraction in the Invariant analysis window.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
@@ -116,7 +119,7 @@ From Porod's Law
 
     \lim_{Q \to \infty}I(Q) = \frac{C_p}{Q^4}
 
-where $C_p$, the *Porod Constant*, is given as
+where $C_p$, the *Porod Constant*, is
 
 .. math::
 
@@ -132,11 +135,15 @@ $S/V$). From this it follows that
 SLD Fluctuation
 ^^^^^^^^^^^^^^^
 
-The mean-square average of the SLD fluctuation is
+The SLD fluctuation, $\eta$, represents the deviation in SLD from the
+weighted-average value, $\langle (\rho^*) \rangle$, at any given point
+in the system.
+
+The mean-square average of the SLD fluctuation is given by
 
 .. math::
 
-    \langle \eta^2 \rangle = \langle (\rho^*)^2 \rangle - \langle (\rho^*) \rangle^2
+    \langle \eta^2 \rangle = \langle (\rho^*)^2 \rangle - \langle (\rho^*) \rangle^2 = \phi_1 \eta_1^2 + \phi_2 \eta_2^2 \equiv \phi_1 \phi_2 (\rho_1 - \rho_2)^2
 
 where
 
@@ -147,6 +154,16 @@ where
 .. math::
     
     \langle (\rho^*) \rangle = \phi_1 \rho_1 + \phi_2 \rho_2
+
+and
+
+.. math::
+
+    \eta_1 = \phi_2 (\rho_1 - \rho_2)
+    
+.. math::
+
+    \eta_2 = \phi_1 (\rho_2 - \rho_1)
 
 Three-Phase Systems
 ^^^^^^^^^^^^^^^^^^^
@@ -215,4 +232,4 @@ Springer, 2016
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 10Jan2020
+.. note::  This help document was last changed by Steve King, 20Mar2020
