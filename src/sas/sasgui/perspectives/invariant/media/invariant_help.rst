@@ -46,6 +46,27 @@ The worth of $Q^*$ is that it can be used to determine quantities such as the
 volume fraction, composition, or specific surface area of a sample. It can also
 be used to cross-calibrate different SAS instruments.
 
+.. note::
+
+    SasView will attempt to calculate the appropriate form of $Q^*$ based on an
+    interrogation of the dataset sent to the Invariant analysis window; ie, by
+    looking at the columns of data in the file. If the nature of the dataset is
+    ambiguous then the first of the two expressions above is used.
+
+.. note::
+
+    The pinhole geometry expression above does not incorporate any resolution
+    smearing; ie, it assumes an infinitely small pinhole with a perfectly
+    parallel beam.
+
+The second expression above has also been used to compute the invariant from
+unidirectional cuts through 2D scattering patterns, for example, such as
+those arising from oriented fibers (see the Crawshaw and Shioya references).
+However, in order to use the Invariant analysis window to do this, it would
+first be necessary to put the cuts in a data format that SasView recognises
+as slit-smeared (see, for example, the data set 1umSlitSmearSphere.ABS in
+the *\\test\\1d* folder).
+
 The difficulty with using $Q^*$  arises from the fact that experimental data is
 never measured over the range $0 \le Q \le \infty$ and it is thus usually
 necessary to extrapolate the experimental data to both low and high $Q$.
@@ -66,13 +87,14 @@ High-\ $Q$ region (>= $Q_{max}$ in data):
 
 *  The power law function $A/Q^m$ is used where the power law constant
    $m$ can be fixed to some value by the user or fit along with the constant
-   $A$. $m$ should typically b between -3 and -4 with -4 indicating sharp
+   $A$. $m$ should typically be between -3 and -4 with -4 indicating sharp
    interfaces. The fitted constant(s) $A$ ($m$) is/are obtained by
    fitting the data within the range $Q_{max-j}$ to $Q_{max}$ 
    where again $j$ is the user chosen number of points from which to
    extrapoloate, the default again being the last 10 points. This extrapolation
    typically contributes 3 - 20% of the value of $Q^*$ so having data measured
-   to as large a value of $Q_{max}$ as possible is much more important.
+   to as large a value of $Q_{max}$ as possible, so as to provide a good estimate
+   of the background level, is much more important.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -89,12 +111,12 @@ is
 where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast, $<\eta^2>$ is the mean-
 square average of the SLD fluctuation and $\phi_1$ and $\phi_2$ are the volume
 fractions of the two phases ($\phi_1 + \phi_2 = 1$). From this the volume fraction, 
-specific surface area, and mean-square average SLD fluctuation can be determined.
+specific surface area, or mean-square average SLD fluctuation can be determined.
 
 Volume Fraction
 ^^^^^^^^^^^^^^^
 
-Rearranging the above yields
+Rearranging the above expression for $Q^*$ yields
 
 .. math::
 
@@ -109,6 +131,12 @@ and thus, if $\phi_1 < \phi_2$
 
 where $\phi_1$ (the volume fraction of the *minority phase*) is reported as the
 the volume fraction in the Invariant analysis window.
+
+.. note::
+
+    If A<0.25 then the program is obviously unable to compute :math:`\phi_1`. In
+    these circumstances the Invariant window will show the volume fraction as NaN
+    (Not-a-Number).
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
@@ -169,7 +197,7 @@ Three-Phase Systems
 ^^^^^^^^^^^^^^^^^^^
 
 For the extension of Invariant Analysis to three phases, see the Melnichenko
-reference, Chapter 6, Section 6.9.
+reference, Chapter 6, Section 6.9, and the Shioya reference.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -222,14 +250,20 @@ Academic Press, New York, 1982
 Available at:
 http://web.archive.org/web/20110824105537/http://physchem.kfunigraz.ac.at/sm/Service/Glatter_Kratky_SAXS_1982.zip
 
-N. Stribeck
-Chapter 8 in *X-Ray Scattering of Soft Matter*
-Springer, 2007
-
 Y.B. Melnichenko
 Chapter 6 in *Small-Angle Scattering from Confined and Interfacial Fluids*
 Springer, 2016
 
+N. Stribeck
+Chapter 8 in *X-Ray Scattering of Soft Matter*
+Springer, 2007
+
+J. Crawshaw, M.E. Vickers, N.P. Briggs, R.K. Heenan, R.E. Cameron
+*Polymer*, 41 (2000) 1873–1881
+
+M. Shioya and A. Takaku
+*J. Appl. Phys.*, 58 (1985) 4074
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 20Mar2020
+.. note::  This help document was last changed by Steve King, 21Mar2020
