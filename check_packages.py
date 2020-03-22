@@ -4,10 +4,16 @@ Check the existing environment against expected values
 from __future__ import print_function
 
 import sys
-import yaml
 import subprocess
-
-from colorama import Fore, Style
+try:
+    import yaml
+    from colorama import Fore, Style
+except ImportError:
+    print("The PyYaml and colorama packages are required for this module. To " +
+          "install them, please try one of the following:")
+    print("\tAnaconda: conda install pyyaml colorama")
+    print("\tBase python: pip install pyyaml colorama")
+    quit()
 
 
 # Output strings
