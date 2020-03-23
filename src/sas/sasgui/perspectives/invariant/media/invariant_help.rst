@@ -4,7 +4,7 @@
 .. S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was subsequently
 .. updated in January 2020 following the realisation that there were issues
 .. with both the text below and the underlying calculation. See SasView GitHub
-.. Issue #1434.
+.. Issues #1434 and #1461.
 
 Invariant Calculation
 =====================
@@ -111,7 +111,12 @@ is
 where $\Delta\rho = (\rho_1 - \rho_2)$ is the SLD contrast, $<\eta^2>$ is the mean-
 square average of the SLD fluctuation and $\phi_1$ and $\phi_2$ are the volume
 fractions of the two phases ($\phi_1 + \phi_2 = 1$). From this the volume fraction, 
-specific surface area, or mean-square average SLD fluctuation can be determined.
+specific surface area, or mean-square average SLD fluctuation can all be determined.
+
+The Invariant analysis window always tries to return the volume fraction (though see
+below) but will only calculate the specific surface area if a value for the Porod
+Constant is supplied. The SLD fluctuation is left for the user to calculate and apply
+using the formulae below.
 
 Volume Fraction
 ^^^^^^^^^^^^^^^
@@ -135,8 +140,9 @@ the volume fraction in the Invariant analysis window.
 .. note::
 
     If A<0.25 then the program is obviously unable to compute :math:`\phi_1`. In
-    these circumstances the Invariant window will show the volume fraction as NaN
-    (Not-a-Number).
+    these circumstances the Invariant window will show the volume fraction as ERROR.
+    Possible reasons for this are that the contrast has been incorrectly entered,
+    or that the dataset is simply not suitable for invariant analysis.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
