@@ -93,6 +93,7 @@
     <addaction name="actionPython_Shell_Editor"/>
     <addaction name="actionOrientation_Viewer"/>
     <addaction name="actionImage_Viewer"/>
+    <addaction name="actionFile_Converter"/>
    </widget>
    <widget class="QMenu" name="menuFitting">
     <property name="title">
@@ -381,7 +382,13 @@
     <string>Image Viewer</string>
    </property>
   </action>
-  <action name="actionNew_Fit_Page">
+  <action name="actionFile_Converter">
+    <property name="text">
+      <string>File Converter</string>
+    </property>
+  </action>
+
+   <action name="actionNew_Fit_Page">
    <property name="text">
     <string>New Fit Page</string>
    </property>
