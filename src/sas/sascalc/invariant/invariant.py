@@ -919,11 +919,16 @@ class InvariantCalculator(object):
         Compute uncertainty on volume value as well as the volume fraction
         This uncertainty is given by the following equation: ::
 
-            dV = 0.5 * (4*k* dq_star) /(2* math.sqrt(1-k* q_star))
+            sigV = dV/dq_star * sigq_star
+            
+            so that
+            sigV = k* sigq_star) /(q_star * math.sqrt(1 - 4 * k))
 
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
 
-            q_star: the invariant value including extrapolated value if existing
+            10^(-8) converts from cm^-1 to A^-1
+            q_star: the invariant, in cm^-1A^-3, including extrapolated values
+                if they have been requested
             dq_star: the invariant uncertainty
             dV: the volume uncertainty
 
@@ -937,14 +942,16 @@ class InvariantCalculator(object):
         volume = self.get_volume_fraction(contrast, extrapolation)
 
         # Compute error
-        k = 1.e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
+        k = 1.e-8 * self._qstar / (2 * (math.pi * \
+                                        math.fabs(float(contrast)))** 2)
         # Check value inside the sqrt function
         value = 1 - k * self._qstar
         if (value) <= 0:
             uncertainty = -1
-        # Compute uncertainty
-        uncertainty = math.fabs((0.5 * 4 * k * \
-                        self._qstar_err) / (2 * math.sqrt(1 - k * self._qstar)))
+        else:
+            # Compute uncertainty
+            uncertainty = math.fabs((k * self._qstar_err)
+                                    / (self._qstar * math.sqrt(1 - 4 * k)))
 
         return volume, uncertainty
 
