@@ -100,7 +100,7 @@ class TestInvariantCalculator(unittest.TestCase):
         Test main functionality of the Invariant calculator
     """
     def setUp(self):
-        data = Loader().load(find("latex_smeared_slit.xml"))
+        data = Loader().load(find("100nmSpheresNodQ.txt"))
         self.data = data[0]
         self.data.dxl = None
         
@@ -135,11 +135,13 @@ class TestInvariantCalculator(unittest.TestCase):
     
     def test_incompatible_data_class(self):
         """
-            Check that only classes that inherit from Data1D are allowed as data.
+            Check that only classes that inherit from Data1D are allowed
+            as data.
         """
         class Incompatible():
             pass
-        self.assertRaises(ValueError, invariant.InvariantCalculator, Incompatible())
+        self.assertRaises(ValueError, invariant.InvariantCalculator,
+                          Incompatible())
         
     def test_error_treatment(self):
         x = np.asarray(np.asarray([0,1,2,3]))
@@ -176,7 +178,8 @@ class TestInvariantCalculator(unittest.TestCase):
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_low()
         
         self.assertEqual(qs_extr, _qstar+delta_qs_extr)
-        self.assertEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_extr*delta_dqs_extr))
+        self.assertEqual(dqs_extr, math.sqrt(dqstar*dqstar +
+                                             delta_dqs_extr*delta_dqs_extr))
         
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
@@ -184,49 +187,68 @@ class TestInvariantCalculator(unittest.TestCase):
         
         # Check that the two results are consistent within errors
         # Note that the error on the extrapolated value takes into account
-        # a systematic error for the fact that we may not know the shape of I(q) at low Q.
-        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
+        # a systematic error for the fact that we may not know the shape of I(q)
+        # at low Q.
+# THIS LINE MAKES NO SENSE!!! First the dif should be the amount of invarinat
+# being contributed by the low q extrapolation so these should NOT be equal
+# Further ths magical huge extra uncertainty added to dqs_extr makes no sense to
+# me either.  Should remove this from invariant.py
+#        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
         
     def test_qstar_low_q_power_law(self):
         """
             Test low-q extrapolation with a power law
+            
+            This test is being removed on March 21, 2020 by PDB during code
+            camp sprint because
+            a) it makes zero sense with this data (i.e. only Guinier does)
+            b) It is not at all clear in what case a low Q power law makes
+            any sense whatsoever in the first place.
         """
-        inv = invariant.InvariantCalculator(self.data)
-        
+#     inv = invariant.InvariantCalculator(self.data, background=0)
+
         # Basic sanity check
-        _qstar = inv.get_qstar()
-        qstar, dqstar = inv.get_qstar_with_error()
-        self.assertEqual(qstar, _qstar)
-        
+#        _qstar = inv.get_qstar()
+#        qstar, dqstar = inv.get_qstar_with_error()
+#        self.assertEqual(qstar, _qstar)
+
         # Low-Q Extrapolation
         # Check that the returned invariant is what we expect given
-        inv.set_extrapolation('low', npts=10, function='power_law')
-        qs_extr, dqs_extr = inv.get_qstar_with_error('low')
-        delta_qs_extr, delta_dqs_extr = inv.get_qstar_low()
-        
+#       inv.set_extrapolation('low', npts=10, function='power_law')
+#       qs_extr, dqs_extr = inv.get_qstar_with_error('low')
+#       delta_qs_extr, delta_dqs_extr = inv.get_qstar_low()
+
         # A fit using SasView gives 0.0655 for the value of the exponent
-        self.assertAlmostEqual(inv._low_extrapolation_function.power, 0.0655, 3)
-        
-        if False:
-            npts = len(inv._data.x)-1
-            import matplotlib.pyplot as plt
-            plt.loglog(inv._data.x[:npts], inv._data.y[:npts], 'o', label='Original data', markersize=10)
-            plt.loglog(inv._data.x[:npts], inv._low_extrapolation_function.evaluate_model(inv._data.x[:npts]), 'r', label='Fitted line')
-            plt.legend()
-            plt.show()        
-        
-        self.assertEqual(qs_extr, _qstar+delta_qs_extr)
-        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_extr*delta_dqs_extr), 15)
-        
+#      self.assertAlmostEqual(inv._low_extrapolation_function.power, 0.0, 3)
+
+#        if False:
+#          npts = len(inv._data.x)-1
+#          import matplotlib.pyplot as plt
+#          plt.loglog(inv._data.x[:npts], inv._data.y[:npts], 'o', 
+#                    label='Original data', markersize=10)
+#          plt.loglog(inv._data.x[:npts],
+#                     inv._low_extrapolation_function.evaluate_model(inv._data.x[:npts]),
+#                     'r', label='Fitted line')
+#          plt.legend()
+#          plt.show()        
+
+#      self.assertEqual(qs_extr, _qstar+delta_qs_extr)
+#        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar
+#                                                   + delta_dqs_extr
+#                                                   *delta_dqs_extr), 15)
+
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
-        self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
-        
+#        self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
+
+        # This section is just wrong in any case. PDB
         # Check that the two results are consistent within errors
         # Note that the error on the extrapolated value takes into account
-        # a systematic error for the fact that we may not know the shape of I(q) at low Q.
-        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
-        
+        # a systematic error for the fact that we may not know the shape of
+        # I(q) at low Q.
+#        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
+        pass
+
     def test_qstar_high_q(self):
         """
             Test high-q extrapolation
@@ -241,15 +263,19 @@ class TestInvariantCalculator(unittest.TestCase):
         # High-Q Extrapolation
         # Check that the returned invariant is what we expect given
         # the result we got without extrapolation
-        inv.set_extrapolation('high', npts=20, function='power_law')
+        inv.set_extrapolation('high', npts=75, function='power_law')
         qs_extr, dqs_extr = inv.get_qstar_with_error('high')
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_high()
         
-        # From previous analysis using SasView, we expect an exponent of about 3 
-        self.assertTrue(math.fabs(inv._high_extrapolation_function.power-3)<0.1)
+        # In principle the slope should be -4. However due to the oscillations
+        # and finite number of points we need quite a lot of points to ensure
+        # that the fit averages close to 4. SasView estimates 3.92 at the
+        # moment 
+        self.assertTrue(math.fabs(inv._high_extrapolation_function.power-4)<0.1)
         
         self.assertEqual(qs_extr, _qstar+delta_qs_extr)
-        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_extr*delta_dqs_extr), 10)
+        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar \
+                                        + delta_dqs_extr*delta_dqs_extr), 10)
         
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
@@ -280,8 +306,9 @@ class TestInvariantCalculator(unittest.TestCase):
         delta_qs_hi,  delta_dqs_hi = inv.get_qstar_high()
         
         self.assertAlmostEqual(qs_extr, _qstar+delta_qs_low+delta_qs_hi, 8)
-        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_low*delta_dqs_low \
-                                             + delta_dqs_hi*delta_dqs_hi), 8)
+        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar
+                                         + delta_dqs_low*delta_dqs_low
+                                         + delta_dqs_hi*delta_dqs_hi), 8)
         
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
@@ -289,44 +316,49 @@ class TestInvariantCalculator(unittest.TestCase):
         #self.assertTrue(math.fabs(qs_extr-qstar)/qstar<0.1)
         
         # Check that the two results are consistent within errors
-        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
+# THIS LINE MAKES NO SENSE!!! First the dif should be the amount of invarinat
+# being contributed by the low q extrapolation so these should NOT be equal
+# Further ths magical huge extra uncertainty added to dqs_extr makes no sense to
+# me either.  Should remove this from invariant.py
+#        self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
         
         def _check_values(to_check, reference, tolerance=0.05):
-            self.assertTrue( math.fabs(to_check-reference)/reference < tolerance, msg="Tested value = "+str(to_check) )
+            self.assertTrue( math.fabs(to_check-reference)/reference \
+                             < tolerance, msg="Tested value = "+str(to_check) )
             
         # The following values should be replaced by values pulled from IGOR
         # Volume Fraction:
-        v, dv = inv.get_volume_fraction_with_error(1, None)
-        _check_values(v, 1.88737914186e-15)
+        v, dv = inv.get_volume_fraction_with_error(2.2e-6, None)
+        _check_values(v, 0.01)
 
-        v_l, dv_l = inv.get_volume_fraction_with_error(1, 'low')
-        _check_values(v_l, 1.94289029309e-15)
+        v_l, dv_l = inv.get_volume_fraction_with_error(2.2e-6, 'low')
+        _check_values(v_l, 0.01)
 
-        v_h, dv_h = inv.get_volume_fraction_with_error(1, 'high')
-        _check_values(v_h, 6.99440505514e-15)
+        v_h, dv_h = inv.get_volume_fraction_with_error(2.2e-6, 'high')
+        _check_values(v_h, 0.01)
         
-        v_b, dv_b = inv.get_volume_fraction_with_error(1, 'both')
-        _check_values(v_b, 6.99440505514e-15)
+        v_b, dv_b = inv.get_volume_fraction_with_error(2.2e-6, 'both')
+        _check_values(v_b, 0.01)
         
         # Specific Surface:
-        s, ds = inv.get_surface_with_error(1, 1, None)
-        _check_values(s, 3.1603095786e-09)
+        s, ds = inv.get_surface_with_error(2.2e-6, 1.825e-7, None)
+        _check_values(s, 6.00e-5)
 
-        s_l, ds_l = inv.get_surface_with_error(1, 1, 'low')
-        _check_values(s_l, 3.1603095786e-09)
+        s_l, ds_l = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'low')
+        _check_values(s_l, 6.00e-5)
 
-        s_h, ds_h = inv.get_surface_with_error(1, 1, 'high')
-        _check_values(s_h, 3.1603095786e-09)
+        s_h, ds_h = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'high')
+        _check_values(s_h, 6.00e-5)
         
-        s_b, ds_b = inv.get_surface_with_error(1, 1, 'both')
-        _check_values(s_b, 3.1603095786e-09)
+        s_b, ds_b = inv.get_surface_with_error(2.2e-6, 1.825e-7, 'both')
+        _check_values(s_b, 6.00e-5)
         
         
     def test_bad_parameter_name(self):
         """
-            The set_extrapolation method checks that the name of the extrapolation
-            function and the name of the q-range to extrapolate (high/low) is 
-            recognized.
+            The set_extrapolation method checks that the name of the 
+            extrapolation function and the name of the q-range to extrapolate
+            (high/low) is recognized.
         """
         inv = invariant.InvariantCalculator(self.data)
         self.assertRaises(ValueError, inv.set_extrapolation, 'low', npts=4, function='not_a_name')
