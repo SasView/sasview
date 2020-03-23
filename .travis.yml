@@ -39,7 +39,7 @@ before_install:
 - conda install --yes python=$PY numpy scipy matplotlib cython pylint wxpython html5lib reportlab pyparsing lxml mako pybind11 sphinx h5py
 install:
 - pip install unittest-xml-reporting xhtml2pdf periodictable bumps
-- pip install pyopencl
+- pip install pyopencl xmlrunner
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
