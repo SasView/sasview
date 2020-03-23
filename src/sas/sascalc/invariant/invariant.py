@@ -968,7 +968,7 @@ class InvariantCalculator(object):
 
                 ds/s = sqrt[(dcp/cp)**2 + 2* (dcontrast/contrast)**2]
 
-            wich gives (this should be checked before using in anger)
+            which gives (this should be checked before using in anger)
                 ds = sqrt((dporod_const)**2 + 2 * (porod_const *
                           dcontrast / contrast)**2) / (2 * pi * contrast**2)
 
