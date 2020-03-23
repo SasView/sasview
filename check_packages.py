@@ -3,6 +3,7 @@ Check the existing environment against expected values
 """
 from __future__ import print_function
 
+import re
 import sys
 import subprocess
 try:
@@ -37,19 +38,10 @@ with open(file_location, 'r') as stream:
     try:
         yaml_dict = yaml.load(stream, Loader=yaml.SafeLoader)
         yaml_packages = yaml_dict['dependencies']
-        common_required_package_list = []
-        pip_packages = yaml_packages.pop()
-        inter_package_list = yaml_packages
-        if isinstance(pip_packages, dict):
-            pip_packages = pip_packages['pip']
-            for pip_package in pip_packages:
-                inter_package_list.append(pip_package)
-        else:
-            inter_package_list = yaml_packages.append(pip_packages)
-        for package in inter_package_list:
-            package = package.replace(">=",
-                                      "=").replace("<=", "=").replace("==", "=")
-            common_required_package_list.append(package)
+        inter_package_list = [p for entry in yaml_packages for p in (
+            entry['pip'] if isinstance(entry, dict) else [entry])]
+        common_required_package_list = [re.sub("[<>=]=", "=", package) for
+                                        package in inter_package_list]
     except Exception as e:
         print(e)
 
