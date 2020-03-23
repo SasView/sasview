@@ -22,6 +22,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit.pagestate import PageState
+from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -38,7 +39,6 @@ from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
@@ -171,8 +171,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_19.setStyleSheet(new_font)
 
     def info(self, type, value, tb):
-        logger.error("SasView threw exception: " + str(value))
-        traceback.print_exception(type, value, tb)
+        logger.error("".join(traceback.format_exception(type, value, tb)))
 
     @property
     def logic(self):
@@ -533,7 +532,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     @classmethod
     def customModels(cls):
         """ Reads in file names in the custom plugin directory """
-        return ModelUtilities._find_models()
+        manager = models.ModelManager()
+        # TODO: Cache plugin models instead of scanning the directory each time.
+        manager.update()
+        # TODO: Define plugin_models property in ModelManager.
+        return manager.base.plugin_models
 
     def initializeControls(self):
         """
@@ -763,7 +766,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def modifyViewOnRow(self, row, font=None, brush=None):
         """
-        Chage how the given row of the main model is shown
+        Change how the given row of the main model is shown
         """
         fields_enabled = False
         if font is None:
@@ -1211,6 +1214,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Reload the custom model combobox
         """
+        ## If caching plugins, then force cache reset to reload plugins
+        #ModelManager().plugins_reset()
         self.custom_models = self.customModels()
         self.readCustomCategoryInfo()
         self.onCategoriesChanged()
@@ -1731,6 +1736,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if param_dict is None:
             return
+
+        # Show bumps convergence plots
         self.communicate.resultPlotUpdateSignal.emit(result[0])
 
         elapsed = result[1]
@@ -1972,15 +1979,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             error_column.append(item)
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._poly_model.dataChanged.disconnect()
         self.iterateOverPolyModel(updateFittedValues)
-        self._poly_model.dataChanged.connect(self.onPolyModelChange)
 
         if self.has_poly_error_column:
             self._poly_model.removeColumn(2)
-            #return
 
         self.lstPoly.itemDelegate().addErrorColumn()
         error_column = []
@@ -2041,11 +2043,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             error_column.append(item)
 
-        # block signals temporarily, so we don't end up
-        # updating charts with every single model change on the end of fitting
-        self._magnet_model.dataChanged.disconnect()
         self.iterateOverMagnetModel(updateFittedValues)
-        self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
 
         if self.has_magnet_error_column:
             self._magnet_model.removeColumn(2)
@@ -2171,7 +2169,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             interval = np.logspace(start=qmin, stop=qmax, num=self.npts, endpoint=True, base=10.0)
         else:
             interval = np.linspace(start=self.q_range_min, stop=self.q_range_max,
-                                   num=self.npts, endpoint=True)
+                                   num=int(self.npts), endpoint=True)
         self.logic.createDefault1dData(interval, self.tab_id)
 
     def readCategoryInfo(self):
@@ -2247,6 +2245,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds weighting contribution to fitting data
         """
+        if not self.data_is_loaded:
+            # no weighing for theories (dy = 0)
+            return data
         new_data = copy.deepcopy(data)
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
@@ -2319,13 +2320,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def fromModelToQModel(self, model_name):
         """
-        Setting model parameters into QStandardItemModel based on selected _model_
+        Setting model parameters into QStandardItemModel based on selected model
         """
         name = model_name
         kernel_module = None
         if self.cbCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
-            name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
+            name = os.path.join(models.find_plugins_dir(), model_name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
         except ModuleNotFoundError as ex:
@@ -2344,7 +2345,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 logger.error("Can't find the model "+ str(ex))
                 return
 
-        if hasattr(kernel_module, 'parameters'):
+        if hasattr(kernel_module, 'model_info'):
+            # for sum/multiply models
+            self.model_parameters = kernel_module.model_info.parameters
+
+        elif hasattr(kernel_module, 'parameters'):
             # built-in and custom models
             self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
@@ -2389,7 +2394,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
-        Setting model parameters into QStandardItemModel based on selected _structure factor_
+        Setting model parameters into QStandardItemModel based on selected structure factor
         """
         if structure_factor is None or structure_factor=="None":
             return
@@ -2531,8 +2536,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            if parameter_name != self.kernel_module.multiplicity_info.control:
-                self.kernel_module.setParam(parameter_name, value)
+            self.kernel_module.setParam(parameter_name, value)
         elif model_column == min_column:
             # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.kernel_module.details[parameter_name][1] = value
@@ -2925,7 +2929,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         scalar_results = self.logic.getScalarIntermediateResults(return_data)
-        ER_value = scalar_results.get("effective_radius") # note name of key
+        ER_value = scalar_results.get("radius_effective")
         if ER_value is None:
             return
         # ensure the model does not recompute when updating the value
@@ -3460,13 +3464,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         profile_data.scale = 'linear'
         profile_data.symbol = 'Line'
         profile_data.hide_error = True
-        profile_data._xaxis = "R(\AA)"
-        profile_data._yaxis = "SLD(10^{-6}\AA^{-2})"
+        profile_data._xaxis = "R"
+        profile_data._xunit = "\AA"
+        profile_data._yaxis = "SLD"
+        profile_data._yunit = "10^{-6}\AA^{-2}"
+        profile_data.ytransform='y'
+        profile_data.xtransform='x'
+
+        profile_data.id = "sld"
 
         plotter = PlotterWidget(self, quickplot=True)
-        plotter.data = profile_data
-        plotter.showLegend = True
-        plotter.plot(hide_error=True, marker='-')
+        plotter.showLegend = False
+        plotter.plot(data=profile_data, hide_error=True, marker='-')
 
         self.plot_widget = QtWidgets.QWidget()
         self.plot_widget.setWindowTitle("Scattering Length Density Profile")
@@ -4004,7 +4013,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
 
-        if 'tab_name' in line_dict.keys():
+        if 'tab_name' in line_dict.keys() and self.kernel_module is not None:
             self.kernel_module.name = line_dict['tab_name'][0]
         if 'polydisperse_params' in line_dict.keys():
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')

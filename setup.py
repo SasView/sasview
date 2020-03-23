@@ -186,7 +186,12 @@ class BuildSphinxCommand(Command):
             if os.path.isdir(SASMODELS_DOCPATH):
                 # if available, build sasmodels docs
                 print("============= Building sasmodels model documentation ===============")
-                smdocbuild = subprocess.call(["make", "-C", SASMODELS_DOCPATH, "html"])
+                smdocbuild = subprocess.call([
+                    "make",
+                    "PYTHON=%s" % sys.executable,
+                    "-C", SASMODELS_DOCPATH,
+                    "html"
+                ])
         else:
             # if not available warning message
             print("== !!WARNING!! sasmodels directory not found. Cannot build model docs. ==")
@@ -196,7 +201,8 @@ class BuildSphinxCommand(Command):
         import build_sphinx
         build_sphinx.rebuild()
 
-_ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
+if 'clean' not in sys.argv:
+    _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
@@ -226,20 +232,10 @@ packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
 
 
 # sas.sascalc.calculator
-gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
 packages.append("sas.sascalc.calculator")
-ext_modules.append(Extension("sas.sascalc.calculator._sld2i",
-                             sources=[
-                                 os.path.join(gen_dir, "sld2i_module.c"),
-                                 os.path.join(gen_dir, "sld2i.c"),
-                                 os.path.join(gen_dir, "libfunc.c"),
-                                 os.path.join(gen_dir, "librefl.c"),
-                             ],
-                             include_dirs=[gen_dir],
-                             )
-                   )
+
 
 # sas.sascalc.pr
 srcdir = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
@@ -254,14 +250,9 @@ ext_modules.append(Extension("sas.sascalc.pr._pr_inversion",
 
 
 # sas.sascalc.file_converter
-mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
 package_dir["sas.sascalc.file_converter"] = os.path.join(
     "src", "sas", "sascalc", "file_converter")
 packages.append("sas.sascalc.file_converter")
-ext_modules.append(Extension("sas.sascalc.file_converter._bsl_loader",
-                             sources=[os.path.join(mydir, "bsl_loader.c")],
-                             include_dirs=[np.get_include()],
-                             ))
 
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
@@ -419,7 +410,6 @@ def append_file(file_list, dir_path):
 
 # Comment out the following to avoid rebuilding all the models
 file_sources = []
-append_file(file_sources, gen_dir)
 
 # Wojtek's hacky way to add doc files while bundling egg
 # def add_doc_files(directory):

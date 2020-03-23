@@ -145,7 +145,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Performs the load operation and updates the view
         """
         self.editor_widget.blockSignals(True)
-        with open(filename, 'r') as plugin:
+        with open(filename, 'r', encoding="utf-8") as plugin:
             self.editor_widget.txtEditor.setPlainText(plugin.read())
         self.editor_widget.setEnabled(True)
         self.editor_widget.blockSignals(False)
@@ -164,7 +164,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.c_editor_widget = ModelEditor(self, is_python=False)
         self.tabWidget.addTab(self.c_editor_widget, display_name)
         # Read in the file and set in on the widget
-        with open(c_path, 'r') as plugin:
+        with open(c_path, 'r', encoding="utf-8") as plugin:
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
         self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
@@ -351,6 +351,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.writeFile(filename, model_str)
         # Update the tab title
         self.setTabEdited(False)
+
+        # Notify listeners, since the plugin name might have changed
+        self.parent.communicate.customModelDirectoryChanged.emit()
+
         # notify the user
         msg = filename + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
@@ -408,7 +412,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Write model content to file "fname"
         """
-        with open(fname, 'w') as out_f:
+        with open(fname, 'w', encoding="utf-8") as out_f:
             out_f.write(model_str)
 
     def generateModel(self, model, fname):
@@ -416,6 +420,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         generate model from the current plugin state
         """
         name = model['filename']
+        if not name:
+            model['filename'] = fname
+            name = fname
         desc_str = model['description']
         param_str = self.strFromParamDict(model['parameters'])
         pd_param_str = self.strFromParamDict(model['pd_parameters'])
@@ -493,9 +500,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     def strFromParamDict(cls, param_dict):
         """
         Creates string from parameter dictionary
-        {0: ('variable','value'),
-         1: ('variable','value'),
-         ...}
+
+        Example::
+
+            {
+                0: ('variable','value'),
+                1: ('variable','value'),
+                ...
+            }
         """
         param_str = ""
         for _, params in param_dict.items():

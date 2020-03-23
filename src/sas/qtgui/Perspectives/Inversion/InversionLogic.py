@@ -150,7 +150,8 @@ class InversionLogic(object):
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
         new_plot.title = "P(r) fit"
         new_plot.id = PR_FIT_LABEL
-        new_plot.scale = "linear"
+        new_plot.xtransform = "x"
+        new_plot.ytransform = "y"
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot

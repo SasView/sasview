@@ -1,23 +1,19 @@
-language: python
 matrix:
   include:
   - os: linux
-    env:
-    - PY=2.7
-    - NUMPYSPEC=numpy
+    language: generic
+    env: PY=3.6
   - os: osx
     language: generic
-    env:
-    - PY=2.7
-    - NUMPYSPEC=numpy
+    env: PY=3.6
 branches:
   only:
   - master
+  - ESS_GUI
 addons:
   apt:
     packages:
     - opencl-headers
-    - fglrx
     - libblas-dev
     - libatlas-dev
     - libatlas-base-dev
@@ -33,12 +29,11 @@ before_install:
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - hash -r
-- conda update --yes conda
+#- conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six
 install:
-- pip install -r build_tools/requirements.txt
-- pip install matplotlib
+- pip install periodictable xhtml2pdf pyopencl unittest-xml-reporting pylint
 script:
 - cd ..
 - export WORKSPACE=$(pwd)

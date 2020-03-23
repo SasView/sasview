@@ -146,8 +146,7 @@ Using the tool
    10) Display mean values or enter a new value if enabled
    11) Save the sld data as sld format
 
-.. After computation the result will appear in the *Theory* box in the SasView
-*Data Explorer* panel.
+.. After computation the result will appear in the *Theory* box in the SasView *Data Explorer* panel.
 
 *Up_frac_in* and *Up_frac_out* are the ratio
 

@@ -186,7 +186,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             try:
                 test.run_all()
             except Exception:
-                failures.append(test.description)
+                failures.append(test.test_name)
             tests_completed += 1
 
         info = {
@@ -237,6 +237,10 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         Testing failed: log the reason
         """
+        from twisted.python.failure import Failure
+        if isinstance(msg, Failure):
+            msg = msg.getErrorMessage()
+
         self.testingFailedSignal.emit(msg)
 
     def testFailed(self, msg):

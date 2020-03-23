@@ -43,6 +43,24 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.xLabel = xlabel
         self.yLabel = ylabel
 
+        self.rg_on = False
+        self.rg_yx = False
+        self.bg_on = False
+
+        # Scale dependent content
+        self.guiner_box.setVisible(False)
+        if (self.yLabel == "ln(y)" or self.yLabel == "ln(y*x)") and \
+                (self.xLabel == "x^(2)"):
+            if self.yLabel == "ln(y*x)":
+                self.label_12.setText('<html><head/><body><p>Rod diameter [Å]</p></body></html>')
+                self.rg_yx = True
+            self.rg_on = True
+            self.guiner_box.setVisible(True)
+
+        if (self.xLabel == "x^(4)") and (self.yLabel == "y*x^(4)"):
+            self.bg_on = True
+            self.label_3.setText('Background')
+
         self.x_is_log = self.xLabel == "log10(x)"
         self.y_is_log = self.yLabel == "log10(y)"
 
@@ -55,6 +73,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtAerr.setText("0")
         self.txtBerr.setText("0")
         self.txtChi2.setText("0")
+
 
         # Initial ranges
         self.txtRangeMin.setText(str(max_range[0]))
@@ -182,6 +201,40 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText(formatNumber(self.ErrBvalue))
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
+        # Possibly Guiner analysis
+        i0 = numpy.exp(cstB)
+        self.txtGuiner_1.setText(formatNumber(i0))
+        err = numpy.abs(numpy.exp(cstB) * errB)
+        self.txtGuiner1_Err.setText(formatNumber(err))
+
+        if self.rg_yx:
+            rg = numpy.sqrt(-2 * float(cstA))
+            diam = 4 * numpy.sqrt(-float(cstA))
+            value = formatNumber(diam)
+            if rg is not None and rg != 0:
+                err = formatNumber(8 * float(errA) / diam)
+            else:
+                err = ''
+        else:
+            rg = numpy.sqrt(-3 * float(cstA))
+            value = formatNumber(rg)
+
+            if rg is not None and rg != 0:
+                err = formatNumber(3 * float(errA) / (2 * rg))
+            else:
+                err = ''
+
+        self.txtGuiner_2.setText(value)
+        self.txtGuiner2_Err.setText(err)
+
+        value = formatNumber(rg * self.floatInvTransform(self.xminFit))
+        self.txtGuiner_3.setText(value)
+        value = formatNumber(rg * self.floatInvTransform(self.xmaxFit))
+        self.txtGuiner_4.setText(value)
+
+        tempx = numpy.array(tempx)
+        tempy = numpy.array(tempy)
+
         self.updatePlot.emit((tempx, tempy))
 
     def origData(self):
@@ -210,7 +263,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         else:
             tempx = x
 
-        return tempx, tempy, tempdy
+        return numpy.array(tempx), numpy.array(tempy), numpy.array(tempdy)
 
     def checkFitValues(self, item):
         """

@@ -23,7 +23,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        self.data = self.base.data[0]
 
         # Connect the plot to event
         self.connect = self.base.connect
@@ -62,7 +61,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
 
     def set_layer(self, n):
         """
-         Allow adding plot to the same panel
+        Allow adding plot to the same panel
+
         :param n: the number of layer
         """
         self.layernum = n
@@ -325,6 +325,7 @@ class SideInteractor(BaseInteractor):
     def set_layer(self, n):
         """
         Allow adding plot to the same panel
+
         :param n: the number of layer
         """
         self.layernum = n

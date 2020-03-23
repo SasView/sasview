@@ -190,6 +190,9 @@
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
    <addaction name="actionBookmarks"/>
+   <addaction name="separator"/>
+   <addaction name="actionPrevious"/>
+   <addaction name="actionNext"/>
   </widget>
   <action name="actionReset">
    <property name="icon">
@@ -439,13 +442,21 @@
    </property>
   </action>
   <action name="actionNext">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/right-round.png</normaloff>:/res/right-round.png</iconset>
+   </property>
    <property name="text">
-    <string>Next</string>
+    <string>Next window</string>
    </property>
   </action>
   <action name="actionPrevious">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/left-round.png</normaloff>:/res/left-round.png</iconset>
+   </property>
    <property name="text">
-    <string>Previous</string>
+    <string>Previous window</string>
    </property>
   </action>
   <action name="actionFitting">
@@ -591,6 +602,6 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resource/>
  <connections/>
 </ui>

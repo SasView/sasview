@@ -589,26 +589,26 @@ def load(path = "sphere_60_q0_2.txt"):
     data_err = np.zeros(0)
     scale    = None
     if path is not None:
-        input_f = open(path,'r')
-        buff    = input_f.read()
-        lines   = buff.split('\n')
-        for line in lines:
-            try:
-                toks = line.split()
-                x = float(toks[0])
-                y = float(toks[1])
-                if len(toks)>2:
-                    err = float(toks[2])
-                else:
-                    if scale==None:
-                        scale = 0.15*math.sqrt(y)
-                    err = scale*math.sqrt(y)
-                data_x = np.append(data_x, x)
-                data_y = np.append(data_y, y)
-                data_err = np.append(data_err, err)
-            except:
-                pass
-               
+        with open(path,'r') as input_f:
+            buff    = input_f.read()
+            lines   = buff.split('\n')
+            for line in lines:
+                try:
+                    toks = line.split()
+                    x = float(toks[0])
+                    y = float(toks[1])
+                    if len(toks)>2:
+                        err = float(toks[2])
+                    else:
+                        if scale==None:
+                            scale = 0.15*math.sqrt(y)
+                        err = scale*math.sqrt(y)
+                    data_x = np.append(data_x, x)
+                    data_y = np.append(data_y, y)
+                    data_err = np.append(data_err, err)
+                except:
+                    pass
+
     return data_x, data_y, data_err 
        
 if __name__ == '__main__':

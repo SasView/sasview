@@ -33,16 +33,16 @@ class BoxMask(BaseInteractor):
         # connect the artist for the motion
         self.connect = self.base.connect
         # when qmax is reached the selected line is reset
-        self.qmax = min(self.base.data.xmax, self.base.data.xmin)
+        self.qmax = min(self.data.xmax, self.data.xmin)
         # Define the box limits
-        self.xmin = -1 * 0.5 * min(np.fabs(self.base.data.xmax),
-                                   np.fabs(self.base.data.xmin))
-        self.ymin = -1 * 0.5 * min(np.fabs(self.base.data.xmax),
-                                   np.fabs(self.base.data.xmin))
-        self.xmax = 0.5 * min(np.fabs(self.base.data.xmax),
-                              np.fabs(self.base.data.xmin))
-        self.ymax = 0.5 * min(np.fabs(self.base.data.xmax),
-                              np.fabs(self.base.data.xmin))
+        self.xmin = -1 * 0.5 * min(np.fabs(self.data.xmax),
+                                   np.fabs(self.data.xmin))
+        self.ymin = -1 * 0.5 * min(np.fabs(self.data.xmax),
+                                   np.fabs(self.data.xmin))
+        self.xmax = 0.5 * min(np.fabs(self.data.xmax),
+                              np.fabs(self.data.xmin))
+        self.ymax = 0.5 * min(np.fabs(self.data.xmax),
+                              np.fabs(self.data.xmin))
         # center of the box
         self.center_x = 0.0002
         self.center_y = 0.0003
@@ -51,7 +51,6 @@ class BoxMask(BaseInteractor):
         # Define initial result the summation
         self.count = 0
         self.error = 0
-        self.data = self.base.data
         # Flag to determine if the current figure has moved
         # set to False == no motion , set to True== motion
         self.has_move = False
@@ -141,7 +140,7 @@ class BoxMask(BaseInteractor):
         """
         from sas.sascalc.dataloader.manipulations import Boxcut
         # # Data 2D for which the pixel will be summed
-        data = self.base.data
+        data = self.data
         mask = data.mask
         # # the region of the summation
         x_min = self.horizontal_lines.x2

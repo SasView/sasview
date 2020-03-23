@@ -18,7 +18,7 @@ class SectorInteractor(BaseInteractor):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.data2D.xmax
+        self.qmax = self.data.xmax
         self.connect = self.base.connect
 
         # # Number of points on the plot
@@ -134,7 +134,7 @@ class SectorInteractor(BaseInteractor):
 
         sect = new_sector(r_min=rmin, r_max=rmax,
                           phi_min=phimin, phi_max=phimax)
-        sector = sect(self.base.data2D)
+        sector = sect(self.data)
 
         from sas.qtgui.Plotting.PlotterData import Data1D
         if hasattr(sector, "dxl"):
@@ -148,15 +148,15 @@ class SectorInteractor(BaseInteractor):
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy,
                           dxl=dxl, dxw=dxw)
         new_plot.name = str(new_sector.__name__) + \
-                        "(" + self.base.data2D.name + ")"
-        new_plot.source = self.base.data2D.source
+                        "(" + self.data.name + ")"
+        new_plot.source = self.data.source
         new_plot.interactive = True
         # print "loader output.detector",output.source
-        new_plot.detector = self.base.data2D.detector
+        new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", 'rad')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-        new_plot.group_id = str(new_sector.__name__) + self.base.data2D.name
+        new_plot.group_id = str(new_sector.__name__) + self.data.name
 
     def validate(self, param_name, param_value):
         """

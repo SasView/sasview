@@ -108,6 +108,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.forcePlotDisplaySignal.connect(self.displayData)
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
+        # fixing silly naming clash in other managers
+        self.communicate = self.communicator
+
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
@@ -269,6 +272,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Currently project load is available only for fitting
             if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
                 self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+            # delete all (including the default) tabs
+            self._perspective().deleteAllTabs()
             self.readProject(filename)
 
     def loadAnalysis(self):
@@ -343,6 +348,35 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.communicator.statusBarUpdateSignal.emit('Analysis saved.')
 
+    def flatDataForModel(self, model):
+        """
+        Get a flat "name:data1d/2d" dict for all
+        items in the model, including children
+        """
+        all_data = {}
+        for i in range(model.rowCount()):
+            item = model.item(i)
+            data = GuiUtils.dataFromItem(item)
+            if data is None: continue
+            # Now, all plots under this item
+            filename = data.filename
+            all_data[filename] = data
+            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            # skip the main plot
+            other_datas = list(other_datas.values())[1:]
+            for data in other_datas:
+                all_data[data.name] = data
+
+        return all_data
+
+    def getAllFlatData(self):
+        """
+        Get items from both data and theory models
+        """
+        data = self.flatDataForModel(self.model)
+        theory = self.flatDataForModel(self.theory_model)
+        return (data, theory)
+
     def allDataForModel(self, model):
         # data model
         all_data = {}
@@ -400,11 +434,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def getAllData(self):
         """
-        converts all datasets into serializable dictionary
+        Get items from both data and theory models
         """
         data = self.allDataForModel(self.model)
         theory = self.allDataForModel(self.theory_model)
+        return (data, theory)
 
+    def getSerializedData(self):
+        """
+        converts all datasets into serializable dictionary
+        """
+        data, theory = self.getAllData()
         all_data = {}
         all_data['is_batch'] = str(self.chkBatch.isChecked())
 
@@ -617,6 +657,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Delete these rows from the model
                 deleted_names.append(str(self.model.item(ind).text()))
                 deleted_items.append(item)
+
+                # Delete corresponding open plots
+                self.closePlotsForItem(item)
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -869,11 +912,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         self.manager.add_data(data_list)
 
-    def updateGraphCount(self, graph_list):
+    def updateGraphCount(self, graphs):
         """
         Modify the graph name combo and potentially remove
         deleted graphs
         """
+        graph2, delete = graphs
+        graph_list = PlotHelper.currentPlots()
         self.updateGraphCombo(graph_list)
 
         if not self.active_plots:
@@ -999,7 +1044,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not hasattr(plot, 'name'):
             return False
-        ids_vals = [val.data[0].name for val in self.active_plots.values()]
+        ids_vals = [val.data[0].name for val in self.active_plots.values()
+                    if val.data[0].plot_role != Data1D.ROLE_DATA]
 
         return plot.name in ids_vals
 
@@ -1076,6 +1122,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Add the plot to the workspace
         plot_widget = self.parent.workspace().addSubWindow(new_plot)
+        if sys.platform == 'darwin':
+            workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
+            workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
+            plot_widget.resize(workspace_width, workspace_height)
 
         # Show the plot
         new_plot.show()
@@ -1168,7 +1218,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def readData(self, path):
         """
         verbatim copy-paste from
-           sasgui.guiframe.local_perspectives.data_loader.data_loader.py
+        ``sasgui.guiframe.local_perspectives.data_loader.data_loader.py``
         slightly modified for clarity
         """
         message = ""
@@ -1223,7 +1273,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     if hasattr(item, 'errors'):
                         for error_data in item.errors:
                             data_error = True
-                            message += "\tError: {0}\n".format(error_data)
+                            error_message += "\tError: {0}\n".format(error_data)
                     else:
 
                         logging.error("Loader returned an invalid object:\n %s" % str(item))
@@ -1233,7 +1283,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 logging.error(sys.exc_info()[1])
 
                 any_error = True
-            if any_error or error_message != "":
+            if any_error or data_error or error_message != "":
                 if error_message == "":
                     error = "Error: " + str(sys.exc_info()[1]) + "\n"
                     error += "while loading Data: \n%s\n" % str(basename)
@@ -1469,7 +1519,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.new_plot = globals()[method_name](self, quickplot=True)
         self.new_plot.data = data
         #new_plot.plot(marker='o')
-        self.new_plot.plot()
+        self.new_plot.plot(data=data)
 
         # Update the global plot counter
         title = "Plot " + data.name

@@ -22,7 +22,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.axes = axes
         self.base = base
         self._item = item
-        self.data = self.base.data[0]
         self.qmax = min(numpy.fabs(self.data.xmax),
                         numpy.fabs(self.data.xmin))  # must be positive
         self.connect = self.base.connect
@@ -30,8 +29,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         # Number of points on the plot
         self.nbins = 36
         # Cursor position of Rings (Left(-1) or Right(1))
-        self.xmaxd = self.base.xmax
-        self.xmind = self.base.xmin
+        self.xmaxd = self.xmax
+        self.xmind = self.xmin
 
         if (self.xmaxd + self.xmind) > 0:
             self.sign = 1

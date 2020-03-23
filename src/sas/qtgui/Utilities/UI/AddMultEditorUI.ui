@@ -163,7 +163,7 @@ Multiply: *</string>
    <item row="2" column="0">
     <widget class="QLabel" name="lblEquation">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Plugin_model = scale_factor * (model_1 + model_2) + background&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Plugin_model = scale_factor * (model_1 + model_2) + background&lt;/span&gt;&lt;/p&gt;&lt;p&gt;To add/multiply plugin models, or combine more than two models, please click Help below.&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>

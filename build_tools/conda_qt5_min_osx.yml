@@ -7,7 +7,7 @@ dependencies:
  - attrs
  - automat
  - babel
- - backports.functools_lru_cache=
+ - backports.functools_lru_cache
  - ca-certificates
  - certifi
  - clangdev
@@ -42,13 +42,13 @@ dependencies:
  - ipykernel=4.9
  - jupyter
  - pytest
- - testpath=0.3.1
- - numpy=1.15.1
- - pyopencl=2018.1.1
+ - testpath
+ - numpy
+ - pyopencl
  - pip:
-   - pytools==2018.4
-   - periodictable==1.5.0
-   - bumps==0.7.11
-   - xhtml2pdf==0.2.3
-   - qt5reactor==0.5
+   - pytools
+   - periodictable
+   - bumps
+   - xhtml2pdf
+   - qt5reactor
 

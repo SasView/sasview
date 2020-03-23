@@ -229,6 +229,11 @@ class FileReader(object):
                     data.dqy_data = data.dqy_data.astype(np.float64)
                 if data.mask is not None:
                     data.mask = data.mask.astype(dtype=bool)
+                    # If all mask elements are False, give a warning to the user
+                    if not data.mask.any():
+                        error = "The entire dataset is masked and may not "
+                        error += "produce usable fits."
+                        data.errors.append(error)
 
                 if len(data.data.shape) == 2:
                     n_rows, n_cols = data.data.shape
