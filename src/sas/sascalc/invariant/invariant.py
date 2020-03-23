@@ -829,7 +829,7 @@ class InvariantCalculator(object):
 
         Implementation: ::
            Given the above, as of SassView 4.3 and 5.0.2 we compute Sv simply
-           from the Poroc Constant and the contrast between the two phases as:
+           from the Porod Constant and the contrast between the two phases as:
              surface = porod_const / (2 * pi contrast**2) 
 
 
@@ -960,9 +960,9 @@ class InvariantCalculator(object):
 
     def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
         """
-        As of SasView 4.3 and 5.0.2, the specivie surface is computed directly
+        As of SasView 4.3 and 5.0.2, the specific surface is computed directly
         fro the contrast and porod_constant wich are currently user inputs
-        with no optionf for any uncertainty so no uncertainty can be calculated.
+        with no option for any uncertainty so no uncertainty can be calculated.
         However we include the uncertainty computation for future use if and
         when these values get an uncertainty. This is given as:  ::
 
