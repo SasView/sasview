@@ -14,7 +14,7 @@ import numpy as np
 from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DataReaderException, DefaultReaderException
 from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
-    combine_data_info_with_plottable
+    combine_data_info_with_plottable, set_loaded_units
 from sas.sascalc.data_util.nxsunit import Converter
 
 logger = logging.getLogger(__name__)
@@ -99,8 +99,8 @@ class FileReader(object):
                         self.handle_error_message(DEPRECATION_MESSAGE)
                     if len(self.output) > 0:
                         # Sort the data that's been loaded
-                        self.convert_data_units()
                         self.sort_data()
+                        self.define_loaded_units()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
@@ -308,7 +308,7 @@ class FileReader(object):
         data.zaxis("\\rm{Intensity}", "1/cm")
         return data
 
-    def convert_data_units(self, default_q_unit="1/A"):
+    def convert_data_units_for_fitting(self, default_q_unit="1/A"):
         """
         Converts al; data to the sasview default of units of A^{-1} for Q and
         cm^{-1} for I.
@@ -367,6 +367,13 @@ class FileReader(object):
                 data.errors.append(message)
             new_output.append(data)
         self.output = new_output
+
+    def define_loaded_units(self):
+        for data in self.output:
+            set_loaded_units(data, 'x', data._xunit)
+            set_loaded_units(data, 'y', data._yunit)
+            if isinstance(data, Data2D):
+                set_loaded_units(data, 'z', data._zunit)
 
     def format_unit(self, unit=None):
         """
