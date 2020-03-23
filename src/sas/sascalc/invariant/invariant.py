@@ -528,7 +528,7 @@ class InvariantCalculator(object):
         dyn: error on dy
 
         :param data:
-        :note: if data doesn't contain dy assume dy= math.sqrt(data.y)
+        :note: if data doesn't contain dy return -1)
         """
         if len(data.x) <= 1 or len(data.y) <= 1 or \
             len(data.x) != len(data.y) or \
@@ -537,9 +537,12 @@ class InvariantCalculator(object):
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
             raise ValueError(msg)
         else:
-            #Create error for data without dy error
+            # For reduced data sqrt(I) is incorrect! if the data has no dy
+            # then we should not invent it and then propogate that completely
+            # bogus value.  So changed behavoir on Mar 23, 2020 to return
+            # -1 instead
             if data.dy is None:
-                dy = math.sqrt(data.y)
+                return -1
             else:
                 dy = data.dy
             # Take care of smeared data
