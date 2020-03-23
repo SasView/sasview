@@ -17,12 +17,12 @@ except ImportError:
 
 
 # Output strings
-CORRECT = Style.RESET_ALL + "{0} - Expected Version Installed: {1}"
+CORRECT = Style.RESET_ALL + " - {0} - Expected Version Installed: {1}"
 VERSION_MISMATCH = Fore.LIGHTYELLOW_EX +\
-          "{0} - Version Mismatch - Installed: {1}, Expected: {2}"
+          " - {0} - Version Mismatch - Installed: {1}, Expected: {2}"
 VERSION_UNKNOWN = Fore.YELLOW +\
-                  "{0} - Version Cannot Be Determined - Expected: {1}"
-NOT_INSTALLED = Fore.LIGHTRED_EX + '{0} NOT INSTALLED'
+                  " - {0} - Version Cannot Be Determined - Expected: {1}"
+NOT_INSTALLED = Fore.LIGHTRED_EX + " - {0} NOT INSTALLED"
 
 # Location of yaml files
 if sys.platform == 'win32':
@@ -36,7 +36,20 @@ else:
 with open(file_location, 'r') as stream:
     try:
         yaml_dict = yaml.load(stream, Loader=yaml.SafeLoader)
-        common_required_package_list = yaml_dict['dependencies']
+        yaml_packages = yaml_dict['dependencies']
+        common_required_package_list = []
+        pip_packages = yaml_packages.pop()
+        inter_package_list = yaml_packages
+        if isinstance(pip_packages, dict):
+            pip_packages = pip_packages['pip']
+            for pip_package in pip_packages:
+                inter_package_list.append(pip_package)
+        else:
+            inter_package_list = yaml_packages.append(pip_packages)
+        for package in inter_package_list:
+            package = package.replace(">=",
+                                      "=").replace("<=", "=").replace("==", "=")
+            common_required_package_list.append(package)
     except Exception as e:
         print(e)
 
@@ -50,6 +63,10 @@ except Exception:
 
 packages_installed = []
 versions_installed = []
+packages_specified = 0
+packages_correct = 0
+packages_mismatch = 0
+packages_not_installed = 0
 
 if isConda:
     for r in reqs.splitlines():
@@ -65,8 +82,7 @@ else:
     versions_installed = [r.decode().split('==')[1] for r in reqs.split()]
 
 print("")
-print(Style.RESET_ALL +
-      "....COMPARING PACKAGES LISTED IN {0} to INSTALLED PACKAGES....".format(
+print("....COMPARING PACKAGES LISTED IN {0} to INSTALLED PACKAGES....".format(
           file_location))
 print("")
 
@@ -74,13 +90,15 @@ print("")
 for yaml_name in common_required_package_list:
     try:
         text_split = yaml_name.split('=')
-    except AttributeError as e:
-        # Continue for tiered files including pip installs
-        continue
-    package_name = text_split[0].lower()
-    package_version = text_split[1]
+        package_name = text_split[0].lower()
+        package_version = text_split[1]
+    except (AttributeError, IndexError) as e:
+        # No version specified
+        package_name = yaml_name
+        package_version = '0.0'
 
     try:
+        packages_specified += 1
         if package_name == 'python':
             full_version = sys.version.split()
             installed_version = full_version[0]
@@ -89,12 +107,18 @@ for yaml_name in common_required_package_list:
             installed_version = versions_installed[i]
         if package_version == installed_version:
             print(CORRECT.format(package_name, installed_version))
+            packages_correct += 1
         else:
             print(VERSION_MISMATCH.format(package_name, installed_version,
                                           package_version))
-    except AttributeError:
-        print(VERSION_UNKNOWN.format(package_name, package_version))
+            packages_mismatch += 1
     except ValueError:
         print(NOT_INSTALLED.format(package_name))
+        packages_not_installed += 1
 
 print(Style.RESET_ALL)
+print("check_packages.py has finished:")
+print("\tPackages required:        {0}".format(packages_specified))
+print("\tInstalled correctly:      {0}".format(packages_correct))
+print("\tMismatched versions:      {0}".format(packages_mismatch))
+print("\tNot installed:            {0}".format(packages_not_installed))
