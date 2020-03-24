@@ -15,6 +15,7 @@ This module implements invariant and its related computations.
 :author: Jae Cho/UTK
 
 """
+from __future__ import division
 import math
 import numpy as np
 
@@ -539,9 +540,10 @@ class InvariantCalculator(object):
         else:
             # For reduced data sqrt(I) is incorrect! if the data has no dy
             # then we should not invent it and then propogate that completely
-            # bogus value.  So changed behavoir on Mar 23, 2020 to return
-            # -1 instead
+            # bogus value.  So changed behaviour on Mar 23, 2020 to return
+            # None instead
             if data.dy is None:
+#                return None
                 return -1
             else:
                 dy = data.dy
@@ -844,8 +846,7 @@ class InvariantCalculator(object):
         # convert porod_const to units of A^-5 instead of cm^-1 A^-4 so that
         # s is returned in units of 1/A.
         _porod_const = 1.0e-8 * porod_const
-        return float(_porod_const) / (2 * math.pi\
-                                     * math.fabs(float(contrast))**2)
+        return _porod_const / (2 * math.pi * math.fabs(contrast)**2)
 
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
@@ -990,7 +991,7 @@ class InvariantCalculator(object):
         _porod_const = porod_const *1e-8
 
         s = self.get_surface(contrast=contrast, porod_const=porod_const)
-        ds = math.sqrt((dporod_const)**2 + 2 * (_porod_const\
-                 * dcontrast / contrast)**2) / (2 * math.pi * contrast**2)
+        ds = math.sqrt(dporod_const**2 + 2 * (_porod_const
+                       * dcontrast / contrast)**2) / (2 * math.pi * contrast**2)
 
         return s, ds
