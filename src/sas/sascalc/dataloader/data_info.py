@@ -98,20 +98,16 @@ class plottable_1D(object):
         if self._xunit == '':
             self._xunit = unit
         elif unit is not None:
-            try:
-                # Converter is built off units loaded from file
-                # Need to scale between current units and desired units
-                scale = self.x_converter.scale(unit) / self.x_converter(
-                    self._xunit)
-                self.x *= scale
-                self.dx *= scale
-                self.dxl *= scale
-                self.dxw *= scale
-                # Only set instance variable once conversion is successful
-                self._xunit = unit
-            except AttributeError:
-                # TODO: handle the conversion error properly
-                pass
+            # Converter is built off units loaded from file
+            # Need to scale between current units and desired units
+            scale = self.x_converter.scale(unit) / self.x_converter(
+                self._xunit)
+            self.x *= scale
+            self.dx *= scale
+            self.dxl *= scale
+            self.dxw *= scale
+            # Only set instance variable once conversion is successful
+            self._xunit = unit
 
     def yaxis(self, label, unit=None):
         """
@@ -121,18 +117,14 @@ class plottable_1D(object):
         if self._yunit == '':
             self._yunit = unit
         elif unit is not None:
-            try:
-                # Converter is built off units loaded from file
-                # Need to scale between current units and desired units
-                scale = self.y_converter.scale(unit) / self.y_converter(
-                    self._yunit)
-                self.y *= scale
-                self.dy *= scale
-                # Only set instance variable once conversion is successful
-                self._yunit = unit
-            except AttributeError:
-                # TODO: handle the conversion error properly
-                pass
+            # Converter is built off units loaded from file
+            # Need to scale between current units and desired units
+            scale = self.y_converter.scale(unit) / self.y_converter(
+                self._yunit)
+            self.y *= scale
+            self.dy *= scale
+            # Only set instance variable once conversion is successful
+            self._yunit = unit
 
     def convert_q_units(self, convert_to_unit):
         self.xaxis(self._xaxis, convert_to_unit)
@@ -198,18 +190,14 @@ class plottable_2D(object):
         if self._xunit == '':
             self._xunit = unit
         elif unit is not None:
-            try:
-                # Converter based off units loaded from file
-                # Need to scale between current units and desired units
-                scale = self.x_converter.scale(unit) / self.x_converter(
-                    self._xunit)
-                self.qx_data *= scale
-                self.dqx_data *= scale
-                # Only set instance variable once conversion is successful
-                self._xunit = unit
-            except AttributeError:
-                # TODO: handle the conversion error properly
-                pass
+            # Converter based off units loaded from file
+            # Need to scale between current units and desired units
+            scale = self.x_converter.scale(unit) / self.x_converter(
+                self._xunit)
+            self.qx_data *= scale
+            self.dqx_data *= scale
+            # Only set instance variable once conversion is successful
+            self._xunit = unit
 
     def yaxis(self, label, unit):
         """
@@ -219,18 +207,14 @@ class plottable_2D(object):
         if self._yunit == '':
             self._yunit = unit
         elif unit is not None:
-            try:
-                # Converter based off units loaded from file
-                # Need to scale between current units and desired units
-                scale = self.y_converter.scale(unit) / self.y_converter(
-                    self._yunit)
-                self.qy_data *= scale
-                self.dqy_data *= scale
-                # Only set instance variable once conversion is successful
-                self._yunit = unit
-            except AttributeError:
-                # TODO: handle the conversion error properly
-                pass
+            # Converter based off units loaded from file
+            # Need to scale between current units and desired units
+            scale = self.y_converter.scale(unit) / self.y_converter(
+                self._yunit)
+            self.qy_data *= scale
+            self.dqy_data *= scale
+            # Only set instance variable once conversion is successful
+            self._yunit = unit
 
     def zaxis(self, label, unit):
         """
@@ -240,18 +224,14 @@ class plottable_2D(object):
         if self._zunit == '':
             self._zunit = unit
         elif unit is not None:
-            try:
-                # Converter based off units loaded from file
-                # Need to scale between current units and desired units
-                scale = self.z_converter.scale(unit) / self.z_converter(
-                    self._zunit)
-                self.data *= scale
-                self.err_data *= scale
-                # Only set instance variable once conversion is successful
-                self._zunit = unit
-            except AttributeError:
-                # TODO: handle the conversion error properly
-                pass
+            # Converter based off units loaded from file
+            # Need to scale between current units and desired units
+            scale = self.z_converter.scale(unit) / self.z_converter(
+                self._zunit)
+            self.data *= scale
+            self.err_data *= scale
+            # Only set instance variable once conversion is successful
+            self._zunit = unit
 
     def convert_q_units(self, convert_to_unit):
         self.xaxis(self._xaxis, convert_to_unit)
