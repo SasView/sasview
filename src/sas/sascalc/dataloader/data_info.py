@@ -134,6 +134,12 @@ class plottable_1D(object):
                 # TODO: handle the conversion error properly
                 pass
 
+    def convert_q_units(self, convert_to_unit):
+        self.xaxis(self._xaxis, convert_to_unit)
+
+    def convert_i_units(self, convert_to_unit):
+        self.yaxis(self._yaxis, convert_to_unit)
+
 
 class plottable_2D(object):
     """
@@ -246,6 +252,13 @@ class plottable_2D(object):
             except AttributeError:
                 # TODO: handle the conversion error properly
                 pass
+
+    def convert_q_units(self, convert_to_unit):
+        self.xaxis(self._xaxis, convert_to_unit)
+        self.yaxis(self._yaxis, convert_to_unit)
+
+    def convert_i_units(self, convert_to_unit):
+        self.zaxis(self._zaxis, convert_to_unit)
 
 
 class Vector(object):
