@@ -543,8 +543,7 @@ class InvariantCalculator(object):
             # bogus value.  So changed behaviour on Mar 23, 2020 to return
             # None instead
             if data.dy is None:
-#                return None
-                return -1
+                return None
             else:
                 dy = data.dy
             # Take care of smeared data
