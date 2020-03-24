@@ -265,7 +265,7 @@ Chapter 8 in *X-Ray Scattering of Soft Matter*
 Springer, 2007
 
 J. Crawshaw, M.E. Vickers, N.P. Briggs, R.K. Heenan, R.E. Cameron
-*Polymer*, 41 (2000) 1873–1881
+*Polymer*, 41 (2000) 1873-1881
 
 M. Shioya and A. Takaku
 *J. Appl. Phys.*, 58 (1985) 4074
