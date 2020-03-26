@@ -1,6 +1,7 @@
 name: qt5_osx
 channels:
  - conda-forge
+ - schrodinger
  - defaults
 dependencies:
  - alabaster=0.7.12=py_0
@@ -138,7 +139,7 @@ dependencies:
  - service_identity=17.0.0
  - twisted
  - zope
- - clang_osx-64
+ - libgfortran=3.0.1=2000
  - pip:
    - pytools==2018.4
    - periodictable==1.5.0
