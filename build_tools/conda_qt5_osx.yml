@@ -139,6 +139,7 @@ dependencies:
  - service_identity=17.0.0
  - twisted
  - zope
+ - clang_osx-64
  - libgfortran=3.0.1=2000
  - pip:
    - pytools==2018.4
