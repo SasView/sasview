@@ -5,8 +5,5 @@
 		<!-- Avoid ctypes MemoryError: -->
 		<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
 		<true/>
-		<!-- Required for loading unsigned .so files from plugins: -->
-		<key>com.apple.security.cs.disable-library-validation</key>
-		<true/>
 	</dict>
 </plist>
