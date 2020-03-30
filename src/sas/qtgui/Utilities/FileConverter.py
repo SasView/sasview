@@ -420,10 +420,6 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         single_file = True
         n_frames = iqdata.shape[0]
 
-        ###
-        n_frames = 4
-        ###
-
         # Standard file has 3 frames: SAS, calibration and WAS
         if n_frames > 3:
             # File has multiple frames - ask the user which ones they want to
