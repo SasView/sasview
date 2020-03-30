@@ -1,3 +1,7 @@
+# pylint: disable=C0103, I1101
+"""
+File Converter Widget
+"""
 import os
 import logging
 
@@ -6,6 +10,9 @@ import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from sas.sascalc.file_converter.ascii2d_loader import ASCII2DLoader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+from sas.sascalc.dataloader.data_info import Data1D
+
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
 from sas.sascalc.dataloader.data_info import Source
@@ -14,11 +21,19 @@ from sas.sascalc.dataloader.data_info import Vector
 import sas.sascalc.file_converter.FileConverterUtilities as Utilities
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.FrameSelect import FrameSelect
 
 from .UI.FileConverterUI import Ui_FileConverterUI
 
 class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
+    """
+    Class to describe the behaviour of the File Converter widget
+    """
     def __init__(self, parent=None):
+        """
+        Parent here is the GUI Manager. Required for access to
+        the help location and to the file loader.
+        """
         super(FileConverterWidget, self).__init__(parent._parent)
 
         self.parent = parent
@@ -40,6 +55,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.ifile = ""
         self.qfile = ""
         self.ofile = ""
+        self.metadata = {}
         self.setValidators()
 
         self.addSlots()
@@ -48,7 +64,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         """
         Apply validators for double precision numbers to numerical fields
         """
-        self.txtMG_RunNumber.setValidator(QtGui.QIntValidator(0, 10000))
+        #self.txtMG_RunNumber.setValidator(QtGui.QIntValidator())
 
         self.txtMD_Distance.setValidator(GuiUtils.DoubleValidator())
         self.txtMD_OffsetX.setValidator(GuiUtils.DoubleValidator())
@@ -89,7 +105,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.btnIFile.clicked.connect(self.onIFileOpen)
         self.btnOutputFile.clicked.connect(self.onNewFile)
 
-        self.txtOutputFile.textEdited.connect(self.onNewFileEdited)
+        self.txtOutputFile.editingFinished.connect(self.onNewFileEdited)
 
         self.cbInputFormat.currentIndexChanged.connect(self.onInputFormat)
 
@@ -103,22 +119,25 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             if not self.isBSL and self.is1D:
                 qdata = Utilities.extract_ascii_data(self.qfile)
                 iqdata = np.array([Utilities.extract_ascii_data(self.ifile)])
-                Utilities.convert_1d_data(qdata, iqdata, self.ofile, self.getMetadata())
+                self.convert1Ddata(qdata, iqdata, self.ofile, self.getMetadata())
             elif self.isBSL and self.is1D:
                 qdata, iqdata = Utilities.extract_otoko_data(self.qfile, self.ifile)
-                Utilities.convert_1d_data(qdata, iqdata, self.ofile, self.getMetadata())
+                self.convert1Ddata(qdata, iqdata, self.ofile, self.getMetadata())
             elif not self.isBSL and not self.is1D:
                 loader = ASCII2DLoader(self.ifile)
                 data = loader.load()
                 dataset = [data] # ASCII 2D only ever contains 1 frame
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())
             else: # self.data_type == 'bsl'
-                dataset = Utilities.extract_bsl_data(self.ifile)
+                #dataset = Utilities.extract_bsl_data(self.ifile)
+                dataset = self.extractBSLdata(self.ifile)
+                
                 if dataset is None:
                     return
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())
 
-        except Exception as ex:
+        except IOError as ex:
+            self.isBSL = False
             msg = str(ex)
             logging.error(msg)
             return
@@ -173,34 +192,23 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             raise
         return datafile
 
-    def toFloat(self, text):
-        """
-        Dumb string->float converter
-        """
-        value = None
-        try:
-            value = float(text) if text is not "" else None
-        except ValueError:
-            pass
-        return value
-
     def getDetectorMetadata(self):
         """
         Read the detector metadata fields and put them in the dictionary
         """
         detector = Detector()
         detector.name = self.txtMD_Name.text()
-        detector.distance = self.toFloat(self.txtMD_Distance.text())
-        detector.offset = Vector(x=self.toFloat(self.txtMD_OffsetX.text()),
-                                 y=self.toFloat(self.txtMD_OffsetY.text()))
-        detector.orientation = Vector(x=self.toFloat(self.txtMD_OrientRoll.text()),
-                                      y=self.toFloat(self.txtMD_OrientPitch.text()),
-                                      z=self.toFloat(self.txtMD_OrientYaw.text()))
-        detector.beam_center = Vector(x=self.toFloat(self.txtMD_BeamX.text()),
-                                      y=self.toFloat(self.txtMD_BeamY.text()))
-        detector.pixel_size = Vector(x=self.toFloat(self.txtMD_PixelX.text()),
-                                     y=self.toFloat(self.txtMD_PixelY.text()))
-        detector.slit_length = self.toFloat(self.txtMD_Distance.text())
+        detector.distance = Utilities.toFloat(self.txtMD_Distance.text())
+        detector.offset = Vector(x=Utilities.toFloat(self.txtMD_OffsetX.text()),
+                                 y=Utilities.toFloat(self.txtMD_OffsetY.text()))
+        detector.orientation = Vector(x=Utilities.toFloat(self.txtMD_OrientRoll.text()),
+                                      y=Utilities.toFloat(self.txtMD_OrientPitch.text()),
+                                      z=Utilities.toFloat(self.txtMD_OrientYaw.text()))
+        detector.beam_center = Vector(x=Utilities.toFloat(self.txtMD_BeamX.text()),
+                                      y=Utilities.toFloat(self.txtMD_BeamY.text()))
+        detector.pixel_size = Vector(x=Utilities.toFloat(self.txtMD_PixelX.text()),
+                                     y=Utilities.toFloat(self.txtMD_PixelY.text()))
+        detector.slit_length = Utilities.toFloat(self.txtMD_Distance.text())
         return detector
 
     def getSampleMetadata(self):
@@ -209,13 +217,13 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         """
         sample = Sample()
         sample.name = self.txtMSa_Name.text()
-        sample.beam_size = Vector(x=self.toFloat(self.txtMSo_BeamSizeX.text()),
-                                  y=self.toFloat(self.txtMSo_BeamSizeY.text()))
+        sample.beam_size = Vector(x=Utilities.toFloat(self.txtMSo_BeamSizeX.text()),
+                                  y=Utilities.toFloat(self.txtMSo_BeamSizeY.text()))
         sample.beam_shape = self.txtMSo_BeamShape.text()
-        sample.wavelength = self.toFloat(self.txtMSo_BeamWavelength.text())
-        sample.wavelength_min = self.toFloat(self.txtMSo_MinWavelength.text())
-        sample.wavelength_max = self.toFloat(self.txtMSo_MaxWavelength.text())
-        sample.wavelength_spread = self.toFloat(self.txtMSo_Spread.text())
+        sample.wavelength = Utilities.toFloat(self.txtMSo_BeamWavelength.text())
+        sample.wavelength_min = Utilities.toFloat(self.txtMSo_MinWavelength.text())
+        sample.wavelength_max = Utilities.toFloat(self.txtMSo_MaxWavelength.text())
+        sample.wavelength_spread = Utilities.toFloat(self.txtMSo_Spread.text())
         return sample
 
     def getSourceMetadata(self):
@@ -227,20 +235,21 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         source.radiation = self.cbRadiation.currentText().lower()
         # the rest is in the 'Source' tab of the Metadata tab
         source.name = self.txtMSo_Name.text()
-        source.thickness = self.toFloat(self.txtMSa_Thickness.text())
-        source.transmission = self.toFloat(self.txtMSa_Transmission.text())
-        source.temperature = self.toFloat(self.txtMSa_Temperature.text())
-        source.position = Vector(x=self.toFloat(self.txtMSa_PositionX.text()),
-                                 y=self.toFloat(self.txtMSa_PositionY.text()))
-        source.orientation = Vector(x=self.toFloat(self.txtMSa_OrientR.text()),
-                                    y=self.toFloat(self.txtMSa_OrientP.text()),
-                                    z=self.toFloat(self.txtMSa_OrientY.text()))
+        source.thickness = Utilities.toFloat(self.txtMSa_Thickness.text())
+        source.transmission = Utilities.toFloat(self.txtMSa_Transmission.text())
+        source.temperature = Utilities.toFloat(self.txtMSa_Temperature.text())
+        source.position = Vector(x=Utilities.toFloat(self.txtMSa_PositionX.text()),
+                                 y=Utilities.toFloat(self.txtMSa_PositionY.text()))
+        source.orientation = Vector(x=Utilities.toFloat(self.txtMSa_OrientR.text()),
+                                    y=Utilities.toFloat(self.txtMSa_OrientP.text()),
+                                    z=Utilities.toFloat(self.txtMSa_OrientY.text()))
 
         source.details = self.txtMSa_Details.toPlainText()
 
         return source
 
     def getMetadata(self):
+        ''' metadata getter '''
         return self.metadata
 
     def readMetadata(self):
@@ -250,10 +259,20 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         This reads the UI elements directly, but we don't
         have a clear MVP distinction in this widgets, so there.
         """
+
+        run_title = self.txtMG_RunName.text()
+        run = self.txtMG_RunNumber.text()
+        run = run.split(",")
+
+        run_name = None
+        if run:
+            run_number = run[0]
+            run_name = { run_number: run_title }
+
         metadata = {
             'title': self.txtMG_Title.text(),
-            'run': self.txtMG_RunNumber.text(),
-            'run_name': self.txtMG_RunName.text(),
+            'run': run,
+            'run_name': run_name, # if run_name != "" else "None" ,
             'instrument': self.txtMG_Instrument.text(),
             'detector': [self.getDetectorMetadata()],
             'sample': self.getSampleMetadata(),
@@ -287,15 +306,29 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
                 filename += '.xml'
             elif 'NXcanSAS' in ext:
                 filename += '.h5'
+            else:
+                filename += '.h5' # default for user entered filenames
 
         self.ofile = filename
         self.txtOutputFile.setText(filename)
         self.updateConvertState()
 
-    def onNewFileEdited(self, text):
+    def onNewFileEdited(self):
         """
         Update the output file state on direct field edit
         """
+        text = self.txtOutputFile.text()
+        if not text:
+            return
+        # Check/add extension
+        filename_tuple = os.path.splitext(text)
+        ext = filename_tuple[1]
+        if not ext.lower() in ('.xml', '.h5'):
+            text += '.h5'
+        if not self.is1D and not '.h5' in ext.lower():
+            # quietly add .h5 as extension
+            text += '.h5'
+
         self.ofile = text
         self.updateConvertState()
 
@@ -304,9 +337,9 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Asserts presece of files for coversion.
         If all present -> enable the Convert button.
         """
-        enabled = self.ifile!="" and os.path.exists(self.ifile) and self.ofile!=""
+        enabled = self.ifile != "" and os.path.exists(self.ifile) and self.ofile != ""
         if self.is1D:
-            enabled = enabled and self.qfile!="" and os.path.exists(self.qfile)
+            enabled = enabled and self.qfile != "" and os.path.exists(self.qfile)
 
         self.cmdConvert.setEnabled(enabled)
 
@@ -326,7 +359,134 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.txtIFile.setText("")
         # No need to clear the output field.
 
+    def extractBSLdata(self, filename):
+        """
+        Extracts data from a 2D BSL file
 
+        :param filename: The header file to extract the data from
+        :return x_data: A 1D array containing all the x coordinates of the data
+        :return y_data: A 1D array containing all the y coordinates of the data
+        :return frame_data: A dictionary of the form *{frame_number: data}*,
+        where data is a 2D numpy array containing the intensity data
+        """
+        loader = Utilities.BSLLoader(filename)
+        frames = [0]
+        should_continue = True
 
+        if loader.n_frames > 1:
+            params = self.askFrameRange(loader.n_frames)
+            frames = params['frames']
+            if len(frames) == 0:
+                should_continue = False
+        elif loader.n_rasters == 1 and loader.n_frames == 1:
+            message = ("The selected file is an OTOKO file. Please select the "
+                       "'OTOKO 1D' option if you wish to convert it.")
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(message)
+            msgbox.setWindowTitle("File Conversion")
+            msgbox.exec_()
+            return
+        else:
+            msg = ("The selected data file only has 1 frame, it might be"
+                       " a multi-frame OTOKO file.\nContinue conversion?")
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("File Conversion")
+            # custom buttons
+            button_yes = QtWidgets.QPushButton("Yes")
+            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
+            button_no = QtWidgets.QPushButton("No")
+            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
+            retval = msgbox.exec_()
+            if retval == QtWidgets.QMessageBox.RejectRole:
+                # cancel fit
+                return
 
+        if not should_continue:
+            return None
+        frame_data = loader.load_frames(frames)
+
+        return frame_data
+
+    def convert1Ddata(self, qdata, iqdata, ofile, metadata):
+        """
+        Formats a 1D array of q_axis data and a 2D array of I axis data (where
+        each row of iqdata is a separate row), into an array of Data1D objects
+        """
+        frames = []
+        increment = 1
+        single_file = True
+        n_frames = iqdata.shape[0]
+
+        ###
+        n_frames = 4
+        ###
+
+        # Standard file has 3 frames: SAS, calibration and WAS
+        if n_frames > 3:
+            # File has multiple frames - ask the user which ones they want to
+            # export
+            params = self.askFrameRange(n_frames)
+            frames = params['frames']
+            increment = params['inc']
+            single_file = params['file']
+            if frames == []:
+                return
+        else: # Only interested in SAS data
+            frames = [0]
+
+        output_path = ofile
+
+        frame_data = {}
+        for i in frames:
+            data = Data1D(x=qdata, y=iqdata[i])
+            frame_data[i] = data
+        if single_file:
+            # Only need to set metadata on first Data1D object
+            frame_data = list(frame_data.values()) # Don't need to know frame numbers
+            frame_data[0].filename = output_path.split('\\')[-1]
+            for key, value in metadata.items():
+                setattr(frame_data[0], key, value)
+        else:
+            # Need to set metadata for all Data1D objects
+            for datainfo in list(frame_data.values()):
+                datainfo.filename = output_path.split('\\')[-1]
+                for key, value in metadata.items():
+                    setattr(datainfo, key, value)
+
+        _, ext = os.path.splitext(output_path)
+        if ext == '.xml':
+            run_name = metadata['title']
+            Utilities.convert_to_cansas(frame_data, output_path, run_name, single_file)
+        else: # ext == '.h5'
+            w = NXcanSASWriter()
+            w.write(frame_data, output_path)
+
+    def askFrameRange(self, n_frames=1):
+        """
+        Display a dialog asking the user to input the range of frames they
+        would like to export
+
+        :param n_frames: How many frames the loaded data file has
+        :return: A dictionary containing the parameters input by the user
+        """
+        valid_input = False
+        output_path = self.txtOutputFile.text()
+        if not output_path:
+            return
+        _, ext = os.path.splitext(output_path)
+        show_single_btn = (ext == '.h5')
+        frames = None
+        increment = None
+        single_file = True
+
+        dlg = FrameSelect(self, n_frames, show_single_btn)
+        if dlg.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
+        (first_frame, last_frame, increment) = dlg.getFrames()
+        frames = list(range(first_frame, last_frame + 1, increment))
+        return { 'frames': frames, 'inc': increment, 'file': single_file }
 
