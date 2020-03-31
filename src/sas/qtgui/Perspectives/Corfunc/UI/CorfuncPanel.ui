@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
-    <height>788</height>
+    <width>498</width>
+    <height>878</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -231,7 +231,17 @@
       <string>Extrapolation parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0" colspan="2">
+      <item row="2" column="0">
+       <widget class="QPushButton" name="cmdExtrapolate">
+        <property name="toolTip">
+         <string>Find the Guinier and Porod extrapolations of the data as Q → 0 and Q → ∞</string>
+        </property>
+        <property name="text">
+         <string>Extrapolate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
        <layout class="QFormLayout" name="formLayout_2">
         <item row="0" column="0">
          <widget class="QLabel" name="label_8">
@@ -279,41 +289,41 @@
           </item>
          </layout>
         </item>
-       </layout>
-      </item>
-      <item row="0" column="2">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
+        <item row="0" column="1">
          <widget class="QLabel" name="label_9">
           <property name="text">
            <string>Porod</string>
           </property>
          </widget>
         </item>
-        <item>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
            <widget class="QLabel" name="label_10">
             <property name="text">
              <string>K</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item>
            <widget class="QLineEdit" name="txtPorodK">
             <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
            <widget class="QLabel" name="label_11">
             <property name="text">
-             <string> σ </string>
+             <string>σ</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item>
            <widget class="QLineEdit" name="txtPorodSigma">
             <property name="readOnly">
              <bool>true</bool>
@@ -324,28 +334,25 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="cmdExtrapolate">
+      <item row="2" column="2">
+       <widget class="QPushButton" name="cmdSave">
         <property name="toolTip">
-         <string>Find the Guinier and Porod extrapolations of the data as Q → 0 and Q → ∞</string>
+         <string>Export the calculated real space correlation function to a file.</string>
         </property>
         <property name="text">
-         <string>Extrapolate</string>
+         <string>Save</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="2">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="cmdTransform">
+        <property name="toolTip">
+         <string>Calculate the real space correlation that matches the scattering data.</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>293</width>
-          <height>20</height>
-         </size>
+        <property name="text">
+         <string>Transform</string>
         </property>
-       </spacer>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -486,22 +493,12 @@
    <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <widget class="QPushButton" name="cmdTransform">
+      <widget class="QPushButton" name="cmdExtract">
        <property name="toolTip">
-        <string>Calculate the real space correlation that matches the scattering data.</string>
+        <string>Extract model parameters from the real space transformed curve.</string>
        </property>
        <property name="text">
-        <string>Transform</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cmdSave">
-       <property name="toolTip">
-        <string>Export the calculated real space correlation function to a file.</string>
-       </property>
-       <property name="text">
-        <string>Save</string>
+        <string>Extract Parameters</string>
        </property>
       </widget>
      </item>
