@@ -136,8 +136,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
                     return
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())
 
-        except IOError as ex:
-            self.isBSL = False
+        except (ValueError, IOError) as ex:
             msg = str(ex)
             logging.error(msg)
             return
