@@ -4,6 +4,8 @@
 	<dict>
 		<!-- Avoid ctypes MemoryError: -->
 		<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+		<true/>
+		<!-- Disable Library Validation Entitlement -->
 		<key>com.apple.security.cs.disable-library-validation</key>
 		<true/>
 	</dict>
