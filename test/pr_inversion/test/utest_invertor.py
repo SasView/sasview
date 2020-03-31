@@ -51,7 +51,7 @@ class TestFiguresOfMerit(unittest.TestCase):
         """
             Test whether P(r) is positive
         """
-        self.assertEqual(self.invertor.get_positive(self.out), 1)
+        self.assertAlmostEqual(self.invertor.get_positive(self.out), 1)
 
     def test_positive_err(self):
         """
