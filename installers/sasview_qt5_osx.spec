@@ -107,7 +107,7 @@ for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     datas.append((f, os.path.split(dirname)[0]))
 
-binaries = []
+binaries = [clang]
 
 # EXCLUDED FILES ############################################################
 # Spelled out to enable easier editing
