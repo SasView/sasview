@@ -180,8 +180,6 @@ class MyMplCanvas(FigureCanvas):
             data1, data3, data_idf = self.data
             self.axes.plot(data1.x, data1.y, label="1D Correlation")
             self.axes.plot(data3.x, data3.y, label="3D Correlation")
-            self.axes.plot(data_idf.x, data_idf.y,
-                           label="Interface Distribution Function")
             self.axes.set_xlim(0, max(data1.x) / 4)
             self.legend = self.axes.legend()
 
@@ -238,6 +236,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdExtrapolate.setEnabled(False)
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+        self.cmdExtract.clicked.connect(self.extract)
+        self.cmdExtract.setEnabled(False)
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
 
@@ -298,25 +298,34 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     def extrapolate(self):
         """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
+        self.model.itemChanged.disconnect(self.model_changed)
         try:
             params, extrapolation, _ = self._calculator.compute_extrapolation()
-            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
-            self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
-            self.model.setItem(W.W_PORODSIGMA,
-                               QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
-
-            self._canvas.extrap = extrapolation
-            self._canvas.draw_q_space()
-            self.cmdTransform.setEnabled(True)
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
                       "cutoff Q, or increasing the lower Q."
             QtWidgets.QMessageBox.warning(self, "Calculation Error",
                                       message)
+            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
             self._canvas.extrap = None
-            self._canvas.draw_q_space()
+            self.model_changed(None)
+            return
+        finally:
+            self.model.itemChanged.connect(self.model_changed)
+
+        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
+        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
+        self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
+        self.model.setItem(W.W_PORODSIGMA,
+                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
+
+        self._canvas.extrap = extrapolation
+        self.model_changed(None)
+        self.cmdTransform.setEnabled(True)
 
 
     def transform(self):
@@ -342,19 +351,29 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
 
     def finish_transform(self, transforms):
+        self._realplot.data = transforms
+
+        self.update_real_space_plot(transforms)
+
+        self._realplot.draw_real_space()
+        self.cmdExtract.setEnabled(True)
+        self.cmdSave.setEnabled(True)
+
+    def extract(self):
+        transforms = self._realplot.data
+
         params = self._calculator.extract_parameters(transforms[0])
+
+        self.model.itemChanged.disconnect(self.model_changed)
         self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
         self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
         self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        self._realplot.data = transforms
+        self.model.itemChanged.connect(self.model_changed)
+        self.model_changed(None)
 
-        self.update_real_space_plot(transforms)
-
-        self._realplot.draw_real_space()
-        self.cmdSave.setEnabled(True)
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""
@@ -456,6 +475,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdCalculateBg.setEnabled(True)
         self.cmdExtrapolate.setEnabled(True)
 
+        self.model.itemChanged.disconnect(self.model_changed)
         self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
         self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
         self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
@@ -466,16 +486,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
+        self.model.itemChanged.connect(self.model_changed)
 
         self._canvas.data = data
         self._canvas.extrap = None
-        self._canvas.draw_q_space()
+        self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
         self._realplot.data = None
         self._realplot.draw_real_space()
 
-        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
 
     def setClosable(self, value=True):
         """
