@@ -26,16 +26,16 @@ dependencies:
  - pyinstaller
  - pyqt
  - pytools
- - qt
+ - qtt=5.6.2
  - qtconsole
- - sphinx=1.7.4
- - sphinxcontrib-websupport=1.0.1
- - tbb=2018_20171205
+ - sphinx
+ - sphinxcontrib-websupport
+ - tbb
  - typing
  - service_identity
  - twisted
- - zope=1.0
- - matplotlib
+ - zope
+ - matplotlib=2.2.2
  - scipy
  - hdf5
  - ipython=6
