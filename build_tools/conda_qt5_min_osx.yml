@@ -26,7 +26,7 @@ dependencies:
  - pyinstaller
  - pyqt
  - pytools
- - qtt=5.6.2
+ - qt=5.6.2
  - qtconsole
  - sphinx
  - sphinxcontrib-websupport
