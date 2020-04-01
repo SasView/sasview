@@ -219,7 +219,10 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Read the source metadata fields and put them in the dictionary
         """
         source = Source()
-        source.name = self.txtMSa_Name.text()
+        # radiation is on the front panel
+        source.radiation = self.cbRadiation.currentText().lower()
+        # the rest is in the 'Source' tab of the Metadata tab
+        source.name = self.txtMSo_Name.text()
         source.beam_size = Vector(x=Utilities.toFloat(self.txtMSo_BeamSizeX.text()),
                                   y=Utilities.toFloat(self.txtMSo_BeamSizeY.text()))
         source.beam_shape = self.txtMSo_BeamShape.text()
@@ -234,10 +237,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Read the sample metadata fields and put them in the dictionary
         """
         sample = Sample()
-        # radiation is on the front panel
-        sample.radiation = self.cbRadiation.currentText().lower()
-        # the rest is in the 'Source' tab of the Metadata tab
-        sample.name = self.txtMSo_Name.text()
+        sample.name = self.txtMSa_Name.text()
         sample.thickness = Utilities.toFloat(self.txtMSa_Thickness.text())
         sample.transmission = Utilities.toFloat(self.txtMSa_Transmission.text())
         sample.temperature = Utilities.toFloat(self.txtMSa_Temperature.text())
