@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>FileConverterUI</class>
  <widget class="QDialog" name="FileConverterUI">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>428</width>
-    <height>331</height>
+    <width>457</width>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -545,11 +548,25 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QLineEdit" name="txtMSa_Temperature">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QLineEdit" name="txtMSa_Temperature">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_28">
+               <property name="text">
+                <string>Unit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="txtMSa_TempUnit"/>
+             </item>
+            </layout>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_31">
@@ -818,6 +835,13 @@
       <widget class="QPushButton" name="cmdConvert">
        <property name="text">
         <string>Convert</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdClose">
+       <property name="text">
+        <string>Close</string>
        </property>
       </widget>
      </item>

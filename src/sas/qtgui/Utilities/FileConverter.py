@@ -34,13 +34,15 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Parent here is the GUI Manager. Required for access to
         the help location and to the file loader.
         """
-        super(FileConverterWidget, self).__init__(parent._parent)
+        super(FileConverterWidget, self).__init__()
+
 
         self.parent = parent
         self.setupUi(self)
 
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+
 
         self.setWindowTitle("File Converter")
 
@@ -99,6 +101,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Create callbacks for UI elements and outside signals
         """
         self.cmdConvert.clicked.connect(self.onConvert)
+        self.cmdClose.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
 
         self.btnQFile.clicked.connect(self.onQFileOpen)
@@ -142,6 +145,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             return
         # everything converted, notify the user
         logging.info("File successfully converted.")
+        self.parent.communicate.statusBarUpdateSignal.emit("File converted successfully.")
 
         # Optionally, load the freshly converted file into Data Explorer
         if self.chkLoadFile.isChecked():
@@ -210,42 +214,43 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         detector.slit_length = Utilities.toFloat(self.txtMD_Distance.text())
         return detector
 
-    def getSampleMetadata(self):
-        """
-        Read the sample metadata fields and put them in the dictionary
-        """
-        sample = Sample()
-        sample.name = self.txtMSa_Name.text()
-        sample.beam_size = Vector(x=Utilities.toFloat(self.txtMSo_BeamSizeX.text()),
-                                  y=Utilities.toFloat(self.txtMSo_BeamSizeY.text()))
-        sample.beam_shape = self.txtMSo_BeamShape.text()
-        sample.wavelength = Utilities.toFloat(self.txtMSo_BeamWavelength.text())
-        sample.wavelength_min = Utilities.toFloat(self.txtMSo_MinWavelength.text())
-        sample.wavelength_max = Utilities.toFloat(self.txtMSo_MaxWavelength.text())
-        sample.wavelength_spread = Utilities.toFloat(self.txtMSo_Spread.text())
-        return sample
-
     def getSourceMetadata(self):
         """
         Read the source metadata fields and put them in the dictionary
         """
         source = Source()
+        source.name = self.txtMSa_Name.text()
+        source.beam_size = Vector(x=Utilities.toFloat(self.txtMSo_BeamSizeX.text()),
+                                  y=Utilities.toFloat(self.txtMSo_BeamSizeY.text()))
+        source.beam_shape = self.txtMSo_BeamShape.text()
+        source.wavelength = Utilities.toFloat(self.txtMSo_BeamWavelength.text())
+        source.wavelength_min = Utilities.toFloat(self.txtMSo_MinWavelength.text())
+        source.wavelength_max = Utilities.toFloat(self.txtMSo_MaxWavelength.text())
+        source.wavelength_spread = Utilities.toFloat(self.txtMSo_Spread.text())
+        return source
+
+    def getSampleMetadata(self):
+        """
+        Read the sample metadata fields and put them in the dictionary
+        """
+        sample = Sample()
         # radiation is on the front panel
-        source.radiation = self.cbRadiation.currentText().lower()
+        sample.radiation = self.cbRadiation.currentText().lower()
         # the rest is in the 'Source' tab of the Metadata tab
-        source.name = self.txtMSo_Name.text()
-        source.thickness = Utilities.toFloat(self.txtMSa_Thickness.text())
-        source.transmission = Utilities.toFloat(self.txtMSa_Transmission.text())
-        source.temperature = Utilities.toFloat(self.txtMSa_Temperature.text())
-        source.position = Vector(x=Utilities.toFloat(self.txtMSa_PositionX.text()),
+        sample.name = self.txtMSo_Name.text()
+        sample.thickness = Utilities.toFloat(self.txtMSa_Thickness.text())
+        sample.transmission = Utilities.toFloat(self.txtMSa_Transmission.text())
+        sample.temperature = Utilities.toFloat(self.txtMSa_Temperature.text())
+        sample.temperature_unit = self.txtMSa_TempUnit.text()
+        sample.position = Vector(x=Utilities.toFloat(self.txtMSa_PositionX.text()),
                                  y=Utilities.toFloat(self.txtMSa_PositionY.text()))
-        source.orientation = Vector(x=Utilities.toFloat(self.txtMSa_OrientR.text()),
+        sample.orientation = Vector(x=Utilities.toFloat(self.txtMSa_OrientR.text()),
                                     y=Utilities.toFloat(self.txtMSa_OrientP.text()),
                                     z=Utilities.toFloat(self.txtMSa_OrientY.text()))
 
-        source.details = self.txtMSa_Details.toPlainText()
+        sample.details = self.txtMSa_Details.toPlainText()
 
-        return source
+        return sample
 
     def getMetadata(self):
         ''' metadata getter '''

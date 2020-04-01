@@ -178,6 +178,7 @@ class GuiManager(object):
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
+        self.FileConverter = FileConverterWidget(self)
 
     def addCategories(self):
         """
@@ -928,10 +929,9 @@ class GuiManager(object):
         Shows the File Converter widget.
         """
         try:
-            self.file_converter = FileConverterWidget(self)
             if sys.platform == "darwin":
                 self.image_viewer.menubar.setNativeMenuBar(False)
-            self.file_converter.show()
+            self.FileConverter.show()
         except Exception as ex:
             logging.error(str(ex))
             return
