@@ -248,7 +248,8 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
                                     y=Utilities.toFloat(self.txtMSa_OrientP.text()),
                                     z=Utilities.toFloat(self.txtMSa_OrientY.text()))
 
-        sample.details = self.txtMSa_Details.toPlainText()
+        details = self.txtMSa_Details.toPlainText()
+        sample.details = [details] if details else []
 
         return sample
 
