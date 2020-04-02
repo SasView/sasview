@@ -47,6 +47,9 @@ Using the Tool
 
 A checkbox allows you to decide if SasView should automatically load in the converted files.
 
+.. figure:: file_converter.png
+   :align: center
+
 Files With Multiple Frames
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
