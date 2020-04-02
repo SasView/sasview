@@ -48,7 +48,7 @@ class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
         """
         Minor bookkeeping
         """
-        self.firstFrame = self.n_frames-1
+        self.firstFrame = 0
         self.lastFrame = self.n_frames-1
         self.increment = 1
         self.updateDisplay()
