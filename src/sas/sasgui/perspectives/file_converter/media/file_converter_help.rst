@@ -45,6 +45,11 @@ Using the Tool
 4) Optionally, input some metadata such as sample size, detector name, etc
 5) Click *Convert* to save the converted file
 
+A checkbox allows you to decide if SasView should automatically load in the converted files.
+
+.. figure:: file_converter.png
+   :align: center
+
 Files With Multiple Frames
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -56,6 +61,9 @@ will be converted. For example, entering 0, 50 and 10 will convert frames 0,
 
 To convert a single frame, enter the same value for first frame & last frame,
 and 1 as the increment.
+
+.. warning:: Conversion of *multi-frame* 2D BSL files is not working properly
+   in this release.
 
 CanSAS XML files can become quite large when exporting multiple frames to a
 single file, so there is an option in the *Select Frame* dialog to output each
@@ -69,4 +77,4 @@ the HDF5 format is more efficient at handling large amounts of data.
 
 
 .. note::
-    This help document was last changed by Steve King, 08Oct2016
+    This help document was last changed by Steve King, 02Apr2020
