@@ -150,8 +150,8 @@ class BSLLoader:
         """
         frame_data = []
         # Prepare axis values (arbitrary scale)
-        x = self.n_rasters * range(1, self.n_pixels+1)
-        y = [self.n_pixels * [i] for i in range(1, self.n_rasters+1)]
+        x = self.n_rasters * list(range(1, self.n_pixels+1))
+        y = [self.n_pixels * [i] for i in list(range(1, self.n_rasters+1))]
         y = np.reshape(y, (1, self.n_pixels*self.n_rasters))[0]
         x_bins = x[:self.n_pixels]
         y_bins = y[0::self.n_pixels]

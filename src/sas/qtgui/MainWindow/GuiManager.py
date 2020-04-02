@@ -53,6 +53,7 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPE
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
+from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +178,7 @@ class GuiManager(object):
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
+        self.FileConverter = FileConverterWidget(self)
 
     def addCategories(self):
         """
@@ -567,6 +569,7 @@ class GuiManager(object):
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
+        self._workspace.actionFile_Converter.triggered.connect(self.actionFile_Converter)
         self._workspace.actionOrientation_Viewer.triggered.connect(self.actionOrientation_Viewer)
         self._workspace.actionFreeze_Theory.triggered.connect(self.actionFreeze_Theory)
         # Fitting
@@ -917,6 +920,18 @@ class GuiManager(object):
             if sys.platform == "darwin":
                 self.image_viewer.menubar.setNativeMenuBar(False)
             self.image_viewer.show()
+        except Exception as ex:
+            logging.error(str(ex))
+            return
+
+    def actionFile_Converter(self):
+        """
+        Shows the File Converter widget.
+        """
+        try:
+            if sys.platform == "darwin":
+                self.image_viewer.menubar.setNativeMenuBar(False)
+            self.FileConverter.show()
         except Exception as ex:
             logging.error(str(ex))
             return
