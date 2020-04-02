@@ -1,25 +1,26 @@
+# pylint: disable=C0103, I1101
 """
 FrameSelect class describes behaviour of the FrameSelect dialog
 
 """
-import sys
-
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-
-from bumps.dream.stats import var_stats, format_vars
-
 
 from .UI.FrameSelectUI import Ui_FrameSelect
 
 class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
+    """
+    Class to describe the behaviour of the Frame Selector widget
+    """
     def __init__(self, parent=None, frames=1, isBSL=True):
         super(FrameSelect, self).__init__(parent)
         self.setupUi(self)
 
         self.n_frames = frames
         self.isBSL = isBSL
+        self.firstFrame = None
+        self.lastFrame = None
+        self.increment = None
 
         self.setWindowTitle("Frame Select")
 
@@ -32,8 +33,8 @@ class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
         Initialize view
         """
         instructions = ("The file you've selected has {} frames. "
-            "Please select a subset of frames to convert to CanSAS "
-            "format").format(self.n_frames)
+                        "Please select a subset of frames to convert to CanSAS "
+                        "format").format(self.n_frames)
 
         self.lblDescription.setText(instructions)
         self.lblDescription.setWordWrap(True)
@@ -59,8 +60,8 @@ class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
         """
         self.cmdOK.clicked.connect(self.accept)
         self.cmdCancel.clicked.connect(self.reject)
-        self.txtFirstFrame.setValidator(QtGui.QIntValidator(0,self.n_frames-1))
-        self.txtLastFrame.setValidator(QtGui.QIntValidator(0,self.n_frames-1))
+        self.txtFirstFrame.setValidator(QtGui.QIntValidator(0, self.n_frames-1))
+        self.txtLastFrame.setValidator(QtGui.QIntValidator(0, self.n_frames-1))
         self.txtIncrement.setValidator(QtGui.QIntValidator())
         self.txtFirstFrame.editingFinished.connect(self.onFirstChanged)
         self.txtLastFrame.editingFinished.connect(self.onLastChanged)
