@@ -20,15 +20,21 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     passed from a slicer instance.
     """
     closeWidgetSignal = QtCore.pyqtSignal()
-    def __init__(self, model=None, validate_method=None):
+    def __init__(self, parent=None, model=None, validate_method=None):
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
 
         assert isinstance(model, QtGui.QStandardItemModel)
+        self.parent = parent
 
         self.model = model
         self.validate_method = validate_method
+
+        self.callbacks = {0: self.parent.onSectorView,
+                          1: self.parent.onAnnulusView,
+                          2: self.parent.onBoxAveragingX,
+                          3: self.parent.onBoxAveragingY}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -46,10 +52,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.delegate.refocus_signal.connect(self.onFocus)
 
         # Display Help on clicking the button
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
+        self.cmdHelp.clicked.connect(self.onHelp)
 
         # Close doesn't trigger closeEvent automatically, so force it
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent, None))
+        self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
+
+        # change the slicer type
+        self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
 
         # Disable row number display
         self.lstParams.verticalHeader().setVisible(False)
@@ -67,6 +76,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         selection_model.select(self.model.index(row, column), QtGui.QItemSelectionModel.Select)
         self.lstParams.setSelectionModel(selection_model)
         self.lstParams.setCurrentIndex(self.model.index(row, column))
+
+    def onSlicerChanged(self, index):
+        """ change the parameters based on the slicer chosen """
+        if index < len(self.callbacks):
+            self.callbacks[index]()
 
     def setModel(self, model):
         """ Model setter """
