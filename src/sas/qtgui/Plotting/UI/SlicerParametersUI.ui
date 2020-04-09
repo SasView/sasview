@@ -132,18 +132,8 @@
           <string>Batch Slicing Options </string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QListWidget" name="listWidget">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="cbSave1DPlots">
             <property name="text">
              <string>Auto save generated 1D plots</string>
             </property>
@@ -159,7 +149,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit"/>
+             <widget class="QLineEdit" name="txtLocation"/>
             </item>
             <item>
              <widget class="QPushButton" name="cmdFiles">
@@ -195,6 +185,25 @@
              <widget class="QComboBox" name="cbFitOptions"/>
             </item>
            </layout>
+          </item>
+          <item row="0" column="0">
+           <widget class="QListWidget" name="lstPlots">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

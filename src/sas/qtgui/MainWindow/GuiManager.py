@@ -247,7 +247,10 @@ class GuiManager(object):
         """
         if not plot:
             return
-        name = plot.data[1].name
+        if len(plot.data) == 1:
+            name = plot.data[0].name
+        else:
+            name = plot.data[1].name
         # loop over actions
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:
