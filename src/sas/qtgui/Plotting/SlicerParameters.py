@@ -95,8 +95,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Create and initially populate the list of plots
         """
         # Fill out list of plots
-        self.lstPlots.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.lstPlots.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         for item in self.active_plots.keys():
             if isinstance(self.active_plots[item].data[0], Data1D):
                 continue
@@ -168,24 +166,28 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Apply current slicer to selected plots
         """
         for row in range(self.lstPlots.count()):
-            # plot - plot name
             item = self.lstPlots.item(row)
             isChecked = item.checkState() == QtCore.Qt.Checked
+            # Only checked items
             if not isChecked:
                 continue
             plot = item.text()
             # don't assign to itself
             if plot == self.parent.data[0].name:
                 continue
+            # a plot might have been deleted
+            if plot not in self.active_plots:
+                continue
             # get the plotter2D instance
             plotter = self.active_plots[plot]
             # Assign model to slicer
             index = self.cbSlicer.currentIndex()
             slicer = self.callbacks[index]
-            slicer._model = self.model
-            #slicer = self.parent.slicer
-            # Assign slicer to the plot
             plotter.setSlicer(slicer=slicer)
+            # override slicer model
+            plotter.slicer._model = self.model
+            # force conversion model->parameters in slicer
+            plotter.slicer.setParamsFromModel()
         pass
 
     def setModel(self, model):
