@@ -6,22 +6,6 @@ from PyQt5 import QtSvg
 
 from sas.qtgui.Utilities import GuiUtils
 
-def new_load_qt(api_options):
-    return QtCore, QtGui, QtSvg, 'pyqt'
-
-def qtconsole_new_load_qt(api_options):
-    # Alias PyQt-specific functions for PySide compatibility.
-    QtCore.Signal = QtCore.pyqtSignal
-    QtCore.Slot = QtCore.pyqtSlot
-    return QtCore, QtGui, QtSvg, 'pyqt'
-
-#from IPython.external import  qt_loaders
-from qtconsole import qt_loaders as qtconsole_qt_loaders
-# Do some monkey patching to satisfy pyinstaller complaining
-# about pyside/pyqt confusion
-#qt_loaders.load_qt = new_load_qt
-#qtconsole_qt_loaders.load_qt = qtconsole_new_load_qt
-
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 
 MODULES_TO_IMPORT = [
