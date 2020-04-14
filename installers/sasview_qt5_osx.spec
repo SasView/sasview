@@ -185,8 +185,8 @@ coll = COLLECT(exe,
 
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
-        name='SasView5.0.app',
+        name='SasView5.app',
         icon='../src/sas/sasview/images/ball.icns',
-        bundle_identifier='org.sasview.SasView5.0',
+        bundle_identifier='org.sasview.SasView5',
         info_plist={'NSHighResolutionCapable': 'True'})
 
