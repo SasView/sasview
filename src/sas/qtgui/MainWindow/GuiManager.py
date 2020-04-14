@@ -232,7 +232,8 @@ class GuiManager(object):
         """
         # loop over all visible plots and find the requested plot
         for plot in PlotHelper.currentPlots():
-            if PlotHelper.plotById(plot).data[1].name == plot_name:
+            # take last plot
+            if PlotHelper.plotById(plot).data[-1].name == plot_name:
                 # set focus on the plot
                 # Note: none of the StackOverflow recommended solutions work here!
                 # neither raise_(), nor showNormal() nor setWindowState(Qt.WindowActive)
@@ -245,9 +246,9 @@ class GuiManager(object):
         """
         Dynamically update the QMenu content and disconnect signals
         """
-        if not plot:
+        if not plot: # watch out for quick plots
             return
-        name = plot.data[1].name
+        name = plot.data[-1].name
         # loop over actions
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:
