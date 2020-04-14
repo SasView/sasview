@@ -15,7 +15,7 @@ def qtconsole_new_load_qt(api_options):
     QtCore.Slot = QtCore.pyqtSlot
     return QtCore, QtGui, QtSvg, 'pyqt'
 
-from IPython.external import  qt_loaders
+#from IPython.external import  qt_loaders
 from qtconsole import qt_loaders as qtconsole_qt_loaders
 # Do some monkey patching to satisfy pyinstaller complaining
 # about pyside/pyqt confusion
