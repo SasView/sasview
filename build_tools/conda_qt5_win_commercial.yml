@@ -18,6 +18,8 @@ dependencies:
  - pytest=4.2.0
  - cython=0.29.4
  - sip
+ - numba=0.39
+ - numpy=1.16.4
  - setuptools=44.0.0
  - numpy=1.14.2
  - pip:
@@ -30,5 +32,3 @@ dependencies:
    - qt5reactor==0.5
    - qtconsole
    - tinycc==1.1
-
-
