@@ -5,8 +5,8 @@ Required for notarization.
 import glob
 import os
 
-so_list = glob.glob("SasView5.0.app/Contents/MacOS/**/*.so", recursive=True)
-dylib_list = glob.glob("SasView5.0.app/Contents/MacOS/**/*.dylib", recursive=True)
+so_list = glob.glob("SasView5.app/Contents/MacOS/**/*.so", recursive=True)
+dylib_list = glob.glob("SasView5.app/Contents/MacOS/**/*.dylib", recursive=True)
 
 
 for sfile in so_list:
