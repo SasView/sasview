@@ -19,7 +19,6 @@ dependencies:
  - cython=0.29.4
  - sip
  - numba=0.39
- - numpy=1.16.4
  - setuptools=44.0.0
  - numpy=1.14.2
  - pip:
