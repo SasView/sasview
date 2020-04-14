@@ -708,6 +708,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
             tab.deleteConstraintOnParameter(param)
+            #Uncheck the parameter that was constrained
+            row=tab.getRowFromName(param)
+            tab.selectCheckbox(row,False)
         # Constraints removed - refresh the table widget
         self.initializeFitList()
 
@@ -887,7 +890,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constrained_tab.addConstraintToRow(constraint, constrained_row)
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.selectCheckbox(constrained_row)
+        constrained_tab.selectCheckbox(constrained_row, True)
 
 
     def showMultiConstraint(self):

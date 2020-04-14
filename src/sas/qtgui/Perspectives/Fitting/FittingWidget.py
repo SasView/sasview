@@ -1427,6 +1427,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if model_column not in delegate.columnDict():
                 return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
+            self.kernel_module.dispersion[parameter_name][delegate.columnDict()[model_column]] = value
             self.poly_params[key] = value
 
             # Update plot
@@ -2623,14 +2624,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def isCheckable(self, row):
         return self._model_model.item(row, 0).isCheckable()
 
-    def selectCheckbox(self, row):
+    def selectCheckbox(self, row, select):
         """
         Select the checkbox in given row.
         """
         assert 0<= row <= self._model_model.rowCount()
         index = self._model_model.index(row, 0)
         item = self._model_model.itemFromIndex(index)
-        item.setCheckState(QtCore.Qt.Checked)
+        if select:
+            item.setCheckState(QtCore.Qt.Checked)
+        else:
+            item.setCheckState(QtCore.Qt.Unchecked)
 
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
