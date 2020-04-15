@@ -18,6 +18,7 @@ New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 * sasview # 1355: SasView 5.0 lacks file conversion option in tool menu
 * sasview # 1480 Added enumeration of plots in the Windows menu, with raising/setting
+* sasmodels # 211 Reparameterize existing model.
 * sasmodels # 390: Re-describe Source intensity in model parameter tables
 * sasmodels # 382 Doc gen speedup, improved random model generation and minor fixes
 
@@ -40,7 +41,6 @@ Bug Fixes
 * Fixes sasview # 1460 resolution setting not persistent in theory mode of 5.0.1
 * Fixes sasview # 1454 5.0.1 sending same data to more than one fit page - plotting issues
 * Fixes sasview # 1481 Fix for Fit Panel based Plot command for single-data/multiple fit tab
-* Fixes sasmodels # 201 Reparameterize existing model. Refs SasView/sasview#501
 * Fixes sasmodels # 381 reparameterize has a bug ( at least in v5)
 * Fixes sasmodels # 383 Model docs build failing on linspace error
 
