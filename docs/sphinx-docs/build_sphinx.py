@@ -34,7 +34,10 @@ SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
 SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
-SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
+# 'platform' descriptor vanished from the main build,
+# so we need to update the location.
+#SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
+SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"))
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
