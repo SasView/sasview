@@ -48,9 +48,9 @@ Bug Fixes
 Known Issues
 ^^^^^^^^^^^^
 A very long-standing error has been identified in the Invariant Analysis
-perspective. The value of the invariant that is being returned is in fact
-*twice* the value that it should be. Work is underway to correct this and
-some other deficiencies in the operation of the perspective, and to significantly
+perspective. The value of the specific surface $Sv$ that is being returned
+is in fact *twice* the value that it should be. Work is underway to correct this
+and some other deficiencies in the operation of the perspective, and to significantly
 enhance the invariant documentation.
 
 New in Version 5.0.1
@@ -934,8 +934,8 @@ users may wish to be aware of can be viewed at the following links:
 All versions - All systems
 --------------------------
 A very long-standing error has been identified in the Invariant Analysis
-perspective. The value of the invariant that is being returned is in fact
-*twice* the value that it should be.
+perspective. The value of the specific surface $Sv$ that is being returned
+is in fact *twice* the value that it should be.
 
 4.2.2 / 5.0.0 / 5.0.1 - All systems
 -----------------------------------
