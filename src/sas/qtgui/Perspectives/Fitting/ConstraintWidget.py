@@ -435,6 +435,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Update the tabs for fitting list
             constraint = self.available_constraints[row]
             constraint.active = (item.checkState() == QtCore.Qt.Checked)
+            param = item.data(0)[item.data(0).index(':') + 1:item.data(0).index('=')].strip()
+            model = item.data(0)[:item.data(0).index(':')].strip()
+            tab = self.available_tabs[model]
+            # Update the fitting widget whenever a constraint is activated/deactivated
+            if item.checkState() == QtCore.Qt.Checked:
+                font = QtGui.QFont()
+                font.setItalic(True)
+                brush = QtGui.QBrush(QtGui.QColor('blue'))
+                tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
+                tab.selectCheckbox(tab.getRowFromName(param), True)
+            else:
+                tab.modifyViewOnRow(tab.getRowFromName(param))
+                tab.selectCheckbox(tab.getRowFromName(param), False)
             return
         # Update the constraint formula
         constraint = self.available_constraints[row]
