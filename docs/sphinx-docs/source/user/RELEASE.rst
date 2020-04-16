@@ -10,6 +10,40 @@ Release Notes
 
 Features
 ========
+New in Version 5.0.2
+--------------------
+This is a point release which fixes several issues reported in version 5.0.1, however there are also some new features
+
+New features/improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^
+* sasview # 1355: SasView 5.0 lacks file conversion option in tool menu
+* sasview # 1480 Added enumeration of plots in the Windows menu, with raising/setting
+* sasmodels # 211 Reparameterize existing model.
+* sasmodels # 390: Re-describe Source intensity in model parameter tables
+* sasmodels # 382 Doc gen speedup, improved random model generation and minor fixes
+
+Bug Fixes
+^^^^^^^^^
+* Fixes sasview # 1455: 5.0.1 load project generates a second FitPage1
+* Fixes sasview # 1499: Ess gui 1355 file converter
+* Fixes sasview # 1501: Update 5.x documentation for Corfunc
+* Fixes sasview # 1431 When loading plugin model with a spurious unicode character plugin editor crashes
+* Fixes sasview # 1138 Check package versions in yaml files and setup.py
+* Fixes sasview # 697 Update check_packages to flag required package versions
+* Fixes sasview # 1482 4.x: Check packages comparison to YAML files
+* Fixes sasview # 1484 SasView 5 (Ubuntu) - Need to change colors in Data operation combobox
+* Fixes sasview # 1419 Could we improve stepping through graph windows in 5.x
+* Fixes sasview # 1476 Quick Plot in Data Explorer not working for 1D data
+* Fixes sasview # 1463 Dmax explorer : pressing enter closes window
+* Fixes sasview # 1479 linspace errors
+* Fixes sasview # 1444 ESS GUI: Warn user when data set fully masked
+* Fixes sasview # 1459 dy = 1 for every point of Freeze theory curves (and saved as data file) in 5.0.
+* Fixes sasview # 1460 resolution setting not persistent in theory mode of 5.0.1
+* Fixes sasview # 1454 5.0.1 sending same data to more than one fit page - plotting issues
+* Fixes sasview # 1481 Fix for Fit Panel based Plot command for single-data/multiple fit tab
+* Fixes sasmodels # 381 reparameterize has a bug ( at least in v5)
+* Fixes sasmodels # 383 Model docs build failing on linspace error
+
 New in Version 5.0.1
 --------------------
 This is a point release which fixes several issues reported in version 5.0.0.
