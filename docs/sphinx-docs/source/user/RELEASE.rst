@@ -12,21 +12,22 @@ Features
 ========
 New in Version 5.0.2
 --------------------
-This is a point release which fixes several issues reported in version 5.0.1, however there are also some new features
+This is a point release which fixes several issues reported in version 5.0.1, however
+there are also some new features:
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-* sasview # 1355: SasView 5.0 lacks file conversion option in tool menu
+* sasview # 1355 SasView 5.0 lacks file conversion option in tool menu
 * sasview # 1480 Added enumeration of plots in the Windows menu, with raising/setting
 * sasmodels # 211 Reparameterize existing model.
-* sasmodels # 390: Re-describe Source intensity in model parameter tables
+* sasmodels # 390 Re-describe Source intensity in model parameter tables
 * sasmodels # 382 Doc gen speedup, improved random model generation and minor fixes
 
 Bug Fixes
 ^^^^^^^^^
-* Fixes sasview # 1455: 5.0.1 load project generates a second FitPage1
-* Fixes sasview # 1499: Ess gui 1355 file converter
-* Fixes sasview # 1501: Update 5.x documentation for Corfunc
+* Fixes sasview # 1455 5.0.1 load project generates a second FitPage1
+* Fixes sasview # 1499 Ess gui 1355 file converter
+* Fixes sasview # 1501 Update 5.x documentation for Corfunc
 * Fixes sasview # 1431 When loading plugin model with a spurious unicode character plugin editor crashes
 * Fixes sasview # 1138 Check package versions in yaml files and setup.py
 * Fixes sasview # 697 Update check_packages to flag required package versions
@@ -41,8 +42,16 @@ Bug Fixes
 * Fixes sasview # 1460 resolution setting not persistent in theory mode of 5.0.1
 * Fixes sasview # 1454 5.0.1 sending same data to more than one fit page - plotting issues
 * Fixes sasview # 1481 Fix for Fit Panel based Plot command for single-data/multiple fit tab
-* Fixes sasmodels # 381 reparameterize has a bug ( at least in v5)
+* Fixes sasmodels # 381 reparameterize has a bug (at least in v5)
 * Fixes sasmodels # 383 Model docs build failing on linspace error
+
+Known Issues
+^^^^^^^^^^^^
+A very long-standing error has been identified in the Invariant Analysis
+perspective. The value of the invariant that is being returned is in fact
+*twice* the value that it should be. Work is underway to correct this and
+some other deficiencies in the operation of the perspective, and to significantly
+enhance the invariant documentation.
 
 New in Version 5.0.1
 --------------------
@@ -922,14 +931,22 @@ users may wish to be aware of can be viewed at the following links:
 
 [sasmodels](https://github.com/SasView/sasmodels/milestones)
 
+All versions - All systems
+--------------------------
+A very long-standing error has been identified in the Invariant Analysis
+perspective. The value of the invariant that is being returned is in fact
+*twice* the value that it should be.
+
 4.2.2 / 5.0.0 / 5.0.1 - All systems
 -----------------------------------
-A problem has been identified in Version 4.2.2 which also affects versions 5.0.0 and 5.0.1.
-The Easy Add/Multiply Editor dialog should not be used to combine a plugin model with a built-in model, or to combine two plugin models.
+A problem has been identified in Version 4.2.2 which also affects versions
+5.0.0 and 5.0.1. The Easy Add/Multiply Editor dialog should not be used to
+combine a plugin model with a built-in model, or to combine two plugin models.
 In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
 Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
 If it is necessary to generate a plugin model from more than two built-in models,
-please edit the plugin model .py file directly and specify the combination of built-in models directly. For example::
+please edit the plugin model .py file directly and specify the combination of
+built-in models directly. For example::
 
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
