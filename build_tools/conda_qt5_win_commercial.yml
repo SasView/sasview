@@ -21,6 +21,7 @@ dependencies:
  - numba=0.39
  - setuptools=44.0.0
  - numpy=1.14.2
+ - qtconsole
  - pip:
    - matplotlib==2.2.3
    - bumps==0.7.11
@@ -29,5 +30,4 @@ dependencies:
    - xhtml2pdf==0.2.3
    - ../../../PyQt5_commercial-5.12.2-5.12.3-cp35.cp36.cp37.cp38-none-win_amd64.whl
    - qt5reactor==0.5
-   - qtconsole
    - tinycc==1.1
