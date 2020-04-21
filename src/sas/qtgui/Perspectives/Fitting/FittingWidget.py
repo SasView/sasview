@@ -1427,7 +1427,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if model_column not in delegate.columnDict():
                 return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
-            self.kernel_module.dispersion[parameter_name][delegate.columnDict()[model_column]] = value
             self.poly_params[key] = value
 
             # Update plot
