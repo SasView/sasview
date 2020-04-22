@@ -53,6 +53,8 @@ is in fact *twice* the value that it should be. Work is underway to correct this
 and some other deficiencies in the operation of the perspective, and to significantly
 enhance the invariant documentation.
 
+Also, at this time, and unlike version 4.x, only fitting sessions can be saved as project files.
+
 New in Version 5.0.1
 --------------------
 This is a point release which fixes several issues reported in version 5.0.0.
@@ -936,6 +938,10 @@ All versions - All systems
 A very long-standing error has been identified in the Invariant Analysis
 perspective. The value of the specific surface $Sv$ that is being returned
 is in fact *twice* the value that it should be.
+
+5.0.0 / 5.0.1 / 5.0.2 - All systems
+-----------------------------------
+In these versions, and unlike version 4.x, only fitting sessions can be saved as project files.
 
 4.2.2 / 5.0.0 / 5.0.1 - All systems
 -----------------------------------
