@@ -97,7 +97,7 @@ class Reader(XMLreader):
                 dyvals.insert(index, normal * float(data[2]))
         except Exception as e:
             error_message = "Couldn't load {}.\n".format(self.f_open.name)
-            error_message += e.message
+            error_message += e.__str__()
             raise FileContentsException(error_message)
         self.current_dataset.x = np.append(self.current_dataset.x, xvals)
         self.current_dataset.y = np.append(self.current_dataset.y, yvals)
@@ -123,7 +123,7 @@ class Reader(XMLreader):
         except Exception as e:
             # Data loaded but XML metadata has an error
             error_message += "Data points have been loaded but there was an "
-            error_message += "error reading XML metadata: " + e.message
+            error_message += "error reading XML metadata: " + e.__str__()
             correctly_loaded = False
         self.send_to_output()
         if not correctly_loaded:

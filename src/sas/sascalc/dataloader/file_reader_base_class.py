@@ -88,7 +88,7 @@ class FileReader(object):
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
-                    msg += e.message
+                    msg += e.__str__()
                     self.handle_error_message(msg)
                 finally:
                     # Close the file handle if it is open
