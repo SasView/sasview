@@ -13,7 +13,7 @@ The readers are tried in order they appear when reading a file.
 #This work benefited from DANSE software developed under NSF award DMR-0520547.
 #copyright 2009, University of Tennessee
 #############################################################################
-import sys
+import importlib
 import logging
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,12 @@ FILE_ASSOCIATIONS = {
     ".pdh": "anton_paar_saxs_reader"
 }
 
+GENERIC_ASSOCIATIONS = {
+    ".xml": "cansas_reader",
+    ".h5": "cansas_reader_HDF5",
+    ".txt": "ascii_reader",
+}
+
 
 def read_associations(loader, settings=FILE_ASSOCIATIONS):
     """
@@ -41,19 +47,28 @@ def read_associations(loader, settings=FILE_ASSOCIATIONS):
     :param settings: path to the json settings file [string]
     """
     # For each FileType entry, get the associated reader and extension
+    path = 'sas.sascalc.dataloader.readers.'
     for ext, reader in settings.items():
         if reader is not None and ext is not None:
             # Associate the extension with a particular reader
-            # TODO: Modify the Register code to be case-insensitive
-            # FIXME: Remove exec statements
-            # and remove the extra line below.
             try:
-                exec("from . import %s" % reader)
-                exec("loader.associate_file_type('%s', %s)"
-                     % (ext.lower(), reader))
-                exec("loader.associate_file_type('%s', %s)"
-                     % (ext.upper(), reader))
+                local_reader = importlib.import_module(path + reader)
+                loader.associate_file_type(ext.lower(), local_reader)
             except Exception as exc:
                 msg = "read_associations: skipping association"
                 msg += " for %s\n  %s" % (ext.lower(), exc)
                 logger.error(msg)
+
+
+def get_generic_readers(settings=GENERIC_ASSOCIATIONS):
+    """
+    Find and load the default loaders used by the program
+    :param settings: path to the json settings file [string]
+    :return: list of default loaders every file can potentially try to use
+    """
+    path = 'sas.sascalc.dataloader.readers.'
+    defaults = [importlib.import_module(path + reader) for ext, reader in
+                settings.items() if reader is not None]
+    return defaults
+
+

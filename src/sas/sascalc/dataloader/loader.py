@@ -30,11 +30,8 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 
 # Default readers are defined in the readers sub-module
 from . import readers
-from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
+from .loader_exceptions import NoKnownLoaderException, FileContentsException, \
     DefaultReaderException
-from .readers import ascii_reader
-from .readers import cansas_reader
-from .readers import cansas_reader_HDF5
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +41,7 @@ class Registry(ExtensionRegistry):
     Registry class for file format extensions.
     Readers and writers are supported.
     """
+
     def __init__(self):
         super(Registry, self).__init__()
 
@@ -59,7 +57,7 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
 
-    def load(self, path, format=None, debug=False):
+    def load(self, path, format=None, use_defaults=True, debug=False):
         """
         Call the loader for the file type of path.
 
@@ -74,76 +72,53 @@ class Registry(ExtensionRegistry):
         import traceback
 
         # Gets set to a string if the file has an associated reader that fails
-        msg_from_reader = None
         try:
             return super(Registry, self).load(path, format=format)
-        #except Exception: raise  # for debugging, don't use fallback loader
-        except NoKnownLoaderException as nkl_e:
+        except (NoKnownLoaderException, DefaultReaderException) as nkl_e:
             if debug: traceback.print_exc()
-            pass  # Try the ASCII reader
-        except FileContentsException as fc_exc:
-            if debug: traceback.print_exc()
-            # File has an associated reader but it failed.
-            # Save the error message to display later, but try the 3 default loaders
-            msg_from_reader = fc_exc.message
-        except Exception:
-            if debug: traceback.print_exc()
-            pass
-
-        # File has no associated reader, or the associated reader failed.
-        # Try the ASCII reader
-        try:
-            ascii_loader = ascii_reader.Reader()
-            return ascii_loader.read(path)
-        except NoKnownLoaderException:
-            if debug: traceback.print_exc()
-            pass  # Try the Cansas XML reader
-        except DefaultReaderException:
-            if debug: traceback.print_exc()
-            pass  # Loader specific error to try the cansas XML reader
+            # Use backup readers
+            try:
+                return self.load_using_generic_loaders(path)
+            except NoKnownLoaderException as nkgl_e:
+                if debug: traceback.print_exc()
+                logging.error(nkgl_e)
+                # No known reader available. Give up and throw an error
+                msg = nkgl_e.__str__()
+                msg += "\nUnknown data format: {}.\nThe file is not a ".format(
+                    path)
+                msg += "known format that can be loaded by SasView.\n"
+                raise NoKnownLoaderException(msg)
         except FileContentsException as e:
             if debug: traceback.print_exc()
-            if msg_from_reader is None:
-                raise RuntimeError(e.message)
-
-        # ASCII reader failed - try CanSAS xML reader
-        try:
-            cansas_loader = cansas_reader.Reader()
-            return cansas_loader.read(path)
-        except NoKnownLoaderException:
-            if debug: traceback.print_exc()
-            pass  # Try the NXcanSAS reader
-        except DefaultReaderException:
-            if debug: traceback.print_exc()
-            pass  # Loader specific error to try the NXcanSAS reader
-        except FileContentsException as e:
-            if debug: traceback.print_exc()
-            if msg_from_reader is None:
-                raise RuntimeError(e.message)
-        except Exception:
-            if debug: traceback.print_exc()
-            pass
-
-        # CanSAS XML reader failed - try NXcanSAS reader
-        try:
-            cansas_nexus_loader = cansas_reader_HDF5.Reader()
-            return cansas_nexus_loader.read(path)
+            raise RuntimeError(e.__str__())
         except DefaultReaderException as e:
             if debug: traceback.print_exc()
             logging.error("No default loader can load the data")
             # No known reader available. Give up and throw an error
-            if msg_from_reader is None:
-                msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
-                msg += "known format that can be loaded by SasView.\n"
-                raise NoKnownLoaderException(msg)
-            else:
-                # Associated reader and default readers all failed.
-                # Show error message from associated reader
-                raise RuntimeError(msg_from_reader)
-        except FileContentsException as e:
+            msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
+            msg += "known format that can be loaded by SasView.\n"
+            raise NoKnownLoaderException(msg)
+        except Exception as e:
             if debug: traceback.print_exc()
-            err_msg = msg_from_reader if msg_from_reader is not None else e.message
-            raise RuntimeError(err_msg)
+            raise RuntimeError(e.__str__())
+
+    def load_using_generic_loaders(self, path):
+        """
+        If the expected reader cannot load the file or no known loader exists,
+        attempt to load the file using a few defaults readers
+        :param path: file path
+        :return: List of Data1D and Data2D objects
+        """
+        for reader in readers.associations.get_generic_readers():
+            # Skip loader if already attempted
+            if reader is not None and reader not in self.loaders.values():
+                try:
+                    return reader.read(path)
+                except Exception as e:
+                    # Likely to fail
+                    pass
+        raise NoKnownLoaderException(
+            "Generic readers failed to load %s" % path)
 
     def find_plugins(self, dir):
         """
