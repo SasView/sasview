@@ -74,7 +74,7 @@ class Registry(ExtensionRegistry):
         # Gets set to a string if the file has an associated reader that fails
         try:
             return super(Registry, self).load(path, format=format)
-        except (NoKnownLoaderException, DefaultReaderException) as nkl_e:
+        except Exception as e:
             if debug: traceback.print_exc()
             # Use backup readers
             try:
@@ -88,19 +88,19 @@ class Registry(ExtensionRegistry):
                     path)
                 msg += "known format that can be loaded by SasView.\n"
                 raise NoKnownLoaderException(msg)
-        except FileContentsException as e:
-            if debug: traceback.print_exc()
-            raise RuntimeError(e.__str__())
-        except DefaultReaderException as e:
-            if debug: traceback.print_exc()
-            logging.error("No default loader can load the data")
-            # No known reader available. Give up and throw an error
-            msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
-            msg += "known format that can be loaded by SasView.\n"
-            raise NoKnownLoaderException(msg)
-        except Exception as e:
-            if debug: traceback.print_exc()
-            raise RuntimeError(e.__str__())
+            except FileContentsException as e:
+                if debug: traceback.print_exc()
+                raise RuntimeError(e.__str__())
+            except DefaultReaderException as e:
+                if debug: traceback.print_exc()
+                logging.error("No default loader can load the data")
+                # No known reader available. Give up and throw an error
+                msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
+                msg += "known format that can be loaded by SasView.\n"
+                raise NoKnownLoaderException(msg)
+            except Exception as e:
+                if debug: traceback.print_exc()
+                raise RuntimeError(e.__str__())
 
     def load_using_generic_loaders(self, path):
         """
@@ -109,14 +109,15 @@ class Registry(ExtensionRegistry):
         :param path: file path
         :return: List of Data1D and Data2D objects
         """
-        for reader in readers.associations.get_generic_readers():
-            # Skip loader if already attempted
-            if reader is not None and reader not in self.loaders.values():
-                try:
-                    return reader.read(path)
-                except Exception as e:
-                    # Likely to fail
-                    pass
+        module_list = readers.get_generic_readers()
+        for module in module_list:
+            reader = module.Reader()
+            try:
+                return reader.read(path)
+            except Exception as e:
+                # Cycle through all generic readers
+                pass
+        # Only throw exception if all generic readers fail
         raise NoKnownLoaderException(
             "Generic readers failed to load %s" % path)
 

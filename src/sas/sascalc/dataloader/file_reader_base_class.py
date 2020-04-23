@@ -84,7 +84,7 @@ class FileReader(object):
                     self.get_file_contents()
 
                 except DataReaderException as e:
-                    self.handle_error_message(e.message)
+                    self.handle_error_message(e.__str__())
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
