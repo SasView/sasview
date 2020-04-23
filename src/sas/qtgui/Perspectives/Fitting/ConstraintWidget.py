@@ -787,7 +787,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
             # Show the text in the constraint table
             item = self.uneditableItem(label)
-            item = QtWidgets.QTableWidgetItem(label)
+            #item = QtWidgets.QTableWidgetItem(label)
             # Why was this set to non-interactive??
             #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             item.setCheckState(QtCore.Qt.Checked)
