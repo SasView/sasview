@@ -123,7 +123,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.cmdOK.setEnabled(False)
             self.cmdAddAll.setEnabled(False)
             txt = "No parameters in model "+self.tab_names[0] +\
-                " are available for constraining."
+                " are available for constraining.\n"+\
+                "Please select at least one parameter for fitting when adding a constraint."
             self.lblWarning.setText(txt)
         else:
             self.cmdOK.setEnabled(True)
@@ -258,15 +259,36 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
         return (model1, con)
 
+    def constraintIsRedefined(self, cons_tuple):
+        """
+        Warn the user when a constraint is being redefined
+        """
+        # get the the parameter that is being redefined
+        param = cons_tuple[1].param
+        # get a list of all constrained parameters
+        tab_index1 = self.cbModel1.currentIndex()
+        items = [param for param in self.params[tab_index1] if self.tabs[tab_index1].paramHasConstraint(param)]
+        # loop over the list of constrained parameters to check for redefinition
+        for item in items:
+            if item == param:
+                return True
+        return False
+
     def onApply(self):
         """
         Respond to Add constraint action.
         Send a signal that the constraint is ready to be applied
         """
         cons_tuple = self.constraint()
+        #check if constraint has been redefined
+        if self.constraintIsRedefined(cons_tuple):
+            txt = "Warning: parameter " + \
+                  cons_tuple[0] + "." + cons_tuple[1].param +\
+                  " has been redefined."
+            self.lblWarning.setText(txt)
         self.constraintReadySignal.emit(cons_tuple)
         # reload the comboboxes
-        self.setupParamWidgets()
+        #self.setupParamWidgets()
 
     def onSetAll(self):
         """
@@ -277,6 +299,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         index2 = self.cbModel2.currentIndex()
         items1 = [param for param in self.tabs[index1].main_params_to_fit]
         items2 = self.params[index2]
+        # create an empty list to store redefined constraints
+        redefined_constraints = []
         for item in items1:
             if item not in items2: continue
             param = item
@@ -293,10 +317,26 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
                              value_ex=value_ex,
                              operator=operator)
 
+            # check for redefined constraints and add them to the list
+            if self.constraintIsRedefined((model1, con)):
+                redefined_constraints.append(model1 + "." + param)
+            # warn the user if constraints have been redefined
+            if redefined_constraints:
+                constraint_txt = ""
+                for redefined_constraint in redefined_constraints:
+                    constraint_txt += redefined_constraint + ", "
+                txt = "Warning: parameters " +\
+                    constraint_txt[:-2] +\
+                    " have been redefined."
+                if len(redefined_constraints) == 1:
+                    txt = txt.replace("parameters", "parameter")
+                    txt = txt.replace("has", "been")
+                self.lblWarning.setText(txt)
+
             self.constraintReadySignal.emit((model1, con))
 
         # reload the comboboxes
-        self.setupParamWidgets()
+        #self.setupParamWidgets()
 
     def onHelp(self):
         """
