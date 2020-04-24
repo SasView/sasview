@@ -376,9 +376,12 @@ class FileReader(object):
     def define_loaded_units(self):
         for data in self.output:
             set_loaded_units(data, 'x', data._xunit)
+            data.x_unit = data._xunit
             set_loaded_units(data, 'y', data._yunit)
+            data.y_unit = data._yunit
             if isinstance(data, Data2D):
                 set_loaded_units(data, 'z', data._zunit)
+                data.z_unit = data._zunit
 
     def format_unit(self, unit=None):
         """

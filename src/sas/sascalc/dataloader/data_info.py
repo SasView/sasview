@@ -107,7 +107,8 @@ class plottable_1D(object):
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
             scale = float(self.x_converter.scale(unit))
-            self.x *= scale
+            if self.x is not None and self.x.all():
+                self.x *= scale
             if self.dx is not None and self.dx.all():
                 self.dx *= scale
             if self.dxl is not None and self.dxl.all():
@@ -130,7 +131,8 @@ class plottable_1D(object):
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
             scale = float(self.y_converter.scale(unit))
-            self.y *= scale
+            if self.y is not None and self.y.all():
+                self.y *= scale
             if self.dy is not None and self.dy.all():
                 self.dy *= scale
             # Only set instance variable once conversion is successful

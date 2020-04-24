@@ -16,7 +16,8 @@ from sas.sascalc.data_util.nxsunit import Converter
 
 # For saving individual sections of data
 from ..data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D, \
-    Collimation, TransmissionSpectrum, Detector, Process, Aperture
+    Collimation, TransmissionSpectrum, Detector, Process, Aperture,\
+    set_loaded_units
 from ..loader_exceptions import FileContentsException, DefaultReaderException, \
     DataReaderException
 from . import xml_reader
@@ -270,12 +271,12 @@ class Reader(XMLreader):
 
                 # I and Q points
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.yaxis("Intensity", unit)
+                    set_loaded_units(self.current_dataset, "y", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
                 elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    self.current_dataset.xaxis("Q", unit)
+                    set_loaded_units(self.current_dataset, "x", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
@@ -289,32 +290,28 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Sesans':
                     self.current_datainfo.isSesans = bool(data_point)
-                    self.current_dataset.xaxis(attr.get('x_axis'),
-                                                attr.get('x_unit'))
-                    self.current_dataset.yaxis(attr.get('y_axis'),
-                                                attr.get('y_unit'))
                 elif tagname == 'yacceptance':
                     self.current_datainfo.sample.yacceptance = (data_point, unit)
+                    set_loaded_units(self.current_dataset, "x", unit)
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
+                    set_loaded_units(self.current_dataset, "y", unit)
 
                 # I and Qx, Qy - 2D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.yaxis("Intensity", unit)
+                    set_loaded_units(self.current_dataset, "z", unit)
                     self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
                     self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qx':
-                    self.current_dataset.xaxis("Qx", unit)
+                    set_loaded_units(self.current_dataset, "x", unit)
                     self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qy':
-                    self.current_dataset.yaxis("Qy", unit)
+                    set_loaded_units(self.current_dataset, "y", unit)
                     self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qxdev':
-                    self.current_dataset.xaxis("Qxdev", unit)
                     self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qydev':
-                    self.current_dataset.yaxis("Qydev", unit)
                     self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Mask':
                     inter = [item == "1" for item in data_point.split(",")]
