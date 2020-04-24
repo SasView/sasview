@@ -444,10 +444,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 font.setItalic(True)
                 brush = QtGui.QBrush(QtGui.QColor('blue'))
                 tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
-                tab.selectCheckbox(tab.getRowFromName(param), True)
             else:
                 tab.modifyViewOnRow(tab.getRowFromName(param))
-                tab.selectCheckbox(tab.getRowFromName(param), False)
             return
         # Update the constraint formula
         constraint = self.available_constraints[row]
@@ -721,9 +719,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
             tab.deleteConstraintOnParameter(param)
-            #Uncheck the parameter that was constrained
-            row=tab.getRowFromName(param)
-            tab.selectCheckbox(row,False)
+
         # Constraints removed - refresh the table widget
         self.initializeFitList()
 

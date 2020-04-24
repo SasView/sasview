@@ -101,7 +101,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         self.cbParam1.clear()
         tab_index1 = self.cbModel1.currentIndex()
-        items1 = [param for param in self.params[tab_index1]]
+        items1 = [param for param in self.tabs[tab_index1].main_params_to_fit]
         self.cbParam1.addItems(items1)
 
         # M2 doesn't have to be non-constrained
