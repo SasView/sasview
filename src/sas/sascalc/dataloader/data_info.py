@@ -205,7 +205,8 @@ class plottable_2D(object):
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             scale = float(self.x_converter.scale(unit))
-            self.qx_data *= scale
+            if self.qx_data is not None and self.qx_data.all():
+                self.qx_data *= scale
             if self.dqx_data is not None and self.dqx_data.all():
                 self.dqx_data *= scale
             # Only set instance variable once conversion is successful
@@ -224,7 +225,8 @@ class plottable_2D(object):
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             scale = float(self.y_converter.scale(unit))
-            self.qy_data *= scale
+            if self.qy_data is not None and self.qy_data.all():
+                self.qy_data *= scale
             if self.dqy_data is not None and self.dqy_data.all():
                 self.dqy_data *= scale
             # Only set instance variable once conversion is successful
@@ -243,7 +245,8 @@ class plottable_2D(object):
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             scale = float(self.z_converter.scale(unit))
-            self.data *= scale
+            if self.data is not None and self.data.all():
+                self.data *= scale
             if self.err_data is not None and self.err_data.all():
                 self.err_data *= scale
             # Only set instance variable once conversion is successful

@@ -292,7 +292,9 @@ class FileReader(object):
         :param data: 1D data set
         :return:
         """
+        set_loaded_units(data, 'x', '1/A')
         data.xaxis(r"\rm{Q}", '1/A')
+        set_loaded_units(data, 'y', '1/cm')
         data.yaxis(r"\rm{Intensity}", "1/cm")
         return data
 
@@ -303,8 +305,11 @@ class FileReader(object):
         :param data: 2D data set
         :return:
         """
+        set_loaded_units(data, 'x', '1/A')
         data.xaxis("\\rm{Q_{x}}", '1/A')
+        set_loaded_units(data, 'y', '1/A')
         data.yaxis("\\rm{Q_{y}}", '1/A')
+        set_loaded_units(data, 'z', '1/cm')
         data.zaxis("\\rm{Intensity}", "1/cm")
         return data
 
