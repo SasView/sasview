@@ -275,7 +275,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = [param for param in self.params[index1] if not self.tabs[index1].paramHasConstraint(param)]
+        items1 = [param for param in self.tabs[index1].main_params_to_fit]
         items2 = self.params[index2]
         for item in items1:
             if item not in items2: continue
