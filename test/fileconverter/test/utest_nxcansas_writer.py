@@ -61,7 +61,7 @@ class nxcansas_writer(unittest.TestCase):
             correct_det = correct.detector[i]
             self.assertAlmostEqual(written_det.distance, correct_det.distance)
             self.assertTrue(written_det.name == correct_det.name)
-        self.assertTrue(written.source.radiation == correct.source.radiation)
+        self.assertTrue(written.source.probe == correct.source.radiation)
 
     def tearDown(self):
         if os.path.isfile(self.write_file_1d):

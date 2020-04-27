@@ -397,8 +397,14 @@ class Source(object):
     """
     # Name
     name = None
-    # Radiation type [string]
+    # Generic radiation type (Type and probe give more specific info) [string]
     radiation = None
+    # Beam size name
+    # Type and probe are only written to by the NXcanSAS reader
+    # Specific radiation type (Synchotron X-ray, Reactor neutron, etc) [string]
+    type = None
+    # Radiation probe (generic probe such as neutron, x-ray, muon, etc) [string]
+    probe = None
     # Beam size name
     beam_size_name = None
     # Beam size [Vector] [mm]
@@ -424,7 +430,10 @@ class Source(object):
 
     def __str__(self):
         _str = "Source:\n"
-        _str += "   Radiation:    %s\n" % str(self.radiation)
+        radiation = self.radiation
+        if self.radiation is None and self.type and self.probe:
+            radiation = self.type + " " + self.probe
+        _str += "   Radiation:    %s\n" % str(radiation)
         _str += "   Shape:        %s\n" % str(self.beam_shape)
         _str += "   Wavelength:   %s [%s]\n" % \
             (str(self.wavelength), str(self.wavelength_unit))
@@ -467,7 +476,7 @@ class Sample(object):
     # Position [Vector] [mm]
     position = None
     position_unit = 'mm'
-    # Orientation [Vector] [degrees]
+    ## Orientation [Vector] [degrees]
     orientation = None
     orientation_unit = 'degree'
     # Details
