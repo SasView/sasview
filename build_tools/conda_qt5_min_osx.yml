@@ -21,6 +21,7 @@ dependencies:
  - hypothesis
  - lxml
  - macholib
+ - matplotlib=2.2.2
  - mako
  - openssl
  - packaging
