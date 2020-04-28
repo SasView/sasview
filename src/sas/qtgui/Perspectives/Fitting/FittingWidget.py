@@ -1055,6 +1055,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     for s in range(param_number) if self.rowHasActiveComplexConstraint(s)]
         return params
 
+    def getAllComplexConstraintsForModel(self):
+        """
+        Return a list of tuples. Each tuple contains constraints mapped as
+        ('constrained parameter', 'function to constrain')
+        e.g. [('sld','5*M2.sld_solvent')].
+        Returns a list of all constraints, not only active ones
+        """
+        param_number = self._model_model.rowCount()
+        params = [(self._model_model.item(s, 0).text(),
+                    self._model_model.item(s, 1).child(0).data().func)
+                    for s in range(param_number) if self.rowHasConstraint(s)]
+        return params
+
     def getConstraintObjectsForModel(self):
         """
         Returns Constraint objects present on the whole model

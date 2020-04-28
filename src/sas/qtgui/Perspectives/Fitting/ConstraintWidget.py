@@ -769,7 +769,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        constraint_names = fit_page.getComplexConstraintsForModel()
+        active_constraint_names = fit_page.getComplexConstraintsForModel()
+        constraint_names = fit_page.getAllComplexConstraintsForModel()
         constraints = fit_page.getConstraintObjectsForModel()
         if not constraints: 
             return
@@ -787,7 +788,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             #item = QtWidgets.QTableWidgetItem(label)
             # Why was this set to non-interactive??
             #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
-            item.setCheckState(QtCore.Qt.Checked)
+            if constraint_name in active_constraint_names:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
         self.tblConstraints.blockSignals(False)
