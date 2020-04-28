@@ -1,6 +1,8 @@
 name: qt5_osx
 channels:
   - conda-forge
+  - schrodinger
+  - defaults
 dependencies:
  - altgraph
  - appdirs
@@ -45,6 +47,8 @@ dependencies:
  - testpath
  - numpy
  - pyopencl
+ - clang_osx-64
+ - libgfortran=3.0.1=2000
  - pip:
    - pytools
    - periodictable
