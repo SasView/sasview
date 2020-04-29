@@ -39,9 +39,10 @@ CANSAS_FORMAT = CONSTANTS.format
 CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
 
+
 class Reader(XMLreader):
-    cansas_version = "1.0"
-    base_ns = "{cansas1d/1.0}"
+    cansas_version = "1.1"
+    base_ns = "{cansas1d/1.1}"
     cansas_defaults = None
     type_name = "canSAS"
     invalid = True
@@ -80,16 +81,8 @@ class Reader(XMLreader):
         self.logging = []
         self.encoding = None
 
-    def _read(self, xml_file, schema_path="", invalid=True):
-        if schema_path != "" or not invalid:
-            # read has been called from self.get_file_contents because xml file doens't conform to schema
-            _, self.extension = os.path.splitext(os.path.basename(xml_file))
-            return self.get_file_contents(xml_file=xml_file, schema_path=schema_path, invalid=invalid)
-
-        # Otherwise, read has been called by the data loader - file_reader_base_class handles this
-        return super(XMLreader, self).read(xml_file)
-
     def get_file_contents(self):
+        # FIXME: combine these methods in an easy and meaningful way
         return self._get_file_contents(xml_file=None, schema_path="", invalid=True)
 
     def _get_file_contents(self, xml_file=None, schema_path="", invalid=True):
@@ -223,7 +216,8 @@ class Reader(XMLreader):
             tagname = node.tag.replace(self.base_ns, "")
             tagname_original = tagname
             # Skip this iteration when loading in save state information
-            if tagname in ["fitting_plug_in", "pr_inversion", "invariant", "corfunc"]:
+            if tagname in ["fitting_plug_in", "pr_inversion", "invariant",
+                           "corfunc"]:
                 continue
             # Get where to store content
             self.names.append(tagname_original)
@@ -253,237 +247,62 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self._add_intermediate()
             else:
-                # TODO: Clean this up to make it faster (fewer if/elifs)
                 if isinstance(self.current_dataset, plottable_2D):
                     data_point = node.text
                     unit = attr.get('unit', '')
                 else:
                     data_point, unit = self._get_node_value(node, tagname)
+                if not unit:
+                    unit = attr.get('unit', '')
 
-                # If this is a dataset, store the data appropriately
-                if tagname == 'Run':
-                    self.current_datainfo.run_name[data_point] = name
-                    self.current_datainfo.run.append(data_point)
-                elif tagname == 'Title':
-                    self.current_datainfo.title = data_point
-                elif tagname == 'SASnote':
-                    self.current_datainfo.notes.append(data_point)
-
-                # I and Q points
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    set_loaded_units(self.current_dataset, "y", unit)
-                    self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
-                elif tagname == 'Q':
-                    set_loaded_units(self.current_dataset, "x", unit)
-                    self.current_dataset.x = np.append(self.current_dataset.x, data_point)
-                elif tagname == 'Qdev':
-                    self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
-                elif tagname == 'dQw':
-                   self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
-                elif tagname == 'dQl':
-                    self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
-                elif tagname == 'Qmean':
-                    pass
-                elif tagname == 'Shadowfactor':
-                    pass
-                elif tagname == 'Sesans':
-                    self.current_datainfo.isSesans = bool(data_point)
-                elif tagname == 'yacceptance':
-                    self.current_datainfo.sample.yacceptance = (data_point, unit)
-                    set_loaded_units(self.current_dataset, "x", unit)
-                elif tagname == 'zacceptance':
-                    self.current_datainfo.sample.zacceptance = (data_point, unit)
-                    set_loaded_units(self.current_dataset, "y", unit)
-
-                # I and Qx, Qy - 2D data
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
-                    set_loaded_units(self.current_dataset, "z", unit)
-                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qx':
-                    set_loaded_units(self.current_dataset, "x", unit)
-                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qy':
-                    set_loaded_units(self.current_dataset, "y", unit)
-                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qxdev':
-                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qydev':
-                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Mask':
-                    inter = [item == "1" for item in data_point.split(",")]
-                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
-
-                # Sample Information
-                elif tagname == 'ID' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.ID = data_point
-                elif tagname == 'Title' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.name = data_point
-                elif tagname == 'thickness' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.thickness = data_point
-                    self.current_datainfo.sample.thickness_unit = unit
-                elif tagname == 'transmission' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.transmission = data_point
-                elif tagname == 'temperature' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.temperature = data_point
-                    self.current_datainfo.sample.temperature_unit = unit
-                elif tagname == 'details' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.details.append(data_point)
-                elif tagname == 'x' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.x = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'y' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.y = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'z' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.z = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.x = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.y = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.z = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-
-                # Instrumental Information
-                elif tagname == 'name' and self.parent_class == 'SASinstrument':
-                    self.current_datainfo.instrument = data_point
-
-                # Detector Information
-                elif tagname == 'name' and self.parent_class == 'SASdetector':
-                    self.detector.name = data_point
-                elif tagname == 'SDD' and self.parent_class == 'SASdetector':
-                    self.detector.distance = data_point
-                    self.detector.distance_unit = unit
-                elif tagname == 'slit_length' and self.parent_class == 'SASdetector':
-                    self.detector.slit_length = data_point
-                    self.detector.slit_length_unit = unit
-                elif tagname == 'x' and self.parent_class == 'offset':
-                    self.detector.offset.x = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'y' and self.parent_class == 'offset':
-                    self.detector.offset.y = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'z' and self.parent_class == 'offset':
-                    self.detector.offset.z = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.x = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.y = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'z' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.z = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'x' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.x = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.y = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.z = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.x = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.y = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.z = data_point
-                    self.detector.orientation_unit = unit
-
-                # Collimation and Aperture
-                elif tagname == 'length' and self.parent_class == 'SAScollimation':
-                    self.collimation.length = data_point
-                    self.collimation.length_unit = unit
-                elif tagname == 'name' and self.parent_class == 'SAScollimation':
-                    self.collimation.name = data_point
-                elif tagname == 'distance' and self.parent_class == 'aperture':
-                    self.aperture.distance = data_point
-                    self.aperture.distance_unit = unit
-                elif tagname == 'x' and self.parent_class == 'size':
-                    self.aperture.size.x = data_point
-                    self.collimation.size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'size':
-                    self.aperture.size.y = data_point
-                    self.collimation.size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'size':
-                    self.aperture.size.z = data_point
-                    self.collimation.size_unit = unit
-
-                # Process Information
-                elif tagname == 'name' and self.parent_class == 'SASprocess':
-                    self.process.name = data_point
-                elif tagname == 'description' and self.parent_class == 'SASprocess':
-                    self.process.description = data_point
-                elif tagname == 'date' and self.parent_class == 'SASprocess':
-                    try:
-                        self.process.date = datetime.datetime.fromtimestamp(data_point)
-                    except:
-                        self.process.date = data_point
-                elif tagname == 'SASprocessnote':
-                    self.process.notes.append(data_point)
-                elif tagname == 'term' and self.parent_class == 'SASprocess':
-                    unit = attr.get("unit", "")
-                    dic = { "name": name, "value": data_point, "unit": unit }
-                    self.process.term.append(dic)
-
-                # Transmission Spectrum
-                elif tagname == 'T' and self.parent_class == 'Tdata':
-                    self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
-                    self.transspectrum.transmission_unit = unit
-                elif tagname == 'Tdev' and self.parent_class == 'Tdata':
-                    self.transspectrum.transmission_deviation = np.append(self.transspectrum.transmission_deviation, data_point)
-                    self.transspectrum.transmission_deviation_unit = unit
-                elif tagname == 'Lambda' and self.parent_class == 'Tdata':
-                    self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
-                    self.transspectrum.wavelength_unit = unit
-
-                # Source Information
-                elif tagname == 'wavelength' and (self.parent_class == 'SASsource' or self.parent_class == 'SASData'):
-                    self.current_datainfo.source.wavelength = data_point
-                    self.current_datainfo.source.wavelength_unit = unit
-                elif tagname == 'wavelength_min' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_min = data_point
-                    self.current_datainfo.source.wavelength_min_unit = unit
-                elif tagname == 'wavelength_max' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_max = data_point
-                    self.current_datainfo.source.wavelength_max_unit = unit
-                elif tagname == 'wavelength_spread' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_spread = data_point
-                    self.current_datainfo.source.wavelength_spread_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_size':
-                    self.current_datainfo.source.beam_size.x = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_size':
-                    self.current_datainfo.source.beam_size.y = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.current_datainfo.source.data_point.z = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'radiation' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.radiation = data_point
-                elif tagname == 'beam_shape' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.beam_shape = data_point
-
-                # Everything else goes in meta_data
+                # Psuedo-switch statement for faster processing of data
+                tagname_switcher = {
+                    "Run": self.process_run,
+                    "Title": self.process_title,
+                    "SASnote": self.process_note,
+                }
+                parent_class_switcher = {
+                    "SASdata": self.process_data,
+                    "SASsample": self.process_sample,
+                    "SASinstrument": self.process_instrument,
+                    "SASdetector": self.process_detector,
+                    "SAScollimation": self.process_collimation,
+                    "Tdata": self.process_transmission_spectrum,
+                    "SASprocess": self.process_process,
+                    "SASsource": self.process_source,
+                }
+                names_switcher = {
+                    "SASdata": self.process_data,
+                    "SASsample": self.process_sample,
+                    "SASdetector": self.process_detector,
+                    "SAScollimation": self.process_collimation,
+                    "SASsource": self.process_source,
+                }
+                use_tag = tagname_switcher.get(tagname, '')
+                use_parent = parent_class_switcher.get(self.parent_class, '')
+                params = {
+                    'tagname': tagname,
+                    'data_point': data_point,
+                    'unit': unit,
+                    'name': name,
+                }
+                if callable(use_tag):
+                    use_tag(params)
+                elif callable(use_parent):
+                    use_parent(params)
                 else:
-                    new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
-                    self.current_datainfo.meta_data[new_key] = data_point
+                    # The elusive for/else statement...
+                    for item in self.names:
+                        name = names_switcher.get(item, '')
+                        if callable(name):
+                            name(params)
+                            break
+                    else:
+                        # Send to meta data if no other known location
+                        self.process_meta_data(params)
 
             self.names.remove(tagname_original)
-            length = 0
-            if len(self.names) > 1:
-                length = len(self.names) - 1
+            length = 0 if len(self.names) < 1 else len(self.names) - 1
             self.parent_class = self.names[length]
         if not self._is_call_local() and not recurse:
             self.frm = ""
@@ -494,6 +313,439 @@ class Reader(XMLreader):
             self.sort_data()
             self.reset_data_list()
             return self.output[0], None
+
+    def process_meta_data(self, params):
+        tagname = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
+        self.current_datainfo.meta_data[key] = data_point
+
+    def process_run(self, params):
+        data_point = params.get('data_point', '')
+        name = params.get('name', '')
+        self.current_datainfo.run_name[data_point] = name
+        self.current_datainfo.run.append(data_point)
+
+    def process_title(self, params):
+        data_point = params.get('data_point', '')
+        self.current_datainfo.title = data_point
+
+    def process_note(self, params):
+        data_point = params.get('data_point', '')
+        self.current_datainfo.notes.append(data_point)
+
+    def process_data(self, params):
+        def process_i(obj):
+            if isinstance(obj.current_dataset, plottable_1D):
+                set_loaded_units(obj.current_dataset, "y", unit)
+                obj.current_dataset.y = np.append(obj.current_dataset.y,
+                                                  data_point)
+            elif isinstance(obj.current_dataset, plottable_2D):
+                set_loaded_units(obj.current_dataset, "z", unit)
+                obj.current_dataset.data = np.fromstring(
+                    data_point, dtype=float, sep=",")
+
+        def process_q(obj):
+            set_loaded_units(obj.current_dataset, "x", unit)
+            obj.current_dataset.x = np.append(obj.current_dataset.x, data_point)
+
+        def process_qx(obj):
+            set_loaded_units(obj.current_dataset, "x", unit)
+            obj.current_dataset.qx_data = np.fromstring(
+                data_point, dtype=float, sep=",")
+
+        def process_qy(obj):
+            set_loaded_units(obj.current_dataset, "y", unit)
+            obj.current_dataset.qy_data = np.fromstring(
+                data_point, dtype=float, sep=",")
+
+        def process_i_dev(obj):
+            if isinstance(obj.current_dataset, plottable_1D):
+                obj.current_dataset.dy = np.append(obj.current_dataset.dy,
+                                                   data_point)
+            elif isinstance(obj.current_dataset, plottable_2D):
+                obj.current_dataset.err_data = np.fromstring(
+                    data_point, dtype=float, sep=",")
+
+        def process_q_dev(obj):
+            obj.current_dataset.dx = np.append(obj.current_dataset.dx,
+                                               data_point)
+
+        def process_qx_dev(obj):
+            obj.current_dataset.dqx_data = np.fromstring(
+                data_point, dtype=float, sep=",")
+
+        def process_qy_dev(obj):
+            obj.current_dataset.dqy_data = np.fromstring(
+                data_point, dtype=float, sep=",")
+
+        def process_dqw(obj):
+            obj.current_dataset.dxw = np.append(obj.current_dataset.dxw,
+                                                data_point)
+
+        def process_dql(obj):
+            obj.current_dataset.dxl = np.append(obj.current_dataset.dxl,
+                                                data_point)
+
+        def process_mask(obj):
+            inter = [item == "1" for item in data_point.split(",")]
+            obj.current_dataset.mask = np.asarray(inter, dtype=bool)
+
+        def process_sesans(obj):
+            obj.current_datainfo.isSesans = bool(data_point)
+
+        def process_y_acceptance(obj):
+            obj.current_datainfo.sample.yacceptance = (data_point, unit)
+            set_loaded_units(obj.current_dataset, "x", unit)
+
+        def process_z_acceptance(obj):
+            obj.current_datainfo.sample.zacceptance = (data_point, unit)
+            set_loaded_units(obj.current_dataset, "y", unit)
+
+        def call_pass(obj):
+            pass
+
+        tag = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        process_switcher = {
+            'I': process_i,
+            'Q': process_q,
+            'Qx': process_qx,
+            'Qy': process_qy,
+            'Idev': process_i_dev,
+            'Qdev': process_q_dev,
+            'Qxdev': process_qx_dev,
+            'Qydev': process_qy_dev,
+            'dQw': process_dqw,
+            'dQl': process_dql,
+            'Mask': process_mask,
+            'Qmean': call_pass,
+            'Shadowfactor': call_pass,
+            'Sesans': process_sesans,
+            'yacceptance': process_y_acceptance,
+            'zacceptance': process_z_acceptance,
+        }
+        handler = process_switcher.get(tag, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
+
+    def process_sample(self, params):
+        def process_id(obj):
+            obj.current_datainfo.sample.ID = data_point
+
+        def process_title(obj):
+            obj.current_datainfo.sample.name = data_point
+
+        def process_transmission(obj):
+            obj.current_datainfo.sample.transmission = data_point
+
+        def process_details(obj):
+            obj.current_datainfo.sample.details.append(data_point)
+
+        def process_thickness(obj):
+            obj.current_datainfo.sample.thickness = data_point
+            obj.current_datainfo.sample.thickness_unit = unit
+
+        def process_temperature(obj):
+            obj.current_datainfo.sample.temperature = data_point
+            obj.current_datainfo.sample.temperature_unit = unit
+
+        def process_roll(obj):
+            obj.current_datainfo.sample.orientation.x = data_point
+            obj.current_datainfo.sample.orientation_unit = unit
+
+        def process_pitch(obj):
+            obj.current_datainfo.sample.orientation.y = data_point
+            obj.current_datainfo.sample.orientation_unit = unit
+
+        def process_yaw(obj):
+            obj.current_datainfo.sample.orientation.z = data_point
+            obj.current_datainfo.sample.orientation_unit = unit
+
+        def process_x(obj):
+            obj.current_datainfo.sample.position.x = data_point
+            obj.current_datainfo.sample.position_unit = unit
+
+        def process_y(obj):
+            obj.current_datainfo.sample.position.y = data_point
+            obj.current_datainfo.sample.position_unit = unit
+
+        def process_z(obj):
+            obj.current_datainfo.sample.position.z = data_point
+            obj.current_datainfo.sample.position_unit = unit
+
+        tagname = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        process_switcher = {
+            'ID': process_id,
+            'Title': process_title,
+            'thickness': process_thickness,
+            'transmission': process_transmission,
+            'temperature': process_temperature,
+            'details': process_details,
+            'x': process_x,
+            'y': process_y,
+            'z': process_z,
+            'roll': process_roll,
+            'pitch': process_pitch,
+            'yaw': process_yaw,
+        }
+        handler = process_switcher.get(tagname, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
+
+    def process_instrument(self, params):
+        if params.get('tagname', '') == 'name':
+            self.current_datainfo.instrument = params.get('data_point', '')
+        else:
+            self.process_meta_data(params)
+
+    def process_detector(self, params):
+        def process_name(obj):
+            obj.detector.name = data_point
+
+        def process_sdd(obj):
+            obj.detector.distance = data_point
+            obj.detector.distance_unit = unit
+
+        def process_slit_length(obj):
+            obj.detector.slit_length = data_point
+            obj.detector.slit_length_unit = unit
+
+        def process_x(obj):
+            if obj.parent_class == 'offset':
+                obj.detector.offset.x = data_point
+                obj.detector.offset_unit = unit
+            elif obj.parent_class == 'beam_center':
+                obj.detector.beam_center.x = data_point
+                obj.detector.beam_center_unit = unit
+            elif obj.parent_class == 'pixel_size':
+                obj.detector.pixel_size.x = data_point
+                obj.detector.pixel_size_unit = unit
+
+        def process_y(obj):
+            if obj.parent_class == 'offset':
+                obj.detector.offset.y = data_point
+                obj.detector.offset_unit = unit
+            elif obj.parent_class == 'beam_center':
+                obj.detector.beam_center.y = data_point
+                obj.detector.beam_center_unit = unit
+            elif obj.parent_class == 'pixel_size':
+                obj.detector.pixel_size.y = data_point
+                obj.detector.pixel_size_unit = unit
+
+        def process_z(obj):
+            if obj.parent_class == 'offset':
+                obj.detector.offset.z = data_point
+                obj.detector.offset_unit = unit
+            elif obj.parent_class == 'beam_center':
+                obj.detector.beam_center.z = data_point
+                obj.detector.beam_center_unit = unit
+            elif obj.parent_class == 'pixel_size':
+                obj.detector.pixel_size.z = data_point
+                obj.detector.pixel_size_unit = unit
+
+        def process_roll(obj):
+            obj.detector.orientation.x = data_point
+            obj.detector.orientation_unit = unit
+
+        def process_pitch(obj):
+            obj.detector.orientation.y = data_point
+            obj.detector.orientation_unit = unit
+
+        def process_yaw(obj):
+            obj.detector.orientation.z = data_point
+            obj.detector.orientation_unit = unit
+
+        tagname = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        process_switcher = {
+            'name': process_name,
+            'SDD': process_sdd,
+            'slit_length': process_slit_length,
+            'x': process_x,
+            'y': process_y,
+            'z': process_z,
+            'roll': process_roll,
+            'pitch': process_pitch,
+            'yaw': process_yaw,
+        }
+        handler = process_switcher.get(tagname, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
+
+    def process_collimation(self, params):
+        def process_name(obj):
+            obj.collimation.name = data_point
+
+        def process_length(obj):
+            obj.collimation.length = data_point
+            obj.collimation.length_unit = unit
+
+        def process_aperture_distance(obj):
+            obj.aperture.distance = data_point
+            obj.aperture.distance_unit = unit
+
+        def process_x(obj):
+            obj.aperture.size.x = data_point
+            obj.collimation.size_unit = unit
+
+        def process_y(obj):
+            obj.aperture.size.y = data_point
+            obj.collimation.size_unit = unit
+
+        def process_z(obj):
+            obj.aperture.size.z = data_point
+            obj.collimation.size_unit = unit
+
+        tagname = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        process_switcher = {
+            'name': process_name,
+            'length': process_length,
+            'distance': process_aperture_distance,
+            'x': process_x,
+            'y': process_y,
+            'z': process_z,
+        }
+        handler = process_switcher.get(tagname, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
+
+    def process_process(self, params):
+        def process_name(obj):
+            obj.process.name = data_point
+
+        def process_desciption(obj):
+            obj.process.description = data_point
+
+        def process_date(obj):
+            try:
+                obj.process.date = datetime.datetime.fromtimestamp(data_point)
+            except:
+                obj.process.date = data_point
+
+        def process_note(obj):
+            obj.process.notes.append(data_point)
+
+        def process_term(obj):
+            dic = {"name": name, "value": data_point, "unit": unit}
+            obj.process.term.append(dic)
+
+        tagname = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        name = params.get('name', '')
+        process_switcher = {
+            'name': process_name,
+            'description': process_desciption,
+            'date': process_date,
+            'SASprocessnote': process_note,
+            'term': process_term,
+        }
+        handler = process_switcher.get(tagname, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
+
+    def process_transmission_spectrum(self, params):
+        def process_t(obj):
+            obj.transspectrum.transmission = np.append(
+                obj.transspectrum.transmission, data_point)
+            obj.transspectrum.transmission_unit = unit
+
+        def process_t_dev(obj):
+            obj.transspectrum.transmission_deviation = np.append(
+                obj.transspectrum.transmission_deviation, data_point)
+            obj.transspectrum.transmission_deviation_unit = unit
+
+        def process_lambda(obj):
+            obj.transspectrum.wavelength = np.append(
+                obj.transspectrum.wavelength, data_point)
+            obj.transspectrum.wavelength_unit = unit
+
+        tag = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        process_switcher = {
+            'T': process_t,
+            'Tdev': process_t_dev,
+            'Lambda': process_lambda,
+        }
+        handler = process_switcher.get(tag, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
+
+    def process_source(self, params):
+        def process_wavelength(obj):
+            obj.current_datainfo.source.wavelength = data_point
+            obj.current_datainfo.source.wavelength_unit = unit
+
+        def process_wavelength_min(obj):
+            obj.current_datainfo.source.wavelength_min = data_point
+            obj.current_datainfo.source.wavelength_min_unit = unit
+
+        def process_wavelength_max(obj):
+            obj.current_datainfo.source.wavelength_max = data_point
+            obj.current_datainfo.source.wavelength_max_unit = unit
+
+        def process_wavelength_spread(obj):
+            obj.current_datainfo.source.wavelength_spread = data_point
+            obj.current_datainfo.source.wavelength_spread_unit = unit
+
+        def process_beam_size_x(obj):
+            obj.current_datainfo.source.beam_size.x = data_point
+            obj.current_datainfo.source.beam_size_unit = unit
+
+        def process_beam_size_y(obj):
+            obj.current_datainfo.source.beam_size.y = data_point
+            obj.current_datainfo.source.beam_size_unit = unit
+
+        def process_beam_size_z(obj):
+            obj.current_datainfo.source.beam_size.z = data_point
+            obj.current_datainfo.source.beam_size_unit = unit
+
+        def process_radiation(obj):
+            obj.current_datainfo.source.radiation = data_point
+
+        def process_beam_shape(obj):
+            obj.current_datainfo.source.beam_shape = data_point
+
+        tag = params.get('tagname', '')
+        data_point = params.get('data_point', '')
+        unit = params.get('unit', '')
+        source_switcher = {
+            'wavelength': process_wavelength,
+            'wavelength_min': process_wavelength_min,
+            'wavelength_max': process_wavelength_max,
+            'wavelength_spread': process_wavelength_spread,
+            'x': process_beam_size_x,
+            'y': process_beam_size_y,
+            'z': process_beam_size_z,
+            'radiation': process_radiation,
+            'beam_shape': process_beam_shape,
+        }
+        # TODO: this is repeated in multiple methods - generalize
+        handler = source_switcher.get(tag, '')
+        if callable(handler):
+            handler(self)
+        else:
+            self.process_meta_data(params)
 
     def _is_call_local(self):
         if self.frm == "":
