@@ -48,6 +48,7 @@ dependencies:
  - testpath
  - numpy
  - pyopencl
+ - sphinx=1.7.4
  - clang_osx-64
  - libgfortran=3.0.1=2000
  - pip:
