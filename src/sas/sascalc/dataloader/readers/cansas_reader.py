@@ -82,74 +82,42 @@ class Reader(XMLreader):
         self.encoding = None
 
     def get_file_contents(self):
-        # FIXME: combine these methods in an easy and meaningful way
-        return self._get_file_contents(xml_file=None, schema_path="", invalid=True)
-
-    def _get_file_contents(self, xml_file=None, schema_path="", invalid=True):
         # Reset everything since we're loading a new file
         self.reset_state()
-        self.invalid = invalid
-        if xml_file is None:
-            xml_file = self.f_open.name
-        # We don't sure f_open since lxml handles opnening/closing files
+        self.invalid = True
+        xml_file = self.f_open.name
         try:
-            # Raises FileContentsException
-            self.load_file_and_schema(xml_file, schema_path)
+            is_valid_cansas = self.load_file_and_schema(xml_file, '')
+        except FileContentsException as fc_exc:
+            msg = "CanSAS Reader could not load {}".format(xml_file)
+            if self.extension not in self.ext:
+                # If the file has no associated loader
+                raise DefaultReaderException(msg)
+            raise FileContentsException(msg)
+        try:
             # Parse each SASentry
-            entry_list = self.xmlroot.xpath('/ns:SASroot/ns:SASentry',
-                                            namespaces={
-                                                'ns': self.cansas_defaults.get(
-                                                    "ns")
-                                            })
-            self.is_cansas(self.extension)
+            entry_list = self.xmlroot.xpath(
+                '/ns:SASroot/ns:SASentry',
+                namespaces={'ns': self.cansas_defaults.get("ns")})
             self.set_processing_instructions()
             for entry in entry_list:
                 self._parse_entry(entry)
-                self.data_cleanup()
-        except FileContentsException as fc_exc:
-            # File doesn't meet schema - try loading with a less strict schema
-            base_name = xml_reader.__file__
-            base_name = base_name.replace("\\", "/")
-            base = base_name.split("/sas/")[0]
-            if self.cansas_version == "1.1":
-                invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
-            else:
-                invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
-            self.set_schema(invalid_schema)
-            if self.invalid:
-                try:
-                    # Load data with less strict schema
-                    self._get_file_contents(xml_file, invalid_schema, False)
-
-                    # File can still be read but doesn't match schema, so raise exception
-                    self.load_file_and_schema(xml_file) # Reload strict schema so we can find where error are in file
-                    invalid_xml = self.find_invalid_xml()
-                    if invalid_xml != "":
-                        basename, _ = os.path.splitext(
-                            os.path.basename(self.f_open.name))
-                        invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
-                        raise DataReaderException(invalid_xml) # Handled by base class
-                except FileContentsException as fc_exc:
-                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
-                    if fc_exc.message is not None: # Propagate error messages from earlier
-                        msg = fc_exc.message
-                    if not self.extension in self.ext: # If the file has no associated loader
-                        raise DefaultReaderException(msg)
-                    raise FileContentsException(msg)
-                    pass
-            else:
-                raise fc_exc
-        except Exception as e: # Convert all other exceptions to FileContentsExceptions
+            if not is_valid_cansas:
+                # Set schema back to default canSAS XML for comparison
+                self.set_default_schema()
+                invalid_xml = self.find_invalid_xml()
+                if invalid_xml:
+                    basename, _ = os.path.splitext(
+                        os.path.basename(self.f_open.name))
+                    bad_xml = INVALID_XML.format(basename + self.extension)
+                    bad_xml += invalid_xml
+                    self.current_datainfo.errors.append(bad_xml)
+            self.data_cleanup()
+        except Exception as e:
+            # Convert all other exceptions to FileContentsExceptions
             raise FileContentsException(str(e))
-        finally:
-            if not self.f_open.closed:
-                self.f_open.close()
 
     def load_file_and_schema(self, xml_file, schema_path=""):
-        base_name = xml_reader.__file__
-        base_name = base_name.replace("\\", "/")
-        base = base_name.split("/sas/")[0]
-
         # Try and parse the XML file
         try:
             self.set_xml_file(xml_file)
@@ -157,14 +125,13 @@ class Reader(XMLreader):
             msg = "SasView cannot load {}.\nInvalid XML syntax".format(xml_file)
             raise FileContentsException(msg)
 
-        self.cansas_version = self.xmlroot.get("version", "1.0")
-        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
+        self.cansas_version = self.xmlroot.get("version", "1.1")
+        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.1")
 
         if schema_path == "":
-            schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
-                base, self.cansas_defaults.get("schema").replace("\\", "/")
-            )
-        self.set_schema(schema_path)
+            self.set_default_schema()
+        is_valid = self.is_cansas(self.extension)
+        return is_valid
 
     def is_cansas(self, ext="xml"):
         """
@@ -173,17 +140,39 @@ class Reader(XMLreader):
         :param ext: The file extension of the data file
         :raises FileContentsException: Raised if XML file isn't valid CanSAS
         """
-        if self.validate_xml(): # Check file is valid XML
+        if self.validate_xml():
             name = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
             value = self.xmlroot.get(name)
             # Check schema CanSAS version matches file CanSAS version
             if CANSAS_NS.get(self.cansas_version).get("ns") == value.rsplit(" ")[0]:
-                return True
+                return None
         if ext == "svs":
-            return True # Why is this required?
+            # Skip check if saved file
+            return None
+        # File doesn't meet schema - try loading with a less strict schema
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+        if self.cansas_version == "1.1":
+            invalid_schema = INVALID_SCHEMA_PATH_1_1.format(
+                base, self.cansas_defaults.get("schema"))
+        else:
+            invalid_schema = INVALID_SCHEMA_PATH_1_0.format(
+                base, self.cansas_defaults.get("schema"))
+        self.set_schema(invalid_schema)
+        if self.validate_xml():
+            return False
         # If we get to this point then file isn't valid CanSAS
-        logger.warning("File doesn't meet CanSAS schema. Trying to load anyway.")
         raise FileContentsException("The file is not valid CanSAS")
+
+    def set_default_schema(self):
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+        schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
+            base, self.cansas_defaults.get("schema").replace("\\", "/")
+        )
+        self.set_schema(schema_path)
 
     def _parse_entry(self, dom, recurse=False):
         if not self._is_call_local() and not recurse:
