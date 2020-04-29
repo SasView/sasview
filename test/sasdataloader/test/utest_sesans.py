@@ -34,7 +34,7 @@ class sesans_reader(unittest.TestCase):
         self.assertEqual(f.x[-1], 46099)
         self.assertEqual(f.y[-1], -0.19956)
         self.assertEqual(f.x_unit, "A")
-        self.assertEqual(f.y_unit, "A-2 cm-1")
+        self.assertEqual(f.y_unit, "A^-2 cm^-1")
         self.assertEqual(f.sample.name, "Polystyrene 2 um in 53% H2O, 47% D2O")
         self.assertEqual(f.sample.thickness, 0.2)
         self.assertEqual(f.sample.zacceptance, (0.0168, "radians"))
