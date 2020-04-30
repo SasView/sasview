@@ -315,7 +315,7 @@ class FileReader(object):
 
     def convert_data_units_for_fitting(self, default_q_unit="1/A"):
         """
-        Converts al; data to the sasview default of units of A^{-1} for Q and
+        Converts all data to the sasview default of units of A^{-1} for Q and
         cm^{-1} for I.
         :param default_q_unit: The default Q unit used by Sasview
         """

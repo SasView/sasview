@@ -48,6 +48,8 @@ class cansas_reader_xml(unittest.TestCase):
         self.cansas1d_units = find("test_data" + os.sep + "cansas1d_units.xml")
         self.cansas1d_notitle = find("test_data" + os.sep
                                      + "cansas1d_notitle.xml")
+        self.cansas1d_multiple_entries = find("test_data" + os.sep
+                                              + "latex_smeared.xml")
         self.isis_1_0 = find("test_data" + os.sep + "ISIS_1_0.xml")
         self.isis_1_1 = find("test_data" + os.sep + "ISIS_1_1.xml")
         self.isis_1_1_notrans = find("test_data" + os.sep
@@ -227,6 +229,10 @@ class cansas_reader_xml(unittest.TestCase):
         self._checkdata()
         if os.path.isfile(self.write_filename):
             os.remove(self.write_filename)
+
+    def test_multiple_sasentries(self):
+        self.data_list = self.loader.load(self.cansas1d_multiple_entries)
+        self.assertTrue(len(self.data_list) == 2)
 
     def test_units(self):
         """

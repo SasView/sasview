@@ -102,17 +102,17 @@ class Reader(XMLreader):
             self.set_processing_instructions()
             for entry in entry_list:
                 self._parse_entry(entry)
-            if not is_valid_cansas:
-                # Set schema back to default canSAS XML for comparison
-                self.set_default_schema()
-                invalid_xml = self.find_invalid_xml()
-                if invalid_xml:
-                    basename, _ = os.path.splitext(
-                        os.path.basename(self.f_open.name))
-                    bad_xml = INVALID_XML.format(basename + self.extension)
-                    bad_xml += invalid_xml
-                    self.current_datainfo.errors.append(bad_xml)
-            self.data_cleanup()
+                if not is_valid_cansas:
+                    # Set schema back to default canSAS XML for comparison
+                    self.set_default_schema()
+                    invalid_xml = self.find_invalid_xml()
+                    if invalid_xml:
+                        basename, _ = os.path.splitext(
+                            os.path.basename(self.f_open.name))
+                        bad_xml = INVALID_XML.format(basename + self.extension)
+                        bad_xml += invalid_xml
+                        self.current_datainfo.errors.append(bad_xml)
+                self.data_cleanup()
         except Exception as e:
             # Convert all other exceptions to FileContentsExceptions
             raise FileContentsException(str(e))
