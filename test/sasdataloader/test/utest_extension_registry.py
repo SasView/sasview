@@ -20,12 +20,12 @@ def find(filename):
 class ExtensionRegistryTests(unittest.TestCase):
 
     def setUp(self):
-        self.valid_file = find("valid_cansas_xml.xml")
+        self.valid_file = find("test_data" + os.sep + "valid_cansas_xml.xml")
         self.valid_file_wrong_known_ext = find("valid_cansas_xml.txt")
         self.valid_file_wrong_unknown_ext = find("valid_cansas_xml.xyz")
         shutil.copyfile(self.valid_file, self.valid_file_wrong_known_ext)
         shutil.copyfile(self.valid_file, self.valid_file_wrong_unknown_ext)
-        self.invalid_file = find("cansas1d_notitle.xml")
+        self.invalid_file = find("test_data" + os.sep + "cansas1d_notitle.xml")
 
         self.loader = Loader()
 
