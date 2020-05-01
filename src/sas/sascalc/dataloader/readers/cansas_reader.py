@@ -9,6 +9,7 @@ import numpy as np
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+# The above 2 import *ARE* used. Do not remove either.
 
 from lxml import etree
 
@@ -16,13 +17,12 @@ from sas.sascalc.data_util.nxsunit import Converter
 
 # For saving individual sections of data
 from ..data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D, \
-    Collimation, TransmissionSpectrum, Detector, Process, Aperture,\
-    set_loaded_units
-from ..loader_exceptions import FileContentsException, DefaultReaderException, \
-    DataReaderException
+    Collimation, TransmissionSpectrum, Detector, Process, Aperture
+from ..loader_exceptions import FileContentsException, DefaultReaderException
 from . import xml_reader
 from .xml_reader import XMLreader
 from .cansas_constants import CansasConstants
+from .cansas_load_helper import CansasLoaderHelper
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,10 @@ class Reader(XMLreader):
     ext = ['.xml', '.svs']
     # Flag to bypass extension check
     allow_all = True
+
+    def __init__(self):
+        super(Reader, self).__init__()
+        self.load_helper = CansasLoaderHelper(parent=self)
 
     def reset_state(self):
         """
@@ -245,36 +249,15 @@ class Reader(XMLreader):
                     unit = attr.get('unit', '')
 
                 # Psuedo-switch statement for faster processing of data
-                tagname_switcher = {
-                    "Run": self.process_run,
-                    "Title": self.process_title,
-                    "SASnote": self.process_note,
-                }
-                parent_class_switcher = {
-                    "SASdata": self.process_data,
-                    "SASsample": self.process_sample,
-                    "SASinstrument": self.process_instrument,
-                    "SASdetector": self.process_detector,
-                    "SAScollimation": self.process_collimation,
-                    "Tdata": self.process_transmission_spectrum,
-                    "SASprocess": self.process_process,
-                    "SASsource": self.process_source,
-                }
-                names_switcher = {
-                    "SASdata": self.process_data,
-                    "SASsample": self.process_sample,
-                    "SASdetector": self.process_detector,
-                    "SAScollimation": self.process_collimation,
-                    "SASsource": self.process_source,
-                }
-                use_tag = tagname_switcher.get(tagname, '')
-                use_parent = parent_class_switcher.get(self.parent_class, '')
                 params = {
                     'tagname': tagname,
                     'data_point': data_point,
                     'unit': unit,
                     'name': name,
                 }
+                use_tag = self.load_helper.tagname_switcher.get(tagname, '')
+                use_parent = self.load_helper.parent_class_switcher.get(
+                    self.parent_class, '')
                 if callable(use_tag):
                     use_tag(params)
                 elif callable(use_parent):
@@ -282,13 +265,13 @@ class Reader(XMLreader):
                 else:
                     # The elusive for/else statement...
                     for item in self.names:
-                        name = names_switcher.get(item, '')
+                        name = self.load_helper.names_switcher.get(item, '')
                         if callable(name):
                             name(params)
                             break
                     else:
                         # Send to meta data if no other known location
-                        self.process_meta_data(params)
+                        self.load_helper.process_meta_data(params)
 
             self.names.remove(tagname_original)
             length = 0 if len(self.names) < 1 else len(self.names) - 1
@@ -302,439 +285,6 @@ class Reader(XMLreader):
             self.sort_data()
             self.reset_data_list()
             return self.output[0], None
-
-    def process_meta_data(self, params):
-        tagname = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
-        self.current_datainfo.meta_data[key] = data_point
-
-    def process_run(self, params):
-        data_point = params.get('data_point', '')
-        name = params.get('name', '')
-        self.current_datainfo.run_name[data_point] = name
-        self.current_datainfo.run.append(data_point)
-
-    def process_title(self, params):
-        data_point = params.get('data_point', '')
-        self.current_datainfo.title = data_point
-
-    def process_note(self, params):
-        data_point = params.get('data_point', '')
-        self.current_datainfo.notes.append(data_point)
-
-    def process_data(self, params):
-        def process_i(obj):
-            if isinstance(obj.current_dataset, plottable_1D):
-                set_loaded_units(obj.current_dataset, "y", unit)
-                obj.current_dataset.y = np.append(obj.current_dataset.y,
-                                                  data_point)
-            elif isinstance(obj.current_dataset, plottable_2D):
-                set_loaded_units(obj.current_dataset, "z", unit)
-                obj.current_dataset.data = np.fromstring(
-                    data_point, dtype=float, sep=",")
-
-        def process_q(obj):
-            set_loaded_units(obj.current_dataset, "x", unit)
-            obj.current_dataset.x = np.append(obj.current_dataset.x, data_point)
-
-        def process_qx(obj):
-            set_loaded_units(obj.current_dataset, "x", unit)
-            obj.current_dataset.qx_data = np.fromstring(
-                data_point, dtype=float, sep=",")
-
-        def process_qy(obj):
-            set_loaded_units(obj.current_dataset, "y", unit)
-            obj.current_dataset.qy_data = np.fromstring(
-                data_point, dtype=float, sep=",")
-
-        def process_i_dev(obj):
-            if isinstance(obj.current_dataset, plottable_1D):
-                obj.current_dataset.dy = np.append(obj.current_dataset.dy,
-                                                   data_point)
-            elif isinstance(obj.current_dataset, plottable_2D):
-                obj.current_dataset.err_data = np.fromstring(
-                    data_point, dtype=float, sep=",")
-
-        def process_q_dev(obj):
-            obj.current_dataset.dx = np.append(obj.current_dataset.dx,
-                                               data_point)
-
-        def process_qx_dev(obj):
-            obj.current_dataset.dqx_data = np.fromstring(
-                data_point, dtype=float, sep=",")
-
-        def process_qy_dev(obj):
-            obj.current_dataset.dqy_data = np.fromstring(
-                data_point, dtype=float, sep=",")
-
-        def process_dqw(obj):
-            obj.current_dataset.dxw = np.append(obj.current_dataset.dxw,
-                                                data_point)
-
-        def process_dql(obj):
-            obj.current_dataset.dxl = np.append(obj.current_dataset.dxl,
-                                                data_point)
-
-        def process_mask(obj):
-            inter = [item == "1" for item in data_point.split(",")]
-            obj.current_dataset.mask = np.asarray(inter, dtype=bool)
-
-        def process_sesans(obj):
-            obj.current_datainfo.isSesans = bool(data_point)
-
-        def process_y_acceptance(obj):
-            obj.current_datainfo.sample.yacceptance = (data_point, unit)
-            set_loaded_units(obj.current_dataset, "x", unit)
-
-        def process_z_acceptance(obj):
-            obj.current_datainfo.sample.zacceptance = (data_point, unit)
-            set_loaded_units(obj.current_dataset, "y", unit)
-
-        def call_pass(obj):
-            pass
-
-        tag = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        process_switcher = {
-            'I': process_i,
-            'Q': process_q,
-            'Qx': process_qx,
-            'Qy': process_qy,
-            'Idev': process_i_dev,
-            'Qdev': process_q_dev,
-            'Qxdev': process_qx_dev,
-            'Qydev': process_qy_dev,
-            'dQw': process_dqw,
-            'dQl': process_dql,
-            'Mask': process_mask,
-            'Qmean': call_pass,
-            'Shadowfactor': call_pass,
-            'Sesans': process_sesans,
-            'yacceptance': process_y_acceptance,
-            'zacceptance': process_z_acceptance,
-        }
-        handler = process_switcher.get(tag, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
-
-    def process_sample(self, params):
-        def process_id(obj):
-            obj.current_datainfo.sample.ID = data_point
-
-        def process_title(obj):
-            obj.current_datainfo.sample.name = data_point
-
-        def process_transmission(obj):
-            obj.current_datainfo.sample.transmission = data_point
-
-        def process_details(obj):
-            obj.current_datainfo.sample.details.append(data_point)
-
-        def process_thickness(obj):
-            obj.current_datainfo.sample.thickness = data_point
-            obj.current_datainfo.sample.thickness_unit = unit
-
-        def process_temperature(obj):
-            obj.current_datainfo.sample.temperature = data_point
-            obj.current_datainfo.sample.temperature_unit = unit
-
-        def process_roll(obj):
-            obj.current_datainfo.sample.orientation.x = data_point
-            obj.current_datainfo.sample.orientation_unit = unit
-
-        def process_pitch(obj):
-            obj.current_datainfo.sample.orientation.y = data_point
-            obj.current_datainfo.sample.orientation_unit = unit
-
-        def process_yaw(obj):
-            obj.current_datainfo.sample.orientation.z = data_point
-            obj.current_datainfo.sample.orientation_unit = unit
-
-        def process_x(obj):
-            obj.current_datainfo.sample.position.x = data_point
-            obj.current_datainfo.sample.position_unit = unit
-
-        def process_y(obj):
-            obj.current_datainfo.sample.position.y = data_point
-            obj.current_datainfo.sample.position_unit = unit
-
-        def process_z(obj):
-            obj.current_datainfo.sample.position.z = data_point
-            obj.current_datainfo.sample.position_unit = unit
-
-        tagname = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        process_switcher = {
-            'ID': process_id,
-            'Title': process_title,
-            'thickness': process_thickness,
-            'transmission': process_transmission,
-            'temperature': process_temperature,
-            'details': process_details,
-            'x': process_x,
-            'y': process_y,
-            'z': process_z,
-            'roll': process_roll,
-            'pitch': process_pitch,
-            'yaw': process_yaw,
-        }
-        handler = process_switcher.get(tagname, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
-
-    def process_instrument(self, params):
-        if params.get('tagname', '') == 'name':
-            self.current_datainfo.instrument = params.get('data_point', '')
-        else:
-            self.process_meta_data(params)
-
-    def process_detector(self, params):
-        def process_name(obj):
-            obj.detector.name = data_point
-
-        def process_sdd(obj):
-            obj.detector.distance = data_point
-            obj.detector.distance_unit = unit
-
-        def process_slit_length(obj):
-            obj.detector.slit_length = data_point
-            obj.detector.slit_length_unit = unit
-
-        def process_x(obj):
-            if obj.parent_class == 'offset':
-                obj.detector.offset.x = data_point
-                obj.detector.offset_unit = unit
-            elif obj.parent_class == 'beam_center':
-                obj.detector.beam_center.x = data_point
-                obj.detector.beam_center_unit = unit
-            elif obj.parent_class == 'pixel_size':
-                obj.detector.pixel_size.x = data_point
-                obj.detector.pixel_size_unit = unit
-
-        def process_y(obj):
-            if obj.parent_class == 'offset':
-                obj.detector.offset.y = data_point
-                obj.detector.offset_unit = unit
-            elif obj.parent_class == 'beam_center':
-                obj.detector.beam_center.y = data_point
-                obj.detector.beam_center_unit = unit
-            elif obj.parent_class == 'pixel_size':
-                obj.detector.pixel_size.y = data_point
-                obj.detector.pixel_size_unit = unit
-
-        def process_z(obj):
-            if obj.parent_class == 'offset':
-                obj.detector.offset.z = data_point
-                obj.detector.offset_unit = unit
-            elif obj.parent_class == 'beam_center':
-                obj.detector.beam_center.z = data_point
-                obj.detector.beam_center_unit = unit
-            elif obj.parent_class == 'pixel_size':
-                obj.detector.pixel_size.z = data_point
-                obj.detector.pixel_size_unit = unit
-
-        def process_roll(obj):
-            obj.detector.orientation.x = data_point
-            obj.detector.orientation_unit = unit
-
-        def process_pitch(obj):
-            obj.detector.orientation.y = data_point
-            obj.detector.orientation_unit = unit
-
-        def process_yaw(obj):
-            obj.detector.orientation.z = data_point
-            obj.detector.orientation_unit = unit
-
-        tagname = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        process_switcher = {
-            'name': process_name,
-            'SDD': process_sdd,
-            'slit_length': process_slit_length,
-            'x': process_x,
-            'y': process_y,
-            'z': process_z,
-            'roll': process_roll,
-            'pitch': process_pitch,
-            'yaw': process_yaw,
-        }
-        handler = process_switcher.get(tagname, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
-
-    def process_collimation(self, params):
-        def process_name(obj):
-            obj.collimation.name = data_point
-
-        def process_length(obj):
-            obj.collimation.length = data_point
-            obj.collimation.length_unit = unit
-
-        def process_aperture_distance(obj):
-            obj.aperture.distance = data_point
-            obj.aperture.distance_unit = unit
-
-        def process_x(obj):
-            obj.aperture.size.x = data_point
-            obj.collimation.size_unit = unit
-
-        def process_y(obj):
-            obj.aperture.size.y = data_point
-            obj.collimation.size_unit = unit
-
-        def process_z(obj):
-            obj.aperture.size.z = data_point
-            obj.collimation.size_unit = unit
-
-        tagname = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        process_switcher = {
-            'name': process_name,
-            'length': process_length,
-            'distance': process_aperture_distance,
-            'x': process_x,
-            'y': process_y,
-            'z': process_z,
-        }
-        handler = process_switcher.get(tagname, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
-
-    def process_process(self, params):
-        def process_name(obj):
-            obj.process.name = data_point
-
-        def process_desciption(obj):
-            obj.process.description = data_point
-
-        def process_date(obj):
-            try:
-                obj.process.date = datetime.datetime.fromtimestamp(data_point)
-            except:
-                obj.process.date = data_point
-
-        def process_note(obj):
-            obj.process.notes.append(data_point)
-
-        def process_term(obj):
-            dic = {"name": name, "value": data_point, "unit": unit}
-            obj.process.term.append(dic)
-
-        tagname = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        name = params.get('name', '')
-        process_switcher = {
-            'name': process_name,
-            'description': process_desciption,
-            'date': process_date,
-            'SASprocessnote': process_note,
-            'term': process_term,
-        }
-        handler = process_switcher.get(tagname, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
-
-    def process_transmission_spectrum(self, params):
-        def process_t(obj):
-            obj.transspectrum.transmission = np.append(
-                obj.transspectrum.transmission, data_point)
-            obj.transspectrum.transmission_unit = unit
-
-        def process_t_dev(obj):
-            obj.transspectrum.transmission_deviation = np.append(
-                obj.transspectrum.transmission_deviation, data_point)
-            obj.transspectrum.transmission_deviation_unit = unit
-
-        def process_lambda(obj):
-            obj.transspectrum.wavelength = np.append(
-                obj.transspectrum.wavelength, data_point)
-            obj.transspectrum.wavelength_unit = unit
-
-        tag = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        process_switcher = {
-            'T': process_t,
-            'Tdev': process_t_dev,
-            'Lambda': process_lambda,
-        }
-        handler = process_switcher.get(tag, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
-
-    def process_source(self, params):
-        def process_wavelength(obj):
-            obj.current_datainfo.source.wavelength = data_point
-            obj.current_datainfo.source.wavelength_unit = unit
-
-        def process_wavelength_min(obj):
-            obj.current_datainfo.source.wavelength_min = data_point
-            obj.current_datainfo.source.wavelength_min_unit = unit
-
-        def process_wavelength_max(obj):
-            obj.current_datainfo.source.wavelength_max = data_point
-            obj.current_datainfo.source.wavelength_max_unit = unit
-
-        def process_wavelength_spread(obj):
-            obj.current_datainfo.source.wavelength_spread = data_point
-            obj.current_datainfo.source.wavelength_spread_unit = unit
-
-        def process_beam_size_x(obj):
-            obj.current_datainfo.source.beam_size.x = data_point
-            obj.current_datainfo.source.beam_size_unit = unit
-
-        def process_beam_size_y(obj):
-            obj.current_datainfo.source.beam_size.y = data_point
-            obj.current_datainfo.source.beam_size_unit = unit
-
-        def process_beam_size_z(obj):
-            obj.current_datainfo.source.beam_size.z = data_point
-            obj.current_datainfo.source.beam_size_unit = unit
-
-        def process_radiation(obj):
-            obj.current_datainfo.source.radiation = data_point
-
-        def process_beam_shape(obj):
-            obj.current_datainfo.source.beam_shape = data_point
-
-        tag = params.get('tagname', '')
-        data_point = params.get('data_point', '')
-        unit = params.get('unit', '')
-        source_switcher = {
-            'wavelength': process_wavelength,
-            'wavelength_min': process_wavelength_min,
-            'wavelength_max': process_wavelength_max,
-            'wavelength_spread': process_wavelength_spread,
-            'x': process_beam_size_x,
-            'y': process_beam_size_y,
-            'z': process_beam_size_z,
-            'radiation': process_radiation,
-            'beam_shape': process_beam_shape,
-        }
-        # TODO: this is repeated in multiple methods - generalize
-        handler = source_switcher.get(tag, '')
-        if callable(handler):
-            handler(self)
-        else:
-            self.process_meta_data(params)
 
     def _is_call_local(self):
         if self.frm == "":
@@ -945,7 +495,6 @@ class Reader(XMLreader):
         else:
             self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
-        # TODO: fix the writer to linearize all data, including T_spectrum
         # self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
         self._write_sample_info(datainfo, entry_node)
