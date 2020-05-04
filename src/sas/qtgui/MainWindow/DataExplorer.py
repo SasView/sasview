@@ -1264,7 +1264,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                     # Model update should be protected
                     self.mutex.lock()
-                    self.updateModel(new_data, p_file)
+                    self.updateModel(new_data, new_data.name)
                     #self.model.reset()
                     QtWidgets.QApplication.processEvents()
                     self.mutex.unlock()
