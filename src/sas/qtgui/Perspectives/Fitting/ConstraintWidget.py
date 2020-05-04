@@ -771,7 +771,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Check if any constraints present in tab
         active_constraint_names = fit_page.getComplexConstraintsForModel()
-        constraint_names = fit_page.getAllComplexConstraintsForModel()
+        constraint_names = fit_page.getFullConstraintNameListForModel()
         constraints = fit_page.getConstraintObjectsForModel()
         if not constraints: 
             return

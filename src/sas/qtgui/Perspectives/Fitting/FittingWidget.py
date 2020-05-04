@@ -1055,7 +1055,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     for s in range(param_number) if self.rowHasActiveComplexConstraint(s)]
         return params
 
-    def getAllComplexConstraintsForModel(self):
+    def getFullConstraintNameListForModel(self):
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
