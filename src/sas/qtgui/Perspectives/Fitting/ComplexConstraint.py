@@ -288,7 +288,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.lblWarning.setText(txt)
         self.constraintReadySignal.emit(cons_tuple)
         # reload the comboboxes
-        #self.setupParamWidgets()
+        self.setupParamWidgets()
 
     def onSetAll(self):
         """

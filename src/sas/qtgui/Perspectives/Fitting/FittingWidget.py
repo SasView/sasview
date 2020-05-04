@@ -2636,14 +2636,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def isCheckable(self, row):
         return self._model_model.item(row, 0).isCheckable()
 
-    def selectCheckbox(self, row, select):
+    def changeCheckboxStatus(self, row, checkbox_status):
         """
-        Select the checkbox in given row.
+        Checks/unchecks the checkbox at given row
         """
         assert 0<= row <= self._model_model.rowCount()
         index = self._model_model.index(row, 0)
         item = self._model_model.itemFromIndex(index)
-        if select:
+        if checkbox_status:
             item.setCheckState(QtCore.Qt.Checked)
         else:
             item.setCheckState(QtCore.Qt.Unchecked)

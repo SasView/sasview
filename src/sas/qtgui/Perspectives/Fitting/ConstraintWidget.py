@@ -438,15 +438,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             param = item.data(0)[item.data(0).index(':') + 1:item.data(0).index('=')].strip()
             model = item.data(0)[:item.data(0).index(':')].strip()
             tab = self.available_tabs[model]
+            if isinstance(tab, FittingWidget):
             # Update the fitting widget whenever a constraint is activated/deactivated
-            if item.checkState() == QtCore.Qt.Checked:
-                font = QtGui.QFont()
-                font.setItalic(True)
-                brush = QtGui.QBrush(QtGui.QColor('blue'))
-                tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
-            else:
-                tab.modifyViewOnRow(tab.getRowFromName(param))
-            return
+                if item.checkState() == QtCore.Qt.Checked:
+                    font = QtGui.QFont()
+                    font.setItalic(True)
+                    brush = QtGui.QBrush(QtGui.QColor('blue'))
+                    tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
+                else:
+                    tab.modifyViewOnRow(tab.getRowFromName(param))
+                return
         # Update the constraint formula
         constraint = self.available_constraints[row]
         function = item.text()
@@ -904,7 +905,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constrained_tab.addConstraintToRow(constraint, constrained_row)
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.selectCheckbox(constrained_row, True)
+        constrained_tab.changeCheckboxStatus(constrained_row, True)
 
 
     def showMultiConstraint(self):
