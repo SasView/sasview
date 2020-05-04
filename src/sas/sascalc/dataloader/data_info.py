@@ -34,16 +34,17 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
         loaded_unit = ""
     loaded_unit = re.sub('([A-Za-z ]+)([-0-9]+)', r"\1^\2", loaded_unit)
     if axis.lower() == 'x':
-        obj._xunit = loaded_unit
-        obj._x_loaded_unit = loaded_unit
-        obj.x_converter = Converter(obj._x_loaded_unit)
+        obj.x_converter = Converter(loaded_unit)
+        obj._xunit = obj.x_converter.base
+        obj._x_loaded_unit = obj.x_converter.base
     elif axis.lower() == 'y':
-        obj._yunit = loaded_unit
-        obj._y_loaded_unit = loaded_unit
-        obj.y_converter = Converter(obj._y_loaded_unit)
+        obj.y_converter = Converter(loaded_unit)
+        obj._yunit = obj.y_converter.base
+        obj._y_loaded_unit = obj.y_converter.base
     elif axis.lower() == 'z':
-        obj._z_loaded_unit = loaded_unit
-        obj.z_converter = Converter(obj._z_loaded_unit)
+        obj.z_converter = Converter(loaded_unit)
+        obj._zunit = obj.z_converter.base
+        obj._z_loaded_unit = obj.z_converter.base
     else:
         raise ValueError(
             "The axis {0} was not found.".format(axis))

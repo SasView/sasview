@@ -167,8 +167,11 @@ class Reader(FileReader):
                     self._find_data_attributes(value)
                     self._initialize_new_data_set(value)
                 # Recursion step to access data within the group
-                self.read_children(value, parent_list)
-                self.add_intermediate()
+                try:
+                    self.read_children(value, parent_list)
+                    self.add_intermediate()
+                except Exception as e:
+                    self.current_datainfo.errors.append(str(e))
                 # Reset parent class when returning from recursive method
                 self.parent_class = last_parent_class
                 parent_list.remove(key)
@@ -177,7 +180,9 @@ class Reader(FileReader):
                 # If this is a dataset, store the data appropriately
                 data_set = value.value
                 unit = self._get_unit(value)
-
+                # Put scalars into lists to be sure they are iterable
+                if np.isscalar(data_set):
+                    data_set = [data_set]
                 for data_point in data_set:
                     if isinstance(data_point, np.ndarray):
                         if data_point.dtype.char == 'S':
@@ -218,37 +223,61 @@ class Reader(FileReader):
                         break
                     # Sample Information
                     elif self.parent_class == u'SASsample':
-                        self.process_sample(data_point, key)
+                        try:
+                            self.process_sample(data_point, key)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Instrumental Information
                     elif (key == u'name'
                           and self.parent_class == u'SASinstrument'):
-                        self.current_datainfo.instrument = data_point
+                        try:
+                            self.current_datainfo.instrument = data_point
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Detector
                     elif self.parent_class == u'SASdetector':
-                        self.process_detector(data_point, key, unit)
+                        try:
+                            self.process_detector(data_point, key, unit)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Collimation
                     elif self.parent_class == u'SAScollimation':
-                        self.process_collimation(data_point, key, unit)
+                        try:
+                            self.process_collimation(data_point, key, unit)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Aperture
                     elif self.parent_class == u'SASaperture':
-                        self.process_aperture(data_point, key)
+                        try:
+                            self.process_aperture(data_point, key)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Process Information
                     elif self.parent_class == u'SASprocess': # CanSAS 2.0
-                        self.process_process(data_point, key)
+                        try:
+                            self.process_process(data_point, key)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Source
                     elif self.parent_class == u'SASsource':
-                        self.process_source(data_point, key, unit)
+                        try:
+                            self.process_source(data_point, key, unit)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
                     # Everything else goes in meta_data
                     elif self.parent_class == u'SASdata':
                         if isinstance(self.current_dataset, plottable_2D):
                             self.process_2d_data_object(data_set, key, unit)
                         else:
                             self.process_1d_data_object(data_set, key, unit)
-
                         break
                     elif self.parent_class == u'SAStransmission_spectrum':
-                        self.process_trans_spectrum(data_set, key)
-                        break
+                        try:
+                            self.process_trans_spectrum(data_set, key)
+                        except Exception as e:
+                            self.current_datainfo.errors.append(str(e))
+                        finally:
+                            break
                     else:
                         new_key = self._create_unique_key(
                             self.current_datainfo.meta_data, key)

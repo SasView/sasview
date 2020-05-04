@@ -50,6 +50,7 @@ inferring the dimension from an example unit.
 
 from __future__ import division
 import math
+import re
 
 __all__ = ['Converter']
 
@@ -107,7 +108,7 @@ def _build_all_units():
     distance = _build_metric_units('meter','m')
     distance.update(_build_metric_units('metre','m'))
     distance.update(_build_plural_units(micron=1e-6, Angstrom=1e-10))
-    distance.update({'A':1e-10, 'Ang':1e-10})
+    distance.update({'A':1e-10})
 
     # Note: minutes are used for angle
     time = _build_metric_units('second','s')
@@ -132,10 +133,9 @@ def _build_all_units():
     charge = _build_metric_units('coulomb','C')
     charge.update({'microAmp*hour':0.0036})
 
-    sld = { '10^-6 Angstrom^-2': 1e-6, 'Angstrom^-2': 1 }
-    Q = { 'invA': 1, 'invAng': 1, 'invAngstroms': 1, '1/A': 1,
-          '1/Angstrom': 1, '1/angstrom': 1, 'A^{-1}': 1, 'cm^{-1}': 1e-8,
-          '10^-3 Angstrom^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
+    sld = { '10^-6 A^-2': 1e-6, 'A^-2': 1 }
+    Q = { 'invA': 1, '1/A': 1, 'A^{-1}': 1, 'cm^{-1}': 1e-8,
+          '10^-3 A^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
           'nm^{-1}': 1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
     se = {'A^-2 cm^-1': 1, 'A^{-2} cm^{-1}': 1, '1/A^2 1/cm': 1, 'A-2 cm-1': 1}
 
@@ -144,6 +144,19 @@ def _build_all_units():
 
     dims = [distance, time, angle, frequency, temperature, charge, sld, Q, se]
     return dims
+
+def _standardize_names(unit):
+    """
+    Convert supplied units to a standard format for maintainability
+    :param unit: Raw unit as supplied
+    :return: Unit with known, reduced values
+    """
+    unit = re.sub(r'([Aa]{1})([Nn][Gg]([Ss][Tt][Rr][Oo][Mm]){0,1}(\b)){1}',
+                  'A', unit)
+    unit = re.sub(r'(([Mm]{1})([Ee][Tt][EeRr][EeRr]){0,1}(\b))', 'm', unit)
+    # TODO: Standardize names
+    return unit
+
 
 class Converter(object):
     """
@@ -160,6 +173,7 @@ class Converter(object):
     unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1}
 
     def __init__(self, name):
+        name = _standardize_names(name)
         self.base = name
         for map in self.dims:
             if name in map:
@@ -173,6 +187,7 @@ class Converter(object):
 
     def scale(self, units=""):
         if units == "" or self.scalemap is None: return 1
+        units = _standardize_names(units)
         return self.scalebase/self.scalemap[units]
 
     def __call__(self, value, units=""):
