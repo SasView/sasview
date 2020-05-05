@@ -2760,18 +2760,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             data = self.data
         # Convert data from raw units to sasmodels compatible units
         try:
-            unit = data.xunit
+            self.nativeQUnit = data.x_unit
             data.convert_q_units('1/A')
-            self.nativeQUnit = unit
         except KeyError:
             msg = "Unable to convert Q units to native sasmodels unit of 1/A:"
             msg += " Fit parameters will be in units relative to the data "
             msg += "Q units {0}".format(data.xunit)
             logger.warning(msg)
         try:
-            unit = data.yunit if not self.is2D else data.zunit
+            self.nativeIUnit = data.y_unit if not self.is2D else data.z_unit
             data.convert_i_units('1/cm')
-            self.nativeIUnit = unit
         except KeyError:
             msg = "Unable to convert I units to native sasmodels unit of 1/cm:"
             msg += " Fit parameters will be in units relative to the data "
@@ -2860,8 +2858,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
         if return_data is None:
             return
-        return_data.convert_q_units(self.nativeQUnit)
-        return_data.convert_i_unit(self.nativeIUnit)
+        return_data['data'].convert_q_units(self.nativeQUnit)
+        return_data['data'].convert_i_units(self.nativeIUnit)
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
         # Fits of Sesans data are in real space
@@ -2916,8 +2914,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if return_data is None:
             return
-        return_data.convert_i_unit(self.nativeIUnit)
-        return_data.convert_q_unit(self.nativeQUnit)
+        return_data.convert_i_units(self.nativeIUnit)
+        return_data.convert_q_units(self.nativeQUnit)
         fitted_data = self.logic.new2DPlot(return_data)
         # assure the current index is set properly for batch
         if len(self._logic) > 1:

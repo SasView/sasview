@@ -132,16 +132,12 @@ class cansas_reader_xml(unittest.TestCase):
         # Source
         self.assertEqual(self.data.source.radiation, "neutron")
 
-        self.assertEqual(self.data.source.beam_size_unit, "mm")
         self.assertEqual(self.data.source.beam_size_name, "bm")
         self.assertEqual(self.data.source.beam_size.x, 12)
-        self.assertEqual(self.data.source.beam_size.y, 13)
-
         self.assertEqual(self.data.source.beam_shape, "disc")
 
         self.assertEqual(self.data.source.wavelength_unit, "A")
         self.assertEqual(self.data.source.wavelength, 6)
-
         self.assertEqual(self.data.source.wavelength_max_unit, "nm")
         self.assertAlmostEqual(self.data.source.wavelength_max, 1.0)
         self.assertEqual(self.data.source.wavelength_min_unit, "nm")
