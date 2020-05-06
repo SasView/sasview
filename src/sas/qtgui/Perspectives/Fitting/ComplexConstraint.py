@@ -42,6 +42,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self._constraint = Constraint()
         self.all_menu = None
         self.parent = parent
+        self.redefining_warning = ""
 
         self.warning = self.lblWarning.text()
         self.setupData()
@@ -125,12 +126,11 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             txt = "No parameters in model "+self.tab_names[0] +\
                 " are available for constraining.\n"+\
                 "Please select at least one parameter for fitting when adding a constraint."
-            self.lblWarning.setText(txt)
         else:
+            txt = self.redefining_warning
             self.cmdOK.setEnabled(True)
             self.cmdAddAll.setEnabled(True)
-            txt = ""
-            self.lblWarning.setText(txt)
+        self.lblWarning.setText(txt)
 
     def setupTooltip(self):
         """
@@ -158,7 +158,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         params_list = [param1, param2]
         all_pars = [tab.model_parameters for tab in self.tabs]
         is2Ds = [tab.is2D for tab in self.tabs]
-        txt = ""
+        txt = self.redefining_warning
         for pars, is2D in zip(all_pars, is2Ds):
             if any([FittingUtilities.isParamPolydisperse(p, pars, is2D) for p in params_list]):
                 # no parameters are pd - reset the text to not show the warning
@@ -285,7 +285,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             txt = "Warning: parameter " + \
                   cons_tuple[0] + "." + cons_tuple[1].param +\
                   " has been redefined."
-            self.lblWarning.setText(txt)
+            self.redefining_warning = txt
+        else:
+            self.redefining_warning = ""
         self.constraintReadySignal.emit(cons_tuple)
         # reload the comboboxes
         self.setupParamWidgets()
@@ -331,12 +333,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
                 if len(redefined_constraints) == 1:
                     txt = txt.replace("parameters", "parameter")
                     txt = txt.replace("has", "been")
-                self.lblWarning.setText(txt)
-
+                self.redefining_warning = txt
+            else:
+                self.redefining_warning = ""
             self.constraintReadySignal.emit((model1, con))
 
         # reload the comboboxes
-        #self.setupParamWidgets()
+        self.setupParamWidgets()
 
     def onHelp(self):
         """
