@@ -823,7 +823,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
-        if len(tabs) < 2:
+        if len(tabs) < 1:
             self.cmdAdd.setEnabled(False)
         else:
             self.cmdAdd.setEnabled(True)
