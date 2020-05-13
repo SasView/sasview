@@ -435,7 +435,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Update the tabs for fitting list
             constraint = self.available_constraints[row]
             constraint.active = (item.checkState() == QtCore.Qt.Checked)
-            return
+            param = item.data(0)[item.data(0).index(':') + 1:item.data(0).index('=')].strip()
+            model = item.data(0)[:item.data(0).index(':')].strip()
+            tab = self.available_tabs[model]
+            if isinstance(tab, FittingWidget):
+            # Update the fitting widget whenever a constraint is activated/deactivated
+                if item.checkState() == QtCore.Qt.Checked:
+                    font = QtGui.QFont()
+                    font.setItalic(True)
+                    brush = QtGui.QBrush(QtGui.QColor('blue'))
+                    tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
+                else:
+                    tab.modifyViewOnRow(tab.getRowFromName(param))
+                return
         # Update the constraint formula
         constraint = self.available_constraints[row]
         function = item.text()
@@ -708,6 +720,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
             tab.deleteConstraintOnParameter(param)
+
         # Constraints removed - refresh the table widget
         self.initializeFitList()
 
@@ -757,7 +770,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        constraint_names = fit_page.getComplexConstraintsForModel()
+        active_constraint_names = fit_page.getComplexConstraintsForModel()
+        constraint_names = fit_page.getFullConstraintNameListForModel()
         constraints = fit_page.getConstraintObjectsForModel()
         if not constraints: 
             return
@@ -771,10 +785,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
             # Show the text in the constraint table
             item = self.uneditableItem(label)
-            item = QtWidgets.QTableWidgetItem(label)
+            item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
+            #item = QtWidgets.QTableWidgetItem(label)
             # Why was this set to non-interactive??
             #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
-            item.setCheckState(QtCore.Qt.Checked)
+            if constraint_name in active_constraint_names:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
         self.tblConstraints.blockSignals(False)
@@ -805,7 +823,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
-        if len(tabs) < 2:
+        if len(tabs) < 1:
             self.cmdAdd.setEnabled(False)
         else:
             self.cmdAdd.setEnabled(True)
@@ -887,7 +905,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constrained_tab.addConstraintToRow(constraint, constrained_row)
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.selectCheckbox(constrained_row)
+        constrained_tab.changeCheckboxStatus(constrained_row, True)
 
 
     def showMultiConstraint(self):
