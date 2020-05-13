@@ -453,10 +453,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Tag along functionality
         self.label.setText("Data loaded from: ")
-        if self.logic.data.filename:
-            self.lblFilename.setText(self.logic.data.filename)
-        else:
+        if self.logic.data.name:
             self.lblFilename.setText(self.logic.data.name)
+        else:
+            self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
@@ -467,8 +467,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.is_batch_fitting:
             self.lblFilename.setVisible(False)
             for dataitem in self.all_data:
-                filename = GuiUtils.dataFromItem(dataitem).filename
-                self.cbFileNames.addItem(filename)
+                name = GuiUtils.dataFromItem(dataitem).name
+                self.cbFileNames.addItem(name)
             self.cbFileNames.setVisible(True)
             self.chkChainFit.setEnabled(True)
             self.chkChainFit.setVisible(True)
@@ -2119,7 +2119,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         data_to_show = self.data
         # Any models for this page
         current_index = self.all_data[self.data_index]
-        item = self._requestPlots(self.data.filename, current_index.model())
+        item = self._requestPlots(self.data.name, current_index.model())
         if item:
             # fit+data has not been shown - show just data
             self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
@@ -2670,7 +2670,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if self.data_is_loaded:
             if not fitted_data.name:
-                name = self.nameForFittedData(self.data.filename)
+                name = self.nameForFittedData(self.data.name)
                 fitted_data.title = name
                 fitted_data.name = name
                 fitted_data.filename = name
@@ -2719,7 +2719,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Return name for the dataset. Terribly impure function.
         """
         if fitted_data.name is None:
-            name = self.nameForFittedData(self.logic.data.filename)
+            name = self.nameForFittedData(self.logic.data.name)
             fitted_data.title = name
             fitted_data.name = name
             fitted_data.filename = name
@@ -3573,7 +3573,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         assert isinstance(fp, FitPage)
         # Main tab info
-        self.logic.data.filename = fp.filename
+        self.logic.data.filename = fp.name
         self.data_is_loaded = fp.data_is_loaded
         self.chkPolydispersity.setCheckState(fp.is_polydisperse)
         self.chkMagnetism.setCheckState(fp.is_magnetic)
@@ -3615,7 +3615,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         assert isinstance(fp, FitPage)
 
         # Main tab info
-        fp.filename = self.logic.data.filename
+        fp.filename = self.logic.data.name
         fp.data_is_loaded = self.data_is_loaded
         fp.is_polydisperse = self.chkPolydispersity.isChecked()
         fp.is_magnetic = self.chkMagnetism.isChecked()
@@ -3839,11 +3839,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # need item->data->data_id
                 data = GuiUtils.dataFromItem(item)
                 data_ids.append(data.id)
-                filenames.append(data.filename)
+                filenames.append(data.name)
         else:
             if self.data_is_loaded:
                 data_ids = [str(self.logic.data.id)]
-                filenames = [str(self.logic.data.filename)]
+                filenames = [str(self.logic.data.name)]
         param_list.append(['tab_index', str(self.tab_id)])
         param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
         param_list.append(['data_name', filenames])

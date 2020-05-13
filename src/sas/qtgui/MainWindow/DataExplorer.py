@@ -359,7 +359,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.filename
+            filename = data.name
             all_data[filename] = data
             other_datas = GuiUtils.plotsFromFilename(filename, model)
             # skip the main plot
@@ -386,7 +386,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.filename
+            filename = data.name
             is_checked = item.checkState()
             properties['checked'] = is_checked
             other_datas = []
@@ -408,7 +408,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data is None: continue
                 if data.id != id: continue
                 # We found the dataset - save it.
-                filename = data.filename
+                filename = data.name
                 is_checked = item.checkState()
                 properties['checked'] = is_checked
                 other_datas = GuiUtils.plotsFromFilename(filename, model)
@@ -600,7 +600,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             from sas.sascalc.dataloader.data_info import Data1D as old_data1d
             from sas.sascalc.dataloader.data_info import Data2D as old_data2d
             if isinstance(new_data, (old_data1d, old_data2d)):
-                new_data = self.manager.create_gui_data(value[0], new_data.filename)
+                new_data = self.manager.create_gui_data(value[0], new_data.name)
             if hasattr(value[0], 'id'):
                 new_data.id = value[0].id
                 new_data.group_id = value[0].group_id
@@ -608,7 +608,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # make sure the ID is retained
             properties = value[1]
             is_checked = properties['checked']
-            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
+            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
             new_item.setCheckState(is_checked)
             items.append(new_item)
             model = self.theory_model
@@ -1249,11 +1249,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.communicator.statusBarUpdateSignal.emit(message)
 
                 output_objects = self.loader.load(p_file)
-
-                # Some loaders return a list and some just a single Data1D object.
-                # Standardize.
-                if not isinstance(output_objects, list):
-                    output_objects = [output_objects]
 
                 for item in output_objects:
                     # cast sascalc.dataloader.data_info.Data1D into
