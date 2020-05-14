@@ -138,11 +138,13 @@ def _build_all_units():
           '10^-3 A^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
           'nm^{-1}': 1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
     se = {'A^-2 cm^-1': 1, 'A^{-2} cm^{-1}': 1, '1/A^2 1/cm': 1, 'A-2 cm-1': 1}
+    saxess = {'1/um^2': 1, 'um^-2': 1, 'um^{-2}': 1}
 
     _caret_optional(sld)
     _caret_optional(Q)
 
-    dims = [distance, time, angle, frequency, temperature, charge, sld, Q, se]
+    dims = [distance, time, angle, frequency, temperature, charge, sld, Q, se,
+            saxess]
     return dims
 
 def _standardize_names(unit):

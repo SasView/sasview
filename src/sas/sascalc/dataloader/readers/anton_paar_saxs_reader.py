@@ -115,7 +115,7 @@ class Reader(XMLreader):
         self.current_dataset.xaxis("Q", q_unit)
         self.current_dataset.yaxis("Intensity", i_unit)
         xml_intermediate = self.raw_data[self.upper:]
-        xml = ''.join(xml_intermediate)
+        xml = bytes(''.join(xml_intermediate), 'utf-8')
         try:
             self.set_xml_string(xml)
             dom = self.xmlroot.xpath('/fileinfo')
@@ -124,7 +124,7 @@ class Reader(XMLreader):
             # Data loaded but XML metadata has an error
             error_message += "Data points have been loaded but there was an "
             error_message += "error reading XML metadata: " + e.__str__()
-            correctly_loaded = False
+            self.current_datainfo.errors.append(error_message)
         self.send_to_output()
         if not correctly_loaded:
             raise DataReaderException(error_message)

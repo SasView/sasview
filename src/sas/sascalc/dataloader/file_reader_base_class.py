@@ -333,10 +333,11 @@ class FileReader(object):
             split = unit.split("/")
             if len(split) == 1:
                 return unit
-            elif split[0] == '1':
-                return "{0}^".format(split[1]) + "{-1}"
             else:
-                return "{0}*{1}^".format(split[0], split[1]) + "{-1}"
+                split_ct = split[1].split("^")
+                number = 1 if len(split_ct) == 1 else split_ct[1]
+                split[0] = '' if split[0] == '1' else split[0] + '*'
+                return "{0}{1}^{{-{2}}}".format(split[0], split_ct[0], number)
 
     def set_all_to_none(self):
         """
