@@ -389,6 +389,15 @@ class FittingWindow(QtWidgets.QTabWidget):
             else:
                 self.addFit(data, is_batch=is_batch)
 
+    def swapData(self, data):
+        """
+        Replace the data from the current fitting tab
+        """
+        assert isinstance(self.currentWidget(), FittingWidget)
+        self.currentWidget().data = data
+        tab_name = str(self.tabText(self.currentIndex()))
+        self.updateFitDict(data, tab_name)
+
     def onFittingOptionsChange(self, fit_engine):
         """
         React to the fitting algorithm change by modifying window title
