@@ -22,7 +22,7 @@ from __future__ import print_function
 #        an adapter class for plottables when needed.
 
 from sas.sascalc.data_util.uncertainty import Uncertainty
-from sas.sascalc.data_util.nxsunit import Converter
+from sas.sascalc.data_util.nxsunit import Converter, standardize_units
 import numpy as np
 import math
 from math import fabs
@@ -107,15 +107,16 @@ class plottable_1D(object):
         elif unit is not None:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
+            unit = standardize_units(unit)
             scale = float(self.x_converter.scale(unit))
             if self.x is not None and self.x.all():
-                self.x *= scale
+                self.x = self.x * scale
             if self.dx is not None and self.dx.all():
-                self.dx *= scale
+                self.dx = self.dx * scale
             if self.dxl is not None and self.dxl.all():
-                self.dxl *= scale
+                self.dxl = self.dxl * scale
             if self.dxw is not None and self.dxw.all():
-                self.dxw *= scale
+                self.dxw = self.dxw * scale
             # Only set instance variable once conversion is successful
             self._xunit = unit
 
@@ -131,11 +132,12 @@ class plottable_1D(object):
         elif unit is not None:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
+            unit = standardize_units(unit)
             scale = float(self.y_converter.scale(unit))
             if self.y is not None and self.y.all():
-                self.y *= scale
+                self.y *= self.y * scale
             if self.dy is not None and self.dy.all():
-                self.dy *= scale
+                self.dy = self.dy * scale
             # Only set instance variable once conversion is successful
             self._yunit = unit
 
@@ -207,11 +209,12 @@ class plottable_2D(object):
         elif unit is not None:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
+            unit = standardize_units(unit)
             scale = float(self.x_converter.scale(unit))
             if self.qx_data is not None and self.qx_data.all():
-                self.qx_data *= scale
+                self.qx_data = scale * self.qx_data
             if self.dqx_data is not None and self.dqx_data.all():
-                self.dqx_data *= scale
+                self.dqx_data = scale * self.dqx_data
             # Only set instance variable once conversion is successful
             self._xunit = unit
 
@@ -227,11 +230,12 @@ class plottable_2D(object):
         elif unit is not None:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
+            unit = standardize_units(unit)
             scale = float(self.y_converter.scale(unit))
             if self.qy_data is not None and self.qy_data.all():
-                self.qy_data *= scale
+                self.qy_data = self.qy_data * scale
             if self.dqy_data is not None and self.dqy_data.all():
-                self.dqy_data *= scale
+                self.dqy_data = self.dqy_data * scale
             # Only set instance variable once conversion is successful
             self._yunit = unit
 
@@ -247,11 +251,12 @@ class plottable_2D(object):
         elif unit is not None:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
+            unit = standardize_units(unit)
             scale = float(self.z_converter.scale(unit))
             if self.data is not None and self.data.all():
-                self.data *= scale
+                self.data = self.data * scale
             if self.err_data is not None and self.err_data.all():
-                self.err_data *= scale
+                self.err_data = self.err_data * scale
             # Only set instance variable once conversion is successful
             self._zunit = unit
 

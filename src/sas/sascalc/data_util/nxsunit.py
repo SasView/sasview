@@ -54,10 +54,11 @@ import re
 
 __all__ = ['Converter']
 
+
 # Limited form of units for returning objects of a specific type.
 # Maybe want to do full units handling with e.g., pyre's
 # unit class. For now lets keep it simple.  Note that
-def _build_metric_units(unit,abbr):
+def _build_metric_units(unit, abbr):
     """
     Construct standard SI names for the given unit.
     Builds e.g.,
@@ -71,20 +72,23 @@ def _build_metric_units(unit,abbr):
 
     Returns a dictionary of names and scales.
     """
-    prefix = dict(peta=1e15,tera=1e12,giga=1e9,mega=1e6,kilo=1e3,
-                  deci=1e-1,centi=1e-2,milli=1e-3,mili=1e-3,micro=1e-6,
-                  nano=1e-9,pico=1e-12,femto=1e-15)
-    short_prefix = dict(P=1e15,T=1e12,G=1e9,M=1e6,k=1e3,
-                        d=1e-1,c=1e-2,m=1e-3,u=1e-6,
-                        n=1e-9,p=1e-12,f=1e-15)
-    map = {abbr:1}
-    map.update([(P+abbr,scale) for (P,scale) in short_prefix.items()])
-    for name in [unit,unit.capitalize()]:
-        map.update({name:1,name+'s':1})
-        map.update([(P+name,scale) for (P,scale) in prefix.items()])
-        map.update([(P+'*'+name,scale) for (P,scale) in prefix.items()])
-        map.update([(P+name+'s',scale) for (P,scale) in prefix.items()])
+    prefix = dict(peta=1e15, tera=1e12, giga=1e9, mega=1e6, kilo=1e3,
+                  deci=1e-1, centi=1e-2, milli=1e-3, mili=1e-3, micro=1e-6,
+                  nano=1e-9, pico=1e-12, femto=1e-15)
+    short_prefix = dict(P=1e15, T=1e12, G=1e9, M=1e6, k=1e3,
+                        d=1e-1, c=1e-2, m=1e-3, u=1e-6,
+                        n=1e-9, p=1e-12, f=1e-15)
+    map = {abbr: 1}
+    for name in [unit, unit.capitalize(), abbr]:
+        map.update({name: 1, name+'s': 1})
+        map.update([(P+name, scale) for (P, scale) in prefix.items()])
+        map.update([(P+'*'+name, scale) for (P, scale) in prefix.items()])
+        map.update([(P+name+'s', scale) for (P, scale) in prefix.items()])
+        map.update([(P+name, scale) for (P, scale) in short_prefix.items()])
+        map.update([(P+'*'+name, scale) for (P, scale) in short_prefix.items()])
+        map.update([(P+name+'s', scale) for (P, scale) in short_prefix.items()])
     return map
+
 
 def _build_plural_units(**kw):
     """
@@ -95,6 +99,7 @@ def _build_plural_units(**kw):
     map.update([(name+'s',scale) for name,scale in kw.items()])
     return map
 
+
 def _caret_optional(s):
     """
     Strip '^' from unit names.
@@ -103,6 +108,7 @@ def _caret_optional(s):
     """
     stripped = [(k.replace('^',''),v) for k, v in s.items() if '^' in k]
     s.update(stripped)
+
 
 def _build_all_units():
     distance = _build_metric_units('meter','m')
@@ -135,8 +141,8 @@ def _build_all_units():
 
     sld = { '10^-6 A^-2': 1e-6, 'A^-2': 1 }
     Q = { 'invA': 1, '1/A': 1, 'A^{-1}': 1, 'cm^{-1}': 1e-8,
-          '10^-3 A^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
-          'nm^{-1}': 1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
+          '10^-3 A^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10, 'm^{-1}': 1e-10,
+          'nm^{-1}': 0.1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
     se = {'A^-2 cm^-1': 1, 'A^{-2} cm^{-1}': 1, '1/A^2 1/cm': 1, 'A-2 cm-1': 1}
     saxess = {'1/um^2': 1, 'um^-2': 1, 'um^{-2}': 1}
 
@@ -147,17 +153,51 @@ def _build_all_units():
             saxess]
     return dims
 
-def _standardize_names(unit):
+
+def standardize_units(unit):
     """
     Convert supplied units to a standard format for maintainability
     :param unit: Raw unit as supplied
     :return: Unit with known, reduced values
     """
+    # Catch ang, angstrom, ANG, ANGSTROM, and any capitalization in between
+    # Replace with 'A'
     unit = re.sub(r'([Aa]{1})([Nn][Gg]([Ss][Tt][Rr][Oo][Mm]){0,1}(\b)){1}',
                   'A', unit)
+    # Catch meter, metre, METER, METRE, and any capitalization in between
+    # Replace with 'm'
     unit = re.sub(r'(([Mm]{1})([Ee][Tt][EeRr][EeRr]){0,1}(\b))', 'm', unit)
-    # TODO: Standardize names
-    return unit
+    # Catch second, sec, SECOND, SEC, and any capitalization in between
+    # Replace with 's'
+    unit = re.sub(r'([Ss]{1})([Ee][Cc]([Oo][Nn][Dd]){0,1}(\b)){1}', 's', unit)
+    # Catch kelvin, KELVIN, and any capitalization in between
+    # Replace with 'K'
+    unit = re.sub(r'([Kk]{1})([Ee][Ll][Vv][Ii][Nn](\b)){1}', 'K', unit)
+    # Catch celcius, CELCIUS, and any capitalization in between
+    # Replace with 'C'
+    unit = re.sub(r'([Cc]{1})([Ee][Ll][Cc][Ii][Uu][Ss](\b)){1}', 'C', unit)
+    # Catch hertz, HERTZ, hz, HZ, and any capitalization in between
+    # Replace with 'Hz'
+    unit = re.sub(r'([Hh]{1})(([Ee][Rr][Tt]){0,1}([Zz])(\b)){1}', 'Hz', unit)
+    return _format_unit_structure(unit)
+
+
+def _format_unit_structure(unit=None):
+    """
+    Format units a common way
+    :param unit: Unit string to be formatted
+    :return: Formatted unit string
+    """
+    if unit:
+        # Convert a/b^n to a*b^{-n}
+        split = unit.split("/")
+        if len(split) == 1:
+            return unit
+        else:
+            split_ct = split[1].split("^")
+            number = 1 if len(split_ct) == 1 else split_ct[1]
+            split[0] = '' if split[0] == '1' else split[0] + '*'
+            return "{0}{1}^{{-{2}}}".format(split[0], split_ct[0], number)
 
 
 class Converter(object):
@@ -175,7 +215,7 @@ class Converter(object):
     unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1}
 
     def __init__(self, name):
-        name = _standardize_names(name)
+        name = standardize_units(name)
         self.base = name
         for map in self.dims:
             if name in map:
@@ -185,11 +225,12 @@ class Converter(object):
         if name in self.unknown:
             return # default scalemap and scalebase correspond to unknown
         else:
-            raise KeyError("Unknown unit %s"%name)
+            raise KeyError("Unknown unit %s" % name)
 
     def scale(self, units=""):
-        if units == "" or self.scalemap is None: return 1
-        units = _standardize_names(units)
+        if not units or self.scalemap is None:
+            return 1
+        units = standardize_units(units)
         return self.scalebase/self.scalemap[units]
 
     def __call__(self, value, units=""):
@@ -198,28 +239,33 @@ class Converter(object):
         # counts array would be bad.  Sometimes copying and other times
         # not copying is also bad, but copy on modify semantics isn't
         # supported.
-        if units == "" or self.scalemap is None: return value
+        if not units:
+            return value
         try:
-            return value * (self.scalebase/self.scalemap[units])
+            return value * self.scale(units)
         except KeyError:
             possible_units = ", ".join(str(k) for k in self.scalemap.keys())
-            raise KeyError("%s not in %s"%(units,possible_units))
+            raise KeyError("%s not in %s" % (units, possible_units))
 
-def _check(expect,get):
+
+def _check(expect, get):
     if expect != get:
-        raise ValueError("Expected %s but got %s"%(expect, get))
-     #print expect,"==",get
+        raise ValueError("Expected %s but got %s" % (expect, get))
+    # print(str(expect) + "==" + str(get))
+
 
 def test():
-    _check(1,Converter('n_m^-1')(10,'invA')) # 10 nm^-1 = 1 inv Angstroms
-    _check(2,Converter('mm')(2000,'m')) # 2000 mm -> 2 m
-    _check(2.011e10,Converter('1/A')(2.011,"1/m")) # 2.011 1/A -> 2.011 * 10^10 1/m
-    _check(0.003,Converter('microseconds')(3,units='ms')) # 3 us -> 0.003 ms
-    _check(45,Converter('nanokelvin')(45))  # 45 nK -> 45 nK
-    _check(0.5,Converter('seconds')(1800,units='hours')) # 1800 s -> 0.5 hr
-    _check(123,Converter('a.u.')(123,units='mm')) # arbitrary units always returns the same value
-    _check(123,Converter('a.u.')(123,units='s')) # arbitrary units always returns the same value
-    _check(123,Converter('a.u.')(123,units='')) # arbitrary units always returns the same value
+    _check(1, Converter('n_m^-1')(10, 'invA'))  # 10 nm^-1 = 1 inv Angstroms
+    _check(2, Converter('mm')(2000, 'm'))  # 2000 mm = 2 m
+    _check(2.011e10, Converter('1/A')(2.011, "1/m"))  # 2.011 1/A = 2.011e10 1/m
+    _check(0.003, Converter('microseconds')(3, units='ms'))  # 3 us = 0.003 ms
+    _check(45, Converter('nanokelvin')(45))  # 45 nK = 45 nK
+    _check(0.5, Converter('seconds')(1800, units='hours'))  # 1800 s = 0.5 hr
+
+    # arbitrary units always returns the same value
+    _check(123, Converter('a.u.')(123, units='mm'))
+    _check(123, Converter('a.u.')(123, units='s'))
+    _check(123, Converter('a.u.')(123, units=''))
     try:
         Converter('help')
     except KeyError:
@@ -228,6 +274,7 @@ def test():
         raise Exception("unknown unit did not raise an error")
 
     # TODO: more tests
+
 
 if __name__ == "__main__":
     test()

@@ -20,14 +20,10 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
-from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
 
 logger = logging.getLogger(__name__)
 
 warnings.simplefilter("ignore")
-
-CANSAS_FORMAT = CansasConstants.CANSAS_FORMAT
-CANSAS_NS = CansasConstants.CANSAS_NS
 
 
 def find(filename):
@@ -90,8 +86,10 @@ class cansas_reader_xml(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data.x_unit, 'A^{-1}')
-        self.assertEqual(self.data.y_unit, 'cm^{-1}')
+        self.assertEqual(self.data._xunit, 'A^{-1}')
+        self.assertEqual(self.data._yunit, 'cm^{-1}')
+        self.assertEqual(self.data.x_unit, self.data.x_loaded_unit)
+        self.assertEqual(self.data.y_unit, self.data.y_loaded_unit)
         self.assertAlmostEqual(self.data.x[0], 0.02, 6)
         self.assertAlmostEqual(self.data.y[0], 1000, 6)
         self.assertAlmostEqual(self.data.dx[0], 0.01, 6)
@@ -237,6 +235,8 @@ class cansas_reader_xml(unittest.TestCase):
         """
         self.data_list = self.reader.read(self.cansas1d_units)
         self.data = self.data_list[0]
+        self.data.convert_q_units('1/A')
+        self.data.convert_i_units('1/cm')
         self.assertEqual(self.data.filename,
                          self.cansas1d_units.split('\\')[-1])
         self._checkdata()

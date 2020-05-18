@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import datetime
 import inspect
 
@@ -21,7 +20,6 @@ from ..data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D, \
 from ..loader_exceptions import FileContentsException, DefaultReaderException
 from . import xml_reader
 from .xml_reader import XMLreader
-from .cansas_constants import CansasConstants
 from .cansas_load_helper import CansasLoaderHelper
 
 logger = logging.getLogger(__name__)
@@ -33,11 +31,14 @@ INVALID_SCHEMA_PATH_1_1 = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_in
 INVALID_SCHEMA_PATH_1_0 = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_invalid_v1_0.xsd"
 INVALID_XML = "\n\nThe loaded xml file, {0} does not fully meet the CanSAS v1.x specification. SasView loaded " + \
               "as much of the data as possible.\n\n"
-
-CONSTANTS = CansasConstants()
-CANSAS_FORMAT = CONSTANTS.format
-CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
+CANSAS_NS = {"1.0" : {"ns" : "cansas1d/1.0",
+                          "schema" : "cansas1d_v1_0.xsd"
+                         },
+                 "1.1" : {"ns" : "urn:cansas1d:1.1",
+                          "schema" : "cansas1d_v1_1.xsd"
+                         }
+                }
 
 
 class Reader(XMLreader):
@@ -52,7 +53,6 @@ class Reader(XMLreader):
     errors = set()
     # Namespace hierarchy for current xml_file object
     names = None
-    ns_list = None
     # Temporary storage location for loading multiple data sets in a single file
     current_data1d = None
     data = None
@@ -81,7 +81,6 @@ class Reader(XMLreader):
         self.detector = Detector()
         self.names = []
         self.cansas_defaults = {}
-        self.ns_list = None
         self.logging = []
         self.encoding = None
 
@@ -192,13 +191,13 @@ class Reader(XMLreader):
             self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
             self.current_datainfo.meta_data[
                 PREPROCESS] = self.processing_instructions
+            self.base_ns = "{" + CANSAS_NS.get(self.cansas_version).get("ns") + "}"
         if self._is_call_local() and not recurse:
             basename, _ = os.path.splitext(os.path.basename(self.f_open.name))
             self.current_datainfo.filename = basename + self.extension
         # Create an empty dataset if no data has been passed to the reader
         if self.current_dataset is None:
             self._initialize_new_data_set(dom)
-        self.base_ns = "{" + CANSAS_NS.get(self.cansas_version).get("ns") + "}"
 
         # Loop through each child in the parent element
         for node in dom:
@@ -214,7 +213,6 @@ class Reader(XMLreader):
                 continue
             # Get where to store content
             self.names.append(tagname_original)
-            self.ns_list = CONSTANTS.iterate_namespace(self.names)
             # If the element is a child element, recurse
             if len(node.getchildren()) > 0:
                 self.parent_class = tagname_original
@@ -240,13 +238,8 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self._add_intermediate()
             else:
-                if isinstance(self.current_dataset, plottable_2D):
-                    data_point = node.text
-                    unit = attr.get('unit', '')
-                else:
-                    data_point, unit = self._get_node_value(node, tagname)
-                if not unit:
-                    unit = attr.get('unit', '')
+                data_point = node.text
+                unit = attr.get('unit', '')
 
                 # Psuedo-switch statement for faster processing of data
                 params = {
@@ -319,120 +312,6 @@ class Reader(XMLreader):
             self.aperture = Aperture()
         elif self.parent_class == 'SASdata':
             self.data.append(self.current_dataset)
-
-    def _get_node_value(self, node, tagname):
-        """
-        Get the value of a node and any applicable units
-
-        :param node: The XML node to get the value of
-        :param tagname: The tagname of the node
-        """
-        #Get the text from the node and convert all whitespace to spaces
-        units = ''
-        node_value = node.text
-        if node_value is not None:
-            node_value = ' '.join(node_value.split())
-        else:
-            node_value = ""
-
-        # If the value is a float, compile with units.
-        if self.ns_list.ns_datatype == "float":
-            # If an empty value is given, set as zero.
-            if node_value is None or node_value.isspace() \
-                                    or node_value.lower() == "nan":
-                node_value = "0.0"
-            #Convert the value to the base units
-            node_value, units = self._unit_conversion(node, tagname, node_value)
-
-        # If the value is a timestamp, convert to a datetime object
-        elif self.ns_list.ns_datatype == "timestamp":
-            if node_value is None or node_value.isspace():
-                pass
-            else:
-                try:
-                    node_value = \
-                        datetime.datetime.fromtimestamp(node_value)
-                except ValueError:
-                    node_value = None
-        return node_value, units
-
-    def _unit_conversion(self, node, tagname, node_value):
-        """
-        A unit converter method used to convert the data included in the file
-        to the default units listed in data_info
-
-        :param node: XML node
-        :param tagname: name of the node
-        :param node_value: The value of the current dom node
-        """
-        attr = node.attrib
-        value_unit = ''
-        err_msg = None
-        default_unit = None
-        if not isinstance(node_value, float):
-            node_value = float(node_value)
-        if 'unit' in attr and attr.get('unit') is not None:
-            try:
-                unit = attr['unit']
-                # Split the units to retain backwards compatibility with
-                # projects, analyses, and saved data from v4.1.0
-                unit_list = unit.split("|")
-                if len(unit_list) > 1:
-                    local_unit = unit_list[1]
-                else:
-                    local_unit = unit
-                unitname = self.ns_list.current_level.get("unit", "")
-                if "SASdetector" in self.names:
-                    save_in = "detector"
-                elif "aperture" in self.names:
-                    save_in = "aperture"
-                elif "SAScollimation" in self.names:
-                    save_in = "collimation"
-                elif "SAStransmission_spectrum" in self.names:
-                    save_in = "transspectrum"
-                elif "SASdata" in self.names:
-                    x = np.zeros(1)
-                    y = np.zeros(1)
-                    self.current_data1d = Data1D(x, y)
-                    save_in = "current_data1d"
-                elif "SASsource" in self.names:
-                    save_in = "current_datainfo.source"
-                elif "SASsample" in self.names:
-                    save_in = "current_datainfo.sample"
-                elif "SASprocess" in self.names:
-                    save_in = "process"
-                else:
-                    save_in = "current_datainfo"
-                default_unit = getattrchain(self, '.'.join((save_in, unitname)))
-                if (local_unit and default_unit
-                        and local_unit.lower() != default_unit.lower()
-                        and local_unit.lower() != "none"):
-                    # Check local units - bad units raise KeyError
-                    #print("loading", tagname, node_value, local_unit, default_unit)
-                    data_conv_q = Converter(local_unit)
-                    value_unit = default_unit
-                    node_value = data_conv_q(node_value, units=default_unit)
-                else:
-                    value_unit = local_unit
-            except KeyError:
-                # Do not throw an error for loading Sesans data in cansas xml
-                # This is a temporary fix.
-                if local_unit != "A" and local_unit != 'pol':
-                    err_msg = "CanSAS reader: unexpected "
-                    err_msg += "\"{0}\" unit [{1}]; "
-                    err_msg = err_msg.format(tagname, local_unit)
-                    err_msg += "expecting [{0}]".format(default_unit)
-                value_unit = local_unit
-            except Exception:
-                err_msg = "CanSAS reader: unknown error converting "
-                err_msg += "\"{0}\" unit [{1}]"
-                err_msg = err_msg.format(tagname, local_unit)
-                value_unit = local_unit
-        elif 'unit' in attr:
-            value_unit = attr['unit']
-        if err_msg:
-            self.errors.add(err_msg)
-        return node_value, value_unit
 
     def _initialize_new_data_set(self, node=None):
         if node is not None:
