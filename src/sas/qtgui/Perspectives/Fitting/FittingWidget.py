@@ -164,9 +164,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if data is not None:
             self.data = data
-        else:
-            self.nativeQUnit = None
-            self.nativeIUnit = None
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -222,11 +219,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Let others know we're full of data now
         self.data_is_loaded = True
-
-        self.nativeQUnit = self.logic.data._xunit
-        self.nativeIUnit = self.logic.data._yunit
-        if self.is2D:
-            self.nativeIUnit = self.logic.data._zunit
 
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
@@ -2774,23 +2766,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if data is None:
             data = self.data
-        # Convert data from raw units to sasmodels compatible units
-        try:
-            self.nativeQUnit = data.x_unit
-            data.convert_q_units('1/A')
-        except KeyError:
-            msg = "Unable to convert Q units to native sasmodels unit of 1/A:"
-            msg += " Fit parameters will be in units relative to the data "
-            msg += "Q units {0}".format(data.xunit)
-            logger.warning(msg)
-        try:
-            self.nativeIUnit = data.y_unit if not self.is2D else data.z_unit
-            data.convert_i_units('1/cm')
-        except KeyError:
-            msg = "Unable to convert I units to native sasmodels unit of 1/cm:"
-            msg += " Fit parameters will be in units relative to the data "
-            msg += "I units {0}".format(data.xunit)
-            logger.warning(msg)
         if model is None:
             model = copy.deepcopy(self.kernel_module)
             self.updateKernelModelWithExtraParams(model)
@@ -2874,8 +2849,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
         if return_data is None:
             return
-        return_data['data'].convert_q_units(self.nativeQUnit)
-        return_data['data'].convert_i_units(self.nativeIUnit)
+        self.convert_to_native_units(return_data)
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
         # Fits of Sesans data are in real space
@@ -2930,8 +2904,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if return_data is None:
             return
-        return_data.convert_i_units(self.nativeIUnit)
-        return_data.convert_q_units(self.nativeQUnit)
+        self.convert_to_native_units(return_data)
         fitted_data = self.logic.new2DPlot(return_data)
         # assure the current index is set properly for batch
         if len(self._logic) > 1:
@@ -2950,6 +2923,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update/generate plots
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
+
+    def convert_to_native_units(self, return_data):
+        return_data['data'].convert_i_units(return_data['data'].x_loaded_unit)
+        return_data['data'].convert_q_units(return_data['data'].z_loaded_unit
+                                            if self.is2D else
+                                            return_data['data'].y_loaded_unit)
+        return return_data
 
     def updateEffectiveRadius(self, return_data):
         """

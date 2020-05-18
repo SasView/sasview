@@ -36,15 +36,15 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
     if axis.lower() == 'x':
         obj.x_converter = Converter(loaded_unit)
         obj._xunit = obj.x_converter.base
-        obj._x_loaded_unit = obj.x_converter.base
+        obj.x_loaded_unit = obj.x_converter.base
     elif axis.lower() == 'y':
         obj.y_converter = Converter(loaded_unit)
         obj._yunit = obj.y_converter.base
-        obj._y_loaded_unit = obj.y_converter.base
+        obj.y_loaded_unit = obj.y_converter.base
     elif axis.lower() == 'z':
         obj.z_converter = Converter(loaded_unit)
         obj._zunit = obj.z_converter.base
-        obj._z_loaded_unit = obj.z_converter.base
+        obj.z_loaded_unit = obj.z_converter.base
     else:
         raise ValueError(
             "The axis {0} was not found.".format(axis))
@@ -71,10 +71,10 @@ class plottable_1D(object):
     # Units
     _xaxis = ''
     _xunit = ''
-    _x_loaded_unit = ''
+    x_loaded_unit = ''
     _yaxis = ''
     _yunit = ''
-    _y_loaded_unit = ''
+    y_loaded_unit = ''
 
     def __init__(self, x, y, dx=None, dy=None, dxl=None,
                  dxw=None, lam=None, dlam=None):
@@ -166,13 +166,13 @@ class plottable_2D(object):
     # Units
     _xaxis = ''
     _xunit = ''
-    _x_loaded_unit = ''
+    x_loaded_unit = ''
     _yaxis = ''
     _yunit = ''
-    _y_loaded_unit = ''
+    y_loaded_unit = ''
     _zaxis = ''
     _zunit = ''
-    _z_loaded_unit = ''
+    z_loaded_unit = ''
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
