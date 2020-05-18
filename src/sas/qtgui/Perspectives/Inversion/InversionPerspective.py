@@ -128,6 +128,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def allowBatch(self):
         return False
 
+    def allowBatch(self):
+        """
+        Tell the caller we don't accept swapping data
+        """
+        return False
+
     def setClosable(self, value=True):
         """
         Allow outsiders close this widget

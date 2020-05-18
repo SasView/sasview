@@ -824,3 +824,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Tell the caller that we don't accept multiple data instances
         """
         return False
+
+    def allowSwap(self):
+        """
+        Tell the caller that we can't swap data
+        """
+        return False

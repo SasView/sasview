@@ -345,6 +345,12 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return True
 
+    def allowSwap(self):
+        """
+        Tell the caller that you can swap data
+        """
+        return True
+
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
