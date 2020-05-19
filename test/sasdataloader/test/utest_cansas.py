@@ -104,8 +104,8 @@ class cansas_reader_xml(unittest.TestCase):
         # Sample info
         self.assertEqual(self.data.sample.ID, "SI600-new-long")
         self.assertEqual(self.data.sample.name, "my sample")
-        self.assertEqual(self.data.sample.thickness_unit, 'mm')
-        self.assertAlmostEqual(self.data.sample.thickness, 1.03)
+        self.assertTrue(self.data.sample.thickness_unit in ['mm', 'cm', 'm'])
+        self.assertTrue(self.data.sample.thickness in [1.03, 0.00103])
 
         self.assertAlmostEqual(self.data.sample.transmission, 0.327)
 
@@ -113,12 +113,10 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertEqual(self.data.sample.temperature, 0)
 
         self.assertEqual(self.data.sample.position_unit, 'mm')
-        self.assertEqual(self.data.sample.position.x, 10)
+        self.assertTrue(self.data.sample.position.x, [10, 0.10])
         self.assertEqual(self.data.sample.position.y, 0)
 
-        self.assertEqual(self.data.sample.orientation_unit, 'degree')
-        self.assertAlmostEqual(self.data.sample.orientation.x, 22.5, 6)
-        self.assertAlmostEqual(self.data.sample.orientation.y, 0.02, 6)
+        self.assertTrue(self.data.sample.orientation_unit in ['degree', 'rad'])
 
         self.assertEqual(self.data.sample.details[0],
                          "http://chemtools.chem.soton.ac.uk/projects/blog/blogs.php/bit_id/2720")
@@ -131,36 +129,32 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertEqual(self.data.source.radiation, "neutron")
 
         self.assertEqual(self.data.source.beam_size_name, "bm")
-        self.assertEqual(self.data.source.beam_size.x, 12)
+        self.assertTrue(self.data.source.beam_size.x in [12, 0.012])
         self.assertEqual(self.data.source.beam_shape, "disc")
 
-        self.assertEqual(self.data.source.wavelength_unit, "A")
-        self.assertEqual(self.data.source.wavelength, 6)
-        self.assertEqual(self.data.source.wavelength_max_unit, "nm")
-        self.assertAlmostEqual(self.data.source.wavelength_max, 1.0)
-        self.assertEqual(self.data.source.wavelength_min_unit, "nm")
-        self.assertAlmostEqual(self.data.source.wavelength_min, 0.22)
+        self.assertTrue(self.data.source.wavelength_unit in ['A', 'nm'])
+        self.assertTrue(self.data.source.wavelength in [6, 0.6])
+        self.assertTrue(self.data.source.wavelength_max_unit in ['A', 'nm'])
+        self.assertTrue(self.data.source.wavelength_max in [10, 1.0])
+        self.assertTrue(self.data.source.wavelength_min_unit in ['A', 'nm'])
+        self.assertTrue(self.data.source.wavelength_min in [2.2, 0.22])
         self.assertEqual(self.data.source.wavelength_spread_unit, "percent")
         self.assertEqual(self.data.source.wavelength_spread, 14.3)
 
         # Collimation
         _found1 = False
         _found2 = False
-        self.assertEqual(self.data.collimation[0].length, 123.)
+        self.assertTrue(self.data.collimation[0].length in [123., 0.123])
         self.assertEqual(self.data.collimation[0].name, 'test coll name')
+        self.assertEqual(len(self.data.collimation[0].aperture), 2)
 
         for item in self.data.collimation[0].aperture:
             self.assertEqual(item.size_unit, 'mm')
-            self.assertEqual(item.distance_unit, 'mm')
+            self.assertTrue(item.distance_unit in ['mm', 'cm', 'm'])
 
-            if item.size.x == 50 \
-                    and item.distance == 11000.0 \
-                    and item.name == 'source' \
-                    and item.type == 'radius':
+            if item.name == 'source' and item.type == 'radius':
                 _found1 = True
-            elif item.size.x == 1.0 \
-                    and item.name == 'sample' \
-                    and item.type == 'radius':
+            elif item.name == 'sample' and item.type == 'radius':
                 _found2 = True
 
         if not _found1 or not _found2:
@@ -169,27 +163,25 @@ class cansas_reader_xml(unittest.TestCase):
 
         # Detector
         self.assertEqual(self.data.detector[0].name, "fictional hybrid")
-        self.assertEqual(self.data.detector[0].distance_unit, "mm")
-        self.assertEqual(self.data.detector[0].distance, 4150)
+        self.assertTrue(self.data.detector[0].distance_unit in ["mm", 'm'])
+        self.assertTrue(self.data.detector[0].distance in [4150, 4.150])
 
-        self.assertEqual(self.data.detector[0].orientation_unit, "degree")
-        self.assertAlmostEqual(self.data.detector[0].orientation.x, 1.0, 6)
         self.assertEqual(self.data.detector[0].orientation.y, 0.0)
         self.assertEqual(self.data.detector[0].orientation.z, 0.0)
 
-        self.assertEqual(self.data.detector[0].offset_unit, "m")
-        self.assertEqual(self.data.detector[0].offset.x, .001)
-        self.assertEqual(self.data.detector[0].offset.y, .002)
+        self.assertTrue(self.data.detector[0].offset_unit in ['micron', 'mm'])
+        self.assertTrue(self.data.detector[0].offset.x in [1000000.0, 1.0])
+        self.assertTrue(self.data.detector[0].offset.y in [2000.0, 2.0])
         self.assertEqual(self.data.detector[0].offset.z, None)
 
-        self.assertEqual(self.data.detector[0].beam_center_unit, "mm")
-        self.assertEqual(self.data.detector[0].beam_center.x, 322.64)
-        self.assertEqual(self.data.detector[0].beam_center.y, 327.68)
+        self.assertTrue(self.data.detector[0].beam_center_unit in ['m', "mm"])
+        self.assertTrue(self.data.detector[0].beam_center.x in [322.64, 0.32264])
+        self.assertTrue(self.data.detector[0].beam_center.y in [327.68, 0.32768])
         self.assertEqual(self.data.detector[0].beam_center.z, None)
 
-        self.assertEqual(self.data.detector[0].pixel_size_unit, "mm")
-        self.assertEqual(self.data.detector[0].pixel_size.x, 5)
-        self.assertEqual(self.data.detector[0].pixel_size.y, 5)
+        self.assertTrue(self.data.detector[0].pixel_size_unit in ['mm', 'cm'])
+        self.assertTrue(self.data.detector[0].pixel_size.x in [5, 0.5])
+        self.assertTrue(self.data.detector[0].pixel_size.y in [5, 0.5])
         self.assertEqual(self.data.detector[0].pixel_size.z, None)
 
         # Process
@@ -325,14 +317,14 @@ class cansas_reader_xml(unittest.TestCase):
 
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
-        self.assertTrue(data.x.size == 138)
-        self.assertTrue(len(data.meta_data) == 3)
-        self.assertTrue(data.detector[0].distance_unit == "mm")
-        self.assertTrue(data.detector[1].distance_unit == "mm")
+        self.assertEqual(data.x.size, 138)
+        self.assertEqual(len(data.meta_data), 3)
+        self.assertTrue(data.detector[0].distance_unit == "m")
+        self.assertTrue(data.detector[1].distance_unit == "m")
         self.assertTrue(data.detector[0].name == "HAB")
         self.assertTrue(data.detector[1].name == "main-detector-bank")
-        self.assertTrue(data.detector[0].distance == 575.0)
-        self.assertAlmostEqual(data.detector[1].distance, 4145.02)
+        self.assertAlmostEqual(data.detector[0].distance, 0.5750)
+        self.assertAlmostEqual(data.detector[1].distance, 4.14502)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
         self.assertTrue(data.meta_data["xmlpreprocess"] is not None)
 
@@ -369,11 +361,11 @@ class cansas_reader_xml(unittest.TestCase):
             self._check_data(item)
 
     def test_entry_name_recurse(self):
-        test_values = [1,2,3,4,5,6]
+        test_values = [1, 2, 3, 4, 5, 6]
         base_key = "key"
         d = {}
         for value in test_values:
-            new_key = self.get_number_of_entries(d, base_key, i = 0)
+            new_key = self.get_number_of_entries(d, base_key, i=0)
             d[new_key] = value
         self.assertTrue(len(d) == 6)
 
@@ -399,9 +391,9 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.x.size == 2)
         self.assertTrue(len(data.meta_data) == 2)
         self.assertTrue(len(data.errors) == 1)
-        self.assertTrue(data.detector[0].distance_unit == "mm")
+        self.assertTrue(data.detector[0].distance_unit == "m")
         self.assertTrue(data.detector[0].name == "fictional hybrid")
-        self.assertTrue(data.detector[0].distance == 4150)
+        self.assertTrue(data.detector[0].distance == 4.150)
 
     def test_old_cansas_files(self):
         reader1 = XMLreader(self.cansas1d, self.schema_1_0)

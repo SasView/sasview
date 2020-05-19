@@ -386,12 +386,12 @@ class CansasLoaderHelper:
             self.process_meta_data(params)
 
     def process_collimation_name(self, params):
-        data_point = float(params.get('data_point', ''))
+        data_point = params.get('data_point', '')
         unit = params.get('unit', '')
         self.parent.collimation.name = data_point
 
     def process_collimation_length(self, params):
-        data_point = params.get('data_point', '')
+        data_point = float(params.get('data_point', ''))
         unit = params.get('unit', '')
         self.parent.collimation.length = data_point
         self.parent.collimation.length_unit = unit

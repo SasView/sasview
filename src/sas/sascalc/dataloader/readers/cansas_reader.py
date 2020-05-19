@@ -244,7 +244,7 @@ class Reader(XMLreader):
                 # Psuedo-switch statement for faster processing of data
                 params = {
                     'tagname': tagname,
-                    'data_point': data_point,
+                    'data_point': str(data_point).strip(),
                     'unit': unit,
                     'name': name,
                 }

@@ -135,7 +135,7 @@ class plottable_1D(object):
             unit = standardize_units(unit)
             scale = float(self.y_converter.scale(unit))
             if self.y is not None and self.y.all():
-                self.y *= self.y * scale
+                self.y = self.y * scale
             if self.dy is not None and self.dy.all():
                 self.dy = self.dy * scale
             # Only set instance variable once conversion is successful
