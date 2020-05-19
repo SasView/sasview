@@ -5,7 +5,7 @@ import webbrowser
 
 from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore, QtTest
 
 # set up import paths
 import path_prepare
@@ -40,6 +40,8 @@ class ComplexConstraintTest(unittest.TestCase):
         self.tab2.cbCategory.setCurrentIndex(category_index)
         model_index = self.tab2.cbModel.findText("barbell")
         self.tab2.cbModel.setCurrentIndex(model_index)
+        # set tab2 model name to M2
+        self.tab2.kernel_module.name = "M2"
 
         tabs = [self.tab1, self.tab2]
         self.widget = ComplexConstraint(parent=None, tabs=tabs)
@@ -59,7 +61,7 @@ class ComplexConstraintTest(unittest.TestCase):
         self.assertTrue(self.widget.isModal())
 
         # initial tab names
-        self.assertEqual(self.widget.tab_names, ['M1','M1'])
+        self.assertEqual(self.widget.tab_names, ['M1','M2'])
         self.assertIn('scale', self.widget.params[0])
         self.assertIn('background', self.widget.params[1])
 
@@ -70,11 +72,32 @@ class ComplexConstraintTest(unittest.TestCase):
         self.assertEqual(self.widget.txtOperator.text(), '=')
         self.assertEqual(self.widget.cbModel1.currentText(), 'M1')
         self.assertEqual(self.widget.cbModel2.currentText(), 'M1')
+        # no parameter has been selected for fitting, so left combobox should contain empty text
+        self.assertEqual(self.widget.cbParam1.currentText(), '')
+        self.assertEqual(self.widget.cbParam2.currentText(), 'scale')
+        # now select a parameter for fitting (M1.scale)
+        self.tab1._model_model.item(0, 0).setCheckState(QtCore.Qt.Checked)
+        # reload widget comboboxes
+        self.widget.setupParamWidgets()
+        # M1.scale has been selected for fit, should now appear in left combobox
+        self.assertEqual(self.widget.cbParam1.currentText(), 'scale')
+        # change model in right combobox
+        index = self.widget.cbModel2.findText('M2')
+        self.widget.cbModel2.setCurrentIndex(index)
+        self.assertEqual(self.widget.cbModel2.currentText(), 'M2')
+        # add a constraint (M1:scale = M2.scale)
+        model, constraint = self.widget.constraint()
+        self.tab1.addConstraintToRow(constraint, 0)
+        # scale should not appear in right combobox, should now be background
+        index = self.widget.cbModel2.findText('M1')
+        self.widget.cbModel2.setCurrentIndex(index)
+        self.widget.setupParamWidgets()
+        self.assertEqual(self.widget.cbParam2.currentText(), 'background')
 
     def testTooltip(self):
         ''' test the tooltip'''
         p1 = self.widget.tab_names[0] + ":" + self.widget.cbParam1.currentText()
-        p2 = self.widget.tab_names[1]+"."+self.widget.cbParam2.currentText()
+        p2 = self.widget.tab_names[1] + "." + self.widget.cbParam2.currentText()
 
         tooltip = "E.g.\n%s = 2.0 * (%s)\n" %(p1, p2)
         tooltip += "%s = sqrt(%s) + 5"%(p1, p2)
