@@ -15,7 +15,7 @@ from sas.sascalc.dataloader.manipulations import (Boxavg, Boxsum,
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class Averaging(unittest.TestCase):
@@ -105,7 +105,7 @@ class Averaging(unittest.TestCase):
 class DataInfoTests(unittest.TestCase):
 
     def setUp(self):
-        filepath = find('test_data' + os.sep + 'MAR07232_rest.h5')
+        filepath = find('MAR07232_rest.h5')
         self.data_list = Loader().load(filepath)
         self.data = self.data_list[0]
 
@@ -120,7 +120,7 @@ class DataInfoTests(unittest.TestCase):
         ##r.nbins_phi = 20
 
         o = r(self.data)
-        filepath = find('test_data' + os.sep + 'ring_testdata.txt')
+        filepath = find('ring_testdata.txt')
         answer_list = Loader().load(filepath)
         answer = answer_list[0]
 
@@ -141,7 +141,7 @@ class DataInfoTests(unittest.TestCase):
 
         o = r(self.data)
 
-        filepath = find('test_data' + os.sep + 'avg_testdata.txt')
+        filepath = find('avg_testdata.txt')
         answer = Loader().load(filepath)[0]
         for i in range(r.nbins_phi):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -176,7 +176,7 @@ class DataInfoTests(unittest.TestCase):
         r.fold = False
         o = r(self.data)
 
-        filepath = find('test_data' + os.sep + 'slabx_testdata.txt')
+        filepath = find('slabx_testdata.txt')
         answer = Loader().load(filepath)[0]
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -194,7 +194,7 @@ class DataInfoTests(unittest.TestCase):
         r.fold = False
         o = r(self.data)
 
-        filepath = find('test_data' + os.sep + 'slaby_testdata.txt')
+        filepath = find('slaby_testdata.txt')
         answer = Loader().load(filepath)[0]
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -220,7 +220,7 @@ class DataInfoTests(unittest.TestCase):
                       nbins=nbins)
         o = r(self.data)
 
-        filepath = find('test_data' + os.sep + 'ring_testdata.txt')
+        filepath = find('ring_testdata.txt')
         answer = Loader().load(filepath)[0]
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -237,7 +237,7 @@ class DataInfoTests(unittest.TestCase):
         r.nbins_phi = 20
         o = r(self.data)
 
-        filepath = find('test_data' + os.sep + 'sectorphi_testdata.txt')
+        filepath = find('sectorphi_testdata.txt')
         answer = Loader().load(filepath)[0]
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -254,7 +254,7 @@ class DataInfoTests(unittest.TestCase):
         r.nbins_phi = 20
         o = r(self.data)
 
-        filepath = find('test_data' + os.sep + 'sectorq_testdata.txt')
+        filepath = find('sectorq_testdata.txt')
         answer = Loader().load(filepath)[0]
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)

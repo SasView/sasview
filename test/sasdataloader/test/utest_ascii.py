@@ -13,7 +13,7 @@ from sas.sascalc.dataloader.data_info import Data2D
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class ABSReaderTests(unittest.TestCase):
@@ -47,7 +47,7 @@ class ABSReaderTests(unittest.TestCase):
         self.assertTrue(self.f1.x_unit == 'A^{-1}')
         self.assertTrue(self.f1.y_unit == 'cm^{-1}')
         
-        self.assertEqual(self.f1.meta_data['loader'],"ASCII")
+        self.assertEqual(self.f1.meta_data['loader'], "ASCII")
 
     def test_truncated_1(self):
         """

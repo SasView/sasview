@@ -11,7 +11,7 @@ warnings.simplefilter("ignore")
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 BASE_POINTS = 36864
@@ -23,11 +23,10 @@ class DatReader(unittest.TestCase):
     def setUp(self):
         self.loader = Loader()
         # Unedited data
-        self.data_list_square = self.loader.load(find(
-            "test_data" + os.path.sep + "detector_square.dat"))
+        self.data_list_square = self.loader.load(find("detector_square.dat"))
         # First 15 rows of data removed
-        self.data_list_rectangle = self.loader.load(find(
-            "test_data" + os.path.sep + "detector_rectangular.dat"))
+        self.data_list_rectangle = self.loader.load(
+            find("detector_rectangular.dat"))
 
     def _check_common_data(self, f, removed):
         self.assertEqual(len(f.qx_data),  BASE_POINTS - removed * BASE_LENGTH)

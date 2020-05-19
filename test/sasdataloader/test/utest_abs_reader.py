@@ -15,7 +15,7 @@ import os.path
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class abs_reader(unittest.TestCase):

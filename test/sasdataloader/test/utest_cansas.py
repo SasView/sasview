@@ -27,7 +27,7 @@ warnings.simplefilter("ignore")
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class cansas_reader_xml(unittest.TestCase):
@@ -35,30 +35,23 @@ class cansas_reader_xml(unittest.TestCase):
     def setUp(self):
         self.loader = Loader()
         self.reader = Reader()
-        self.xml_valid = find("test_data" + os.sep + "cansas_test_modified.xml")
-        self.xml_invalid = find("test_data" + os.sep + "cansas_test.xml")
-        self.cansas1d_badunits = find("test_data" + os.sep
-                                      + "cansas1d_badunits.xml")
-        self.cansas1d = find("test_data" + os.sep + "cansas1d.xml")
-        self.cansas1d_slit = find("test_data" + os.sep + "cansas1d_slit.xml")
-        self.cansas1d_units = find("test_data" + os.sep + "cansas1d_units.xml")
-        self.cansas1d_notitle = find("test_data" + os.sep
-                                     + "cansas1d_notitle.xml")
-        self.cansas1d_multiple_entries = find("test_data" + os.sep
-                                              + "latex_smeared.xml")
-        self.isis_1_0 = find("test_data" + os.sep + "ISIS_1_0.xml")
-        self.isis_1_1 = find("test_data" + os.sep + "ISIS_1_1.xml")
-        self.isis_1_1_notrans = find("test_data" + os.sep
-                                     + "ISIS_1_1_notrans.xml")
-        self.isis_1_1_doubletrans = find("test_data" + os.sep
-                                         + "ISIS_1_1_doubletrans.xml")
-        self.schema_1_0 = find("test_data" + os.sep + "cansas1d_v1_0.xsd")
-        self.schema_1_1 = find("test_data" + os.sep + "cansas1d_v1_1.xsd")
-        self.write_1_0_filename = find("test_data" + os.sep
-                                       + "isis_1_0_write_test.xml")
-        self.write_1_1_filename = find("test_data" + os.sep
-                                       + "isis_1_1_write_test.xml")
-        self.write_filename = find("test_data" + os.sep + "write_test.xml")
+        self.xml_valid = find("cansas_test_modified.xml")
+        self.xml_invalid = find("cansas_test.xml")
+        self.cansas1d_badunits = find("cansas1d_badunits.xml")
+        self.cansas1d = find("cansas1d.xml")
+        self.cansas1d_slit = find("cansas1d_slit.xml")
+        self.cansas1d_units = find("cansas1d_units.xml")
+        self.cansas1d_notitle = find("cansas1d_notitle.xml")
+        self.cansas1d_multiple_entries = find("latex_smeared.xml")
+        self.isis_1_0 = find("ISIS_1_0.xml")
+        self.isis_1_1 = find("ISIS_1_1.xml")
+        self.isis_1_1_notrans = find("ISIS_1_1_notrans.xml")
+        self.isis_1_1_doubletrans = find("ISIS_1_1_doubletrans.xml")
+        self.schema_1_0 = find("cansas1d_v1_0.xsd")
+        self.schema_1_1 = find("cansas1d_v1_1.xsd")
+        self.write_1_0_filename = find("isis_1_0_write_test.xml")
+        self.write_1_1_filename = find("isis_1_1_write_test.xml")
+        self.write_filename = find("write_test.xml")
 
     def test_generic_loader(self):
         # the generic loader should work as well
@@ -471,16 +464,14 @@ class cansas_reader_hdf5(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
-        self.datafile_basic = find(
-            "test_data" + os.sep + "simpleexamplefile.h5")
-        self.datafile_nodi = find(
-            "test_data" + os.sep + "x25000_no_di.h5")
+        self.datafile_basic = find("simpleexamplefile.h5")
+        self.datafile_nodi = find("x25000_no_di.h5")
         self.datafile_multiplesasentry = find(
-            "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry.h5")
+            "nxcansas_1Dand2D_multisasentry.h5")
         self.datafile_multiplesasdata = find(
-            "test_data" + os.sep + "nxcansas_1Dand2D_multisasdata.h5")
+            "nxcansas_1Dand2D_multisasdata.h5")
         self.datafile_multiplesasdata_multiplesasentry = find(
-            "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
+            "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
 
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class GenericFileReaderTests(unittest.TestCase):
@@ -50,13 +50,13 @@ class GenericFileReaderTests(unittest.TestCase):
 
     def test_same_file_unknown_extensions(self):
         # Five files, all with the same content, but different file extensions
-        no_ext = find("test_data" + os.sep + "TestExtensions")
-        not_xml = find("test_data" + os.sep + "TestExtensions.notxml")
+        no_ext = find("TestExtensions")
+        not_xml = find("TestExtensions.notxml")
         # Deprecated extensions
-        asc_dep = find("test_data" + os.sep + "TestExtensions.asc")
-        nxs_dep = find("test_data" + os.sep + "TestExtensions.nxs")
+        asc_dep = find("TestExtensions.asc")
+        nxs_dep = find("TestExtensions.nxs")
         # Native extension as a baseline
-        xml_native = find("test_data" + os.sep + "TestExtensions.xml")
+        xml_native = find("TestExtensions.xml")
         # Load the files and check contents
         no_ext_load = self.generic_reader.load(no_ext)
         asc_load = self.generic_reader.load(asc_dep)
