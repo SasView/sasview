@@ -3993,7 +3993,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         line_dict = {}
         for line in lines[1:]:
             content = line.split(',')
-            if len(content) > 1:
+            if len(content) > 1 and content[0] != "tab_name":
                 line_dict[content[0]] = content[1:]
 
         self.updatePageWithParameters(line_dict)
