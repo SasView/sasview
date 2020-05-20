@@ -374,7 +374,7 @@ class Reader(XMLreader):
         else:
             self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
-        # self._write_trans_spectrum(datainfo, entry_node)
+        self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
         self._write_sample_info(datainfo, entry_node)
         # Instrument info
@@ -557,26 +557,26 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        for i in range(len(datainfo.trans_spectrum)):
-            spectrum = datainfo.trans_spectrum[i]
+        for spectrum in datainfo.trans_spectrum:
             node = self.create_element("SAStransmission_spectrum",
                                        {"name" : spectrum.name})
             self.append(node, entry_node)
             if isinstance(spectrum.timestamp, datetime.datetime):
                 node.setAttribute("timestamp", spectrum.timestamp)
-            for i in range(len(spectrum.wavelength)):
+            for i in range(0, len(spectrum.wavelength)):
                 point = self.create_element("Tdata")
                 node.append(point)
                 self.write_node(point, "Lambda", spectrum.wavelength[i],
                                 {'unit': spectrum.wavelength_unit})
+                if len(spectrum.transmission) <= i:
+                    spectrum.transmission_unit[i] = 0.0
                 self.write_node(point, "T", spectrum.transmission[i],
                                 {'unit': spectrum.transmission_unit})
-                if spectrum.transmission_deviation is not None \
-                and len(spectrum.transmission_deviation) >= i:
-                    self.write_node(point, "Tdev",
-                                    spectrum.transmission_deviation[i],
-                                    {'unit':
-                                     spectrum.transmission_deviation_unit})
+                if spectrum.transmission_deviation is not None and len(
+                        spectrum.transmission_deviation) >= i:
+                    self.write_node(
+                        point, "Tdev", spectrum.transmission_deviation[i],
+                        {'unit': spectrum.transmission_deviation_unit})
 
     def _write_sample_info(self, datainfo, entry_node):
         """

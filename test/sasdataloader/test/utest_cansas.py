@@ -323,7 +323,9 @@ class cansas_reader_xml(unittest.TestCase):
 
     def _check_data_1_1(self, data):
         spectrum = data.trans_spectrum[0]
-        self.assertTrue(len(spectrum.wavelength) == 138)
+        self.assertEqual(len(spectrum.wavelength), 138)
+        self.assertEqual(len(spectrum.transmission), 138)
+        self.assertEqual(len(spectrum.transmission_deviation), 138)
 
     def test_cansas_xml(self):
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
@@ -343,6 +345,7 @@ class cansas_reader_xml(unittest.TestCase):
             return_data = reader2.load(self.write_1_1_filename)
             written_data = return_data[0]
             self._check_data(written_data)
+            self._check_data_1_1(written_data)
         if os.path.isfile(self.write_1_1_filename):
             os.remove(self.write_1_1_filename)
 
