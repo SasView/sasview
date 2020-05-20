@@ -122,9 +122,6 @@ class ABSReaderTests(unittest.TestCase):
             self.assertFalse(math.isnan(f_1d.y[i]))
             self.assertFalse(math.isnan(f_1d.dy[i]))
         self.assertTrue(isinstance(f_2d, Data2D))
-        f_2d.data = f_2d.data.flatten()
-        f_2d.qx_data = f_2d.qx_data.flatten()
-        f_2d.qy_data = f_2d.qy_data.flatten()
         for i in range(0, len(f_2d.data) - 1):
             self.assertFalse(math.isnan(f_2d.data[i]))
             self.assertFalse(math.isnan(f_2d.qx_data[i]))

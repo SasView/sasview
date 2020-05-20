@@ -73,7 +73,10 @@ class Registry(ExtensionRegistry):
 
         # Gets set to a string if the file has an associated reader that fails
         try:
-            return super(Registry, self).load(path, format=format)
+            data_list = super(Registry, self).load(path, format=format)
+            if len(data_list) < 1:
+                raise Exception()
+            return data_list
         except Exception as e:
             if debug: traceback.print_exc()
             # Use backup readers

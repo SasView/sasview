@@ -240,7 +240,7 @@ class Reader(FileReader):
         x_bins = np.unique(qx_data)
         y_bins = np.unique(qy_data)
         # For non-uniform Qx and Qy arrays
-        if len(x_bins) * len(y_bins) != len(qx_data):
+        if round(len(x_bins) * len(y_bins) / len(qx_data)) >= 2:
             x_bins = [qx_data[i] for i in takewhile(
                 lambda i: qx_data[i] < qx_data[i + 1], range(len(qx_data)))]
             # Above list comprehension rejects last item
