@@ -712,8 +712,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.manager.update_stored_data(deleted_names)
 
     @staticmethod
-    def convert_to_calculator_units(data):
+    def convert_to_calculator_units(qtGuiStdItem):
         # Convert data from raw units to sasmodels compatible units
+        data = GuiUtils.dataFromItem(qtGuiStdItem)
         try:
             data.convert_q_units('1/A')
         except KeyError:
@@ -728,7 +729,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msg += " Fit parameters will be in units relative to the data "
             msg += "I units {0}".format(data.xunit)
             logger.warning(msg)
-        return data
+        qtGuiStdItem.setData(data)
+        return qtGuiStdItem
 
     def sendData(self, event=None):
         """
@@ -739,9 +741,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
 
         # Figure out which rows are checked
-        selected_items = [self.convert_to_calculator_units(
-            self.model.item(index)) for index in range(self.model.rowCount())
-            if isItemReady(index)]
+        selected_items = [
+            self.convert_to_calculator_units(self.model.item(index))
+            for index in range(self.model.rowCount()) if isItemReady(index)]
 
         if len(selected_items) < 1:
             return

@@ -220,6 +220,8 @@ class cansas_reader_xml(unittest.TestCase):
         """
         self.data_list = self.reader.read(self.cansas1d_units)
         self.data = self.data_list[0]
+        self.assertEqual(self.data.x_loaded_unit, 'nm^{-1}')
+        self.assertEqual(self.data.y_loaded_unit, 'nm^{-1}')
         self.data.convert_q_units('1/A')
         self.data.convert_i_units('1/cm')
         self.assertEqual(self.data.filename,
