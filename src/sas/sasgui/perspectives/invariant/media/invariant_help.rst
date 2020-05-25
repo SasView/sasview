@@ -16,12 +16,12 @@ Principle
 ---------
 
 For any multi-phase system, i.e. any system that contains regions with
-different scattering length densities (SLD), the integral over all $q$ (or
-$4\pi$ in scattering angle) of the appropriately dimensionally-weighted 
-scattering cross-section (ie, 'intensity', $I(q)$ in absolute units) is a
-*constant* directly proportional to the mean-square average fluctuation (SLD)
-and the phase composition. Usefully, this value is *independent* of the sizes,
-shapes, or interactions, or, more generally, the arrangement, of the phase
+different scattering length densities (SLD), the integral over all $\vec(q)$
+of the appropriately dimensionally-weighted scattering cross-section (ie,
+'intensity', $I(\vec{q})$ in absolute units) is a *constant* directly
+proportional to the mean-square average fluctuation (SLD) and the phase
+composition. Usefully, this value is *independent* of the sizes, shapes, or
+interactions, or, more generally, the arrangement, of the phase
 domains (i.e. it is **invariant**) *provided the system is incompressible*
 (i.e, the relative volume fractions of the phases do not change). For the
 purposes of this discussion, a phase is any portion of the material which
@@ -64,6 +64,13 @@ data as:
     with very significant resolution smearing (more likely to be encountered
     with SANS than with SAXS data) the calculated invariant will be distorted
     (it will be too high).
+
+.. note::
+    The observant reader may notice the lack of a $4 \pi$ prefactor in the
+    above equation which would be required for an integral over all $q$ stated
+    at the beginning. This seems to be the convention historically adopted and
+    is only important when extracting terms from the invariant as below. As
+    long as the same covention is applied in their derivation all is consistent. 
 
 In the extreme case of "infinite" slit smearing, the above equation reduces to:
 
@@ -112,7 +119,10 @@ The difficulty with using $Q^*$  arises from the fact that experimental data is
 never measured over the range $0 \le q \le \infty$ and it is thus usually
 necessary to extrapolate the experimental data to both low and high $q$.
 Currently, SasView allows extrapolation to a fixed low and high $q$ such that
-$10^{-5} \le q \le 10$ |Ang^-1|. 
+$10^{-5} \le q \le 10$ |Ang^-1|. Note that the integrals above are
+weighted by $q^2$ or $q$. Thus the high-$q$ extrapolation is weighted far more
+heavily than the low-$q$ extrapolation so that having data measured to as large
+a value of $q_{max}$ as possible can be surprisingly important.
 
 Low-\ $q$ region (<= $q_{min}$ in data):
 
@@ -121,27 +131,22 @@ Low-\ $q$ region (<= $q_{min}$ in data):
    $q_{min+j}$ where $j$ is the user-chosen number of points from which to
    extrapolate. The default is the first 10 points. Alternatively a power
    law, similar to the high $q$ extrapolation, can be used but this is not
-   recommended! Because the integrals above are weighted by $q^2$ or $q$
-   the low-$q$ extrapolation generally only contributes a small proportion,
-   say <3%, to the overall value of $Q^*$.
+   recommended!
    
 High-\ $q$ region (>= $q_{max}$ in data):
 
 *  The power law function $A/q^m$ is used where the power law constant
    $m$ can be fixed to some value by the user or fit along with the constant
    $A$. $m$ should typically be between -3 and -4 with -4 indicating sharp
-   interfaces. The fitted constant(s) $A$ ($m$) is/are obtained by
-   fitting the data within the range $q_{max-j}$ to $q_{max}$ 
-   where, again, $j$ is the user chosen number of points from which to
-   extrapolate, the default again being the last 10 points. This extrapolation
-   typically contributes 3 - 20% of the value of $Q^*$ so having data measured
-   to as large a value of $q_{max}$ as possible is generally much more
-   important.
+   interfaces though there may be occasions when it will deviate from this.
+   The fitted constant(s) $A$ ($m$) is/are obtained by fitting the data within
+   the range $q_{max-j}$ to $q_{max}$ where, again, $j$ is the user chosen
+   number of points from which to extrapolate, the default again being the
+   last 10 points.
 
-.. note:: While the high $q$ exponent should generally be close to -4 for the
-    assumptions underlying the extraction of other parameters to be correct,
-    in the special case of slit smearing that power law should be -3 for the
-    same sharp interfaces.
+.. note:: While the high $q$ exponent should generally be close to -4 for a
+    system with sharp interfaces, in the special case of slit smearing that
+    power law should be -3 for the same sharp interfaces.
 
 Invariant
 ^^^^^^^^^
@@ -237,8 +242,8 @@ general concept and not limited to two phases.  Extending the formalism to more
 phases, so that useful information can be extracted from the invariant
 is, however, more difficult.  
 
-We note here that in the more generalized formalism the contrast term is replaced
-by a quantity called the *SLD fluctuation*, $\eta$, so that:
+We note here that in the more generalized formalism the contrast term is
+replaced by a quantity called the *SLD fluctuation*, $\eta$, so that:
 
 .. math::
 
@@ -253,7 +258,8 @@ average of the SLD fluctuations, $<\eta^2>$, is:
     \langle \eta^2 \rangle = \langle (\rho^*)^2 \rangle -
     \langle (\rho^*) \rangle^2
 
-**In the case of a two-phase system**:
+Returning to the simplest case of a two-phase system, this formalism can be
+shown to reduce to the same results given above:
 
 .. math::
 
@@ -280,7 +286,7 @@ then yields:
     \langle \eta^2 \rangle = \phi_1 \eta_1^2 + \phi_2 \eta_2^2 \equiv \phi_1 \phi_2
     (\rho_1 - \rho_2)^2
 
-and thus:
+and thus for the two phase system we recover:
 
 .. math::
 
