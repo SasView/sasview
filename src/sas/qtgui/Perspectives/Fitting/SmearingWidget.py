@@ -176,10 +176,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         elif text == "Use dQ Data":
             self.setElementsVisibility(True)
             self.setDQLabels()
-            if self.smear_type == "Pinhole":
-                self.onPinholeSmear()
-            else:
-                self.onSlitSmear()
+            self.onDQSmear()
         elif text == "Custom Pinhole Smear":
             self.setElementsVisibility(True)
             self.setPinholeLabels()
@@ -224,7 +221,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Accuracy combobox visibility
         """
-        if isinstance(self.data, Data2D) and self.cbSmearing.currentIndex() == 1:
+        if isinstance(self.data, Data2D) and self.cbSmearing.currentIndex() >= 1:
             self.gAccuracy.setVisible(True)
         else:
             self.gAccuracy.setVisible(False)
@@ -321,6 +318,22 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if d_up is not None:
             self.model.item(MODEL.index('PINHOLE_MAX')).setText(d_up)
 
+    def onDQSmear(self):
+        """
+        Create a custom dQ smear object that will change the way residuals
+        are compute when fitting
+        """
+        # resolution information already in data.dx (if 1D) or 
+        # data.dqx_data & data.dqy_data (if 2D),
+        # so only need to set accuracy for 2D
+        self.current_smearer = smear_selection(self.data, self.kernel_model)
+        if isinstance(self.data, Data2D):
+            try:
+                backend_accuracy = ACCURACY_DICT.get(accuracy)
+            except:
+                backend_accuracy = 'low'
+            self.current_smearer.set_accuracy(accuracy=backend_accuracy)
+
     def onPinholeSmear(self):
         """
         Create a custom pinhole smear object that will change the way residuals
@@ -338,10 +351,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             len_data = len(data.data)
             data.dqx_data = np.zeros(len_data)
             data.dqy_data = np.zeros(len_data)
-            data.dqx_data[data.dqx_data == 0] = percent * data.qx_data
-            data.dqy_data[data.dqy_data == 0] = percent * data.qy_data
             q = np.sqrt(data.qx_data**2 + data.qy_data**2)
-            data.dx_data = data.dqy_data = percent*q
+            data.dqx_data = data.dqy_data = percent*q/np.sqrt(2.)
         else:
             len_data = len(data.x)
             data.dx = np.zeros(len_data)
@@ -355,7 +366,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             backend_accuracy = ACCURACY_DICT.get(accuracy)
             if backend_accuracy:
                 self.current_smearer.set_accuracy(accuracy=backend_accuracy)
-
+            else:
+                self.current_smearer.set_accuracy(accuracy='low')
+    
     def onSlitSmear(self):
         """
         Create a custom slit smear object that will change the way residuals
