@@ -143,6 +143,27 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Check for 4 tabs
         self.assertEqual(len(self.widget.tabs), 4)
 
+    def testSwapData(self):
+        '''Assure that data swapping is correct'''
+
+        # Mock the datafromitem() call from FittingWidget
+        data1 = Data1D(x=[3,4], y=[3,4])
+        GuiUtils.dataFromItem = MagicMock(return_value=data1)
+
+        # Add a new tab
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item])
+
+        # Create a new dataset and mock the datafromitemcall()
+        data2 = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data2)
+
+        # Swap the data
+        self.widget.swapData(item)
+
+        # Check that data has been swapped
+        self.assertEqual(self.widget.tabs[0].data, data2)
+
     def testSetBatchData(self):
         ''' Assure that setting batch data is correct'''
 
