@@ -137,12 +137,12 @@ High-\ $q$ region (>= $q_{max}$ in data):
 
 *  The power law function $A/q^m$ is used where the power law constant
    $m$ can be fixed to some value by the user or fit along with the constant
-   $A$. $m$ should typically be between -3 and -4 with -4 indicating sharp
-   interfaces though there may be occasions when it will deviate from this.
-   The fitted constant(s) $A$ ($m$) is/are obtained by fitting the data within
-   the range $q_{max-j}$ to $q_{max}$ where, again, $j$ is the user chosen
-   number of points from which to extrapolate, the default again being the
-   last 10 points.
+   $A$. $m$ should typically be between -3 and -4 for pinhole resolution with
+   -4 indicating sharp interfaces though there may be occasions when it will
+   deviate from this. The fitted constant(s) $A$ ($m$) is/are obtained by
+   fitting the data within the range $q_{max-j}$ to $q_{max}$ where, again,
+   $j$ is the user chosen number of points from which to extrapolate, the
+   default again being the last 10 points.
 
 .. note:: While the high $q$ exponent should generally be close to -4 for a
     system with sharp interfaces, in the special case of slit smearing that
