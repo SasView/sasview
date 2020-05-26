@@ -16,7 +16,7 @@ Principle
 ---------
 
 For any multi-phase system, i.e. any system that contains regions with
-different scattering length densities (SLD), the integral over all $\vec(q)$
+different scattering length densities (SLD), the integral over all $\vec{q}$
 of the appropriately dimensionally-weighted scattering cross-section (ie,
 'intensity', $I(\vec{q})$ in absolute units) is a *constant* directly
 proportional to the mean-square average fluctuation (SLD) and the phase
@@ -62,8 +62,8 @@ data as:
     implementations of this calculation, does not include the effects of
     instrumental resolution on the equation above. This means that for data
     with very significant resolution smearing (more likely to be encountered
-    with SANS than with SAXS data) the calculated invariant will be distorted
-    (it will be too high).
+    with SANS than with SAXS data) the calculated invariant will be somewhat
+    high (though in most real cases probably not the dominant uncertainty).
 
 .. note::
     The observant reader may notice the lack of a $4 \pi$ prefactor in the
@@ -137,9 +137,9 @@ High-\ $q$ region (>= $q_{max}$ in data):
 
 *  The power law function $A/q^m$ is used where the power law constant
    $m$ can be fixed to some value by the user or fit along with the constant
-   $A$. $m$ should typically be between -3 and -4 for pinhole resolution with
+   $A$. $m$ will typically be between -3 and -4 for pinhole resolution with
    -4 indicating sharp interfaces and other values more diffuse interfaces.
-   In real system this may not always hold of course, but the user should
+   In real systems this may not always hold of course, but the user should
    think about what a deviation means and to what extent it is valid to use
    such an extrapolation. The fitted constant(s) $A$ ($m$) is/are obtained by
    fitting the data within the range $q_{max-j}$ to $q_{max}$ where, again,
