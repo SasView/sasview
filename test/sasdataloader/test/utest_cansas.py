@@ -55,6 +55,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.schema_1_1 = find("cansas1d_v1_1.xsd")
         self.write_1_0_filename = find("isis_1_0_write_test.xml")
         self.write_1_1_filename = find("isis_1_1_write_test.xml")
+        self.write_filename = find("write_test.xml")
 
     def get_number_of_entries(self, dictionary, name, i):
         if dictionary.get(name) is not None:
@@ -267,10 +268,21 @@ class cansas_reader_hdf5(unittest.TestCase):
             "test_data" + os.sep + "nxcansas_1Dand2D_multisasdata.h5")
         self.datafile_multiplesasdata_multiplesasentry = find(
             "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
+        self.datafile_multiple_frames = find(
+            "test_data" + os.sep + "multiframe_1d.nxs")
 
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)
         self._check_example_data(self.data[0])
+
+    def test_multi_frame_data(self):
+        self.data = self.loader.load(self.datafile_multiple_frames)
+        self.assertEqual(len(self.data), 120)
+        for frame in self.data:
+            self.assertTrue(isinstance(frame, Data1D))
+            self.assertEqual(frame.run[0], 'BBAA_processed_180309_132658')
+            self.assertEqual(frame.run[0], frame.title)
+            self.assertEqual(len(frame.y), 1617)
 
     def test_no_di(self):
         self.data = self.loader.load(self.datafile_nodi)
