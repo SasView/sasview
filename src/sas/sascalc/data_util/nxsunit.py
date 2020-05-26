@@ -212,7 +212,8 @@ class Converter(object):
     # Note: a.u. stands for arbitrary units, which should return the default
     # units for that particular dimension.
     # Note: don't have support for dimensionless units.
-    unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1}
+    unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1,
+               'arbitrary': 1, 'arbitrary units': 1}
 
     def __init__(self, name):
         name = standardize_units(name)

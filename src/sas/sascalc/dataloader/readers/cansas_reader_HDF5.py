@@ -201,7 +201,8 @@ class Reader(FileReader):
                     elif key == u'run':
                         try:
                             run_name = h5attr(value, 'name')
-                            run_dict = {data_set: run_name}
+                            run_name = run_name if run_name else 'name'
+                            run_dict = {data_point: run_name}
                             self.current_datainfo.run_name = run_dict
                         except Exception:
                             pass

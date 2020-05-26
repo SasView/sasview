@@ -477,10 +477,21 @@ class cansas_reader_hdf5(unittest.TestCase):
             "nxcansas_1Dand2D_multisasdata.h5")
         self.datafile_multiplesasdata_multiplesasentry = find(
             "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
+        self.datafile_multiple_frames = find("multiframe_1d.nxs")
 
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)
         self._check_example_data(self.data[0])
+
+    def test_multi_frame_data(self):
+        self.data = self.loader.load(self.datafile_multiple_frames)
+        self.assertEqual(len(self.data), 120)
+        for frame in self.data:
+            self.assertTrue(isinstance(frame, Data1D))
+            self.assertEqual(frame.run[0], 'BBAA_processed_180309_132658')
+            self.assertEqual(frame.run[0], frame.title)
+            self.assertEqual(len(frame.y), 1617)
+            self.assertEqual(frame.y_loaded_unit, None)
 
     def test_no_di(self):
         self.data = self.loader.load(self.datafile_nodi)
