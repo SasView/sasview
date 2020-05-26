@@ -38,7 +38,11 @@ class DataExplorerTest(unittest.TestCase):
                 return Communicate()
             def allowBatch(self):
                 return True
+            def allowSwap(self):
+                return True
             def setData(self, data_item=None, is_batch=False):
+                return None
+            def swapData(self, data_item=None, is_batch=False):
                 return None
             def title(self):
                 return "Dummy Perspective"
@@ -77,6 +81,8 @@ class DataExplorerTest(unittest.TestCase):
         self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
         self.assertEqual(self.form.chkBatch.text(), "Batch mode")
         self.assertFalse(self.form.chkBatch.isChecked())
+        self.assertEqual(self.form.chkSwap.text(), "Swap data")
+        self.assertFalse(self.form.chkSwap.isChecked())
 
         # Buttons - theory tab
 
@@ -274,7 +280,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
 
-    def notestSendToButton(self):
+    def testSendToButton(self):
         """
         Test that clicking the Send To button sends checked data to a perspective
         """
@@ -295,8 +301,9 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # setData is the method we want to see called
-        mocked_perspective = self.form.parent.perspective()
-        mocked_perspective.setData = MagicMock(filename)
+        mocked_perspective.setData = MagicMock()
+        mocked_perspective.swapData = MagicMock()
+        self.form.parent.perspective().setData = MagicMock()
 
         # Assure the checkbox is on
         self.form.cbSelect.setCurrentIndex(0)
@@ -307,7 +314,8 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # Test the set_data method called once
-        self.assertTrue(mocked_perspective.setData.called)
+        self.assertTrue(self.form.parent.perspective().setData.called)
+        self.assertFalse(mocked_perspective.swapData.called)
 
         # open another file
         filename = ["cyl_400_20.txt"]
@@ -321,6 +329,39 @@ class DataExplorerTest(unittest.TestCase):
 
         # Assure the message box popped up
         QMessageBox.assert_called_once()
+
+    def testSwapData(self):
+        """
+        Test that clicking the Send To button when the swap option is checked swaps the data
+        """
+
+        # Check the swap option
+        self.form.chkSwap.setChecked(True)
+
+        # Populate the model
+        filename = ["cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        QApplication.processEvents()
+
+        # Swap data
+        mocked_perspective = self.form.parent.perspective()
+        mocked_perspective.swapData = MagicMock(filename)
+        mocked_perspective.setData = MagicMock(filename)
+
+        # Assure the checkbox is on
+        self.form.cbSelect.setCurrentIndex(0)
+
+        # Click on the Send To  button
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
+
+        QApplication.processEvents()
+
+        # Test the swapData method called
+        #self.assertFalse(mocked_perspective.setData.called)
+        #self.assertTrue(mocked_perspective.swapData.called)
+
+        # Uncheck the swap data
 
     def testDataSelection(self):
         """
