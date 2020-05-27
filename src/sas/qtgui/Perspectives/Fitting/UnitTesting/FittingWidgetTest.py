@@ -442,6 +442,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget._poly_model.item(0,0).setCheckState(2)
         # Assure the parameter is added
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width'])
+        # Check that it's value has not changed (reproduce the polydispersity checkbox bug)
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
 
         # Add another parameter
         self.widget._poly_model.item(2,0).setCheckState(2)
