@@ -41,7 +41,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.active_plots = active_plots
 
         # Initially, Apply is disabled
-        self.cmdApply.setEnabled(False)
+        #self.cmdApply.setEnabled(False)
 
         # Mapping combobox index -> slicer module
         self.callbacks = {0: SectorInteractor,
@@ -104,22 +104,22 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             chkboxItem = QtWidgets.QListWidgetItem(str(item))
             chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             chkboxItem.setCheckState(checked)
-            self.lstPlots.addItem(chkboxItem)
+            #self.lstPlots.addItem(chkboxItem)
 
     def setSlots(self):
         """
         define slots for signals from various sources
         """
         self.delegate.refocus_signal.connect(self.onFocus)
-        self.cbSave1DPlots.toggled.connect(self.onGeneratePlots)
+        #self.cbSave1DPlots.toggled.connect(self.onGeneratePlots)
         # Display Help on clicking the button
-        self.cmdHelp.clicked.connect(self.onHelp)
+        #self.cmdHelp.clicked.connect(self.onHelp)
 
         # Close doesn't trigger closeEvent automatically, so force it
-        self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
+        #self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
 
         # Apply slicer to selected plots
-        self.cmdApply.clicked.connect(self.onApply)
+        #self.cmdApply.clicked.connect(self.onApply)
 
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
@@ -131,7 +131,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
 
         # selecting/deselecting items in lstPlots enables `Apply`
-        self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
+        #self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
     def onFocus(self, row, column):
         """ Set the focus on the cell (row, column) """
@@ -157,9 +157,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Sets enablement of file related UI elements
         """
-        self.txtLocation.setEnabled(enabled)
-        self.cmdFiles.setEnabled(enabled)
-        self.cbFitOptions.setEnabled(enabled)
+        #self.txtLocation.setEnabled(enabled)
+        #self.cmdFiles.setEnabled(enabled)
+        #self.cbFitOptions.setEnabled(enabled)
 
     def onApply(self):
         """
