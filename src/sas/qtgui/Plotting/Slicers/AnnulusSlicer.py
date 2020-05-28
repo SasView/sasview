@@ -29,8 +29,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         # Number of points on the plot
         self.nbins = 36
         # Cursor position of Rings (Left(-1) or Right(1))
-        self.xmaxd = self.xmax
-        self.xmind = self.xmin
+        self.xmaxd = self.data.xmax
+        self.xmind = self.data.xmin
 
         if (self.xmaxd + self.xmind) > 0:
             self.sign = 1
