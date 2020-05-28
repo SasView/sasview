@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
-from sas.sascalc.data_util.nxsunit import Converter
+from sas.sascalc.dataloader.data_info import set_loaded_units
 from sas.qtgui.Plotting.UI.UnitPropertiesUI import Ui_unitPropertiesUI
 
 
@@ -17,13 +17,13 @@ class PlotterUnits(QtWidgets.QDialog, Ui_unitPropertiesUI):
         self.data = data
         if not x_converter and hasattr(self.data[0], 'x_converter'):
             if not self.data[0].x_converter:
-                self.data[0].x_converter = Converter(self.data[0].x_unit)
+                set_loaded_units(self.data[0], 'x', self.data[0].x_unit)
             self.x_converter = self.data[0].x_converter
         else:
             self.x_converter = x_converter
         if not y_converter and hasattr(self.data[0], 'y_converter'):
             if not self.data[0].y_converter:
-                self.data[0].y_converter = Converter(self.data[0].y_unit)
+                set_loaded_units(self.data[0], 'y', self.data[0].y_unit)
             self.y_converter = self.data[0].y_converter
         else:
             self.y_converter = y_converter

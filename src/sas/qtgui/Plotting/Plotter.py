@@ -380,7 +380,9 @@ class PlotterWidget(PlotterBase):
         if self.units.exec_() == QtWidgets.QDialog.Accepted:
             for id in list(self.plot_dict.keys()):
                 plot = self.plot_dict[id]
+                plot.convert_q_units(self.units.cbX.currentText())
                 plot.xaxis(plot._xaxis, self.units.cbX.currentText())
+                plot.convert_i_units(self.units.cbY.currentText())
                 plot.yaxis(plot._yaxis, self.units.cbY.currentText())
                 self.replacePlot(id, plot)
 

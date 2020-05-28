@@ -37,14 +37,20 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
         obj.x_converter = Converter(loaded_unit)
         obj._xunit = obj.x_converter.base
         obj.x_loaded_unit = obj.x_converter.base
+        if hasattr(obj, 'x_unit'):
+            obj.x_unit = obj.x_converter.base
     elif axis.lower() == 'y':
         obj.y_converter = Converter(loaded_unit)
         obj._yunit = obj.y_converter.base
         obj.y_loaded_unit = obj.y_converter.base
+        if hasattr(obj, 'y_unit'):
+            obj.y_unit = obj.y_converter.base
     elif axis.lower() == 'z':
         obj.z_converter = Converter(loaded_unit)
         obj._zunit = obj.z_converter.base
         obj.z_loaded_unit = obj.z_converter.base
+        if hasattr(obj, 'z_unit'):
+            obj.z_unit = obj.z_converter.base
     else:
         raise ValueError(
             "The axis {0} was not found.".format(axis))
@@ -95,6 +101,30 @@ class plottable_1D(object):
         if dlam is not None:
             self.dlam = np.asarray(dlam)
 
+    @property
+    def x_unit(self):
+        return self._xunit
+
+    @x_unit.setter
+    def x_unit(self, x_unit):
+        self._xunit = x_unit
+        if hasattr(self, 'x_converter') and self.x_converter:
+            self.convert_q_units(x_unit)
+        else:
+            set_loaded_units(self, 'x', x_unit)
+
+    @property
+    def y_unit(self):
+        return self._yunit
+
+    @y_unit.setter
+    def y_unit(self, y_unit):
+        self._yunit = y_unit
+        if hasattr(self, 'y_converter') and self.y_converter:
+            self.convert_i_units(y_unit)
+        else:
+            set_loaded_units(self, 'y', y_unit)
+
     def xaxis(self, label, unit=None):
         """
         set the x axis label and unit
@@ -105,20 +135,7 @@ class plottable_1D(object):
         if self._xunit == '':
             self._xunit = unit
         elif unit is not None:
-            # Converter is built off units loaded from file
-            # Need to scale between current units and desired units
-            unit = standardize_units(unit)
-            scale = float(self.x_converter.scale(unit))
-            if self.x is not None and self.x.all():
-                self.x = self.x * scale
-            if self.dx is not None and self.dx.all():
-                self.dx = self.dx * scale
-            if self.dxl is not None and self.dxl.all():
-                self.dxl = self.dxl * scale
-            if self.dxw is not None and self.dxw.all():
-                self.dxw = self.dxw * scale
-            # Only set instance variable once conversion is successful
-            self._xunit = unit
+            self.convert_q_units(unit)
 
     def yaxis(self, label, unit=None):
         """
@@ -130,22 +147,39 @@ class plottable_1D(object):
         if self._yunit == '':
             self._yunit = unit
         elif unit is not None:
+            self.convert_i_units(unit)
+
+    def convert_q_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
-            unit = standardize_units(unit)
+            unit = standardize_units(convert_to_unit)
+            base_scale = float(self.x_converter.scale(self.x_unit))
+            scale = float(self.x_converter.scale(unit))
+            if self.x is not None and self.x.all():
+                self.x = self.x * scale / base_scale
+            if self.dx is not None and self.dx.all():
+                self.dx = self.dx * scale / base_scale
+            if self.dxl is not None and self.dxl.all():
+                self.dxl = self.dxl * scale / base_scale
+            if self.dxw is not None and self.dxw.all():
+                self.dxw = self.dxw * scale / base_scale
+            # Only set instance variable once conversion is successful
+            self._xunit = unit
+
+    def convert_i_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
+            # Converter is built off units loaded from file
+            # Need to scale between current units and desired units
+            unit = standardize_units(convert_to_unit)
+            base_scale = float(self.y_converter.scale(self.y_unit))
             scale = float(self.y_converter.scale(unit))
             if self.y is not None and self.y.all():
-                self.y = self.y * scale
+                self.y = self.y * scale / base_scale
             if self.dy is not None and self.dy.all():
-                self.dy = self.dy * scale
+                self.dy = self.dy * scale / base_scale
             # Only set instance variable once conversion is successful
             self._yunit = unit
-
-    def convert_q_units(self, convert_to_unit):
-        self.xaxis(self._xaxis, convert_to_unit)
-
-    def convert_i_units(self, convert_to_unit):
-        self.yaxis(self._yaxis, convert_to_unit)
 
 
 class plottable_2D(object):
@@ -207,16 +241,7 @@ class plottable_2D(object):
         if self._xunit == '':
             self._xunit = unit
         elif unit is not None:
-            # Converter based off units loaded from file
-            # Need to scale between current units and desired units
-            unit = standardize_units(unit)
-            scale = float(self.x_converter.scale(unit))
-            if self.qx_data is not None and self.qx_data.all():
-                self.qx_data = scale * self.qx_data
-            if self.dqx_data is not None and self.dqx_data.all():
-                self.dqx_data = scale * self.dqx_data
-            # Only set instance variable once conversion is successful
-            self._xunit = unit
+            self.convert_q_units(unit)
 
     def yaxis(self, label, unit):
         """
@@ -228,16 +253,7 @@ class plottable_2D(object):
         if self._yunit == '':
             self._yunit = unit
         elif unit is not None:
-            # Converter based off units loaded from file
-            # Need to scale between current units and desired units
-            unit = standardize_units(unit)
-            scale = float(self.y_converter.scale(unit))
-            if self.qy_data is not None and self.qy_data.all():
-                self.qy_data = self.qy_data * scale
-            if self.dqy_data is not None and self.dqy_data.all():
-                self.dqy_data = self.dqy_data * scale
-            # Only set instance variable once conversion is successful
-            self._yunit = unit
+            self.convert_q_units(unit)
 
     def zaxis(self, label, unit):
         """
@@ -249,9 +265,32 @@ class plottable_2D(object):
         if self._zunit == '':
             self._zunit = unit
         elif unit is not None:
+            self.convert_i_units(unit)
+
+    def convert_q_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
-            unit = standardize_units(unit)
+            unit = standardize_units(convert_to_unit)
+            scale = float(self.x_converter.scale(unit))
+            if self.qx_data is not None and self.qx_data.all():
+                self.qx_data = scale * self.qx_data
+            if self.dqx_data is not None and self.dqx_data.all():
+                self.dqx_data = scale * self.dqx_data
+            # Only set instance variable once conversion is successful
+            self._xunit = unit
+            if self.qy_data is not None and self.qy_data.all():
+                self.qy_data = self.qy_data * scale
+            if self.dqy_data is not None and self.dqy_data.all():
+                self.dqy_data = self.dqy_data * scale
+            # Only set instance variable once conversion is successful
+            self._yunit = unit
+
+    def convert_i_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
+            # Converter based off units loaded from file
+            # Need to scale between current units and desired units
+            unit = standardize_units(convert_to_unit)
             scale = float(self.z_converter.scale(unit))
             if self.data is not None and self.data.all():
                 self.data = self.data * scale
@@ -259,13 +298,6 @@ class plottable_2D(object):
                 self.err_data = self.err_data * scale
             # Only set instance variable once conversion is successful
             self._zunit = unit
-
-    def convert_q_units(self, convert_to_unit):
-        self.xaxis(self._xaxis, convert_to_unit)
-        self.yaxis(self._yaxis, convert_to_unit)
-
-    def convert_i_units(self, convert_to_unit):
-        self.zaxis(self._zaxis, convert_to_unit)
 
 
 class Vector(object):
@@ -846,16 +878,6 @@ class Data1D(plottable_1D, DataInfo):
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy, None, None, lam, dlam)
         self.isSesans = isSesans
-        try:
-            if self.isSesans:  # the data is SESANS
-                self.x_unit = 'A'
-                self.y_unit = 'pol'
-            elif not self.isSesans:  # the data is SANS
-                self.x_unit = '1/A'
-                self.y_unit = '1/cm'
-        except Exception:  # the data is not recognized/supported
-            raise TypeError('data not recognized, check documentation for ' +
-                            'supported 1D data formats')
 
     def __str__(self):
         """

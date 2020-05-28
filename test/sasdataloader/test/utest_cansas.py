@@ -81,8 +81,6 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertEqual(len(self.data.x), 2)
         self.assertEqual(self.data._xunit, 'A^{-1}')
         self.assertEqual(self.data._yunit, 'cm^{-1}')
-        self.assertEqual(self.data.x_unit, self.data.x_loaded_unit)
-        self.assertEqual(self.data.y_unit, self.data.y_loaded_unit)
         self.assertAlmostEqual(self.data.x[0], 0.02, 6)
         self.assertAlmostEqual(self.data.y[0], 1000, 6)
         self.assertAlmostEqual(self.data.dx[0], 0.01, 6)
@@ -220,13 +218,23 @@ class cansas_reader_xml(unittest.TestCase):
         """
         self.data_list = self.reader.read(self.cansas1d_units)
         self.data = self.data_list[0]
+        # Check as-loaded data
         self.assertEqual(self.data.x_loaded_unit, 'nm^{-1}')
         self.assertEqual(self.data.y_loaded_unit, 'nm^{-1}')
+        self.assertAlmostEqual(self.data.x[0], 0.2, 6)
+        self.assertAlmostEqual(self.data.y[0], 0.0001, 6)
+        # Convert to same units as other files
         self.data.convert_q_units('1/A')
         self.data.convert_i_units('1/cm')
         self.assertEqual(self.data.filename,
                          self.cansas1d_units.split('\\')[-1])
         self._checkdata()
+        # Convert back to as-loaded units
+        self.data.convert_q_units('1/nm')
+        self.data.convert_i_units('1/nm')
+        # Check data again
+        self.assertAlmostEqual(self.data.x[0], 0.2, 6)
+        self.assertAlmostEqual(self.data.y[0], 0.0001, 6)
 
     def test_badunits(self):
         """
