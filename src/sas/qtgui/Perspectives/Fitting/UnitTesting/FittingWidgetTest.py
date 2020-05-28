@@ -462,6 +462,16 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
         self.widget._poly_model.item(0,4).setText("22")
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
+        # test that sasmodel is updated with the new value
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+
+        # Change the pd value
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
+        self.widget._poly_model.item(0,1).setText("0.8")
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # test that sasmodel is updated with the new value
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.8)
+
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
