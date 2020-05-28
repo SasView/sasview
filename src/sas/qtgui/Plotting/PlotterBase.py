@@ -222,8 +222,6 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage = self.contextMenu.addAction("Save Image")
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
-        #self.contextMenu.addSeparator()
-        #self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.contextMenu.addSeparator()
 
 
@@ -231,7 +229,6 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
-        #self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenu(self):
         """
@@ -389,13 +386,10 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Toggle navigation menu visibility in the chart
         """
-        self.toolbar.hide()
-        # Current toolbar menu is too buggy.
-        # Comment out until we support 3.x, then recheck.
-        #if self.toolbar.isVisible():
-        #    self.toolbar.hide()
-        #else:
-        #    self.toolbar.show()
+        if self.toolbar.isVisible():
+            self.toolbar.hide()
+        else:
+            self.toolbar.show()
 
     def offset_graph(self):
         """
