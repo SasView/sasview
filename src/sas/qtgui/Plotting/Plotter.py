@@ -291,7 +291,6 @@ class PlotterWidget(PlotterBase):
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
-
     def addPlotsToContextMenu(self):
         """
         Adds operations on all plotted sets of data to the context menu

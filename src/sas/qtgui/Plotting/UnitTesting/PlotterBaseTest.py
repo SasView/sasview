@@ -123,7 +123,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.plotter.defaultContextMenu()
 
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 4)
+        self.assertEqual(len(actions), 3)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
@@ -146,7 +146,7 @@ class PlotterBaseTest(unittest.TestCase):
         # Make sure clipboard got updated.
         self.assertTrue(self.clipboard_called)
 
-        ## Trigger toggle navigation bar and make sure the method is called
+        # Trigger toggle navigation bar and make sure the method is called
         #self.assertEqual(actions[4].text(), "Toggle Navigation Menu")
         #isShown = self.plotter.toolbar.isVisible()
         #self.assertTrue(isShow)
@@ -192,6 +192,17 @@ class PlotterBaseTest(unittest.TestCase):
     def testOnMplWheel(self):
         """ Test what happens on mouse pick in chart """
         pass
+
+    def testOnToggleMenu(self):
+        """ Test if toolbar toggles properly """
+        self.assertFalse(self.plotter.toolbar.isVisible())
+        self.plotter.onToggleMenu()
+        QtWidgets.qApp.processEvents()
+        self.assertTrue(self.plotter.toolbar.isVisible())
+        self.plotter.onToggleMenu()
+        QtWidgets.qApp.processEvents()
+        self.assertFalse(self.plotter.toolbar.isVisible())
+
 
 if __name__ == "__main__":
     unittest.main()

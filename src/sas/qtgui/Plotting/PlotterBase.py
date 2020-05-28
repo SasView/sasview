@@ -224,7 +224,6 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
         self.contextMenu.addSeparator()
 
-
         # Define the callbacks
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
