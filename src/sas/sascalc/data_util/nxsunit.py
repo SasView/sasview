@@ -179,6 +179,9 @@ def standardize_units(unit):
     # Catch hertz, HERTZ, hz, HZ, and any capitalization in between
     # Replace with 'Hz'
     unit = re.sub(r'([Hh]{1})(([Ee][Rr][Tt]){0,1}([Zz])(\b)){1}', 'Hz', unit)
+    # Catch arbitrary units, arbitrary, and any capitalization
+    # Replace with 'a.u.'
+    unit = re.sub(r'([Aa]){1}((([Rr][Bb][Ii][Tt][Rr][Aa][Rr][Yy]){1}([ .]){0,1}([Uu][Nn][Ii][Tt][Ss]){0,1}[.]{0,1})|([ .]{0,1}[Uu]{1}[.]{0,1})){1}', 'a.u.', unit)
     return _format_unit_structure(unit)
 
 
@@ -212,8 +215,7 @@ class Converter(object):
     # Note: a.u. stands for arbitrary units, which should return the default
     # units for that particular dimension.
     # Note: don't have support for dimensionless units.
-    unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1,
-               'arbitrary': 1, 'arbitrary units': 1}
+    unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1}
 
     def __init__(self, name):
         name = standardize_units(name)
@@ -233,6 +235,13 @@ class Converter(object):
             return 1
         units = standardize_units(units)
         return self.scalebase/self.scalemap[units]
+
+    def get_compatible_units(self):
+        for map in self.dims:
+            if self.base in map:
+                return list(map.keys())
+        else:
+            return self.unknown if self.base in self.unknown else []
 
     def __call__(self, value, units=""):
         # Note: calculating a*1 rather than simply returning a would produce

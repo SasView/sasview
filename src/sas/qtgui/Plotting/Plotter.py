@@ -16,6 +16,7 @@ from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
+from sas.qtgui.Plotting.PlotterUnits import PlotterUnits
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
@@ -69,6 +70,9 @@ class PlotterWidget(PlotterBase):
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         self.fit_result.name = "Fit"
+
+        # Unit conversion tool - create on load
+        self.units = None
 
         parent.geometry()
 
@@ -272,6 +276,7 @@ class PlotterWidget(PlotterBase):
         self.actionRemoveText = self.contextMenu.addAction("Remove Text")
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
+        self.actionChangeUnits = self.contextMenu.addAction("Change Units")
         self.contextMenu.addSeparator()
         self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
         self.actionResetGraphRange =\
@@ -284,6 +289,7 @@ class PlotterWidget(PlotterBase):
         self.actionAddText.triggered.connect(self.onAddText)
         self.actionRemoveText.triggered.connect(self.onRemoveText)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
+        self.actionChangeUnits.triggered.connect(self.onUnitsChange)
         self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
@@ -364,6 +370,19 @@ class PlotterWidget(PlotterBase):
                 d.xtransform = self.xLogLabel
                 d.ytransform = self.yLogLabel
             self.xyTransform(self.xLogLabel, self.yLogLabel)
+
+    def onUnitsChange(self):
+        """
+        Show a dialog allowing unit conversions for each axis
+        """
+        # Create the Unit conversion dialog on the fly
+        self.units = PlotterUnits(self, self.data)
+        if self.units.exec_() == QtWidgets.QDialog.Accepted:
+            for id in list(self.plot_dict.keys()):
+                plot = self.plot_dict[id]
+                plot.xaxis(plot._xaxis, self.units.cbX.currentText())
+                plot.yaxis(plot._yaxis, self.units.cbY.currentText())
+                self.replacePlot(id, plot)
 
     def onAddText(self):
         """
