@@ -233,12 +233,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.txtSmearDown.setVisible(False)
         self.lblSmearDown.setText('')
         self.lblUnitDown.setText('')
-        if isinstance(self.data, Data2D):
-            self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
-            self.lblSmearUp.setText('<html><head/><body><p>&lt;dQ<span style=" vertical-align:sub;">low</span>&gt;</p></body></html>')
-        else:
-            self.lblSmearUp.setText('<html><head/><body><p>dQ/Q</p></body></html>')
-            self.lblUnitUp.setText('%')
+        self.lblSmearUp.setText('<html><head/><body><p>dQ/Q</p></body></html>')
+        self.lblUnitUp.setText('%')
         self.txtSmearUp.setText(str(self.pinhole))
 
         self.txtSmearDown.setEnabled(True)
@@ -326,13 +322,14 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         # resolution information already in data.dx (if 1D) or 
         # data.dqx_data & data.dqy_data (if 2D),
         # so only need to set accuracy for 2D
+        _, accuracy, _, _ = self.state()
         self.current_smearer = smear_selection(self.data, self.kernel_model)
         if isinstance(self.data, Data2D):
-            try:
-                backend_accuracy = ACCURACY_DICT.get(accuracy)
-            except:
-                backend_accuracy = 'low'
-            self.current_smearer.set_accuracy(accuracy=backend_accuracy)
+            backend_accuracy = ACCURACY_DICT.get(accuracy)
+            if backend_accuracy:
+                self.current_smearer.set_accuracy(accuracy=backend_accuracy)
+            else:
+                self.current_smearer.set_accuracy(accuracy='low')
 
     def onPinholeSmear(self):
         """
@@ -352,7 +349,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             data.dqx_data = np.zeros(len_data)
             data.dqy_data = np.zeros(len_data)
             q = np.sqrt(data.qx_data**2 + data.qy_data**2)
-            data.dqx_data = data.dqy_data = percent*q/np.sqrt(2.)
+            data.dqx_data = data.dqy_data = percent*q
         else:
             len_data = len(data.x)
             data.dx = np.zeros(len_data)
