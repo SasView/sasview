@@ -1439,6 +1439,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
             self.poly_params[key] = value
+            self.kernel_module.setParam(key, value)
 
             # Update plot
             self.updateData()
