@@ -146,7 +146,7 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.data = self.data
         self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 6)
+        self.assertEqual(len(actions), 7)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
@@ -158,15 +158,15 @@ class Plotter2DTest(unittest.TestCase):
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
 
         # Trigger Toggle Grid and make sure the method is called
-        self.assertEqual(actions[3].text(), "Toggle Grid On/Off")
+        self.assertEqual(actions[4].text(), "Toggle Grid On/Off")
         self.plotter.ax.grid = MagicMock()
-        actions[3].trigger()
+        actions[4].trigger()
         self.assertTrue(self.plotter.ax.grid.called)
 
         # Trigger Change Scale and make sure the method is called
-        self.assertEqual(actions[5].text(), "Toggle Linear/Log Scale")
+        self.assertEqual(actions[6].text(), "Toggle Linear/Log Scale")
         FigureCanvas.draw_idle = MagicMock()
-        actions[5].trigger()
+        actions[6].trigger()
         self.assertTrue(FigureCanvas.draw_idle.called)
 
         # Spy on cliboard's dataChanged() signal
