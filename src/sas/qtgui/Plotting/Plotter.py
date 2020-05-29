@@ -279,6 +279,8 @@ class PlotterWidget(PlotterBase):
         # Add the title change for dialogs
         self.contextMenu.addSeparator()
         self.actionWindowTitle = self.contextMenu.addAction("Window Title")
+        self.contextMenu.addSeparator()
+        self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
 
         # Define the callbacks
         self.actionAddText.triggered.connect(self.onAddText)
@@ -287,6 +289,7 @@ class PlotterWidget(PlotterBase):
         self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
+        self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def addPlotsToContextMenu(self):
         """
