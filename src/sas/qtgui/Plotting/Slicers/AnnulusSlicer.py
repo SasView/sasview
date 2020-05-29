@@ -22,8 +22,9 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.axes = axes
         self.base = base
         self._item = item
-        self.qmax = min(numpy.fabs(self.data.xmax),
+        self.qmax = max(numpy.fabs(self.data.xmax),
                         numpy.fabs(self.data.xmin))  # must be positive
+        self.dqmin = min(numpy.fabs(self.data.qx_data))
         self.connect = self.base.connect
 
         # Number of points on the plot
@@ -157,7 +158,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         """
         Test the proposed new value "value" for row "row" of parameters
         """
-        MIN_DIFFERENCE = 0.01
+        #Set minimum difference in outer/inner ring to ensure data exists in annulus
+        MIN_DIFFERENCE = self.dqmin
         isValid = True
 
         if param_name == 'inner_radius':
