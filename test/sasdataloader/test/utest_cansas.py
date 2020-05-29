@@ -202,7 +202,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.data_list = self.loader.load(self.write_filename)
         self.data = self.data_list[0]
         self.assertEqual(self.data.filename,
-                         self.write_filename.split('\\')[-1])
+                         self.write_filename.split(os.path.sep)[-1])
         self._checkdata()
         if os.path.isfile(self.write_filename):
             os.remove(self.write_filename)
@@ -227,7 +227,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.data.convert_q_units('1/A')
         self.data.convert_i_units('1/cm')
         self.assertEqual(self.data.filename,
-                         self.cansas1d_units.split('\\')[-1])
+                         self.cansas1d_units.split(os.path.sep)[-1])
         self._checkdata()
         # Convert back to as-loaded units
         self.data.convert_q_units('1/nm')
@@ -245,7 +245,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.data = self.data_list[0]
         self.assertEqual(len(self.data_list), 1)
         self.assertEqual(self.data.filename,
-                         self.cansas1d_badunits.split('\\')[-1])
+                         self.cansas1d_badunits.split(os.path.sep)[-1])
         # The followed should not have been loaded
         self.assertAlmostEqual(self.data.sample.thickness, 0.00103)
         # This one should
@@ -261,7 +261,8 @@ class cansas_reader_xml(unittest.TestCase):
         self.data_list = self.reader.read(self.cansas1d_slit)
         self.data = self.data_list[0]
         self.assertEqual(len(self.data_list), 1)
-        self.assertEqual(self.data.filename, self.cansas1d_slit.split('\\')[-1])
+        self.assertEqual(self.data.filename,
+                         self.cansas1d_slit.split(os.path.sep)[-1])
         self.assertEqual(self.data.run[0], "1234")
 
         # Data
