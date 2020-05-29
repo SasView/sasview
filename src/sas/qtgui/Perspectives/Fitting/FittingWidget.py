@@ -3987,7 +3987,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
-            return False
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            retval = msgbox.exec_()
+            return
 
         # put the text into dictionary
         line_dict = {}

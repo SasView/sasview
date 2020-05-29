@@ -1523,6 +1523,26 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
+    def testOnParameterPaste(self):
+        """
+        Test response of the widget to clipboard content
+        paste request
+        """
+        self.widget.updatePageWithParameters = MagicMock()
+        QtWidgets.QMessageBox.exec_ = MagicMock()
+        cb = QtWidgets.QApplication.clipboard()
+
+        # test bad clipboard
+        cb.setText("bad clipboard")
+        self.widget.onParameterPaste()
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        self.widget.updatePageWithParameters.assert_not_called()
+
+        # Test correct clipboard
+        cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
+        self.widget.onParameterPaste()
+        self.widget.updatePageWithParameters.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

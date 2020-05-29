@@ -725,7 +725,7 @@ class GuiManager(object):
         can be saved to the clipboard
         """
         self.communicate.copyFitParamsSignal.emit("")
-        self._workspace.actionPaste.setEnabled(True)
+        #self._workspace.actionPaste.setEnabled(True)
         pass
 
     def actionPaste(self):
