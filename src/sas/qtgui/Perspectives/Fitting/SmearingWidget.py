@@ -49,6 +49,7 @@ DEFAULT_PINHOLE_DOWN=0.0
 
 class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
     smearingChangedSignal = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(SmearingWidget, self).__init__()
 
@@ -71,6 +72,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.pinhole = 0.0
         self.slit_height = 0.0
         self.slit_width = 0.0
+
+        # current accuracy option
+        self.accuracy = ""
 
         # Let only floats in the line edits
         self.txtSmearDown.setValidator(GuiUtils.DoubleValidator())
@@ -198,10 +202,15 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         # don't save the state if dQ Data
         if smearing == "Custom Pinhole Smear":
             self.pinhole = d_up
-            self.accuracy = accuracy
         elif smearing == 'Custom Slit Smear':
-            self.slit_height = d_down
-            self.slit_width = d_up
+            self.slit_height = d_up
+            self.slit_width = d_down
+        # check changes in accuracy
+        if self.accuracy != accuracy:
+            self.accuracy = accuracy
+            if accuracy == 'High' or accuracy == 'Extra high':
+                QtWidgets.QMessageBox.information(self, "Accuracy Warning",
+                  "Higher accuracy is very expensive, \nso fitting can be very slow!")      
 
         self.onIndexChange(index)
 
@@ -248,8 +257,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.lblSmearDown.setText('Slit width')
         self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
-        self.txtSmearDown.setText(str(self.slit_height))
-        self.txtSmearUp.setText(str(self.slit_width))
+        self.txtSmearUp.setText(str(self.slit_height))
+        self.txtSmearDown.setText(str(self.slit_width))
         self.txtSmearDown.setEnabled(True)
         self.txtSmearUp.setEnabled(True)
 
