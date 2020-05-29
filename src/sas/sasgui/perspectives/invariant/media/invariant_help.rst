@@ -63,7 +63,8 @@ data as:
     instrumental resolution on the equation above. This means that for data
     with very significant resolution smearing (more likely to be encountered
     with SANS than with SAXS data) the calculated invariant will be somewhat
-    high (though in most real cases probably not the dominant uncertainty).
+    high (though in most real cases this will probably not be the dominant
+    uncertainty).
 
 .. note::
     The observant reader may notice the lack of a $4 \pi$ prefactor in the
@@ -208,6 +209,9 @@ the volume fraction in the Invariant analysis window.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
+
+.. warning:: The value of $S_v$ returned by *ALL earlier versions of SasView* is
+   **twice** what it should be. This is now corrected.
 
 The total surface area per unit volume is an important quantity for a variety of
 applications, for example, to understand the absorption capacity, reactivity, or
@@ -366,4 +370,4 @@ References
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. note::  This help document was last changed (completely re-written) by Paul
-    Butler and Steve King, 27 May 2020
+    Butler and Steve King, 29 May 2020
