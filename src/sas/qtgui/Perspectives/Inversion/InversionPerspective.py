@@ -141,6 +141,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         return self._allowClose
 
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
@@ -494,6 +500,37 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.batchResultsWindow is not None:
             self.showBatchOutput()
 
+    def getParameters(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        params = [
+            ['alpha', self._calculator.alpha],
+            ['suggested_alpha', self._calculator.suggested_alpha],
+            ['background', self._calculator.background],
+            ['chi2', self._calculator.chi2],
+            ['chisqr', self._calculator.chisqr],
+            ['cov', self._calculator.cov],
+            ['d_max', self._calculator.d_max],
+            ['elapsed', self._calculator.elapsed],
+            ['err', self._calculator.err],
+            ['est_bck', self._calculator.est_bck],
+            ['nerr', self._calculator.nerr],
+            ['nfunc', self.getNFunc()],
+            ['npoints', self._calculator.npoints],
+            ['ny', self._calculator.ny],
+            ['out', self._calculator.out],
+            ['q_max', self._calculator.q_max],
+            ['q_min', self._calculator.q_min],
+            ['slit_height', self._calculator.slit_height],
+            ['slit_width', self._calculator.slit_width],
+            ['suggested_alpha', self._calculator.suggested_alpha],
+            ['x', self._calculator.x],
+            ['y', self._calculator.y],
+        ]
+        return params
+
     def getNFunc(self):
         """Get the n_func value from the GUI object"""
         try:
@@ -614,6 +651,59 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         else:
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
+
+    def serializeAllFitpage(self):
+        # serialize all active pages and return
+        # a dictionary: {data_id: inversion-state}
+        params = {}
+        tab_data = self.serializeCurrentFitpage()
+        id = tab_data['data_id'][0]
+        if isinstance(id, list):
+            for i in id:
+                if i in params:
+                    params[i].append(tab_data)
+                else:
+                    params[i] = [tab_data]
+        else:
+            if id in params:
+                params[id].append(tab_data)
+            else:
+                params[id] = [tab_data]
+        return params
+
+    def serializeCurrentFitpage(self):
+        """
+        get serialize requested fit tab
+        """
+        pr_state = self.getPage()
+        # put the text into dictionary
+        line_dict = {}
+        for line in pr_state:
+            #content = line.split(',')
+            if len(line) > 1:
+                line_dict[line[0]] = line[1:]
+        return line_dict
+
+    def getPage(self):
+        """
+        serializes full state of this fit page
+        """
+        # run a loop over all parameters and pull out
+        # first - regular params
+        param_list = self.getParameters()
+
+        param_list.append(['is_data', str(self.logic.data_is_loaded)])
+        data_ids = []
+        filenames = []
+        if self.logic.data_is_loaded:
+            data_ids = [str(self.logic.data.id)]
+            filenames = [str(self.logic.data.filename)]
+        param_list.append(['data_name', filenames])
+        param_list.append(['data_id', data_ids])
+
+        # checkboxes, if required
+
+        return param_list
 
     ######################################################################
     # Thread Creators
