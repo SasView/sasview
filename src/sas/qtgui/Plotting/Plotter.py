@@ -271,11 +271,15 @@ class PlotterWidget(PlotterBase):
         self.actionAddText = self.contextMenu.addAction("Add Text")
         self.actionRemoveText = self.contextMenu.addAction("Remove Text")
         self.contextMenu.addSeparator()
+        if self.show_legend:
+            self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
+            self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
         self.contextMenu.addSeparator()
         self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
         self.actionResetGraphRange =\
             self.contextMenu.addAction("Reset Graph Range")
+
         # Add the title change for dialogs
         self.contextMenu.addSeparator()
         self.actionWindowTitle = self.contextMenu.addAction("Window Title")
@@ -290,6 +294,8 @@ class PlotterWidget(PlotterBase):
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
+        if self.show_legend:
+            self.actionToggleLegend.triggered.connect(self.onToggleLegend)
 
     def addPlotsToContextMenu(self):
         """
@@ -356,6 +362,10 @@ class PlotterWidget(PlotterBase):
         # Define the callbacks
         self.actionToggleGrid.triggered.connect(self.onGridToggle)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
+
+        if self.show_legend:
+            self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
+            self.actionToggleLegend.triggered.connect(self.onToggleLegend)
 
     def onScaleChange(self):
         """
@@ -640,6 +650,17 @@ class PlotterWidget(PlotterBase):
 
         # Plot the line
         self.plot(data=self.fit_result, marker='-', hide_error=True)
+
+    def onToggleLegend(self):
+        """
+        Toggle legend visibility in the chart
+        """
+        if not self.showLegend:
+            return
+
+        visible = self.legend.get_visible()
+        self.legend.set_visible(not visible)
+        self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):
         """
