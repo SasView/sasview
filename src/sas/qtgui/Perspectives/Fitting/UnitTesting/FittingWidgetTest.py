@@ -469,8 +469,15 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
         self.widget._poly_model.item(0,1).setText("0.8")
         self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
-        # test that sasmodel is updated with the new value
+        # Test that sasmodel is updated with the new value
         self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.8)
+
+        # Uncheck pd
+        self.widget.chkPolydispersity.setCheckState(False)
+        # Should not change the value of the qt model
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # sasmodel should be set to 0
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.0)
 
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
