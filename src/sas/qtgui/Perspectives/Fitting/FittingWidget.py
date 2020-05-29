@@ -1405,10 +1405,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 if parameter_name_w in self.poly_params_to_fit:
                     self.poly_params_to_fit.remove(parameter_name_w)
             self.cmdFit.setEnabled(self.haveParamsToFit())
-            # force data update
-            key = parameter_name + '.' + delegate.columnDict()[delegate.poly_pd]
-            self.poly_params[key] = value
-            self.updateData()
+            # Update state stack
+            self.updateUndo()
 
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
