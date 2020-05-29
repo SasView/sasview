@@ -505,6 +505,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
+        # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
+        if self._poly_model.rowCount() > 0:
+            for key, value in self.poly_params.items():
+                if key[-5:] == 'width':
+                    if isChecked:
+                        self.kernel_module.setParam(key, value)
+                    else:
+                        self.kernel_module.setParam(key, 0)
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
