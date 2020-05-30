@@ -930,8 +930,6 @@ class GuiManager(object):
         Shows the File Converter widget.
         """
         try:
-            if sys.platform == "darwin":
-                self.image_viewer.menubar.setNativeMenuBar(False)
             self.FileConverter.show()
         except Exception as ex:
             logging.error(str(ex))
