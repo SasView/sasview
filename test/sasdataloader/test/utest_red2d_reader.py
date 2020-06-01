@@ -33,7 +33,7 @@ class DatReader(unittest.TestCase):
         self.assertEqual(len(f.x_bins) + removed, len(f.y_bins))
         self.assertEqual(len(f.x_bins), 192 - removed)
         self.assertEqual(f.qx_data[len(f.qx_data) - 1], 0.2908819)
-        self.assertEqual(f.Q_unit, 'A^{-1}')
+        self.assertEqual(f.Q_unit, 'Å^{-1}')
         self.assertEqual(f.I_unit, 'cm^{-1}')
         self.assertEqual(f.meta_data['loader'], "IGOR/DAT 2D Q_map")
 

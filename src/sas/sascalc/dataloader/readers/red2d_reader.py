@@ -246,7 +246,7 @@ class Reader(FileReader):
             # Above list comprehension rejects last item
             x_bins.append(qx_data[len(x_bins)])
             qy = np.reshape(qy_data,
-                            (int(len(qx_data)/len(x_bins)), len(x_bins)))
+                            (len(qx_data)//len(x_bins), len(x_bins)))
             y_bins = np.transpose(qy)[0].tolist()
 
         # Store data in outputs
@@ -291,11 +291,9 @@ class Reader(FileReader):
                     cos_th = qx_data / diag
                     sin_th = qy_data / diag
                     self.current_dataset.dqx_data = np.sqrt(
-                        (dqx_data * cos_th) * (dqx_data * cos_th)
-                        + (dqy_data * sin_th) * (dqy_data * sin_th))
+                        (dqx_data * cos_th)**2 + (dqy_data * sin_th)**2)
                     self.current_dataset.dqy_data = np.sqrt(
-                        (dqx_data * sin_th) * (dqx_data * sin_th)
-                        + (dqy_data * cos_th) * (dqy_data * cos_th))
+                        (dqx_data * sin_th)**2 + (dqy_data * cos_th)**2)
                 else:
                     self.current_dataset.dqx_data = dqx_data
                     self.current_dataset.dqy_data = dqy_data

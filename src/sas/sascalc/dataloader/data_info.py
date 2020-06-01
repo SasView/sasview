@@ -32,25 +32,33 @@ import re
 def set_loaded_units(obj, axis='', loaded_unit=None):
     if loaded_unit is None:
         loaded_unit = ""
-    loaded_unit = re.sub('([A-Za-z ]+)([-0-9]+)', r"\1^\2", loaded_unit)
     if axis.lower() == 'x':
         obj.x_converter = Converter(loaded_unit)
-        obj._xunit = obj.x_converter.base
-        obj.x_loaded_unit = obj.x_converter.base
-        if hasattr(obj, 'x_unit'):
+        if hasattr(obj, 'Q_unit'):
+            obj.Q_unit = obj.x_converter.base
+        elif hasattr(obj, 'x_unit'):
             obj.x_unit = obj.x_converter.base
+        else:
+            obj._xunit = obj.x_converter.base
+        obj.x_loaded_unit = obj.x_converter.base
     elif axis.lower() == 'y':
         obj.y_converter = Converter(loaded_unit)
-        obj._yunit = obj.y_converter.base
-        obj.y_loaded_unit = obj.y_converter.base
-        if hasattr(obj, 'y_unit'):
+        if hasattr(obj, 'Q_unit'):
+            obj.Q_unit = obj.y_converter.base
+        elif hasattr(obj, 'y_unit'):
             obj.y_unit = obj.y_converter.base
+        else:
+            obj._yunit = obj.y_converter.base
+        obj.y_loaded_unit = obj.y_converter.base
     elif axis.lower() == 'z':
         obj.z_converter = Converter(loaded_unit)
-        obj._zunit = obj.z_converter.base
-        obj.z_loaded_unit = obj.z_converter.base
-        if hasattr(obj, 'z_unit'):
+        if hasattr(obj, 'I_unit'):
+            obj.I_unit = obj.z_converter.base
+        elif hasattr(obj, 'z_unit'):
             obj.z_unit = obj.z_converter.base
+        else:
+            obj._zunit = obj.z_converter.base
+        obj.z_loaded_unit = obj.z_converter.base
     else:
         raise ValueError(
             "The axis {0} was not found.".format(axis))
@@ -124,6 +132,22 @@ class plottable_1D(object):
             self.convert_i_units(y_unit)
         else:
             set_loaded_units(self, 'y', y_unit)
+
+    @property
+    def x_axis(self):
+        return self._xaxis
+
+    @x_axis.setter
+    def x_axis(self, x_axis):
+        self._xaxis = x_axis
+
+    @property
+    def y_axis(self):
+        return self._yaxis
+
+    @y_axis.setter
+    def y_axis(self, y_axis):
+        self._yaxis = y_axis
 
     def xaxis(self, label, unit=None):
         """
@@ -230,6 +254,56 @@ class plottable_2D(object):
             self.dqx_data = np.asarray(dqx_data)
         if dqy_data is not None:
             self.dqy_data = np.asarray(dqy_data)
+
+    @property
+    def Q_unit(self):
+        return self._xunit
+
+    @Q_unit.setter
+    def Q_unit(self, Q_unit):
+        self._xunit = Q_unit
+        self._yunit = Q_unit
+        if hasattr(self, 'x_converter') and self.x_converter:
+            self.convert_q_units(Q_unit)
+        else:
+            set_loaded_units(self, 'x', Q_unit)
+            set_loaded_units(self, 'y', Q_unit)
+
+    @property
+    def I_unit(self):
+        return self._zunit
+
+    @I_unit.setter
+    def I_unit(self, I_unit):
+        self._zunit = I_unit
+        if hasattr(self, 'z_converter') and self.z_converter:
+            self.convert_i_units(I_unit)
+        else:
+            set_loaded_units(self, 'z', I_unit)
+
+    @property
+    def x_axis(self):
+        return self._xaxis
+
+    @x_axis.setter
+    def x_axis(self, x_axis):
+        self._xaxis = x_axis
+
+    @property
+    def y_axis(self):
+        return self._yaxis
+
+    @y_axis.setter
+    def y_axis(self, y_axis):
+        self._yaxis = y_axis
+
+    @property
+    def z_axis(self):
+        return self._zaxis
+
+    @z_axis.setter
+    def y_axis(self, z_axis):
+        self._zaxis = z_axis
 
     def xaxis(self, label, unit):
         """

@@ -114,7 +114,7 @@ def _build_all_units():
     distance = _build_metric_units('meter','m')
     distance.update(_build_metric_units('metre','m'))
     distance.update(_build_plural_units(micron=1e-6, Angstrom=1e-10))
-    distance.update({'A':1e-10})
+    distance.update({'Å':1e-10})
 
     # Note: minutes are used for angle
     time = _build_metric_units('second','s')
@@ -133,24 +133,21 @@ def _build_all_units():
     # Note: temperature needs an offset as well as a scale
     temperature = _build_metric_units('kelvin','K')
     temperature.update(_build_metric_units('Kelvin','K'))
-    temperature.update(_build_metric_units('Celcius', 'C'))
-    temperature.update(_build_metric_units('celcius', 'C'))
+    temperature.update(_build_metric_units('Celcius', '℃'))
+    temperature.update(_build_metric_units('celcius', '℃'))
 
     charge = _build_metric_units('coulomb','C')
     charge.update({'microAmp*hour':0.0036})
 
-    sld = { '10^-6 A^-2': 1e-6, 'A^-2': 1 }
-    Q = { 'invA': 1, '1/A': 1, 'A^{-1}': 1, 'cm^{-1}': 1e-8,
-          '10^-3 A^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10, 'm^{-1}': 1e-10,
-          'nm^{-1}': 0.1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
-    se = {'A^-2 cm^-1': 1, 'A^{-2} cm^{-1}': 1, '1/A^2 1/cm': 1, 'A-2 cm-1': 1}
-    saxess = {'1/um^2': 1, 'um^-2': 1, 'um^{-2}': 1}
+    sld = {'10^{-6} Å^{-2}': 1e-6, 'Å^{-2}': 1, 'um^{-2}': 1e10}
+    Q = {'Å^{-1}': 1, 'cm^{-1}': 1e-8, '10^{-3} Å^{-1}': 1e-3, 'm^{-1}': 1e-10,
+         'nm^{-1}': 0.1, 'mm^{-1}': 1e-7}
+    se = {'Å^{-2} cm^{-1}': 1}
 
     _caret_optional(sld)
     _caret_optional(Q)
 
-    dims = [distance, time, angle, frequency, temperature, charge, sld, Q, se,
-            saxess]
+    dims = [distance, time, angle, frequency, temperature, charge, sld, Q, se]
     return dims
 
 
@@ -161,27 +158,28 @@ def standardize_units(unit):
     :return: Unit with known, reduced values
     """
     # Catch ang, angstrom, ANG, ANGSTROM, and any capitalization in between
-    # Replace with 'A'
-    unit = re.sub(r'([Aa]{1})([Nn][Gg]([Ss][Tt][Rr][Oo][Mm]){0,1}(\b)){1}',
-                  'A', unit)
+    # Replace with 'Å'
+    unit = re.sub(r'[Åa]ng(strom)?(s)?', 'Å', unit, flags=re.IGNORECASE)
+    unit = re.sub(r'[A]', 'Å', unit)
     # Catch meter, metre, METER, METRE, and any capitalization in between
     # Replace with 'm'
-    unit = re.sub(r'(([Mm]{1})([Ee][Tt][EeRr][EeRr]){0,1}(\b))', 'm', unit)
+    unit = re.sub(r'(met(er|re)(s)?)', 'm', unit, flags=re.IGNORECASE)
     # Catch second, sec, SECOND, SEC, and any capitalization in between
     # Replace with 's'
-    unit = re.sub(r'([Ss]{1})([Ee][Cc]([Oo][Nn][Dd]){0,1}(\b)){1}', 's', unit)
+    unit = re.sub(r'sec(ond)?(s)?', 's', unit, flags=re.IGNORECASE)
     # Catch kelvin, KELVIN, and any capitalization in between
     # Replace with 'K'
-    unit = re.sub(r'([Kk]{1})([Ee][Ll][Vv][Ii][Nn](\b)){1}', 'K', unit)
+    unit = re.sub(r'kel(vin)?(s)?', 'K', unit, flags=re.IGNORECASE)
     # Catch celcius, CELCIUS, and any capitalization in between
-    # Replace with 'C'
-    unit = re.sub(r'([Cc]{1})([Ee][Ll][Cc][Ii][Uu][Ss](\b)){1}', 'C', unit)
+    # Replace with '℃'
+    unit = re.sub(r'cel(cius)?', '℃', unit)
     # Catch hertz, HERTZ, hz, HZ, and any capitalization in between
     # Replace with 'Hz'
-    unit = re.sub(r'([Hh]{1})(([Ee][Rr][Tt]){0,1}([Zz])(\b)){1}', 'Hz', unit)
+    unit = re.sub(r'h(ert)?z', 'Hz', unit)
     # Catch arbitrary units, arbitrary, and any capitalization
     # Replace with 'a.u.'
-    unit = re.sub(r'([Aa]){1}((([Rr][Bb][Ii][Tt][Rr][Aa][Rr][Yy]){1}([ .]){0,1}([Uu][Nn][Ii][Tt][Ss]){0,1}[.]{0,1})|([ .]{0,1}[Uu]{1}[.]{0,1})){1}', 'a.u.', unit)
+    unit = re.sub(r'^(arb(itrary|[.]|) ?units?|a[.] ?u[.]|au[.]?|aus[.]?)$',
+                  'a.u.', unit, flags=re.IGNORECASE)
     return _format_unit_structure(unit)
 
 
@@ -191,16 +189,30 @@ def _format_unit_structure(unit=None):
     :param unit: Unit string to be formatted
     :return: Formatted unit string
     """
-    if unit:
-        # Convert a/b^n to a*b^{-n}
-        split = unit.split("/")
-        if len(split) == 1:
-            return unit
-        else:
-            split_ct = split[1].split("^")
-            number = 1 if len(split_ct) == 1 else split_ct[1]
-            split[0] = '' if split[0] == '1' else split[0] + '*'
-            return "{0}{1}^{{-{2}}}".format(split[0], split_ct[0], number)
+    if not unit:
+        return
+    # a-m[ /?]b-n ... -> a^m b^-n and pre_Unit -> preUnit
+    unit = re.sub('([℃ÅA-Za-z ]+)([-0-9]+)', r"\1^\2", unit).replace("_", '')
+    # invUnit -> /unit
+    unit = re.sub('inv', '/', unit, flags=re.IGNORECASE)
+    # Capture multi-unit
+    split_ws = unit.split()
+    final = ''
+    for item in split_ws:
+        # a/b^n, a*inv{b^n} or a*b^n -> a*b^{[-?]n}
+        split = item.split("/")
+        index = 1 if len(split) > 1 else 0
+        split_ct = split[index].split("^")
+        # Break if unit format is prefixUnit
+        if len(split_ct) == 1 and not index:
+            final += "{0} ".format(item)
+            break
+        number = 1 if len(split_ct) == 1 else split_ct[1]
+        start = '' if split[0] in ['1', '', item] else split[0] + '*'
+        sign = '-' if len(split_ct) == 1 else ''
+        final += "{0}{1}^{{{2}{3}}} ".format(start, split_ct[0], sign, number)
+    # Remove leading and trailing whitespace and double brackets with single
+    return final.strip().replace('{{', '{').replace('}}', '}')
 
 
 class Converter(object):
@@ -271,6 +283,9 @@ def test():
     _check(0.003, Converter('microseconds')(3, units='ms'))  # 3 us = 0.003 ms
     _check(45, Converter('nanokelvin')(45))  # 45 nK = 45 nK
     _check(0.5, Converter('seconds')(1800, units='hours'))  # 1800 s = 0.5 hr
+
+    # Multi-unit strings
+    _check(1, Converter('A-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
 
     # arbitrary units always returns the same value
     _check(123, Converter('a.u.')(123, units='mm'))

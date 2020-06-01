@@ -86,13 +86,13 @@ class PlotterWidget(PlotterBase):
         #self._data = value
         self._data.append(value)
         if value._xunit:
-            self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
+            self.xLabel = "%s(%s)"%(value.x_axis, value._xunit)
         else:
-            self.xLabel = "%s"%(value._xaxis)
+            self.xLabel = "%s"%(value.x_axis)
         if value._yunit:
-            self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
+            self.yLabel = "%s(%s)"%(value.y_axis, value.y_unit)
         else:
-            self.yLabel = "%s"%(value._yaxis)
+            self.yLabel = "%s"%(value.y_axis)
 
         if value.scale == 'linear' or value.isSesans:
             self.xscale = 'linear'
@@ -127,7 +127,7 @@ class PlotterWidget(PlotterBase):
                 else:
                     data.ytransform = 'log10(y)'
             #Added condition to Dmax explorer from P(r) perspective
-            if data._xaxis == 'D_{max}':
+            if data.x_axis == 'D_{max}':
                 self.xscale = 'linear'
             # Transform data if required.
             if transform and (data.xtransform is not None or data.ytransform is not None):
@@ -381,9 +381,9 @@ class PlotterWidget(PlotterBase):
             for id in list(self.plot_dict.keys()):
                 plot = self.plot_dict[id]
                 plot.convert_q_units(self.units.cbX.currentText())
-                plot.xaxis(plot._xaxis, self.units.cbX.currentText())
+                plot.xaxis(plot.x_axis, self.units.cbX.currentText())
                 plot.convert_i_units(self.units.cbY.currentText())
-                plot.yaxis(plot._yaxis, self.units.cbY.currentText())
+                plot.yaxis(plot.y_axis, self.units.cbY.currentText())
                 self.replacePlot(id, plot)
 
     def onAddText(self):

@@ -80,7 +80,7 @@ class cansas_reader_xml(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data._xunit, 'A^{-1}')
+        self.assertEqual(self.data._xunit, 'Å^{-1}')
         self.assertEqual(self.data._yunit, 'cm^{-1}')
         self.assertAlmostEqual(self.data.x[0], 0.02, 6)
         self.assertAlmostEqual(self.data.y[0], 1000, 6)
@@ -268,7 +268,7 @@ class cansas_reader_xml(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.x_unit, 'Å^{-1}')
         self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertEqual(self.data.x[0], 0.02)
         self.assertEqual(self.data.y[0], 1000)
@@ -587,7 +587,7 @@ class cansas_reader_hdf5(unittest.TestCase):
     def _check_example_data(self, data):
         self.assertEqual(data.title, "")
         self.assertEqual(data.x.size, 100)
-        self.assertEqual(data._xunit, "A^{-1}")
+        self.assertEqual(data._xunit, "Å^{-1}")
         self.assertEqual(data._yunit, "cm^{-1}")
         self.assertEqual(data.y.size, 100)
         self.assertAlmostEqual(data.y[40], 0.952749011516985)

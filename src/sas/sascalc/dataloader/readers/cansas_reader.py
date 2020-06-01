@@ -563,7 +563,7 @@ class Reader(XMLreader):
             self.append(node, entry_node)
             if isinstance(spectrum.timestamp, datetime.datetime):
                 node.setAttribute("timestamp", spectrum.timestamp)
-            for i in range(0, len(spectrum.wavelength)):
+            for i in range(len(spectrum.wavelength)):
                 point = self.create_element("Tdata")
                 node.append(point)
                 self.write_node(point, "Lambda", spectrum.wavelength[i],

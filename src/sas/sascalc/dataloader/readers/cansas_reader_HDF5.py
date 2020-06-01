@@ -224,47 +224,26 @@ class Reader(FileReader):
                         break
                     # Sample Information
                     elif self.parent_class == u'SASsample':
-                        try:
-                            self.process_sample(data_point, key)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.process_sample(data_point, key)
                     # Instrumental Information
                     elif (key == u'name'
                           and self.parent_class == u'SASinstrument'):
-                        try:
-                            self.current_datainfo.instrument = data_point
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.current_datainfo.instrument = data_point
                     # Detector
                     elif self.parent_class == u'SASdetector':
-                        try:
-                            self.process_detector(data_point, key, unit)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.process_detector(data_point, key, unit)
                     # Collimation
                     elif self.parent_class == u'SAScollimation':
-                        try:
-                            self.process_collimation(data_point, key, unit)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.process_collimation(data_point, key, unit)
                     # Aperture
                     elif self.parent_class == u'SASaperture':
-                        try:
-                            self.process_aperture(data_point, key)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.process_aperture(data_point, key)
                     # Process Information
                     elif self.parent_class == u'SASprocess': # CanSAS 2.0
-                        try:
-                            self.process_process(data_point, key)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.process_process(data_point, key)
                     # Source
                     elif self.parent_class == u'SASsource':
-                        try:
-                            self.process_source(data_point, key, unit)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
+                        self.process_source(data_point, key, unit)
                     # Everything else goes in meta_data
                     elif self.parent_class == u'SASdata':
                         if isinstance(self.current_dataset, plottable_2D):
@@ -273,12 +252,8 @@ class Reader(FileReader):
                             self.process_1d_data_object(data_set, key, unit)
                         break
                     elif self.parent_class == u'SAStransmission_spectrum':
-                        try:
-                            self.process_trans_spectrum(data_set, key)
-                        except Exception as e:
-                            self.current_datainfo.errors.append(str(e))
-                        finally:
-                            break
+                        self.process_trans_spectrum(data_set, key)
+                        break
                     else:
                         new_key = self._create_unique_key(
                             self.current_datainfo.meta_data, key)

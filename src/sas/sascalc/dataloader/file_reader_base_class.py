@@ -11,11 +11,10 @@ import logging
 from abc import abstractmethod
 
 import numpy as np
-from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
-    DataReaderException, DefaultReaderException
-from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
-    combine_data_info_with_plottable, set_loaded_units
-from sas.sascalc.data_util.nxsunit import Converter
+from .loader_exceptions import (NoKnownLoaderException, FileContentsException,
+                                DataReaderException)
+from .data_info import (Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,
+                        combine_data_info_with_plottable, set_loaded_units)
 
 logger = logging.getLogger(__name__)
 
@@ -83,13 +82,13 @@ class FileReader(object):
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
                 except DataReaderException as e:
-                    self.handle_error_message(e.__str__())
+                    self.handle_error_message(str(e))
                 except FileContentsException as e:
                     raise
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
-                    msg += e.__str__()
+                    msg += str(e)
                     self.handle_error_message(msg)
                 except Exception as e:
                     self.handle_error_message(str(e))
@@ -175,11 +174,6 @@ class FileReader(object):
         """
         for data in self.output:
             if isinstance(data, Data1D):
-                # Normalize the units for
-                data.x_unit = self.format_unit(data.x_unit)
-                data._xunit = data.x_unit
-                data.y_unit = self.format_unit(data.y_unit)
-                data._yunit = data.y_unit
                 # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
                 data.x = self._reorder_1d_array(data.x, ind)
@@ -209,9 +203,6 @@ class FileReader(object):
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
             elif isinstance(data, Data2D):
-                # Normalize the units for
-                data.Q_unit = self.format_unit(data.Q_unit)
-                data.I_unit = self.format_unit(data.I_unit)
                 data._xunit = data.Q_unit
                 data._yunit = data.Q_unit
                 data._zunit = data.I_unit
@@ -325,22 +316,6 @@ class FileReader(object):
             if isinstance(data, Data2D):
                 set_loaded_units(data, 'z', data._zunit)
                 data.z_unit = data._zunit
-
-    def format_unit(self, unit=None):
-        """
-        Format units a common way
-        :param unit:
-        :return:
-        """
-        if unit:
-            split = unit.split("/")
-            if len(split) == 1:
-                return unit
-            else:
-                split_ct = split[1].split("^")
-                number = 1 if len(split_ct) == 1 else split_ct[1]
-                split[0] = '' if split[0] == '1' else split[0] + '*'
-                return "{0}{1}^{{-{2}}}".format(split[0], split_ct[0], number)
 
     def set_all_to_none(self):
         """
