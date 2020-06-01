@@ -51,8 +51,9 @@ Implementation
 Calculation
 ^^^^^^^^^^^
 Assuming isotropic scattering, acquired on a typical 'pinhole geometry'
-instrument, the invariant integral can be computed from the 1D reduced
-data as:
+instrument, the invariant integral can be computed from the 1D reduced data
+(assuming the reduced data has removed all background from sample
+holders,incoherent scattering in the case of neutrons, etc.) as:
 
 .. math::
 
@@ -71,7 +72,12 @@ data as:
     above equation which would be required for an integral over all $q$ stated
     at the beginning. This seems to be the convention historically adopted and
     is only important when extracting terms from the invariant as below. As
-    long as the same covention is applied in their derivation all is consistent. 
+    long as the same covention is applied in their derivation all is consistent.
+
+.. note::
+    Also note that if some residual flat background remains in the data, it can
+    be corrected for if the amount can be estimated as disucussed in the usage
+    section below.
 
 In the extreme case of "infinite" slit smearing, the above equation reduces to:
 
@@ -138,8 +144,8 @@ High-\ $q$ region (>= $q_{max}$ in data):
 
 *  The power law function $A/q^m$ is used where the power law constant
    $m$ can be fixed to some value by the user or fit along with the constant
-   $A$. $m$ will typically be between -3 and -4 for pinhole resolution with
-   -4 indicating sharp interfaces and other values more diffuse interfaces.
+   $A$. $m$ will typically be between 3 and 4 for pinhole resolution with
+   4 indicating sharp interfaces and smaller values more diffuse interfaces.
    In real systems this may not always hold of course, but the user should
    think about what a deviation means and to what extent it is valid to use
    such an extrapolation. The fitted constant(s) $A$ ($m$) is/are obtained by
@@ -147,9 +153,9 @@ High-\ $q$ region (>= $q_{max}$ in data):
    $j$ is the user chosen number of points from which to extrapolate, the
    default again being the last 10 points.
 
-.. note:: While the high $q$ exponent should generally be close to -4 for a
-    system with sharp interfaces, in the special case of slit smearing that
-    power law should be -3 for the same sharp interfaces.
+.. note:: While the high $q$ exponent should generally be close to 4 for a
+    system with sharp interfaces, in the special case of *infinite* slit
+    smearing that power law should be 3 for the same sharp interfaces.
 
 Invariant
 ^^^^^^^^^
