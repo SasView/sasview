@@ -205,6 +205,10 @@ class plottable_1D(object):
             # Only set instance variable once conversion is successful
             self._yunit = unit
 
+    def convert_to_native_units(self):
+        self.convert_i_units(self.x_loaded_unit)
+        self.convert_q_units(self.y_loaded_unit)
+
 
 class plottable_2D(object):
     """
@@ -372,6 +376,10 @@ class plottable_2D(object):
                 self.err_data = self.err_data * scale
             # Only set instance variable once conversion is successful
             self._zunit = unit
+
+    def convert_to_native_units(self):
+        self.convert_i_units(self.x_loaded_unit)
+        self.convert_q_units(self.z_loaded_unit)
 
 
 class Vector(object):
@@ -693,8 +701,8 @@ class TransmissionSpectrum(object):
         _str += "   Transmission unit:\t{0}\n".format(self.transmission_unit)
         _str += "   Trans. Dev. unit:  \t{0}\n".format(
                                             self.transmission_deviation_unit)
-        length_list = [len(self.wavelength), len(self.transmission), len(
-            self.transmission_deviation)]
+        length_list = [len(v) for v in (self.wavelength, self.transmission,
+                                        self.transmission_deviation)]
         _str += "   Number of Pts:    \t{0}\n".format(max(length_list))
         return _str
 
@@ -971,8 +979,8 @@ class Data1D(plottable_1D, DataInfo):
         :return: True is slit smearing info is present, False otherwise
         """
         def _check(v):
-            return (v.__class__ == list or v.__class__ == np.ndarray) and len(
-                    v) > 0 and min(v) > 0
+            return (isinstance(v, (list, np.ndarray))
+                    and len(v) > 0 and min(v) > 0)
         return _check(self.dxl) or _check(self.dxw)
 
     def clone_without_data(self, length=0, clone=None):
@@ -1258,33 +1266,32 @@ class Data2D(plottable_2D, DataInfo):
         TOLERANCE = 0.01
         if isinstance(other, Data2D):
             # Check that data lengths are the same
-            if (len(self.data) != len(other.data)) or (
-                    len(self.qx_data) != len(other.qx_data)) or (
-                    len(self.qy_data) != len(other.qy_data)):
+            if ((len(self.data) != len(other.data))
+                    or (len(self.qx_data) != len(other.qx_data))
+                    or (len(self.qy_data) != len(other.qy_data))):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError(msg)
             for ind in range(len(self.data)):
-                if fabs(self.qx_data[ind] - other.qx_data[ind]) > fabs(
-                        self.qx_data[ind]) * TOLERANCE:
+                if (fabs(self.qx_data[ind] - other.qx_data[ind])
+                        > fabs(self.qx_data[ind]) * TOLERANCE):
                     msg = "Incompatible data: qx-values do not match: {0} {1}"
                     raise ValueError(msg.format(self.qx_data[ind],
                                                 other.qx_data[ind]))
-                if fabs(self.qy_data[ind] - other.qy_data[ind]) > fabs(
-                        self.qy_data[ind]) * TOLERANCE:
+                if (fabs(self.qy_data[ind] - other.qy_data[ind])
+                        > fabs(self.qy_data[ind]) * TOLERANCE):
                     msg = "Incompatible data: qy-values do not match:  {0} {1}"
                     raise ValueError(msg.format(self.qy_data[ind],
                                                 other.qy_data[ind]))
 
             # Check that the scales match
             err_other = other.err_data
-            if other.err_data is None or (len(other.err_data)
-                                          != len(other.data)):
+            if (other.err_data is None
+                    or (len(other.err_data) != len(other.data))):
                 err_other = np.zeros(len(other.data))
 
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
-        if self.err_data is None or \
-            (len(self.err_data) != len(self.data)):
+        if self.err_data is None or (len(self.err_data) != len(self.data)):
             err = np.zeros(len(other.data))
         return err, err_other
 
@@ -1306,8 +1313,8 @@ class Data2D(plottable_2D, DataInfo):
             result.dqy_data = np.zeros(len(self.data))
         for i in range(np.size(self.data)):
             result.data[i] = self.data[i]
-            if self.err_data is not None and \
-                    np.size(self.data) == np.size(self.err_data):
+            if (self.err_data is not None
+                and np.size(self.data) == np.size(self.err_data)):
                 result.err_data[i] = self.err_data[i]
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
@@ -1321,14 +1328,12 @@ class Data2D(plottable_2D, DataInfo):
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)
-                if other.dqx_data is not None and \
-                        result.dqx_data is not None:
+                if other.dqx_data is not None and result.dqx_data is not None:
                     result.dqx_data[i] *= self.dqx_data[i]
                     result.dqx_data[i] += (other.dqx_data[i]**2)
                     result.dqx_data[i] /= 2
                     result.dqx_data[i] = math.sqrt(result.dqx_data[i])
-                if other.dqy_data is not None and \
-                        result.dqy_data is not None:
+                if other.dqy_data is not None and result.dqy_data is not None:
                     result.dqy_data[i] *= self.dqy_data[i]
                     result.dqy_data[i] += (other.dqy_data[i]**2)
                     result.dqy_data[i] /= 2
