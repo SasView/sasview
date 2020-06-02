@@ -1423,7 +1423,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-            current_details = self.kernel_module.details[parameter_name]
+            current_details = self.kernel_module.details[parameter_name + '.width']
             if self.has_poly_error_column:
                 # err column changes the indexing
                 current_details[model_column-2] = value
