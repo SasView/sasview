@@ -451,9 +451,11 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width', 'length.width'])
 
         # Change the min/max values
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 0.0)
         self.widget._poly_model.item(0,2).setText("1.0")
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 1.0)
+        # Check that changing the polydispersity min/max value doesn't affect the paramer min/max
+        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
 
         #self.widget.show()
         #QtWidgets.QApplication.exec_()
