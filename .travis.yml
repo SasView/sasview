@@ -3,9 +3,6 @@ matrix:
   include:
   - os: linux
     env:
-    - PY=2.7
-  - os: linux
-    env:
     - PY=3.6
   - os: osx
     language: generic
@@ -37,7 +34,6 @@ before_install:
 - conda update --yes conda
 - conda info -a
 - conda install --yes python=$PY numpy scipy matplotlib cython pylint wxpython html5lib reportlab pyparsing lxml mako pybind11 sphinx h5py
-- if [[ "$PY" == "2.7" ]]; then pip install pathlib; fi
 install:
 - pip install unittest-xml-reporting xhtml2pdf periodictable bumps
 - pip install pyopencl xmlrunner
