@@ -500,35 +500,34 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.batchResultsWindow is not None:
             self.showBatchOutput()
 
-    def getParameters(self):
+    def getState(self):
         """
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
         """
-        params = [
-            ['alpha', self._calculator.alpha],
-            ['suggested_alpha', self._calculator.suggested_alpha],
-            ['background', self._calculator.background],
-            ['chi2', self._calculator.chi2],
-            ['chisqr', self._calculator.chisqr],
-            ['cov', self._calculator.cov],
-            ['d_max', self._calculator.d_max],
-            ['elapsed', self._calculator.elapsed],
-            ['err', self._calculator.err],
-            ['est_bck', self._calculator.est_bck],
-            ['nerr', self._calculator.nerr],
-            ['nfunc', self.getNFunc()],
-            ['npoints', self._calculator.npoints],
-            ['ny', self._calculator.ny],
-            ['out', self._calculator.out],
-            ['q_max', self._calculator.q_max],
-            ['q_min', self._calculator.q_min],
-            ['slit_height', self._calculator.slit_height],
-            ['slit_width', self._calculator.slit_width],
-            ['suggested_alpha', self._calculator.suggested_alpha],
-            ['x', self._calculator.x],
-            ['y', self._calculator.y],
-        ]
+        params = {
+            'alpha': self._calculator.alpha,
+            'background': self._calculator.background,
+            'chi2': self._calculator.chi2,
+            'chisqr': self._calculator.chisqr,
+            'cov': self._calculator.cov,
+            'd_max': self._calculator.d_max,
+            'elapsed': self._calculator.elapsed,
+            'err': self._calculator.err,
+            'est_bck': self._calculator.est_bck,
+            'nerr': self._calculator.nerr,
+            'nfunc': self.getNFunc(),
+            'npoints': self._calculator.npoints,
+            'ny': self._calculator.ny,
+            'out': self._calculator.out,
+            'q_max': self._calculator.q_max,
+            'q_min': self._calculator.q_min,
+            'slit_height': self._calculator.slit_height,
+            'slit_width': self._calculator.slit_width,
+            'suggested_alpha': self._calculator.suggested_alpha,
+            'x': self._calculator.x,
+            'y': self._calculator.y,
+        }
         return params
 
     def getNFunc(self):
@@ -652,58 +651,29 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
 
-    def serializeAllFitpage(self):
-        # serialize all active pages and return
-        # a dictionary: {data_id: inversion-state}
-        params = {}
-        tab_data = self.serializeCurrentFitpage()
-        id = tab_data['data_id'][0]
-        if isinstance(id, list):
-            for i in id:
-                if i in params:
-                    params[i].append(tab_data)
-                else:
-                    params[i] = [tab_data]
-        else:
-            if id in params:
-                params[id].append(tab_data)
-            else:
-                params[id] = [tab_data]
-        return params
-
-    def serializeCurrentFitpage(self):
+    def serializeAll(self, all_data):
         """
-        get serialize requested fit tab
+        Serialize the inversion state so data can be saved
+        :return: {data-id: {self.name: {inversion-state}}}
         """
-        pr_state = self.getPage()
-        # put the text into dictionary
-        line_dict = {}
-        for line in pr_state:
-            #content = line.split(',')
-            if len(line) > 1:
-                line_dict[line[0]] = line[1:]
-        return line_dict
+        # Serialize and return a dictionary of {data_id: inversion-state}
+        # Return original dictionary if no data
+        if self.logic.data_is_loaded:
+            tab_data = self.getPage()
+            data_id = tab_data.pop('data_id', '')
+            if data_id in all_data:
+                all_data[data_id]['pr_params'] = tab_data
+        return all_data
 
     def getPage(self):
         """
         serializes full state of this fit page
         """
-        # run a loop over all parameters and pull out
-        # first - regular params
-        param_list = self.getParameters()
-
-        param_list.append(['is_data', str(self.logic.data_is_loaded)])
-        data_ids = []
-        filenames = []
-        if self.logic.data_is_loaded:
-            data_ids = [str(self.logic.data.id)]
-            filenames = [str(self.logic.data.filename)]
-        param_list.append(['data_name', filenames])
-        param_list.append(['data_id', data_ids])
-
-        # checkboxes, if required
-
-        return param_list
+        # Get all parameters from page
+        param_dict = self.getState()
+        param_dict['data_name'] = str(self.logic.data.filename)
+        param_dict['data_id'] = str(self.logic.data.id)
+        return param_dict
 
     ######################################################################
     # Thread Creators

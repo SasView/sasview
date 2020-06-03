@@ -644,35 +644,17 @@ class GuiManager(object):
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
+        analysis = {}
+        for id, data in all_data.items():
+            analysis[id] = {'fit-data': data}
 
         # fit tabs
-        params={}
-        perspective = self.perspective()
-        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
-            params = perspective.serializeAllFitpage()
+        per = self.perspective()
+        if hasattr(per, 'isSerializable') and per.isSerializable:
+            analysis = per.serializeAll(analysis)
 
-        # project dictionary structure:
-        # analysis[data.id] = [{"fit_data":[data, checkbox, child data],
-        #                       "fit_params":[fitpage_state]}
-        # "fit_params" not present if dataset not sent to fitting
-        analysis = {}
-
-        for id, data in all_data.items():
-            if id=='is_batch':
-                analysis['is_batch'] = data
-                analysis['batch_grid'] = self.grid_window.data_dict
-                continue
-            data_content = {"fit_data":data}
-            if id in params.keys():
-                # this dataset is represented also by the fit tab. Add to it.
-                data_content["fit_params"] = params[id]
-            analysis[id] = data_content
-
-        # standalone constraint pages
-        for keys, values in params.items():
-            if not 'is_constraint' in values[0]:
-                continue
-            analysis[keys] = values[0]
+        analysis['is_batch'] = analysis.get('is_batch', False)
+        analysis['batch_grid'] = self.grid_window.data_dict
 
         with open(filename, 'w') as outfile:
             GuiUtils.saveData(outfile, analysis)

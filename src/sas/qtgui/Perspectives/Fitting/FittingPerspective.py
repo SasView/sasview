@@ -118,26 +118,26 @@ class FittingWindow(QtWidgets.QTabWidget):
     def onLatexCopy(self):
         self.currentTab.onCopyToClipboard("Latex")
 
-    def serializeAllFitpage(self):
+    def serializeAll(self, all_data):
+        return self.serializeAllFitpage(all_data)
+
+    def serializeAllFitpage(self, all_data):
         # serialize all active fitpages and return
         # a dictionary: {data_id: fitpage_state}
-        params = {}
         for i, tab in enumerate(self.tabs):
             tab_data = self.getSerializedFitpage(tab)
             if 'data_id' not in tab_data: continue
             id = tab_data['data_id'][0]
-            if isinstance(id, list):
-                for i in id:
-                    if i in params:
-                        params[i].append(tab_data)
-                    else:
-                        params[i] = [tab_data]
-            else:
-                if id in params:
-                    params[id].append(tab_data)
+            if not isinstance(id, list):
+                id = [id]
+            for i in id:
+                if 'is_constraint' in tab_data.keys():
+                    all_data[i] = tab_data
+                elif 'fit-params' in all_data[i]:
+                    all_data[i]['fit_params'].extend(tab_data)
                 else:
-                    params[id] = [tab_data]
-        return params
+                    all_data[i]['fit_params'] = [tab_data]
+        return all_data
 
     def serializeCurrentFitpage(self):
         # serialize current(active) fitpage
