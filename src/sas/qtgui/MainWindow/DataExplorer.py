@@ -313,13 +313,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         return filename
 
-    def saveAsAnalysisFile(self, tab_id=1):
+    def saveAsAnalysisFile(self, tab_id=1, extension='fitv'):
         """
         Show the save as... dialog and return the chosen filepath
         """
-        default_name = "FitPage"+str(tab_id)+".fitv"
+        default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
-        wildcard = "fitv files (*.fitv)"
+        wildcard = "{0} files (*.{0})".format(extension)
         kwargs = {
             'caption'   : 'Save As',
             'directory' : default_name,
@@ -331,16 +331,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = filename_tuple[0]
         return filename
 
-    def saveAnalysis(self, data, tab_id=1):
+    def saveAnalysis(self, data, tab_id=1, ext='fitv'):
         """
         Called when the "Save Analysis" menu item chosen.
         """
-        filename = self.saveAsAnalysisFile(tab_id)
+        filename = self.saveAsAnalysisFile(tab_id, ext)
         if not filename:
             return
         _, extension = os.path.splitext(filename)
         if not extension:
-            filename = '.'.join((filename, 'fitv'))
+            filename = '.'.join((filename, ext))
         self.communicator.statusBarUpdateSignal.emit("Saving analysis... %s\n" % os.path.basename(filename))
 
         with open(filename, 'w') as outfile:
@@ -466,7 +466,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def readProject(self, filename):
         """
-        Read out datasets and fitpages from file
+        Read out datasets and perspective information from file
         """
         # Find out the filetype based on extension
         ext = os.path.splitext(filename)[1]
@@ -558,6 +558,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Create new model items in the data explorer
             items = self.updateModelFromData(data_dict)
 
+        # TODO: Move 'fit_params' to FittingPerspective
         if 'fit_params' in value:
             params = value['fit_params']
             # Make the perspective read the rest of the read data

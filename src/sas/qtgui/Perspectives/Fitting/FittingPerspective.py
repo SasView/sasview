@@ -25,6 +25,7 @@ class FittingWindow(QtWidgets.QTabWidget):
     fittingStoppedSignal = QtCore.pyqtSignal(list)
 
     name = "Fitting" # For displaying in the combo box in DataExplorer
+    ext = "fitv"  # Extension used for saving analyses
     def __init__(self, parent=None, data=None):
 
         super(FittingWindow, self).__init__()
@@ -125,25 +126,14 @@ class FittingWindow(QtWidgets.QTabWidget):
         # serialize all active fitpages and return
         # a dictionary: {data_id: fitpage_state}
         for i, tab in enumerate(self.tabs):
-            tab_data = self.getSerializedFitpage(tab)
-            if 'data_id' not in tab_data: continue
-            id = tab_data['data_id'][0]
-            if not isinstance(id, list):
-                id = [id]
-            for i in id:
-                if 'is_constraint' in tab_data.keys():
-                    all_data[i] = tab_data
-                elif 'fit-params' in all_data[i]:
-                    all_data[i]['fit_params'].extend(tab_data)
-                else:
-                    all_data[i]['fit_params'] = [tab_data]
+            all_data = self.getSerializedFitpage(tab, all_data)
         return all_data
 
-    def serializeCurrentFitpage(self):
+    def serializeCurrentPage(self, all_data):
         # serialize current(active) fitpage
-        return self.getSerializedFitpage(self.currentTab)
+        return self.getSerializedFitpage(self.currentTab, all_data)
 
-    def getSerializedFitpage(self, tab):
+    def getSerializedFitpage(self, tab, all_data):
         """
         get serialize requested fit tab
         """
@@ -155,7 +145,19 @@ class FittingWindow(QtWidgets.QTabWidget):
             #content = line.split(',')
             if len(line) > 1:
                 line_dict[line[0]] = line[1:]
-        return line_dict
+
+        if 'data_id' not in line_dict: return all_data
+        id = line_dict['data_id'][0]
+        if not isinstance(id, list):
+            id = [id]
+        for i in id:
+            if 'is_constraint' in line_dict.keys():
+                all_data[i] = line_dict
+            elif 'fit-params' in all_data[i]:
+                all_data[i]['fit_params'].extend(line_dict)
+            else:
+                all_data[i]['fit_params'] = [line_dict]
+        return all_data
 
     def currentTabDataId(self):
         """

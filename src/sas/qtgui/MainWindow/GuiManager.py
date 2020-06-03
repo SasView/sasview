@@ -664,23 +664,27 @@ class GuiManager(object):
         Menu File/Save Analysis
         """
         per = self.perspective()
-        if not isinstance(per, FittingWindow):
+        if not hasattr(per, 'isSerializable') or not per.isSerializable:
             return
         # get fit page serialization
-        params = per.serializeCurrentFitpage()
+        all_data = self.filesWidget.getSerializedData()
+        analysis = {}
+        for id, data in all_data.items():
+            analysis[id] = {'fit-data': data}
+        analysis = per.serializeCurrentPage(analysis)
         # Find dataset ids for the current tab
         # (can be multiple, if batch)
         data_id = per.currentTabDataId()
-        tab_id = per.currentTab.tab_id
-        analysis = {}
+        final_analysis = {}
         for id in data_id:
-            an = {}
-            data_for_id = self.filesWidget.getDataForID(id)
-            an['fit_data'] = data_for_id
-            an['fit_params'] = [params]
-            analysis[id] = an
-
-        self.filesWidget.saveAnalysis(analysis, tab_id)
+            an = analysis.get(id)
+            final_analysis[id] = an
+        if len(final_analysis) > 0:
+            tab_id = 1 if not hasattr(per,
+                                      'currentTab') else per.currentTab.tab_id
+            self.filesWidget.saveAnalysis(final_analysis, tab_id, per.ext)
+        else:
+            logger.warning('No analysis was available to be saved.')
 
     def actionQuit(self):
         """

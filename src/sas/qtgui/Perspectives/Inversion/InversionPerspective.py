@@ -41,6 +41,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
 
     name = "Inversion"
+    ext = "pr"  # Extension used for saving analyses
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
@@ -654,8 +655,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def serializeAll(self, all_data):
         """
         Serialize the inversion state so data can be saved
+        Inversion is not batch-ready so this will only effect a single page
         :return: {data-id: {self.name: {inversion-state}}}
         """
+        return self.serializeCurrentPage(all_data=all_data)
+
+    def serializeCurrentPage(self, all_data):
         # Serialize and return a dictionary of {data_id: inversion-state}
         # Return original dictionary if no data
         if self.logic.data_is_loaded:
@@ -674,6 +679,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         param_dict['data_name'] = str(self.logic.data.filename)
         param_dict['data_id'] = str(self.logic.data.id)
         return param_dict
+
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = []
+        if self.logic.data_is_loaded:
+            tab_id.append(str(self.logic.data.id))
+        return tab_id
 
     ######################################################################
     # Thread Creators
