@@ -646,7 +646,7 @@ class GuiManager(object):
         all_data = self.filesWidget.getSerializedData()
         analysis = {}
         for id, data in all_data.items():
-            analysis[id] = {'fit-data': data}
+            analysis[id] = {'fit_data': data}
 
         # fit tabs
         per = self.perspective()
@@ -670,7 +670,7 @@ class GuiManager(object):
         all_data = self.filesWidget.getSerializedData()
         analysis = {}
         for id, data in all_data.items():
-            analysis[id] = {'fit-data': data}
+            analysis[id] = {'fit_data': data}
         analysis = per.serializeCurrentPage(analysis)
         # Find dataset ids for the current tab
         # (can be multiple, if batch)

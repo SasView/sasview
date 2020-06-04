@@ -510,19 +510,24 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             'alpha': self._calculator.alpha,
             'background': self._calculator.background,
             'chi2': self._calculator.chi2,
-            'chisqr': self._calculator.chisqr,
             'cov': self._calculator.cov,
             'd_max': self._calculator.d_max,
             'elapsed': self._calculator.elapsed,
             'err': self._calculator.err,
             'est_bck': self._calculator.est_bck,
+            'iq0': self._calculator.iq0(self._calculator.out),
             'nerr': self._calculator.nerr,
             'nfunc': self.getNFunc(),
             'npoints': self._calculator.npoints,
             'ny': self._calculator.ny,
             'out': self._calculator.out,
+            'oscillations': self._calculator.oscillations(self._calculator.out),
+            'pos_frac': self._calculator.get_positive(self._calculator.out),
+            'pos_err': self._calculator.get_pos_err(self._calculator.out,
+                                                    self._calculator.cov),
             'q_max': self._calculator.q_max,
             'q_min': self._calculator.q_min,
+            'rg': self._calculator.rg,
             'slit_height': self._calculator.slit_height,
             'slit_width': self._calculator.slit_width,
             'suggested_alpha': self._calculator.suggested_alpha,
@@ -688,6 +693,32 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.logic.data_is_loaded:
             tab_id.append(str(self.logic.data.id))
         return tab_id
+
+    def updateFromParameters(self, params):
+        self._calculator.suggested_alpha = params['alpha']
+        self.updateDynamicGuiValues()
+        self.acceptAlpha()
+        self.backgroundInput.setText(str(params['background']))
+        self._calculator.chi2 = params['chi2']
+        self._calculator.cov = params['cov']
+        self._calculator.d_max = params['d_max']
+        self._calculator.elapsed = params['elapsed']
+        self._calculator.err = params['err']
+        self._calculator.set_est_bck = bool(params['est_bck'])
+        self._calculator.nerr = params['nerr']
+        self.noOfTermsInput.setText(str(params['nfunc']))
+        self._calculator.npoints = params['npoints']
+        self._calculator.ny = params['ny']
+        self._calculator.out = params['out']
+        self._calculator.q_max = params['q_max']
+        self._calculator.q_min = params['q_min']
+        self._calculator.slit_height = params['slit_height']
+        self._calculator.slit_width = params['slit_width']
+        self._calculator.suggested_alpha = params['suggested_alpha']
+        self._calculator.x = params['x']
+        self._calculator.y = params['y']
+        self.updateGuiValues()
+        self.updateDynamicGuiValues()
 
     ######################################################################
     # Thread Creators
