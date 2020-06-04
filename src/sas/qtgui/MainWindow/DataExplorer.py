@@ -272,10 +272,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.default_project_location = os.path.dirname(filename)
             self.deleteAllItems()
             # Currently project load is available only for fitting
-            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
-                self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
-            # delete all (including the default) tabs
-            self._perspective().deleteAllTabs()
+            if self.cbFitting.currentText == DEFAULT_PERSPECTIVE:
+                # delete all (including the default) tabs
+                self._perspective().deleteAllTabs()
             self.readProject(filename)
 
     def loadAnalysis(self):
