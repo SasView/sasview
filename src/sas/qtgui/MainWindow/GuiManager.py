@@ -125,6 +125,13 @@ class GuiManager(object):
         """
         Populate the main window with widgets
         """
+        # Preload all perspectives
+        loaded_dict = {}
+        for name, perspective in Perspectives.PERSPECTIVES.items():
+            loaded_perspective = perspective(parent=self)
+            loaded_dict[name] = loaded_perspective
+        self.loadedPerspectives = loaded_dict
+
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
@@ -317,18 +324,21 @@ class GuiManager(object):
         """
         Respond to change of the perspective signal
         """
-        # Close the previous perspective
+        # Remove the previous perspective from the window
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
-            self._current_perspective.setClosable()
+            # Remove perspective and store in Perspective dictionary
+            self.loadedPerspectives[
+                self._current_perspective.name] = self._current_perspective
+            self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._workspace.workspace.removeSubWindow(self.subwindow)
-            self._current_perspective.close()
-        # Default perspective
-        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
+        # Get new perspective
+        self._current_perspective = self.loadedPerspectives[str(perspective_name)]
 
         self.setupPerspectiveMenubarOptions(self._current_perspective)
 
-        self.subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
+        self.subwindow = self._workspace.workspace.addSubWindow(
+            self._current_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()

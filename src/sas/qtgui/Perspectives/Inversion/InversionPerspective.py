@@ -632,7 +632,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             data_list = [self._data]
         self.closeDMax()
         for data in data_list:
-            self._dataList.pop(data)
+            if data in self._dataList.keys():
+                self._dataList.pop(data)
         self._data = None
         length = len(self.dataList)
         for index in reversed(range(length)):
