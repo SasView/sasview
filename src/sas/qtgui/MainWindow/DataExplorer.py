@@ -579,7 +579,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.sendItemToPerspective(items[0], tab_index=tab_index)
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
-        elif value.get('pr_params'):
+        if value.get('pr_params'):
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Inversion'))
             params = value['pr_params']
             self.sendItemToPerspective(items[0])

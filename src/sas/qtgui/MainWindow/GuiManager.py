@@ -658,10 +658,10 @@ class GuiManager(object):
         for id, data in all_data.items():
             analysis[id] = {'fit_data': data}
 
-        # fit tabs
-        per = self.perspective()
-        if hasattr(per, 'isSerializable') and per.isSerializable:
-            analysis = per.serializeAll(analysis)
+        # Save from all serializable perspectives
+        for name, per in self.loadedPerspectives.items():
+            if hasattr(per, 'isSerializable') and per.isSerializable:
+                analysis = per.serializeAll(analysis)
 
         analysis['is_batch'] = analysis.get('is_batch', False)
         analysis['batch_grid'] = self.grid_window.data_dict
