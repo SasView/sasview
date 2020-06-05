@@ -1399,12 +1399,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = parameter_name.rsplit()[-1]
 
         delegate = self.lstPoly.itemDelegate()
+        parameter_name_w = parameter_name + '.width'
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name_w = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
                 self.poly_params_to_fit.append(parameter_name_w)
             else:
@@ -1421,7 +1421,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-            current_details = self.kernel_module.details[parameter_name + '.width']
+            current_details = self.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
                 current_details[model_column-2] = value
