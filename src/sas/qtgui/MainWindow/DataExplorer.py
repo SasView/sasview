@@ -270,9 +270,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.default_project_location = os.path.dirname(filename)
+            # Inversion perspective will remove all data with delete
             self.deleteAllItems()
             # Currently project load is available only for fitting
-            if self.cbFitting.currentText == DEFAULT_PERSPECTIVE:
+            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
+                self.cbFitting.setCurrentIndex(
+                    self.cbFitting.findText(DEFAULT_PERSPECTIVE))
                 # delete all (including the default) tabs
                 self._perspective().deleteAllTabs()
             self.readProject(filename)
