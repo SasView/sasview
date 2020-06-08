@@ -1523,6 +1523,30 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
+    def testParameterPaste(self):
+        """
+        Test parameter pasting
+        """
+        # Mock the clipboard and make it return unconsistent string
+        cb = QtWidgets.QApplication.clipboard()
+        cb.text = MagicMock(return_value='foo')
+        # Mock the updatePageWithParameters call
+        widget = self.widget
+        widget.updatePageWithParameters = MagicMock()
+        self.widget.onParameterPaste()
+        # Check if the function is called
+        self.assertFalse(widget.updatePageWithParameters.called)
+        # Now return a consistent string in the
+        cb.text = MagicMock(return_value='sasview_parameter_values:tab_name,M1:scale,0.1:background,0.1')
+        self.widget.onParameterPaste()
+        self.assertTrue(widget.updatePageWithParameters.called)
+        # Get the pasted dict
+        paste_dict = widget.updatePageWithParameters.call_args[0]
+        # tab_name should not be in the dict
+        self.assertFalse('tab_name' in paste_dict[0])
+        # scale and background should
+        self.assertTrue('scale' in paste_dict[0])
+        self.assertTrue('background' in paste_dict[0])
 
 if __name__ == "__main__":
     unittest.main()
