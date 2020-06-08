@@ -114,7 +114,7 @@ def _build_all_units():
     distance = _build_metric_units('meter','m')
     distance.update(_build_metric_units('metre','m'))
     distance.update(_build_plural_units(micron=1e-6, Angstrom=1e-10))
-    distance.update({'Å':1e-10})
+    distance.update({'Å':1e-10, 'A':1e-10})
 
     # Note: minutes are used for angle
     time = _build_metric_units('second','s')
@@ -139,10 +139,11 @@ def _build_all_units():
     charge = _build_metric_units('coulomb','C')
     charge.update({'microAmp*hour':0.0036})
 
-    sld = {'10^{-6} Å^{-2}': 1e-6, 'Å^{-2}': 1, 'um^{-2}': 1e10}
-    Q = {'Å^{-1}': 1, 'cm^{-1}': 1e-8, '10^{-3} Å^{-1}': 1e-3, 'm^{-1}': 1e-10,
-         'nm^{-1}': 0.1, 'mm^{-1}': 1e-7}
-    se = {'Å^{-2} cm^{-1}': 1}
+    sld = {'10^{-6} Å^{-2}': 1e-6, 'Å^{-2}': 1, '10^{-6} A^{-2}': 1e-6,
+           'A^{-2}': 1, 'um^{-2}': 1e10}
+    Q = {'Å^{-1}': 1, 'A^{-1}': 1, 'cm^{-1}': 1e-8, '10^{-3} Å^{-1}': 1e-3,
+         'm^{-1}': 1e-10, 'nm^{-1}': 0.1, 'mm^{-1}': 1e-7}
+    se = {'Å^{-2} cm^{-1}': 1, 'A^{-2} cm^{-1}': 1}
 
     _caret_optional(sld)
     _caret_optional(Q)
@@ -157,10 +158,11 @@ def standardize_units(unit):
     :param unit: Raw unit as supplied
     :return: Unit with known, reduced values
     """
+    if not unit:
+        return None
     # Catch ang, angstrom, ANG, ANGSTROM, and any capitalization in between
     # Replace with 'Å'
-    unit = re.sub(r'[Åa]ng(strom)?(s)?', 'Å', unit, flags=re.IGNORECASE)
-    unit = re.sub(r'[A]', 'Å', unit)
+    unit = re.sub(r'[Åa]ng(str[oö]m)?(s)?', 'Å', unit, flags=re.IGNORECASE)
     # Catch meter, metre, METER, METRE, and any capitalization in between
     # Replace with 'm'
     unit = re.sub(r'(met(er|re)(s)?)', 'm', unit, flags=re.IGNORECASE)
@@ -178,8 +180,10 @@ def standardize_units(unit):
     unit = re.sub(r'h(ert)?z', 'Hz', unit)
     # Catch arbitrary units, arbitrary, and any capitalization
     # Replace with 'a.u.'
-    unit = re.sub(r'^(arb(itrary|[.]|) ?units?|a[.] ?u[.]|au[.]?|aus[.]?)$',
+    unit = re.sub(r'(arb(itrary|[.]|)?( )?(units)?|a[.] ?u[.]|au[.]?|aus[.]?)',
                   'a.u.', unit, flags=re.IGNORECASE)
+    unit = re.sub(r'(unk)(nown)?', 'Unk', unit, flags=re.IGNORECASE)
+    unit = re.sub(r'(c)(oun)?(t)(s)?', 'cts', unit, flags=re.IGNORECASE)
     return _format_unit_structure(unit)
 
 
@@ -191,27 +195,31 @@ def _format_unit_structure(unit=None):
     """
     if not unit:
         return
-    # a-m[ /?]b-n ... -> a^m b^-n and pre_Unit -> preUnit
-    unit = re.sub('([℃ÅA-Za-z ]+)([-0-9]+)', r"\1^\2", unit).replace("_", '')
-    # invUnit -> /unit
-    unit = re.sub('inv', '/', unit, flags=re.IGNORECASE)
-    # Capture multi-unit
-    split_ws = unit.split()
+    # a-m[ /?]b-n ... -> a^m b^-n
+    unit = re.sub('([℃ÅA-Za-z_ ]+)([-0-9]+)', r"\1^\2", unit)
+    # a^-m*b^-n -> a^-m b^-n
+    unit = unit.replace('*', ' ')
+    # invUnit or 1/unit -> /unit
+    for x in ['inv', '1/']:
+        unit = re.sub(x, '/', unit, flags=re.IGNORECASE)
+    # (a_m^2 b_n^-3) -> am^2 bn^-3
+    for x in ['_', '(', ')']:
+        unit = unit.replace(x, '')
     final = ''
-    for item in split_ws:
-        # a/b^n, a*inv{b^n} or a*b^n -> a*b^{[-?]n}
-        split = item.split("/")
-        index = 1 if len(split) > 1 else 0
-        split_ct = split[index].split("^")
-        # Break if unit format is prefixUnit
-        if len(split_ct) == 1 and not index:
-            final += "{0} ".format(item)
-            break
-        number = 1 if len(split_ct) == 1 else split_ct[1]
-        start = '' if split[0] in ['1', '', item] else split[0] + '*'
-        sign = '-' if len(split_ct) == 1 else ''
-        final += "{0}{1}^{{{2}{3}}} ".format(start, split_ct[0], sign, number)
-    # Remove leading and trailing whitespace and double brackets with single
+    factors = unit.split('/')
+    # am^2/bn^2 c -> am^{{2}} bn^{{-2}} c^{{-1}}
+    for i in range(len(factors)):
+        sign = '-' if i > 0 else ''
+        for item in factors[i].split():
+            if item == '':
+                continue
+            ct_split = item.split('^')
+            final += f"{ct_split[0]}"
+            number = 1 if len(ct_split) == 1 else ct_split[1]
+            final += (f"^{{{sign}{number}}} "
+                      if len(ct_split) > 1 or sign == '-'
+                      else " ")
+    # ' am^{{2}} bn^{{-2}} c^{{-1}} ' -> 'am^{2} bn^{-2} c^{-1}'
     return final.strip().replace('{{', '{').replace('}}', '}')
 
 
@@ -227,10 +235,10 @@ class Converter(object):
     # Note: a.u. stands for arbitrary units, which should return the default
     # units for that particular dimension.
     # Note: don't have support for dimensionless units.
-    unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1}
+    unknown = {None: 1, '???': 1, '': 1, 'a.u.': 1, 'cts': 1, 'Unk': 1}
 
     def __init__(self, name):
-        name = standardize_units(name)
+        name = standardize_units(name) if name else None
         self.base = name
         for map in self.dims:
             if name in map:
@@ -238,7 +246,7 @@ class Converter(object):
                 self.scalebase = self.scalemap[name]
                 return
         if name in self.unknown:
-            return # default scalemap and scalebase correspond to unknown
+            return  # default scalemap and scalebase correspond to unknown
         else:
             raise KeyError("Unknown unit %s" % name)
 
@@ -268,38 +276,3 @@ class Converter(object):
         except KeyError:
             possible_units = ", ".join(str(k) for k in self.scalemap.keys())
             raise KeyError("%s not in %s" % (units, possible_units))
-
-
-def _check(expect, get):
-    if expect != get:
-        raise ValueError("Expected %s but got %s" % (expect, get))
-    # print(str(expect) + "==" + str(get))
-
-
-def test():
-    _check(1, Converter('n_m^-1')(10, 'invA'))  # 10 nm^-1 = 1 inv Angstroms
-    _check(2, Converter('mm')(2000, 'm'))  # 2000 mm = 2 m
-    _check(2.011e10, Converter('1/A')(2.011, "1/m"))  # 2.011 1/A = 2.011e10 1/m
-    _check(0.003, Converter('microseconds')(3, units='ms'))  # 3 us = 0.003 ms
-    _check(45, Converter('nanokelvin')(45))  # 45 nK = 45 nK
-    _check(0.5, Converter('seconds')(1800, units='hours'))  # 1800 s = 0.5 hr
-
-    # Multi-unit strings
-    _check(1, Converter('A-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
-
-    # arbitrary units always returns the same value
-    _check(123, Converter('a.u.')(123, units='mm'))
-    _check(123, Converter('a.u.')(123, units='s'))
-    _check(123, Converter('a.u.')(123, units=''))
-    try:
-        Converter('help')
-    except KeyError:
-        pass
-    else:
-        raise Exception("unknown unit did not raise an error")
-
-    # TODO: more tests
-
-
-if __name__ == "__main__":
-    test()

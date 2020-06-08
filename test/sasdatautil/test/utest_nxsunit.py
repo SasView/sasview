@@ -1,0 +1,90 @@
+"""
+    Unit tests for the unit conversion tool
+"""
+import unittest
+
+from sas.sascalc.data_util.nxsunit import Converter, standardize_units
+
+
+class NXSUnitTests(unittest.TestCase):
+
+    def setUp(self):
+        self.converter = Converter(None)
+        self.k_conv = Converter('nanoKelvins')
+        self.base_value = 123
+
+    def test_initialization(self):
+        self.assertEqual(self.converter.base, None)
+        self.assertEqual(self.converter.scalebase, 1)
+        self.assertEqual(self.converter.scalemap, None)
+        self.assertEqual(self.k_conv.base, 'nanoK')
+        self.assertEqual(self.k_conv.scalebase, 1e-9)
+        self.assertEqual(len(self.k_conv.scalemap.keys()), 462)
+
+    def testBasicUnits(self):
+        # 10 nm^-1 = 1 inv Angstroms
+        self.assertEqual(1, Converter('n_m^-1')(10, 'invA'))
+        # Test different 1/A representations
+        self.assertEqual(1, Converter('/A')(1, 'invA'))
+        # 1.65 1/A = 1.65e10 1/m
+        self.assertEqual(1.65e10, Converter('/A')(1.65, '/m'))
+        # 2000 mm = 2 m
+        self.assertEqual(2, Converter('mm')(2000, 'm'))
+        # 2.011 1/A = 2.011e10 1/m
+        self.assertEqual(2.011e10, Converter('1/A')(2.011, "1/m"))
+        # 3 us = 0.003 ms
+        self.assertEqual(0.003, Converter('microseconds')(3, units='ms'))
+        # 45 nK = 45 nK
+        self.assertEqual(45, self.k_conv(45))
+        # 1 K = 1e9 nK
+        self.assertEqual(1, self.k_conv(1e9, 'K'))
+        # 1800 s = 0.5 hr
+        self.assertEqual(0.5, Converter('seconds')(1800, units='hours'))
+
+    def test_known_unknown_units(self):
+        self.assertEqual(self.base_value,
+                         self.converter(self.base_value, units='K'))
+        self.assertEqual(self.base_value,
+                         Converter('arbitrary')(self.base_value, units='K'))
+        self.assertEqual(self.base_value,
+                         Converter('cts')(self.base_value, units='K'))
+        self.assertEqual(self.base_value,
+                         Converter('Counts')(self.base_value, units='Angstrom'))
+        self.assertEqual(self.base_value,
+                         Converter('Unknown')(self.base_value, units='mm'))
+        self.assertEqual(self.base_value,
+                         Converter('a.u.')(self.base_value, units='mm'))
+        self.assertEqual(self.base_value,
+                         Converter('a.u.')(self.base_value, units='s'))
+        self.assertEqual(self.base_value,
+                         Converter('a.u.')(self.base_value, units=''))
+        self.assertEqual(1, self.converter.scalebase)
+
+    def test_se_units(self):
+        self.assertEqual(1, Converter('A-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertEqual(1, Converter('A^-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertEqual(1, Converter('A-2 cm^-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertEqual(1, Converter('A^-2 cm^-1')(1, 'Å^{-2} cm^{-1}'))
+
+    def test_unit_structures(self):
+        # Both should return None
+        self.assertEqual(standardize_units(None), standardize_units(''))
+        # Test substitutions
+        self.assertEqual('nK', standardize_units('nKelvin'))
+        # Capitalization standardization
+        self.assertEqual(standardize_units('seconds'),
+                         standardize_units('SECONDS'))
+        # US vs. European spellings
+        self.assertEqual(standardize_units('meters'),
+                         standardize_units('metres'))
+        # Multiple units
+        self.assertEqual('nanoK^{-4} cm^{-1} Å^{-2}',
+                         standardize_units('nanoKelvin-4 invcm/angstrom^2'))
+        # Numerator vs. Denominator
+        self.assertEqual(standardize_units('A^2/nanoKelvin^4'),
+                         'A^{2} nanoK^{-4}')
+        # Tackle parentheses
+        self.assertEqual(standardize_units('(A^2 B^2)/(C^2)'),
+                         'A^{2} B^{2} C^{-2}')
+        # Multiple divisions
+        self.assertEqual(standardize_units('A/B/C'), 'A B^{-1} C^{-1}')
