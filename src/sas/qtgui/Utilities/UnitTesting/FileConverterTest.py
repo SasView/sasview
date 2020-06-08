@@ -62,8 +62,8 @@ class FileConverterTest(unittest.TestCase):
     def testOnHelp(self):
         """ Test the default help renderer """
 
-        webbrowser.open = MagicMock()
-        # invoke the tested method
+        self.widget.parent.showHelp = MagicMock()
         self.widget.onHelp()
-        # see that webbrowser open was attempted
-        webbrowser.open.assert_called()
+        self.assertTrue(self.widget.parent.showHelp.called_once())
+        #args = self.widget.manager.showHelp.call_args
+        #self.assertIn('data_operator_help.html', args[0][0])
