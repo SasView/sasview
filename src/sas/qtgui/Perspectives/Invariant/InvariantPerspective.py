@@ -52,7 +52,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # initial input params
         self._background = 0.0
         self._scale = 1.0
-        self._contrast = 1.0
+        self._contrast = 1.0e-6
         self._porod = None
 
         self.parent = parent
