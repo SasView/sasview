@@ -101,6 +101,9 @@
           <property name="title">
            <string>Accuracy</string>
           </property>
+          <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Higher accuracy is very expensive. Use it with care!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
             <widget class="QComboBox" name="cbAccuracy">
