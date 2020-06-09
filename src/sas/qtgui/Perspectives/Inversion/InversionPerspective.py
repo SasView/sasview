@@ -506,7 +506,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
         """
-        params = {
+        return {
             'alpha': self._calculator.alpha,
             'background': self._calculator.background,
             'chi2': self._calculator.chi2,
@@ -527,14 +527,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                                     self._calculator.cov),
             'q_max': self._calculator.q_max,
             'q_min': self._calculator.q_min,
-            'rg': self._calculator.rg,
+            'rg': self._calculator.rg(self._calculator.out),
             'slit_height': self._calculator.slit_height,
             'slit_width': self._calculator.slit_width,
             'suggested_alpha': self._calculator.suggested_alpha,
             'x': self._calculator.x,
             'y': self._calculator.y,
         }
-        return params
 
     def getNFunc(self):
         """Get the n_func value from the GUI object"""
@@ -632,8 +631,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             data_list = [self._data]
         self.closeDMax()
         for data in data_list:
-            if data in self._dataList.keys():
-                self._dataList.pop(data)
+            self._dataList.pop(data, None)
         self._data = None
         length = len(self.dataList)
         for index in reversed(range(length)):
@@ -658,23 +656,23 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
 
-    def serializeAll(self, all_data):
+    def serializeAll(self):
         """
         Serialize the inversion state so data can be saved
         Inversion is not batch-ready so this will only effect a single page
         :return: {data-id: {self.name: {inversion-state}}}
         """
-        return self.serializeCurrentPage(all_data=all_data)
+        return self.serializeCurrentPage()
 
-    def serializeCurrentPage(self, all_data):
+    def serializeCurrentPage(self):
         # Serialize and return a dictionary of {data_id: inversion-state}
         # Return original dictionary if no data
+        state = {}
         if self.logic.data_is_loaded:
             tab_data = self.getPage()
             data_id = tab_data.pop('data_id', '')
-            if data_id in all_data:
-                all_data[data_id]['pr_params'] = tab_data
-        return all_data
+            state[data_id] = {'pr_params': tab_data}
+        return state
 
     def getPage(self):
         """

@@ -502,6 +502,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     logging.error("Project load failed with " + str(ex))
                     return
         cs_keys = []
+        visible_perspective = DEFAULT_PERSPECTIVE
         for key, value in all_data.items():
             if key == 'is_batch':
                 self.chkBatch.setChecked(value == 'True')
@@ -514,15 +515,24 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if 'cs_tab' in key:
                 cs_keys.append(key)
                 continue
+            if 'visible_perspective' in key:
+                visible_perspective = value
             # send newly created items to the perspective
             self.updatePerspectiveWithProperties(key, value)
 
+        # Set to fitting perspective and load in Batch and C&S Pages
+        self.cbFitting.setCurrentIndex(
+            self.cbFitting.findText(DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
 
         # Only now can we create/assign C&S pages.
         for key in cs_keys:
             self.updatePerspectiveWithProperties(key, all_data[key])
+
+        # Set to perspective shown when project was saved
+        self.cbFitting.setCurrentIndex(
+                self.cbFitting.findText(visible_perspective))
 
     def updateWithBatchPages(self, all_data):
         """
@@ -558,12 +568,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def updatePerspectiveWithProperties(self, key, value):
         """
         """
-        if value.get('fit_data'):
+        if 'fit_data' in value:
             data_dict = {key:value['fit_data']}
             # Create new model items in the data explorer
             items = self.updateModelFromData(data_dict)
 
-        if value.get('fit_params'):
+        if 'fit_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
             params = value['fit_params']
             # Make the perspective read the rest of the read data
@@ -582,7 +592,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.sendItemToPerspective(items[0], tab_index=tab_index)
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
-        if value.get('pr_params'):
+        if 'pr_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Inversion'))
             params = value['pr_params']
             self.sendItemToPerspective(items[0])

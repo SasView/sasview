@@ -119,24 +119,31 @@ class FittingWindow(QtWidgets.QTabWidget):
     def onLatexCopy(self):
         self.currentTab.onCopyToClipboard("Latex")
 
-    def serializeAll(self, all_data):
-        return self.serializeAllFitpage(all_data)
+    def serializeAll(self):
+        return self.serializeAllFitpage()
 
-    def serializeAllFitpage(self, all_data):
+    def serializeAllFitpage(self):
         # serialize all active fitpages and return
         # a dictionary: {data_id: fitpage_state}
+        state = {}
         for i, tab in enumerate(self.tabs):
-            all_data = self.getSerializedFitpage(tab, all_data)
-        return all_data
+            tab_state = self.getSerializedFitpage(tab)
+            for key, value in tab_state.items():
+                if key in state:
+                    state[key].update(value)
+                else:
+                    state[key] = value
+        return state
 
-    def serializeCurrentPage(self, all_data):
+    def serializeCurrentPage(self):
         # serialize current(active) fitpage
-        return self.getSerializedFitpage(self.currentTab, all_data)
+        return self.getSerializedFitpage(self.currentTab)
 
-    def getSerializedFitpage(self, tab, all_data):
+    def getSerializedFitpage(self, tab):
         """
         get serialize requested fit tab
         """
+        state = {}
         fitpage_state = tab.getFitPage()
         fitpage_state += tab.getFitModel()
         # put the text into dictionary
@@ -146,18 +153,18 @@ class FittingWindow(QtWidgets.QTabWidget):
             if len(line) > 1:
                 line_dict[line[0]] = line[1:]
 
-        if 'data_id' not in line_dict: return all_data
+        if 'data_id' not in line_dict: return state
         id = line_dict['data_id'][0]
         if not isinstance(id, list):
             id = [id]
         for i in id:
             if 'is_constraint' in line_dict.keys():
-                all_data[i] = line_dict
-            elif 'fit-params' in all_data[i]:
-                all_data[i]['fit_params'].extend(line_dict)
+                state[i] = line_dict
+            elif i in state and 'fit-params' in state[i]:
+                state[i]['fit_params'].update(line_dict)
             else:
-                all_data[i]['fit_params'] = [line_dict]
-        return all_data
+                state[i] = {'fit_params': [line_dict]}
+        return state
 
     def currentTabDataId(self):
         """

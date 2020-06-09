@@ -654,20 +654,27 @@ class GuiManager(object):
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
-        analysis = {}
+        final_data = {}
         for id, data in all_data.items():
-            analysis[id] = {'fit_data': data}
+            final_data[id] = {'fit_data': data}
 
         # Save from all serializable perspectives
+        # Analysis should return {data-id: serialized-state}
         for name, per in self.loadedPerspectives.items():
             if hasattr(per, 'isSerializable') and per.isSerializable:
-                analysis = per.serializeAll(analysis)
+                analysis = per.serializeAll()
+                for key, value in analysis.items():
+                    if key in final_data:
+                        final_data[key].update(value)
+                    elif 'cs_tab' in key:
+                        final_data[key] = value
 
-        analysis['is_batch'] = analysis.get('is_batch', False)
-        analysis['batch_grid'] = self.grid_window.data_dict
+        final_data['is_batch'] = analysis.get('is_batch', 'False')
+        final_data['batch_grid'] = self.grid_window.data_dict
+        final_data['visible_perspective'] = self._current_perspective.name
 
         with open(filename, 'w') as outfile:
-            GuiUtils.saveData(outfile, analysis)
+            GuiUtils.saveData(outfile, final_data)
 
     def actionSave_Analysis(self):
         """
@@ -679,20 +686,15 @@ class GuiManager(object):
         # get fit page serialization
         all_data = self.filesWidget.getSerializedData()
         analysis = {}
-        for id, data in all_data.items():
-            analysis[id] = {'fit_data': data}
-        analysis = per.serializeCurrentPage(analysis)
-        # Find dataset ids for the current tab
-        # (can be multiple, if batch)
-        data_id = per.currentTabDataId()
-        final_analysis = {}
-        for id in data_id:
-            an = analysis.get(id)
-            final_analysis[id] = an
-        if len(final_analysis) > 0:
+        state = per.serializeCurrentPage()
+        for id, params in state.items():
+            if id in all_data:
+                analysis[id] = {'fit_data': all_data[id]}
+                analysis[id].update(params)
+        if len(analysis) > 0:
             tab_id = 1 if not hasattr(per,
                                       'currentTab') else per.currentTab.tab_id
-            self.filesWidget.saveAnalysis(final_analysis, tab_id, per.ext)
+            self.filesWidget.saveAnalysis(analysis, tab_id, per.ext)
         else:
             logger.warning('No analysis was available to be saved.')
 
