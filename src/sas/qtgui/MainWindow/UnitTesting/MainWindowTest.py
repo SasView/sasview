@@ -3,7 +3,8 @@ import unittest
 import logging
 
 from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtTest
+from PyQt5.QtGui import *
+from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
@@ -57,6 +58,36 @@ class MainWindowTest(unittest.TestCase):
         self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
 
         tmp_main.close()
+
+    def testPerspectiveChanges(self):
+        """
+        Test all information is retained on perspective change
+        """
+        FIT = 'Fitting'
+        INVAR = 'Invariant'
+        # Verify defaults
+        self.assertEqual(4, len(self.widget.loadedPerspectives))
+        self.assertEqual(FIT, self.widget.perspective.name)
+        # Load data
+        file = ["cyl_400_20.txt"]
+        self.widget.filesWidget.readData(file)
+        # Send data to fitting perspective
+        sendDataButton = self.widget.filesWidget.cmdSendTo
+        QTest.mouseClick(sendDataButton, Qt.LeftButton)
+        # Verify one data set is loaded in the current Fitting Tab
+        self.assertEqual(1, len(self.widget.perspective.currentTabDataId))
+        # Change to Invariant Perspective and verify
+        self.widget.filesWidget.cbFitting.setCurrentIndex(
+            self.cbFitting.findText(INVAR))
+        self.assertEqual(INVAR, self.widget.perspective.name)
+        # Send data to perspective
+        QTest.mouseClick(sendDataButton, Qt.LeftButton)
+        # Change back to Fitting Perspective and verify
+        self.widget.filesWidget.cbFitting.setCurrentIndex(
+            self.cbFitting.findText(FIT))
+        self.assertEqual(FIT, self.widget.perspective.name)
+        # Verify one data set remains loaded in the current Fitting Tab
+        self.assertEqual(1, len(self.widget.perspective.currentTabDataId))
 
     def testExit(self):
         """
