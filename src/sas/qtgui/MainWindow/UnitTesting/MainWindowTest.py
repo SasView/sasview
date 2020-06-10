@@ -63,31 +63,41 @@ class MainWindowTest(unittest.TestCase):
         """
         Test all information is retained on perspective change
         """
+        def check_after_load(name):
+            self.assertEqual(name, gui.perspective().name)
+            self.assertEqual(1, len(gui.perspective().currentTabDataId()))
+            self.assertTrue(
+                (gui.perspective().currentTabDataId()[0]) in dataIDList)
+
+        # Base definitions
         FIT = 'Fitting'
-        INVAR = 'Invariant'
+        PR = 'Inversion'
+        gui = self.widget.guiManager
+        filesWidget = gui.filesWidget
+        currentPers = filesWidget.cbFitting
+        sendDataButton = filesWidget.cmdSendTo
         # Verify defaults
-        self.assertEqual(4, len(self.widget.loadedPerspectives))
-        self.assertEqual(FIT, self.widget.perspective.name)
+        self.assertTrue(hasattr(gui, 'loadedPerspectives'))
+        self.assertEqual(4, len(gui.loadedPerspectives))
         # Load data
         file = ["cyl_400_20.txt"]
-        self.widget.filesWidget.readData(file)
+        filesWidget.readData(file)
+        data, _ = filesWidget.getAllData()
+        dataIDList = list(data.keys())
         # Send data to fitting perspective
-        sendDataButton = self.widget.filesWidget.cmdSendTo
-        QTest.mouseClick(sendDataButton, Qt.LeftButton)
+        QTest.mouseClick(sendDataButton, QtCore.Qt.LeftButton)
         # Verify one data set is loaded in the current Fitting Tab
-        self.assertEqual(1, len(self.widget.perspective.currentTabDataId))
-        # Change to Invariant Perspective and verify
-        self.widget.filesWidget.cbFitting.setCurrentIndex(
-            self.cbFitting.findText(INVAR))
-        self.assertEqual(INVAR, self.widget.perspective.name)
-        # Send data to perspective
-        QTest.mouseClick(sendDataButton, Qt.LeftButton)
+        check_after_load(FIT)
+        # Change to Inversion Perspective, Send data, and verify
+        currentPers.setCurrentIndex(currentPers.findText(PR))
+        QTest.mouseClick(sendDataButton, QtCore.Qt.LeftButton)
+        check_after_load(PR)
         # Change back to Fitting Perspective and verify
-        self.widget.filesWidget.cbFitting.setCurrentIndex(
-            self.cbFitting.findText(FIT))
-        self.assertEqual(FIT, self.widget.perspective.name)
-        # Verify one data set remains loaded in the current Fitting Tab
-        self.assertEqual(1, len(self.widget.perspective.currentTabDataId))
+        currentPers.setCurrentIndex(currentPers.findText(FIT))
+        check_after_load(FIT)
+        # Go back to Inversion perspective and verify data still exists
+        currentPers.setCurrentIndex(currentPers.findText(PR))
+        check_after_load(PR)
 
     def testExit(self):
         """

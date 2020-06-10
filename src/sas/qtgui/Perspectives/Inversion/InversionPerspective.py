@@ -506,6 +506,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
         """
+        # If no measurement performed, calculate using base params
+        if self.chiDofValue.text() == '':
+            self._calculator.out, self._calculator.cov = self._calculator.invert()
         return {
             'alpha': self._calculator.alpha,
             'background': self._calculator.background,
