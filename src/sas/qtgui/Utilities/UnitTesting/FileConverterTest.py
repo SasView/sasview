@@ -48,15 +48,12 @@ class FileConverterTest(unittest.TestCase):
         # Size policy
         self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
 
-        # self.assertEqual(self.widget.is1D)
-        #
-        # self.is1D = True
-        # self.isBSL = False
-        # self.ifile = ""
-        # self.qfile = ""
-        # self.ofile = ""
-        # self.metadata = {}
-        # self.setValidators()
+        self.assertTrue(self.widget.is1D,)
+        self.assertFalse(self.widget.isBSL)
+        self.assertEqual(self.widget.ifile, '')
+        self.assertEqual(self.widget.qfile, '')
+        self.assertEqual(self.widget.ofile, '')
+        self.assertEqual(self.widget.metadata,{})
 
 
     def testOnHelp(self):
@@ -67,3 +64,30 @@ class FileConverterTest(unittest.TestCase):
         self.assertTrue(self.widget.parent.showHelp.called_once())
         #args = self.widget.manager.showHelp.call_args
         #self.assertIn('data_operator_help.html', args[0][0])
+
+    def testOnIFileOpen(self):
+        """
+        Testing intensity file read in.
+        :return:
+        """
+        filename = os.path.join("UnitTesting", "FIT2D_I.TXT")
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        self.widget.onIFileOpen()
+
+        # check updated values in ui, read from loaded file
+        self.assertEqual(self.widget.txtIFile.text(), 'FIT2D_I.TXT')
+        self.assertEqual(self.widget.ifile, 'UnitTesting/FIT2D_I.TXT')
+
+    def testOnQFileOpen(self):
+        """
+        Testing intensity file read in.
+        :return:
+        """
+        filename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        self.widget.onQFileOpen()
+
+        # check updated values in ui, read from loaded file
+        self.assertEqual(self.widget.txtQFile.text(), 'FIT2D_Q.TXT')
+        self.assertEqual(self.widget.qfile, 'UnitTesting/FIT2D_Q.TXT')
+       
