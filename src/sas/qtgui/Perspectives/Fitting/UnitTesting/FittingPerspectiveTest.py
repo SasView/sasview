@@ -168,5 +168,36 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.tabText(1), "BatchPage2")
         self.assertEqual(self.widget.tabText(2), "BatchPage3")
 
+    def testSerialization(self):
+        ''' Serialize fit pages and check data '''
+        data = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item])
+        tab = self.widget.tabs[0]
+        cbCat = tab.cbCategory
+        cbModel = tab.cbModel
+        cbCat.setCurrentIndex(cbCat.findText("Cylinder"))
+        cbModel.setCurrentIndex(cbModel.findText("barbell"))
+        data_id = str(self.widget.currentTabDataId()[0])
+        # check values - disabled control, present weights
+        rowcount = tab._model_model.rowCount()
+        self.assertEqual(rowcount, 8)
+        state_default = self.widget.serializeAll()
+        state_all = self.widget.serializeAllFitpage()
+        state_cp = self.widget.serializeCurrentPage()
+        page = self.widget.getSerializedFitpage(self.widget.currentTab)
+        # Pull out params from state
+        params = state_all[data_id]['fit_params'][0]
+        # Tests
+        self.assertEqual(len(state_all), len(state_default))
+        self.assertEqual(len(state_cp), len(page))
+        self.assertEqual(len(state_all), 1)
+        # getPage should include an extra param 'data_id' removed by serialize
+        self.assertNotEqual(len(params), len(page))
+        self.assertEqual(len(params), 28)
+        self.assertEqual(page.get('data_id', None), None)
+
+
 if __name__ == "__main__":
     unittest.main()
