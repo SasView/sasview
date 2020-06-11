@@ -96,11 +96,8 @@ class ComplexConstraintTest(unittest.TestCase):
 
     def testTooltip(self):
         ''' test the tooltip'''
-        p1 = self.widget.tab_names[0] + ":" + self.widget.cbParam1.currentText()
-        p2 = self.widget.tab_names[1] + "." + self.widget.cbParam2.currentText()
-
-        tooltip = "E.g.\n%s = 2.0 * (%s)\n" %(p1, p2)
-        tooltip += "%s = sqrt(%s) + 5"%(p1, p2)
+        tooltip = "E.g. M1:scale = 2.0 * M2.scale\n"
+        tooltip += "M1:scale = sqrt(M2.scale) + 5"
         self.assertEqual(self.widget.txtConstraint.toolTip(), tooltip)
 
     def notestValidateFormula(self):
