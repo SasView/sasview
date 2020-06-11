@@ -1,7 +1,7 @@
+# pylint:disable=C0103,I1101
 """
 Allows users to modify the box slicer parameters.
 """
-import numpy
 import functools
 
 from PyQt5 import QtCore
@@ -9,9 +9,14 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
+from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
+#from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
@@ -20,15 +25,29 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     passed from a slicer instance.
     """
     closeWidgetSignal = QtCore.pyqtSignal()
-    def __init__(self, model=None, validate_method=None):
+    def __init__(self, parent=None,
+                 model=None,
+                 active_plots=None,
+                 validate_method=None):
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
 
         assert isinstance(model, QtGui.QStandardItemModel)
+        self.parent = parent
 
         self.model = model
         self.validate_method = validate_method
+        self.active_plots = active_plots
+
+        # Initially, Apply is disabled
+        #self.cmdApply.setEnabled(False)
+
+        # Mapping combobox index -> slicer module
+        self.callbacks = {0: SectorInteractor,
+                          1: AnnulusInteractor,
+                          2: BoxInteractorX,
+                          3: BoxInteractorY}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -43,23 +62,76 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Specify the validator on the parameter value column.
         self.delegate = EditDelegate(self, validate_method=self.validate_method)
         self.lstParams.setItemDelegate(self.delegate)
-        self.delegate.refocus_signal.connect(self.onFocus)
 
-        # Display Help on clicking the button
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
+        # define slots
+        self.setSlots()
 
-        # Close doesn't trigger closeEvent automatically, so force it
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent, None))
+        # Switch off Auto Save
+        self.onGeneratePlots(False)
 
+        # Set up params list
+        self.setParamsList()
+
+        # Set up plots list
+        self.setPlotsList()
+
+    def setParamsList(self):
+        """
+        Create and initially populate the list of parameters
+        """
         # Disable row number display
         self.lstParams.verticalHeader().setVisible(False)
         self.lstParams.setAlternatingRowColors(True)
-        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                     QtWidgets.QSizePolicy.Expanding)
 
         # Header properties for nicer display
         header = self.lstParams.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
+
+    def setPlotsList(self):
+        """
+        Create and initially populate the list of plots
+        """
+        # Fill out list of plots
+        for item in self.active_plots.keys():
+            if isinstance(self.active_plots[item].data[0], Data1D):
+                continue
+            checked = QtCore.Qt.Unchecked
+            if self.parent.data[0].name == item:
+                checked = QtCore.Qt.Checked
+            chkboxItem = QtWidgets.QListWidgetItem(str(item))
+            chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            chkboxItem.setCheckState(checked)
+            #self.lstPlots.addItem(chkboxItem)
+
+    def setSlots(self):
+        """
+        define slots for signals from various sources
+        """
+        self.delegate.refocus_signal.connect(self.onFocus)
+        #self.cbSave1DPlots.toggled.connect(self.onGeneratePlots)
+        # Display Help on clicking the button
+        #self.cmdHelp.clicked.connect(self.onHelp)
+
+        # Close doesn't trigger closeEvent automatically, so force it
+        #self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
+
+        # Apply slicer to selected plots
+        #self.cmdApply.clicked.connect(self.onApply)
+
+        # Initialize slicer combobox to the current slicer
+        current_slicer = type(self.parent.slicer)
+        for index in self.callbacks:
+            if self.callbacks[index] == current_slicer:
+                self.cbSlicer.setCurrentIndex(index)
+                break
+        # change the slicer type
+        self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
+
+        # selecting/deselecting items in lstPlots enables `Apply`
+        #self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
     def onFocus(self, row, column):
         """ Set the focus on the cell (row, column) """
@@ -68,15 +140,67 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.lstParams.setSelectionModel(selection_model)
         self.lstParams.setCurrentIndex(self.model.index(row, column))
 
+    def onSlicerChanged(self, index):
+        """ change the parameters based on the slicer chosen """
+        if index < len(self.callbacks):
+            slicer = self.callbacks[index]
+            self.parent.setSlicer(slicer=slicer)
+
+    def onGeneratePlots(self, isChecked):
+        """
+        Respond to choice of auto saving plots
+        """
+        self.enableFileControls(isChecked)
+        self.isSave = isChecked
+
+    def enableFileControls(self, enabled):
+        """
+        Sets enablement of file related UI elements
+        """
+        #self.txtLocation.setEnabled(enabled)
+        #self.cmdFiles.setEnabled(enabled)
+        #self.cbFitOptions.setEnabled(enabled)
+
+    def onApply(self):
+        """
+        Apply current slicer to selected plots
+        """
+        for row in range(self.lstPlots.count()):
+            item = self.lstPlots.item(row)
+            isChecked = item.checkState() == QtCore.Qt.Checked
+            # Only checked items
+            if not isChecked:
+                continue
+            plot = item.text()
+            # don't assign to itself
+            if plot == self.parent.data[0].name:
+                continue
+            # a plot might have been deleted
+            if plot not in self.active_plots:
+                continue
+            # get the plotter2D instance
+            plotter = self.active_plots[plot]
+            # Assign model to slicer
+            index = self.cbSlicer.currentIndex()
+            slicer = self.callbacks[index]
+            plotter.setSlicer(slicer=slicer)
+            # override slicer model
+            plotter.slicer._model = self.model
+            # force conversion model->parameters in slicer
+            plotter.slicer.setParamsFromModel()
+        pass
+
     def setModel(self, model):
         """ Model setter """
         self.model = model
         self.proxy.setSourceModel(self.model)
 
     def keyPressEvent(self, event):
-         key = event.key()
-
-         if key == QtCore.Qt.Key_Escape:
+        """
+        Added Esc key shortcut
+        """
+        key = event.key()
+        if key == QtCore.Qt.Key_Escape:
             self.closeWidgetSignal.emit()
 
     def closeEvent(self, event):
@@ -126,18 +250,18 @@ class PositiveDoubleEditor(QtWidgets.QLineEdit):
     editingFinished = QtCore.Signal()
 
     def __init__(self, parent=None):
-            # Initialize the editor object
-            super(PositiveDoubleEditor, self).__init__(parent)
-            self.setAutoFillBackground(True)
-            validator = GuiUtils.DoubleValidator()
-            # Don't use the scientific notation, cause 'e'.
-            validator.setNotation(GuiUtils.DoubleValidator.StandardNotation)
+        # Initialize the editor object
+        super(PositiveDoubleEditor, self).__init__(parent)
+        self.setAutoFillBackground(True)
+        validator = GuiUtils.DoubleValidator()
+        # Don't use the scientific notation, cause 'e'.
+        validator.setNotation(GuiUtils.DoubleValidator.StandardNotation)
 
-            self.setValidator(validator)
+        self.setValidator(validator)
 
     def focusOutEvent(self, event):
-            # Once focus is lost, tell the delegate we're done editing
-            self.editingFinished.emit()
+        # Once focus is lost, tell the delegate we're done editing
+        self.editingFinished.emit()
 
 
 class EditDelegate(QtWidgets.QStyledItemDelegate):
@@ -154,12 +278,12 @@ class EditDelegate(QtWidgets.QStyledItemDelegate):
             return 0
 
         result = index.column()
-        if result==1:
-                self.editor = PositiveDoubleEditor(parent)
-                self.index = index
-                return self.editor
-        else:
-                return QtWidgets.QStyledItemDelegate.createEditor(self, parent, option, index)
+        if result == 1:
+            self.editor = PositiveDoubleEditor(parent)
+            self.index = index
+            return self.editor
+
+        return QtWidgets.QStyledItemDelegate.createEditor(self, parent, option, index)
 
     def setModelData(self, editor, model, index):
         """
@@ -169,13 +293,13 @@ class EditDelegate(QtWidgets.QStyledItemDelegate):
 
         # Find out the changed parameter name and proposed value
         new_value = GuiUtils.toDouble(self.editor.text())
-        param_name = model.sourceModel().item(index.row(),0).text()
+        param_name = model.sourceModel().item(index.row(), 0).text()
 
-        validated = True
         if self.validate_method:
             # Validate the proposed value in the slicer
             value_accepted = self.validate_method(param_name, new_value)
 
         if value_accepted:
             # Update the model only if value accepted
-            return super(EditDelegate, self).setModelData(editor, model, index)          
+            return super(EditDelegate, self).setModelData(editor, model, index)
+        return None

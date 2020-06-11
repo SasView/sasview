@@ -103,7 +103,7 @@ class PlotterTest(unittest.TestCase):
         """ Test the right click menu """
         self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 7)
+        self.assertEqual(len(actions), 8)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
@@ -444,6 +444,48 @@ class PlotterTest(unittest.TestCase):
             self.plotter.onModifyPlot(2)
         self.plotter.figure.clf()
 
+    def testOnToggleLegend(self):
+        """
+        Make sure Legend can be switched on/off
+        """
+        # Prepare new data
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        data2.custom_color = None
+        data2.symbol = 1
+        data2.markersize = 11
+
+        self.plotter.plot(data2)
+
+        self.assertTrue(self.plotter.showLegend)
+        # assure we see the legend
+        self.assertTrue(self.plotter.legend.get_visible())
+
+        # toggle legend
+        self.plotter.onToggleLegend()
+
+        # now we don't see the legend
+        self.assertFalse(self.plotter.legend.get_visible())
+
+        # toggle again
+        self.plotter.onToggleLegend()
+
+        # see the legend again
+        self.assertTrue(self.plotter.legend.get_visible())
+
+        # switch the visibility of the legend
+        self.plotter.showLegend = False
+
+        # see that the legend setting is not done
+        self.plotter.legend.set_visible = MagicMock()
+
+        self.plotter.onToggleLegend()
+        self.plotter.legend.set_visible.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()

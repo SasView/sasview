@@ -397,6 +397,12 @@ class VerticalLines(BaseInteractor):
         self.connect_markers([self.right_line, self.inner_marker])
         self.update()
 
+    def validate(self, param_name, param_value):
+        """
+        Validate input from user
+        """
+        return True
+
     def set_layer(self, n):
         """
         Allow adding plot to the same panel
