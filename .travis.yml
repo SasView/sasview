@@ -31,7 +31,7 @@ before_install:
 - hash -r
 #- conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba
 install:
 - pip install periodictable xhtml2pdf pyopencl unittest-xml-reporting pylint
 script:
