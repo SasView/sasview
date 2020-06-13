@@ -77,6 +77,7 @@ class FileConverterTest(unittest.TestCase):
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtIFile.text(), 'FIT2D_I.TXT')
         self.assertEqual(self.widget.ifile, 'UnitTesting/FIT2D_I.TXT')
+        self.assertTrue(self.widget.cmdConvert)
 
     def testOnQFileOpen(self):
         """
@@ -90,4 +91,27 @@ class FileConverterTest(unittest.TestCase):
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtQFile.text(), 'FIT2D_Q.TXT')
         self.assertEqual(self.widget.qfile, 'UnitTesting/FIT2D_Q.TXT')
-       
+        self.assertTrue(self.widget.cmdConvert)
+
+
+    def testOnConvert(self):
+        """
+
+        :return:
+        """
+        ifilename = os.path.join("UnitTesting", "FIT2D_I.TXT")
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[ifilename, ''])
+        self.widget.onIFileOpen()
+
+        qfilename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[qfilename, ''])
+        self.widget.onQFileOpen()
+        self.widget.onConvert()
+
+        test_metadata = self.widget.metadata
+        self.assertEqual(test_metadata['title'], '')
+        self.assertEqual(test_metadata['run_name'], {'': ''})
+        self.assertEqual(test_metadata['instrument'], '')
+        self.assertEqual(test_metadata['detector'][0].name, '') #What is the reason to have it as array
+        self.assertEqual(test_metadata['sample'].name, '')
+        self.assertEqual(test_metadata['source'].name, '')
