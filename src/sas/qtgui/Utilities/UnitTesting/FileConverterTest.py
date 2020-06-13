@@ -1,31 +1,28 @@
 import sys
 import os
 import unittest
-import webbrowser
-import tempfile
+import numpy as np
+
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
-
-# Local
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+import sas.sascalc.file_converter.FileConverterUtilities as Utilities
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
 
+class dummy_manager(object):
+    HELP_DIRECTORY_LOCATION = "html"
+    communicate = Communicate()
+    _parent = QtWidgets.QDialog()
 
 class FileConverterTest(unittest.TestCase):
     """ Test the simple FileConverter dialog """
     def setUp(self):
         """ Create FileConverter dialog """
-
-        class dummy_manager(object):
-            def communicator(self):
-                return Communicate()
-
         self.widget = FileConverterWidget(dummy_manager())
 
     def tearDown(self):
@@ -79,6 +76,9 @@ class FileConverterTest(unittest.TestCase):
         self.assertEqual(self.widget.ifile, 'UnitTesting/FIT2D_I.TXT')
         self.assertTrue(self.widget.cmdConvert)
 
+        iqdata = np.array([Utilities.extract_ascii_data(self.widget.ifile)])
+        self.assertAlmostEqual(iqdata[0][0], 224.08691, places=4)
+
     def testOnQFileOpen(self):
         """
         Testing intensity file read in.
@@ -93,6 +93,8 @@ class FileConverterTest(unittest.TestCase):
         self.assertEqual(self.widget.qfile, 'UnitTesting/FIT2D_Q.TXT')
         self.assertTrue(self.widget.cmdConvert)
 
+        qdata = Utilities.extract_ascii_data(self.widget.qfile)
+        self.assertAlmostEqual(qdata[0], 0.13073, places=4)
 
     def testOnConvert(self):
         """
@@ -102,10 +104,17 @@ class FileConverterTest(unittest.TestCase):
         ifilename = os.path.join("UnitTesting", "FIT2D_I.TXT")
         QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[ifilename, ''])
         self.widget.onIFileOpen()
-
         qfilename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
         QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[qfilename, ''])
         self.widget.onQFileOpen()
+
+        self.assertFalse(self.widget.isBSL)
+        self.assertTrue(self.widget.is1D)
+
+        ofilemame = os.path.join('UnitTesting', 'FIT2D_IQ.xml')
+        self.widget.ofile = ofilemame
+
+        self.widget.chkLoadFile.setChecked(False)
         self.widget.onConvert()
 
         test_metadata = self.widget.metadata
@@ -115,3 +124,6 @@ class FileConverterTest(unittest.TestCase):
         self.assertEqual(test_metadata['detector'][0].name, '') #What is the reason to have it as array
         self.assertEqual(test_metadata['sample'].name, '')
         self.assertEqual(test_metadata['source'].name, '')
+
+        #TODO Load xml file to check if it has what is upposed to have 
+
