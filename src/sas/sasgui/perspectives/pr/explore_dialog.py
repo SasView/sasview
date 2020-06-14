@@ -138,8 +138,8 @@ class Results(object):
         self.outputs['1-sigma positive fraction'] = [r"P^+_{1\ \sigma}",
                                                      "a.u.", self.pos_err]
         self.outputs['Rg'] = ["R_g", "A", self.rg]
-        self.outputs['I(q=0)'] = ["I(q=0)", "1/A", self.iq0]
-        self.outputs['Background'] = ["Bck", "1/A", self.bck]
+        self.outputs['I(q=0)'] = ["I(q=0)", "1/cm", self.iq0]
+        self.outputs['Background'] = ["Bck", "1/cm", self.bck]
 
 class ExploreDialog(wx.Dialog):
     """
