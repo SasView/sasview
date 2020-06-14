@@ -318,6 +318,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             try:
                 surface, surface_error = \
                     inv.get_surface_with_error(self._contrast, self._porod)
+                if surface_error == 0:
+                    item = QtGui.QStandardItem("NONE")
+                    self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
             except Exception as ex:
                 calculation_failed = True
                 msg += str(ex)
