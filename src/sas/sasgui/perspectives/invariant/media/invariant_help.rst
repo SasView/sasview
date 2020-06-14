@@ -120,6 +120,7 @@ $q_v$ in the data file.
     with: "The 6 columns". For an example, see the example data set
     1umSlitSmearSphere.ABS in the *\\test\\1d* folder).
 
+.. _invariant-extrapolation-section: 
 Data Extrapolation
 ^^^^^^^^^^^^^^^^^^
 The difficulty with using $Q^*$  arises from the fact that experimental data is
@@ -215,10 +216,6 @@ the volume fraction in the Invariant analysis window.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
-
-.. warning:: The value of $S_v$ returned by *ALL earlier versions of SasView* is
-   **twice** what it should be. This is now corrected.
-
 The total surface area per unit volume is an important quantity for a variety of
 applications, for example, to understand the absorption capacity, reactivity, or
 catalytic activity of a material. This value, known as the specific surface area
@@ -246,6 +243,9 @@ documentation in the Models Documentation for more details).
 **This calculation is unrelated to the Invariant** other than to obtain the
 contrast term if it is not known (and the volume fraction is known), and depends
 only on two values - the contrast and Porod Constant - *which must be provided*.
+
+.. changed::
+    Prior to versions 5.0.3 and 4.3 the value returned was 2 * $S_v$
 
 Extension to Three or More Phases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -329,15 +329,18 @@ and to therefore have any meaning), or to rescale the data.
 
 (Optional) If known, a value for $C_p$ can also be specified.
 
-Adjust the extrapolation ranges and extrapolation types as necessary. In
-most cases the default values will suffice. Click the *Compute* button.
+Adjust the extrapolation types as necessary by checking the relevant *Enable
+Extrapolate* check boxes. If power law extrapolations are chosen, the exponent
+can be either held fixed or fitted. The number of points, $Npts$, to be used
+for the basis of the extrapolation can also be specified.
 
-To adjust the lower and/or higher $Q$ ranges, check the relevant *Enable
-Extrapolate* check boxes.
+In most cases the default values will suffice. Click the *Compute* button.
 
-If power law extrapolations are chosen, the exponent can be either held
-fixed or fitted. The number of points, $Npts$, to be used for the basis of
-the extrapolation can also be specified.
+..note::
+    As mentioned above in the extrapolation section, :ref:`invariant-extrapolation-section`
+    , the extrapolation range are currently fixed and not adjustable. They are
+    designed to keep the computation time reasonable while including as much of
+    the total q range as should be necessary for any SAS data.
 
 If the value of $Q^*$ calculated with the extrapolated regions is invalid, a
 red warning will appear at the top of the *Invariant* panel. Strictly
@@ -376,4 +379,4 @@ References
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. note::  This help document was last changed (completely re-written) by Paul
-    Butler and Steve King, 29 May 2020
+    Butler and Steve King, March-June 2020

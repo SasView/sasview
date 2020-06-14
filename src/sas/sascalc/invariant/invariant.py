@@ -529,7 +529,7 @@ class InvariantCalculator(object):
         dyn: error on dy
 
         :param data:
-        :note: if data doesn't contain dy return -1)
+        :note: if data doesn't contain dy return "None"
         """
         if len(data.x) <= 1 or len(data.y) <= 1 or \
             len(data.x) != len(data.y) or \
