@@ -9,7 +9,7 @@ class SlicerModel(object):
         self._model = QtGui.QStandardItemModel()
 
         self.update_model = True
-        self._model.itemChanged.connect(self.setParamsFromModel)
+        self._model.itemChanged.connect(self.setParamsFromModelItem)
 
     def setModelFromParams(self):
         """
@@ -25,9 +25,24 @@ class SlicerModel(object):
         self._model.setHeaderData(0, QtCore.Qt.Horizontal, "Parameter")
         self._model.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
 
-    def setParamsFromModel(self, item):
+    def setParamsFromModel(self):
         """
-        Set up the params dictionary based on the model content.
+        Set up the params dictionary based on the current model content.
+        """
+        params = self.getParams()
+        for row_index in range(self._model.rowCount()):
+            #index = self._model.indexFromItem(item)
+            #row_index = index.row()
+            param_name = str(self._model.item(row_index, 0).text())
+            params[param_name] = float(self._model.item(row_index, 1).text())
+
+        self.update_model = False
+        self.setParams(params)
+        self.update_model = True
+
+    def setParamsFromModelItem(self, item):
+        """
+        Set up the params dictionary for the parameter in item.
         """
         params = self.getParams()
         index = self._model.indexFromItem(item)
