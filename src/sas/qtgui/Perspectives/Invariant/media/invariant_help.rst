@@ -216,7 +216,6 @@ the volume fraction in the Invariant analysis window.
 
 Specific Surface Area
 ^^^^^^^^^^^^^^^^^^^^^
-
 The total surface area per unit volume is an important quantity for a variety of
 applications, for example, to understand the absorption capacity, reactivity, or
 catalytic activity of a material. This value, known as the specific surface area
