@@ -16,7 +16,6 @@ if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
 
 class dummy_manager(object):
-    HELP_DIRECTORY_LOCATION = "html"
     communicate = Communicate()
     _parent = QtWidgets.QDialog()
 
