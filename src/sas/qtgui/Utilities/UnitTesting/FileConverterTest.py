@@ -2,6 +2,7 @@ import sys
 import os
 import unittest
 import numpy as np
+from lxml import etree
 
 from unittest.mock import MagicMock, patch
 
@@ -77,7 +78,7 @@ class FileConverterTest(unittest.TestCase):
         self.assertTrue(self.widget.cmdConvert)
 
         iqdata = np.array([Utilities.extract_ascii_data(self.widget.ifile)])
-        self.assertAlmostEqual(iqdata[0][0], 224.08691, places=4)
+        self.assertAlmostEqual(iqdata[0][0], 224.08691, places=5)
 
     def testOnQFileOpen(self):
         """
@@ -94,7 +95,7 @@ class FileConverterTest(unittest.TestCase):
         self.assertTrue(self.widget.cmdConvert)
 
         qdata = Utilities.extract_ascii_data(self.widget.qfile)
-        self.assertAlmostEqual(qdata[0], 0.13073, places=4)
+        self.assertAlmostEqual(qdata[0], 0.13073, places=5)
 
     def testOnConvert(self):
         """
@@ -125,5 +126,24 @@ class FileConverterTest(unittest.TestCase):
         self.assertEqual(test_metadata['sample'].name, '')
         self.assertEqual(test_metadata['source'].name, '')
 
-        #TODO Load xml file to check if it has what is upposed to have 
+        tree = etree.parse(ofilemame, parser=etree.ETCompatXMLParser())
 
+        def xml2dict(node):
+            """
+            Converts an lxml.etree to dict for a quick test of conversion results
+            """
+            result = {}
+            for element in node.iterchildren():
+                key = element.tag.split('}')[1] if '}' in element.tag else element.tag
+                if element.text and element.text.strip():
+                    value = element.text
+                else:
+                    value = xml2dict(element)
+                result[key] = value
+            return result
+
+        xml_dict = xml2dict(tree.getroot())
+        output_qdata = float(xml_dict['SASentry']['SASdata']['Idata']['Q'])
+        output_idata = float(xml_dict['SASentry']['SASdata']['Idata']['I'])
+        self.assertAlmostEqual(output_qdata, 0.86961, places=5)
+        self.assertAlmostEqual(output_idata, 0.21477, places=5)
