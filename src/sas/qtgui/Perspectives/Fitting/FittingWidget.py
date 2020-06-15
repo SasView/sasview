@@ -505,6 +505,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
+        # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
+        if self._poly_model.rowCount() > 0:
+            for key, value in self.poly_params.items():
+                if key[-6:] == '.width':
+                    self.kernel_module.setParam(key, (value if isChecked else 0))
+
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
@@ -1393,12 +1399,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = parameter_name.rsplit()[-1]
 
         delegate = self.lstPoly.itemDelegate()
+        parameter_name_w = parameter_name + '.width'
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name_w = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
                 self.poly_params_to_fit.append(parameter_name_w)
             else:
@@ -1415,7 +1421,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-            current_details = self.kernel_module.details[parameter_name]
+            current_details = self.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
                 current_details[model_column-2] = value
@@ -1439,6 +1445,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
             self.poly_params[key] = value
+            self.kernel_module.setParam(key, value)
 
             # Update plot
             self.updateData()
@@ -3991,7 +3998,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         line_dict = {}
         for line in lines[1:]:
             content = line.split(',')
-            if len(content) > 1:
+            if len(content) > 1 and content[0] != "tab_name":
                 line_dict[content[0]] = content[1:]
 
         self.updatePageWithParameters(line_dict)
