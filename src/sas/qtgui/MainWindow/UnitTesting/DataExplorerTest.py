@@ -31,6 +31,9 @@ if not QApplication.instance():
 
 
 class MyPerspective(object):
+    def __init__(self):
+        self.name = "Dummy Perspective"
+
     def communicator(self):
         return Communicate()
 
@@ -47,7 +50,7 @@ class MyPerspective(object):
         return None
 
     def title(self):
-        return "Dummy Perspective"
+        return self.name
 
 
 class dummy_manager(object):
@@ -340,12 +343,23 @@ class DataExplorerTest(unittest.TestCase):
         self.assertTrue(mocked_perspective.setData.called_once)
         self.assertTrue(mocked_perspective.swapData.called)
 
+        # Test the exception block
+        QMessageBox.exec_ = MagicMock()
+        mocked_perspective.swapData = MagicMock(side_effect = Exception())
+
+        # Click on the button to so the mocked swapData method raises an exception
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
+
+        # Assure the message box popped up
+        QMessageBox.exec_.assert_called_once()
+
         # open another file
         filename = ["cyl_400_20.txt"]
         self.form.readData(filename)
 
-        # Mock the warning message
+        # Mock the warning message and the swapData method
         QMessageBox.exec_ = MagicMock()
+        mocked_perspective.swapData = MagicMock()
 
         # Click on the button to swap both datasets to the perspective
         QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
