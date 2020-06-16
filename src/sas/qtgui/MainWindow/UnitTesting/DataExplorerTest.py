@@ -324,22 +324,34 @@ class DataExplorerTest(unittest.TestCase):
 
         QApplication.processEvents()
 
-        # Test the set_data method called once
+        # Test the set_data method called
         self.assertTrue(mocked_perspective.setData.called)
         self.assertFalse(mocked_perspective.swapData.called)
+
+        # Now select the swap data checkbox
+        self.form.chkSwap.setChecked(True)
+
+        # Click on the Send To  button
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
+
+        QApplication.processEvents()
+
+        # Now the swap data method should be called
+        self.assertTrue(mocked_perspective.setData.called_once)
+        self.assertTrue(mocked_perspective.swapData.called)
 
         # open another file
         filename = ["cyl_400_20.txt"]
         self.form.readData(filename)
 
         # Mock the warning message
-        QMessageBox = MagicMock()
+        QMessageBox.exec_ = MagicMock()
 
-        # Click on the button
+        # Click on the button to swap both datasets to the perspective
         QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
 
         # Assure the message box popped up
-        #QMessageBox.assert_called_once()
+        QMessageBox.exec_.assert_called_once()
 
     def testDataSelection(self):
         """

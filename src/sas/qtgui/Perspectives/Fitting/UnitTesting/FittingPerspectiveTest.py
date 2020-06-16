@@ -164,6 +164,9 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Check that data has been swapped
         self.assertEqual(self.widget.tabs[0].data, data2)
 
+        # We should only have one tab
+        self.assertEqual(len(self.widget.tabs), 1)
+
     def testSetBatchData(self):
         ''' Assure that setting batch data is correct'''
 
