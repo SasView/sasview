@@ -732,7 +732,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 title = self._perspective().title()
             else:
                 title = self._perspective().windowTitle()
-            msg = title + " does not allow replacing multiple data. Please select only one data."
+            msg = title + " does not allow replacing multiple data."
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)

@@ -345,13 +345,16 @@ class DataExplorerTest(unittest.TestCase):
 
         # Test the exception block
         QMessageBox.exec_ = MagicMock()
-        mocked_perspective.swapData = MagicMock(side_effect = Exception())
+        QMessageBox.setText = MagicMock()
+        mocked_perspective.swapData = MagicMock(side_effect = Exception("foo"))
 
         # Click on the button to so the mocked swapData method raises an exception
         QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
 
         # Assure the message box popped up
         QMessageBox.exec_.assert_called_once()
+        # With the right message
+        QMessageBox.setText.assert_called_with("foo")
 
         # open another file
         filename = ["cyl_400_20.txt"]
@@ -359,6 +362,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Mock the warning message and the swapData method
         QMessageBox.exec_ = MagicMock()
+        QMessageBox.setText = MagicMock()
         mocked_perspective.swapData = MagicMock()
 
         # Click on the button to swap both datasets to the perspective
@@ -366,6 +370,9 @@ class DataExplorerTest(unittest.TestCase):
 
         # Assure the message box popped up
         QMessageBox.exec_.assert_called_once()
+        # With the right message
+        QMessageBox.setText.assert_called_with(
+            "Dummy Perspective does not allow replacing multiple data.")
 
     def testDataSelection(self):
         """
