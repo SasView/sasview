@@ -727,26 +727,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if len(selected_items) < 1:
             return
         #Check that you have only one box item checked when swaping data
-        if len(selected_items) > 1 and self.chkSwap.isChecked():
+        if len(selected_items) > 1 and (self.chkSwap.isChecked() or not self._perspective().allowBatch()):
             if hasattr(self._perspective(), 'title'):
                 title = self._perspective().title()
             else:
                 title = self._perspective().windowTitle()
             msg = title + " does not allow replacing multiple data. Please select only one data."
-            msgbox = QtWidgets.QMessageBox()
-            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
-            msgbox.setText(msg)
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            retval = msgbox.exec_()
-            return
-
-        # Which perspective has been selected?
-        if len(selected_items) > 1 and not self._perspective().allowBatch():
-            if hasattr(self._perspective(), 'title'):
-                title = self._perspective().title()
-            else:
-                title = self._perspective().windowTitle()
-            msg = title + " does not allow multiple data."
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
