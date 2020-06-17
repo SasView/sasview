@@ -400,6 +400,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         Replace the data from the current fitting tab
         """
         assert isinstance(self.currentWidget(), FittingWidget)
+        if not isinstance(data, QtGui.QStandardItem):
+            msg = "Incorrect type passed to the Fitting Perspective"
+            raise AttributeError(msg)
         self.currentWidget().data = data
         tab_name = str(self.tabText(self.currentIndex()))
         self.updateFitDict(data, tab_name)
