@@ -3,7 +3,8 @@ import unittest
 import logging
 
 from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtTest
+from PyQt5.QtGui import *
+from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
@@ -57,6 +58,46 @@ class MainWindowTest(unittest.TestCase):
         self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
 
         tmp_main.close()
+
+    def testPerspectiveChanges(self):
+        """
+        Test all information is retained on perspective change
+        """
+        def check_after_load(name):
+            self.assertEqual(name, gui.perspective().name)
+            self.assertEqual(1, len(gui.perspective().currentTabDataId()))
+            self.assertTrue(
+                (gui.perspective().currentTabDataId()[0]) in dataIDList)
+
+        # Base definitions
+        FIT = 'Fitting'
+        PR = 'Inversion'
+        gui = self.widget.guiManager
+        filesWidget = gui.filesWidget
+        currentPers = filesWidget.cbFitting
+        sendDataButton = filesWidget.cmdSendTo
+        # Verify defaults
+        self.assertTrue(hasattr(gui, 'loadedPerspectives'))
+        self.assertEqual(4, len(gui.loadedPerspectives))
+        # Load data
+        file = ["cyl_400_20.txt"]
+        filesWidget.readData(file)
+        data, _ = filesWidget.getAllData()
+        dataIDList = list(data.keys())
+        # Send data to fitting perspective
+        QTest.mouseClick(sendDataButton, QtCore.Qt.LeftButton)
+        # Verify one data set is loaded in the current Fitting Tab
+        check_after_load(FIT)
+        # Change to Inversion Perspective, Send data, and verify
+        currentPers.setCurrentIndex(currentPers.findText(PR))
+        QTest.mouseClick(sendDataButton, QtCore.Qt.LeftButton)
+        check_after_load(PR)
+        # Change back to Fitting Perspective and verify
+        currentPers.setCurrentIndex(currentPers.findText(FIT))
+        check_after_load(FIT)
+        # Go back to Inversion perspective and verify data still exists
+        currentPers.setCurrentIndex(currentPers.findText(PR))
+        check_after_load(PR)
 
     def testExit(self):
         """
