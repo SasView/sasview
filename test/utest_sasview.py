@@ -76,7 +76,12 @@ def run_tests(dirs=None, run_all=False):
 
                     has_failed = "FAILED (" in std_out
                     if has_failed:
-                        failure_text.append(std_out)
+                        if std_out:
+                            failure_text.append("== %s std out ==\n%s"
+                                                % (module_name, std_out))
+                        if std_err:
+                            failure_text.append("== %s std err ==\n%s"
+                                                % (module_name, std_out))
 
                     m = re.search("FAILED \(.*errors=([0-9]+)", std_out)
                     if m is not None:
