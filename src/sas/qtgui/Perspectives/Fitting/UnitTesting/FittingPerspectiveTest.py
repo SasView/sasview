@@ -7,6 +7,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
+from unittest.mock import PropertyMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -166,6 +167,19 @@ class FittingPerspectiveTest(unittest.TestCase):
 
         # We should only have one tab
         self.assertEqual(len(self.widget.tabs), 1)
+
+        # send something stupid as data
+        item = "foo"
+
+        # It should raise an AttributeError
+        self.assertRaises(AttributeError, self.widget.swapData, item)
+
+        # Mock a batch tab
+        item = QtGui.QStandardItem("test")
+        self.widget.tabs[0].is_batch_fitting = PropertyMock(return_value = True)
+
+        # It should raise an exception
+        self.assertRaises(Exception, self.widget.swapData, item)
 
     def testSetBatchData(self):
         ''' Assure that setting batch data is correct'''
