@@ -59,9 +59,7 @@ class FileConverterTest(unittest.TestCase):
         self.widget.parent.showHelp = MagicMock()
         self.widget.onHelp()
         self.assertTrue(self.widget.parent.showHelp.called_once())
-        #args = self.widget.manager.showHelp.call_args
-        #self.assertIn('data_operator_help.html', args[0][0])
-
+     
     def testOnIFileOpen(self):
         """
         Testing intensity file read in.
@@ -73,7 +71,7 @@ class FileConverterTest(unittest.TestCase):
 
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtIFile.text(), 'FIT2D_I.TXT')
-        self.assertEqual(self.widget.ifile, 'UnitTesting/FIT2D_I.TXT')
+        self.assertEqual(self.widget.ifile, filename)
         self.assertTrue(self.widget.cmdConvert)
 
         iqdata = np.array([Utilities.extract_ascii_data(self.widget.ifile)])
@@ -90,7 +88,7 @@ class FileConverterTest(unittest.TestCase):
 
         # check updated values in ui, read from loaded file
         self.assertEqual(self.widget.txtQFile.text(), 'FIT2D_Q.TXT')
-        self.assertEqual(self.widget.qfile, 'UnitTesting/FIT2D_Q.TXT')
+        self.assertEqual(self.widget.qfile, filename)
         self.assertTrue(self.widget.cmdConvert)
 
         qdata = Utilities.extract_ascii_data(self.widget.qfile)
