@@ -4089,11 +4089,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
         try:
-            button_id = int(line_dict['weighting'][0])
-            for button in self.options_widget.weightingGroup.buttons():
-                if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
-                    button.setChecked(True)
-                    break
+            if 'weighting' in line_dict.keys():
+                button_id = int(line_dict['weighting'][0])
+                for button in self.options_widget.weightingGroup.buttons():
+                    if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
+                        button.setChecked(True)
+                        break
         except ValueError:
             pass
 
