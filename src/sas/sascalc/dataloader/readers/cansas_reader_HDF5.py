@@ -2,11 +2,12 @@
     NXcanSAS data reader for reading HDF5 formatted CanSAS files.
 """
 
+import logging
 import h5py
 import numpy as np
 import re
 import os
-import sys
+import traceback
 
 from ..data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
@@ -18,6 +19,8 @@ try:
   basestring
 except NameError:  # CRUFT: python 2 support
   basestring = str
+
+logger = logging.getLogger(__name__)
 
 
 def h5attr(node, key, default=None):
@@ -167,8 +170,12 @@ class Reader(FileReader):
                     self._find_data_attributes(value)
                     self._initialize_new_data_set(value)
                 # Recursion step to access data within the group
-                self.read_children(value, parent_list)
-                self.add_intermediate()
+                try:
+                    self.read_children(value, parent_list)
+                    self.add_intermediate()
+                except Exception as e:
+                    self.current_datainfo.errors.append(str(e))
+                    logger.debug(traceback.format_exc())
                 # Reset parent class when returning from recursive method
                 self.parent_class = last_parent_class
                 parent_list.remove(key)
@@ -177,6 +184,9 @@ class Reader(FileReader):
                 # If this is a dataset, store the data appropriately
                 data_set = value.value
                 unit = self._get_unit(value)
+                # Put scalars into lists to be sure they are iterable
+                if np.isscalar(data_set):
+                    data_set = [data_set]
 
                 for data_point in data_set:
                     if isinstance(data_point, np.ndarray):
@@ -195,8 +205,8 @@ class Reader(FileReader):
                     # Run
                     elif key == u'run':
                         try:
-                            run_name = h5attr(value, 'name')
-                            run_dict = {data_set: run_name}
+                            run_name = h5attr(value, 'name', default='name')
+                            run_dict = {data_point: run_name}
                             self.current_datainfo.run_name = run_dict
                         except Exception:
                             pass
