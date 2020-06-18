@@ -128,7 +128,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def allowBatch(self):
         return False
 
-    def allowBatch(self):
+    def allowSwap(self):
         """
         Tell the caller we don't accept swapping data
         """
