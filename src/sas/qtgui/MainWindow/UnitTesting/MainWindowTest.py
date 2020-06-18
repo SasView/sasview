@@ -33,9 +33,9 @@ class MainWindowTest(unittest.TestCase):
         self.assertIsInstance(self.widget, QtWidgets.QMainWindow)
         self.assertIsInstance(self.widget.centralWidget(), QtWidgets.QMdiArea)
         self.assertTrue(self.widget.workspace.horizontalScrollBarPolicy() ==
-                        QtCore.Qt.ScrollBarAlwaysOn)
+                        QtCore.Qt.ScrollBarAsNeeded)
         self.assertTrue(self.widget.workspace.verticalScrollBarPolicy() ==
-                        QtCore.Qt.ScrollBarAlwaysOn)
+                        QtCore.Qt.ScrollBarAsNeeded)
 
     def testSplashScreen(self):
         """ Test the splash screen """
