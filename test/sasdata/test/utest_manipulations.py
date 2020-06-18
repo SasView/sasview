@@ -10,8 +10,7 @@ import unittest
 import numpy as np
 
 from sas.sascalc.dataloader.loader import Loader
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.sascalc.dataloader.data_info import Data1D, Data2D
 
 
 def find(filename):
@@ -175,7 +174,7 @@ class Manin2DTests(unittest.TestCase):
         dqx_0 = np.arange(25) / 100
         dqy_0 = np.arange(25) / 100
         q_0 = np.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
-        self.data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0,
+        self.data = Data2D(data=x_0, err_data=dx_0, qx_data=qx_0,
                            qy_data=qy_0, q_data=q_0, mask=mask_0,
                            dqx_data=dqx_0, dqy_data=dqy_0)
 
@@ -185,7 +184,7 @@ class Manin2DTests(unittest.TestCase):
         qy = np.arange(25)
         mask = np.zeros(25)
         q = np.sqrt(qx * qx + qy * qy)
-        self.data2 = Data2D(image=y, err_image=dy, qx_data=qx, qy_data=qy,
+        self.data2 = Data2D(data=y, err_data=dy, qx_data=qx, qy_data=qy,
                             q_data=q, mask=mask)
 
     def test_load(self):
@@ -285,7 +284,7 @@ class ExtraManip2DTests(unittest.TestCase):
         dqx_0 = np.arange(25) / 100
         dqy_0 = np.arange(25) / 100
         q_0 = np.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
-        self.data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0,
+        self.data = Data2D(data=x_0, err_data=dx_0, qx_data=qx_0,
                            qy_data=qy_0, q_data=q_0, mask=mask_0,
                            dqx_data=dqx_0, dqy_data=dqy_0)
 
@@ -295,7 +294,7 @@ class ExtraManip2DTests(unittest.TestCase):
         qy = np.arange(25)
         mask = np.zeros(25)
         q = np.sqrt(qx * qx + qy * qy)
-        self.data2 = Data2D(image=y, err_image=dy, qx_data=qx, qy_data=qy,
+        self.data2 = Data2D(data=y, err_data=dy, qx_data=qx, qy_data=qy,
                             q_data=q, mask=mask)
 
     def test_load(self):
