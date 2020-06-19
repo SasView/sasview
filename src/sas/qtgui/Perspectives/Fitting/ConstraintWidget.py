@@ -492,6 +492,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             msg = "Fitting failed. Please ensure correctness of chosen constraints."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
+        # Warn the user if fitting has been unsuccessfull
+        if not result[0][0][0].success:
+            msg = result[0][0][0].mesg
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            _ = msgbox.exec_()
+            return
 
         # get the elapsed time
         elapsed = result[1]
