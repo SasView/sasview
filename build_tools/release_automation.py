@@ -130,9 +130,9 @@ def update_sasview_init(version, doi):
     output_lines = []
     with open(init_file, 'r') as f:
         for line in f.readlines():
-            if '__version__ =' in line:
+            if line[:9] == '__version__':
                output_lines.append('__version__ = \"'+version+'\"\n')
-            elif '__DOI__ =' in line:
+            elif line[:7] == '__DOI__' :
                 output_lines.append('__DOI__ = Zenodo,' + str(doi) + '\n')
             else:
                 output_lines.append(line)
