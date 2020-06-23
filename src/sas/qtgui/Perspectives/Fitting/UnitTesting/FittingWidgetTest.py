@@ -1545,30 +1545,26 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
-    def testParameterPaste(self):
+    def testOnParameterPaste(self):
         """
-        Test parameter pasting
+        Test response of the widget to clipboard content
+        paste request
         """
-        # Mock the clipboard and make it return unconsistent string
+        self.widget.updatePageWithParameters = MagicMock()
+        QtWidgets.QMessageBox.exec_ = MagicMock()
         cb = QtWidgets.QApplication.clipboard()
-        cb.text = MagicMock(return_value='foo')
-        # Mock the updatePageWithParameters call
-        widget = self.widget
-        widget.updatePageWithParameters = MagicMock()
+
+        # test bad clipboard
+        cb.setText("bad clipboard")
         self.widget.onParameterPaste()
-        # Check if the function is called
-        self.assertFalse(widget.updatePageWithParameters.called)
-        # Now return a consistent string in the
-        cb.text = MagicMock(return_value='sasview_parameter_values:tab_name,M1:scale,0.1:background,0.1')
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        self.widget.updatePageWithParameters.assert_not_called()
+
+        # Test correct clipboard
+        cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
         self.widget.onParameterPaste()
-        self.assertTrue(widget.updatePageWithParameters.called)
-        # Get the pasted dict
-        paste_dict = widget.updatePageWithParameters.call_args[0]
-        # tab_name should not be in the dict
-        self.assertFalse('tab_name' in paste_dict[0])
-        # scale and background should
-        self.assertTrue('scale' in paste_dict[0])
-        self.assertTrue('background' in paste_dict[0])
+        self.widget.updatePageWithParameters.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
