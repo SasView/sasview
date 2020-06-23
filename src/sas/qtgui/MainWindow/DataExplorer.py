@@ -30,8 +30,10 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 import sas.qtgui.Perspectives as Perspectives
 
 DEFAULT_PERSPECTIVE = "Fitting"
+ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'All File (*.*)']
 
 logger = logging.getLogger(__name__)
+
 
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
@@ -268,22 +270,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.default_project_location = os.path.dirname(filename)
+            # Inversion perspective will remove all data with delete
             self.deleteAllItems()
             # Currently project load is available only for fitting
             if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
-                self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
-            # delete all (including the default) tabs
-            self._perspective().deleteAllTabs()
+                self.cbFitting.setCurrentIndex(
+                    self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+                # delete all (including the default) tabs
+                self._perspective().deleteAllTabs()
             self.readProject(filename)
 
     def loadAnalysis(self):
         """
         Called when the "Open Analysis" menu item chosen.
         """
+        file_filter = ';;'.join(ANALYSIS_TYPES)
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Analysis',
-            'filter'    : 'Project (*.fitv);;All files (*.*)',
+            'filter'    : file_filter,
             'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
@@ -313,13 +318,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         return filename
 
-    def saveAsAnalysisFile(self, tab_id=1):
+    def saveAsAnalysisFile(self, tab_id=1, extension='fitv'):
         """
         Show the save as... dialog and return the chosen filepath
         """
-        default_name = "FitPage"+str(tab_id)+".fitv"
+        default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
-        wildcard = "fitv files (*.fitv)"
+        wildcard = "{0} files (*.{0})".format(extension)
         kwargs = {
             'caption'   : 'Save As',
             'directory' : default_name,
@@ -331,16 +336,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = filename_tuple[0]
         return filename
 
-    def saveAnalysis(self, data, tab_id=1):
+    def saveAnalysis(self, data, tab_id=1, ext='fitv'):
         """
         Called when the "Save Analysis" menu item chosen.
         """
-        filename = self.saveAsAnalysisFile(tab_id)
+        filename = self.saveAsAnalysisFile(tab_id, ext)
         if not filename:
             return
         _, extension = os.path.splitext(filename)
         if not extension:
-            filename = '.'.join((filename, 'fitv'))
+            filename = '.'.join((filename, ext))
         self.communicator.statusBarUpdateSignal.emit("Saving analysis... %s\n" % os.path.basename(filename))
 
         with open(filename, 'w') as outfile:
@@ -466,7 +471,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def readProject(self, filename):
         """
-        Read out datasets and fitpages from file
+        Read out datasets and perspective information from file
         """
         # Find out the filetype based on extension
         ext = os.path.splitext(filename)[1]
@@ -496,28 +501,38 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 except Exception as ex:
                     logging.error("Project load failed with " + str(ex))
                     return
+        cs_keys = []
+        visible_perspective = DEFAULT_PERSPECTIVE
         for key, value in all_data.items():
-            if key=='is_batch':
-                self.chkBatch.setChecked(True if value=='True' else False)
-                if 'batch_grid' not in all_data:
-                    continue
-                grid_pages = all_data['batch_grid']
-                for grid_name, grid_page in grid_pages.items():
-                    grid_page.append(grid_name)
-                    self.parent.showBatchOutput(grid_page)
+            if key == 'is_batch':
+                self.chkBatch.setChecked(value == 'True')
+                if 'batch_grid' in all_data:
+                    grid_pages = all_data['batch_grid']
+                    for grid_name, grid_page in grid_pages.items():
+                        grid_page.append(grid_name)
+                        self.parent.showBatchOutput(grid_page)
                 continue
             if 'cs_tab' in key:
+                cs_keys.append(key)
                 continue
+            if 'visible_perspective' in key:
+                visible_perspective = value
             # send newly created items to the perspective
             self.updatePerspectiveWithProperties(key, value)
 
+        # Set to fitting perspective and load in Batch and C&S Pages
+        self.cbFitting.setCurrentIndex(
+            self.cbFitting.findText(DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
 
         # Only now can we create/assign C&S pages.
-        for key, value in all_data.items():
-            if 'cs_tab' in key:
-                self.updatePerspectiveWithProperties(key, value)
+        for key in cs_keys:
+            self.updatePerspectiveWithProperties(key, all_data[key])
+
+        # Set to perspective shown when project was saved
+        self.cbFitting.setCurrentIndex(
+                self.cbFitting.findText(visible_perspective))
 
     def updateWithBatchPages(self, all_data):
         """
@@ -559,6 +574,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             items = self.updateModelFromData(data_dict)
 
         if 'fit_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
             params = value['fit_params']
             # Make the perspective read the rest of the read data
             if not isinstance(params, list):
@@ -576,6 +592,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.sendItemToPerspective(items[0], tab_index=tab_index)
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
+        if 'pr_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Inversion'))
+            params = value['pr_params']
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(params)
         if 'cs_tab' in key and 'is_constraint' in value:
             # Create a C&S page
             self._perspective().addConstraintTab()
@@ -1044,7 +1065,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not hasattr(plot, 'name'):
             return False
-        ids_vals = [val.data[0].name for val in self.active_plots.values()]
+
+        ids_vals = [val.data[0].name for val in self.active_plots.values()
+                    if val.data[0].plot_role != Data1D.ROLE_DATA or
+                    isinstance(val.data[0], Data2D)]
 
         return plot.name in ids_vals
 

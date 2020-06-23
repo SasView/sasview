@@ -39,8 +39,8 @@ CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
 
 class Reader(XMLreader):
-    cansas_version = "1.0"
-    base_ns = "{cansas1d/1.0}"
+    cansas_version = "1.1"
+    base_ns = "{cansas1d/1.1}"
     cansas_defaults = None
     type_name = "canSAS"
     invalid = True
@@ -707,8 +707,7 @@ class Reader(XMLreader):
         else:
             self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
-        # TODO: fix the writer to linearize all data, including T_spectrum
-        # self._write_trans_spectrum(datainfo, entry_node)
+        self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
         self._write_sample_info(datainfo, entry_node)
         # Instrument info
@@ -766,18 +765,13 @@ class Reader(XMLreader):
         Creates the primary xml header used when writing to file
         """
         xsi = "http://www.w3.org/2001/XMLSchema-instance"
-        version = self.cansas_version
-        n_s = CANSAS_NS.get(version).get("ns")
-        if version == "1.1":
-            url = "http://www.cansas.org/formats/1.1/"
-        else:
-            url = "http://svn.smallangles.net/svn/canSAS/1dwg/trunk/"
-        schema_location = "{0} {1}cansas1d.xsd".format(n_s, url)
-        attrib = {"{" + xsi + "}schemaLocation" : schema_location,
-                  "version" : version}
-        nsmap = {'xsi' : xsi, None: n_s}
-
-        main_node = self.create_element("{" + n_s + "}SASroot",
+        n_s = CANSAS_NS.get(self.cansas_version).get("ns")
+        url = "http://www.cansas.org/formats/1.1/"
+        schema_location = f"{n_s} {url}cansas1d.xsd"
+        attrib = {f"{{{xsi}}}schemaLocation": schema_location,
+                  "version": self.cansas_version}
+        nsmap = {'xsi': xsi, None: n_s}
+        main_node = self.create_element(f"{{{n_s}}}SASroot",
                                         attrib=attrib, nsmap=nsmap)
         return main_node
 
@@ -891,8 +885,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        for i in range(len(datainfo.trans_spectrum)):
-            spectrum = datainfo.trans_spectrum[i]
+        for spectrum in datainfo.trans_spectrum:
             node = self.create_element("SAStransmission_spectrum",
                                        {"name" : spectrum.name})
             self.append(node, entry_node)
@@ -903,14 +896,15 @@ class Reader(XMLreader):
                 node.append(point)
                 self.write_node(point, "Lambda", spectrum.wavelength[i],
                                 {'unit': spectrum.wavelength_unit})
+                if len(spectrum.transmission) <= i:
+                    spectrum.transmission[i] = 0.0
                 self.write_node(point, "T", spectrum.transmission[i],
                                 {'unit': spectrum.transmission_unit})
-                if spectrum.transmission_deviation is not None \
-                and len(spectrum.transmission_deviation) >= i:
-                    self.write_node(point, "Tdev",
-                                    spectrum.transmission_deviation[i],
-                                    {'unit':
-                                     spectrum.transmission_deviation_unit})
+                if len(spectrum.transmission_deviation) <= i:
+                    spectrum.transmission_deviation[i] = 0.0
+                self.write_node(
+                    point, "Tdev", spectrum.transmission_deviation[i],
+                    {'unit': spectrum.transmission_deviation_unit})
 
     def _write_sample_info(self, datainfo, entry_node):
         """

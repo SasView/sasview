@@ -442,6 +442,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget._poly_model.item(0,0).setCheckState(2)
         # Assure the parameter is added
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width'])
+        # Check that it's value has not changed (reproduce the polydispersity checkbox bug)
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
 
         # Add another parameter
         self.widget._poly_model.item(2,0).setCheckState(2)
@@ -449,9 +451,11 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width', 'length.width'])
 
         # Change the min/max values
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 0.0)
         self.widget._poly_model.item(0,2).setText("1.0")
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 1.0)
+        # Check that changing the polydispersity min/max value doesn't affect the paramer min/max
+        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
 
         #self.widget.show()
         #QtWidgets.QApplication.exec_()
@@ -460,6 +464,24 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
         self.widget._poly_model.item(0,4).setText("22")
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
+        # test that sasmodel is updated with the new value
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+
+        # Change the pd value
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
+        self.widget._poly_model.item(0,1).setText("0.8")
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # Test that sasmodel is updated with the new value
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.8)
+
+        # Uncheck pd in the fitting widget
+        self.widget.chkPolydispersity.setCheckState(2)
+        self.widget.chkPolydispersity.click()
+        # Should not change the value of the qt model
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # sasmodel should be set to 0
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.0)
+
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
