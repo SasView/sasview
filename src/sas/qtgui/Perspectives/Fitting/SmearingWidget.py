@@ -444,3 +444,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 dq_r = GuiUtils.formatNumber(data.dxw[0])
 
         return smear_type, dq_l, dq_r
+
+    def resetSmearer(self):
+        self.current_smearer = None
+        self.cbSmearing.blockSignals(True)
+        self.cbSmearing.clear()
+        self.cbSmearing.blockSignals(False)

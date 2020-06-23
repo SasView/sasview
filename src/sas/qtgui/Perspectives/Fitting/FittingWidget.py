@@ -219,7 +219,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Let others know we're full of data now
         self.data_is_loaded = True
-
+        # Reset the smearer
+        #self.smearing_widget.resetSmearer()
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
 
