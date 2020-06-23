@@ -286,16 +286,20 @@ class NXcanSASWriter(Reader):
                                        data=trans.transmission_deviation)
             trans_entry.create_dataset('lambda', data=trans.wavelength)
 
-        note_entry = sasentry.create_group('sasnote'.format(i))
-        note_entry.attrs['canSAS_class'] = 'SASnote'
-        notes = None
-        if len(data_info.notes) > 1:
+        if np.isscalar(data_info.notes) and data_info.notes:
+            # Handle scalars that aren't empty arrays, None, '', etc.
+            notes = [np.string_(data_info.notes)]
+        elif len(data_info.notes) > 1:
+            # Handle iterables that aren't empty
             notes = [np.string_(n) for n in data_info.notes]
-            notes = np.array(notes)
-        elif data_info.notes != []:
-            notes = _h5_string(data_info.notes[0])
+        else:
+            # Notes are required in NXcanSAS format
+            notes = [np.string_('')]
         if notes is not None:
-            note_entry.create_dataset('SASnote', data=notes)
+            for i, note in enumerate(notes):
+                note_entry = sasentry.create_group('sasnote{0}'.format(i))
+                note_entry.attrs['canSAS_class'] = 'SASnote'
+                note_entry.create_dataset('SASnote', data=note)
 
         f.close()
 

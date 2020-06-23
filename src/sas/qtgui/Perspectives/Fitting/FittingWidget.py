@@ -508,6 +508,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
+        # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
+        if self._poly_model.rowCount() > 0:
+            for key, value in self.poly_params.items():
+                if key[-6:] == '.width':
+                    self.kernel_module.setParam(key, (value if isChecked else 0))
+
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
@@ -1400,12 +1406,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = parameter_name.rsplit()[-1]
 
         delegate = self.lstPoly.itemDelegate()
+        parameter_name_w = parameter_name + '.width'
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name_w = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
                 self.poly_params_to_fit.append(parameter_name_w)
             else:
@@ -1422,7 +1428,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-            current_details = self.kernel_module.details[parameter_name]
+            current_details = self.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
                 current_details[model_column-2] = value
@@ -1446,6 +1452,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
             self.poly_params[key] = value
+            self.kernel_module.setParam(key, value)
 
             # Update plot
             self.updateData()
@@ -4011,13 +4018,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
-            return False
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            retval = msgbox.exec_()
+            return
 
         # put the text into dictionary
         line_dict = {}
         for line in lines[1:]:
             content = line.split(',')
-            if len(content) > 1:
+            if len(content) > 1 and content[0] != "tab_name":
                 line_dict[content[0]] = content[1:]
 
         self.updatePageWithParameters(line_dict)
@@ -4107,11 +4120,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
         try:
-            button_id = int(line_dict['weighting'][0])
-            for button in self.options_widget.weightingGroup.buttons():
-                if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
-                    button.setChecked(True)
-                    break
+            if 'weighting' in line_dict.keys():
+                button_id = int(line_dict['weighting'][0])
+                for button in self.options_widget.weightingGroup.buttons():
+                    if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
+                        button.setChecked(True)
+                        break
         except ValueError:
             pass
 
