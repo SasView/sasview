@@ -1545,6 +1545,40 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
+
+    def testRetainParametersBetweenModelChange(self):
+        """
+        Test constantess of model parameters on model change
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # modify the initial value of radius (different from default)
+        new_value = "333.0"
+        self.widget._model_model.item(5, 1).setText(new_value)
+
+        # change parameter in the same category
+        model_index = self.widget.cbModel.findText("barbell")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # see if radius is the same as set
+        self.assertTrue(self.widget._model_model.item(5, 1).text() == "333.0")
+
+        # Now, change not just model but a category as well
+        # cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("sphere")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # see if radius is still the same
+        self.assertTrue(int(self.widget._model_model.item(5, 1).text()) == 333)
+
     def testOnParameterPaste(self):
         """
         Test response of the widget to clipboard content
@@ -1564,7 +1598,6 @@ class FittingWidgetTest(unittest.TestCase):
         cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
         self.widget.onParameterPaste()
         self.widget.updatePageWithParameters.assert_called_once()
-
 
 if __name__ == "__main__":
     unittest.main()
