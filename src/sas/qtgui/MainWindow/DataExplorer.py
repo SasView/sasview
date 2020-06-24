@@ -728,8 +728,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return
         #Check that you have only one box item checked when swaping data
         if len(selected_items) > 1 and (self.chkSwap.isChecked() or not self._perspective().allowBatch()):
-            if hasattr(self._perspective(), 'title'):
-                title = self._perspective().title()
+            if hasattr(self._perspective(), 'name'):
+                title = self._perspective().name
             else:
                 title = self._perspective().windowTitle()
             msg = title + " does not allow replacing multiple data."
