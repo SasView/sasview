@@ -178,7 +178,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.widget.addFit(None, is_batch=True)
 
         # It should raise an exception
-        self.assertRaises(Exception, self.widget.swapData, item)
+        self.assertRaises(RuntimeError, self.widget.swapData, item)
 
         # Create a non valid tab
         self.widget.addConstraintTab()

@@ -408,8 +408,8 @@ class FittingWindow(QtWidgets.QTabWidget):
             raise AttributeError(msg)
 
         if self.currentTab.is_batch_fitting:
-            msg = "Current tab is in batch mode"
-            raise Exception(msg)
+            msg = "Data in Batch Fitting cannot be swapped"
+            raise RuntimeError(msg)
 
         self.currentTab.data = data
         tab_name = str(self.tabText(self.currentIndex()))
