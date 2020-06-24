@@ -311,6 +311,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Fitting just ran - don't recalculate chi2
         self.fitResults = False
 
+        # Current parameters
+        self.page_parameters = None
+
         # signal communicator
         self.communicate = self.parent.communicate
 
@@ -1187,6 +1190,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.cbStructureFactor.isEnabled():
             structure = str(self.cbStructureFactor.currentText())
         self.respondToModelStructure(model=model, structure_factor=structure)
+
+        # paste parameters from previous state
+        if self.page_parameters:
+            self.updatePageWithParameters(self.page_parameters, warn_user=False)
 
     def onSelectBatchFilename(self, data_index):
         """
@@ -2577,6 +2584,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update state stack
         self.updateUndo()
+        self.page_parameters = self.getParameterDict()
 
     def processEffectiveRadius(self):
         """
@@ -3747,6 +3755,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         return filename
 
+    def getParameterDict(self):
+        """
+        Gather current fitting parameters as dict
+        """
+        param_list = self.getFitParameters()
+        param_list = self.getFitPage()
+        param_list += self.getFitModel()
+
+        params = FittingUtilities.formatParameters(param_list)
+        lines = params.split(':')
+        # put the text into dictionary
+        line_dict = {}
+        for line in lines[1:]:
+            content = line.split(',')
+            if len(content) > 1:
+                line_dict[content[0]] = content[1:]
+        return line_dict
+
     def onCopyToClipboard(self, format=None):
         """
         Copy current fitting parameters into the clipboard
@@ -3992,7 +4018,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
-            return False
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            retval = msgbox.exec_()
+            return
 
         # put the text into dictionary
         line_dict = {}
@@ -4018,7 +4050,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Now that the page is ready for parameters, fill it up
         self.updatePageWithParameters(line_dict)
 
-    def updatePageWithParameters(self, line_dict):
+    def updatePageWithParameters(self, line_dict, warn_user=True):
         """
         Update FitPage with parameters in line_dict
         """
@@ -4051,7 +4083,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if len(value) > 2:
                 context[key] = value
 
-        if str(self.cbModel.currentText()) != str(context['model_name']):
+        if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.setText("The model in the clipboard is not the same as the currently loaded model. \
@@ -4088,11 +4120,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
         try:
-            button_id = int(line_dict['weighting'][0])
-            for button in self.options_widget.weightingGroup.buttons():
-                if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
-                    button.setChecked(True)
-                    break
+            if 'weighting' in line_dict.keys():
+                button_id = int(line_dict['weighting'][0])
+                for button in self.options_widget.weightingGroup.buttons():
+                    if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
+                        button.setChecked(True)
+                        break
         except ValueError:
             pass
 

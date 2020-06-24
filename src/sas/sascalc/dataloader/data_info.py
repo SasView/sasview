@@ -15,17 +15,20 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
-from __future__ import print_function
-
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write
 #        an adapter class for plottables when needed.
 
-#from sas.guitools.plottables import Data1D as plottable_1D
-from sas.sascalc.data_util.uncertainty import Uncertainty
-import numpy as np
+from __future__ import print_function
+
 import math
 from math import fabs
+import copy
+
+import numpy as np
+
+#from sas.guitools.plottables import Data1D as plottable_1D
+from sas.sascalc.data_util.uncertainty import Uncertainty
 
 class plottable_1D(object):
     """
@@ -109,7 +112,8 @@ class plottable_2D(object):
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
-                 dqx_data=None, dqy_data=None):
+                 dqx_data=None, dqy_data=None, xmin=None, xmax=None,
+                 ymin=None, ymax=None, zmin=None, zmax=None):
         self.data = np.asarray(data)
         self.qx_data = np.asarray(qx_data)
         self.qy_data = np.asarray(qy_data)
@@ -124,6 +128,14 @@ class plottable_2D(object):
             self.dqx_data = np.asarray(dqx_data)
         if dqy_data is not None:
             self.dqy_data = np.asarray(dqy_data)
+
+        # plot limits
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.zmin = zmin
+        self.zmax = zmax
 
     def xaxis(self, label, unit):
         """
@@ -718,9 +730,9 @@ class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=False):
         DataInfo.__init__(self)
-        plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
+        plottable_1D.__init__(self, x, y, dx, dy, None, None, lam, dlam)
         self.isSesans = isSesans
         try:
             if self.isSesans: # the data is SESANS
@@ -791,6 +803,25 @@ class Data1D(plottable_1D, DataInfo):
         clone.errors = deepcopy(self.errors)
 
         return clone
+
+    def copy_from_datainfo(self, data1d):
+        """
+        copy values of Data1D of type DataLaoder.Data_info
+        """
+        self.x  = copy.deepcopy(data1d.x)
+        self.y  = copy.deepcopy(data1d.y)
+        self.dy = copy.deepcopy(data1d.dy)
+
+        if hasattr(data1d, "dx"):
+            self.dx = copy.deepcopy(data1d.dx)
+        if hasattr(data1d, "dxl"):
+            self.dxl = copy.deepcopy(data1d.dxl)
+        if hasattr(data1d, "dxw"):
+            self.dxw = copy.deepcopy(data1d.dxw)
+
+        self.xaxis(data1d._xaxis, data1d._xunit)
+        self.yaxis(data1d._yaxis, data1d._yunit)
+        self.title = data1d.title
 
     def _validity_check(self, other):
         """
@@ -954,10 +985,15 @@ class Data2D(plottable_2D, DataInfo):
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
-                 dqx_data=None, dqy_data=None):
+                 dqx_data=None, dqy_data=None,
+                 xmin=None, xmax=None, ymin=None, ymax=None,
+                 zmin=None, zmax=None):
         DataInfo.__init__(self)
-        plottable_2D.__init__(self, data, err_data, qx_data,
-                              qy_data, q_data, mask, dqx_data, dqy_data)
+        plottable_2D.__init__(self, data=data, err_data=err_data,
+                              qx_data=qx_data, qy_data=qy_data,
+                              dqx_data=dqx_data, dqy_data=dqy_data,
+                              q_data=q_data, mask=mask, xmin=xmin, xmax=xmax,
+                              ymin=ymin, ymax=ymax, zmin=zmin, zmax=zmax)
         self.y_bins = []
         self.x_bins = []
 
@@ -1023,6 +1059,34 @@ class Data2D(plottable_2D, DataInfo):
         clone.errors = deepcopy(self.errors)
 
         return clone
+
+    def copy_from_datainfo(self, data2d):
+        """
+        copy value of Data2D of type DataLoader.data_info
+        """
+        self.data = copy.deepcopy(data2d.data)
+        self.qx_data = copy.deepcopy(data2d.qx_data)
+        self.qy_data = copy.deepcopy(data2d.qy_data)
+        self.q_data = copy.deepcopy(data2d.q_data)
+        self.mask = copy.deepcopy(data2d.mask)
+        self.err_data = copy.deepcopy(data2d.err_data)
+        self.x_bins = copy.deepcopy(data2d.x_bins)
+        self.y_bins = copy.deepcopy(data2d.y_bins)
+        if data2d.dqx_data is not None:
+            self.dqx_data = copy.deepcopy(data2d.dqx_data)
+        if data2d.dqy_data is not None:
+            self.dqy_data = copy.deepcopy(data2d.dqy_data)
+        self.xmin = data2d.xmin
+        self.xmax = data2d.xmax
+        self.ymin = data2d.ymin
+        self.ymax = data2d.ymax
+        if hasattr(data2d, "zmin"):
+            self.zmin = data2d.zmin
+        if hasattr(data2d, "zmax"):
+            self.zmax = data2d.zmax
+        self.xaxis(data2d._xaxis, data2d._xunit)
+        self.yaxis(data2d._yaxis, data2d._yunit)
+        self.title = data2d.title
 
     def _validity_check(self, other):
         """

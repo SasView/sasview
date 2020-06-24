@@ -1,6 +1,5 @@
 import sys
 import unittest
-import logging
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtGui import *
@@ -14,7 +13,6 @@ import path_prepare
 # Local
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
-from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
 
 if not QtWidgets.QApplication.instance():
@@ -24,7 +22,7 @@ class MainWindowTest(unittest.TestCase):
     """Test the Main Window GUI"""
     def setUp(self):
         """Create the GUI"""
-        screen_resolution = QtCore.QRect(0,0,640,480)
+        screen_resolution = QtCore.QRect(0, 0, 640, 480)
         self.widget = MainSasViewWindow(screen_resolution, None)
 
     def tearDown(self):
@@ -35,7 +33,11 @@ class MainWindowTest(unittest.TestCase):
         """Test the GUI in its default state"""
         self.assertIsInstance(self.widget, QtWidgets.QMainWindow)
         self.assertIsInstance(self.widget.centralWidget(), QtWidgets.QMdiArea)
-        
+        self.assertTrue(self.widget.workspace.horizontalScrollBarPolicy() ==
+                        QtCore.Qt.ScrollBarAsNeeded)
+        self.assertTrue(self.widget.workspace.verticalScrollBarPolicy() ==
+                        QtCore.Qt.ScrollBarAsNeeded)
+
     def testSplashScreen(self):
         """ Test the splash screen """
         splash = SplashScreen()
@@ -44,7 +46,7 @@ class MainWindowTest(unittest.TestCase):
     def testWidgets(self):
         """ Test enablement/disablement of widgets """
         # Open the main window
-        screen_resolution = QtCore.QRect(0,0,640,480)
+        screen_resolution = QtCore.QRect(0, 0, 640, 480)
         tmp_main = MainSasViewWindow(screen_resolution, None)
         tmp_main.showMaximized()
         # See that only one subwindow is up
@@ -108,12 +110,13 @@ class MainWindowTest(unittest.TestCase):
         QtWidgets.QMessageBox.question = MagicMock(return_value=QtWidgets.QMessageBox.Yes)
 
         # Open, then close the main window
-        screen_resolution = QtCore.QRect(0,0,640,480)
+        screen_resolution = QtCore.QRect(0, 0, 640, 480)
         tmp_main = MainSasViewWindow(screen_resolution, None)
         tmp_main.close()
 
         # See that the MessageBox method got called
         self.assertTrue(QtWidgets.QMessageBox.question.called)
-       
+
+
 if __name__ == "__main__":
     unittest.main()
