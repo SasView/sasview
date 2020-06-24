@@ -317,9 +317,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if accuracy is not None:
             self.model.item(MODEL.index('ACCURACY')).setText(accuracy)
         if d_down is not None:
-            self.model.item(MODEL.index('PINHOLE_MIN')).setText(d_down)
+            self.model.item(MODEL.index('PINHOLE_MIN')).setText(str(d_down))
         if d_up is not None:
-            self.model.item(MODEL.index('PINHOLE_MAX')).setText(d_up)
+            self.model.item(MODEL.index('PINHOLE_MAX')).setText(str(d_up))
 
     def onPinholeSmear(self):
         """
