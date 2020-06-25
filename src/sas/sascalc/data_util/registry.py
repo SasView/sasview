@@ -97,6 +97,7 @@ class ExtensionRegistry(object):
         :return: List of available readers for the file extension (maybe empty)
         """
         # Find matching extensions
+        path = path.lower()
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
         extlist.sort(key=len)
@@ -126,6 +127,7 @@ class ExtensionRegistry(object):
                 raise NoKnownLoaderException("No loaders match extension in %r"
                                              % path)
         else:
+            format = format.lower()
             loaders = self.loaders.get(format, [])
             if not loaders:
                 raise NoKnownLoaderException("No loaders match format %r"
