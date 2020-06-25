@@ -1,13 +1,10 @@
 """
     File handler to support different file extensions.
     Uses reflectometer registry utility.
-
     The default readers are found in the 'readers' sub-module
     and registered by default at initialization time.
-
     To add a new default reader, one must register it in
     the register_readers method found in readers/__init__.py.
-
     A utility method (find_plugins) is available to inspect
     a directory (for instance, a user plug-in directory) and
     look for new readers/writers.
@@ -30,11 +27,8 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 
 # Default readers are defined in the readers sub-module
 from . import readers
-from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
-    DefaultReaderException
-from .readers import ascii_reader
-from .readers import cansas_reader
-from .readers import cansas_reader_HDF5
+from .loader_exceptions import (NoKnownLoaderException, FileContentsException,
+                                DefaultReaderException)
 
 logger = logging.getLogger(__name__)
 
@@ -59,98 +53,76 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
 
-    def load(self, path, format=None, debug=False):
+    def load(self, path, format=None, use_defaults=True, debug=False):
         """
         Call the loader for the file type of path.
-
         :param path: file path
         :param format: explicit extension, to force the use
             of a particular reader
         :param debug: when True, print the traceback for each loader that fails
-
         Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
         readers if no reader was registered for the file's extension.
         """
         import traceback
 
         # Gets set to a string if the file has an associated reader that fails
-        msg_from_reader = None
         try:
-            return super(Registry, self).load(path, format=format)
-        #except Exception: raise  # for debugging, don't use fallback loader
-        except NoKnownLoaderException as nkl_e:
+            data_list = super(Registry, self).load(path, format=format)
+            if len(data_list) < 1:
+                raise Exception()
+            return data_list
+        except Exception as e:
             if debug: traceback.print_exc()
-            pass  # Try the ASCII reader
-        except FileContentsException as fc_exc:
-            if debug: traceback.print_exc()
-            # File has an associated reader but it failed.
-            # Save the error message to display later, but try the 3 default loaders
-            msg_from_reader = fc_exc.message
-        except Exception:
-            if debug: traceback.print_exc()
-            pass
-
-        # File has no associated reader, or the associated reader failed.
-        # Try the ASCII reader
-        try:
-            ascii_loader = ascii_reader.Reader()
-            return ascii_loader.read(path)
-        except NoKnownLoaderException:
-            if debug: traceback.print_exc()
-            pass  # Try the Cansas XML reader
-        except DefaultReaderException:
-            if debug: traceback.print_exc()
-            pass  # Loader specific error to try the cansas XML reader
-        except FileContentsException as e:
-            if debug: traceback.print_exc()
-            if msg_from_reader is None:
-                raise RuntimeError(e.message)
-
-        # ASCII reader failed - try CanSAS xML reader
-        try:
-            cansas_loader = cansas_reader.Reader()
-            return cansas_loader.read(path)
-        except NoKnownLoaderException:
-            if debug: traceback.print_exc()
-            pass  # Try the NXcanSAS reader
-        except DefaultReaderException:
-            if debug: traceback.print_exc()
-            pass  # Loader specific error to try the NXcanSAS reader
-        except FileContentsException as e:
-            if debug: traceback.print_exc()
-            if msg_from_reader is None:
-                raise RuntimeError(e.message)
-        except Exception:
-            if debug: traceback.print_exc()
-            pass
-
-        # CanSAS XML reader failed - try NXcanSAS reader
-        try:
-            cansas_nexus_loader = cansas_reader_HDF5.Reader()
-            return cansas_nexus_loader.read(path)
-        except DefaultReaderException as e:
-            if debug: traceback.print_exc()
-            logging.error("No default loader can load the data")
-            # No known reader available. Give up and throw an error
-            if msg_from_reader is None:
+            # Use backup readers
+            try:
+                return self.load_using_generic_loaders(path)
+            except NoKnownLoaderException as nkgl_e:
+                if debug: traceback.print_exc()
+                logging.error(nkgl_e)
+                # No known reader available. Give up and throw an error
+                msg = str(nkgl_e)
+                msg += "\nUnknown data format: {}.\nThe file is not a ".format(
+                    path)
+                msg += "known format that can be loaded by SasView.\n"
+                raise NoKnownLoaderException(msg)
+            except FileContentsException as e:
+                if debug: traceback.print_exc()
+                raise RuntimeError(e)
+            except DefaultReaderException as e:
+                if debug: traceback.print_exc()
+                logging.error("No default loader can load the data")
+                # No known reader available. Give up and throw an error
                 msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
                 msg += "known format that can be loaded by SasView.\n"
                 raise NoKnownLoaderException(msg)
-            else:
-                # Associated reader and default readers all failed.
-                # Show error message from associated reader
-                raise RuntimeError(msg_from_reader)
-        except FileContentsException as e:
-            if debug: traceback.print_exc()
-            err_msg = msg_from_reader if msg_from_reader is not None else e.message
-            raise RuntimeError(err_msg)
+            except Exception as e:
+                if debug: traceback.print_exc()
+                raise RuntimeError(e)
+
+    def load_using_generic_loaders(self, path):
+        """
+        If the expected reader cannot load the file or no known loader exists,
+        attempt to load the file using a few defaults readers
+        :param path: file path
+        :return: List of Data1D and Data2D objects
+        """
+        module_list = readers.get_generic_readers()
+        for module in module_list:
+            reader = module.Reader()
+            try:
+                return reader.read(path)
+            except Exception as e:
+                # Cycle through all generic readers
+                pass
+        # Only throw exception if all generic readers fail
+        raise NoKnownLoaderException(
+            "Generic readers failed to load %s" % path)
 
     def find_plugins(self, dir):
         """
         Find readers in a given directory. This method
         can be used to inspect user plug-in directories to
         find new readers/writers.
-
         :param dir: directory to search into
         :return: number of readers found
         """
@@ -222,7 +194,6 @@ class Registry(ExtensionRegistry):
         Look into a module to find whether it contains a
         Reader class. If so, APPEND it to readers and (potentially)
         to the list of writers for the given extension
-
         :param ext: file extension [string]
         :param module: module object
         """
@@ -265,7 +236,6 @@ class Registry(ExtensionRegistry):
     def associate_file_reader(self, ext, loader):
         """
         Append a reader object to readers
-
         :param ext: file extension [string]
         :param module: reader object
         """
@@ -301,7 +271,6 @@ class Registry(ExtensionRegistry):
         Reader class. If so, add it to readers and (potentially)
         to the list of writers.
         :param module: module object
-
         """
         reader_found = False
 
@@ -369,7 +338,6 @@ class Registry(ExtensionRegistry):
     def save(self, path, data, format=None):
         """
         Call the writer for the file type of path.
-
         Raises ValueError if no writer is available.
         Raises KeyError if format is not available.
         May raise a writer-defined exception if writer fails.
@@ -400,7 +368,6 @@ class Loader(object):
         Look into a module to find whether it contains a
         Reader class. If so, append it to readers and (potentially)
         to the list of writers for the given extension
-
         :param ext: file extension [string]
         :param module: module object
         """
@@ -409,7 +376,6 @@ class Loader(object):
     def associate_file_reader(self, ext, loader):
         """
         Append a reader object to readers
-
         :param ext: file extension [string]
         :param module: reader object
         """
@@ -418,7 +384,6 @@ class Loader(object):
     def load(self, file, format=None):
         """
         Load a file
-
         :param file: file name (path)
         :param format: specified format to use (optional)
         :return: DataInfo object
@@ -444,7 +409,6 @@ class Loader(object):
     def find_plugins(self, directory):
         """
         Find plugins in a given directory
-
         :param dir: directory to look into to find new readers/writers
         """
         return self.__registry.find_plugins(directory)
