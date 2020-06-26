@@ -29,7 +29,7 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 from sas.qtgui.Utilities.ReportDialog import ReportDialog
-from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
+from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
@@ -56,13 +56,6 @@ from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 logger = logging.getLogger(__name__)
-
-class Acknowledgements(QDialog, Ui_Acknowledgements):
-    def __init__(self, parent=None):
-        QDialog.__init__(self, parent)
-        self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 
 
 class GuiManager(object):

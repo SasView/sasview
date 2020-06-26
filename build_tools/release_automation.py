@@ -1,6 +1,7 @@
 import requests
 import argparse
 import json
+import datetime
 import sys
 import os
 
@@ -118,7 +119,7 @@ def generate_zenodo(sasview_data):
     print("Record has been created on Zenodo with DOI: "+newDOI+"\nNext:\n- Add DOI to appropriate places in SasView code\n- "
                                                             "Make GitHub release\n - Download all release files from GitHub "
                                                             "and attach to Zenodo release record.\n- Publish Zenodo record")
-
+    return newDOI
 
 def update_sasview_init(version, doi):
     """
@@ -126,17 +127,23 @@ def update_sasview_init(version, doi):
     :return:
     """
 
-    init_file = os.path.join('src', 'sas', 'sasview', '__init__.py')
+    init_file = os.path.join('sasview','src', 'sas', 'sasview', '__init__.py')
     output_lines = []
+    year = datetime.datetime.now().year
     with open(init_file, 'r') as f:
         for line in f.readlines():
-            if line[:9] == '__version__':
+            if line[:11] == '__version__':
                output_lines.append('__version__ = \"'+version+'\"\n')
             elif line[:7] == '__DOI__' :
-                output_lines.append('__DOI__ = Zenodo,' + str(doi) + '\n')
+                output_lines.append('__DOI__ = \"Zenodo, ' + str(doi) + '\"\n')
+            elif line[:16] == '__release_date__':
+                output_lines.append('__release_date__ = \"' + str(year) + '\"\n')
             else:
                 output_lines.append(line)
-    print(output_lines)
+
+    with open(init_file, 'w') as f:
+        f.writelines(output_lines)
+
 
 def update_sasmodels_init(version):
     """
@@ -144,15 +151,35 @@ def update_sasmodels_init(version):
     :param version:
     :return:
     """
-    pass
+    init_file = os.path.join('sasmodels', 'sasmodels', '__init__.py')
+    output_lines = []
+    with open(init_file, 'r') as f:
+        for line in f.readlines():
+            if line[:11] == '__version__':
+                output_lines.append('__version__ = \"' + version + '\"\n')
+            else:
+                output_lines.append(line)
+    with open(init_file, 'w') as f:
+        f.writelines(output_lines)
 
-def update_sasview_license(version, doi):
+def update_license(license_file, license_line, line_to_update):
+    """
+
+    :return:
+    """
+    with open(license_file, 'r') as f:
+        output_lines = f.readlines()
+        output_lines[line_to_update] = license_line
+    with open(license_file, 'w') as f:
+        f.writelines(output_lines)
+
+
+def update_acknowledgement_widget():
     """
 
     :return:
     """
     pass
-
 if __name__ == "__main__":
 
     # STEPS:
@@ -162,16 +189,29 @@ if __name__ == "__main__":
     # 3.
 
     parser = argparse.ArgumentParser('Script to automate release process')
-    parser.add_argument('-v', '--version', required=True)
+    parser.add_argument('-v', '--sasview_version', required=True)
+    parser.add_argument('-s', '--sasmodels_version', required=True)
     parser.add_argument('-z', '--zenodo', default=False)
     args = parser.parse_args()
 
-    version = args.version
-    sasview_data['metadata']['title'] = 'SasView version '+ version
-    sasview_data['metadata']['description'] = version + ' release'
+    sasview_version = args.sasview_version
+    sasmodels_version = args.sasmodels_version
+    sasview_data['metadata']['title'] = 'SasView version '+ sasview_version
+    sasview_data['metadata']['description'] = sasview_version + ' release'
     sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
-        'https://github.com/SasView/sasview/releases/tag/v' + version
+        'https://github.com/SasView/sasview/releases/tag/v' + sasview_version
 
-    #generate_zenodo(sasview_data)
-    doi = 12345
-    update_sasview_init(version, doi)
+    #new_doi = generate_zenodo(sasview_data)
+    #update_sasview_init(sasview_version, new_doi)
+    #update_sasmodels_init(sasmodels_version)
+    #update_sasmodels_license()
+
+    year = datetime.datetime.now().year
+    license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
+    license_file = os.path.join('sasview', 'LICENSE.txt')
+    update_license(license_file, license_line, 0)
+    license_file = os.path.join('sasmodels', 'LICENSE.txt')
+    update_license(license_file, license_line, 0)
+    license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
+    license_file = os.path.join('sasview', 'installers', 'license.txt')
+    update_license(license_file, license_line, -1)
