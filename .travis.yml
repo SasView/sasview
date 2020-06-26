@@ -2,10 +2,14 @@ matrix:
   include:
   - os: linux
     language: generic
-    env: PY=3.6
+    env:
+      - MINICONDA=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+      - PY=3.6
   - os: osx
     language: generic
-    env: PY=3.6
+    env:
+      - MINICONDA=https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+      - PY=3.6
 branches:
   only:
   - master
@@ -24,10 +28,7 @@ addons:
     - libhdf5-serial-dev
 before_install:
 - echo $TRAVIS_OS_NAME
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  -O miniconda.sh; elif
-  [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-  -O miniconda.sh; fi
+- wget $MINICONDA -O miniconda.sh
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - hash -r
@@ -35,12 +36,9 @@ before_install:
 - conda info -a
 - conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako
 install:
-# Make sure libOpenCL is available to miniconda on linux.
 - pip install periodictable xhtml2pdf unittest-xml-reporting pylint
-#- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so* $HOME/miniconda/lib; ls -l $HOME/miniconda/lib; fi
-#- if test -n "$TRAVIS_OS_NAME" == "linux"; then pip install pyopencl; fi
-# Install pyopencl, but quietly ignore failures
-- pip install pyopencl || true
+# Note: use "... || true" below to silently ignore failure
+- pip install pyopencl
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
