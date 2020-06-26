@@ -31,11 +31,12 @@ before_install:
 - hash -r
 #- conda update --yes conda
 - conda info -a
-# Make sure libOpenCL is available to miniconda on linux.
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so* $HOME/miniconda/lib; fi
-- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako
 install:
-- pip install periodictable xhtml2pdf pyopencl unittest-xml-reporting pylint
+# Make sure libOpenCL is available to miniconda on linux.
+- pip install periodictable xhtml2pdf unittest-xml-reporting pylint
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so* $HOME/miniconda/lib; ls -l $HOME/miniconda/lib; fi
+- if test -n "$TRAVIS_OS_NAME" == "linux"; pip install pyopencl; fi
 script:
 - cd ..
 - export WORKSPACE=$(pwd)
