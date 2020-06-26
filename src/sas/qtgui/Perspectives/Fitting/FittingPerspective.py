@@ -354,6 +354,12 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return True
 
+    def allowSwap(self):
+        """
+        Tell the caller that you can swap data
+        """
+        return True
+
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
@@ -397,6 +403,26 @@ class FittingWindow(QtWidgets.QTabWidget):
                 self.updateFitDict(data, tab_name)
             else:
                 self.addFit(data, is_batch=is_batch)
+
+    def swapData(self, data):
+        """
+        Replace the data from the current fitting tab
+        """
+        if not isinstance(self.currentWidget(), FittingWidget):
+            msg = "Current tab is not  a fitting widget"
+            raise TypeError(msg)
+
+        if not isinstance(data, QtGui.QStandardItem):
+            msg = "Incorrect type passed to the Fitting Perspective"
+            raise AttributeError(msg)
+
+        if self.currentTab.is_batch_fitting:
+            msg = "Data in Batch Fitting cannot be swapped"
+            raise RuntimeError(msg)
+
+        self.currentTab.data = data
+        tab_name = str(self.tabText(self.currentIndex()))
+        self.updateFitDict(data, tab_name)
 
     def onFittingOptionsChange(self, fit_engine):
         """

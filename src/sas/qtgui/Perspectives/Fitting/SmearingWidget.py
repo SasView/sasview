@@ -319,9 +319,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if accuracy is not None:
             self.model.item(MODEL.index('ACCURACY')).setText(accuracy)
         if d_down is not None:
-            self.model.item(MODEL.index('PINHOLE_MIN')).setText(d_down)
+            self.model.item(MODEL.index('PINHOLE_MIN')).setText(str(d_down))
         if d_up is not None:
-            self.model.item(MODEL.index('PINHOLE_MAX')).setText(d_up)
+            self.model.item(MODEL.index('PINHOLE_MAX')).setText(str(d_up))
 
     def onDQSmear(self):
         """
@@ -463,3 +463,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 dq_r = GuiUtils.formatNumber(data.dxw[0])
 
         return smear_type, dq_l, dq_r
+
+    def resetSmearer(self):
+        self.current_smearer = None
+        self.cbSmearing.blockSignals(True)
+        self.cbSmearing.clear()
+        self.cbSmearing.blockSignals(False)
