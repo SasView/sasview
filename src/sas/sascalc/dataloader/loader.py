@@ -27,8 +27,7 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 
 # Default readers are defined in the readers sub-module
 from . import readers
-from .loader_exceptions import (NoKnownLoaderException, FileContentsException,
-                                DefaultReaderException)
+from .loader_exceptions import (NoKnownLoaderException, DefaultReaderException)
 
 logger = logging.getLogger(__name__)
 
@@ -53,13 +52,15 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
 
-    def load(self, path, format=None, use_defaults=True, debug=False):
+    def load(self, path, format=None, debug=False, use_defaults=True):
         """
         Call the loader for the file type of path.
         :param path: file path
         :param format: explicit extension, to force the use
             of a particular reader
         :param debug: when True, print the traceback for each loader that fails
+        :param use_defaults: Flag to use the default readers as a backup if the
+            main reader fails or no reader exists
         Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
         readers if no reader was registered for the file's extension.
         """
@@ -68,36 +69,32 @@ class Registry(ExtensionRegistry):
         # Gets set to a string if the file has an associated reader that fails
         try:
             data_list = super(Registry, self).load(path, format=format)
-            if len(data_list) < 1:
-                raise Exception()
-            return data_list
+            if data_list:
+                return data_list
+            if format:
+                logger.debug(
+                    f"No data returned from '{path}' for format {format}")
+            else:
+                logger.debug(f"No data returned from '{path}'")
         except Exception as e:
-            if debug: traceback.print_exc()
-            # Use backup readers
-            try:
-                return self.load_using_generic_loaders(path)
-            except NoKnownLoaderException as nkgl_e:
-                if debug: traceback.print_exc()
-                logging.error(nkgl_e)
-                # No known reader available. Give up and throw an error
-                msg = str(nkgl_e)
-                msg += "\nUnknown data format: {}.\nThe file is not a ".format(
-                    path)
-                msg += "known format that can be loaded by SasView.\n"
-                raise NoKnownLoaderException(msg)
-            except FileContentsException as e:
-                if debug: traceback.print_exc()
-                raise RuntimeError(e)
-            except DefaultReaderException as e:
-                if debug: traceback.print_exc()
-                logging.error("No default loader can load the data")
-                # No known reader available. Give up and throw an error
-                msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
-                msg += "known format that can be loaded by SasView.\n"
-                raise NoKnownLoaderException(msg)
-            except Exception as e:
-                if debug: traceback.print_exc()
-                raise RuntimeError(e)
+            logger.debug(traceback.print_exc())
+            if not use_defaults:
+                raise
+        # Use backup readers
+        try:
+            return self.load_using_generic_loaders(path)
+        except (NoKnownLoaderException, DefaultReaderException) as e:
+            logger.debug(traceback.print_exc())
+            # No known reader available. Give up and throw an error
+            msg = str(e)
+            msg += "\nUnknown data format: {}.\nThe file is not a ".format(
+                path)
+            msg += "known format that can be loaded by SasView.\n"
+            logger.error(msg)
+            raise
+        except Exception as e:
+            logger.debug(traceback.print_exc())
+            raise
 
     def load_using_generic_loaders(self, path):
         """
@@ -110,7 +107,9 @@ class Registry(ExtensionRegistry):
         for module in module_list:
             reader = module.Reader()
             try:
-                return reader.read(path)
+                data_list = reader.read(path)
+                if data_list:
+                    return data_list
             except Exception as e:
                 # Cycle through all generic readers
                 pass
