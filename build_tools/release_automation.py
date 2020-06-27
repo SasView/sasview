@@ -180,6 +180,15 @@ def update_acknowledgement_widget():
     :return:
     """
     pass
+
+
+def prepare_release_notes(issues_list):
+    """
+    https://api.github.com/repos/<repo-owner>/<repo-name>/issues?state=all
+    curl -i "https://api.github.com/repos/SasView/sasview/issues/1535" -u "wpotrzebowski"
+    :return:
+    """
+
 if __name__ == "__main__":
 
     # STEPS:
@@ -215,3 +224,8 @@ if __name__ == "__main__":
     license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
     license_file = os.path.join('sasview', 'installers', 'license.txt')
     update_license(license_file, license_line, -1)
+
+    sasview_issues_list = ['1414','1550', '1556', '1534', '1546', '1552', '1564', '1565', '1560', '1567',
+                           '1547', '1456','1553', '1538', '1554', '1523', '1536', '1522', '1548', '1529',
+                           '1543', '1599', '1535', '1598']
+    sasmodels_issues_list = ['402', '401']
