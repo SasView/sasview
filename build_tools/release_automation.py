@@ -182,12 +182,20 @@ def update_acknowledgement_widget():
     pass
 
 
-def prepare_release_notes(issues_list):
+def prepare_release_notes(issues_list, repository, username, password):
     """
-    https://api.github.com/repos/<repo-owner>/<repo-name>/issues?state=all
-    curl -i "https://api.github.com/repos/SasView/sasview/issues/1535" -u "wpotrzebowski"
+    Retrieving information from github and creating issue list for release notes
     :return:
     """
+    issue_titles = []
+    for issue in issues_list:
+        #WARNING: One can try running with auth but there is limitted number of requests
+        response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
+                                auth=(username, password))
+        title = response.json()['title']
+        issue_title = f"#{issue}, {title}"
+        issue_titles.append(issue_title)
+    return issue_titles
 
 if __name__ == "__main__":
 
@@ -201,6 +209,8 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--sasview_version', required=True)
     parser.add_argument('-s', '--sasmodels_version', required=True)
     parser.add_argument('-z', '--zenodo', default=False)
+    parser.add_argument('-u', '--username', default=False, required=True)
+    parser.add_argument('-p', '--password', default=False, required=True)
     args = parser.parse_args()
 
     sasview_version = args.sasview_version
@@ -215,17 +225,29 @@ if __name__ == "__main__":
     #update_sasmodels_init(sasmodels_version)
     #update_sasmodels_license()
 
-    year = datetime.datetime.now().year
-    license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
-    license_file = os.path.join('sasview', 'LICENSE.txt')
-    update_license(license_file, license_line, 0)
-    license_file = os.path.join('sasmodels', 'LICENSE.txt')
-    update_license(license_file, license_line, 0)
-    license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
-    license_file = os.path.join('sasview', 'installers', 'license.txt')
-    update_license(license_file, license_line, -1)
+    # year = datetime.datetime.now().year
+    # license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
+    # license_file = os.path.join('sasview', 'LICENSE.txt')
+    # update_license(license_file, license_line, 0)
+    # license_file = os.path.join('sasmodels', 'LICENSE.txt')
+    # update_license(license_file, license_line, 0)
+    # license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
+    # license_file = os.path.join('sasview', 'installers', 'license.txt')
+    # update_license(license_file, license_line, -1)
 
     sasview_issues_list = ['1414','1550', '1556', '1534', '1546', '1552', '1564', '1565', '1560', '1567',
                            '1547', '1456','1553', '1538', '1554', '1523', '1536', '1522', '1548', '1529',
                            '1543', '1599', '1535', '1598']
     sasmodels_issues_list = ['402', '401']
+
+    username = args.username
+    password = args.password
+    sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
+    sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
+
+    print('Copy text bellow to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
+    for issue_title in sasview_issues:
+        print('Fixes sasview ' + issue_title)
+
+    for issue_title in sasmodels_issues:
+        print('Fixes sasmodels ' + issue_title)
