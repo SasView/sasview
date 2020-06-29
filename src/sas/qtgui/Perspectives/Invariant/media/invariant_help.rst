@@ -244,9 +244,6 @@ documentation in the Models Documentation for more details).
 contrast term if it is not known (and the volume fraction is known), and depends
 only on two values - the contrast and Porod Constant - *which must be provided*.
 
-.. changed::
-    Prior to versions 5.0.3 and 4.3 the value returned was 2 * $S_v$
-
 Extension to Three or More Phases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In principle, as suggested in the Introduction, the invariant is a completely
