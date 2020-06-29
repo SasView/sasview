@@ -212,7 +212,7 @@ def eval_expressions():
     # CRUFT: python < 3.0;  doc builder isn't allowing the following exec
     # https://stackoverflow.com/questions/4484872/why-doesnt-exec-work-in-a-function-with-a-subfunction/41368813#comment73790496_41368813
     #exec(functiondef, global_context, local_context)
-    eval(compile(functiondef, '<string>', 'exec'), global_context, local_context)
+    eval(compile(functiondef, functiondef, 'exec'), global_context, local_context)
     retfn = local_context['eval_expressions']
 
     # Remove garbage added to globals by exec
