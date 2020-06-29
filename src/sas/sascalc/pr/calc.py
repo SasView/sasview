@@ -217,14 +217,12 @@ def reg_term(pars, d_max, nslice):
 
     :return: Regularization term calculated from the expansion.
     """
-    nslice_d = np.float64(nslice)
-    i_r = np.arange(nslice)
-    r = d_max/nslice_d * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     deriv = dprdr(pars, d_max, r)
-
     total = np.sum(deriv ** 2)
 
-    return total/nslice_d * d_max
+    return total*dx
 
 @njit('f8(f8[:], f8, u8)')
 def int_pr_square(pars, d_max, nslice):
@@ -237,13 +235,12 @@ def int_pr_square(pars, d_max, nslice):
 
     :return:  Regularization term calculated from the expansion.
     """
-    nslice_d = np.float64(nslice)
-    i_r = np.arange(nslice)
-    r = d_max/nslice_d * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
     total = np.sum(values ** 2)
 
-    return total/nslice_d * d_max
+    return total * dx
 
 @njit('f8(f8[:], f8, u8)')
 def int_pr(pars, d_max, nslice):
@@ -256,15 +253,13 @@ def int_pr(pars, d_max, nslice):
 
     :return: Integral of P(r).
     """
-    nslice_d = np.float64(nslice)
-
-    i_r = np.arange(nslice)
-    r = d_max/nslice_d * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
 
     total = np.sum(values)
 
-    return total/nslice_d * d_max
+    return total * dx
 
 @njit('u8(f8[:], f8, u8)')
 def npeaks(pars, d_max, nslice):
@@ -277,8 +272,8 @@ def npeaks(pars, d_max, nslice):
 
     :return: Number of P(r) peaks.
     """
-    i_r = np.arange(nslice)
-    r = d_max/np.float64(nslice) * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
 
     # Build an index vector with True for ascending and false for flat or descending
@@ -289,9 +284,6 @@ def npeaks(pars, d_max, nslice):
     count += 1 - pos[0] + pos[-1]
 
     return count
-
-
-
 
 @njit('f8(f8[:], f8, u8)')
 def positive_integral(pars, d_max, nslice):
@@ -307,15 +299,14 @@ def positive_integral(pars, d_max, nslice):
     :return: The fraction of the integral of P(r) over the whole
     range of r that is above 0.
     """
-    nslice_d = np.float64(nslice)
-    i_r = np.arange(nslice)
-    r = d_max/nslice_d * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
 
     total = np.sum(np.fabs(values))
     total_pos = np.sum(values[values > 0.0])
 
-    return total_pos / total
+    return total_pos / total  # dx cancels
 
 @njit('f8(f8[:], f8[:,:], f8, u8)')
 def positive_errors(pars, err, d_max, nslice):
@@ -331,9 +322,8 @@ def positive_errors(pars, err, d_max, nslice):
     :return: The fraction of the integral of P(r) over the whole range
     of r that is at least one sigma above 0.
     """
-    nslice_d = np.float64(nslice)
-    i_r = np.arange(nslice)
-    r = d_max/nslice_d * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     pr_vals = pr_err(pars, err, d_max, r)
 
     pr_val = pr_vals[0, :]
@@ -344,7 +334,7 @@ def positive_errors(pars, err, d_max, nslice):
     index = pr_val > pr_val_err
     total_pos = np.sum(pr_val[index])
 
-    return total_pos / total
+    return total_pos / total  # dx cancels
 
 @njit('f8(f8[:], f8, u8)')
 def rg(pars, d_max, nslice):
@@ -359,12 +349,12 @@ def rg(pars, d_max, nslice):
 
     :return: R_g radius of gyration.
     """
-    i_r = np.arange(nslice)
-    r = (d_max / nslice) * i_r
+    dx = d_max/nslice
+    r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
 
     total = np.sum(values)
     total_r2 = np.sum((r ** 2) * values)
 
-    return np.sqrt(total_r2 / (2.0*total))
+    return np.sqrt(total_r2 / (2.0*total))  # dx cancels
 
