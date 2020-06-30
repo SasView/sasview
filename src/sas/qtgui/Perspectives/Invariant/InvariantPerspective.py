@@ -222,7 +222,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Set the button back to available
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
-        self.cmdStatus.setEnabled(True)
 
         self.model = model
         self.mapper.toFirst()
@@ -301,11 +300,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.model.setItem(WIDGETS.W_INVARIANT, item)
             item = QtGui.QStandardItem("ERROR")
             self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
-
         try:
             volume_fraction, volume_fraction_error = \
                 inv.get_volume_fraction_with_error(self._contrast)
-
         except Exception as ex:
             calculation_failed = True
             msg += str(ex)
@@ -331,9 +328,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             surface = None
 
         if (calculation_failed):
+            self.cmdStatus.setEnabled(False)
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
-
+        else:
+            self.cmdStatus.setEnabled(True)
+            
         low_calculation_pass = True
         high_calculation_pass = True
         if self._low_extrapolate:
