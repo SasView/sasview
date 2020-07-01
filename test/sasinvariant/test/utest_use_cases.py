@@ -187,7 +187,7 @@ class TestInvNoResolution(unittest.TestCase):
 
     def test_use_case_2(self):
         """
-            Tes the Invariant with the low-Q Guinier extrapolation
+            Test the Invariant with the low-Q Guinier extrapolation
         """
         # Create an invariant object with background of zero as that is how the
         # data was created. A different background could cause negative

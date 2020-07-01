@@ -966,10 +966,10 @@ class InvariantCalculator(object):
         However we include the uncertainty computation for future use if and
         when these values get an uncertainty. This is given as:
 
-                ds/s = sqrt[(dcp/cp)**2 + 2* (dcontrast/contrast)**2]
+            ds/s = sqrt[(dcp/cp)**2 + 2* (dcontrast/contrast)**2]
 
-            which gives (this should be checked before using in anger)
-                ds = sqrt((dporod_const)**2 + 2 * (porod_const *
+        which gives (this should be checked before using in anger)
+            ds = sqrt((dporod_const)**2 + 2 * (porod_const *
                           dcontrast / contrast)**2) / (2 * pi * contrast**2)
         We also assume some users will never enter a value for uncertainty so
         allow for None even when it is an option.
@@ -998,11 +998,13 @@ class InvariantCalculator(object):
             _dporod_const = dporod_const * 1e-8
         _porod_const = porod_const *1e-8
         s = self.get_surface(contrast=contrast, porod_const=porod_const)
-        if (dcontrast == None) and (dporod_const == None):
-            ds = None
-        else:
-            ds = math.sqrt(_dporod_const**2 + 2 * (_porod_const
-                           * _dcontrast / contrast)**2) / (
-                               2 * math.pi * contrast**2)
-
+        # Until contrast and are provided the return nothing.
+        ds = None
+        # When they are available, use the following:
+        # if dporod_const is None:
+        #    dporod_const = 0.
+        # if dcontrast is None:
+        #   dcontrast = 0.
+        # ds = math.sqrt(dporod_const**2 + 2 * (porod_const * dcontrast / constrast**2)
+        #               / (2 * math,.pi * contrast**2) * 1e-8
         return s, ds

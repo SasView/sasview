@@ -273,8 +273,8 @@ class TestInvariantCalculator(unittest.TestCase):
         self.assertTrue(math.fabs(inv._high_extrapolation_function.power-4)<0.1)
 
         self.assertEqual(qs_extr, _qstar+delta_qs_extr)
-        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar \
-                                        + delta_dqs_extr*delta_dqs_extr), 10)
+        self.assertAlmostEqual(
+            dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_extr*delta_dqs_extr), 10)
 
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
@@ -397,8 +397,8 @@ class TestGuinierExtrapolation(unittest.TestCase):
         self.scale = 1.5
         self.rg = 30.0
         x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale *
-                        math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
+        y = np.asarray([
+            self.scale * math.exp(-(q*self.rg)**2 / 3.0) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
 
@@ -540,8 +540,8 @@ class TestDataExtraLow(unittest.TestCase):
         self.scale = 1.5
         self.rg = 30.0
         x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale *
-                        math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
+        y = np.asarray([
+            self.scale * math.exp(-(q*self.rg)**2 / 3.0) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
 
@@ -598,8 +598,8 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         self.scale = 1.5
         self.rg = 30.0
         x = np.arange(0.0001, 0.1, 0.0001)
-        y = np.asarray([self.scale *
-                        math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
+        y = np.asarray([
+            self.scale * math.exp(-(q*self.rg)**2 / 3.0) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
         self.npts = len(x)-10
