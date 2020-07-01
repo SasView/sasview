@@ -72,7 +72,7 @@ holders,incoherent scattering in the case of neutrons, etc.) as:
     above equation which would be required for an integral over all $q$ stated
     at the beginning. This seems to be the convention historically adopted and
     is only important when extracting terms from the invariant as below. As
-    long as the same covention is applied in their derivation all is consistent.
+    long as the same convention is applied in their derivation all is consistent.
 
 .. note::
     Also note that if some residual flat background remains in the data, it can
@@ -120,7 +120,7 @@ $q_v$ in the data file.
     with: "The 6 columns". For an example, see the example data set
     1umSlitSmearSphere.ABS in the *\\test\\1d* folder).
 
-.. _invariant-extrapolation-section: 
+.. _invariant-data-extrapolation: 
 Data Extrapolation
 ^^^^^^^^^^^^^^^^^^
 The difficulty with using $Q^*$  arises from the fact that experimental data is
@@ -176,7 +176,7 @@ fraction. However, the current implementation in SasView only allows for the
 former: extracting the volume fraction given a known contrast factor.
 
 .. warning:: The Invariant analysis window always tries to return the volume
-    fraction using a default SLD of 1e-6 |Ang^-1|. The user **must** provide
+    fraction using a default SLD of 2e-6 |Ang^-1|. The user **must** provide
     the **correct** SLD for their system and click on *Compute* before
     examining/using the value of the invariant displayed.
 
@@ -338,10 +338,10 @@ for the basis of the extrapolation can also be specified.
 In most cases the default values will suffice. Click the *Compute* button.
 
 ..note::
-    As mentioned above in the extrapolation section, :ref:`invariant-extrapolation-section`
-    , the extrapolation range are currently fixed and not adjustable. They are
+    As mentioned above in the Data Extrapolation section, :ref:`invariant-data-extrapolation`
+    , the extrapolation ranges are currently fixed and not adjustable. They are
     designed to keep the computation time reasonable while including as much of
-    the total q range as should be necessary for any SAS data.
+    the total $q$ range as should be necessary for any SAS data.
 
 The details of the calculation are available by clicking the *Status*
 button at the bottom right of the panel.

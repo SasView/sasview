@@ -825,7 +825,7 @@ class InvariantCalculator(object):
 
         Thus either way, mathematically it is always identical to computing
         with only the contrast and the Porod Constant. up to and including
-        SasView versions 4.2.2 and 5.0.1 the implentation used the traditional
+        SasView versions 4.2.2 and 5.0.1 the implementation used the traditional
         circular approach.
 
         Implementation: ::
@@ -925,7 +925,7 @@ class InvariantCalculator(object):
             sigV = dV/dq_star * sigq_star
             
             so that
-            sigV = k* sigq_star) /(q_star * math.sqrt(1 - 4 * k))
+            sigV = (k * sigq_star) /(q_star * math.sqrt(1 - 4 * k))
 
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
 
