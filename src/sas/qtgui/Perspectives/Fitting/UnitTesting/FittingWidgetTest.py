@@ -451,9 +451,11 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width', 'length.width'])
 
         # Change the min/max values
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 0.0)
         self.widget._poly_model.item(0,2).setText("1.0")
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 1.0)
+        # Check that changing the polydispersity min/max value doesn't affect the paramer min/max
+        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
 
         #self.widget.show()
         #QtWidgets.QApplication.exec_()
@@ -462,6 +464,24 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
         self.widget._poly_model.item(0,4).setText("22")
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
+        # test that sasmodel is updated with the new value
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+
+        # Change the pd value
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
+        self.widget._poly_model.item(0,1).setText("0.8")
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # Test that sasmodel is updated with the new value
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.8)
+
+        # Uncheck pd in the fitting widget
+        self.widget.chkPolydispersity.setCheckState(2)
+        self.widget.chkPolydispersity.click()
+        # Should not change the value of the qt model
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # sasmodel should be set to 0
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.0)
+
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
@@ -1525,6 +1545,59 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
+
+    def testRetainParametersBetweenModelChange(self):
+        """
+        Test constantess of model parameters on model change
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # modify the initial value of radius (different from default)
+        new_value = "333.0"
+        self.widget._model_model.item(5, 1).setText(new_value)
+
+        # change parameter in the same category
+        model_index = self.widget.cbModel.findText("barbell")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # see if radius is the same as set
+        self.assertTrue(self.widget._model_model.item(5, 1).text() == "333.0")
+
+        # Now, change not just model but a category as well
+        # cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("sphere")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # see if radius is still the same
+        self.assertTrue(int(self.widget._model_model.item(5, 1).text()) == 333)
+
+    def testOnParameterPaste(self):
+        """
+        Test response of the widget to clipboard content
+        paste request
+        """
+        self.widget.updatePageWithParameters = MagicMock()
+        QtWidgets.QMessageBox.exec_ = MagicMock()
+        cb = QtWidgets.QApplication.clipboard()
+
+        # test bad clipboard
+        cb.setText("bad clipboard")
+        self.widget.onParameterPaste()
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        self.widget.updatePageWithParameters.assert_not_called()
+
+        # Test correct clipboard
+        cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
+        self.widget.onParameterPaste()
+        self.widget.updatePageWithParameters.assert_called_once()
 
 if __name__ == "__main__":
     unittest.main()

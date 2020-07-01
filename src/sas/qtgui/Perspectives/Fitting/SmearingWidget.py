@@ -49,6 +49,7 @@ DEFAULT_PINHOLE_DOWN=0.0
 
 class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
     smearingChangedSignal = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(SmearingWidget, self).__init__()
 
@@ -71,6 +72,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.pinhole = 0.0
         self.slit_height = 0.0
         self.slit_width = 0.0
+
+        # current accuracy option
+        self.accuracy = ""
 
         # Let only floats in the line edits
         self.txtSmearDown.setValidator(GuiUtils.DoubleValidator())
@@ -176,10 +180,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         elif text == "Use dQ Data":
             self.setElementsVisibility(True)
             self.setDQLabels()
-            if self.smear_type == "Pinhole":
-                self.onPinholeSmear()
-            else:
-                self.onSlitSmear()
+            self.onDQSmear()
         elif text == "Custom Pinhole Smear":
             self.setElementsVisibility(True)
             self.setPinholeLabels()
@@ -201,10 +202,15 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         # don't save the state if dQ Data
         if smearing == "Custom Pinhole Smear":
             self.pinhole = d_up
-            self.accuracy = accuracy
         elif smearing == 'Custom Slit Smear':
-            self.slit_height = d_down
-            self.slit_width = d_up
+            self.slit_height = d_up
+            self.slit_width = d_down
+        # check changes in accuracy
+        if self.accuracy != accuracy:
+            self.accuracy = accuracy
+            if accuracy == 'High' or accuracy == 'Extra high':
+                QtWidgets.QMessageBox.information(self, "Accuracy Warning",
+                  "Higher accuracy is very expensive, \nso fitting can be very slow!")      
 
         self.onIndexChange(index)
 
@@ -224,7 +230,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Accuracy combobox visibility
         """
-        if isinstance(self.data, Data2D) and self.cbSmearing.currentIndex() == 1:
+        if isinstance(self.data, Data2D) and self.cbSmearing.currentIndex() >= 1:
             self.gAccuracy.setVisible(True)
         else:
             self.gAccuracy.setVisible(False)
@@ -236,12 +242,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.txtSmearDown.setVisible(False)
         self.lblSmearDown.setText('')
         self.lblUnitDown.setText('')
-        if isinstance(self.data, Data2D):
-            self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
-            self.lblSmearUp.setText('<html><head/><body><p>&lt;dQ<span style=" vertical-align:sub;">low</span>&gt;</p></body></html>')
-        else:
-            self.lblSmearUp.setText('<html><head/><body><p>dQ/Q</p></body></html>')
-            self.lblUnitUp.setText('%')
+        self.lblSmearUp.setText('<html><head/><body><p>dQ/Q</p></body></html>')
+        self.lblUnitUp.setText('%')
         self.txtSmearUp.setText(str(self.pinhole))
 
         self.txtSmearDown.setEnabled(True)
@@ -255,8 +257,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.lblSmearDown.setText('Slit width')
         self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
-        self.txtSmearDown.setText(str(self.slit_height))
-        self.txtSmearUp.setText(str(self.slit_width))
+        self.txtSmearUp.setText(str(self.slit_height))
+        self.txtSmearDown.setText(str(self.slit_width))
         self.txtSmearDown.setEnabled(True)
         self.txtSmearUp.setEnabled(True)
 
@@ -317,9 +319,26 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if accuracy is not None:
             self.model.item(MODEL.index('ACCURACY')).setText(accuracy)
         if d_down is not None:
-            self.model.item(MODEL.index('PINHOLE_MIN')).setText(d_down)
+            self.model.item(MODEL.index('PINHOLE_MIN')).setText(str(d_down))
         if d_up is not None:
-            self.model.item(MODEL.index('PINHOLE_MAX')).setText(d_up)
+            self.model.item(MODEL.index('PINHOLE_MAX')).setText(str(d_up))
+
+    def onDQSmear(self):
+        """
+        Create a custom dQ smear object that will change the way residuals
+        are compute when fitting
+        """
+        # resolution information already in data.dx (if 1D) or 
+        # data.dqx_data & data.dqy_data (if 2D),
+        # so only need to set accuracy for 2D
+        _, accuracy, _, _ = self.state()
+        self.current_smearer = smear_selection(self.data, self.kernel_model)
+        if isinstance(self.data, Data2D):
+            backend_accuracy = ACCURACY_DICT.get(accuracy)
+            if backend_accuracy:
+                self.current_smearer.set_accuracy(accuracy=backend_accuracy)
+            else:
+                self.current_smearer.set_accuracy(accuracy='low')
 
     def onPinholeSmear(self):
         """
@@ -338,10 +357,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             len_data = len(data.data)
             data.dqx_data = np.zeros(len_data)
             data.dqy_data = np.zeros(len_data)
-            data.dqx_data[data.dqx_data == 0] = percent * data.qx_data
-            data.dqy_data[data.dqy_data == 0] = percent * data.qy_data
             q = np.sqrt(data.qx_data**2 + data.qy_data**2)
-            data.dx_data = data.dqy_data = percent*q
+            data.dqx_data = data.dqy_data = percent*q
         else:
             len_data = len(data.x)
             data.dx = np.zeros(len_data)
@@ -355,7 +372,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             backend_accuracy = ACCURACY_DICT.get(accuracy)
             if backend_accuracy:
                 self.current_smearer.set_accuracy(accuracy=backend_accuracy)
-
+            else:
+                self.current_smearer.set_accuracy(accuracy='low')
+    
     def onSlitSmear(self):
         """
         Create a custom slit smear object that will change the way residuals
@@ -444,3 +463,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 dq_r = GuiUtils.formatNumber(data.dxw[0])
 
         return smear_type, dq_l, dq_r
+
+    def resetSmearer(self):
+        self.current_smearer = None
+        self.cbSmearing.blockSignals(True)
+        self.cbSmearing.clear()
+        self.cbSmearing.blockSignals(False)

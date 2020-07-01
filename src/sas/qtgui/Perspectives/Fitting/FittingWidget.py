@@ -219,7 +219,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Let others know we're full of data now
         self.data_is_loaded = True
-
+        # Reset the smearer
+        self.smearing_widget.resetSmearer()
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
 
@@ -310,6 +311,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Fitting just ran - don't recalculate chi2
         self.fitResults = False
+
+        # Current parameters
+        self.page_parameters = None
 
         # signal communicator
         self.communicate = self.parent.communicate
@@ -505,6 +509,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
+        # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
+        if self._poly_model.rowCount() > 0:
+            for key, value in self.poly_params.items():
+                if key[-6:] == '.width':
+                    self.kernel_module.setParam(key, (value if isChecked else 0))
+
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
@@ -1182,6 +1192,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             structure = str(self.cbStructureFactor.currentText())
         self.respondToModelStructure(model=model, structure_factor=structure)
 
+        # paste parameters from previous state
+        if self.page_parameters:
+            self.updatePageWithParameters(self.page_parameters, warn_user=False)
+
     def onSelectBatchFilename(self, data_index):
         """
         Update the logic based on the selected file in batch fitting
@@ -1393,12 +1407,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = parameter_name.rsplit()[-1]
 
         delegate = self.lstPoly.itemDelegate()
+        parameter_name_w = parameter_name + '.width'
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name_w = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
                 self.poly_params_to_fit.append(parameter_name_w)
             else:
@@ -1415,7 +1429,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-            current_details = self.kernel_module.details[parameter_name]
+            current_details = self.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
                 # err column changes the indexing
                 current_details[model_column-2] = value
@@ -1439,6 +1453,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             key = parameter_name + '.' + delegate.columnDict()[model_column]
             self.poly_params[key] = value
+            self.kernel_module.setParam(key, value)
 
             # Update plot
             self.updateData()
@@ -2570,6 +2585,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update state stack
         self.updateUndo()
+        self.page_parameters = self.getParameterDict()
 
     def processEffectiveRadius(self):
         """
@@ -3740,6 +3756,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         return filename
 
+    def getParameterDict(self):
+        """
+        Gather current fitting parameters as dict
+        """
+        param_list = self.getFitParameters()
+        param_list = self.getFitPage()
+        param_list += self.getFitModel()
+
+        params = FittingUtilities.formatParameters(param_list)
+        lines = params.split(':')
+        # put the text into dictionary
+        line_dict = {}
+        for line in lines[1:]:
+            content = line.split(',')
+            if len(content) > 1:
+                line_dict[content[0]] = content[1:]
+        return line_dict
+
     def onCopyToClipboard(self, format=None):
         """
         Copy current fitting parameters into the clipboard
@@ -3985,13 +4019,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         lines = cb_text.split(':')
         if lines[0] != 'sasview_parameter_values':
-            return False
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            retval = msgbox.exec_()
+            return
 
         # put the text into dictionary
         line_dict = {}
         for line in lines[1:]:
             content = line.split(',')
-            if len(content) > 1:
+            if len(content) > 1 and content[0] != "tab_name":
                 line_dict[content[0]] = content[1:]
 
         self.updatePageWithParameters(line_dict)
@@ -4011,7 +4051,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Now that the page is ready for parameters, fill it up
         self.updatePageWithParameters(line_dict)
 
-    def updatePageWithParameters(self, line_dict):
+    def updatePageWithParameters(self, line_dict, warn_user=True):
         """
         Update FitPage with parameters in line_dict
         """
@@ -4044,7 +4084,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if len(value) > 2:
                 context[key] = value
 
-        if str(self.cbModel.currentText()) != str(context['model_name']):
+        if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.setText("The model in the clipboard is not the same as the currently loaded model. \
@@ -4081,11 +4121,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
         try:
-            button_id = int(line_dict['weighting'][0])
-            for button in self.options_widget.weightingGroup.buttons():
-                if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
-                    button.setChecked(True)
-                    break
+            if 'weighting' in line_dict.keys():
+                button_id = int(line_dict['weighting'][0])
+                for button in self.options_widget.weightingGroup.buttons():
+                    if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:
+                        button.setChecked(True)
+                        break
         except ValueError:
             pass
 

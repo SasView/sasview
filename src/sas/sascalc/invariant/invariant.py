@@ -960,17 +960,19 @@ class InvariantCalculator(object):
 
     def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
         """
-        As of SasView 4.3 and 5.0.2, the specific surface is computed directly
+        As of SasView 4.3 and 5.0.3, the specific surface is computed directly
         from the contrast and porod_constant wich are currently user inputs
         with no option for any uncertainty so no uncertainty can be calculated.
         However we include the uncertainty computation for future use if and
-        when these values get an uncertainty. This is given as:  ::
+        when these values get an uncertainty. This is given as:
 
                 ds/s = sqrt[(dcp/cp)**2 + 2* (dcontrast/contrast)**2]
 
             which gives (this should be checked before using in anger)
                 ds = sqrt((dporod_const)**2 + 2 * (porod_const *
                           dcontrast / contrast)**2) / (2 * pi * contrast**2)
+        We also assume some users will never enter a value for uncertainty so
+        allow for None even when it is an option.
 
         :param contrast: contrast value eventually with the error
         :param porod_const: porod constant value eventually with the error
@@ -980,17 +982,27 @@ class InvariantCalculator(object):
 
         :return s, ds: the surface, with its uncertainty
         """
-
         # until contrast and porod_constant are given with uncertainties set
         # them to 0
-        dcontrast = 0
+        dcontrast = None
+        dporod_const = None
         # If and when dporod_const exists remember it likely needs unit
         # conversion from cm^-1 A^-4 to A^-5.
-        dporod_const = 0 * 1e-8
+        if dcontrast == None:
+            _dcontrast = 0
+        else:
+            _dcontrast = dcontrast
+        if dporod_const == None:
+            _dporod_const = 0
+        else:
+            _dporod_const = dporod_const * 1e-8
         _porod_const = porod_const *1e-8
-
         s = self.get_surface(contrast=contrast, porod_const=porod_const)
-        ds = math.sqrt(dporod_const**2 + 2 * (_porod_const
-                       * dcontrast / contrast)**2) / (2 * math.pi * contrast**2)
+        if (dcontrast == None) and (dporod_const == None):
+            ds = None
+        else:
+            ds = math.sqrt(_dporod_const**2 + 2 * (_porod_const
+                           * _dcontrast / contrast)**2) / (
+                               2 * math.pi * contrast**2)
 
         return s, ds
