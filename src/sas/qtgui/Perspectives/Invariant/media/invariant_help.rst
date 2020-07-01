@@ -120,7 +120,6 @@ $q_v$ in the data file.
     with: "The 6 columns". For an example, see the example data set
     1umSlitSmearSphere.ABS in the *\\test\\1d* folder).
 
-.. _invariant-data-extrapolation: 
 Data Extrapolation
 ^^^^^^^^^^^^^^^^^^
 The difficulty with using $Q^*$  arises from the fact that experimental data is
@@ -337,11 +336,10 @@ for the basis of the extrapolation can also be specified.
 
 In most cases the default values will suffice. Click the *Compute* button.
 
-..note::
-    As mentioned above in the Data Extrapolation section, :ref:`invariant-data-extrapolation`
-    , the extrapolation ranges are currently fixed and not adjustable. They are
-    designed to keep the computation time reasonable while including as much of
-    the total $q$ range as should be necessary for any SAS data.
+.. note:: As mentioned above in the `Data Extrapolation`_ section, the 
+    extrapolation ranges are currently fixed and not adjustable. They are
+    designed to keep the computation time reasonable while including as
+    much of the total $q$ range as should be necessary for any SAS data.
 
 The details of the calculation are available by clicking the *Status*
 button at the bottom right of the panel.
@@ -375,4 +373,4 @@ References
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. note::  This help document was last changed (completely re-written) by Paul
-    Butler and Steve King, March-June 2020
+    Butler and Steve King, March-July 2020
