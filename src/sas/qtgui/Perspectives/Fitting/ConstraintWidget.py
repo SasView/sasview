@@ -497,7 +497,30 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             msg = result[0][0][0].mesg
             msgbox = QtWidgets.QMessageBox(self)
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
-            msgbox.setText(msg)
+            # if the exception is a NameError, warn the user of which constraint is faulty
+            if msg[0] == NameError:
+                # get the exception in the traceback
+                trace = result[0][0][0].trace
+                while True:
+                    if trace.tb_next == None:
+                        break
+                    else:
+                        trace = trace.tb_next
+                # get the line of the faulty constraint in the code
+                lineno = trace.tb_lineno
+                # get the code that assigns the constraints
+                constraint_code = trace.tb_frame.f_code.co_filename.split('\n')
+                # get the incriminated constraint from the code
+                line = lineno - 2 - (len(constraint_code)-6)/2
+                faulty_constraint = constraint_code[int(line)]
+                constraint_no = self.findConstraintInTable(faulty_constraint)
+                # warn the user of which constraint is failing
+                error_text = 'Fit failed because constraint %s in inconsistent:\n%s'%(
+                    constraint_no + 1,
+                    self.tblConstraints.item(constraint_no, 0).text())
+                msgbox.setText(error_text)
+            else :
+                msgbox.setText("Fit failed")
             _ = msgbox.exec_()
             return
 
@@ -578,6 +601,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         msg = "Fitting failed: %s s.\n" % reason
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
+
+    def findConstraintInTable(self, constraint):
+        """
+        Returns the row number of the constraint table containing the constraint passed as argument
+        """
+        for row in range(self.tblConstraints.rowCount()):
+            constraint_name = self.tblConstraints.item(row,0).text().replace(":", ".")
+            if constraint_name.replace(" ", "") == constraint.replace(" ", ""):
+                return row
+        return None
 
     def isTabImportable(self, tab):
         """
