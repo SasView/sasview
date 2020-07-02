@@ -101,7 +101,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.txtTotalQMax.text(), '0.0')
         self.assertEqual(self.widget.txtBackgd.text(), '0.0')
         self.assertEqual(self.widget.txtScale.text(), '1.0')
-        self.assertEqual(self.widget.txtContrast.text(), '2e-06')
+        self.assertEqual(self.widget.txtContrast.text(), '8e-06')
         self.assertEqual(self.widget.txtExtrapolQMin.text(), '1e-05')
         self.assertEqual(self.widget.txtExtrapolQMax.text(), '10')
         self.assertEqual(self.widget.txtPowerLowQ.text(), '4')
