@@ -4,10 +4,11 @@
 .. S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was subsequently
 .. updated in January 2020 following the realisation that there were issues
 .. with both the text below and the underlying calculation. See SasView GitHub
-.. Issues #1434 and #1461.
+.. Issues #1434, #1461 and #1574.
 
 .. set up some substitutions
 .. |Ang^-1| replace:: |Ang|\ :sup:`-1`
+.. |Ang^-2| replace:: |Ang|\ :sup:`-2`
 
 Invariant Calculation
 =====================
@@ -27,7 +28,7 @@ domains (i.e. it is **invariant**) *provided the system is incompressible*
 purposes of this discussion, a phase is any portion of the material which
 has a SLD that is distinctly different from the average SLD of the material.
 This constant is known as the *Scattering Invariant*, the *Porod Invariant*,
-or simply as the *Invariant*, $Q^*$. 
+or simply as the *Invariant*, $Q^*$.
 
 .. note::
    In this document we shall denote the invariant by the often encountered
@@ -72,7 +73,7 @@ holders,incoherent scattering in the case of neutrons, etc.) as:
     above equation which would be required for an integral over all $q$ stated
     at the beginning. This seems to be the convention historically adopted and
     is only important when extracting terms from the invariant as below. As
-    long as the same covention is applied in their derivation all is consistent.
+    long as the same convention is applied in their derivation all is consistent.
 
 .. note::
     Also note that if some residual flat background remains in the data, it can
@@ -120,7 +121,6 @@ $q_v$ in the data file.
     with: "The 6 columns". For an example, see the example data set
     1umSlitSmearSphere.ABS in the *\\test\\1d* folder).
 
-.. _invariant-extrapolation-section: 
 Data Extrapolation
 ^^^^^^^^^^^^^^^^^^
 The difficulty with using $Q^*$  arises from the fact that experimental data is
@@ -175,10 +175,11 @@ two phases given the contrast or, calculate the contrast given the volume
 fraction. However, the current implementation in SasView only allows for the
 former: extracting the volume fraction given a known contrast factor.
 
-.. warning:: The Invariant analysis window always tries to return the volume
-    fraction using a default SLD of 1e-6 |Ang^-1|. The user **must** provide
-    the **correct** SLD for their system and click on *Compute* before
-    examining/using the value of the invariant displayed.
+.. warning:: **The user must provide the correct SLD contrast** for the data
+    they are analysing in the *Options* tab of the Invariant window **and then**
+    click on *Compute* before examining/using any displayed value of the
+    invariant or volume fraction. **The default contrast has been deliberately
+    set to the unlikley-to-be-realistic value of 8e-06** |Ang^-2|\ . 
 
 Volume Fraction
 ^^^^^^^^^^^^^^^
@@ -243,9 +244,6 @@ documentation in the Models Documentation for more details).
 **This calculation is unrelated to the Invariant** other than to obtain the
 contrast term if it is not known (and the volume fraction is known), and depends
 only on two values - the contrast and Porod Constant - *which must be provided*.
-
-.. changed::
-    Prior to versions 5.0.3 and 4.3 the value returned was 2 * $S_v$
 
 Extension to Three or More Phases
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -336,11 +334,10 @@ for the basis of the extrapolation can also be specified.
 
 In most cases the default values will suffice. Click the *Compute* button.
 
-..note::
-    As mentioned above in the extrapolation section, :ref:`invariant-extrapolation-section`
-    , the extrapolation range are currently fixed and not adjustable. They are
-    designed to keep the computation time reasonable while including as much of
-    the total q range as should be necessary for any SAS data.
+.. note:: As mentioned above in the `Data Extrapolation`_ section, the 
+    extrapolation ranges are currently fixed and not adjustable. They are
+    designed to keep the computation time reasonable while including as
+    much of the total $q$ range as should be necessary for any SAS data.
 
 If the value of $Q^*$ calculated with the extrapolated regions is invalid, a
 red warning will appear at the top of the *Invariant* panel. Strictly
@@ -379,4 +376,4 @@ References
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. note::  This help document was last changed (completely re-written) by Paul
-    Butler and Steve King, March-June 2020
+    Butler and Steve King, March-July 2020
