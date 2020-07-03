@@ -1,9 +1,7 @@
 # global
-import sys
-import os
 import logging
 import copy
-import webbrowser
+import  numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
@@ -15,8 +13,6 @@ from twisted.internet import reactor
 from sas.sascalc.invariant import invariant
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-# import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # local
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
@@ -415,6 +411,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
                                    surface_error)
+
+        qstar_total += qstar_low + qstar_high
+        qstar_total_error = np.sqrt(
+            qstar_total_error * qstar_total_error
+            + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
