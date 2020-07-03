@@ -60,13 +60,14 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
 
         # invariant total
         self.qstar_total = None
+        self.qdata = None
         self.qhigh = None
         self.qlow = None
         self._model = None
 
         self.progress_low_qstar = 0.0
         self.progress_high_qstar = 0.0
-        self.progress_qstar = 100.0
+        self.progress_data_qstar = 100.0
 
     def setModel(self, model):
         """ """
@@ -77,13 +78,20 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         # Pull out data from the model
         self.qstar_total = float(self._model.item(WIDGETS.W_INVARIANT).text())
 
-        self.txtQData.setText(str(self.qstar_total))
-        self.txtQDataErr.setText(self._model.item(WIDGETS.W_INVARIANT_ERR).text())
-
         # Reset progress counters
         self.progress_low_qstar = 0.0
         self.progress_high_qstar = 0.0
-        self.progress_qstar = 100.0
+        self.progress_data_qstar = 100.0
+
+        # Q* from data
+        self.qdata = float(self._model.item(WIDGETS.D_DATA_QSTAR).text())
+
+        self.txtQData.setText(str(self.qdata))
+        self.txtQDataErr.setText(self._model.item(WIDGETS.D_DATA_QSTAR_ERR).text())
+        try:
+            self.progress_data_qstar = (self.qdata/self.qstar_total)*100.0
+        except:
+            self.progress_data_qstar = 'error'
 
         # Low-Q
         if self._model.item(WIDGETS.W_ENABLE_LOWQ).text() == "true":
@@ -107,11 +115,6 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             except:
                 self.progress_high_qstar = 'error'
 
-        try:
-            self.progress_qstar -= self.progress_low_qstar + self.progress_high_qstar
-        except:
-            self.progress_qstar = 'error'
-
         # check values and display warning
         if self.checkValues():
             self.lblWarning.setText(self.checkValues())
@@ -127,10 +130,10 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         else:
             self.progressBarHighQ.setValue(self.progress_high_qstar)
 
-        if self.progress_qstar == 'error':
+        if self.progress_data_qstar == 'error':
             self.progressBarData.setValue(0)
         else:
-            self.progressBarData.setValue(self.progress_qstar)
+            self.progressBarData.setValue(self.progress_data_qstar)
 
         self.show()
 
@@ -149,10 +152,10 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             return warning_msg
 
         msg = ''
-        if self.progress_qstar == 'error':
+        if self.progress_data_qstar == 'error':
             msg += 'Error occurred when computing invariant from data.\n '
         try:
-            if float(self.progress_qstar) > 100:
+            if float(self.progress_data_qstar) > 100:
                 msg += "Invariant Q contribution is greater than 100% .\n"
         except ValueError:
             # Text message, skip msg update
@@ -202,4 +205,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             msg += "The sum of all extrapolated contributions is higher " \
                    "than 5% of the invariant.\n"
 
+        if msg == '':
+            msg = "No Warnings to report\n"
+        
         return msg

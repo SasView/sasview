@@ -251,6 +251,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.updateFromModel()
         msg = ''
 
+        qstar_data = 0.0
+        qstar_data_err = 0.0
         qstar_low = 0.0
         qstar_low_err = 0.0
         qstar_high = 0.0
@@ -287,7 +289,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         calculation_failed = False
 
         try:
-            qstar_total, qstar_total_error = inv.get_qstar_with_error()
+            qstar_data, qstar_data_err = inv.get_qstar_with_error()
         except Exception as ex:
             msg += str(ex)
             calculation_failed = True
@@ -412,13 +414,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
                                    surface_error)
 
-        qstar_total += qstar_low + qstar_high
+        qstar_total = qstar_data + qstar_low + qstar_high
         qstar_total_error = np.sqrt(
-            qstar_total_error * qstar_total_error
+            qstar_data_err * qstar_total_error
             + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
