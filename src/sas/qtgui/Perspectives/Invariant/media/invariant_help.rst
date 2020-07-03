@@ -20,7 +20,7 @@ For any multi-phase system, i.e. any system that contains regions with
 different scattering length densities (SLD), the integral over all $\vec{q}$
 of the appropriately dimensionally-weighted scattering cross-section (ie,
 'intensity', $I(\vec{q})$ in absolute units) is a *constant* directly
-proportional to the mean-square average fluctuation (SLD) and the phase
+proportional to the mean-square average fluctuation in SLD and the phase
 composition. Usefully, this value is *independent* of the sizes, shapes, or
 interactions, or, more generally, the arrangement, of the phase
 domains (i.e. it is **invariant**) *provided the system is incompressible*
@@ -175,12 +175,6 @@ two phases given the contrast or, calculate the contrast given the volume
 fraction. However, the current implementation in SasView only allows for the
 former: extracting the volume fraction given a known contrast factor.
 
-.. warning:: **The user must provide the correct SLD contrast** for the data
-    they are analysing in the *Options* tab of the Invariant window **and then**
-    click on *Compute* before examining/using any displayed value of the
-    invariant or volume fraction. **The default contrast has been deliberately
-    set to the unlikley-to-be-realistic value of 8e-06** |Ang^-2|\ . 
-
 Volume Fraction
 ^^^^^^^^^^^^^^^
 In some cases, especially in non-particulate systems for which no good
@@ -319,15 +313,24 @@ the dataset into the *Invariant* panel. Or select *Invariant* from the
 
 .. image:: image_invariant_load_data.png
 
-A first estimate of $Q^*$ should be computed automatically. If not, click on
-the *Compute* button.
+A first estimate of $Q^*$ should be computed automatically but should be
+ignored as it will be incorect until the proper contrast term is specified.
 
-Use the boxes on the *Options* tab to subtract
-any background, specify the contrast (i.e. difference in SLDs: note this
-must be specified for the eventual value of $Q^*$ to be on an absolute scale
-and to therefore have any meaning), or to rescale the data.
+Use the box on the *Options* tab to specify the contrast term(i.e. difference
+in SLDs). Note this must be specified for the eventual value of $Q^*$ to be on
+an absolute scale and to therefore have any meaning).
 
-(Optional) If known, a value for $C_p$ can also be specified.
+.. warning:: **The user must provide the correct SLD contrast** for the data
+    they are analysing in the *Options* tab of the Invariant window **and then**
+    click on *Compute* before examining/using any displayed value of the
+    invariant or volume fraction. **The default contrast has been deliberately
+    set to the unlikley-to-be-realistic value of 8e-06** |Ang^-2|\ . 
+
+Optional: Also in this tab a background term to subtract from the data can be
+specified (if the data is not already properly background subtracted), the data
+can be rescaled if necessary (e.g. to be on an absolute scale) and a value for 
+$C_p$ can be specified (required if the specific surface area $S_v$ is desired).
+
 
 .. image:: image_invariant_option_tab.png
 
