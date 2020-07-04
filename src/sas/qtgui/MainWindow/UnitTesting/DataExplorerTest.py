@@ -31,31 +31,51 @@ from sas.sasview import __version__ as SASVIEW_VERSION
 if not QApplication.instance():
     app = QApplication(sys.argv)
 
+
+class MyPerspective(object):
+    def __init__(self):
+        self.name = "Dummy Perspective"
+
+    def communicator(self):
+        return Communicate()
+
+    def allowBatch(self):
+        return True
+
+    def allowSwap(self):
+        return True
+
+    def setData(self, data_item=None, is_batch=False):
+        return None
+
+    def swapData(self, data_item=None, is_batch=False):
+        return None
+
+    def title(self):
+        return self.name
+
+
+class dummy_manager(object):
+    def __init__(self):
+        self._perspective = MyPerspective()
+
+    def communicator(self):
+        return Communicate()
+
+    def perspective(self):
+        return self._perspective
+
+    def workspace(self):
+        return None
+
+    class _parent(object):
+        screen_width = 1024
+        screen_height = 768
+
 class DataExplorerTest(unittest.TestCase):
     '''Test the Data Explorer GUI'''
     def setUp(self):
         '''Create the GUI'''
-        class MyPerspective(object):
-            def communicator(self):
-                return Communicate()
-            def allowBatch(self):
-                return True
-            def setData(self, data_item=None, is_batch=False):
-                return None
-            def title(self):
-                return "Dummy Perspective"
-
-        class dummy_manager(object):
-            def communicator(self):
-                return Communicate()
-            def perspective(self):
-                return MyPerspective()
-            def workspace(self):
-                return None
-            class _parent(object):
-                screen_width = 1024
-                screen_height = 768
-
         self.form = DataExplorerWindow(None, dummy_manager())
 
     def tearDown(self):
@@ -79,6 +99,8 @@ class DataExplorerTest(unittest.TestCase):
         self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
         self.assertEqual(self.form.chkBatch.text(), "Batch mode")
         self.assertFalse(self.form.chkBatch.isChecked())
+        self.assertEqual(self.form.chkSwap.text(), "Swap data")
+        self.assertFalse(self.form.chkSwap.isChecked())
 
         # Buttons - theory tab
 
@@ -276,12 +298,12 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
 
-    def notestSendToButton(self):
+    def testSendToButton(self):
         """
         Test that clicking the Send To button sends checked data to a perspective
         """
         # Send empty data
-        mocked_perspective = self.form.parent.perspective()
+        mocked_perspective = self.form._perspective()
         mocked_perspective.setData = MagicMock()
 
         # Click on the Send To  button
@@ -289,7 +311,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # The set_data method not called
         self.assertFalse(mocked_perspective.setData.called)
-               
+
         # Populate the model
         filename = ["cyl_400_20.txt"]
         self.form.readData(filename)
@@ -297,8 +319,7 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # setData is the method we want to see called
-        mocked_perspective = self.form.parent.perspective()
-        mocked_perspective.setData = MagicMock(filename)
+        mocked_perspective.swapData = MagicMock()
 
         # Assure the checkbox is on
         self.form.cbSelect.setCurrentIndex(0)
@@ -308,21 +329,52 @@ class DataExplorerTest(unittest.TestCase):
 
         QApplication.processEvents()
 
-        # Test the set_data method called once
+        # Test the set_data method called
         self.assertTrue(mocked_perspective.setData.called)
+        self.assertFalse(mocked_perspective.swapData.called)
+
+        # Now select the swap data checkbox
+        self.form.chkSwap.setChecked(True)
+
+        # Click on the Send To  button
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
+
+        QApplication.processEvents()
+
+        # Now the swap data method should be called
+        self.assertTrue(mocked_perspective.setData.called_once)
+        self.assertTrue(mocked_perspective.swapData.called)
+
+        # Test the exception block
+        QMessageBox.exec_ = MagicMock()
+        QMessageBox.setText = MagicMock()
+        mocked_perspective.swapData = MagicMock(side_effect = Exception("foo"))
+
+        # Click on the button to so the mocked swapData method raises an exception
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
+
+        # Assure the message box popped up
+        QMessageBox.exec_.assert_called_once()
+        # With the right message
+        QMessageBox.setText.assert_called_with("foo")
 
         # open another file
         filename = ["cyl_400_20.txt"]
         self.form.readData(filename)
 
-        # Mock the warning message
-        QMessageBox = MagicMock()
+        # Mock the warning message and the swapData method
+        QMessageBox.exec_ = MagicMock()
+        QMessageBox.setText = MagicMock()
+        mocked_perspective.swapData = MagicMock()
 
-        # Click on the button
+        # Click on the button to swap both datasets to the perspective
         QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
 
         # Assure the message box popped up
-        QMessageBox.assert_called_once()
+        QMessageBox.exec_.assert_called_once()
+        # With the right message
+        QMessageBox.setText.assert_called_with(
+            "Dummy Perspective does not allow replacing multiple data.")
 
     def testDataSelection(self):
         """

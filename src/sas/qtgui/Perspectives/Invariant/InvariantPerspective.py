@@ -38,6 +38,7 @@ DEFAULT_POWER_LOW = 4
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
+
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -350,7 +351,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 msg += str(ex)
                 logging.warning('High-q calculation failed: {}'.format(msg))
 
-
         if self._low_extrapolate and low_calculation_pass:
             extrapolated_data = inv.get_extra_data_low(self._low_points)
             power_low = inv.get_extrapolation_power(range='low')
@@ -375,9 +375,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             # Add the plot to the model item
             # This needs to run in the main thread
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                                       self._model_item,
-                                       extrapolated_data,
-                                       title)
+                                   self._model_item,
+                                   extrapolated_data,
+                                   title)
 
         if self._high_extrapolate and high_calculation_pass:
             # for presentation in InvariantDetails
@@ -407,14 +407,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             # Add the plot to the model item
             # This needs to run in the main thread
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                                       self._model_item, high_out_data, title)
+                                   self._model_item, high_out_data, title)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
         if surface:
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
-                                                    surface_error)
+                                   surface_error)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
@@ -423,7 +423,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
         return self.model
-
 
     def updateModelFromThread(self, widget, value):
         """
@@ -654,8 +653,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.rbFixLowQ.setEnabled(clicked)  # and not self._low_guinier)
 
         self.txtPowerLowQ.setEnabled(clicked
-                                    and not self._low_guinier
-                                    and not self._low_fit)
+                                     and not self._low_guinier
+                                     and not self._low_fit)
 
     def setupModel(self):
         """ """
@@ -746,7 +745,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.mapper.addMapping(self.txtNptsHighQ, WIDGETS.W_NPTS_HIGHQ)
         self.mapper.addMapping(self.rbFitHighQ, WIDGETS.W_HIGHQ_FIT)
         self.mapper.addMapping(self.txtPowerHighQ, WIDGETS.W_HIGHQ_POWER_VALUE)
-    
+
         # Output
         self.mapper.addMapping(self.txtVolFract, WIDGETS.W_VOLUME_FRACTION)
         self.mapper.addMapping(self.txtVolFractErr, WIDGETS.W_VOLUME_FRACTION_ERR)
@@ -822,5 +821,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     def allowBatch(self):
         """
         Tell the caller that we don't accept multiple data instances
+        """
+        return False
+
+    def allowSwap(self):
+        """
+        Tell the caller that we can't swap data
         """
         return False

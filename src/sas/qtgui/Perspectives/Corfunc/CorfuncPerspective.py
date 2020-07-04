@@ -455,6 +455,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         """
         return False
 
+    @staticmethod
+    def allowSwap():
+        """
+        We cannot swap data with corfunc analysis at this time.
+        """
+        return False
+
     def setData(self, data_item, is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D

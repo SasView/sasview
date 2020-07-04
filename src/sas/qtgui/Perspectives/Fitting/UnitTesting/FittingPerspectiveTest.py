@@ -143,6 +143,49 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Check for 4 tabs
         self.assertEqual(len(self.widget.tabs), 4)
 
+    def testSwapData(self):
+        '''Assure that data swapping is correct'''
+
+        # Mock the datafromitem() call from FittingWidget
+        data1 = Data1D(x=[3,4], y=[3,4])
+        GuiUtils.dataFromItem = MagicMock(return_value=data1)
+
+        # Add a new tab
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item])
+
+        # Create a new dataset and mock the datafromitemcall()
+        data2 = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data2)
+
+        # Swap the data
+        self.widget.swapData(item)
+
+        # Check that data has been swapped
+        self.assertEqual(self.widget.tabs[0].data, data2)
+
+        # We should only have one tab
+        self.assertEqual(len(self.widget.tabs), 1)
+
+        # send something stupid as data
+        item = "foo"
+
+        # It should raise an AttributeError
+        self.assertRaises(AttributeError, self.widget.swapData, item)
+
+        # Create a batch tab
+        item = QtGui.QStandardItem("test")
+        self.widget.addFit(None, is_batch=True)
+
+        # It should raise an exception
+        self.assertRaises(RuntimeError, self.widget.swapData, item)
+
+        # Create a non valid tab
+        self.widget.addConstraintTab()
+
+        # It should raise a TypeError
+        self.assertRaises(TypeError, self.widget.swapData, item)
+
     def testSetBatchData(self):
         ''' Assure that setting batch data is correct'''
 
