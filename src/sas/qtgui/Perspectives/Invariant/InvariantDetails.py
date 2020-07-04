@@ -83,6 +83,15 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.progress_high_qstar = 0.0
         self.progress_data_qstar = 100.0
 
+        # Reset numerical values
+        self.txtQData.setText(None)
+        self.txtQDataErr.setText(None)
+        self.txtQLowQ.setText(None)
+        self.txtQLowQErr.setText(None)
+        self.txtQHighQ.setText(None)
+        self.txtQHighQErr.setText(None)
+
+
         # Q* from data
         self.qdata = float(self._model.item(WIDGETS.D_DATA_QSTAR).text())
 

@@ -6,6 +6,7 @@
 #See the license text in license.txt
 #copyright 2010, University of Tennessee
 ######################################################################
+from numpy import pi
 
 """
 This module implements invariant and its related computations.
@@ -544,8 +545,7 @@ class InvariantCalculator(object):
             # None instead
             if data.dy is None:
                 return None
-            else:
-                dy = data.dy
+            dy = data.dy
             # Take care of smeared data
             if self._smeared is None:
                 gx = data.x * data.x
@@ -966,11 +966,11 @@ class InvariantCalculator(object):
         However we include the uncertainty computation for future use if and
         when these values get an uncertainty. This is given as:
 
-            ds/s = sqrt[(dcp/cp)**2 + 2* (dcontrast/contrast)**2]
-
+            ds = sqrt[(s'_cp)**2 * dcp**2 + (s'_contrast)**2 * dcontrast**2]
+            where s'_x is the partial derivative of S with respect to x 
         which gives (this should be checked before using in anger)
-            ds = sqrt((dporod_const)**2 + 2 * (porod_const *
-                          dcontrast / contrast)**2) / (2 * pi * contrast**2)
+            ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
+                          dcontrast)**2) / (4 * pi**2 * contrast**6))
         We also assume some users will never enter a value for uncertainty so
         allow for None even when it is an option.
 
@@ -986,25 +986,27 @@ class InvariantCalculator(object):
         # them to 0
         dcontrast = None
         dporod_const = None
-        # If and when dporod_const exists remember it likely needs unit
-        # conversion from cm^-1 A^-4 to A^-5.
-        if dcontrast == None:
-            _dcontrast = 0
-        else:
-            _dcontrast = dcontrast
-        if dporod_const == None:
-            _dporod_const = 0
-        else:
-            _dporod_const = dporod_const * 1e-8
-        _porod_const = porod_const *1e-8
+        # IMPORTATN: the porod constant (and eventually its uncertainty) are
+        # given in units of cm^-1 A^-4.  We need to be mindfult of units when
+        # writing equations. Thus for computing ds both the porod constant and
+        # its uncertainty need to be converted to A^-5 so they play well with
+        # the contrast which is in A-2.
+        # Note that the porod constant is converted in self.get_surface method
+        #so do NOT convert before calling here
         s = self.get_surface(contrast=contrast, porod_const=porod_const)
-        # Until contrast and are provided the return nothing.
+        # Until uncertainties in contrast and the Porod Constant are provided
+        # just return nothing.
         ds = None
         # When they are available, use the following:
         # if dporod_const is None:
-        #    dporod_const = 0.
+        #     _dporod_const = 0.
+        # else:
+        #     _dporod_const = dporod_const * 1e-8 
         # if dcontrast is None:
-        #   dcontrast = 0.
-        # ds = math.sqrt(dporod_const**2 + 2 * (porod_const * dcontrast / constrast**2)
+        #    dcontrast = 0.
+        # For this new computation we DO need to convert the units
+        # _porod_const = porod_const * 1e-8
+        #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const * 
+        #                 dcontrast)**2 / (4 * pi**2 * constrast**6))
         #               / (2 * math,.pi * contrast**2) * 1e-8
         return s, ds

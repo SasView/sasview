@@ -329,8 +329,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.cmdStatus.setEnabled(False)
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
-        else:
-            self.cmdStatus.setEnabled(True)
+        self.cmdStatus.setEnabled(True)
 
         low_calculation_pass = True
         high_calculation_pass = True
@@ -416,7 +415,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         qstar_total = qstar_data + qstar_low + qstar_high
         qstar_total_error = np.sqrt(
-            qstar_data_err * qstar_total_error
+            qstar_data_err * qstar_data_err
             + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
