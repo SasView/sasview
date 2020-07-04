@@ -224,19 +224,19 @@ if __name__ == "__main__":
     update_sasview_init(sasview_version, new_doi)
     update_sasmodels_init(sasmodels_version)
 
-    # year = datetime.datetime.now().year
-    # license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
-    # license_file = os.path.join('sasview', 'LICENSE.txt')
-    # update_license(license_file, license_line, 0)
-    # license_file = os.path.join('sasmodels', 'LICENSE.txt')
-    # update_license(license_file, license_line, 0)
-    # license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
-    # license_file = os.path.join('sasview', 'installers', 'license.txt')
-    # update_license(license_file, license_line, -1)
+    year = datetime.datetime.now().year
+    license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
+    license_file = os.path.join('sasview', 'LICENSE.txt')
+    update_license(license_file, license_line, 0)
+    license_file = os.path.join('sasmodels', 'LICENSE.txt')
+    update_license(license_file, license_line, 0)
+    license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
+    license_file = os.path.join('sasview', 'installers', 'license.txt')
+    update_license(license_file, license_line, -1)
 
     sasview_issues_list = ['1414','1550', '1556', '1534', '1546', '1552', '1564', '1565', '1560', '1567',
                            '1547', '1456','1553', '1538', '1554', '1523', '1536', '1522', '1548', '1529',
-                           '1543', '1599', '1535', '1598']
+                           '1543', '1599', '1535', '1598', '1606']
     sasmodels_issues_list = ['402', '401']
 
     username = args.username
