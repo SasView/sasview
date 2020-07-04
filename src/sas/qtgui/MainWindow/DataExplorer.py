@@ -747,14 +747,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if len(selected_items) < 1:
             return
-
-        # Which perspective has been selected?
-        if len(selected_items) > 1 and not self._perspective().allowBatch():
-            if hasattr(self._perspective(), 'title'):
-                title = self._perspective().title()
+        #Check that you have only one box item checked when swaping data
+        if len(selected_items) > 1 and (self.chkSwap.isChecked() or not self._perspective().allowBatch()):
+            if hasattr(self._perspective(), 'name'):
+                title = self._perspective().name
             else:
                 title = self._perspective().windowTitle()
-            msg = title + " does not allow multiple data."
+            msg = title + " does not allow replacing multiple data."
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
@@ -764,7 +763,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Notify the GuiManager about the send request
         try:
-            self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+            if self.chkSwap.isChecked():
+                self._perspective().swapData(selected_items[0])
+            else:
+                self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
             logging.error(msg)
@@ -968,6 +970,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
+        # Deactivate and uncheck the swap data option if the current perspective does not allow it
+        self.chkSwap.setEnabled(self.parent.perspective().allowSwap())
+        if not self.parent.perspective().allowSwap():
+            self.chkSwap.setCheckState(False)
 
     def itemFromFilename(self, filename):
         """
