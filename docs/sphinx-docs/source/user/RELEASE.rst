@@ -10,6 +10,47 @@ Release Notes
 
 Features
 ========
+
+New in Version 5.0.2
+--------------------
+This is a point release which fixes several issues mostly related to polydispersity
+and invariant perspective.
+
+New features/improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^
+sasview #1552, Enable mpl toolbar
+sasview #1564, Enhancements to Report Results
+sasview #1565, (ESS_GUI) Report dialog enhancements
+
+Bug fixes
+^^^^^^^^^
+Fixes sasview #1414, No pan function in plot windows in 5.0.1
+Fixes sasview #1550, Ess gui 1522 poly check
+Fixes sasview #1556, Fixed the edge cases and added a beefy unit test. #1546
+Fixes sasview #1534, ESS_GUI: Something strange with 5.x and the .sasview folder
+Fixes sasview #1546, Plotting an already plotted dataset causes the new plot to only show model
+Fixes sasview #1560, set the sasmodels dll cache directory in sasview startup
+Fixes sasview #1567, Ess gui 1554 slicer
+Fixes sasview #1547, Resolution is incorrectly handled in 5.x
+Fixes sasview #1456, 5.0.1 constraints between FitPages stop working
+Fixes sasview #1553, Ess gui 1547 smearing
+Fixes sasview #1538, Constrained fitting doesn't work when setting min/max for polydispersity
+Fixes sasview #1554, ESS_GUI: annulus slicer not opening
+Fixes sasview #1523, Plot legend visibility toggle needs to be restored
+Fixes sasview #1536, ESS GUI: Paste Params not activated until Copy Params has been used
+Fixes sasview #1522, Incorrect behavior of "fittable" checkbox in polydispersity tab
+Fixes sasview #1548, Sasview 5.0.2 "file converter" tool does not open
+Fixes sasview #1529, ESS GUI Corfunc: Input area is not scrollable in Corfunc Perspective in 5.0.2
+Fixes sasview #1543, SasView application window needs to be scrollable
+Fixes sasview #1599, ESS_GUI: fix data test
+Fixes sasview #1535, ESS_GUI: Existing common parameters not preserved between models in 5.x
+Fixes sasview #1598, ESS_GUI: allow data replacement on a fit page
+Fixes sasview #1606, Invariant does not report the total invariant
+Fixes sasmodels #402, sasview 1534: use source hash as part of dll name to avoid collisions
+Fixes sasmodels #401, warn if ER() is ignored
+Fixes sasmodels #404, delay the inevitable a little longer and reenable python 2.7 support
+Fixes sasmodels #414, sasview saying unknown distribution option 'test_requires'
+
 New in Version 5.0.2
 --------------------
 This is a point release which fixes several issues reported in version 5.0.1, however
