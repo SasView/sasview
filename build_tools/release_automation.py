@@ -9,7 +9,6 @@ import os
 #DO NOT STORE KEY ON GITHUB
 #TEST settings for Sandbox
 zenodo_url = "https://zenodo.org"
-zenodo_api_key = ""
 
 #Record metadata
 #Should import release notes from git repo, for now will need to cut and paste
@@ -76,7 +75,7 @@ sasview_data = {
     }
 }
 
-def generate_zenodo(sasview_data):
+def generate_zenodo(sasview_data, zenodo_api_key):
     """
     Generating zenodo record
     :return:
@@ -196,15 +195,15 @@ if __name__ == "__main__":
 
     sasview_version = args.sasview_version
     sasmodels_version = args.sasmodels_version
+    zenodo_api_key = args.zenodo
     sasview_data['metadata']['title'] = 'SasView version '+ sasview_version
     sasview_data['metadata']['description'] = sasview_version + ' release'
     sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
         'https://github.com/SasView/sasview/releases/tag/v' + sasview_version
 
-    #new_doi = generate_zenodo(sasview_data)
-    #update_sasview_init(sasview_version, new_doi)
-    #update_sasmodels_init(sasmodels_version)
-    #update_sasmodels_license()
+    new_doi = generate_zenodo(sasview_data, zenodo_api_key)
+    update_sasview_init(sasview_version, new_doi)
+    update_sasmodels_init(sasmodels_version)
 
     year = datetime.datetime.now().year
     license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
