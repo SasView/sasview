@@ -1,14 +1,12 @@
 .. invariant_help.rst
 
+.. 4.x version
+
 .. This help file was ported from the original HTML to ReSTructured text by
 .. S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was subsequently
 .. updated in January 2020 following the realisation that there were issues
 .. with both the text below and the underlying calculation. See SasView GitHub
 .. Issues #1434, #1461 and #1574.
-
-.. set up some substitutions
-.. |Ang^-1| replace:: |Ang|\ :sup:`-1`
-.. |Ang^-2| replace:: |Ang|\ :sup:`-2`
 
 Invariant Calculation
 =====================
@@ -175,12 +173,6 @@ two phases given the contrast or, calculate the contrast given the volume
 fraction. However, the current implementation in SasView only allows for the
 former: extracting the volume fraction given a known contrast factor.
 
-.. warning:: **The user must provide the correct SLD contrast** for the data
-    they are analysing in the *Options* tab of the Invariant window **and then**
-    click on *Compute* before examining/using any displayed value of the
-    invariant or volume fraction. **The default contrast has been deliberately
-    set to the unlikley-to-be-realistic value of 8e-06** |Ang^-2|\ . 
-
 Volume Fraction
 ^^^^^^^^^^^^^^^
 In some cases, especially in non-particulate systems for which no good
@@ -317,15 +309,29 @@ Select a dataset and use the *Send To* button on the *Data Explorer* to load
 the dataset into the *Invariant* panel. Or select *Invariant* from the
 *Analysis* category in the menu bar.
 
-A first estimate of $Q^*$ should be computed automatically. If not, click on
-the *Compute* button.
+.. image:: image_4x_invariant_load_data.png
 
-Use the *Customised Inputs* boxes on the *Invariant* panel to subtract
-any background, specify the contrast (i.e. difference in SLDs: note this
-must be specified for the eventual value of $Q^*$ to be on an absolute scale
-and to therefore have any meaning), or to rescale the data.
+A first estimate of $Q^*$ should be computed automatically but should be
+ignored as it will be incorect until the proper contrast term is specified.
 
-(Optional) If known, a value for $C_p$ can also be specified.
+Use the *Customised Inputs* box on the *Invariant* panel to specify the
+contrast term(i.e. difference in SLDs). Note this must be specified for
+the eventual value of $Q^*$ to be on an absolute scale and to therefore
+have any meaning).
+
+.. warning:: **The user must provide the correct SLD contrast** for the data
+    they are analysing in the *Customised Inputs* box **and then**
+    click on *Compute* before examining/using any displayed value of the
+    invariant or volume fraction. **The default contrast has been deliberately
+    set to the unlikley-to-be-realistic value of 8e-06** |Ang^-2|\ . 
+
+Optional: Other *Customised Inputs* boxes allow a background term to be
+subtracted from the data (if the data is not already properly background
+subtracted), to rescale the data if necessary (e.g. to be on an absolute
+scale), or to specify a value for $C_p$ (required if the specific surface
+area $S_v$ is desired).
+
+.. image:: image_4x_invariant_customized_inputs.png
 
 Adjust the extrapolation types as necessary by checking the relevant *Enable
 Extrapolate* check boxes. If power law extrapolations are chosen, the exponent
@@ -349,7 +355,7 @@ with caution.
 The details of the calculation are available by clicking the *Details*
 button in the middle of the panel.
 
-.. image:: image005.png
+.. image:: image_4x_invariant_details.png
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
