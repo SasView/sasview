@@ -300,7 +300,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
         try:
             volume_fraction, volume_fraction_error = \
-                inv.get_volume_fraction_with_error(self._contrast)
+                inv.get_volume_fraction_with_error(self._contrast,
+                                                   extrapolation=extrapolation)
         except Exception as ex:
             calculation_failed = True
             msg += str(ex)

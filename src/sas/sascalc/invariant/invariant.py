@@ -6,17 +6,17 @@
 #See the license text in license.txt
 #copyright 2010, University of Tennessee
 ######################################################################
-from __future__ import division
-from numpy import pi
-
 """
 This module implements invariant and its related computations.
 
 :author: Gervaise B. Alina/UTK
 :author: Mathieu Doucet/UTK
 :author: Jae Cho/UTK
+:author: Paul Butler/NIST/UD/UTK -- refactor in 2020
 
 """
+from __future__ import division
+
 import math
 import numpy as np
 
@@ -1007,6 +1007,6 @@ class InvariantCalculator(object):
         # For this new computation we DO need to convert the units
         # _porod_const = porod_const * 1e-8
         #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const * 
-        #                 dcontrast)**2 / (4 * pi**2 * constrast**6))
-        #               / (2 * math,.pi * contrast**2) * 1e-8
+        #                 dcontrast)**2 / (4 * math.pi**2 * constrast**6))
+   
         return s, ds
