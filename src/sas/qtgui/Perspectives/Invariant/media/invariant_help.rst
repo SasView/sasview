@@ -1,14 +1,12 @@
 .. invariant_help.rst
 
+.. 5.x version
+
 .. This help file was ported from the original HTML to ReSTructured text by
 .. S King, ISIS, during SasView CodeCamp-III in Feb 2015. It was subsequently
 .. updated in January 2020 following the realisation that there were issues
 .. with both the text below and the underlying calculation. See SasView GitHub
 .. Issues #1434, #1461 and #1574.
-
-.. set up some substitutions
-.. |Ang^-1| replace:: |Ang|\ :sup:`-1`
-.. |Ang^-2| replace:: |Ang|\ :sup:`-2`
 
 Invariant Calculation
 =====================
@@ -330,7 +328,6 @@ Optional: Also in this tab a background term to subtract from the data can be
 specified (if the data is not already properly background subtracted), the data
 can be rescaled if necessary (e.g. to be on an absolute scale) and a value for 
 $C_p$ can be specified (required if the specific surface area $S_v$ is desired).
-
 
 .. image:: image_invariant_option_tab.png
 
