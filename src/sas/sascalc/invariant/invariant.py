@@ -6,6 +6,7 @@
 #See the license text in license.txt
 #copyright 2010, University of Tennessee
 ######################################################################
+from __future__ import division
 from numpy import pi
 
 """
@@ -16,7 +17,6 @@ This module implements invariant and its related computations.
 :author: Jae Cho/UTK
 
 """
-from __future__ import division
 import math
 import numpy as np
 
