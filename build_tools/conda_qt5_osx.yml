@@ -94,7 +94,7 @@ dependencies:
  - pycrypto=2.6.1=py36_1
  - pygments=2.3.1=py_0
  - pyinstaller=3.3.1=py36_0
- - pyopencl=2018.1.1=py36h3e44d54_3
+ - pyopencl=2019.1.2
  - pyopenssl=19.0.0=py36_0
  - pyparsing=2.3.1=py_0
  - pyqt=5.6.0=py36_5
