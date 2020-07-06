@@ -1052,17 +1052,3 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msgbox.setWindowTitle("Fit Report")
         _ = msgbox.exec_()
         return
-
-    def showMessageBox(self, text, type, window_title):
-        """
-        Shows a message box with
-        """
-        if type == 0:
-            icon = QtWidgets.QMessageBox.Warning
-        else :
-            icon = QtWidgets.QMessageBox.Critical
-        msgbox = QtWidgets.QMessageBox(self)
-        msgbox.setIcon(icon)
-        msgbox.setText(text)
-        msgbox.setWindowTitle(window_title)
-        msgbox.exec_()
