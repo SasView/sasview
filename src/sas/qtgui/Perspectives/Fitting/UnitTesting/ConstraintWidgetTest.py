@@ -116,4 +116,11 @@ class ConstraintWidgetTest(unittest.TestCase):
         ''' see if the constraint table can be updated '''
         pass
 
-
+    def testFindNameErrorInConstraint(self):
+        ''' test if we get get a faulty constraint'''
+        constraint = "M1.scale = M2.scal + M2.background"
+        name_error = "M2"
+        expression = "P1.scale = M2.scal + M2.background"
+        name = self.widget.findNameErrorInConstraint(constraint, expression, name_error)
+        self.assertEqual("M2.scal", name)
+        
