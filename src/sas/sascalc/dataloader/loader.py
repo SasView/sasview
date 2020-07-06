@@ -73,9 +73,10 @@ class Registry(ExtensionRegistry):
                 return data_list
             if format:
                 logger.debug(
-                    f"No data returned from '{path}' for format {format}")
+                    "No data returned from '{0}' for format {1}".format(
+                        path, format))
             else:
-                logger.debug(f"No data returned from '{path}'")
+                logger.debug("No data returned from '{0}'".format(path))
         except Exception as e:
             logger.debug(traceback.print_exc())
             if not use_defaults:
@@ -86,7 +87,7 @@ class Registry(ExtensionRegistry):
         except (NoKnownLoaderException, DefaultReaderException) as e:
             logger.debug(traceback.print_exc())
             # No known reader available. Give up and throw an error
-            msg = str(e)
+            msg = e.message
             msg += "\nUnknown data format: {}.\nThe file is not a ".format(
                 path)
             msg += "known format that can be loaded by SasView.\n"

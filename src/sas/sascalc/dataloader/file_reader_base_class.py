@@ -83,16 +83,16 @@ class FileReader(object):
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
                 except DataReaderException as e:
-                    self.handle_error_message(str(e))
+                    self.handle_error_message(e.message)
                 except FileContentsException as e:
                     raise
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
-                    msg += str(e)
+                    msg += e.message
                     self.handle_error_message(msg)
                 except Exception as e:
-                    self.handle_error_message(str(e))
+                    self.handle_error_message(e.message)
                 finally:
                     # Close the file handle if it is open
                     if not self.f_open.closed:
