@@ -359,7 +359,7 @@ def run_bumps(problem, handler, curr_thread):
     except Exception as exc:
         best, fbest = None, np.NaN
         exc_type, exc_value, exc_tb = sys.exc_info()
-        errors = [type(exc), traceback.format_exception(exc_type, exc_value, exc_tb)]
+        errors = [exc, traceback.format_exception(exc_type, exc_value, exc_tb)]
         stack_trace = exc_tb
     finally:
         mapper.stop_mapper(fitdriver.mapper)

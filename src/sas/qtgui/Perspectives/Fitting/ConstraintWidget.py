@@ -496,9 +496,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if not result[0][0][0].success:
             msg = result[0][0][0].mesg
             # if the exception is a NameError, warn the user of which constraint is faulty
-            if msg[0] == NameError:
+            if type(msg[0]) == NameError:
                 # get the exception in the traceback
+                name = str(msg).split("'")[1]
                 trace = result[0][0][0].trace
+                # Hop to the last trace to find the orginal exception
                 while True:
                     if trace.tb_next == None:
                         break
@@ -508,14 +510,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 lineno = trace.tb_lineno
                 # get the code that assigns the constraints
                 constraint_code = trace.tb_frame.f_code.co_filename.split('\n')
-                # get the incriminated constraint from the code
+                # get the incriminated constraint from the code (see expression.py for details)
                 line = lineno - 2 - (len(constraint_code)-6)/2
                 faulty_constraint = constraint_code[int(line)]
                 constraint_no = self.findConstraintInTable(faulty_constraint)
-                # warn the user of which constraint is failing
-                error_text = 'Fit failed because constraint %s in inconsistent:\n%s'%(
+                name_error = self.findNameErrorInConstraint(self.tblConstraints.item(constraint_no, 0).text(),
+                                                            faulty_constraint,
+                                                            name)
+                # warn the user of which constraint is failing and highlight the error
+                error_text = 'Fit failed because constraint <b>%s</b> is inconsistent:<br>%s'%(
                     constraint_no + 1,
-                    self.tblConstraints.item(constraint_no, 0).text())
+                    self.tblConstraints.item(constraint_no, 0).text().replace(name_error, "<b>"+name_error+"</b>"))
             else:
                 error_text = 'Fit failed'
             QtWidgets.QMessageBox.warning(self,
@@ -611,6 +616,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             constraint_name = self.tblConstraints.item(row,0).text().replace(":", ".")
             if constraint_name.replace(" ", "") == constraint.replace(" ", ""):
                 return row
+        return None
+
+    def findNameErrorInConstraint(self, constraint, expression, name_error):
+        """
+        Finds the unconsistent name in a constraint
+        Takes a faulty constraint, the translated constraint (by expression.py), and the NameError symbol as arguments
+        """
+        for name in constraint.split():
+            if name in expression and name_error in name:
+                return name
         return None
 
     def isTabImportable(self, tab):
