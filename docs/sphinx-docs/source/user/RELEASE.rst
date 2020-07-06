@@ -46,6 +46,7 @@ Fixes sasview #1599, ESS_GUI: fix data test
 Fixes sasview #1535, ESS_GUI: Existing common parameters not preserved between models in 5.x
 Fixes sasview #1598, ESS_GUI: allow data replacement on a fit page
 Fixes sasview #1606, Invariant does not report the total invariant
+Fixes sasmodels #365, OpenCL errors on macbook pro 2017
 Fixes sasmodels #402, sasview 1534: use source hash as part of dll name to avoid collisions
 Fixes sasmodels #401, warn if ER() is ignored
 Fixes sasmodels #404, delay the inevitable a little longer and reenable python 2.7 support
