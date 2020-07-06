@@ -11,7 +11,7 @@ Release Notes
 Features
 ========
 
-New in Version 5.0.2
+New in Version 5.0.3
 --------------------
 This is a point release which fixes several issues mostly related to polydispersity
 and invariant perspective.
