@@ -495,8 +495,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Warn the user if fitting has been unsuccessfull
         if not result[0][0][0].success:
             msg = result[0][0][0].mesg
-            msgbox = QtWidgets.QMessageBox(self)
-            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             # if the exception is a NameError, warn the user of which constraint is faulty
             if msg[0] == NameError:
                 # get the exception in the traceback
@@ -518,10 +516,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 error_text = 'Fit failed because constraint %s in inconsistent:\n%s'%(
                     constraint_no + 1,
                     self.tblConstraints.item(constraint_no, 0).text())
-                msgbox.setText(error_text)
-            else :
-                msgbox.setText("Fit failed")
-            _ = msgbox.exec_()
+            else:
+                error_text = 'Fit failed'
+            QtWidgets.QMessageBox.warning(self,
+                                          'Warning',
+                                          error_text,
+                                          QtWidgets.QMessageBox.Ok)
+            self.parent.communicate.statusBarUpdateSignal.emit("Fit failed")
             return
 
         # get the elapsed time
@@ -1051,3 +1052,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msgbox.setWindowTitle("Fit Report")
         _ = msgbox.exec_()
         return
+
+    def showMessageBox(self, text, type, window_title):
+        """
+        Shows a message box with
+        """
+        if type == 0:
+            icon = QtWidgets.QMessageBox.Warning
+        else :
+            icon = QtWidgets.QMessageBox.Critical
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setIcon(icon)
+        msgbox.setText(text)
+        msgbox.setWindowTitle(window_title)
+        msgbox.exec_()
