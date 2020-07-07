@@ -5,7 +5,6 @@ import time
 import os
 import logging
 
-#from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
 
 # Version of the application
@@ -46,8 +45,8 @@ developed under NSF award DMR-0520547.
 '''
 _acknowledgement =  \
 '''This work originally developed as part of the DANSE project funded by the NSF
-under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS,
-ILL, ANSTO and BAM.
+under grant DMR-0520547, and currently maintained by UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, 
+TUD, BAM and ANSTO.
 
 '''
 _homepage = "http://www.sasview.org"
@@ -57,8 +56,6 @@ _paper = "http://sourceforge.net/p/sasview/tickets/"
 _license = "mailto:help@sasview.org"
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
-
-#logging.info("icon path: %s", icon_path)
 
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
@@ -88,7 +85,7 @@ _delft_url = "http://www.tudelft.nl/en/tnw/business/facilities/reactor-instituut
 _diamond_url = "http://www.diamond.ac.uk"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2020, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and BAM"
+_copyright = "Copyright (c) 2009-2020 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO"
 
 
 #edit the list of file state your plugin can read
