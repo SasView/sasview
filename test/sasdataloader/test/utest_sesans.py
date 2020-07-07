@@ -11,7 +11,7 @@ from sas.sascalc.dataloader.loader import  Loader
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'sesans_examples', filename)
 
 
 class sesans_reader(unittest.TestCase):
@@ -24,8 +24,7 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES in the full loader to make sure that the file type is correctly accepted
         """
-        file = Loader().load(find("sesans_examples" + os.sep +
-                                  "sphere2micron.ses"))
+        file = Loader().load(find("sphere2micron.ses"))
         f = file[0]
         # self.assertEqual(f, 5)
         self.assertEqual(len(file), 1)
@@ -44,7 +43,7 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES loading on a TOF dataset
         """
-        file = self.loader(find("sesans_examples" + os.sep + "sphere_isis.ses"))
+        file = self.loader(find("sphere_isis.ses"))
         f = file[0]
         self.assertEqual(len(file), 1)
         self.assertEqual(len(f.x), 57)
@@ -62,7 +61,7 @@ class sesans_reader(unittest.TestCase):
         self.assertRaises(
             FileContentsException,
             self.loader,
-            find("sesans_examples" + os.sep + "sesans_no_data.ses"))
+            find("sesans_no_data.ses"))
 
     def test_sesans_no_spin_echo_unit(self):
         """
@@ -71,7 +70,7 @@ class sesans_reader(unittest.TestCase):
         self.assertRaises(
             FileContentsException,
             self.loader,
-            find("sesans_examples" + os.sep + "no_spin_echo_unit.ses"))
+            find("no_spin_echo_unit.ses"))
 
     def test_sesans_future_version(self):
         """
@@ -80,7 +79,7 @@ class sesans_reader(unittest.TestCase):
         self.assertRaises(
             FileContentsException,
             self.loader,
-            find("sesans_examples" + os.sep + "next_gen.ses"))
+            find("next_gen.ses"))
 
     def test_sesans_mandatory_headers(self):
         """
@@ -89,7 +88,7 @@ class sesans_reader(unittest.TestCase):
         self.assertRaises(
             FileContentsException,
             self.loader,
-            find("sesans_examples" + os.sep + "no_wavelength.ses"))
+            find("no_wavelength.ses"))
 
     def test_sesans_columns_match_headers(self):
         """
@@ -98,7 +97,7 @@ class sesans_reader(unittest.TestCase):
         self.assertRaises(
             FileContentsException,
             self.loader,
-            find("sesans_examples" + os.sep + "too_many_headers.ses"))
+            find("too_many_headers.ses"))
 
 if __name__ == "__main__":
     unittest.main()

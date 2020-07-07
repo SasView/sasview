@@ -17,7 +17,7 @@ from sas.sascalc.pr.invertor import Invertor
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 class TestFiguresOfMerit(unittest.TestCase):
 
@@ -569,17 +569,17 @@ class TestErrorConditions(unittest.TestCase):
         out, cov = self.invertor.lstsq(10)
 
 
-
 def pr_theory(r, R):
     """
        P(r) for a sphere
     """
-    if r<=2*R:
-        return 12.0* ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * ( 2.0 + 0.5*r/R )
+    if r <= 2*R:
+        return 12.0 * ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * (2.0 + 0.5*r/R)
     else:
         return 0.0
 
-def load(path = "sphere_60_q0_2.txt"):
+
+def load(path = find("sphere_60_q0_2.txt")):
     import numpy as np
     import math
     import sys
@@ -610,6 +610,7 @@ def load(path = "sphere_60_q0_2.txt"):
                     pass
 
     return data_x, data_y, data_err 
-       
+
+
 if __name__ == '__main__':
     unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))

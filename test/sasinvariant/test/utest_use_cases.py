@@ -13,7 +13,7 @@ from sas.sascalc.invariant import invariant
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class Data1D:

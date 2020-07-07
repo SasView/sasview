@@ -15,7 +15,6 @@ from lxml import etree
 from lxml.etree import XMLSyntaxError
 from xml.dom import minidom
 
-import sas.sascalc.dataloader.readers.cansas_reader as cansas
 from sas.sascalc.dataloader.file_reader_base_class import decode
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
@@ -32,13 +31,15 @@ CANSAS_NS = CansasConstants.CANSAS_NS
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class cansas_reader_xml(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
+        self.cansas_reader = Reader()
+        self.xml_reader = XMLreader()
         self.xml_valid = find("cansas_test_modified.xml")
         self.xml_invalid = find("cansas_test.xml")
         self.cansas1d_badunits = find("cansas1d_badunits.xml")
@@ -89,9 +90,9 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertFalse(xmlschema.validate(invalid))
 
     def test_real_xml(self):
-        reader = XMLreader(self.xml_valid, self.schema_1_0)
-        valid = reader.validate_xml()
-        self.assertTrue(valid)
+        self.xml_reader.set_xml_file(self.xml_valid)
+        self.xml_reader.set_schema(self.schema_1_0)
+        self.assertTrue(self.xml_reader.validate_xml())
 
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
@@ -111,20 +112,18 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(len(spectrum.wavelength) == 138)
 
     def test_cansas_xml(self):
-        xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
-        valid = xmlreader.validate_xml()
-        xmlreader.set_processing_instructions()
-        self.assertTrue(valid)
-        reader_generic = Loader()
-        dataloader = reader_generic.load(self.isis_1_1)
-        reader_cansas = Reader()
-        cansasreader = reader_cansas.read(self.isis_1_1)
+        self.xml_reader.set_xml_file(self.isis_1_1)
+        self.xml_reader.set_schema(self.schema_1_1)
+        self.xml_reader.set_processing_instructions()
+        self.assertTrue(self.xml_reader.validate_xml())
+        dataloader = self.loader.load(self.isis_1_1)
+        cansasreader = self.cansas_reader.read(self.isis_1_1)
         for i in range(len(dataloader)):
             self._check_data(dataloader[i])
             self._check_data_1_1(dataloader[i])
             self._check_data(cansasreader[i])
             self._check_data_1_1(cansasreader[i])
-            reader_generic.save(self.write_1_1_filename, dataloader[i], None)
+            self.loader.save(self.write_1_1_filename, dataloader[i], None)
             reader2 = Loader()
             self.assertTrue(os.path.isfile(self.write_1_1_filename))
             return_data = reader2.load(self.write_1_1_filename)
@@ -134,10 +133,10 @@ class cansas_reader_xml(unittest.TestCase):
             os.remove(self.write_1_1_filename)
 
     def test_double_trans_spectra(self):
-        xmlreader = XMLreader(self.isis_1_1_doubletrans, self.schema_1_1)
-        self.assertTrue(xmlreader.validate_xml())
-        reader = Loader()
-        data = reader.load(self.isis_1_1_doubletrans)
+        self.xml_reader.set_xml_file(self.isis_1_1_doubletrans)
+        self.xml_reader.set_schema(self.schema_1_1)
+        self.assertTrue(self.xml_reader.validate_xml())
+        data = self.loader.load(self.isis_1_1_doubletrans)
         for item in data:
             self._check_data(item)
 
@@ -177,10 +176,10 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.detector[0].distance == 4150)
 
     def test_old_cansas_files(self):
-        reader1 = XMLreader(self.cansas1d, self.schema_1_0)
-        self.assertTrue(reader1.validate_xml())
-        file_loader = Loader()
-        file_loader.load(self.cansas1d)
+        self.xml_reader.set_xml_file(self.cansas1d)
+        self.xml_reader.set_schema(self.schema_1_0)
+        self.assertTrue(self.xml_reader.validate_xml())
+        self.loader.load(self.cansas1d)
         reader2 = XMLreader(self.cansas1d_units, self.schema_1_0)
         self.assertTrue(reader2.validate_xml())
         reader3 = XMLreader(self.cansas1d_badunits, self.schema_1_0)
@@ -191,14 +190,12 @@ class cansas_reader_xml(unittest.TestCase):
     def test_save_cansas_v1_0(self):
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
         self.assertTrue(xmlreader.validate_xml())
-        reader_generic = Loader()
-        dataloader = reader_generic.load(self.isis_1_0)
-        reader_cansas = Reader()
-        cansasreader = reader_cansas.read(self.isis_1_0)
+        dataloader = self.loader.load(self.isis_1_0)
+        cansasreader = self.cansas_reader.read(self.isis_1_0)
         for i in range(len(dataloader)):
             self._check_data(dataloader[i])
             self._check_data(cansasreader[i])
-            reader_generic.save(self.write_1_0_filename, dataloader[i], None)
+            self.loader.save(self.write_1_0_filename, dataloader[i], None)
             reader2 = Reader()
             self.assertTrue(os.path.isfile(self.write_1_0_filename))
             return_data = reader2.read(self.write_1_0_filename)
@@ -211,11 +208,11 @@ class cansas_reader_xml(unittest.TestCase):
             os.remove(self.write_1_0_filename)
 
     def test_processing_instructions(self):
-        reader = XMLreader(self.isis_1_1, self.schema_1_1)
-        valid = reader.validate_xml()
-        if valid:
+        self.xml_reader.set_xml_file(self.isis_1_1)
+        self.xml_reader.set_schema(self.schema_1_1)
+        if self.xml_reader.validate_xml():
             # find the processing instructions and make into a dictionary
-            dic = self.get_processing_instructions(reader)
+            dic = self.get_processing_instructions(self.xml_reader)
             self.assertEqual(dic, {'xml-stylesheet':
                                    'type="text/xsl" href="cansas1d.xsl" '})
 
@@ -250,23 +247,245 @@ class cansas_reader_xml(unittest.TestCase):
             pi = pi.getprevious()
         return dict
 
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = self.loader.load(find("cansas1d.xml"))
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0].meta_data['loader'], "CanSAS XML 1D")
+
+    def test_cansas_checkdata(self):
+        self.data_list = self.loader.load(find("cansas1d.xml"))
+        self.data = self.data_list[0]
+        self.assertEqual(self.data.filename, "cansas1d.xml")
+        self._checkdata()
+
+    def _checkdata(self):
+        """
+            Check the data content to see whether
+            it matches the specific file we loaded.
+            Check the units too to see whether the
+            Data1D defaults changed. Otherwise the
+            tests won't pass
+        """
+        self.assertEqual(len(self.data_list), 1)
+        self.assertEqual(self.data.run[0], "1234")
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
+
+        # Data
+        self.assertEqual(len(self.data.x), 2)
+        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
+        self.assertAlmostEqual(self.data.x[0], 0.02, 6)
+        self.assertAlmostEqual(self.data.y[0], 1000, 6)
+        self.assertAlmostEqual(self.data.dx[0], 0.01, 6)
+        self.assertAlmostEqual(self.data.dy[0], 3, 6)
+        self.assertAlmostEqual(self.data.x[1], 0.03, 6)
+        self.assertAlmostEqual(self.data.y[1], 1001.0)
+        self.assertAlmostEqual(self.data.dx[1], 0.02, 6)
+        self.assertAlmostEqual(self.data.dy[1], 4, 6)
+        self.assertEqual(self.data.run_name['1234'], 'run name')
+        self.assertEqual(self.data.title, "Test title")
+
+        # Sample info
+        self.assertEqual(self.data.sample.ID, "SI600-new-long")
+        self.assertEqual(self.data.sample.name, "my sample")
+        self.assertEqual(self.data.sample.thickness_unit, 'mm')
+        self.assertAlmostEqual(self.data.sample.thickness, 1.03)
+
+        self.assertAlmostEqual(self.data.sample.transmission, 0.327)
+
+        self.assertEqual(self.data.sample.temperature_unit, 'C')
+        self.assertEqual(self.data.sample.temperature, 0)
+
+        self.assertEqual(self.data.sample.position_unit, 'mm')
+        self.assertEqual(self.data.sample.position.x, 10)
+        self.assertEqual(self.data.sample.position.y, 0)
+
+        self.assertEqual(self.data.sample.orientation_unit, 'degree')
+        self.assertAlmostEqual(self.data.sample.orientation.x, 22.5, 6)
+        self.assertAlmostEqual(self.data.sample.orientation.y, 0.02, 6)
+
+        self.assertEqual(self.data.sample.details[0], "http://chemtools.chem.soton.ac.uk/projects/blog/blogs.php/bit_id/2720")
+        self.assertEqual(self.data.sample.details[1], "Some text here")
+
+        # Instrument info
+        self.assertEqual(self.data.instrument, "canSAS instrument")
+
+        # Source
+        self.assertEqual(self.data.source.radiation, "neutron")
+
+        self.assertEqual(self.data.source.beam_size_unit, "mm")
+        self.assertEqual(self.data.source.beam_size_name, "bm")
+        self.assertEqual(self.data.source.beam_size.x, 12)
+        self.assertEqual(self.data.source.beam_size.y, 13)
+
+        self.assertEqual(self.data.source.beam_shape, "disc")
+
+        self.assertEqual(self.data.source.wavelength_unit, "A")
+        self.assertEqual(self.data.source.wavelength, 6)
+
+        self.assertEqual(self.data.source.wavelength_max_unit, "nm")
+        self.assertAlmostEqual(self.data.source.wavelength_max, 1.0)
+        self.assertEqual(self.data.source.wavelength_min_unit, "nm")
+        self.assertAlmostEqual(self.data.source.wavelength_min, 0.22)
+        self.assertEqual(self.data.source.wavelength_spread_unit, "percent")
+        self.assertEqual(self.data.source.wavelength_spread, 14.3)
+
+        # Collimation
+        _found1 = False
+        _found2 = False
+        self.assertEqual(self.data.collimation[0].length, 123.)
+        self.assertEqual(self.data.collimation[0].name, 'test coll name')
+
+        for item in self.data.collimation[0].aperture:
+            self.assertEqual(item.size_unit,'mm')
+            self.assertEqual(item.distance_unit,'mm')
+
+            if item.size.x == 50 \
+                and item.distance == 11000.0 \
+                and item.name == 'source' \
+                and item.type == 'radius':
+                _found1 = True
+            elif item.size.x == 1.0 \
+                and item.name == 'sample' \
+                and item.type == 'radius':
+                _found2 = True
+
+        if not _found1 or not _found2:
+            raise RuntimeError("Could not find all data %s %s"
+                               % (_found1, _found2))
+
+        # Detector
+        self.assertEqual(self.data.detector[0].name, "fictional hybrid")
+        self.assertEqual(self.data.detector[0].distance_unit, "mm")
+        self.assertEqual(self.data.detector[0].distance, 4150)
+
+        self.assertEqual(self.data.detector[0].orientation_unit, "degree")
+        self.assertAlmostEqual(self.data.detector[0].orientation.x, 1.0, 6)
+        self.assertEqual(self.data.detector[0].orientation.y, 0.0)
+        self.assertEqual(self.data.detector[0].orientation.z, 0.0)
+
+        self.assertEqual(self.data.detector[0].offset_unit, "m")
+        self.assertEqual(self.data.detector[0].offset.x, .001)
+        self.assertEqual(self.data.detector[0].offset.y, .002)
+        self.assertEqual(self.data.detector[0].offset.z, None)
+
+        self.assertEqual(self.data.detector[0].beam_center_unit, "mm")
+        self.assertEqual(self.data.detector[0].beam_center.x, 322.64)
+        self.assertEqual(self.data.detector[0].beam_center.y, 327.68)
+        self.assertEqual(self.data.detector[0].beam_center.z, None)
+
+        self.assertEqual(self.data.detector[0].pixel_size_unit, "mm")
+        self.assertEqual(self.data.detector[0].pixel_size.x, 5)
+        self.assertEqual(self.data.detector[0].pixel_size.y, 5)
+        self.assertEqual(self.data.detector[0].pixel_size.z, None)
+
+        # Process
+        _found_term1 = False
+        _found_term2 = False
+        for item in self.data.process:
+            self.assertTrue(item.name in ['NCNR-IGOR', 'spol'])
+            self.assertTrue(item.date in ['04-Sep-2007 18:35:02',
+                                          '03-SEP-2006 11:42:47'])
+            for t in item.term:
+                if (t['name'] == "ABS:DSTAND"
+                    and t['unit'] == 'mm'
+                    and float(t['value']) == 1.0):
+                    _found_term2 = True
+                elif (t['name'] == "radialstep"
+                      and t['unit'] == 'mm'
+                      and float(t['value']) == 10.0):
+                    _found_term1 = True
+
+        if not _found_term1 or not _found_term2:
+            raise RuntimeError("Could not find all process terms %s %s"
+                               % (_found_term1, _found_term2))
+
+    def test_writer(self):
+        filename = "write_test.xml"
+        data_list = self.loader.load(self.cansas1d)
+        data = data_list[0]
+        self.cansas_reader.write(self.write_filename, data)
+        self.data_list = self.loader.load(self.write_filename)
+        self.data = self.data_list[0]
+        self.assertEqual(len(self.data_list), 1)
+        self.assertEqual(len(self.data_list), len(self.data_list))
+        self.assertEqual(self.data.filename, filename)
+        self._checkdata()
+        if os.path.isfile(self.write_filename):
+            os.remove(self.write_filename)
+
+    def test_units(self):
+        """
+            Check units.
+            Note that not all units are available.
+        """
+        filename = "cansas1d_units.xml"
+        self.data_list = self.cansas_reader.read(find(filename))
+        self.data = self.data_list[0]
+        self.assertEqual(len(self.data_list), 1)
+        self.assertEqual(self.data.filename, filename)
+        self._checkdata()
+
+    def test_badunits(self):
+        """
+            Check units.
+            Note that not all units are available.
+        """
+        filename = "cansas1d_badunits.xml"
+        self.data_list = self.cansas_reader.read(find(filename))
+        self.data = self.data_list[0]
+        self.assertEqual(len(self.data_list), 1)
+        self.assertEqual(self.data.filename, filename)
+        # The followed should not have been loaded
+        self.assertAlmostEqual(self.data.sample.thickness, 0.00103)
+        # This one should
+        self.assertAlmostEqual(self.data.sample.transmission, 0.327)
+
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
+        self.assertEqual(len(self.data.errors), 0)
+
+    def test_slits(self):
+        """
+            Check slit data
+        """
+        filename = "cansas1d_slit.xml"
+        self.data_list = self.cansas_reader.read(find(filename))
+        self.data = self.data_list[0]
+        self.assertEqual(len(self.data_list), 1)
+        self.assertEqual(self.data.filename, filename)
+        self.assertEqual(self.data.run[0], "1234")
+
+        # Data
+        self.assertEqual(len(self.data.x), 2)
+        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
+        self.assertEqual(self.data.x[0], 0.02)
+        self.assertEqual(self.data.y[0], 1000)
+        self.assertEqual(self.data.dxl[0], 0.005)
+        self.assertEqual(self.data.dxw[0], 0.001)
+        self.assertEqual(self.data.dy[0], 3)
+        self.assertEqual(self.data.x[1], 0.03)
+        self.assertAlmostEqual(self.data.y[1], 1001.0)
+        self.assertEqual(self.data.dxl[1], 0.005)
+        self.assertEqual(self.data.dxw[1], 0.001)
+        self.assertEqual(self.data.dy[1], 4)
+        self.assertEqual(self.data.run_name['1234'], 'run name')
+        self.assertEqual(self.data.title, "Test title")
+
 
 class cansas_reader_hdf5(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
-        self.datafile_basic = find(
-            "test_data" + os.sep + "simpleexamplefile.h5")
-        self.datafile_nodi = find(
-            "test_data" + os.sep + "x25000_no_di.h5")
+        self.datafile_basic = find("simpleexamplefile.h5")
+        self.datafile_nodi = find("x25000_no_di.h5")
         self.datafile_multiplesasentry = find(
-            "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry.h5")
-        self.datafile_multiplesasdata = find(
-            "test_data" + os.sep + "nxcansas_1Dand2D_multisasdata.h5")
+            "nxcansas_1Dand2D_multisasentry.h5")
+        self.datafile_multiplesasdata = find("nxcansas_1Dand2D_multisasdata.h5")
         self.datafile_multiplesasdata_multiplesasentry = find(
-            "test_data" + os.sep + "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
-        self.datafile_multiple_frames = find(
-            "test_data" + os.sep + "multiframe_1d.nxs")
+            "nxcansas_1Dand2D_multisasentry_multisasdata.h5")
+        self.datafile_multiple_frames = find("multiframe_1d.nxs")
 
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)

@@ -14,7 +14,7 @@ from sas.sascalc.dataloader.data_info import Data1D
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 
 class TestCalculator(unittest.TestCase):

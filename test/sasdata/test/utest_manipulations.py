@@ -16,7 +16,7 @@ from sas.sascalc.dataloader.data_info import Data1D, Data2D
 RTOL = 1e-12
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), filename)
+    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
 
 class DataInfoTests(unittest.TestCase):
 
