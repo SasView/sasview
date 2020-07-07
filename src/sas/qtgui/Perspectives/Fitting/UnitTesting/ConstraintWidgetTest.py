@@ -18,6 +18,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -95,13 +96,20 @@ class ConstraintWidgetTest(unittest.TestCase):
 
     def testIsTabImportable(self):
         ''' tab checks for consistency '''
-        test_tab = QtCore.QObject()
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = None
         test_tab.data = self.constraint1
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
         self.assertFalse(self.widget.isTabImportable(None))
         self.assertFalse(self.widget.isTabImportable("BatchTab1"))
+        self.widget.currentType = "Batch"
         self.assertFalse(self.widget.isTabImportable("BatchTab"))
+        self.widget.currentType = "test"
+        self.assertFalse(self.widget.isTabImportable("test_tab"))
+        test_tab.data_is_loaded = True
+        self.assertTrue(self.widget.isTabImportable("test_tab"))
 
     def testOnTabCellEdit(self):
         ''' test what happens on monicker edit '''
