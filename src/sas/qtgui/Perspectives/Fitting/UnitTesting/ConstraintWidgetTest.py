@@ -83,8 +83,15 @@ class ConstraintWidgetTest(unittest.TestCase):
     def testGetTabsForFit(self):
         ''' Test the fitting tab list '''
         self.assertEqual(self.widget.getTabsForFit(),[])
-        # Add some tabs
-        pass
+        # add one tab
+        self.widget.tabs_for_fitting = {"foo": True}
+        self.assertEqual(self.widget.getTabsForFit(), ['foo'])
+        # add two tabs
+        self.widget.tabs_for_fitting = {"foo": True, "bar": True}
+        self.assertEqual(self.widget.getTabsForFit(), ['foo', 'bar'])
+        # disable one tab
+        self.widget.tabs_for_fitting = {"foo": False, "bar": True}
+        self.assertEqual(self.widget.getTabsForFit(), ['bar'])
 
     def testIsTabImportable(self):
         ''' tab checks for consistency '''
