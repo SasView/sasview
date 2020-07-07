@@ -40,6 +40,8 @@ Bug fixes
 * Fixes sasview  # 1606: Invariant does not report the total invariant
 * Fixes sasview  # 1599: ESS_GUI: fix data test
 * Fixes sasview  # 1598: ESS_GUI: allow data replacement on a fit page
+* Fixes sasview  # 1579: Save inversion state in project and analysis files (ESS_GUI)
+* Fixes sasview  # 1578: Changing perspective closes the perspective
 * Fixes sasview  # 1567: Ess gui 1554 slicer
 * Fixes sasview  # 1560: set the sasmodels dll cache directory in sasview startup
 * Fixes sasview  # 1556: Fixed the edge cases and added a beefy unit test. #1546
@@ -55,11 +57,14 @@ Bug fixes
 * Fixes sasview  # 1535: ESS_GUI: Existing common parameters not preserved between models in 5.x
 * Fixes sasview  # 1534: ESS_GUI: Something strange with 5.x and the .sasview folder
 * Fixes sasview  # 1529: ESS GUI Corfunc: Input area is not scrollable in Corfunc Perspective in 5.0.2
+* Fixes sasview  # 1527: NXcanSAS definition changes
 * Fixes sasview  # 1523: Plot legend visibility toggle needs to be restored
 * Fixes sasview  # 1522: Incorrect behavior of "fittable" checkbox in polydispersity tab
 * Fixes sasview  # 1490: Problem using constraints in 5.x
 * Fixes sasview  # 1456: 5.0.1 constraints between FitPages stop working
 * Fixes sasview  # 1414: No pan function in plot windows in 5.0.1
+* Fixes sasview  # 1002: canSAS XML should save transmission spectrum
+* Fixes sasview  # 726: Check default value of cansas_version property in CansasReader class
 * Fixes sasmodels # 414: sasview saying unknown distribution option 'test_requires'
 * Fixes sasmodels # 404: delay the inevitable a little longer and reenable python 2.7 support
 * Fixes sasmodels # 402: sasview 1534: use source hash as part of dll name to avoid collisions
@@ -68,7 +73,7 @@ Bug fixes
 
 Known Issues
 ^^^^^^^^^^^^
-At this time, and unlike version 4.x, only fitting sessions can be saved as project files.
+At this time, and unlike version 4.x, only fitting and P(r) inversion sessions can be saved as project files.
 
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
