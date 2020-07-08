@@ -83,7 +83,7 @@ class ConstraintWidgetTest(unittest.TestCase):
 
     def testGetTabsForFit(self):
         ''' Test the fitting tab list '''
-        self.assertEqual(self.widget.getTabsForFit(),[])
+        self.assertEqual(self.widget.getTabsForFit(), [])
         # add one tab
         self.widget.tabs_for_fitting = {"foo": True}
         self.assertEqual(self.widget.getTabsForFit(), ['foo'])
@@ -113,11 +113,24 @@ class ConstraintWidgetTest(unittest.TestCase):
 
     def testOnTabCellEdit(self):
         ''' test what happens on monicker edit '''
-        # Mock the datafromitem() call from FittingWidget
-        data = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
-        item = QtGui.QStandardItem("test")
-        self.perspective.addFit([item])
+        # Mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.id = "foo"
+        test_tab.kernel_module.name = "bar"
+        test_tab.data.filename = "baz"
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        self.widget.updateFitLine("test_tab")
+
+        # disable the tab
+        self.widget.tblTabList.item(0, 0).setCheckState(0)
+        self.assertEqual(self.widget.tabs_for_fitting["test_tab"], False)
+        self.assertFalse(self.widget.cmdFit.isEnabled())
+        # enable the tab
+        self.widget.tblTabList.item(0, 0).setCheckState(2)
+        self.assertEqual(self.widget.tabs_for_fitting["test_tab"], True)
+        self.assertTrue(self.widget.cmdFit.isEnabled())
 
     def testUpdateFitLine(self):
         ''' See if the fit table row can be updated '''
@@ -138,4 +151,3 @@ class ConstraintWidgetTest(unittest.TestCase):
         expression = "P1.scale = M2.scal + M2.background"
         name = self.widget.findNameErrorInConstraint(constraint, expression, name_error)
         self.assertEqual("M2.scal", name)
-        
