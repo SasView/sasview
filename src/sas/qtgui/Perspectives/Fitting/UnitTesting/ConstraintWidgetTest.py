@@ -134,7 +134,46 @@ class ConstraintWidgetTest(unittest.TestCase):
 
     def testUpdateFitLine(self):
         ''' See if the fit table row can be updated '''
-        pass
+        # mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.id = "foo"
+        test_tab.kernel_module.name = "bar"
+        test_tab.data.filename = "baz"
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+
+        # Add a tab without an constraint
+        self.widget.updateFitLine("test_tab")
+        self.assertEqual(self.widget.tblTabList.rowCount(), 1)
+        # Constraint tab should be empty
+        self.assertEqual(self.widget.tblConstraints.rowCount(), 0)
+
+        # Add a second tab with an active constraint
+        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
+        test_tab.getFullConstraintNameListForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
+        test_tab.getConstraintObjectsForModel = MagicMock(return_value=[self.constraint1])
+        self.widget.updateFitLine("test_tab")
+        # We should have 2 tabs in the model tab
+        self.assertEqual(self.widget.tblTabList.rowCount(), 2)
+        # One constraint in the constraint tab
+        self.assertEqual(self.widget.tblConstraints.rowCount(), 1)
+        # Constraint should be active
+        self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 2)
+        # Check the text
+        self.assertEqual(self.widget.tblConstraints.item(0, 0).text(),
+                         test_tab.kernel_module.name +
+                         ":" +
+                         "scale" +
+                         " = " +
+                         self.constraint1.func)
+        # Add a tab with a non active constraint
+        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[])
+        self.widget.updateFitLine("test_tab")
+        # There should be two constraints now
+        self.assertEqual(self.widget.tblConstraints.rowCount(), 2)
+        # Added constraint should not be checked since it isn't active
+        self.assertEqual(self.widget.tblConstraints.item(1, 0).checkState(), 0)
 
     def testUpdateFitList(self):
         ''' see if the fit table can be updated '''
