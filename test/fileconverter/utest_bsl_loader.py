@@ -8,7 +8,7 @@ import numpy as np
 from sas.sascalc.file_converter.bsl_loader import BSLLoader
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
+    return os.path.join(os.path.dirname(__file__), 'data', filename)
 
 class bsl_test(unittest.TestCase):
 

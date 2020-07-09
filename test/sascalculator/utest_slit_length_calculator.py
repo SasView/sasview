@@ -10,7 +10,7 @@ from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator \
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
+    return os.path.join(os.path.dirname(__file__), 'data', filename)
 
 
 class SlitCalculator(unittest.TestCase):

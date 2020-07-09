@@ -2,7 +2,7 @@ Running Tests
 =============
 
 Tests are stored in subdirectories of the test directory, as
-*package/test/utest_\*.py*. Test data, expected output and other support files
+*package/utest_\*.py*. Test data, expected output and other support files
 should be in a subdirectory of the unit test directory. Before running any tests
 you must first run *setup.py build* in the root. Tests are run against the
 current source directory with run magic to find the compiled code, so you

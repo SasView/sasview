@@ -17,7 +17,7 @@ from sas.sascalc.pr.invertor import Invertor
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), 'test_data', filename)
+    return os.path.join(os.path.dirname(__file__), 'data', filename)
 
 class TestFiguresOfMerit(unittest.TestCase):
 

@@ -11,7 +11,7 @@ from sas.sascalc.dataloader.loader import  Loader
 
 
 def find(filename):
-    return os.path.join(os.path.dirname(__file__), 'sesans_examples', filename)
+    return os.path.join(os.path.dirname(__file__), 'sesans_data', filename)
 
 
 class sesans_reader(unittest.TestCase):
