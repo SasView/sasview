@@ -201,8 +201,8 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.updateFitLine = MagicMock()
         self.widget.updateSignalsFromTab = MagicMock()
         self.widget.initializeFitList()
-        self.assertTrue(self.widget.updateFitLine.called_once)
-        self.assertTrue(self.widget.updateSignalsFromTab.called_once)
+        self.widget.updateFitLine.assert_called_once()
+        self.widget.updateSignalsFromTab.assert_called_once()
         self.assertTrue(self.widget.cmdFit.isEnabled())
 
         # Check if the tab list gets ordered
@@ -211,14 +211,30 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.updateFitLine = MagicMock()
         self.widget.updateSignalsFromTab = MagicMock()
         self.widget._row_order = [test_tab]
-        self.widget.orderedSubList = MagicMock()
+        self.widget.orderedSublist = MagicMock()
         self.widget.initializeFitList()
-        self.assertTrue(self.widget.orderedSubList.called_once)
+        self.widget.orderedSublist.assert_called_with([test_tab], [test_tab])
 
 
     def testUpdateConstraintList(self):
         ''' see if the constraint table can be updated '''
-        pass
+        # mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.id = "foo"
+        test_tab.kernel_module.name = "bar"
+        test_tab.data.filename = "baz"
+        self.widget.getObjectByName = MagicMock(return_value=test_tab)
+        test_tab.addConstraintToRow = MagicMock()
+        test_tab.changeCheckboxStatus = MagicMock()
+        test_tab.getRowFromName = MagicMock(return_value=1)
+        test_tab.changeCheckboxStatus = MagicMock()
+
+        # add a constraint
+        self.widget.onAcceptConstraint((test_tab, self.constraint1))
+        test_tab.addConstraintToRow.assert_called_with(self.constraint1, 1)
+        test_tab.changeCheckboxStatus.assert_called_with(1, True)
 
     def testFindNameErrorInConstraint(self):
         ''' test if we get get a faulty constraint'''
