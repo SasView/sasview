@@ -39,7 +39,7 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget = ConstraintWidget(parent=self.perspective)
 
         # Example constraint object
-        self.constraint1 = Constraint(parent=None, param="test", value="7.0", min="0.0", max="inf", func="M1:sld")
+        self.constraint1 = Constraint(parent=None, param="test", value="7.0", min="0.0", max="inf", func="M1.sld")
         self.constraint2 = Constraint(parent=None, param="poop", value="7.0", min="0.0", max="inf", func="7.0")
 
     def tearDown(self):
@@ -243,3 +243,36 @@ class ConstraintWidgetTest(unittest.TestCase):
         expression = "P1.scale = M2.scal + M2.background"
         name = self.widget.findNameErrorInConstraint(constraint, expression, name_error)
         self.assertEqual("M2.scal", name)
+
+    def testFindConstraintInTable(self):
+        ''' test if we can retrieve a constraint in the constraint list'''
+        # mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.id = "foo"
+        test_tab.kernel_module.name = "bar"
+        test_tab.data.filename = "baz"
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+
+        # add a constraint
+        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
+        test_tab.getFullConstraintNameListForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
+        test_tab.getConstraintObjectsForModel = MagicMock(return_value=[self.constraint1])
+        self.widget.updateFitLine("test_tab")
+        # Find a non existent constraint
+        constraint_number = self.widget.findConstraintInTable("foo")
+        self.assertEqual(None, constraint_number)
+        # add a second constraint
+        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[('scale', self.constraint2.func)])
+        test_tab.getFullConstraintNameListForModel = MagicMock(return_value=[('scale', self.constraint2.func)])
+        test_tab.getConstraintObjectsForModel = MagicMock(return_value=[self.constraint2])
+        self.widget.updateFitLine("test_tab")
+        # find first constraint
+        constraint = test_tab.kernel_module.name + "." + "scale" + "=" + self.constraint1.func
+        constraint_number = self.widget.findConstraintInTable(constraint)
+        self.assertEqual(0, constraint_number)
+        # find second constraint
+        constraint = test_tab.kernel_module.name + "." + "scale" + "=" + self.constraint2.func
+        constraint_number = self.widget.findConstraintInTable(constraint)
+        self.assertEqual(1, constraint_number)
