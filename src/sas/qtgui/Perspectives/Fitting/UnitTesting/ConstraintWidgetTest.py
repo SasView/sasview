@@ -177,7 +177,44 @@ class ConstraintWidgetTest(unittest.TestCase):
 
     def testUpdateFitList(self):
         ''' see if the fit table can be updated '''
-        pass
+        # mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.id = "foo"
+        test_tab.kernel_module.name = "bar"
+        test_tab.data.filename = "baz"
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+
+        # Fit button should be disabled if no tabs are present
+        ObjectLibrary.listObjects =MagicMock(return_value=False)
+        self.widget.initializeFitList()
+        self.assertEqual(self.widget.available_tabs, {})
+        self.assertEqual(self.widget.available_constraints, {})
+        self.assertEqual(self.widget.tblConstraints.rowCount(), 0)
+        self.assertEqual(self.widget.tblTabList.rowCount(), 0)
+        self.assertFalse(self.widget.cmdFit.isEnabled())
+
+        # Add a tab
+        self.widget.isTabImportable = MagicMock(return_value=True)
+        ObjectLibrary.listObjects = MagicMock(return_value=[test_tab])
+        self.widget.updateFitLine = MagicMock()
+        self.widget.updateSignalsFromTab = MagicMock()
+        self.widget.initializeFitList()
+        self.assertTrue(self.widget.updateFitLine.called_once)
+        self.assertTrue(self.widget.updateSignalsFromTab.called_once)
+        self.assertTrue(self.widget.cmdFit.isEnabled())
+
+        # Check if the tab list gets ordered
+        self.widget.isTabImportable = MagicMock(return_value=True)
+        ObjectLibrary.listObjects = MagicMock(return_value=[test_tab])
+        self.widget.updateFitLine = MagicMock()
+        self.widget.updateSignalsFromTab = MagicMock()
+        self.widget._row_order = [test_tab]
+        self.widget.orderedSubList = MagicMock()
+        self.widget.initializeFitList()
+        self.assertTrue(self.widget.orderedSubList.called_once)
+
 
     def testUpdateConstraintList(self):
         ''' see if the constraint table can be updated '''
