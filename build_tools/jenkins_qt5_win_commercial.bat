@@ -14,7 +14,7 @@ set PYTHON=python.exe
 set EASY_INSTALL=easy_install.exe
 set PYLINT= pylint.exe
 set PYINSTALLER=pyinstaller.exe
-set INNO=C:\"Program Files (x86)"\"Inno Setup 5"\ISCC.exe
+set INNO=C:\"Program Files (x86)"\"Inno Setup 6"\ISCC.exe
 set GIT_SED=C:\"Program Files"\Git\bin\sed.exe
 set SAS_COMPILER=tinycc
 
@@ -81,6 +81,6 @@ cd installers
 
 :: READY FOR INNO
 %PYTHON% installer_generator64.py
-%INNO% installer.iss
+%INNO% new_installer.iss
 cd Output
 xcopy setupSasView.exe %WORKSPACE%\sasview\dist
