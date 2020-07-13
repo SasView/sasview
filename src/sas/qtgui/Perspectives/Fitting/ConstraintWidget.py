@@ -498,9 +498,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # if the exception is a NameError, warn the user of which constraint is faulty
             if type(msg[0]) == NameError:
                 # get the exception in the traceback
-                name = str(msg).split("'")[1]
+                name = str(msg[0]).split("'")[1]
                 trace = result[0][0][0].trace
-                # Hop to the last trace to find the orginal exception
+                # Hop to the last trace to find the original exception
                 while True:
                     if trace.tb_next == None:
                         break
