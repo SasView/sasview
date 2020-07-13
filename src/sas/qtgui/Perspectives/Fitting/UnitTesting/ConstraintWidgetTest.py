@@ -304,3 +304,19 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.fitComplete(result)
         self.assertEqual(QtWidgets.QMessageBox.warning.call_args[0][2],
                          'Fit failed because constraint <b>1</b> is inconsistent:<br>M1.scale = <b>M1.foo</b>')
+        # test handling of other exceptions
+        result[0][0][0].mesg = [ValueError, None]
+        self.widget.fitComplete(result)
+        self.assertEqual(QtWidgets.QMessageBox.warning.call_args[0][2], 'Fit failed')
+
+        # test a successful fit
+        result[0][0][0].success = True
+        test_tab= MagicMock()
+        test_tab.kernel_module.name = 'M1'
+        test_tab.fitComplete = MagicMock()
+        result[0][0][0].model.name = 'M1'
+        self.widget.tabs_for_fitting = {"test_tab": test_tab}
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        self.widget.fitComplete(result)
+        self.assertEqual(test_tab.fitComplete.call_args[0][0][1], result[1])
+        self.assertEqual(test_tab.fitComplete.call_args[0][0][0], [[result[0][0][0]]])
