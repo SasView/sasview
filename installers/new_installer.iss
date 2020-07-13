@@ -13,18 +13,19 @@
 AppId={{3498B749-1A91-4B17-B354-458D838C1C71}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppName}-{#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName=c:\{#MyAppName}-{#MyAppVersion}
+DefaultGroupName={#MyAppName}-{#MyAppVersion}
 DisableProgramGroupPage=yes
-; The [Icons] "quicklaunchicon" entry uses {userappdata} but its [Tasks] entry has a proper IsAdminInstallMode Check.
 UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=setupSasView
+SetupIconFile=dist\sasview\images\ball.ico
 
 
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
@@ -39,7 +40,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
 
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -47,15 +48,25 @@ Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
 Source: "dist\sasview\plugin_models\*";	DestDir: "{userdesktop}\..\.sasview\plugin_models";	Flags: recursesubdirs createallsubdirs
 Source: "dist\sasview\custom_config.py";	DestDir: "{userdesktop}\..\.sasview\config";	Flags: recursesubdirs createallsubdirs
 
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
+Name: "{group}\SasView";	Filename: "{app}\SasView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
+Name: "{group}\{cm:UninstallProgram, SasView}";	 Filename: "{uninstallexe}" 
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+; Delete directories and files that are dynamically created by the application (i.e. at runtime).
+Type: filesandordirs; Name: "{app}\.matplotlib"
+Type: files; Name: "{app}\*.*"
+; The following is a workaround for the case where the application is installed and uninstalled but the
+;{app} directory is not deleted because it has user files.  Then the application is installed into the
+; existing directory, user files are deleted, and the application is un-installed again.  Without the
+; directive below, {app} will not be deleted because Inno Setup did not create it during the previous
+; installation.
+Type: dirifempty; Name: "{app}"
 
 [Registry]
 Root: HKCR;	Subkey: ".xml\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
@@ -87,7 +98,6 @@ Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\
 Root: HKCR;	Subkey: ".crf";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror
 Root: HKCR; Subkey: "{app}\SasView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView File";	 Flags: uninsdeletekey  noerror 	
 Root: HKCR; Subkey: "{app}\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1""";	 Flags: uninsdeletevalue noerror 	
-; Root: HKCR; Subkey: "{app}\C:\Anaconda3\envs\qt5\lib\site-packages\sasview-5.0.2-py3.6.egg\sas\sasview\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView.exe,0";	 Flags: uninsdeletevalue noerror 	
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SASVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
 
 
