@@ -276,3 +276,31 @@ class ConstraintWidgetTest(unittest.TestCase):
         constraint = test_tab.kernel_module.name + "." + "scale" + "=" + self.constraint2.func
         constraint_number = self.widget.findConstraintInTable(constraint)
         self.assertEqual(1, constraint_number)
+
+    def testFitComplete(self):
+        ''' test the handling of fit results'''
+        self.widget.getTabsForFit = MagicMock(return_value=[[None], [None]])
+        QtWidgets.QMessageBox.warning = MagicMock()
+        # test handling of NameError
+        result = MagicMock()
+        result[0][0][0].success = False
+        result[0][0][0].mesg = [NameError("foo'M1"), None]
+        trace = result[0][0][0].trace
+        trace.tb_next = None
+        trace.tb_lineno = 6
+        trace.tb_frame.f_code.co_filename = """
+        def eval_expressions():
+        '''
+        M1.scale = M1.foo
+        '''
+        P1.value = M1.foo
+        return 0
+        """
+        self.widget.findConstraintInTable = MagicMock(return_value=0)
+        self.widget.findNameErrorInConstraint = MagicMock(return_value="M1.foo")
+        mocked_item = MagicMock()
+        mocked_item.text = MagicMock(return_value="M1.scale = M1.foo")
+        self.widget.tblConstraints.item = MagicMock(return_value=mocked_item)
+        self.widget.fitComplete(result)
+        self.assertEqual(QtWidgets.QMessageBox.warning.call_args[0][2],
+                         'Fit failed because constraint <b>1</b> is inconsistent:<br>M1.scale = <b>M1.foo</b>')
