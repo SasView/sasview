@@ -99,7 +99,6 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = None
-        test_tab.data = self.constraint1
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
         self.assertFalse(self.widget.isTabImportable(None))
@@ -117,9 +116,6 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = MagicMock()
-        test_tab.kernel_module.id = "foo"
-        test_tab.kernel_module.name = "bar"
-        test_tab.data.filename = "baz"
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
         self.widget.updateFitLine("test_tab")
 
@@ -138,9 +134,7 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = MagicMock()
-        test_tab.kernel_module.id = "foo"
-        test_tab.kernel_module.name = "bar"
-        test_tab.data.filename = "baz"
+        test_tab.kernel_module.name = "M1"
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
         # Add a tab without an constraint
@@ -181,9 +175,6 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = MagicMock()
-        test_tab.kernel_module.id = "foo"
-        test_tab.kernel_module.name = "bar"
-        test_tab.data.filename = "baz"
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
         # Fit button should be disabled if no tabs are present
@@ -222,9 +213,6 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = MagicMock()
-        test_tab.kernel_module.id = "foo"
-        test_tab.kernel_module.name = "bar"
-        test_tab.data.filename = "baz"
         self.widget.getObjectByName = MagicMock(return_value=test_tab)
         test_tab.addConstraintToRow = MagicMock()
         test_tab.changeCheckboxStatus = MagicMock()
@@ -250,9 +238,7 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = MagicMock()
-        test_tab.kernel_module.id = "foo"
-        test_tab.kernel_module.name = "bar"
-        test_tab.data.filename = "baz"
+        test_tab.kernel_module.name = "M1"
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
         # add a constraint
