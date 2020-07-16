@@ -523,11 +523,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                     self.tblConstraints.item(constraint_no, 0).text().replace(name_error, "<b>"+name_error+"</b>"))
             else:
                 error_text = 'Fit failed'
-            QtWidgets.QMessageBox.warning(self,
-                                          'Warning',
-                                          error_text,
-                                          QtWidgets.QMessageBox.Ok)
-            self.parent.communicate.statusBarUpdateSignal.emit("Fit failed")
+            self.parent.communicate.statusBarUpdateSignal.emit(error_text)
             return
 
         # get the elapsed time
