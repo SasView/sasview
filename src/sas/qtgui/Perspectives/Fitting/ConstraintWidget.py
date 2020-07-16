@@ -498,44 +498,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         error_text = "Fit Failed"
         # Warn the user if fitting has been unsuccessful
         if not results[0].success:
-            msg = results[0].mesg
-            # if the exception is a NameError, warn the user of which constraint is faulty
-            if type(msg[0]) == NameError:
-                # check that the NameError is meaningful
-                if len(str(msg[0]).split("'")) < 2:
-                    self.parent.communicate.statusBarUpdateSignal.emit(error_text)
-                    return
-                # get the exception in the traceback
-                name = str(msg[0]).split("'")[1]
-                trace = results[0].trace
-                # Hop to the last trace to find the original exception
-                while trace.tb_next:
-                       trace = trace.tb_next
-                # get the line of the faulty constraint in the code
-                lineno = trace.tb_lineno
-                # get the code that assigns the constraints
-                constraint_code = trace.tb_frame.f_code.co_filename.split('\n')
-                # get the incriminated constraint from the code (see expression.py for details)
-                line = lineno - 2 - (len(constraint_code)-6)/2
-                # check that constraint_code contains something meaningful
-                if line < 0 or len(constraint_code) < line:
-                    self.parent.communicate.statusBarUpdateSignal.emit(error_text)
-                    return
-                faulty_constraint = constraint_code[int(line)]
-                constraint_no = self.findConstraintInTable(faulty_constraint)
-                name_error = self.findNameErrorInConstraint(self.tblConstraints.item(constraint_no, 0).text(),
-                                                            faulty_constraint,
-                                                            name)
-                # check that findConstraintInTable and findNameErrorInConstraint returned something meaningful
-                if name_error is None or constraint_no is None:
-                    self.parent.communicate.statusBarUpdateSignal.emit(error_text)
-                    return
-                # warn the user of which constraint is failing and highlight the error
-                error_text = 'Fit failed because constraint <b>%s</b> is inconsistent:<br>%s'%(
-                    constraint_no + 1,
-                    self.tblConstraints.item(constraint_no, 0).text().replace(name_error, "<b>"+name_error+"</b>"))
-
-            self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+            self.analyzeFitFailure(results[0].mesg[0], results[0].trace)
             return
 
         # get the elapsed time
@@ -583,6 +546,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
+        # Get the results list
+        results = result[0][0]
+        error_text = "Fit Failed"
+        # Warn the user if fitting has been unsuccessful
+        if not results[0].success:
+            self.analyzeFitFailure(results[0].mesg[0], results[0].trace)
+            return
+
         # Show the grid panel
         page_name = "ConstSimulPage"
         results = copy.deepcopy(result[0])
@@ -591,6 +562,47 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
+
+    def analyzeFitFailure(self, exception, trace):
+        """
+        Analyzes the error message and the traceback of a fit result and shows a proper message error in the status bar
+        """
+        error_text = "Fit Failed"
+        # if the exception is a NameError, warn the user of which constraint is faulty
+        if type(exception) == NameError and trace is not None:
+            # check that the NameError is meaningful
+            if len(str(exception).split("'")) < 2:
+                self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+                return
+            name = str(exception).split("'")[1]
+            # Hop to the last trace to find the original exception
+            while trace.tb_next:
+                trace = trace.tb_next
+            # get the line of the faulty constraint in the code
+            lineno = trace.tb_lineno
+            # get the code that assigns the constraints
+            constraint_code = trace.tb_frame.f_code.co_filename.split('\n')
+            # get the incriminated constraint from the code (see expression.py for details)
+            line = lineno - 2 - (len(constraint_code)-6)/2
+            # check that constraint_code contains something meaningful
+            if line < 0 or len(constraint_code) < line:
+                self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+                return
+            faulty_constraint = constraint_code[int(line)]
+            constraint_no = self.findConstraintInTable(faulty_constraint)
+            name_error = self.findNameErrorInConstraint(self.tblConstraints.item(constraint_no, 0).text(),
+                                                        faulty_constraint,
+                                                        name)
+            # check that findConstraintInTable and findNameErrorInConstraint returned something meaningful
+            if name_error is None or constraint_no is None:
+                self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+                return
+            # warn the user of which constraint is failing and highlight the error
+            error_text = 'Fit failed because constraint <b>%s</b> is inconsistent:<br>%s'%(
+                constraint_no + 1,
+                self.tblConstraints.item(constraint_no, 0).text().replace(name_error, "<b>"+name_error+"</b>"))
+
+        self.parent.communicate.statusBarUpdateSignal.emit(error_text)
 
     def onFitFailed(self, reason):
         """
