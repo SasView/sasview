@@ -504,11 +504,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 name = str(msg[0]).split("'")[1]
                 trace = results[0].trace
                 # Hop to the last trace to find the original exception
-                while True:
-                    if trace.tb_next == None:
-                        break
-                    else:
-                        trace = trace.tb_next
+                while trace.tb_next:
+                       trace = trace.tb_next
                 # get the line of the faulty constraint in the code
                 lineno = trace.tb_lineno
                 # get the code that assigns the constraints
