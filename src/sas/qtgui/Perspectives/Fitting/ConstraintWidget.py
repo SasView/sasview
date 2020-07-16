@@ -492,14 +492,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             msg = "Fitting failed. Please ensure correctness of chosen constraints."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
-        # Warn the user if fitting has been unsuccessfull
-        if not result[0][0][0].success:
-            msg = result[0][0][0].mesg
+
+        # Get the results list
+        results = result[0][0]
+        # Warn the user if fitting has been unsuccessful
+        if not results[0].success:
+            msg = results[0].mesg
             # if the exception is a NameError, warn the user of which constraint is faulty
             if type(msg[0]) == NameError:
                 # get the exception in the traceback
                 name = str(msg[0]).split("'")[1]
-                trace = result[0][0][0].trace
+                trace = results[0].trace
                 # Hop to the last trace to find the original exception
                 while True:
                     if trace.tb_next == None:
@@ -532,9 +535,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # get the elapsed time
         elapsed = result[1]
-
-        # result list
-        results = result[0][0]
 
         # Find out all tabs to fit
         tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
