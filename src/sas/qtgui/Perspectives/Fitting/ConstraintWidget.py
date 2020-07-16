@@ -495,11 +495,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Get the results list
         results = result[0][0]
+        error_text = "Fit Failed"
         # Warn the user if fitting has been unsuccessful
         if not results[0].success:
             msg = results[0].mesg
             # if the exception is a NameError, warn the user of which constraint is faulty
             if type(msg[0]) == NameError:
+                # check that the NameError is meaningful
+                if len(str(msg[0]).split("'")) < 2:
+                    self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+                    return
                 # get the exception in the traceback
                 name = str(msg[0]).split("'")[1]
                 trace = results[0].trace
@@ -512,17 +517,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 constraint_code = trace.tb_frame.f_code.co_filename.split('\n')
                 # get the incriminated constraint from the code (see expression.py for details)
                 line = lineno - 2 - (len(constraint_code)-6)/2
+                # check that constraint_code contains something meaningful
+                if line < 0 or len(constraint_code) < line:
+                    self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+                    return
                 faulty_constraint = constraint_code[int(line)]
                 constraint_no = self.findConstraintInTable(faulty_constraint)
                 name_error = self.findNameErrorInConstraint(self.tblConstraints.item(constraint_no, 0).text(),
                                                             faulty_constraint,
                                                             name)
+                # check that findConstraintInTable and findNameErrorInConstraint returned something meaningful
+                if name_error is None or constraint_no is None:
+                    self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+                    return
                 # warn the user of which constraint is failing and highlight the error
                 error_text = 'Fit failed because constraint <b>%s</b> is inconsistent:<br>%s'%(
                     constraint_no + 1,
                     self.tblConstraints.item(constraint_no, 0).text().replace(name_error, "<b>"+name_error+"</b>"))
-            else:
-                error_text = 'Fit failed'
+
             self.parent.communicate.statusBarUpdateSignal.emit(error_text)
             return
 
