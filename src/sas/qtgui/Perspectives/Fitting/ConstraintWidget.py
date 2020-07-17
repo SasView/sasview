@@ -473,6 +473,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Send the fit complete signal to main thread
         """
+        # Complete signal only accepts a tuple, so send an empty tuple
+        # when fit throws an error.
+
+        if result is None:
+            result = ()
         self.fitCompleteSignal.emit(result)
 
     def fitComplete(self, result):
@@ -567,7 +572,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Analyzes the error message and the traceback of a fit result and shows a proper message error in the status bar
         """
-        error_text = "Fit Failed"
+        error_text = "Fit failed"
         # if the exception is a NameError, warn the user of which constraint is faulty
         if type(exception) == NameError and trace is not None:
             # check that the NameError is meaningful
