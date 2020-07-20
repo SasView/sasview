@@ -10,6 +10,8 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
 
+from sas.sascalc.fit.expression import check_constraints
+
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
 
 model_header_tooltips = ['Select parameter for fitting',
@@ -889,3 +891,15 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             has_poly = True
             break
     return has_poly
+
+def compileConstraints(symtab, constraints):
+    exprs = {}
+    duplicates = []
+    for parameter_name, expression in constraints:
+        if parameter_name in exprs:
+            duplicates.append(parameter_name)
+        exprs[parameter_name] = expression
+    errors = check_constraints(symtab, exprs)
+    if duplicates:
+        errors.append("Duplicate parameter definitions for " + ", ".join(duplicates))
+    return errors

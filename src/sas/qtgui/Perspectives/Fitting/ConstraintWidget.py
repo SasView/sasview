@@ -16,6 +16,7 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 class DnDTableWidget(QtWidgets.QTableWidget):
@@ -556,7 +557,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         error_text = "Fit Failed"
         # Warn the user if fitting has been unsuccessful
         if not results[0].success:
-            self.analyzeFitFailure(results[0].mesg[0], results[0].trace)
+            #self.analyzeFitFailure(results[0].mesg[0], results[0].trace)
             return
 
         # Show the grid panel
@@ -568,46 +569,26 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
-    def analyzeFitFailure(self, exception, trace):
+    def outputConstraintError(self, exception):
         """
-        Analyzes the error message and the traceback of a fit result and shows a proper message error in the status bar
+        Returns an error string highlighting the error in the constraint.
+        The argument is an exception that was raised by expression.py, which are interpreted as following:
+        ValueError: parameter has cyclic dependencies
+        NameError: unknown symbol found in constraint
+        SyntaxError: syntax problem, such as missing parantheses
         """
-        error_text = "Fit failed"
-        # if the exception is a NameError, warn the user of which constraint is faulty
-        if type(exception) == NameError and trace is not None:
-            # check that the NameError is meaningful
-            if len(str(exception).split("'")) < 2:
-                self.parent.communicate.statusBarUpdateSignal.emit(error_text)
-                return
-            name = str(exception).split("'")[1]
-            # Hop to the last trace to find the original exception
-            while trace.tb_next:
-                trace = trace.tb_next
-            # get the line of the faulty constraint in the code
-            lineno = trace.tb_lineno
-            # get the code that assigns the constraints
-            constraint_code = trace.tb_frame.f_code.co_filename.split('\n')
-            # get the incriminated constraint from the code (see expression.py for details)
-            line = lineno - 2 - (len(constraint_code)-6)/2
-            # check that constraint_code contains something meaningful
-            if line < 0 or len(constraint_code) < line:
-                self.parent.communicate.statusBarUpdateSignal.emit(error_text)
-                return
-            faulty_constraint = constraint_code[int(line)]
-            constraint_no = self.findConstraintInTable(faulty_constraint)
-            name_error = self.findNameErrorInConstraint(self.tblConstraints.item(constraint_no, 0).text(),
-                                                        faulty_constraint,
-                                                        name)
-            # check that findConstraintInTable and findNameErrorInConstraint returned something meaningful
-            if name_error is None or constraint_no is None:
-                self.parent.communicate.statusBarUpdateSignal.emit(error_text)
-                return
-            # warn the user of which constraint is failing and highlight the error
-            error_text = 'Fit failed because constraint <b>%s</b> is inconsistent:<br>%s'%(
-                constraint_no + 1,
-                self.tblConstraints.item(constraint_no, 0).text().replace(name_error, "<b>"+name_error+"</b>"))
-
-        self.parent.communicate.statusBarUpdateSignal.emit(error_text)
+        assert(exception, Exception)
+        if type(exception) is ValueError:
+            error_message = "Cyclic dependency with parameter <b>%s</b>"%(exception.args[0])
+        elif type(exception) is NameError:
+            error_message = "Unknown symbol <b>%s</b>"%(exception.args[0])
+        elif type(exception) is SyntaxError:
+            constraint = exception.text
+            constraint = constraint.replace(constraint[exception.offset-1], "<b>%s</b>"%(constraint[exception.offset-1]))
+            error_message = "Syntax error: %s"%(constraint)
+        else:
+            error_message = "Unfeasible constraint"
+        return error_message
 
     def onFitFailed(self, reason):
         """
@@ -976,7 +957,28 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constrained_tab = self.getObjectByName(model_name)
         if constrained_tab is None:
             return
-
+        # Create a symbol dict for all constraints, as well as a full list of constraints
+        symbol_dict = {}
+        constraints = []
+        for tab in self.getTabsForFit():
+            model = ObjectLibrary.getObject(tab)
+            constraint_list = model.getConstraintsForModel()
+            symbol_dict.update(model.getSymbolDict())
+            for i in range(len(constraint_list)):
+                constraint_list[i] = (model.kernel_module.name + "." + constraint_list[i][0], constraint_list[i][1])
+            constraints.append(constraint_list)
+        current_constraint = (model_name + "." + constraint.param, constraint.func)
+        constraints = [item for sublist in constraints for item in sublist]
+        constraints.append(current_constraint)
+        errors = FittingUtilities.compileConstraints(symbol_dict, constraints)
+        if errors:
+            error_message = "\n".join([self.outputConstraintError(error) for error in errors])
+            print([self.outputConstraintError(error) for error in errors])
+            QtWidgets.QMessageBox.warning(self,
+                                          'Warning: unconsistent constraint',
+                                          error_message,
+                                          QtWidgets.QMessageBox.Ok)
+            return
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
 
