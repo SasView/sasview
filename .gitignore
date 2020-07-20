@@ -65,7 +65,6 @@ tests.log
 
 # Installer files
 /sasview-install
-/installers/installer.iss
 /installers/build
 /installers/dist
 *.exe
