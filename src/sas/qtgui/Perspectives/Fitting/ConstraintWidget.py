@@ -141,6 +141,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # tab_name : True/False
         self.tabs_for_fitting = {}
 
+        self.constraint_accepted = True
+
         # Set up the widgets
         self.initializeWidgets()
 
@@ -992,6 +994,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                                           'Inconsistent constraints',
                                           error_message,
                                           QtWidgets.QMessageBox.Ok)
+            self.constraint_accepted = False
             return
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
@@ -1001,6 +1004,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Select this parameter for adjusting/fitting
         constrained_tab.changeCheckboxStatus(constrained_row, True)
+        self.constraint_accepted = True
 
 
     def showMultiConstraint(self):

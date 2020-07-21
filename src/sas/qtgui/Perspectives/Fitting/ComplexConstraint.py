@@ -290,7 +290,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.redefining_warning = ""
         self.constraintReadySignal.emit(cons_tuple)
         # reload the comboboxes
-        self.setupParamWidgets()
+        if self.parent.constraint_accepted:
+            self.setupParamWidgets()
 
     def onSetAll(self):
         """
