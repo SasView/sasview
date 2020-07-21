@@ -315,7 +315,6 @@ class BumpsFit(FitEngine):
                 R.uncertainty_state = result['uncertainty']
             all_results.append(R)
         all_results[0].mesg = result['errors']
-        all_results[0].trace = result['stack trace']
 
         if q is not None:
             q.put(all_results)
@@ -355,12 +354,9 @@ def run_bumps(problem, handler, curr_thread):
     try:
         best, fbest = fitdriver.fit()
         errors = []
-        stack_trace = None
     except Exception as exc:
         best, fbest = None, np.NaN
-        exc_type, exc_value, exc_tb = sys.exc_info()
         errors = [exc, traceback.format_exc()]
-        stack_trace = exc_tb
     finally:
         mapper.stop_mapper(fitdriver.mapper)
 
@@ -383,5 +379,4 @@ def run_bumps(problem, handler, curr_thread):
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
         'errors': errors,
-        'stack trace': stack_trace,
         }
