@@ -18,6 +18,8 @@ from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.sascalc.fit.expression import CyclicDefinitionError, UnknownParameterNameError, ConstraintSyntaxError
+
 
 class DnDTableWidget(QtWidgets.QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -573,21 +575,29 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Returns an error string highlighting the error in the constraint.
         The argument is an exception that was raised by expression.py, which are interpreted as following:
-        ValueError: parameter has cyclic dependencies
-        NameError: unknown symbol found in constraint
-        SyntaxError: syntax problem, such as missing parantheses
+        CyclicDefinitionError: parameter has cyclic dependencies
+        UnknownParameterNameError: unknown symbol found in constraint
+        ConstraintSyntaxError: syntax problem, such as missing parentheses
         """
-        assert(exception, Exception)
-        if type(exception) is ValueError:
-            error_message = "Cyclic dependency with parameter <b>%s</b>"%(exception.args[0])
-        elif type(exception) is NameError:
-            error_message = "Unknown symbol <b>%s</b>"%(exception.args[0])
-        elif type(exception) is SyntaxError:
-            constraint = exception.text
-            constraint = constraint.replace(constraint[exception.offset-1], "<b>%s</b>"%(constraint[exception.offset-1]))
-            error_message = "Syntax error: %s"%(constraint)
+        assert(isinstance(exception, Exception))
+        if isinstance(exception, CyclicDefinitionError):
+            error_message = "Cyclic dependency with parameter: <b>%s</b>"%(exception.parameter)
+
+        elif isinstance(exception, UnknownParameterNameError):
+            constraint = exception.constraint
+            for symbol in exception.unknown_symbol:
+                constraint = constraint.replace(symbol, "<b>%s</b>" % (symbol))
+            error_message = "Unknown symbol: %s" % (constraint)
+
+        elif isinstance(exception, ConstraintSyntaxError):
+            constraint = exception.constraint
+            syntax_problem = exception.parameter
+            highlighted_syntax = syntax_problem.replace(syntax_problem[exception.offset-1], "<b>%s</b>" % (syntax_problem[exception.offset-1]))
+            constraint = constraint.replace(syntax_problem, highlighted_syntax)
+            error_message = "Syntax error: %s" % (constraint)
+
         else:
-            error_message = "Unfeasible constraint"
+            error_message = str(exception)
         return error_message
 
     def onFitFailed(self, reason):
@@ -972,10 +982,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraints.append(current_constraint)
         errors = FittingUtilities.compileConstraints(symbol_dict, constraints)
         if errors:
-            error_message = "\n".join([self.outputConstraintError(error) for error in errors])
-            print([self.outputConstraintError(error) for error in errors])
-            QtWidgets.QMessageBox.warning(self,
-                                          'Warning: unconsistent constraint',
+            error_message = "<br>".join([self.outputConstraintError(error) for error in errors])
+            QtWidgets.QMessageBox.critical(self,
+                                          'Inconsistent constraints',
                                           error_message,
                                           QtWidgets.QMessageBox.Ok)
             return
