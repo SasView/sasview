@@ -5,7 +5,7 @@ import numpy as np
 from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtTest import QTest
+from PyQt5.QtTest import QTest, QSignalSpy
 
 # set up import paths
 import path_prepare
@@ -266,38 +266,17 @@ class ConstraintWidgetTest(unittest.TestCase):
     def testFitComplete(self):
         ''' test the handling of fit results'''
         self.widget.getTabsForFit = MagicMock(return_value=[[None], [None]])
-        QtWidgets.QMessageBox.warning = MagicMock()
-        # test handling of NameError
+        spy = QSignalSpy(self.widget.parent.communicate.statusBarUpdateSignal)
+        # test handling of fit error
         result = MagicMock()
         result[0][0][0].success = False
-        result[0][0][0].mesg = [NameError("foo'M1"), None]
-        trace = result[0][0][0].trace
-        trace.tb_next = None
-        trace.tb_lineno = 6
-        trace.tb_frame.f_code.co_filename = """
-        def eval_expressions():
-        '''
-        M1.scale = M1.foo
-        '''
-        P1.value = M1.foo
-        return 0
-        """
-        self.widget.findConstraintInTable = MagicMock(return_value=0)
-        self.widget.findNameErrorInConstraint = MagicMock(return_value="M1.foo")
-        mocked_item = MagicMock()
-        mocked_item.text = MagicMock(return_value="M1.scale = M1.foo")
-        self.widget.tblConstraints.item = MagicMock(return_value=mocked_item)
-        self.widget.fitComplete(result)
-        self.assertEqual(QtWidgets.QMessageBox.warning.call_args[0][2],
-                         'Fit failed because constraint <b>1</b> is inconsistent:<br>M1.scale = <b>M1.foo</b>')
-        # test handling of other exceptions
         result[0][0][0].mesg = [ValueError, None]
         self.widget.fitComplete(result)
-        self.assertEqual(QtWidgets.QMessageBox.warning.call_args[0][2], 'Fit failed')
+        self.assertEqual(spy[1][0], 'Fit failed')
 
         # test a successful fit
         result[0][0][0].success = True
-        test_tab= MagicMock()
+        test_tab = MagicMock()
         test_tab.kernel_module.name = 'M1'
         test_tab.fitComplete = MagicMock()
         result[0][0][0].model.name = 'M1'
