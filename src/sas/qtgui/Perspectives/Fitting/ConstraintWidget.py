@@ -503,10 +503,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Get the results list
         results = result[0][0]
-        error_text = "Fit Failed"
         # Warn the user if fitting has been unsuccessful
         if not results[0].success:
-            self.analyzeFitFailure(results[0].mesg[0], results[0].trace)
+            if isinstance(results[0].mesg[0], SyntaxError):
+                msg = "<br>".join([self.outputConstraintError(error) for error in results[0].mesg[0].args[0]])
+            else:
+                msg = "Fitting failed. Please ensure correctness of chosen constraints."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
         # get the elapsed time
@@ -556,11 +559,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Get the results list
         results = result[0][0]
-        error_text = "Fit Failed"
         # Warn the user if fitting has been unsuccessful
         if not results[0].success:
-            #self.analyzeFitFailure(results[0].mesg[0], results[0].trace)
-            return
+            if isinstance(results[0].mesg[0], SyntaxError):
+                msg = "<br>".join([self.outputConstraintError(error) for error in results[0].mesg[0].args[0]])
+            else:
+                msg = "Fitting failed. Please ensure correctness of chosen constraints."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
         # Show the grid panel
         page_name = "ConstSimulPage"
@@ -577,7 +582,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         The argument is an exception that was raised by expression.py, which are interpreted as following:
         CyclicDefinitionError: parameter has cyclic dependencies
         UnknownParameterNameError: unknown symbol found in constraint
-        ConstraintSyntaxError: syntax problem, such as missing parentheses
+        ConstraintSyntaxError: syntax problem such as missing parentheses
         """
         assert(isinstance(exception, Exception))
         if isinstance(exception, CyclicDefinitionError):
