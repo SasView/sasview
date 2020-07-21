@@ -892,7 +892,7 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             break
     return has_poly
 
-def compileConstraints(symtab, constraints):
+def compileConstraints(symtab, constraints, check_cyclic = False):
     exprs = {}
     duplicates = []
     for parameter_name, expression in constraints:
@@ -900,6 +900,6 @@ def compileConstraints(symtab, constraints):
             duplicates.append(parameter_name)
         exprs[parameter_name] = expression
     errors = check_constraints(symtab, exprs)
-    if duplicates:
+    if duplicates and check_cyclic:
         errors.append("Duplicate parameter definitions for " + ", ".join(duplicates))
     return errors
