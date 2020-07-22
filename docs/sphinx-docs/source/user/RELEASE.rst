@@ -28,6 +28,7 @@ This is a point release which fixes several issues, but in particular:
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+* sasview # 1622: RC1 problems with installation/running on Windows
 * sasview # 1565: (ESS_GUI) Report dialog enhancements
 * sasview # 1564: Enhancements to Report Results
 * sasview # 1552: Enable mpl toolbar
@@ -35,8 +36,18 @@ New features/improvements
 There are also several usability improvements, including better handling of
 constraints between datasets for simultaneous fits, and control over plots.
 
+With this release Windows users are no longer guided to install SasView
+to C:\Program Files. This had started to become an issue as some IT providers
+tightened their security settings, particularly under Windows 10, either
+causing installation to fail (unless the user could elevate permissions), or
+prevent SasView starting ('failed to execute script sasview'). The installation
+process now prompts for the type of installation required, and defaults to
+C:\SasView-x.x.x
+
 Bug fixes
 ^^^^^^^^^
+* Fixes sasview  # 1632: ESS_GUI Documentation: How to test a plugin model needs updating
+* Fixes sasview  # 1623: 5.0.3 RC1 crashing during fitting
 * Fixes sasview  # 1606: Invariant does not report the total invariant
 * Fixes sasview  # 1599: ESS_GUI: fix data test
 * Fixes sasview  # 1598: ESS_GUI: allow data replacement on a fit page
@@ -64,7 +75,8 @@ Bug fixes
 * Fixes sasview  # 1456: 5.0.1 constraints between FitPages stop working
 * Fixes sasview  # 1414: No pan function in plot windows in 5.0.1
 * Fixes sasview  # 1002: canSAS XML should save transmission spectrum
-* Fixes sasview  # 726: Check default value of cansas_version property in CansasReader class
+* Fixes sasview  #  726: Check default value of cansas_version property in CansasReader class
+* Fixes sasmodels # 415: Suppress pyopencl caching bug for Intel on Mac
 * Fixes sasmodels # 414: sasview saying unknown distribution option 'test_requires'
 * Fixes sasmodels # 404: delay the inevitable a little longer and reenable python 2.7 support
 * Fixes sasmodels # 402: sasview 1534: use source hash as part of dll name to avoid collisions
