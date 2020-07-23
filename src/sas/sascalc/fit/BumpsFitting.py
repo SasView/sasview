@@ -4,7 +4,6 @@ BumpsFitting module runs the bumps optimizer.
 import os
 from datetime import timedelta, datetime
 import traceback
-import sys
 
 import numpy as np
 
@@ -356,7 +355,7 @@ def run_bumps(problem, handler, curr_thread):
         errors = []
     except Exception as exc:
         best, fbest = None, np.NaN
-        errors = [exc, traceback.format_exc()]
+        errors = [str(exc), traceback.format_exc()]
     finally:
         mapper.stop_mapper(fitdriver.mapper)
 
@@ -378,5 +377,5 @@ def run_bumps(problem, handler, curr_thread):
         'success': success,
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
-        'errors': errors,
+        'errors': '\n'.join(errors),
         }
