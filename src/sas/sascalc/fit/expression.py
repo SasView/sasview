@@ -58,19 +58,42 @@ def standard_symbols(context={}):
     symbols['id'] = id
     return symbols
 
-def _check_syntax(target, expr):
+def _check_syntax(target, expr, html = False):
     try:
         compile(expr, expr, "exec")
-    except SyntaxError as syn:
-        raise ConstraintSyntaxError("%s = %s" % (target, expr), syn.offset, syn.filename)
+    except SyntaxError as exc:
+        if html:
+            constraint = "% s = % s" % (target, expr)
+            text = exc.text.strip("\n")
+            highlighted_text = text[:exc.offset-1] + "<b>" + \
+                               text[exc.offset-1:] + "</b>"
+            constraint = constraint.replace(text, highlighted_text)
+            return ["Syntax error in expression '%s'" % constraint]
+        else:
+            return ["Syntax error in expression '%s = %s'" % (target, expr)]
     return []
 
-def _check_free_variables(target, expr, symbol_table):
+def _check_free_variables(target, expr, symbol_table, html=False):
     undefined = [sym for sym in _symbols(expr)
                  if sym not in symbol_table and not iskeyword(sym)]
     if undefined:
         undefined_str = ", ".join(sorted(undefined))
-        raise UnknownParameterNameError("%s = %s" % (target, expr), undefined)
+        if html:
+            for symbol in undefined:
+                # Identify the symbol for replacement as everything between a
+                # word boundary. Since symbols can contain '.', we need to
+                # use negative lookbehind and negative lookahead on a
+                # character set containing '.' to check for the boundaries.
+                # Also, if there is a '.' in the symbol it could match any
+                # character, so it needs to be turned into a regular
+                # expression that matches '.'.
+                pattern = f"(?<![a-zA-Z0-9_.]){symbol.replace('.', '[.]')}(?![a-zA-Z0-9_.])"
+                expr = re.sub(pattern, f"<b>{symbol}</b>", expr)
+            return ["Unknown parameters (%s) in expression '%s = %s'"
+                    % (undefined_str, target, expr)]
+        else:
+            return ["Unknown parameters (%s) in expression '%s = %s'"
+                    % (undefined_str, target, expr)]
     return []
 
 # simple pattern which matches symbols.  Note that it will also match
@@ -174,9 +197,10 @@ def compile_constraints(symtab, exprs, context={}):
 
     Raises:
 
-       SyntaxError if any expression contains a syntax error, if any
+       RunTimeError if any expression contains a syntax error, if any
        symbol used is not defined, or if there are circular dependencies
-       between symbols.
+       between symbols. Runtime error argument is a string describing all
+       found errors.
 
     This function is not terribly sophisticated, and it would be easy to
     trick.  However it handles the common cases cleanly and generates
@@ -199,7 +223,7 @@ def compile_constraints(symtab, exprs, context={}):
     """
     retfn, errors = _compile_constraints(symtab, exprs, context=context)
     if errors:
-        raise SyntaxError(error for error in errors)
+        raise RuntimeError("\n".join(errors))
     return retfn
 
 # Simple parameter class for checking constraints
@@ -207,47 +231,16 @@ class _Parameter:
     def __init__(self, value=0):
         self.value = value
 
-class ConstraintError(Exception):
-    """
-    Base exception for constraint errors
-    """
-    def __init__(self, constraint):
-        self.constraint = constraint
-
-class CyclicDefinitionError(ConstraintError):
-    """
-    Exception raised when cyclic definitions are present in the constraints
-    The constraint attribute is a string containing the constraint,
-    and the parameter attribute is a string containing the parameter name for which cyclic dependencies were detected
-    """
-    def __init__(self, constraint, parameter):
-        self.constraint = constraint
-        self.parameter = parameter
-
-class ConstraintSyntaxError(ConstraintError):
-    """
-    Exception raised when the constraint contains bad syntax such as missing parentheses
-    The parameter attribute contains a string of the bad syntax,
-    and the offset parameter is a clue on which char is causing the syntax error in this string
-    """
-    def __init__(self, constraint, offset, parameter):
-        self.constraint = constraint
-        self.offset = offset
-        self.parameter = parameter
-
-class UnknownParameterNameError(ConstraintError):
-    """
-    Exception raised when the constraint contains a unknown symbol
-    The unknown_symbol parameter contains a string of the detected unknown symbol
-    """
-    def __init__(self, constraint, unknown_symbol):
-        self.constraint = constraint
-        self.unknown_symbol = unknown_symbol
-
-
-def check_constraints(symtab, exprs, context={}):
+def check_constraints(symtab, exprs, context={}, html=False):
     """
     Returns a list of errors in *exprs* or the empty list if there are none.
+    If the html flag is set to True, the list elements will have html <b>
+    markups that allow the caller to control rendering:
+
+    Unknown symbol: tags unknown symbols in *exprs*
+    Syntax error: tags the beginning of a syntax error in *exprs*
+    Cyclic dependency: tags comma separated parameters that have
+    cyclic dependency
 
     All symbols must exist in *context* or in *symtab*. The symbols in
     *context* should be constants or functions. The symbols in *symtab*
@@ -262,29 +255,26 @@ def check_constraints(symtab, exprs, context={}):
     # us to run the function and check constraints.
     symtab = {k: (copy(v) if hasattr(v, 'value') else _Parameter(v))
               for k, v in symtab.items()}
-    retfn, errors = _compile_constraints(symtab, exprs, context=context)
+    retfn, errors = _compile_constraints(symtab,
+                                         exprs,
+                                         context=context,
+                                         html=html)
     if not errors:
         try:
             retfn()
         except Exception as exc:
-            errors.append(exc)
+            errors.append(str(exc))
     return errors
 
-def _compile_constraints(symtab, exprs, context={}):
+def _compile_constraints(symtab, exprs, context={}, html=False):
     errors = []
 
     # Check the syntax before compiling the complete function.
     available_symbols = standard_symbols(context)
     available_symbols.update(symtab)
     for k, v in exprs.items():
-        try:
-            _check_syntax(k, v)
-        except ConstraintSyntaxError as exc:
-            errors.append(exc)
-        try:
-            _check_free_variables(k, v, available_symbols)
-        except UnknownParameterNameError as exc:
-            errors.append(exc)
+        errors.extend(_check_syntax(k, v, html=html))
+        errors.extend(_check_free_variables(k, v, available_symbols, html=html))
 
     # Sort the parameters in the order they need to be evaluated
     # Note: order_dependencies raises an error if there are cyclic dependencies
@@ -294,7 +284,12 @@ def _compile_constraints(symtab, exprs, context={}):
     try:
         order = order_dependencies(deps)
     except Exception as exc:
-        errors.append(exc)
+        if html:
+            errors.append("Cyclic dependency amongst parameters: "
+                          "<b>%s</b>"
+                          % str(exc))
+        else:
+            errors.append("Cyclic dependency amongst parameters: %s" % str(exc))
 
     if errors:
         return None, errors
@@ -361,7 +356,7 @@ def order_dependencies(pairs):
         independent = right - left
         if independent == emptyset:
             cycleset = ", ".join(str(s) for s in left)
-            raise CyclicDefinitionError(None, cycleset)
+            raise ValueError(cycleset)
 
         # The possibly resolvable items are those that depend on the independents
         dependent = set([a for a, b in pairs if b in independent])
