@@ -913,8 +913,11 @@ def checkConstraints(symtab, constraints):
     errors = "<br>".join(check_constraints(symtab, dict(constraints),
                                            html=True))
     # wrap everything in <div class = "error">
-    errors = "<div class = \"error\">" + errors + "</div>"
-    header = "<style type=\"text/css\"> div.error b { " \
-             "font-weight: normal; color:red;}</style>"
-    return header + errors
+    if errors:
+        errors = "<div class = \"error\">" + errors + "</div>"
+        header = "<style type=\"text/css\"> div.error b { "\
+                 "font-weight: normal; color:red;}</style>"
+        return header + errors
+    else:
+        return []
 
