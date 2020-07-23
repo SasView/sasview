@@ -260,12 +260,18 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.getTabsForFit = MagicMock(return_value=[[None], [None]])
         spy = QSignalSpy(self.widget.parent.communicate.statusBarUpdateSignal)
         # test handling of fit error
-        result = MagicMock()
-        result[0][0][0].success = False
-        result[0][0][0].mesg = [ValueError, None]
+        # result is None
+        result = None
         self.widget.fitComplete(result)
         self.assertEqual(spy[0][0], 'Fitting failed. Please ensure '
                                     'correctness of chosen constraints.')
+        # Result has returned an exception
+        result = MagicMock()
+        result[0][0][0].success = False
+        result[0][0][0].mesg = [Exception("foo"), None]
+        self.widget.fitComplete(result)
+        self.assertEqual(spy[1][0], 'Fitting failed with the following '
+                                    'message: foo')
 
         # test a successful fit
         result[0][0][0].success = True
@@ -273,9 +279,12 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab.kernel_module.name = 'M1'
         test_tab.fitComplete = MagicMock()
         result[0][0][0].model.name = 'M1'
+        GuiUtils.formatNumber = MagicMock(return_value="1.5")
         self.widget.tabs_for_fitting = {"test_tab": test_tab}
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
         self.widget.fitComplete(result)
         self.assertEqual(test_tab.fitComplete.call_args[0][0][1], result[1])
         self.assertEqual(test_tab.fitComplete.call_args[0][0][0],
                          [[result[0][0][0]]])
+        self.assertEqual(spy[2][0], 'Fitting completed successfully in: 1.5 '
+                                    's.\n')

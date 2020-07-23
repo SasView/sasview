@@ -507,9 +507,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Get the results list
         results = result[0][0]
         if not results[0].success:
-            if isinstance(results[0].mesg[0], RuntimeError):
-                msg = "Fitting failed with the following message" + \
-                      results[0].mesg[0].args[0]
+            if isinstance(results[0].mesg[0], Exception):
+                msg = "Fitting failed with the following message: " + \
+                      str(results[0].mesg[0].args[0])
             else:
                 msg = "Fitting failed. Please ensure correctness of " \
                       "chosen constraints."
