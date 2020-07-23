@@ -4314,11 +4314,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getSymbolDict(self):
         """
-        Return a dict containing a list of all the symbols used for fitting and their values,
-        e.g. {'M1.scale':1, 'M1.background': 0.001}
+        Return a dict containing a list of all the symbols used for fitting
+        and their values, e.g. {'M1.scale':1, 'M1.background': 0.001}
         """
         sym_dict = {}
         model_name = self.kernel_module.name
         for param in self.getParamNames():
-            sym_dict[f"{model_name}.{param}"] = self._model_model.item(self.getRowFromName(param), 1).text()
+            sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
+                self._model_model.item(self.getRowFromName(param), 1).text())
         return sym_dict
