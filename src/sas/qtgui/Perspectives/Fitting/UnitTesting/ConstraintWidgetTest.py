@@ -12,6 +12,7 @@ import path_prepare
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 # Local
@@ -144,9 +145,12 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.tblConstraints.rowCount(), 0)
 
         # Add a second tab with an active constraint
-        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
-        test_tab.getFullConstraintNameListForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
-        test_tab.getConstraintObjectsForModel = MagicMock(return_value=[self.constraint1])
+        test_tab.getComplexConstraintsForModel = MagicMock(
+            return_value=[('scale', self.constraint1.func)])
+        test_tab.getFullConstraintNameListForModel = MagicMock(
+            return_value=[('scale', self.constraint1.func)])
+        test_tab.getConstraintObjectsForModel = MagicMock(
+            return_value=[self.constraint1])
         self.widget.updateFitLine("test_tab")
         # We should have 2 tabs in the model tab
         self.assertEqual(self.widget.tblTabList.rowCount(), 2)
@@ -207,61 +211,49 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.orderedSublist.assert_called_with([test_tab], [test_tab])
 
 
-    def testUpdateConstraintList(self):
-        ''' see if the constraint table can be updated '''
-        # mock a tab
-        test_tab = MagicMock(spec=FittingWidget)
-        test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
-        self.widget.getObjectByName = MagicMock(return_value=test_tab)
-        test_tab.addConstraintToRow = MagicMock()
-        test_tab.changeCheckboxStatus = MagicMock()
-        test_tab.getRowFromName = MagicMock(return_value=1)
-        test_tab.changeCheckboxStatus = MagicMock()
-
-        # add a constraint
-        self.widget.onAcceptConstraint((test_tab, self.constraint1))
-        test_tab.addConstraintToRow.assert_called_with(self.constraint1, 1)
-        test_tab.changeCheckboxStatus.assert_called_with(1, True)
-
-    def testFindNameErrorInConstraint(self):
-        ''' test if we get get a faulty constraint'''
-        constraint = "M1.scale = M2.scal + M2.background"
-        name_error = "M2"
-        expression = "P1.scale = M2.scal + M2.background"
-        name = self.widget.findNameErrorInConstraint(constraint, expression, name_error)
-        self.assertEqual("M2.scal", name)
-
-    def testFindConstraintInTable(self):
-        ''' test if we can retrieve a constraint in the constraint list'''
+    def testOnAcceptConstraint(self):
+        ''' test if a constraint can be added '''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = MagicMock()
         test_tab.kernel_module.name = "M1"
+        test_tab.getSymbolDict = MagicMock(return_value = {})
+        test_tab.addConstraintToRow = MagicMock()
+        test_tab.changeCheckboxStatus = MagicMock()
+        test_tab.getRowFromName = MagicMock(return_value=1)
+        test_tab.changeCheckboxStatus = MagicMock()
+        test_tab.getConstraintsForModel = MagicMock(return_value=[('sld',
+                                                                  'sld_solvent*5')])
+
+        self.widget.getObjectByName = MagicMock(return_value=test_tab)
+        self.widget.getTabsForFit = MagicMock(return_value=[test_tab])
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
+        FittingUtilities.checkConstraints = MagicMock(return_value=[])
+
         # add a constraint
-        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
-        test_tab.getFullConstraintNameListForModel = MagicMock(return_value=[('scale', self.constraint1.func)])
-        test_tab.getConstraintObjectsForModel = MagicMock(return_value=[self.constraint1])
-        self.widget.updateFitLine("test_tab")
-        # Find a non existent constraint
-        constraint_number = self.widget.findConstraintInTable("foo")
-        self.assertEqual(None, constraint_number)
-        # add a second constraint
-        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[('scale', self.constraint2.func)])
-        test_tab.getFullConstraintNameListForModel = MagicMock(return_value=[('scale', self.constraint2.func)])
-        test_tab.getConstraintObjectsForModel = MagicMock(return_value=[self.constraint2])
-        self.widget.updateFitLine("test_tab")
-        # find first constraint
-        constraint = test_tab.kernel_module.name + "." + "scale" + "=" + self.constraint1.func
-        constraint_number = self.widget.findConstraintInTable(constraint)
-        self.assertEqual(0, constraint_number)
-        # find second constraint
-        constraint = test_tab.kernel_module.name + "." + "scale" + "=" + self.constraint2.func
-        constraint_number = self.widget.findConstraintInTable(constraint)
-        self.assertEqual(1, constraint_number)
+        self.widget.onAcceptConstraint(("M1", self.constraint1))
+        FittingUtilities.checkConstraints.assert_called_with({}, [('M1.sld',
+                                                                  'sld_solvent*5'),
+                                                                  ('M1.test',
+                                                                   'M1.sld')])
+        test_tab.addConstraintToRow.assert_called_with(self.constraint1, 1)
+        test_tab.changeCheckboxStatus.assert_called_with(1, True)
+
+        # add an invalid constraint
+        QtWidgets.QMessageBox.critical = MagicMock()
+        test_tab.addConstraintToRow = MagicMock()
+        test_tab.changeCheckboxStatus = MagicMock()
+        FittingUtilities.checkConstraints = MagicMock(return_value="foo")
+        self.widget.onAcceptConstraint(("M1", self.constraint1))
+        QtWidgets.QMessageBox.critical.assert_called_with(self.widget,
+                                                          "Inconsistent "
+                                                          "constraint",
+                                                          "foo",
+                                                          QtWidgets.QMessageBox.Ok)
+        self.assertFalse(test_tab.addConstraintToRow.called)
+        self.assertFalse(test_tab.changeCheckboxStatus.called)
 
     def testFitComplete(self):
         ''' test the handling of fit results'''
@@ -272,7 +264,8 @@ class ConstraintWidgetTest(unittest.TestCase):
         result[0][0][0].success = False
         result[0][0][0].mesg = [ValueError, None]
         self.widget.fitComplete(result)
-        self.assertEqual(spy[1][0], 'Fit failed')
+        self.assertEqual(spy[0][0], 'Fitting failed. Please ensure '
+                                    'correctness of chosen constraints.')
 
         # test a successful fit
         result[0][0][0].success = True
@@ -284,4 +277,5 @@ class ConstraintWidgetTest(unittest.TestCase):
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
         self.widget.fitComplete(result)
         self.assertEqual(test_tab.fitComplete.call_args[0][0][1], result[1])
-        self.assertEqual(test_tab.fitComplete.call_args[0][0][0], [[result[0][0][0]]])
+        self.assertEqual(test_tab.fitComplete.call_args[0][0][0],
+                         [[result[0][0][0]]])
