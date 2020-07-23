@@ -892,14 +892,29 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             break
     return has_poly
 
-def compileConstraints(symtab, constraints, check_cyclic = False):
-    exprs = {}
-    duplicates = []
-    for parameter_name, expression in constraints:
-        if parameter_name in exprs:
-            duplicates.append(parameter_name)
-        exprs[parameter_name] = expression
-    errors = check_constraints(symtab, exprs)
-    if duplicates and check_cyclic:
-        errors.append("Duplicate parameter definitions for " + ", ".join(duplicates))
-    return errors
+def checkConstraints(symtab, constraints):
+    # type: (Dict[str, float], Sequence[Tuple[str, str]]) -> str
+    """
+    Compile and evaluate the constraints in the context of the initial values
+    and return the list of errors.
+
+    Errors are returned as an html string where errors are tagged with <b>
+    markups:
+    Unknown symbol: tags unknown symbols in *constraints*
+    Syntax error: tags the beginning of a syntax error in *constraints*
+    Cyclic dependency: tags comma separated parameters that have
+    cyclic dependency
+
+    The errors are wrapped in a <div class = "error"> and a style header is
+    added
+    """
+    # Note: dict(constraints) will choose the latest definition if
+    # there are duplicates.
+    errors = "<br>".join(check_constraints(symtab, dict(constraints),
+                                           html=True))
+    # wrap everything in <div class = "error">
+    errors = "<div class = \"error\">" + errors + "</div>"
+    header = "<style type=\"text/css\"> div.error b { " \
+             "font-weight: normal; color:red;}</style>"
+    return header + errors
+
