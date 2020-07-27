@@ -937,17 +937,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         symbol_dict = {}
         constraints = []
         for tab in self.getTabsForFit():
-            model = ObjectLibrary.getObject(tab)
-            constraint_list = model.getConstraintsForModel()
-            symbol_dict.update(model.getSymbolDict())
-            for i in range(len(constraint_list)):
-                constraint_list[i] = (model.kernel_module.name + "." +
-                                      constraint_list[i][0],
-                                      constraint_list[i][1])
-            constraints.append(constraint_list)
-        current_constraint = (model_name + "." + constraint.param,
-                              constraint.func)
-        constraints = [item for sublist in constraints for item in sublist]
+            tab_model = ObjectLibrary.getObject(tab)
+            tab_name = tab_model.kernel_module.name
+            tab_constraints = tab_model.getConstraintsForModel()
+            constraints.extend(
+                (tab_name + "." + par, expr) for par, expr in tab_constraints)
+            symbol_dict.update(tab_model.getSymbolDict())
+        current_constraint = (
+        model_name + "." + constraint.param, constraint.func)
         constraints.append(current_constraint)
         errors = FittingUtilities.checkConstraints(symbol_dict, constraints)
         if errors:
