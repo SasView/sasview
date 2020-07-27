@@ -58,7 +58,7 @@ def standard_symbols(context={}):
     symbols['id'] = id
     return symbols
 
-def _check_syntax(target, expr, html = False):
+def _check_syntax(target, expr, html=False):
     try:
         compile(expr, expr, "exec")
     except SyntaxError as exc:
