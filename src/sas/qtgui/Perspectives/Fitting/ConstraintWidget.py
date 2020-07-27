@@ -500,16 +500,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Assure the fitting succeeded
         if result is None or not result:
-            msg = "Fitting failed. Please ensure correctness of chosen constraints."
+            msg = "Fitting failed."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
         # Get the results list
         results = result[0][0]
         if not results[0].success:
-            if isinstance(results[0].mesg[0], Exception):
+            if isinstance(results[0].mesg[0], str):
                 msg = "Fitting failed with the following message: " + \
-                      str(results[0].mesg[0].args[0])
+                      results[0].mesg[0]
             else:
                 msg = "Fitting failed. Please ensure correctness of " \
                       "chosen constraints."
@@ -552,22 +552,21 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
-
-        # get the elapsed time
-        elapsed = result[1]
-
         if result is None:
             msg = "Fitting failed."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
+        # get the elapsed time
+        elapsed = result[1]
+
         # Get the results list
         results = result[0][0]
         # Warn the user if fitting has been unsuccessful
         if not results[0].success:
-            if isinstance(results[0].mesg[0], RuntimeError):
-                msg = "Fitting failed with the following message" + \
-                      results[0].mesg[0].args[0]
+            if isinstance(results[0].mesg[0], str):
+                msg = "Fitting failed with the following message: " + \
+                      results[0].mesg[0]
             else:
                 msg = "Fitting failed. Please ensure correctness of " \
                       "chosen constraints."

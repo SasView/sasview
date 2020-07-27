@@ -263,28 +263,54 @@ class ConstraintWidgetTest(unittest.TestCase):
         # result is None
         result = None
         self.widget.fitComplete(result)
-        self.assertEqual(spy[0][0], 'Fitting failed. Please ensure '
-                                    'correctness of chosen constraints.')
-        # Result has returned an exception
-        result = MagicMock()
-        result[0][0][0].success = False
-        result[0][0][0].mesg = [Exception("foo"), None]
-        self.widget.fitComplete(result)
+        self.assertEqual(spy[0][0], 'Fitting failed.')
+        # Result has failed
+        result = MagicMock(return_value= "foo")
+        results = [[[result]], 1.5]
+        result.success = False
+        result.mesg = ["foo", None]
+        self.widget.fitComplete(results)
         self.assertEqual(spy[1][0], 'Fitting failed with the following '
                                     'message: foo')
 
         # test a successful fit
-        result[0][0][0].success = True
+        result.success = True
         test_tab = MagicMock()
         test_tab.kernel_module.name = 'M1'
         test_tab.fitComplete = MagicMock()
-        result[0][0][0].model.name = 'M1'
-        GuiUtils.formatNumber = MagicMock(return_value="1.5")
+        result.model.name = 'M1'
         self.widget.tabs_for_fitting = {"test_tab": test_tab}
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
-        self.widget.fitComplete(result)
-        self.assertEqual(test_tab.fitComplete.call_args[0][0][1], result[1])
+        self.widget.fitComplete(results)
+        self.assertEqual(test_tab.fitComplete.call_args[0][0][1], 1.5)
         self.assertEqual(test_tab.fitComplete.call_args[0][0][0],
-                         [[result[0][0][0]]])
+                         [[result]])
         self.assertEqual(spy[2][0], 'Fitting completed successfully in: 1.5 '
                                     's.\n')
+
+    def testBatchFitComplete(self):
+        ''' test the handling of batch fit results'''
+        self.widget.getTabsForFit = MagicMock(return_value=[[None], [None]])
+        spy = QSignalSpy(self.widget.parent.communicate.statusBarUpdateSignal)
+        spy_data = QSignalSpy(
+            self.widget.parent.communicate.sendDataToGridSignal)
+        # test handling of fit error
+        # result is None
+        result = None
+        self.widget.batchComplete(result)
+        self.assertEqual(spy[0][0], 'Fitting failed.')
+        # Result has failed
+        result = MagicMock(return_value= "foo")
+        results = [[[result]], 1.5]
+        result.success = False
+        result.mesg = ["foo", None]
+        self.widget.batchComplete(results)
+        self.assertEqual(spy[1][0], 'Fitting failed with the following '
+                                    'message: foo')
+
+        # test a successful fit
+        result.success = True
+        self.widget.batchComplete(results)
+        self.assertEqual(spy[2][0], 'Fitting completed successfully in: 1.5 '
+                                    's.\n')
+        self.assertEqual(spy_data[0][0], [[result], 'ConstSimulPage'])
