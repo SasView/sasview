@@ -148,9 +148,10 @@ def _find_dependencies(symtab, exprs):
 def _dependent_symbols(expr, symtab):
     """
     Given an expression string and a symbol table, return the set of symbols
-    used in the expression. Symbols are only returned once even if they
-    occur multiple times. The return value is a set with the elements in
-    no particular order.
+    used in the expression. Symbols are only returned once even if they occur
+    multiple times. The return value is a set with the elements in no
+    particular order. Returns a set containing *None* if no dependencies (as
+    needed by *order_dependencies*).
 
     This is the first step in computing a dependency graph.
     """
