@@ -63,12 +63,24 @@ def _check_syntax(target, expr, html=False):
         compile(expr, expr, "exec")
     except SyntaxError as exc:
         if html:
-            constraint = "% s = % s" % (target, expr)
-            text = exc.text.strip("\n")
-            highlighted_text = text[:exc.offset-1] + "<b>" + \
-                               text[exc.offset-1:] + "</b>"
-            constraint = constraint.replace(text, highlighted_text)
-            return ["Syntax error in expression '%s'" % constraint]
+            if "\n" in expr:
+                # Multiline expression. Be lazy and just show line, col for
+                # syntax error since this should never happen.
+                return [
+                    f"Syntax error on line {exc.lineno} column {exc.offset} for {target}:\n<pre>\n{expr}\n</pre>"]
+
+            if exc.offset > len(expr):
+                # Single line expression with error after the expression.
+                # Probably missing a closing paren, but it could
+                # also be that the expression ends with an operator such as
+                # "3+4+"
+                return [f"Expression `{target} = {expr}` is not complete."]
+
+            # Single line expression. Wrap the tail of the expr after the
+            # syntax error in <b>...</b>. exc.lineno=1, exc.text = expr+"\n",
+            # and exc.offset = location of the syntax error in expr.
+            return [
+                f"Syntax error in expression '{target} = {expr[:exc.offset - 1]}<b>{expr[exc.offset - 1:]}</b>'"]
         else:
             return ["Syntax error in expression '%s = %s'" % (target, expr)]
     return []
