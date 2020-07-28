@@ -506,6 +506,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Get the results list
         results = result[0][0]
+        if isinstance(result[0], str):
+            msg = "Fitting failed with the following message: " + \
+                  result[0]
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
         if not results[0].success:
             if isinstance(results[0].mesg[0], str):
                 msg = "Fitting failed with the following message: " + \
@@ -586,7 +591,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Send the fit failed signal to main thread
         """
-        self.fitFailedSignal.emit(result)
+        self.fitFailedSignal.emit(reason)
 
     def fitFailed(self, reason):
         """
