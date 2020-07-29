@@ -59,9 +59,8 @@ def standard_symbols(context={}):
     return symbols
 
 def _check_syntax(target, expr, html=False):
-    constraint = "%s = %s"%(target, expr)
     try:
-        compile(constraint, constraint, "exec")
+        compile(expr, expr, "exec")
     except SyntaxError as exc:
         if html:
             if "\n" in expr:
@@ -70,7 +69,7 @@ def _check_syntax(target, expr, html=False):
                 return [
                     f"Syntax error on line {exc.lineno} column {exc.offset} for {target}:\n<pre>\n{expr}\n</pre>"]
 
-            if exc.offset > len(constraint):
+            if exc.offset > len(expr):
                 # Single line expression with error after the expression.
                 # Probably missing a closing paren, but it could
                 # also be that the expression ends with an operator such as
@@ -81,9 +80,7 @@ def _check_syntax(target, expr, html=False):
             # syntax error in <b>...</b>. exc.lineno=1, exc.text = expr+"\n",
             # and exc.offset = location of the syntax error in expr.
             return [
-                f"Syntax error in expression '"
-                f"{constraint[:exc.offset - 1]}<b"
-                f">{constraint[exc.offset - 1:]}</b>'"]
+                f"Syntax error in expression '{target} = {expr[:exc.offset - 1]}<b>{expr[exc.offset - 1:]}</b>'"]
         else:
             return ["Syntax error in expression '%s = %s'" % (target, expr)]
     return []
