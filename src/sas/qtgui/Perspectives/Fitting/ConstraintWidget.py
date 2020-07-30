@@ -937,28 +937,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constrained_tab = self.getObjectByName(model_name)
         if constrained_tab is None:
             return
-        # Create a symbol dict for all constraints,
-        # as well as a full list of constraints
-        symbol_dict = {}
-        constraints = []
-        for tab in self.getTabsForFit():
-            tab_model = ObjectLibrary.getObject(tab)
-            tab_name = tab_model.kernel_module.name
-            tab_constraints = tab_model.getConstraintsForModel()
-            constraints.extend(
-                (tab_name + "." + par, expr) for par, expr in tab_constraints)
-            symbol_dict.update(tab_model.getSymbolDict())
-        current_constraint = (
-        model_name + "." + constraint.param, constraint.func)
-        constraints.append(current_constraint)
-        errors = FittingUtilities.checkConstraints(symbol_dict, constraints)
-        if errors:
-            QtWidgets.QMessageBox.critical(self,
-                                           "Inconsistent constraint",
-                                           errors,
-                                           QtWidgets.QMessageBox.Ok)
-            self.constraint_accepted = False
-            return
+
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
 
