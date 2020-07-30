@@ -943,11 +943,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row)
+        if not self.constraint_accepted:
+            return
 
         # Select this parameter for adjusting/fitting
         constrained_tab.changeCheckboxStatus(constrained_row, True)
-        self.constraint_accepted = True
-
 
     def showMultiConstraint(self):
         """
