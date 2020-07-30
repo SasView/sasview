@@ -791,13 +791,36 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def addConstraintToRow(self, constraint=None, row=0):
         """
-        Adds the constraint object to requested row
+        Adds the constraint object to requested row. The constraint is first
+        checked for errors, and a  message box interrupting flow is
+        displayed, with the reason of the failure.
         """
         # Create a new item and add the Constraint object as a child
         assert isinstance(constraint, Constraint)
         assert 0 <= row <= self._model_model.rowCount()
         assert self.isCheckable(row)
 
+        # Error checking
+        # First, get a list of constraints and symbols
+        constraint_list = self.parent.perspective().getActiveConstraintList()
+        symbol_dict = self.parent.perspective().getSymbolDictForConstraints()
+        constraint_list.append((self.modelName() + '.' + constraint.param,
+                                constraint.func))
+        # Call the error checking function
+        errors = FittingUtilities.checkConstraints(symbol_dict, constraint_list)
+        if errors:
+            # Display the message box
+            QtWidgets.QMessageBox.critical(self,
+                                           "Inconsistent constraint",
+                                           errors,
+                                           QtWidgets.QMessageBox.Ok)
+            # Check if there is a constraint tab
+            constraint_tab = self.parent.perspective().getConstraintTab()
+            if constraint_tab:
+                # Set the constraint_accepted flag to False to inform the
+                # constraint tab that the constraint was not accepted
+                constraint_tab.constraint_accepted = False
+            return
         item = QtGui.QStandardItem()
         item.setData(constraint)
         self._model_model.item(row, 1).setChild(0, item)

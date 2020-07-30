@@ -467,7 +467,6 @@ class FittingWindow(QtWidgets.QTabWidget):
             tab_constraints = tab.getConstraintsForModel()
             constraints.extend((tab_name + "." + par, expr) for par, expr in
                                tab_constraints)
-        print(constraints)
         return constraints
 
     def getSymbolDictForConstraints(self):
