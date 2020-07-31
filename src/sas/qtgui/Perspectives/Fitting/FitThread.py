@@ -101,7 +101,7 @@ class FitThread(CalcThread):
                 self.handler.error(msg=str(ex))
                 self.completefn((str(ex), None))
             else:
-                return(None)
+                return None
 
 
 
