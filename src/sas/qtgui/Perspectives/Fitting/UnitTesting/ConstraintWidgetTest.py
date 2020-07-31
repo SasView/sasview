@@ -161,9 +161,7 @@ class ConstraintWidgetTest(unittest.TestCase):
         # Check the text
         self.assertEqual(self.widget.tblConstraints.item(0, 0).text(),
                          test_tab.kernel_module.name +
-                         ":" +
-                         "scale" +
-                         " = " +
+                         ":scale = " +
                          self.constraint1.func)
         # Add a tab with a non active constraint
         test_tab.getComplexConstraintsForModel = MagicMock(return_value=[])
@@ -215,45 +213,24 @@ class ConstraintWidgetTest(unittest.TestCase):
         ''' test if a constraint can be added '''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
-        test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
-        test_tab.kernel_module.name = "M1"
-        test_tab.getSymbolDict = MagicMock(return_value = {})
         test_tab.addConstraintToRow = MagicMock()
-        test_tab.changeCheckboxStatus = MagicMock()
         test_tab.getRowFromName = MagicMock(return_value=1)
         test_tab.changeCheckboxStatus = MagicMock()
-        test_tab.getConstraintsForModel = MagicMock(return_value=[('sld',
-                                                                  'sld_solvent*5')])
 
+        # mock the getObjectByName method
         self.widget.getObjectByName = MagicMock(return_value=test_tab)
-        self.widget.getTabsForFit = MagicMock(return_value=[test_tab])
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
-
-        FittingUtilities.checkConstraints = MagicMock(return_value=[])
 
         # add a constraint
-        self.widget.onAcceptConstraint(("M1", self.constraint1))
-        FittingUtilities.checkConstraints.assert_called_with({}, [('M1.sld',
-                                                                  'sld_solvent*5'),
-                                                                  ('M1.test',
-                                                                   'M1.sld')])
+        constraint_tuple = ('M1', self.constraint1)
+        self.widget.onAcceptConstraint(constraint_tuple)
+
+        # check the getObjectByName call
+        self.widget.getObjectByName.assert_called_with('M1')
+
+        # check the tab method calls
+        test_tab.getRowFromName.assert_called_with(self.constraint1.param)
         test_tab.addConstraintToRow.assert_called_with(self.constraint1, 1)
         test_tab.changeCheckboxStatus.assert_called_with(1, True)
-
-        # add an invalid constraint
-        QtWidgets.QMessageBox.critical = MagicMock()
-        test_tab.addConstraintToRow = MagicMock()
-        test_tab.changeCheckboxStatus = MagicMock()
-        FittingUtilities.checkConstraints = MagicMock(return_value="foo")
-        self.widget.onAcceptConstraint(("M1", self.constraint1))
-        QtWidgets.QMessageBox.critical.assert_called_with(self.widget,
-                                                          "Inconsistent "
-                                                          "constraint",
-                                                          "foo",
-                                                          QtWidgets.QMessageBox.Ok)
-        self.assertFalse(test_tab.addConstraintToRow.called)
-        self.assertFalse(test_tab.changeCheckboxStatus.called)
 
     def testFitComplete(self):
         ''' test the handling of fit results'''
