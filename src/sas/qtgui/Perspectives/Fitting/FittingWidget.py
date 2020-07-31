@@ -808,6 +808,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                 constraint.func))
         # Call the error checking function
         errors = FittingUtilities.checkConstraints(symbol_dict, constraint_list)
+        # get the constraint tab
+        constraint_tab = self.parent.perspective().getConstraintTab()
         if errors:
             # Display the message box
             QtWidgets.QMessageBox.critical(
@@ -816,7 +818,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 errors,
                 QtWidgets.QMessageBox.Ok)
             # Check if there is a constraint tab
-            constraint_tab = self.parent.perspective().getConstraintTab()
             if constraint_tab:
                 # Set the constraint_accepted flag to False to inform the
                 # constraint tab that the constraint was not accepted
@@ -833,6 +834,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         brush = QtGui.QBrush(QtGui.QColor('blue'))
         self.modifyViewOnRow(row, font=font, brush=brush)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
+        if constraint_tab:
+            # Set the constraint_accepted flag to True to inform the
+            # constraint tab that the constraint was accepted
+            constraint_tab.constraint_accepted = True
 
     def addSimpleConstraint(self):
         """
