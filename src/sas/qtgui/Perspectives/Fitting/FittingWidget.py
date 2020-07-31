@@ -810,10 +810,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         errors = FittingUtilities.checkConstraints(symbol_dict, constraint_list)
         if errors:
             # Display the message box
-            QtWidgets.QMessageBox.critical(self,
-                                           "Inconsistent constraint",
-                                           errors,
-                                           QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                errors,
+                QtWidgets.QMessageBox.Ok)
             # Check if there is a constraint tab
             constraint_tab = self.parent.perspective().getConstraintTab()
             if constraint_tab:
