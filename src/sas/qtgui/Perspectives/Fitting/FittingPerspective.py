@@ -465,8 +465,8 @@ class FittingWindow(QtWidgets.QTabWidget):
         for tab in self.getFitTabs():
             tab_name = tab.modelName()
             tab_constraints = tab.getConstraintsForModel()
-            constraints.extend((tab_name + "." + par, expr) for par, expr in
-                               tab_constraints)
+            constraints.extend((tab_name + "." + par, expr)
+                               for par, expr in tab_constraints)
         return constraints
 
     def getSymbolDictForConstraints(self):
@@ -484,8 +484,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         Returns the constraint tab, or None if no constraint tab is active
         """
         if any(isinstance(tab, ConstraintWidget) for tab in self.tabs):
-            constraint_tab = next(tab for tab in self.tabs if isinstance(tab,
-                                                                     ConstraintWidget))
+            constraint_tab = next(tab
+                                  for tab in self.tabs
+                                  if isinstance(tab, ConstraintWidget))
         else:
             constraint_tab = None
         return constraint_tab
