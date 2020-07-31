@@ -1340,7 +1340,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Now try to add an constraint when the checking function returns an
         # error message
         FittingUtilities.checkConstraints = MagicMock(return_value="foo")
-        
+
         # Mock the QMessagebox Warning
         QtWidgets.QMessageBox.critical = MagicMock()
 
