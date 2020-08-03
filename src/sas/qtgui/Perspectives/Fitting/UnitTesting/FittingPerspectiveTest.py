@@ -168,5 +168,63 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.tabText(1), "BatchPage2")
         self.assertEqual(self.widget.tabText(2), "BatchPage3")
 
+    def testGetFitTabs(self):
+        '''test the fit tab getter method'''
+        # Add an empty tab
+        self.widget.addFit(None)
+        # Get the tabs
+        tabs = self.widget.getFitTabs()
+        self.assertTrue(isinstance(tabs, list))
+        self.assertEqual(len(tabs), 2)
+
+    def testGetActiveConstraintList(self):
+        '''test the active constraint getter'''
+        # Add an empty tab
+        self.widget.addFit(None)
+        # mock the getConstraintsForModel method of the FittingWidget tab of
+        # the first tab
+        tab = self.widget.tabs[0]
+        tab.getConstraintsForModel = MagicMock(return_value=[("scale",
+                                                               "M2.scale +2")])
+        # mock the getConstraintsForModel method of the FittingWidget tab of
+        # the second tab
+        tab = self.widget.tabs[1]
+        tab.getConstraintsForModel = MagicMock(return_value=[("scale",
+                                                               "M2.background "
+                                                               "+2")])
+        constraints = self.widget.getActiveConstraintList()
+
+        # we should have 2 constraints
+        self.assertEqual(len(constraints), 2)
+        self.assertEqual(constraints, [("M1.scale", "M2.scale +2"),
+                                       ('M2.scale', 'M2.background +2')])
+
+    def testGetSymbolDictForConstraints(self):
+        '''test the symbol dict getter'''
+        # Add an empty tab
+        self.widget.addFit(None)
+        # mock the getSymbolDict method of the first tab
+        tab = self.widget.tabs[0]
+        tab.getSymbolDict = MagicMock(return_value={"M1.scale": 1})
+        # mock the getSymbolDict method of the second tab
+        tab = self.widget.tabs[1]
+        tab.getSymbolDict = MagicMock(return_value={"M2.scale": 1})
+
+        symbols = self.widget.getSymbolDictForConstraints()
+        # we should have 2 symbols
+        self.assertEqual(len(symbols), 2)
+        self.assertEqual(list(symbols.keys()), ["M1.scale", "M2.scale"])
+
+    def testGetConstraintTab(self):
+        '''test the constraint tab getter'''
+        # no constraint tab is present, should return None
+        constraint_tab = self.widget.getConstraintTab()
+        self.assertEqual(constraint_tab, None)
+
+        # add a constraint tab
+        self.widget.addConstraintTab()
+        constraint_tab = self.widget.getConstraintTab()
+        self.assertEquals(constraint_tab, self.widget.tabs[1])
+
 if __name__ == "__main__":
     unittest.main()
