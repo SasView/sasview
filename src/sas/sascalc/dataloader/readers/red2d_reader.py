@@ -12,7 +12,6 @@ import os
 import time
 
 import numpy as np
-from itertools import takewhile
 
 from sas.sascalc.data_util.nxsunit import Converter
 
@@ -225,6 +224,8 @@ class Reader(FileReader):
             dqx_data = data_point[(4 + ver)]
         if col_num > (5 + ver):
             dqy_data = data_point[(5 + ver)]
+        # Column '6 + ver' is the shadow factor value. A separate mask column
+        #   was added to account for self-drawn masks.
         # if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
         if col_num > (7 + ver):
             mask = np.invert(np.asarray(data_point[(7 + ver)], dtype=bool))
@@ -236,19 +237,21 @@ class Reader(FileReader):
         ymin = np.min(qy_data)
         ymax = np.max(qy_data)
 
-        # store x and y axis bin centers in q space
+        # Find unique Qx and Qy values for data binning and visualization
+        # len(x_bins) * len(y_bins) ~= len(qx_data) ~= len(qy_data)
         x_bins = np.unique(qx_data)
         y_bins = np.unique(qy_data)
-        # For non-uniform Qx and Qy arrays
+        # For non-uniform qx_data and/or qy_data
+        #  Cases: Rotated detectors, floating point variations
         if round(len(x_bins) * len(y_bins) / len(qx_data)) >= 2:
-            x_bins = [qx_data[i] for i in takewhile(
-                lambda i: qx_data[i] < qx_data[i + 1], range(len(qx_data)))]
-            # Above list comprehension rejects last item
-            x_bins.append((qx_data[len(x_bins)]))
+            # qx_data increases along rows => travel along a single pixel line
+            num_qx = np.argmax(np.hstack((qx_data[1:] < qx_data[:-1], True)))
+            x_bins = qx_data[:num_qx + 1]
+            # qy_data increases along columns => transpose qx_data shape
             qy = np.reshape(qy_data, (len(qx_data)//len(x_bins), len(x_bins)))
             y_bins = np.transpose(qy)[0].tolist()
 
-        #Store data in outputs
+        # Store data in outputs
         self.current_dataset.data = data
         if (err_data == 1).all():
             self.current_dataset.err_data = np.sqrt(np.abs(data))
