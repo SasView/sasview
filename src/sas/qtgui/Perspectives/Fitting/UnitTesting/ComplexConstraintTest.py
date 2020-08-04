@@ -10,6 +10,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore, QtTest
 # set up import paths
 import path_prepare
 
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
 # Local
@@ -30,6 +31,11 @@ class ComplexConstraintTest(unittest.TestCase):
         # mockup tabs
         self.tab1 = FittingWidget(dummy_manager())
         self.tab2 = FittingWidget(dummy_manager())
+        # mock the constraint error mechanism
+        FittingUtilities.checkConstraints = MagicMock(return_value=None)
+        self.tab1.parent.perspective = MagicMock()
+        self.tab2.parent.perspective = MagicMock()
+
         # set some models on tabs
         category_index = self.tab1.cbCategory.findText("Shape Independent")
         self.tab1.cbCategory.setCurrentIndex(category_index)
