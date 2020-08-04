@@ -1,9 +1,7 @@
 # global
-import sys
-import os
 import logging
 import copy
-import webbrowser
+import  numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
@@ -15,8 +13,6 @@ from twisted.internet import reactor
 from sas.sascalc.invariant import invariant
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-# import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # local
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
@@ -38,6 +34,7 @@ DEFAULT_POWER_LOW = 4
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
+
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -52,7 +49,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # initial input params
         self._background = 0.0
         self._scale = 1.0
-        self._contrast = 1.0
+        self._contrast = 8.0e-6
         self._porod = None
 
         self.parent = parent
@@ -221,7 +218,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Set the button back to available
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
-        self.cmdStatus.setEnabled(True)
 
         self.model = model
         self.mapper.toFirst()
@@ -255,6 +251,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.updateFromModel()
         msg = ''
 
+        qstar_data = 0.0
+        qstar_data_err = 0.0
         qstar_low = 0.0
         qstar_low_err = 0.0
         qstar_high = 0.0
@@ -291,7 +289,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         calculation_failed = False
 
         try:
-            qstar_total, qstar_total_error = inv.get_qstar_with_error()
+            qstar_data, qstar_data_err = inv.get_qstar_with_error()
         except Exception as ex:
             msg += str(ex)
             calculation_failed = True
@@ -300,11 +298,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.model.setItem(WIDGETS.W_INVARIANT, item)
             item = QtGui.QStandardItem("ERROR")
             self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
-
         try:
             volume_fraction, volume_fraction_error = \
-                inv.get_volume_fraction_with_error(self._contrast)
-
+                inv.get_volume_fraction_with_error(self._contrast,
+                                                   extrapolation=extrapolation)
         except Exception as ex:
             calculation_failed = True
             msg += str(ex)
@@ -330,8 +327,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             surface = None
 
         if (calculation_failed):
+            self.cmdStatus.setEnabled(False)
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
+        self.cmdStatus.setEnabled(True)
 
         low_calculation_pass = True
         high_calculation_pass = True
@@ -349,7 +348,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 high_calculation_pass = False
                 msg += str(ex)
                 logging.warning('High-q calculation failed: {}'.format(msg))
-
 
         if self._low_extrapolate and low_calculation_pass:
             extrapolated_data = inv.get_extra_data_low(self._low_points)
@@ -375,9 +373,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             # Add the plot to the model item
             # This needs to run in the main thread
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                                       self._model_item,
-                                       extrapolated_data,
-                                       title)
+                                   self._model_item,
+                                   extrapolated_data,
+                                   title)
 
         if self._high_extrapolate and high_calculation_pass:
             # for presentation in InvariantDetails
@@ -407,23 +405,29 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             # Add the plot to the model item
             # This needs to run in the main thread
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                                       self._model_item, high_out_data, title)
+                                   self._model_item, high_out_data, title)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
         if surface:
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
-                                                    surface_error)
+                                   surface_error)
+
+        qstar_total = qstar_data + qstar_low + qstar_high
+        qstar_total_error = np.sqrt(
+            qstar_data_err * qstar_data_err
+            + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
         return self.model
-
 
     def updateModelFromThread(self, widget, value):
         """
@@ -654,8 +658,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.rbFixLowQ.setEnabled(clicked)  # and not self._low_guinier)
 
         self.txtPowerLowQ.setEnabled(clicked
-                                    and not self._low_guinier
-                                    and not self._low_fit)
+                                     and not self._low_guinier
+                                     and not self._low_fit)
 
     def setupModel(self):
         """ """
@@ -746,7 +750,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.mapper.addMapping(self.txtNptsHighQ, WIDGETS.W_NPTS_HIGHQ)
         self.mapper.addMapping(self.rbFitHighQ, WIDGETS.W_HIGHQ_FIT)
         self.mapper.addMapping(self.txtPowerHighQ, WIDGETS.W_HIGHQ_POWER_VALUE)
-    
+
         # Output
         self.mapper.addMapping(self.txtVolFract, WIDGETS.W_VOLUME_FRACTION)
         self.mapper.addMapping(self.txtVolFractErr, WIDGETS.W_VOLUME_FRACTION_ERR)
@@ -822,5 +826,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     def allowBatch(self):
         """
         Tell the caller that we don't accept multiple data instances
+        """
+        return False
+
+    def allowSwap(self):
+        """
+        Tell the caller that we can't swap data
         """
         return False

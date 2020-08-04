@@ -136,10 +136,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Tooltip for txtConstraint
         """
-        p1 = self.tab_names[0] + ":" + self.cbParam1.currentText()
-        p2 = self.tab_names[1] +"."+self.cbParam2.currentText() if len(self.tab_names) != 1 else self.tab_names[0] +"."+self.cbParam2.currentText()
-        tooltip = "E.g.\n%s = 2.0 * (%s)\n" %(p1, p2)
-        tooltip += "%s = sqrt(%s) + 5"%(p1, p2)
+        tooltip = "E.g. M1:scale = 2.0 * M2.scale\n"
+        tooltip += "M1:scale = sqrt(M2.scale) + 5"
         self.txtConstraint.setToolTip(tooltip)
 
     def onParamIndexChange(self, index):

@@ -89,6 +89,9 @@
         <property name="toolTip">
          <string>Extrapolated invariant from low-Q range.</string>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="2">
@@ -102,6 +105,9 @@
        <widget class="QLineEdit" name="txtQLowQErr">
         <property name="toolTip">
          <string>Uncertainty on the invariant from low-Q range.</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -124,6 +130,9 @@
         <property name="toolTip">
          <string>Invariant in the data set's Q range.</string>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="1" column="2">
@@ -137,6 +146,9 @@
        <widget class="QLineEdit" name="txtQDataErr">
         <property name="toolTip">
          <string>Uncertainty on the invariant from data's range.</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -159,6 +171,9 @@
         <property name="toolTip">
          <string>Extrapolated invariant from high-Q range.</string>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="2" column="2">
@@ -172,6 +187,9 @@
        <widget class="QLineEdit" name="txtQHighQErr">
         <property name="toolTip">
          <string>Uncertainty on the invariant from high-Q range.</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

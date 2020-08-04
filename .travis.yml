@@ -2,10 +2,14 @@ matrix:
   include:
   - os: linux
     language: generic
-    env: PY=3.6
+    env:
+      - MINICONDA=https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+      - PY=3.6
   - os: osx
     language: generic
-    env: PY=3.6
+    env:
+      - MINICONDA=https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+      - PY=3.6
 branches:
   only:
   - master
@@ -13,6 +17,8 @@ branches:
 addons:
   apt:
     packages:
+    - python-pyopencl
+    - ocl-icd-opencl-dev
     - opencl-headers
     - libblas-dev
     - libatlas-dev
@@ -22,18 +28,17 @@ addons:
     - libhdf5-serial-dev
 before_install:
 - echo $TRAVIS_OS_NAME
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  -O miniconda.sh; sudo apt-get update; sudo apt-get install python-pyopencl; elif
-  [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-  -O miniconda.sh; fi
+- wget $MINICONDA -O miniconda.sh
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - hash -r
 #- conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako
 install:
-- pip install periodictable xhtml2pdf pyopencl unittest-xml-reporting pylint
+- pip install periodictable xhtml2pdf unittest-xml-reporting pylint
+# Note: use "... || true" below to silently ignore failure
+- pip install pyopencl
 script:
 - cd ..
 - export WORKSPACE=$(pwd)

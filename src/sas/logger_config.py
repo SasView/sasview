@@ -29,7 +29,7 @@ class SetupLogger(object):
             self._read_config_file()
             logging.captureWarnings(True)
             logger = logging.getLogger(self.name)
-
+        logging.getLogger('matplotlib').setLevel(logging.WARN)
         return logger
 
     def config_development(self):
@@ -39,9 +39,8 @@ class SetupLogger(object):
         logger = logging.getLogger(self.name)
         self._update_all_logs_to_debug(logger)
         logging.captureWarnings(True)
-
         self._disable_debug_from_config()
-
+        logging.getLogger('matplotlib').setLevel(logging.WARN)
         return logger
 
     def _disable_debug_from_config(self):

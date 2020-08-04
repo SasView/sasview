@@ -27,6 +27,7 @@ class FittingWindow(QtWidgets.QTabWidget):
     fittingStoppedSignal = QtCore.pyqtSignal(list)
 
     name = "Fitting" # For displaying in the combo box in DataExplorer
+    ext = "fitv"  # Extension used for saving analyses
     def __init__(self, parent=None, data=None):
 
         super(FittingWindow, self).__init__()
@@ -120,28 +121,23 @@ class FittingWindow(QtWidgets.QTabWidget):
     def onLatexCopy(self):
         self.currentTab.onCopyToClipboard("Latex")
 
+    def serializeAll(self):
+        return self.serializeAllFitpage()
+
     def serializeAllFitpage(self):
         # serialize all active fitpages and return
         # a dictionary: {data_id: fitpage_state}
-        params = {}
+        state = {}
         for i, tab in enumerate(self.tabs):
-            tab_data = self.getSerializedFitpage(tab)
-            if 'data_id' not in tab_data: continue
-            id = tab_data['data_id'][0]
-            if isinstance(id, list):
-                for i in id:
-                    if i in params:
-                        params[i].append(tab_data)
-                    else:
-                        params[i] = [tab_data]
-            else:
-                if id in params:
-                    params[id].append(tab_data)
+            tab_state = self.getSerializedFitpage(tab)
+            for key, value in tab_state.items():
+                if key in state:
+                    state[key].update(value)
                 else:
-                    params[id] = [tab_data]
-        return params
+                    state[key] = value
+        return state
 
-    def serializeCurrentFitpage(self):
+    def serializeCurrentPage(self):
         # serialize current(active) fitpage
         return self.getSerializedFitpage(self.currentTab)
 
@@ -149,6 +145,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         get serialize requested fit tab
         """
+        state = {}
         fitpage_state = tab.getFitPage()
         fitpage_state += tab.getFitModel()
         # put the text into dictionary
@@ -157,7 +154,19 @@ class FittingWindow(QtWidgets.QTabWidget):
             #content = line.split(',')
             if len(line) > 1:
                 line_dict[line[0]] = line[1:]
-        return line_dict
+
+        if 'data_id' not in line_dict: return state
+        id = line_dict['data_id'][0]
+        if not isinstance(id, list):
+            id = [id]
+        for i in id:
+            if 'is_constraint' in line_dict.keys():
+                state[i] = line_dict
+            elif i in state and 'fit-params' in state[i]:
+                state[i]['fit_params'].update(line_dict)
+            else:
+                state[i] = {'fit_params': [line_dict]}
+        return state
 
     def currentTabDataId(self):
         """
@@ -347,6 +356,12 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return True
 
+    def allowSwap(self):
+        """
+        Tell the caller that you can swap data
+        """
+        return True
+
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
@@ -390,6 +405,26 @@ class FittingWindow(QtWidgets.QTabWidget):
                 self.updateFitDict(data, tab_name)
             else:
                 self.addFit(data, is_batch=is_batch)
+
+    def swapData(self, data):
+        """
+        Replace the data from the current fitting tab
+        """
+        if not isinstance(self.currentWidget(), FittingWidget):
+            msg = "Current tab is not  a fitting widget"
+            raise TypeError(msg)
+
+        if not isinstance(data, QtGui.QStandardItem):
+            msg = "Incorrect type passed to the Fitting Perspective"
+            raise AttributeError(msg)
+
+        if self.currentTab.is_batch_fitting:
+            msg = "Data in Batch Fitting cannot be swapped"
+            raise RuntimeError(msg)
+
+        self.currentTab.data = data
+        tab_name = str(self.tabText(self.currentIndex()))
+        self.updateFitDict(data, tab_name)
 
     def onFittingOptionsChange(self, fit_engine):
         """
