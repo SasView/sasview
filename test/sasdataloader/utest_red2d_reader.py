@@ -27,7 +27,7 @@ class DatReaderTests(unittest.TestCase):
         self.data_list = self.loader.load(find("detector_square.dat"))
         # Same data file, but first 15 rows of data removed
         self.data_list_rectangle = self.loader.load(
-            find("detector_rectangular.dat"))
+            find("detector_rectangular.DAT"))
 
     def _check_common_data(self, f, removed):
         self.assertEqual(len(f.qx_data),
