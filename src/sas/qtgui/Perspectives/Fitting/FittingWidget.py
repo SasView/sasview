@@ -795,13 +795,38 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def addConstraintToRow(self, constraint=None, row=0):
         """
-        Adds the constraint object to requested row
+        Adds the constraint object to requested row. The constraint is first
+        checked for errors, and a  message box interrupting flow is
+        displayed, with the reason of the failure.
         """
         # Create a new item and add the Constraint object as a child
         assert isinstance(constraint, Constraint)
         assert 0 <= row <= self._model_model.rowCount()
         assert self.isCheckable(row)
 
+        # Error checking
+        # First, get a list of constraints and symbols
+        constraint_list = self.parent.perspective().getActiveConstraintList()
+        symbol_dict = self.parent.perspective().getSymbolDictForConstraints()
+        constraint_list.append((self.modelName() + '.' + constraint.param,
+                                constraint.func))
+        # Call the error checking function
+        errors = FittingUtilities.checkConstraints(symbol_dict, constraint_list)
+        # get the constraint tab
+        constraint_tab = self.parent.perspective().getConstraintTab()
+        if errors:
+            # Display the message box
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                errors,
+                QtWidgets.QMessageBox.Ok)
+            # Check if there is a constraint tab
+            if constraint_tab:
+                # Set the constraint_accepted flag to False to inform the
+                # constraint tab that the constraint was not accepted
+                constraint_tab.constraint_accepted = False
+            return
         item = QtGui.QStandardItem()
         item.setData(constraint)
         self._model_model.item(row, 1).setChild(0, item)
@@ -813,6 +838,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         brush = QtGui.QBrush(QtGui.QColor('blue'))
         self.modifyViewOnRow(row, font=font, brush=brush)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
+        if constraint_tab:
+            # Set the constraint_accepted flag to True to inform the
+            # constraint tab that the constraint was accepted
+            constraint_tab.constraint_accepted = True
 
     def addSimpleConstraint(self):
         """
@@ -4345,3 +4374,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # save checkbutton state and txtcrtl values
         state.parameters = FittingUtilities.getStandardParam(self._model_model)
         state.orientation_params_disp = FittingUtilities.getOrientationParam(self.kernel_module)
+
+    def getSymbolDict(self):
+        """
+        Return a dict containing a list of all the symbols used for fitting
+        and their values, e.g. {'M1.scale':1, 'M1.background': 0.001}
+        """
+        sym_dict = {}
+        model_name = self.kernel_module.name
+        for param in self.getParamNames():
+            sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
+                self._model_model.item(self.getRowFromName(param), 1).text())
+        return sym_dict

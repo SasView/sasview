@@ -1,3 +1,5 @@
+from distutils.command.config import config
+
 import numpy
 import copy
 
@@ -482,3 +484,44 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return self.currentWidget()
 
+    def getFitTabs(self):
+        """
+        Returns the list of fitting tabs
+        """
+        return [tab for tab in self.tabs if isinstance(tab, FittingWidget)]
+
+    def getActiveConstraintList(self):
+        """
+        Returns a list of the constraints for all fitting tabs. Constraints
+        are a tuple of strings (parameter, expression) e.g. ('M1.scale',
+        'M2.scale + 2')
+        """
+        constraints = []
+        for tab in self.getFitTabs():
+            tab_name = tab.modelName()
+            tab_constraints = tab.getConstraintsForModel()
+            constraints.extend((tab_name + "." + par, expr)
+                               for par, expr in tab_constraints)
+        return constraints
+
+    def getSymbolDictForConstraints(self):
+        """
+        Returns a dictionary containing all the symbols in  all constrained tabs
+        and their values.
+        """
+        symbol_dict = {}
+        for tab in self.getFitTabs():
+            symbol_dict.update(tab.getSymbolDict())
+        return symbol_dict
+
+    def getConstraintTab(self):
+        """
+        Returns the constraint tab, or None if no constraint tab is active
+        """
+        if any(isinstance(tab, ConstraintWidget) for tab in self.tabs):
+            constraint_tab = next(tab
+                                  for tab in self.tabs
+                                  if isinstance(tab, ConstraintWidget))
+        else:
+            constraint_tab = None
+        return constraint_tab

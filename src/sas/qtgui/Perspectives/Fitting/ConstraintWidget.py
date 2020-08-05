@@ -16,7 +16,9 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+
 
 class DnDTableWidget(QtWidgets.QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -137,6 +139,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Tabs used in simultaneous fitting
         # tab_name : True/False
         self.tabs_for_fitting = {}
+
+        # Flag that warns ComplexConstraint widget if the constraint has been
+        # accepted
+        self.constraint_accepted = True
 
         # Set up the widgets
         self.initializeWidgets()
@@ -473,6 +479,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Send the fit complete signal to main thread
         """
+        # Complete signal only accepts a tuple, so send an empty tuple
+        # when fit throws an error.
+
+        if result is None:
+            result = ()
         self.fitCompleteSignal.emit(result)
 
     def fitComplete(self, result):
@@ -489,15 +500,29 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Assure the fitting succeeded
         if result is None or not result:
-            msg = "Fitting failed. Please ensure correctness of chosen constraints."
+            msg = "Fitting failed."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
+
+        # Get the results list
+        results = result[0][0]
+        if isinstance(result[0], str):
+            msg = ("Fitting failed with the following message: " +
+                   result[0])
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
+        if not results[0].success:
+            if isinstance(results[0].mesg[0], str):
+                msg = ("Fitting failed with the following message: " +
+                       results[0].mesg[0])
+            else:
+                msg = ("Fitting failed. Please ensure correctness of " +
+                       "chosen constraints.")
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
         # get the elapsed time
         elapsed = result[1]
-
-        # result list
-        results = result[0][0]
 
         # Find out all tabs to fit
         tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
@@ -532,12 +557,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
+        if result is None:
+            msg = "Fitting failed."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
 
         # get the elapsed time
         elapsed = result[1]
 
-        if result is None:
-            msg = "Fitting failed."
+        # Get the results list
+        results = result[0][0]
+        # Warn the user if fitting has been unsuccessful
+        if not results[0].success:
+            if isinstance(results[0].mesg[0], str):
+                msg = ("Fitting failed with the following message: " +
+                       results[0].mesg[0])
+            else:
+                msg = ("Fitting failed. Please ensure correctness of " +
+                       "chosen constraints.")
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
@@ -554,7 +591,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Send the fit failed signal to main thread
         """
-        self.fitFailedSignal.emit(result)
+        self.fitFailedSignal.emit(reason)
 
     def fitFailed(self, reason):
         """
@@ -890,7 +927,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onAcceptConstraint(self, con_tuple):
         """
-        Receive constraint tuple from the ComplexConstraint dialog and adds contraint
+        Receive constraint tuple from the ComplexConstraint dialog and adds
+        constraint.
+        Checks the constraints for errors and displays a warning message
+        interrupting flow if any are found
         """
         #"M1, M2, M3" etc
         model_name, constraint = con_tuple
@@ -903,10 +943,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row)
+        if not self.constraint_accepted:
+            return
 
         # Select this parameter for adjusting/fitting
         constrained_tab.changeCheckboxStatus(constrained_row, True)
-
 
     def showMultiConstraint(self):
         """
