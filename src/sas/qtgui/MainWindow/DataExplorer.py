@@ -364,9 +364,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.name
-            all_data[filename] = data
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            name = data.name
+            all_data[name] = data
+            other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
             for data in other_datas:
@@ -391,12 +391,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.name
+            name = data.name
             is_checked = item.checkState()
             properties['checked'] = is_checked
             other_datas = []
             # save underlying theories
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
             all_data[data.id] = [data, properties, other_datas]
@@ -413,10 +413,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data is None: continue
                 if data.id != id: continue
                 # We found the dataset - save it.
-                filename = data.name
+                name = data.name
                 is_checked = item.checkState()
                 properties['checked'] = is_checked
-                other_datas = GuiUtils.plotsFromFilename(filename, model)
+                other_datas = GuiUtils.plotsFromDisplayName(name, model)
                 # skip the main plot
                 other_datas = list(other_datas.values())[1:]
                 all_data = [data, properties, other_datas]
@@ -975,20 +975,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not self.parent.perspective().allowSwap():
             self.chkSwap.setCheckState(False)
 
-    def itemFromFilename(self, filename):
+    def itemFromDisplayName(self, name):
         """
-        Retrieves model item corresponding to the given filename
+        Retrieves model item corresponding to the given display name
         """
-        item = GuiUtils.itemFromFilename(filename, self.model)
+        item = GuiUtils.itemFromDisplayName(name, self.model)
         return item
 
-    def displayFile(self, filename=None, is_data=True, id=None):
+    def displayData(self, name=None, is_data=True, id=None):
         """
-        Forces display of charts for the given filename
+        Forces display of charts for the given name
         """
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
-        plots = GuiUtils.plotsFromFilename(filename, model)
+        plots = GuiUtils.plotsFromDisplayName(name, model)
         # Each fitpage contains the name based on fit widget number
         fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
@@ -1005,8 +1005,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Don't include plots from different fitpages,
             # but always include the original data
             if (fitpage_name in plot.name
-                    or filename in plot.name
-                    or filename == plot.filename):
+                    or name in plot.name
+                    or name == plot.filename):
                 # Residuals get their own plot
                 if plot.plot_role == Data1D.ROLE_RESIDUAL:
                     plot.yscale='linear'

@@ -2127,7 +2127,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.theory_item is None:
             self.recalculatePlotData()
         elif self.model_data:
-            self._requestPlots(self.model_data.filename, self.theory_item.model())
+            self._requestPlots(self.model_data.name, self.theory_item.model())
 
     def showPlot(self):
         """
@@ -2147,7 +2147,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Emits plotRequestedSignal for all plots found in the given model under the provided item name.
         """
         fitpage_name = self.kernel_module.name
-        plots = GuiUtils.plotsFromFilename(item_name, item_model)
+        plots = GuiUtils.plotsFromDisplayName(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
         item = None
@@ -3575,7 +3575,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         assert isinstance(fp, FitPage)
         # Main tab info
-        self.logic.data.filename = fp.name
+        self.logic.data.name = fp.name
         self.data_is_loaded = fp.data_is_loaded
         self.chkPolydispersity.setCheckState(fp.is_polydisperse)
         self.chkMagnetism.setCheckState(fp.is_magnetic)
@@ -3617,7 +3617,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         assert isinstance(fp, FitPage)
 
         # Main tab info
-        fp.filename = self.logic.data.name
+        fp.name = self.logic.data.name
         fp.data_is_loaded = self.data_is_loaded
         fp.is_polydisperse = self.chkPolydispersity.isChecked()
         fp.is_magnetic = self.chkMagnetism.isChecked()
@@ -3853,20 +3853,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         param_list.append(['is_data', str(self.data_is_loaded)])
         data_ids = []
-        filenames = []
+        names = []
         if self.is_batch_fitting:
             for item in self.all_data:
                 # need item->data->data_id
                 data = GuiUtils.dataFromItem(item)
                 data_ids.append(data.id)
-                filenames.append(data.name)
+                names.append(data.name)
         else:
             if self.data_is_loaded:
                 data_ids = [str(self.logic.data.id)]
-                filenames = [str(self.logic.data.name)]
+                names = [str(self.logic.data.name)]
         param_list.append(['tab_index', str(self.tab_id)])
         param_list.append(['is_batch_fitting', str(self.is_batch_fitting)])
-        param_list.append(['data_name', filenames])
+        param_list.append(['data_name', names])
         param_list.append(['data_id', data_ids])
         param_list.append(['tab_name', self.modelName()])
         # option tab

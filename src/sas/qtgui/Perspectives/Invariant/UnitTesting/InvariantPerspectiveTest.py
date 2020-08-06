@@ -384,7 +384,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testSetupModel(self):
         """ Test default settings of model"""
-        self.assertEqual(self.widget.model.item(WIDGETS.W_FILENAME).text(),
+        self.assertEqual(self.widget.model.item(WIDGETS.W_NAME).text(),
                          self.widget._path)
 
         self.assertEqual(self.widget.model.item(WIDGETS.W_QMIN).text(), '0.0')

@@ -477,6 +477,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
+        self._path = data.name
         self._model_item = model_item
         self._calculator.set_data(data)
         self.cmdCalculateBg.setEnabled(True)
@@ -500,7 +501,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.extrap = None
         self.model_changed(None)
         self.cmdTransform.setEnabled(False)
-        self._path = data.name
         self._realplot.data = None
         self._realplot.draw_real_space()
 

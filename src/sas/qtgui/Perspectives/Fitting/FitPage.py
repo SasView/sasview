@@ -26,7 +26,7 @@ class FitPage(object):
 
         self.page_id = 0
         self.data_is_loaded = False
-        self.filename = ""
+        self.name = ""
         self.data = None
         self.parameters_to_fit = []
         self.kernel_module = None
