@@ -525,3 +525,16 @@ class FittingWindow(QtWidgets.QTabWidget):
         else:
             constraint_tab = None
         return constraint_tab
+
+    def getTabIndexFromName(self, name):
+        """
+        Returns the index of the tab name equal to *name*, or None if no tab
+        is named *name*
+        """
+        assert(name, str)
+        for tab in self.tabs:
+            if tab.modelName() == name:
+                return tab
+            else:
+                continue
+        return None
