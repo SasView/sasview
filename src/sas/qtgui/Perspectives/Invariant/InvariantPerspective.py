@@ -39,6 +39,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
     name = "Invariant"  # For displaying in the combo box in DataExplorer
+    ext = 'inv'  # File extension used for saving analyses
 
     def __init__(self, parent=None):
         super(InvariantWindow, self).__init__()
@@ -138,11 +139,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ """
         self.cmdStatus.setEnabled(True)
 
-    def setClosable(self, value=True):
+    def setClosable(self, value=False):
         """ Allow outsiders close this widget """
         assert isinstance(value, bool)
 
         self._allow_close = value
+
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
 
     def closeEvent(self, event):
         """
@@ -822,6 +829,88 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
         self.calculateInvariant()
+
+    def serializeAll(self):
+        """
+        Serialize the invariant state so data can be saved
+        Invariant is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {invariant-state}}}
+        """
+        return self.serializeCurrentPage()
+
+    def serializeCurrentPage(self):
+        """
+        Serialize and return a dictionary of {data_id: invariant-state}
+        Return empty dictionary if no data
+        :return: {data-id: {self.name: {invariant-state}}}
+        """
+        state = {}
+        if self._data:
+            tab_data = self.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'invar_params': tab_data}
+        return state
+
+    def getPage(self):
+        """
+        Serializes full state of this invariant page
+        Called by Save Analysis
+        :return: {invariant-state}
+        """
+        # Get all parameters from page
+        param_dict = self.getState()
+        param_dict['data_name'] = str(self.logic.data.filename)
+        param_dict['data_id'] = str(self.logic.data.id)
+        return param_dict
+
+    def getState(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        # Be sure model has been updated
+        self.updateFromModel()
+        # TODO: Are these the minimum params?
+        return {
+            'bkg': self._background,
+            'contrast': self._contrast,
+            'scale': self._scale,
+            'porod': self._porod,
+            'low_extrapolate': self._low_extrapolate,
+            'low_points': self._low_points,
+            'low_guinier': self._low_guinier,
+            'low_fit': self._low_fit,
+            'low_power_value': self._low_power_value,
+            'high_extrapolate': self._high_extrapolate,
+            'high_points': self._high_points,
+            'high_fit': self._high_fit,
+            'high_power_value': self._high_power_value,
+        }
+
+    def updateFromParameters(self, params):
+        """
+        Called by Open Project and Open Analysis
+        :param params: {param_name: value}
+        :return: None
+        """
+        # TODO: Are these the minimum params?
+        # TODO: Update the model, not the instance variables
+        if not isinstance(params, dict):
+            c_name = params.__class__.__name__
+            msg = "Invariant.updateFromParameters expects a dictionary"
+            raise TypeError(f"{msg}: {c_name} received")
+        self._background = params.get('bkg', 0.0)
+        self._contrast = params.get('contrast', 0.0)
+        self._scale = params.get('scale', 0.0)
+        self._porod = params.get('porod', 0.0)
+        self._low_extrapolate = params.get('low_extrapolate', 0.0)
+        self._low_points = params.get('low_points', 0.0)
+        self._low_guinier = params.get('low_guinier', 0.0)
+        self._low_power_value = params.get('low_power_value', 0.0)
+        self._high_extrapolate = params.get('high_extrapolate', 0.0)
+        self._high_points = params.get('high_points', 0.0)
+        self._high_fit = params.get('high_fit', 0.0)
+        self._high_power_value = params.get('high_power_value', 0.0)
 
     def allowBatch(self):
         """
