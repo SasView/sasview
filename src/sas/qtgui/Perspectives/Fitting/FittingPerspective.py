@@ -13,6 +13,7 @@ from bumps import fitters
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
@@ -186,6 +187,30 @@ class FittingWindow(QtWidgets.QTabWidget):
         Pass the update parameters to the current fit page
         """
         self.currentTab.createPageForParameters(parameters)
+
+    def updateFromConstraints(self, constraint_dict):
+        """
+        Updates all tabs with constraints present in *constraint_dict*, where
+        *constraint_dict*  keys are the fit page name, and the value is a
+        list of constraints.
+        """
+        for fit_page_name, constraint_list in constraint_dict:
+            tab = ObjectLibrary.getObject(fit_page_name)
+            for constraint_params in constraint_list:
+                if constraint_params is not None and len(constraint_params) == 5:
+                    value = constraint_params[0]
+                    param = constraint_params[1]
+                    value_ex = constraint_params[2]
+                    validate = constraint_params[3]
+                    function = constraint_params[4]
+                    constraint = Constraint()
+                    constraint.value = value
+                    constraint.func = function
+                    constraint.param = param
+                    constraint.value_ex = value_ex
+                    constraint.validate = validate
+                    tab.addConstraintToRow(tab.getRowFromName(constraint[1]),
+                                           constraint)
 
     def onParamSave(self):
         self.currentTab.onCopyToClipboard("Save")
@@ -525,16 +550,3 @@ class FittingWindow(QtWidgets.QTabWidget):
         else:
             constraint_tab = None
         return constraint_tab
-
-    def getTabIndexFromName(self, name):
-        """
-        Returns the index of the tab name equal to *name*, or None if no tab
-        is named *name*
-        """
-        assert(name, str)
-        for tab in self.tabs:
-            if tab.modelName() == name:
-                return tab
-            else:
-                continue
-        return None
