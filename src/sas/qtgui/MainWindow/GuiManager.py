@@ -97,6 +97,7 @@ class GuiManager(object):
 
         # Currently displayed perspective
         self._current_perspective = None
+        self.loadedPerspectives = {}
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -126,11 +127,7 @@ class GuiManager(object):
         Populate the main window with widgets
         """
         # Preload all perspectives
-        loaded_dict = {}
-        for name, perspective in Perspectives.PERSPECTIVES.items():
-            loaded_perspective = perspective(parent=self)
-            loaded_dict[name] = loaded_perspective
-        self.loadedPerspectives = loaded_dict
+        self.loadAllPerspectives()
 
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
@@ -186,6 +183,28 @@ class GuiManager(object):
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+
+    def loadAllPerspectives(self):
+        # Close any existing perspectives to prevent multiple open instances
+        self.closeAllPerspectives()
+        # Load all perspectives
+        loaded_dict = {}
+        for name, perspective in Perspectives.PERSPECTIVES.items():
+            loaded_perspective = perspective(parent=self)
+            loaded_dict[name] = loaded_perspective
+        self.loadedPerspectives = loaded_dict
+
+    def closeAllPerspectives(self):
+        # Close all perspectives if they are open
+        if (not hasattr(self, 'loadedPerspectives')
+                or not isinstance(self.loadedPerspectives, dict)):
+            return
+        for name, perspective in self.loadedPerspectives.items():
+            perspective.setClosable(True)
+            self._workspace.workspace.removeSubWindow(self.subwindow)
+            perspective.close()
+        self.loadedPerspectives = {}
+        self._current_perspective = None
 
     def addCategories(self):
         """

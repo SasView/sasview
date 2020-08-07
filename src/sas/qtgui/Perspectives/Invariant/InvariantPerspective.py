@@ -159,8 +159,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()

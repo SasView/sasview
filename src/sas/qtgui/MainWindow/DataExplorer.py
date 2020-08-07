@@ -271,14 +271,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.default_project_location = os.path.dirname(filename)
-            # Inversion perspective will remove all data with delete
+            # Delete all data and initialize all perspectives
             self.deleteAllItems()
-            # Fitting perspective uses its own delete scheme
-            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
-                self.cbFitting.setCurrentIndex(
-                    self.cbFitting.findText(DEFAULT_PERSPECTIVE))
-                # delete all (including the default) tabs
-                self._perspective().deleteAllTabs()
+            self.cbFitting.disconnect()
+            self.parent.loadAllPerspectives()
+            self.initPerspectives()
             self.readProject(filename)
 
     def loadAnalysis(self):
@@ -513,9 +510,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         grid_page.append(grid_name)
                         self.parent.showBatchOutput(grid_page)
                 continue
+            # Store constraint pages until all individual fits are open
             if 'cs_tab' in key:
                 cs_keys.append(key)
                 continue
+            # Load last visible perspective as stored in project file
             if 'visible_perspective' in key:
                 visible_perspective = value
             # send newly created items to the perspective
@@ -526,7 +525,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.findText(DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
-
         # Only now can we create/assign C&S pages.
         for key in cs_keys:
             self.updatePerspectiveWithProperties(key, all_data[key])
