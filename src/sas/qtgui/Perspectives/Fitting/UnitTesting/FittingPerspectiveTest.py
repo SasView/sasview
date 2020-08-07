@@ -13,6 +13,7 @@ import sas.qtgui.path_prepare
 
 # Local
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
@@ -298,6 +299,55 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertNotEqual(len(params), len(page))
         self.assertEqual(len(params), 28)
         self.assertEqual(page.get('data_id', None), None)
+
+    def testUpdateFromConstraints(self):
+        '''tests the method that parses the loaded project dict and retuens a dict with constrains across all fit pages'''
+        # create a constraint dict with one constraint for fit pages 1 and 2
+        constraint_dict = {'M1': [['scale', 'scale', 'M1.scale', True,
+                                 'M2.scale']],
+                           'M2': [['background', 'background',
+                                   'M2.background', True, 'M1.background']]}
+        # add a second tab
+        self.widget.addFit(None)
+        tab1 = self.widget.tabs[0]
+        tab2 = self.widget.tabs[1]
+        # mock the getRowFromName methods from both tabs
+        tab1.getRowFromName = MagicMock(return_value=0)
+        tab2.getRowFromName = MagicMock(return_value=1)
+        # mock the addConstraintToRow method of both tabs
+        tab1.addConstraintToRow = MagicMock()
+        tab2.addConstraintToRow = MagicMock()
+        # add the constraints
+        self.widget.updateFromConstraints(constraint_dict)
+        # check that getRowFromName was called correctly on both tabs
+        tab1.getRowFromName.assert_called_with("scale")
+        tab2.getRowFromName.assert_called_with("background")
+        # check that addConstraintToRow was called correctly
+        constraint1 = Constraint(param='scale',
+                                 value='scale',
+                                 value_ex="M1.scale",
+                                 func="M2.scale")
+        constraint2 = Constraint(param='background',
+                                 value='background',
+                                 value_ex="M2.background",
+                                 func="M1.background")
+        tab1_call_dict = tab1.addConstraintToRow.call_args[1]
+        tab2_call_dict = tab2.addConstraintToRow.call_args[1]
+        self.assertEqual(vars(tab1_call_dict['constraint']), vars(constraint1))
+        self.assertEqual(vars(tab2_call_dict['constraint']), vars(constraint2))
+        self.assertEqual(tab1_call_dict['row'], 0)
+        self.assertEqual(tab2_call_dict['row'], 1)
+
+    def testGetTabByName(self):
+        '''test getting a tab by its name'''
+        # add a second tab
+        self.widget.addFit(None)
+        # get the second tab
+        tab = self.widget.getTabByName('M2')
+        self.assertEqual(tab, self.widget.tabs[1])
+        # get some unexisting tab
+        tab = self.widget.getTabByName('foo')
+        self.assertFalse(tab)
 
 if __name__ == "__main__":
     unittest.main()
