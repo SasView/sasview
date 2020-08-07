@@ -79,6 +79,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.resize(self.minimumSizeHint())
 
         self.communicate = self._manager.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self._data = None
         self._path = ""
@@ -796,6 +797,35 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # update GUI and model with info from loaded data
         self.updateGuiFromFile(data=data)
 
+    def removeData(self, data_list=None):
+        """Remove the existing data reference from the Invariant Persepective"""
+        if not data_list or self._model_item not in data_list:
+            return
+        self._data = None
+        self._model_item = None
+        self._path = ""
+        self._porod = None
+        self.txtName.setText('')
+        self.txtTotalQMin.setText('1e-05')
+        self.txtTotalQMax.setText('10')
+        self.txtBackgd.setText('0.0')
+        self.txtScale.setText('1.0')
+        self.txtContrast.setText('8.0e-6')
+        self.txtPorodCst.setText('')
+        self.txtPowerLowQ.setText('4')
+        self.txtNptsLowQ.setText('10')
+        self.txtPowerHighQ.setText('4')
+        self.txtNptsHighQ.setText('10')
+        self.chkLowQ.setChecked(False)
+        self.chkHighQ.setChecked(False)
+        self.txtVolFract.setText('')
+        self.txtVolFractErr.setText('')
+        self.txtSpecSurf.setText('')
+        self.txtSpecSurfErr.setText('')
+        self.txtInvariantTot.setText('')
+        self.txtInvariantTotErr.setText('')
+        self.updateFromModel()
+
     def updateGuiFromFile(self, data=None):
         """
         update display in GUI and plot
@@ -859,8 +889,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """
         # Get all parameters from page
         param_dict = self.getState()
-        param_dict['data_name'] = str(self.logic.data.filename)
-        param_dict['data_id'] = str(self.logic.data.id)
+        param_dict['data_name'] = str(self._data.name)
+        param_dict['data_id'] = str(self._data.id)
         return param_dict
 
     def getState(self):
@@ -903,14 +933,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._contrast = params.get('contrast', 0.0)
         self._scale = params.get('scale', 0.0)
         self._porod = params.get('porod', 0.0)
-        self._low_extrapolate = params.get('low_extrapolate', 0.0)
-        self._low_points = params.get('low_points', 0.0)
-        self._low_guinier = params.get('low_guinier', 0.0)
-        self._low_power_value = params.get('low_power_value', 0.0)
-        self._high_extrapolate = params.get('high_extrapolate', 0.0)
-        self._high_points = params.get('high_points', 0.0)
-        self._high_fit = params.get('high_fit', 0.0)
-        self._high_power_value = params.get('high_power_value', 0.0)
+        self._low_extrapolate = params.get('low_extrapolate', False)
+        self._low_points = params.get('low_points', NPOINTS_Q_INTERP)
+        self._low_guinier = params.get('low_guinier', False)
+        self._low_power_value = params.get('low_power_value', DEFAULT_POWER_LOW)
+        self._high_extrapolate = params.get('high_extrapolate', False)
+        self._high_points = params.get('high_points', NPOINTS_Q_INTERP)
+        self._high_fit = params.get('high_fit', False)
+        self._high_power_value = params.get('high_power_value',
+                                            DEFAULT_POWER_LOW)
 
     def allowBatch(self):
         """
