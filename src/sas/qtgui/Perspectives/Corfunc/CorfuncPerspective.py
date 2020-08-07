@@ -189,6 +189,7 @@ class MyMplCanvas(FigureCanvas):
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
+    ext = " crf"  # File extension used for saving analysis files
 
     trigger = QtCore.pyqtSignal(tuple)
 
@@ -203,7 +204,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper = None
         self._path = ""
         self.model = QtGui.QStandardItemModel(self)
-        self.communicate = GuiUtils.Communicate()
+        self.communicate = self.parent.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item = None
@@ -279,6 +281,22 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(str(0)))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(0)))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(0)))
+
+    def removeData(self, data_list=None):
+        """Remove the existing data reference from the Invariant Persepective"""
+        if not data_list or self._model_item not in data_list:
+            return
+        # Clear data plots
+        self._canvas.data = None
+        self._canvas.extrap = None
+        self._realplot.data = None
+        self._realplot.draw_real_space()
+        # Clear calculator, model, and data path
+        self._calculator = None
+        self._model_item = None
+        self._path = ""
+        # Pass an empty dictionary to set all inputs to their default values
+        self.updateFromParameters({})
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
@@ -556,3 +574,46 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
+
+    def updateFromParameters(self, params):
+        """
+        Called by Open Project, Open Analysis, and removeData
+        :param params: {param_name: value} -> Default values used if not valid
+        :return: None
+        """
+        # Params should be a dictionary
+        if not isinstance(params, dict):
+            c_name = params.__class__.__name__
+            msg = "Corfunc.updateFromParameters expects a dictionary"
+            raise TypeError(f"{msg}: {c_name} received")
+        # Assign values to 'Invariant' tab inputs - use defaults if not found
+        self.model.setItem(
+            W.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
+        self.model.setItem(
+            W.W_GUINIERB, QtGui.QStandardItem(params.get('guinier_b', '0.0')))
+        self.model.setItem(
+            W.W_PORODK, QtGui.QStandardItem(params.get('porod_k', '0.0')))
+        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(
+            params.get('porod_sigma', '0.0')))
+        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(
+            params.get('avg_core_thick', '0')))
+        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(
+            params.get('avg_inter_thick', '0')))
+        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(
+            params.get('avg_hard_block_thick', '0')))
+        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(
+            params.get('local_crystalinity', '0')))
+        self.model.setItem(
+            W.W_POLY, QtGui.QStandardItem(params.get('polydispersity', '0')))
+        self.model.setItem(
+            W.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
+        self.model.setItem(
+            W.W_FILENAME, QtGui.QStandardItem(params.get('data_name', '')))
+        self.model.setItem(
+            W.W_QMIN, QtGui.QStandardItem(params.get('lower_q_max', '0.01')))
+        self.model.setItem(
+            W.W_QMAX, QtGui.QStandardItem(params.get('upper_q_min', '0.20')))
+        self.model.setItem(
+            W.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
+        self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(
+            params.get('background', '0.0')))
