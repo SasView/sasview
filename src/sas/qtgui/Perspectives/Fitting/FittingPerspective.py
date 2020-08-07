@@ -192,7 +192,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Updates all tabs with constraints present in *constraint_dict*, where
         *constraint_dict*  keys are the fit page name, and the value is a
-        list of constraints.
+        list of constraints. A constraint is represented by a list [value,
+        param, value_ex, validate, function] of attributes of a Constraint
+        object
         """
         for fit_page_name, constraint_list in constraint_dict.items():
             tab = self.getTabByName(fit_page_name)
