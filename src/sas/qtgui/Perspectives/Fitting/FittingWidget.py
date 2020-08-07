@@ -4233,22 +4233,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             except:
                 pass
 
-            # constraints
-            cons = param_dict[param_name][4+ioffset]
-            if cons is not None and len(cons)==5:
-                value = cons[0]
-                param = cons[1]
-                value_ex = cons[2]
-                validate = cons[3]
-                function = cons[4]
-                constraint = Constraint()
-                constraint.value = value
-                constraint.func = function
-                constraint.param = param
-                constraint.value_ex = value_ex
-                constraint.validate = validate
-                self.addConstraintToRow(constraint=constraint, row=row)
-
             self.setFocus()
 
         self.iterateOverModel(updateFittedValues)
