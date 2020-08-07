@@ -65,12 +65,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._low_extrapolate = False
         self._low_guinier = True
         self._low_fit = False
-        self._low_power_value = False
         self._low_points = NPOINTS_Q_INTERP
         self._low_power_value = DEFAULT_POWER_LOW
 
         self._high_extrapolate = False
-        self._high_power_value = False
         self._high_fit = False
         self._high_points = NPOINTS_Q_INTERP
         self._high_power_value = DEFAULT_POWER_LOW
@@ -806,26 +804,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._model_item = None
         self._path = ""
         self._porod = None
-        self.txtName.setText('')
-        self.txtTotalQMin.setText('1e-05')
-        self.txtTotalQMax.setText('10')
-        self.txtBackgd.setText('0.0')
-        self.txtScale.setText('1.0')
-        self.txtContrast.setText('8.0e-6')
-        self.txtPorodCst.setText('')
-        self.txtPowerLowQ.setText('4')
-        self.txtNptsLowQ.setText('10')
-        self.txtPowerHighQ.setText('4')
-        self.txtNptsHighQ.setText('10')
-        self.chkLowQ.setChecked(False)
-        self.chkHighQ.setChecked(False)
-        self.txtVolFract.setText('')
-        self.txtVolFractErr.setText('')
-        self.txtSpecSurf.setText('')
-        self.txtSpecSurfErr.setText('')
-        self.txtInvariantTot.setText('')
-        self.txtInvariantTotErr.setText('')
-        self.updateFromModel()
+        # Pass an empty dictionary to set all inputs to their default values
+        self.updateFromParameters({})
 
     def updateGuiFromFile(self, data=None):
         """
@@ -901,21 +881,30 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """
         # Be sure model has been updated
         self.updateFromModel()
-        # TODO: Are these the minimum params?
         return {
-            'bkg': self._background,
-            'contrast': self._contrast,
-            'scale': self._scale,
-            'porod': self._porod,
-            'low_extrapolate': self._low_extrapolate,
-            'low_points': self._low_points,
-            'low_guinier': self._low_guinier,
-            'low_fit': self._low_fit,
-            'low_power_value': self._low_power_value,
-            'high_extrapolate': self._high_extrapolate,
-            'high_points': self._high_points,
-            'high_fit': self._high_fit,
-            'high_power_value': self._high_power_value,
+            'extrapolated_q_min': self.txtExtrapolQMin.text(),
+            'extrapolated_q_max': self.txtExtrapolQMax.text(),
+            'vol_fraction': self.txtVolFract.text(),
+            'vol_fraction_err': self.txtVolFractErr.text(),
+            'specific_surface': self.txtSpecSurf.text(),
+            'specific_surface_err': self.txtSpecSurfErr.text(),
+            'invariant_total': self.txtInvariantTot.text(),
+            'invariant_total_err': self.txtInvariantTotErr.text(),
+            'background': self.txtBackgd.text(),
+            'contrast': self.txtContrast.text(),
+            'scale': self.txtScale.text(),
+            'porod': self.txtPorodCst.text(),
+            'low_extrapolate': self.chkLowQ.isChecked(),
+            'low_points': self.txtNptsLowQ.text(),
+            'low_guinier': self.rbGuinier.isChecked(),
+            'low_fit_rb': self.rbFitLowQ.isChecked(),
+            'low_power_value': self.txtPowerLowQ.text(),
+            'high_extrapolate': self.chkHighQ.isChecked(),
+            'high_points': self.txtNptsHighQ.text(),
+            'high_fit_rb': self.rbFitHighQ.isChecked(),
+            'high_power_value': self.txtPowerHighQ.text(),
+            'total_q_min': self.txtTotalQMin.text(),
+            'total_q_max': self.txtTotalQMax.text(),
         }
 
     def updateFromParameters(self, params):
@@ -924,25 +913,42 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         :param params: {param_name: value}
         :return: None
         """
-        # TODO: Are these the minimum params?
-        # TODO: Update the model, not the instance variables
+        # Params should be a dictionary
         if not isinstance(params, dict):
             c_name = params.__class__.__name__
             msg = "Invariant.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
-        self._background = params.get('bkg', 0.0)
-        self._contrast = params.get('contrast', 0.0)
-        self._scale = params.get('scale', 0.0)
-        self._porod = params.get('porod', 0.0)
-        self._low_extrapolate = params.get('low_extrapolate', False)
-        self._low_points = params.get('low_points', NPOINTS_Q_INTERP)
-        self._low_guinier = params.get('low_guinier', False)
-        self._low_power_value = params.get('low_power_value', DEFAULT_POWER_LOW)
-        self._high_extrapolate = params.get('high_extrapolate', False)
-        self._high_points = params.get('high_points', NPOINTS_Q_INTERP)
-        self._high_fit = params.get('high_fit', False)
-        self._high_power_value = params.get('high_power_value',
-                                            DEFAULT_POWER_LOW)
+        # Assign values to 'Invariant' tab inputs - use defaults if not found
+        self.txtTotalQMin.setText(str(params.get('total_q_min', Q_MINIMUM)))
+        self.txtTotalQMax.setText(str(params.get('total_q_max', Q_MAXIMUM)))
+        self.txtVolFract.setText(str(params.get('vol_fraction', '')))
+        self.txtVolFractErr.setText(str(params.get('vol_fraction_err', '')))
+        self.txtSpecSurf.setText(str(params.get('specific_surface', '')))
+        self.txtSpecSurfErr.setText(str(params.get('specific_surface_err', '')))
+        self.txtInvariantTot.setText(str(params.get('invariant_total', '')))
+        self.txtInvariantTotErr.setText(
+            str(params.get('invariant_total_err', '')))
+        # Assign values to 'Options' tab inputs - use defaults if not found
+        self.txtBackgd.setText(str(params.get('background', '0.0')))
+        self.txtScale.setText(str(params.get('scale', '0.0')))
+        self.txtContrast.setText(str(params.get('contrast', '0.0')))
+        self.txtPorodCst.setText(str(params.get('porod', '0.0')))
+        # Toggle extrapolation buttons to enable other inputs
+        self.chkLowQ.setChecked(params.get('low_extrapolate', False))
+        self.chkHighQ.setChecked(params.get('high_extrapolate', False))
+        self.txtPowerLowQ.setText(
+            str(params.get('low_power_value', DEFAULT_POWER_LOW)))
+        self.txtNptsLowQ.setText(
+            str(params.get('low_points', NPOINTS_Q_INTERP)))
+        self.rbGuinier.setChecked(params.get('low_guinier', True))
+        self.rbFitLowQ.setChecked(params.get('low_fit_rb', False))
+        self.txtNptsHighQ.setText(
+            str(params.get('high_points', NPOINTS_Q_INTERP)))
+        self.rbFitHighQ.setChecked(params.get('high_fit_rb', True))
+        self.txtPowerHighQ.setText(
+            str(params.get('high_power_value', DEFAULT_POWER_LOW)))
+        # Update once all inputs are changed
+        self.updateFromModel()
 
     def allowBatch(self):
         """
