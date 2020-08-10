@@ -44,6 +44,12 @@ class MyMplCanvas(FigureCanvas):
         self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
         self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
     def on_legend(self, qx, qy):
         """
         Checks if mouse coursor is on legend box
@@ -574,6 +580,67 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
+
+    def serializeAll(self):
+        """
+        Serialize the invariant state so data can be saved
+        Invariant is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {invariant-state}}}
+        """
+        return self.serializeCurrentPage()
+
+    def serializeCurrentPage(self):
+        """
+        Serialize and return a dictionary of {data_id: invariant-state}
+        Return empty dictionary if no data
+        :return: {data-id: {self.name: {invariant-state}}}
+        """
+        state = {}
+        if self.data:
+            tab_data = self.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'invar_params': tab_data}
+        return state
+
+    def getPage(self):
+        """
+        Serializes full state of this invariant page
+        Called by Save Analysis
+        :return: {invariant-state}
+        """
+        # Get all parameters from page
+        param_dict = self.getState()
+        param_dict['data_name'] = str(self.data.name)
+        param_dict['data_id'] = str(self.data.id)
+        return param_dict
+
+    def getState(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        # Be sure model has been updated
+        self.updateFromModel()
+        # Get plot data and store in file
+        data1, data3, data_idf = self._realplot.data
+        data_all = np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T
+        return {
+            'guinier_a': self.txtGuinierA.text(),
+            'guinier_b': self.txtGuinierB.text(),
+            'porod_k': self.txtPorodK.text(),
+            'porod_sigma': self.txtPorodSigma.text(),
+            'avg_core_thick': self.txtAvgCoreThick.text(),
+            'avg_inter_thick': self.txtAvgIntThick.text(),
+            'avg_hard_block_thick': self.txtAvgHardBlock.text(),
+            'local_crystalinity': self.txtLocalCrystal.text(),
+            'polydispersity': self.txtPolydisp.text(),
+            'long_period': self.txtLongPeriod.text(),
+            'lower_q_max': self.txtLowerQMax.text(),
+            'upper_q_min': self.txtUpperQMin.text(),
+            'upper_q_max': self.txtUpperQMax.text(),
+            'background': self.txtBackground.text(),
+            'all_data': data_all,
+        }
 
     def updateFromParameters(self, params):
         """
