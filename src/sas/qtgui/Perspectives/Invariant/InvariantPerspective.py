@@ -803,9 +803,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._data = None
         self._model_item = None
         self._path = ""
+        self.txtName.setText('')
         self._porod = None
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
+        # Disable buttons to return to base state
+        self.cmdCalculate.setEnabled(False)
+        self.cmdStatus.setEnabled(False)
 
     def updateGuiFromFile(self, data=None):
         """

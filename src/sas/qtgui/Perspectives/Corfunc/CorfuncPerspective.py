@@ -298,11 +298,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._realplot.data = None
         self._realplot.draw_real_space()
         # Clear calculator, model, and data path
-        self._calculator = None
+        self._calculator = CorfuncCalculator()
         self._model_item = None
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
+        # Disable buttons to return to base state
+        self.cmdExtrapolate.setEnabled(False)
+        self.cmdTransform.setEnabled(False)
+        self.cmdExtract.setEnabled(False)
+        self.cmdSave.setEnabled(False)
+        self.cmdCalculateBg.setEnabled(False)
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
@@ -517,7 +523,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
         self.model.itemChanged.connect(self.model_changed)
 
         self._canvas.data = data
@@ -525,6 +530,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
+        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
         self._realplot.data = None
         self._realplot.draw_real_space()
 
