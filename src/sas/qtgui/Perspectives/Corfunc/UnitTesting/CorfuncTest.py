@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Plotting.Plottables import PlottableData1D as Data1D
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -38,6 +39,15 @@ class CorfuncTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = CorfuncWindow(dummy_manager())
+
+        self.fakeData1 = GuiUtils.HashableStandardItem("A")
+        self.fakeData2 = GuiUtils.HashableStandardItem("B")
+        reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
+        reference_data1.filename = "Test A"
+        reference_data2 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
+        reference_data2.filename = "Test B"
+        GuiUtils.updateModelItem(self.fakeData1, reference_data1)
+        GuiUtils.updateModelItem(self.fakeData2, reference_data2)
 
     def tearDown(self):
         '''Destroy the CorfuncWindow'''
@@ -110,6 +120,25 @@ class CorfuncTest(unittest.TestCase):
         # self.assertTrue(float(self.widget.longPeriod.text()) >
         #                 float(self.widget.avgCoreThick.text()) > 0)
 
+    def testSerialization(self):
+        """ Serialization routines """
+        print("Testing serialization of Corfunc started")
+        self.widget.setData([self.fakeData1])
+        data = GuiUtils.dataFromItem(self.widget._model_item)
+        data_id = data.id
+        # Test three separate serialization routines
+        state_all = self.widget.serializeAll()
+        state_one = self.widget.serializeCurrentPage()
+        page = self.widget.getPage()
+        # Pull out params from state
+        params = state_all[data_id]['corfunc_params']
+        # Tests
+        self.assertEqual(len(state_all), len(state_one))
+        self.assertEqual(len(state_all), 1)
+        # getPage should include an extra param 'data_id' removed by serialize
+        self.assertNotEqual(len(params), len(page))
+        self.assertEqual(len(params), 15)
+        print("Testing serialization of Corfunc finished")
 
 if __name__ == "__main__":
     unittest.main()

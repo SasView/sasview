@@ -589,35 +589,36 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def serializeAll(self):
         """
-        Serialize the invariant state so data can be saved
-        Invariant is not batch-ready so this will only effect a single page
-        :return: {data-id: {self.name: {invariant-state}}}
+        Serialize the corfunc state so data can be saved
+        Corfunc is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {corfunc-state}}}
         """
         return self.serializeCurrentPage()
 
     def serializeCurrentPage(self):
         """
-        Serialize and return a dictionary of {data_id: invariant-state}
+        Serialize and return a dictionary of {data_id: corfunc-state}
         Return empty dictionary if no data
-        :return: {data-id: {self.name: {invariant-state}}}
+        :return: {data-id: {self.name: {corfunc-state}}}
         """
         state = {}
-        if self.data:
+        if GuiUtils.dataFromItem(self._model_item):
             tab_data = self.getPage()
             data_id = tab_data.pop('data_id', '')
-            state[data_id] = {'invar_params': tab_data}
+            state[data_id] = {'corfunc_params': tab_data}
         return state
 
     def getPage(self):
         """
-        Serializes full state of this invariant page
+        Serializes full state of this corfunc page
         Called by Save Analysis
-        :return: {invariant-state}
+        :return: {corfunc-state}
         """
         # Get all parameters from page
+        data = GuiUtils.dataFromItem(self._model_item)
         param_dict = self.getState()
-        param_dict['data_name'] = str(self.data.name)
-        param_dict['data_id'] = str(self.data.id)
+        param_dict['data_name'] = str(data.name)
+        param_dict['data_id'] = str(data.id)
         return param_dict
 
     def getState(self):
@@ -625,11 +626,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
         """
-        # Be sure model has been updated
-        self.updateFromModel()
         # Get plot data and store in file
-        data1, data3, data_idf = self._realplot.data
-        data_all = np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T
+        if self._realplot.data:
+            data1, data3, data_idf = self._realplot.data
+            data_all = np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T
+        else:
+            data_all = np.zeros((1, 4))
         return {
             'guinier_a': self.txtGuinierA.text(),
             'guinier_b': self.txtGuinierB.text(),
