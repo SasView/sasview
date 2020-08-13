@@ -1,7 +1,8 @@
-# pylint:disable=C0103,I1101
+# pylint:disable=C0103,E501,E203
 """
 Allows users to modify the box slicer parameters.
 """
+import os
 import functools
 
 from PyQt5 import QtCore
@@ -16,8 +17,8 @@ from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
 # Local UI
-#from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
+
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     """
@@ -25,6 +26,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     passed from a slicer instance.
     """
     closeWidgetSignal = QtCore.pyqtSignal()
+
     def __init__(self, parent=None,
                  model=None,
                  active_plots=None,
@@ -39,6 +41,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
+        self.save_location = GuiUtils.DEFAULT_OPEN_FOLDER
 
         # Initially, Apply is disabled
         self.cmdApply.setEnabled(False)
@@ -62,6 +65,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Specify the validator on the parameter value column.
         self.delegate = EditDelegate(self, validate_method=self.validate_method)
         self.lstParams.setItemDelegate(self.delegate)
+
+        # Set up paths
+        self.txtLocation.setText(self.save_location)
 
         # define slots
         self.setSlots()
@@ -112,6 +118,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         self.delegate.refocus_signal.connect(self.onFocus)
         self.cbSave1DPlots.toggled.connect(self.onGeneratePlots)
+        self.cmdFiles.clicked.connect(self.onChooseFilesLocation)
         # Display Help on clicking the button
         self.cmdHelp.clicked.connect(self.onHelp)
 
@@ -153,11 +160,33 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.enableFileControls(isChecked)
         self.isSave = isChecked
 
+    def onChooseFilesLocation(self):
+        """
+        Open save file location dialog
+        """
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Save files to:',
+            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.save_location
+        }
+        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+
+        if folder is None:
+            return
+
+        folder = str(folder)
+        if not os.path.isdir(folder):
+            return
+        self.save_location = folder
+        self.txtLocation.setText(self.save_location)
+
     def enableFileControls(self, enabled):
         """
         Sets enablement of file related UI elements
         """
         self.txtLocation.setEnabled(enabled)
+        self.txtExtension.setEnabled(enabled)
         self.cmdFiles.setEnabled(enabled)
         self.cbFitOptions.setEnabled(enabled)
 
@@ -219,6 +248,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         GuiUtils.showHelp(url)
 
+
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
     Trivial proxy model with custom column edit flag
@@ -245,6 +275,7 @@ class ProxyModel(QtCore.QIdentityProxyModel):
             flags &= ~QtCore.Qt.ItemIsEditable
         return flags
 
+
 class PositiveDoubleEditor(QtWidgets.QLineEdit):
     # a signal to tell the delegate when we have finished editing
     editingFinished = QtCore.Signal()
@@ -266,6 +297,7 @@ class PositiveDoubleEditor(QtWidgets.QLineEdit):
 
 class EditDelegate(QtWidgets.QStyledItemDelegate):
     refocus_signal = QtCore.pyqtSignal(int, int)
+
     def __init__(self, parent=None, validate_method=None):
         super(EditDelegate, self).__init__(parent)
         self.editor = None
@@ -294,12 +326,9 @@ class EditDelegate(QtWidgets.QStyledItemDelegate):
         # Find out the changed parameter name and proposed value
         new_value = GuiUtils.toDouble(self.editor.text())
         param_name = model.sourceModel().item(index.row(), 0).text()
-
         if self.validate_method:
             # Validate the proposed value in the slicer
             value_accepted = self.validate_method(param_name, new_value)
-
-        if value_accepted:
             # Update the model only if value accepted
             return super(EditDelegate, self).setModelData(editor, model, index)
         return None

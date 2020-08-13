@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
-    <height>423</height>
+    <width>362</width>
+    <height>427</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,6 +24,50 @@
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="cmdApply">
+       <property name="toolTip">
+        <string>Apply Slicer to Selected Plots</string>
+       </property>
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdClose">
+       <property name="toolTip">
+        <string>Close the dialog</string>
+       </property>
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdHelp">
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -132,6 +176,25 @@
           <string>Batch Slicing Options </string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QListWidget" name="lstPlots">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
            <widget class="QCheckBox" name="cbSave1DPlots">
             <property name="text">
@@ -149,7 +212,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="txtLocation"/>
+             <widget class="QLineEdit" name="txtLocation">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="cmdFiles">
@@ -173,6 +240,24 @@
            </layout>
           </item>
           <item row="3" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="lblExtension">
+              <property name="text">
+               <string>Append text:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtExtension">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Files will be saved as &amp;lt;SlicerType&amp;gt;&amp;lt;FileName&amp;gt;&amp;lt;AppendText&amp;gt;.txt&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QLabel" name="label_3">
@@ -182,28 +267,25 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="cbFitOptions"/>
+             <widget class="QComboBox" name="cbFitOptions">
+              <item>
+               <property name="text">
+                <string>No fitting</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Fitting</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Batch fitting</string>
+               </property>
+              </item>
+             </widget>
             </item>
            </layout>
-          </item>
-          <item row="0" column="0">
-           <widget class="QListWidget" name="lstPlots">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
@@ -211,50 +293,6 @@
       </layout>
      </widget>
     </widget>
-   </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="cmdApply">
-       <property name="toolTip">
-        <string>Apply Slicer to Selected Plots</string>
-       </property>
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cmdClose">
-       <property name="toolTip">
-        <string>Close the dialog</string>
-       </property>
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cmdHelp">
-       <property name="text">
-        <string>Help</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
  </widget>
