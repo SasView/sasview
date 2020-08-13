@@ -557,6 +557,4 @@ class FittingWindow(QtWidgets.QTabWidget):
         for tab in self.tabs:
             if tab.modelName() == name:
                 return tab
-            else:
-                continue
         return None
