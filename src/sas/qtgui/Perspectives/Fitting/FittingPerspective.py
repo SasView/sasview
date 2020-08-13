@@ -200,17 +200,12 @@ class FittingWindow(QtWidgets.QTabWidget):
             tab = self.getTabByName(fit_page_name)
             for constraint_param in constraint_list:
                 if constraint_param is not None and len(constraint_param) == 5:
-                    value = constraint_param[0]
-                    param = constraint_param[1]
-                    value_ex = constraint_param[2]
-                    validate = constraint_param[3]
-                    function = constraint_param[4]
                     constraint = Constraint()
-                    constraint.value = value
-                    constraint.func = function
-                    constraint.param = param
-                    constraint.value_ex = value_ex
-                    constraint.validate = validate
+                    constraint.value = constraint_param[0]
+                    constraint.func = constraint_param[4]
+                    constraint.param = constraint_param[1]
+                    constraint.value_ex = constraint_param[2]
+                    constraint.validate = constraint_param[3]
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
                                                constraint_param[1]))
