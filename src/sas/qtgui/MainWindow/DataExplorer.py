@@ -519,14 +519,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 visible_perspective = value
             # send newly created items to the perspective
             self.updatePerspectiveWithProperties(key, value)
-        constraint_dict = self.readConstraintsFromProject(all_data)
-        self._perspective().updateFromConstraints(constraint_dict)
         # Set to fitting perspective and load in Batch and C&S Pages
         self.cbFitting.setCurrentIndex(
             self.cbFitting.findText(DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
-
+        # Get the constraint dict and apply it
+        constraint_dict = GuiUtils.getConstraints(all_data)
+        self._perspective().updateFromConstraints(constraint_dict)
         # Only now can we create/assign C&S pages.
         for key in cs_keys:
             self.updatePerspectiveWithProperties(key, all_data[key])
