@@ -535,47 +535,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbFitting.setCurrentIndex(
                 self.cbFitting.findText(visible_perspective))
 
-    def readConstraintsFromProject(self, all_data):
-        """
-        Extracts constraints from *all_data* dict and returns a dict where keys
-        are the tab name and values are a list of constraints on that tab. The
-        dict can then be passed to the updateFromConstraints method from the
-        fitting perspective to apply the constraints with error checking
-        mechanism
-        """
-        constraint_dict = {}
-        for key, value in all_data.items():
-            # make sure we dealing with params
-            if 'fit_params' not in value:
-                continue
-            params = value['fit_params']
-            for page in params:
-                if not isinstance(page, dict):
-                    continue
-
-                tab_name = None
-                constraint_list = []
-                for param_name, param_value in page.items():
-                    # make sure we are dealing with lists
-                    if not isinstance(param_value, list):
-                        continue
-                    # get the tab name
-                    elif param_name == "tab_name":
-                        tab_name = param_value[0]
-                    # get parameters
-                    elif len(param_value) >= 5:
-                        ioffset = 1 if len(param_value) > 5 else 0
-                        cons = param_value[4+ioffset]
-                        # get the constraint
-                        if cons is not None and len(cons) == 5:
-                            constraint_list.append(cons)
-                    else:
-                        continue
-
-                if tab_name and constraint_list:
-                    constraint_dict.update({tab_name: constraint_list})
-        return constraint_dict
-
     def updateWithBatchPages(self, all_data):
         """
         Checks all properties and see if there are any batch pages defined.
