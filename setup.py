@@ -107,15 +107,11 @@ class BuildSphinxCommand(Command):
         import build_sphinx
         build_sphinx.rebuild()
 
-# determine if this run requires building of Qt GUI ui->py
-build_qt = True
-# _standard_ commands which shouldn't trigger the Qt build
-no_build_commands = ['clean', 'sdist', 'bdist', 'check', 'upload', 'register', '--help']
 
-for c in no_build_commands:
-    if any([c in b for b in sys.argv]):
-        build_qt = False
-        break
+# _standard_ commands which should trigger the Qt build
+build_commands = ['build', 'build_py', 'develop', 'test']
+# determine if this run requires building of Qt GUI ui->py
+build_qt = any(c in sys.argv for c in build_commands)
 
 if build_qt:
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
