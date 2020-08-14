@@ -109,7 +109,8 @@ class BuildSphinxCommand(Command):
 
 
 # _standard_ commands which should trigger the Qt build
-build_commands = ['build', 'build_py', 'develop', 'test']
+build_commands = ['install', 'build', 'build_py', 'bdist', 'bdist_rpm',
+                  'bdist_wheel', 'develop', 'test']
 # determine if this run requires building of Qt GUI ui->py
 build_qt = any(c in sys.argv for c in build_commands)
 
