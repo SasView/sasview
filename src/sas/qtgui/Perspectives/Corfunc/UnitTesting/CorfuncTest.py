@@ -39,15 +39,10 @@ class CorfuncTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = CorfuncWindow(dummy_manager())
-
         self.fakeData1 = GuiUtils.HashableStandardItem("A")
-        self.fakeData2 = GuiUtils.HashableStandardItem("B")
         reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
         reference_data1.filename = "Test A"
-        reference_data2 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        reference_data2.filename = "Test B"
         GuiUtils.updateModelItem(self.fakeData1, reference_data1)
-        GuiUtils.updateModelItem(self.fakeData2, reference_data2)
 
     def tearDown(self):
         '''Destroy the CorfuncWindow'''
@@ -122,10 +117,9 @@ class CorfuncTest(unittest.TestCase):
 
     def testSerialization(self):
         """ Serialization routines """
-        print("Testing serialization of Corfunc started")
         self.widget.setData([self.fakeData1])
         data = GuiUtils.dataFromItem(self.widget._model_item)
-        data_id = data.id
+        data_id = str(data.id)
         # Test three separate serialization routines
         state_all = self.widget.serializeAll()
         state_one = self.widget.serializeCurrentPage()
@@ -137,8 +131,8 @@ class CorfuncTest(unittest.TestCase):
         self.assertEqual(len(state_all), 1)
         # getPage should include an extra param 'data_id' removed by serialize
         self.assertNotEqual(len(params), len(page))
-        self.assertEqual(len(params), 15)
-        print("Testing serialization of Corfunc finished")
+        self.assertEqual(len(params), 16)
+        self.assertEqual(len(page), 17)
 
 if __name__ == "__main__":
     unittest.main()

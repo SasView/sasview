@@ -600,6 +600,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Invariant'))
             self.sendItemToPerspective(items[0])
             self._perspective().updateFromParameters(value['invar_params'])
+        if 'corfunc_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Corfunc'))
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(value['corfunc_params'])
         if 'cs_tab' in key and 'is_constraint' in value:
             # Create a C&S page
             self._perspective().addConstraintTab()
