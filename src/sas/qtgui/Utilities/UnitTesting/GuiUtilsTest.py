@@ -674,6 +674,32 @@ class HashableStandardItemTest(unittest.TestCase):
         item_clone = self.item.clone()
         self.assertEqual(item_clone.__hash__(), 0)
 
+    def testGetConstraints(self):
+        '''test the method that reads constraints from a project and returns
+        a dict with the constraints'''
+        # create a project dict with constraints
+        constraint1 = ['scale', 'scale', 'M2.scale', True, 'M2.scale']
+        constraint2 = ['scale', 'scale', 'M1.scale', True, 'M1.scale']
+        fit_params1 = {'tab_name': ['M1'], 'scale': [True, '1.0', None,
+                                                     '0.0', 'inf',
+                                                     constraint1], 'foo': 'bar'}
+        fit_params2 = {'tab_name': ['M2'], 'scale': [True, '1.0', None,
+                                                     '0.0', 'inf',
+                                                     constraint2], 'foo': 'bar'}
+        fit_page1 = {'fit_data': None, 'fit_params': [fit_params1]}
+        fit_page2 = {'fit_data': None, 'fit_params': [fit_params2]}
+        fit_project = {'dataset1': fit_page1, 'dataset2': fit_page2}
+        # get the constraint_dict
+        constraint_dict = getConstraints(fit_project)
+        # we have two constraints on different fit pages
+        self.assertEqual(len(constraint_dict), 2)
+        # we have one constraint per fit page
+        self.assertEqual(len(constraint_dict['M1']), 1)
+        self.assertEqual(len(constraint_dict['M2']), 1)
+        # check the constraints in the constraint_dict
+        self.assertEqual(constraint_dict['M1'][0], constraint1)
+        self.assertEqual(constraint_dict['M2'][0], constraint2)
+
 if __name__ == "__main__":
     unittest.main()
 

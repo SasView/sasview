@@ -13,6 +13,7 @@ from bumps import fitters
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
@@ -186,6 +187,28 @@ class FittingWindow(QtWidgets.QTabWidget):
         Pass the update parameters to the current fit page
         """
         self.currentTab.createPageForParameters(parameters)
+
+    def updateFromConstraints(self, constraint_dict):
+        """
+        Updates all tabs with constraints present in *constraint_dict*, where
+        *constraint_dict*  keys are the fit page name, and the value is a
+        list of constraints. A constraint is represented by a list [value,
+        param, value_ex, validate, function] of attributes of a Constraint
+        object
+        """
+        for fit_page_name, constraint_list in constraint_dict.items():
+            tab = self.getTabByName(fit_page_name)
+            for constraint_param in constraint_list:
+                if constraint_param is not None and len(constraint_param) == 5:
+                    constraint = Constraint()
+                    constraint.value = constraint_param[0]
+                    constraint.func = constraint_param[4]
+                    constraint.param = constraint_param[1]
+                    constraint.value_ex = constraint_param[2]
+                    constraint.validate = constraint_param[3]
+                    tab.addConstraintToRow(constraint=constraint,
+                                           row=tab.getRowFromName(
+                                               constraint_param[1]))
 
     def onParamSave(self):
         self.currentTab.onCopyToClipboard("Save")
@@ -525,3 +548,13 @@ class FittingWindow(QtWidgets.QTabWidget):
         else:
             constraint_tab = None
         return constraint_tab
+
+    def getTabByName(self, name):
+        """
+        Returns the tab with with attribute name *name*
+        """
+        assert(name, str)
+        for tab in self.tabs:
+            if tab.modelName() == name:
+                return tab
+        return None
