@@ -245,7 +245,7 @@ class Communicate(QtCore.QObject):
     plotRequestedSignal = QtCore.pyqtSignal(list, int)
 
     # Plot from file names
-    plotFromFilenameSignal = QtCore.pyqtSignal(str)
+    plotFromNameSignal = QtCore.pyqtSignal(str)
 
     # Plot update requested from a perspective
     plotUpdateSignal = QtCore.pyqtSignal(list)
@@ -469,17 +469,17 @@ def updateModelItemStatus(model_item, filename="", name="", status=2):
 
     return
 
-def itemFromFilename(filename, model_item):
+def itemFromDisplayName(name, model_item):
     """
-    Returns the model item text=filename in the model
+    Returns the model item text=name in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, str)
+    assert isinstance(name, str)
 
     # Iterate over model looking for named items
     item = list([i for i in [model_item.item(index)
                              for index in range(model_item.rowCount())]
-                 if str(i.text()) == filename])
+                 if str(i.text()) == name])
     return item[0] if len(item)>0 else None
 
 def plotsFromModel(model_name, model_item):
@@ -505,18 +505,18 @@ def plotsFromModel(model_name, model_item):
 
     return plot_data
 
-def plotsFromFilename(filename, model_item):
+def plotsFromDisplayName(name, model_item):
     """
-    Returns the list of plots for the item with text=filename in the model
+    Returns the list of plots for the item with text=name in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, str)
+    assert isinstance(name, str)
 
     plot_data = {}
     # Iterate over model looking for named items
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if filename in str(item.text()):
+        if name in str(item.text()):
             # TODO: assure item type is correct (either data1/2D or Plotter)
             plot_data[item] = item.child(0).data()
             # Going 1 level deeper only

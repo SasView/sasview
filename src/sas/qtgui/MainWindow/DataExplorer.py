@@ -364,9 +364,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.filename
-            all_data[filename] = data
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            name = data.name
+            all_data[name] = data
+            other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
             for data in other_datas:
@@ -391,12 +391,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.filename
+            name = data.name
             is_checked = item.checkState()
             properties['checked'] = is_checked
             other_datas = []
             # save underlying theories
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
             all_data[data.id] = [data, properties, other_datas]
@@ -413,10 +413,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data is None: continue
                 if data.id != id: continue
                 # We found the dataset - save it.
-                filename = data.filename
+                name = data.name
                 is_checked = item.checkState()
                 properties['checked'] = is_checked
-                other_datas = GuiUtils.plotsFromFilename(filename, model)
+                other_datas = GuiUtils.plotsFromDisplayName(name, model)
                 # skip the main plot
                 other_datas = list(other_datas.values())[1:]
                 all_data = [data, properties, other_datas]
@@ -622,7 +622,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             from sas.sascalc.dataloader.data_info import Data1D as old_data1d
             from sas.sascalc.dataloader.data_info import Data2D as old_data2d
             if isinstance(new_data, (old_data1d, old_data2d)):
-                new_data = self.manager.create_gui_data(value[0], new_data.filename)
+                new_data = self.manager.create_gui_data(value[0], new_data.name)
             if hasattr(value[0], 'id'):
                 new_data.id = value[0].id
                 new_data.group_id = value[0].group_id
@@ -630,7 +630,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # make sure the ID is retained
             properties = value[1]
             is_checked = properties['checked']
-            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
+            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
             new_item.setCheckState(is_checked)
             items.append(new_item)
             model = self.theory_model
@@ -976,20 +976,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not self.parent.perspective().allowSwap():
             self.chkSwap.setCheckState(False)
 
-    def itemFromFilename(self, filename):
+    def itemFromDisplayName(self, name):
         """
-        Retrieves model item corresponding to the given filename
+        Retrieves model item corresponding to the given display name
         """
-        item = GuiUtils.itemFromFilename(filename, self.model)
+        item = GuiUtils.itemFromDisplayName(name, self.model)
         return item
 
-    def displayFile(self, filename=None, is_data=True, id=None):
+    def displayData(self, name=None, is_data=True, id=None):
         """
-        Forces display of charts for the given filename
+        Forces display of charts for the given name
         """
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
-        plots = GuiUtils.plotsFromFilename(filename, model)
+        plots = GuiUtils.plotsFromDisplayName(name, model)
         # Each fitpage contains the name based on fit widget number
         fitpage_name = "" if id is None else "M"+str(id)
         new_plots = []
@@ -1006,8 +1006,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Don't include plots from different fitpages,
             # but always include the original data
             if (fitpage_name in plot.name
-                    or filename in plot.name
-                    or filename == plot.filename):
+                    or name in plot.name
+                    or name == plot.filename):
                 # Residuals get their own plot
                 if plot.plot_role == Data1D.ROLE_RESIDUAL:
                     plot.yscale='linear'
@@ -1281,11 +1281,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 output_objects = self.loader.load(p_file)
 
-                # Some loaders return a list and some just a single Data1D object.
-                # Standardize.
-                if not isinstance(output_objects, list):
-                    output_objects = [output_objects]
-
                 for item in output_objects:
                     # cast sascalc.dataloader.data_info.Data1D into
                     # sasgui.guiframe.dataFitting.Data1D
@@ -1295,7 +1290,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                     # Model update should be protected
                     self.mutex.lock()
-                    self.updateModel(new_data, p_file)
+                    self.updateModel(new_data, new_data.name)
                     #self.model.reset()
                     QtWidgets.QApplication.processEvents()
                     self.mutex.unlock()
@@ -1507,7 +1502,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
         self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
-        self.txt_widget.setWindowTitle("Data Info: %s" % data.filename)
+        self.txt_widget.setWindowTitle("Data Info: %s" % data.name)
         self.txt_widget.clear()
         self.txt_widget.insertPlainText(text_to_show)
 

@@ -1,6 +1,6 @@
 from sas.qtgui.Utilities.GuiUtils import enum
 
-WIDGETS = enum( 'W_FILENAME',
+WIDGETS = enum( 'W_NAME',
                 'W_QMIN',
                 'W_QMAX',
                 'W_BACKGROUND',

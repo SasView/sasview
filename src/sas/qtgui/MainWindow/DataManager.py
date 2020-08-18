@@ -93,7 +93,9 @@ class DataManager(object):
         #creating a name for data
         title = ""
         file_name = os.path.basename(path) if path is not None else os.path.basename(data.filename)
-        if file_name:
+        if data.title:
+            name = data.title
+        elif file_name:
             name = file_name
         elif data.run:
             name = data.run[0]
