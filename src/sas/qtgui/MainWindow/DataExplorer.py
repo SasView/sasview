@@ -30,8 +30,8 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 import sas.qtgui.Perspectives as Perspectives
 
 DEFAULT_PERSPECTIVE = "Fitting"
-ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)',
-                  'Invariant (*.inv)', 'All Files (*.*)']
+ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'Invariant (*.inv)',
+                  'Corfunc (*crf)', 'All Files (*.*)']
 
 logger = logging.getLogger(__name__)
 

@@ -874,8 +874,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """
         # Get all parameters from page
         param_dict = self.getState()
-        param_dict['data_name'] = str(self._data.name)
-        param_dict['data_id'] = str(self._data.id)
+        if self._data:
+            param_dict['data_name'] = str(self._data.name)
+            param_dict['data_id'] = str(self._data.id)
         return param_dict
 
     def getState(self):

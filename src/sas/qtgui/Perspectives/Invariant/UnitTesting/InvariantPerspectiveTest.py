@@ -17,8 +17,6 @@ from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindo
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.MainWindow.GuiManager import GuiManager
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -468,6 +466,28 @@ class InvariantPerspectiveTest(unittest.TestCase):
         GuiUtils.updateModelItemStatus = MagicMock()
 
         self.assertTrue(GuiUtils.updateModelItemStatus.called_once())
+
+    def testSerialization(self):
+        """ Serialization routines """
+        data = Data1D(x=[1, 2], y=[1, 2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item])
+        data_return = GuiUtils.dataFromItem(self.widget._model_item)
+        data_id = str(data_return.id)
+        # Test three separate serialization routines
+        state_all = self.widget.serializeAll()
+        state_one = self.widget.serializeCurrentPage()
+        page = self.widget.getPage()
+        # Pull out params from state
+        params = state_all[data_id]['invar_params']
+        # Tests
+        self.assertEqual(len(state_all), len(state_one))
+        self.assertEqual(len(state_all), 1)
+        # getPage should include an extra param 'data_id' removed by serialize
+        self.assertNotEqual(len(params), len(page))
+        self.assertEqual(len(params), 24)
+        self.assertEqual(len(page), 25)
 
 
 if __name__ == "__main__":
