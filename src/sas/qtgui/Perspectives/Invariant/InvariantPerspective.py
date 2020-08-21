@@ -138,7 +138,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ """
         self.cmdStatus.setEnabled(True)
 
-    def setClosable(self, value=False):
+    def setClosable(self, value=True):
         """ Allow outsiders close this widget """
         assert isinstance(value, bool)
 
@@ -924,8 +924,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             msg = "Invariant.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
         # Assign values to 'Invariant' tab inputs - use defaults if not found
-        self.txtTotalQMin.setText(str(params.get('total_q_min', Q_MINIMUM)))
-        self.txtTotalQMax.setText(str(params.get('total_q_max', Q_MAXIMUM)))
+        self.txtTotalQMin.setText(str(params.get('total_q_min', '0.0')))
+        self.txtTotalQMax.setText(str(params.get('total_q_max', '0.0')))
+        self.txtExtrapolQMax.setText(str(params.get('extrapolated_q_max',
+                                                    Q_MAXIMUM)))
+        self.txtExtrapolQMin.setText(str(params.get('extrapolated_q_min',
+                                                    Q_MINIMUM)))
         self.txtVolFract.setText(str(params.get('vol_fraction', '')))
         self.txtVolFractErr.setText(str(params.get('vol_fraction_err', '')))
         self.txtSpecSurf.setText(str(params.get('specific_surface', '')))
@@ -935,8 +939,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             str(params.get('invariant_total_err', '')))
         # Assign values to 'Options' tab inputs - use defaults if not found
         self.txtBackgd.setText(str(params.get('background', '0.0')))
-        self.txtScale.setText(str(params.get('scale', '0.0')))
-        self.txtContrast.setText(str(params.get('contrast', '0.0')))
+        self.txtScale.setText(str(params.get('scale', '1.0')))
+        self.txtContrast.setText(str(params.get('contrast', '8e-06')))
         self.txtPorodCst.setText(str(params.get('porod', '0.0')))
         # Toggle extrapolation buttons to enable other inputs
         self.chkLowQ.setChecked(params.get('low_extrapolate', False))

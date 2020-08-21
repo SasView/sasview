@@ -691,4 +691,4 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(
             W.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
         self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(
-            params.get('background', '0.0')))
+            params.get('background', '0')))
