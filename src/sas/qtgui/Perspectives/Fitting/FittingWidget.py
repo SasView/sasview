@@ -1131,13 +1131,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msg = "The current fit contains constraints relying on other fit pages.\n"
             msg += "Parameters with those constraints are:\n" +\
                 '\n'.join([cons[0] for cons in multi_constraints])
-            msg += "\n\nWould you like to remove these constraints or cancel fitting?"
+            msg += "\n\nWould you like to deactivate these constraints or " \
+                   "cancel fitting?"
             msgbox = QtWidgets.QMessageBox(self)
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
             msgbox.setText(msg)
             msgbox.setWindowTitle("Existing Constraints")
             # custom buttons
-            button_remove = QtWidgets.QPushButton("Remove")
+            button_remove = QtWidgets.QPushButton("Deactivate")
             msgbox.addButton(button_remove, QtWidgets.QMessageBox.YesRole)
             button_cancel = QtWidgets.QPushButton("Cancel")
             msgbox.addButton(button_cancel, QtWidgets.QMessageBox.RejectRole)
@@ -1155,8 +1156,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     if constraint_tab:
                         constraint_tab.uncheckConstraint(
                             self.kernel_module.name + ':' + cons[0])
-
-
                 # re-read the constraints
                 constraints = self.getComplexConstraintsForModel()
 
