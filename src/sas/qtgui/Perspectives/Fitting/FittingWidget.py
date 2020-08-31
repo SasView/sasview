@@ -1146,9 +1146,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # cancel fit
                 raise ValueError("Fitting cancelled")
             else:
-                # remove constraint
+                constraint_tab = self.parent.perspective().getConstraintTab()
                 for cons in multi_constraints:
-                    self.deleteConstraintOnParameter(param=cons[0])
+                    # deactivate the constraint
+                    row = self.getRowFromName(cons[0])
+                    self.getConstraintForRow(row).active = False
+                    # uncheck in the constraint tab
+                    if constraint_tab:
+                        constraint_tab.uncheckConstraint(
+                            self.kernel_module.name + ':' + cons[0])
+
+
                 # re-read the constraints
                 constraints = self.getComplexConstraintsForModel()
 
