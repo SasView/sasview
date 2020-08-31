@@ -1051,3 +1051,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msgbox.setWindowTitle("Fit Report")
         _ = msgbox.exec_()
         return
+
+    def uncheckConstraint(self, name):
+        """
+        Unchecks the constraint in tblConstraint list with *name* slave
+        parameter. Only works with equality, this should change when
+        inequality constraints are implemented.
+        """
+        for row in range(self.tblConstraints.rowCount()):
+            constraint = self.tblConstraints.item(row, 0).data(0)
+            if constraint[:constraint.index("=")].strip(" ") == name:
+                self.tblConstraints.item(row, 0).setCheckState(0)
