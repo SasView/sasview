@@ -1054,11 +1054,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def uncheckConstraint(self, name):
         """
-        Unchecks the constraint in tblConstraint list with *name* slave
-        parameter. Only works with equality, this should change when
-        inequality constraints are implemented.
+        Unchecks the constraint in tblConstraint with *name* slave
+        parameter.
         """
         for row in range(self.tblConstraints.rowCount()):
             constraint = self.tblConstraints.item(row, 0).data(0)
-            if constraint[:constraint.index("=")].strip(" ") == name:
+            # slave parameter has model name and parameter separated
+            # by semicolon e.g `M1:scale` so no need to parse the constraint
+            # string.
+            if name in constraint:
                 self.tblConstraints.item(row, 0).setCheckState(0)
