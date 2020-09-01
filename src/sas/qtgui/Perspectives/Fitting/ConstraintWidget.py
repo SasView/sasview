@@ -1060,7 +1060,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         for row in range(self.tblConstraints.rowCount()):
             constraint = self.tblConstraints.item(row, 0).data(0)
             # slave parameter has model name and parameter separated
-            # by semicolon e.g `M1:scale` so no need to parse the constraint
+            # by colon e.g `M1:scale` so no need to parse the constraint
             # string.
             if name in constraint:
                 self.tblConstraints.item(row, 0).setCheckState(0)
