@@ -821,11 +821,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.available_constraints[pos] = constraint
 
             # Show the text in the constraint table
-            item = self.uneditableItem(label)
-            item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
-            #item = QtWidgets.QTableWidgetItem(label)
+            item = QtWidgets.QTableWidgetItem(label)
+            item.setFlags(QtCore.Qt.ItemIsSelectable |
+                          QtCore.Qt.ItemIsEnabled |
+                          QtCore.Qt.ItemIsUserCheckable |
+                          QtCore.Qt.ItemIsEditable)
             # Why was this set to non-interactive??
-            #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             if constraint_name in active_constraint_names:
                 item.setCheckState(QtCore.Qt.Checked)
             else:
