@@ -1129,10 +1129,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if multi_constraints:
             # Let users choose what to do
             msg = "The current fit contains constraints relying on other fit pages.\n"
-            msg += "Parameters with those constraints are:\n" +\
-                '\n'.join([cons[0] for cons in multi_constraints])
-            msg += "\n\nWould you like to deactivate these constraints or " \
-                   "cancel fitting?"
+            msg += ("Parameters with those constraints are:\n" +
+                    '\n'.join([cons[0] for cons in multi_constraints]))
+            msg += ("\n\nWould you like to deactivate these constraints or "
+                    "cancel fitting?")
             msgbox = QtWidgets.QMessageBox(self)
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
             msgbox.setText(msg)
