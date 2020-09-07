@@ -1055,7 +1055,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     def uncheckConstraint(self, name):
         """
         Unchecks the constraint in tblConstraint with *name* slave
-        parameter.
+        parameter and deactivates the constraint.
         """
         for row in range(self.tblConstraints.rowCount()):
             constraint = self.tblConstraints.item(row, 0).data(0)
@@ -1064,3 +1064,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # string.
             if name in constraint:
                 self.tblConstraints.item(row, 0).setCheckState(0)
+                # deactivate the constraint
+                tab = self.parent.getTabByName(name[:name.index(":")])
+                row = tab.getRowFromName(name[name.index(":") + 1:])
+                tab.getConstraintForRow(row).active = False
