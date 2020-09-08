@@ -244,7 +244,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param = self.cbParam1.currentText()
         value = self.cbParam2.currentText()
         func = self.txtConstraint.text()
-        value_ex = self.cbModel2.currentText() + "." + self.cbParam2.currentText()
+        value_ex = (self.cbModel1.currentText() + "." +
+                    self.cbParam1.currentText())
         model1 = self.cbModel1.currentText()
         operator = self.cbOperator.currentText()
 
