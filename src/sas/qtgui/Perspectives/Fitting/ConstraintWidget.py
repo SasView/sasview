@@ -434,37 +434,98 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint's "active" instance variable.
+        Modify the constraint when the user edits the constraint list. If the
+        user changes the constrained parameter, the constraint is erased and a
+        new one is created.
+        Checking is performed on the constrained entered by the user, showing
+        message box warning him the constraint is not valid and cancelling
+        his changes by reloading the view. View is reloaded
+        when the user is finished for consistency.
         """
         item = self.tblConstraints.item(row, column)
-        if column == 0:
-            # Update the tabs for fitting list
-            constraint = self.available_constraints[row]
-            constraint.active = (item.checkState() == QtCore.Qt.Checked)
-            param = item.data(0)[item.data(0).index(':') + 1:item.data(0).index('=')].strip()
-            model = item.data(0)[:item.data(0).index(':')].strip()
-            tab = self.available_tabs[model]
-            if isinstance(tab, FittingWidget):
-            # Update the fitting widget whenever a constraint is activated/deactivated
-                if item.checkState() == QtCore.Qt.Checked:
-                    font = QtGui.QFont()
-                    font.setItalic(True)
-                    brush = QtGui.QBrush(QtGui.QColor('blue'))
-                    tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
-                else:
-                    tab.modifyViewOnRow(tab.getRowFromName(param))
-                return
-        # Update the constraint formula
+        # extract information from the constraint object
         constraint = self.available_constraints[row]
-        function = item.text()
-        # remove anything left of '=' to get the constraint
-        function = function[function.index('=')+1:]
-        # No check on function here - trust the user (R)
-        if function != constraint.func:
-            # This becomes rather difficult to validate now.
-            # Turn off validation for Edit Constraint
-            constraint.func = function
-            constraint.validate = False
+        model = constraint.value_ex[:constraint.value_ex.index(".")]
+        param = constraint.param
+        function = constraint.func
+        tab = self.available_tabs[model]
+        # Extract information from the text in the table
+        constraint_text = item.data(0)
+        # Basic sanity check of the string
+        # First check if we have an acceptable sign
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+        if "=" not in constraint_text:
+            msg = ("Incorrect operator in constraint definition.Please use = "
+                   "sign to define constraints.")
+            msgbox.setText(msg)
+            msgbox.exec()
+            self.initializeFitList()
+            return
+        # Then check if the parameter is correctly defined with colons
+        # separating model and parameter name
+        parameter_full_name = constraint_text[:constraint_text.index(
+            "=")].strip()
+        if ":" not in parameter_full_name:
+            msg = ("Incorrect constrained parameter definition. Please use "
+                   "colons to separate model and parameter on the rhs of the "
+                   "definition, e.g. M1:scale")
+            msgbox.setText(msg)
+            msgbox.exec()
+            self.initializeFitList()
+            return
+        # We can parse the string
+        new_param = item.data(0)[
+                item.data(0).index(':') + 1:item.data(0).index('=')].strip()
+        new_model = item.data(0)[:item.data(0).index(':')].strip()
+        # Check that the symbol is known
+        # All the conditional statements could be grouped in one
+        symbol_dict = self.parent.parent.perspective(
+            ).getSymbolDictForConstraints()
+        if (new_model + "." + new_param) not in symbol_dict:
+            msg = ("Incorrect constrained parameter definition. Please use "
+                   "a single known parameter in the rhs of the constraint "
+                   "definition, e.g. M1:scale = M1.radius + 2")
+            msgbox.setText(msg)
+            msgbox.exec()
+            self.initializeFitList()
+            return
+        new_function = item.data(0)[item.data(0).index('=') + 1:].strip()
+        new_tab = self.available_tabs[new_model]
+        # Make sure we are dealing with fit tabs
+        assert(isinstance(tab, FittingWidget))
+        assert(isinstance(new_tab, FittingWidget))
+        # Now check if the user has redefined the constraint and reapply it
+        if new_function != function or new_model != model or new_param != param:
+            # Apply the new constraint
+            constraint = Constraint(param=new_param, func=new_function,
+                                    value_ex=new_model + "." + new_param)
+            new_tab.addConstraintToRow(constraint=constraint,
+                                       row=tab.getRowFromName(new_param))
+            # If the constraint is valid and we are changing model or
+            # parameter, delete the old constraint
+            if self.constraint_accepted and (new_model != model or
+                                                 new_param != param):
+                tab.deleteConstraintOnParameter(param)
+            # Reload the view
+            self.initializeFitList()
+            return
+        # activate/deactivate constraint if the user has changed the checkbox
+        # state
+        constraint.active = (item.checkState() == QtCore.Qt.Checked)
+        # Update the fitting widget whenever a constraint is
+        # activated/deactivated
+        if item.checkState() == QtCore.Qt.Checked:
+            font = QtGui.QFont()
+            font.setItalic(True)
+            brush = QtGui.QBrush(QtGui.QColor('blue'))
+            tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
+                                brush=brush)
+        else:
+            tab.modifyViewOnRow(tab.getRowFromName(new_param))
+        # reload the view so the user gets a consistent feedback on the
+        # constraints
+        self.initializeFitList()
 
     def onTabCellEntered(self, row, column):
         """
