@@ -23,6 +23,7 @@ dependencies:
  - numpy=1.14.2
  - qtconsole
  - mkl=2020.0
+ - unittest-xml-reporting=3.0.4
  - pip:
    - matplotlib==2.2.3
    - bumps==0.7.11
