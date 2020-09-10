@@ -680,7 +680,7 @@ class GuiManager(object):
         # Save from all serializable perspectives
         # Analysis should return {data-id: serialized-state}
         for name, per in self.loadedPerspectives.items():
-            if hasattr(per, 'isSerializable') and per.isSerializable:
+            if hasattr(per, 'isSerializable') and per.isSerializable():
                 analysis = per.serializeAll()
                 for key, value in analysis.items():
                     if key in final_data:

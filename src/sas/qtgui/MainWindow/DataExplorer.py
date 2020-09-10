@@ -31,7 +31,7 @@ import sas.qtgui.Perspectives as Perspectives
 
 DEFAULT_PERSPECTIVE = "Fitting"
 ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'Invariant (*.inv)',
-                  'Corfunc (*crf)', 'All Files (*.*)']
+                  'Corfunc (*.crf)', 'All Files (*.*)']
 
 logger = logging.getLogger(__name__)
 

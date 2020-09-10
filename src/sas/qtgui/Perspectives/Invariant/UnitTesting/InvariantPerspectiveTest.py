@@ -468,6 +468,8 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testSerialization(self):
         """ Serialization routines """
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
         self.widget.setData([self.fakeData])
         self.checkFakeDataState()
         data_return = GuiUtils.dataFromItem(self.widget._model_item)

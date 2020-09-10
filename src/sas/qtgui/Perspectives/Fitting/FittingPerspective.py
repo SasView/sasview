@@ -224,15 +224,14 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        #self.maxIndex += 1
-        self.maxIndex = len(self.tabs)
+        self.maxIndex = tab_index + 1
 
         icon = QtGui.QIcon()
         if is_batch:
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
-        self.setCurrentWidget(tab);
+        self.setCurrentWidget(tab)
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -389,7 +388,7 @@ class FittingWindow(QtWidgets.QTabWidget):
             available_tabs = [tab.acceptsData() for tab in self.tabs]
 
             if tab_index is not None:
-                if tab_index > self.maxIndex:
+                if tab_index >= self.maxIndex:
                     self.addFit(data, is_batch=is_batch, tab_index=tab_index)
                 else:
                     self.setCurrentIndex(tab_index-1)

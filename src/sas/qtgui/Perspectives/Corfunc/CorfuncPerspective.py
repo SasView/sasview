@@ -44,12 +44,6 @@ class MyMplCanvas(FigureCanvas):
         self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
         self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
-    def isSerializable(self):
-        """
-        Tell the caller that this perspective writes its state
-        """
-        return True
-
     def on_legend(self, qx, qy):
         """
         Checks if mouse coursor is on legend box
@@ -238,6 +232,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         # Set up the mapper
         self.setup_mapper()
+
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
 
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""

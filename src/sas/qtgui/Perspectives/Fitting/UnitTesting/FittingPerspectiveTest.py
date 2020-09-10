@@ -271,6 +271,8 @@ class FittingPerspectiveTest(unittest.TestCase):
 
     def testSerialization(self):
         ''' Serialize fit pages and check data '''
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
         data = Data1D(x=[1,2], y=[1,2])
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         item = QtGui.QStandardItem("test")

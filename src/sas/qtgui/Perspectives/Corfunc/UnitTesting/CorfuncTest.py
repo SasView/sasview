@@ -135,6 +135,8 @@ class CorfuncTest(unittest.TestCase):
     def testSerialization(self):
         """ Serialization routines """
         self.widget.setData([self.fakeData])
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
         self.checkFakeDataState()
         data = GuiUtils.dataFromItem(self.widget._model_item)
         data_id = str(data.id)
