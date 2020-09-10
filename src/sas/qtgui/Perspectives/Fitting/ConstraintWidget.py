@@ -453,13 +453,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraint_text = item.data(0)
         # Basic sanity check of the string
         # First check if we have an acceptable sign
-        msgbox = QtWidgets.QMessageBox(self)
-        msgbox.setIcon(QtWidgets.QMessageBox.Critical)
         if "=" not in constraint_text:
-            msg = ("Incorrect operator in constraint definition.Please use = "
+            msg = ("Incorrect operator in constraint definition. Please use = "
                    "sign to define constraints.")
-            msgbox.setText(msg)
-            msgbox.exec()
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
         # Then check if the parameter is correctly defined with colons
@@ -470,8 +471,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             msg = ("Incorrect constrained parameter definition. Please use "
                    "colons to separate model and parameter on the rhs of the "
                    "definition, e.g. M1:scale")
-            msgbox.setText(msg)
-            msgbox.exec()
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
         # We can parse the string
@@ -486,8 +490,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             msg = ("Incorrect constrained parameter definition. Please use "
                    "a single known parameter in the rhs of the constraint "
                    "definition, e.g. M1:scale = M1.radius + 2")
-            msgbox.setText(msg)
-            msgbox.exec()
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
         new_function = item.data(0)[item.data(0).index('=') + 1:].strip()
