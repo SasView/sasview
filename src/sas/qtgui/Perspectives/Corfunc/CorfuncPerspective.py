@@ -215,6 +215,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item = None
+        self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
 
@@ -300,6 +301,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
+        self.has_data = False
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
@@ -533,7 +535,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
         self._realplot.data = None
         self._realplot.draw_real_space()
-
+        self.has_data = True
 
     def setClosable(self, value=True):
         """
@@ -602,7 +604,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         :return: {data-id: {self.name: {corfunc-state}}}
         """
         state = {}
-        if GuiUtils.dataFromItem(self._model_item):
+        if self.has_data:
             tab_data = self.getPage()
             data_id = tab_data.pop('data_id', '')
             state[data_id] = {'corfunc_params': tab_data}
@@ -626,12 +628,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
         """
-        # Get plot data and store in file
-        if self._realplot.data:
-            data1, data3, data_idf = self._realplot.data
-            data_all = np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T
-        else:
-            data_all = np.zeros((1, 4))
         return {
             'guinier_a': self.txtGuinierA.text(),
             'guinier_b': self.txtGuinierB.text(),
@@ -647,7 +643,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             'upper_q_min': self.txtUpperQMin.text(),
             'upper_q_max': self.txtUpperQMax.text(),
             'background': self.txtBackground.text(),
-            'all_data': data_all,
         }
 
     def updateFromParameters(self, params):

@@ -9,7 +9,7 @@ from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
-from sas.qtgui.Plotting.Plottables import PlottableData1D as Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -39,10 +39,10 @@ class CorfuncTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = CorfuncWindow(dummy_manager())
-        self.fakeData1 = GuiUtils.HashableStandardItem("A")
-        reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
+        reference_data1 = Data1D(x=[0.1, 0.2, 0.3, 0.4, 0.5], y=[1000, 1000, 100, 10, 1], dy=[0.0, 0.0, 0.0, 0.0, 0.0])
         reference_data1.filename = "Test A"
-        GuiUtils.updateModelItem(self.fakeData1, reference_data1)
+        GuiUtils.dataFromItem = MagicMock(return_value=reference_data1)
+        self.fakeData = QtGui.QStandardItem("test")
 
     def tearDown(self):
         '''Destroy the CorfuncWindow'''
@@ -134,7 +134,7 @@ class CorfuncTest(unittest.TestCase):
 
     def testSerialization(self):
         """ Serialization routines """
-        self.widget.setData([self.fakeData1])
+        self.widget.setData([self.fakeData])
         self.checkFakeDataState()
         data = GuiUtils.dataFromItem(self.widget._model_item)
         data_id = str(data.id)
@@ -143,33 +143,34 @@ class CorfuncTest(unittest.TestCase):
         state_one = self.widget.serializeCurrentPage()
         page = self.widget.getPage()
         # Pull out params from state
-        params = state_all[data_id]['corfunc_params']
+        params_dict = state_all.get(data_id)
+        params = params_dict.get('corfunc_params')
         # Tests
         self.assertEqual(len(state_all), len(state_one))
         self.assertEqual(len(state_all), 1)
         # getPage should include an extra param 'data_id' removed by serialize
         self.assertNotEqual(len(params), len(page))
-        self.assertEqual(len(params), 16)
-        self.assertEqual(len(page), 17)
+        self.assertEqual(len(params), 15)
+        self.assertEqual(len(page), 16)
 
     def testRemoveData(self):
-        self.widget.setData([self.fakeData1])
+        self.widget.setData([self.fakeData])
         self.checkFakeDataState()
         # Removing something not already in the perspective should do nothing
         self.widget.removeData([])
         self.checkFakeDataState()
         # Removing the data from the perspective should set it to base state
-        self.widget.removeData([self.fakeData1])
+        self.widget.removeData([self.fakeData])
         # Be sure the defaults hold true after data removal
         self.testDefaults()
 
     def testLoadParams(self):
-        self.widget.setData([self.fakeData1])
+        self.widget.setData([self.fakeData])
         self.checkFakeDataState()
         pageState = self.widget.getPage()
         self.widget.updateFromParameters(pageState)
         self.checkFakeDataState()
-        self.widget.removeData([self.fakeData1])
+        self.widget.removeData([self.fakeData])
         self.testDefaults()
 
     def checkFakeDataState(self):
