@@ -543,7 +543,7 @@ class GuiManager(object):
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
-        self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
+        self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
         self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
 
@@ -1188,12 +1188,12 @@ class GuiManager(object):
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
 
-    def showPlotFromFilename(self, filename):
+    def showPlotFromName(self, name):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayFile(filename=filename, is_data=True)
+            self.filesWidget.displayData(name=name, is_data=True)
 
     def showPlot(self, plot, id):
         """

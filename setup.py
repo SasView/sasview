@@ -107,7 +107,14 @@ class BuildSphinxCommand(Command):
         import build_sphinx
         build_sphinx.rebuild()
 
-if 'clean' not in sys.argv:
+
+# _standard_ commands which should trigger the Qt build
+build_commands = ['install', 'build', 'build_py', 'bdist', 'bdist_rpm',
+                  'bdist_wheel', 'develop', 'test']
+# determine if this run requires building of Qt GUI ui->py
+build_qt = any(c in sys.argv for c in build_commands)
+
+if build_qt:
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
 
 # sas module
@@ -162,52 +169,10 @@ packages.append("sas.sascalc.corfunc")
 package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
 packages.append("sas.sascalc.fit")
 
-# Perspectives
-# package_dir["sas.sasgui.perspectives"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives")
-# package_dir["sas.sasgui.perspectives.pr"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives", "pr")
-# packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.pr"])
-# package_data["sas.sasgui.perspectives.pr"] = ['media/*']
-
-# package_dir["sas.sasgui.perspectives.invariant"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives", "invariant")
-# packages.extend(["sas.sasgui.perspectives.invariant"])
-# package_data['sas.sasgui.perspectives.invariant'] = [
-#     os.path.join("media", '*')]
-
-# package_dir["sas.sasgui.perspectives.fitting"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives", "fitting")
-# package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
-# packages.extend(["sas.sasgui.perspectives.fitting",
-#                  "sas.sasgui.perspectives.fitting.plugin_models"])
-# package_data['sas.sasgui.perspectives.fitting'] = [
-#     'media/*', 'plugin_models/*']
-
-# packages.extend(["sas.sasgui.perspectives",
-#                  "sas.sasgui.perspectives.calculator"])
-# package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
-
-# package_dir["sas.sasgui.perspectives.corfunc"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives", "corfunc")
-# packages.extend(["sas.sasgui.perspectives.corfunc"])
-# package_data['sas.sasgui.perspectives.corfunc'] = ['media/*']
-
-# package_dir["sas.sasgui.perspectives.file_converter"] = os.path.join(
-#     "src", "sas", "sasgui", "perspectives", "file_converter")
-# packages.extend(["sas.sasgui.perspectives.file_converter"])
-# package_data['sas.sasgui.perspectives.file_converter'] = ['media/*']
-
 # Data util
 package_dir["sas.sascalc.data_util"] = os.path.join(
     "src", "sas", "sascalc", "data_util")
 packages.append("sas.sascalc.data_util")
-
-# # Plottools
-# package_dir["sas.sasgui.plottools"] = os.path.join(
-#     "src", "sas", "sasgui", "plottools")
-# packages.append("sas.sasgui.plottools")
 
 # QTGUI
 ## UI
@@ -281,20 +246,6 @@ package_dir["sas.qtgui.Plotting.Masks"] = os.path.join(
 packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
                  "sas.qtgui.Plotting.Slicers", "sas.qtgui.Plotting.Masks"])
 
-# # Last of the sas.models
-# package_dir["sas.models"] = os.path.join("src", "sas", "models")
-# packages.append("sas.models")
-
-# Wojtek's hacky way to add doc files while bundling egg
-# def add_doc_files(directory):
-#    paths = []
-#    for (path, directories, filenames) in os.walk(directory):
-#        for filename in filenames:
-#            paths.append(os.path.join(path, filename))
-#    return paths
-
-#doc_files = add_doc_files('doc')
-
 # SasView
 package_data['sas'] = ['logging.ini']
 package_data['sas.sasview'] = ['images/*',
@@ -328,11 +279,6 @@ packages.append("sas.qtgui")
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml', 'h5py',
-
-    # The following dependecies won't install automatically, so assume them
-    # The numbers should be bumped up for matplotlib and wxPython as well.
-    # 'numpy>=1.4.1', 'scipy>=0.7.2', 'matplotlib>=0.99.1.1',
-    # 'wxPython>=2.8.11', 'pil',
 ]
 
 if os.name == 'nt':

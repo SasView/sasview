@@ -601,7 +601,7 @@ def plotResiduals(reference_data, current_data, weights):
         return None
 
     theory_name = str(current_data.name.split()[0])
-    res_name = reference_data.filename if reference_data.filename else reference_data.name
+    res_name = reference_data.name if reference_data.name else reference_data.filename
     residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
     residuals.title = residuals.name
     residuals.ytransform = 'y'

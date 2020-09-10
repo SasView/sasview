@@ -100,7 +100,7 @@ class ReportPageLogic(object):
 
     def buildPlotsForReport(self, images):
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
-        html = FEET_1 % self.data.filename
+        html = FEET_1 % self.data.name
 
         for fig in images:
             canvas = FigureCanvas(fig)

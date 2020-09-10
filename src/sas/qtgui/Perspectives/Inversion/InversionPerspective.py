@@ -343,13 +343,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.logic.data_is_loaded and
             self._calculator.nfunc != self.nTermsSuggested)
 
-    def populateDataComboBox(self, filename, data_ref):
+    def populateDataComboBox(self, name, data_ref):
         """
-        Append a new file name to the data combobox
-        :param filename: data filename
+        Append a new name to the data combobox
+        :param name: data name
         :param data_ref: QStandardItem reference for data set to be added
         """
-        self.dataList.addItem(filename, data_ref)
+        self.dataList.addItem(name, data_ref)
 
     def acceptNoTerms(self):
         """Send estimated no of terms to input"""
@@ -435,7 +435,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def showBatchOutput(self):
         """
         Display the batch output in tabular form
-        :param output_data: Dictionary mapping filename -> P(r) instance
+        :param output_data: Dictionary mapping name -> P(r) instance
         """
         if self.batchResultsWindow is None:
             self.batchResultsWindow = BatchInversionOutputPanel(
@@ -488,7 +488,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
                 self.logic.add_errors()
             self.updateDataList(data)
-            self.populateDataComboBox(self.logic.data.filename, data)
+            self.populateDataComboBox(self.logic.data.name, data)
         self.dataList.setCurrentIndex(len(self.dataList) - 1)
         #Checking for 1D again to mitigate the case when 2D data is last on the data list
         if isinstance(self.logic.data, Data1D):
@@ -504,7 +504,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             DICT_KEYS[2]: self.dataPlot
         }
         # Update batch results window when finished
-        self.batchResults[self.logic.data.filename] = self._calculator
+        self.batchResults[self.logic.data.name] = self._calculator
         if self.batchResultsWindow is not None:
             self.showBatchOutput()
 
@@ -690,7 +690,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         # Get all parameters from page
         param_dict = self.getState()
-        param_dict['data_name'] = str(self.logic.data.filename)
+        param_dict['data_name'] = str(self.logic.data.name)
         param_dict['data_id'] = str(self.logic.data.id)
         return param_dict
 
@@ -1005,9 +1005,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Update P(r) and fit plots
         self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
-        self.prPlot.filename = self.logic.data.filename
+        self.prPlot.name = self.logic.data.name
         self.dataPlot = self.logic.new1DPlot(out, self._calculator)
-        self.dataPlot.filename = self.logic.data.filename
+        self.dataPlot.name = self.logic.data.name
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

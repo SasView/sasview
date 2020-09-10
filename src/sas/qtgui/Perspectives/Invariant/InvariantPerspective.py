@@ -229,12 +229,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.model = model
         self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
-        filename = self._data.filename
+        name = self._data.name
         # Send the modified model item to DE for keeping in the model
         # Currently -unused
         # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
-        plot_data = GuiUtils.plotsFromFilename(filename, self._manager.filesWidget.model)
+        plot_data = GuiUtils.plotsFromDisplayName(name, self._manager.filesWidget.model)
 
         # only the Low-Q/High-Q data for plotting
         data_to_plot = [(self._model_item, p) for p in plot_data.values() if p.plot_role == p.ROLE_DATA]
@@ -672,7 +672,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ """
         # filename
         item = QtGui.QStandardItem(self._path)
-        self.model.setItem(WIDGETS.W_FILENAME, item)
+        self.model.setItem(WIDGETS.W_NAME, item)
 
         # add Q parameters to the model
         qmin = 0.0
@@ -727,7 +727,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.mapper.setModel(self.model)
 
         # Filename
-        self.mapper.addMapping(self.txtName, WIDGETS.W_FILENAME)
+        self.mapper.addMapping(self.txtName, WIDGETS.W_NAME)
 
         # Qmin/Qmax
         self.mapper.addMapping(self.txtTotalQMin, WIDGETS.W_QMIN)
@@ -792,7 +792,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
-        self.model.item(WIDGETS.W_FILENAME).setData(self._model_item.text())
+        self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
         # update GUI and model with info from loaded data
         self.updateGuiFromFile(data=data)
 
@@ -823,23 +823,23 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             raise ValueError(msg)
 
         try:
-            filename = data.filename
+            name = data.name
         except:
-            msg = 'No filename chosen.'
+            msg = 'No data name chosen.'
             raise ValueError(msg)
         try:
             qmin = min(self._data.x)
             qmax = max(self._data.x)
         except:
             msg = "Unable to find q min/max of \n data named %s" % \
-                  data.filename
+                  data.name
             raise ValueError(msg)
 
-        # update model with input form files: filename, qmin, qmax
-        self.model.item(WIDGETS.W_FILENAME).setText(filename)
+        # update model with input form files: name, qmin, qmax
+        self.model.item(WIDGETS.W_NAME).setText(name)
         self.model.item(WIDGETS.W_QMIN).setText(str(qmin))
         self.model.item(WIDGETS.W_QMAX).setText(str(qmax))
-        self._path = filename
+        self._path = data.filename
 
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked

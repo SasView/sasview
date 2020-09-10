@@ -1067,6 +1067,5 @@ class DataExplorerTest(unittest.TestCase):
         # same data but must show, since different model
         self.assertFalse(self.form.isPlotShown(data4))
 
-
 if __name__ == "__main__":
     unittest.main()
