@@ -297,7 +297,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.data = None
         self._canvas.extrap = None
         self._realplot.data = None
-        self._realplot.draw_real_space()
+        self._realplot.extrap = None
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
@@ -506,6 +506,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         if not isinstance(data_item[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the Corfunc Perspective"
             raise AttributeError(msg)
+
+        if self.has_data:
+            msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
+            msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+            retval = dialog.exec_()
+            if retval == QtWidgets.QMessageBox.Cancel:
+                return
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
