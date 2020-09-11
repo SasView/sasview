@@ -482,8 +482,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         new_param = item.data(0)[
                 item.data(0).index(':') + 1:item.data(0).index('=')].strip()
         new_model = item.data(0)[:item.data(0).index(':')].strip()
-        # Check that the symbol is known
-        # All the conditional statements could be grouped in one
+        # Check that the symbol is known so we dont get an unknown tab
+        # All the conditional statements could be grouped in one or
+        # alternatively we could check with expression.py, but we would still
+        # need to do some checks to parse the string
         symbol_dict = self.parent.parent.perspective(
             ).getSymbolDictForConstraints()
         if (new_model + "." + new_param) not in symbol_dict:
@@ -512,7 +514,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # If the constraint is valid and we are changing model or
             # parameter, delete the old constraint
             if self.constraint_accepted and (new_model != model or
-                                                 new_param != param):
+                                             new_param != param):
                 tab.deleteConstraintOnParameter(param)
             # Reload the view
             self.initializeFitList()
