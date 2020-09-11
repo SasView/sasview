@@ -100,16 +100,29 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Fill out comboboxes and set labels with non-constrained parameters
         """
+        # Store previously select parameter
+        previous_param1 = self.cbParam1.currentText()
+        # Clear the combobox
         self.cbParam1.clear()
         tab_index1 = self.cbModel1.currentIndex()
         items1 = [param for param in self.tabs[tab_index1].main_params_to_fit]
         self.cbParam1.addItems(items1)
+        # Show the previously selected parameter if available
+        if previous_param1 in items1:
+            index1 = self.cbParam1.findText(previous_param1)
+            self.cbParam1.setCurrentIndex(index1)
 
+        # Store previously select parameter
+        previous_param2 = self.cbParam2.currentText()
         # M2 has to be non-constrained
         self.cbParam2.clear()
         tab_index2 = self.cbModel2.currentIndex()
         items2 = [param for param in self.params[tab_index2] if not self.tabs[tab_index2].paramHasConstraint(param)]
         self.cbParam2.addItems(items2)
+        # Show the previously selected parameter if available
+        if previous_param2 in items2:
+            index2 = self.cbParam2.findText(previous_param2)
+            self.cbParam2.setCurrentIndex(index2)
 
         self.txtParam.setText(self.tab_names[tab_index1] + ":" + self.cbParam1.currentText())
 
