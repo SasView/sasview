@@ -11,6 +11,8 @@ from PyQt5 import QtGui, QtWidgets, QtCore, QtTest
 import path_prepare
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
 # Local
@@ -41,6 +43,9 @@ class ComplexConstraintTest(unittest.TestCase):
         self.tab1.cbCategory.setCurrentIndex(category_index)
         model_index = self.tab1.cbModel.findText("be_polyelectrolyte")
         self.tab1.cbModel.setCurrentIndex(model_index)
+        # select some parameters so we can populate the combo box
+        for i in range(0, 5):
+            self.tab1._model_model.item(i, 0).setCheckState(2)
 
         category_index = self.tab2.cbCategory.findText("Cylinder")
         self.tab2.cbCategory.setCurrentIndex(category_index)
@@ -79,7 +84,7 @@ class ComplexConstraintTest(unittest.TestCase):
         self.assertEqual(self.widget.cbModel1.currentText(), 'M1')
         self.assertEqual(self.widget.cbModel2.currentText(), 'M1')
         # no parameter has been selected for fitting, so left combobox should contain empty text
-        self.assertEqual(self.widget.cbParam1.currentText(), '')
+        self.assertEqual(self.widget.cbParam1.currentText(), 'scale')
         self.assertEqual(self.widget.cbParam2.currentText(), 'scale')
         # now select a parameter for fitting (M1.scale)
         self.tab1._model_model.item(0, 0).setCheckState(QtCore.Qt.Checked)
@@ -180,3 +185,15 @@ class ComplexConstraintTest(unittest.TestCase):
 
         # see that webbrowser open was attempted
         webbrowser.open.assert_called_once()
+
+    def testOnSetAll(self):
+        """
+        Test the `Add all` option for the constraints
+        """
+        index = self.widget.cbModel2.findText("M2")
+        self.widget.cbModel2.setCurrentIndex(index)
+        spy = QtSignalSpy(self.widget,
+                          self.widget.constraintReadySignal)
+        QtTest.QTest.mouseClick(self.widget.cmdAddAll, QtCore.Qt.LeftButton)
+        # Only two constraints should've been added: scale and background
+        self.assertEqual(spy.count(), 2)
