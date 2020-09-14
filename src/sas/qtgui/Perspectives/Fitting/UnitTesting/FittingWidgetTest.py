@@ -7,7 +7,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import QtTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from twisted.internet import threads
 
 # set up import paths
@@ -1656,6 +1656,41 @@ class FittingWidgetTest(unittest.TestCase):
         cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
         self.widget.onParameterPaste()
         self.widget.updatePageWithParameters.assert_called_once()
+
+    def testGetConstraintsForFitting(self):
+        """
+        Test the deactivation of constraints when trying to fit a single page
+        with constraints relying on other pages
+        """
+        # mock the constraint getter
+        self.widget.getComplexConstraintsForModel = MagicMock(return_value=[
+            ('scale', 'M2.background')])
+        # mock isConstraintMultimodel so that our constraint is multi-model
+        self.widget.isConstraintMultimodel = MagicMock(return_value=True)
+        # Mock a constraint tab
+        constraint_tab = MagicMock()
+        self.widget.parent.perspective().constraint_tab = constraint_tab
+        # instanciate a constraint
+        constraint = Constraint(parent=None, param="scale", value=7.0)
+        self.widget.getConstraintForRow = MagicMock(return_value=constraint)
+        # mock the messagebox
+        QtWidgets.QMessageBox.exec_ = MagicMock()
+
+        # select a model
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # Call the method
+        self.widget.getConstraintsForFitting()
+        # Check that QMessagebox was called
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        # Constraint should be inactive
+        self.assertEqual(constraint.active, False)
+        # Check that the uncheckConstraint method was called
+        constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 
 if __name__ == "__main__":
     unittest.main()

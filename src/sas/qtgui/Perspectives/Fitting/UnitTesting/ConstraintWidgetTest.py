@@ -291,3 +291,32 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.assertEqual(spy[2][0], 'Fitting completed successfully in: 1.5 '
                                     's.\n')
         self.assertEqual(spy_data[0][0], [[result], 'ConstSimulPage'])
+
+    def testUncheckConstraints(self):
+        '''Tests the unchecking of constraints'''
+        # mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.name = "M1"
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+
+        # Add a tab with an active constraint
+        test_tab.getComplexConstraintsForModel = MagicMock(
+            return_value=[('scale', self.constraint1.func)])
+        test_tab.getFullConstraintNameListForModel = MagicMock(
+            return_value=[('scale', self.constraint1.func)])
+        test_tab.getConstraintObjectsForModel = MagicMock(
+            return_value=[self.constraint1])
+        test_tab.getConstraintForRow = MagicMock(return_value=self.constraint1)
+        self.widget.updateFitLine("test_tab")
+        self.widget.parent.getTabByName = MagicMock(return_value=test_tab)
+
+        # Constraint should be checked
+        self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 2)
+
+        self.widget.uncheckConstraint('M1:scale')
+        # Should be unchecked in tblConstraint
+        self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 0)
+        # Constraint should be deactivated
+        self.assertEqual(self.constraint1.active, False)
