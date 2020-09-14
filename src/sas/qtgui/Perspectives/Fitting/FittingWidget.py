@@ -793,10 +793,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Allow the user to interact or not with the fields depending on
             # whether the parameter is constrained or not
             self._model_model.item(row, column).setEditable(fields_enabled)
-        # Force checkbox selection when parameter is constrained
+        # Force checkbox selection when parameter is constrained and disable
+        # checkbox interaction
         if not fields_enabled and self._model_model.item(row, 0).isCheckable():
-                self._model_model.item(row, 0).setCheckState(2)
-                self._model_model.item(row, 0).setEnabled(False)
+            self._model_model.item(row, 0).setCheckState(2)
+            self._model_model.item(row, 0).setEnabled(False)
+        else:
+            # Enable checkbox interaction
+            self._model_model.item(row, 0).setEnabled(True)
         self._model_model.blockSignals(False)
 
     def addConstraintToRow(self, constraint=None, row=0):
