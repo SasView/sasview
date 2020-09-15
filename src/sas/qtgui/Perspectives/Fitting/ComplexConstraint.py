@@ -82,6 +82,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Setup widgets based on current parameters
         """
         self.cbModel1.insertItems(0, self.tab_names)
+        # add an `All` option in the lhs if there are more than 3 tabs
+        if len(self.tab_names) > 2:
+            self.cbModel1.addItem("All")
         self.cbModel2.insertItems(0, self.tab_names)
 
         self.setupParamWidgets()
@@ -105,8 +108,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         previous_param1 = self.cbParam1.currentText()
         # Clear the combobox
         self.cbParam1.clear()
-        tab_index1 = self.cbModel1.currentIndex()
-        items1 = [param for param in self.tabs[tab_index1].main_params_to_fit]
+        # Populate the left combobox parameter arbitrarily with the parameters
+        # from the first tab if `All` option is selected
+        if self.cbModel1.currentText() == "All":
+            items1 = [param for param in self.tabs[1].main_params_to_fit]
+        else:
+            tab_index1 = self.cbModel1.currentIndex()
+            items1 = [param for param in self.tabs[tab_index1].main_params_to_fit]
         self.cbParam1.addItems(items1)
         # Show the previously selected parameter if available
         if previous_param1 in items1:
@@ -125,7 +133,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             index2 = self.cbParam2.findText(previous_param2)
             self.cbParam2.setCurrentIndex(index2)
 
-        self.txtParam.setText(self.tab_names[tab_index1] + ":" + self.cbParam1.currentText())
+        self.txtParam.setText(self.cbModel1.currentText() + ":" +
+                              self.cbParam1.currentText())
 
         self.cbOperator.clear()
         self.cbOperator.addItems(ALLOWED_OPERATORS)
@@ -145,6 +154,12 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.cmdOK.setEnabled(True)
             self.cmdAddAll.setEnabled(True)
         self.lblWarning.setText(txt)
+
+        # disable Aplly all if `All` option on lhs has been selected
+        if self.cbModel1.currentText() == "All":
+            self.cmdAddAll.setEnabled(False)
+        else:
+            self.cmdAddAll.setEnabled(True)
 
     def setupTooltip(self):
         """
@@ -292,6 +307,17 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Respond to Add constraint action.
         Send a signal that the constraint is ready to be applied
         """
+        # if the combobox is set to `All` just call `onApplyAcrossTabs` and
+        # return
+        if self.cbModel1.currentText() == "All":
+            # exclude the tab on the lhs
+            tabs = [tab for tab in self.tabs if tab.kernel_module.name !=
+                    self.cbModel2.currentText()]
+            self.onApplyAcrossTabs(tabs, self.cbParam1.currentText(),
+                                   self.txtConstraint.text())
+            self.setupParamWidgets()
+            return
+
         cons_tuple = self.constraint()
         #check if constraint has been redefined
         if self.constraintIsRedefined(cons_tuple):
@@ -306,7 +332,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if self.parent.constraint_accepted:
             self.setupParamWidgets()
 
-    def onApplyAcrossModels(self, tabs, param, expr):
+    def onApplyAcrossTabs(self, tabs, param, expr):
         """
         Apply constraints across tabs, e.g. all `scale` parameters
         constrained to an expression. *tabs* is a list of active fit tabs
