@@ -15,6 +15,7 @@ import webbrowser
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
 #ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 ALLOWED_OPERATORS = ['=']
@@ -304,6 +305,22 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # reload the comboboxes
         if self.parent.constraint_accepted:
             self.setupParamWidgets()
+
+    def onApplyAcrossModels(self, tabs, param, expr):
+        """
+        Apply constraints across tabs, e.g. all `scale` parameters
+        constrained to an expression. *tabs* is a list of active fit tabs
+        for which the parameter string *param* will be constrained to the
+        *expr* string.
+        """
+        for tab in tabs:
+            assert(isinstance(tab, FittingWidget))
+            if param in tab.kernel_module.params:
+                constraint = Constraint(param=param, value=param, func=expr,
+                                        value_ex=tab.kernel_module.name + "."
+                                        + param, operator="=")
+                self.constraintReadySignal.emit((tab.kernel_module.name,
+                                                 constraint))
 
     def onSetAll(self):
         """
