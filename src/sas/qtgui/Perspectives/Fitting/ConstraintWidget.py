@@ -1122,3 +1122,20 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msgbox.setWindowTitle("Fit Report")
         _ = msgbox.exec_()
         return
+
+    def uncheckConstraint(self, name):
+        """
+        Unchecks the constraint in tblConstraint with *name* slave
+        parameter and deactivates the constraint.
+        """
+        for row in range(self.tblConstraints.rowCount()):
+            constraint = self.tblConstraints.item(row, 0).data(0)
+            # slave parameter has model name and parameter separated
+            # by colon e.g `M1:scale` so no need to parse the constraint
+            # string.
+            if name in constraint:
+                self.tblConstraints.item(row, 0).setCheckState(0)
+                # deactivate the constraint
+                tab = self.parent.getTabByName(name[:name.index(":")])
+                row = tab.getRowFromName(name[name.index(":") + 1:])
+                tab.getConstraintForRow(row).active = False
