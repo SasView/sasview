@@ -536,7 +536,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertFalse(self.widget.txtNptsHighQ.isReadOnly())
 
         # content of line edits
-        self.assertEqual(self.widget.txtName.text(), '')
+        self.assertEqual(self.widget.txtName.text(), 'data')
         self.assertEqual(self.widget.txtTotalQMin.text(), '1')
         self.assertEqual(self.widget.txtTotalQMax.text(), '2')
         self.assertEqual(self.widget.txtBackgd.text(), '0.0')
