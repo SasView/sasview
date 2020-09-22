@@ -1239,7 +1239,7 @@ def saveData(fp, data):
             return add_type(content, type(o))
 
         # ndarray
-        if isinstance(o, np.ndarray):
+        if isinstance(o, (np.ndarray, np.float)):
             content = {'data':o.tolist()}
             return add_type(content, type(o))
 

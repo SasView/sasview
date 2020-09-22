@@ -1687,6 +1687,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.dataDeletedSignal.emit(deleted_items)
         # update stored_data
         self.manager.update_stored_data(deleted_names)
+        self.manager.delete_data(data_id=[], theory_id=[], delete_all=True)
 
         # Clear the model
         self.model.clear()
