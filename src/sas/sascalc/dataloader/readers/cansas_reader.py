@@ -79,83 +79,42 @@ class Reader(XMLreader):
         self.logging = []
         self.encoding = None
 
-    def _read(self, xml_file, schema_path="", invalid=True):
-        if schema_path != "" or not invalid:
-            # read has been called from self.get_file_contents because xml file doens't conform to schema
-            _, self.extension = os.path.splitext(os.path.basename(xml_file))
-            return self.get_file_contents(xml_file=xml_file, schema_path=schema_path, invalid=invalid)
-
-        # Otherwise, read has been called by the data loader - file_reader_base_class handles this
-        return super(XMLreader, self).read(xml_file)
-
     def get_file_contents(self):
-        return self._get_file_contents(xml_file=None, schema_path="", invalid=True)
-
-    def _get_file_contents(self, xml_file=None, schema_path="", invalid=True):
-        # Reset everything since we're loading a new file
         self.reset_state()
-        self.invalid = invalid
-        if xml_file is None:
-            xml_file = self.f_open.name
-        # We don't sure f_open since lxml handles opnening/closing files
+        xml_file = self.f_open.name
         try:
             # Raises FileContentsException
-            self.load_file_and_schema(xml_file, schema_path)
+            is_valid_cansas = self.load_file_and_schema(xml_file, '')
+        except FileContentsException as fc_exc:
+            msg = "CanSAS Reader could not load {}".format(xml_file)
+            if self.extension not in self.ext:
+                # If the file has no associated loader
+                raise DefaultReaderException(msg)
+            raise FileContentsException(msg)
+        try:
             # Parse each SASentry
-            entry_list = self.xmlroot.xpath('/ns:SASroot/ns:SASentry',
-                                            namespaces={
-                                                'ns': self.cansas_defaults.get(
-                                                    "ns")
-                                            })
-            self.is_cansas(self.extension)
+            entry_list = self.xmlroot.xpath(
+                '/ns:SASroot/ns:SASentry',
+                namespaces={'ns': self.cansas_defaults.get("ns")})
             self.set_processing_instructions()
             for entry in entry_list:
                 self._parse_entry(entry)
-                self.data_cleanup()
-        except FileContentsException as fc_exc:
-            # File doesn't meet schema - try loading with a less strict schema
-            base_name = xml_reader.__file__
-            base_name = base_name.replace("\\", "/")
-            base = base_name.split("/sas/")[0]
-            if self.cansas_version == "1.1":
-                invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
-            else:
-                invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
-            self.set_schema(invalid_schema)
-            if self.invalid:
-                try:
-                    # Load data with less strict schema
-                    self._get_file_contents(xml_file, invalid_schema, False)
-
-                    # File can still be read but doesn't match schema, so raise exception
-                    self.load_file_and_schema(xml_file) # Reload strict schema so we can find where error are in file
+                if not is_valid_cansas:
+                    # Set schema back to default canSAS XML for comparison
+                    self.set_default_schema()
                     invalid_xml = self.find_invalid_xml()
-                    if invalid_xml != "":
+                    if invalid_xml:
                         basename, _ = os.path.splitext(
                             os.path.basename(self.f_open.name))
-                        invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
-                        raise DataReaderException(invalid_xml) # Handled by base class
-                except FileContentsException as fc_exc:
-                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
-                    if fc_exc.message is not None: # Propagate error messages from earlier
-                        msg = fc_exc.message
-                    if not self.extension in self.ext: # If the file has no associated loader
-                        raise DefaultReaderException(msg)
-                    raise FileContentsException(msg)
-                    pass
-            else:
-                raise fc_exc
-        except Exception as e: # Convert all other exceptions to FileContentsExceptions
+                        bad_xml = INVALID_XML.format(basename + self.extension)
+                        bad_xml += invalid_xml
+                        self.current_datainfo.errors.append(bad_xml)
+                self.data_cleanup()
+        except Exception as e:
+            # Convert all other exceptions to FileContentsExceptions
             raise FileContentsException(str(e))
-        finally:
-            if not self.f_open.closed:
-                self.f_open.close()
 
     def load_file_and_schema(self, xml_file, schema_path=""):
-        base_name = xml_reader.__file__
-        base_name = base_name.replace("\\", "/")
-        base = base_name.split("/sas/")[0]
-
         # Try and parse the XML file
         try:
             self.set_xml_file(xml_file)
@@ -163,14 +122,13 @@ class Reader(XMLreader):
             msg = "SasView cannot load {}.\nInvalid XML syntax".format(xml_file)
             raise FileContentsException(msg)
 
-        self.cansas_version = self.xmlroot.get("version", "1.0")
-        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
+        self.cansas_version = self.xmlroot.get("version", "1.1")
+        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.1")
 
         if schema_path == "":
-            schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
-                base, self.cansas_defaults.get("schema").replace("\\", "/")
-            )
-        self.set_schema(schema_path)
+            self.set_default_schema()
+        is_valid = self.is_cansas(self.extension)
+        return is_valid
 
     def is_cansas(self, ext="xml"):
         """
@@ -179,25 +137,45 @@ class Reader(XMLreader):
         :param ext: The file extension of the data file
         :raises FileContentsException: Raised if XML file isn't valid CanSAS
         """
-        if self.validate_xml(): # Check file is valid XML
+        if self.validate_xml():
             name = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
             value = self.xmlroot.get(name)
             # Check schema CanSAS version matches file CanSAS version
             if CANSAS_NS.get(self.cansas_version).get("ns") == value.rsplit(" ")[0]:
-                return True
+                return None
         if ext == "svs":
-            return True # Why is this required?
+            # Skip check if saved file
+            return None
+        # File doesn't meet schema - try loading with a less strict schema
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+        if self.cansas_version == "1.1":
+            invalid_schema = INVALID_SCHEMA_PATH_1_1.format(
+                base, self.cansas_defaults.get("schema"))
+        else:
+            invalid_schema = INVALID_SCHEMA_PATH_1_0.format(
+                base, self.cansas_defaults.get("schema"))
+        self.set_schema(invalid_schema)
+        if self.validate_xml():
+            return False
         # If we get to this point then file isn't valid CanSAS
-        logger.warning("File doesn't meet CanSAS schema. Trying to load anyway.")
         raise FileContentsException("The file is not valid CanSAS")
+
+    def set_default_schema(self):
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+        schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
+            base, self.cansas_defaults.get("schema").replace("\\", "/")
+        )
+        self.set_schema(schema_path)
 
     def _parse_entry(self, dom, recurse=False):
         if not self._is_call_local() and not recurse:
             self.reset_state()
         if not recurse:
             self.current_datainfo = DataInfo()
-            # Raises FileContentsException if file doesn't meet CanSAS schema
-            self.invalid = False
             # Look for a SASentry
             self.data = []
             self.parent_class = "SASentry"
@@ -205,6 +183,7 @@ class Reader(XMLreader):
             self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
             self.current_datainfo.meta_data[
                 PREPROCESS] = self.processing_instructions
+            self.base_ns = "{" + CANSAS_NS.get(self.cansas_version).get("ns") + "}"
         if self._is_call_local() and not recurse:
             basename, _ = os.path.splitext(os.path.basename(self.f_open.name))
             self.current_datainfo.filename = basename + self.extension
@@ -359,50 +338,51 @@ class Reader(XMLreader):
                     self.current_datainfo.instrument = data_point
 
                 # Detector Information
-                elif tagname == 'name' and self.parent_class == 'SASdetector':
-                    self.detector.name = data_point
-                elif tagname == 'SDD' and self.parent_class == 'SASdetector':
-                    self.detector.distance = data_point
-                    self.detector.distance_unit = unit
-                elif tagname == 'slit_length' and self.parent_class == 'SASdetector':
-                    self.detector.slit_length = data_point
-                    self.detector.slit_length_unit = unit
-                elif tagname == 'x' and self.parent_class == 'offset':
-                    self.detector.offset.x = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'y' and self.parent_class == 'offset':
-                    self.detector.offset.y = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'z' and self.parent_class == 'offset':
-                    self.detector.offset.z = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.x = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.y = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'z' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.z = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'x' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.x = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.y = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.z = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.x = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.y = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.z = data_point
-                    self.detector.orientation_unit = unit
+                elif self.parent_class == 'SASdetector' or 'SASdetector' in self.names:
+                    if tagname == 'name':
+                        self.detector.name = data_point
+                    elif tagname == 'SDD':
+                        self.detector.distance = data_point
+                        self.detector.distance_unit = unit
+                    elif tagname == 'slit_length':
+                        self.detector.slit_length = data_point
+                        self.detector.slit_length_unit = unit
+                    elif tagname == 'x' and self.parent_class == 'offset':
+                        self.detector.offset.x = data_point
+                        self.detector.offset_unit = unit
+                    elif tagname == 'y' and self.parent_class == 'offset':
+                        self.detector.offset.y = data_point
+                        self.detector.offset_unit = unit
+                    elif tagname == 'z' and self.parent_class == 'offset':
+                        self.detector.offset.z = data_point
+                        self.detector.offset_unit = unit
+                    elif tagname == 'x' and self.parent_class == 'beam_center':
+                        self.detector.beam_center.x = data_point
+                        self.detector.beam_center_unit = unit
+                    elif tagname == 'y' and self.parent_class == 'beam_center':
+                        self.detector.beam_center.y = data_point
+                        self.detector.beam_center_unit = unit
+                    elif tagname == 'z' and self.parent_class == 'beam_center':
+                        self.detector.beam_center.z = data_point
+                        self.detector.beam_center_unit = unit
+                    elif tagname == 'x' and self.parent_class == 'pixel_size':
+                        self.detector.pixel_size.x = data_point
+                        self.detector.pixel_size_unit = unit
+                    elif tagname == 'y' and self.parent_class == 'pixel_size':
+                        self.detector.pixel_size.y = data_point
+                        self.detector.pixel_size_unit = unit
+                    elif tagname == 'z' and self.parent_class == 'pixel_size':
+                        self.detector.pixel_size.z = data_point
+                        self.detector.pixel_size_unit = unit
+                    elif tagname == 'roll' and self.parent_class == 'orientation':
+                        self.detector.orientation.x = data_point
+                        self.detector.orientation_unit = unit
+                    elif tagname == 'pitch' and self.parent_class == 'orientation':
+                        self.detector.orientation.y = data_point
+                        self.detector.orientation_unit = unit
+                    elif tagname == 'yaw' and self.parent_class == 'orientation':
+                        self.detector.orientation.z = data_point
+                        self.detector.orientation_unit = unit
 
                 # Collimation and Aperture
                 elif tagname == 'length' and self.parent_class == 'SAScollimation':
@@ -484,9 +464,7 @@ class Reader(XMLreader):
                     self.current_datainfo.meta_data[new_key] = data_point
 
             self.names.remove(tagname_original)
-            length = 0
-            if len(self.names) > 1:
-                length = len(self.names) - 1
+            length = 0 if len(self.names) < 1 else len(self.names) - 1
             self.parent_class = self.names[length]
         if not self._is_call_local() and not recurse:
             self.frm = ""

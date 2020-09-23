@@ -43,6 +43,7 @@ class XMLreader(FileReader):
     processing_instructions = None
 
     def __init__(self, xml=None, schema=None):
+        super(XMLreader, self).__init__()
         self.xml = xml
         self.schema = schema
         self.processing_instructions = {}
