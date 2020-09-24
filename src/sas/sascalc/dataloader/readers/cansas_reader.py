@@ -9,6 +9,7 @@ import numpy as np
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+# The preceding 2 imports *ARE* used. Do not remove either.
 
 from lxml import etree
 
@@ -249,7 +250,7 @@ class Reader(XMLreader):
                 # I and Q points - 1D data
                 elif ((self.parent_class == 'SASdata' or 'SASdata' in self.names)
                       and isinstance(self.current_dataset, plottable_1D)):
-                    self.process_1d_data_object(tagname, data_point, attr)
+                    self.process_1d_data_object(tagname, data_point, unit, attr)
 
                 # I and Qx, Qy - 2D data
                 elif ((self.parent_class == 'SASdata' or 'SASdata' in self.names)
@@ -302,8 +303,15 @@ class Reader(XMLreader):
             self.reset_data_list()
             return self.output[0], None
 
-    def process_1d_data_object(self, tagname, data_point, attr):
-        unit = attr.get('unit', '')
+    def process_1d_data_object(self, tagname, data_point, unit, attr):
+        """
+        Assign a 1D data variable to the appropriate plottable value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :param attr: Extra attributes
+        :return: None
+        """
         if tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
             self.current_dataset.yaxis("Intensity", unit)
             self.current_dataset.y = np.append(self.current_dataset.y, data_point)
@@ -334,6 +342,13 @@ class Reader(XMLreader):
             self.current_datainfo.sample.zacceptance = (data_point, unit)
 
     def process_2d_data_object(self, tagname, data_point, unit):
+        """
+        Assign a 2D data variable to the appropriate plottable value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
         if tagname == 'I':
             self.current_dataset.yaxis("Intensity", unit)
             self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
@@ -356,6 +371,13 @@ class Reader(XMLreader):
             self.current_dataset.mask = np.asarray(inter, dtype=bool)
 
     def process_sample_data_object(self, tagname, data_point, unit):
+        """
+        Assign a sample data variable to the appropriate Sample value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
         if tagname == 'ID':
             self.current_datainfo.sample.ID = data_point
         elif tagname == 'Title':
@@ -392,6 +414,13 @@ class Reader(XMLreader):
                 self.current_datainfo.sample.orientation_unit = unit
 
     def process_detector_data_object(self, tagname, data_point, unit):
+        """
+        Assign a detector variable to the appropriate Detector value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
         if tagname == 'name':
             self.detector.name = data_point
         elif tagname == 'SDD':
@@ -442,6 +471,13 @@ class Reader(XMLreader):
                 self.detector.orientation_unit = unit
 
     def process_collimation_data_object(self, tagname, data_point, unit):
+        """
+        Assign a collimation variable to the appropriate Collimation value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
         if tagname == 'length':
             self.collimation.length = data_point
             self.collimation.length_unit = unit
@@ -462,6 +498,13 @@ class Reader(XMLreader):
                 self.collimation.size_unit = unit
 
     def process_process_data_object(self, tagname, data_point, attr):
+        """
+        Assign a process variable to the appropriate Process value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param attr: XML attributes
+        :return: None
+        """
         name = attr.get('name', '')
         if tagname == 'name' and self.parent_class == 'SASprocess':
             self.process.name = data_point
@@ -480,6 +523,13 @@ class Reader(XMLreader):
             self.process.term.append(dic)
 
     def process_source_data_object(self, tagname, data_point, unit):
+        """
+        Assign a source  variable to the appropriate Source value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
         if tagname == 'wavelength':
             self.current_datainfo.source.wavelength = data_point
             self.current_datainfo.source.wavelength_unit = unit
@@ -507,6 +557,13 @@ class Reader(XMLreader):
             self.current_datainfo.source.beam_shape = data_point
 
     def process_trans_spec_data_object(self, tagname, data_point, unit):
+        """
+        Assign a transmission spectrum data variable to the appropriate datainfo value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
         if tagname == 'T':
             self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
             self.transspectrum.transmission_unit = unit
