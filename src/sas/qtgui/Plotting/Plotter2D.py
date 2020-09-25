@@ -175,9 +175,9 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
             self.actionClearSlicer.triggered.connect(self.onClearSlicer)
-            if self.slicer.__class__.__name__ != "BoxSumCalculator":
-                self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
-                self.actionEditSlicer.triggered.connect(self.onEditSlicer)
+        #if self.slicer.__class__.__name__ != "BoxSumCalculator":
+        self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
+        self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
@@ -224,11 +224,15 @@ class Plotter2DWidget(PlotterBase):
         self.canvas.draw()
         self.slicer = None
 
+    def getActivePlots(self):
+        ''' utility method for manager query of active plots '''
+        return self.manager.active_plots
+
     def onEditSlicer(self):
         """
-        Present a small dialog for manipulating the current slicer
+        Present a dialog for manipulating the current slicer
         """
-        assert self.slicer
+        #assert self.slicer
         # Only show the dialog if not currently shown
         if self.slicer_widget:
             return
@@ -239,11 +243,16 @@ class Plotter2DWidget(PlotterBase):
             # reset slicer_widget on "Edit Slicer Parameters" window close
             self.slicer_widget = None
 
-        self.param_model = self.slicer.model()
+        self.param_model = None
+        validator = None
+        if self.slicer is not None:
+            self.param_model = self.slicer.model()
+            validator = self.slicer.validate
         # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(self, model=self.param_model,
-                                              active_plots=self.manager.active_plots,
-                                              validate_method=self.slicer.validate)
+                                              active_plots=self.getActivePlots(),
+                                              validate_method=validator,
+                                              communicator = self.manager.communicator)
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
         self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)

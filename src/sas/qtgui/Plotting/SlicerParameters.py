@@ -30,27 +30,30 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     def __init__(self, parent=None,
                  model=None,
                  active_plots=None,
-                 validate_method=None):
+                 validate_method=None,
+                 communicator=None):
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
 
-        assert isinstance(model, QtGui.QStandardItemModel)
+        #assert isinstance(model, QtGui.QStandardItemModel)
         self.parent = parent
 
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
         self.save_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.communicator = communicator
 
         # Initially, Apply is disabled
         self.cmdApply.setEnabled(False)
 
         # Mapping combobox index -> slicer module
-        self.callbacks = {0: SectorInteractor,
-                          1: AnnulusInteractor,
-                          2: BoxInteractorX,
-                          3: BoxInteractorY}
+        self.callbacks = {0: None,
+                          1: SectorInteractor,
+                          2: AnnulusInteractor,
+                          3: BoxInteractorX,
+                          4: BoxInteractorY}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -65,6 +68,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Specify the validator on the parameter value column.
         self.delegate = EditDelegate(self, validate_method=self.validate_method)
         self.lstParams.setItemDelegate(self.delegate)
+
+        # respond to graph deletion
+        self.communicator.activeGraphsSignal.connect(self.updatePlotList)
 
         # Set up paths
         self.txtLocation.setText(self.save_location)
@@ -96,10 +102,17 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
+    def updatePlotList(self):
+        '''
+        '''
+        self.active_plots = self.parent.getActivePlots()
+        self.setPlotsList()
+
     def setPlotsList(self):
         """
         Create and initially populate the list of plots
         """
+        self.lstPlots.clear()
         # Fill out list of plots
         for item in self.active_plots.keys():
             if isinstance(self.active_plots[item].data[0], Data1D):
@@ -149,9 +162,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def onSlicerChanged(self, index):
         """ change the parameters based on the slicer chosen """
-        if index < len(self.callbacks):
+        if index == 0: # No interactor
+            self.parent.onClearSlicer()
+            self.setModel(None)
+        else:
             slicer = self.callbacks[index]
-            self.parent.setSlicer(slicer=slicer)
+            if self.active_plots.keys():
+                self.parent.setSlicer(slicer=slicer)
 
     def onGeneratePlots(self, isChecked):
         """
@@ -211,6 +228,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             plotter = self.active_plots[plot]
             # Assign model to slicer
             index = self.cbSlicer.currentIndex()
+
             slicer = self.callbacks[index]
             plotter.setSlicer(slicer=slicer)
             # override slicer model
