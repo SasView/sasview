@@ -847,6 +847,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         font.setItalic(True)
         brush = QtGui.QBrush(QtGui.QColor('blue'))
         self.modifyViewOnRow(row, font=font, brush=brush)
+        # update the main parameter list so the constrained parameter gets
+        # updated when fitting
+        self.checkboxSelected(self._model_model.item(row, 0))
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
         if constraint_tab:
             # Set the constraint_accepted flag to True to inform the
