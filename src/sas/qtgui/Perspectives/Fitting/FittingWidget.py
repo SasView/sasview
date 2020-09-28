@@ -4383,7 +4383,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         sym_dict = {}
         # return an empty dict if no model has been selected
-        if self.kernel.module == None:
+        if self.kernel_module == None:
             return sym_dict
         model_name = self.kernel_module.name
         for param in self.getParamNames():

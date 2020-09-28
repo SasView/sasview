@@ -111,10 +111,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # Populate the left combobox parameter arbitrarily with the parameters
         # from the first tab if `All` option is selected
         if self.cbModel1.currentText() == "All":
-            items1 = [param for param in self.tabs[1].main_params_to_fit]
+            items1 = self.tabs[1].main_params_to_fit
         else:
             tab_index1 = self.cbModel1.currentIndex()
-            items1 = [param for param in self.tabs[tab_index1].main_params_to_fit]
+            items1 = self.tabs[tab_index1].main_params_to_fit
         self.cbParam1.addItems(items1)
         # Show the previously selected parameter if available
         if previous_param1 in items1:
@@ -355,7 +355,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = [param for param in self.tabs[index1].kernel_module.params]
+        items1 = self.tabs[index1].kernel_module.params
         items2 = self.params[index2]
         # create an empty list to store redefined constraints
         redefined_constraints = []
