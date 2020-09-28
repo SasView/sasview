@@ -335,6 +335,9 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab.getConstraintForRow = MagicMock(return_value=self.constraint1)
         self.widget.updateFitLine("test_tab")
         self.widget.parent.getTabByName = MagicMock(return_value=test_tab)
+        perspective = self.widget.parent.parent.perspective()
+        perspective.symbol_dict = {"M1.scale": 1, "M1.radius": 1}
+        self.widget.initializeFitList = MagicMock()
 
         # Constraint should be checked
         self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 2)
