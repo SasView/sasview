@@ -885,6 +885,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
         for constraint, constraint_name in zip(constraints, constraint_names):
+            # Ignore constraints that have no *func* attribute defined
+            if constraint.func is None:
+                continue
             # Create the text for widget item
             label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
             pos = self.tblConstraints.rowCount()
