@@ -190,19 +190,23 @@ class GuiManager(object):
         # Load all perspectives
         loaded_dict = {}
         for name, perspective in Perspectives.PERSPECTIVES.items():
-            loaded_perspective = perspective(parent=self)
-            loaded_dict[name] = loaded_perspective
+            try:
+                loaded_perspective = perspective(parent=self)
+                loaded_dict[name] = loaded_perspective
+            except Exception as e:
+                logger.log(f"Unable to loading {name} perpesctive.\n{e}")
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
-        if (not hasattr(self, 'loadedPerspectives')
-                or not isinstance(self.loadedPerspectives, dict)):
-            return
-        for name, perspective in self.loadedPerspectives.items():
-            perspective.setClosable(True)
-            self._workspace.workspace.removeSubWindow(self.subwindow)
-            perspective.close()
+        if isinstance(self.loadedPerspectives, dict):
+            for name, perspective in self.loadedPerspectives.items():
+                try:
+                    perspective.setClosable(True)
+                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    perspective.close()
+                except Exception as e:
+                    logger.log(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
         self._current_perspective = None
 
