@@ -194,7 +194,7 @@ class GuiManager(object):
                 loaded_perspective = perspective(parent=self)
                 loaded_dict[name] = loaded_perspective
             except Exception as e:
-                logger.log(f"Unable to loading {name} perpesctive.\n{e}")
+                logger.log(f"Unable to load {name} perspective.\n{e}")
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
