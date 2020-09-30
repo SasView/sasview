@@ -86,14 +86,14 @@ class Reader(FileReader):
                         msg = "NXcanSAS Reader could not load file {}".format(
                             basename + extension)
                         raise DefaultReaderException(msg)
-                    raise FileContentsException(exc)
+                    raise FileContentsException(exc.message)
                 try:
                     # Read in all child elements of top level SASroot
                     self.read_children(self.raw_data, [])
                     # Add the last data set to the list of outputs
                     self.add_data_set()
                 except Exception as exc:
-                    raise FileContentsException(exc)
+                    raise FileContentsException(exc.message)
                 finally:
                     # Close the data file
                     self.raw_data.close()
