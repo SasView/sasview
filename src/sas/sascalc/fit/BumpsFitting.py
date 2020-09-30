@@ -6,6 +6,7 @@ from datetime import timedelta, datetime
 import traceback
 
 import numpy as np
+from uncertainties import ufloat as U
 
 from bumps import fitters
 try:
@@ -282,32 +283,44 @@ class BumpsFit(FitEngine):
 
         # TODO: shouldn't reference internal parameters of fit problem
         varying = problem._parameters
+        # Propagate uncertainty through the parameter expressions
+        # We are going to abuse bumps a little here and stuff uncertainty
+        # objects into the parameter values, then update all the
+        # derived parameters with uncertainty propagation. We need to
+        # avoid triggering a model recalc since the uncertainty objects
+        # will not be working with sasmodels.
+        # TODO: if dream then use forward MC to evaluate uncertainty
+        # TODO: move uncertainty propagation into bumps
+        # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
+        values, errs = result['value'], result['stderr']
+        assert values is not None and errs is not None
+
+        for p, v, s in zip(varying, values, errs):
+            p.value = U(v, s)
+        problem.setp_hook()
         # collect the results
         all_results = []
         for M in problem.models:
             fitness = M.fitness
-            fitted_index = [varying.index(p) for p in fitness.fitted_pars]
-            param_list = fitness.fitted_par_names + fitness.computed_par_names
-            R = FResult(model=fitness.model, data=fitness.data,
-                        param_list=param_list)
+            print([par.value.s for par in fitness.computed_pars])
+            par_names = fitness.fitted_par_names + fitness.computed_par_names
+            pars = fitness.fitted_pars + fitness.computed_pars
+            R = FResult(model=fitness.model,
+                        data=fitness.data,
+                        param_list=par_names)
             R.theory = fitness.theory()
             R.residuals = fitness.residuals()
             R.index = fitness.data.idx
             R.fitter_id = self.fitter_id
-            # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             R.success = result['success']
             if R.success:
-                if result['stderr'] is None:
-                    R.stderr = np.NaN*np.ones(len(param_list))
-                else:
-                    R.stderr = np.hstack((result['stderr'][fitted_index],
-                                          np.NaN*np.ones(len(fitness.computed_pars))))
-                R.pvec = np.hstack((result['value'][fitted_index],
-                                    [p.value for p in fitness.computed_pars]))
-                R.fitness = np.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
+                R.pvec = np.array([p.value.n for p in pars])
+                R.stderr = np.array([p.value.s for p in pars])
+                DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
+                R.fitness = np.sum(R.residuals ** 2) / DOF
             else:
-                R.stderr = np.NaN*np.ones(len(param_list))
-                R.pvec = np.asarray([p.value for p in fitness.fitted_pars+fitness.computed_pars])
+                R.pvec = np.asarray([p.value for p in pars])
+                R.stderr = np.NaN * np.ones(len(pars))
                 R.fitness = np.NaN
             R.convergence = result['convergence']
             if result['uncertainty'] is not None:
