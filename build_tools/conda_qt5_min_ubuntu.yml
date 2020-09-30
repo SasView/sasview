@@ -28,3 +28,4 @@ dependencies:
    - bumps==0.7.8
    - xhtml2pdf==0.2.2
    - qt5reactor==0.5
+   - uncertainties
