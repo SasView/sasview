@@ -114,7 +114,7 @@ class Reader(XMLreader):
         self.current_dataset.xaxis("Q", q_unit)
         self.current_dataset.yaxis("Intensity", i_unit)
         xml_intermediate = self.raw_data[self.upper:]
-        xml = bytes(''.join(xml_intermediate), 'utf-8')
+        xml = bytes(''.join(xml_intermediate))
         try:
             self.set_xml_string(xml)
             dom = self.xmlroot.xpath('/fileinfo')
