@@ -294,7 +294,12 @@ class BumpsFit(FitEngine):
         # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
         values, errs = result['value'], result['stderr']
         assert values is not None and errs is not None
-
+        # first have the parameter value attribute point towards a
+        # uncertainty object with 0 standard deviation
+        for model in problem.model_parameters()["models"]:
+            for param in model:
+                model[param].value = U(model[param].value, 0)
+        # then update the computed standard deviation of fitted parameters
         for p, v, s in zip(varying, values, errs):
             p.value = U(v, s)
         problem.setp_hook()
@@ -302,7 +307,6 @@ class BumpsFit(FitEngine):
         all_results = []
         for M in problem.models:
             fitness = M.fitness
-            print([par.value.s for par in fitness.computed_pars])
             par_names = fitness.fitted_par_names + fitness.computed_par_names
             pars = fitness.fitted_pars + fitness.computed_pars
             R = FResult(model=fitness.model,
