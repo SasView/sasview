@@ -55,12 +55,15 @@ class Registry(ExtensionRegistry):
     def load(self, path, format=None, debug=False, use_defaults=True):
         """
         Call the loader for the file type of path.
+
         :param path: file path
-        :param format: explicit extension, to force the use
-            of a particular reader
+        :param format: explicit extension, to force the use of a particular
+                       reader
         :param debug: when True, print the traceback for each loader that fails
-        :param use_defaults: Flag to use the default readers as a backup if the
+        :param use_defaults:
+            Flag to use the default readers as a backup if the
             main reader fails or no reader exists
+
         Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
         readers if no reader was registered for the file's extension.
         """

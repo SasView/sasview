@@ -116,7 +116,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
 
     def onConvert(self):
         """
-        Call the conversion method (*and update DataExplorer with converted data)?
+        Call the conversion method (and update DataExplorer with converted data)?
         """
         self.readMetadata()
 
@@ -375,7 +375,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         :return x_data: A 1D array containing all the x coordinates of the data
         :return y_data: A 1D array containing all the y coordinates of the data
         :return frame_data: A dictionary of the form *{frame_number: data}*,
-        where data is a 2D numpy array containing the intensity data
+            where data is a 2D numpy array containing the intensity data
         """
         loader = Utilities.BSLLoader(filename)
         frames = [0]
