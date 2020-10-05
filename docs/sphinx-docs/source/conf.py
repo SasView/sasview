@@ -107,7 +107,7 @@ exclude_patterns = ["*sas.sasgui.perspectives.simulation.rst",
                     "*sas.sasgui.guiframe.custom_pstats.rst", # pstats not in standard library on Ubuntu out of the box
                     ]
 
-autodoc_mock_imports = ['sip', 'PyQt5']
+autodoc_mock_import = ['sip']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
