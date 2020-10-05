@@ -36,9 +36,9 @@ before_install:
 - hash -r
 #- conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole
 install:
-- pip install periodictable xhtml2pdf unittest-xml-reporting pylint
+- pip install periodictable xhtml2pdf unittest-xml-reporting pylint qt5reactor
 # Note: use "... || true" below to silently ignore failure
 - pip install pyopencl
 script:
