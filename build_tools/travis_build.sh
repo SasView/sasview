@@ -51,6 +51,10 @@ $PYTHON build_sphinx.py
 cd $WORKSPACE/sasview/dist
 $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
 
+for egg in $WORKSPACE/sasview/utils/*egg $WORKSPACE/sasview/sasview-install/*egg; do
+  PYTHONPATH=$egg:$PYTHONPATH
+done
+
 # TEST
 cd $WORKSPACE/sasview/test
 $PYTHON utest_sasview.py
