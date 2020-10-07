@@ -130,6 +130,22 @@ class ABSReaderTests(unittest.TestCase):
             self.assertFalse(math.isnan(f_2d.qx_data[i]))
             self.assertFalse(math.isnan(f_2d.qy_data[i]))
 
+    def test_encoding(self):
+        # Compare loading of utf-8 versus ansi/windows-1252
+        ansi = self.loader.load(find("encoding_ANSI.txt"))
+        utf8 = self.loader.load(find("encoding_UTF_8.txt"))
+        self._check_cl_data(ansi)
+        self._check_cl_data(utf8)
+
+    def _check_cl_data(self, data):
+        self.assertEqual(len(data), 1)
+        data_set = data[0]
+        self.assertEqual(len(data_set.x), 969)
+        self.assertEqual(len(data_set.x), len(data_set.y))
+        self.assertEqual(data_set.x[0], 0.000201634)
+        self.assertEqual(data_set.y[0], 208487062.3)
+        self.assertEqual(data_set.x_unit, 'A^{-1}')
+        self.assertEqual(data_set.y_unit, 'cm^{-1}')
 
 if __name__ == '__main__':
     unittest.main()

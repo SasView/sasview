@@ -80,8 +80,14 @@ class FileReader(object):
             if self.extension in self.ext or self.allow_all:
                 # Try to load the file, but raise an error if unable to.
                 try:
-                    self.f_open = open(filepath, 'rb')
-                    self.get_file_contents()
+                    try:
+                        self.f_open = open(filepath, 'rb')
+                        self.get_file_contents()
+                    except ValueError:
+                        # Issue(s) found while reading file in binary mode
+                        # Attempt to open in text-only mode
+                        self.f_open = open(filepath, 'r')
+                        self.get_file_contents()
                 except DataReaderException as e:
                     self.handle_error_message(str(e))
                 except FileContentsException as e:
