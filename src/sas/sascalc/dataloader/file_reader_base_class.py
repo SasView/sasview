@@ -81,13 +81,13 @@ class FileReader(object):
                 # Try to load the file, but raise an error if unable to.
                 try:
                     try:
-                        self.f_open = open(filepath, 'rb')
-                        self.get_file_contents()
+                        with open(filepath, 'rb') as self.f_open:
+                            self.get_file_contents()
                     except ValueError:
                         # Issue(s) found while reading file in binary mode
                         # Attempt to open in text-only mode
-                        self.f_open = open(filepath, 'r')
-                        self.get_file_contents()
+                        with open(filepath, 'r') as self.f_open:
+                            self.get_file_contents()
                 except DataReaderException as e:
                     self.handle_error_message(str(e))
                 except FileContentsException as e:
@@ -99,17 +99,14 @@ class FileReader(object):
                     self.handle_error_message(msg)
                 except Exception as e:
                     self.handle_error_message(str(e))
-                finally:
-                    # Close the file handle if it is open
-                    if not self.f_open.closed:
-                        self.f_open.close()
-                    if any(filepath.lower().endswith(ext) for ext in
-                           self.deprecated_extensions):
-                        self.handle_error_message(DEPRECATION_MESSAGE)
-                    if len(self.output) > 0:
-                        # Sort the data that's been loaded
-                        self.convert_data_units()
-                        self.sort_data()
+
+                if any(filepath.lower().endswith(ext) for ext in
+                       self.deprecated_extensions):
+                    self.handle_error_message(DEPRECATION_MESSAGE)
+                if len(self.output) > 0:
+                    # Sort the data that's been loaded
+                    self.convert_data_units()
+                    self.sort_data()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
