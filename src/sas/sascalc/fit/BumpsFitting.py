@@ -7,6 +7,7 @@ import traceback
 
 import numpy as np
 from uncertainties import ufloat as U
+from uncertainties import correlated_values
 
 from bumps import fitters
 try:
@@ -292,7 +293,9 @@ class BumpsFit(FitEngine):
         # TODO: if dream then use forward MC to evaluate uncertainty
         # TODO: move uncertainty propagation into bumps
         # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-        values, errs = result['value'], result['stderr']
+        values, errs, state = result['value'], result["stderr"], result[
+            'uncertainty']
+        cov = problem.cov() if not state else np.cov(state.draw().points.T)
         assert values is not None and errs is not None
         # first have the parameter value attribute point towards a
         # uncertainty object with 0 standard deviation
@@ -300,8 +303,14 @@ class BumpsFit(FitEngine):
             for param in model:
                 model[param].value = U(model[param].value, 0)
         # then update the computed standard deviation of fitted parameters
-        for p, v, s in zip(varying, values, errs):
-            p.value = U(v, s)
+        if len(varying) < 2:
+            varying[0].value = U(values[0], errs[0])
+        # take into account parameter correlation in the uncertainty if we
+        # are fitting more than one parameter
+        else:
+            fitted = correlated_values([var.value.n for var in varying], cov)
+            for p, v in zip(varying, fitted):
+                p.value = v
         problem.setp_hook()
         # collect the results
         all_results = []
