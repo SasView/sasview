@@ -6,10 +6,11 @@ from datetime import timedelta, datetime
 import traceback
 
 import numpy as np
-from uncertainties import ufloat as U
-from uncertainties import correlated_values
+from uncertainties import ufloat, correlated_values
 
 from bumps import fitters
+from bumps.parameter import unique as unique_parameters
+
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
@@ -293,22 +294,18 @@ class BumpsFit(FitEngine):
         # TODO: if dream then use forward MC to evaluate uncertainty
         # TODO: move uncertainty propagation into bumps
         # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-        values, errs, state = result['value'], result["stderr"], result[
-            'uncertainty']
-        cov = problem.cov() if not state else np.cov(state.draw().points.T)
-        assert values is not None and errs is not None
-        # first have the parameter value attribute point towards a
-        # uncertainty object with 0 standard deviation
-        for model in problem.model_parameters()["models"]:
-            for param in model:
-                model[param].value = U(model[param].value, 0)
+        values, errs, cov = result['value'], result["stderr"], result[
+            'covariance']
+        assert values is not None and errs is not None and cov is not None
+        # Turn all parameters (fixed and varying) into uncertainty objects with
+        # zero uncertainty.
+        for p in unique_parameters(problem.model_parameters()):
+            p.value = ufloat(p.value, 0)
         # then update the computed standard deviation of fitted parameters
         if len(varying) < 2:
-            varying[0].value = U(values[0], errs[0])
-        # take into account parameter correlation in the uncertainty if we
-        # are fitting more than one parameter
+            varying[0].value = ufloat(values[0], errs[0])
         else:
-            fitted = correlated_values([var.value.n for var in varying], cov)
+            fitted = correlated_values(values, cov)
             for p, v in zip(varying, fitted):
                 p.value = v
         problem.setp_hook()
@@ -393,10 +390,13 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
+        cov = (fitdriver.cov() if not hasattr(fitdriver.fitter, 'state') else
+               np.cov(fitdriver.fitter.state.draw().points.T))
     except Exception as exc:
         errors.append(str(exc))
         errors.append(traceback.format_exc())
         stderr = None
+        cov = None
     return {
         'value': best if success else None,
         'stderr': stderr,
@@ -404,4 +404,5 @@ def run_bumps(problem, handler, curr_thread):
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
         'errors': '\n'.join(errors),
+        'covariance': cov,
         }
