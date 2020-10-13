@@ -148,8 +148,11 @@ class Guinier(Transform):
         return [self.radius, self.scale], [self.dradius, self.dscale]
 
     def evaluate_model(self, x):
-        """
-        return F(x)= scale* e-((radius*x)**2/3)
+        r"""
+        return calculated I(q) for the model
+
+        Calculates the Guinier expression
+        $F(x)= s * \exp\left(-(r x)^{2/3}\right)$
         """
         return self._guinier(x)
 
@@ -167,14 +170,16 @@ class Guinier(Transform):
         return np.array([math.sqrt(err) for err in diq2])
 
     def _guinier(self, x):
-        """
+        r"""
         Retrieve the guinier function after apply an inverse guinier function
         to x
-        Compute a F(x) = scale* e-((radius*x)**2/3).
+        Compute $F(x) = s * \exp\left(-(r x)^{2/3}\right)$.
 
         :param x: a vector of q values
-        :param scale: the scale value
-        :param radius: the guinier radius value
+
+        Also uses:
+         - self.scale: $s$, the scale value
+         - self.radius: $r$, the guinier radius value
 
         :return: F(x)
         """
@@ -204,7 +209,7 @@ class PowerLaw(Transform):
 
         :param value: q-value
 
-        :return: log(q)
+        :return: $\log(q)$
         """
         return math.log(value)
 
@@ -291,7 +296,7 @@ class Extrapolator(object):
 
     def fit(self, power=None, qmin=None, qmax=None):
         """
-        Fit data for y = ax + b  return a and b
+        Fit data for $y = ax + b$  return $a$ and $b$
 
         :param power: a fixed, otherwise None
         :param qmin: Minimum Q-value
@@ -608,7 +613,8 @@ class InvariantCalculator(object):
         """
         Compute the invariant for extrapolated data at low q range.
 
-        Implementation:
+        Implementation: ::
+
             data = self._get_extra_data_low()
             return self._get_qstar()
 
@@ -647,7 +653,8 @@ class InvariantCalculator(object):
         """
         Compute the invariant for extrapolated data at high q range.
 
-        Implementation:
+        Implementation: ::
+
             data = self._get_extra_data_high()
             return self._get_qstar()
 
@@ -816,11 +823,15 @@ class InvariantCalculator(object):
 
         Historically, Sv was computed with the invariant and the Porod
         constant so as not to have to know the contrast in order to get the
-        Sv as:
+        Sv as: ::
+
             surface = (pi * V * (1- V) * porod_const) / q_star
+
         However, that turns out to be a pointless exercise since it
         also requires a knowledge of the volume fractions and from the
-        volumer fraction and the invariant the contrast can be calculated as:
+        volume fraction and the invariant the contrast can be calculated
+        as: ::
+
             contrast**2 = q_star / (2 * pi**2 * V * (1- V))
 
         Thus either way, mathematically it is always identical to computing
@@ -829,10 +840,11 @@ class InvariantCalculator(object):
         circular approach.
 
         Implementation: ::
-           Given the above, as of SasView 4.3 and 5.0.2 we compute Sv simply
-           from the Porod Constant and the contrast between the two phases as:
-             surface = porod_const / (2 * pi contrast**2) 
 
+            Given the above, as of SasView 4.3 and 5.0.2 we compute Sv simply
+            from the Porod Constant and the contrast between the two phases as:
+
+            surface = porod_const / (2 * pi contrast**2)
 
         :param contrast: contrast between the two phases
         :param porod_const: Porod constant
@@ -849,7 +861,7 @@ class InvariantCalculator(object):
 
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
-        Compute volume fraction is deduced as follow: ::
+        Compute volume fraction is deduced as follows: ::
 
             q_star = 2*(pi*contrast)**2* volume( 1- volume)
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
@@ -924,16 +936,19 @@ class InvariantCalculator(object):
 
             sigV = dV/dq_star * sigq_star
             
-            so that
+        so that: ::
+
             sigV = (k * sigq_star) /(q_star * math.sqrt(1 - 4 * k))
 
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
 
-            10^(-8) converts from cm^-1 to A^-1
-            q_star: the invariant, in cm^-1A^-3, including extrapolated values
-                if they have been requested
-            dq_star: the invariant uncertainty
-            dV: the volume uncertainty
+        Notes:
+
+        - 10^(-8) converts from cm^-1 to A^-1
+        - q_star: the invariant, in cm^-1A^-3, including extrapolated values
+          if they have been requested
+        - dq_star: the invariant uncertainty
+        - dV: the volume uncertainty
 
         The uncertainty will be set to -1 if it can't be computed.
 
@@ -964,13 +979,17 @@ class InvariantCalculator(object):
         from the contrast and porod_constant wich are currently user inputs
         with no option for any uncertainty so no uncertainty can be calculated.
         However we include the uncertainty computation for future use if and
-        when these values get an uncertainty. This is given as:
+        when these values get an uncertainty. This is given as: ::
 
-            ds = sqrt[(s'_cp)**2 * dcp**2 + (s'_contrast)**2 * dcontrast**2]
-            where s'_x is the partial derivative of S with respect to x 
-        which gives (this should be checked before using in anger)
+            ds = sqrt[(s\'_cp)**2 * dcp**2 + (s\'_contrast)**2 * dcontrast**2]
+
+        where s'_x is the partial derivative of S with respect to x
+
+        which gives (this should be checked before using in anger): ::
+
             ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
                           dcontrast)**2) / (4 * pi**2 * contrast**6))
+
         We also assume some users will never enter a value for uncertainty so
         allow for None even when it is an option.
 

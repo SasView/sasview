@@ -297,7 +297,7 @@ def positive_integral(pars, d_max, nslice):
     :param nslice: nslice.
 
     :return: The fraction of the integral of P(r) over the whole
-    range of r that is above 0.
+        range of r that is above 0.
     """
     dx = d_max/nslice
     r = np.linspace(0., d_max - dx, nslice)
@@ -320,7 +320,7 @@ def positive_errors(pars, err, d_max, nslice):
     :param nslice: nslice.
 
     :return: The fraction of the integral of P(r) over the whole range
-    of r that is at least one sigma above 0.
+        of r that is at least one sigma above 0.
     """
     dx = d_max/nslice
     r = np.linspace(0., d_max - dx, nslice)

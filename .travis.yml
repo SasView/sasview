@@ -26,6 +26,8 @@ addons:
     - liblapack-dev
     - gfortran
     - libhdf5-serial-dev
+services:
+  - xvfb
 before_install:
 - echo $TRAVIS_OS_NAME
 - wget $MINICONDA -O miniconda.sh
@@ -34,9 +36,9 @@ before_install:
 - hash -r
 #- conda update --yes conda
 - conda info -a
-- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako
+- conda install --yes python=$PY numpy scipy cython pylint wxpython matplotlib lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole
 install:
-- pip install periodictable xhtml2pdf unittest-xml-reporting pylint
+- pip install periodictable xhtml2pdf unittest-xml-reporting pylint qt5reactor
 # Note: use "... || true" below to silently ignore failure
 - pip install pyopencl
 script:
@@ -45,7 +47,7 @@ script:
 - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
 - git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
 - ls -ltr
-- if [ ! -d "utils" ]; then mkdir utils; fi
+- mkdir -p utils
 - /bin/sh -xe sasview/build_tools/travis_build.sh
 - export LC_ALL=en_US.UTF-8
 - export LANG=en_US.UTF-8
