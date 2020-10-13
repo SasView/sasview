@@ -777,8 +777,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         box_sizer.Add((20, -1))
         box_sizer.Add(self.set_button, flag=wx.RIGHT | wx.EXPAND, border=5)
         sizer_constraint.Add(box_sizer, flag=wx.RIGHT | wx.EXPAND, border=5)
-        self.sizer_all_constraints.Insert(before=0,
-                             item=sizer_constraint,
+        self.sizer_all_constraints.Insert(0, sizer_constraint,
                              flag=wx.TOP | wx.BOTTOM | wx.EXPAND, border=5)
         self.FitInside()
 
@@ -914,9 +913,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         sizer_constraint.Add(constraint, flag=wx.RIGHT | wx.EXPAND, border=10)
         sizer_constraint.Add(bt_remove, flag=wx.RIGHT | wx.EXPAND, border=10)
 
-        self.sizer_constraints.Insert(before=self.nb_constraint,
-                item=sizer_constraint, flag=wx.TOP | wx.BOTTOM | wx.EXPAND,
-                border=5)
+        self.sizer_constraints.Insert(self.nb_constraint, sizer_constraint,
+                flag=wx.TOP | wx.BOTTOM | wx.EXPAND, border=5)
         c = ConstraintLine(model_cbox, param_cbox, egal_txt,
                            constraint, bt_remove, sizer_constraint)
         self.constraints_list.append(c)
