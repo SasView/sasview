@@ -47,7 +47,7 @@ class ComplexConstraintTest(unittest.TestCase):
         model_index = self.tab1.cbModel.findText("be_polyelectrolyte")
         self.tab1.cbModel.setCurrentIndex(model_index)
         # select some parameters so we can populate the combo box
-        for i in range(0, 5):
+        for i in range(5):
             self.tab1._model_model.item(i, 0).setCheckState(2)
 
         category_index = self.tab2.cbCategory.findText("Cylinder")
@@ -229,14 +229,11 @@ class ComplexConstraintTest(unittest.TestCase):
         index = self.widget.cbModel1.findText("All")
         self.widget.cbModel1.setCurrentIndex(index)
         self.widget.onApply()
-        self.widget.onApplyAcrossTabs.assert_called_once_with([self.tab1,
-                                                               self.tab3],
-                                                              self.widget.
-                                                              cbParam1.
-                                                              currentText(),
-                                                              self.widget.
-                                                              txtConstraint.
-                                                              text())
+        self.widget.onApplyAcrossTabs.assert_called_once_with(
+            [self.tab1, self.tab3],
+            self.widget.cbParam1.currentText(),
+            self.widget.txtConstraint.text(),
+        )
 
     def testOnApplyAcrossTabs(self):
         """

@@ -1,5 +1,6 @@
 import logging
 import copy
+import re
 
 from twisted.internet import threads
 
@@ -465,9 +466,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         # Then check if the parameter is correctly defined with colons
         # separating model and parameter name
-        parameter_full_name = constraint_text[:constraint_text.index(
-            "=")].strip()
-        if ":" not in parameter_full_name:
+        lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
+        if ":" not in lhs:
             msg = ("Incorrect constrained parameter definition. Please use "
                    "colons to separate model and parameter on the rhs of the "
                    "definition, e.g. M1:scale")
@@ -479,19 +479,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.initializeFitList()
             return
         # We can parse the string
-        new_param = item.data(0)[
-                item.data(0).index(':') + 1:item.data(0).index('=')].strip()
-        new_model = item.data(0)[:item.data(0).index(':')].strip()
+        new_param = lhs.split(":", 1)[1].strip()
+        new_model = lhs.split(":", 1)[0].strip()
         # Check that the symbol is known so we dont get an unknown tab
         # All the conditional statements could be grouped in one or
         # alternatively we could check with expression.py, but we would still
         # need to do some checks to parse the string
-        symbol_dict = self.parent.parent.perspective(
-            ).getSymbolDictForConstraints()
-        if (new_model + "." + new_param) not in symbol_dict:
-            msg = ("Incorrect constrained parameter definition. Please use "
-                   "a single known parameter in the rhs of the constraint "
-                   "definition, e.g. M1:scale = M1.radius + 2")
+        symbol_dict = (self.parent.parent.perspective().
+                       getSymbolDictForConstraints())
+        qualified_par = f"{new_model}.{new_param}"
+        if qualified_par not in symbol_dict:
+            msg = (f"Unknown parameter {qualified_par} used in constraint."
+                   " Please use a single known parameter in the rhs of the "
+                   "constraint definition, e.g. M1:scale = M1.radius + 2")
             QtWidgets.QMessageBox.critical(
                 self,
                 "Inconsistent constraint",
@@ -499,11 +499,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
-        new_function = item.data(0)[item.data(0).index('=') + 1:].strip()
+        new_function = rhs
         new_tab = self.available_tabs[new_model]
         # Make sure we are dealing with fit tabs
-        assert(isinstance(tab, FittingWidget))
-        assert(isinstance(new_tab, FittingWidget))
+        assert isinstance(tab, FittingWidget)
+        assert isinstance(new_tab, FittingWidget)
         # Now check if the user has redefined the constraint and reapply it
         if new_function != function or new_model != model or new_param != param:
             # Apply the new constraint
@@ -513,8 +513,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                                        row=tab.getRowFromName(new_param))
             # If the constraint is valid and we are changing model or
             # parameter, delete the old constraint
-            if self.constraint_accepted and (new_model != model or
-                                             new_param != param):
+            if (self.constraint_accepted and new_model != model or
+                    new_param != param):
                 tab.deleteConstraintOnParameter(param)
             # Reload the view
             self.initializeFitList()
@@ -880,7 +880,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         active_constraint_names = fit_page.getComplexConstraintsForModel()
         constraint_names = fit_page.getFullConstraintNameListForModel()
         constraints = fit_page.getConstraintObjectsForModel()
-        if not constraints: 
+        if not constraints:
             return
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
@@ -895,10 +895,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
             # Show the text in the constraint table
             item = QtWidgets.QTableWidgetItem(label)
-            item.setFlags(QtCore.Qt.ItemIsSelectable |
-                          QtCore.Qt.ItemIsEnabled |
-                          QtCore.Qt.ItemIsUserCheckable |
-                          QtCore.Qt.ItemIsEditable)
+            item.setFlags(QtCore.Qt.ItemIsSelectable
+                          | QtCore.Qt.ItemIsEnabled
+                          | QtCore.Qt.ItemIsUserCheckable
+                          | QtCore.Qt.ItemIsEditable)
             # Why was this set to non-interactive??
             if constraint_name in active_constraint_names:
                 item.setCheckState(QtCore.Qt.Checked)

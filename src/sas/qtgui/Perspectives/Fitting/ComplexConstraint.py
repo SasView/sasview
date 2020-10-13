@@ -133,8 +133,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             index2 = self.cbParam2.findText(previous_param2)
             self.cbParam2.setCurrentIndex(index2)
 
-        self.txtParam.setText(self.cbModel1.currentText() + ":" +
-                              self.cbParam1.currentText())
+        self.txtParam.setText(self.cbModel1.currentText() + ":"
+                              + self.cbParam1.currentText())
 
         self.cbOperator.clear()
         self.cbOperator.addItems(ALLOWED_OPERATORS)
@@ -273,8 +273,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param = self.cbParam1.currentText()
         value = self.cbParam2.currentText()
         func = self.txtConstraint.text()
-        value_ex = (self.cbModel1.currentText() + "." +
-                    self.cbParam1.currentText())
+        value_ex = (self.cbModel1.currentText() + "."
+                    + self.cbParam1.currentText())
         model1 = self.cbModel1.currentText()
         operator = self.cbOperator.currentText()
 
@@ -311,8 +311,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # return
         if self.cbModel1.currentText() == "All":
             # exclude the tab on the lhs
-            tabs = [tab for tab in self.tabs if tab.kernel_module.name !=
-                    self.cbModel2.currentText()]
+            tabs = [tab for tab in self.tabs if
+                    tab.kernel_module.name != self.cbModel2.currentText()]
             self.onApplyAcrossTabs(tabs, self.cbParam1.currentText(),
                                    self.txtConstraint.text())
             self.setupParamWidgets()
@@ -340,7 +340,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         *expr* string.
         """
         for tab in tabs:
-            assert(isinstance(tab, FittingWidget))
+            assert isinstance(tab, FittingWidget)
             if param in tab.kernel_module.params:
                 constraint = Constraint(param=param, value=param, func=expr,
                                         value_ex=tab.kernel_module.name + "."

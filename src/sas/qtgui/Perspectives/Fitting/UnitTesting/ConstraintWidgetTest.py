@@ -376,12 +376,9 @@ class ConstraintWidgetTest(unittest.TestCase):
 
         msg = ("Incorrect operator in constraint definition. Please use = "
                "sign to define constraints.")
-        QtWidgets.QMessageBox.critical.assert_called_with(self.widget,
-                                                          "Inconsistent "
-                                                          "constraint",
-                                                          msg,
-                                                          QtWidgets.QMessageBox.
-                                                          Ok)
+        (QtWidgets.QMessageBox.critical.
+         assert_called_with(self.widget, "Inconsistent constraint", msg,
+                            QtWidgets.QMessageBox.Ok))
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
 
@@ -391,12 +388,9 @@ class ConstraintWidgetTest(unittest.TestCase):
         msg = ("Incorrect constrained parameter definition. Please use colons"
                " to separate model and parameter on the rhs of the definition, "
                "e.g. M1:scale")
-        QtWidgets.QMessageBox.critical.assert_called_with(self.widget,
-                                                          "Inconsistent "
-                                                          "constraint",
-                                                          msg,
-                                                          QtWidgets.QMessageBox.
-                                                          Ok)
+        (QtWidgets.QMessageBox.critical.
+         assert_called_with(self.widget, "Inconsistent constraint", msg,
+                            QtWidgets.QMessageBox.Ok))
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
 
@@ -405,15 +399,12 @@ class ConstraintWidgetTest(unittest.TestCase):
         # Change the constraint to one with an unknown symbol or with several
         # parameters on the rhs of the constraint definition
         self.widget.tblConstraints.item(0, 0).setText("M1:foo = bar")
-        msg = ("Incorrect constrained parameter definition. Please use "
+        msg = ("Unknown parameter M1.foo used in constraint. Please use "
                "a single known parameter in the rhs of the constraint "
                "definition, e.g. M1:scale = M1.radius + 2")
-        QtWidgets.QMessageBox.critical.assert_called_with(self.widget,
-                                                          "Inconsistent "
-                                                          "constraint",
-                                                          msg,
-                                                          QtWidgets.QMessageBox.
-                                                          Ok)
+        (QtWidgets.QMessageBox.critical.
+         assert_called_with(self.widget, "Inconsistent constraint", msg,
+                            QtWidgets.QMessageBox.Ok))
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
 
@@ -424,15 +415,13 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.tblConstraints.item(0, 0).setText("M1:radius = bar")
         constraint = Constraint(param="radius", func="bar",
                                 value_ex="M1.radius")
-        self.assertEqual(test_tab.addConstraintToRow.call_args[1][
-                             "constraint"].value_ex, constraint.value_ex)
-        self.assertEqual(test_tab.addConstraintToRow.call_args[1][
-                             "constraint"].func, constraint.func)
-        self.assertEqual(test_tab.addConstraintToRow.call_args[1][
-                             "constraint"].param, constraint.param)
-        self.assertEqual(test_tab.addConstraintToRow.call_args[1]["row"], 0)
-        self.assertEqual(test_tab.deleteConstraintOnParameter.call_args[0][
-                             0], "scale")
+        target = test_tab.addConstraintToRow.call_args[1]
+        self.assertEqual(target["constraint"].value_ex, constraint.value_ex)
+        self.assertEqual(target["constraint"].func, constraint.func)
+        self.assertEqual(target["constraint"].param, constraint.param)
+        self.assertEqual(target["row"], 0)
+        target = test_tab.deleteConstraintOnParameter.call_args[0]
+        self.assertEqual(target[0], "scale")
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
 
