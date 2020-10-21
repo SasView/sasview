@@ -6,7 +6,7 @@ class
 
 import os
 import sys
-import math
+import codecs
 import logging
 from abc import abstractmethod
 
@@ -24,7 +24,13 @@ if sys.version_info[0] < 3:
         return s
 else:
     def decode(s):
-        return s.decode() if isinstance(s, bytes) else s
+        for codec in ['utf-8', 'windows-1252']:
+            try:
+                return codecs.decode(s, codec) if isinstance(s, bytes) else s
+            except (ValueError, UnicodeError):
+                pass
+            except Exception as e:
+                logger.warning(e)
 
 # Data 1D fields for iterative purposes
 FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
