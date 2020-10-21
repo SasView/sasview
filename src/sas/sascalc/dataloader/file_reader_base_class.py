@@ -24,13 +24,18 @@ if sys.version_info[0] < 3:
         return s
 else:
     def decode(s):
+        # Attempt to decode files using common encodings
+        # *NB* windows-1252, aka cp1252, overlaps with most ASCII-style encodings
         for codec in ['utf-8', 'windows-1252']:
             try:
                 return codecs.decode(s, codec) if isinstance(s, bytes) else s
             except (ValueError, UnicodeError):
+                # If the specific codec fails, try the next one.
                 pass
             except Exception as e:
                 logger.warning(e)
+        # Give warning if unable to decode the item using the codecs
+        logger.warning(f"Unable to decode {s}")
 
 # Data 1D fields for iterative purposes
 FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
@@ -86,14 +91,8 @@ class FileReader(object):
             if self.extension in self.ext or self.allow_all:
                 # Try to load the file, but raise an error if unable to.
                 try:
-                    try:
-                        with open(filepath, 'rb') as self.f_open:
-                            self.get_file_contents()
-                    except ValueError:
-                        # Issue(s) found while reading file in binary mode
-                        # Attempt to open in text-only mode
-                        with open(filepath, 'r') as self.f_open:
-                            self.get_file_contents()
+                    with open(filepath, 'rb') as self.f_open:
+                        self.get_file_contents()
                 except DataReaderException as e:
                     self.handle_error_message(str(e))
                 except FileContentsException as e:
@@ -105,14 +104,14 @@ class FileReader(object):
                     self.handle_error_message(msg)
                 except Exception as e:
                     self.handle_error_message(str(e))
-
-                if any(filepath.lower().endswith(ext) for ext in
-                       self.deprecated_extensions):
-                    self.handle_error_message(DEPRECATION_MESSAGE)
-                if len(self.output) > 0:
-                    # Sort the data that's been loaded
-                    self.convert_data_units()
-                    self.sort_data()
+                finally:
+                    if any(filepath.lower().endswith(ext) for ext in
+                           self.deprecated_extensions):
+                        self.handle_error_message(DEPRECATION_MESSAGE)
+                    if len(self.output) > 0:
+                        # Sort the data that's been loaded
+                        self.convert_data_units()
+                        self.sort_data()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
