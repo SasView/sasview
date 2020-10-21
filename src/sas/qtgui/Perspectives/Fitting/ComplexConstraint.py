@@ -339,12 +339,14 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         *expr* string.
         """
         for tab in tabs:
-            if param in tab.kernel_module.params:
-                constraint = Constraint(param=param, value=param, func=expr,
-                                        value_ex=tab.kernel_module.name + "."
-                                        + param, operator="=")
-                self.constraintReadySignal.emit((tab.kernel_module.name,
-                                                 constraint))
+            if hasattr(tab, "kernel_module"):
+                if param in tab.kernel_module.params:
+                    constraint = Constraint(param=param, value=param,
+                                            func=expr,
+                                            value_ex=tab.kernel_module.name +
+                                            "." + param, operator="=")
+                    self.constraintReadySignal.emit((tab.kernel_module.name,
+                                                     constraint))
 
     def onSetAll(self):
         """
