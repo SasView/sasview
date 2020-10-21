@@ -15,7 +15,6 @@ import webbrowser
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
 #ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 ALLOWED_OPERATORS = ['=']
@@ -307,13 +306,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Respond to Add constraint action.
         Send a signal that the constraint is ready to be applied
         """
-        # if the combobox is set to `All` just call `onApplyAcrossTabs` and
+        # if the combobox is set to `All` just call `applyAcrossTabs` and
         # return
         if self.cbModel1.currentText() == "All":
             # exclude the tab on the lhs
             tabs = [tab for tab in self.tabs if
                     tab.kernel_module.name != self.cbModel2.currentText()]
-            self.onApplyAcrossTabs(tabs, self.cbParam1.currentText(),
+            self.applyAcrossTabs(tabs, self.cbParam1.currentText(),
                                    self.txtConstraint.text())
             self.setupParamWidgets()
             return
@@ -332,7 +331,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if self.parent.constraint_accepted:
             self.setupParamWidgets()
 
-    def onApplyAcrossTabs(self, tabs, param, expr):
+    def applyAcrossTabs(self, tabs, param, expr):
         """
         Apply constraints across tabs, e.g. all `scale` parameters
         constrained to an expression. *tabs* is a list of active fit tabs
@@ -340,7 +339,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         *expr* string.
         """
         for tab in tabs:
-            assert isinstance(tab, FittingWidget)
             if param in tab.kernel_module.params:
                 constraint = Constraint(param=param, value=param, func=expr,
                                         value_ex=tab.kernel_module.name + "."
