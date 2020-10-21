@@ -344,9 +344,12 @@ class EditDelegate(QtWidgets.QStyledItemDelegate):
         # Find out the changed parameter name and proposed value
         new_value = GuiUtils.toDouble(self.editor.text())
         param_name = model.sourceModel().item(index.row(), 0).text()
+        value_accepted = True
         if self.validate_method:
             # Validate the proposed value in the slicer
             value_accepted = self.validate_method(param_name, new_value)
             # Update the model only if value accepted
+        if value_accepted:
             return super(EditDelegate, self).setModelData(editor, model, index)
-        return None
+        else:
+            return None
