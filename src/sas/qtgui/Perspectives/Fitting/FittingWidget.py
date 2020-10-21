@@ -1061,11 +1061,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         return [s.row() for s in self.lstParams.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
 
-    def setParameterSelection(self, status=QtCore.Qt.Unchecked):
+    def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None):
         """
         Selected parameters are chosen for fitting
         """
         # Convert to proper indices and set requested enablement
+        if item is None:
+            return
+        # We only want to select/deselect all items if
+        # `item` is also selected!
+        # Otherwise things get confusing.
+        # https://github.com/SasView/sasview/issues/1676
+        if item.row() not in self.selectedParameters():
+            return
         for row in self.selectedParameters():
             self._model_model.item(row, 0).setCheckState(status)
 
@@ -2706,7 +2714,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # If multiple rows selected - toggle all of them, filtering uncheckable
         # Convert to proper indices and set requested enablement
-        self.setParameterSelection(status)
+        # Careful with `item` NOT being selected. This means we only want to
+        # select that one item.
+        self.setParameterSelection(status, item=item)
 
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel(self._model_model)
