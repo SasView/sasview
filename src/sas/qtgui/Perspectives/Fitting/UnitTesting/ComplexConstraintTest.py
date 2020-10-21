@@ -225,17 +225,17 @@ class ComplexConstraintTest(unittest.TestCase):
         self.assertTrue(isinstance(spy.signal(0)[0][1], Constraint))
 
         # Test the `All` option in the combobox
-        self.widget.onApplyAcrossTabs = MagicMock()
+        self.widget.applyAcrossTabs = MagicMock()
         index = self.widget.cbModel1.findText("All")
         self.widget.cbModel1.setCurrentIndex(index)
         self.widget.onApply()
-        self.widget.onApplyAcrossTabs.assert_called_once_with(
+        self.widget.applyAcrossTabs.assert_called_once_with(
             [self.tab1, self.tab3],
             self.widget.cbParam1.currentText(),
             self.widget.txtConstraint.text(),
         )
 
-    def testOnApplyAcrossTabs(self):
+    def testApplyAcrossTabs(self):
         """
         Test the application of constraints across tabs
         """
@@ -244,6 +244,6 @@ class ComplexConstraintTest(unittest.TestCase):
         tabs = [self.tab1, self.tab2]
         param = "scale"
         expr = "M3.scale"
-        self.widget.onApplyAcrossTabs(tabs, param, expr)
+        self.widget.applyAcrossTabs(tabs, param, expr)
         # We should have two calls
         self.assertEqual(spy.count(), 2)
