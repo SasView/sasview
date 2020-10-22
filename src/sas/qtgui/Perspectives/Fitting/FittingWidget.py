@@ -1047,14 +1047,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        self.setParameterSelection(status)
+        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item)
 
     def deselectParameters(self):
         """
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        self.setParameterSelection(status)
+        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item)
 
     def selectedParameters(self):
         """ Returns list of selected (highlighted) parameters """
