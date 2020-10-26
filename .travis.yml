@@ -13,7 +13,7 @@ matrix:
 branches:
   only:
   - master
-  - ESS_GUI
+  - main
 addons:
   apt:
     packages:
