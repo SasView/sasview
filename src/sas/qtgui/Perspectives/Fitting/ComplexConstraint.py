@@ -313,7 +313,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             tabs = [tab for tab in self.tabs if
                     tab.kernel_module.name != self.cbModel2.currentText()]
             self.applyAcrossTabs(tabs, self.cbParam1.currentText(),
-                                   self.txtConstraint.text())
+                                 self.txtConstraint.text())
             self.setupParamWidgets()
             return
 
@@ -341,10 +341,12 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         for tab in tabs:
             if hasattr(tab, "kernel_module"):
                 if param in tab.kernel_module.params:
-                    constraint = Constraint(param=param, value=param,
+                    value_ex = tab.kernel_module.name + "." +param
+                    constraint = Constraint(param=param,
+                                            value=param,
                                             func=expr,
-                                            value_ex=tab.kernel_module.name +
-                                            "." + param, operator="=")
+                                            value_ex=value_ex,
+                                            operator="=")
                     self.constraintReadySignal.emit((tab.kernel_module.name,
                                                      constraint))
 
