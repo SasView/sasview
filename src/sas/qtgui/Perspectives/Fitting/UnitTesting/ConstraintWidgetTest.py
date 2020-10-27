@@ -33,6 +33,28 @@ class ConstraintWidgetTest(unittest.TestCase):
                 return GuiUtils.Communicate()
             communicate = GuiUtils.Communicate()
 
+            def __init__(self):
+                self._perspective = dummy_perspective()
+
+            def perspective(self):
+                return self._perspective
+
+        class dummy_perspective(object):
+
+            def __init__(self):
+                self.symbol_dict = {}
+                self.constraint_list = []
+                self.constraint_tab = None
+
+            def getActiveConstraintList(self):
+                return self.constraint_list
+
+            def getSymbolDictForConstraints(self):
+                return self.symbol_dict
+
+            def getConstraintTab(self):
+                return self.constraint_tab
+
         '''Create the perspective'''
         self.perspective = FittingWindow(dummy_manager())
         ConstraintWidget.updateSignalsFromTab = MagicMock()
@@ -40,7 +62,9 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget = ConstraintWidget(parent=self.perspective)
 
         # Example constraint object
-        self.constraint1 = Constraint(parent=None, param="test", value="7.0", min="0.0", max="inf", func="M1.sld")
+        self.constraint1 = Constraint(parent=None, param="scale", value="7.0",
+                                      min="0.0", max="inf", func="M1.sld",
+                                      value_ex="M1.scale")
         self.constraint2 = Constraint(parent=None, param="poop", value="7.0", min="0.0", max="inf", func="7.0")
 
     def tearDown(self):
@@ -311,6 +335,9 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab.getConstraintForRow = MagicMock(return_value=self.constraint1)
         self.widget.updateFitLine("test_tab")
         self.widget.parent.getTabByName = MagicMock(return_value=test_tab)
+        perspective = self.widget.parent.parent.perspective()
+        perspective.symbol_dict = {"M1.scale": 1, "M1.radius": 1}
+        self.widget.initializeFitList = MagicMock()
 
         # Constraint should be checked
         self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 2)
@@ -320,3 +347,103 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 0)
         # Constraint should be deactivated
         self.assertEqual(self.constraint1.active, False)
+
+    def testOnConstraintChange(self):
+        ''' test edition of the constraint list '''
+        # mock a tab
+        test_tab = MagicMock(spec=FittingWidget)
+        test_tab.data_is_loaded = False
+        test_tab.kernel_module = MagicMock()
+        test_tab.kernel_module.name = "M1"
+        test_tab.getRowFromName = MagicMock(return_value=0)
+        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+
+        # Add a constraint to the tab
+        test_tab.getComplexConstraintsForModel = MagicMock(
+            return_value=[('scale', self.constraint1.func)])
+        test_tab.getFullConstraintNameListForModel = MagicMock(
+            return_value=[('scale', self.constraint1.func)])
+        test_tab.getConstraintObjectsForModel = MagicMock(
+            return_value=[self.constraint1])
+
+        self.widget.updateFitLine("test_tab")
+
+        self.widget.initializeFitList = MagicMock()
+        QtWidgets.QMessageBox.critical = MagicMock()
+
+        # Change the constraint to one with no equal sign
+        self.widget.tblConstraints.item(0, 0).setText("foo")
+
+        msg = ("Incorrect operator in constraint definition. Please use = "
+               "sign to define constraints.")
+        (QtWidgets.QMessageBox.critical.
+         assert_called_with(self.widget, "Inconsistent constraint", msg,
+                            QtWidgets.QMessageBox.Ok))
+        # Check the reloading of the view
+        self.widget.initializeFitList.assert_called_once()
+
+        self.widget.initializeFitList.reset_mock()
+        # Change the constraint to one with no colons in constrained parameter
+        self.widget.tblConstraints.item(0, 0).setText("foo = bar")
+        msg = ("Incorrect constrained parameter definition. Please use colons"
+               " to separate model and parameter on the rhs of the definition, "
+               "e.g. M1:scale")
+        (QtWidgets.QMessageBox.critical.
+         assert_called_with(self.widget, "Inconsistent constraint", msg,
+                            QtWidgets.QMessageBox.Ok))
+        # Check the reloading of the view
+        self.widget.initializeFitList.assert_called_once()
+
+        self.widget.initializeFitList.reset_mock()
+        perspective = self.widget.parent.parent.perspective()
+        # Change the constraint to one with an unknown symbol or with several
+        # parameters on the rhs of the constraint definition
+        self.widget.tblConstraints.item(0, 0).setText("M1:foo = bar")
+        msg = ("Unknown parameter M1.foo used in constraint. Please use "
+               "a single known parameter in the rhs of the constraint "
+               "definition, e.g. M1:scale = M1.radius + 2")
+        (QtWidgets.QMessageBox.critical.
+         assert_called_with(self.widget, "Inconsistent constraint", msg,
+                            QtWidgets.QMessageBox.Ok))
+        # Check the reloading of the view
+        self.widget.initializeFitList.assert_called_once()
+
+        self.widget.initializeFitList.reset_mock()
+        # Check replacement of a constraint
+        perspective.symbol_dict = {"M1.scale": 1, "M1.radius": 1}
+
+        self.widget.tblConstraints.item(0, 0).setText("M1:radius = bar")
+        constraint = Constraint(param="radius", func="bar",
+                                value_ex="M1.radius")
+        target = test_tab.addConstraintToRow.call_args[1]
+        self.assertEqual(target["constraint"].value_ex, constraint.value_ex)
+        self.assertEqual(target["constraint"].func, constraint.func)
+        self.assertEqual(target["constraint"].param, constraint.param)
+        self.assertEqual(target["row"], 0)
+        target = test_tab.deleteConstraintOnParameter.call_args[0]
+        self.assertEqual(target[0], "scale")
+        # Check the reloading of the view
+        self.widget.initializeFitList.assert_called_once()
+
+        self.widget.initializeFitList.reset_mock()
+        # Check the checkbox
+        self.widget.tblConstraints.item(0, 0).setText("M1:scale = M1.sld")
+        self.assertEqual(test_tab.modifyViewOnRow.call_args[0][0], 0)
+        font = QtGui.QFont()
+        font.setItalic(True)
+        self.assertEqual(test_tab.modifyViewOnRow.call_args[1]["font"],
+                         font)
+        brush = QtGui.QBrush(QtGui.QColor('blue'))
+        self.assertEqual(test_tab.modifyViewOnRow.call_args[1]["brush"],
+                         brush)
+        # Check the reloading of the view
+        self.widget.initializeFitList.assert_called_once()
+
+        self.widget.initializeFitList.reset_mock()
+        # Uncheck the checkbox
+        self.widget.tblConstraints.item(0, 0).setCheckState(0)
+        self.assertEqual(test_tab.modifyViewOnRow.call_args[0][0], 0)
+        self.assertTrue(not test_tab.modifyViewOnRow.call_args[1])
+        self.assertEqual(self.constraint1.active, False)
+        # Check the reloading of the view
+        self.widget.initializeFitList.assert_called_once()
