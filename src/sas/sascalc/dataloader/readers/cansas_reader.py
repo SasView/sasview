@@ -128,8 +128,7 @@ class Reader(XMLreader):
 
         if schema_path == "":
             self.set_default_schema()
-        is_valid = self.is_cansas(self.extension)
-        return is_valid
+        return self.is_cansas(self.extension)
 
     def is_cansas(self, ext="xml"):
         """
@@ -143,10 +142,10 @@ class Reader(XMLreader):
             value = self.xmlroot.get(name)
             # Check schema CanSAS version matches file CanSAS version
             if CANSAS_NS.get(self.cansas_version).get("ns") == value.rsplit(" ")[0]:
-                return None
+                return True
         if ext == "svs":
             # Skip check if saved file
-            return None
+            return True
         # File doesn't meet schema - try loading with a less strict schema
         base_name = xml_reader.__file__
         base_name = base_name.replace("\\", "/")
@@ -287,8 +286,7 @@ class Reader(XMLreader):
 
                 # Everything else goes in meta_data
                 else:
-                    new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
-                    self.current_datainfo.meta_data[new_key] = data_point
+                    self.process_meta_data(tagname, data_point)
 
             self.names.remove(tagname_original)
             length = 0 if len(self.names) < 1 else len(self.names) - 1
@@ -340,6 +338,8 @@ class Reader(XMLreader):
             self.current_datainfo.sample.yacceptance = (data_point, unit)
         elif tagname == 'zacceptance':
             self.current_datainfo.sample.zacceptance = (data_point, unit)
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_2d_data_object(self, tagname, data_point, unit):
         """
@@ -369,6 +369,8 @@ class Reader(XMLreader):
         elif tagname == 'Mask':
             inter = [item == "1" for item in data_point.split(",")]
             self.current_dataset.mask = np.asarray(inter, dtype=bool)
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_sample_data_object(self, tagname, data_point, unit):
         """
@@ -412,6 +414,8 @@ class Reader(XMLreader):
             elif tagname == 'yaw':
                 self.current_datainfo.sample.orientation.z = data_point
                 self.current_datainfo.sample.orientation_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_detector_data_object(self, tagname, data_point, unit):
         """
@@ -469,6 +473,8 @@ class Reader(XMLreader):
             elif tagname == 'yaw':
                 self.detector.orientation.z = data_point
                 self.detector.orientation_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_collimation_data_object(self, tagname, data_point, unit):
         """
@@ -496,6 +502,8 @@ class Reader(XMLreader):
             elif tagname == 'z':
                 self.aperture.size.z = data_point
                 self.collimation.size_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_process_data_object(self, tagname, data_point, attr):
         """
@@ -521,6 +529,8 @@ class Reader(XMLreader):
             unit = attr.get("unit", "")
             dic = {"name": name, "value": data_point, "unit": unit}
             self.process.term.append(dic)
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_source_data_object(self, tagname, data_point, unit):
         """
@@ -555,6 +565,8 @@ class Reader(XMLreader):
             self.current_datainfo.source.radiation = data_point
         elif tagname == 'beam_shape':
             self.current_datainfo.source.beam_shape = data_point
+        else:
+            self.process_meta_data(tagname, data_point)
 
     def process_trans_spec_data_object(self, tagname, data_point, unit):
         """
@@ -573,6 +585,18 @@ class Reader(XMLreader):
         elif tagname == 'Lambda':
             self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
             self.transspectrum.wavelength_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_meta_data(self, tagname, data_point):
+        """
+        Any unrecognized tag should still be loaded - add to meta_data
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :return: None
+        """
+        new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
+        self.current_datainfo.meta_data[new_key] = data_point
 
     def _is_call_local(self):
         if self.frm == "":

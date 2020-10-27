@@ -97,7 +97,7 @@ class cansas_reader_xml(unittest.TestCase):
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
         self.assertTrue(data.x.size == 138)
-        self.assertTrue(len(data.meta_data) == 2)
+        self.assertTrue(len(data.meta_data) == 3)
         self.assertTrue(data.detector[0].distance_unit == "mm")
         self.assertTrue(data.detector[1].distance_unit == "mm")
         self.assertTrue(data.detector[0].name == "HAB")
