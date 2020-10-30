@@ -14,7 +14,7 @@ dependencies:
  - h5py=2.9.0
  - lxml=4.3.0
  - twisted=18.9.0
- - sphinx=1.8.4
+ - sphinx=1.8.5
  - pytest=4.2.0
  - cython=0.29.4
  - sip
