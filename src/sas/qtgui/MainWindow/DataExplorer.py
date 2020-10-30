@@ -120,6 +120,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
 
+        # Slots for model changes
+        self.model.itemChanged.connect(self.onFileListChanged)
+
         # Don't show "empty" rows with data objects
         self.data_proxy.setFilterRegExp(r"[^()]")
 
@@ -1938,3 +1941,26 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         for item in items_to_delete:
             self.theory_model.removeRow(item.row())
+
+    def onFileListChanged(self, index):
+        """
+        Slot for model (data/theory) changes.
+        Currently only reacting to checkbox selection.
+        """
+        if len(self.current_view.selectedIndexes()) < 2:
+            return
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
+        current_status = model_item.checkState()
+        new_status = QtCore.Qt.Unchecked
+        if current_status == new_status:
+            new_status = QtCore.Qt.Checked
+        model.blockSignals(True)
+        for index in self.current_view.selectedIndexes():
+            item = model.itemFromIndex(proxy.mapToSource(index))
+            if item.isCheckable():
+                item.setCheckState(new_status)
+        model.blockSignals(False)
