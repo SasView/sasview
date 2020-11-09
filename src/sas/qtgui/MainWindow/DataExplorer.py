@@ -1478,8 +1478,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
         self.actionQuick3DPlot.setEnabled(is_2D)
         self.actionEditMask.setEnabled(is_2D)
-        #has_multiple_selection = self.current_view.selectedIndexes() > 2
-        #if has_multiple_selection:
         self.actionSelect.setEnabled(True)
 
         # Freezing
