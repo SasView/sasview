@@ -82,14 +82,17 @@ class FileReader(object):
                 try:
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
-
                 except DataReaderException as e:
                     self.handle_error_message(e.message)
+                except FileContentsException as e:
+                    raise
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
                     msg += e.message
                     self.handle_error_message(msg)
+                except Exception as e:
+                    self.handle_error_message(e.message)
                 finally:
                     # Close the file handle if it is open
                     if not self.f_open.closed:
@@ -229,6 +232,11 @@ class FileReader(object):
                     data.dqy_data = data.dqy_data.astype(np.float64)
                 if data.mask is not None:
                     data.mask = data.mask.astype(dtype=bool)
+                    # If all mask elements are False, give a warning to the user
+                    if not data.mask.any():
+                        error = "The entire dataset is masked and may not "
+                        error += "produce usable fits."
+                        data.errors.append(error)
 
                 if len(data.data.shape) == 2:
                     n_rows, n_cols = data.data.shape

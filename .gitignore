@@ -41,13 +41,14 @@ Thumbs.db
 
 # test outputs
 /.eggs
-/test/pr_inversion/test/test_output.txt
-/test/sasdataloader/test/plugins.zip
-/test/sasdataloader/test/test_log.txt
-/test/sasdataloader/test/isis_1_0_write_test.xml
-/test/sasdataloader/test/isis_1_1_write_test.xml
-/test/sasdataloader/test/write_test.xml
-/test/fileconverter/test/export2d.h5
+/test/pr_inversion/data/test_output.txt
+/test/sasdataloader/data/plugins.zip
+/test/sasdataloader/data/test_log.txt
+/test/sasdataloader/data/isis_1_0_write_test.xml
+/test/sasdataloader/data/isis_1_1_write_test.xml
+/test/sasdataloader/data/write_test.xml
+/test/fileconverter/data/export2d.h5
+**/logs
 **/test/logs
 tests.log
 

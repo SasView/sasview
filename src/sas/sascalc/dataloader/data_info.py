@@ -8,11 +8,11 @@
     http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation
 """
 #####################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#See the license text in license.txt
-#copyright 2008, University of Tennessee
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
+# See the license text in license.txt
+# copyright 2008, University of Tennessee
 ######################################################################
 
 from __future__ import print_function
@@ -21,11 +21,15 @@ from __future__ import print_function
 #TODO: This module should be independent of plottables. We should write
 #        an adapter class for plottables when needed.
 
-#from sas.guitools.plottables import Data1D as plottable_1D
 from sas.sascalc.data_util.uncertainty import Uncertainty
-import numpy as np
 import math
 from math import fabs
+import copy
+
+import numpy as np
+
+from sas.sascalc.data_util.uncertainty import Uncertainty
+
 
 class plottable_1D(object):
     """
@@ -37,11 +41,11 @@ class plottable_1D(object):
     y = None
     dx = None
     dy = None
-    ## Slit smearing length
+    # Slit smearing length
     dxl = None
-    ## Slit smearing width
+    # Slit smearing width
     dxw = None
-    ## SESANS specific params (wavelengths for spin echo length calculation)
+    # SESANS specific params (wavelengths for spin echo length calculation)
     lam = None
     dlam = None
 
@@ -51,7 +55,8 @@ class plottable_1D(object):
     _yaxis = ''
     _yunit = ''
 
-    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None, lam=None, dlam=None):
+    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None,
+                 lam=None, dlam=None):
         self.x = np.asarray(x)
         self.y = np.asarray(y)
         if dx is not None:
@@ -98,6 +103,8 @@ class plottable_2D(object):
     dqx_data = None
     dqy_data = None
     mask = None
+    x_bins = None
+    y_bins = None
 
     # Units
     _xaxis = ''
@@ -109,7 +116,9 @@ class plottable_2D(object):
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
-                 dqx_data=None, dqy_data=None):
+                 dqx_data=None, dqy_data=None, xmin=None, xmax=None,
+                 ymin=None, ymax=None, zmin=None, zmax=None,
+                 x_bins=None, y_bins=None):
         self.data = np.asarray(data)
         self.qx_data = np.asarray(qx_data)
         self.qy_data = np.asarray(qy_data)
@@ -124,6 +133,17 @@ class plottable_2D(object):
             self.dqx_data = np.asarray(dqx_data)
         if dqy_data is not None:
             self.dqy_data = np.asarray(dqy_data)
+
+        # plot limits
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.zmin = zmin
+        self.zmax = zmax
+
+        self.y_bins = x_bins
+        self.x_bins = y_bins
 
     def xaxis(self, label, unit):
         """
@@ -151,11 +171,11 @@ class Vector(object):
     """
     Vector class to hold multi-dimensional objects
     """
-    ## x component
+    # x component
     x = None
-    ## y component
+    # y component
     y = None
-    ## z component
+    # z component
     z = None
 
     def __init__(self, x=None, y=None, z=None):
@@ -180,27 +200,27 @@ class Detector(object):
     """
     Class to hold detector information
     """
-    ## Name of the instrument [string]
+    # Name of the instrument [string]
     name = None
-    ## Sample to detector distance [float] [mm]
+    # Sample to detector distance [float] [mm]
     distance = None
     distance_unit = 'mm'
-    ## Offset of this detector position in X, Y,
-    #(and Z if necessary) [Vector] [mm]
+    # Offset of this detector position in X, Y,
+    # (and Z if necessary) [Vector] [mm]
     offset = None
     offset_unit = 'm'
-    ## Orientation (rotation) of this detector in roll,
+    # Orientation (rotation) of this detector in roll,
     # pitch, and yaw [Vector] [degrees]
     orientation = None
     orientation_unit = 'degree'
-    ## Center of the beam on the detector in X and Y
-    #(and Z if necessary) [Vector] [mm]
+    # Center of the beam on the detector in X and Y
+    # (and Z if necessary) [Vector] [mm]
     beam_center = None
     beam_center_unit = 'mm'
-    ## Pixel size in X, Y, (and Z if necessary) [Vector] [mm]
+    # Pixel size in X, Y, (and Z if necessary) [Vector] [mm]
     pixel_size = None
     pixel_size_unit = 'mm'
-    ## Slit length of the instrument for this detector.[float] [mm]
+    # Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
     slit_length_unit = 'mm'
 
@@ -232,16 +252,16 @@ class Detector(object):
 
 
 class Aperture(object):
-    ## Name
+    # Name
     name = None
-    ## Type
+    # Type
     type = None
-    ## Size name
+    # Size name
     size_name = None
-    ## Aperture size [Vector]
+    # Aperture size [Vector]
     size = None
     size_unit = 'mm'
-    ## Aperture distance [float]
+    # Aperture distance [float]
     distance = None
     distance_unit = 'mm'
 
@@ -253,12 +273,12 @@ class Collimation(object):
     """
     Class to hold collimation information
     """
-    ## Name
+    # Name
     name = None
-    ## Length [float] [mm]
+    # Length [float] [mm]
     length = None
     length_unit = 'mm'
-    ## Aperture
+    # Aperture
     aperture = None
 
     def __init__(self):
@@ -280,27 +300,32 @@ class Source(object):
     """
     Class to hold source information
     """
-    ## Name
+    # Name
     name = None
-    ## Radiation type [string]
+    # Generic radiation type (Type and probe give more specific info) [string]
     radiation = None
-    ## Beam size name
+    # Type and probe are only written to by the NXcanSAS reader
+    # Specific radiation type (Synchotron X-ray, Reactor neutron, etc) [string]
+    type = None
+    # Radiation probe (generic probe such as neutron, x-ray, muon, etc) [string]
+    probe = None
+    # Beam size name
     beam_size_name = None
-    ## Beam size [Vector] [mm]
+    # Beam size [Vector] [mm]
     beam_size = None
     beam_size_unit = 'mm'
-    ## Beam shape [string]
+    # Beam shape [string]
     beam_shape = None
-    ## Wavelength [float] [Angstrom]
+    # Wavelength [float] [Angstrom]
     wavelength = None
     wavelength_unit = 'A'
-    ## Minimum wavelength [float] [Angstrom]
+    # Minimum wavelength [float] [Angstrom]
     wavelength_min = None
     wavelength_min_unit = 'nm'
-    ## Maximum wavelength [float] [Angstrom]
+    # Maximum wavelength [float] [Angstrom]
     wavelength_max = None
     wavelength_max_unit = 'nm'
-    ## Wavelength spread [float] [Angstrom]
+    # Wavelength spread [float] [Angstrom]
     wavelength_spread = None
     wavelength_spread_unit = 'percent'
 
@@ -309,7 +334,10 @@ class Source(object):
 
     def __str__(self):
         _str = "Source:\n"
-        _str += "   Radiation:    %s\n" % str(self.radiation)
+        radiation = self.radiation
+        if self.radiation is None and self.type and self.probe:
+            radiation = self.type + " " + self.probe
+        _str += "   Radiation:    %s\n" % str(radiation)
         _str += "   Shape:        %s\n" % str(self.beam_shape)
         _str += "   Wavelength:   %s [%s]\n" % \
             (str(self.wavelength), str(self.wavelength_unit))
@@ -337,27 +365,27 @@ class Sample(object):
     """
     Class to hold the sample description
     """
-    ## Short name for sample
+    # Short name for sample
     name = ''
-    ## ID
+    # ID
     ID = ''
-    ## Thickness [float] [mm]
+    # Thickness [float] [mm]
     thickness = None
     thickness_unit = 'mm'
-    ## Transmission [float] [fraction]
+    # Transmission [float] [fraction]
     transmission = None
-    ## Temperature [float] [No Default]
+    # Temperature [float] [No Default]
     temperature = None
     temperature_unit = None
-    ## Position [Vector] [mm]
+    # Position [Vector] [mm]
     position = None
     position_unit = 'mm'
-    ## Orientation [Vector] [degrees]
+    # Orientation [Vector] [degrees]
     orientation = None
     orientation_unit = 'degree'
-    ## Details
+    # Details
     details = None
-    ## SESANS zacceptance
+    # SESANS zacceptance
     zacceptance = (0,"")
     yacceptance = (0,"")
 
@@ -405,8 +433,9 @@ class Process(object):
         """
             Return True if the object is empty
         """
-        return len(self.name) == 0 and len(self.date) == 0 and len(self.description) == 0 \
-            and len(self.term) == 0 and len(self.notes) == 0
+        return (len(self.name) == 0 and len(self.date) == 0
+                and len(self.description) == 0 and len(self.term) == 0
+                and len(self.notes) == 0)
 
     def single_line_desc(self):
         """
@@ -433,13 +462,13 @@ class TransmissionSpectrum(object):
     """
     name = ''
     timestamp = ''
-    ## Wavelength (float) [A]
+    # Wavelength (float) [A]
     wavelength = None
     wavelength_unit = 'A'
-    ## Transmission (float) [unit less]
+    # Transmission (float) [unit less]
     transmission = None
     transmission_unit = ''
-    ## Transmission Deviation (float) [unit less]
+    # Transmission Deviation (float) [unit less]
     transmission_deviation = None
     transmission_deviation_unit = ''
 
@@ -454,10 +483,10 @@ class TransmissionSpectrum(object):
         _str += "   Timestamp:        \t{0}\n".format(self.timestamp)
         _str += "   Wavelength unit:  \t{0}\n".format(self.wavelength_unit)
         _str += "   Transmission unit:\t{0}\n".format(self.transmission_unit)
-        _str += "   Trans. Dev. unit:  \t{0}\n".format(\
+        _str += "   Trans. Dev. unit:  \t{0}\n".format(
                                             self.transmission_deviation_unit)
-        length_list = [len(self.wavelength), len(self.transmission), \
-                len(self.transmission_deviation)]
+        length_list = [len(self.wavelength), len(self.transmission),
+                       len(self.transmission_deviation)]
         _str += "   Number of Pts:    \t{0}\n".format(max(length_list))
         return _str
 
@@ -469,70 +498,69 @@ class DataInfo(object):
     instrument description, the sample description,
     the data itself and any other meta data.
     """
-    ## Title
+    # Title
     title = ''
-    ## Run number
+    # Run number
     run = None
-    ## Run name
+    # Run name
     run_name = None
-    ## File name
+    # File name
     filename = ''
-    ## Notes
+    # Notes
     notes = None
-    ## Processes (Action on the data)
+    # Processes (Action on the data)
     process = None
-    ## Instrument name
+    # Instrument name
     instrument = ''
-    ## Detector information
+    # Detector information
     detector = None
-    ## Sample information
+    # Sample information
     sample = None
-    ## Source information
+    # Source information
     source = None
-    ## Collimation information
+    # Collimation information
     collimation = None
-    ## Transmission Spectrum INfo
+    # Transmission Spectrum INfo
     trans_spectrum = None
-    ## Additional meta-data
+    # Additional meta-data
     meta_data = None
-    ## Loading errors
+    # Loading errors
     errors = None
-    ## SESANS data check
+    # SESANS data check
     isSesans = None
-
 
     def __init__(self):
         """
         Initialization
         """
-        ## Title
+        # Title
         self.title = ''
-        ## Run number
+        # Run number
         self.run = []
         self.run_name = {}
-        ## File name
+        # File name
         self.filename = ''
-        ## Notes
+        # Notes
         self.notes = []
-        ## Processes (Action on the data)
+        # Processes (Action on the data)
         self.process = []
-        ## Instrument name
+        # Instrument name
         self.instrument = ''
-        ## Detector information
+        # Detector information
         self.detector = []
-        ## Sample information
+        # Sample information
         self.sample = Sample()
-        ## Source information
+        # Source information
         self.source = Source()
-        ## Collimation information
+        # Collimation information
         self.collimation = []
-        ## Transmission Spectrum
+        # Transmission Spectrum
         self.trans_spectrum = []
-        ## Additional meta-data
+        # Additional meta-data
         self.meta_data = {}
-        ## Loading errors
+        # Loading errors
         self.errors = []
-        ## SESANS data check
+        # SESANS data check
         self.isSesans = False
 
     def append_empty_process(self):
@@ -706,23 +734,25 @@ class DataInfo(object):
         """
         return self._perform_union(other)
 
+
 class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None,
+                 lam=None, dlam=None, isSesans=False):
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
         self.isSesans = isSesans
         try:
-            if self.isSesans: # the data is SESANS
+            if self.isSesans:  # the data is SESANS
                 self.x_unit = 'A'
                 self.y_unit = 'pol'
-            elif not self.isSesans: # the data is SANS
+            elif not self.isSesans:  # the data is SANS
                 self.x_unit = '1/A'
                 self.y_unit = '1/cm'
-        except: # the data is not recognized/supported, and the user is notified
-            raise TypeError('data not recognized, check documentation for supported 1D data formats')
+        except Exception:  # the data is not recognized, notifying user
+            raise TypeError('Check documentation for supported 1D data formats')
 
     def __str__(self):
         """
@@ -742,10 +772,8 @@ class Data1D(plottable_1D, DataInfo):
         :return: True is slit smearing info is present, False otherwise
         """
         def _check(v):
-            if (v.__class__ == list or v.__class__ == np.ndarray) \
-                and len(v) > 0 and min(v) > 0:
-                return True
-            return False
+            return ((v.__class__ == list or v.__class__ == np.ndarray)
+                    and len(v) > 0 and min(v) > 0)
         return _check(self.dxl) or _check(self.dxw)
 
     def clone_without_data(self, length=0, clone=None):
@@ -784,6 +812,25 @@ class Data1D(plottable_1D, DataInfo):
 
         return clone
 
+    def copy_from_datainfo(self, data1d):
+        """
+        copy values of Data1D of type DataLaoder.Data_info
+        """
+        self.x  = copy.deepcopy(data1d.x)
+        self.y  = copy.deepcopy(data1d.y)
+        self.dy = copy.deepcopy(data1d.dy)
+
+        if hasattr(data1d, "dx"):
+            self.dx = copy.deepcopy(data1d.dx)
+        if hasattr(data1d, "dxl"):
+            self.dxl = copy.deepcopy(data1d.dxl)
+        if hasattr(data1d, "dxw"):
+            self.dxw = copy.deepcopy(data1d.dxw)
+
+        self.xaxis(data1d._xaxis, data1d._xunit)
+        self.yaxis(data1d._yaxis, data1d._yunit)
+        self.title = data1d.title
+
     def _validity_check(self, other):
         """
         Checks that the data lengths are compatible.
@@ -799,8 +846,7 @@ class Data1D(plottable_1D, DataInfo):
         dy_other = None
         if isinstance(other, Data1D):
             # Check that data lengths are the same
-            if len(self.x) != len(other.x) or \
-                len(self.y) != len(other.y):
+            if len(self.x) != len(other.x) or len(self.y) != len(other.y):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError(msg)
             # Here we could also extrapolate between data points
@@ -909,7 +955,7 @@ class Data1D(plottable_1D, DataInfo):
             result.dxl = np.zeros(len(self.x) + len(other.x))
 
         result.x = np.append(self.x, other.x)
-        #argsorting
+        # argsorting
         ind = np.argsort(result.x)
         result.x = result.x[ind]
         result.y = np.append(self.y, other.y)
@@ -933,23 +979,27 @@ class Data2D(plottable_2D, DataInfo):
     """
     2D data class
     """
-    ## Units for Q-values
+    # Units for Q-values
     Q_unit = '1/A'
-    ## Units for I(Q) values
+    # Units for I(Q) values
     I_unit = '1/cm'
-    ## Vector of Q-values at the center of each bin in x
+    # Vector of Q-values at the center of each bin in x
     x_bins = None
-    ## Vector of Q-values at the center of each bin in y
+    # Vector of Q-values at the center of each bin in y
     y_bins = None
-    ## No 2D SESANS data as of yet. Always set it to False
+    # No 2D SESANS data as of yet. Always set it to False
     isSesans = False
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
-                 dqx_data=None, dqy_data=None):
+                 dqx_data=None, dqy_data=None, xmin=None, xmax=None,
+                 ymin=None, ymax=None, zmin=None, zmax=None):
         DataInfo.__init__(self)
-        plottable_2D.__init__(self, data, err_data, qx_data,
-                              qy_data, q_data, mask, dqx_data, dqy_data)
+        plottable_2D.__init__(self, data=data, err_data=err_data,
+                              qx_data=qx_data, qy_data=qy_data,
+                              dqx_data=dqx_data, dqy_data=dqy_data,
+                              q_data=q_data, mask=mask, xmin=xmin, xmax=xmax,
+                              ymin=ymin, ymax=ymax, zmin=zmin, zmax=zmax)
         self.y_bins = []
         self.x_bins = []
 
@@ -964,7 +1014,8 @@ class Data2D(plottable_2D, DataInfo):
         _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
         _str += "   Length:       %g \n" % (len(self.data))
-        _str += "   Shape:        (%d, %d)\n" % (len(self.y_bins), len(self.x_bins))
+        _str += "   Shape:        (%d, %d)\n" % (len(self.y_bins),
+                                                 len(self.x_bins))
         return _str
 
     def clone_without_data(self, length=0, clone=None):
@@ -985,8 +1036,6 @@ class Data2D(plottable_2D, DataInfo):
             qy_data = np.zeros(length)
             q_data = np.zeros(length)
             mask = np.zeros(length)
-            dqx_data = None
-            dqy_data = None
             clone = Data2D(data=data, err_data=err_data,
                            qx_data=qx_data, qy_data=qy_data,
                            q_data=q_data, mask=mask)
@@ -1016,6 +1065,34 @@ class Data2D(plottable_2D, DataInfo):
 
         return clone
 
+    def copy_from_datainfo(self, data2d):
+        """
+        copy value of Data2D of type DataLoader.data_info
+        """
+        self.data = copy.deepcopy(data2d.data)
+        self.qx_data = copy.deepcopy(data2d.qx_data)
+        self.qy_data = copy.deepcopy(data2d.qy_data)
+        self.q_data = copy.deepcopy(data2d.q_data)
+        self.mask = copy.deepcopy(data2d.mask)
+        self.err_data = copy.deepcopy(data2d.err_data)
+        self.x_bins = copy.deepcopy(data2d.x_bins)
+        self.y_bins = copy.deepcopy(data2d.y_bins)
+        if data2d.dqx_data is not None:
+            self.dqx_data = copy.deepcopy(data2d.dqx_data)
+        if data2d.dqy_data is not None:
+            self.dqy_data = copy.deepcopy(data2d.dqy_data)
+        self.xmin = data2d.xmin
+        self.xmax = data2d.xmax
+        self.ymin = data2d.ymin
+        self.ymax = data2d.ymax
+        if hasattr(data2d, "zmin"):
+            self.zmin = data2d.zmin
+        if hasattr(data2d, "zmax"):
+            self.zmax = data2d.zmax
+        self.xaxis(data2d._xaxis, data2d._xunit)
+        self.yaxis(data2d._yaxis, data2d._yunit)
+        self.title = data2d.title
+
     def _validity_check(self, other):
         """
         Checks that the data lengths are compatible.
@@ -1032,9 +1109,9 @@ class Data2D(plottable_2D, DataInfo):
         TOLERANCE = 0.01
         if isinstance(other, Data2D):
             # Check that data lengths are the same
-            if len(self.data) != len(other.data) or \
-                len(self.qx_data) != len(other.qx_data) or \
-                len(self.qy_data) != len(other.qy_data):
+            if (len(self.data) != len(other.data)
+                    or len(self.qx_data) != len(other.qx_data)
+                    or len(self.qy_data) != len(other.qy_data)):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError(msg)
             for ind in range(len(self.data)):
@@ -1047,14 +1124,13 @@ class Data2D(plottable_2D, DataInfo):
 
             # Check that the scales match
             err_other = other.err_data
-            if other.err_data is None or \
-                (len(other.err_data) != len(other.data)):
+            if (other.err_data is None
+                    or (len(other.err_data) != len(other.data))):
                 err_other = np.zeros(len(other.data))
 
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
-        if self.err_data is None or \
-            (len(self.err_data) != len(self.data)):
+        if self.err_data is None or (len(self.err_data) != len(self.data)):
             err = np.zeros(len(other.data))
         return err, err_other
 
@@ -1076,8 +1152,8 @@ class Data2D(plottable_2D, DataInfo):
             result.dqy_data = np.zeros(len(self.data))
         for i in range(np.size(self.data)):
             result.data[i] = self.data[i]
-            if self.err_data is not None and \
-                            np.size(self.data) == np.size(self.err_data):
+            if (self.err_data is not None
+                    and np.size(self.data) == np.size(self.err_data)):
                 result.err_data[i] = self.err_data[i]
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
@@ -1091,14 +1167,12 @@ class Data2D(plottable_2D, DataInfo):
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)
-                if other.dqx_data is not None and \
-                        result.dqx_data is not None:
+                if other.dqx_data is not None and result.dqx_data is not None:
                     result.dqx_data[i] *= self.dqx_data[i]
                     result.dqx_data[i] += (other.dqx_data[i]**2)
                     result.dqx_data[i] /= 2
                     result.dqx_data[i] = math.sqrt(result.dqx_data[i])
-                if other.dqy_data is not None and \
-                        result.dqy_data is not None:
+                if other.dqy_data is not None and result.dqy_data is not None:
                     result.dqy_data[i] *= self.dqy_data[i]
                     result.dqy_data[i] += (other.dqy_data[i]**2)
                     result.dqy_data[i] /= 2
@@ -1110,6 +1184,7 @@ class Data2D(plottable_2D, DataInfo):
             result.err_data[i] = math.sqrt(math.fabs(output.variance))
         return result
 
+    @staticmethod
     def _validity_check_union(self, other):
         """
         Checks that the data lengths are compatible.
@@ -1136,21 +1211,19 @@ class Data2D(plottable_2D, DataInfo):
         """
         # First, check the data compatibility
         self._validity_check_union(other)
-        result = self.clone_without_data(np.size(self.data) + \
-                                         np.size(other.data))
+        result = self.clone_without_data(np.size(self.data)
+                                         + np.size(other.data))
         result.xmin = self.xmin
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data is None or self.dqy_data is None or \
-                other.dqx_data is None or other.dqy_data is None:
+        if (self.dqx_data is None or self.dqy_data is None
+                or other.dqx_data is None or other.dqy_data is None):
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = np.zeros(len(self.data) + \
-                                       np.size(other.data))
-            result.dqy_data = np.zeros(len(self.data) + \
-                                       np.size(other.data))
+            result.dqx_data = np.zeros(len(self.data) + np.size(other.data))
+            result.dqy_data = np.zeros(len(self.data) + np.size(other.data))
 
         result.data = np.append(self.data, other.data)
         result.qx_data = np.append(self.qx_data, other.qx_data)
@@ -1173,10 +1246,10 @@ def combine_data_info_with_plottable(data, datainfo):
     plottable_1D or 2D data object.
 
     :param data: A plottable_1D or plottable_2D data object
+    :param datainfo: A DataInfo object to be combined with the plottable
     :return: A fully specified Data1D or Data2D object
     """
 
-    final_dataset = None
     if isinstance(data, plottable_1D):
         final_dataset = Data1D(data.x, data.y, isSesans=datainfo.isSesans)
         final_dataset.dx = data.dx
@@ -1194,6 +1267,8 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
+        final_dataset.x_bins = data.x_bins
+        final_dataset.y_bins = data.y_bins
     else:
         return_string = ("Should Never Happen: _combine_data_info_with_plottabl"
                          "e input is not a plottable1d or plottable2d data "

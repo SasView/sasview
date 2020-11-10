@@ -52,7 +52,7 @@ def run_tests(dirs=None, run_all=False):
 
 
         # Go through modules looking for unit tests
-        module_dir = os.path.join(test_root, d, "test")
+        module_dir = os.path.join(test_root, d)
         if os.path.isdir(module_dir):
             for f in os.listdir(module_dir):
                 file_path = os.path.join(module_dir,f)

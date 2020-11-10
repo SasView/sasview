@@ -489,6 +489,10 @@ class Reader(FileReader):
             self.current_datainfo.source.beam_shape = data_point
         elif key == u'radiation':
             self.current_datainfo.source.radiation = data_point
+        elif key == u'type':
+            self.current_datainfo.source.type = data_point
+        elif key == u'probe':
+            self.current_datainfo.source.probe = data_point
 
     def process_process(self, data_point, key):
         """

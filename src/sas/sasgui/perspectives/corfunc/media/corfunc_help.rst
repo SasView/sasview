@@ -230,6 +230,8 @@ References
 Correlation Function
 ....................
 
+Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
+
 Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
 
 Koberstein, J.; Stein R. *J. Polym. Sci. Phys. Ed.* (1983), 21, 2181-2200
@@ -309,4 +311,4 @@ will appear in the "Output Parameters" section of the SasView GUI.
 
 
 .. note::
-    This help document was last changed by Steve King, 28Sep2017
+    This help document was last changed by Steve King, 21May2020
