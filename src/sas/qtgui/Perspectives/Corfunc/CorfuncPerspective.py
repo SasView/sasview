@@ -696,3 +696,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             W.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
         self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(
             params.get('background', '0')))
+        self.cmdCalculateBg.setEnabled(params.get('background', '0') != '0')
+        self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+        self.cmdExtrapolate.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0.0')
+        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0.0')
+        if params.get('guinier_a', '0.0') != '0.0':
+            self.extrapolate()
+        if params.get('long_period', '0') != '0.0':
+            self.transform()

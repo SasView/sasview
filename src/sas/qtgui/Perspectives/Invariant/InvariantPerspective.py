@@ -958,6 +958,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             str(params.get('high_power_value', DEFAULT_POWER_LOW)))
         # Update once all inputs are changed
         self.updateFromModel()
+        self.plotResult(self.model)
 
     def allowBatch(self):
         """
