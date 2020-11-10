@@ -683,6 +683,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
+            data.xmin = self.data.xmin
+            data.xmax = self.data.xmax
+            data.ymin = self.data.ymin
+            data.ymax = self.data.ymax
 
             self.graph_num += 1
             # TODO
@@ -862,6 +866,12 @@ class Plotter3DWidget(PlotterBase):
         Define context menu and associated actions for the quickplot MPL widget
         """
         return
+
+    def closeEvent(self, event):
+        """
+        Overwrite the close event adding helper notification
+        """
+        event.accept()
 
 
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):

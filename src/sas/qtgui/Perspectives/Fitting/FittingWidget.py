@@ -790,7 +790,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for column in range(0, self._model_model.columnCount()):
             self._model_model.item(row, column).setForeground(brush)
             self._model_model.item(row, column).setFont(font)
+            # Allow the user to interact or not with the fields depending on
+            # whether the parameter is constrained or not
             self._model_model.item(row, column).setEditable(fields_enabled)
+        # Force checkbox selection when parameter is constrained and disable
+        # checkbox interaction
+        if not fields_enabled and self._model_model.item(row, 0).isCheckable():
+            self._model_model.item(row, 0).setCheckState(2)
+            self._model_model.item(row, 0).setEnabled(False)
+        else:
+            # Enable checkbox interaction
+            self._model_model.item(row, 0).setEnabled(True)
         self._model_model.blockSignals(False)
 
     def addConstraintToRow(self, constraint=None, row=0):
@@ -837,6 +847,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         font.setItalic(True)
         brush = QtGui.QBrush(QtGui.QColor('blue'))
         self.modifyViewOnRow(row, font=font, brush=brush)
+        # update the main parameter list so the constrained parameter gets
+        # updated when fitting
+        self.checkboxSelected(self._model_model.item(row, 0))
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
         if constraint_tab:
             # Set the constraint_accepted flag to True to inform the
@@ -1047,25 +1060,35 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        self.setParameterSelection(status)
+        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item)
 
     def deselectParameters(self):
         """
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        self.setParameterSelection(status)
+        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item)
 
     def selectedParameters(self):
         """ Returns list of selected (highlighted) parameters """
         return [s.row() for s in self.lstParams.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
 
-    def setParameterSelection(self, status=QtCore.Qt.Unchecked):
+    def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None):
         """
         Selected parameters are chosen for fitting
         """
         # Convert to proper indices and set requested enablement
+        if item is None:
+            return
+        # We only want to select/deselect all items if
+        # `item` is also selected!
+        # Otherwise things get confusing.
+        # https://github.com/SasView/sasview/issues/1676
+        if item.row() not in self.selectedParameters():
+            return
         for row in self.selectedParameters():
             self._model_model.item(row, 0).setCheckState(status)
 
@@ -2706,7 +2729,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # If multiple rows selected - toggle all of them, filtering uncheckable
         # Convert to proper indices and set requested enablement
-        self.setParameterSelection(status)
+        # Careful with `item` NOT being selected. This means we only want to
+        # select that one item.
+        self.setParameterSelection(status, item=item)
 
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel(self._model_model)
@@ -4372,6 +4397,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         and their values, e.g. {'M1.scale':1, 'M1.background': 0.001}
         """
         sym_dict = {}
+        # return an empty dict if no model has been selected
+        if self.kernel_module == None:
+            return sym_dict
         model_name = self.kernel_module.name
         for param in self.getParamNames():
             sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(

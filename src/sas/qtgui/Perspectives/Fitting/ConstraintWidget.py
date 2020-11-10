@@ -1,5 +1,6 @@
 import logging
 import copy
+import re
 
 from twisted.internet import threads
 
@@ -434,37 +435,106 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint's "active" instance variable.
+        Modify the constraint when the user edits the constraint list. If the
+        user changes the constrained parameter, the constraint is erased and a
+        new one is created.
+        Checking is performed on the constrained entered by the user, showing
+        message box warning him the constraint is not valid and cancelling
+        his changes by reloading the view. View is reloaded
+        when the user is finished for consistency.
         """
         item = self.tblConstraints.item(row, column)
-        if column == 0:
-            # Update the tabs for fitting list
-            constraint = self.available_constraints[row]
-            constraint.active = (item.checkState() == QtCore.Qt.Checked)
-            param = item.data(0)[item.data(0).index(':') + 1:item.data(0).index('=')].strip()
-            model = item.data(0)[:item.data(0).index(':')].strip()
-            tab = self.available_tabs[model]
-            if isinstance(tab, FittingWidget):
-            # Update the fitting widget whenever a constraint is activated/deactivated
-                if item.checkState() == QtCore.Qt.Checked:
-                    font = QtGui.QFont()
-                    font.setItalic(True)
-                    brush = QtGui.QBrush(QtGui.QColor('blue'))
-                    tab.modifyViewOnRow(tab.getRowFromName(param), font=font, brush=brush)
-                else:
-                    tab.modifyViewOnRow(tab.getRowFromName(param))
-                return
-        # Update the constraint formula
+        # extract information from the constraint object
         constraint = self.available_constraints[row]
-        function = item.text()
-        # remove anything left of '=' to get the constraint
-        function = function[function.index('=')+1:]
-        # No check on function here - trust the user (R)
-        if function != constraint.func:
-            # This becomes rather difficult to validate now.
-            # Turn off validation for Edit Constraint
-            constraint.func = function
-            constraint.validate = False
+        model = constraint.value_ex[:constraint.value_ex.index(".")]
+        param = constraint.param
+        function = constraint.func
+        tab = self.available_tabs[model]
+        # Extract information from the text in the table
+        constraint_text = item.data(0)
+        # Basic sanity check of the string
+        # First check if we have an acceptable sign
+        if "=" not in constraint_text:
+            msg = ("Incorrect operator in constraint definition. Please use = "
+                   "sign to define constraints.")
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
+            self.initializeFitList()
+            return
+        # Then check if the parameter is correctly defined with colons
+        # separating model and parameter name
+        lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
+        if ":" not in lhs:
+            msg = ("Incorrect constrained parameter definition. Please use "
+                   "colons to separate model and parameter on the rhs of the "
+                   "definition, e.g. M1:scale")
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
+            self.initializeFitList()
+            return
+        # We can parse the string
+        new_param = lhs.split(":", 1)[1].strip()
+        new_model = lhs.split(":", 1)[0].strip()
+        # Check that the symbol is known so we dont get an unknown tab
+        # All the conditional statements could be grouped in one or
+        # alternatively we could check with expression.py, but we would still
+        # need to do some checks to parse the string
+        symbol_dict = (self.parent.parent.perspective().
+                       getSymbolDictForConstraints())
+        qualified_par = f"{new_model}.{new_param}"
+        if qualified_par not in symbol_dict:
+            msg = (f"Unknown parameter {qualified_par} used in constraint."
+                   " Please use a single known parameter in the rhs of the "
+                   "constraint definition, e.g. M1:scale = M1.radius + 2")
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
+            self.initializeFitList()
+            return
+        new_function = rhs
+        new_tab = self.available_tabs[new_model]
+        # Make sure we are dealing with fit tabs
+        assert isinstance(tab, FittingWidget)
+        assert isinstance(new_tab, FittingWidget)
+        # Now check if the user has redefined the constraint and reapply it
+        if new_function != function or new_model != model or new_param != param:
+            # Apply the new constraint
+            constraint = Constraint(param=new_param, func=new_function,
+                                    value_ex=new_model + "." + new_param)
+            new_tab.addConstraintToRow(constraint=constraint,
+                                       row=tab.getRowFromName(new_param))
+            # If the constraint is valid and we are changing model or
+            # parameter, delete the old constraint
+            if (self.constraint_accepted and new_model != model or
+                    new_param != param):
+                tab.deleteConstraintOnParameter(param)
+            # Reload the view
+            self.initializeFitList()
+            return
+        # activate/deactivate constraint if the user has changed the checkbox
+        # state
+        constraint.active = (item.checkState() == QtCore.Qt.Checked)
+        # Update the fitting widget whenever a constraint is
+        # activated/deactivated
+        if item.checkState() == QtCore.Qt.Checked:
+            font = QtGui.QFont()
+            font.setItalic(True)
+            brush = QtGui.QBrush(QtGui.QColor('blue'))
+            tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
+                                brush=brush)
+        else:
+            tab.modifyViewOnRow(tab.getRowFromName(new_param))
+        # reload the view so the user gets a consistent feedback on the
+        # constraints
+        self.initializeFitList()
 
     def onTabCellEntered(self, row, column):
         """
@@ -810,22 +880,26 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         active_constraint_names = fit_page.getComplexConstraintsForModel()
         constraint_names = fit_page.getFullConstraintNameListForModel()
         constraints = fit_page.getConstraintObjectsForModel()
-        if not constraints: 
+        if not constraints:
             return
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
         for constraint, constraint_name in zip(constraints, constraint_names):
+            # Ignore constraints that have no *func* attribute defined
+            if constraint.func is None:
+                continue
             # Create the text for widget item
             label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
             pos = self.tblConstraints.rowCount()
             self.available_constraints[pos] = constraint
 
             # Show the text in the constraint table
-            item = self.uneditableItem(label)
-            item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
-            #item = QtWidgets.QTableWidgetItem(label)
+            item = QtWidgets.QTableWidgetItem(label)
+            item.setFlags(QtCore.Qt.ItemIsSelectable
+                          | QtCore.Qt.ItemIsEnabled
+                          | QtCore.Qt.ItemIsUserCheckable
+                          | QtCore.Qt.ItemIsEditable)
             # Why was this set to non-interactive??
-            #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             if constraint_name in active_constraint_names:
                 item.setCheckState(QtCore.Qt.Checked)
             else:
