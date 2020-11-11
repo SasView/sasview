@@ -1953,32 +1953,24 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Slot for actionSelect
         """
-        self.setCheckItems(status=True)
+        self.setCheckItems(status=QtCore.Qt.Checked)
 
     def onFileListDeselected(self):
         """
         Slot for actionDeselect
         """
-        self.setCheckItems(status=False)
+        self.setCheckItems(status=QtCore.Qt.Unchecked)
 
-    def onFileListChanged(self):
+    def onFileListChanged(self, item):
         """
         Slot for model (data/theory) changes.
         Currently only reacting to checkbox selection.
         """
         if len(self.current_view.selectedIndexes()) < 2:
             return
-        index = self.current_view.selectedIndexes()[0]
-        proxy = self.current_view.model()
-        model = proxy.sourceModel()
-        model_item = model.itemFromIndex(proxy.mapToSource(index))
-        current_status = model_item.checkState()
-        new_status = QtCore.Qt.Unchecked
-        if current_status == new_status:
-            new_status = QtCore.Qt.Checked
-        self.setCheckItems(status=new_status)
+        self.setCheckItems(status=item.checkState())
 
-    def setCheckItems(self, status=True):
+    def setCheckItems(self, status=QtCore.Qt.Unchecked):
         """
         Sets requested checkbox status on selected indices
         """
