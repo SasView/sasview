@@ -4,7 +4,7 @@ import logging
 import logging.config
 import os
 import os.path
-
+import ConfigParser
 
 '''
 Module that manages the global logging
