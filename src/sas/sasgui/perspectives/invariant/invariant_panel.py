@@ -40,7 +40,7 @@ BACKGROUND = 0.0
 #default value for the scale
 SCALE = 1.0
 #default value of the contrast
-CONTRAST = 1.0
+CONTRAST = 8.0e-6
 #default value of the power used for power law
 POWER = 4.0
 #Invariant panel size
@@ -386,10 +386,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 self.volume_tcl.SetValue(format_number(v))
                 self.volume_err_tcl.SetValue(format_number(dv))
             except Exception as exc:
-                self.volume_tcl.SetValue(format_number(None))
-                self.volume_err_tcl.SetValue(format_number(None))
+                self.volume_tcl.SetValue("ERROR")
+                self.volume_err_tcl.SetValue("ERROR")
                 msg = "Error occurred computing volume "
                 msg += " fraction: %s" % exc
+                logger.error(msg)
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       info="error",
                                                       type="stop"))
@@ -404,10 +405,13 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                    porod_const=porod_const,
                                                    extrapolation=extrapolation)
                 self.surface_tcl.SetValue(format_number(s))
-                self.surface_err_tcl.SetValue(format_number(ds))
+                if ds==0:
+                    self.surface_err_tcl.SetValue("NONE")
+                else:
+                    self.surface_err_tcl.SetValue(format_number(ds))
             except Exception as exc:
-                self.surface_tcl.SetValue(format_number(None))
-                self.surface_err_tcl.SetValue(format_number(None))
+                self.surface_tcl.SetValue("ERROR")
+                self.surface_err_tcl.SetValue("ERROR")
                 msg = "Error occurred computing "
                 msg += "specific surface: %s" % exc
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
