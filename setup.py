@@ -14,9 +14,8 @@ import sys
 
 import numpy as np
 
-from setuptools import Extension, setup
+from setuptools import setup
 from setuptools import Command
-from setuptools.command.build_ext import build_ext
 
 try:
     import tinycc.distutils
@@ -39,7 +38,6 @@ with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
 package_dir = {}
 package_data = {}
 packages = []
-ext_modules = []
 
 # Remove all files that should be updated by this setup
 # We do this here because application updates these files from .sasview
@@ -102,56 +100,6 @@ if sys.platform == 'darwin':
                 'unix': ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
     except:
         print("PROBLEM determining Darwin version")
-
-
-class DisableOpenMPCommand(Command):
-    description = "The version of MinGW that comes with Anaconda does not come with OpenMP :( "\
-                  "This commands means we can turn off compiling with OpenMP for this or any "\
-                  "other reason."
-    user_options = []
-
-    def initialize_options(self):
-        self.cwd = None
-
-    def finalize_options(self):
-        self.cwd = os.getcwd()
-        global enable_openmp
-        enable_openmp = False
-
-    def run(self):
-        pass
-
-
-class build_ext_subclass(build_ext):
-    def build_extensions(self):
-        # Get 64-bitness
-        c = self.compiler.compiler_type
-        print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
-        #print("=== compiler attributes ===")
-        #print("\n".join("%s: %s"%(k, v) for k, v in sorted(self.compiler.__dict__.items())))
-        #print("=== build_ext attributes ===")
-        #print("\n".join("%s: %s"%(k, v) for k, v in self.__dict__.items()))
-        #sys.exit(1)
-
-        # OpenMP build options
-        if enable_openmp:
-            if c in copt:
-                for e in self.extensions:
-                    e.extra_compile_args = copt[c]
-            if c in lopt:
-                for e in self.extensions:
-                    e.extra_link_args = lopt[c]
-
-        # Platform-specific build options
-        if c in platform_lopt:
-            for e in self.extensions:
-                e.extra_link_args = platform_lopt[c]
-
-        if c in platform_copt:
-            for e in self.extensions:
-                e.extra_compile_args = platform_copt[c]
-
-        build_ext.build_extensions(self)
 
 
 class BuildSphinxCommand(Command):
@@ -229,19 +177,10 @@ packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
 
 
 # sas.sascalc.calculator
-gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
 packages.append("sas.sascalc.calculator")
-ext_modules.append(Extension("sas.sascalc.calculator._sld2i",
-                             sources=[
-                                 os.path.join(gen_dir, "sld2i_module.c"),
-                                 os.path.join(gen_dir, "sld2i.c"),
-                                 os.path.join(gen_dir, "libfunc.c"),
-                                 os.path.join(gen_dir, "librefl.c"),
-                             ],
-                             include_dirs=[gen_dir],
-                             ))
+
 
 # sas.sascalc.pr
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
@@ -313,32 +252,6 @@ packages.append("sas.sasgui.plottools")
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")
 # packages.append("sas.models")
 
-EXTENSIONS = [".c", ".cpp"]
-
-
-def append_file(file_list, dir_path):
-    """
-    Add sources file to sources
-    """
-    for f in os.listdir(dir_path):
-        if os.path.isfile(os.path.join(dir_path, f)):
-            _, ext = os.path.splitext(f)
-            if ext.lower() in EXTENSIONS:
-                file_list.append(os.path.join(dir_path, f))
-        elif os.path.isdir(os.path.join(dir_path, f)) and \
-                not f.startswith("."):
-            sub_dir = os.path.join(dir_path, f)
-            for new_f in os.listdir(sub_dir):
-                if os.path.isfile(os.path.join(sub_dir, new_f)):
-                    _, ext = os.path.splitext(new_f)
-                    if ext.lower() in EXTENSIONS:
-                        file_list.append(os.path.join(sub_dir, new_f))
-
-
-# Comment out the following to avoid rebuilding all the models
-file_sources = []
-append_file(file_sources, gen_dir)
-
 # Wojtek's hacky way to add doc files while bundling egg
 # def add_doc_files(directory):
 #    paths = []
@@ -399,7 +312,6 @@ setup(
     package_dir=package_dir,
     packages=packages,
     package_data=package_data,
-    ext_modules=ext_modules,
     install_requires=required,
     zip_safe=False,
     entry_points={
@@ -407,9 +319,7 @@ setup(
             "sasview = sas.sasview.sasview:run_gui",
         ]
     },
-    cmdclass={'build_ext': build_ext_subclass,
-              'docs': BuildSphinxCommand,
-              'disable_openmp': DisableOpenMPCommand},
+    cmdclass={'docs': BuildSphinxCommand},
     setup_requires=['pytest-runner'] if 'pytest' in sys.argv else [],
     tests_require=['pytest'],
 )
