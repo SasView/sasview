@@ -306,7 +306,8 @@ class BumpsFit(FitEngine):
             if len(varying) < 2:
                 varying[0].value = ufloat(values[0], errs[0])
             else:
-                fitted = correlated_values(values, cov)
+                fitted = (correlated_values(values, np.nan) if errs else
+                          correlated_values(values, cov))
                 for p, v in zip(varying, fitted):
                     p.value = v
             problem.setp_hook()
