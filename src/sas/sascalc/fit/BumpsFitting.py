@@ -282,33 +282,35 @@ class BumpsFit(FitEngine):
         result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
             handler.update_fit(last=True)
+        is_constrained = all(model.constraints for model in models)
+        if is_constrained:
+            # TODO: shouldn't reference internal parameters of fit problem
+            varying = problem._parameters
+            # Propagate uncertainty through the parameter expressions
+            # We are going to abuse bumps a little here and stuff uncertainty
+            # objects into the parameter values, then update all the
+            # derived parameters with uncertainty propagation. We need to
+            # avoid triggering a model recalc since the uncertainty objects
+            # will not be working with sasmodels.
+            # TODO: if dream then use forward MC to evaluate uncertainty
+            # TODO: move uncertainty propagation into bumps
+            # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
+            values, errs, cov = result['value'], result["stderr"], result[
+                'covariance']
+            assert values is not None and errs is not None and cov is not None
+            # Turn all parameters (fixed and varying) into uncertainty objects with
+            # zero uncertainty.
+            for p in unique_parameters(problem.model_parameters()):
+                p.value = ufloat(p.value, 0)
+            # then update the computed standard deviation of fitted parameters
+            if len(varying) < 2:
+                varying[0].value = ufloat(values[0], errs[0])
+            else:
+                fitted = correlated_values(values, cov)
+                for p, v in zip(varying, fitted):
+                    p.value = v
+            problem.setp_hook()
 
-        # TODO: shouldn't reference internal parameters of fit problem
-        varying = problem._parameters
-        # Propagate uncertainty through the parameter expressions
-        # We are going to abuse bumps a little here and stuff uncertainty
-        # objects into the parameter values, then update all the
-        # derived parameters with uncertainty propagation. We need to
-        # avoid triggering a model recalc since the uncertainty objects
-        # will not be working with sasmodels.
-        # TODO: if dream then use forward MC to evaluate uncertainty
-        # TODO: move uncertainty propagation into bumps
-        # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-        values, errs, cov = result['value'], result["stderr"], result[
-            'covariance']
-        assert values is not None and errs is not None and cov is not None
-        # Turn all parameters (fixed and varying) into uncertainty objects with
-        # zero uncertainty.
-        for p in unique_parameters(problem.model_parameters()):
-            p.value = ufloat(p.value, 0)
-        # then update the computed standard deviation of fitted parameters
-        if len(varying) < 2:
-            varying[0].value = ufloat(values[0], errs[0])
-        else:
-            fitted = correlated_values(values, cov)
-            for p, v in zip(varying, fitted):
-                p.value = v
-        problem.setp_hook()
         # collect the results
         all_results = []
         for M in problem.models:
@@ -324,8 +326,10 @@ class BumpsFit(FitEngine):
             R.fitter_id = self.fitter_id
             R.success = result['success']
             if R.success:
-                R.pvec = np.array([p.value.n for p in pars])
-                R.stderr = np.array([p.value.s for p in pars])
+                R.pvec = (np.array([p.value.n for p in pars]) if
+                    is_constrained else result['value'])
+                R.stderr = (np.array([p.value.s for p in pars]) if
+                    is_constrained else result["stderr"])
                 DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
                 R.fitness = np.sum(R.residuals ** 2) / DOF
             else:
