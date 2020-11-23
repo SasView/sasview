@@ -282,8 +282,9 @@ class BumpsFit(FitEngine):
         result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
             handler.update_fit(last=True)
-        is_constrained = all(model.constraints for model in models)
-        if is_constrained:
+        propagate_errors = all(model.constraints for model in models)
+        uncertainty_error = None
+        if propagate_errors:
             # TODO: shouldn't reference internal parameters of fit problem
             varying = problem._parameters
             # Propagate uncertainty through the parameter expressions
@@ -297,7 +298,7 @@ class BumpsFit(FitEngine):
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             values, errs, cov = result['value'], result["stderr"], result[
                 'covariance']
-            assert values is not None and errs is not None and cov is not None
+            assert values is not None
             # Turn all parameters (fixed and varying) into uncertainty objects with
             # zero uncertainty.
             for p in unique_parameters(problem.model_parameters()):
@@ -306,11 +307,23 @@ class BumpsFit(FitEngine):
             if len(varying) < 2:
                 varying[0].value = ufloat(values[0], errs[0])
             else:
-                fitted = (correlated_values(values, np.nan) if errs else
-                          correlated_values(values, cov))
+                fitted = (correlated_values(values, cov) if not errs else
+                          [ufloat(value, np.nan) for value in values])
+
                 for p, v in zip(varying, fitted):
                     p.value = v
-            problem.setp_hook()
+            try:
+                problem.setp_hook()
+            except np.linalg.LinAlgError:
+                fitted = [ufloat(value, err) for value, err in zip(
+                    values, errs)]
+                uncertainty_error = True
+                for p, v in zip(varying, fitted):
+                    p.value = v
+                problem.setp_hook()
+            except TypeError:
+                propagate_errors = False
+                uncertainty_error = True
 
         # collect the results
         all_results = []
@@ -328,9 +341,9 @@ class BumpsFit(FitEngine):
             R.success = result['success']
             if R.success:
                 R.pvec = (np.array([p.value.n for p in pars]) if
-                    is_constrained else result['value'])
+                    propagate_errors else result['value'])
                 R.stderr = (np.array([p.value.s for p in pars]) if
-                    is_constrained else result["stderr"])
+                    propagate_errors else result["stderr"])
                 DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
                 R.fitness = np.sum(R.residuals ** 2) / DOF
             else:
