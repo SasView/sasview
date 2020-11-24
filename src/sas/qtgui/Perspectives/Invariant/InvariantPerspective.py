@@ -39,6 +39,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
     name = "Invariant"  # For displaying in the combo box in DataExplorer
+    ext = 'inv'  # File extension used for saving analyses
 
     def __init__(self, parent=None):
         super(InvariantWindow, self).__init__()
@@ -64,12 +65,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._low_extrapolate = False
         self._low_guinier = True
         self._low_fit = False
-        self._low_power_value = False
         self._low_points = NPOINTS_Q_INTERP
         self._low_power_value = DEFAULT_POWER_LOW
 
         self._high_extrapolate = False
-        self._high_power_value = False
         self._high_fit = False
         self._high_points = NPOINTS_Q_INTERP
         self._high_power_value = DEFAULT_POWER_LOW
@@ -78,6 +77,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.resize(self.minimumSizeHint())
 
         self.communicate = self._manager.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self._data = None
         self._path = ""
@@ -144,6 +144,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self._allow_close = value
 
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
@@ -151,8 +157,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
@@ -789,6 +796,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # update GUI and model with info from loaded data
         self.updateGuiFromFile(data=data)
 
+    def removeData(self, data_list=None):
+        """Remove the existing data reference from the Invariant Persepective"""
+        if not data_list or self._model_item not in data_list:
+            return
+        self._data = None
+        self._model_item = None
+        self._path = ""
+        self.txtName.setText('')
+        self._porod = None
+        # Pass an empty dictionary to set all inputs to their default values
+        self.updateFromParameters({})
+        # Disable buttons to return to base state
+        self.cmdCalculate.setEnabled(False)
+        self.cmdStatus.setEnabled(False)
+
     def updateGuiFromFile(self, data=None):
         """
         update display in GUI and plot
@@ -822,6 +844,121 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
         self.calculateInvariant()
+
+    def serializeAll(self):
+        """
+        Serialize the invariant state so data can be saved
+        Invariant is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {invariant-state}}}
+        """
+        return self.serializeCurrentPage()
+
+    def serializeCurrentPage(self):
+        """
+        Serialize and return a dictionary of {data_id: invariant-state}
+        Return empty dictionary if no data
+        :return: {data-id: {self.name: {invariant-state}}}
+        """
+        state = {}
+        if self._data:
+            tab_data = self.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'invar_params': tab_data}
+        return state
+
+    def getPage(self):
+        """
+        Serializes full state of this invariant page
+        Called by Save Analysis
+        :return: {invariant-state}
+        """
+        # Get all parameters from page
+        param_dict = self.getState()
+        if self._data:
+            param_dict['data_name'] = str(self._data.name)
+            param_dict['data_id'] = str(self._data.id)
+        return param_dict
+
+    def getState(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        # Be sure model has been updated
+        self.updateFromModel()
+        return {
+            'extrapolated_q_min': self.txtExtrapolQMin.text(),
+            'extrapolated_q_max': self.txtExtrapolQMax.text(),
+            'vol_fraction': self.txtVolFract.text(),
+            'vol_fraction_err': self.txtVolFractErr.text(),
+            'specific_surface': self.txtSpecSurf.text(),
+            'specific_surface_err': self.txtSpecSurfErr.text(),
+            'invariant_total': self.txtInvariantTot.text(),
+            'invariant_total_err': self.txtInvariantTotErr.text(),
+            'background': self.txtBackgd.text(),
+            'contrast': self.txtContrast.text(),
+            'scale': self.txtScale.text(),
+            'porod': self.txtPorodCst.text(),
+            'low_extrapolate': self.chkLowQ.isChecked(),
+            'low_points': self.txtNptsLowQ.text(),
+            'low_guinier': self.rbGuinier.isChecked(),
+            'low_fit_rb': self.rbFitLowQ.isChecked(),
+            'low_power_value': self.txtPowerLowQ.text(),
+            'high_extrapolate': self.chkHighQ.isChecked(),
+            'high_points': self.txtNptsHighQ.text(),
+            'high_fit_rb': self.rbFitHighQ.isChecked(),
+            'high_power_value': self.txtPowerHighQ.text(),
+            'total_q_min': self.txtTotalQMin.text(),
+            'total_q_max': self.txtTotalQMax.text(),
+        }
+
+    def updateFromParameters(self, params):
+        """
+        Called by Open Project and Open Analysis
+        :param params: {param_name: value}
+        :return: None
+        """
+        # Params should be a dictionary
+        if not isinstance(params, dict):
+            c_name = params.__class__.__name__
+            msg = "Invariant.updateFromParameters expects a dictionary"
+            raise TypeError(f"{msg}: {c_name} received")
+        # Assign values to 'Invariant' tab inputs - use defaults if not found
+        self.txtTotalQMin.setText(str(params.get('total_q_min', '0.0')))
+        self.txtTotalQMax.setText(str(params.get('total_q_max', '0.0')))
+        self.txtExtrapolQMax.setText(str(params.get('extrapolated_q_max',
+                                                    Q_MAXIMUM)))
+        self.txtExtrapolQMin.setText(str(params.get('extrapolated_q_min',
+                                                    Q_MINIMUM)))
+        self.txtVolFract.setText(str(params.get('vol_fraction', '')))
+        self.txtVolFractErr.setText(str(params.get('vol_fraction_err', '')))
+        self.txtSpecSurf.setText(str(params.get('specific_surface', '')))
+        self.txtSpecSurfErr.setText(str(params.get('specific_surface_err', '')))
+        self.txtInvariantTot.setText(str(params.get('invariant_total', '')))
+        self.txtInvariantTotErr.setText(
+            str(params.get('invariant_total_err', '')))
+        # Assign values to 'Options' tab inputs - use defaults if not found
+        self.txtBackgd.setText(str(params.get('background', '0.0')))
+        self.txtScale.setText(str(params.get('scale', '1.0')))
+        self.txtContrast.setText(str(params.get('contrast', '8e-06')))
+        self.txtPorodCst.setText(str(params.get('porod', '0.0')))
+        # Toggle extrapolation buttons to enable other inputs
+        self.chkLowQ.setChecked(params.get('low_extrapolate', False))
+        self.chkHighQ.setChecked(params.get('high_extrapolate', False))
+        self.txtPowerLowQ.setText(
+            str(params.get('low_power_value', DEFAULT_POWER_LOW)))
+        self.txtNptsLowQ.setText(
+            str(params.get('low_points', NPOINTS_Q_INTERP)))
+        self.rbGuinier.setChecked(params.get('low_guinier', True))
+        self.rbFitLowQ.setChecked(params.get('low_fit_rb', False))
+        self.txtNptsHighQ.setText(
+            str(params.get('high_points', NPOINTS_Q_INTERP)))
+        self.rbFitHighQ.setChecked(params.get('high_fit_rb', True))
+        self.txtPowerHighQ.setText(
+            str(params.get('high_power_value', DEFAULT_POWER_LOW)))
+        # Update once all inputs are changed
+        self.updateFromModel()
+        self.plotResult(self.model)
 
     def allowBatch(self):
         """

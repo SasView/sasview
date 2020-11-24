@@ -221,8 +221,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
             event.accept()
         else:
             # Maybe we should just minimize
@@ -246,7 +247,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        #self.maxIndex += 1
         self.maxIndex = tab_index + 1
 
         icon = QtGui.QIcon()
@@ -254,7 +254,7 @@ class FittingWindow(QtWidgets.QTabWidget):
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
-        self.setCurrentWidget(tab);
+        self.setCurrentWidget(tab)
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -303,14 +303,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         page_name = "Const. & Simul. Fit"
         return page_name
-
-    def deleteAllTabs(self):
-        """
-        Explicitly deletes all the fittabs, leaving nothing.
-        This is in preparation for the project load step.
-        """
-        for tab_index in range(len(self.tabs)):
-            self.closeTabByIndex(tab_index)
 
     def closeTabByIndex(self, index):
         """
@@ -419,7 +411,11 @@ class FittingWindow(QtWidgets.QTabWidget):
             available_tabs = [tab.acceptsData() for tab in self.tabs]
 
             if tab_index is not None:
-                self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                if tab_index >= self.maxIndex:
+                    self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                else:
+                    self.setCurrentIndex(tab_index-1)
+                    self.swapData(data)
                 return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)

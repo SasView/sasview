@@ -88,9 +88,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             list_datafiles = []
 
             for key_id in list(filenames.keys()):
-                if filenames[key_id].title:
+                if filenames[key_id].name:
                     # filenames with titles
-                    new_title = filenames[key_id].title
+                    new_title = filenames[key_id].name
                     list_datafiles.append(new_title)
                     self.list_data_items.append(new_title)
 
@@ -355,8 +355,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         for key_id in list(self.filenames.keys()):
             # data with title
-            if self.filenames[key_id].title:
-                input = self.filenames[key_id].title
+            if self.filenames[key_id].name:
+                input = self.filenames[key_id].name
             # data without title
             else:
                 input = str(key_id)

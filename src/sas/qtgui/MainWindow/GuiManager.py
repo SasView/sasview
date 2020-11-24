@@ -97,6 +97,7 @@ class GuiManager(object):
 
         # Currently displayed perspective
         self._current_perspective = None
+        self.loadedPerspectives = {}
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -126,11 +127,7 @@ class GuiManager(object):
         Populate the main window with widgets
         """
         # Preload all perspectives
-        loaded_dict = {}
-        for name, perspective in Perspectives.PERSPECTIVES.items():
-            loaded_perspective = perspective(parent=self)
-            loaded_dict[name] = loaded_perspective
-        self.loadedPerspectives = loaded_dict
+        self.loadAllPerspectives()
 
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
@@ -186,6 +183,32 @@ class GuiManager(object):
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+
+    def loadAllPerspectives(self):
+        # Close any existing perspectives to prevent multiple open instances
+        self.closeAllPerspectives()
+        # Load all perspectives
+        loaded_dict = {}
+        for name, perspective in Perspectives.PERSPECTIVES.items():
+            try:
+                loaded_perspective = perspective(parent=self)
+                loaded_dict[name] = loaded_perspective
+            except Exception as e:
+                logger.log(f"Unable to load {name} perspective.\n{e}")
+        self.loadedPerspectives = loaded_dict
+
+    def closeAllPerspectives(self):
+        # Close all perspectives if they are open
+        if isinstance(self.loadedPerspectives, dict):
+            for name, perspective in self.loadedPerspectives.items():
+                try:
+                    perspective.setClosable(True)
+                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    perspective.close()
+                except Exception as e:
+                    logger.log(f"Unable to close {name} perspective\n{e}")
+        self.loadedPerspectives = {}
+        self._current_perspective = None
 
     def addCategories(self):
         """
@@ -661,7 +684,7 @@ class GuiManager(object):
         # Save from all serializable perspectives
         # Analysis should return {data-id: serialized-state}
         for name, per in self.loadedPerspectives.items():
-            if hasattr(per, 'isSerializable') and per.isSerializable:
+            if hasattr(per, 'isSerializable') and per.isSerializable():
                 analysis = per.serializeAll()
                 for key, value in analysis.items():
                     if key in final_data:

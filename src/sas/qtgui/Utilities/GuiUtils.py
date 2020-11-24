@@ -1212,7 +1212,7 @@ def saveData(fp, data):
         objects that can't otherwise be serialized need to be converted
         """
         # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
-        if isinstance(o, (tuple, set)):
+        if isinstance(o, (tuple, set, np.float)):
             content = { 'data': list(o) }
             return add_type(content, type(o))
 
