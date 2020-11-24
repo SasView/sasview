@@ -84,19 +84,19 @@ class Reader(FileReader):
                 # Load the data file
                 try:
                     self.raw_data = h5py.File(filename, 'r')
-                except Exception as e:
+                except Exception as exc:
                     if extension not in self.ext:
                         msg = "NXcanSAS Reader could not load file {}".format(
                             basename + extension)
                         raise DefaultReaderException(msg)
-                    raise FileContentsException(e.message)
+                    raise FileContentsException(exc)
                 try:
                     # Read in all child elements of top level SASroot
                     self.read_children(self.raw_data, [])
                     # Add the last data set to the list of outputs
                     self.add_data_set()
                 except Exception as exc:
-                    raise FileContentsException(exc.message)
+                    raise FileContentsException(exc)
                 finally:
                     # Close the data file
                     self.raw_data.close()
@@ -331,19 +331,26 @@ class Reader(FileReader):
                 self.current_dataset.qx_data = data_set
             elif self.q_names.index(key) == 1:
                 self.current_dataset.qy_data = data_set
-        elif key in self.q_uncertainty_names or key in self.q_resolution_names:
-            if ((self.q_uncertainty_names[0] == self.q_uncertainty_names[1]) or
-                    (self.q_resolution_names[0] == self.q_resolution_names[1])):
-                # All q data in a single array
+        elif key in self.q_resolution_names:
+            if (len(self.q_resolution_names) == 1
+                    or (self.q_resolution_names[0]
+                        == self.q_resolution_names[1])):
                 self.current_dataset.dqx_data = data_set[0].flatten()
                 self.current_dataset.dqy_data = data_set[1].flatten()
-            elif (self.q_uncertainty_names.index(key) == 0 or
-                  self.q_resolution_names.index(key) == 0):
+            elif self.q_resolution_names[0] == key:
                 self.current_dataset.dqx_data = data_set.flatten()
-            elif (self.q_uncertainty_names.index(key) == 1 or
-                  self.q_resolution_names.index(key) == 1):
+            else:
                 self.current_dataset.dqy_data = data_set.flatten()
-                self.current_dataset.yaxis("Q_y", unit)
+        elif key in self.q_uncertainty_names:
+            if (len(self.q_uncertainty_names) == 1
+                    or (self.q_uncertainty_names[0]
+                        == self.q_uncertainty_names[1])):
+                self.current_dataset.dqx_data = data_set[0].flatten()
+                self.current_dataset.dqy_data = data_set[1].flatten()
+            elif self.q_uncertainty_names[0] == key:
+                self.current_dataset.dqx_data = data_set.flatten()
+            else:
+                self.current_dataset.dqy_data = data_set.flatten()
         elif key == self.mask_name:
             self.current_dataset.mask = data_set.flatten()
         elif key == u'Qy':
