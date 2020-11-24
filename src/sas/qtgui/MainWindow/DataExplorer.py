@@ -121,6 +121,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
 
+        # Slots for model changes
+        self.model.itemChanged.connect(self.onFileListChanged)
+        self.theory_model.itemChanged.connect(self.onFileListChanged)
+
         # Don't show "empty" rows with data objects
         self.data_proxy.setFilterRegExp(r"[^()]")
 
@@ -1437,6 +1441,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Create a custom menu based on actions defined in the UI file
         self.context_menu = QtWidgets.QMenu(self)
+        self.context_menu.addAction(self.actionSelect)
+        self.context_menu.addAction(self.actionDeselect)
+        self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1450,6 +1457,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
 
         # Define the callbacks
+        self.actionSelect.triggered.connect(self.onFileListSelected)
+        self.actionDeselect.triggered.connect(self.onFileListDeselected)
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
@@ -1477,6 +1486,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
         self.actionQuick3DPlot.setEnabled(is_2D)
         self.actionEditMask.setEnabled(is_2D)
+        self.actionSelect.setEnabled(True)
 
         # Freezing
         # check that the selection has inner items
@@ -1947,3 +1957,37 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         for item in items_to_delete:
             self.theory_model.removeRow(item.row())
+
+    def onFileListSelected(self):
+        """
+        Slot for actionSelect
+        """
+        self.setCheckItems(status=QtCore.Qt.Checked)
+
+    def onFileListDeselected(self):
+        """
+        Slot for actionDeselect
+        """
+        self.setCheckItems(status=QtCore.Qt.Unchecked)
+
+    def onFileListChanged(self, item):
+        """
+        Slot for model (data/theory) changes.
+        Currently only reacting to checkbox selection.
+        """
+        if len(self.current_view.selectedIndexes()) < 2:
+            return
+        self.setCheckItems(status=item.checkState())
+
+    def setCheckItems(self, status=QtCore.Qt.Unchecked):
+        """
+        Sets requested checkbox status on selected indices
+        """
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model.blockSignals(True)
+        for index in self.current_view.selectedIndexes():
+            item = model.itemFromIndex(proxy.mapToSource(index))
+            if item.isCheckable():
+                item.setCheckState(status)
+        model.blockSignals(False)
