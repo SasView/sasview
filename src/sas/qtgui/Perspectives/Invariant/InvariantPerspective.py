@@ -250,7 +250,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                                              self.low_extrapolation_plot.title)
             plots.append(self.low_extrapolation_plot)
         if len(plots) > 1:
-            reactor.callFromThread(self.communicate.plotRequestedSignal.emit, plots, None)
+            self.communicate.plotRequestedSignal.emit(plots, None)
 
         # Update the details dialog in case it is open
         self.updateDetailsWidget(model)
