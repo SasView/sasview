@@ -1,7 +1,7 @@
 # global
 import logging
 import copy
-import  numpy as np
+import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
@@ -72,6 +72,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._high_fit = False
         self._high_points = NPOINTS_Q_INTERP
         self._high_power_value = DEFAULT_POWER_LOW
+
+        # Define plots
+        self.high_extrapolation_plot = None
+        self.low_extrapolation_plot = None
 
         # no reason to have this widget resizable
         self.resize(self.minimumSizeHint())
@@ -192,12 +196,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ Use twisted to thread the calculations away """
         # Find out if extrapolation needs to be used.
         extrapolation = None
-        if self._low_extrapolate and not self._high_extrapolate:
-            extrapolation = "low"
-        elif not self._low_extrapolate and self._high_extrapolate:
-            extrapolation = "high"
-        elif self._low_extrapolate and self._high_extrapolate:
+        if self._low_extrapolate and self._high_extrapolate:
             extrapolation = "both"
+        elif self._high_extrapolate:
+            extrapolation = "high"
+        elif self._low_extrapolate:
+            extrapolation = "low"
 
         # modify the Calculate button to indicate background process
         self.cmdCalculate.setText("Calculating...")
@@ -229,16 +233,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.model = model
         self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
-        name = self._data.name
         # Send the modified model item to DE for keeping in the model
-        # Currently -unused
-        # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
-
-        plot_data = GuiUtils.plotsFromDisplayName(name, self._manager.filesWidget.model)
-
-        # only the Low-Q/High-Q data for plotting
-        data_to_plot = [(self._model_item, p) for p in plot_data.values() if p.plot_role == p.ROLE_DATA]
-        self._manager.filesWidget.plotData(data_to_plot)
+        plots = [self._model_item]
+        if self.high_extrapolation_plot:
+            self.high_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
+            self.high_extrapolation_plot.symbol = "Line"
+            self.high_extrapolation_plot.show_errors = False
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.high_extrapolation_plot,
+                                             self.high_extrapolation_plot.title)
+            plots.append(self.high_extrapolation_plot)
+        if self.low_extrapolation_plot:
+            self.low_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
+            self.low_extrapolation_plot.symbol = "Line"
+            self.low_extrapolation_plot.show_errors = False
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.low_extrapolation_plot,
+                                             self.low_extrapolation_plot.title)
+            plots.append(self.low_extrapolation_plot)
+        if len(plots) > 1:
+            reactor.callFromThread(self.communicate.plotRequestedSignal.emit, plots, None)
 
         # Update the details dialog in case it is open
         self.updateDetailsWidget(model)
@@ -364,25 +376,18 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             title = "Low-Q extrapolation"
 
             # Convert the data into plottable
-            extrapolated_data = self._manager.createGuiData(extrapolated_data)
+            self.low_extrapolation_plot = self._manager.createGuiData(extrapolated_data)
 
-            extrapolated_data.name = title
-            extrapolated_data.title = title
-            extrapolated_data.symbol = "Line"
-            extrapolated_data.has_errors = False
+            self.low_extrapolation_plot.name = title
+            self.low_extrapolation_plot.title = title
+            self.low_extrapolation_plot.symbol = "Line"
+            self.low_extrapolation_plot.has_errors = False
 
             # copy labels and units of axes for plotting
-            extrapolated_data._xaxis = temp_data._xaxis
-            extrapolated_data._xunit = temp_data._xunit
-            extrapolated_data._yaxis = temp_data._yaxis
-            extrapolated_data._yunit = temp_data._yunit
-
-            # Add the plot to the model item
-            # This needs to run in the main thread
-            reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                                   self._model_item,
-                                   extrapolated_data,
-                                   title)
+            self.low_extrapolation_plot._xaxis = temp_data._xaxis
+            self.low_extrapolation_plot._xunit = temp_data._xunit
+            self.low_extrapolation_plot._yaxis = temp_data._yaxis
+            self.low_extrapolation_plot._yunit = temp_data._yunit
 
         if self._high_extrapolate and high_calculation_pass:
             # for presentation in InvariantDetails
@@ -397,22 +402,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             title = "High-Q extrapolation"
 
             # Convert the data into plottable
-            high_out_data = self._manager.createGuiData(high_out_data)
-            high_out_data.name = title
-            high_out_data.title = title
-            high_out_data.symbol = "Line"
-            high_out_data.has_errors = False
+            self.high_extrapolation_plot = self._manager.createGuiData(high_out_data)
+            self.high_extrapolation_plot.name = title
+            self.high_extrapolation_plot.title = title
+            self.high_extrapolation_plot.symbol = "Line"
+            self.high_extrapolation_plot.has_errors = False
 
             # copy labels and units of axes for plotting
-            high_out_data._xaxis = temp_data._xaxis
-            high_out_data._xunit = temp_data._xunit
-            high_out_data._yaxis = temp_data._yaxis
-            high_out_data._yunit = temp_data._yunit
-
-            # Add the plot to the model item
-            # This needs to run in the main thread
-            reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                                   self._model_item, high_out_data, title)
+            self.high_extrapolation_plot._xaxis = temp_data._xaxis
+            self.high_extrapolation_plot._xunit = temp_data._xunit
+            self.high_extrapolation_plot._yaxis = temp_data._yaxis
+            self.high_extrapolation_plot._yunit = temp_data._yunit
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
@@ -802,6 +802,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             return
         self._data = None
         self._model_item = None
+        self.low_extrapolation_plot = None
+        self.high_extrapolation_plot = None
         self._path = ""
         self.txtName.setText('')
         self._porod = None
