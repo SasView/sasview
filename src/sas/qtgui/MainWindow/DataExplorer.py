@@ -1035,7 +1035,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Forces display of charts for the given data set
         """
         # data_list = [QStandardItem, Data1D/Data2D]
-        plot_to_show = data_list[1]
+        plots_to_show = data_list[1:]
         plot_item = data_list[0]
 
         # plots to show
@@ -1047,7 +1047,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Try the current item
             main_data = GuiUtils.dataFromItem(plot_item)
         # 1D dependent plots of 2D sets - special treatment
-        if isinstance(main_data, Data2D) and isinstance(plot_to_show, Data1D):
+        if isinstance(main_data, Data2D) and isinstance(plots_to_show[0], Data1D):
             main_data = None
 
         # Make sure main data for 2D is always displayed
@@ -1058,23 +1058,24 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 else:
                     self.plotData([(plot_item, main_data)])
 
-        # Check if this is merely a plot update
-        if self.updatePlot(plot_to_show):
-            return
+        for plot_to_show in plots_to_show:
+            # Check if this is merely a plot update
+            if self.updatePlot(plot_to_show):
+                continue
 
-        # Residuals get their own plot
-        if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
-            plot_to_show.yscale='linear'
-            self.plotData([(plot_item, plot_to_show)])
-        elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
-            # No plot
-            return
-        else:
-            # Plots with main data points on the same chart
-            # Get the main data plot
-            if main_data is not None and not self.isPlotShown(main_data):
-                new_plots.append((plot_item, main_data))
-            new_plots.append((plot_item, plot_to_show))
+            # Residuals get their own plot
+            if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
+                plot_to_show.yscale='linear'
+                self.plotData([(plot_item, plot_to_show)])
+            elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
+                # No plot
+                continue
+            else:
+                # Plots with main data points on the same chart
+                # Get the main data plot
+                if main_data is not None and not self.isPlotShown(main_data):
+                    new_plots.append((plot_item, main_data))
+                new_plots.append((plot_item, plot_to_show))
         if new_plots:
             self.plotData(new_plots)
 
