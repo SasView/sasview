@@ -995,7 +995,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         item = GuiUtils.itemFromDisplayName(name, self.model)
         return item
 
-    def displayData(self, name=None, is_data=True, id=None):
+    def displayDataByName(self, name=None, is_data=True, id=None):
         """
         Forces display of charts for the given name
         """
