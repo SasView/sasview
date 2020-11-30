@@ -182,7 +182,7 @@ class Reader(FileReader):
 
             elif isinstance(value, h5py.Dataset):
                 # If this is a dataset, store the data appropriately
-                data_set = value.value
+                data_set = value[()]
                 unit = self._get_unit(value)
                 # Put scalars into lists to be sure they are iterable
                 if np.isscalar(data_set):
