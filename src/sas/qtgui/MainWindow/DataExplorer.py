@@ -1444,6 +1444,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addAction(self.actionSelect)
         self.context_menu.addAction(self.actionDeselect)
         self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionChangeName)
+        self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1459,6 +1461,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Define the callbacks
         self.actionSelect.triggered.connect(self.onFileListSelected)
         self.actionDeselect.triggered.connect(self.onFileListDeselected)
+        self.actionChangeName.triggered.connect(self.changeName)
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
@@ -1497,6 +1500,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Fire up the menu
         self.context_menu.exec_(self.current_view.mapToGlobal(position))
+
+    def changeName(self):
+        # Placeholder for upcoming feature - #1702
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        # TODO: Create a modal window that shows base file info and an input box, if desired
+        pass
 
     def showDataInfo(self):
         """
@@ -1876,7 +1886,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         if p_file is not None:
-            checkbox_item.setText(os.path.basename(p_file))
+            p_file = os.path.basename(p_file) if os.path.exists(p_file) else p_file
+            checkbox_item.setText(p_file)
 
         # Add the actual Data1D/Data2D object
         object_item = GuiUtils.HashableStandardItem()
