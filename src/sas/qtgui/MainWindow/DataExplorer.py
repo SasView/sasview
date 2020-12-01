@@ -26,6 +26,7 @@ from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
+from sas.qtgui.MainWindow.NameChanger import ChangeName
 
 import sas.qtgui.Perspectives as Perspectives
 
@@ -127,6 +128,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Don't show "empty" rows with data objects
         self.data_proxy.setFilterRegExp(r"[^()]")
+
+        # Create a window to allow the display name to change
+        self.nameChangeBox = ChangeName()
 
         # The Data viewer is QTreeView showing the proxy model
         self.treeView.setModel(self.data_proxy)
@@ -1502,11 +1506,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.exec_(self.current_view.mapToGlobal(position))
 
     def changeName(self):
-        # Placeholder for upcoming feature - #1702
+        """
+        Open a modal window that can change the display name of the selected data
+        """
         index = self.current_view.selectedIndexes()[0]
         proxy = self.current_view.model()
-        # TODO: Create a modal window that shows base file info and an input box, if desired
-        pass
+        model = proxy.sourceModel()
+
+        # Get the model item and update the name change box
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        self.nameChangeBox.model_item = model_item
+
+        # Open the window
+        self.nameChangeBox.show()
 
     def showDataInfo(self):
         """

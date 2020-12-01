@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ChangeCategoryUI</class>
+ <widget class="QDialog" name="ChangeCategoryUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>341</width>
+    <height>295</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Change Category:</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>11</y>
+     <width>321</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Change Display Name</string>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="2">
+     <widget class="QLineEdit" name="txtCurrentName"/>
+    </item>
+    <item row="0" column="0">
+     <widget class="QRadioButton" name="rbExisting">
+      <property name="text">
+       <string>Current name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QRadioButton" name="rbFileName">
+      <property name="text">
+       <string>File name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QRadioButton" name="rbDataName">
+      <property name="text">
+       <string>Data name</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLineEdit" name="txtDataName"/>
+    </item>
+    <item row="3" column="0">
+     <widget class="QRadioButton" name="rbNew">
+      <property name="text">
+       <string>Create new</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QLineEdit" name="txtNewCategory"/>
+    </item>
+    <item row="2" column="2">
+     <widget class="QLineEdit" name="txtFileName"/>
+    </item>
+   </layout>
+   <zorder>txtNewCategory</zorder>
+   <zorder>rbNew</zorder>
+   <zorder>rbExisting</zorder>
+   <zorder>txtCurrentName</zorder>
+   <zorder>rbDataName</zorder>
+   <zorder>rbFileName</zorder>
+   <zorder>txtDataName</zorder>
+   <zorder>txtFileName</zorder>
+  </widget>
+  <widget class="QPushButton" name="cmdOK">
+   <property name="geometry">
+    <rect>
+     <x>112</x>
+     <y>247</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cmdCancel">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>247</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
