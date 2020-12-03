@@ -755,6 +755,95 @@ class DataExplorerTest(unittest.TestCase):
         # See that the menu has been shown
         self.form.context_menu.exec_.assert_called_once()
 
+    def testNameChange(self):
+        """
+        Test the display name change routines
+        """
+        # Define Constants
+        FILE_NAME = "cyl_400_20.txt"
+        TEST_STRING_1 = "test value change"
+        TEST_STRING_2 = "TEST VALUE CHANGE"
+        # Test base state of the name change window
+        self.assertTrue(hasattr(self.form, "nameChangeBox"))
+        self.assertEqual(self.form.nameChangeBox.windowTitle(), "Display Name Change")
+        self.assertFalse(self.form.nameChangeBox.isVisible())
+        self.assertIsNone(self.form.nameChangeBox.data)
+        self.assertIsNone(self.form.nameChangeBox.model_item)
+        self.assertFalse(self.form.nameChangeBox.txtCurrentName.isEnabled())
+        self.assertFalse(self.form.nameChangeBox.txtDataName.isEnabled())
+        self.assertFalse(self.form.nameChangeBox.txtFileName.isEnabled())
+        self.assertFalse(self.form.nameChangeBox.txtNewCategory.isEnabled())
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), "")
+        self.assertEqual(self.form.nameChangeBox.txtDataName.text(), "")
+        self.assertEqual(self.form.nameChangeBox.txtFileName.text(), "")
+        self.assertEqual(self.form.nameChangeBox.txtNewCategory.text(), "")
+
+        # Get Data1D
+        p_file=[FILE_NAME]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        key = list(output.keys())
+        output[key[0]].title = TEST_STRING_1
+        self.form.loadComplete((output, message))
+
+        # select the data and run name change routine
+        self.form.treeView.selectAll()
+        self.form.changeName()
+
+        # Test window state after adding data
+        self.assertTrue(self.form.nameChangeBox.isVisible())
+        self.assertIsNotNone(self.form.nameChangeBox.data)
+        self.assertIsNotNone(self.form.nameChangeBox.model_item)
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        self.assertEqual(self.form.nameChangeBox.txtDataName.text(), TEST_STRING_1)
+        self.assertEqual(self.form.nameChangeBox.txtFileName.text(), FILE_NAME)
+        self.assertTrue(self.form.nameChangeBox.rbExisting.isChecked())
+        self.assertFalse(self.form.nameChangeBox.rbDataName.isChecked())
+        self.assertFalse(self.form.nameChangeBox.rbFileName.isChecked())
+        self.assertFalse(self.form.nameChangeBox.rbNew.isChecked())
+
+        # Take the existing name
+        self.form.nameChangeBox.cmdOK.click()
+
+        # Take the title
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        self.form.nameChangeBox.rbDataName.setChecked(True)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+
+        # Take the file name again
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_1)
+        self.form.nameChangeBox.rbFileName.setChecked(True)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+
+        # Take the user-defined name, which is empty - should retain existing value
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        self.form.nameChangeBox.rbNew.setChecked(True)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+
+        # Take a different user-defined name
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        self.form.nameChangeBox.rbNew.setChecked(True)
+        self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_2)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+
+        # Test cancel button
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        self.form.nameChangeBox.rbNew.setChecked(True)
+        self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_1)
+        self.form.nameChangeBox.cmdCancel.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        self.form.nameChangeBox.cmdOK.click()
+
     def testShowDataInfo(self):
         """
         Test of the showDataInfo method

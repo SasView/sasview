@@ -6,6 +6,7 @@ from sas.qtgui.Utilities import GuiUtils
 
 from .UI.ChangeNameUI import Ui_ChangeCategoryUI
 
+
 class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
     def __init__(self, parent=None):
         super(ChangeName, self).__init__(parent)
@@ -14,11 +15,10 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("Display Name Change")
-        self.currentValue = self.txtCurrentName.text()
         self._data = None
         self._model_item = None
 
-        # Disable the fixed inputs
+        # Disable the inputs
         self.txtCurrentName.setEnabled(False)
         self.txtDataName.setEnabled(False)
         self.txtFileName.setEnabled(False)
@@ -52,7 +52,7 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
 
     def addActions(self):
         """
-        Add actions to the logo push buttons
+        Add actions for buttons
         """
         # Close actions - return selected value on ok, otherwise just close
         self.cmdCancel.clicked.connect(lambda: self.close(False))
