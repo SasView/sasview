@@ -18,6 +18,12 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self._data = None
         self._model_item = None
 
+        # Disable the fixed inputs
+        self.txtCurrentName.setEnabled(False)
+        self.txtDataName.setEnabled(False)
+        self.txtFileName.setEnabled(False)
+        self.txtNewCategory.setEnabled(False)
+
         self.addActions()
 
     @property
@@ -39,7 +45,7 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         if var:
             self._data = var
             self.rbExisting.setChecked(True)
-            self.txtCurrentName.setText(self._data.name)
+            self.txtCurrentName.setText(self._model_item.text())
             self.txtDataName.setText(self._data.title)
             self.txtFileName.setText(os.path.basename(self._data.filename))
             self.txtNewCategory.setText("")
@@ -51,6 +57,7 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         # Close actions - return selected value on ok, otherwise just close
         self.cmdCancel.clicked.connect(lambda: self.close(False))
         self.cmdOK.clicked.connect(lambda: self.close(True))
+        self.rbNew.toggled.connect(lambda: self.txtNewCategory.setEnabled(self.rbNew.isChecked()))
 
     def getNewText(self):
         """
@@ -61,8 +68,8 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         textValues = [self.txtCurrentName.text(), self.txtDataName.text(),
                       self.txtFileName.text(), self.txtNewCategory.text()]
         newValues = [textValues[i] for i, value in enumerate(textValues) if buttonStates[i]]
-        self.data.name = newValues[0] if len(newValues) == 1 else self.txtCurrentName.text()
-        GuiUtils.updateModelItem(self.model_item, self.data, self.data.name)
+        name = newValues[0] if len(newValues) == 1 and newValues[0] else self.txtCurrentName.text()
+        self._model_item.setText(name)
 
     def close(self, retVal=False):
         """
