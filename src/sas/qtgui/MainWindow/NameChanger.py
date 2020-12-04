@@ -13,6 +13,11 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self.setupUi(self)
 
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setModal(True)
+
+        self.parent = parent
+        self.communicator = self.parent.communicator
+        self.communicator.dataDeletedSignal.connect(self.removeData)
 
         self.setWindowTitle("Display Name Change")
         self._data = None
@@ -31,8 +36,9 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         return self._model_item
 
     @model_item.setter
-    def model_item(self, val):
-        assert isinstance(val, GuiUtils.HashableStandardItem)
+    def model_item(self, val=None):
+        # Explicit check for None or HashableStandardItem
+        assert isinstance(val, (GuiUtils.HashableStandardItem, type(None)))
         self._model_item = val
         self.data = GuiUtils.dataFromItem(self._model_item)
 
@@ -41,14 +47,18 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         return self._data
 
     @data.setter
-    def data(self, var=None):
-        if var:
-            self._data = var
+    def data(self, val=None):
+        self._data = val
+        # Set values to base state
+        self.txtCurrentName.setText("")
+        self.txtDataName.setText("")
+        self.txtFileName.setText("")
+        self.txtNewCategory.setText("")
+        if val:
             self.rbExisting.setChecked(True)
             self.txtCurrentName.setText(self._model_item.text())
             self.txtDataName.setText(self._data.title)
             self.txtFileName.setText(os.path.basename(self._data.filename))
-            self.txtNewCategory.setText("")
 
     def addActions(self):
         """
@@ -70,6 +80,16 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         newValues = [textValues[i] for i, value in enumerate(textValues) if buttonStates[i]]
         name = newValues[0] if len(newValues) == 1 and newValues[0] else self.txtCurrentName.text()
         self._model_item.setText(name)
+
+    def removeData(self, data_list=None):
+        """
+        Safely remove data from the window in the unlikely event a data deletion signal is sent to the modal window
+        """
+        if not data_list or self._model_item not in data_list:
+            return
+        # Reset model_item and data to None and close the window
+        self.model_item = None
+        self.close()
 
     def close(self, retVal=False):
         """

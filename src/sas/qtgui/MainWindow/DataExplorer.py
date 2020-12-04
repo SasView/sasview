@@ -130,7 +130,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.data_proxy.setFilterRegExp(r"[^()]")
 
         # Create a window to allow the display name to change
-        self.nameChangeBox = ChangeName()
+        self.nameChangeBox = ChangeName(self)
 
         # The Data viewer is QTreeView showing the proxy model
         self.treeView.setModel(self.data_proxy)

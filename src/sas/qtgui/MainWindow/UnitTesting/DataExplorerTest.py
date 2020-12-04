@@ -755,16 +755,12 @@ class DataExplorerTest(unittest.TestCase):
         # See that the menu has been shown
         self.form.context_menu.exec_.assert_called_once()
 
-    def testNameChange(self):
+    def baseNameStateCheck(self):
         """
-        Test the display name change routines
+        Helper method for the Name Change Tests Below - Check the base state of the window
         """
-        # Define Constants
-        FILE_NAME = "cyl_400_20.txt"
-        TEST_STRING_1 = "test value change"
-        TEST_STRING_2 = "TEST VALUE CHANGE"
-        # Test base state of the name change window
         self.assertTrue(hasattr(self.form, "nameChangeBox"))
+        self.assertTrue(self.form.nameChangeBox.isModal())
         self.assertEqual(self.form.nameChangeBox.windowTitle(), "Display Name Change")
         self.assertFalse(self.form.nameChangeBox.isVisible())
         self.assertIsNone(self.form.nameChangeBox.data)
@@ -778,6 +774,16 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(self.form.nameChangeBox.txtFileName.text(), "")
         self.assertEqual(self.form.nameChangeBox.txtNewCategory.text(), "")
 
+    def testNameChange(self):
+        """
+        Test the display name change routines
+        """
+        # Define Constants
+        FILE_NAME = "cyl_400_20.txt"
+        TEST_STRING_1 = "test value change"
+        TEST_STRING_2 = "TEST VALUE CHANGE"
+        # Test base state of the name change window
+        self.baseNameStateCheck()
         # Get Data1D
         p_file=[FILE_NAME]
         # Read in the file
@@ -804,45 +810,51 @@ class DataExplorerTest(unittest.TestCase):
 
         # Take the existing name
         self.form.nameChangeBox.cmdOK.click()
-
-        # Take the title
         self.form.changeName()
         self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+
+        # Take the title
         self.form.nameChangeBox.rbDataName.setChecked(True)
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
-
-        # Take the file name again
         self.form.changeName()
         self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_1)
+
+        # Take the file name again
         self.form.nameChangeBox.rbFileName.setChecked(True)
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
-
-        # Take the user-defined name, which is empty - should retain existing value
         self.form.changeName()
         self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+
+        # Take the user-defined name, which is empty - should retain existing value
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
-
-        # Take a different user-defined name
         self.form.changeName()
         self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+
+        # Take a different user-defined name
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_2)
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
-
-        # Test cancel button
         self.form.changeName()
         self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+
+        # Test cancel button
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_1)
         self.form.nameChangeBox.cmdCancel.click()
         self.form.changeName()
         self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
         self.form.nameChangeBox.cmdOK.click()
+
+        # Test delete data
+        self.form.nameChangeBox.removeData(None)  # Nothing should happen
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        self.form.nameChangeBox.removeData([self.form.nameChangeBox.model_item])  # Should return to base state
+        self.baseNameStateCheck()
 
     def testShowDataInfo(self):
         """
