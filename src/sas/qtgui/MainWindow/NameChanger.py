@@ -18,6 +18,7 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self.parent = parent
         self.communicator = self.parent.communicator
         self.communicator.dataDeletedSignal.connect(self.removeData)
+        self.manager = self.parent.manager
 
         self.setWindowTitle("Display Name Change")
         self._data = None
@@ -73,13 +74,34 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         """
         Find the radio button that is selected and find its associated textbox
         """
-        buttonStates = [self.rbExisting.isChecked(), self.rbDataName.isChecked(),
-                   self.rbFileName.isChecked(), self.rbNew.isChecked()]
-        textValues = [self.txtCurrentName.text(), self.txtDataName.text(),
-                      self.txtFileName.text(), self.txtNewCategory.text()]
+        if self.rbExisting.isChecked() or (self.rbNew.isChecked() and not str(self.txtNewCategory.text())):
+            # Do not attempt to change the name if the existing name is selected and an empty new string is sent
+            return
+        buttonStates = [self.rbDataName.isChecked(), self.rbFileName.isChecked(), self.rbNew.isChecked()]
+        textValues = [self.txtDataName.text(), self.txtFileName.text(), self.txtNewCategory.text()]
         newValues = [textValues[i] for i, value in enumerate(textValues) if buttonStates[i]]
-        name = newValues[0] if len(newValues) == 1 and newValues[0] else self.txtCurrentName.text()
-        self._model_item.setText(name)
+        # Create a unique name based on the value set - Set name to "" if multiple boxes somehow checked
+        new_name = self.manager.rename(newValues[0]) if len(newValues) == 1 else ""
+        # Only rename if there is something to add.
+        if new_name:
+            # TODO: This needs to update all theories and theory plots
+            old_name = self._model_item.text()
+            # Rename all theory elements
+            # for index in range(self._model_item.rowCount()):
+            #     item = self._model_item.child(index)
+            #     data = GuiUtils.dataFromItem(item)
+            #     if old_name in item.text():
+            #         text = str(item.text())
+            #         item.setText(text.replace(old_name, new_name))
+            #     if data:
+            #         data.name = new_name
+            #         data.title.replace(old_name, new_name)
+            #     if hasattr(item, 'title'):
+            #         item.title.replace(old_name, new_name)
+            #     item.setData(data)
+            self._data.name = new_name
+            self._model_item.setData(self._data)
+            self._model_item.setText(new_name)
 
     def removeData(self, data_list=None):
         """
