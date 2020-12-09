@@ -1449,7 +1449,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addAction(self.actionDeselect)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionChangeName)
-        self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1495,6 +1494,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.setEnabled(is_2D)
         self.actionSelect.setEnabled(True)
 
+        # Name Changing
+        # Disallow name changes after the data has been sent to any perspective to prevent orphaned plots
+        plots = GuiUtils.plotsFromModel(str(model_item.text()), model_item)
+        self.actionChangeName.setEnabled(len(plots) == 1)
+        # Do not allow name change for lower level plots
+        self.actionChangeName.setVisible(model_item.parent() is None)
+
         # Freezing
         # check that the selection has inner items
         freeze_enabled = False
@@ -1515,10 +1521,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Get the model item and update the name change box
         model_item = model.itemFromIndex(proxy.mapToSource(index))
-        self.nameChangeBox.model_item = model_item
+        plots = GuiUtils.plotsFromModel(str(model_item.text()), model_item)
 
-        # Open the window
-        self.nameChangeBox.show()
+        # Do not allow name changes then the data is in a perspective
+        if len(plots) == 1:
+            self.nameChangeBox.model_item = model_item
+            # Open the window
+            self.nameChangeBox.show()
 
     def showDataInfo(self):
         """

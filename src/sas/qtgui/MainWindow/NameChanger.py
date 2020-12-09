@@ -84,21 +84,6 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         new_name = self.manager.rename(newValues[0]) if len(newValues) == 1 else ""
         # Only rename if there is something to add.
         if new_name:
-            # TODO: This needs to update all theories and theory plots
-            old_name = self._model_item.text()
-            # Rename all theory elements
-            # for index in range(self._model_item.rowCount()):
-            #     item = self._model_item.child(index)
-            #     data = GuiUtils.dataFromItem(item)
-            #     if old_name in item.text():
-            #         text = str(item.text())
-            #         item.setText(text.replace(old_name, new_name))
-            #     if data:
-            #         data.name = new_name
-            #         data.title.replace(old_name, new_name)
-            #     if hasattr(item, 'title'):
-            #         item.title.replace(old_name, new_name)
-            #     item.setData(data)
             self._data.name = new_name
             self._model_item.setData(self._data)
             self._model_item.setText(new_name)
