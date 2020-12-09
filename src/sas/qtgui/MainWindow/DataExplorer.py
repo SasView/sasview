@@ -1495,9 +1495,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionSelect.setEnabled(True)
 
         # Name Changing
-        # Disallow name changes after the data has been sent to any perspective to prevent orphaned plots
-        plots = GuiUtils.plotsFromModel(str(model_item.text()), model_item)
-        self.actionChangeName.setEnabled(len(plots) == 1)
+        # Disallow name changes after the data has been assigned any plots to prevent orphans
+        children = list(GuiUtils.getChildrenFromItem(model_item))
+        hashables = [child for child in children if isinstance(child, GuiUtils.HashableStandardItem)]
+        self.actionChangeName.setEnabled(len(hashables) <= 1)
         # Do not allow name change for lower level plots
         self.actionChangeName.setVisible(model_item.parent() is None)
 
@@ -1521,10 +1522,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Get the model item and update the name change box
         model_item = model.itemFromIndex(proxy.mapToSource(index))
-        plots = GuiUtils.plotsFromModel(str(model_item.text()), model_item)
 
-        # Do not allow name changes then the data is in a perspective
-        if len(plots) == 1:
+        # Do not allow name changes after the data has plots assigned
+        children = list(GuiUtils.getChildrenFromItem(model_item))
+        hashables = [child for child in children if isinstance(child, GuiUtils.HashableStandardItem)]
+        if len(hashables) <= 1:
             self.nameChangeBox.model_item = model_item
             # Open the window
             self.nameChangeBox.show()
