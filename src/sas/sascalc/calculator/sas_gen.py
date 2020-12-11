@@ -25,8 +25,8 @@ else:
     def decode(s):
         return s.decode() if isinstance(s, bytes) else s
 
-MFACTOR_AM = 2.853E-12
-MFACTOR_MT = 2.3164E-9
+MFACTOR_AM = 2.90636E-12
+MFACTOR_MT = 2.3128E-9
 METER2ANG = 1.0E+10
 #Avogadro constant [1/mol]
 NA = 6.02214129e+23
@@ -35,7 +35,7 @@ def mag2sld(mag, v_unit=None):
     """
     Convert magnetization to magnatic SLD
     sldm = Dm * mag where Dm = gamma * classical elec. radius/(2*Bohr magneton)
-    Dm ~ 2.853E-12 [A^(-2)] ==> Shouldn't be 2.90636E-12 [A^(-2)]???
+    Dm ~ 2.90636E8 [(A m)^(-1)]= 2.90636E-12 [to Ang^(-2)]
     """
     if v_unit == "A/m":
         factor = MFACTOR_AM
@@ -87,6 +87,7 @@ class GenSAS(object):
         self.params['Up_frac_in'] = 1.0
         self.params['Up_frac_out'] = 1.0
         self.params['Up_theta'] = 0.0
+        self.params['Up_phi'] = 0.0
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
@@ -97,6 +98,7 @@ class GenSAS(object):
         self.details['Up_frac_in'] = ['[u/(u+d)]', 0.0, 1.0]
         self.details['Up_frac_out'] = ['[u/(u+d)]', 0.0, 1.0]
         self.details['Up_theta'] = ['[deg]', -np.inf, np.inf]
+        self.details['Up_phi'] = ['[deg]', -np.inf, np.inf]
         # fixed parameters
         self.fixed = []
 
@@ -132,9 +134,10 @@ class GenSAS(object):
             in_spin = self.params['Up_frac_in']
             out_spin = self.params['Up_frac_out']
             s_theta = self.params['Up_theta']
+            s_phi = self.params['Up_phi']
             I_out = Iqxy(
                 qx, qy, x, y, z, sld, vol, mx, my, mz,
-                in_spin, out_spin, s_theta,
+                in_spin, out_spin, s_theta, s_phi,
                 )
         else:
             # 1-D calculation
@@ -802,6 +805,7 @@ class MagSLD(object):
         #self.sld_m = None
         #self.sld_phi = None
         #self.sld_theta = None
+        #self.sld_phi = None
         self.pix_symbol = None
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
@@ -1086,6 +1090,7 @@ def sas_gen_c(self, qx, qy=None):
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
+    s_phi = self.params['Up_phi']
     scale = self.params['scale']
     total_volume = self.params['total_volume']
     background = self.params['background']
@@ -1095,10 +1100,10 @@ def sas_gen_c(self, qx, qy=None):
         mx = my = mz = np.zeros_like(x)
     args = (
         (1 if self.is_avg else 0),
-        # WARNING: calc_msld in libfunc.c at line 174-175 swaps mz and my.
+        # WARNING: 
         # To compare new to old need to swap the inputs.  Also need to
         # reverse the sign.
-        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta)
+        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta, s_phi)
     model = _sld2i.new_GenI(*args)
     I_out = np.empty_like(qx)
     if qy is not None and len(qy) > 0:
@@ -1128,6 +1133,7 @@ def realspace_Iq(self, qx, qy):
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
+    s_phi = self.params['Up_phi']
     scale = self.params['scale']
     total_volume = self.params['total_volume']
     background = self.params['background']
@@ -1152,7 +1158,7 @@ def realspace_Iq(self, qx, qy):
         if is_magnetic:
             I_out = calc_Iq_magnetic(
                 qx, qy, rho, rho_m, points, volume,
-                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
+                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta, up_phi=s_phi,
                 )
         else:
             I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
@@ -1370,12 +1376,12 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         rho, rho_m, points = shape.sample_magnetic(sampling_density)
         rho, rho_m = rho*1e-6, rho_m*1e-6
         mx, my, mz = rho_m
-        up_i, up_f, up_angle = shape.spin
+        up_i, up_f, up_angle, up_phi = shape.spin
     else:
         rho, points = shape.sample(sampling_density)
         rho = rho*1e-6
         mx = my = mz = None
-        up_i, up_f, up_angle = 1.0, 1.0, 0.0
+        up_i, up_f, up_angle, up_phi = 1.0, 1.0, 0.0, 0.0
     points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
     #print("shape, pixel volume", shape.volume, shape.volume/len(points))
@@ -1391,6 +1397,7 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     model.params['Up_frac_in'] = up_i
     model.params['Up_frac_out'] = up_f
     model.params['Up_theta'] = up_angle
+    model.params['Up_phi'] = up_phi
     if use_2d or shape.is_magnetic:
         q = np.linspace(-qmax, qmax, nq)
         qx, qy = np.meshgrid(q, q)
@@ -1421,7 +1428,7 @@ def demo():
         # Shape + qrange + magnetism (only for ellip).
         #shape='ellip', rab=125, rc=50, qmax=0.1,
         #shape='ellip', rab=25, rc=50, qmax=0.1,
-        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
+        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35, up_phi=35,
 
         # 1D or 2D curve (ignored for magnetism).
         #use_2d=False,
