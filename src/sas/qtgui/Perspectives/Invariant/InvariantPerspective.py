@@ -85,6 +85,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self._data = None
         self._path = ""
+        self._calculator = None
 
         self._allow_close = False
 
@@ -265,7 +266,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     def calculateThread(self, extrapolation):
         """
         Perform Invariant calculations.
-        TODO: Create a dictionary of results to be sent to DE on completion.
         """
         self.updateFromModel()
         msg = ''
@@ -281,34 +281,48 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         temp_data = copy.deepcopy(self._data)
 
-        # Prepare the invariant object
-        inv = invariant.InvariantCalculator(data=temp_data,
-                                            background=self._background,
-                                            scale=self._scale)
-        if self._low_extrapolate:
+        calculation_failed = False
+        low_calculation_pass = False
+        high_calculation_pass = False
 
+        # Prepare the invariant object
+        # FIXME: This needs a complete overhaul - too many things broken in this part of the code
+
+        if self._low_extrapolate:
+            # FIXME: self._low_guinier should be false here when 'Power Law' selected
             function_low = "power_law"
             if self._low_guinier:
                 function_low = "guinier"
             if self._low_fit:
                 self._low_power_value = None
 
-            inv.set_extrapolation(range="low",
-                                  npts=int(self._low_points),
-                                  function=function_low,
-                                  power=self._low_power_value)
+            self._calculator.set_extrapolation(
+                range="low", npts=int(self._low_points),
+                function=function_low, power=self._low_power_value)
+
+            try:
+                qstar_low, qstar_low_err = self._calculator.get_qstar_low()
+                low_calculation_pass = True
+            except Exception as ex:
+                msg += str(ex)
+                logging.warning('Low-q calculation failed: {}'.format(msg))
 
         if self._high_extrapolate:
             function_low = "power_law"
-            inv.set_extrapolation(range="high",
-                                  npts=int(self._high_points),
-                                  function=function_low,
-                                  power=self._high_power_value)
-        # Compute invariant
-        calculation_failed = False
+            # FIXME: Set power to None if high Q set to fit
+            self._calculator.set_extrapolation(
+                range="high", npts=int(self._high_points),
+                function=function_low, power=self._high_power_value)
+
+            try:
+                qstar_high, qstar_high_err = self._calculator.get_qstar_high()
+                high_calculation_pass = True
+            except Exception as ex:
+                msg += str(ex)
+                logging.warning('High-q calculation failed: {}'.format(msg))
 
         try:
-            qstar_data, qstar_data_err = inv.get_qstar_with_error()
+            qstar_data, qstar_data_err = self._calculator.get_qstar_with_error()
         except Exception as ex:
             msg += str(ex)
             calculation_failed = True
@@ -319,7 +333,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
         try:
             volume_fraction, volume_fraction_error = \
-                inv.get_volume_fraction_with_error(self._contrast,
+                self._calculator.get_volume_fraction_with_error(self._contrast,
                                                    extrapolation=extrapolation)
         except Exception as ex:
             calculation_failed = True
@@ -332,8 +346,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         if self._porod:
             try:
-                surface, surface_error = \
-                    inv.get_surface_with_error(self._contrast, self._porod)
+                surface, surface_error = self._calculator.get_surface_with_error(self._contrast, self._porod)
             except Exception as ex:
                 calculation_failed = True
                 msg += str(ex)
@@ -351,26 +364,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             return self.model
         self.cmdStatus.setEnabled(True)
 
-        low_calculation_pass = True
-        high_calculation_pass = True
-        if self._low_extrapolate:
-            try:
-                qstar_low, qstar_low_err = inv.get_qstar_low()
-            except Exception as ex:
-                low_calculation_pass = False
-                msg += str(ex)
-                logging.warning('Low-q calculation failed: {}'.format(msg))
-        if self._high_extrapolate:
-            try:
-                qstar_high, qstar_high_err = inv.get_qstar_high()
-            except Exception as ex:
-                high_calculation_pass = False
-                msg += str(ex)
-                logging.warning('High-q calculation failed: {}'.format(msg))
-
-        if self._low_extrapolate and low_calculation_pass:
-            extrapolated_data = inv.get_extra_data_low(self._low_points)
-            power_low = inv.get_extrapolation_power(range='low')
+        if low_calculation_pass:
+            extrapolated_data = self._calculator.get_extra_data_low(self._low_points)
+            power_low = self._calculator.get_extrapolation_power(range='low')
 
             # Plot the chart
             title = "Low-Q extrapolation"
@@ -389,14 +385,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot._yaxis = temp_data._yaxis
             self.low_extrapolation_plot._yunit = temp_data._yunit
 
-        if self._high_extrapolate and high_calculation_pass:
+        if high_calculation_pass:
             # for presentation in InvariantDetails
             qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
 
             if qmax_plot > Q_MAXIMUM:
                 qmax_plot = Q_MAXIMUM
-            power_high = inv.get_extrapolation_power(range='high')
-            high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
+            power_high = self._calculator.get_extrapolation_power(range='high')
+            high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
 
             # Plot the chart
             title = "High-Q extrapolation"
@@ -502,11 +498,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtNptsHighQ.textChanged.connect(self.updateFromGui)
 
         # check values of n_points compared to distribution length
-        if self.txtNptsLowQ.isEnabled():
-            self.txtNptsLowQ.textChanged.connect(self.checkLength)
+        self.txtNptsLowQ.textChanged.connect(self.checkLength)
 
-        if self.txtNptsHighQ.isEnabled():
-            self.txtNptsHighQ.textChanged.connect(self.checkLength)
+        self.txtNptsHighQ.textChanged.connect(self.checkLength)
 
     def stateChanged(self):
         """
@@ -609,35 +603,22 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         If Power is selected, Fit and Fix radio buttons are visible and
         Power line edit can be edited if Fix is selected
         """
+        # FIXME: Set the model item, *not* the value - allow cascade
         if self.sender().text() == 'Guinier':
             self._low_guinier = toggle
-
             toggle = not toggle
             self.rbPowerLawLowQ.setChecked(toggle)
-
-            self.rbFitLowQ.toggled.connect(self.lowFitAndFixToggle)
-            self.rbFitLowQ.setVisible(toggle)
-            self.rbFixLowQ.setVisible(toggle)
-
-            self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
-
         else:
-            self._low_guinier = not toggle
-
             self.rbGuinier.setChecked(not toggle)
 
-            self.rbFitLowQ.toggled.connect(self.lowFitAndFixToggle)
-            self.rbFitLowQ.setVisible(toggle)
-            self.rbFixLowQ.setVisible(toggle)
-
-            self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
+        self.rbFitLowQ.setVisible(toggle)
+        self.rbFixLowQ.setVisible(toggle)
+        self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
 
     def lowFitAndFixToggle(self, toggle):
         """ Fit and Fix radiobuttons cannot be selected at the same time """
         self._low_fit = toggle
-
-        toggle = not toggle
-        self.txtPowerLowQ.setEnabled(toggle)
+        self.txtPowerLowQ.setEnabled(not toggle)
 
     def hiFitAndFixToggle(self, toggle):
         """
@@ -842,6 +823,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.model.item(WIDGETS.W_QMIN).setText(str(qmin))
         self.model.item(WIDGETS.W_QMAX).setText(str(qmax))
         self._path = data.filename
+
+        self._calculator = invariant.InvariantCalculator(
+            data=self._data, background=self._background, scale=self._scale)
 
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
