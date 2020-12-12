@@ -222,9 +222,11 @@ def _calc_Iqxy_magnetic_helper(
         qsq = qxk**2 + qyk**2
         norm = 1./qsq if qsq > 1e-16 else 0.
         
+
         px = sin_spin*cos_phi
         py = sin_spin*sin_phi
         pz = cos_spin  
+
 
         qvector = [qxk*norm, qyk*norm, 0]
         Mvector = [mx, my, mz]
