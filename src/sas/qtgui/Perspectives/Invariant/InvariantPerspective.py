@@ -45,7 +45,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         super(InvariantWindow, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("Invariant Perspective")
+        self.setWindowTitle(self.title())
 
         # initial input params
         self._background = 0.0
@@ -176,8 +176,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
         self._contrast = float(self.model.item(WIDGETS.W_CONTRAST).text())
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
-        if self.model.item(WIDGETS.W_POROD_CST).text() != 'None' \
-                and self.model.item(WIDGETS.W_POROD_CST).text() != '':
+        if self.model.item(WIDGETS.W_POROD_CST).text() != 'None' and self.model.item(WIDGETS.W_POROD_CST).text() != '':
             self._porod = float(self.model.item(WIDGETS.W_POROD_CST).text())
 
         # Low extrapolating
@@ -217,22 +216,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
     def calculationFailed(self, reason):
         print("calculation failed: ", reason)
-        pass
+        self.allow_calculation()
 
     def deferredPlot(self, model):
         """
         Run the GUI/model update in the main thread
         """
         reactor.callFromThread(lambda: self.plotResult(model))
+        self.allow_calculation()
 
-    def plotResult(self, model):
-        """ Plot result of calculation """
-        # Set the button back to available
+    def allow_calculation(self):
+        # Set the calculate button to available
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
 
+    def plotResult(self, model):
+        """ Plot result of calculation """
+
         self.model = model
-        self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
         # Send the modified model item to DE for keeping in the model
         plots = [self._model_item]
@@ -285,11 +286,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         low_calculation_pass = False
         high_calculation_pass = False
 
-        # Prepare the invariant object
-        # FIXME: This needs a complete overhaul - too many things broken in this part of the code
-
         if self._low_extrapolate:
-            # FIXME: self._low_guinier should be false here when 'Power Law' selected
             function_low = "power_law"
             if self._low_guinier:
                 function_low = "guinier"
@@ -309,7 +306,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         if self._high_extrapolate:
             function_low = "power_law"
-            # FIXME: Set power to None if high Q set to fit
+            if self._high_fit:
+                self._high_power_value = None
             self._calculator.set_extrapolation(
                 range="high", npts=int(self._high_points),
                 function=function_low, power=self._high_power_value)
@@ -385,6 +383,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot._yaxis = temp_data._yaxis
             self.low_extrapolation_plot._yunit = temp_data._yunit
 
+            if self._low_fit:
+                self.txtPowerLowQ.setText(str(power_low))
+
         if high_calculation_pass:
             # for presentation in InvariantDetails
             qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
@@ -409,6 +410,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot._xunit = temp_data._xunit
             self.high_extrapolation_plot._yaxis = temp_data._yaxis
             self.high_extrapolation_plot._yunit = temp_data._yunit
+
+            if self._high_fit:
+                self.txtPowerHighQ.setText(str(power_high))
 
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
@@ -441,7 +445,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
     def title(self):
         """ Perspective name """
-        return "Invariant panel"
+        return "Invariant Perspective"
 
     def onStatus(self):
         """
@@ -520,24 +524,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Validators of number of points for extrapolation.
         Error if it is larger than the distribution length
         """
+        self.cmdCalculate.setEnabled(False)
         try:
             int_value = int(self.sender().text())
         except ValueError:
             self.sender().setStyleSheet(BG_RED)
-            self.cmdCalculate.setEnabled(False)
             return
 
         if self._data:
             if len(self._data.x) < int_value:
                 self.sender().setStyleSheet(BG_RED)
                 logging.warning('The number of points must be smaller than {}'.format(len(self._data.x)))
-                self.cmdCalculate.setEnabled(False)
             else:
                 self.sender().setStyleSheet(BG_WHITE)
-                self.cmdCalculate.setEnabled(True)
-        else:
-            # logging.info('no data is loaded')
-            self.cmdCalculate.setEnabled(False)
+                self.allow_calculation()
 
     def modelChanged(self, item):
         """ Update when model changed """
@@ -591,7 +591,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         try:
             related_internal_values[index_elt] = float(self.sender().text())
             self.sender().setStyleSheet(BG_WHITE)
-            self.cmdCalculate.setEnabled(True)
+            self.allow_calculation()
         except ValueError:
             # empty field, just skip
             self.sender().setStyleSheet(BG_RED)
@@ -603,7 +603,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         If Power is selected, Fit and Fix radio buttons are visible and
         Power line edit can be edited if Fix is selected
         """
-        # FIXME: Set the model item, *not* the value - allow cascade
         if self.sender().text() == 'Guinier':
             self._low_guinier = toggle
             toggle = not toggle
@@ -614,11 +613,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.rbFitLowQ.setVisible(toggle)
         self.rbFixLowQ.setVisible(toggle)
         self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
+        self.updateFromModel()
 
     def lowFitAndFixToggle(self, toggle):
         """ Fit and Fix radiobuttons cannot be selected at the same time """
         self._low_fit = toggle
         self.txtPowerLowQ.setEnabled(not toggle)
+        self.updateFromModel()
 
     def hiFitAndFixToggle(self, toggle):
         """
@@ -626,13 +627,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Disable otherwise
         """
         self.txtPowerHighQ.setEnabled(not toggle)
+        self.updateFromModel()
 
     def highQToggle(self, clicked):
         """ Disable/enable High Q extrapolation """
         self.rbFitHighQ.setEnabled(clicked)
         self.rbFixHighQ.setEnabled(clicked)
         self.txtNptsHighQ.setEnabled(clicked)
-        self.txtPowerHighQ.setEnabled(clicked)
+        self.txtPowerHighQ.setEnabled(clicked and not self._high_fit)
 
     def lowQToggle(self, clicked):
         """ Disable / enable Low Q extrapolation """
