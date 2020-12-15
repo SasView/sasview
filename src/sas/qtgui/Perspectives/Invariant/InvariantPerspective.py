@@ -139,6 +139,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtPowerHighQ.setValidator(GuiUtils.DoubleValidator())
 
+        self.mapper.toFirst()
+
     def enabling(self):
         """ """
         self.cmdStatus.setEnabled(True)
@@ -268,17 +270,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """
         Perform Invariant calculations.
         """
+        # Get most recent values from GUI and model
         self.updateFromModel()
+
+        # Define base message
         msg = ''
 
-        qstar_data = 0.0
-        qstar_data_err = 0.0
+        # Set base Q* values to 0.0
         qstar_low = 0.0
         qstar_low_err = 0.0
         qstar_high = 0.0
         qstar_high_err = 0.0
-        qstar_total = 0.0
-        qstar_total_error = 0.0
 
         temp_data = copy.deepcopy(self._data)
 
@@ -286,6 +288,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         low_calculation_pass = False
         high_calculation_pass = False
 
+        # Update calculator with background, scale, and data values
+        self._calculator.background = self._background
+        self._calculator.scale = self._scale
+        self._calculator.set_data(temp_data)
+
+        # Low Q extrapolation calculations
         if self._low_extrapolate:
             function_low = "power_law"
             if self._low_guinier:
@@ -296,71 +304,76 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self._calculator.set_extrapolation(
                 range="low", npts=int(self._low_points),
                 function=function_low, power=self._low_power_value)
-
             try:
                 qstar_low, qstar_low_err = self._calculator.get_qstar_low()
                 low_calculation_pass = True
             except Exception as ex:
-                msg += str(ex)
-                logging.warning('Low-q calculation failed: {}'.format(msg))
+                logging.warning('Low-q calculation failed: {}'.format(str(ex)))
+                qstar_low = "ERROR"
+                qstar_low_err = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
 
+        # High Q Extrapolation calculations
         if self._high_extrapolate:
-            function_low = "power_law"
+            function_high = "power_law"
             if self._high_fit:
                 self._high_power_value = None
             self._calculator.set_extrapolation(
                 range="high", npts=int(self._high_points),
-                function=function_low, power=self._high_power_value)
-
+                function=function_high, power=self._high_power_value)
             try:
                 qstar_high, qstar_high_err = self._calculator.get_qstar_high()
                 high_calculation_pass = True
             except Exception as ex:
-                msg += str(ex)
-                logging.warning('High-q calculation failed: {}'.format(msg))
+                logging.warning('High-q calculation failed: {}'.format(str(ex)))
+                qstar_high = "ERROR"
+                qstar_high_err = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
 
+        # Q* Data calculations
         try:
             qstar_data, qstar_data_err = self._calculator.get_qstar_with_error()
         except Exception as ex:
             msg += str(ex)
             calculation_failed = True
-            # Display relevant information
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_INVARIANT, item)
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
+            qstar_data = "ERROR"
+            qstar_data_err  = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
+
+        # Volume Fraction calculations
         try:
-            volume_fraction, volume_fraction_error = \
-                self._calculator.get_volume_fraction_with_error(self._contrast,
-                                                   extrapolation=extrapolation)
+            volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(
+                self._contrast, extrapolation=extrapolation)
         except Exception as ex:
             calculation_failed = True
             msg += str(ex)
-            # Display relevant information
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
+            volume_fraction = "ERROR"
+            volume_fraction_error = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
 
+        # Surface Error calculations
         if self._porod:
             try:
                 surface, surface_error = self._calculator.get_surface_with_error(self._contrast, self._porod)
             except Exception as ex:
                 calculation_failed = True
                 msg += str(ex)
-                # Display relevant information
-                item = QtGui.QStandardItem("ERROR")
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE, item)
-                item = QtGui.QStandardItem("ERROR")
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
-        else:
-            surface = None
+                surface = "ERROR"
+                surface_error = "ERROR"
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
 
-        if (calculation_failed):
+        # Enable the status button
+        self.cmdStatus.setEnabled(True)
+        # Early exit if calculations failed
+        if calculation_failed:
             self.cmdStatus.setEnabled(False)
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
-        self.cmdStatus.setEnabled(True)
 
         if low_calculation_pass:
             extrapolated_data = self._calculator.get_extra_data_low(self._low_points)
@@ -384,7 +397,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot._yunit = temp_data._yunit
 
             if self._low_fit:
-                self.txtPowerLowQ.setText(str(power_low))
+                reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_LOWQ_POWER_VALUE, power_low)
 
         if high_calculation_pass:
             # for presentation in InvariantDetails
@@ -412,36 +425,34 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot._yunit = temp_data._yunit
 
             if self._high_fit:
-                self.txtPowerHighQ.setText(str(power_high))
+                reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_HIGHQ_POWER_VALUE, power_high)
 
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
-        if surface:
-            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
-            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
-                                   surface_error)
-
+        if qstar_high == "ERROR":
+            qstar_high = 0.0
+            qstar_high_err = 0.0
+        if qstar_low == "ERROR":
+            qstar_low = 0.0
+            qstar_low_err = 0.0
         qstar_total = qstar_data + qstar_low + qstar_high
         qstar_total_error = np.sqrt(
             qstar_data_err * qstar_data_err
             + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
-
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
+
         return self.model
 
     def updateModelFromThread(self, widget, value):
         """
         Update the model in the main thread
         """
-        item = QtGui.QStandardItem(str(float('%.3g' % value)))
+        try:
+            value = float('%.3g' % value)
+        except TypeError:
+            pass
+        item = QtGui.QStandardItem(str(value))
         self.model.setItem(widget, item)
+        self.mapper.toLast()
 
     def title(self):
         """ Perspective name """
@@ -604,11 +615,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Power line edit can be edited if Fix is selected
         """
         if self.sender().text() == 'Guinier':
-            self._low_guinier = toggle
+            itemt = QtGui.QStandardItem(str(toggle).lower())
+            self.model.setItem(WIDGETS.W_LOWQ_GUINIER, itemt)
             toggle = not toggle
             self.rbPowerLawLowQ.setChecked(toggle)
         else:
             self.rbGuinier.setChecked(not toggle)
+            itemt = QtGui.QStandardItem(str(not toggle).lower())
+            self.model.setItem(WIDGETS.W_LOWQ_GUINIER, itemt)
 
         self.rbFitLowQ.setVisible(toggle)
         self.rbFixLowQ.setVisible(toggle)
@@ -617,7 +631,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
     def lowFitAndFixToggle(self, toggle):
         """ Fit and Fix radiobuttons cannot be selected at the same time """
-        self._low_fit = toggle
+        itemt = QtGui.QStandardItem(str(toggle).lower())
+        self.model.setItem(WIDGETS.W_LOWQ_FIT, itemt)
         self.txtPowerLowQ.setEnabled(not toggle)
         self.updateFromModel()
 
@@ -626,6 +641,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Enable editing of power exponent if Fix for high Q is checked
         Disable otherwise
         """
+        itemt = QtGui.QStandardItem(str(toggle).lower())
+        self.model.setItem(WIDGETS.W_HIGHQ_FIT, itemt)
         self.txtPowerHighQ.setEnabled(not toggle)
         self.updateFromModel()
 
