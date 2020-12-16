@@ -1,15 +1,9 @@
 import copy
 import numpy
 import functools
-import logging
 
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-
-
-import matplotlib as mpl
-DEFAULT_CMAP = mpl.cm.jet
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -33,8 +27,12 @@ from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
 
+import matplotlib as mpl
+DEFAULT_CMAP = mpl.cm.jet
+
 # Minimum value of Z for which we will present data.
 MIN_Z = -32
+
 
 class Plotter2DWidget(PlotterBase):
     """
@@ -140,7 +138,6 @@ class Plotter2DWidget(PlotterBase):
                 zmax_temp = numpy.log10(self.zmax)
 
         return (zmin_temp, zmax_temp)
-
 
     def createContextMenu(self):
         """
@@ -351,7 +348,7 @@ class Plotter2DWidget(PlotterBase):
 
         # Show the plot
 
-    def setSlicer(self, slicer):
+    def setSlicer(self, slicer, reset=True):
         """
         Clear the previous slicer and create a new one.
         slicer: slicer class to create
@@ -370,7 +367,7 @@ class Plotter2DWidget(PlotterBase):
 
         # Reset the model on the Edit slicer parameters widget
         self.param_model = self.slicer.model()
-        if self.slicer_widget:
+        if self.slicer_widget and reset:
             self.slicer_widget.setModel(self.param_model)
 
     def onSectorView(self):
@@ -540,7 +537,7 @@ class Plotter2DWidget(PlotterBase):
                 self.ax.set_title(label=self._title)
 
             if cbax is None:
-                ax.set_frame_on(False)
+                self.ax.set_frame_on(False)
                 cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
             else:
                 cb = self.figure.colorbar(self.im, cax=cbax)

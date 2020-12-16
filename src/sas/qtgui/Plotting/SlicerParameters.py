@@ -36,7 +36,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         self.setupUi(self)
 
-        #assert isinstance(model, QtGui.QStandardItemModel)
         self.parent = parent
 
         self.model = model
@@ -108,18 +107,38 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
 
+    def getCurrentPlotDict(self):
+        """
+        Returns a dictionary of currently shown plots
+        {plot_name:checkbox_status}
+        """
+        current_plots = {}
+        if self.lstPlots.count() != 0:
+            for row in range(self.lstPlots.count()):
+                item = self.lstPlots.item(row)
+                isChecked = item.checkState() != QtCore.Qt.Unchecked
+                plot = item.text()
+                current_plots[plot] = isChecked
+        return current_plots
+
     def setPlotsList(self):
         """
         Create and initially populate the list of plots
         """
+        current_plots = self.getCurrentPlotDict()
         self.lstPlots.clear()
         # Fill out list of plots
         for item in self.active_plots.keys():
             if isinstance(self.active_plots[item].data[0], Data1D):
+                # don't include dependant 1D plots
                 continue
-            checked = QtCore.Qt.Unchecked
-            if self.parent.data[0].name == item:
-                checked = QtCore.Qt.Checked
+            if str(item) in current_plots.keys():
+                # redo the list
+                checked = current_plots[item]
+            else:
+                # create a new list
+                checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
+
             chkboxItem = QtWidgets.QListWidgetItem(str(item))
             chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             chkboxItem.setCheckState(checked)
@@ -150,6 +169,10 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # change the slicer type
         self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
 
+        # Updates to the slicer moder must propagate to all plotters
+        if self.model is not None:
+            self.model.itemChanged.connect(self.onApply)
+
         # selecting/deselecting items in lstPlots enables `Apply`
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
@@ -162,13 +185,14 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def onSlicerChanged(self, index):
         """ change the parameters based on the slicer chosen """
-        if index == 0: # No interactor
+        if index == 0:  # No interactor
             self.parent.onClearSlicer()
             self.setModel(None)
         else:
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
+            self.onApply()
 
     def onGeneratePlots(self, isChecked):
         """
@@ -213,34 +237,83 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         for row in range(self.lstPlots.count()):
             item = self.lstPlots.item(row)
-            isChecked = item.checkState() == QtCore.Qt.Checked
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
             # Only checked items
             if not isChecked:
                 continue
             plot = item.text()
-            # don't assign to itself
-            if plot == self.parent.data[0].name:
-                continue
-            # a plot might have been deleted
-            if plot not in self.active_plots:
-                continue
-            # get the plotter2D instance
-            plotter = self.active_plots[plot]
-            # Assign model to slicer
-            index = self.cbSlicer.currentIndex()
+            # Apply plotter to a plot
+            self.applyPlotter(plot)
+            # Save 1D plots if required
+            if self.isSave:
+                self.save1DPlotsForPlot(plot)
+        pass  # debug anchor
 
-            slicer = self.callbacks[index]
-            plotter.setSlicer(slicer=slicer)
-            # override slicer model
-            plotter.slicer._model = self.model
-            # force conversion model->parameters in slicer
-            plotter.slicer.setParamsFromModel()
-        pass
+    def applyPlotter(self, plot):
+        """
+        Apply the current slicer to a plot
+        """
+        # don't assign to itself
+        if plot == self.parent.data[0].name:
+            return
+        # a plot might have been deleted
+        if plot not in self.active_plots:
+            return
+        # get the plotter2D instance
+        plotter = self.active_plots[plot]
+        # Assign model to slicer
+        index = self.cbSlicer.currentIndex()
+
+        slicer = self.callbacks[index]
+        if slicer is None:
+            return
+        plotter.setSlicer(slicer=slicer, reset=False)
+        # override slicer model
+        plotter.slicer._model = self.model
+        # force conversion model->parameters in slicer
+        plotter.slicer.setParamsFromModel()
+
+    def save1DPlotsForPlot(self, plot):
+        """
+        Save currently shown 1D sliced data plots for a given 2D plot
+        """
+        items_for_fit = []
+        for item in self.active_plots.keys():
+            data = self.active_plots[item].data[0]
+            if not isinstance(data, Data1D):
+                continue
+            if plot not in data.name:
+                continue
+            filename = data.name if self.txtExtension.text() == ""\
+                else data.name + "_" + str(self.txtExtension.text())
+            # Saved as "TXT" file, as in original impl
+            filename_ext = filename + ".txt"
+            GuiUtils.onTXTSave(data, filename_ext)
+            new_item = GuiUtils.createModelItemWithPlot(data, name=filename)
+            self.parent.manager.updateModelFromPerspective(new_item)
+
+            items_for_fit.append(new_item)
+        # Send to fitting, if needed
+        # We can get away with directly querying the UI, since this is the only
+        # place we need that state.
+        fitting_requested = self.cbFitOptions.currentIndex()
+        self.sendToFit(items_for_fit, fitting_requested)
 
     def setModel(self, model):
         """ Model setter """
         self.model = model
         self.proxy.setSourceModel(self.model)
+        self.model.itemChanged.connect(self.onApply)
+
+    def sendToFit(self, items_for_fit, fitting_requested):
+        """
+        Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
+        """
+        if 3 < fitting_requested < 1:
+            return
+        isBatch = fitting_requested == 2
+        # icky way to go up the tree
+        self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
 
     def keyPressEvent(self, event):
         """

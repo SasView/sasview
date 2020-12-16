@@ -459,7 +459,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.is_batch_fitting:
             self.lblFilename.setVisible(False)
             for dataitem in self.all_data:
-                filename = GuiUtils.dataFromItem(dataitem).filename
+                filename = GuiUtils.dataFromItem(dataitem).name
                 self.cbFileNames.addItem(filename)
             self.cbFileNames.setVisible(True)
             self.chkChainFit.setEnabled(True)

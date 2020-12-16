@@ -1,3 +1,4 @@
+# pylint: disable=E501, E203, E701
 # global
 import sys
 import os
@@ -95,7 +96,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Connect the comboboxes
         self.cbSelect.activated.connect(self.selectData)
 
-        #self.closeEvent.connect(self.closeEvent)
         self.currentChanged.connect(self.onTabSwitch)
         self.communicator = self.parent.communicator()
         self.communicator.fileReadSignal.connect(self.loadFromURL)
@@ -158,7 +158,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         0: data tab
         1: theory tab
         """
-        assert(tab in [0,1])
+        assert(tab in [0, 1])
         self.setCurrentIndex(tab)
 
     def displayHelp(self):
@@ -423,7 +423,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         item = None
         for model in (self.model, self.theory_model):
             for i in range(model.rowCount()):
-                properties = {}
                 data = GuiUtils.dataFromItem(model.item(i))
                 if data is None: continue
                 if data.id != id: continue
@@ -478,7 +477,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             except Exception as ex:
                 # disregard malformed SVS and try to recover whatever
                 # is available
-                msg = "Error while reading the project file: "+str(ex)
+                msg = "Error while reading the project file: " + str(ex)
                 logging.error(msg)
                 pass
             # Convert fitpage properties and update the dict
@@ -486,7 +485,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 all_data = GuiUtils.convertFromSVS(datasets)
             except Exception as ex:
                 # disregard malformed SVS and try to recover regardless
-                msg = "Error while converting the project file: "+str(ex)
+                msg = "Error while converting the project file: " + str(ex)
                 logging.error(msg)
                 pass
         else:
@@ -554,7 +553,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         """
         if 'fit_data' in value:
-            data_dict = {key:value['fit_data']}
+            data_dict = {key: value['fit_data']}
             # Create new model items in the data explorer
             items = self.updateModelFromData(data_dict)
 
@@ -568,7 +567,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # if so, skip the update
                 if page['is_batch_fitting'][0] == 'True':
                     continue
-                tab_index=None
+                tab_index = None
                 if 'tab_index' in page:
                     tab_index = page['tab_index'][0]
                     tab_index = int(tab_index)
@@ -582,7 +581,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Modify the tab
             self._perspective().updateFromParameters(value)
 
-        pass # debugger
+        pass  # debugger
 
     def updateModelFromData(self, data):
         """
@@ -618,7 +617,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_item.setChild(2, QtGui.QStandardItem("FIT RESULTS"))
 
             model.appendRow(new_item)
-            self.manager.add_data(data_list={new_data.id:new_data})
+            self.manager.add_data(data_list={new_data.id: new_data})
 
             # Add the underlying data
             if not value[2]:
@@ -636,10 +635,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
-                                           'Warning',
-                                           delete_msg,
-                                           QtWidgets.QMessageBox.Yes,
-                                           QtWidgets.QMessageBox.No)
+                                               'Warning',
+                                               delete_msg,
+                                               QtWidgets.QMessageBox.Yes,
+                                               QtWidgets.QMessageBox.No)
 
         if reply == QtWidgets.QMessageBox.No:
             return
@@ -679,10 +678,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
-                                           'Warning',
-                                           delete_msg,
-                                           QtWidgets.QMessageBox.Yes,
-                                           QtWidgets.QMessageBox.No)
+                                               'Warning',
+                                               delete_msg,
+                                               QtWidgets.QMessageBox.Yes,
+                                               QtWidgets.QMessageBox.No)
 
         if reply == QtWidgets.QMessageBox.No:
             return
@@ -738,21 +737,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            retval = msgbox.exec_()
+            _ = msgbox.exec_()
             return
 
         # Notify the GuiManager about the send request
         try:
             self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
-            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(msg)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            retval = msgbox.exec_()
+            _ = msgbox.exec_()
 
     def sendItemToPerspective(self, item, tab_index=None):
         """
@@ -768,14 +767,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             else:
                 self._perspective().setData(data_item=selected_items, is_batch=False, tab_index=tab_index)
         except Exception as ex:
-            msg = "%s perspective returned the following message: \n%s\n" %(self._perspective().name, str(ex))
+            msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(msg)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            retval = msgbox.exec_()
+            _ = msgbox.exec_()
 
     def freezeCheckedData(self):
         """
@@ -794,19 +793,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Look for checked inner items
             inner_index = -1
             while inner_index < outer_item.rowCount():
-               inner_item = outer_item.child(inner_index)
-               inner_index += 1
-               if not inner_item:
-                   continue
-               if not inner_item.isCheckable():
-                   continue
-               if inner_item.checkState() != QtCore.Qt.Checked:
-                   continue
-               self.model.beginResetModel()
-               theories_copied += 1
-               new_item = self.cloneTheory(inner_item)
-               self.model.appendRow(new_item)
-               self.model.endResetModel()
+                inner_item = outer_item.child(inner_index)
+                inner_index += 1
+                if not inner_item:
+                    continue
+                if not inner_item.isCheckable():
+                    continue
+                if inner_item.checkState() != QtCore.Qt.Checked:
+                    continue
+                self.model.beginResetModel()
+                theories_copied += 1
+                new_item = self.cloneTheory(inner_item)
+                self.model.appendRow(new_item)
+                self.model.endResetModel()
 
         freeze_msg = ""
         if theories_copied == 0:
@@ -836,8 +835,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             outer_item = self.theory_model.item(outer_index)
             if not outer_item:
                 continue
-            if outer_item.isCheckable() and \
-                   outer_item.checkState() == QtCore.Qt.Checked:
+            if outer_item.isCheckable() and outer_item.checkState() == QtCore.Qt.Checked:
                 self.model.beginResetModel()
                 theories_copied += 1
                 new_item = self.cloneTheory(outer_item)
@@ -882,7 +880,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             new_item.child(0).data().symbol = 'Circle'
             new_item.child(0).data().id = new_name
         except AttributeError:
-            #no data here, pass
+            # no data here, pass
             pass
         return new_item
 
@@ -963,7 +961,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
         # Each fitpage contains the name based on fit widget number
-        fitpage_name = "" if id is None else "M"+str(id)
+        fitpage_name = "" if id is None else "M" + str(id)
         new_plots = []
         for item, plot in plots.items():
             if self.updatePlot(plot):
@@ -973,7 +971,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             match = GuiUtils.theory_plot_ID_pattern.match(plot.id)
             # 2nd match group contains the identifier for the intermediate
             # result, if present (e.g. "[P(Q)]")
-            if match and match.groups()[1] != None:
+            if match and match.groups()[1] is not None:
                 continue
             # Don't include plots from different fitpages,
             # but always include the original data
@@ -982,7 +980,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     or filename == plot.filename):
                 # Residuals get their own plot
                 if plot.plot_role == Data1D.ROLE_RESIDUAL:
-                    plot.yscale='linear'
+                    plot.yscale = 'linear'
                     self.plotData([(item, plot)])
                 else:
                     new_plots.append((item, plot))
@@ -1024,7 +1022,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Residuals get their own plot
         if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
-            plot_to_show.yscale='linear'
+            plot_to_show.yscale = 'linear'
             self.plotData([(plot_item, plot_to_show)])
         elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
             # No plot
@@ -1058,19 +1056,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
         self.active_plots[plot2D.data[0].name] = plot2D
-        #============================================
+        # ============================================
         # Experimental hook for silx charts
-        #============================================
-        ## Attach silx
-        #from silx.gui import qt
-        #from silx.gui.plot import StackView
-        #sv = StackView()
-        #sv.setColormap("jet", autoscale=True)
-        #sv.setStack(plot_set.data.reshape(1,100,100))
-        ##sv.setLabels(["x: -10 to 10 (200 samples)",
-        ##              "y: -10 to 5 (150 samples)"])
-        #sv.show()
-        #============================================
+        # ============================================
+        # # Attach silx
+        # from silx.gui import qt
+        # from silx.gui.plot import StackView
+        # sv = StackView()
+        # sv.setColormap("jet", autoscale=True)
+        # sv.setStack(plot_set.data.reshape(1,100,100))
+        # #sv.setLabels(["x: -10 to 10 (200 samples)",
+        # #              "y: -10 to 5 (150 samples)"])
+        # sv.show()
+        # ============================================
 
     def plotData(self, plots, transform=True):
         """
@@ -1080,7 +1078,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # All same-type charts in one plot
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
-                if not 'new_plot' in locals():
+                if 'new_plot' not in locals():
                     new_plot = Plotter(self)
                     new_plot.item = item
                 new_plot.plot(plot_set, transform=transform)
@@ -1095,7 +1093,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
             isinstance(new_plot.data[0], Data1D):
-                self.addPlot(new_plot)
+            self.addPlot(new_plot)
 
     def newPlot(self):
         """
@@ -1132,7 +1130,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.canvas.draw()
 
         # Update the plot widgets dict
-        self.plot_widgets[title]=plot_widget
+        self.plot_widgets[title] = plot_widget
 
         # Update the active chart list
         self.active_plots[new_plot.data[0].name] = new_plot
@@ -1150,7 +1148,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # old plot data
         plot_id = str(self.cbgraph.currentText())
         try:
-            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
+            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s" % (plot_id)
         except:
             return
 
@@ -1166,7 +1164,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Modify existing plot for immediate response and returns True.
         Returns false, if the plot does not exist already.
         """
-        try: # there might be a list or a single value being passed
+        try:  # there might be a list or a single value being passed
             data = data[0]
         except TypeError:
             pass
@@ -1280,7 +1278,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(sys.exc_info()[1])
+                logging.error(str(ex) + sys.exc_info()[1])
 
                 any_error = True
             if any_error or data_error or error_message != "":
@@ -1343,7 +1341,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert isinstance(checked, bool)
 
         types = (None, Data1D, Data2D)
-        if not dimension in types:
+        if dimension not in types:
             return
 
         for index in range(model.rowCount()):
@@ -1415,7 +1413,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDelete)
 
-
         # Define the callbacks
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
@@ -1468,11 +1465,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if isinstance(data, Data1D):
             text_to_show = GuiUtils.retrieveData1d(data)
             # Hardcoded sizes to enable full width rendering with default font
-            self.txt_widget.resize(420,600)
+            self.txt_widget.resize(420, 600)
         else:
             text_to_show = GuiUtils.retrieveData2d(data)
             # Hardcoded sizes to enable full width rendering with default font
-            self.txt_widget.resize(700,600)
+            self.txt_widget.resize(700, 600)
 
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
@@ -1514,11 +1511,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         method_name = 'Plotter'
         if isinstance(data, Data2D):
-            method_name='Plotter2D'
+            method_name = 'Plotter2D'
 
         self.new_plot = globals()[method_name](self, quickplot=True)
         self.new_plot.data = data
-        #new_plot.plot(marker='o')
         self.new_plot.plot(data=data)
 
         # Update the global plot counter
@@ -1559,7 +1555,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Information)
-        msg.setText("Error: cannot apply mask.\n"+
+        msg.setText("Error: cannot apply mask.\n" +
                     "Please select a 2D dataset.")
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
 
@@ -1578,7 +1574,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # If data is still not right, complain
                 msg.exec_()
                 return
-        except:
+        except Exception as ex:
+            logging.error(str(ex) + sys.exc_info()[1])
             msg.exec_()
             return
 
@@ -1616,7 +1613,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data.symbol = 'Circle'
             data.id = new_name
         except AttributeError:
-            #no data here, pass
+            # no data here, pass
             pass
         new_item = GuiUtils.createModelItemWithPlot(data, new_name)
 
@@ -1668,10 +1665,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                      "and all the dependents." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
-                                           'Warning',
-                                           delete_msg,
-                                           QtWidgets.QMessageBox.Yes,
-                                           QtWidgets.QMessageBox.No)
+                                               'Warning',
+                                               delete_msg,
+                                               QtWidgets.QMessageBox.Yes,
+                                               QtWidgets.QMessageBox.No)
 
         if reply == QtWidgets.QMessageBox.No:
             return
@@ -1772,13 +1769,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # try to delete the plot
                     try:
                         plotter.close()
-                        #self.parent.workspace().removeSubWindow(plotter)
                         self.plot_widgets[plot_name].close()
                         self.plot_widgets.pop(plot_name, None)
                     except AttributeError as ex:
                         logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
-        pass # debugger anchor
+        pass  # debugger anchor
 
     def onAnalysisUpdate(self, new_perspective=""):
         """
@@ -1795,9 +1791,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Post message to status bar and update the data manager
         """
         assert isinstance(output, tuple)
-
-        # Reset the model so the view gets updated.
-        #self.model.reset()
         self.communicator.progressBarUpdateSignal.emit(-1)
 
         output_data = output[0]
