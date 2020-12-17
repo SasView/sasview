@@ -17,7 +17,7 @@ The tests can be run with ``python GUITests.py``, or
 To get more verbose console output (recommended), use ``python GUITests.py -v``
 """
 
-# Llist of all suite names. Every time a new suite is added, its name should
+# List of all suite names. Every time a new suite is added, its name should
 # also be added here
 ALL_SUITES = [
     'calculatorsSuite',
@@ -25,8 +25,9 @@ ALL_SUITES = [
     'fittingSuite',
     'plottingSuite',
     'utilitiesSuite',
-    'perspectivesSuite',
+    'corfuncPerspectiveSuite',
     'invariantPerspectiveSuite',
+    'inversionPerspectiveSuite',
     ]
 
 # Prepare the general QApplication instance
