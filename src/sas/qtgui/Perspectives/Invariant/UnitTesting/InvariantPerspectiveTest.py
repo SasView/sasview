@@ -34,6 +34,9 @@ class InvariantPerspectiveTest(unittest.TestCase):
             def __init__(self):
                 self.model = QtGui.QStandardItemModel()
 
+            def plotData(self, data_to_plot):
+                pass
+
         class dummy_manager(object):
             def __init__(self):
                 self.filesWidget = MainWindow()
@@ -45,12 +48,13 @@ class InvariantPerspectiveTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = InvariantWindow(dummy_manager())
-        data = Data1D(x=[1, 2], y=[1, 2])
+        data = Data1D(x=[1, 2], y=[1, 2], dy=[0.01, 0.01])
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         self.fakeData = QtGui.QStandardItem("test")
 
     def tearDown(self):
         """Destroy the DataOperationUtility"""
+        self.widget.setClosable(True)
         self.widget.close()
         self.widget = None
 
@@ -58,43 +62,17 @@ class InvariantPerspectiveTest(unittest.TestCase):
         """Test the GUI in its default state"""
 
         self.assertIsInstance(self.widget, QtWidgets.QDialog)
-
-        self.assertEqual(self.widget.windowTitle(), "Invariant Perspective")
+        self.assertIsInstance(self.widget.model, QtGui.QStandardItemModel)
 
         # name for displaying in the DataExplorer combo box
         self.assertEqual(self.widget.name, "Invariant")
-
-        self.assertIsInstance(self.widget.model, QtGui.QStandardItemModel)
+        self.assertEqual(self.widget.windowTitle(), "Invariant Perspective")
+        self.assertEqual(self.widget.title(), self.widget.windowTitle())
 
         self.assertIsNone(self.widget._data)
         self.assertEqual(self.widget._path, '')
-        self.assertFalse(self.widget._allow_close)
 
-        # disabled pushbuttons
-        self.assertFalse(self.widget.cmdStatus.isEnabled())
-        self.assertFalse(self.widget.cmdCalculate.isEnabled())
-
-        # disabled, read only line edits
-        self.assertFalse(self.widget.txtName.isEnabled())
-        self.assertTrue(self.widget.txtVolFract.isReadOnly())
-        self.assertTrue(self.widget.txtVolFractErr.isReadOnly())
-
-        self.assertTrue(self.widget.txtSpecSurf.isReadOnly())
-        self.assertTrue(self.widget.txtSpecSurfErr.isReadOnly())
-
-        self.assertTrue(self.widget.txtInvariantTot.isReadOnly())
-        self.assertTrue(self.widget.txtInvariantTotErr.isReadOnly())
-
-        self.assertFalse(self.widget.txtBackgd.isReadOnly())
-        self.assertFalse(self.widget.txtScale.isReadOnly())
-        self.assertFalse(self.widget.txtContrast.isReadOnly())
-        self.assertFalse(self.widget.txtPorodCst.isReadOnly())
-
-        self.assertTrue(self.widget.txtExtrapolQMin.isEnabled())
-        self.assertTrue(self.widget.txtExtrapolQMax.isEnabled())
-
-        self.assertFalse(self.widget.txtNptsLowQ.isReadOnly())
-        self.assertFalse(self.widget.txtNptsHighQ.isReadOnly())
+        self.checkControlDefaults()
 
         # content of line edits
         self.assertEqual(self.widget.txtName.text(), '')
@@ -108,10 +86,6 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.txtPowerLowQ.text(), '4')
         self.assertEqual(self.widget.txtPowerHighQ.text(), '4')
 
-        # unchecked checkboxes
-        self.assertFalse(self.widget.chkLowQ.isChecked())
-        self.assertFalse(self.widget.chkHighQ.isChecked())
-
         # number of tabs
         self.assertEqual(self.widget.tabWidget.count(), 2)
         # default tab
@@ -121,24 +95,18 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.tabWidget.tabText(1), 'Options')
 
         # Tooltips
-        self.assertEqual(self.widget.cmdStatus.toolTip(), "Get more details of computation such as fraction from extrapolation" )
-
+        self.assertEqual(self.widget.cmdStatus.toolTip(),
+                         "Get more details of computation such as fraction from extrapolation" )
         self.assertEqual(self.widget.txtInvariantTot.toolTip(), "Total invariant [Q*], including extrapolated regions.")
-
         self.assertEqual(self.widget.txtExtrapolQMin.toolTip(), "The minimum extrapolated q value.")
-
-        self.assertEqual(self.widget.txtPowerHighQ.toolTip(),"Exponent to apply to the Power_law function.")
-
-        self.assertEqual(self.widget.txtNptsHighQ.toolTip(), "Number of Q points to consider\n while extrapolating the high-Q region")
-
+        self.assertEqual(self.widget.txtPowerHighQ.toolTip(), "Exponent to apply to the Power_law function.")
+        self.assertEqual(self.widget.txtNptsHighQ.toolTip(),
+                         "Number of Q points to consider\n while extrapolating the high-Q region")
         self.assertEqual(self.widget.chkHighQ.toolTip(), "Check to extrapolate data at high-Q")
-
-        self.assertEqual(self.widget.txtNptsLowQ.toolTip(), "Number of Q points to consider\nwhile extrapolating the low-Q region")
-
+        self.assertEqual(self.widget.txtNptsLowQ.toolTip(),
+                         "Number of Q points to consider\nwhile extrapolating the low-Q region")
         self.assertEqual(self.widget.chkLowQ.toolTip(), "Check to extrapolate data at low-Q")
-
         self.assertEqual(self.widget.cmdCalculate.toolTip(), "Compute invariant")
-
         self.assertEqual(self.widget.txtPowerLowQ.toolTip(), "Exponent to apply to the Power_law function." )
 
         # Validators
@@ -146,21 +114,40 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertIsInstance(self.widget.txtNptsHighQ.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.txtPowerLowQ.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtPowerHighQ.validator(), GuiUtils.DoubleValidator)
-
         self.assertIsInstance(self.widget.txtBackgd.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtContrast.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtScale.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtPorodCst.validator(), GuiUtils.DoubleValidator)
 
-        # Test autoexclusivity of radiobuttons
-        # Low Q
-        self.assertFalse(self.widget.rbGuinier.autoExclusive())
-        self.assertFalse(self.widget.rbPowerLawLowQ.autoExclusive())
-        self.assertTrue(self.widget.rbFixLowQ.autoExclusive())
-        self.assertTrue(self.widget.rbFitLowQ.autoExclusive())
-        # High Q
-        self.assertTrue(self.widget.rbFixHighQ.autoExclusive())
-        self.assertTrue(self.widget.rbFitHighQ.autoExclusive())
+    def checkControlDefaults(self):
+        # All values in this list should assert to False
+        false_list = [
+            self.widget._allow_close, self.widget.allowBatch(),
+            # disabled buttons
+            self.widget.cmdStatus.isEnabled(), self.widget.cmdCalculate.isEnabled(),
+            # read only text boxes
+            self.widget.txtBackgd.isReadOnly(), self.widget.txtScale.isReadOnly(), self.widget.txtContrast.isReadOnly(),
+            self.widget.txtPorodCst.isReadOnly(), self.widget.txtNptsLowQ.isReadOnly(),
+            self.widget.txtNptsHighQ.isReadOnly(), self.widget.txtName.isEnabled(),
+            # unchecked check boxes
+            self.widget.chkLowQ.isChecked(), self.widget.chkHighQ.isChecked(),
+            # radio buttons exclusivity
+            self.widget.rbGuinier.autoExclusive(), self.widget.rbPowerLawLowQ.autoExclusive()
+            ]
+        # All values in this list should assert to True
+        true_list = [
+            # Enable buttons
+            self.widget.txtExtrapolQMax.isEnabled(), self.widget.txtExtrapolQMin.isEnabled(),
+            # enabled text boxes
+            self.widget.txtVolFract.isReadOnly(), self.widget.txtVolFractErr.isReadOnly(),
+            self.widget.txtSpecSurf.isReadOnly(), self.widget.txtSpecSurfErr.isReadOnly(),
+            self.widget.txtInvariantTot.isReadOnly(), self.widget.txtInvariantTotErr.isReadOnly(),
+            # radio buttons exclusivity
+            self.widget.rbFixLowQ.autoExclusive(), self.widget.rbFitLowQ.autoExclusive(),
+            self.widget.rbFixHighQ.autoExclusive(), self.widget.rbFitHighQ.autoExclusive()
+            ]
+        self.assertTrue(all(v is False for v in false_list))
+        self.assertTrue(all(v is True for v in true_list))
 
     def testOnCalculate(self):
         """ Test onCompute function """
@@ -182,6 +169,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
     # TODO
     def testPlotResult(self):
         """ """
+        # TODO: Enable these tests
         pass
         # create fake input
         # data = Data1D(x=[1, 2], y=[3, 4])
@@ -205,32 +193,21 @@ class InvariantPerspectiveTest(unittest.TestCase):
     def notestHelp(self):
         """ Assure help file is shown """
         # this should not rise
+        # TODO: What is this...
         self.widget.onHelp()
-
-    def testAllowBatch(self):
-        """ """
-        self.assertFalse(self.widget.allowBatch())
-
-    def testTitle(self):
-        """
-        Test Perspective name
-        """
-        self.assertEqual(self.widget.title(), "Invariant panel")
 
     def testOnStatus(self):
         """
         Test Display of Invariant Details
         """
+        # TODO: This isn't testing anything...
         # enable click on Calculate button
         self.widget.cmdStatus.setEnabled(True)
-
         invariant_details_dialog = create_autospec(DetailsDialog)
-
         self.widget.detailsDialog = invariant_details_dialog
 
         # click on button
         QTest.mouseClick(self.widget.cmdStatus, Qt.LeftButton)
-
         invariant_details_dialog.showDialog.assert_called_once_with()
 
     def testUpdateFromModel(self):
@@ -238,35 +215,27 @@ class InvariantPerspectiveTest(unittest.TestCase):
         update the globals based on the data in the model
         """
         self.widget.updateFromModel()
-        self.assertEqual(self.widget._background,
-                         float(self.widget.model.item(WIDGETS.W_BACKGROUND).text()))
-        self.assertEqual(self.widget._contrast,
-                         float(self.widget.model.item(WIDGETS.W_CONTRAST).text()))
+        self.assertEqual(self.widget._background, float(self.widget.model.item(WIDGETS.W_BACKGROUND).text()))
+        self.assertEqual(self.widget._contrast, float(self.widget.model.item(WIDGETS.W_CONTRAST).text()))
         self.assertEqual(self.widget._scale, float(self.widget.model.item(WIDGETS.W_SCALE).text()))
         self.assertEqual(self.widget._low_extrapolate,
                          str(self.widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == 'true')
-        self.assertEqual(self.widget._low_points,
-                         float(self.widget.model.item(WIDGETS.W_NPTS_LOWQ).text()))
-
+        self.assertEqual(self.widget._low_points, float(self.widget.model.item(WIDGETS.W_NPTS_LOWQ).text()))
         self.assertEqual(self.widget._low_guinier, str(self.widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()) == 'true' )
-
         self.assertEqual(self.widget._low_fit,str(self.widget.model.item(WIDGETS.W_LOWQ_FIT).text()) == 'true')
         self.assertEqual(self.widget._low_power_value, float(self.widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text()))
-
-        self.assertEqual(self.widget._high_extrapolate,str(self.widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == 'true')
-        self.assertEqual(self.widget._high_points,
-                         float(self.widget.model.item(WIDGETS.W_NPTS_HIGHQ).text()))
-        self.assertEqual(self.widget._high_fit,str(self.widget.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true')
-
-        self.assertEqual(self.widget._high_power_value, float(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()))
+        self.assertEqual(self.widget._high_extrapolate,
+                         str(self.widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == 'true')
+        self.assertEqual(self.widget._high_points, float(self.widget.model.item(WIDGETS.W_NPTS_HIGHQ).text()))
+        self.assertEqual(self.widget._high_fit, str(self.widget.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true')
+        self.assertEqual(self.widget._high_power_value,
+                         float(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()))
 
     def testEnabling(self):
         """ """
-
+        # TODO: This is a useless test - do something meaningful
         self.widget.cmdStatus.setEnabled(False)
-
         self.widget.enabling()
-
         self.assertTrue(self.widget.cmdStatus.isEnabled())
 
     def testCheckLength(self):
@@ -277,20 +246,18 @@ class InvariantPerspectiveTest(unittest.TestCase):
         logging.warning = MagicMock()
         self.widget.txtNptsLowQ.setEnabled(True)
 
-        self.widget._data = Data1D(x=[1, 2], y=[1, 2])
+        self.widget.setData([self.fakeData])
         self.widget.txtNptsLowQ.setText('9')
 
-        # QTest.keyClicks(self.widget.txtNptsLowQ, '9')
-        # QTest.keyClick(self.widget.txtNptsLowQ, QtCore.Qt.Key_Return)
-
         BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
-        # print 'style ',self.widget.txtNptsLowQ.styleSheet()
         self.assertIn(BG_COLOR_ERR, self.widget.txtNptsLowQ.styleSheet())
         self.assertTrue(logging.warning.called_once_with())
         self.assertFalse(self.widget.cmdCalculate.isEnabled())
 
     def testModelChanged(self):
         """ """
+
+        # FIXME: WHAT?!?!? No, no, no...
         self.widget.lowQToggle = MagicMock()
         status_ini = self.widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()
         if status_ini == 'true':
@@ -309,11 +276,14 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testUpdateFromGui(self):
         """ """
+        # TODO: Test changes to *more* editable text boxes
+        # TODO: Try to edit disabled/uneditable text boxes
         self.widget.txtBackgd.setText('0.22')
         self.assertEqual(str(self.widget.model.item(WIDGETS.W_BACKGROUND).text()), '0.22')
 
     def testLowGuinierAndPowerToggle(self):
         """ """
+        # TODO: Verify this is checking value states - before and after calculation
         # enable all tested radiobuttons
         self.widget.rbGuinier.setEnabled(True)
         self.widget.rbPowerLawLowQ.setEnabled(True)
@@ -337,6 +307,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testLowFitAndFixToggle(self):
         """ """
+        # TODO: Verify this is checking value states - before and after calculation
         status = True
         # run function to test
         self.widget.lowFitAndFixToggle(status)
@@ -344,12 +315,15 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertNotEqual(self.widget.txtPowerLowQ.isEnabled(), status)
 
     def testHiFitAndFixToggle(self):
+        # TODO: Verify this is checking value states - before and after calculation
         status = True
         self.widget.hiFitAndFixToggle(status)
         self.assertEqual(self.widget.txtPowerHighQ.isEnabled(), not status)
 
     def testHighQToggle(self):
         """ Test enabling / disabling for check box High Q extrapolation """
+
+        # TODO: Verify this is checking value states - before and after calculation
         status_chkHighQ = self.widget.chkHighQ.isChecked()
         self.widget.highQToggle(status_chkHighQ)
 
@@ -360,15 +334,15 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
         # change checked status of chkHighQ
         self.widget.chkHighQ.setChecked(True)
-        status_chkHighQ = self.widget.chkHighQ.isChecked()
-        self.assertEqual(self.widget.rbFitHighQ.isEnabled(), status_chkHighQ)
-        self.assertEqual(self.widget.rbFixHighQ.isEnabled(), status_chkHighQ)
-        self.assertEqual(self.widget.txtNptsHighQ.isEnabled(), status_chkHighQ)
-        self.assertEqual(self.widget.txtPowerHighQ.isEnabled(),
-                         status_chkHighQ)
+        self.assertTrue(self.widget.rbFitHighQ.isEnabled())
+        self.assertTrue(self.widget.rbFixHighQ.isEnabled())
+        self.assertTrue(self.widget.txtNptsHighQ.isEnabled())
+        self.assertFalse(self.widget.txtPowerHighQ.isEnabled())
 
     def testLowQToggle(self):
         """ Test enabling / disabling for check box Low Q extrapolation """
+
+        # TODO: Verify this is checking value states - before and after calculation
         status_chkLowQ = self.widget.chkLowQ.isChecked()
 
         self.assertEqual(self.widget.rbGuinier.isEnabled(), status_chkLowQ)
@@ -385,58 +359,25 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testSetupModel(self):
         """ Test default settings of model"""
-        self.assertEqual(self.widget.model.item(WIDGETS.W_NAME).text(),
-                         self.widget._path)
 
+        self.assertEqual(self.widget.model.item(WIDGETS.W_NAME).text(), self.widget._path)
         self.assertEqual(self.widget.model.item(WIDGETS.W_QMIN).text(), '0.0')
-
         self.assertEqual(self.widget.model.item(WIDGETS.W_QMAX).text(), '0.0')
+        self.assertEqual(self.widget.model.item(WIDGETS.W_BACKGROUND).text(), str(self.widget._background))
+        self.assertEqual(self.widget.model.item(WIDGETS.W_CONTRAST).text(), str(self.widget._contrast))
+        self.assertEqual(self.widget.model.item(WIDGETS.W_SCALE).text(), str(self.widget._scale))
+        self.assertIn(str(self.widget.model.item(WIDGETS.W_POROD_CST).text()), ['', str(self.widget._porod)])
 
-        self.assertEqual(self.widget.model.item(WIDGETS.W_BACKGROUND).text(),
-                         str(self.widget._background))
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()).lower(), 'false')
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()).lower(), 'false')
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()).lower(), 'true')
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_LOWQ_FIT).text()).lower(), 'true')
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_HIGHQ_FIT).text()).lower(), 'true')
 
-        self.assertEqual(self.widget.model.item(WIDGETS.W_CONTRAST).text(),
-                         str(self.widget._contrast))
-
-        self.assertEqual(self.widget.model.item(WIDGETS.W_SCALE).text(),
-                         str(self.widget._scale))
-
-        self.assertIn(str(self.widget.model.item(WIDGETS.W_POROD_CST).text()),
-                      ['', str(self.widget._porod)])
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()).lower(),
-            'false')
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()).lower(),
-            'false')
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_NPTS_LOWQ).text()),
-            str(10))
-
-        self.assertEqual(self.widget.model.item(WIDGETS.W_NPTS_HIGHQ).text(),
-                         str(10))
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()).lower(),
-            'true')
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_LOWQ_FIT).text()).lower(),
-            'true')
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text()), '4')
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_HIGHQ_FIT).text()).lower(),
-            'true')
-
-        self.assertEqual(
-            str(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()),
-            '4')
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_NPTS_LOWQ).text()), str(10))
+        self.assertEqual(self.widget.model.item(WIDGETS.W_NPTS_HIGHQ).text(), str(10))
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text()), '4')
+        self.assertEqual(str(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()), '4')
 
     # TODO
     def testSetupMapper(self):
@@ -449,10 +390,8 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testSetData(self):
         """ """
-        self.widget.updateGuiFromFile = MagicMock()
         self.widget.setData([self.fakeData])
-
-        self.assertTrue(self.widget.updateGuiFromFile.called_once())
+        self.checkFakeDataState()
 
     def TestCheckQExtrapolatedData(self):
         """
@@ -460,6 +399,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
         DataExplorer with low or high-Q extrapolation checkbox in invariant
         panel
         """
+        # TODO: This isn't testing anything real. At all.
         # Low-Q check box ticked
         self.widget.chkLowQ.setCheckStatus(QtCore.Qt.Checked)
         GuiUtils.updateModelItemStatus = MagicMock()
@@ -493,17 +433,19 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.checkFakeDataState()
         pageState = self.widget.getPage()
         self.widget.updateFromParameters(pageState)
+        self.checkFakeDataState()
         self.widget.removeData([self.fakeData])
-        self.testDefaults()
+        self.checkControlDefaults()
 
     def testRemoveData(self):
         self.widget.setData([self.fakeData])
         self.checkFakeDataState()
         # Removing something not already in the perspective should do nothing
         self.widget.removeData([])
+        self.checkFakeDataState()
         # Be sure the defaults hold true after data removal
         self.widget.removeData([self.fakeData])
-        self.testDefaults()
+        self.checkControlDefaults()
 
     def checkFakeDataState(self):
         """ Ensure the state is constant every time the fake data set loaded """
