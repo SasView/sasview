@@ -26,6 +26,7 @@ ALL_SUITES = [
     'plottingSuite',
     'utilitiesSuite',
     'perspectivesSuite',
+    'invariantPerspectiveSuite',
     ]
 
 # Prepare the general QApplication instance
@@ -93,6 +94,7 @@ from Perspectives.Fitting.UnitTesting import ConstraintWidgetTest
 
 #  Invariant
 from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
+from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
 
 #  Inversion
 from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
@@ -184,10 +186,33 @@ def perspectivesSuite():
     suites = (
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,  'test'),
         #  Inversion
         unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
         #  Corfunc
         unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def invariantPerspectiveSuite():
+    suites = (
+        #  Invariant only
+        unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,  'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def corfuncPerspectiveSuite():
+    suites = (
+        #  Corfunc only
+        unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def inversionPerspectiveSuite():
+    suites = (
+        #  Inversion only
+        unittest.makeSuite(InversionPerspectiveTest.InversionTest, 'test'),
         )
     return unittest.TestSuite(suites)
 
