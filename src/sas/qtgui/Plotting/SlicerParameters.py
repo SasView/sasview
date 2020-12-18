@@ -235,6 +235,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Apply current slicer to selected plots
         """
+        plots = []
         for row in range(self.lstPlots.count()):
             item = self.lstPlots.item(row)
             isChecked = item.checkState() != QtCore.Qt.Unchecked
@@ -245,8 +246,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             # Apply plotter to a plot
             self.applyPlotter(plot)
             # Save 1D plots if required
-            if self.isSave:
-                self.save1DPlotsForPlot(plot)
+            plots.append(plot)
+        if self.isSave:
+            self.save1DPlotsForPlot(plots)
         pass  # debug anchor
 
     def applyPlotter(self, plot):
@@ -273,26 +275,27 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # force conversion model->parameters in slicer
         plotter.slicer.setParamsFromModel()
 
-    def save1DPlotsForPlot(self, plot):
+    def save1DPlotsForPlot(self, plots):
         """
         Save currently shown 1D sliced data plots for a given 2D plot
         """
         items_for_fit = []
-        for item in self.active_plots.keys():
-            data = self.active_plots[item].data[0]
-            if not isinstance(data, Data1D):
-                continue
-            if plot not in data.name:
-                continue
-            filename = data.name if self.txtExtension.text() == ""\
-                else data.name + "_" + str(self.txtExtension.text())
-            # Saved as "TXT" file, as in original impl
-            filename_ext = filename + ".txt"
-            GuiUtils.onTXTSave(data, filename_ext)
-            new_item = GuiUtils.createModelItemWithPlot(data, name=filename)
-            self.parent.manager.updateModelFromPerspective(new_item)
+        for plot in plots:
+            for item in self.active_plots.keys():
+                data = self.active_plots[item].data[0]
+                if not isinstance(data, Data1D):
+                    continue
+                if plot not in data.name:
+                    continue
+                filename = data.name if self.txtExtension.text() == ""\
+                    else data.name + "_" + str(self.txtExtension.text())
+                # Saved as "TXT" file, as in original impl
+                filename_ext = filename + ".txt"
+                GuiUtils.onTXTSave(data, filename_ext)
+                new_item = GuiUtils.createModelItemWithPlot(data, name=filename)
+                self.parent.manager.updateModelFromPerspective(new_item)
 
-            items_for_fit.append(new_item)
+                items_for_fit.append(new_item)
         # Send to fitting, if needed
         # We can get away with directly querying the UI, since this is the only
         # place we need that state.
