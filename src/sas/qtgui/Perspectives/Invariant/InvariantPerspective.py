@@ -304,7 +304,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 range="low", npts=int(self._low_points),
                 function=function_low, power=self._low_power_value)
             try:
-                qstar_low, qstar_low_err = self._calculator.get_qstar_low()
+                qmin_ext = float(self.txtExtrapolQMin.text())
+                qmin = None if qmin_ext < self._data.x[0] else qmin_ext
+                qstar_low, qstar_low_err = self._calculator.get_qstar_low(qmin)
                 low_calculation_pass = True
             except Exception as ex:
                 logging.warning('Low-q calculation failed: {}'.format(str(ex)))
@@ -331,7 +333,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 range="high", npts=int(self._high_points),
                 function=function_high, power=self._high_power_value)
             try:
-                qstar_high, qstar_high_err = self._calculator.get_qstar_high()
+                qmax_ext = float(self.txtExtrapolQMax.text())
+                qmax = None if qmax_ext > self._data.x[int(len(self._data.x) - 1)] else qmax_ext
+                qstar_high, qstar_high_err = self._calculator.get_qstar_high(qmax)
                 high_calculation_pass = True
             except Exception as ex:
                 logging.warning('High-q calculation failed: {}'.format(str(ex)))
@@ -421,7 +425,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             # for presentation in InvariantDetails
             qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
             qmax_input = float(self.txtExtrapolQMax.text())
-
             qmax_plot = qmax_input if qmax_plot > qmax_input else qmax_plot
 
             power_high = self._calculator.get_extrapolation_power(range='high')
@@ -540,6 +543,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.txtExtrapolQMax.textChanged.connect(self.checkQRange)
 
+        self.txtNptsLowQ.textChanged.connect(self.checkQRange)
+
+        self.txtNptsHighQ.textChanged.connect(self.checkQRange)
+
     def stateChanged(self):
         """
         Catch modifications from low- and high-Q extrapolation check boxes
@@ -603,17 +610,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     def checkQRange(self):
         """
         Validate the Q range for the upper and lower bounds
+
+        Valid: q_low_max < q_high_min, q_low_min < q_low_max, q_high_min > q_low_max, q_high_max > q_high_min
         """
-        q_high_min = -1 * np.inf if not self._data else self._data.x[len(self._data.x) - 1]
-        q_high_max = np.inf if not self._data and not self.txtExtrapolQMax.text() else float(
-            self.txtExtrapolQMax.text())
-        q_low_min = -1 * np.inf if not self._data and not self.txtExtrapolQMin.text() else float(
-            self.txtExtrapolQMin.text())
-        q_low_max = np.inf if not self._data else self._data.x[0]
-        calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and self.txtExtrapolQMax.text()
-                     and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text() and self.txtNptsHighQ.text())
-        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max else BG_WHITE)
-        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max else BG_WHITE)
+        q_high_min = -1 * np.inf if not self._data or not self.txtNptsHighQ.text() else self._data.x[
+            int(len(self._data.x) - float(self.txtNptsHighQ.text()) - 1)]
+        q_high_max = np.inf if not self.txtExtrapolQMax.text() else float(self.txtExtrapolQMax.text())
+        q_low_min = -1 * np.inf if not self.txtExtrapolQMin.text() else float(self.txtExtrapolQMin.text())
+        q_low_max = np.inf if not self._data or not self.txtNptsLowQ.text() else self._data.x[
+            int(self.txtNptsLowQ.text())]
+        calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
+                     and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
+                     and self.txtNptsHighQ.text())
+        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_WHITE)
+        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_WHITE)
         if calculate:
             self.allow_calculation()
         else:
@@ -897,6 +907,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._calculator = invariant.InvariantCalculator(
             data=self._data, background=self._background, scale=self._scale)
 
+        # Ensure extrapolated Q range is valid on data load
         self.checkQRange()
 
         # Calculate and add to GUI: volume fraction, invariant total,

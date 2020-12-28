@@ -628,7 +628,7 @@ class InvariantCalculator(object):
             return self._low_extrapolation_power_fitted
         return self._high_extrapolation_power_fitted
 
-    def get_qstar_low(self):
+    def get_qstar_low(self, qmin=None):
         """
         Compute the invariant for extrapolated data at low q range.
 
@@ -640,8 +640,10 @@ class InvariantCalculator(object):
         :return q_star: the invariant for data extrapolated at low q.
         """
         # Data boundaries for fitting
-        qmin = self._data.x[0]
         qmax = self._data.x[int(self._low_extrapolation_npts - 1)]
+        # Allow minimum q to be passed as an argument
+        if not qmin or qmin < self._data.x[0] or qmin >= qmax:
+            qmin = self._data.x[0]
 
         # Extrapolate the low-Q data
         p, _ = self._fit(model=self._low_extrapolation_function,
@@ -668,7 +670,7 @@ class InvariantCalculator(object):
                                   (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data) + err
 
-    def get_qstar_high(self):
+    def get_qstar_high(self, qmax=None):
         """
         Compute the invariant for extrapolated data at high q range.
 
@@ -680,9 +682,10 @@ class InvariantCalculator(object):
         :return q_star: the invariant for data extrapolated at high q.
         """
         # Data boundaries for fitting
-        x_len = len(self._data.x) - 1
+        x_len = int(len(self._data.x) - 1)
         qmin = self._data.x[int(x_len - (self._high_extrapolation_npts - 1))]
-        qmax = self._data.x[int(x_len)]
+        if not qmax or qmax > self._data.x[x_len] or qmax <= qmin:
+            qmax = self._data.x[x_len]
 
         # fit the data with a model to get the appropriate parameters
         p, _ = self._fit(model=self._high_extrapolation_function,
