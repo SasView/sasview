@@ -108,9 +108,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtPowerLowQ.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
         self.txtPowerHighQ.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
-        self.txtExtrapolQMin.setText(str(Q_MINIMUM))
-        self.txtExtrapolQMax.setText(str(Q_MAXIMUM))
-
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
 
@@ -128,6 +125,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.cmdCalculate.setEnabled(False)
 
         # validator: double
+        self.txtExtrapolQMin.setValidator(GuiUtils.DoubleValidator())
+        self.txtExtrapolQMax.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
         self.txtContrast.setValidator(GuiUtils.DoubleValidator())
         self.txtScale.setValidator(GuiUtils.DoubleValidator())
@@ -394,7 +393,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             return self.model
 
         if low_calculation_pass:
-            extrapolated_data = self._calculator.get_extra_data_low(self._low_points)
+            extrapolated_data = self._calculator.get_extra_data_low(
+                self._low_points, q_start=float(self.txtExtrapolQMin.text()))
             power_low = self._calculator.get_extrapolation_power(range='low')
 
             # Plot the chart
@@ -420,9 +420,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         if high_calculation_pass:
             # for presentation in InvariantDetails
             qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
+            qmax_input = float(self.txtExtrapolQMax.text())
 
-            if qmax_plot > Q_MAXIMUM:
-                qmax_plot = Q_MAXIMUM
+            qmax_plot = qmax_input if qmax_plot > qmax_input else qmax_plot
+
             power_high = self._calculator.get_extrapolation_power(range='high')
             high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
 
@@ -535,6 +536,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.txtNptsHighQ.textChanged.connect(self.checkLength)
 
+        self.txtExtrapolQMin.textChanged.connect(self.checkQRange)
+
+        self.txtExtrapolQMax.textChanged.connect(self.checkQRange)
+
     def stateChanged(self):
         """
         Catch modifications from low- and high-Q extrapolation check boxes
@@ -594,6 +599,25 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         GuiUtils.updateModelItemStatus(self._manager.filesWidget.model,
                                        self._path, name,
                                        self.sender().checkState())
+
+    def checkQRange(self):
+        """
+        Validate the Q range for the upper and lower bounds
+        """
+        q_high_min = -1 * np.inf if not self._data else self._data.x[len(self._data.x) - 1]
+        q_high_max = np.inf if not self._data and not self.txtExtrapolQMax.text() else float(
+            self.txtExtrapolQMax.text())
+        q_low_min = -1 * np.inf if not self._data and not self.txtExtrapolQMin.text() else float(
+            self.txtExtrapolQMin.text())
+        q_low_max = np.inf if not self._data else self._data.x[0]
+        calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and self.txtExtrapolQMax.text()
+                     and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text() and self.txtNptsHighQ.text())
+        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max else BG_WHITE)
+        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max else BG_WHITE)
+        if calculate:
+            self.allow_calculation()
+        else:
+            self.cmdCalculate.setEnabled(False)
 
     def updateFromGui(self):
         """ Update model when new user inputs """
@@ -700,6 +724,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         item = QtGui.QStandardItem(str(qmax))
         self.model.setItem(WIDGETS.W_QMAX, item)
 
+        # add extrapolated Q parameters to the model
+        item = QtGui.QStandardItem(str(Q_MINIMUM))
+        self.model.setItem(WIDGETS.W_EX_QMIN, item)
+        item = QtGui.QStandardItem(str(Q_MAXIMUM))
+        self.model.setItem(WIDGETS.W_EX_QMAX, item)
+
         # add custom input params
         item = QtGui.QStandardItem(str(self._background))
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
@@ -750,6 +780,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Qmin/Qmax
         self.mapper.addMapping(self.txtTotalQMin, WIDGETS.W_QMIN)
         self.mapper.addMapping(self.txtTotalQMax, WIDGETS.W_QMAX)
+        # Extrapolated Qmin/Qmax
+        self.mapper.addMapping(self.txtExtrapolQMin, WIDGETS.W_EX_QMIN)
+        self.mapper.addMapping(self.txtExtrapolQMax, WIDGETS.W_EX_QMAX)
 
         # Background
         self.mapper.addMapping(self.txtBackgd, WIDGETS.W_BACKGROUND)
@@ -864,9 +897,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._calculator = invariant.InvariantCalculator(
             data=self._data, background=self._background, scale=self._scale)
 
+        self.checkQRange()
+
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
-        self.calculateInvariant()
+        if self.cmdCalculate.isEnabled():
+            self.calculateInvariant()
 
     def serializeAll(self):
         """
