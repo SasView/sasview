@@ -217,15 +217,12 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.widget.txtExtrapolQMin.setText('0.8')
         self.widget.txtExtrapolQMax.setText('0.2')
         self.widget.setData([self.fakeData])
-        self.widget.checkQRange()
         self.assertFalse(self.widget.cmdCalculate.isEnabled())
         # Set Qmin to a valid value, but leave Qmax invalid - should not be able to calculate
         self.widget.txtExtrapolQMin.setText('0.001')
-        self.widget.checkQRange()
         self.assertFalse(self.widget.cmdCalculate.isEnabled())
         # Set Qmax to a valid value - calculation should now be possible
         self.widget.txtExtrapolQMax.setText('100.0')
-        self.widget.checkQRange()
         self.assertTrue(self.widget.cmdCalculate.isEnabled())
 
     def testUpdateFromGui(self):
