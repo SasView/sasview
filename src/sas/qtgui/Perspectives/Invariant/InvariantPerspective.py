@@ -360,7 +360,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             msg += str(ex)
             calculation_failed = True
             qstar_data = "ERROR"
-            qstar_data_err  = "ERROR"
+            qstar_data_err = "ERROR"
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
 
@@ -613,12 +613,41 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         Valid: q_low_max < q_high_min, q_low_min < q_low_max, q_high_min > q_low_max, q_high_max > q_high_min
         """
-        q_high_min = -1 * np.inf if not self._data or not self.txtNptsHighQ.text() else self._data.x[
-            int(len(self._data.x) - float(self.txtNptsHighQ.text()) - 1)]
-        q_high_max = np.inf if not self.txtExtrapolQMax.text() else float(self.txtExtrapolQMax.text())
-        q_low_min = -1 * np.inf if not self.txtExtrapolQMin.text() else float(self.txtExtrapolQMin.text())
-        q_low_max = np.inf if not self._data or not self.txtNptsLowQ.text() else self._data.x[
-            int(self.txtNptsLowQ.text())]
+        q_high_min = q_low_min = np.inf
+        q_high_max = q_low_max = -1 * np.inf
+        try:
+            # Set high extrapolation lower bound to infinity if no data, or if number points undefined
+            q_high_min = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text())]
+        except (ValueError, AttributeError, IndexError):
+            # No data, number of points too large/small, or unable to convert number of points to int
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+        try:
+            # Set high extrapolation upper bound to negative infinity if Q max input empty
+            q_high_max = float(self.txtExtrapolQMax.text())
+        except ValueError:
+            # Couldn't convert Q min for extrapolation to a float
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+        try:
+            # Set low extrapolation lower bound to infinity if Q min input empty
+            q_low_min = float(self.txtExtrapolQMin.text())
+        except ValueError:
+            # Couldn't convert Q min for extrapolation to a float
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+        try:
+            # Set high extrapolation lower bound to infinity if no data, or if number points undefined
+            q_low_max = self._data.x[int(self.txtNptsLowQ.text())]
+        except (ValueError, AttributeError, IndexError):
+            # No data, number of points too large/small, or unable to convert number of points to int
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+
         calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
                      and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
                      and self.txtNptsHighQ.text())
@@ -907,7 +936,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._calculator = invariant.InvariantCalculator(
             data=self._data, background=self._background, scale=self._scale)
 
-        # Ensure extrapolated Q range is valid on data load
+        # Ensure extrapolated number of points and Q range are valid on data load
+        self.txtNptsLowQ.setText(self.txtNptsLowQ.text())
+        self.txtNptsHighQ.setText(self.txtNptsHighQ.text())
         self.checkQRange()
 
         # Calculate and add to GUI: volume fraction, invariant total,
