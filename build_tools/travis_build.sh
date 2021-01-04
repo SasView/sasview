@@ -1,5 +1,4 @@
 # Simplified build for Travis CI
-# No documentation is built
 export PATH=$PATH:/usr/local/bin/
 
 PYTHON=${PYTHON:-`which python`}
@@ -40,10 +39,30 @@ $PYTHON setup.py clean
 # $PYTHON setup.py build docs bdist_egg
 $PYTHON setup.py bdist_egg
 
+# BUILD DOCS
+NUM=4
+mkdir -p ~/.sasmodels/compiled_models
+make PYTHON=$PYTHON -j $NUM -C $WORKSPACE/bumps/doc html
+make PYTHON=$PYTHON -j $NUM -C $WORKSPACE/sasmodels/doc html
+cd $WORKSPACE/sasview/docs/sphinx-docs/
+$PYTHON build_sphinx.py
+
 # INSTALL SASVIEW
 cd $WORKSPACE/sasview/dist
 $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
 
+for egg in $WORKSPACE/sasview/utils/*egg $WORKSPACE/sasview/sasview-install/*egg; do
+  PYTHONPATH=$egg:$PYTHONPATH
+done
+
 # TEST
 cd $WORKSPACE/sasview/test
 $PYTHON utest_sasview.py
+# If a display is available, also run the GUI tests
+if [ -n "$DISPLAY" ]; then
+  cd $WORKSPACE/sasview/src/sas/qtgui
+  # suppress errors from the GUI tests until a baseline 'pass' is obtained
+  $PYTHON GUITests.py || true
+else
+  echo "NOTE: GUITests.py skipped as no DISPLAY was found"
+fi

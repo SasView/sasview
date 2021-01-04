@@ -6,7 +6,7 @@ class
 
 import os
 import sys
-import math
+import codecs
 import logging
 from abc import abstractmethod
 
@@ -24,7 +24,18 @@ if sys.version_info[0] < 3:
         return s
 else:
     def decode(s):
-        return s.decode() if isinstance(s, bytes) else s
+        # Attempt to decode files using common encodings
+        # *NB* windows-1252, aka cp1252, overlaps with most ASCII-style encodings
+        for codec in ['utf-8', 'windows-1252']:
+            try:
+                return codecs.decode(s, codec) if isinstance(s, bytes) else s
+            except (ValueError, UnicodeError):
+                # If the specific codec fails, try the next one.
+                pass
+            except Exception as e:
+                logger.warning(e)
+        # Give warning if unable to decode the item using the codecs
+        logger.warning(f"Unable to decode {s}")
 
 # Data 1D fields for iterative purposes
 FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
@@ -80,20 +91,20 @@ class FileReader(object):
             if self.extension in self.ext or self.allow_all:
                 # Try to load the file, but raise an error if unable to.
                 try:
-                    self.f_open = open(filepath, 'rb')
-                    self.get_file_contents()
-
+                    with open(filepath, 'rb') as self.f_open:
+                        self.get_file_contents()
                 except DataReaderException as e:
-                    self.handle_error_message(e.message)
+                    self.handle_error_message(str(e))
+                except FileContentsException as e:
+                    raise
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
-                    msg += e.message
+                    msg += str(e)
                     self.handle_error_message(msg)
+                except Exception as e:
+                    self.handle_error_message(str(e))
                 finally:
-                    # Close the file handle if it is open
-                    if not self.f_open.closed:
-                        self.f_open.close()
                     if any(filepath.lower().endswith(ext) for ext in
                            self.deprecated_extensions):
                         self.handle_error_message(DEPRECATION_MESSAGE)

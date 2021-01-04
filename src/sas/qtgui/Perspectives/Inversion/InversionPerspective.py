@@ -41,6 +41,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
 
     name = "Inversion"
+    ext = "pr"  # Extension used for saving analyses
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
@@ -128,6 +129,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def allowBatch(self):
         return False
 
+    def allowSwap(self):
+        """
+        Tell the caller we don't accept swapping data
+        """
+        return False
+
     def setClosable(self, value=True):
         """
         Allow outsiders close this widget
@@ -141,6 +148,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         return self._allowClose
 
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
@@ -151,8 +164,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self._allowClose:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
@@ -329,13 +343,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.logic.data_is_loaded and
             self._calculator.nfunc != self.nTermsSuggested)
 
-    def populateDataComboBox(self, filename, data_ref):
+    def populateDataComboBox(self, name, data_ref):
         """
-        Append a new file name to the data combobox
-        :param filename: data filename
+        Append a new name to the data combobox
+        :param name: data name
         :param data_ref: QStandardItem reference for data set to be added
         """
-        self.dataList.addItem(filename, data_ref)
+        self.dataList.addItem(name, data_ref)
 
     def acceptNoTerms(self):
         """Send estimated no of terms to input"""
@@ -421,7 +435,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def showBatchOutput(self):
         """
         Display the batch output in tabular form
-        :param output_data: Dictionary mapping filename -> P(r) instance
+        :param output_data: Dictionary mapping name -> P(r) instance
         """
         if self.batchResultsWindow is None:
             self.batchResultsWindow = BatchInversionOutputPanel(
@@ -474,7 +488,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
                 self.logic.add_errors()
             self.updateDataList(data)
-            self.populateDataComboBox(self.logic.data.filename, data)
+            self.populateDataComboBox(self.logic.data.name, data)
         self.dataList.setCurrentIndex(len(self.dataList) - 1)
         #Checking for 1D again to mitigate the case when 2D data is last on the data list
         if isinstance(self.logic.data, Data1D):
@@ -490,9 +504,46 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             DICT_KEYS[2]: self.dataPlot
         }
         # Update batch results window when finished
-        self.batchResults[self.logic.data.filename] = self._calculator
+        self.batchResults[self.logic.data.name] = self._calculator
         if self.batchResultsWindow is not None:
             self.showBatchOutput()
+
+    def getState(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        # If no measurement performed, calculate using base params
+        if self.chiDofValue.text() == '':
+            self._calculator.out, self._calculator.cov = self._calculator.invert()
+        return {
+            'alpha': self._calculator.alpha,
+            'background': self._calculator.background,
+            'chi2': self._calculator.chi2,
+            'cov': self._calculator.cov,
+            'd_max': self._calculator.d_max,
+            'elapsed': self._calculator.elapsed,
+            'err': self._calculator.err,
+            'est_bck': self._calculator.est_bck,
+            'iq0': self._calculator.iq0(self._calculator.out),
+            'nerr': self._calculator.nerr,
+            'nfunc': self.getNFunc(),
+            'npoints': self._calculator.npoints,
+            'ny': self._calculator.ny,
+            'out': self._calculator.out,
+            'oscillations': self._calculator.oscillations(self._calculator.out),
+            'pos_frac': self._calculator.get_positive(self._calculator.out),
+            'pos_err': self._calculator.get_pos_err(self._calculator.out,
+                                                    self._calculator.cov),
+            'q_max': self._calculator.q_max,
+            'q_min': self._calculator.q_min,
+            'rg': self._calculator.rg(self._calculator.out),
+            'slit_height': self._calculator.slit_height,
+            'slit_width': self._calculator.slit_width,
+            'suggested_alpha': self._calculator.suggested_alpha,
+            'x': self._calculator.x,
+            'y': self._calculator.y,
+        }
 
     def getNFunc(self):
         """Get the n_func value from the GUI object"""
@@ -590,7 +641,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             data_list = [self._data]
         self.closeDMax()
         for data in data_list:
-            self._dataList.pop(data)
+            self._dataList.pop(data, None)
         self._data = None
         length = len(self.dataList)
         for index in reversed(range(length)):
@@ -614,6 +665,69 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         else:
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
+
+    def serializeAll(self):
+        """
+        Serialize the inversion state so data can be saved
+        Inversion is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {inversion-state}}}
+        """
+        return self.serializeCurrentPage()
+
+    def serializeCurrentPage(self):
+        # Serialize and return a dictionary of {data_id: inversion-state}
+        # Return original dictionary if no data
+        state = {}
+        if self.logic.data_is_loaded:
+            tab_data = self.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'pr_params': tab_data}
+        return state
+
+    def getPage(self):
+        """
+        serializes full state of this fit page
+        """
+        # Get all parameters from page
+        param_dict = self.getState()
+        param_dict['data_name'] = str(self.logic.data.name)
+        param_dict['data_id'] = str(self.logic.data.id)
+        return param_dict
+
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = []
+        if self.logic.data_is_loaded:
+            tab_id.append(str(self.logic.data.id))
+        return tab_id
+
+    def updateFromParameters(self, params):
+        self._calculator.suggested_alpha = params['alpha']
+        self.updateDynamicGuiValues()
+        self.acceptAlpha()
+        self.backgroundInput.setText(str(params['background']))
+        self._calculator.chi2 = params['chi2']
+        self._calculator.cov = params['cov']
+        self._calculator.d_max = params['d_max']
+        self._calculator.elapsed = params['elapsed']
+        self._calculator.err = params['err']
+        self._calculator.set_est_bck = bool(params['est_bck'])
+        self._calculator.nerr = params['nerr']
+        self.noOfTermsInput.setText(str(params['nfunc']))
+        self._calculator.npoints = params['npoints']
+        self._calculator.ny = params['ny']
+        self._calculator.out = params['out']
+        self._calculator.q_max = params['q_max']
+        self._calculator.q_min = params['q_min']
+        self._calculator.slit_height = params['slit_height']
+        self._calculator.slit_width = params['slit_width']
+        self._calculator.suggested_alpha = params['suggested_alpha']
+        self._calculator.x = params['x']
+        self._calculator.y = params['y']
+        self.updateGuiValues()
+        self.updateDynamicGuiValues()
 
     ######################################################################
     # Thread Creators
@@ -891,9 +1005,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Update P(r) and fit plots
         self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
-        self.prPlot.filename = self.logic.data.filename
+        self.prPlot.name = self.logic.data.name
         self.dataPlot = self.logic.new1DPlot(out, self._calculator)
-        self.dataPlot.filename = self.logic.data.filename
+        self.dataPlot.name = self.logic.data.name
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

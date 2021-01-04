@@ -34,7 +34,10 @@ SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
 SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
-SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
+# 'platform' descriptor vanished from the main build,
+# so we need to update the location.
+#SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
+SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"))
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
@@ -173,30 +176,41 @@ def apidoc():
     # Clean directory before generating a new version.
     #_remove_dir(SASVIEW_API_TARGET)
 
-    subprocess.call(["sphinx-apidoc",
-                     "-o", SASVIEW_API_TARGET, # Output dir.
-                     "-d", "8", # Max depth of TOC.
-                     "-H", "SasView", # Package header
-                     SASVIEW_BUILD])
+    subprocess.check_call([
+        "sphinx-apidoc",
+        "-o", SASVIEW_API_TARGET, # Output dir.
+        "-d", "8", # Max depth of TOC.
+        "-H", "SasView", # Package header
+        SASVIEW_BUILD,
+        # omit the following documents from the API documentation
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "GUITests.py"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py"),
+        joinpath(SASVIEW_BUILD, "sas", "sasview", "welcome_panel.py"),
+        joinpath(SASVIEW_BUILD, "sas", "sasview", "wxcruft.py"),
+    ])
 
-    subprocess.call(["sphinx-apidoc",
-                     "-o", SASMODELS_API_TARGET, # Output dir.
-                     "-d", "8", # Max depth of TOC.
-                     "-H", "sasmodels", # Package header
-                     SASMODELS_BUILD,
-                     joinpath(SASMODELS_BUILD, "sasmodels", "models"), # exclude
-                     ])
+    subprocess.check_call([
+        "sphinx-apidoc",
+        "-o", SASMODELS_API_TARGET, # Output dir.
+        "-d", "8", # Max depth of TOC.
+        "-H", "sasmodels", # Package header
+        SASMODELS_BUILD,
+        # omit the following documents from the API documentation
+        joinpath(SASMODELS_BUILD, "sasmodels", "models"),
+    ])
 
 def build_pdf():
     """
     Runs sphinx-build for pdf.  Reads in all .rst files and spits out the final html.
     """
     print("=== Build PDF Docs from ReST Files ===")
-    subprocess.call(["sphinx-build",
-                     "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
-                     "-d", joinpath(SPHINX_BUILD, "doctrees"),
-                     SPHINX_SOURCE,
-                     joinpath(SPHINX_BUILD, "latex")])
+    subprocess.check_call([
+        "sphinx-build",
+        "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
+        "-d", joinpath(SPHINX_BUILD, "doctrees"),
+        SPHINX_SOURCE,
+        joinpath(SPHINX_BUILD, "latex")
+    ])
 
     LATEXDIR = joinpath(SPHINX_BUILD, "latex")
     #TODO: Does it need to be done so many time?
@@ -219,11 +233,15 @@ def build():
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
     print("=== Build HTML Docs from ReST Files ===")
-    subprocess.call(["sphinx-build",
-                     "-b", "html", # Builder name. TODO: accept as arg to setup.py.
-                     "-d", joinpath(SPHINX_BUILD, "doctrees"),
-                     SPHINX_SOURCE,
-                     joinpath(SPHINX_BUILD, "html")])
+    subprocess.check_call([
+        "sphinx-build",
+        "-v",
+        "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+        "-d", joinpath(SPHINX_BUILD, "doctrees"),
+        "-W", "--keep-going",
+        SPHINX_SOURCE,
+        joinpath(SPHINX_BUILD, "html")
+    ])
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")

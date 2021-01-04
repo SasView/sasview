@@ -7,7 +7,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import QtTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from twisted.internet import threads
 
 # set up import paths
@@ -32,12 +32,35 @@ class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"
     communicate = Communicate()
 
+    def __init__(self):
+        self._perspective = dummy_perspective()
+
+    def perspective(self):
+        return self._perspective
+
+class dummy_perspective(object):
+
+    def __init__(self):
+        self.symbol_dict = {}
+        self.constraint_list = []
+        self.constraint_tab = None
+
+    def getActiveConstraintList(self):
+        return self.constraint_list
+
+    def getSymbolDictForConstraints(self):
+        return self.symbol_dict
+
+    def getConstraintTab(self):
+        return self.constraint_tab
+
 class FittingWidgetTest(unittest.TestCase):
     """Test the fitting widget GUI"""
 
     def setUp(self):
         """Create the GUI"""
         self.widget = FittingWidget(dummy_manager())
+        FittingUtilities.checkConstraints = MagicMock(return_value=None)
 
     def tearDown(self):
         """Destroy the GUI"""
@@ -442,6 +465,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget._poly_model.item(0,0).setCheckState(2)
         # Assure the parameter is added
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width'])
+        # Check that it's value has not changed (reproduce the polydispersity checkbox bug)
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
 
         # Add another parameter
         self.widget._poly_model.item(2,0).setCheckState(2)
@@ -449,9 +474,11 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params_to_fit, ['radius_bell.width', 'length.width'])
 
         # Change the min/max values
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 0.0)
         self.widget._poly_model.item(0,2).setText("1.0")
-        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
+        self.assertEqual(self.widget.kernel_module.details['radius_bell.width'][1], 1.0)
+        # Check that changing the polydispersity min/max value doesn't affect the paramer min/max
+        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
 
         #self.widget.show()
         #QtWidgets.QApplication.exec_()
@@ -460,6 +487,24 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 35)
         self.widget._poly_model.item(0,4).setText("22")
         self.assertEqual(self.widget.poly_params['radius_bell.npts'], 22)
+        # test that sasmodel is updated with the new value
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+
+        # Change the pd value
+        self.assertEqual(self.widget.poly_params['radius_bell.width'], 0.0)
+        self.widget._poly_model.item(0,1).setText("0.8")
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # Test that sasmodel is updated with the new value
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.8)
+
+        # Uncheck pd in the fitting widget
+        self.widget.chkPolydispersity.setCheckState(2)
+        self.widget.chkPolydispersity.click()
+        # Should not change the value of the qt model
+        self.assertAlmostEqual(self.widget.poly_params['radius_bell.width'], 0.8)
+        # sasmodel should be set to 0
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.width'), 0.0)
+
         # try something stupid
         self.widget._poly_model.item(0,4).setText("butt")
         # see that this didn't annoy the control at all
@@ -1246,10 +1291,18 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # Create a constraint object
-        const = Constraint(parent=None, value=7.0)
+        const = Constraint(parent=None, param="scale",value=7.0)
         row = 3
 
         spy = QtSignalSpy(self.widget, self.widget.constraintAddedSignal)
+
+        # Mock the modelName method
+        self.widget.modelName = MagicMock(return_value='M1')
+
+        # Mock a constraint tab
+        constraint_tab = MagicMock()
+        constraint_tab.constraint_accepted = False
+        self.widget.parent.perspective().constraint_tab = constraint_tab
 
         # call the method tested
         self.widget.addConstraintToRow(constraint=const, row=row)
@@ -1263,6 +1316,9 @@ class FittingWidgetTest(unittest.TestCase):
         # Assure the row has the constraint
         self.assertEqual(self.widget.getConstraintForRow(row), const)
         self.assertTrue(self.widget.rowHasConstraint(row))
+
+        # Check that the constraint tab flag is set to True
+        self.assertTrue(constraint_tab.constraint_accepted)
 
         # assign complex constraint now
         const = Constraint(parent=None, param='radius', func='5*sld')
@@ -1280,6 +1336,30 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.getConstraintForRow(row), const)
         # and it is a complex constraint
         self.assertTrue(self.widget.rowHasConstraint(row))
+
+        # Now try to add an constraint when the checking function returns an
+        # error message
+        FittingUtilities.checkConstraints = MagicMock(return_value="foo")
+
+        # Mock the QMessagebox Warning
+        QtWidgets.QMessageBox.critical = MagicMock()
+
+        # Call the method tested
+        self.widget.addConstraintToRow(constraint=const, row=row)
+
+        # Check that the messagebox was called with the right error message
+        QtWidgets.QMessageBox.critical.assert_called_with(
+            self.widget,
+            "Inconsistent constraint",
+            "foo",
+            QtWidgets.QMessageBox.Ok,
+        )
+
+        # Make sure no signal was emitted
+        self.assertEqual(spy.count(), 2)
+        # Check that constraint tab flag is set to False
+        self.assertFalse(constraint_tab.constraint_accepted)
+
 
     def testAddSimpleConstraint(self):
         """
@@ -1523,6 +1603,94 @@ class FittingWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
+
+    def testRetainParametersBetweenModelChange(self):
+        """
+        Test constantess of model parameters on model change
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # modify the initial value of radius (different from default)
+        new_value = "333.0"
+        self.widget._model_model.item(5, 1).setText(new_value)
+
+        # change parameter in the same category
+        model_index = self.widget.cbModel.findText("barbell")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # see if radius is the same as set
+        self.assertTrue(self.widget._model_model.item(5, 1).text() == "333.0")
+
+        # Now, change not just model but a category as well
+        # cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("sphere")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # see if radius is still the same
+        self.assertTrue(int(self.widget._model_model.item(5, 1).text()) == 333)
+
+    def testOnParameterPaste(self):
+        """
+        Test response of the widget to clipboard content
+        paste request
+        """
+        self.widget.updatePageWithParameters = MagicMock()
+        QtWidgets.QMessageBox.exec_ = MagicMock()
+        cb = QtWidgets.QApplication.clipboard()
+
+        # test bad clipboard
+        cb.setText("bad clipboard")
+        self.widget.onParameterPaste()
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        self.widget.updatePageWithParameters.assert_not_called()
+
+        # Test correct clipboard
+        cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
+        self.widget.onParameterPaste()
+        self.widget.updatePageWithParameters.assert_called_once()
+
+    def testGetConstraintsForFitting(self):
+        """
+        Test the deactivation of constraints when trying to fit a single page
+        with constraints relying on other pages
+        """
+        # mock the constraint getter
+        self.widget.getComplexConstraintsForModel = MagicMock(return_value=[
+            ('scale', 'M2.background')])
+        # mock isConstraintMultimodel so that our constraint is multi-model
+        self.widget.isConstraintMultimodel = MagicMock(return_value=True)
+        # Mock a constraint tab
+        constraint_tab = MagicMock()
+        self.widget.parent.perspective().constraint_tab = constraint_tab
+        # instanciate a constraint
+        constraint = Constraint(parent=None, param="scale", value=7.0)
+        self.widget.getConstraintForRow = MagicMock(return_value=constraint)
+        # mock the messagebox
+        QtWidgets.QMessageBox.exec_ = MagicMock()
+
+        # select a model
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # Call the method
+        self.widget.getConstraintsForFitting()
+        # Check that QMessagebox was called
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        # Constraint should be inactive
+        self.assertEqual(constraint.active, False)
+        # Check that the uncheckConstraint method was called
+        constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 
 if __name__ == "__main__":
     unittest.main()

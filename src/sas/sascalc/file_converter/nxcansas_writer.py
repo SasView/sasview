@@ -4,11 +4,17 @@
 
 import h5py
 import numpy as np
-import re
-import os
 
 from sas.sascalc.dataloader.readers.cansas_reader_HDF5 import Reader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
+
+PROBES = ['neutron', 'x-ray', 'muon', 'electron', 'ultraviolet',
+          'visible light', 'positron', 'proton']
+TYPES = ['Spallation Neutron Source', 'UV Plasma Source', 'Free-Electron Laser',
+         'Reactor Neutron Source', 'Synchrotron X-ray Source', 'UV Laser',
+         'Pulsed Muon Source', 'Pulsed Reactor Neutron Source', 'Ion Source',
+         'Rotating Anode X-ray', 'Optical Laser', 'Fixed Tube X-ray']
+
 
 class NXcanSASWriter(Reader):
     """
@@ -107,7 +113,7 @@ class NXcanSASWriter(Reader):
         sasentry['run'].attrs['name'] = run_name
         sasentry['title'] = _h5_string(data_info.title)
         sasentry.attrs['canSAS_class'] = 'SASentry'
-        sasentry.attrs['version'] = '1.0'
+        sasentry.attrs['version'] = '1.1'
 
         for i, data_obj in enumerate(dataset):
             data_entry = sasentry.create_group("sasdata{0:0=2d}".format(i+1))
@@ -153,10 +159,18 @@ class NXcanSASWriter(Reader):
         # Source metadata
         source_entry = instrument_entry.create_group('sassource')
         source_entry.attrs['canSAS_class'] = 'SASsource'
-        if data_info.source.radiation is None:
-            source_entry['radiation'] = _h5_string('neutron')
-        else:
-            source_entry['radiation'] = _h5_string(data_info.source.radiation)
+        if data_info.source.radiation is not None:
+            if data_info.source.radiation in PROBES:
+                source_entry['probe'] = _h5_string(data_info.source.radiation)
+            elif data_info.source.radiation in TYPES:
+                source_entry['type'] = _h5_string(data_info.source.radiation)
+            else:
+                # Should not get here, but we shouldn't throw info out either
+                source_entry['notes'] = _h5_string(data_info.source.radiation)
+        if data_info.source.type is not None:
+            source_entry['type'] = _h5_string(data_info.source.type)
+        if data_info.source.probe is not None:
+            source_entry['probe'] = _h5_string(data_info.source.probe)
         if data_info.source.beam_shape is not None:
             source_entry['beam_shape'] = _h5_string(data_info.source.beam_shape)
         wavelength_keys = { 'wavelength': 'incident_wavelength',
@@ -272,16 +286,20 @@ class NXcanSASWriter(Reader):
                                        data=trans.transmission_deviation)
             trans_entry.create_dataset('lambda', data=trans.wavelength)
 
-        note_entry = sasentry.create_group('sasnote'.format(i))
-        note_entry.attrs['canSAS_class'] = 'SASnote'
-        notes = None
-        if len(data_info.notes) > 1:
+        if np.isscalar(data_info.notes) and data_info.notes:
+            # Handle scalars that aren't empty arrays, None, '', etc.
+            notes = [np.string_(data_info.notes)]
+        elif len(data_info.notes) > 1:
+            # Handle iterables that aren't empty
             notes = [np.string_(n) for n in data_info.notes]
-            notes = np.array(notes)
-        elif data_info.notes != []:
-            notes = _h5_string(data_info.notes[0])
+        else:
+            # Notes are required in NXcanSAS format
+            notes = [np.string_('')]
         if notes is not None:
-            note_entry.create_dataset('SASnote', data=notes)
+            for i, note in enumerate(notes):
+                note_entry = sasentry.create_group('sasnote{0}'.format(i))
+                note_entry.attrs['canSAS_class'] = 'SASnote'
+                note_entry.create_dataset('SASnote', data=note)
 
         f.close()
 

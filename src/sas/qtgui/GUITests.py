@@ -1,3 +1,4 @@
+import os
 import unittest
 import sys
 from PyQt5 import QtGui
@@ -73,6 +74,7 @@ from Utilities.UnitTesting import PluginDefinitionTest
 from Utilities.UnitTesting import TabbedModelEditorTest
 from Utilities.UnitTesting import AddMultEditorTest
 from Utilities.UnitTesting import ReportDialogTest
+from Utilities.UnitTesting import FileConverterTest
 
 # Unit Testing
 from UnitTesting import TestUtilsTest
@@ -145,6 +147,7 @@ def utilitiesSuite():
         unittest.makeSuite(TabbedModelEditorTest.TabbedModelEditorTest,'test'),
         unittest.makeSuite(AddMultEditorTest.AddMultEditorTest, 'test'),
         unittest.makeSuite(ReportDialogTest.ReportDialogTest,     'test'),
+        unittest.makeSuite(FileConverterTest.FileConverterTest, 'test'),
         )
     return unittest.TestSuite(suites)
 
@@ -227,3 +230,5 @@ if __name__ == "__main__":
             for r in errors[1]:
                     print("\nSuite: %s had following failures:\n %s : %s"%(suite, r[0], r[1]))
             print("=================================================")
+        print("Exiting with error")
+        os._exit(1)

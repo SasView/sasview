@@ -66,7 +66,7 @@ datas.append(('../src/sas/logging.ini','.'))
 # TODO
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
 datas.append((os.path.join('..', '..','sasmodels','sasmodels'),'sasmodels'))
-datas.append((os.path.join('..', 'src','sas','sasgui','perspectives','fitting','plugin_models'),'plugin_models'))
+datas.append((os.path.join('..', 'src','sas','qtgui','Perspectives','Fitting','plugin_models'),'plugin_models'))
 datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','jedi'),'jedi'))
 
 # TRN COMMENT OUT 

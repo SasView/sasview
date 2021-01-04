@@ -5,16 +5,16 @@ import json
 #Replace with live server and live server key
 #DO NOT STORE KEY ON GITHUB
 #TEST settings for Sandbox
-zenodo_url = "https://sandbox.zenodo.org"
-zenodo_api_key = "rdNmQU4ogrtYQKp5jd7238DnigkPu51aMKHa8yFttYtp3GgsxOW8MCfL8Exp"
+zenodo_url = "https://zenodo.org"
+zenodo_api_key = ""
 
 #Record metadata
 #Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
     'metadata': {
-    'title': 'SasView version 5.0.1',
-    'description': '5.0.1 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.1',
+    'title': 'SasView version 5.0.2',
+    'description': '5.0.2 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.2',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
@@ -47,7 +47,7 @@ sasview_data = {
         {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology'},
         {'name': 'Campbell, Kieran','affiliation': 'University of Oxford'},
         {'name': 'Cooper-Benun, Torin', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Durniak, Celine','affiliation': 'Data Management and Software Centre, ,European Spallation Source' },
+        {'name': 'Durniak, Celine','affiliation': 'Data Management and Software Centre, European Spallation Source' },
         {'name': 'Forster, Laura','affiliation': 'Diamond Light Source'},
         {'name': 'Gonzales, Miguel','affiliation': 'Institut Laue-Langevin'},
         {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory',},

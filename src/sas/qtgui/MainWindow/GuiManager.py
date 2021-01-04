@@ -97,6 +97,7 @@ class GuiManager(object):
 
         # Currently displayed perspective
         self._current_perspective = None
+        self.loadedPerspectives = {}
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -125,6 +126,9 @@ class GuiManager(object):
         """
         Populate the main window with widgets
         """
+        # Preload all perspectives
+        self.loadAllPerspectives()
+
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
@@ -180,6 +184,32 @@ class GuiManager(object):
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
 
+    def loadAllPerspectives(self):
+        # Close any existing perspectives to prevent multiple open instances
+        self.closeAllPerspectives()
+        # Load all perspectives
+        loaded_dict = {}
+        for name, perspective in Perspectives.PERSPECTIVES.items():
+            try:
+                loaded_perspective = perspective(parent=self)
+                loaded_dict[name] = loaded_perspective
+            except Exception as e:
+                logger.log(f"Unable to load {name} perspective.\n{e}")
+        self.loadedPerspectives = loaded_dict
+
+    def closeAllPerspectives(self):
+        # Close all perspectives if they are open
+        if isinstance(self.loadedPerspectives, dict):
+            for name, perspective in self.loadedPerspectives.items():
+                try:
+                    perspective.setClosable(True)
+                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    perspective.close()
+                except Exception as e:
+                    logger.log(f"Unable to close {name} perspective\n{e}")
+        self.loadedPerspectives = {}
+        self._current_perspective = None
+
     def addCategories(self):
         """
         Make sure categories.json exists and if not compile it and install in ~/.sasview
@@ -232,7 +262,8 @@ class GuiManager(object):
         """
         # loop over all visible plots and find the requested plot
         for plot in PlotHelper.currentPlots():
-            if PlotHelper.plotById(plot).data[1].name == plot_name:
+            # take last plot
+            if PlotHelper.plotById(plot).data[-1].name == plot_name:
                 # set focus on the plot
                 # Note: none of the StackOverflow recommended solutions work here!
                 # neither raise_(), nor showNormal() nor setWindowState(Qt.WindowActive)
@@ -245,12 +276,9 @@ class GuiManager(object):
         """
         Dynamically update the QMenu content and disconnect signals
         """
-        if not plot:
+        if not plot: # watch out for quick plots
             return
-        if len(plot.data) == 1:
-            name = plot.data[0].name
-        else:
-            name = plot.data[1].name
+        name = plot.data[-1].name
         # loop over actions
         for action in self._workspace.menuWindow.actions():
             if action.text() == name:
@@ -319,18 +347,21 @@ class GuiManager(object):
         """
         Respond to change of the perspective signal
         """
-        # Close the previous perspective
+        # Remove the previous perspective from the window
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
-            self._current_perspective.setClosable()
+            # Remove perspective and store in Perspective dictionary
+            self.loadedPerspectives[
+                self._current_perspective.name] = self._current_perspective
+            self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._workspace.workspace.removeSubWindow(self.subwindow)
-            self._current_perspective.close()
-        # Default perspective
-        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
+        # Get new perspective
+        self._current_perspective = self.loadedPerspectives[str(perspective_name)]
 
         self.setupPerspectiveMenubarOptions(self._current_perspective)
 
-        self.subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
+        self.subwindow = self._workspace.workspace.addSubWindow(
+            self._current_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
@@ -516,7 +547,7 @@ class GuiManager(object):
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
-        self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
+        self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
         self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
 
@@ -646,61 +677,49 @@ class GuiManager(object):
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
-
-        # fit tabs
-        params={}
-        perspective = self.perspective()
-        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
-            params = perspective.serializeAllFitpage()
-
-        # project dictionary structure:
-        # analysis[data.id] = [{"fit_data":[data, checkbox, child data],
-        #                       "fit_params":[fitpage_state]}
-        # "fit_params" not present if dataset not sent to fitting
-        analysis = {}
-
+        final_data = {}
         for id, data in all_data.items():
-            if id=='is_batch':
-                analysis['is_batch'] = data
-                analysis['batch_grid'] = self.grid_window.data_dict
-                continue
-            data_content = {"fit_data":data}
-            if id in params.keys():
-                # this dataset is represented also by the fit tab. Add to it.
-                data_content["fit_params"] = params[id]
-            analysis[id] = data_content
+            final_data[id] = {'fit_data': data}
 
-        # standalone constraint pages
-        for keys, values in params.items():
-            if not 'is_constraint' in values[0]:
-                continue
-            analysis[keys] = values[0]
+        # Save from all serializable perspectives
+        # Analysis should return {data-id: serialized-state}
+        for name, per in self.loadedPerspectives.items():
+            if hasattr(per, 'isSerializable') and per.isSerializable():
+                analysis = per.serializeAll()
+                for key, value in analysis.items():
+                    if key in final_data:
+                        final_data[key].update(value)
+                    elif 'cs_tab' in key:
+                        final_data[key] = value
+
+        final_data['is_batch'] = analysis.get('is_batch', 'False')
+        final_data['batch_grid'] = self.grid_window.data_dict
+        final_data['visible_perspective'] = self._current_perspective.name
 
         with open(filename, 'w') as outfile:
-            GuiUtils.saveData(outfile, analysis)
+            GuiUtils.saveData(outfile, final_data)
 
     def actionSave_Analysis(self):
         """
         Menu File/Save Analysis
         """
         per = self.perspective()
-        if not isinstance(per, FittingWindow):
+        if not hasattr(per, 'isSerializable') or not per.isSerializable:
             return
         # get fit page serialization
-        params = per.serializeCurrentFitpage()
-        # Find dataset ids for the current tab
-        # (can be multiple, if batch)
-        data_id = per.currentTabDataId()
-        tab_id = per.currentTab.tab_id
+        all_data = self.filesWidget.getSerializedData()
         analysis = {}
-        for id in data_id:
-            an = {}
-            data_for_id = self.filesWidget.getDataForID(id)
-            an['fit_data'] = data_for_id
-            an['fit_params'] = [params]
-            analysis[id] = an
-
-        self.filesWidget.saveAnalysis(analysis, tab_id)
+        state = per.serializeCurrentPage()
+        for id, params in state.items():
+            if id in all_data:
+                analysis[id] = {'fit_data': all_data[id]}
+                analysis[id].update(params)
+        if len(analysis) > 0:
+            tab_id = 1 if not hasattr(per,
+                                      'currentTab') else per.currentTab.tab_id
+            self.filesWidget.saveAnalysis(analysis, tab_id, per.ext)
+        else:
+            logger.warning('No analysis was available to be saved.')
 
     def actionQuit(self):
         """
@@ -727,7 +746,7 @@ class GuiManager(object):
         can be saved to the clipboard
         """
         self.communicate.copyFitParamsSignal.emit("")
-        self._workspace.actionPaste.setEnabled(True)
+        #self._workspace.actionPaste.setEnabled(True)
         pass
 
     def actionPaste(self):
@@ -932,8 +951,6 @@ class GuiManager(object):
         Shows the File Converter widget.
         """
         try:
-            if sys.platform == "darwin":
-                self.image_viewer.menubar.setNativeMenuBar(False)
             self.FileConverter.show()
         except Exception as ex:
             logging.error(str(ex))
@@ -1175,12 +1192,12 @@ class GuiManager(object):
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
 
-    def showPlotFromFilename(self, filename):
+    def showPlotFromName(self, name):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayFile(filename=filename, is_data=True)
+            self.filesWidget.displayData(name=name, is_data=True)
 
     def showPlot(self, plot, id):
         """

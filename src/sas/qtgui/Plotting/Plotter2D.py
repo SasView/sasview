@@ -181,6 +181,9 @@ class Plotter2DWidget(PlotterBase):
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Toggle Linear/Log Scale")
         self.actionChangeScale.triggered.connect(self.onToggleScale)
+        self.contextMenu.addSeparator()
+        self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
+        self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenuQuick(self):
         """

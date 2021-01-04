@@ -63,7 +63,7 @@ datas.append(('../src/sas/sasview/local_config.py','sas/sasview'))
 # TODO
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
 datas.append((os.path.join('..', '..','sasmodels','sasmodels'),'sasmodels'))
-datas.append((os.path.join('..', 'src','sas','sasgui','perspectives','fitting','plugin_models'),'plugin_models'))
+datas.append((os.path.join('..', 'src','sas','qtgui','Perspectives','Fitting','plugin_models'),'plugin_models'))
 datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','jedi'),'jedi'))
 print("HW------WH")
 #TRN datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
@@ -185,8 +185,8 @@ coll = COLLECT(exe,
 
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
-        name='SasView5.0.app',
+        name='SasView5.app',
         icon='../src/sas/sasview/images/ball.icns',
-        bundle_identifier='org.sasview.SasView5.0',
+        bundle_identifier='org.sasview.SasView5',
         info_plist={'NSHighResolutionCapable': 'True'})
 

@@ -31,8 +31,11 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 import sas.qtgui.Perspectives as Perspectives
 
 DEFAULT_PERSPECTIVE = "Fitting"
+ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'Invariant (*.inv)',
+                  'Corfunc (*.crf)', 'All Files (*.*)']
 
 logger = logging.getLogger(__name__)
+
 
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
@@ -117,6 +120,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
+
+        # Slots for model changes
+        self.model.itemChanged.connect(self.onFileListChanged)
+        self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
         self.data_proxy.setFilterRegExp(r"[^()]")
@@ -268,22 +275,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.default_project_location = os.path.dirname(filename)
+            # Delete all data and initialize all perspectives
             self.deleteAllItems()
-            # Currently project load is available only for fitting
-            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
-                self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
-            # delete all (including the default) tabs
-            self._perspective().deleteAllTabs()
+            self.cbFitting.disconnect()
+            self.parent.loadAllPerspectives()
+            self.initPerspectives()
             self.readProject(filename)
 
     def loadAnalysis(self):
         """
         Called when the "Open Analysis" menu item chosen.
         """
+        file_filter = ';;'.join(ANALYSIS_TYPES)
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Analysis',
-            'filter'    : 'Project (*.fitv);;All files (*.*)',
+            'filter'    : file_filter,
             'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
@@ -313,13 +320,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         return filename
 
-    def saveAsAnalysisFile(self, tab_id=1):
+    def saveAsAnalysisFile(self, tab_id=1, extension='fitv'):
         """
         Show the save as... dialog and return the chosen filepath
         """
-        default_name = "FitPage"+str(tab_id)+".fitv"
+        default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
-        wildcard = "fitv files (*.fitv)"
+        wildcard = "{0} files (*.{0})".format(extension)
         kwargs = {
             'caption'   : 'Save As',
             'directory' : default_name,
@@ -331,16 +338,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = filename_tuple[0]
         return filename
 
-    def saveAnalysis(self, data, tab_id=1):
+    def saveAnalysis(self, data, tab_id=1, ext='fitv'):
         """
         Called when the "Save Analysis" menu item chosen.
         """
-        filename = self.saveAsAnalysisFile(tab_id)
+        filename = self.saveAsAnalysisFile(tab_id, ext)
         if not filename:
             return
         _, extension = os.path.splitext(filename)
         if not extension:
-            filename = '.'.join((filename, 'fitv'))
+            filename = '.'.join((filename, ext))
         self.communicator.statusBarUpdateSignal.emit("Saving analysis... %s\n" % os.path.basename(filename))
 
         with open(filename, 'w') as outfile:
@@ -359,9 +366,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.filename
-            all_data[filename] = data
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            name = data.name
+            all_data[name] = data
+            other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
             for data in other_datas:
@@ -386,12 +393,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
             # Now, all plots under this item
-            filename = data.filename
+            name = data.name
             is_checked = item.checkState()
             properties['checked'] = is_checked
             other_datas = []
             # save underlying theories
-            other_datas = GuiUtils.plotsFromFilename(filename, model)
+            other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
             all_data[data.id] = [data, properties, other_datas]
@@ -408,10 +415,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data is None: continue
                 if data.id != id: continue
                 # We found the dataset - save it.
-                filename = data.filename
+                name = data.name
                 is_checked = item.checkState()
                 properties['checked'] = is_checked
-                other_datas = GuiUtils.plotsFromFilename(filename, model)
+                other_datas = GuiUtils.plotsFromDisplayName(name, model)
                 # skip the main plot
                 other_datas = list(other_datas.values())[1:]
                 all_data = [data, properties, other_datas]
@@ -465,7 +472,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def readProject(self, filename):
         """
-        Read out datasets and fitpages from file
+        Read out datasets and perspective information from file
         """
         # Find out the filetype based on extension
         ext = os.path.splitext(filename)[1]
@@ -495,28 +502,41 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 except Exception as ex:
                     logging.error("Project load failed with " + str(ex))
                     return
+        cs_keys = []
+        visible_perspective = DEFAULT_PERSPECTIVE
         for key, value in all_data.items():
-            if key=='is_batch':
-                self.chkBatch.setChecked(True if value=='True' else False)
-                if 'batch_grid' not in all_data:
-                    continue
-                grid_pages = all_data['batch_grid']
-                for grid_name, grid_page in grid_pages.items():
-                    grid_page.append(grid_name)
-                    self.parent.showBatchOutput(grid_page)
+            if key == 'is_batch':
+                self.chkBatch.setChecked(value == 'True')
+                if 'batch_grid' in all_data:
+                    grid_pages = all_data['batch_grid']
+                    for grid_name, grid_page in grid_pages.items():
+                        grid_page.append(grid_name)
+                        self.parent.showBatchOutput(grid_page)
                 continue
+            # Store constraint pages until all individual fits are open
             if 'cs_tab' in key:
+                cs_keys.append(key)
                 continue
+            # Load last visible perspective as stored in project file
+            if 'visible_perspective' in key:
+                visible_perspective = value
             # send newly created items to the perspective
             self.updatePerspectiveWithProperties(key, value)
-
+        # Set to fitting perspective and load in Batch and C&S Pages
+        self.cbFitting.setCurrentIndex(
+            self.cbFitting.findText(DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
-
+        # Get the constraint dict and apply it
+        constraint_dict = GuiUtils.getConstraints(all_data)
+        self._perspective().updateFromConstraints(constraint_dict)
         # Only now can we create/assign C&S pages.
-        for key, value in all_data.items():
-            if 'cs_tab' in key:
-                self.updatePerspectiveWithProperties(key, value)
+        for key in cs_keys:
+            self.updatePerspectiveWithProperties(key, all_data[key])
+
+        # Set to perspective shown when project was saved
+        self.cbFitting.setCurrentIndex(
+                self.cbFitting.findText(visible_perspective))
 
     def updateWithBatchPages(self, all_data):
         """
@@ -558,6 +578,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             items = self.updateModelFromData(data_dict)
 
         if 'fit_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
             params = value['fit_params']
             # Make the perspective read the rest of the read data
             if not isinstance(params, list):
@@ -575,6 +596,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.sendItemToPerspective(items[0], tab_index=tab_index)
                 # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
+        if 'pr_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Inversion'))
+            params = value['pr_params']
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(params)
+        if 'invar_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Invariant'))
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(value['invar_params'])
+        if 'corfunc_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Corfunc'))
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(value['corfunc_params'])
         if 'cs_tab' in key and 'is_constraint' in value:
             # Create a C&S page
             self._perspective().addConstraintTab()
@@ -599,7 +633,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             from sas.sascalc.dataloader.data_info import Data1D as old_data1d
             from sas.sascalc.dataloader.data_info import Data2D as old_data2d
             if isinstance(new_data, (old_data1d, old_data2d)):
-                new_data = self.manager.create_gui_data(value[0], new_data.filename)
+                new_data = self.manager.create_gui_data(value[0], new_data.name)
             if hasattr(value[0], 'id'):
                 new_data.id = value[0].id
                 new_data.group_id = value[0].group_id
@@ -607,7 +641,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # make sure the ID is retained
             properties = value[1]
             is_checked = properties['checked']
-            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.filename)
+            new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
             new_item.setCheckState(is_checked)
             items.append(new_item)
             model = self.theory_model
@@ -725,14 +759,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if len(selected_items) < 1:
             return
-
-        # Which perspective has been selected?
-        if len(selected_items) > 1 and not self._perspective().allowBatch():
-            if hasattr(self._perspective(), 'title'):
-                title = self._perspective().title()
+        #Check that you have only one box item checked when swaping data
+        if len(selected_items) > 1 and (self.chkSwap.isChecked() or not self._perspective().allowBatch()):
+            if hasattr(self._perspective(), 'name'):
+                title = self._perspective().name
             else:
                 title = self._perspective().windowTitle()
-            msg = title + " does not allow multiple data."
+            msg = title + " does not allow replacing multiple data."
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
@@ -742,7 +775,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Notify the GuiManager about the send request
         try:
-            self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+            if self.chkSwap.isChecked():
+                self._perspective().swapData(selected_items[0])
+            else:
+                self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(msg)
@@ -945,21 +981,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
+        # Deactivate and uncheck the swap data option if the current perspective does not allow it
+        self.chkSwap.setEnabled(self.parent.perspective().allowSwap())
+        if not self.parent.perspective().allowSwap():
+            self.chkSwap.setCheckState(False)
 
-    def itemFromFilename(self, filename):
+    def itemFromDisplayName(self, name):
         """
-        Retrieves model item corresponding to the given filename
+        Retrieves model item corresponding to the given display name
         """
-        item = GuiUtils.itemFromFilename(filename, self.model)
+        item = GuiUtils.itemFromDisplayName(name, self.model)
         return item
 
-    def displayFile(self, filename=None, is_data=True, id=None):
+    def displayData(self, name=None, is_data=True, id=None):
         """
-        Forces display of charts for the given filename
+        Forces display of charts for the given name
         """
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
-        plots = GuiUtils.plotsFromFilename(filename, model)
+        plots = GuiUtils.plotsFromDisplayName(name, model)
         # Each fitpage contains the name based on fit widget number
         fitpage_name = "" if id is None else "M" + str(id)
         new_plots = []
@@ -976,8 +1016,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Don't include plots from different fitpages,
             # but always include the original data
             if (fitpage_name in plot.name
-                    or filename in plot.name
-                    or filename == plot.filename):
+                    or name in plot.name
+                    or name == plot.filename):
                 # Residuals get their own plot
                 if plot.plot_role == Data1D.ROLE_RESIDUAL:
                     plot.yscale = 'linear'
@@ -1249,11 +1289,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 output_objects = self.loader.load(p_file)
 
-                # Some loaders return a list and some just a single Data1D object.
-                # Standardize.
-                if not isinstance(output_objects, list):
-                    output_objects = [output_objects]
-
                 for item in output_objects:
                     # cast sascalc.dataloader.data_info.Data1D into
                     # sasgui.guiframe.dataFitting.Data1D
@@ -1263,7 +1298,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                     # Model update should be protected
                     self.mutex.lock()
-                    self.updateModel(new_data, p_file)
+                    self.updateModel(new_data, new_data.name)
                     #self.model.reset()
                     QtWidgets.QApplication.processEvents()
                     self.mutex.unlock()
@@ -1402,6 +1437,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Create a custom menu based on actions defined in the UI file
         self.context_menu = QtWidgets.QMenu(self)
+        self.context_menu.addAction(self.actionSelect)
+        self.context_menu.addAction(self.actionDeselect)
+        self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1414,6 +1452,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addAction(self.actionDelete)
 
         # Define the callbacks
+        self.actionSelect.triggered.connect(self.onFileListSelected)
+        self.actionDeselect.triggered.connect(self.onFileListDeselected)
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
@@ -1441,6 +1481,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
         self.actionQuick3DPlot.setEnabled(is_2D)
         self.actionEditMask.setEnabled(is_2D)
+        self.actionSelect.setEnabled(True)
 
         # Freezing
         # check that the selection has inner items
@@ -1474,7 +1515,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
         self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
-        self.txt_widget.setWindowTitle("Data Info: %s" % data.filename)
+        self.txt_widget.setWindowTitle("Data Info: %s" % data.name)
         self.txt_widget.clear()
         self.txt_widget.insertPlainText(text_to_show)
 
@@ -1651,6 +1692,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.dataDeletedSignal.emit(deleted_items)
         # update stored_data
         self.manager.update_stored_data(deleted_names)
+        self.manager.delete_data(data_id=[], theory_id=[], delete_all=True)
 
         # Clear the model
         self.model.clear()
@@ -1906,3 +1948,37 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         for item in items_to_delete:
             self.theory_model.removeRow(item.row())
+
+    def onFileListSelected(self):
+        """
+        Slot for actionSelect
+        """
+        self.setCheckItems(status=QtCore.Qt.Checked)
+
+    def onFileListDeselected(self):
+        """
+        Slot for actionDeselect
+        """
+        self.setCheckItems(status=QtCore.Qt.Unchecked)
+
+    def onFileListChanged(self, item):
+        """
+        Slot for model (data/theory) changes.
+        Currently only reacting to checkbox selection.
+        """
+        if len(self.current_view.selectedIndexes()) < 2:
+            return
+        self.setCheckItems(status=item.checkState())
+
+    def setCheckItems(self, status=QtCore.Qt.Unchecked):
+        """
+        Sets requested checkbox status on selected indices
+        """
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model.blockSignals(True)
+        for index in self.current_view.selectedIndexes():
+            item = model.itemFromIndex(proxy.mapToSource(index))
+            if item.isCheckable():
+                item.setCheckState(status)
+        model.blockSignals(False)

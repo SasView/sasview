@@ -305,6 +305,31 @@ class InversionTest(unittest.TestCase):
         self.assertTrue(self.widget.dmaxWindow.isVisible())
         self.assertTrue(self.widget.dmaxWindow.windowTitle() == "Dmax Explorer")
 
+    def testSerialization(self):
+        """ Serialization routines """
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
+        self.widget.setData([self.fakeData1])
+        self.oneDataSetState()
+        data_id = self.widget.currentTabDataId()[0]
+        # Test three separate serialization routines
+        state_all = self.widget.serializeAll()
+        state_one = self.widget.serializeCurrentPage()
+        page = self.widget.getPage()
+        # Pull out params from state
+        params = state_all[data_id]['pr_params']
+        # Tests
+        self.assertEqual(len(state_all), len(state_one))
+        self.assertEqual(len(state_all), 1)
+        # getPage should include an extra param 'data_id' removed by serialize
+        self.assertNotEqual(len(params), len(page))
+        self.assertEqual(len(params), 26)
+        self.assertEqual(params.get('data_id', None), None)
+        self.assertNotEqual(page.get('data_id', None), None)
+        self.assertNotEqual(params.get('alpha', None), None)
+        self.assertEqual(params.get('alpha', None), page.get('alpha', None))
+        self.assertTrue(np.isnan(params.get('rg')))
+
 
 if __name__ == "__main__":
     unittest.main()

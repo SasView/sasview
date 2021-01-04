@@ -1,13 +1,7 @@
-# global
-import sys
-import os
-
 from PyQt5 import QtWidgets
 
 import sas.sasview
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
-from sas.qtgui.UI import images_rc
-from sas.qtgui.UI import main_resources_rc
 
 from sas.qtgui.MainWindow.UI.WelcomePanelUI import Ui_WelcomePanelUI
 

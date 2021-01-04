@@ -147,7 +147,7 @@ class FittingLogic(object):
         new_plot.id = str(tab_id) + " " + ("[" + component + "] " if component else "") + model.id
 
         # use data.filename for data, use model.id for theory
-        id_str = data.filename if data.filename else model.id
+        id_str = data.name if data.name else model.id
         new_plot.name = model.name + ((" " + component) if component else "") + " [" + id_str + "]"
 
         new_plot.title = new_plot.name
