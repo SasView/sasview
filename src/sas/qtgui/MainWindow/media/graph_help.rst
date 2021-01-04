@@ -298,7 +298,7 @@ in red, it means that the slicer can move/change size.
 *NOTE! The slicer size will reset if you try to select a region greater than
 the size of the data.*
 
-Alternatively, once a 'slicer' is active you can also select the region to
+Alternatively, you can also select the region to
 average by bringing back the *Dataset Menu* and selecting *Edit Slicer
 Parameters*. A dialog window will appear in which you can enter values to
 define a region or select the number of points to plot (*nbins*).
@@ -313,7 +313,25 @@ average.
 Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in
 order to display the average numerically, rather than graphically.
 
-To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*.
+A slicer can be applied to any or all existing 2D data plots using the *Edit Slicer
+Parameters* window. Batch slicing options are available in the right pane *Batch Slicing*.
+Select the 2D plots you want to apply the slicer to. Current 2D plot is selected by default.
+The resulting 1D data for all slicers can be saved as a text file and then sent to fitting by selecting the Auto save generated 1D check box.
+Sending data to the fitting perspective requires the data be saved.
+
+Once the auto save check box is selected, you can select where the files are saved.
+The file name for the saved data is the slicer name plus the file name of the original data set,
+plus what is in the Append to file name field. The default value in the append to field includes the names and values for all of the slicer parameters.
+
+The batch of slices can be sent to fitting if desired, with three options available.
+The first is to not fit the data, the second is to send the slices to individual fit pages,
+and the third is to send all sliced data to a single batch fit window.
+
+Clicking *Apply* will create a slicer for each selected plot with the parameters entered in the 'Slicer Parameters' window of the 'Slicer' tab.
+Depending on the options selected the data may then be saved, loaded as separate data sets in the data manager panel, and finally sent to fitting.
+
+To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*. Alternatively, you can select *None* in the 'Slicer type' dropdown
+list in the 'Slicer Parameters' dialog.
 
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
