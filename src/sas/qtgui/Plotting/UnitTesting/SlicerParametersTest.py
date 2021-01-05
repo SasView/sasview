@@ -11,12 +11,22 @@ from PyQt5 import QtTest
 import sas.qtgui.path_prepare
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
 
 # Local
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
+
+
+class dummy_manager(object):
+    def communicator(self):
+        return Communicate()
+    communicate = Communicate()
+    active_plots = {}
+
 
 class SlicerParametersTest(unittest.TestCase):
     '''Test the SlicerParameters dialog'''
@@ -27,7 +37,10 @@ class SlicerParametersTest(unittest.TestCase):
         item2 = QtGui.QStandardItem("999.0")
         self.model = QtGui.QStandardItemModel()
         self.model.appendRow([item1, item2])
-        self.widget = SlicerParameters(model=self.model)
+        plotter = Plotter2D(parent=dummy_manager(), quickplot=True)
+        plotter.getActivePlots = MagicMock(return_value={})
+        self.widget = SlicerParameters(model=self.model, parent=plotter,
+                                       communicator = dummy_manager().communicate)
 
     def tearDown(self):
         '''Destroy the model'''
@@ -99,8 +112,8 @@ class SlicerParametersTest(unittest.TestCase):
         # Test if the widget got it
         self.assertEqual(self.widget.model.columnCount(), 2)
         self.assertEqual(self.widget.model.rowCount(), 2)
-        self.assertEqual(self.widget.model.item(0,0).text(), 's1')
-        self.assertEqual(self.widget.model.item(1,0).text(), 's2')
+        self.assertEqual(self.widget.model.item(0, 0).text(), 's1')
+        self.assertEqual(self.widget.model.item(1, 0).text(), 's2')
 
 
         
