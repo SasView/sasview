@@ -409,6 +409,9 @@
        </item>
        <item row="1" column="0">
         <widget class="QTreeView" name="freezeView">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
          <attribute name="headerVisible">
           <bool>false</bool>
          </attribute>
@@ -517,6 +520,16 @@
   <action name="actionFreezeResults">
    <property name="text">
     <string>Freeze Results</string>
+   </property>
+  </action>
+  <action name="actionSelect">
+   <property name="text">
+    <string>Select items</string>
+   </property>
+  </action>
+  <action name="actionDeselect">
+   <property name="text">
+    <string>Deselect items</string>
    </property>
   </action>
  </widget>

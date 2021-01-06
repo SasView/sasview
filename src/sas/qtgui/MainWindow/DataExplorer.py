@@ -30,7 +30,8 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 import sas.qtgui.Perspectives as Perspectives
 
 DEFAULT_PERSPECTIVE = "Fitting"
-ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'All File (*.*)']
+ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'Invariant (*.inv)',
+                  'Corfunc (*.crf)', 'All Files (*.*)']
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
+
+        # Slots for model changes
+        self.model.itemChanged.connect(self.onFileListChanged)
+        self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
         self.data_proxy.setFilterRegExp(r"[^()]")
@@ -270,14 +275,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             self.default_project_location = os.path.dirname(filename)
-            # Inversion perspective will remove all data with delete
+            # Delete all data and initialize all perspectives
             self.deleteAllItems()
-            # Currently project load is available only for fitting
-            if self.cbFitting.currentText != DEFAULT_PERSPECTIVE:
-                self.cbFitting.setCurrentIndex(
-                    self.cbFitting.findText(DEFAULT_PERSPECTIVE))
-                # delete all (including the default) tabs
-                self._perspective().deleteAllTabs()
+            self.cbFitting.disconnect()
+            self.parent.loadAllPerspectives()
+            self.initPerspectives()
             self.readProject(filename)
 
     def loadAnalysis(self):
@@ -512,9 +514,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         grid_page.append(grid_name)
                         self.parent.showBatchOutput(grid_page)
                 continue
+            # Store constraint pages until all individual fits are open
             if 'cs_tab' in key:
                 cs_keys.append(key)
                 continue
+            # Load last visible perspective as stored in project file
             if 'visible_perspective' in key:
                 visible_perspective = value
             # send newly created items to the perspective
@@ -598,6 +602,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             params = value['pr_params']
             self.sendItemToPerspective(items[0])
             self._perspective().updateFromParameters(params)
+        if 'invar_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Invariant'))
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(value['invar_params'])
+        if 'corfunc_params' in value:
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText('Corfunc'))
+            self.sendItemToPerspective(items[0])
+            self._perspective().updateFromParameters(value['corfunc_params'])
         if 'cs_tab' in key and 'is_constraint' in value:
             # Create a C&S page
             self._perspective().addConstraintTab()
@@ -1429,6 +1441,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Create a custom menu based on actions defined in the UI file
         self.context_menu = QtWidgets.QMenu(self)
+        self.context_menu.addAction(self.actionSelect)
+        self.context_menu.addAction(self.actionDeselect)
+        self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1442,6 +1457,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
 
         # Define the callbacks
+        self.actionSelect.triggered.connect(self.onFileListSelected)
+        self.actionDeselect.triggered.connect(self.onFileListDeselected)
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
@@ -1469,6 +1486,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
         self.actionQuick3DPlot.setEnabled(is_2D)
         self.actionEditMask.setEnabled(is_2D)
+        self.actionSelect.setEnabled(True)
 
         # Freezing
         # check that the selection has inner items
@@ -1679,6 +1697,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.dataDeletedSignal.emit(deleted_items)
         # update stored_data
         self.manager.update_stored_data(deleted_names)
+        self.manager.delete_data(data_id=[], theory_id=[], delete_all=True)
 
         # Clear the model
         self.model.clear()
@@ -1938,3 +1957,37 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         for item in items_to_delete:
             self.theory_model.removeRow(item.row())
+
+    def onFileListSelected(self):
+        """
+        Slot for actionSelect
+        """
+        self.setCheckItems(status=QtCore.Qt.Checked)
+
+    def onFileListDeselected(self):
+        """
+        Slot for actionDeselect
+        """
+        self.setCheckItems(status=QtCore.Qt.Unchecked)
+
+    def onFileListChanged(self, item):
+        """
+        Slot for model (data/theory) changes.
+        Currently only reacting to checkbox selection.
+        """
+        if len(self.current_view.selectedIndexes()) < 2:
+            return
+        self.setCheckItems(status=item.checkState())
+
+    def setCheckItems(self, status=QtCore.Qt.Unchecked):
+        """
+        Sets requested checkbox status on selected indices
+        """
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model.blockSignals(True)
+        for index in self.current_view.selectedIndexes():
+            item = model.itemFromIndex(proxy.mapToSource(index))
+            if item.isCheckable():
+                item.setCheckState(status)
+        model.blockSignals(False)

@@ -307,6 +307,8 @@ class InversionTest(unittest.TestCase):
 
     def testSerialization(self):
         """ Serialization routines """
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
         self.widget.setData([self.fakeData1])
         self.oneDataSetState()
         data_id = self.widget.currentTabDataId()[0]

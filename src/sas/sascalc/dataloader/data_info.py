@@ -141,8 +141,8 @@ class plottable_2D(object):
         self.zmin = zmin
         self.zmax = zmax
 
-        self.y_bins = x_bins
-        self.x_bins = y_bins
+        self.y_bins = x_bins if x_bins else []
+        self.x_bins = y_bins if y_bins else []
 
     def xaxis(self, label, unit):
         """
