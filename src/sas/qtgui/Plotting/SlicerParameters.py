@@ -188,17 +188,20 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if index == 0:  # No interactor
             self.parent.onClearSlicer()
             self.setModel(None)
+            self.onGeneratePlots(False)
         else:
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
-            self.onApply()
+        self.onApply()
 
     def onGeneratePlots(self, isChecked):
         """
         Respond to choice of auto saving plots
         """
         self.enableFileControls(isChecked)
+        # state changed - enable apply
+        self.cmdApply.setEnabled(True)
         self.isSave = isChecked
 
     def onChooseFilesLocation(self):
@@ -247,7 +250,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             self.applyPlotter(plot)
             # Save 1D plots if required
             plots.append(plot)
-        if self.isSave:
+        if self.isSave and self.model is not None:
             self.save1DPlotsForPlot(plots)
         pass  # debug anchor
 
@@ -268,6 +271,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         slicer = self.callbacks[index]
         if slicer is None:
+            plotter.onClearSlicer()
             return
         plotter.setSlicer(slicer=slicer, reset=False)
         # override slicer model
@@ -306,15 +310,25 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """ Model setter """
         self.model = model
         self.proxy.setSourceModel(self.model)
-        self.model.itemChanged.connect(self.onApply)
+        if model is not None:
+            self.model.itemChanged.connect(self.onApply)
 
     def sendToFit(self, items_for_fit, fitting_requested):
         """
         Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
         """
-        if 3 < fitting_requested < 1:
+        if fitting_requested not in (1, 2):
             return
         isBatch = fitting_requested == 2
+        # Check if perspective is correct, otherwise complain
+        if self.parent.manager._perspective().name != 'Fitting':
+            msg = "Please change current perspective to Fitting to enable requested Fitting Options."
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
+            return
         # icky way to go up the tree
         self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
 
