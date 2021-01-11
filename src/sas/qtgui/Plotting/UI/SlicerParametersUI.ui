@@ -120,12 +120,12 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-				 <item>
-					 <property name="text">
-						 <string>None</string>
-					 </property>
-				 </item>
-			    <item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
                <property name="text">
                 <string>Sector Interactor</string>
                </property>
@@ -180,7 +180,7 @@
          <property name="title">
           <string>Batch Slicing Options </string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3">
+         <layout class="QGridLayout" name="gridLayout_6">
           <item row="0" column="0">
            <widget class="QListWidget" name="lstPlots">
             <property name="sizePolicy">
@@ -208,87 +208,117 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Files saved in:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="txtLocation">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="cmdFiles">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>20</width>
-                <height>21</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QLabel" name="lblExtension">
-              <property name="text">
-               <string>Append text:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="txtExtension">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Files will be saved as &amp;lt;SlicerType&amp;gt;&amp;lt;FileName&amp;gt;&amp;lt;AppendText&amp;gt;.txt&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Fitting Options:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="cbFitOptions">
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <property name="text">
-                <string>No fitting</string>
-               </property>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Files saved in:</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <property name="text">
-                <string>Fitting</string>
-               </property>
+               <widget class="QLineEdit" name="txtLocation">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <property name="text">
-                <string>Batch fitting</string>
-               </property>
+               <widget class="QPushButton" name="cmdFiles">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>20</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
               </item>
-             </widget>
+              <item>
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>as </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cbSaveExt">
+                <item>
+                 <property name="text">
+                  <string>.txt</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>.xml</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>.h5</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLabel" name="lblExtension">
+                <property name="text">
+                 <string>Append text:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="txtExtension">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Files will be saved as &amp;lt;SlicerType&amp;gt;&amp;lt;FileName&amp;gt;&amp;lt;AppendText&amp;gt;.txt&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Fitting Options:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cbFitOptions">
+                <item>
+                 <property name="text">
+                  <string>No fitting</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Fitting</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Batch fitting</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>

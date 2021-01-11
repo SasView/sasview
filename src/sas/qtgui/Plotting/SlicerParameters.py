@@ -16,6 +16,8 @@ from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
@@ -233,6 +235,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.txtExtension.setEnabled(enabled)
         self.cmdFiles.setEnabled(enabled)
         self.cbFitOptions.setEnabled(enabled)
+        self.label_4.setEnabled(enabled)
+        self.cbSaveExt.setEnabled(enabled)
 
     def onApply(self):
         """
@@ -294,8 +298,17 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 filename = data.name if self.txtExtension.text() == ""\
                     else data.name + "_" + str(self.txtExtension.text())
                 # Saved as "TXT" file, as in original impl
-                filename_ext = filename + ".txt"
-                GuiUtils.onTXTSave(data, filename_ext)
+                extension = self.cbSaveExt.currentText()
+                filename_ext = filename + extension
+                filepath = os.path.join(self.save_location, filename_ext)
+                if 'txt' in extension:
+                    GuiUtils.onTXTSave(data, filepath)
+                elif 'xml' in extension:
+                    loader = Loader()
+                    loader.save(filepath, data, ".xml")
+                elif 'h5' in extension:
+                    nxcansaswriter = NXcanSASWriter()
+                    nxcansaswriter.write([data], filepath)
                 new_item = GuiUtils.createModelItemWithPlot(data, name=filename)
                 self.parent.manager.updateModelFromPerspective(new_item)
 
