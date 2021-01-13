@@ -398,7 +398,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             power_low = self._calculator.get_extrapolation_power(range='low')
 
             # Plot the chart
-            title = f"Low-Q extrapolation: {self._data.name}"
+            title = f"Low-Q extrapolation [{self._data.name}]"
 
             # Convert the data into plottable
             self.low_extrapolation_plot = self._manager.createGuiData(extrapolated_data)
@@ -427,7 +427,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
 
             # Plot the chart
-            title = f"High-Q extrapolation: {self._data.name}"
+            title = f"High-Q extrapolation [{self._data.name}]"
 
             # Convert the data into plottable
             self.high_extrapolation_plot = self._manager.createGuiData(high_out_data)
