@@ -23,6 +23,7 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
@@ -1030,10 +1031,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if new_plots:
             self.plotData(new_plots)
 
-    def displayData(self, data_list, id=None):
+    def displayData(self, data_list, id=None, callbacks=None):
         """
         Forces display of charts for the given data set
         """
+        # TODO: Add q-range sliders to *all* items in plots_to_show that aren't residual plots
+        # TODO: Add list at end or create new method that calls this and adds callback?
         # data_list = [QStandardItem, Data1D/Data2D]
         plots_to_show = data_list[1:]
         plot_item = data_list[0]
@@ -1060,7 +1063,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         append = False
         plot_to_append_to = None
-        for plot_to_show in plots_to_show:
+        for i, plot_to_show in enumerate(plots_to_show):
             # Check if this plot already exists
             shown = self.updatePlot(plot_to_show)
             # Retain append status throughout loop
@@ -1149,6 +1152,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
+
+                # Add q-range sliders to the fits to change the q range
+                # Only applying to 1D fits for now
+                # FIXME: Why isn't this being added?
+                if plot_set.plot_role != Data1D.ROLE_RESIDUAL:
+                    # callback = None if not callbacks or len(callbacks) < i or not callbacks[i] else callbacks[i]
+                    slider_min = QRangeSlider(new_plot, new_plot.ax,
+                                              x=min(plot_set.x), y_min=min(plot_set.y), y_max=max(plot_set.y))
+                    slider_max = QRangeSlider(new_plot, new_plot.ax,
+                                              x=max(plot_set.x), y_min=min(plot_set.y), y_max=max(plot_set.y))
+                    new_plot.sliders[plot_set.name + "_min"] = slider_min
+                    new_plot.sliders[plot_set.name + "_max"] = slider_max
+
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:

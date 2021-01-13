@@ -56,8 +56,10 @@ class PlotterWidget(PlotterBase):
         # Dictionary of {plot_id:Data1d}
         self.plot_dict = {}
         # Dictionaty of {plot_id:line}
-
         self.plot_lines = {}
+        # Dictionary of slider interactors {plot_id:interactor}
+        self.sliders = {}
+
         # Window for text add
         self.addText = AddText(self)
 
