@@ -4,6 +4,7 @@ Allows users to modify the box slicer parameters.
 """
 import os
 import functools
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -173,7 +174,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # Updates to the slicer moder must propagate to all plotters
         if self.model is not None:
-            self.model.itemChanged.connect(self.onApply)
+            self.model.itemChanged.connect(self.onParamChange)
 
         # selecting/deselecting items in lstPlots enables `Apply`
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
@@ -195,7 +196,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             slicer = self.callbacks[index]
             if self.active_plots.keys():
                 self.parent.setSlicer(slicer=slicer)
-        self.onApply()
+        self.onParamChange()
 
     def onGeneratePlots(self, isChecked):
         """
@@ -237,6 +238,20 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.cbFitOptions.setEnabled(enabled)
         self.label_4.setEnabled(enabled)
         self.cbSaveExt.setEnabled(enabled)
+
+    def onParamChange(self):
+        """
+        Respond to param change by updating plots
+        """
+        for row in range(self.lstPlots.count()):
+            item = self.lstPlots.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            # Only checked items
+            if not isChecked:
+                continue
+            plot = item.text()
+            # Apply plotter to a plot
+            self.applyPlotter(plot)
 
     def onApply(self):
         """
@@ -283,6 +298,41 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # force conversion model->parameters in slicer
         plotter.slicer.setParamsFromModel()
 
+    def prepareFilePathFromData(self, data):
+        """
+        Prepares full, unique path for a 1D plot
+        """
+        # Extend filename with the requested string
+        filename = data.name if self.txtExtension.text() == ""\
+            else data.name + "_" + str(self.txtExtension.text())
+        extension = self.cbSaveExt.currentText()
+        filename_ext = filename + extension
+
+        # Assure filename uniqueness
+        dst_filename = GuiUtils.findNextFilename(filename_ext, self.save_location)
+        if not dst_filename:
+            logging.error("Could not find appropriate filename for " + filename_ext)
+            return
+        filepath = os.path.join(self.save_location, dst_filename)
+        return filepath
+
+    def serializeData(self, data, filepath):
+        """
+        Write out 1D plot in a requested format
+        """
+        # Choose serializer based on requested extension
+        extension = self.cbSaveExt.currentText()
+        if 'txt' in extension:
+            GuiUtils.onTXTSave(data, filepath)
+        elif 'xml' in extension:
+            loader = Loader()
+            loader.save(filepath, data, ".xml")
+        elif 'h5' in extension:
+            nxcansaswriter = NXcanSASWriter()
+            nxcansaswriter.write([data], filepath)
+        else:
+            raise AttributeError("Incorrect extension chosen")
+
     def save1DPlotsForPlot(self, plots):
         """
         Save currently shown 1D sliced data plots for a given 2D plot
@@ -295,21 +345,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                     continue
                 if plot not in data.name:
                     continue
-                filename = data.name if self.txtExtension.text() == ""\
-                    else data.name + "_" + str(self.txtExtension.text())
-                # Saved as "TXT" file, as in original impl
-                extension = self.cbSaveExt.currentText()
-                filename_ext = filename + extension
-                filepath = os.path.join(self.save_location, filename_ext)
-                if 'txt' in extension:
-                    GuiUtils.onTXTSave(data, filepath)
-                elif 'xml' in extension:
-                    loader = Loader()
-                    loader.save(filepath, data, ".xml")
-                elif 'h5' in extension:
-                    nxcansaswriter = NXcanSASWriter()
-                    nxcansaswriter.write([data], filepath)
-                new_item = GuiUtils.createModelItemWithPlot(data, name=filename)
+
+                filepath = self.prepareFilePathFromData(data)
+                self.serializeData(data, filepath)
+
+                # Add plot to the DataExplorer tree
+                new_name, _ = os.path.splitext(os.path.basename(filepath))
+                new_item = GuiUtils.createModelItemWithPlot(data, name=new_name)
                 self.parent.manager.updateModelFromPerspective(new_item)
 
                 items_for_fit.append(new_item)
@@ -324,7 +366,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.proxy.setSourceModel(self.model)
         if model is not None:
-            self.model.itemChanged.connect(self.onApply)
+            self.model.itemChanged.connect(self.onParamChange)
 
     def sendToFit(self, items_for_fit, fitting_requested):
         """

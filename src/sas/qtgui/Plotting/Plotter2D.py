@@ -172,7 +172,6 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
             self.actionClearSlicer.triggered.connect(self.onClearSlicer)
-        #if self.slicer.__class__.__name__ != "BoxSumCalculator":
         self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
         self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()

@@ -50,7 +50,7 @@ class SlicerParametersTest(unittest.TestCase):
     '''Test the SlicerParameters dialog'''
     def setUp(self):
         '''Create the SlicerParameters dialog'''
-        self.model = None
+        self.model = QtGui.QStandardItemModel()
         plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
         plotter.data = testData()
         active_plots = {"test_plot": plotter}
@@ -88,10 +88,10 @@ class SlicerParametersTest(unittest.TestCase):
         ''' test lstParams with content '''
         item1 = QtGui.QStandardItem('t1')
         item2 = QtGui.QStandardItem('t2')
-        item1 = QtGui.QStandardItem('t3')
-        item2 = QtGui.QStandardItem('t4')
         model = QtGui.QStandardItemModel()
         model.appendRow([item1, item2])
+        item1 = QtGui.QStandardItem('t3')
+        item2 = QtGui.QStandardItem('t4')
         model.appendRow([item1, item2])
 
         plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
@@ -121,8 +121,9 @@ class SlicerParametersTest(unittest.TestCase):
 
         # Check the signal
         self.assertEqual(spy_close.count(), 1)
+        self.widget.close()
 
-    def notestOnHelp(self):
+    def testOnHelp(self):
         ''' Assure clicking on help returns QtWeb view on requested page'''
         self.widget.show()
 
@@ -137,6 +138,8 @@ class SlicerParametersTest(unittest.TestCase):
 
         # Assure the filename is correct
         self.assertIn("graph_help.html", webbrowser.open.call_args[0][0])
+
+        self.widget.close()
 
     def testSetModel(self):
         ''' Test if resetting the model works'''
@@ -183,7 +186,25 @@ class SlicerParametersTest(unittest.TestCase):
         self.assertEqual(self.widget.lstParams.model().rowCount(), 0)
         self.assertEqual(self.widget.lstParams.model().columnCount(), 0)
         self.assertEqual(self.widget.lstParams.model().index(0, 0).data(), None)
- 
+
+    def testOnApply(self):
+        self.widget.lstPlots.item(0).setCheckState(True)
+        self.widget.applyPlotter = MagicMock()
+        self.widget.save1DPlotsForPlot = MagicMock()
+        self.assertFalse(self.widget.isSave)
+        # Apply without 1D data saved
+        self.widget.onApply()
+        self.widget.applyPlotter.assert_called_once()
+        self.widget.save1DPlotsForPlot.assert_not_called()
+
+        # Apply with 1D data saved
+        self.widget.cbSave1DPlots.setCheckState(True)
+        self.assertTrue(self.widget.isSave)
+        self.widget.onApply()
+        self.assertIsNotNone(self.widget.model)
+        self.widget.applyPlotter.assert_called()
+        self.widget.save1DPlotsForPlot.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
