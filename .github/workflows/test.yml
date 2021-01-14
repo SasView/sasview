@@ -130,7 +130,7 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         cd docs/sphinx-docs/
-        python build_sphinx.py || true
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python build_sphinx.py || true
 
     - name: Test with pytest
       env:
