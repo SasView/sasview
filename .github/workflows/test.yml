@@ -119,15 +119,18 @@ jobs:
         python setup.py build
         python -m pip install .
 
-    - name: Build sasview docs
+    - name: Build sasmodels and bumps docs (Linux only)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        NUM=4
+        make -C ../bumps/doc html || true
         mkdir -p ~/.sasmodels/compiled_models
-        make -j $NUM -C ../bumps/doc html || true
-        make -j $NUM -C ../sasmodels/doc html || true
+        make -j4 -C ../sasmodels/doc html || true
+
+    - name: Build sasview docs (Linux only)
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
         cd docs/sphinx-docs/
-        python build_sphinx.py || true
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python build_sphinx.py || true
 
     - name: Test with pytest
       env:
@@ -141,4 +144,4 @@ jobs:
         PYOPENCL_COMPILER_OUTPUT: 1
       run: |
         cd src/sas/qtgui
-        xvfb-run -a --server-args="-screen 0 1024x768x24" python3 GUITests.py || true
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python GUITests.py || true
