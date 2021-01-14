@@ -122,9 +122,9 @@ jobs:
     - name: Build sasmodels and bumps docs (Linux only)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
+        make -C ../bumps/doc html || true
         mkdir -p ~/.sasmodels/compiled_models
         make -j4 -C ../sasmodels/doc html || true
-        make -C ../bumps/doc html || true
 
     - name: Build sasview docs (Linux only)
       if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -144,4 +144,4 @@ jobs:
         PYOPENCL_COMPILER_OUTPUT: 1
       run: |
         cd src/sas/qtgui
-        xvfb-run -a --server-args="-screen 0 1024x768x24" python3 GUITests.py || true
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python GUITests.py || true
