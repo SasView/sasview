@@ -1005,9 +1005,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Update P(r) and fit plots
         self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
-        self.prPlot.name = self.logic.data.name
+        self.prPlot.filename = self.logic.data.filename
         self.dataPlot = self.logic.new1DPlot(out, self._calculator)
-        self.dataPlot.name = self.logic.data.name
+        self.dataPlot.filename = self.logic.data.filename
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

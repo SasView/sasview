@@ -1197,7 +1197,7 @@ class GuiManager(object):
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
-            self.filesWidget.displayData(name=name, is_data=True)
+            self.filesWidget.displayDataByName(name=name, is_data=True)
 
     def showPlot(self, plot, id):
         """
