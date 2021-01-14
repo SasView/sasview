@@ -222,6 +222,8 @@ class Plotter2DWidget(PlotterBase):
         self.slicer.clear()
         self.canvas.draw()
         self.slicer = None
+        if self.slicer_widget:
+            self.slicer_widget.setModel(None)
 
     def getActivePlots(self):
         ''' utility method for manager query of active plots '''
@@ -231,10 +233,10 @@ class Plotter2DWidget(PlotterBase):
         """
         Present a dialog for manipulating the current slicer
         """
-        #assert self.slicer
         # Only show the dialog if not currently shown
         if self.slicer_widget:
             return
+
         def slicer_closed():
             # Need to disconnect the signal!!
             self.slicer_widget.closeWidgetSignal.disconnect()
@@ -251,7 +253,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_widget = SlicerParameters(self, model=self.param_model,
                                               active_plots=self.getActivePlots(),
                                               validate_method=validator,
-                                              communicator = self.manager.communicator)
+                                              communicator=self.manager.communicator)
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
         self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
@@ -321,7 +323,7 @@ class Plotter2DWidget(PlotterBase):
         """
         Update circular averaging plot on Data2D change
         """
-        if not hasattr(self,'_item'): return
+        if not hasattr(self, '_item'): return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
@@ -329,12 +331,12 @@ class Plotter2DWidget(PlotterBase):
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
         if plots is None: return
-        ca_caption = '2daverage'+self.data0.name
+        ca_caption = '2daverage' + self.data0.name
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
             if plot.group_id is None: continue
-            if ca_caption in plot.group_id: has_plot=True
+            if ca_caption in plot.group_id: has_plot = True
         # return prematurely if no circular average plot found
         if not has_plot: return
 
@@ -345,10 +347,6 @@ class Plotter2DWidget(PlotterBase):
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
         # Show the new plot, if already visible
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
-
-        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
-
-        # Show the plot
 
     def setSlicer(self, slicer, reset=True):
         """

@@ -363,6 +363,19 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def setModel(self, model):
         """ Model setter """
+        # check if parent slicer changed
+        current_slicer = type(self.parent.slicer)
+        for index in self.callbacks:
+            # must use type() for None or just imported type for ! None
+            if type(self.callbacks[index]) == current_slicer or \
+               self.callbacks[index] == current_slicer:
+                if index != self.cbSlicer.currentIndex():
+                    # parameters already updated, no need to notify
+                    # combobox listeners
+                    self.cbSlicer.blockSignals(True)
+                    self.cbSlicer.setCurrentIndex(index)
+                    self.cbSlicer.blockSignals(False)
+                break
         self.model = model
         self.proxy.setSourceModel(self.model)
         if model is not None:
