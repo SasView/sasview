@@ -119,13 +119,16 @@ jobs:
         python setup.py build
         python -m pip install .
 
-    - name: Build sasview docs
+    - name: Build sasmodels and bumps docs (Linux only)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        NUM=4
         mkdir -p ~/.sasmodels/compiled_models
-        make -j $NUM -C ../bumps/doc html || true
-        make -j $NUM -C ../sasmodels/doc html || true
+        make -j4 -C ../sasmodels/doc html || true
+        make -C ../bumps/doc html || true
+
+    - name: Build sasview docs (Linux only)
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
         cd docs/sphinx-docs/
         python build_sphinx.py || true
 
