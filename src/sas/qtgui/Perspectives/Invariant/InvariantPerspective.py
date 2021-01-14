@@ -312,7 +312,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 logging.warning('Low-q calculation failed: {}'.format(str(ex)))
                 qstar_low = "ERROR"
                 qstar_low_err = "ERROR"
-        elif self.low_extrapolation_plot:
+        if self.low_extrapolation_plot and not low_calculation_pass:
             # Remove the existing extrapolation plot
             model_items = GuiUtils.getChildrenFromItem(self._model_item)
             for item in model_items:
@@ -341,7 +341,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 logging.warning('High-q calculation failed: {}'.format(str(ex)))
                 qstar_high = "ERROR"
                 qstar_high_err = "ERROR"
-        elif self.high_extrapolation_plot:
+        if self.high_extrapolation_plot and not high_calculation_pass:
             # Remove the existing extrapolation plot
             model_items = GuiUtils.getChildrenFromItem(self._model_item)
             for item in model_items:
@@ -879,6 +879,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # only 1 file can be loaded
         self._model_item = data_item[0]
+
+        # Reset plots on data change
+        self.low_extrapolation_plot = None
+        self.high_extrapolation_plot = None
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
