@@ -412,7 +412,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         assert isinstance(datas, tuple)
         plot_id = id(self)
-        titles = ['1D Correlation', '3D Correlation', 'Interface Distribution Function']
+        titles = [f"1D Correlation [{self._path}]", f"3D Correlation [{self._path}]",
+                  'Interface Distribution Function']
         for i, plot in enumerate(datas):
             plot_to_add = self.parent.createGuiData(plot)
             # set plot properties

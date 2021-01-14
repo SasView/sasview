@@ -993,7 +993,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         item = GuiUtils.itemFromDisplayName(name, self.model)
         return item
 
-    def displayData(self, name=None, is_data=True, id=None):
+    def displayDataByName(self, name=None, is_data=True, id=None):
         """
         Forces display of charts for the given name
         """
@@ -1033,7 +1033,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Forces display of charts for the given data set
         """
         # data_list = [QStandardItem, Data1D/Data2D]
-        plot_to_show = data_list[1]
+        plots_to_show = data_list[1:]
         plot_item = data_list[0]
 
         # plots to show
@@ -1045,7 +1045,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Try the current item
             main_data = GuiUtils.dataFromItem(plot_item)
         # 1D dependent plots of 2D sets - special treatment
-        if isinstance(main_data, Data2D) and isinstance(plot_to_show, Data1D):
+        if isinstance(main_data, Data2D) and isinstance(plots_to_show[0], Data1D):
             main_data = None
 
         # Make sure main data for 2D is always displayed
@@ -1056,23 +1056,44 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 else:
                     self.plotData([(plot_item, main_data)])
 
-        # Check if this is merely a plot update
-        if self.updatePlot(plot_to_show):
-            return
+        append = False
+        plot_to_append_to = None
+        for plot_to_show in plots_to_show:
+            # Check if this plot already exists
+            shown = self.updatePlot(plot_to_show)
+            # Retain append status throughout loop
+            append = shown if shown else append
 
-        # Residuals get their own plot
-        if plot_to_show.plot_role == Data1D.ROLE_RESIDUAL:
-            plot_to_show.yscale = 'linear'
-            self.plotData([(plot_item, plot_to_show)])
-        elif plot_to_show.plot_role == Data1D.ROLE_DELETABLE:
-            # No plot
-            return
-        else:
-            # Plots with main data points on the same chart
-            # Get the main data plot
-            if main_data is not None and not self.isPlotShown(main_data):
-                new_plots.append((plot_item, main_data))
-            new_plots.append((plot_item, plot_to_show))
+            plot_name = plot_to_show.name
+            role = plot_to_show.plot_role
+
+            if (role == Data1D.ROLE_RESIDUAL and shown) or role == Data1D.ROLE_DELETABLE:
+                # Nothing to do if separate plot already shown or to be deleted
+                continue
+            elif role == Data1D.ROLE_RESIDUAL:
+                # Residual plots should always be separate
+                plot_to_show.yscale='linear'
+                self.plotData([(plot_item, plot_to_show)])
+            elif append:
+                # Assume all other plots sent together should be on the same chart if a previous plot exists
+                if not plot_to_append_to:
+                    plot_to_append_to = self.active_plots[plot_name]
+                # Remove existing if already exists
+                self.appendOrUpdatePlot(self, plot_to_show, plot_to_append_to)
+            else:
+                # Plots with main data points on the same chart
+                # Get the main data plot
+                if main_data is not None and not self.isPlotShown(main_data):
+                    new_plots.append((plot_item, main_data))
+                new_plots.append((plot_item, plot_to_show))
+
+        if append:
+            # Append any plots handled in loop before an existing plot was found
+            for _, plot_set in new_plots:
+                self.appendOrUpdatePlot(self, plot_set, plot_to_append_to)
+            # Clear list of any potential new plots now that they're appended to the existing plot
+            new_plots = []
+
         if new_plots:
             self.plotData(new_plots)
 
@@ -1198,6 +1219,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for _, plot_set in new_plots:
             if type(plot_set) is type(old_plot._data[0]):
                 old_plot.plot(plot_set)
+
+    @staticmethod
+    def appendOrUpdatePlot(self, data, plot):
+        name = data.name
+        if name in plot.plot_dict.keys():
+            plot.replacePlot(name, data)
+        else:
+            plot.plot(data)
 
     def updatePlot(self, data):
         """
