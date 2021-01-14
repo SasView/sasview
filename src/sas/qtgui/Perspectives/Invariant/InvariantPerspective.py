@@ -311,6 +311,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 logging.warning('Low-q calculation failed: {}'.format(str(ex)))
                 qstar_low = "ERROR"
                 qstar_low_err = "ERROR"
+        elif self.low_extrapolation_plot:
+            # Remove the existing extrapolation plot
+            model_items = GuiUtils.getChildrenFromItem(self._model_item)
+            for item in model_items:
+                if item.text() == self.low_extrapolation_plot.title:
+                    reactor.callFromThread(self._manager.filesWidget.closePlotsForItem, item)
+                    reactor.callFromThread(self._model_item.removeRow, item.row())
+                    break
+            self.low_extrapolation_plot = None
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
 
@@ -329,6 +338,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 logging.warning('High-q calculation failed: {}'.format(str(ex)))
                 qstar_high = "ERROR"
                 qstar_high_err = "ERROR"
+        elif self.high_extrapolation_plot:
+            # Remove the existing extrapolation plot
+            model_items = GuiUtils.getChildrenFromItem(self._model_item)
+            for item in model_items:
+                if item.text() == self.high_extrapolation_plot.title:
+                    reactor.callFromThread(self._manager.filesWidget.closePlotsForItem, item)
+                    reactor.callFromThread(self._model_item.removeRow, item.row())
+                    break
+            self.high_extrapolation_plot = None
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
 
