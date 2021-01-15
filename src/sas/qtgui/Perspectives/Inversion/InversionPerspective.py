@@ -456,6 +456,22 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.isCalculating = False
         self.updateGuiValues()
 
+    def check_q_low(self, q_value):
+        """ Validate the value of low q sent by the slider """
+        if self._calculator.get_qmax() > q_value and q_value > min(self._calculator.x):
+            self._calculator.q_min = q_value
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            return True
+        return False
+
+    def check_q_high(self, q_value):
+        """ Validate the value of high q sent by the slider """
+        if self._calculator.get_qmin() < q_value and q_value < max(self._calculator.x):
+            self._calculator.q_max = q_value
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            return True
+        return False
+
     ######################################################################
     # Response Actions
 
@@ -1008,6 +1024,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.prPlot.filename = self.logic.data.filename
         self.dataPlot = self.logic.new1DPlot(out, self._calculator)
         self.dataPlot.filename = self.logic.data.filename
+
+        self.dataPlot.show_q_range_sliders = True
+        self.dataPlot.q_range_slider_low_validator = self.check_q_low
+        self.dataPlot.q_range_slider_high_validator = self.check_q_high
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

@@ -9,11 +9,6 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 logger = logging.getLogger(__name__)
 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
-
 
 class QRangeSlider(BaseInteractor):
     """
@@ -34,8 +29,10 @@ class QRangeSlider(BaseInteractor):
         self.y_marker_min = self.data.y[np.where(self.data.x == self.x_min)[0][0]]
         self.x_max = np.fabs(max(self.data.x))
         self.y_marker_max = self.data.y[np.where(self.data.x == self.x_max)[0][-1]]
-        self.line_min = LineInteractor(self, axes, zorder=zorder, x=self.x_min, y=self.y_marker_min)
-        self.line_max = LineInteractor(self, axes, zorder=zorder, x=self.x_max, y=self.y_marker_max)
+        self.line_min = LineInteractor(self, axes, zorder=zorder, x=self.x_min, y=self.y_marker_min,
+                                       validator=self.data.q_range_slider_low_validator)
+        self.line_max = LineInteractor(self, axes, zorder=zorder, x=self.x_max, y=self.y_marker_max,
+                                       validator=self.data.q_range_slider_high_validator)
         self.has_move = True
         self.update()
 
@@ -114,7 +111,7 @@ class LineInteractor(BaseInteractor):
     """
     Draw a single vertical line that can be modified
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
+    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5, validator=None):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -132,6 +129,7 @@ class LineInteractor(BaseInteractor):
         self.line = self.axes.axvline(self.x, linestyle='-', color=self.color, marker='', pickradius=5,
                                       label=None, zorder=zorder, visible=True)
         self.has_move = True
+        self.validator = validator
         self.connect_markers([self.line, self.inner_marker])
         self.update()
 
@@ -173,9 +171,10 @@ class LineInteractor(BaseInteractor):
         if y is not None:
             self.y_marker = y
         # Draw lines and markers
-        self.inner_marker.set_xdata([self.x])
-        self.inner_marker.set_ydata([self.y_marker])
-        self.line.set_xdata([self.x])
+        if self.validator(self.x):
+            self.inner_marker.set_xdata([self.x])
+            self.inner_marker.set_ydata([self.y_marker])
+            self.line.set_xdata([self.x])
 
     def save(self, ev):
         """
