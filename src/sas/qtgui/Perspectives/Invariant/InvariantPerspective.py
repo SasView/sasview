@@ -305,7 +305,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 function=function_low, power=self._low_power_value)
             try:
                 qmin_ext = float(self.txtExtrapolQMin.text())
-                qmin = None if qmin_ext < self._data.x[0] else qmin_ext
+                qmin = None if qmin_ext > self._data.x[0] else qmin_ext
                 qstar_low, qstar_low_err = self._calculator.get_qstar_low(qmin)
                 low_calculation_pass = True
             except Exception as ex:
@@ -334,7 +334,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                 function=function_high, power=self._high_power_value)
             try:
                 qmax_ext = float(self.txtExtrapolQMax.text())
-                qmax = None if qmax_ext > self._data.x[int(len(self._data.x) - 1)] else qmax_ext
+                qmax = None if qmax_ext < self._data.x[int(len(self._data.x) - 1)] else qmax_ext
                 qstar_high, qstar_high_err = self._calculator.get_qstar_high(qmax)
                 high_calculation_pass = True
             except Exception as ex:

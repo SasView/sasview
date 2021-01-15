@@ -658,14 +658,13 @@ class InvariantCalculator(object):
 
         data = self._get_extrapolated_data(
             model=self._low_extrapolation_function,
-            npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmax)
+            npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin)
 
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
         # may not be a Guinier or simple power law. The following is
         # a conservative estimation for the systematic error.
-        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * \
-                                  (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
+        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data) + err
 
     def get_qstar_high(self, high_q_limit=None):
@@ -699,7 +698,7 @@ class InvariantCalculator(object):
         #create new Data1D to compute the invariant
         data = self._get_extrapolated_data(
             model=self._high_extrapolation_function,
-            npts=INTEGRATION_NSTEPS, q_start=qmin, q_end=high_q_limit)
+            npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit)
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
