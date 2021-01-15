@@ -82,6 +82,9 @@ class PlotterBase(QtWidgets.QWidget):
         self.selectedText = None
         self.textList = []
 
+        # Create Artist and bind it
+        self.connect = BindArtist(self.figure)
+
         # Pre-define the Scale properties dialog
         self.properties = ScaleProperties(self,
                                 init_scale_x=self.x_label,
@@ -202,6 +205,12 @@ class PlotterBase(QtWidgets.QWidget):
     def showLegend(self, show=True):
         """ Legend visibility setter """
         self.show_legend = show
+
+    def update(self):
+        self.figure.canvas.draw()
+
+    def draw(self):
+        self.figure.canvas.draw()
 
     def upatePlotHelper(self):
         """

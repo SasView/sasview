@@ -5,6 +5,8 @@ import time
 import logging
 import copy
 
+import numpy as np
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -1155,15 +1157,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Add q-range sliders to the fits to change the q range
                 # Only applying to 1D fits for now
-                # FIXME: Why isn't this being added?
-                if plot_set.plot_role != Data1D.ROLE_RESIDUAL:
-                    # callback = None if not callbacks or len(callbacks) < i or not callbacks[i] else callbacks[i]
-                    slider_min = QRangeSlider(new_plot, new_plot.ax,
-                                              x=min(plot_set.x), y_min=min(plot_set.y), y_max=max(plot_set.y))
-                    slider_max = QRangeSlider(new_plot, new_plot.ax,
-                                              x=max(plot_set.x), y_min=min(plot_set.y), y_max=max(plot_set.y))
-                    new_plot.sliders[plot_set.name + "_min"] = slider_min
-                    new_plot.sliders[plot_set.name + "_max"] = slider_max
+                if plot_set.plot_role != Data1D.ROLE_RESIDUAL and plot_set.plot_role != Data1D.ROLE_DATA:
+                    sliders = QRangeSlider(new_plot, new_plot.ax, data=plot_set)
+                    new_plot.sliders[plot_set.name] = sliders
 
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
