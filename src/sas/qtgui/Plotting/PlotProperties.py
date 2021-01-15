@@ -1,10 +1,7 @@
 from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotUtilities import COLORS, SHAPES
-
-from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.PlotPropertiesUI import Ui_PlotPropertiesUI
 
 class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
