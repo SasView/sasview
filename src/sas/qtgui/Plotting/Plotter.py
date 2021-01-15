@@ -222,6 +222,10 @@ class PlotterWidget(PlotterBase):
                             zorder=1,
                             picker=True)
 
+        # Display horizontal axis if requested
+        if data.show_yzero:
+            ax.axhline(color='black', linewidth=1)
+
         # Update the list of data sets (plots) in chart
         self.plot_dict[data.name] = data
 
@@ -594,7 +598,7 @@ class PlotterWidget(PlotterBase):
             if ids == id:
                 self.plot(data=plot_dict[ids], hide_error=(not current))
             else:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
+                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
 
     def xyTransform(self, xLabel="", yLabel=""):
         """
@@ -841,5 +845,3 @@ class Plotter(QtWidgets.QDialog, PlotterWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
-
-
