@@ -75,6 +75,10 @@ sasview_data = {
     }
 }
 
+class SplitArgs(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values.split(','))
+
 def generate_zenodo(sasview_data, zenodo_api_key):
     """
     Generating zenodo record
@@ -197,30 +201,35 @@ def prepare_release_notes(issues_list, repository, username, password):
     return issue_titles
 
 if __name__ == "__main__":
-
-    # STEPS:
-    # 1. Generate zenodo
-    # 2. src/sas/sasview/_init_.py
-    # 2. LICENSE file
-    # 3.
+    """
+    Setups init and license files
+    Generates zenodo doi and writes to the init file
+    Templates release notes
+    """
 
     parser = argparse.ArgumentParser('Script to automate release process')
     parser.add_argument('-v', '--sasview_version', required=True)
     parser.add_argument('-s', '--sasmodels_version', required=True)
     parser.add_argument('-z', '--zenodo', default=False)
-    parser.add_argument('-u', '--username', default=False, required=True)
-    parser.add_argument('-p', '--password', default=False, required=True)
+    parser.add_argument('-u', '--username', default=False)
+    parser.add_argument('-p', '--password', default=False)
+    parser.add_argument('-l', '--sasview_list', default=False, action=SplitArgs)
+    parser.add_argument('-m', '--sasmodels_list', default=False, action=SplitArgs)
     args = parser.parse_args()
 
     sasview_version = args.sasview_version
     sasmodels_version = args.sasmodels_version
-    zenodo_api_key = args.zenodo
     sasview_data['metadata']['title'] = 'SasView version '+ sasview_version
     sasview_data['metadata']['description'] = sasview_version + ' release'
     sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
         'https://github.com/SasView/sasview/releases/tag/v' + sasview_version
 
-    new_doi = generate_zenodo(sasview_data, zenodo_api_key)
+    # Generates zenodo doi if zenodo api key is provided
+    new_doi = ''
+    if args.zenodo:
+        zenodo_api_key = args.zenodo
+        new_doi = generate_zenodo(sasview_data, zenodo_api_key)
+
     update_sasview_init(sasview_version, new_doi)
     update_sasmodels_init(sasmodels_version)
 
@@ -234,19 +243,20 @@ if __name__ == "__main__":
     license_file = os.path.join('sasview', 'installers', 'license.txt')
     update_license(license_file, license_line, -1)
 
-    sasview_issues_list = ['1414','1550', '1556', '1534', '1546', '1552', '1564', '1565', '1560', '1567',
-                           '1547', '1456','1553', '1538', '1554', '1523', '1536', '1522', '1548', '1529',
-                           '1543', '1599', '1535', '1598', '1606']
-    sasmodels_issues_list = ['402', '401']
+    sasview_issues_list = args.sasview_list
+    sasmodels_issues_list = args.sasmodels_list
 
-    username = args.username
-    password = args.password
-    sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
-    sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
+    #Release notes template is generated if github credentials are provided
+    if args.username and args.password:
+        username = args.username
+        password = args.password
 
-    print('Copy text bellow to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
-    for issue_title in sasview_issues:
-        print('Fixes sasview ' + issue_title)
+        sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
+        sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
 
-    for issue_title in sasmodels_issues:
-        print('Fixes sasmodels ' + issue_title)
+        print('Copy text bellow to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
+        for issue_title in sasview_issues:
+            print(f'Fixes sasview {issue_title}')
+
+        for issue_title in sasmodels_issues:
+            print(f'Fixes sasmodels {issue_title}')
