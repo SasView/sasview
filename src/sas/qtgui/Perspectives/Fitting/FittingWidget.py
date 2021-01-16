@@ -2341,6 +2341,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             new_data.dy = weight
 
+        new_data.show_q_range_sliders = True
+        new_data.slider_high_q_input = self.options_widget.txtMaxRange
+        new_data.slider_low_q_input = self.options_widget.txtMinRange
         return new_data
 
     def updateQRange(self):
