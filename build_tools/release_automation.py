@@ -62,7 +62,7 @@ sasview_data = {
         {'name': 'Potrzebowski, Wojciech','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'orcid': '0000-0002-7789-6779'},
         {'name': "Prescott, Stewart",'affiliation': 'University of New South Wales'},
         {'name': 'Ferraz Leal, Ricardo','affiliation': 'Oak Ridge National Laboratory'},
-        {'name': 'Rozycko, Piotr','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC' },
+        {'name': 'Rozycko, Piotr','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'orcid' : '0000-0002-2359-1013' },
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'}
         ],
@@ -103,7 +103,6 @@ def generate_zenodo(sasview_data, zenodo_api_key):
     else:
         newDOI = r.json()['metadata']['prereserve_doi']['doi']
         print("Empty record created with DOI:"+newDOI)
-        #print(r.json())
 
     #populate record
     deposition_id = r.json()['id']
@@ -135,11 +134,11 @@ def update_sasview_init(version, doi):
     year = datetime.datetime.now().year
     with open(init_file, 'r') as f:
         for line in f.readlines():
-            if line[:11] == '__version__':
+            if line[:11] in '__version__':
                output_lines.append('__version__ = \"'+version+'\"\n')
-            elif line[:7] == '__DOI__' :
+            elif line[:7] in '__DOI__' :
                 output_lines.append('__DOI__ = \"Zenodo, ' + str(doi) + '\"\n')
-            elif line[:16] == '__release_date__':
+            elif line[:16] in '__release_date__':
                 output_lines.append('__release_date__ = \"' + str(year) + '\"\n')
             else:
                 output_lines.append(line)
@@ -165,7 +164,7 @@ def update_sasmodels_init(version):
     with open(init_file, 'w') as f:
         f.writelines(output_lines)
 
-def update_license(license_file, license_line, line_to_update):
+def update_file(license_file, license_line, line_to_update):
     """
 
     :return:
@@ -234,14 +233,14 @@ if __name__ == "__main__":
     update_sasmodels_init(sasmodels_version)
 
     year = datetime.datetime.now().year
-    license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n'
+    license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n\n'
     license_file = os.path.join('sasview', 'LICENSE.txt')
-    update_license(license_file, license_line, 0)
+    update_file(license_file, license_line, 0)
     license_file = os.path.join('sasmodels', 'LICENSE.txt')
-    update_license(license_file, license_line, 0)
+    update_file(license_file, license_line, 0)
     license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
     license_file = os.path.join('sasview', 'installers', 'license.txt')
-    update_license(license_file, license_line, -1)
+    update_file(license_file, license_line, -1)
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list
