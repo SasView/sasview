@@ -46,8 +46,8 @@ class Data1D(PlottableData1D, LoadData1D):
         self.plot_role = Data1D.ROLE_DEFAULT
         # Q-range sliders
         self.show_q_range_sliders = False
-        self.q_range_slider_low_validator = None
-        self.q_range_slider_high_validator = None
+        self.slider_low_q_input = None
+        self.slider_high_q_input = None
         
     def copy_from_datainfo(self, data1d):
         """
