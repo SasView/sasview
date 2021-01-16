@@ -62,7 +62,7 @@ sasview_data = {
         {'name': 'Potrzebowski, Wojciech','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'orcid': '0000-0002-7789-6779'},
         {'name': "Prescott, Stewart",'affiliation': 'University of New South Wales'},
         {'name': 'Ferraz Leal, Ricardo','affiliation': 'Oak Ridge National Laboratory'},
-        {'name': 'Rozycko, Piotr','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'orcid' : '0000-0002-2359-1013' },
+        {'name': 'Rozyczko, Piotr','affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'orcid' : '0000-0002-2359-1013' },
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'}
         ],
