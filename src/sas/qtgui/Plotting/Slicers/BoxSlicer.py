@@ -233,6 +233,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         params["x_max"] = numpy.fabs(self.vertical_lines.x)
         params["y_max"] = numpy.fabs(self.horizontal_lines.y)
         params["nbins"] = self.nbins
+        params["fold"]= self.fold
         return params
 
     def setParams(self, params):
@@ -246,6 +247,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.x = float(numpy.fabs(params["x_max"]))
         self.y = float(numpy.fabs(params["y_max"]))
         self.nbins = params["nbins"]
+        self.fold = params["fold"]
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
