@@ -12,9 +12,9 @@ dependencies:
  - scipy=1.2.0
  - hdf5=1.10.4
  - h5py=2.9.0
- - lxml=4.3.0
+ - lxml=4.6.2
  - twisted=18.9.0
- - sphinx=1.8.4
+ - sphinx=1.8.5
  - pytest=4.2.0
  - cython=0.29.4
  - sip
@@ -22,6 +22,7 @@ dependencies:
  - setuptools=44.0.0
  - numpy=1.14.2
  - qtconsole
+ - mkl=2020.0
  - pip:
    - matplotlib==2.2.3
    - bumps==0.7.11

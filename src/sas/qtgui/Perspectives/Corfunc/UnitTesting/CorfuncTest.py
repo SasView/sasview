@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -38,6 +39,10 @@ class CorfuncTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = CorfuncWindow(dummy_manager())
+        reference_data1 = Data1D(x=[0.1, 0.2, 0.3, 0.4, 0.5], y=[1000, 1000, 100, 10, 1], dy=[0.0, 0.0, 0.0, 0.0, 0.0])
+        reference_data1.filename = "Test A"
+        GuiUtils.dataFromItem = MagicMock(return_value=reference_data1)
+        self.fakeData = QtGui.QStandardItem("test")
 
     def tearDown(self):
         '''Destroy the CorfuncWindow'''
@@ -50,6 +55,23 @@ class CorfuncTest(unittest.TestCase):
         self.assertEqual(self.widget.windowTitle(), "Corfunc Perspective")
         self.assertEqual(self.widget.model.columnCount(), 1)
         self.assertEqual(self.widget.model.rowCount(), 16)
+        self.assertEqual(self.widget.txtLowerQMin.text(), '0.0')
+        self.assertFalse(self.widget.txtLowerQMin.isEnabled())
+        self.assertEqual(self.widget.txtFilename.text(), '')
+        self.assertEqual(self.widget.txtLowerQMax.text(), '0.01')
+        self.assertEqual(self.widget.txtUpperQMin.text(), '0.20')
+        self.assertEqual(self.widget.txtUpperQMax.text(), '0.22')
+        self.assertEqual(self.widget.txtBackground.text(), '0')
+        self.assertEqual(self.widget.txtGuinierA.text(), '0.0')
+        self.assertEqual(self.widget.txtGuinierB.text(), '0.0')
+        self.assertEqual(self.widget.txtPorodK.text(), '0.0')
+        self.assertEqual(self.widget.txtPorodSigma.text(), '0.0')
+        self.assertEqual(self.widget.txtAvgCoreThick.text(), '0')
+        self.assertEqual(self.widget.txtAvgIntThick.text(), '0')
+        self.assertEqual(self.widget.txtAvgHardBlock.text(), '0')
+        self.assertEqual(self.widget.txtPolydisp.text(), '0')
+        self.assertEqual(self.widget.txtLongPeriod.text(), '0')
+        self.assertEqual(self.widget.txtLocalCrystal.text(), '0')
 
     def testOnCalculate(self):
         """ Test onCompute function """
@@ -109,6 +131,68 @@ class CorfuncTest(unittest.TestCase):
         #                 float(self.widget.avgIntThick.text()) > 0)
         # self.assertTrue(float(self.widget.longPeriod.text()) >
         #                 float(self.widget.avgCoreThick.text()) > 0)
+
+    def testSerialization(self):
+        """ Serialization routines """
+        self.widget.setData([self.fakeData])
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
+        self.checkFakeDataState()
+        data = GuiUtils.dataFromItem(self.widget._model_item)
+        data_id = str(data.id)
+        # Test three separate serialization routines
+        state_all = self.widget.serializeAll()
+        state_one = self.widget.serializeCurrentPage()
+        page = self.widget.getPage()
+        # Pull out params from state
+        params_dict = state_all.get(data_id)
+        params = params_dict.get('corfunc_params')
+        # Tests
+        self.assertEqual(len(state_all), len(state_one))
+        self.assertEqual(len(state_all), 1)
+        # getPage should include an extra param 'data_id' removed by serialize
+        self.assertNotEqual(len(params), len(page))
+        self.assertEqual(len(params), 15)
+        self.assertEqual(len(page), 16)
+
+    def testRemoveData(self):
+        self.widget.setData([self.fakeData])
+        self.checkFakeDataState()
+        # Removing something not already in the perspective should do nothing
+        self.widget.removeData([])
+        self.checkFakeDataState()
+        # Removing the data from the perspective should set it to base state
+        self.widget.removeData([self.fakeData])
+        # Be sure the defaults hold true after data removal
+        self.testDefaults()
+
+    def testLoadParams(self):
+        self.widget.setData([self.fakeData])
+        self.checkFakeDataState()
+        pageState = self.widget.getPage()
+        self.widget.updateFromParameters(pageState)
+        self.checkFakeDataState()
+        self.widget.removeData([self.fakeData])
+        self.testDefaults()
+
+    def checkFakeDataState(self):
+        self.assertEqual(self.widget.txtFilename.text(), 'data')
+        self.assertEqual(self.widget.txtLowerQMin.text(), '0.0')
+        self.assertFalse(self.widget.txtLowerQMin.isEnabled())
+        self.assertEqual(self.widget.txtLowerQMax.text(), '0.01')
+        self.assertEqual(self.widget.txtUpperQMin.text(), '0.20')
+        self.assertEqual(self.widget.txtUpperQMax.text(), '0.22')
+        self.assertEqual(self.widget.txtBackground.text(), '0')
+        self.assertEqual(self.widget.txtGuinierA.text(), '')
+        self.assertEqual(self.widget.txtGuinierB.text(), '')
+        self.assertEqual(self.widget.txtPorodK.text(), '')
+        self.assertEqual(self.widget.txtPorodSigma.text(), '')
+        self.assertEqual(self.widget.txtAvgCoreThick.text(), '')
+        self.assertEqual(self.widget.txtAvgIntThick.text(), '')
+        self.assertEqual(self.widget.txtAvgHardBlock.text(), '')
+        self.assertEqual(self.widget.txtPolydisp.text(), '')
+        self.assertEqual(self.widget.txtLongPeriod.text(), '')
+        self.assertEqual(self.widget.txtLocalCrystal.text(), '')
 
 
 if __name__ == "__main__":

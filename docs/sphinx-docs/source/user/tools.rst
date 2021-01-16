@@ -26,4 +26,4 @@ Tools & Utilities
 
    Image Viewer <qtgui/Calculators/image_viewer_help>
 
-   File Converter <sasgui/perspectives/file_converter/file_converter_help>
+   File Converter <qtgui/Calculators/file_converter_help>

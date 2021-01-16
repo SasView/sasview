@@ -1,5 +1,7 @@
 import sys
 import unittest
+from unittest.mock import MagicMock
+
 from PyQt5 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -13,6 +15,7 @@ from sasmodels.sasview_model import load_standard_models
 
 # Tested module
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.FittingUtilities import checkConstraints
 
 class FittingUtilitiesTest(unittest.TestCase):
     '''Test the Fitting Utilities functions'''
@@ -285,6 +288,18 @@ class FittingUtilitiesTest(unittest.TestCase):
         names_from_model2 = [model2.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
         self.assertEqual(names, names_from_model2)
 
+    def testCheckConstraints(self):
+        ''' Test the constraints checks'''
+        # Send a valid constraint
+        symtab = {"M1.scale": 1, "M1.background": 1}
+        constraints = [("M1.scale", "M1.background")]
+        errors = checkConstraints(symtab, constraints)
+        self.assertEqual(errors, [])
+
+        # Send a constraint with an error
+        constraints = [("M1.foo", "M1.background")]
+        errors = checkConstraints(symtab, constraints)
+        self.assertTrue(isinstance(errors, str))
 
 if __name__ == "__main__":
     unittest.main()

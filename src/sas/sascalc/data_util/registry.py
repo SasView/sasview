@@ -65,7 +65,7 @@ class ExtensionRegistry(object):
     def __setitem__(self, ext, loader):
         if ext not in self.loaders:
             self.loaders[ext] = []
-        self.loaders[ext].insert(0,loader)
+        self.loaders[ext].insert(0, loader)
 
     def __getitem__(self, ext):
         return self.loaders[ext]
@@ -96,8 +96,9 @@ class ExtensionRegistry(object):
         :param path: Data file path
         :return: List of available readers for the file extension (maybe empty)
         """
-        # Find matching extensions
-        extlist = [ext for ext in self.extensions() if path.endswith(ext)]
+        # Find matching lower-case extensions
+        path_lower = path.lower()
+        extlist = [ext for ext in self.extensions() if path_lower.endswith(ext)]
         # Sort matching extensions by decreasing order of length
         extlist.sort(key=len)
         # Combine loaders for matching extensions into one big list
@@ -126,7 +127,7 @@ class ExtensionRegistry(object):
                 raise NoKnownLoaderException("No loaders match extension in %r"
                                              % path)
         else:
-            loaders = self.loaders.get(format, [])
+            loaders = self.loaders.get(format.lower(), [])
             if not loaders:
                 raise NoKnownLoaderException("No loaders match format %r"
                                              % format)

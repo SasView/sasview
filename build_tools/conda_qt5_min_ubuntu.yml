@@ -10,8 +10,8 @@ dependencies:
  - ipykernel=4.9
  - jupyter
  - twisted=18.4.0
- - lxml=4.2.1
- - sphinx=1.7.4
+ - lxml=4.6.2
+ - sphinx=1.8.5
  - cython=0.28.3
  - pytest
  - mako=1.0.7

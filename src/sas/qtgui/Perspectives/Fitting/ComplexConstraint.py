@@ -81,6 +81,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Setup widgets based on current parameters
         """
         self.cbModel1.insertItems(0, self.tab_names)
+        # add an `All` option in the lhs if there are more than 3 tabs
+        if len(self.tab_names) > 2:
+            self.cbModel1.addItem("All")
         self.cbModel2.insertItems(0, self.tab_names)
 
         self.setupParamWidgets()
@@ -100,18 +103,37 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Fill out comboboxes and set labels with non-constrained parameters
         """
+        # Store previously select parameter
+        previous_param1 = self.cbParam1.currentText()
+        # Clear the combobox
         self.cbParam1.clear()
-        tab_index1 = self.cbModel1.currentIndex()
-        items1 = [param for param in self.tabs[tab_index1].main_params_to_fit]
+        # Populate the left combobox parameter arbitrarily with the parameters
+        # from the first tab if `All` option is selected
+        if self.cbModel1.currentText() == "All":
+            items1 = self.tabs[1].main_params_to_fit
+        else:
+            tab_index1 = self.cbModel1.currentIndex()
+            items1 = self.tabs[tab_index1].main_params_to_fit
         self.cbParam1.addItems(items1)
+        # Show the previously selected parameter if available
+        if previous_param1 in items1:
+            index1 = self.cbParam1.findText(previous_param1)
+            self.cbParam1.setCurrentIndex(index1)
 
+        # Store previously select parameter
+        previous_param2 = self.cbParam2.currentText()
         # M2 has to be non-constrained
         self.cbParam2.clear()
         tab_index2 = self.cbModel2.currentIndex()
         items2 = [param for param in self.params[tab_index2] if not self.tabs[tab_index2].paramHasConstraint(param)]
         self.cbParam2.addItems(items2)
+        # Show the previously selected parameter if available
+        if previous_param2 in items2:
+            index2 = self.cbParam2.findText(previous_param2)
+            self.cbParam2.setCurrentIndex(index2)
 
-        self.txtParam.setText(self.tab_names[tab_index1] + ":" + self.cbParam1.currentText())
+        self.txtParam.setText(self.cbModel1.currentText() + ":"
+                              + self.cbParam1.currentText())
 
         self.cbOperator.clear()
         self.cbOperator.addItems(ALLOWED_OPERATORS)
@@ -131,6 +153,12 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.cmdOK.setEnabled(True)
             self.cmdAddAll.setEnabled(True)
         self.lblWarning.setText(txt)
+
+        # disable Aplly all if `All` option on lhs has been selected
+        if self.cbModel1.currentText() == "All":
+            self.cmdAddAll.setEnabled(False)
+        else:
+            self.cmdAddAll.setEnabled(True)
 
     def setupTooltip(self):
         """
@@ -244,7 +272,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param = self.cbParam1.currentText()
         value = self.cbParam2.currentText()
         func = self.txtConstraint.text()
-        value_ex = self.cbModel2.currentText() + "." + self.cbParam2.currentText()
+        value_ex = (self.cbModel1.currentText() + "."
+                    + self.cbParam1.currentText())
         model1 = self.cbModel1.currentText()
         operator = self.cbOperator.currentText()
 
@@ -277,6 +306,17 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         Respond to Add constraint action.
         Send a signal that the constraint is ready to be applied
         """
+        # if the combobox is set to `All` just call `applyAcrossTabs` and
+        # return
+        if self.cbModel1.currentText() == "All":
+            # exclude the tab on the lhs
+            tabs = [tab for tab in self.tabs if
+                    tab.kernel_module.name != self.cbModel2.currentText()]
+            self.applyAcrossTabs(tabs, self.cbParam1.currentText(),
+                                 self.txtConstraint.text())
+            self.setupParamWidgets()
+            return
+
         cons_tuple = self.constraint()
         #check if constraint has been redefined
         if self.constraintIsRedefined(cons_tuple):
@@ -288,7 +328,27 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.redefining_warning = ""
         self.constraintReadySignal.emit(cons_tuple)
         # reload the comboboxes
-        self.setupParamWidgets()
+        if self.parent.constraint_accepted:
+            self.setupParamWidgets()
+
+    def applyAcrossTabs(self, tabs, param, expr):
+        """
+        Apply constraints across tabs, e.g. all `scale` parameters
+        constrained to an expression. *tabs* is a list of active fit tabs
+        for which the parameter string *param* will be constrained to the
+        *expr* string.
+        """
+        for tab in tabs:
+            if hasattr(tab, "kernel_module"):
+                if param in tab.kernel_module.params:
+                    value_ex = tab.kernel_module.name + "." +param
+                    constraint = Constraint(param=param,
+                                            value=param,
+                                            func=expr,
+                                            value_ex=value_ex,
+                                            operator="=")
+                    self.constraintReadySignal.emit((tab.kernel_module.name,
+                                                     constraint))
 
     def onSetAll(self):
         """
@@ -297,7 +357,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = [param for param in self.tabs[index1].main_params_to_fit]
+        items1 = self.tabs[index1].kernel_module.params
         items2 = self.params[index2]
         # create an empty list to store redefined constraints
         redefined_constraints = []

@@ -10,6 +10,8 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
 
+from sas.sascalc.fit.expression import check_constraints
+
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
 
 model_header_tooltips = ['Select parameter for fitting',
@@ -599,7 +601,7 @@ def plotResiduals(reference_data, current_data, weights):
         return None
 
     theory_name = str(current_data.name.split()[0])
-    res_name = reference_data.filename if reference_data.filename else reference_data.name
+    res_name = reference_data.name if reference_data.name else reference_data.filename
     residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
     residuals.title = residuals.name
     residuals.ytransform = 'y'
@@ -889,3 +891,33 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             has_poly = True
             break
     return has_poly
+
+def checkConstraints(symtab, constraints):
+    # type: (Dict[str, float], Sequence[Tuple[str, str]]) -> str
+    """
+    Compile and evaluate the constraints in the context of the initial values
+    and return the list of errors.
+
+    Errors are returned as an html string where errors are tagged with <b>
+    markups:
+    Unknown symbol: tags unknown symbols in *constraints*
+    Syntax error: tags the beginning of a syntax error in *constraints*
+    Cyclic dependency: tags comma separated parameters that have
+    cyclic dependency
+
+    The errors are wrapped in a <div class = "error"> and a style header is
+    added
+    """
+    # Note: dict(constraints) will choose the latest definition if
+    # there are duplicates.
+    errors = "<br>".join(check_constraints(symtab, dict(constraints),
+                                           html=True))
+    # wrap everything in <div class = "error">
+    if errors:
+        errors = "<div class = \"error\">" + errors + "</div>"
+        header = "<style type=\"text/css\"> div.error b { "\
+                 "font-weight: normal; color:red;}</style>"
+        return header + errors
+    else:
+        return []
+

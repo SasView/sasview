@@ -17,8 +17,6 @@ from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindo
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.MainWindow.GuiManager import GuiManager
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -47,6 +45,9 @@ class InvariantPerspectiveTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = InvariantWindow(dummy_manager())
+        data = Data1D(x=[1, 2], y=[1, 2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        self.fakeData = QtGui.QStandardItem("test")
 
     def tearDown(self):
         """Destroy the DataOperationUtility"""
@@ -101,7 +102,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.txtTotalQMax.text(), '0.0')
         self.assertEqual(self.widget.txtBackgd.text(), '0.0')
         self.assertEqual(self.widget.txtScale.text(), '1.0')
-        self.assertEqual(self.widget.txtContrast.text(), '1.0')
+        self.assertEqual(self.widget.txtContrast.text(), '8e-06')
         self.assertEqual(self.widget.txtExtrapolQMin.text(), '1e-05')
         self.assertEqual(self.widget.txtExtrapolQMax.text(), '10')
         self.assertEqual(self.widget.txtPowerLowQ.text(), '4')
@@ -384,7 +385,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
     def testSetupModel(self):
         """ Test default settings of model"""
-        self.assertEqual(self.widget.model.item(WIDGETS.W_FILENAME).text(),
+        self.assertEqual(self.widget.model.item(WIDGETS.W_NAME).text(),
                          self.widget._path)
 
         self.assertEqual(self.widget.model.item(WIDGETS.W_QMIN).text(), '0.0')
@@ -449,11 +450,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
     def testSetData(self):
         """ """
         self.widget.updateGuiFromFile = MagicMock()
-
-        data = Data1D(x=[1, 2], y=[1, 2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
-        item = QtGui.QStandardItem("test")
-        self.widget.setData([item])
+        self.widget.setData([self.fakeData])
 
         self.assertTrue(self.widget.updateGuiFromFile.called_once())
 
@@ -468,6 +465,91 @@ class InvariantPerspectiveTest(unittest.TestCase):
         GuiUtils.updateModelItemStatus = MagicMock()
 
         self.assertTrue(GuiUtils.updateModelItemStatus.called_once())
+
+    def testSerialization(self):
+        """ Serialization routines """
+        self.assertTrue(hasattr(self.widget, 'isSerializable'))
+        self.assertTrue(self.widget.isSerializable())
+        self.widget.setData([self.fakeData])
+        self.checkFakeDataState()
+        data_return = GuiUtils.dataFromItem(self.widget._model_item)
+        data_id = str(data_return.id)
+        # Test three separate serialization routines
+        state_all = self.widget.serializeAll()
+        state_one = self.widget.serializeCurrentPage()
+        page = self.widget.getPage()
+        # Pull out params from state
+        params = state_all[data_id]['invar_params']
+        # Tests
+        self.assertEqual(len(state_all), len(state_one))
+        self.assertEqual(len(state_all), 1)
+        # getPage should include an extra param 'data_id' removed by serialize
+        self.assertNotEqual(len(params), len(page))
+        self.assertEqual(len(params), 24)
+        self.assertEqual(len(page), 25)
+
+    def testLoadParams(self):
+        self.widget.setData([self.fakeData])
+        self.checkFakeDataState()
+        pageState = self.widget.getPage()
+        self.widget.updateFromParameters(pageState)
+        self.widget.removeData([self.fakeData])
+        self.testDefaults()
+
+    def testRemoveData(self):
+        self.widget.setData([self.fakeData])
+        self.checkFakeDataState()
+        # Removing something not already in the perspective should do nothing
+        self.widget.removeData([])
+        # Be sure the defaults hold true after data removal
+        self.widget.removeData([self.fakeData])
+        self.testDefaults()
+
+    def checkFakeDataState(self):
+        """ Ensure the state is constant every time the fake data set loaded """
+        self.assertIsNotNone(self.widget._data)
+
+        # push buttons enabled
+        self.assertFalse(self.widget.cmdStatus.isEnabled())
+        self.assertFalse(self.widget.cmdCalculate.isEnabled())
+
+        # disabled, read only line edits
+        self.assertFalse(self.widget.txtName.isEnabled())
+        self.assertTrue(self.widget.txtVolFract.isReadOnly())
+        self.assertTrue(self.widget.txtVolFractErr.isReadOnly())
+
+        self.assertTrue(self.widget.txtSpecSurf.isReadOnly())
+        self.assertTrue(self.widget.txtSpecSurfErr.isReadOnly())
+
+        self.assertTrue(self.widget.txtInvariantTot.isReadOnly())
+        self.assertTrue(self.widget.txtInvariantTotErr.isReadOnly())
+
+        self.assertFalse(self.widget.txtBackgd.isReadOnly())
+        self.assertFalse(self.widget.txtScale.isReadOnly())
+        self.assertFalse(self.widget.txtContrast.isReadOnly())
+        self.assertFalse(self.widget.txtPorodCst.isReadOnly())
+
+        self.assertTrue(self.widget.txtExtrapolQMin.isEnabled())
+        self.assertTrue(self.widget.txtExtrapolQMax.isEnabled())
+
+        self.assertFalse(self.widget.txtNptsLowQ.isReadOnly())
+        self.assertFalse(self.widget.txtNptsHighQ.isReadOnly())
+
+        # content of line edits
+        self.assertEqual(self.widget.txtName.text(), 'data')
+        self.assertEqual(self.widget.txtTotalQMin.text(), '1')
+        self.assertEqual(self.widget.txtTotalQMax.text(), '2')
+        self.assertEqual(self.widget.txtBackgd.text(), '0.0')
+        self.assertEqual(self.widget.txtScale.text(), '1.0')
+        self.assertEqual(self.widget.txtContrast.text(), '8e-06')
+        self.assertEqual(self.widget.txtExtrapolQMin.text(), '1e-05')
+        self.assertEqual(self.widget.txtExtrapolQMax.text(), '10')
+        self.assertEqual(self.widget.txtPowerLowQ.text(), '4')
+        self.assertEqual(self.widget.txtPowerHighQ.text(), '4')
+
+        # unchecked checkboxes
+        self.assertFalse(self.widget.chkLowQ.isChecked())
+        self.assertFalse(self.widget.chkHighQ.isChecked())
 
 
 if __name__ == "__main__":

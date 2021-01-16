@@ -99,9 +99,9 @@ class FitThread(CalcThread):
             # print "ERROR IN FIT THREAD: ", traceback.format_exc()
             if self.handler is not None:
                 self.handler.error(msg=str(ex))
-                self.completefn(None)
+                self.completefn((str(ex), None))
             else:
-                return(None)
+                return None
 
 
 

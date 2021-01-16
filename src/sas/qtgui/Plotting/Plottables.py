@@ -438,6 +438,8 @@ class Plottable(object):
     interactive = True
     custom_color = None
     markersize = 3  # default marker size is 'size 3'
+    # Option to show a horizontal line at y=0
+    show_yzero = False
 
     def __init__(self):
         self.view = View()

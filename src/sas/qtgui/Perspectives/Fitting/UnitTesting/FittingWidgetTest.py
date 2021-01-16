@@ -7,7 +7,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import QtTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from twisted.internet import threads
 
 # set up import paths
@@ -32,12 +32,35 @@ class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"
     communicate = Communicate()
 
+    def __init__(self):
+        self._perspective = dummy_perspective()
+
+    def perspective(self):
+        return self._perspective
+
+class dummy_perspective(object):
+
+    def __init__(self):
+        self.symbol_dict = {}
+        self.constraint_list = []
+        self.constraint_tab = None
+
+    def getActiveConstraintList(self):
+        return self.constraint_list
+
+    def getSymbolDictForConstraints(self):
+        return self.symbol_dict
+
+    def getConstraintTab(self):
+        return self.constraint_tab
+
 class FittingWidgetTest(unittest.TestCase):
     """Test the fitting widget GUI"""
 
     def setUp(self):
         """Create the GUI"""
         self.widget = FittingWidget(dummy_manager())
+        FittingUtilities.checkConstraints = MagicMock(return_value=None)
 
     def tearDown(self):
         """Destroy the GUI"""
@@ -1268,10 +1291,18 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # Create a constraint object
-        const = Constraint(parent=None, value=7.0)
+        const = Constraint(parent=None, param="scale",value=7.0)
         row = 3
 
         spy = QtSignalSpy(self.widget, self.widget.constraintAddedSignal)
+
+        # Mock the modelName method
+        self.widget.modelName = MagicMock(return_value='M1')
+
+        # Mock a constraint tab
+        constraint_tab = MagicMock()
+        constraint_tab.constraint_accepted = False
+        self.widget.parent.perspective().constraint_tab = constraint_tab
 
         # call the method tested
         self.widget.addConstraintToRow(constraint=const, row=row)
@@ -1285,6 +1316,9 @@ class FittingWidgetTest(unittest.TestCase):
         # Assure the row has the constraint
         self.assertEqual(self.widget.getConstraintForRow(row), const)
         self.assertTrue(self.widget.rowHasConstraint(row))
+
+        # Check that the constraint tab flag is set to True
+        self.assertTrue(constraint_tab.constraint_accepted)
 
         # assign complex constraint now
         const = Constraint(parent=None, param='radius', func='5*sld')
@@ -1302,6 +1336,30 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.getConstraintForRow(row), const)
         # and it is a complex constraint
         self.assertTrue(self.widget.rowHasConstraint(row))
+
+        # Now try to add an constraint when the checking function returns an
+        # error message
+        FittingUtilities.checkConstraints = MagicMock(return_value="foo")
+
+        # Mock the QMessagebox Warning
+        QtWidgets.QMessageBox.critical = MagicMock()
+
+        # Call the method tested
+        self.widget.addConstraintToRow(constraint=const, row=row)
+
+        # Check that the messagebox was called with the right error message
+        QtWidgets.QMessageBox.critical.assert_called_with(
+            self.widget,
+            "Inconsistent constraint",
+            "foo",
+            QtWidgets.QMessageBox.Ok,
+        )
+
+        # Make sure no signal was emitted
+        self.assertEqual(spy.count(), 2)
+        # Check that constraint tab flag is set to False
+        self.assertFalse(constraint_tab.constraint_accepted)
+
 
     def testAddSimpleConstraint(self):
         """
@@ -1598,6 +1656,41 @@ class FittingWidgetTest(unittest.TestCase):
         cb.setText("sasview_parameter_values:model_name,core_shell_bicelle:scale,False,1.0,None,0.0,inf,()")
         self.widget.onParameterPaste()
         self.widget.updatePageWithParameters.assert_called_once()
+
+    def testGetConstraintsForFitting(self):
+        """
+        Test the deactivation of constraints when trying to fit a single page
+        with constraints relying on other pages
+        """
+        # mock the constraint getter
+        self.widget.getComplexConstraintsForModel = MagicMock(return_value=[
+            ('scale', 'M2.background')])
+        # mock isConstraintMultimodel so that our constraint is multi-model
+        self.widget.isConstraintMultimodel = MagicMock(return_value=True)
+        # Mock a constraint tab
+        constraint_tab = MagicMock()
+        self.widget.parent.perspective().constraint_tab = constraint_tab
+        # instanciate a constraint
+        constraint = Constraint(parent=None, param="scale", value=7.0)
+        self.widget.getConstraintForRow = MagicMock(return_value=constraint)
+        # mock the messagebox
+        QtWidgets.QMessageBox.exec_ = MagicMock()
+
+        # select a model
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # Call the method
+        self.widget.getConstraintsForFitting()
+        # Check that QMessagebox was called
+        QtWidgets.QMessageBox.exec_.assert_called_once()
+        # Constraint should be inactive
+        self.assertEqual(constraint.active, False)
+        # Check that the uncheckConstraint method was called
+        constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 
 if __name__ == "__main__":
     unittest.main()

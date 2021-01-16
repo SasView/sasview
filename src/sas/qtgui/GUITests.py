@@ -1,3 +1,4 @@
+import os
 import unittest
 import sys
 from PyQt5 import QtGui
@@ -229,3 +230,5 @@ if __name__ == "__main__":
             for r in errors[1]:
                     print("\nSuite: %s had following failures:\n %s : %s"%(suite, r[0], r[1]))
             print("=================================================")
+        print("Exiting with error")
+        os._exit(1)
