@@ -108,18 +108,18 @@ jobs:
     - name: Build sasview pyinstaller
       run: |
         cd installers
-        pyinstaller.exe sasview_qt5.spec
+        pyinstaller.exe sasview.spec
 
     - name: Make tarball of sasview pyinstaller output directory
       run: |
         cd installers/dist
-        tar zcf sasview-pyinstaller-dist.tar sasview
+        tar zcf sasview-pyinstaller-dist.tar.gz sasview
 
     - name: Publish pyinstaller components
       uses: actions/upload-artifact@v2
       with:
         name: SasView-PyInstaller-Dist-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
-        path: installers/dist/sasview-pyinstaller-dist.tar
+        path: installers/dist/sasview-pyinstaller-dist.tar.gz
         if-no-files-found: error
 
     - name: Build sasview INNO setup package
