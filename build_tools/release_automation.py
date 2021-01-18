@@ -52,7 +52,7 @@ sasview_data = {
         {'name': 'Durniak, Celine','affiliation': 'Data Management and Software Centre, European Spallation Source' },
         {'name': 'Forster, Laura','affiliation': 'Diamond Light Source'},
         {'name': 'Gonzales, Miguel','affiliation': 'Institut Laue-Langevin'},
-        {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory',},
+        {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory','orcid': '0000-0002-7729-1454'},
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source', 'orcid': '0000-0002-6296-0336'},
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
         {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
