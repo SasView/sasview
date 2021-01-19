@@ -32,12 +32,12 @@ SHAPES = OrderedDict([
 
 # MPL Colors dictionary. Ordered for consistent display
 COLORS = OrderedDict([
-        ('Blue', 'b'),
-        ('Green', 'g'),
-        ('Red', 'r'),
-        ('Cyan', 'c'),
-        ('Magenta', 'm'),
-        ('Yellow', 'y'),
+        ('Blue', '#1f77b4'),
+        ('Green', '#2ca02c'),
+        ('Red', '#d62728'),
+        ('Cyan', '#17becf'),
+        ('Magenta', '#e377c2'),
+        ('Yellow', '#bcbd22'),
         ('Black', 'k'),
         ('Custom', 'x'),
 ])
