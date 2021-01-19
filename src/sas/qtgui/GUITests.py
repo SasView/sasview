@@ -17,7 +17,7 @@ The tests can be run with ``python GUITests.py``, or
 To get more verbose console output (recommended), use ``python GUITests.py -v``
 """
 
-# Llist of all suite names. Every time a new suite is added, its name should
+# List of all suite names. Every time a new suite is added, its name should
 # also be added here
 ALL_SUITES = [
     'calculatorsSuite',
@@ -25,7 +25,9 @@ ALL_SUITES = [
     'fittingSuite',
     'plottingSuite',
     'utilitiesSuite',
-    'perspectivesSuite',
+    'corfuncPerspectiveSuite',
+    'invariantPerspectiveSuite',
+    'inversionPerspectiveSuite',
     ]
 
 # Prepare the general QApplication instance
@@ -93,6 +95,7 @@ from Perspectives.Fitting.UnitTesting import ConstraintWidgetTest
 
 #  Invariant
 from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
+from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
 
 #  Inversion
 from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
@@ -184,10 +187,33 @@ def perspectivesSuite():
     suites = (
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,  'test'),
         #  Inversion
         unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
         #  Corfunc
         unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def invariantPerspectiveSuite():
+    suites = (
+        #  Invariant only
+        unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,  'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def corfuncPerspectiveSuite():
+    suites = (
+        #  Corfunc only
+        unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def inversionPerspectiveSuite():
+    suites = (
+        #  Inversion only
+        unittest.makeSuite(InversionPerspectiveTest.InversionTest, 'test'),
         )
     return unittest.TestSuite(suites)
 

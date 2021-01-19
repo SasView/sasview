@@ -424,6 +424,25 @@ class InvariantCalculator(object):
         # Extrapolation range
         self._low_q_limit = Q_MINIMUM
 
+    @property
+    def background(self):
+        return self._background
+
+    @background.setter
+    def background(self, value):
+        self._background = value
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, value):
+        self._scale = value
+
+    def set_data(self, data):
+        self._data = self._get_data(data)
+
     def _get_data(self, data):
         """
         :note: this function must be call before computing any type
