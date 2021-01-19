@@ -1,15 +1,9 @@
 import copy
 import numpy
 import functools
-import logging
 
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-
-
-import matplotlib as mpl
-DEFAULT_CMAP = mpl.cm.jet
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -32,8 +26,12 @@ from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
 
+import matplotlib as mpl
+DEFAULT_CMAP = mpl.cm.jet
+
 # Minimum value of Z for which we will present data.
 MIN_Z = -32
+
 
 class Plotter2DWidget(PlotterBase):
     """
@@ -138,7 +136,6 @@ class Plotter2DWidget(PlotterBase):
 
         return (zmin_temp, zmax_temp)
 
-
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -172,9 +169,8 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
             self.actionClearSlicer.triggered.connect(self.onClearSlicer)
-            if self.slicer.__class__.__name__ != "BoxSumCalculator":
-                self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
-                self.actionEditSlicer.triggered.connect(self.onEditSlicer)
+        self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
+        self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
@@ -223,15 +219,21 @@ class Plotter2DWidget(PlotterBase):
         self.slicer.clear()
         self.canvas.draw()
         self.slicer = None
+        if self.slicer_widget:
+            self.slicer_widget.setModel(None)
+
+    def getActivePlots(self):
+        ''' utility method for manager query of active plots '''
+        return self.manager.active_plots
 
     def onEditSlicer(self):
         """
-        Present a small dialog for manipulating the current slicer
+        Present a dialog for manipulating the current slicer
         """
-        assert self.slicer
         # Only show the dialog if not currently shown
         if self.slicer_widget:
             return
+
         def slicer_closed():
             # Need to disconnect the signal!!
             self.slicer_widget.closeWidgetSignal.disconnect()
@@ -239,11 +241,16 @@ class Plotter2DWidget(PlotterBase):
             # reset slicer_widget on "Edit Slicer Parameters" window close
             self.slicer_widget = None
 
-        self.param_model = self.slicer.model()
+        self.param_model = None
+        validator = None
+        if self.slicer is not None:
+            self.param_model = self.slicer.model()
+            validator = self.slicer.validate
         # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(self, model=self.param_model,
-                                              active_plots=self.manager.active_plots,
-                                              validate_method=self.slicer.validate)
+                                              active_plots=self.getActivePlots(),
+                                              validate_method=validator,
+                                              communicator=self.manager.communicator)
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
         self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
@@ -313,7 +320,7 @@ class Plotter2DWidget(PlotterBase):
         """
         Update circular averaging plot on Data2D change
         """
-        if not hasattr(self,'_item'): return
+        if not hasattr(self, '_item'): return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
@@ -321,12 +328,12 @@ class Plotter2DWidget(PlotterBase):
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
         if plots is None: return
-        ca_caption = '2daverage'+self.data0.name
+        ca_caption = '2daverage' + self.data0.name
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
             if plot.group_id is None: continue
-            if ca_caption in plot.group_id: has_plot=True
+            if ca_caption in plot.group_id: has_plot = True
         # return prematurely if no circular average plot found
         if not has_plot: return
 
@@ -338,11 +345,7 @@ class Plotter2DWidget(PlotterBase):
         # Show the new plot, if already visible
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
-        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
-
-        # Show the plot
-
-    def setSlicer(self, slicer):
+    def setSlicer(self, slicer, reset=True):
         """
         Clear the previous slicer and create a new one.
         slicer: slicer class to create
@@ -361,7 +364,7 @@ class Plotter2DWidget(PlotterBase):
 
         # Reset the model on the Edit slicer parameters widget
         self.param_model = self.slicer.model()
-        if self.slicer_widget:
+        if self.slicer_widget and reset:
             self.slicer_widget.setModel(self.param_model)
 
     def onSectorView(self):
@@ -531,7 +534,7 @@ class Plotter2DWidget(PlotterBase):
                 self.ax.set_title(label=self._title)
 
             if cbax is None:
-                ax.set_frame_on(False)
+                self.ax.set_frame_on(False)
                 cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
             else:
                 cb = self.figure.colorbar(self.im, cax=cbax)

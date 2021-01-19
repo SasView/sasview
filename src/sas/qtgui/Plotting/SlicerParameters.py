@@ -1,8 +1,10 @@
-# pylint:disable=C0103,I1101
+# pylint:disable=C0103,E501,E203
 """
 Allows users to modify the box slicer parameters.
 """
+import os
 import functools
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -15,9 +17,11 @@ from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 # Local UI
-#from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
+
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     """
@@ -25,29 +29,33 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     passed from a slicer instance.
     """
     closeWidgetSignal = QtCore.pyqtSignal()
+
     def __init__(self, parent=None,
                  model=None,
                  active_plots=None,
-                 validate_method=None):
+                 validate_method=None,
+                 communicator=None):
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
 
-        assert isinstance(model, QtGui.QStandardItemModel)
         self.parent = parent
 
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
+        self.save_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.communicator = communicator
 
         # Initially, Apply is disabled
-        #self.cmdApply.setEnabled(False)
+        self.cmdApply.setEnabled(False)
 
         # Mapping combobox index -> slicer module
-        self.callbacks = {0: SectorInteractor,
-                          1: AnnulusInteractor,
-                          2: BoxInteractorX,
-                          3: BoxInteractorY}
+        self.callbacks = {0: None,
+                          1: SectorInteractor,
+                          2: AnnulusInteractor,
+                          3: BoxInteractorX,
+                          4: BoxInteractorY}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -62,6 +70,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Specify the validator on the parameter value column.
         self.delegate = EditDelegate(self, validate_method=self.validate_method)
         self.lstParams.setItemDelegate(self.delegate)
+
+        # respond to graph deletion
+        self.communicator.activeGraphsSignal.connect(self.updatePlotList)
+
+        # Set up paths
+        self.txtLocation.setText(self.save_location)
 
         # define slots
         self.setSlots()
@@ -90,36 +104,64 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
+    def updatePlotList(self):
+        '''
+        '''
+        self.active_plots = self.parent.getActivePlots()
+        self.setPlotsList()
+
+    def getCurrentPlotDict(self):
+        """
+        Returns a dictionary of currently shown plots
+        {plot_name:checkbox_status}
+        """
+        current_plots = {}
+        if self.lstPlots.count() != 0:
+            for row in range(self.lstPlots.count()):
+                item = self.lstPlots.item(row)
+                isChecked = item.checkState() != QtCore.Qt.Unchecked
+                plot = item.text()
+                current_plots[plot] = isChecked
+        return current_plots
+
     def setPlotsList(self):
         """
         Create and initially populate the list of plots
         """
+        current_plots = self.getCurrentPlotDict()
+        self.lstPlots.clear()
         # Fill out list of plots
         for item in self.active_plots.keys():
             if isinstance(self.active_plots[item].data[0], Data1D):
+                # don't include dependant 1D plots
                 continue
-            checked = QtCore.Qt.Unchecked
-            if self.parent.data[0].name == item:
-                checked = QtCore.Qt.Checked
+            if str(item) in current_plots.keys():
+                # redo the list
+                checked = current_plots[item]
+            else:
+                # create a new list
+                checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
+
             chkboxItem = QtWidgets.QListWidgetItem(str(item))
             chkboxItem.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             chkboxItem.setCheckState(checked)
-            #self.lstPlots.addItem(chkboxItem)
+            self.lstPlots.addItem(chkboxItem)
 
     def setSlots(self):
         """
         define slots for signals from various sources
         """
         self.delegate.refocus_signal.connect(self.onFocus)
-        #self.cbSave1DPlots.toggled.connect(self.onGeneratePlots)
+        self.cbSave1DPlots.toggled.connect(self.onGeneratePlots)
+        self.cmdFiles.clicked.connect(self.onChooseFilesLocation)
         # Display Help on clicking the button
-        #self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdHelp.clicked.connect(self.onHelp)
 
         # Close doesn't trigger closeEvent automatically, so force it
-        #self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
+        self.cmdClose.clicked.connect(functools.partial(self.closeEvent, None))
 
         # Apply slicer to selected plots
-        #self.cmdApply.clicked.connect(self.onApply)
+        self.cmdApply.clicked.connect(self.onApply)
 
         # Initialize slicer combobox to the current slicer
         current_slicer = type(self.parent.slicer)
@@ -130,8 +172,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # change the slicer type
         self.cbSlicer.currentIndexChanged.connect(self.onSlicerChanged)
 
+        # Updates to the slicer moder must propagate to all plotters
+        if self.model is not None:
+            self.model.itemChanged.connect(self.onParamChange)
+
         # selecting/deselecting items in lstPlots enables `Apply`
-        #self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
+        self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
     def onFocus(self, row, column):
         """ Set the focus on the cell (row, column) """
@@ -142,58 +188,217 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def onSlicerChanged(self, index):
         """ change the parameters based on the slicer chosen """
-        if index < len(self.callbacks):
+        if index == 0:  # No interactor
+            self.parent.onClearSlicer()
+            self.setModel(None)
+            self.onGeneratePlots(False)
+        else:
             slicer = self.callbacks[index]
-            self.parent.setSlicer(slicer=slicer)
+            if self.active_plots.keys():
+                self.parent.setSlicer(slicer=slicer)
+        self.onParamChange()
 
     def onGeneratePlots(self, isChecked):
         """
         Respond to choice of auto saving plots
         """
         self.enableFileControls(isChecked)
+        # state changed - enable apply
+        self.cmdApply.setEnabled(True)
         self.isSave = isChecked
+
+    def onChooseFilesLocation(self):
+        """
+        Open save file location dialog
+        """
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Save files to:',
+            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
+            'directory' : self.save_location
+        }
+        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+
+        if folder is None:
+            return
+
+        folder = str(folder)
+        if not os.path.isdir(folder):
+            return
+        self.save_location = folder
+        self.txtLocation.setText(self.save_location)
 
     def enableFileControls(self, enabled):
         """
         Sets enablement of file related UI elements
         """
-        #self.txtLocation.setEnabled(enabled)
-        #self.cmdFiles.setEnabled(enabled)
-        #self.cbFitOptions.setEnabled(enabled)
+        self.txtLocation.setEnabled(enabled)
+        self.txtExtension.setEnabled(enabled)
+        self.cmdFiles.setEnabled(enabled)
+        self.cbFitOptions.setEnabled(enabled)
+        self.label_4.setEnabled(enabled)
+        self.cbSaveExt.setEnabled(enabled)
+
+    def onParamChange(self):
+        """
+        Respond to param change by updating plots
+        """
+        for row in range(self.lstPlots.count()):
+            item = self.lstPlots.item(row)
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
+            # Only checked items
+            if not isChecked:
+                continue
+            plot = item.text()
+            # Apply plotter to a plot
+            self.applyPlotter(plot)
 
     def onApply(self):
         """
         Apply current slicer to selected plots
         """
+        plots = []
         for row in range(self.lstPlots.count()):
             item = self.lstPlots.item(row)
-            isChecked = item.checkState() == QtCore.Qt.Checked
+            isChecked = item.checkState() != QtCore.Qt.Unchecked
             # Only checked items
             if not isChecked:
                 continue
             plot = item.text()
-            # don't assign to itself
-            if plot == self.parent.data[0].name:
-                continue
-            # a plot might have been deleted
-            if plot not in self.active_plots:
-                continue
-            # get the plotter2D instance
-            plotter = self.active_plots[plot]
-            # Assign model to slicer
-            index = self.cbSlicer.currentIndex()
-            slicer = self.callbacks[index]
-            plotter.setSlicer(slicer=slicer)
-            # override slicer model
-            plotter.slicer._model = self.model
-            # force conversion model->parameters in slicer
-            plotter.slicer.setParamsFromModel()
-        pass
+            # Apply plotter to a plot
+            self.applyPlotter(plot)
+            # Save 1D plots if required
+            plots.append(plot)
+        if self.isSave and self.model is not None:
+            self.save1DPlotsForPlot(plots)
+        pass  # debug anchor
+
+    def applyPlotter(self, plot):
+        """
+        Apply the current slicer to a plot
+        """
+        # don't assign to itself
+        if plot == self.parent.data[0].name:
+            return
+        # a plot might have been deleted
+        if plot not in self.active_plots:
+            return
+        # get the plotter2D instance
+        plotter = self.active_plots[plot]
+        # Assign model to slicer
+        index = self.cbSlicer.currentIndex()
+
+        slicer = self.callbacks[index]
+        if slicer is None:
+            plotter.onClearSlicer()
+            return
+        plotter.setSlicer(slicer=slicer, reset=False)
+        # override slicer model
+        plotter.slicer._model = self.model
+        # force conversion model->parameters in slicer
+        plotter.slicer.setParamsFromModel()
+
+    def prepareFilePathFromData(self, data):
+        """
+        Prepares full, unique path for a 1D plot
+        """
+        # Extend filename with the requested string
+        filename = data.name if self.txtExtension.text() == ""\
+            else data.name + "_" + str(self.txtExtension.text())
+        extension = self.cbSaveExt.currentText()
+        filename_ext = filename + extension
+
+        # Assure filename uniqueness
+        dst_filename = GuiUtils.findNextFilename(filename_ext, self.save_location)
+        if not dst_filename:
+            logging.error("Could not find appropriate filename for " + filename_ext)
+            return
+        filepath = os.path.join(self.save_location, dst_filename)
+        return filepath
+
+    def serializeData(self, data, filepath):
+        """
+        Write out 1D plot in a requested format
+        """
+        # Choose serializer based on requested extension
+        extension = self.cbSaveExt.currentText()
+        if 'txt' in extension:
+            GuiUtils.onTXTSave(data, filepath)
+        elif 'xml' in extension:
+            loader = Loader()
+            loader.save(filepath, data, ".xml")
+        elif 'h5' in extension:
+            nxcansaswriter = NXcanSASWriter()
+            nxcansaswriter.write([data], filepath)
+        else:
+            raise AttributeError("Incorrect extension chosen")
+
+    def save1DPlotsForPlot(self, plots):
+        """
+        Save currently shown 1D sliced data plots for a given 2D plot
+        """
+        items_for_fit = []
+        for plot in plots:
+            for item in self.active_plots.keys():
+                data = self.active_plots[item].data[0]
+                if not isinstance(data, Data1D):
+                    continue
+                if plot not in data.name:
+                    continue
+
+                filepath = self.prepareFilePathFromData(data)
+                self.serializeData(data, filepath)
+
+                # Add plot to the DataExplorer tree
+                new_name, _ = os.path.splitext(os.path.basename(filepath))
+                new_item = GuiUtils.createModelItemWithPlot(data, name=new_name)
+                self.parent.manager.updateModelFromPerspective(new_item)
+
+                items_for_fit.append(new_item)
+        # Send to fitting, if needed
+        # We can get away with directly querying the UI, since this is the only
+        # place we need that state.
+        fitting_requested = self.cbFitOptions.currentIndex()
+        self.sendToFit(items_for_fit, fitting_requested)
 
     def setModel(self, model):
         """ Model setter """
+        # check if parent slicer changed
+        current_slicer = type(self.parent.slicer)
+        for index in self.callbacks:
+            # must use type() for None or just imported type for ! None
+            if type(self.callbacks[index]) == current_slicer or \
+               self.callbacks[index] == current_slicer:
+                if index != self.cbSlicer.currentIndex():
+                    # parameters already updated, no need to notify
+                    # combobox listeners
+                    self.cbSlicer.blockSignals(True)
+                    self.cbSlicer.setCurrentIndex(index)
+                    self.cbSlicer.blockSignals(False)
+                break
         self.model = model
         self.proxy.setSourceModel(self.model)
+        if model is not None:
+            self.model.itemChanged.connect(self.onParamChange)
+
+    def sendToFit(self, items_for_fit, fitting_requested):
+        """
+        Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
+        """
+        if fitting_requested not in (1, 2):
+            return
+        isBatch = fitting_requested == 2
+        # Check if perspective is correct, otherwise complain
+        if self.parent.manager._perspective().name != 'Fitting':
+            msg = "Please change current perspective to Fitting to enable requested Fitting Options."
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
+            return
+        # icky way to go up the tree
+        self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
 
     def keyPressEvent(self, event):
         """
@@ -218,6 +423,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         GuiUtils.showHelp(url)
+
 
 class ProxyModel(QtCore.QIdentityProxyModel):
     """
@@ -245,6 +451,7 @@ class ProxyModel(QtCore.QIdentityProxyModel):
             flags &= ~QtCore.Qt.ItemIsEditable
         return flags
 
+
 class PositiveDoubleEditor(QtWidgets.QLineEdit):
     # a signal to tell the delegate when we have finished editing
     editingFinished = QtCore.Signal()
@@ -266,6 +473,7 @@ class PositiveDoubleEditor(QtWidgets.QLineEdit):
 
 class EditDelegate(QtWidgets.QStyledItemDelegate):
     refocus_signal = QtCore.pyqtSignal(int, int)
+
     def __init__(self, parent=None, validate_method=None):
         super(EditDelegate, self).__init__(parent)
         self.editor = None
@@ -294,12 +502,12 @@ class EditDelegate(QtWidgets.QStyledItemDelegate):
         # Find out the changed parameter name and proposed value
         new_value = GuiUtils.toDouble(self.editor.text())
         param_name = model.sourceModel().item(index.row(), 0).text()
-
+        value_accepted = True
         if self.validate_method:
             # Validate the proposed value in the slicer
             value_accepted = self.validate_method(param_name, new_value)
-
-        if value_accepted:
             # Update the model only if value accepted
+        if value_accepted:
             return super(EditDelegate, self).setModelData(editor, model, index)
-        return None
+        else:
+            return None

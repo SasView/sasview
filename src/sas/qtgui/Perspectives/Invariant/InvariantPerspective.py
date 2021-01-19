@@ -45,7 +45,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         super(InvariantWindow, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("Invariant Perspective")
+        self.setWindowTitle(self.title())
 
         # initial input params
         self._background = 0.0
@@ -85,6 +85,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self._data = None
         self._path = ""
+        self._calculator = None
 
         self._allow_close = False
 
@@ -107,9 +108,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtPowerLowQ.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
         self.txtPowerHighQ.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
-        self.txtExtrapolQMin.setText(str(Q_MINIMUM))
-        self.txtExtrapolQMax.setText(str(Q_MAXIMUM))
-
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
 
@@ -127,6 +125,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.cmdCalculate.setEnabled(False)
 
         # validator: double
+        self.txtExtrapolQMin.setValidator(GuiUtils.DoubleValidator())
+        self.txtExtrapolQMax.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
         self.txtContrast.setValidator(GuiUtils.DoubleValidator())
         self.txtScale.setValidator(GuiUtils.DoubleValidator())
@@ -137,6 +137,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtNptsHighQ.setValidator(QtGui.QIntValidator())
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtPowerHighQ.setValidator(GuiUtils.DoubleValidator())
+
+        self.mapper.toFirst()
 
     def get_low_q_extrapolation_upper_limit(self):
         q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
@@ -193,8 +195,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
         self._contrast = float(self.model.item(WIDGETS.W_CONTRAST).text())
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
-        if self.model.item(WIDGETS.W_POROD_CST).text() != 'None' \
-                and self.model.item(WIDGETS.W_POROD_CST).text() != '':
+        if self.model.item(WIDGETS.W_POROD_CST).text() != 'None' and self.model.item(WIDGETS.W_POROD_CST).text() != '':
             self._porod = float(self.model.item(WIDGETS.W_POROD_CST).text())
 
         # Low extrapolating
@@ -234,22 +235,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
     def calculationFailed(self, reason):
         print("calculation failed: ", reason)
-        pass
+        self.allow_calculation()
 
     def deferredPlot(self, model):
         """
         Run the GUI/model update in the main thread
         """
         reactor.callFromThread(lambda: self.plotResult(model))
+        self.allow_calculation()
 
-    def plotResult(self, model):
-        """ Plot result of calculation """
-        # Set the button back to available
+    def allow_calculation(self):
+        # Set the calculate button to available
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
 
+    def plotResult(self, model):
+        """ Plot result of calculation """
+
         self.model = model
-        self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
         # Send the modified model item to DE for keeping in the model
         plots = [self._model_item]
@@ -293,112 +296,138 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     def calculateThread(self, extrapolation):
         """
         Perform Invariant calculations.
-        TODO: Create a dictionary of results to be sent to DE on completion.
         """
+        # Get most recent values from GUI and model
         self.updateFromModel()
+
+        # Define base message
         msg = ''
 
-        qstar_data = 0.0
-        qstar_data_err = 0.0
+        # Set base Q* values to 0.0
         qstar_low = 0.0
         qstar_low_err = 0.0
         qstar_high = 0.0
         qstar_high_err = 0.0
-        qstar_total = 0.0
-        qstar_total_error = 0.0
 
         temp_data = copy.deepcopy(self._data)
 
-        # Prepare the invariant object
-        inv = invariant.InvariantCalculator(data=temp_data,
-                                            background=self._background,
-                                            scale=self._scale)
-        if self._low_extrapolate:
+        calculation_failed = False
+        low_calculation_pass = False
+        high_calculation_pass = False
 
+        # Update calculator with background, scale, and data values
+        self._calculator.background = self._background
+        self._calculator.scale = self._scale
+        self._calculator.set_data(temp_data)
+
+        # Low Q extrapolation calculations
+        if self._low_extrapolate:
             function_low = "power_law"
             if self._low_guinier:
                 function_low = "guinier"
             if self._low_fit:
                 self._low_power_value = None
 
-            inv.set_extrapolation(range="low",
-                                  npts=int(self._low_points),
-                                  function=function_low,
-                                  power=self._low_power_value)
+            self._calculator.set_extrapolation(
+                range="low", npts=int(self._low_points),
+                function=function_low, power=self._low_power_value)
+            try:
+                qmin_ext = float(self.txtExtrapolQMin.text())
+                qmin = None if qmin_ext > self._data.x[0] else qmin_ext
+                qstar_low, qstar_low_err = self._calculator.get_qstar_low(qmin)
+                low_calculation_pass = True
+            except Exception as ex:
+                logging.warning('Low-q calculation failed: {}'.format(str(ex)))
+                qstar_low = "ERROR"
+                qstar_low_err = "ERROR"
+        if self.low_extrapolation_plot and not low_calculation_pass:
+            # Remove the existing extrapolation plot
+            model_items = GuiUtils.getChildrenFromItem(self._model_item)
+            for item in model_items:
+                if item.text() == self.low_extrapolation_plot.title:
+                    reactor.callFromThread(self._manager.filesWidget.closePlotsForItem, item)
+                    reactor.callFromThread(self._model_item.removeRow, item.row())
+                    break
+            self.low_extrapolation_plot = None
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
 
+        # High Q Extrapolation calculations
         if self._high_extrapolate:
-            function_low = "power_law"
-            inv.set_extrapolation(range="high",
-                                  npts=int(self._high_points),
-                                  function=function_low,
-                                  power=self._high_power_value)
-        # Compute invariant
-        calculation_failed = False
+            function_high = "power_law"
+            if self._high_fit:
+                self._high_power_value = None
+            self._calculator.set_extrapolation(
+                range="high", npts=int(self._high_points),
+                function=function_high, power=self._high_power_value)
+            try:
+                qmax_ext = float(self.txtExtrapolQMax.text())
+                qmax = None if qmax_ext < self._data.x[int(len(self._data.x) - 1)] else qmax_ext
+                qstar_high, qstar_high_err = self._calculator.get_qstar_high(qmax)
+                high_calculation_pass = True
+            except Exception as ex:
+                logging.warning('High-q calculation failed: {}'.format(str(ex)))
+                qstar_high = "ERROR"
+                qstar_high_err = "ERROR"
+        if self.high_extrapolation_plot and not high_calculation_pass:
+            # Remove the existing extrapolation plot
+            model_items = GuiUtils.getChildrenFromItem(self._model_item)
+            for item in model_items:
+                if item.text() == self.high_extrapolation_plot.title:
+                    reactor.callFromThread(self._manager.filesWidget.closePlotsForItem, item)
+                    reactor.callFromThread(self._model_item.removeRow, item.row())
+                    break
+            self.high_extrapolation_plot = None
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
 
+        # Q* Data calculations
         try:
-            qstar_data, qstar_data_err = inv.get_qstar_with_error()
+            qstar_data, qstar_data_err = self._calculator.get_qstar_with_error()
         except Exception as ex:
             msg += str(ex)
             calculation_failed = True
-            # Display relevant information
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_INVARIANT, item)
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_INVARIANT_ERR, item)
+            qstar_data = "ERROR"
+            qstar_data_err = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
+
+        # Volume Fraction calculations
         try:
-            volume_fraction, volume_fraction_error = \
-                inv.get_volume_fraction_with_error(self._contrast,
-                                                   extrapolation=extrapolation)
+            volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(
+                self._contrast, extrapolation=extrapolation)
         except Exception as ex:
             calculation_failed = True
             msg += str(ex)
-            # Display relevant information
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
-            item = QtGui.QStandardItem("ERROR")
-            self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
+            volume_fraction = "ERROR"
+            volume_fraction_error = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
 
+        # Surface Error calculations
         if self._porod:
             try:
-                surface, surface_error = \
-                    inv.get_surface_with_error(self._contrast, self._porod)
+                surface, surface_error = self._calculator.get_surface_with_error(self._contrast, self._porod)
             except Exception as ex:
                 calculation_failed = True
                 msg += str(ex)
-                # Display relevant information
-                item = QtGui.QStandardItem("ERROR")
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE, item)
-                item = QtGui.QStandardItem("ERROR")
-                self.model.setItem(WIDGETS.W_SPECIFIC_SURFACE_ERR, item)
-        else:
-            surface = None
+                surface = "ERROR"
+                surface_error = "ERROR"
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
+            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
 
-        if (calculation_failed):
+        # Enable the status button
+        self.cmdStatus.setEnabled(True)
+        # Early exit if calculations failed
+        if calculation_failed:
             self.cmdStatus.setEnabled(False)
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
-        self.cmdStatus.setEnabled(True)
 
-        low_calculation_pass = True
-        high_calculation_pass = True
-        if self._low_extrapolate:
-            try:
-                qstar_low, qstar_low_err = inv.get_qstar_low()
-            except Exception as ex:
-                low_calculation_pass = False
-                msg += str(ex)
-                logging.warning('Low-q calculation failed: {}'.format(msg))
-        if self._high_extrapolate:
-            try:
-                qstar_high, qstar_high_err = inv.get_qstar_high()
-            except Exception as ex:
-                high_calculation_pass = False
-                msg += str(ex)
-                logging.warning('High-q calculation failed: {}'.format(msg))
-
-        if self._low_extrapolate and low_calculation_pass:
-            extrapolated_data = inv.get_extra_data_low(self._low_points)
-            power_low = inv.get_extrapolation_power(range='low')
+        if low_calculation_pass:
+            extrapolated_data = self._calculator.get_extra_data_low(
+                self._low_points, q_start=float(self.txtExtrapolQMin.text()))
+            power_low = self._calculator.get_extrapolation_power(range='low')
 
             # Plot the chart
             title = f"Low-Q extrapolation [{self._data.name}]"
@@ -417,14 +446,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot._yaxis = temp_data._yaxis
             self.low_extrapolation_plot._yunit = temp_data._yunit
 
-        if self._high_extrapolate and high_calculation_pass:
+            if self._low_fit:
+                reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_LOWQ_POWER_VALUE, power_low)
+
+        if high_calculation_pass:
             # for presentation in InvariantDetails
             qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
+            qmax_input = float(self.txtExtrapolQMax.text())
+            qmax_plot = qmax_input if qmax_plot > qmax_input else qmax_plot
 
-            if qmax_plot > Q_MAXIMUM:
-                qmax_plot = Q_MAXIMUM
-            power_high = inv.get_extrapolation_power(range='high')
-            high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
+            power_high = self._calculator.get_extrapolation_power(range='high')
+            high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
 
             # Plot the chart
             title = f"High-Q extrapolation [{self._data.name}]"
@@ -442,38 +474,39 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot._yaxis = temp_data._yaxis
             self.high_extrapolation_plot._yunit = temp_data._yunit
 
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
-        if surface:
-            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
-            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR,
-                                   surface_error)
+            if self._high_fit:
+                reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_HIGHQ_POWER_VALUE, power_high)
 
+        if qstar_high == "ERROR":
+            qstar_high = 0.0
+            qstar_high_err = 0.0
+        if qstar_low == "ERROR":
+            qstar_low = 0.0
+            qstar_low_err = 0.0
         qstar_total = qstar_data + qstar_low + qstar_high
         qstar_total_error = np.sqrt(
             qstar_data_err * qstar_data_err
             + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
-
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
+
         return self.model
 
     def updateModelFromThread(self, widget, value):
         """
         Update the model in the main thread
         """
-        item = QtGui.QStandardItem(str(float('%.3g' % value)))
+        try:
+            value = float('%.3g' % value)
+        except TypeError:
+            pass
+        item = QtGui.QStandardItem(str(value))
         self.model.setItem(widget, item)
+        self.mapper.toLast()
 
     def title(self):
         """ Perspective name """
-        return "Invariant panel"
+        return "Invariant Perspective"
 
     def onStatus(self):
         """
@@ -530,11 +563,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtNptsHighQ.textChanged.connect(self.updateFromGui)
 
         # check values of n_points compared to distribution length
-        if self.txtNptsLowQ.isEnabled():
-            self.txtNptsLowQ.textChanged.connect(self.checkLength)
+        self.txtNptsLowQ.textChanged.connect(self.checkLength)
 
-        if self.txtNptsHighQ.isEnabled():
-            self.txtNptsHighQ.textChanged.connect(self.checkLength)
+        self.txtNptsHighQ.textChanged.connect(self.checkLength)
+
+        self.txtExtrapolQMin.textChanged.connect(self.checkQRange)
+
+        self.txtExtrapolQMax.textChanged.connect(self.checkQRange)
+
+        self.txtNptsLowQ.textChanged.connect(self.checkQRange)
+
+        self.txtNptsHighQ.textChanged.connect(self.checkQRange)
 
     def stateChanged(self):
         """
@@ -554,24 +593,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Validators of number of points for extrapolation.
         Error if it is larger than the distribution length
         """
+        self.cmdCalculate.setEnabled(False)
         try:
             int_value = int(self.sender().text())
         except ValueError:
             self.sender().setStyleSheet(BG_RED)
-            self.cmdCalculate.setEnabled(False)
             return
 
         if self._data:
             if len(self._data.x) < int_value:
                 self.sender().setStyleSheet(BG_RED)
                 logging.warning('The number of points must be smaller than {}'.format(len(self._data.x)))
-                self.cmdCalculate.setEnabled(False)
             else:
                 self.sender().setStyleSheet(BG_WHITE)
-                self.cmdCalculate.setEnabled(True)
-        else:
-            # logging.info('no data is loaded')
-            self.cmdCalculate.setEnabled(False)
+                self.allow_calculation()
 
     def modelChanged(self, item):
         """ Update when model changed """
@@ -600,6 +635,57 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                                        self._path, name,
                                        self.sender().checkState())
 
+    def checkQRange(self):
+        """
+        Validate the Q range for the upper and lower bounds
+
+        Valid: q_low_max < q_high_min, q_low_min < q_low_max, q_high_min > q_low_max, q_high_max > q_high_min
+        """
+        q_high_min = q_low_min = np.inf
+        q_high_max = q_low_max = -1 * np.inf
+        try:
+            # Set high extrapolation lower bound to infinity if no data, or if number points undefined
+            q_high_min = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text())]
+        except (ValueError, AttributeError, IndexError):
+            # No data, number of points too large/small, or unable to convert number of points to int
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+        try:
+            # Set high extrapolation upper bound to negative infinity if Q max input empty
+            q_high_max = float(self.txtExtrapolQMax.text())
+        except ValueError:
+            # Couldn't convert Q min for extrapolation to a float
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+        try:
+            # Set low extrapolation lower bound to infinity if Q min input empty
+            q_low_min = float(self.txtExtrapolQMin.text())
+        except ValueError:
+            # Couldn't convert Q min for extrapolation to a float
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+        try:
+            # Set high extrapolation lower bound to infinity if no data, or if number points undefined
+            q_low_max = self._data.x[int(self.txtNptsLowQ.text())]
+        except (ValueError, AttributeError, IndexError):
+            # No data, number of points too large/small, or unable to convert number of points to int
+            pass
+        except Exception as e:
+            logging.error(f"{e}")
+
+        calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
+                     and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
+                     and self.txtNptsHighQ.text())
+        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_WHITE)
+        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_WHITE)
+        if calculate:
+            self.allow_calculation()
+        else:
+            self.cmdCalculate.setEnabled(False)
+
     def updateFromGui(self):
         """ Update model when new user inputs """
         possible_senders = ['txtBackgd', 'txtContrast', 'txtPorodCst',
@@ -625,7 +711,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         try:
             related_internal_values[index_elt] = float(self.sender().text())
             self.sender().setStyleSheet(BG_WHITE)
-            self.cmdCalculate.setEnabled(True)
+            self.allow_calculation()
         except ValueError:
             # empty field, just skip
             self.sender().setStyleSheet(BG_RED)
@@ -638,48 +724,43 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Power line edit can be edited if Fix is selected
         """
         if self.sender().text() == 'Guinier':
-            self._low_guinier = toggle
-
+            itemt = QtGui.QStandardItem(str(toggle).lower())
+            self.model.setItem(WIDGETS.W_LOWQ_GUINIER, itemt)
             toggle = not toggle
             self.rbPowerLawLowQ.setChecked(toggle)
-
-            self.rbFitLowQ.toggled.connect(self.lowFitAndFixToggle)
-            self.rbFitLowQ.setVisible(toggle)
-            self.rbFixLowQ.setVisible(toggle)
-
-            self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
-
         else:
-            self._low_guinier = not toggle
-
             self.rbGuinier.setChecked(not toggle)
+            itemt = QtGui.QStandardItem(str(not toggle).lower())
+            self.model.setItem(WIDGETS.W_LOWQ_GUINIER, itemt)
 
-            self.rbFitLowQ.toggled.connect(self.lowFitAndFixToggle)
-            self.rbFitLowQ.setVisible(toggle)
-            self.rbFixLowQ.setVisible(toggle)
-
-            self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
+        self.rbFitLowQ.setVisible(toggle)
+        self.rbFixLowQ.setVisible(toggle)
+        self.txtPowerLowQ.setEnabled(toggle and (not self._low_fit))
+        self.updateFromModel()
 
     def lowFitAndFixToggle(self, toggle):
         """ Fit and Fix radiobuttons cannot be selected at the same time """
-        self._low_fit = toggle
-
-        toggle = not toggle
-        self.txtPowerLowQ.setEnabled(toggle)
+        itemt = QtGui.QStandardItem(str(toggle).lower())
+        self.model.setItem(WIDGETS.W_LOWQ_FIT, itemt)
+        self.txtPowerLowQ.setEnabled(not toggle)
+        self.updateFromModel()
 
     def hiFitAndFixToggle(self, toggle):
         """
         Enable editing of power exponent if Fix for high Q is checked
         Disable otherwise
         """
+        itemt = QtGui.QStandardItem(str(toggle).lower())
+        self.model.setItem(WIDGETS.W_HIGHQ_FIT, itemt)
         self.txtPowerHighQ.setEnabled(not toggle)
+        self.updateFromModel()
 
     def highQToggle(self, clicked):
         """ Disable/enable High Q extrapolation """
         self.rbFitHighQ.setEnabled(clicked)
         self.rbFixHighQ.setEnabled(clicked)
         self.txtNptsHighQ.setEnabled(clicked)
-        self.txtPowerHighQ.setEnabled(clicked)
+        self.txtPowerHighQ.setEnabled(clicked and not self._high_fit)
 
     def lowQToggle(self, clicked):
         """ Disable / enable Low Q extrapolation """
@@ -709,6 +790,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         qmax = 0.0
         item = QtGui.QStandardItem(str(qmax))
         self.model.setItem(WIDGETS.W_QMAX, item)
+
+        # add extrapolated Q parameters to the model
+        item = QtGui.QStandardItem(str(Q_MINIMUM))
+        self.model.setItem(WIDGETS.W_EX_QMIN, item)
+        item = QtGui.QStandardItem(str(Q_MAXIMUM))
+        self.model.setItem(WIDGETS.W_EX_QMAX, item)
 
         # add custom input params
         item = QtGui.QStandardItem(str(self._background))
@@ -760,6 +847,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Qmin/Qmax
         self.mapper.addMapping(self.txtTotalQMin, WIDGETS.W_QMIN)
         self.mapper.addMapping(self.txtTotalQMax, WIDGETS.W_QMAX)
+        # Extrapolated Qmin/Qmax
+        self.mapper.addMapping(self.txtExtrapolQMin, WIDGETS.W_EX_QMIN)
+        self.mapper.addMapping(self.txtExtrapolQMax, WIDGETS.W_EX_QMAX)
 
         # Background
         self.mapper.addMapping(self.txtBackgd, WIDGETS.W_BACKGROUND)
@@ -818,6 +908,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # only 1 file can be loaded
         self._model_item = data_item[0]
 
+        # Reset plots on data change
+        self.low_extrapolation_plot = None
+        self.high_extrapolation_plot = None
+
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
         self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
@@ -871,9 +965,18 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.model.item(WIDGETS.W_QMAX).setText(str(qmax))
         self._path = data.filename
 
+        self._calculator = invariant.InvariantCalculator(
+            data=self._data, background=self._background, scale=self._scale)
+
+        # Ensure extrapolated number of points and Q range are valid on data load
+        self.txtNptsLowQ.setText(self.txtNptsLowQ.text())
+        self.txtNptsHighQ.setText(self.txtNptsHighQ.text())
+        self.checkQRange()
+
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
-        self.calculateInvariant()
+        if self.cmdCalculate.isEnabled():
+            self.calculateInvariant()
 
     def serializeAll(self):
         """

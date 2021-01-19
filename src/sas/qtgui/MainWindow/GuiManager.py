@@ -194,7 +194,7 @@ class GuiManager(object):
                 loaded_perspective = perspective(parent=self)
                 loaded_dict[name] = loaded_perspective
             except Exception as e:
-                logger.log(f"Unable to load {name} perspective.\n{e}")
+                logger.warning(f"Unable to load {name} perspective.\n{e}")
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
@@ -206,7 +206,7 @@ class GuiManager(object):
                     self._workspace.workspace.removeSubWindow(self.subwindow)
                     perspective.close()
                 except Exception as e:
-                    logger.log(f"Unable to close {name} perspective\n{e}")
+                    logger.warning(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
         self._current_perspective = None
 

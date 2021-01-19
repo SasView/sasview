@@ -3,6 +3,7 @@ from PyQt5 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
+
 class SlicerModel(object):
     def __init__(self):
         # Model representation of local parameters
@@ -16,7 +17,7 @@ class SlicerModel(object):
         Set up the Qt model for data handling between controls
         """
         parameters = self.getParams()
-        self._model.removeRows( 0, self._model.rowCount() )
+        self._model.removeRows(0, self._model.rowCount())
         # Crete/overwrite model items
         for parameter in list(parameters.keys()):
             item1 = QtGui.QStandardItem(parameter)
@@ -31,8 +32,8 @@ class SlicerModel(object):
         """
         params = self.getParams()
         for row_index in range(self._model.rowCount()):
-            #index = self._model.indexFromItem(item)
-            #row_index = index.row()
+            # index = self._model.indexFromItem(item)
+            # row_index = index.row()
             param_name = str(self._model.item(row_index, 0).text())
             params[param_name] = float(self._model.item(row_index, 1).text())
 
@@ -69,4 +70,3 @@ class SlicerModel(object):
     def validate(self):
         ''' pure virtual '''
         raise NotImplementedError("Validator must be implemented in derived class.")
-

@@ -133,16 +133,19 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             self.progressBarLowQ.setValue(0)
         else:
             self.progressBarLowQ.setValue(self.progress_low_qstar)
+            self.progressBarLowQ.setFormat("%.2f %%" % self.progress_low_qstar)
 
         if self.progress_high_qstar == 'error':
             self.progressBarHighQ.setValue(0)
         else:
             self.progressBarHighQ.setValue(self.progress_high_qstar)
+            self.progressBarHighQ.setFormat("%.2f %%" % self.progress_high_qstar)
 
         if self.progress_data_qstar == 'error':
             self.progressBarData.setValue(0)
         else:
             self.progressBarData.setValue(self.progress_data_qstar)
+            self.progressBarData.setFormat("%.2f %%" % self.progress_data_qstar)
 
         self.show()
 

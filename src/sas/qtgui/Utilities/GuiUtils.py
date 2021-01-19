@@ -411,7 +411,7 @@ def createModelItemWithPlot(update_data, name=""):
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
-    checkbox_item.setCheckState(QtCore.Qt.Checked)
+    checkbox_item.setCheckState(QtCore.Qt.Unchecked)
     checkbox_item.setText(name)
 
     # Add "Info" item
@@ -504,6 +504,30 @@ def plotsFromModel(model_name, model_item):
                     plot_data.append(item_2.data())
 
     return plot_data
+
+
+def plotsOfType(model, datatype=Data1D):
+    """
+    Returns the list of plots for the whole model of type `datatype`
+    """
+    assert isinstance(model, QtGui.QStandardItemModel)
+    assert (isinstance(datatype, Data1D) or isinstance(datatype, Data2D))
+
+    plot_data = []
+    # Iterate over model looking for named items
+    for index in range(model.rowCount()):
+        item = model.item(index)
+        data = item.child(0).data()
+        if isinstance(data, datatype):
+            plot_data[item.text()] = data
+        # Going 1 level deeper only
+        for index_2 in range(item.rowCount()):
+            item_2 = item.child(index_2)
+            if item_2 and item_2.isCheckable() and isinstance(item_2.child(0).data, datatype):
+                plot_data[item_2.text()] = item_2.child(0).data()
+
+    return plot_data
+
 
 def plotsFromDisplayName(name, model_item):
     """

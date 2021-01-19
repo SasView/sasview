@@ -69,7 +69,7 @@ class InversionLogic(object):
         index = np.isnan(y)
         if index.any():
             y[index] = err[index] = 1.0
-            logger.log("Could not compute I(q) for q =", list((x[index])))
+            logger.info("Could not compute I(q) for q =", list((x[index])))
 
         new_plot = Data1D(x, y)
         new_plot.name = IQ_FIT_LABEL + f"[{self._data.name}]"
@@ -94,7 +94,7 @@ class InversionLogic(object):
             index = np.isnan(y)
             if index.any():
                 y[index] = err[index] = 1.0
-                logger.log("Could not compute smeared I(q) for q =", list((x[index])))
+                logger.info("Could not compute smeared I(q) for q =", list((x[index])))
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL
