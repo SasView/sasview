@@ -46,7 +46,10 @@ class InvariantPerspectiveTest(unittest.TestCase):
                 return GuiUtils.Communicate()
 
         self.widget = InvariantWindow(dummy_manager())
-        data = Data1D(x=[1, 2], y=[1, 2], dy=[0.01, 0.01])
+        data = Data1D(
+            x=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+            y=[10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+            dy=[0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         self.fakeData = QtGui.QStandardItem("test")
 
@@ -110,6 +113,8 @@ class InvariantPerspectiveTest(unittest.TestCase):
         # Validators
         self.assertIsInstance(self.widget.txtNptsLowQ.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.txtNptsHighQ.validator(), QtGui.QIntValidator)
+        self.assertIsInstance(self.widget.txtExtrapolQMin.validator(), GuiUtils.DoubleValidator)
+        self.assertIsInstance(self.widget.txtExtrapolQMax.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtPowerLowQ.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtPowerHighQ.validator(), GuiUtils.DoubleValidator)
         self.assertIsInstance(self.widget.txtBackgd.validator(), GuiUtils.DoubleValidator)
@@ -127,6 +132,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
             self.widget.txtBackgd.isReadOnly(), self.widget.txtScale.isReadOnly(), self.widget.txtContrast.isReadOnly(),
             self.widget.txtPorodCst.isReadOnly(), self.widget.txtNptsLowQ.isReadOnly(),
             self.widget.txtNptsHighQ.isReadOnly(), self.widget.txtName.isEnabled(),
+            self.widget.txtExtrapolQMin.isReadOnly(), self.widget.txtExtrapolQMax.isReadOnly(),
             # unchecked check boxes
             self.widget.chkLowQ.isChecked(), self.widget.chkHighQ.isChecked(),
             # radio buttons exclusivity
@@ -194,12 +200,30 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.widget.txtNptsLowQ.setEnabled(True)
 
         self.widget.setData([self.fakeData])
-        self.widget.txtNptsLowQ.setText('9')
+        self.widget.txtNptsLowQ.setText('25')
 
         BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
         self.assertIn(BG_COLOR_ERR, self.widget.txtNptsLowQ.styleSheet())
         self.assertTrue(logging.warning.called_once_with())
         self.assertFalse(self.widget.cmdCalculate.isEnabled())
+
+    def testExtrapolationQRange(self):
+        """
+        Test changing the extrapolated Q-range
+        """
+        # Set values to invalid points and be sure the calculation cannot be run
+        self.widget.txtNptsLowQ.setText('4')
+        self.widget.txtNptsHighQ.setText('4')
+        self.widget.txtExtrapolQMin.setText('0.8')
+        self.widget.txtExtrapolQMax.setText('0.2')
+        self.widget.setData([self.fakeData])
+        self.assertFalse(self.widget.cmdCalculate.isEnabled())
+        # Set Qmin to a valid value, but leave Qmax invalid - should not be able to calculate
+        self.widget.txtExtrapolQMin.setText('0.001')
+        self.assertFalse(self.widget.cmdCalculate.isEnabled())
+        # Set Qmax to a valid value - calculation should now be possible
+        self.widget.txtExtrapolQMax.setText('100.0')
+        self.assertTrue(self.widget.cmdCalculate.isEnabled())
 
     def testUpdateFromGui(self):
         """ """
@@ -378,8 +402,8 @@ class InvariantPerspectiveTest(unittest.TestCase):
 
         # content of line edits
         self.assertEqual(self.widget.txtName.text(), 'data')
-        self.assertEqual(self.widget.txtTotalQMin.text(), '1')
-        self.assertEqual(self.widget.txtTotalQMax.text(), '2')
+        self.assertEqual(self.widget.txtTotalQMin.text(), '0.1')
+        self.assertEqual(self.widget.txtTotalQMax.text(), '1.0')
         self.assertEqual(self.widget.txtBackgd.text(), '0.0')
         self.assertEqual(self.widget.txtScale.text(), '1.0')
         self.assertEqual(self.widget.txtContrast.text(), '8e-06')

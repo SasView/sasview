@@ -628,7 +628,7 @@ class InvariantCalculator(object):
             return self._low_extrapolation_power_fitted
         return self._high_extrapolation_power_fitted
 
-    def get_qstar_low(self):
+    def get_qstar_low(self, low_q_limit=None):
         """
         Compute the invariant for extrapolated data at low q range.
 
@@ -640,8 +640,14 @@ class InvariantCalculator(object):
         :return q_star: the invariant for data extrapolated at low q.
         """
         # Data boundaries for fitting
-        qmin = self._data.x[0]
         qmax = self._data.x[int(self._low_extrapolation_npts - 1)]
+        # Allow minimum q to be passed as an argument
+        if not low_q_limit or low_q_limit < self._data.x[0] or low_q_limit >= qmax:
+            qmin = self._data.x[0]
+        else:
+            qmin = low_q_limit
+        # Distribution starting point
+        self._low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
 
         # Extrapolate the low-Q data
         p, _ = self._fit(model=self._low_extrapolation_function,
@@ -650,25 +656,18 @@ class InvariantCalculator(object):
                          power=self._low_extrapolation_power)
         self._low_extrapolation_power_fitted = p[0]
 
-        # Distribution starting point
-        self._low_q_limit = Q_MINIMUM
-        if Q_MINIMUM >= qmin:
-            self._low_q_limit = qmin / 10
-
-        data = self._get_extrapolated_data(\
-                                    model=self._low_extrapolation_function,
-                                    npts=INTEGRATION_NSTEPS,
-                                    q_start=self._low_q_limit, q_end=qmin)
+        data = self._get_extrapolated_data(
+            model=self._low_extrapolation_function,
+            npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin)
 
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
         # may not be a Guinier or simple power law. The following is
         # a conservative estimation for the systematic error.
-        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * \
-                                  (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
+        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data) + err
 
-    def get_qstar_high(self):
+    def get_qstar_high(self, high_q_limit=None):
         """
         Compute the invariant for extrapolated data at high q range.
 
@@ -680,9 +679,14 @@ class InvariantCalculator(object):
         :return q_star: the invariant for data extrapolated at high q.
         """
         # Data boundaries for fitting
-        x_len = len(self._data.x) - 1
-        qmin = self._data.x[int(x_len - (self._high_extrapolation_npts - 1))]
-        qmax = self._data.x[int(x_len)]
+        x_len = int(len(self._data.x) - 1)
+        qmin = self._data.x[int(x_len - self._high_extrapolation_npts)]
+        if not high_q_limit or high_q_limit > self._data.x[x_len] or high_q_limit <= qmin:
+            qmax = self._data.x[x_len]
+        else:
+            qmax = high_q_limit
+
+        high_q_limit = high_q_limit if high_q_limit else Q_MAXIMUM
 
         # fit the data with a model to get the appropriate parameters
         p, _ = self._fit(model=self._high_extrapolation_function,
@@ -692,10 +696,9 @@ class InvariantCalculator(object):
         self._high_extrapolation_power_fitted = p[0]
 
         #create new Data1D to compute the invariant
-        data = self._get_extrapolated_data(\
-                                    model=self._high_extrapolation_function,
-                                    npts=INTEGRATION_NSTEPS,
-                                    q_start=qmax, q_end=Q_MAXIMUM)
+        data = self._get_extrapolated_data(
+            model=self._high_extrapolation_function,
+            npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit)
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
