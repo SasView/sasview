@@ -138,6 +138,24 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtPowerHighQ.setValidator(GuiUtils.DoubleValidator())
 
+    def get_low_q_extrapolation_upper_limit(self):
+        q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
+        return q_value
+
+    def set_low_q_extrapolation_upper_limit(self, value):
+        n_pts = (np.abs(self._data.x - value)).argmin() + 1
+        item = QtGui.QStandardItem(str(n_pts))
+        self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
+
+    def get_high_q_extrapolation_lower_limit(self):
+        q_value = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text()) - 1]
+        return q_value
+
+    def set_high_q_extrapolation_lower_limit(self, value):
+        n_pts = (np.abs(self._data.x - value)).argmin() + 1
+        item = QtGui.QStandardItem(str(int(n_pts)))
+        self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
+
     def enabling(self):
         """ """
         self.cmdStatus.setEnabled(True)
@@ -239,6 +257,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.show_errors = False
+            self.high_extrapolation_plot.show_q_range_sliders = True
+            self.high_extrapolation_plot.slider_low_q_input = self.txtNptsHighQ
+            self.high_extrapolation_plot.slider_low_q_setter = self.set_high_q_extrapolation_lower_limit
+            self.high_extrapolation_plot.slider_low_q_getter = self.get_high_q_extrapolation_lower_limit
+            self.high_extrapolation_plot.slider_high_q_input = self.txtExtrapolQMax
             GuiUtils.updateModelItemWithPlot(self._model_item, self.high_extrapolation_plot,
                                              self.high_extrapolation_plot.title)
             plots.append(self.high_extrapolation_plot)
@@ -246,6 +269,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.show_errors = False
+            self.low_extrapolation_plot.show_q_range_sliders = True
+            self.low_extrapolation_plot.slider_high_q_input = self.txtNptsLowQ
+            self.high_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
+            self.high_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
+            self.low_extrapolation_plot.slider_low_q_input = self.txtExtrapolQMin
             GuiUtils.updateModelItemWithPlot(self._model_item, self.low_extrapolation_plot,
                                              self.low_extrapolation_plot.title)
             plots.append(self.low_extrapolation_plot)
