@@ -156,7 +156,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     def set_high_q_extrapolation_lower_limit(self, value):
         n_pts = (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(int(n_pts)))
-        self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
+        self.model.setItem(WIDGETS.W_NPTS_HIGHQ, item)
 
     def enabling(self):
         """ """
@@ -274,8 +274,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot.show_errors = False
             self.low_extrapolation_plot.show_q_range_sliders = True
             self.low_extrapolation_plot.slider_high_q_input = self.txtNptsLowQ
-            self.high_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
-            self.high_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
+            self.low_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
+            self.low_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
             self.low_extrapolation_plot.slider_low_q_input = self.txtExtrapolQMin
             GuiUtils.updateModelItemWithPlot(self._model_item, self.low_extrapolation_plot,
                                              self.low_extrapolation_plot.title)
@@ -679,6 +679,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
                      and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
                      and self.txtNptsHighQ.text())
+        item = QtGui.QStandardItem(self.txtExtrapolQMax.text())
+        self.model.setItem(WIDGETS.W_EX_QMAX, item)
+        item = QtGui.QStandardItem(self.txtExtrapolQMin.text())
+        self.model.setItem(WIDGETS.W_EX_QMIN, item)
         self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_WHITE)
         self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_WHITE)
         if calculate:
@@ -690,7 +694,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ Update model when new user inputs """
         possible_senders = ['txtBackgd', 'txtContrast', 'txtPorodCst',
                             'txtScale', 'txtPowerLowQ', 'txtPowerHighQ',
-                            'txtNptsLowQ', 'txtNptsHighQ']
+                            'txtNptsLowQ', 'txtNptsHighQ',
+                            'txt']
 
         related_widgets = [WIDGETS.W_BACKGROUND, WIDGETS.W_CONTRAST,
                            WIDGETS.W_POROD_CST, WIDGETS.W_SCALE,

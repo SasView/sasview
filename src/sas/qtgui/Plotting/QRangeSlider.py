@@ -133,8 +133,8 @@ class LineInteractor(BaseInteractor):
         self.input = input
         if self.input:
             self.input.textChanged.connect(self.inputChanged)
-        self.set_q = setter if callable(setter) else None
-        self.get_q = getter if callable(getter) else None
+        self.setter = setter if callable(setter) else None
+        self.getter = getter if callable(getter) else None
         self.connect_markers([self.line, self.inner_marker])
         self.update()
 
@@ -154,20 +154,24 @@ class LineInteractor(BaseInteractor):
         self.inner_marker.remove()
         self.line.remove()
 
-    def inputChanged(self):
-        """ Track the input linked to the x value for this slider and update as needed """
-        if self.get_q:
+    def set_q(self, value):
+        if self.setter:
+            self.setter(value)
+
+    def get_q(self):
+        if self.getter:
             # Separate callback method to get Q value
-            self.x = float(self.get_q())
+            self.x = float(self.getter())
         elif hasattr(self.input, 'text'):
             # Line edit box
             self.x = float(self.input.text())
         elif hasattr(self.input, 'getText'):
             # Text box
             self.x = float(self.input.getText())
-        else:
-            # Unknown type - should probably set a callback method instead
-            self.input = None
+
+    def inputChanged(self):
+        """ Track the input linked to the x value for this slider and update as needed """
+        self.get_q()
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
         self.update()
 
@@ -210,7 +214,7 @@ class LineInteractor(BaseInteractor):
         """
         self.has_move = True
         self.x = x
-        if self.set_q:
+        if self.setter:
             self.set_q(self.x)
         else:
             self.input.setText(f"{self.x:.3}")

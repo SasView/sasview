@@ -1153,11 +1153,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
 
-                # Add q-range sliders to the fits to change the q range
-                if plot_set.show_q_range_sliders:
-                    sliders = QRangeSlider(new_plot, new_plot.ax, data=plot_set)
-                    new_plot.sliders[plot_set.name] = sliders
-
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:

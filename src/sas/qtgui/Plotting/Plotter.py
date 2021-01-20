@@ -14,6 +14,7 @@ from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
@@ -248,6 +249,11 @@ class PlotterWidget(PlotterBase):
             ax.set_ylabel(self.yLabel)
         if self.xLabel and not is_fit:
             ax.set_xlabel(self.xLabel)
+
+        # Add q-range sliders
+        if data.show_q_range_sliders:
+            sliders = QRangeSlider(self, self.ax, data=data)
+            self.sliders[data.name] = sliders
 
         # refresh canvas
         self.canvas.draw_idle()
@@ -517,22 +523,19 @@ class PlotterWidget(PlotterBase):
         if id not in list(self.plot_dict.keys()):
             return
 
-        selected_plot = self.plot_dict[id]
-
-        plot_dict = copy.deepcopy(self.plot_dict)
+        # Remove the plot from the list of plots
+        self.plot_dict.pop(id)
 
         # Labels might have been changed
         xl = self.ax.xaxis.label.get_text()
         yl = self.ax.yaxis.label.get_text()
 
-        self.plot_dict = {}
-
         mpl.pyplot.cla()
         self.ax.cla()
 
-        for ids in plot_dict:
+        for ids in self.plot_dict:
             if ids != id:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
+                self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
 
         # Reset the labels
         self.ax.set_xlabel(xl)
