@@ -10,6 +10,9 @@ from .UI.ChangeNameUI import Ui_ChangeCategoryUI
 class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
     def __init__(self, parent=None):
         super(ChangeName, self).__init__(parent)
+
+        self._data = None
+        self._model_item = None
         self.setupUi(self)
 
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
@@ -21,8 +24,6 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self.manager = self.parent.manager
 
         self.setWindowTitle("Display Name Change")
-        self._data = None
-        self._model_item = None
 
         # Disable the inputs
         self.txtCurrentName.setEnabled(False)
