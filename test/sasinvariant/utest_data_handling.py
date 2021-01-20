@@ -262,14 +262,14 @@ class TestInvariantCalculator(unittest.TestCase):
         # High-Q Extrapolation
         # Check that the returned invariant is what we expect given
         # the result we got without extrapolation
-        inv.set_extrapolation('high', npts=75, function='power_law')
+        inv.set_extrapolation('high', npts=95, function='power_law')
         qs_extr, dqs_extr = inv.get_qstar_with_error('high')
         delta_qs_extr, delta_dqs_extr = inv.get_qstar_high()
 
         # In principle the slope should be -4. However due to the oscillations
         # and finite number of points we need quite a lot of points to ensure
         # that the fit averages close to 4. SasView estimates 3.92 at the
-        # moment 
+        # moment
         self.assertTrue(math.fabs(inv._high_extrapolation_function.power-4)<0.1)
 
         self.assertEqual(qs_extr, _qstar+delta_qs_extr)
