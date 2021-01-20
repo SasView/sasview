@@ -38,7 +38,7 @@ COLORS = OrderedDict([
         ('Cyan', '#17becf'),
         ('Magenta', '#e377c2'),
         ('Yellow', '#bcbd22'),
-        ('Black', 'k'),
+        ('Black', '#000000'),
         ('Custom', 'x'),
 ])
 
