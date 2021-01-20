@@ -6,8 +6,6 @@ import time
 import logging
 import copy
 
-import numpy as np
-
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -26,7 +24,6 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
-from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
@@ -1152,7 +1149,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
-
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:

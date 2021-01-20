@@ -606,6 +606,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
+        self.options_widget.txtMinRange.textChanged.connect(self.options_widget.updateMinQ)
+        self.options_widget.txtMaxRange.textChanged.connect(self.options_widget.updateMaxQ)
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
@@ -2341,9 +2343,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             new_data.dy = weight
 
-        new_data.show_q_range_sliders = True
-        new_data.slider_high_q_input = self.options_widget.txtMaxRange
-        new_data.slider_low_q_input = self.options_widget.txtMinRange
         return new_data
 
     def updateQRange(self):
@@ -2941,6 +2940,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     self.data_index = i
 
         residuals = self.calculateResiduals(fitted_data)
+
+        fitted_data.show_q_range_sliders = True
+        fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
+        fitted_data.slider_low_q_input = self.options_widget.txtMinRange
+
         self.model_data = fitted_data
         new_plots = [fitted_data]
         if residuals is not None:

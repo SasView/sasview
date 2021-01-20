@@ -213,6 +213,18 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
             self.rbWeighting1.setChecked(True)
             self.onWeightingChoice(self.rbWeighting1)
 
+    def updateMinQ(self):
+        qmin = self.txtMinRange.text()
+        qmax = self.model.item(self.MODEL.index('MAX_RANGE')).text()
+        npts = self.model.item(self.MODEL.index('NPTS')).text()
+        self.updateQRange(qmin, qmax, npts)
+
+    def updateMaxQ(self):
+        qmin = self.model.item(self.MODEL.index('MIN_RANGE')).text()
+        qmax = self.txtMaxRange.text()
+        npts = self.model.item(self.MODEL.index('NPTS')).text()
+        self.updateQRange(qmin, qmax, npts)
+
     def updateQRange(self, q_range_min, q_range_max, npts):
         """
         Update the local model based on calculated values
