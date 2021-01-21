@@ -2942,6 +2942,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals = self.calculateResiduals(fitted_data)
 
         fitted_data.show_q_range_sliders = True
+        # Suppress the GUI update until the move is finished to limit model calculations
+        fitted_data.slider_update_on_move = False
         fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
         fitted_data.slider_low_q_input = self.options_widget.txtMinRange
 

@@ -567,9 +567,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.txtNptsHighQ.textChanged.connect(self.checkLength)
 
-        self.txtExtrapolQMin.textChanged.connect(self.checkQRange)
+        self.txtExtrapolQMin.textChanged.connect(self.checkQMinRange)
 
-        self.txtExtrapolQMax.textChanged.connect(self.checkQRange)
+        self.txtExtrapolQMax.textChanged.connect(self.checkQMaxRange)
 
         self.txtNptsLowQ.textChanged.connect(self.checkQRange)
 
@@ -635,6 +635,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                                        self._path, name,
                                        self.sender().checkState())
 
+    def checkQMaxRange(self):
+        item = QtGui.QStandardItem(self.txtExtrapolQMax.text())
+        self.model.setItem(WIDGETS.W_EX_QMAX, item)
+        self.checkQRange()
+
+    def checkQMinRange(self):
+        item = QtGui.QStandardItem(self.txtExtrapolQMin.text())
+        self.model.setItem(WIDGETS.W_EX_QMIN, item)
+        self.checkQRange()
+
     def checkQRange(self):
         """
         Validate the Q range for the upper and lower bounds
@@ -679,10 +689,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
                      and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
                      and self.txtNptsHighQ.text())
-        item = QtGui.QStandardItem(self.txtExtrapolQMax.text())
-        self.model.setItem(WIDGETS.W_EX_QMAX, item)
-        item = QtGui.QStandardItem(self.txtExtrapolQMin.text())
-        self.model.setItem(WIDGETS.W_EX_QMIN, item)
         self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_WHITE)
         self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_WHITE)
         if calculate:
@@ -694,8 +700,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ Update model when new user inputs """
         possible_senders = ['txtBackgd', 'txtContrast', 'txtPorodCst',
                             'txtScale', 'txtPowerLowQ', 'txtPowerHighQ',
-                            'txtNptsLowQ', 'txtNptsHighQ',
-                            'txt']
+                            'txtNptsLowQ', 'txtNptsHighQ']
 
         related_widgets = [WIDGETS.W_BACKGROUND, WIDGETS.W_CONTRAST,
                            WIDGETS.W_POROD_CST, WIDGETS.W_SCALE,

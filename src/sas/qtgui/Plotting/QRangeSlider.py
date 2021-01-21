@@ -1,18 +1,16 @@
 """
-Slider for modifying the Q range on a fit
+Double slider interactor for setting the Q range for a fit or function
 """
-import logging
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
-logger = logging.getLogger(__name__)
-
 
 class QRangeSlider(BaseInteractor):
     """
-    Draw a pair of draggable vertical lines that are linked to an input for bi-directional
+    Draw a pair of draggable vertical lines. Each line can be linked to a GUI input.
+    The GUI input should update the lines and vice-versa.
     """
     def __init__(self, base, axes, color='black', zorder=5, data=None):
         """
@@ -29,6 +27,7 @@ class QRangeSlider(BaseInteractor):
         self.y_marker_min = self.data.y[np.where(self.data.x == self.x_min)[0][0]]
         self.x_max = np.fabs(max(self.data.x))
         self.y_marker_max = self.data.y[np.where(self.data.x == self.x_max)[0][-1]]
+        self.updateOnMove = data.slider_update_on_move
         self.line_min = LineInteractor(self, axes, zorder=zorder, x=self.x_min, y=self.y_marker_min,
                                        input=self.data.slider_low_q_input, setter=self.data.slider_low_q_setter,
                                        getter=self.data.slider_low_q_getter)
@@ -62,16 +61,12 @@ class QRangeSlider(BaseInteractor):
         self.line_max.remove()
         self.line_min.remove()
 
-    def update(self):
+    def update(self, x=None, y=None):
         """
         Draw the new roughness on the graph.
-
-        :param x: x-coordinates to reset current class x
-        :param y: y-coordinates to reset current class y
-
         """
-        self.line_min.update()
-        self.line_max.update()
+        self.line_min.update(x, y)
+        self.line_max.update(x, y)
         self.base.update()
 
     def save(self, ev):
@@ -109,7 +104,7 @@ class QRangeSlider(BaseInteractor):
 
 class LineInteractor(BaseInteractor):
     """
-    Draw a single vertical line that can be modified
+    Draw a single vertical line that can be dragged on a plot
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5, input=None, setter=None, getter=None):
         """
@@ -140,7 +135,7 @@ class LineInteractor(BaseInteractor):
 
     def validate(self, param_name, param_value):
         """
-        Validate input from user
+        Validate input from user - Should never fail
         """
         return True
 
@@ -155,10 +150,16 @@ class LineInteractor(BaseInteractor):
         self.line.remove()
 
     def set_q(self, value):
+        """
+        Call the q setter callback method if it exists
+        """
         if self.setter:
             self.setter(value)
 
     def get_q(self):
+        """
+        Get the q value, inferring the method to get the value
+        """
         if self.getter:
             # Separate callback method to get Q value
             self.x = float(self.getter())
@@ -177,11 +178,7 @@ class LineInteractor(BaseInteractor):
 
     def update(self, x=None, y=None):
         """
-        Draw the new roughness on the graph.
-
-        :param x: x-coordinates to reset current class x
-        :param y: y-coordinates to reset current class y
-
+        Update the line position on the graph.
         """
         # Reset x, y -coordinates if given as parameters
         if x is not None:
@@ -195,15 +192,14 @@ class LineInteractor(BaseInteractor):
 
     def save(self, ev):
         """
-        Remember the roughness for this layer and the next so that we
-        can restore on Esc.
+        Remember the position for this line so that we can restore on Esc.
         """
         self.save_x = self.x
         self.save_y = self.y_marker
 
     def restore(self, ev):
         """
-        Restore the roughness for this layer.
+        Restore the position for this line
         """
         self.x = self.save_x
         self.y_marker = self.save_y
@@ -214,12 +210,25 @@ class LineInteractor(BaseInteractor):
         """
         self.has_move = True
         self.x = x
+        if self.base.updateOnMove:
+            if self.setter:
+                self.set_q(self.x)
+            else:
+                self.input.setText(f"{self.x:.3}")
+        self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
+        self.update()
+
+    def onRelease(self, ev):
+        """
+        Update the line position when the mouse button is released
+        """
         if self.setter:
             self.set_q(self.x)
         else:
             self.input.setText(f"{self.x:.3}")
-        self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
         self.update()
+        self.moveend(ev)
+        return True
 
     def clear_markers(self):
         """

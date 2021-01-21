@@ -1087,7 +1087,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             else:
                 # Plots with main data points on the same chart
                 # Get the main data plot
-                if main_data is not None and not self.isPlotShown(main_data):
+                if main_data is not None:
                     new_plots.append((plot_item, main_data))
                 new_plots.append((plot_item, plot_to_show))
 
