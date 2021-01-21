@@ -407,6 +407,9 @@ class PlotterTest(unittest.TestCase):
         data2._yunit = "cake"
         error_status = True
         data2.hide_error = error_status
+        data2.custom_color = None
+        data2.symbol = 1
+        data2.markersize = 11
 
         # Replace data in plot
         self.plotter.replacePlot("Test name", data2)
