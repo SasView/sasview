@@ -46,7 +46,7 @@ sasview_data = {
         {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
         {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
-        {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'}
         {'name': 'Campbell, Kieran','affiliation': 'University of Oxford'},
         {'name': 'Cooper-Benun, Torin', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Durniak, Celine','affiliation': 'Data Management and Software Centre, European Spallation Source' },
