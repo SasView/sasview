@@ -12,15 +12,12 @@ import matplotlib as mpl
 from matplotlib import rcParams
 
 DEFAULT_CMAP = mpl.cm.jet
-from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
-import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
 class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):

@@ -1,4 +1,3 @@
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
@@ -502,6 +501,11 @@ class PlotterWidget(PlotterBase):
         selected_plot = self.plot_dict[id]
         new_plot.xtransform = selected_plot.xtransform
         new_plot.ytransform = selected_plot.ytransform
+        #Adding few properties ftom ModifyPlot to preserve them in future changes
+        new_plot.title = selected_plot.title
+        new_plot.custom_color = selected_plot.custom_color
+        new_plot.markersize = selected_plot.markersize
+        new_plot.symbol = selected_plot.symbol
 
         self.removePlot(id)
         self.plot(data=new_plot)
@@ -556,7 +560,6 @@ class PlotterWidget(PlotterBase):
         Allows for MPL modifications to the selected plot
         """
         selected_plot = self.plot_dict[id]
-        selected_line = self.plot_lines[id]
         # Old style color - single integer for enum color
         # New style color - #hhhhhh
         color = selected_plot.custom_color
@@ -565,7 +568,6 @@ class PlotterWidget(PlotterBase):
         marker_size = selected_plot.markersize
         # plot name
         legend = selected_plot.title
-
         plotPropertiesWidget = PlotProperties(self,
                                 color=color,
                                 marker=marker,
@@ -577,7 +579,6 @@ class PlotterWidget(PlotterBase):
             selected_plot.custom_color = plotPropertiesWidget.color()
             selected_plot.symbol = plotPropertiesWidget.marker()
             selected_plot.title = plotPropertiesWidget.legend()
-
             # Redraw the plot
             self.replacePlot(id, selected_plot)
 
