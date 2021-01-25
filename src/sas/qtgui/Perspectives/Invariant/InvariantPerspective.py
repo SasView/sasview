@@ -260,11 +260,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.show_errors = False
-            self.high_extrapolation_plot.show_q_range_sliders = True
-            self.high_extrapolation_plot.slider_low_q_input = self.txtNptsHighQ
-            self.high_extrapolation_plot.slider_low_q_setter = self.set_high_q_extrapolation_lower_limit
-            self.high_extrapolation_plot.slider_low_q_getter = self.get_high_q_extrapolation_lower_limit
-            self.high_extrapolation_plot.slider_high_q_input = self.txtExtrapolQMax
+            # TODO: Fix the link between npts and q and then enable the q-range sliders
+            #self.high_extrapolation_plot.show_q_range_sliders = True
+            #self.high_extrapolation_plot.slider_update_on_move = False
+            #self.high_extrapolation_plot.slider_low_q_input = self.txtNptsHighQ
+            #self.high_extrapolation_plot.slider_low_q_setter = self.set_high_q_extrapolation_lower_limit
+            #self.high_extrapolation_plot.slider_low_q_getter = self.get_high_q_extrapolation_lower_limit
+            #self.high_extrapolation_plot.slider_high_q_input = self.txtExtrapolQMax
             GuiUtils.updateModelItemWithPlot(self._model_item, self.high_extrapolation_plot,
                                              self.high_extrapolation_plot.title)
             plots.append(self.high_extrapolation_plot)
@@ -272,11 +274,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.show_errors = False
-            self.low_extrapolation_plot.show_q_range_sliders = True
-            self.low_extrapolation_plot.slider_high_q_input = self.txtNptsLowQ
-            self.low_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
-            self.low_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
-            self.low_extrapolation_plot.slider_low_q_input = self.txtExtrapolQMin
+            # TODO: Fix the link between npts and q and then enable the q-range sliders
+            #self.low_extrapolation_plot.show_q_range_sliders = True
+            #self.low_extrapolation_plot.slider_update_on_move = False
+            #self.low_extrapolation_plot.slider_high_q_input = self.txtNptsLowQ
+            #self.low_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
+            #self.low_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
+            #self.low_extrapolation_plot.slider_low_q_input = self.txtExtrapolQMin
             GuiUtils.updateModelItemWithPlot(self._model_item, self.low_extrapolation_plot,
                                              self.low_extrapolation_plot.title)
             plots.append(self.low_extrapolation_plot)

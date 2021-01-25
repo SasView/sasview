@@ -22,7 +22,6 @@ class QRangeSlider(BaseInteractor):
         self.axes = axes
         self.data = data
         self.connect = self.base.connect
-        self.connect = self.base.connect
         self.x_min = np.fabs(min(self.data.x))
         self.y_marker_min = self.data.y[np.where(self.data.x == self.x_min)[0][0]]
         self.x_max = np.fabs(max(self.data.x))
