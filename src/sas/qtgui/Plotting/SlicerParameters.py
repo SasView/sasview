@@ -352,7 +352,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 # Add plot to the DataExplorer tree
                 new_name, _ = os.path.splitext(os.path.basename(filepath))
                 new_item = GuiUtils.createModelItemWithPlot(data, name=new_name)
-                new_item.setCheckState(QtCore.Qt.Unchecked)
                 self.parent.manager.updateModelFromPerspective(new_item)
 
                 items_for_fit.append(new_item)
