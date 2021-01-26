@@ -25,8 +25,11 @@ sasview_data = {
         {'name': 'Fultz, Brent', 'affiliation': 'California Institute of Technology', 'type':'WorkPackageLeader'},
         {'name': 'Juhas, Pavol', 'affiliation': 'Brookhaven National Laboratory', 'type':'Researcher'},
         {'name': 'Knudsen, Mikkel', 'affiliation': 'University of Copenhagen', 'type':'Researcher'},
+        {'name': 'Gilbert, Peter', 'affiliation': 'National Institute of Standards and Technology', 'type': 'Researcher'},
+        {'name': 'Krueger, Susan', 'affiliation': 'National Institute of Standards and Technology', 'type': 'Researcher'},
         {'name': 'Markvardsen, Anders', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Supervisor'},
         {'name': 'McKerns, Mike', 'affiliation': 'California Institute of Technology', 'type':'Researcher'},
+        {'name': 'Mothander, Karolina', 'affiliation': 'Lund University', 'type':'Researcher'},
         {'name': 'Narayanan, Theyencheri', 'affiliation': 'European Synchrotron Radiation Facility', 'type':'Researcher'},
         {'name': 'Parsons, Drew', 'affiliation': 'University of New South Wales', 'type':'DataManager'},
         {'name': 'Porcar, Lionel', 'affiliation': 'Institut Laue-Langevin', 'type':'Researcher'},
@@ -35,8 +38,9 @@ sasview_data = {
         {'name': 'Rennie, Adrian', 'affiliation': 'Uppsala University', 'type':'Researcher'},
         {'name': 'Rod, Thomas Holm', 'affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'type':'WorkPackageLeader'},
         {'name': 'Taylor, Jonathan', 'affiliation': 'Data Management and Software Centre, European Spallation Source ERIC', 'type':'ContactPerson'},
+        {'name': 'Teixeira, Susana', 'affiliation': 'National Institute of Standards and Technology', 'type': 'Researcher'},
         {'name': 'Udby, Linda', 'affiliation': 'Niels Bohr Institute', 'type':'ContactPerson'},
-        {'name': 'Weigandt, Katie', 'affiliation':'University of Washington','type':'Researcher'},
+        {'name': 'Weigandt, Katie', 'affiliation':'National Institute of Standards and Technology','type':'Researcher'},
     ],
 
     'creators': [
@@ -46,7 +50,7 @@ sasview_data = {
         {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
         {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
-        {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'}
+        {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'},
         {'name': 'Campbell, Kieran','affiliation': 'University of Oxford'},
         {'name': 'Cooper-Benun, Torin', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Durniak, Celine','affiliation': 'Data Management and Software Centre, European Spallation Source' },
