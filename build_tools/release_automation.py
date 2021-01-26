@@ -31,7 +31,7 @@ sasview_data = {
         {'name': 'McKerns, Mike', 'affiliation': 'California Institute of Technology', 'type':'Researcher'},
         {'name': 'Mothander, Karolina', 'affiliation': 'Lund University', 'type':'Researcher'},
         {'name': 'Narayanan, Theyencheri', 'affiliation': 'European Synchrotron Radiation Facility', 'type':'Researcher'},
-        {'name': 'Parsons, Drew', 'affiliation': 'University of New South Wales', 'type':'DataManager'},
+        {'name': 'Parsons, Drew', 'affiliation': 'University of Cagliari and the Debian Project', 'type':'DataManager'},
         {'name': 'Porcar, Lionel', 'affiliation': 'Institut Laue-Langevin', 'type':'Researcher'},
         {'name': 'Pozzo, Lilo', 'affiliation': 'University of Washington', 'type':'Researcher'},
         {'name': 'Rakitin, Maksim', 'affiliation': 'Brookhaven National Laboratory','type':'DataManager'},
