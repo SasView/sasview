@@ -246,7 +246,7 @@ class Plotter2DWidget(PlotterBase):
 
         self.param_model = None
         validator = None
-        if self.slicer is not None:
+        if self.slicer is not None and not isinstance(self.slicer, BoxSumCalculator):
             self.param_model = self.slicer.model()
             validator = self.slicer.validate
         # Pass the model to the Slicer Parameters widget
