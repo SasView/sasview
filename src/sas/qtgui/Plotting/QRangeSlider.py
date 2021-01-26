@@ -148,14 +148,13 @@ class LineInteractor(BaseInteractor):
         self.inner_marker.remove()
         self.line.remove()
 
-    def set_q(self, value):
+    def _set_q(self, value):
         """
         Call the q setter callback method if it exists
         """
-        if self.setter:
-            self.setter(value)
+        self.setter(value)
 
-    def get_q(self):
+    def _get_q(self):
         """
         Get the q value, inferring the method to get the value
         """
@@ -171,7 +170,7 @@ class LineInteractor(BaseInteractor):
 
     def inputChanged(self):
         """ Track the input linked to the x value for this slider and update as needed """
-        self.get_q()
+        self._get_q()
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
         self.update()
 
@@ -211,7 +210,7 @@ class LineInteractor(BaseInteractor):
         self.x = x
         if self.base.updateOnMove:
             if self.setter:
-                self.set_q(self.x)
+                self._set_q(self.x)
             else:
                 self.input.setText(f"{self.x:.3}")
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
@@ -222,7 +221,7 @@ class LineInteractor(BaseInteractor):
         Update the line position when the mouse button is released
         """
         if self.setter:
-            self.set_q(self.x)
+            self._set_q(self.x)
         else:
             self.input.setText(f"{self.x:.3}")
         self.update()

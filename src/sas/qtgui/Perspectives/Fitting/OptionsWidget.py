@@ -213,13 +213,17 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
             self.rbWeighting1.setChecked(True)
             self.onWeightingChoice(self.rbWeighting1)
 
-    def updateMinQ(self):
+    def updateMinQ(self, q_min=None):
+        if q_min and (isinstance(q_min, (float, str))):
+            self.txtMinRange.setText(f"{float(q_min):.3}")
         qmin = self.txtMinRange.text()
         qmax = self.model.item(self.MODEL.index('MAX_RANGE')).text()
         npts = self.model.item(self.MODEL.index('NPTS')).text()
         self.updateQRange(qmin, qmax, npts)
 
-    def updateMaxQ(self):
+    def updateMaxQ(self, q_max=None):
+        if q_max and (isinstance(q_max, (float, str))):
+            self.txtMaxRange.setText(f"{float(q_max):.3}")
         qmin = self.model.item(self.MODEL.index('MIN_RANGE')).text()
         qmax = self.txtMaxRange.text()
         npts = self.model.item(self.MODEL.index('NPTS')).text()
@@ -266,6 +270,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
             qmax = qmax_c
         if npts is None:
             npts = npts_c
+        qmax = float(qmax)
+        qmin = float(qmin)
+        npts = int(npts)
         if isinstance(data, Data2D):
             radius = np.sqrt(data.qx_data * data.qx_data +
                              data.qy_data * data.qy_data)

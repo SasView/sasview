@@ -1086,8 +1086,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.appendOrUpdatePlot(self, plot_to_show, plot_to_append_to)
             else:
                 # Plots with main data points on the same chart
-                # Get the main data plot
-                if main_data is not None:
+                # Get the main data plot unless data is 2D which is plotted earlier
+                if main_data is not None and not isinstance(main_data, Data2D):
                     new_plots.append((plot_item, main_data))
                 new_plots.append((plot_item, plot_to_show))
 
