@@ -456,9 +456,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def check_q_low(self, q_value):
         """ Validate the low q value """
-        q_min = min(self._calculator.x)
-        q_max = self._calculator.get_qmax()
-        q_value = float(q_value)
+        q_value = float(q_value) if q_value else None
+        if not q_value:
+            # Data deleted - Q value set to ''
+            q_value = ''
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(q_value))
+            return
+        q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
+        q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
             # Value too high - coerce to max q
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_max)))
@@ -472,9 +477,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def check_q_high(self, q_value):
         """ Validate the value of high q sent by the slider """
-        q_max = max(self._calculator.x)
-        q_min = self._calculator.get_qmin()
-        q_value = float(q_value)
+        q_value = float(q_value) if q_value else None
+        if not q_value:
+            # Data deleted - Q value set to ''
+            q_value = ''
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(q_value))
+            return
+        q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
+        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
         if q_value > q_max:
             # Value too high - coerce to max q
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))

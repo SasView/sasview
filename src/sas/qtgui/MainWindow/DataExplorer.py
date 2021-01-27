@@ -396,6 +396,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             item = model.item(i)
             data = GuiUtils.dataFromItem(item)
             if data is None: continue
+            ###############################################
+            # FIXME: Temporary patch to remove q-range slider params on project/analysis save
+            # Remove when q-range sliders are moved out of PlotterData
+            data.show_q_range_sliders = False
+            data.slider_update_on_move = True
+            data.slider_low_q_input = None
+            data.slider_high_q_input = None
+            data.slider_low_q_setter = None
+            data.slider_low_q_getter = None
+            data.slider_high_q_setter = None
+            data.slider_high_q_getter = None
+            # End temporary patch
+            ###############################################
             # Now, all plots under this item
             name = data.name
             is_checked = item.checkState()
