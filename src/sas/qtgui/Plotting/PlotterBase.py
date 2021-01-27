@@ -16,8 +16,10 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
+from sas.qtgui.Plotting.Binder import BindArtist
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
+
 
 class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):
@@ -78,6 +80,9 @@ class PlotterBase(QtWidgets.QWidget):
         # Annotations
         self.selectedText = None
         self.textList = []
+
+        # Create Artist and bind it
+        self.connect = BindArtist(self.figure)
 
         # Pre-define the Scale properties dialog
         self.properties = ScaleProperties(self,
@@ -199,6 +204,12 @@ class PlotterBase(QtWidgets.QWidget):
     def showLegend(self, show=True):
         """ Legend visibility setter """
         self.show_legend = show
+
+    def update(self):
+        self.figure.canvas.draw()
+
+    def draw(self):
+        self.figure.canvas.draw()
 
     def upatePlotHelper(self):
         """

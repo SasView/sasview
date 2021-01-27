@@ -200,14 +200,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.backgroundInput.textChanged.connect(
             lambda: self.set_background(self.backgroundInput.text()))
-        self.minQInput.textChanged.connect(
-            lambda: self._calculator.set_qmin(is_float(self.minQInput.text())))
         self.regularizationConstantInput.textChanged.connect(
             lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
             lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
-        self.maxQInput.textChanged.connect(
-            lambda: self._calculator.set_qmax(is_float(self.maxQInput.text())))
+        self.maxQInput.textChanged.connect(self.check_q_high)
+        self.minQInput.textChanged.connect(self.check_q_low)
         self.slitHeightInput.textChanged.connect(
             lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
         self.slitWidthInput.textChanged.connect(
@@ -455,6 +453,38 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.isBatch = False
         self.isCalculating = False
         self.updateGuiValues()
+
+    def check_q_low(self, q_value):
+        """ Validate the low q value """
+        q_min = min(self._calculator.x)
+        q_max = self._calculator.get_qmax()
+        q_value = float(q_value)
+        if q_value > q_max:
+            # Value too high - coerce to max q
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_max)))
+        elif q_value < q_min:
+            # Value too low - coerce to min q
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_min)))
+        else:
+            # Valid Q - set model item
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            self._calculator.set_qmin(q_value)
+
+    def check_q_high(self, q_value):
+        """ Validate the value of high q sent by the slider """
+        q_max = max(self._calculator.x)
+        q_min = self._calculator.get_qmin()
+        q_value = float(q_value)
+        if q_value > q_max:
+            # Value too high - coerce to max q
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))
+        elif q_value < q_min:
+            # Value too low - coerce to min q
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_min)))
+        else:
+            # Valid Q - set model item
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            self._calculator.set_qmax(q_value)
 
     ######################################################################
     # Response Actions
@@ -1009,6 +1039,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.prPlot.filename = self.logic.data.filename
         self.dataPlot = self.logic.new1DPlot(out, self._calculator)
         self.dataPlot.filename = self.logic.data.filename
+
+        self.dataPlot.show_q_range_sliders = True
+        self.dataPlot.slider_low_q_input = self.minQInput
+        self.dataPlot.slider_high_q_input = self.maxQInput
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

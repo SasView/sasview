@@ -65,18 +65,10 @@ points to explore in that range.  They can also choose to plot several other
 parameters as a function of Dmax including: I0, Rg, Oscillation parameter,
 background, positive fraction, and 1-sigma positive fraction.
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Batch_Pr_Mode:
-
-Batch P(r) inversion
---------------------
-
-The p(r) calculator accepts any number of data sets, and supports batch fitting
-for all data sets in the p(r) data set combo box. Switching between data sets in
-the combo box allows for individual fits and review of fit parameters. The
-displayed plots will also update to include the latest fit results for the
-selected data set.
+The p(r) calculator accepts any number of data sets in the p(r) data set combo 
+box. Switching between data sets in the combo box allows for individual fits 
+and review of fit parameters. The displayed plots will also update to include 
+the latest fit results for the selected data set.
 
 The 'Calculate All' button will run the p(r) calculation for each file,
 sequentially. The calculator will estimate the number of terms, background, and
@@ -93,4 +85,4 @@ P.B. Moore
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Jeff Krzywon, 18 April 2018
+.. note::  This help document was last modified by Steve King, 26 Jan 2021
