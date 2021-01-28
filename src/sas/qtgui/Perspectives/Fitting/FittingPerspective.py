@@ -409,9 +409,10 @@ class FittingWindow(QtWidgets.QTabWidget):
             # Find the first unassigned tab.
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
+            tab_ids = [tab.tab_id for tab in self.tabs]
 
             if tab_index is not None:
-                if tab_index >= self.maxIndex:
+                if tab_index not in tab_ids:
                     self.addFit(data, is_batch=is_batch, tab_index=tab_index)
                 else:
                     self.setCurrentIndex(tab_index-1)
