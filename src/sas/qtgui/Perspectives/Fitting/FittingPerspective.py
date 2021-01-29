@@ -247,7 +247,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        self.maxIndex = tab_index + 1
+        self.maxIndex = max([tab.tab_id for tab in self.tabs]) + 1
 
         icon = QtGui.QIcon()
         if is_batch:
