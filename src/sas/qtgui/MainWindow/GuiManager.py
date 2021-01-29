@@ -196,7 +196,8 @@ class GuiManager(object):
             for name, perspective in self.loadedPerspectives.items():
                 try:
                     perspective.setClosable(True)
-                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    if self.subwindow in self._workspace.workspace.subWindowList():
+                        self._workspace.workspace.removeSubWindow(self.subwindow)
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")

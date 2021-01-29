@@ -1750,6 +1750,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         deleted_items += deleted_theory_items
         deleted_names = [item.text() for item in deleted_items]
         deleted_names += deleted_theory_items
+        # Close all active plots
+        self.closeAllPlots()
         # Let others know we deleted data
         self.communicator.dataDeletedSignal.emit(deleted_items)
         # update stored_data

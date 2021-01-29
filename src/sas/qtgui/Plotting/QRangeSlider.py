@@ -68,8 +68,6 @@ class QRangeSlider(BaseInteractor):
         Clear this slicer and its markers
         """
         self.clear_markers()
-        self.line_max.remove()
-        self.line_min.remove()
 
     def update(self, x=None, y=None):
         """
@@ -102,9 +100,10 @@ class QRangeSlider(BaseInteractor):
 
     def clear_markers(self):
         """
-        Should be no way to clear the markers
+        Clear each of the lines individually
         """
-        pass
+        self.line_min.clear()
+        self.line_max.clear()
 
     def draw(self):
         """
@@ -150,6 +149,7 @@ class LineInteractor(BaseInteractor):
         return True
 
     def clear(self):
+        self.clear_markers()
         self.remove()
 
     def remove(self):
@@ -241,6 +241,10 @@ class LineInteractor(BaseInteractor):
 
     def clear_markers(self):
         """
-        Should be no way to clear the markers
+        Disconnect the input and clear the callbacks
         """
-        pass
+        if self.input:
+            self.input.textChanged.disconnect(self.inputChanged)
+        self.setter = None
+        self.getter = None
+        self.input = None
