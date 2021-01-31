@@ -411,7 +411,7 @@ def createModelItemWithPlot(update_data, name=""):
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
-    checkbox_item.setCheckState(QtCore.Qt.Checked)
+    checkbox_item.setCheckState(QtCore.Qt.Unchecked)
     checkbox_item.setText(name)
 
     # Add "Info" item

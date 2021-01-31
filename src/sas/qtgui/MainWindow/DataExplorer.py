@@ -27,6 +27,7 @@ from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
+from sas.qtgui.MainWindow.NameChanger import ChangeName
 
 import sas.qtgui.Perspectives as Perspectives
 
@@ -127,6 +128,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Don't show "empty" rows with data objects
         self.data_proxy.setFilterRegExp(r"[^()]")
+
+        # Create a window to allow the display name to change
+        self.nameChangeBox = ChangeName(self)
 
         # The Data viewer is QTreeView showing the proxy model
         self.treeView.setModel(self.data_proxy)
@@ -1469,6 +1473,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addAction(self.actionSelect)
         self.context_menu.addAction(self.actionDeselect)
         self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionChangeName)
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1483,6 +1488,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Define the callbacks
         self.actionSelect.triggered.connect(self.onFileListSelected)
         self.actionDeselect.triggered.connect(self.onFileListDeselected)
+        self.actionChangeName.triggered.connect(self.changeName)
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
@@ -1512,6 +1518,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.setEnabled(is_2D)
         self.actionSelect.setEnabled(True)
 
+        # Name Changing
+        # Disallow name changes after the data has been assigned any plots to prevent orphans
+        children = list(GuiUtils.getChildrenFromItem(model_item))
+        hashables = [child for child in children if isinstance(child, GuiUtils.HashableStandardItem)]
+        self.actionChangeName.setEnabled(len(hashables) <= 1)
+        # Do not allow name change for lower level plots
+        self.actionChangeName.setVisible(model_item.parent() is None)
+
         # Freezing
         # check that the selection has inner items
         freeze_enabled = False
@@ -1521,6 +1535,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Fire up the menu
         self.context_menu.exec_(self.current_view.mapToGlobal(position))
+
+    def changeName(self):
+        """
+        Open a modal window that can change the display name of the selected data
+        """
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+
+        # Get the model item and update the name change box
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
+        # Do not allow name changes after the data has plots assigned
+        children = list(GuiUtils.getChildrenFromItem(model_item))
+        hashables = [child for child in children if isinstance(child, GuiUtils.HashableStandardItem)]
+        if len(hashables) <= 1:
+            self.nameChangeBox.model_item = model_item
+            # Open the window
+            self.nameChangeBox.show()
 
     def showDataInfo(self):
         """
@@ -1896,7 +1929,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         if p_file is not None:
-            checkbox_item.setText(os.path.basename(p_file))
+            p_file = os.path.basename(p_file) if os.path.exists(p_file) else p_file
+            checkbox_item.setText(p_file)
 
         # Add the actual Data1D/Data2D object
         object_item = GuiUtils.HashableStandardItem()

@@ -532,6 +532,14 @@
     <string>Deselect items</string>
    </property>
   </action>
+  <action name="actionChangeName">
+   <property name="text">
+    <string>Change Name</string>
+   </property>
+   <property name="toolTip">
+    <string>Change Display Name</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
