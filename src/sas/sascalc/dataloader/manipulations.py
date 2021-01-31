@@ -997,7 +997,7 @@ class SectorQ(_Sector):
 
         :return: Data1D object
         """
-        return self._agv(data2D, 'q2')
+        return self._agv(data2D, 'q')
 
 ################################################################################
 
