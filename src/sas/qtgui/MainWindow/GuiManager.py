@@ -668,6 +668,8 @@ class GuiManager(object):
         Menu Save Project
         """
         filename = self.filesWidget.saveProject()
+        if not filename:
+            return
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
