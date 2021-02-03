@@ -1346,7 +1346,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(str(ex) + sys.exc_info()[1])
+                logging.error(str(ex) + str(sys.exc_info()[1]))
 
                 any_error = True
             if any_error or data_error or error_message != "":
@@ -1678,7 +1678,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg.exec_()
                 return
         except Exception as ex:
-            logging.error(str(ex) + sys.exc_info()[1])
+            logging.error(str(ex) + str(sys.exc_info()[1]))
             msg.exec_()
             return
 
