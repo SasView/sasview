@@ -34,17 +34,6 @@ class QRangeSlider(BaseInteractor):
                                        input=self.data.slider_high_q_input, setter=self.data.slider_high_q_setter,
                                        getter=self.data.slider_high_q_getter)
         self.has_move = True
-        ######################################################
-        # Reset all slider values in data so save/load does not choke on them
-        # Remove once slider definition moved out of PlotterData
-        self.data.slider_low_q_setter = None
-        self.data.slider_high_q_setter = None
-        self.data.slider_low_q_input = None
-        self.data.slider_high_q_input = None
-        self.data.slider_update_on_move = False
-        self.data.slider_low_q_getter = None
-        self.data.slider_high_q_getter = None
-        ######################################################
         self.update()
 
     def validate(self, param_name, param_value):

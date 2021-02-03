@@ -204,8 +204,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
             lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
-        self.maxQInput.textChanged.connect(self.check_q_high)
-        self.minQInput.textChanged.connect(self.check_q_low)
+        self.maxQInput.editingFinished.connect(self.check_q_high)
+        self.minQInput.editingFinished.connect(self.check_q_low)
         self.slitHeightInput.textChanged.connect(
             lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
         self.slitWidthInput.textChanged.connect(
@@ -454,12 +454,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.isCalculating = False
         self.updateGuiValues()
 
-    def check_q_low(self, q_value):
+    def check_q_low(self, q_value=None):
         """ Validate the low q value """
-        q_value = float(q_value) if q_value else None
         if not q_value:
-            # Data deleted - Q value set to ''
-            q_value = ''
+            q_value = float(self.minQInput.text()) if self.minQInput.text() else ''
+        if q_value == '':
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(q_value))
             return
         q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
@@ -475,12 +474,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
             self._calculator.set_qmin(q_value)
 
-    def check_q_high(self, q_value):
+    def check_q_high(self, q_value=None):
         """ Validate the value of high q sent by the slider """
-        q_value = float(q_value) if q_value else None
         if not q_value:
-            # Data deleted - Q value set to ''
-            q_value = ''
+            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else ''
+        if q_value == '':
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(q_value))
             return
         q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
@@ -1052,7 +1050,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.dataPlot.show_q_range_sliders = True
         self.dataPlot.slider_low_q_input = self.minQInput
+        self.dataPlot.slider_low_q_setter = self.check_q_low
         self.dataPlot.slider_high_q_input = self.maxQInput
+        self.dataPlot.slider_high_q_setter = self.check_q_high
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

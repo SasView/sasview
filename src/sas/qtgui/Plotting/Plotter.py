@@ -11,6 +11,7 @@ from matplotlib.font_manager import FontProperties
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
+from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
@@ -529,6 +530,7 @@ class PlotterWidget(PlotterBase):
 
         # Remove the plot from the list of plots
         self.plot_dict.pop(id)
+        self.sliders.pop(id, None)
 
         # Labels might have been changed
         xl = self.ax.xaxis.label.get_text()
@@ -536,6 +538,9 @@ class PlotterWidget(PlotterBase):
 
         mpl.pyplot.cla()
         self.ax.cla()
+
+        # Recreate Artist bindings after plot clear
+        self.connect = BindArtist(self.figure)
 
         for ids in self.plot_dict:
             if ids != id:
