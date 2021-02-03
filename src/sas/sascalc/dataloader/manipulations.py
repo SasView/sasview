@@ -347,6 +347,7 @@ class _Slab(object):
         err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         # Build array of Q intervals
         if maj == 'x':
@@ -371,6 +372,9 @@ class _Slab(object):
 
         # Average pixelsize in q space
         for npts in range(len(data)):
+            if not mask_data[npts]:
+                # ignore points that are masked
+                continue
             # default frac
             frac_x = 0
             frac_y = 0
@@ -506,6 +510,7 @@ class Boxsum(object):
         err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         y = 0.0
         err_y = 0.0
@@ -513,6 +518,9 @@ class Boxsum(object):
 
         # Average pixelsize in q space
         for npts in range(len(data)):
+            if not mask_data[npts]:
+                # ignore points that are masked
+                continue
             # default frac
             frac_x = 0
             frac_y = 0
@@ -730,6 +738,7 @@ class Ring(object):
         err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         # Set space for 1d outputs
         phi_bins = np.zeros(self.nbins_phi)
@@ -742,6 +751,9 @@ class Ring(object):
         phi_shift = Pi / self.nbins_phi
 
         for npt in range(len(data)):
+            if not mask_data[npt]:
+                # ignore points that are masked
+                continue
             frac = 0
             # q-value at the point (npt)
             q_value = q_data[npt]
@@ -831,6 +843,7 @@ class _Sector(object):
         err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         dq_data = None
         if data2D.dqx_data is not None and data2D.dqy_data is not None:
@@ -854,6 +867,9 @@ class _Sector(object):
             binning = Binning(self.r_min, self.r_max, self.nbins, self.base)
 
         for n in range(len(data)):
+            if not mask_data[n]:
+                # ignore points that are masked
+                continue
 
             # q-value at the pixel (j,i)
             q_value = q_data[n]
