@@ -27,7 +27,7 @@ class FitPageTest(unittest.TestCase):
         self.assertEqual(self.page.current_factor, "")
         self.assertEqual(self.page.page_id, 0)
         self.assertFalse(self.page.data_is_loaded)
-        self.assertEqual(self.page.filename, "")
+        self.assertEqual(self.page.name, "")
         self.assertIsNone(self.page.data)
         self.assertIsNone(self.page.kernel_module)
         self.assertEqual(self.page.parameters_to_fit, [])

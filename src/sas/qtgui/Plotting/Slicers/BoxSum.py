@@ -34,22 +34,21 @@ class BoxSumCalculator(BaseInteractor):
         self.axes = axes
         self._model = None
         self.update_model = False
-
         # connect the artist for the motion
         self.connect = self.base.connect
 
         # when qmax is reached the selected line is reset the its previous value
-        self.qmax = min(self.base.data.xmax, self.base.data.xmin)
+        self.qmax = min(self.data.xmax, self.data.xmin)
 
         # Define the boxsum limits
-        self.xmin = -1 * 0.5 * min(numpy.fabs(self.base.data.xmax),
-                                   numpy.fabs(self.base.data.xmin))
-        self.ymin = -1 * 0.5 * min(numpy.fabs(self.base.data.xmax),
-                                   numpy.fabs(self.base.data.xmin))
-        self.xmax = 0.5 * min(numpy.fabs(self.base.data.xmax),
-                              numpy.fabs(self.base.data.xmin))
-        self.ymax = 0.5 * min(numpy.fabs(self.base.data.xmax),
-                              numpy.fabs(self.base.data.xmin))
+        self.xmin = -1 * 0.5 * min(numpy.fabs(self.data.xmax),
+                                   numpy.fabs(self.data.xmin))
+        self.ymin = -1 * 0.5 * min(numpy.fabs(self.data.xmax),
+                                   numpy.fabs(self.data.xmin))
+        self.xmax = 0.5 * min(numpy.fabs(self.data.xmax),
+                              numpy.fabs(self.data.xmin))
+        self.ymax = 0.5 * min(numpy.fabs(self.data.xmax),
+                              numpy.fabs(self.data.xmin))
         # center of the boxSum
         self.center_x = 0.0002
         self.center_y = 0.0003
@@ -102,6 +101,12 @@ class BoxSumCalculator(BaseInteractor):
         self.setModelFromParams()
         self.update_model = True
         self._model.itemChanged.connect(self.setParamsFromModel)
+
+    def validate(self, param_name, param_value):
+        """
+        Validate input from user
+        """
+        return True
 
     def setModelFromParams(self):
         """
@@ -216,10 +221,10 @@ class BoxSumCalculator(BaseInteractor):
         y_max = self.vertical_lines.y1
         #computation of the sum and its error
         box = Boxavg(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-        self.count, self.error = box(self.base.data)
+        self.count, self.error = box(self.data)
         # Dig out number of points summed, SMK & PDB, 04/03/2013
         boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-        self.total, self.totalerror, self.points = boxtotal(self.base.data)
+        self.total, self.totalerror, self.points = boxtotal(self.data)
         if self.update_model:
             self.setModelFromParams()
         self.draw()

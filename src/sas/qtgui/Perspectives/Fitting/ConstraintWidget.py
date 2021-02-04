@@ -1,5 +1,6 @@
 import logging
 import copy
+import re
 
 from twisted.internet import threads
 
@@ -16,7 +17,9 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+
 
 class DnDTableWidget(QtWidgets.QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -137,6 +140,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Tabs used in simultaneous fitting
         # tab_name : True/False
         self.tabs_for_fitting = {}
+
+        # Flag that warns ComplexConstraint widget if the constraint has been
+        # accepted
+        self.constraint_accepted = True
 
         # Set up the widgets
         self.initializeWidgets()
@@ -428,25 +435,106 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint's "active" instance variable.
+        Modify the constraint when the user edits the constraint list. If the
+        user changes the constrained parameter, the constraint is erased and a
+        new one is created.
+        Checking is performed on the constrained entered by the user, showing
+        message box warning him the constraint is not valid and cancelling
+        his changes by reloading the view. View is reloaded
+        when the user is finished for consistency.
         """
         item = self.tblConstraints.item(row, column)
-        if column == 0:
-            # Update the tabs for fitting list
-            constraint = self.available_constraints[row]
-            constraint.active = (item.checkState() == QtCore.Qt.Checked)
-            return
-        # Update the constraint formula
+        # extract information from the constraint object
         constraint = self.available_constraints[row]
-        function = item.text()
-        # remove anything left of '=' to get the constraint
-        function = function[function.index('=')+1:]
-        # No check on function here - trust the user (R)
-        if function != constraint.func:
-            # This becomes rather difficult to validate now.
-            # Turn off validation for Edit Constraint
-            constraint.func = function
-            constraint.validate = False
+        model = constraint.value_ex[:constraint.value_ex.index(".")]
+        param = constraint.param
+        function = constraint.func
+        tab = self.available_tabs[model]
+        # Extract information from the text in the table
+        constraint_text = item.data(0)
+        # Basic sanity check of the string
+        # First check if we have an acceptable sign
+        if "=" not in constraint_text:
+            msg = ("Incorrect operator in constraint definition. Please use = "
+                   "sign to define constraints.")
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
+            self.initializeFitList()
+            return
+        # Then check if the parameter is correctly defined with colons
+        # separating model and parameter name
+        lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
+        if ":" not in lhs:
+            msg = ("Incorrect constrained parameter definition. Please use "
+                   "colons to separate model and parameter on the rhs of the "
+                   "definition, e.g. M1:scale")
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
+            self.initializeFitList()
+            return
+        # We can parse the string
+        new_param = lhs.split(":", 1)[1].strip()
+        new_model = lhs.split(":", 1)[0].strip()
+        # Check that the symbol is known so we dont get an unknown tab
+        # All the conditional statements could be grouped in one or
+        # alternatively we could check with expression.py, but we would still
+        # need to do some checks to parse the string
+        symbol_dict = (self.parent.parent.perspective().
+                       getSymbolDictForConstraints())
+        qualified_par = f"{new_model}.{new_param}"
+        if qualified_par not in symbol_dict:
+            msg = (f"Unknown parameter {qualified_par} used in constraint."
+                   " Please use a single known parameter in the rhs of the "
+                   "constraint definition, e.g. M1:scale = M1.radius + 2")
+            QtWidgets.QMessageBox.critical(
+                self,
+                "Inconsistent constraint",
+                msg,
+                QtWidgets.QMessageBox.Ok)
+            self.initializeFitList()
+            return
+        new_function = rhs
+        new_tab = self.available_tabs[new_model]
+        # Make sure we are dealing with fit tabs
+        assert isinstance(tab, FittingWidget)
+        assert isinstance(new_tab, FittingWidget)
+        # Now check if the user has redefined the constraint and reapply it
+        if new_function != function or new_model != model or new_param != param:
+            # Apply the new constraint
+            constraint = Constraint(param=new_param, func=new_function,
+                                    value_ex=new_model + "." + new_param)
+            new_tab.addConstraintToRow(constraint=constraint,
+                                       row=tab.getRowFromName(new_param))
+            # If the constraint is valid and we are changing model or
+            # parameter, delete the old constraint
+            if (self.constraint_accepted and new_model != model or
+                    new_param != param):
+                tab.deleteConstraintOnParameter(param)
+            # Reload the view
+            self.initializeFitList()
+            return
+        # activate/deactivate constraint if the user has changed the checkbox
+        # state
+        constraint.active = (item.checkState() == QtCore.Qt.Checked)
+        # Update the fitting widget whenever a constraint is
+        # activated/deactivated
+        if item.checkState() == QtCore.Qt.Checked:
+            font = QtGui.QFont()
+            font.setItalic(True)
+            brush = QtGui.QBrush(QtGui.QColor('blue'))
+            tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
+                                brush=brush)
+        else:
+            tab.modifyViewOnRow(tab.getRowFromName(new_param))
+        # reload the view so the user gets a consistent feedback on the
+        # constraints
+        self.initializeFitList()
 
     def onTabCellEntered(self, row, column):
         """
@@ -461,6 +549,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Send the fit complete signal to main thread
         """
+        # Complete signal only accepts a tuple, so send an empty tuple
+        # when fit throws an error.
+
+        if result is None:
+            result = ()
         self.fitCompleteSignal.emit(result)
 
     def fitComplete(self, result):
@@ -477,15 +570,29 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Assure the fitting succeeded
         if result is None or not result:
-            msg = "Fitting failed. Please ensure correctness of chosen constraints."
+            msg = "Fitting failed."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
+
+        # Get the results list
+        results = result[0][0]
+        if isinstance(result[0], str):
+            msg = ("Fitting failed with the following message: " +
+                   result[0])
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
+        if not results[0].success:
+            if isinstance(results[0].mesg[0], str):
+                msg = ("Fitting failed with the following message: " +
+                       results[0].mesg[0])
+            else:
+                msg = ("Fitting failed. Please ensure correctness of " +
+                       "chosen constraints.")
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
         # get the elapsed time
         elapsed = result[1]
-
-        # result list
-        results = result[0][0]
 
         # Find out all tabs to fit
         tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
@@ -520,12 +627,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
+        if result is None:
+            msg = "Fitting failed."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
 
         # get the elapsed time
         elapsed = result[1]
 
-        if result is None:
-            msg = "Fitting failed."
+        # Get the results list
+        results = result[0][0]
+        # Warn the user if fitting has been unsuccessful
+        if not results[0].success:
+            if isinstance(results[0].mesg[0], str):
+                msg = ("Fitting failed with the following message: " +
+                       results[0].mesg[0])
+            else:
+                msg = ("Fitting failed. Please ensure correctness of " +
+                       "chosen constraints.")
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
 
@@ -542,7 +661,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Send the fit failed signal to main thread
         """
-        self.fitFailedSignal.emit(result)
+        self.fitFailedSignal.emit(reason)
 
     def fitFailed(self, reason):
         """
@@ -708,6 +827,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
             tab.deleteConstraintOnParameter(param)
+
         # Constraints removed - refresh the table widget
         self.initializeFitList()
 
@@ -759,6 +879,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Check if any constraints present in tab
         constraint_names = fit_page.getComplexConstraintsForAllModels()
         constraints = fit_page.getConstraintObjectsForAllModels()
+
+        #active_constraint_names = fit_page.getComplexConstraintsForModel()
+        #constraint_names = fit_page.getFullConstraintNameListForModel()
+        #constraints = fit_page.getConstraintObjectsForModel()
+
         if not constraints: 
             return
         self.tblConstraints.setEnabled(True)
@@ -774,11 +899,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.available_constraints[pos] = constraint
 
             # Show the text in the constraint table
-            item = self.uneditableItem(label)
             item = QtWidgets.QTableWidgetItem(label)
+            item.setFlags(QtCore.Qt.ItemIsSelectable
+                          | QtCore.Qt.ItemIsEnabled
+                          | QtCore.Qt.ItemIsUserCheckable
+                          | QtCore.Qt.ItemIsEditable)
             # Why was this set to non-interactive??
-            #item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
-            item.setCheckState(QtCore.Qt.Checked)
+            if constraint_name in active_constraint_names:
+                item.setCheckState(QtCore.Qt.Checked)
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
         self.tblConstraints.blockSignals(False)
@@ -809,7 +939,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
-        if len(tabs) < 2:
+        if len(tabs) < 1:
             self.cmdAdd.setEnabled(False)
         else:
             self.cmdAdd.setEnabled(True)
@@ -876,7 +1006,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onAcceptConstraint(self, con_tuple):
         """
-        Receive constraint tuple from the ComplexConstraint dialog and adds contraint
+        Receive constraint tuple from the ComplexConstraint dialog and adds
+        constraint.
+        Checks the constraints for errors and displays a warning message
+        interrupting flow if any are found
         """
         #"M1, M2, M3" etc
         model_name, constraint = con_tuple
@@ -890,6 +1023,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row, model=model)
+        if not self.constraint_accepted:
+            return
 
         # Select this parameter for adjusting/fitting
         constrained_tab.selectCheckbox(constrained_row, model=model)
@@ -997,3 +1132,20 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msgbox.setWindowTitle("Fit Report")
         _ = msgbox.exec_()
         return
+
+    def uncheckConstraint(self, name):
+        """
+        Unchecks the constraint in tblConstraint with *name* slave
+        parameter and deactivates the constraint.
+        """
+        for row in range(self.tblConstraints.rowCount()):
+            constraint = self.tblConstraints.item(row, 0).data(0)
+            # slave parameter has model name and parameter separated
+            # by colon e.g `M1:scale` so no need to parse the constraint
+            # string.
+            if name in constraint:
+                self.tblConstraints.item(row, 0).setCheckState(0)
+                # deactivate the constraint
+                tab = self.parent.getTabByName(name[:name.index(":")])
+                row = tab.getRowFromName(name[name.index(":") + 1:])
+                tab.getConstraintForRow(row).active = False

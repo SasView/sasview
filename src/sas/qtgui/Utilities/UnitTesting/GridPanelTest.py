@@ -110,7 +110,7 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
         '''Test plot generation from selected table rows'''
         # mock tested calls
         #GuiUtils.Communicate.plot
-        spy_plot_signal = QtSignalSpy(self.widget.communicate, self.widget.communicate().plotFromFilenameSignal)
+        spy_plot_signal = QtSignalSpy(self.widget.communicate, self.widget.communicate().plotFromNameSignal)
         # Select row #1
         self.widget.tblParams.selectRow(0)
         QtWidgets.QApplication.processEvents()

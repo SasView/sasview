@@ -16,15 +16,14 @@ class CircularMask(BaseInteractor):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.base = base
         self.is_inside = side
-        self.qmax = min(numpy.fabs(self.base.data.xmax),
-                        numpy.fabs(self.base.data.xmin))  # must be positive
+        self.qmax = min(numpy.fabs(self.data.xmax),
+                        numpy.fabs(self.data.xmin))  # must be positive
         self.connect = self.base.connect
 
         # Cursor position of Rings (Left(-1) or Right(1))
-        self.xmaxd = self.base.data.xmax
-        self.xmind = self.base.data.xmin
+        self.xmaxd = self.data.xmax
+        self.xmind = self.data.xmin
 
         if (self.xmaxd + self.xmind) > 0:
             self.sign = 1
@@ -81,7 +80,7 @@ class CircularMask(BaseInteractor):
 
         """
         # Data to average
-        data = self.base.data
+        data = self.data
 
         # If we have no data, just return
         if data is None:

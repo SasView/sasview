@@ -42,9 +42,10 @@ Window
 The Window option allows you to select which *SasView* windows are visible;
 
 - enable window cascading/tiling;
-- switch between windows in the workspace;
+- move focus between windows both forward and backward;
 - minimize all plot windows;
 - close all plot windows;
+- access plots by name;
 
 Analysis
 --------

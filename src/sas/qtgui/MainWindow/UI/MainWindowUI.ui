@@ -93,6 +93,7 @@
     <addaction name="actionPython_Shell_Editor"/>
     <addaction name="actionOrientation_Viewer"/>
     <addaction name="actionImage_Viewer"/>
+    <addaction name="actionFile_Converter"/>
    </widget>
    <widget class="QMenu" name="menuFitting">
     <property name="title">
@@ -190,6 +191,9 @@
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
    <addaction name="actionBookmarks"/>
+   <addaction name="separator"/>
+   <addaction name="actionPrevious"/>
+   <addaction name="actionNext"/>
   </widget>
   <action name="actionReset">
    <property name="icon">
@@ -263,7 +267,7 @@
   </action>
   <action name="actionPaste">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset>
@@ -378,6 +382,11 @@
     <string>Image Viewer</string>
    </property>
   </action>
+  <action name="actionFile_Converter">
+   <property name="text">
+    <string>File Converter</string>
+   </property>
+  </action>
   <action name="actionNew_Fit_Page">
    <property name="text">
     <string>New Fit Page</string>
@@ -439,13 +448,21 @@
    </property>
   </action>
   <action name="actionNext">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/right-round.png</normaloff>:/res/right-round.png</iconset>
+   </property>
    <property name="text">
-    <string>Next</string>
+    <string>Next window</string>
    </property>
   </action>
   <action name="actionPrevious">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/left-round.png</normaloff>:/res/left-round.png</iconset>
+   </property>
    <property name="text">
-    <string>Previous</string>
+    <string>Previous window</string>
    </property>
   </action>
   <action name="actionFitting">

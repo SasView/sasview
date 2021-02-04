@@ -203,9 +203,9 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                filename = data['Data'][row]
+                name = data['Data'][row]
                 # emit a signal so the plots are being shown
-                self.communicate.plotFromFilenameSignal.emit(filename)
+                self.communicate.plotFromNameSignal.emit(name)
             except (IndexError, AttributeError):
                 # data messed up.
                 return

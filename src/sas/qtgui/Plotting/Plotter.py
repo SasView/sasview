@@ -1,9 +1,9 @@
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 import functools
 import copy
+import sys
 import matplotlib as mpl
 import numpy as np
 from matplotlib.font_manager import FontProperties
@@ -13,18 +13,36 @@ from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-def _legendResize(width):
+def _legendResize(width, parent):
     """
     resize factor for the legend, based on total canvas width
     """
     # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
-    return (width/100.0)+4.0
+    if not hasattr(parent.parent, "manager"):
+        return None
+    if parent is None or parent.parent is None or parent.parent.manager is None \
+        or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
+        return None
+
+    screen_width = parent.parent.manager.parent._parent.screen_width
+    screen_height = parent.parent.manager.parent._parent.screen_height
+    screen_factor = screen_width * screen_height
+
+    if sys.platform == 'win32':
+        factor = 4
+        denomintor = 100
+        scale_factor = width/denomintor + factor
+    else:
+        #Function inferred based on tests for several resolutions
+        scale_factor = (3e-6*screen_factor + 1)*width/640
+    return scale_factor
 
 class PlotterWidget(PlotterBase):
     """
@@ -38,8 +56,10 @@ class PlotterWidget(PlotterBase):
         # Dictionary of {plot_id:Data1d}
         self.plot_dict = {}
         # Dictionaty of {plot_id:line}
-
         self.plot_lines = {}
+        # Dictionary of slider interactors {plot_id:interactor}
+        self.sliders = {}
+
         # Window for text add
         self.addText = AddText(self)
 
@@ -52,6 +72,8 @@ class PlotterWidget(PlotterBase):
         self.fit_result.symbol = 13
         self.fit_result.name = "Fit"
 
+        parent.geometry()
+
     @property
     def data(self):
         return self._data
@@ -59,7 +81,8 @@ class PlotterWidget(PlotterBase):
     @data.setter
     def data(self, value):
         """ data setter """
-        self._data = value
+        #self._data = value
+        self._data.append(value)
         if value._xunit:
             self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
         else:
@@ -78,37 +101,36 @@ class PlotterWidget(PlotterBase):
         """
         Add a new plot of self._data to the chart.
         """
-        # Data1D
-        if isinstance(data, Data1D):
-            self.data = data
-
-        if not self._data:
+        if data is None:
+            # just refresh
+            self.canvas.draw_idle()
             return
 
-        is_fit = (self.data.id=="fit")
+        # Data1D
+        if isinstance(data, Data1D):
+            self.data.append(data)
+
+        is_fit = (data.id=="fit")
 
         if not is_fit:
             # make sure we have some function to operate on
-            if self.data.xtransform is None:
-                if self.data.isSesans:
-                    self.data.xtransform='x'
+            if data.xtransform is None:
+                if data.isSesans:
+                    data.xtransform='x'
                 else:
-                    self.data.xtransform = 'log10(x)'
-            if self.data.ytransform is None:
-                if self.data.isSesans:
-                    self.data.ytransform='y'
+                    data.xtransform = 'log10(x)'
+            if data.ytransform is None:
+                if data.isSesans:
+                    data.ytransform='y'
                 else:
-                    self.data.ytransform = 'log10(y)'
+                    data.ytransform = 'log10(y)'
             #Added condition to Dmax explorer from P(r) perspective
-            if self.data._xaxis == 'D_{max}':
+            if data._xaxis == 'D_{max}':
                 self.xscale = 'linear'
             # Transform data if required.
-            if transform and (self.data.xtransform is not None or self.data.ytransform is not None):
-                # data for each plot needs to be properly updated for transformation.
-                # logLabel holds the current(chosen) transformation string
-                self.data.xtransform = self.xLogLabel
-                self.data.ytransform = self.yLogLabel
-                _, _, xscale, yscale = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
+            if transform and (data.xtransform is not None or data.ytransform is not None):
+                self.xLabel, self.yLabel, xscale, yscale = \
+                    GuiUtils.xyTransform(data, data.xtransform, data.ytransform)
                 if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
                 if yscale != 'log' and yscale != self.yscale:
@@ -116,18 +138,18 @@ class PlotterWidget(PlotterBase):
 
                 # Redefine the Scale properties dialog
                 self.properties = ScaleProperties(self,
-                                        init_scale_x=self.data.xtransform,
-                                        init_scale_y=self.data.ytransform)
+                                        init_scale_x=data.xtransform,
+                                        init_scale_y=data.ytransform)
 
         # Shortcuts
         ax = self.ax
-        x = self._data.view.x
-        y = self._data.view.y
+        x = data.view.x
+        y = data.view.y
 
         # Marker symbol. Passed marker is one of matplotlib.markers characters
         # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
         if marker is None:
-            marker = self.data.symbol
+            marker = data.symbol
             # Try name first
             try:
                 marker = dict(PlotUtilities.SHAPES)[marker]
@@ -136,23 +158,23 @@ class PlotterWidget(PlotterBase):
 
         assert marker is not None
         # Plot name
-        if self.data.title:
-            self.title(title=self.data.title)
+        if data.title:
+            self.title(title=data.title)
         else:
-            self.title(title=self.data.name)
+            self.title(title=data.name)
 
         # Error marker toggle
         if hide_error is None:
-            hide_error = self.data.hide_error
+            hide_error = data.hide_error
 
         # Plot color
         if color is None:
-            color = self.data.custom_color
+            color = data.custom_color
 
         color = PlotUtilities.getValidColor(color)
-        self.data.custom_color = color
+        data.custom_color = color
 
-        markersize = self._data.markersize
+        markersize = data.markersize
 
         # Include scaling (log vs. linear)
         ax.set_xscale(self.xscale, nonposx='clip')
@@ -183,7 +205,7 @@ class PlotterWidget(PlotterBase):
                 line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
                         linestyle='', label=self._title, picker=True)
             else:
-                dy = self._data.view.dy
+                dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
                 if dy is not None and type(dy) == type(()):
                     dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
@@ -202,25 +224,35 @@ class PlotterWidget(PlotterBase):
                             zorder=1,
                             picker=True)
 
-        # Update the list of data sets (plots) in chart
-        self.plot_dict[self._data.name] = self.data
+        # Display horizontal axis if requested
+        if data.show_yzero:
+            ax.axhline(color='black', linewidth=1)
 
-        self.plot_lines[self._data.name] = line
+        # Update the list of data sets (plots) in chart
+        self.plot_dict[data.name] = data
+
+        self.plot_lines[data.name] = line
 
         # Now add the legend with some customizations.
-
         if self.showLegend:
-            width=_legendResize(self.canvas.size().width())
-
-            self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            width=_legendResize(self.canvas.size().width(), self.parent)
+            if width is not None:
+                self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            else:
+                self.legend = ax.legend(loc='upper right', shadow=True)
             if self.legend:
                 self.legend.set_picker(True)
 
         # Current labels for axes
-        if self.y_label and not is_fit:
-            ax.set_ylabel(self.y_label)
-        if self.x_label and not is_fit:
-            ax.set_xlabel(self.x_label)
+        if self.yLabel and not is_fit:
+            ax.set_ylabel(self.yLabel)
+        if self.xLabel and not is_fit:
+            ax.set_xlabel(self.xLabel)
+
+        # Add q-range sliders
+        if data.show_q_range_sliders:
+            sliders = QRangeSlider(self, self.ax, data=data)
+            self.sliders[data.name] = sliders
 
         # refresh canvas
         self.canvas.draw_idle()
@@ -231,9 +263,10 @@ class PlotterWidget(PlotterBase):
         """
         if not self.showLegend:
             return
-        width = _legendResize(event.width)
+        width = _legendResize(event.width, self.parent)
         # resize the legend to follow the canvas width.
-        self.legend.prop.set_size(width)
+        if width is not None:
+            self.legend.prop.set_size(width)
 
     def createContextMenu(self):
         """
@@ -249,14 +282,20 @@ class PlotterWidget(PlotterBase):
         self.actionAddText = self.contextMenu.addAction("Add Text")
         self.actionRemoveText = self.contextMenu.addAction("Remove Text")
         self.contextMenu.addSeparator()
+        if self.show_legend:
+            self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
+            self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
         self.contextMenu.addSeparator()
         self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
         self.actionResetGraphRange =\
             self.contextMenu.addAction("Reset Graph Range")
+
         # Add the title change for dialogs
         self.contextMenu.addSeparator()
         self.actionWindowTitle = self.contextMenu.addAction("Window Title")
+        self.contextMenu.addSeparator()
+        self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
 
         # Define the callbacks
         self.actionAddText.triggered.connect(self.onAddText)
@@ -265,6 +304,9 @@ class PlotterWidget(PlotterBase):
         self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
+        self.actionToggleMenu.triggered.connect(self.onToggleMenu)
+        if self.show_legend:
+            self.actionToggleLegend.triggered.connect(self.onToggleLegend)
 
     def addPlotsToContextMenu(self):
         """
@@ -332,14 +374,19 @@ class PlotterWidget(PlotterBase):
         self.actionToggleGrid.triggered.connect(self.onGridToggle)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
 
+        if self.show_legend:
+            self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
+            self.actionToggleLegend.triggered.connect(self.onToggleLegend)
+
     def onScaleChange(self):
         """
         Show a dialog allowing axes rescaling
         """
         if self.properties.exec_() == QtWidgets.QDialog.Accepted:
             self.xLogLabel, self.yLogLabel = self.properties.getValues()
-            self.data.xtransform = self.xLogLabel
-            self.data.ytransform = self.yLogLabel
+            for d in self.data:
+                d.xtransform = self.xLogLabel
+                d.ytransform = self.yLogLabel
             self.xyTransform(self.xLogLabel, self.yLogLabel)
 
     def onAddText(self):
@@ -417,8 +464,9 @@ class PlotterWidget(PlotterBase):
         """
         Resets the chart X and Y ranges to their original values
         """
-        x_range = (self.data.x.min(), self.data.x.max())
-        y_range = (self.data.y.min(), self.data.y.max())
+        for d in self.data:
+            x_range = (d.x.min(), d.x.max())
+            y_range = (d.y.min(), d.y.max())
         if x_range is not None and y_range is not None:
             self.ax.set_xlim(x_range)
             self.ax.set_ylim(y_range)
@@ -453,6 +501,11 @@ class PlotterWidget(PlotterBase):
         selected_plot = self.plot_dict[id]
         new_plot.xtransform = selected_plot.xtransform
         new_plot.ytransform = selected_plot.ytransform
+        #Adding few properties ftom ModifyPlot to preserve them in future changes
+        new_plot.title = selected_plot.title
+        new_plot.custom_color = selected_plot.custom_color
+        new_plot.markersize = selected_plot.markersize
+        new_plot.symbol = selected_plot.symbol
 
         self.removePlot(id)
         self.plot(data=new_plot)
@@ -474,22 +527,19 @@ class PlotterWidget(PlotterBase):
         if id not in list(self.plot_dict.keys()):
             return
 
-        selected_plot = self.plot_dict[id]
-
-        plot_dict = copy.deepcopy(self.plot_dict)
+        # Remove the plot from the list of plots
+        self.plot_dict.pop(id)
 
         # Labels might have been changed
         xl = self.ax.xaxis.label.get_text()
         yl = self.ax.yaxis.label.get_text()
 
-        self.plot_dict = {}
-
         mpl.pyplot.cla()
         self.ax.cla()
 
-        for ids in plot_dict:
+        for ids in self.plot_dict:
             if ids != id:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
+                self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
 
         # Reset the labels
         self.ax.set_xlabel(xl)
@@ -510,7 +560,6 @@ class PlotterWidget(PlotterBase):
         Allows for MPL modifications to the selected plot
         """
         selected_plot = self.plot_dict[id]
-        selected_line = self.plot_lines[id]
         # Old style color - single integer for enum color
         # New style color - #hhhhhh
         color = selected_plot.custom_color
@@ -519,7 +568,6 @@ class PlotterWidget(PlotterBase):
         marker_size = selected_plot.markersize
         # plot name
         legend = selected_plot.title
-
         plotPropertiesWidget = PlotProperties(self,
                                 color=color,
                                 marker=marker,
@@ -531,7 +579,6 @@ class PlotterWidget(PlotterBase):
             selected_plot.custom_color = plotPropertiesWidget.color()
             selected_plot.symbol = plotPropertiesWidget.marker()
             selected_plot.title = plotPropertiesWidget.legend()
-
             # Redraw the plot
             self.replacePlot(id, selected_plot)
 
@@ -557,7 +604,7 @@ class PlotterWidget(PlotterBase):
             if ids == id:
                 self.plot(data=plot_dict[ids], hide_error=(not current))
             else:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
+                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
 
     def xyTransform(self, xLabel="", yLabel=""):
         """
@@ -613,6 +660,17 @@ class PlotterWidget(PlotterBase):
 
         # Plot the line
         self.plot(data=self.fit_result, marker='-', hide_error=True)
+
+    def onToggleLegend(self):
+        """
+        Toggle legend visibility in the chart
+        """
+        if not self.showLegend:
+            return
+
+        visible = self.legend.get_visible()
+        self.legend.set_visible(not visible)
+        self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):
         """
@@ -793,5 +851,3 @@ class Plotter(QtWidgets.QDialog, PlotterWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
-
-

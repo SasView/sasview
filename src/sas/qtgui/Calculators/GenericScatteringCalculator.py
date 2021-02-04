@@ -3,6 +3,7 @@ import os
 import numpy
 import logging
 import time
+import timeit
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -142,9 +143,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         try:
             self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Choose a file", "", "All Gen files (*.OMF *.omf) ;;"
-                                          "SLD files (*.SLD *.sld);;PDB files (*.pdb *.PDB);; "
-                                          "OMF files (*.OMF *.omf);; "
+                self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld *.pdb *.PDB);;"
+                                          "OMF files (*.OMF *.omf);;"
+                                          "SLD files (*.SLD *.sld);;"
+                                          "PDB files (*.pdb *.PDB);;"
                                           "All files (*.*)")[0]
             if self.datafile:
                 self.default_shape = str(self.cbShape.currentText())
@@ -553,12 +555,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.write_new_values_from_gui()
             if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()
-                i_out = numpy.zeros(len(self.data.y))
-                inputs = [self.data.x, [], i_out]
+                inputs = [self.data.x, []]
             else:
                 self._create_default_2d_data()
-                i_out = numpy.zeros(len(self.data.data))
-                inputs = [self.data.qx_data, self.data.qy_data, i_out]
+                inputs = [self.data.qx_data, self.data.qy_data]
             logging.info("Computation is in progress...")
             self.cmdCompute.setText('Wait...')
             self.cmdCompute.setEnabled(False)
@@ -572,11 +572,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             logging.info(log_msg)
         return
 
-    def _update(self, value):
+    def _update(self, time=None, percentage=None):
         """
         Copied from previous version
         """
-        pass
+        if percentage is not None:
+            msg = "%d%% complete..." % int(percentage)
+        else:
+            msg = "Computing..."
+        logging.info(msg)
 
     def calculateFailed(self, reason):
         """
@@ -595,26 +599,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Gen compute complete function
         :Param input: input list [qx_data, qy_data, i_out]
         """
-        out = numpy.empty(0)
-        for ind in range(len(input[0])):
+        timer = timeit.default_timer
+        update_rate = 1.0 # seconds between updates
+        next_update = timer() + update_rate if update is not None else numpy.inf
+        nq = len(input[0])
+        chunk_size = 32 if self.is_avg else 256
+        out = []
+        for ind in range(0, nq, chunk_size):
+            t = timer()
+            if t > next_update:
+                update(time=t, percentage=100*ind/nq)
+                time.sleep(0.01)
+                next_update = t + update_rate
             if self.is_avg:
-                if ind % 1 == 0 and update is not None:
-                    # update()
-                    percentage = int(100.0 * float(ind) / len(input[0]))
-                    update(percentage)
-                    time.sleep(0.001)  # 0.1
-                inputi = [input[0][ind:ind + 1], [], input[2][ind:ind + 1]]
+                inputi = [input[0][ind:ind + chunk_size], []]
                 outi = self.model.run(inputi)
-                out = numpy.append(out, outi)
             else:
-                if ind % 50 == 0 and update is not None:
-                    percentage = int(100.0 * float(ind) / len(input[0]))
-                    update(percentage)
-                    time.sleep(0.001)
-                inputi = [input[0][ind:ind + 1], input[1][ind:ind + 1],
-                          input[2][ind:ind + 1]]
+                inputi = [input[0][ind:ind + chunk_size],
+                          input[1][ind:ind + chunk_size]]
                 outi = self.model.runXY(inputi)
-                out = numpy.append(out, outi)
+            out.append(outi)
+        out = numpy.hstack(out)
         self.data_to_plot = out
         logging.info('Gen computation completed.')
         self.cmdCompute.setText('Compute')
@@ -678,6 +683,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
+            data.xmin = self.data.xmin
+            data.xmax = self.data.xmax
+            data.ymin = self.data.ymin
+            data.ymax = self.data.ymax
 
             self.graph_num += 1
             # TODO
@@ -850,13 +859,19 @@ class Plotter3DWidget(PlotterBase):
         """
         Define common context menu and associated actions for the MPL widget
         """
-        return
+        self.defaultContextMenu()
 
     def createContextMenuQuick(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
         return
+
+    def closeEvent(self, event):
+        """
+        Overwrite the close event adding helper notification
+        """
+        event.accept()
 
 
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):

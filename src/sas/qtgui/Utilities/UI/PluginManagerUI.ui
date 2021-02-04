@@ -35,7 +35,14 @@
      <item>
       <widget class="QPushButton" name="cmdAdd">
        <property name="text">
-        <string>Add</string>
+        <string>Add...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdAddFile">
+       <property name="text">
+        <string>Add file...</string>
        </property>
       </widget>
      </item>
@@ -49,7 +56,7 @@
      <item>
       <widget class="QPushButton" name="cmdEdit">
        <property name="text">
-        <string>Edit</string>
+        <string>Edit...</string>
        </property>
       </widget>
      </item>
@@ -75,7 +82,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer">

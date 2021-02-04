@@ -219,6 +219,8 @@ References
 Correlation Function
 ....................
 
+Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
+
 Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
 
 Koberstein, J.; Stein R. *J. Polym. Sci. Phys. Ed.* (1983), 21, 2181-2200
@@ -268,17 +270,42 @@ yellow this indicates that background subtraction has created some negative inte
 
 Now click the "Extrapolate" button to extrapolate the data. The graph window will update 
 to show the extrapolated data, and the values of the parameters used for the Guinier and 
-Porod extrapolations will appear in the "Extrapolation Parameters" section of the SasView 
+Porod extrapolations will appear in the "Extrapolation Parameters" section of the Corfunc 
 GUI.
 
 .. figure:: tutorial2.png
    :align: center
 
-Now click the "Transform" button to perform the **Fourier** transform and plot
-the results.
+Now click the "Transform" button to perform the Fourier transform and plot
+the results. The lower graph will display the 1D and 3D-averaged correlation functions.
+The Interface Distribution Function (or IDF) is also computed, but is not displayed
+for clarity. How to access the IDF, and the correlation functions themselves, is
+explained shortly.
 
  .. figure:: tutorial3.png
     :align: center
 
+*If* the sample morphology can be adequately described as an ideal lamellar morphology
+the Corfunc GUI can attempt to derive morphological characterization parameters from the
+1D correlation function. To do this, click the "Extract Parameters" button.
+
+ .. figure:: tutorial4.png
+    :align: center
+
+Finally, it is possible to save the values of the real-space distance axis, the 1D and 3D
+correlation functions, and the IDF to a simple ASCII text file by clicking on the "Save"
+button. The file is given the unique file descriptor *.crf*.
+
+ .. figure:: tutorial5.png
+    :align: center
+
+The structure of the file is shown below.
+
+ .. figure:: tutorial6.png
+    :align: center
+
+.. note:: At the time of writing SasView will not load these *.crf* files, but they can
+   be easily loaded and displayed in most spreadsheet applications.
+
 .. note::
-    This help document was last changed by Steve King, 26Sep2017
+    This help document was last changed by Steve King, 21May2020

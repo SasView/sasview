@@ -44,6 +44,8 @@ def run_tests(dirs=None, run_all=False):
     n_errors = 0
     n_failures = 0
 
+    failure_text = []
+
     for d in (dirs if dirs else os.listdir(test_root)):
 
         # Check for modules to be skipped
@@ -52,7 +54,7 @@ def run_tests(dirs=None, run_all=False):
 
 
         # Go through modules looking for unit tests
-        module_dir = os.path.join(test_root, d, "test")
+        module_dir = os.path.join(test_root, d)
         if os.path.isdir(module_dir):
             for f in os.listdir(module_dir):
                 file_path = os.path.join(module_dir,f)
@@ -63,6 +65,7 @@ def run_tests(dirs=None, run_all=False):
                     std_out, std_err = proc.communicate()
                     std_out, std_err = std_out.decode(), (std_err.decode() if std_err else None)
                     #print(">>>>>> standard out", file_path, "\n", std_out, "\n>>>>>>>>> end stdout", file_path)
+                    #print(">>>>>> standard err", file_path, "\n", std_err, "\n>>>>>>>>> end stderr", file_path)
                     #sys.exit()
                     m = re.search("Ran ([0-9]+) test", std_out)
                     if m is not None:
@@ -72,6 +75,14 @@ def run_tests(dirs=None, run_all=False):
                         has_tests = False
 
                     has_failed = "FAILED (" in std_out
+                    if has_failed:
+                        if std_out:
+                            failure_text.append("== %s std out ==\n%s"
+                                                % (module_name, std_out))
+                        if std_err:
+                            failure_text.append("== %s std err ==\n%s"
+                                                % (module_name, std_out))
+
                     m = re.search("FAILED \(.*errors=([0-9]+)", std_out)
                     if m is not None:
                         n_errors += int(m.group(1))
@@ -103,6 +114,8 @@ def run_tests(dirs=None, run_all=False):
         print("    Tests failed: %d" % n_failures)
         print("    Test errors:  %d" % n_errors)
     print("----------------------------------------------")
+
+    print("\n\n".join(failure_text))
 
     return failed
 

@@ -1,3 +1,5 @@
+from distutils.command.config import config
+
 import numpy
 import copy
 
@@ -11,6 +13,7 @@ from bumps import fitters
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
@@ -25,6 +28,7 @@ class FittingWindow(QtWidgets.QTabWidget):
     fittingStoppedSignal = QtCore.pyqtSignal(list)
 
     name = "Fitting" # For displaying in the combo box in DataExplorer
+    ext = "fitv"  # Extension used for saving analyses
     def __init__(self, parent=None, data=None):
 
         super(FittingWindow, self).__init__()
@@ -118,28 +122,23 @@ class FittingWindow(QtWidgets.QTabWidget):
     def onLatexCopy(self):
         self.currentTab.onCopyToClipboard("Latex")
 
+    def serializeAll(self):
+        return self.serializeAllFitpage()
+
     def serializeAllFitpage(self):
         # serialize all active fitpages and return
         # a dictionary: {data_id: fitpage_state}
-        params = {}
+        state = {}
         for i, tab in enumerate(self.tabs):
-            tab_data = self.getSerializedFitpage(tab)
-            if 'data_id' not in tab_data: continue
-            id = tab_data['data_id'][0]
-            if isinstance(id, list):
-                for i in id:
-                    if i in params:
-                        params[i].append(tab_data)
-                    else:
-                        params[i] = [tab_data]
-            else:
-                if id in params:
-                    params[id].append(tab_data)
+            tab_state = self.getSerializedFitpage(tab)
+            for key, value in tab_state.items():
+                if key in state:
+                    state[key].update(value)
                 else:
-                    params[id] = [tab_data]
-        return params
+                    state[key] = value
+        return state
 
-    def serializeCurrentFitpage(self):
+    def serializeCurrentPage(self):
         # serialize current(active) fitpage
         return self.getSerializedFitpage(self.currentTab)
 
@@ -147,6 +146,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         get serialize requested fit tab
         """
+        state = {}
         fitpage_state = tab.getFitPage()
         fitpage_state += tab.getFitModel()
         # put the text into dictionary
@@ -155,7 +155,19 @@ class FittingWindow(QtWidgets.QTabWidget):
             #content = line.split(',')
             if len(line) > 1:
                 line_dict[line[0]] = line[1:]
-        return line_dict
+
+        if 'data_id' not in line_dict: return state
+        id = line_dict['data_id'][0]
+        if not isinstance(id, list):
+            id = [id]
+        for i in id:
+            if 'is_constraint' in line_dict.keys():
+                state[i] = line_dict
+            elif i in state and 'fit-params' in state[i]:
+                state[i]['fit_params'].update(line_dict)
+            else:
+                state[i] = {'fit_params': [line_dict]}
+        return state
 
     def currentTabDataId(self):
         """
@@ -176,6 +188,28 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         self.currentTab.createPageForParameters(parameters)
 
+    def updateFromConstraints(self, constraint_dict):
+        """
+        Updates all tabs with constraints present in *constraint_dict*, where
+        *constraint_dict*  keys are the fit page name, and the value is a
+        list of constraints. A constraint is represented by a list [value,
+        param, value_ex, validate, function] of attributes of a Constraint
+        object
+        """
+        for fit_page_name, constraint_list in constraint_dict.items():
+            tab = self.getTabByName(fit_page_name)
+            for constraint_param in constraint_list:
+                if constraint_param is not None and len(constraint_param) == 5:
+                    constraint = Constraint()
+                    constraint.value = constraint_param[0]
+                    constraint.func = constraint_param[4]
+                    constraint.param = constraint_param[1]
+                    constraint.value_ex = constraint_param[2]
+                    constraint.validate = constraint_param[3]
+                    tab.addConstraintToRow(constraint=constraint,
+                                           row=tab.getRowFromName(
+                                               constraint_param[1]))
+
     def onParamSave(self):
         self.currentTab.onCopyToClipboard("Save")
 
@@ -187,8 +221,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
             event.accept()
         else:
             # Maybe we should just minimize
@@ -212,7 +247,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        #self.maxIndex += 1
         self.maxIndex = tab_index + 1
 
         icon = QtGui.QIcon()
@@ -220,7 +254,7 @@ class FittingWindow(QtWidgets.QTabWidget):
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
-        self.setCurrentWidget(tab);
+        self.setCurrentWidget(tab)
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -270,6 +304,20 @@ class FittingWindow(QtWidgets.QTabWidget):
         page_name = "Const. & Simul. Fit"
         return page_name
 
+    def closeTabByIndex(self, index):
+        """
+        Close/delete a tab with the given index.
+        No checks on validity of the index.
+        """
+        try:
+            ObjectLibrary.deleteObjectByRef(self.tabs[index])
+            self.removeTab(index)
+            del self.tabs[index]
+            self.tabsModifiedSignal.emit()
+        except IndexError:
+            # The tab might have already been deleted previously
+            pass
+
     def resetTab(self, index):
         """
         Adds a new tab and removes the last tab
@@ -291,22 +339,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         if len(self.tabs) <= 1:
             self.resetTab(index)
             return
-        # If it is not the only tab, remove it now
-        self.closeTabForIndex(index)
-
-    def closeTabForIndex(self, index):
-        """
-        Delete the tab from the object library and remove it from the widget,
-        notifying listeners
-        """
-        try:
-            ObjectLibrary.deleteObjectByRef(self.tabs[index])
-            self.removeTab(index)
-            del self.tabs[index]
-            self.tabsModifiedSignal.emit()
-        except IndexError:
-            # The tab might have already been deleted previously
-            pass
+        self.closeTabByIndex(index)
 
     def closeTabByName(self, tab_name):
         """
@@ -335,6 +368,12 @@ class FittingWindow(QtWidgets.QTabWidget):
     def allowBatch(self):
         """
         Tell the caller that we accept multiple data instances
+        """
+        return True
+
+    def allowSwap(self):
+        """
+        Tell the caller that you can swap data
         """
         return True
 
@@ -372,10 +411,11 @@ class FittingWindow(QtWidgets.QTabWidget):
             available_tabs = [tab.acceptsData() for tab in self.tabs]
 
             if tab_index is not None:
-                # if tab with this index exists - delete it first
-                self.closeTabForIndex(tab_index-1)
-                # Now add fit to the tab with requested index
-                self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                if tab_index >= self.maxIndex:
+                    self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                else:
+                    self.setCurrentIndex(tab_index-1)
+                    self.swapData(data)
                 return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
@@ -384,6 +424,26 @@ class FittingWindow(QtWidgets.QTabWidget):
                 self.updateFitDict(data, tab_name)
             else:
                 self.addFit(data, is_batch=is_batch)
+
+    def swapData(self, data):
+        """
+        Replace the data from the current fitting tab
+        """
+        if not isinstance(self.currentWidget(), FittingWidget):
+            msg = "Current tab is not  a fitting widget"
+            raise TypeError(msg)
+
+        if not isinstance(data, QtGui.QStandardItem):
+            msg = "Incorrect type passed to the Fitting Perspective"
+            raise AttributeError(msg)
+
+        if self.currentTab.is_batch_fitting:
+            msg = "Data in Batch Fitting cannot be swapped"
+            raise RuntimeError(msg)
+
+        self.currentTab.data = data
+        tab_name = str(self.tabText(self.currentIndex()))
+        self.updateFitDict(data, tab_name)
 
     def onFittingOptionsChange(self, fit_engine):
         """
@@ -443,3 +503,54 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         return self.currentWidget()
 
+    def getFitTabs(self):
+        """
+        Returns the list of fitting tabs
+        """
+        return [tab for tab in self.tabs if isinstance(tab, FittingWidget)]
+
+    def getActiveConstraintList(self):
+        """
+        Returns a list of the constraints for all fitting tabs. Constraints
+        are a tuple of strings (parameter, expression) e.g. ('M1.scale',
+        'M2.scale + 2')
+        """
+        constraints = []
+        for tab in self.getFitTabs():
+            tab_name = tab.modelName()
+            tab_constraints = tab.getConstraintsForModel()
+            constraints.extend((tab_name + "." + par, expr)
+                               for par, expr in tab_constraints)
+        return constraints
+
+    def getSymbolDictForConstraints(self):
+        """
+        Returns a dictionary containing all the symbols in  all constrained tabs
+        and their values.
+        """
+        symbol_dict = {}
+        for tab in self.getFitTabs():
+            symbol_dict.update(tab.getSymbolDict())
+        return symbol_dict
+
+    def getConstraintTab(self):
+        """
+        Returns the constraint tab, or None if no constraint tab is active
+        """
+        if any(isinstance(tab, ConstraintWidget) for tab in self.tabs):
+            constraint_tab = next(tab
+                                  for tab in self.tabs
+                                  if isinstance(tab, ConstraintWidget))
+        else:
+            constraint_tab = None
+        return constraint_tab
+
+    def getTabByName(self, name):
+        """
+        Returns the tab with with attribute name *name*
+        """
+        assert(name, str)
+        for tab in self.tabs:
+            if tab.modelName() == name:
+                return tab
+        return None

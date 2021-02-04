@@ -14,8 +14,7 @@ class EmbeddedPylab(object):
 
     As a convenience, the pylab module is returned on entry.
 
-    Example
-    -------
+    *Example*
 
     The following example shows how to use the WxAgg backend in a wx panel::
 

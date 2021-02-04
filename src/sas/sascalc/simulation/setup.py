@@ -28,7 +28,7 @@ def get_c_files(path):
 # Top package name
 #pck_top = "sasModeling"
 pck_top = "sas.sascalc.simulation"
-pck_dir = os.path.join("src","sas", "simulation")
+pck_dir = os.path.join("src", "sas", "sascalc", "simulation")
 # The temp directory that the compiled files will be put in
 tempdir = "build/temp."+util.get_platform()+'-'+sysconfig.get_python_version()
 if os.name=='nt':

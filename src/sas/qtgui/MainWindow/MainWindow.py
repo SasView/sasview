@@ -1,25 +1,33 @@
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
+import os
+import sys
+
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-import os
-import sys
+
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
-    def __init__(self, parent=None):
+    def __init__(self, screen_resolution, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
         self.setupUi(self)
 
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
+        # some perspectives are fixed size.
+        # the two scrollbars will help managing the workspace.
+        self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.screen_width =  screen_resolution.width()
+        self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
 
         # Temporary solution for problem with menubar on Mac
@@ -55,6 +63,19 @@ def SplashScreen():
 def run_sasview():
     app = QApplication([])
 
+    #Initialize logger
+    from sas.logger_config import SetupLogger
+    SetupLogger(__name__).config_development()
+
+    # initialize sasmodels settings
+    from sas import get_custom_config, get_user_dir
+    if "SAS_DLL_PATH" not in os.environ:
+        os.environ["SAS_DLL_PATH"] = os.path.join(
+            get_user_dir(), "compiled_models")
+    SAS_OPENCL = get_custom_config().SAS_OPENCL
+    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
+        os.environ["SAS_OPENCL"] = SAS_OPENCL
+
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -67,7 +88,6 @@ def run_sasview():
     #app.setStyle('Fusion')
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
-    import sys
     if 'twisted.internet.reactor' in sys.modules:
         del sys.modules['twisted.internet.reactor']
 
@@ -80,8 +100,10 @@ def run_sasview():
     # DO NOT move the following import to the top!
     from twisted.internet import reactor
 
+    screen_resolution = app.desktop().screenGeometry()
+
     # Show the main SV window
-    mainwindow = MainSasViewWindow()
+    mainwindow = MainSasViewWindow(screen_resolution)
     mainwindow.showMaximized()
 
     # no more splash screen

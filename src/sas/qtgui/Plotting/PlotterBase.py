@@ -12,15 +12,14 @@ import matplotlib as mpl
 from matplotlib import rcParams
 
 DEFAULT_CMAP = mpl.cm.jet
-from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
+from sas.qtgui.Plotting.Binder import BindArtist
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
-import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
+
 
 class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):
@@ -81,6 +80,9 @@ class PlotterBase(QtWidgets.QWidget):
         # Annotations
         self.selectedText = None
         self.textList = []
+
+        # Create Artist and bind it
+        self.connect = BindArtist(self.figure)
 
         # Pre-define the Scale properties dialog
         self.properties = ScaleProperties(self,
@@ -203,6 +205,12 @@ class PlotterBase(QtWidgets.QWidget):
         """ Legend visibility setter """
         self.show_legend = show
 
+    def update(self):
+        self.figure.canvas.draw()
+
+    def draw(self):
+        self.figure.canvas.draw()
+
     def upatePlotHelper(self):
         """
         Notify the plot helper about the new plot
@@ -210,7 +218,7 @@ class PlotterBase(QtWidgets.QWidget):
         # Notify the helper
         PlotHelper.addPlot(self)
         # Notify the listeners about a new graph
-        self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+        self.manager.communicator.activeGraphsSignal.emit([self, False])
 
     def defaultContextMenu(self):
         """
@@ -222,16 +230,12 @@ class PlotterBase(QtWidgets.QWidget):
         self.actionSaveImage = self.contextMenu.addAction("Save Image")
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
-        #self.contextMenu.addSeparator()
-        #self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
         self.contextMenu.addSeparator()
-
 
         # Define the callbacks
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
-        #self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenu(self):
         """
@@ -315,7 +319,7 @@ class PlotterBase(QtWidgets.QWidget):
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
         # Notify the listeners
-        self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+        self.manager.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
 
@@ -389,13 +393,10 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Toggle navigation menu visibility in the chart
         """
-        self.toolbar.hide()
-        # Current toolbar menu is too buggy.
-        # Comment out until we support 3.x, then recheck.
-        #if self.toolbar.isVisible():
-        #    self.toolbar.hide()
-        #else:
-        #    self.toolbar.show()
+        if self.toolbar.isVisible():
+            self.toolbar.hide()
+        else:
+            self.toolbar.show()
 
     def offset_graph(self):
         """

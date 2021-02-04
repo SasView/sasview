@@ -15,12 +15,10 @@ Without arguments run.py runs sasview.  With arguments, run.py will run
 the given module or script.
 """
 
-import imp
-import os
 import sys
+import os
+from os.path import abspath, dirname, realpath, join as joinpath
 from contextlib import contextmanager
-from os.path import join as joinpath
-from os.path import abspath, dirname, realpath
 
 PLUGIN_MODEL_DIR = 'plugin_models'
 
@@ -47,24 +45,6 @@ def cd(path):
     os.chdir(path)
     yield
     os.chdir(old_dir)
-
-
-def import_package(modname, path):
-    """Import a package into a particular point in the python namespace"""
-    #logger.debug("Dynamicly importing: %s", path)
-    mod = imp.load_source(modname, abspath(joinpath(path, '__init__.py')))
-    sys.modules[modname] = mod
-    mod.__path__ = [abspath(path)]
-    return mod
-
-
-def import_dll(modname, build_path):
-    """Import a DLL from the build directory"""
-    import sysconfig
-    ext = sysconfig.get_config_var('SO')
-    # build_path comes from context
-    path = joinpath(build_path, *modname.split('.')) + ext
-    return imp.load_dynamic(modname, path)
 
 def setup_sasmodels():
     """
@@ -104,19 +84,20 @@ def prepare():
     # add periodictable to the path
     try:
         import periodictable
-    except:
+    except ImportError:
         addpath(joinpath(root, '..', 'periodictable'))
 
     try:
         import bumps
-    except:
+    except ImportError:
         addpath(joinpath(root, '..', 'bumps'))
 
-    # Build project if the build directory does not already exist.
-    if not os.path.exists(build_path):
-        import subprocess
-        with cd(root):
-            subprocess.call((sys.executable, "setup.py", "build"), shell=False)
+    # == no more C sources so no need to build project to run it ==
+    ## Build project if the build directory does not already exist.
+    #if not os.path.exists(build_path):
+    #    import subprocess
+    #    with cd(root):
+    #        subprocess.call((sys.executable, "setup.py", "build"), shell=False)
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
@@ -124,31 +105,12 @@ def prepare():
     # sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
 
-    # Import the sasview package from root/sasview as sas.sasview.  It would
-    # be better to just store the package in src/sas/sasview.
-    #import sas
-    #sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
-
-    # Compiled modules need to be pulled from the build directory.
-    import sas.sascalc
-    sas.sascalc.pr = import_package(
-        'sas.sascalc.pr',
-        joinpath(build_path, 'sas', 'sascalc', 'pr'))
-    sas.sascalc.file_converter = import_package(
-        'sas.sascalc.file_converter',
-        joinpath(build_path, 'sas', 'sascalc', 'file_converter'))
-    sas.sascalc.calculator = import_package(
-        'sas.sascalc.calculator',
-        joinpath(build_path, 'sas', 'sascalc', 'calculator'))
-
-
-    sys.path.append(build_path)
-
-    # Run the UI conversion tool if executed from script
-    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
-        import sas.qtgui.convertUI
+    # Note: only needed when running gui so suppress for now.
+    ## Run the UI conversion tool.
+    #import sas.qtgui.convertUI
 
     # initialize OpenCL setting
+    import sas
     SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
     if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
         os.environ["SAS_OPENCL"] = SAS_OPENCL
@@ -162,13 +124,16 @@ if __name__ == "__main__":
     addpath(joinpath(root, 'src'))
     addpath(joinpath(root, joinpath('..', 'sasmodels'))) # dependency (for loading custom_config.py during log setup)
 
-    from sas.logger_config import SetupLogger
-    logger = SetupLogger(__name__).config_development()
+    #from sas.logger_config import SetupLogger
+    #logger = SetupLogger(__name__).config_development()
 
-    logger.debug("Starting SASVIEW in debug mode.")
+    #logger.debug("Starting SASVIEW in debug mode.")
     prepare()
+    # Run the UI conversion tool when executed from script.  This has to
+    # happen after prepare() so that sas.qtgui is on the path.
+    import sas.qtgui.convertUI
     setup_sasmodels()
 
     from sas.qtgui.MainWindow.MainWindow import run_sasview
     run_sasview()
-    logger.debug("Ending SASVIEW in debug mode.")
+    #logger.debug("Ending SASVIEW in debug mode.")

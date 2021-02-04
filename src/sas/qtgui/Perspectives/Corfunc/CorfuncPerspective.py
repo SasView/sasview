@@ -180,8 +180,6 @@ class MyMplCanvas(FigureCanvas):
             data1, data3, data_idf = self.data
             self.axes.plot(data1.x, data1.y, label="1D Correlation")
             self.axes.plot(data3.x, data3.y, label="3D Correlation")
-            self.axes.plot(data_idf.x, data_idf.y,
-                           label="Interface Distribution Function")
             self.axes.set_xlim(0, max(data1.x) / 4)
             self.legend = self.axes.legend()
 
@@ -191,6 +189,7 @@ class MyMplCanvas(FigureCanvas):
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
+    ext = " crf"  # File extension used for saving analysis files
 
     trigger = QtCore.pyqtSignal(tuple)
 
@@ -205,10 +204,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper = None
         self._path = ""
         self.model = QtGui.QStandardItemModel(self)
-        self.communicate = GuiUtils.Communicate()
+        self.communicate = self.parent.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item = None
+        self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
 
@@ -232,12 +233,20 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         # Set up the mapper
         self.setup_mapper()
 
+    def isSerializable(self):
+        """
+        Tell the caller that this perspective writes its state
+        """
+        return True
+
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
         self.cmdExtrapolate.clicked.connect(self.extrapolate)
         self.cmdExtrapolate.setEnabled(False)
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+        self.cmdExtract.clicked.connect(self.extract)
+        self.cmdExtract.setEnabled(False)
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
 
@@ -280,6 +289,29 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(0)))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(0)))
 
+    def removeData(self, data_list=None):
+        """Remove the existing data reference from the Invariant Persepective"""
+        if not data_list or self._model_item not in data_list:
+            return
+        # Clear data plots
+        self._canvas.data = None
+        self._canvas.extrap = None
+        self._realplot.data = None
+        self._realplot.extrap = None
+        # Clear calculator, model, and data path
+        self._calculator = CorfuncCalculator()
+        self._model_item = None
+        self.has_data = False
+        self._path = ""
+        # Pass an empty dictionary to set all inputs to their default values
+        self.updateFromParameters({})
+        # Disable buttons to return to base state
+        self.cmdExtrapolate.setEnabled(False)
+        self.cmdTransform.setEnabled(False)
+        self.cmdExtract.setEnabled(False)
+        self.cmdSave.setEnabled(False)
+        self.cmdCalculateBg.setEnabled(False)
+
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
         if not self.mapper:
@@ -298,25 +330,34 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     def extrapolate(self):
         """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
+        self.model.itemChanged.disconnect(self.model_changed)
         try:
             params, extrapolation, _ = self._calculator.compute_extrapolation()
-            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
-            self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
-            self.model.setItem(W.W_PORODSIGMA,
-                               QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
-
-            self._canvas.extrap = extrapolation
-            self._canvas.draw_q_space()
-            self.cmdTransform.setEnabled(True)
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
                       "cutoff Q, or increasing the lower Q."
             QtWidgets.QMessageBox.warning(self, "Calculation Error",
                                       message)
+            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
+            self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
             self._canvas.extrap = None
-            self._canvas.draw_q_space()
+            self.model_changed(None)
+            return
+        finally:
+            self.model.itemChanged.connect(self.model_changed)
+
+        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
+        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
+        self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
+        self.model.setItem(W.W_PORODSIGMA,
+                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
+
+        self._canvas.extrap = extrapolation
+        self.model_changed(None)
+        self.cmdTransform.setEnabled(True)
 
 
     def transform(self):
@@ -342,26 +383,37 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
 
     def finish_transform(self, transforms):
+        self._realplot.data = transforms
+
+        self.update_real_space_plot(transforms)
+
+        self._realplot.draw_real_space()
+        self.cmdExtract.setEnabled(True)
+        self.cmdSave.setEnabled(True)
+
+    def extract(self):
+        transforms = self._realplot.data
+
         params = self._calculator.extract_parameters(transforms[0])
+
+        self.model.itemChanged.disconnect(self.model_changed)
         self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
         self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
         self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        self._realplot.data = transforms
+        self.model.itemChanged.connect(self.model_changed)
+        self.model_changed(None)
 
-        self.update_real_space_plot(transforms)
-
-        self._realplot.draw_real_space()
-        self.cmdSave.setEnabled(True)
 
     def update_real_space_plot(self, datas):
         """take the datas tuple and create a plot in DE"""
 
         assert isinstance(datas, tuple)
         plot_id = id(self)
-        titles = ['1D Correlation', '3D Correlation', 'Interface Distribution Function']
+        titles = [f"1D Correlation [{self._path}]", f"3D Correlation [{self._path}]",
+                  'Interface Distribution Function']
         for i, plot in enumerate(datas):
             plot_to_add = self.parent.createGuiData(plot)
             # set plot properties
@@ -436,6 +488,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         """
         return False
 
+    @staticmethod
+    def allowSwap():
+        """
+        We cannot swap data with corfunc analysis at this time.
+        """
+        return False
+
     def setData(self, data_item, is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
@@ -449,6 +508,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             msg = "Incorrect type passed to the Corfunc Perspective"
             raise AttributeError(msg)
 
+        if self.has_data:
+            msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
+            msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+            retval = dialog.exec_()
+            if retval == QtWidgets.QMessageBox.Cancel:
+                return
+
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
         self._model_item = model_item
@@ -456,6 +524,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdCalculateBg.setEnabled(True)
         self.cmdExtrapolate.setEnabled(True)
 
+        self.model.itemChanged.disconnect(self.model_changed)
         self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
         self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
         self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
@@ -466,16 +535,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
+        self.model.itemChanged.connect(self.model_changed)
 
         self._canvas.data = data
         self._canvas.extrap = None
-        self._canvas.draw_q_space()
+        self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
+        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
         self._realplot.data = None
         self._realplot.draw_real_space()
-
-        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
+        self.has_data = True
 
     def setClosable(self, value=True):
         """
@@ -492,8 +562,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            if self.parent:
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
                 self.parentWidget().close()
             event.accept()
         else:
@@ -528,3 +598,111 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
+
+    def serializeAll(self):
+        """
+        Serialize the corfunc state so data can be saved
+        Corfunc is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {corfunc-state}}}
+        """
+        return self.serializeCurrentPage()
+
+    def serializeCurrentPage(self):
+        """
+        Serialize and return a dictionary of {data_id: corfunc-state}
+        Return empty dictionary if no data
+        :return: {data-id: {self.name: {corfunc-state}}}
+        """
+        state = {}
+        if self.has_data:
+            tab_data = self.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'corfunc_params': tab_data}
+        return state
+
+    def getPage(self):
+        """
+        Serializes full state of this corfunc page
+        Called by Save Analysis
+        :return: {corfunc-state}
+        """
+        # Get all parameters from page
+        data = GuiUtils.dataFromItem(self._model_item)
+        param_dict = self.getState()
+        param_dict['data_name'] = str(data.name)
+        param_dict['data_id'] = str(data.id)
+        return param_dict
+
+    def getState(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        return {
+            'guinier_a': self.txtGuinierA.text(),
+            'guinier_b': self.txtGuinierB.text(),
+            'porod_k': self.txtPorodK.text(),
+            'porod_sigma': self.txtPorodSigma.text(),
+            'avg_core_thick': self.txtAvgCoreThick.text(),
+            'avg_inter_thick': self.txtAvgIntThick.text(),
+            'avg_hard_block_thick': self.txtAvgHardBlock.text(),
+            'local_crystalinity': self.txtLocalCrystal.text(),
+            'polydispersity': self.txtPolydisp.text(),
+            'long_period': self.txtLongPeriod.text(),
+            'lower_q_max': self.txtLowerQMax.text(),
+            'upper_q_min': self.txtUpperQMin.text(),
+            'upper_q_max': self.txtUpperQMax.text(),
+            'background': self.txtBackground.text(),
+        }
+
+    def updateFromParameters(self, params):
+        """
+        Called by Open Project, Open Analysis, and removeData
+        :param params: {param_name: value} -> Default values used if not valid
+        :return: None
+        """
+        # Params should be a dictionary
+        if not isinstance(params, dict):
+            c_name = params.__class__.__name__
+            msg = "Corfunc.updateFromParameters expects a dictionary"
+            raise TypeError(f"{msg}: {c_name} received")
+        # Assign values to 'Invariant' tab inputs - use defaults if not found
+        self.model.setItem(
+            W.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
+        self.model.setItem(
+            W.W_GUINIERB, QtGui.QStandardItem(params.get('guinier_b', '0.0')))
+        self.model.setItem(
+            W.W_PORODK, QtGui.QStandardItem(params.get('porod_k', '0.0')))
+        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(
+            params.get('porod_sigma', '0.0')))
+        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(
+            params.get('avg_core_thick', '0')))
+        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(
+            params.get('avg_inter_thick', '0')))
+        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(
+            params.get('avg_hard_block_thick', '0')))
+        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(
+            params.get('local_crystalinity', '0')))
+        self.model.setItem(
+            W.W_POLY, QtGui.QStandardItem(params.get('polydispersity', '0')))
+        self.model.setItem(
+            W.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
+        self.model.setItem(
+            W.W_FILENAME, QtGui.QStandardItem(params.get('data_name', '')))
+        self.model.setItem(
+            W.W_QMIN, QtGui.QStandardItem(params.get('lower_q_max', '0.01')))
+        self.model.setItem(
+            W.W_QMAX, QtGui.QStandardItem(params.get('upper_q_min', '0.20')))
+        self.model.setItem(
+            W.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
+        self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(
+            params.get('background', '0')))
+        self.cmdCalculateBg.setEnabled(params.get('background', '0') != '0')
+        self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+        self.cmdExtrapolate.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0.0')
+        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0.0')
+        if params.get('guinier_a', '0.0') != '0.0':
+            self.extrapolate()
+        if params.get('long_period', '0') != '0.0':
+            self.transform()

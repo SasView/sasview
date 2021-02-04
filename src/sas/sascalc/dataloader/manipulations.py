@@ -309,7 +309,7 @@ class _Slab(object):
     """
 
     def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0,
-                 y_max=0.0, bin_width=0.001):
+                 y_max=0.0, bin_width=0.001, fold = False):
         # Minimum Qx value [A-1]
         self.x_min = x_min
         # Maximum Qx value [A-1]
@@ -322,7 +322,7 @@ class _Slab(object):
         self.bin_width = bin_width
         # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
-        self.fold = False
+        self.fold = fold
 
     def __call__(self, data2D):
         return NotImplemented

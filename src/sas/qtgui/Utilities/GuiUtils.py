@@ -126,7 +126,6 @@ def _find_local_config(confg_file, path):
 # Get APP folder
 PATH_APP = get_app_dir()
 DATAPATH = PATH_APP
-
 # Read in the local config, which can either be with the main
 # application or in the installation directory
 config = _find_local_config('local_config', PATH_APP)
@@ -137,12 +136,12 @@ else:
     pass
 
 c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-
 custom_config = _find_local_config('custom_config', c_conf_dir)
 if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
     if custom_config is None:
         msgConfig = "Custom_config file was not imported"
+logging.info("Custom config path: %s", custom_config)
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -246,7 +245,7 @@ class Communicate(QtCore.QObject):
     plotRequestedSignal = QtCore.pyqtSignal(list, int)
 
     # Plot from file names
-    plotFromFilenameSignal = QtCore.pyqtSignal(str)
+    plotFromNameSignal = QtCore.pyqtSignal(str)
 
     # Plot update requested from a perspective
     plotUpdateSignal = QtCore.pyqtSignal(list)
@@ -329,6 +328,8 @@ def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
         plot_data = plot_item.child(0).data()
         if plot_data.id is not None and \
                 plot_data.name == update_data.name:
+                #(plot_data.name == update_data.name or plot_data.id == update_data.id):
+            # if plot_data.id is not None and plot_data.id == update_data.id:
             # replace data section in item
             plot_item.child(0).setData(update_data)
             plot_item.setText(name)
@@ -468,17 +469,17 @@ def updateModelItemStatus(model_item, filename="", name="", status=2):
 
     return
 
-def itemFromFilename(filename, model_item):
+def itemFromDisplayName(name, model_item):
     """
-    Returns the model item text=filename in the model
+    Returns the model item text=name in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, str)
+    assert isinstance(name, str)
 
     # Iterate over model looking for named items
     item = list([i for i in [model_item.item(index)
                              for index in range(model_item.rowCount())]
-                 if str(i.text()) == filename])
+                 if str(i.text()) == name])
     return item[0] if len(item)>0 else None
 
 def plotsFromModel(model_name, model_item):
@@ -504,18 +505,42 @@ def plotsFromModel(model_name, model_item):
 
     return plot_data
 
-def plotsFromFilename(filename, model_item):
+
+def plotsOfType(model, datatype=Data1D):
     """
-    Returns the list of plots for the item with text=filename in the model
+    Returns the list of plots for the whole model of type `datatype`
+    """
+    assert isinstance(model, QtGui.QStandardItemModel)
+    assert (isinstance(datatype, Data1D) or isinstance(datatype, Data2D))
+
+    plot_data = []
+    # Iterate over model looking for named items
+    for index in range(model.rowCount()):
+        item = model.item(index)
+        data = item.child(0).data()
+        if isinstance(data, datatype):
+            plot_data[item.text()] = data
+        # Going 1 level deeper only
+        for index_2 in range(item.rowCount()):
+            item_2 = item.child(index_2)
+            if item_2 and item_2.isCheckable() and isinstance(item_2.child(0).data, datatype):
+                plot_data[item_2.text()] = item_2.child(0).data()
+
+    return plot_data
+
+
+def plotsFromDisplayName(name, model_item):
+    """
+    Returns the list of plots for the item with text=name in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, str)
+    assert isinstance(name, str)
 
     plot_data = {}
     # Iterate over model looking for named items
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if filename in str(item.text()):
+        if name in str(item.text()):
             # TODO: assure item type is correct (either data1/2D or Plotter)
             plot_data[item] = item.child(0).data()
             # Going 1 level deeper only
@@ -1211,7 +1236,7 @@ def saveData(fp, data):
         objects that can't otherwise be serialized need to be converted
         """
         # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
-        if isinstance(o, (tuple, set)):
+        if isinstance(o, (tuple, set, np.float)):
             content = { 'data': list(o) }
             return add_type(content, type(o))
 
@@ -1359,6 +1384,47 @@ def readDataFromFile(fp):
             logging.info('unable to load %s' % id)
 
     return new_stored_data
+
+def getConstraints(fit_project):
+    """
+    Extracts constraints from *fir_project* dict and returns a dict where keys
+    are the tab name and values are a list of constraints on that tab. The
+    dict can then be passed to the updateFromConstraints method from the
+    fitting perspective to apply the constraints with error checking
+    mechanism
+    """
+    constraint_dict = {}
+    for key, value in fit_project.items():
+        # make sure we dealing with params
+        if 'fit_params' not in value:
+            continue
+        params = value['fit_params']
+        for page in params:
+            if not isinstance(page, dict):
+                continue
+
+            tab_name = None
+            constraint_list = []
+            for param_name, param_value in page.items():
+                # make sure we are dealing with lists
+                if not isinstance(param_value, list):
+                    continue
+                # get the tab name
+                elif param_name == "tab_name":
+                    tab_name = param_value[0]
+                # get parameters
+                elif len(param_value) >= 5:
+                    ioffset = 1 if len(param_value) > 5 else 0
+                    cons = param_value[4+ioffset]
+                    # get the constraint
+                    if cons is not None and len(cons) == 5:
+                        constraint_list.append(cons)
+                else:
+                    continue
+
+            if tab_name and constraint_list:
+                constraint_dict.update({tab_name: constraint_list})
+    return constraint_dict
 
 def readProjectFromSVS(filepath):
     """

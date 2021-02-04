@@ -47,7 +47,7 @@ class PlotterTest(unittest.TestCase):
         """ Adding data """
         self.plotter.data = self.data
 
-        self.assertEqual(self.plotter.data, self.data)
+        self.assertEqual(self.plotter.data[0], self.data)
         self.assertEqual(self.plotter._title, self.data.name)
         self.assertEqual(self.plotter.xLabel, "")
         self.assertEqual(self.plotter.yLabel, "")
@@ -60,7 +60,7 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.plot(hide_error=False)
 
-        self.assertEqual(self.plotter.ax.get_xscale(), 'log')
+        self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertTrue(FigureCanvas.draw_idle.called)
 
         self.plotter.figure.clf()
@@ -73,7 +73,7 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.plot(hide_error=True)
 
-        self.assertEqual(self.plotter.ax.get_yscale(), 'log')
+        self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
         self.assertTrue(FigureCanvas.draw_idle.called)
         self.plotter.figure.clf()
 
@@ -96,14 +96,14 @@ class PlotterTest(unittest.TestCase):
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertEqual(self.plotter.data.ytransform, "y")
+        #self.assertEqual(self.plotter.data[0].ytransform, "y")
         self.assertTrue(FigureCanvas.draw_idle.called)
 
     def testCreateContextMenuQuick(self):
         """ Test the right click menu """
         self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 7)
+        self.assertEqual(len(actions), 8)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
@@ -146,8 +146,8 @@ class PlotterTest(unittest.TestCase):
         self.plotter.xyTransform(xLabel="x", yLabel="log10(y)")
 
         # Assure new plot has correct labels
-        #self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
-        #self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
         # ... and scale
         self.assertEqual(self.plotter.xscale, "linear")
         self.assertEqual(self.plotter.yscale, "log")
@@ -390,8 +390,8 @@ class PlotterTest(unittest.TestCase):
         # See the default labels
         xl = self.plotter.ax.xaxis.label.get_text()
         yl = self.plotter.ax.yaxis.label.get_text()
-        self.assertEqual(xl, "")
-        self.assertEqual(yl, "")
+        self.assertEqual(xl, "$()$")
+        self.assertEqual(yl, "$()$")
 
         # Prepare new data
         data2 = Data1D(x=[1.0, 2.0, 3.0],
@@ -407,6 +407,9 @@ class PlotterTest(unittest.TestCase):
         data2._yunit = "cake"
         error_status = True
         data2.hide_error = error_status
+        data2.custom_color = None
+        data2.symbol = 1
+        data2.markersize = 11
 
         # Replace data in plot
         self.plotter.replacePlot("Test name", data2)
@@ -444,6 +447,48 @@ class PlotterTest(unittest.TestCase):
             self.plotter.onModifyPlot(2)
         self.plotter.figure.clf()
 
+    def testOnToggleLegend(self):
+        """
+        Make sure Legend can be switched on/off
+        """
+        # Prepare new data
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        data2.custom_color = None
+        data2.symbol = 1
+        data2.markersize = 11
+
+        self.plotter.plot(data2)
+
+        self.assertTrue(self.plotter.showLegend)
+        # assure we see the legend
+        self.assertTrue(self.plotter.legend.get_visible())
+
+        # toggle legend
+        self.plotter.onToggleLegend()
+
+        # now we don't see the legend
+        self.assertFalse(self.plotter.legend.get_visible())
+
+        # toggle again
+        self.plotter.onToggleLegend()
+
+        # see the legend again
+        self.assertTrue(self.plotter.legend.get_visible())
+
+        # switch the visibility of the legend
+        self.plotter.showLegend = False
+
+        # see that the legend setting is not done
+        self.plotter.legend.set_visible = MagicMock()
+
+        self.plotter.onToggleLegend()
+        self.plotter.legend.set_visible.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()

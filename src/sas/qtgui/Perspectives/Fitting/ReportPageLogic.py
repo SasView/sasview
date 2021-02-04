@@ -10,8 +10,12 @@ from io import BytesIO
 import urllib.parse
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from bumps import options
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.sasview import __version__ as SASVIEW_VERSION
+from sasmodels import __version__ as SASMODELS_VERSION
+
 
 class ReportPageLogic(object):
     """
@@ -71,6 +75,7 @@ class ReportPageLogic(object):
         current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
         filename = self.data.filename
         modelname = self.kernel_module.id
+        optimizer = options.FIT_CONFIG.selected_fitter.name
         if hasattr(self.data, 'xmin'):
             qrange_min = self.data.xmin
             qrange_max = self.data.xmax
@@ -82,17 +87,20 @@ class ReportPageLogic(object):
         title = title + " [" + current_time + "]"
         title_name = HEADER % title
         report = title_name
-        report = report + CENTRE % "File name:{}\n".format(filename)
-        report = report + CENTRE % "Model name:{}\n".format(modelname)
-        report = report + CENTRE % "Q Range: {}\n".format(qrange)
+        report += CENTRE % "File name: {}\n".format(filename)
+        report += CENTRE % "SasView version: {}\n".format(SASVIEW_VERSION)
+        report += CENTRE % "SasModels version: {}\n".format(SASMODELS_VERSION)
+        report += CENTRE % "Fit optimizer used: {}\n".format(optimizer)
+        report += CENTRE % "Model name: {}\n".format(modelname)
+        report += CENTRE % "Q Range: {}\n".format(qrange)
         chi2_repr = GuiUtils.formatNumber(self.parent.chi2, high=True)
-        report = report + CENTRE % "Chi2/Npts:{}\n".format(chi2_repr)
+        report += CENTRE % "Chi2/Npts: {}\n".format(chi2_repr)
 
         return report
 
     def buildPlotsForReport(self, images):
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
-        html = FEET_1 % self.data.filename
+        html = FEET_1 % self.data.name
 
         for fig in images:
             canvas = FigureCanvas(fig)
@@ -128,6 +136,11 @@ class ReportPageLogic(object):
         for value in self.params:
             try:
                 par_name = value[1]
+                par_dispersion_type = ""
+                if 'Distribution of' in par_name:
+                    par_name_original = par_name.replace('Distribution of ', '')
+                    par_dispersion_type = self.kernel_module.dispersion[
+                        par_name_original.strip()]['type']
                 par_fixed = not value[0]
                 par_value = value[2]
                 par_unit = value[7]
@@ -138,6 +151,8 @@ class ReportPageLogic(object):
                 else:
                     error = plus_minus + str(value[4][1])
                 param = par_name + " = " + par_value + error + " " + par_unit
+                if par_dispersion_type:
+                    param += " Function: " + par_dispersion_type
             except IndexError as ex:
                 # corrupted model. Complain and skip the line
                 logging.error("Error in parsing parameters: "+str(ex))
@@ -162,7 +177,7 @@ class ReportPageLogic(object):
 
         # current_plots = list of graph names of currently shown plots
         # which are related to this dataset
-        current_plots = [name for name in shown_plot_names if PlotHelper.plotById(name).data.id in plot_ids]
+        current_plots = [name for name in shown_plot_names if PlotHelper.plotById(name).data[0].id in plot_ids]
 
         for name in current_plots:
             # get the plotter object first

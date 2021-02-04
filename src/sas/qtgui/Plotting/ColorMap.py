@@ -213,7 +213,7 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         """
         Call ColorbarBase with current values, effectively redrawing the widget
         """
-        self.cb = mpl.colorbar.ColorbarBase(self.ax1, cmap=self._cmap,
+        self.cb = mpl.colorbar.ColorbarBase(self.ax1, cmap=mpl.pyplot.get_cmap(self._cmap),
                                             norm=self._norm,
                                             orientation='horizontal')
         self.cb.set_label('Color map range')

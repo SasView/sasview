@@ -1,3 +1,4 @@
+import os
 import unittest
 import sys
 from PyQt5 import QtGui
@@ -16,7 +17,7 @@ The tests can be run with ``python GUITests.py``, or
 To get more verbose console output (recommended), use ``python GUITests.py -v``
 """
 
-# Llist of all suite names. Every time a new suite is added, its name should
+# List of all suite names. Every time a new suite is added, its name should
 # also be added here
 ALL_SUITES = [
     'calculatorsSuite',
@@ -24,7 +25,9 @@ ALL_SUITES = [
     'fittingSuite',
     'plottingSuite',
     'utilitiesSuite',
-    'perspectivesSuite',
+    'corfuncPerspectiveSuite',
+    'invariantPerspectiveSuite',
+    'inversionPerspectiveSuite',
     ]
 
 # Prepare the general QApplication instance
@@ -73,6 +76,7 @@ from Utilities.UnitTesting import PluginDefinitionTest
 from Utilities.UnitTesting import TabbedModelEditorTest
 from Utilities.UnitTesting import AddMultEditorTest
 from Utilities.UnitTesting import ReportDialogTest
+from Utilities.UnitTesting import FileConverterTest
 
 # Unit Testing
 from UnitTesting import TestUtilsTest
@@ -91,6 +95,7 @@ from Perspectives.Fitting.UnitTesting import ConstraintWidgetTest
 
 #  Invariant
 from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
+from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
 
 #  Inversion
 from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
@@ -145,6 +150,7 @@ def utilitiesSuite():
         unittest.makeSuite(TabbedModelEditorTest.TabbedModelEditorTest,'test'),
         unittest.makeSuite(AddMultEditorTest.AddMultEditorTest, 'test'),
         unittest.makeSuite(ReportDialogTest.ReportDialogTest,     'test'),
+        unittest.makeSuite(FileConverterTest.FileConverterTest, 'test'),
         )
     return unittest.TestSuite(suites)
 
@@ -181,10 +187,33 @@ def perspectivesSuite():
     suites = (
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,  'test'),
         #  Inversion
         unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
         #  Corfunc
         unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def invariantPerspectiveSuite():
+    suites = (
+        #  Invariant only
+        unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,  'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def corfuncPerspectiveSuite():
+    suites = (
+        #  Corfunc only
+        unittest.makeSuite(CorfuncTest.CorfuncTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
+
+def inversionPerspectiveSuite():
+    suites = (
+        #  Inversion only
+        unittest.makeSuite(InversionPerspectiveTest.InversionTest, 'test'),
         )
     return unittest.TestSuite(suites)
 
@@ -227,3 +256,5 @@ if __name__ == "__main__":
             for r in errors[1]:
                     print("\nSuite: %s had following failures:\n %s : %s"%(suite, r[0], r[1]))
             print("=================================================")
+        print("Exiting with error")
+        os._exit(1)

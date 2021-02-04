@@ -268,6 +268,13 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="chkSwap">
+           <property name="text">
+            <string>Swap data</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item row="2" column="2">
@@ -402,6 +409,9 @@
        </item>
        <item row="1" column="0">
         <widget class="QTreeView" name="freezeView">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
          <attribute name="headerVisible">
           <bool>false</bool>
          </attribute>
@@ -510,6 +520,24 @@
   <action name="actionFreezeResults">
    <property name="text">
     <string>Freeze Results</string>
+   </property>
+  </action>
+  <action name="actionSelect">
+   <property name="text">
+    <string>Select items</string>
+   </property>
+  </action>
+  <action name="actionDeselect">
+   <property name="text">
+    <string>Deselect items</string>
+   </property>
+  </action>
+  <action name="actionChangeName">
+   <property name="text">
+    <string>Change Name</string>
+   </property>
+   <property name="toolTip">
+    <string>Change Display Name</string>
    </property>
   </action>
  </widget>

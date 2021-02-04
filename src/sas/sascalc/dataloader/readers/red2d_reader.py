@@ -9,7 +9,6 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 import os
-import math
 import time
 
 import numpy as np
@@ -225,13 +224,12 @@ class Reader(FileReader):
             dqx_data = data_point[(4 + ver)]
         if col_num > (5 + ver):
             dqy_data = data_point[(5 + ver)]
-        #if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
+        # Column '6 + ver' is the shadow factor value. A separate mask column
+        #   was added to account for self-drawn masks.
+        # if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
+        if col_num > (7 + ver):
+            mask = np.invert(np.asarray(data_point[(7 + ver)], dtype=bool))
         q_data = np.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
-
-        # Extra protection(it is needed for some data files):
-        # If all mask elements are False, put all True
-        if not mask.any():
-            mask[mask == False] = True
 
         # Store limits of the image in q space
         xmin = np.min(qx_data)
@@ -239,30 +237,21 @@ class Reader(FileReader):
         ymin = np.min(qy_data)
         ymax = np.max(qy_data)
 
-        ## calculate the range of the qx and qy_data
-        x_size = math.fabs(xmax - xmin)
-        y_size = math.fabs(ymax - ymin)
+        # Find unique Qx and Qy values for data binning and visualization
+        # len(x_bins) * len(y_bins) ~= len(qx_data) ~= len(qy_data)
+        x_bins = np.unique(qx_data)
+        y_bins = np.unique(qy_data)
+        # For non-uniform qx_data and/or qy_data
+        #  Cases: Rotated detectors, floating point variations
+        if round(len(x_bins) * len(y_bins) / len(qx_data)) >= 2:
+            # qx_data increases along rows => travel along a single pixel line
+            num_qx = np.argmax(np.hstack((qx_data[1:] < qx_data[:-1], True)))
+            x_bins = qx_data[:num_qx + 1]
+            # qy_data increases along columns => transpose qx_data shape
+            qy = np.reshape(qy_data, (len(qx_data)//len(x_bins), len(x_bins)))
+            y_bins = np.transpose(qy)[0].tolist()
 
-        # calculate the number of pixels in the each axes
-        npix_y = math.floor(math.sqrt(len(data)))
-        npix_x = math.floor(len(data) / npix_y)
-
-        # calculate the size of bins
-        xstep = x_size / (npix_x - 1)
-        ystep = y_size / (npix_y - 1)
-
-        # store x and y axis bin centers in q space
-        x_bins = np.arange(xmin, xmax + xstep, xstep)
-        y_bins = np.arange(ymin, ymax + ystep, ystep)
-
-        # get the limits of q values
-        xmin = xmin - xstep / 2
-        xmax = xmax + xstep / 2
-        ymin = ymin - ystep / 2
-        ymax = ymax + ystep / 2
-
-        #Store data in outputs
-        #TODO: Check the lengths
+        # Store data in outputs
         self.current_dataset.data = data
         if (err_data == 1).all():
             self.current_dataset.err_data = np.sqrt(np.abs(data))
@@ -295,22 +284,18 @@ class Reader(FileReader):
         # optional data: if all of dq data == 0, do not pass to output
         if len(dqx_data) == len(qx_data) and dqx_data.any() != 0:
             # if no dqx_data, do not pass dqy_data.
-            #(1 axis dq is not supported yet).
+            # (1 axis dq is not supported yet).
             if len(dqy_data) == len(qy_data) and dqy_data.any() != 0:
                 # Currently we do not support dq parr, perp.
-                # tranfer the comp. to cartesian coord. for newer version.
+                # transfer the comp. to cartesian coord. for newer version.
                 if ver != 1:
                     diag = np.sqrt(qx_data * qx_data + qy_data * qy_data)
                     cos_th = qx_data / diag
                     sin_th = qy_data / diag
-                    self.current_dataset.dqx_data = np.sqrt((dqx_data * cos_th) * \
-                                                 (dqx_data * cos_th) \
-                                                 + (dqy_data * sin_th) * \
-                                                  (dqy_data * sin_th))
-                    self.current_dataset.dqy_data = np.sqrt((dqx_data * sin_th) * \
-                                                 (dqx_data * sin_th) \
-                                                 + (dqy_data * cos_th) * \
-                                                  (dqy_data * cos_th))
+                    self.current_dataset.dqx_data = np.sqrt(
+                        (dqx_data * cos_th)**2 + (dqy_data * sin_th)**2)
+                    self.current_dataset.dqy_data = np.sqrt(
+                        (dqx_data * sin_th)**2 + (dqy_data * cos_th)**2)
                 else:
                     self.current_dataset.dqx_data = dqx_data
                     self.current_dataset.dqy_data = dqy_data

@@ -13,6 +13,8 @@ Version 4.2 or later)
 
 :download:`Old Tutorial <sasview/Tutorial.pdf>`
 
+:download:`Subtracting a Model Calculation from Experimental Data <sasview/subtracting_a_model_calculation_from_real_data_v4x.pdf>`
+
 The following tutorials have been written for Version 5.x
 
 :download:`Getting Started with Sasview <sasview/getting_started_with_sasview_v5.pdf>`
@@ -20,5 +22,7 @@ The following tutorials have been written for Version 5.x
 :download:`Basic 1D Fitting in Sasview <sasview/basic_1d_fitting_in_sasview_v5.pdf>`
 
 :download:`Simultaneous 1D Fitting in Sasview <sasview/simultaneous_1d_fitting_in_sasview_v5.pdf>`
+
+:download:`P(r) Inversion Analysis in Sasview <sasview/pr_inversion_analysis_in_sasview_v5.pdf>`
 
 :download:`Correlation Function Analysis in SasView <sasview/correlation_function_analysis_in_sasview_v5.pdf>`

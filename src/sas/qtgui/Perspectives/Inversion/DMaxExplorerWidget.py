@@ -49,6 +49,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
         self.plot = PlotterWidget(self, self)
         self.hasPlot = False
+        self.plot.showLegend = False
         self.verticalLayout.insertWidget(0, self.plot)
 
         # Let's choose the Standard Item Model.
@@ -119,7 +120,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         try:
             dmin = float(self.model.item(W.DMIN).text())
             dmax = float(self.model.item(W.DMAX).text())
-            npts = float(self.model.item(W.NPTS).text())
+            npts = int(self.model.item(W.NPTS).text())
             xs = np.linspace(dmin, dmax, npts)
         except ValueError as e:
             msg = ("An input value is not correctly formatted. Please check {}"
@@ -166,7 +167,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         elif plotter == "I(Q=0)":
             ys = iq0
             y_label = "I(q=0)"
-            y_unit = "\\AA^{-1}"
+            y_unit = "cm^{-1}"
         elif plotter == "Rg":
             ys = rg
             y_label = "R_g"
@@ -178,7 +179,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         elif plotter == "Background":
             ys = bck
             y_label = "Bckg"
-            y_unit = "\\AA^{-1}"
+            y_unit = "cm^{-1}"
         elif plotter == "Positive Fraction":
             ys = pos
             y_label = "P^+"

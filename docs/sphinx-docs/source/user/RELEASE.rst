@@ -1,3 +1,5 @@
+.. RELEASE.rst
+
 Release Notes
 =============
 
@@ -9,14 +11,199 @@ Release Notes
 Features
 ========
 
-New in Version 5.0
+New in Version 5.0.3
 --------------------
-This is a new version of SasView featuring new and enhanced GUI, back-end calculations, GUI separation, optimization of calculations and other improvements. This release also includes beta (decoupling) approximation for intensity calculation.
+This is a point release which fixes several issues, but in particular:
+
+* a serious bug in the resolution smearing interface which was applying
+  a single value of $dq/q$ to all data points even if $dq/q$ was provided in
+  the data file;
+* a very long-standing bug in the Invariant Analysis interface which was
+  computing specific surface ($Sv$) values that were *twice* what they should
+  have been (The opportunity has also been taken to completely overhaul the
+  documentation for the Invariant Analysis at the same time);
+* inconsistent and incorrect behaviour of the 'is fittable' checkbox
+  for polydispersities which could lead to unrealistic PD values being
+  returned during fitting.
+
+New features/improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^
+* sasview # 1622: RC1 problems with installation/running on Windows
+* sasview # 1565: (ESS_GUI) Report dialog enhancements
+* sasview # 1564: Enhancements to Report Results
+* sasview # 1552: Enable mpl toolbar
+  
+There are also several usability improvements, including better handling of
+constraints between datasets for simultaneous fits, and control over plots.
+
+With this release Windows users are no longer guided to install SasView
+to C:\Program Files. This had started to become an issue as some IT providers
+tightened their security settings, particularly under Windows 10, either
+causing installation to fail (unless the user could elevate permissions), or
+prevent SasView starting ('failed to execute script sasview'). The installation
+process now prompts for the type of installation required, and defaults to
+C:\SasView-x.x.x
+
+Bug fixes
+^^^^^^^^^
+* Fixes sasview  # 1632: ESS_GUI Documentation: How to test a plugin model needs updating
+* Fixes sasview  # 1623: 5.0.3 RC1 crashing during fitting
+* Fixes sasview  # 1606: Invariant does not report the total invariant
+* Fixes sasview  # 1599: ESS_GUI: fix data test
+* Fixes sasview  # 1598: ESS_GUI: allow data replacement on a fit page
+* Fixes sasview  # 1579: Save inversion state in project and analysis files (ESS_GUI)
+* Fixes sasview  # 1578: Changing perspective closes the perspective
+* Fixes sasview  # 1567: Ess gui 1554 slicer
+* Fixes sasview  # 1560: set the sasmodels dll cache directory in sasview startup
+* Fixes sasview  # 1556: Fixed the edge cases and added a beefy unit test. #1546
+* Fixes sasview  # 1554: ESS_GUI: annulus slicer not opening
+* Fixes sasview  # 1553: Ess gui 1547 smearing
+* Fixes sasview  # 1550: Ess gui 1522 poly check
+* Fixes sasview  # 1548: Sasview 5.0.2 "file converter" tool does not open
+* Fixes sasview  # 1547: Resolution is incorrectly handled in 5.x
+* Fixes sasview  # 1546: Plotting an already plotted dataset causes the new plot to only show model
+* Fixes sasview  # 1543: SasView application window needs to be scrollable
+* Fixes sasview  # 1538: Constrained fitting doesn't work when setting min/max for polydispersity
+* Fixes sasview  # 1536: ESS GUI: Paste Params not activated until Copy Params has been used
+* Fixes sasview  # 1535: ESS_GUI: Existing common parameters not preserved between models in 5.x
+* Fixes sasview  # 1534: ESS_GUI: Something strange with 5.x and the .sasview folder
+* Fixes sasview  # 1529: ESS GUI Corfunc: Input area is not scrollable in Corfunc Perspective in 5.0.2
+* Fixes sasview  # 1527: NXcanSAS definition changes
+* Fixes sasview  # 1523: Plot legend visibility toggle needs to be restored
+* Fixes sasview  # 1522: Incorrect behavior of "fittable" checkbox in polydispersity tab
+* Fixes sasview  # 1490: Problem using constraints in 5.x
+* Fixes sasview  # 1456: 5.0.1 constraints between FitPages stop working
+* Fixes sasview  # 1414: No pan function in plot windows in 5.0.1
+* Fixes sasview  # 1002: canSAS XML should save transmission spectrum
+* Fixes sasview  #  726: Check default value of cansas_version property in CansasReader class
+* Fixes sasmodels # 415: Suppress pyopencl caching bug for Intel on Mac
+* Fixes sasmodels # 414: sasview saying unknown distribution option 'test_requires'
+* Fixes sasmodels # 404: delay the inevitable a little longer and reenable python 2.7 support
+* Fixes sasmodels # 402: sasview 1534: use source hash as part of dll name to avoid collisions
+* Fixes sasmodels # 401: warn if ER() is ignored
+* Fixes sasmodels # 365: OpenCL errors on macbook pro 2017
+
+Known Issues
+^^^^^^^^^^^^
+At this time, and unlike version 4.x, only fitting and P(r) inversion sessions can be saved as project files.
+
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+
+[sasview](https://github.com/SasView/sasview/milestones)
+
+[sasmodels](https://github.com/SasView/sasmodels/milestones)
+
+
+New in Version 5.0.2
+--------------------
+This is a point release which fixes several issues reported in version 5.0.1, however
+there are also some new features:
+
+New features/improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^
+* sasview  # 1480: Added enumeration of plots in the Windows menu, with raising/setting
+* sasview  # 1355: SasView 5.0 lacks file conversion option in tool menu
+* sasmodels # 390: Re-describe Source intensity in model parameter tables
+* sasmodels # 382: Doc gen speedup, improved random model generation and minor fixes
+* sasmodels # 211: Reparameterize existing model.
+
+Bug Fixes
+^^^^^^^^^
+* Fixes sasview  # 1501: Update 5.x documentation for Corfunc
+* Fixes sasview  # 1499: Ess gui 1355 file converter
+* Fixes sasview  # 1484: SasView 5 (Ubuntu) - Need to change colors in Data operation combobox
+* Fixes sasview  # 1482: 4.x: Check packages comparison to YAML files
+* Fixes sasview  # 1481: Fix for Fit Panel based Plot command for single-data/multiple fit tab
+* Fixes sasview  # 1479: linspace errors
+* Fixes sasview  # 1476: Quick Plot in Data Explorer not working for 1D data
+* Fixes sasview  # 1463: Dmax explorer : pressing enter closes window
+* Fixes sasview  # 1460: resolution setting not persistent in theory mode of 5.0.1
+* Fixes sasview  # 1459: dy = 1 for every point of Freeze theory curves (and saved as data file) in 5.0.
+* Fixes sasview  # 1455: 5.0.1 load project generates a second FitPage1
+* Fixes sasview  # 1454: 5.0.1 sending same data to more than one fit page - plotting issues
+* Fixes sasview  # 1444: ESS GUI: Warn user when data set fully masked
+* Fixes sasview  # 1431: When loading plugin model with a spurious unicode character plugin editor crashes
+* Fixes sasview  # 1419: Could we improve stepping through graph windows in 5.x
+* Fixes sasview  # 1138: Check package versions in yaml files and setup.py
+* Fixes sasview  #  697: Update check_packages to flag required package versions
+* Fixes sasmodels # 383: Model docs build failing on linspace error
+* Fixes sasmodels # 381: reparameterize has a bug (at least in v5)
+
+Known Issues
+^^^^^^^^^^^^
+A very long-standing error has been identified in the Invariant Analysis
+perspective. The value of the specific surface $Sv$ that is being returned
+is in fact *twice* the value that it should be. Work is underway to correct this
+and some other deficiencies in the operation of the perspective, and to significantly
+enhance the invariant documentation.
+
+Also, at this time, and unlike version 4.x, only fitting sessions can be saved as project files.
+
+
+New in Version 5.0.1
+--------------------
+This is a point release which fixes several issues reported in version 5.0.0.
+
+Bug Fixes
+^^^^^^^^^
+* Fixes sasview # 1452: Clarified issue with Add/Multiply operation for plugin models
+* Fixes sasview # 1441: Show SLD profile plot - linear not log
+* Fixes sasview # 1431: When loading plugin model with unicode character, plugin editor crashes
+* Fixes sasview # 1417: Ambiguous labeling in Resolution tab
+* Fixes sasview # 1413: Corfunc is not working well
+* Fixes sasview # 1412: Windows installer shortcut is misnamed
+* Fixes sasview # 1410: Issues with multi-core shell model
+* Fixes sasview # 1374: Data Operations not including all datasets
+* Fixes sasview # 1371: Multiple issues with fit plot lifetimes
+* Fixes sasview # 1361: Data with negative values not showing on linear scale
+* Fixes sasview # 1357: Q-range in the Correlation Function can be set by dragging
+* Fixes sasview # 1356: Load in Mask Data column from NCNR 2D Data
+* Fixes sasview # 1356: Change default state of dependent plots to unchecked
+* Fixes sasview # 1350: Multiple issues with the 2D slicer
+* Fixes sasview # 1339: Problem with plotting of the Correlation Function
+* Fixes sasview # 1337: Automatically resizing plot legends
+* Fixes sasview # 1337: Non-resizing plot legend on OSX
+* Fixes sasview # 1336: Issues with closing and reopening fit plots
+* Fixes sasview # 1327: Append functionality too generous
+* Fixes sasview # 1325: Changing model resets the Q-range
+* Fixes sasview # 1293: Cannot model SESANS Data in GUI
+* Fixes sasview # 1086: Added separate thread for OpenCL tests
+* Fixes sasview #  937: Set theory and data to the same Vmin/Vmax for 2D plots
+* Fixes sasview #  690: Set reasonable min/max on polydispersity values for fitting
+
+Known Issues
+^^^^^^^^^^^^
+A problem has been identified in Version 4.2.2 which also affects versions
+5.0.0 and 5.0.1. The Easy Add/Multiply Editor dialog should not be used to
+combine a plugin model with a built-in model, or to combine two plugin models.
+In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
+Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
+If it is necessary to generate a plugin model from more than two built-in models,
+please edit the plugin model .py file directly and specify the combination of built-in
+models directly. For example::
+
+     from sasmodels.core import load_model_info
+     from sasmodels.sasview_model import make_model_from_info
+     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info.name = 'MyBigPluginModel'
+     model_info.description = 'For fitting pores in crystalline framework'
+     Model = make_model_from_info(model_info)
+
+
+New in Version 5.0
+------------------
+This is a new version of SasView featuring new and enhanced GUI, back-end calculations,
+GUI separation, optimization of calculations and other improvements. This release also
+includes beta (decoupling) approximation for intensity calculation.
+
 The release is based on Python 3 and Qt5/PyQt5.
-We recommend that you avoid using installation folder paths which contain spaces, non-Latin characters or characters not available on a standard keyboard.
+
+We recommend that you avoid using installation folder paths which contain spaces, non-Latin
+characters or characters not available on a standard keyboard.
 
 Changes/Improvements from 5.0.beta2
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Beta (decoupling) approximation has been introduced
 * Stop fit button added to Constrained and Simultaneous Fitting
 * Plotting has been improved
@@ -33,10 +220,10 @@ Documentation
 * Tutorials have been adapted to match 5.0 interface
 
 Known Issues
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^
 All the known bugs/feature requests can be found in the issues on github.
 
-[sasview](https://github.com/SasView/sasview/milestone/9)
+[sasview](https://github.com/SasView/sasview/milestones)
 
 
 New in Version 4.2.0
@@ -155,7 +342,7 @@ Bug Fixes
 * Fixes # 776: angular dispersity
 * Fixes # 784: Add 3D integral to Correlation Function analysis
 * Fixes # 786: core_shell_parallelepiped 1-D model is incorrect
-* Fixes # 818: �report button� followed by �save� makes an empty pdf file???
+* Fixes # 818: 'report button' followed by 'save' makes an empty pdf file???
 * Fixes # 830: Check compliance of loader against NXcanSAS-1.0 release
 * Fixes # 838: Fix model download from marketplace
 * Fixes # 848: can't save analysis when only one fit page
@@ -771,18 +958,19 @@ Downloading and Installing
           installing the new version UNLESS you are installing SasView to 
           versioned folders.
 
-.. note:: The easiest approach to setting up the proper environment to
-          build from source is to use Conda.  Instructions for setting up
-          and using Conda can be found at http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
+The easiest approach to setting up the proper environment to build from source 
+is to use Conda. Instructions for setting up and using Conda can be found at 
+http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
                     
-.. note:: Much more information is available at www.sasview.org under 
-          links/downloads. In particular, look in the 'For Developers' section. 
-          Also have a look at http://trac.sasview.org/
+Additional information is available at http://www.sasview.org/download/ under 
+the 'For Developers' section, and on our Trac site at http://trac.sasview.org/
 
 System Requirements
 -------------------
-* Python version >= 2.5 and < 3.0 should be running on the system
-* We currently use Python 2.7
+* For SasView 4.x and earlier: A Python version >= 2.5 and < 3.0 should be running 
+  on the system. We currently use Python 2.7
+* For SasView 5.x: A Python version > 3.0 should be running on the system. We 
+  currently use Python 3.6
 
 Package Dependencies
 --------------------
@@ -826,7 +1014,39 @@ Known Issues
 ============
 
 A full list of known bugs and feature requests by release version that 
-users may wish to be aware of can be viewed at http://trac.sasview.org/report/3
+users may wish to be aware of can be viewed at the following links:
+
+[sasview](https://github.com/SasView/sasview/milestones)
+
+[sasmodels](https://github.com/SasView/sasmodels/milestones)
+
+All versions upto and including 5.0.2 - All systems
+---------------------------------------------------
+A very long-standing error has been identified in the Invariant Analysis
+perspective. The value of the specific surface $Sv$ that is being returned
+is in fact *twice* the value that it should be.
+
+5.0.0 / 5.0.1 / 5.0.2 - All systems
+-----------------------------------
+In these versions, and unlike version 4.x, only fitting sessions can be saved as project files.
+
+4.2.2 / 5.0.0 / 5.0.1 - All systems
+-----------------------------------
+A problem has been identified in Version 4.2.2 which also affects versions
+5.0.0 and 5.0.1. The Easy Add/Multiply Editor dialog should not be used to
+combine a plugin model with a built-in model, or to combine two plugin models.
+In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
+Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
+If it is necessary to generate a plugin model from more than two built-in models,
+please edit the plugin model .py file directly and specify the combination of
+built-in models directly. For example::
+
+     from sasmodels.core import load_model_info
+     from sasmodels.sasview_model import make_model_from_info
+     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info.name = 'MyBigPluginModel'
+     model_info.description = 'For fitting pores in crystalline framework'
+     Model = make_model_from_info(model_info)
 
 4.2.0 - All systems
 -------------------
@@ -964,7 +1184,7 @@ to all developer and user information, tools and resources.
 
 Frequently Asked Questions
 ==========================
-http://www.sasview.org/faq.html
+http://www.sasview.org/faq/
 
 
 Installer Download Website

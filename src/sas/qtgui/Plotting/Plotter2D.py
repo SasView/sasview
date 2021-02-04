@@ -1,15 +1,9 @@
 import copy
 import numpy
 import functools
-import logging
 
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-
-
-import matplotlib as mpl
-DEFAULT_CMAP = mpl.cm.jet
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -24,7 +18,6 @@ from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
-from sas.qtgui.Plotting.Binder import BindArtist
 
 # TODO: move to sas.qtgui namespace
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
@@ -33,8 +26,12 @@ from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
 
+import matplotlib as mpl
+DEFAULT_CMAP = mpl.cm.jet
+
 # Minimum value of Z for which we will present data.
 MIN_Z = -32
+
 
 class Plotter2DWidget(PlotterBase):
     """
@@ -52,8 +49,6 @@ class Plotter2DWidget(PlotterBase):
         # Reference to the current slicer
         self.slicer = None
         self.slicer_widget = None
-        # Create Artist and bind it
-        self.connect = BindArtist(self.figure)
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -64,10 +59,17 @@ class Plotter2DWidget(PlotterBase):
     def data(self):
         return self._data
 
+    @property
+    def data0(self):
+        return self._data[0]
+
     @data.setter
     def data(self, data=None):
         """ data setter """
-        self._data = data
+        if self._data:
+            self._data[0] = data
+        else:
+            self._data.append(data)
         self.qx_data = data.qx_data
         self.qy_data = data.qy_data
         self.xmin = data.xmin
@@ -88,6 +90,7 @@ class Plotter2DWidget(PlotterBase):
         """
         # Assing data
         if isinstance(data, Data2D):
+            # no append, since there can only be one data in Data2D plot
             self.data = data
 
         if not self._data:
@@ -97,7 +100,7 @@ class Plotter2DWidget(PlotterBase):
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
 
         # Prepare and show the plot
-        self.showPlot(data=self.data.data,
+        self.showPlot(data=self.data0.data,
                       qx_data=self.qx_data,
                       qy_data=self.qy_data,
                       xmin=self.xmin,
@@ -133,7 +136,6 @@ class Plotter2DWidget(PlotterBase):
 
         return (zmin_temp, zmax_temp)
 
-
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -143,11 +145,11 @@ class Plotter2DWidget(PlotterBase):
         self.contextMenu.addSeparator()
         self.actionDataInfo = self.contextMenu.addAction("&DataInfo")
         self.actionDataInfo.triggered.connect(
-             functools.partial(self.onDataInfo, self.data))
+             functools.partial(self.onDataInfo, self.data0))
 
         self.actionSavePointsAsFile = self.contextMenu.addAction("&Save Points as a File")
         self.actionSavePointsAsFile.triggered.connect(
-             functools.partial(self.onSavePoints, self.data))
+             functools.partial(self.onSavePoints, self.data0))
         self.contextMenu.addSeparator()
 
         self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
@@ -167,15 +169,17 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
             self.actionClearSlicer.triggered.connect(self.onClearSlicer)
-            if self.slicer.__class__.__name__ != "BoxSumCalculator":
-                self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
-                self.actionEditSlicer.triggered.connect(self.onEditSlicer)
+        self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
+        self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Toggle Linear/Log Scale")
         self.actionChangeScale.triggered.connect(self.onToggleScale)
+        self.contextMenu.addSeparator()
+        self.actionToggleMenu = self.contextMenu.addAction("Toggle Navigation Menu")
+        self.actionToggleMenu.triggered.connect(self.onToggleMenu)
 
     def createContextMenuQuick(self):
         """
@@ -215,15 +219,21 @@ class Plotter2DWidget(PlotterBase):
         self.slicer.clear()
         self.canvas.draw()
         self.slicer = None
+        if self.slicer_widget:
+            self.slicer_widget.setModel(None)
+
+    def getActivePlots(self):
+        ''' utility method for manager query of active plots '''
+        return self.manager.active_plots
 
     def onEditSlicer(self):
         """
-        Present a small dialog for manipulating the current slicer
+        Present a dialog for manipulating the current slicer
         """
-        assert self.slicer
         # Only show the dialog if not currently shown
         if self.slicer_widget:
             return
+
         def slicer_closed():
             # Need to disconnect the signal!!
             self.slicer_widget.closeWidgetSignal.disconnect()
@@ -231,10 +241,16 @@ class Plotter2DWidget(PlotterBase):
             # reset slicer_widget on "Edit Slicer Parameters" window close
             self.slicer_widget = None
 
-        self.param_model = self.slicer.model()
+        self.param_model = None
+        validator = None
+        if self.slicer is not None and not isinstance(self.slicer, BoxSumCalculator):
+            self.param_model = self.slicer.model()
+            validator = self.slicer.validate
         # Pass the model to the Slicer Parameters widget
-        self.slicer_widget = SlicerParameters(model=self.param_model,
-                                              validate_method=self.slicer.validate)
+        self.slicer_widget = SlicerParameters(self, model=self.param_model,
+                                              active_plots=self.getActivePlots(),
+                                              validate_method=validator,
+                                              communicator=self.manager.communicator)
         self.slicer_widget.closeWidgetSignal.connect(slicer_closed)
         # Add the plot to the workspace
         self.slicer_subwindow = self.manager.parent.workspace().addSubWindow(self.slicer_widget)
@@ -246,41 +262,41 @@ class Plotter2DWidget(PlotterBase):
         Calculate the circular average and create the Data object for it
         """
         # Find the best number of bins
-        npt = numpy.sqrt(len(self.data.data[numpy.isfinite(self.data.data)]))
+        npt = numpy.sqrt(len(self.data0.data[numpy.isfinite(self.data0.data)]))
         npt = numpy.floor(npt)
         # compute the maximum radius of data2D
-        self.qmax = max(numpy.fabs(self.data.xmax),
-                        numpy.fabs(self.data.xmin))
-        self.ymax = max(numpy.fabs(self.data.ymax),
-                        numpy.fabs(self.data.ymin))
+        self.qmax = max(numpy.fabs(self.data0.xmax),
+                        numpy.fabs(self.data0.xmin))
+        self.ymax = max(numpy.fabs(self.data0.ymax),
+                        numpy.fabs(self.data0.ymin))
         self.radius = numpy.sqrt(numpy.power(self.qmax, 2) + numpy.power(self.ymax, 2))
         #Compute beam width
         bin_width = (self.qmax + self.qmax) / npt
         # Create data1D circular average of data2D
         circle = CircularAverage(r_min=0, r_max=self.radius, bin_width=bin_width)
-        circ = circle(self.data)
+        circ = circle(self.data0)
         dxl = circ.dxl if hasattr(circ, "dxl") else None
         dxw = circ.dxw if hasattr(circ, "dxw") else None
 
         new_plot = Data1D(x=circ.x, y=circ.y, dy=circ.dy, dx=circ.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = new_plot.title = "Circ avg " + self.data.name
-        new_plot.source = self.data.source
+        new_plot.name = new_plot.title = "Circ avg " + self.data0.name
+        new_plot.source = self.data0.source
         new_plot.interactive = True
-        new_plot.detector = self.data.detector
+        new_plot.detector = self.data0.detector
 
         # Define axes if not done yet.
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        if hasattr(self.data, "scale") and \
-                    self.data.scale == 'linear':
+        if hasattr(self.data0, "scale") and \
+                    self.data0.scale == 'linear':
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "normalized")
         else:
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.group_id = "2daverage" + self.data.name
-        new_plot.id = "Circ avg " + self.data.name
+        new_plot.group_id = "2daverage" + self.data0.name
+        new_plot.id = "Circ avg " + self.data0.name
         new_plot.is_data = True
 
         return new_plot
@@ -304,7 +320,7 @@ class Plotter2DWidget(PlotterBase):
         """
         Update circular averaging plot on Data2D change
         """
-        if not hasattr(self,'_item'): return
+        if not hasattr(self, '_item'): return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
@@ -312,12 +328,12 @@ class Plotter2DWidget(PlotterBase):
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
         if plots is None: return
-        ca_caption = '2daverage'+self.data.name
+        ca_caption = '2daverage' + self.data0.name
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
             if plot.group_id is None: continue
-            if ca_caption in plot.group_id: has_plot=True
+            if ca_caption in plot.group_id: has_plot = True
         # return prematurely if no circular average plot found
         if not has_plot: return
 
@@ -329,11 +345,7 @@ class Plotter2DWidget(PlotterBase):
         # Show the new plot, if already visible
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
-        self.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
-
-        # Show the plot
-
-    def setSlicer(self, slicer):
+    def setSlicer(self, slicer, reset=True):
         """
         Clear the previous slicer and create a new one.
         slicer: slicer class to create
@@ -344,15 +356,15 @@ class Plotter2DWidget(PlotterBase):
         # Create a new slicer
         self.slicer_z += 1
         self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
-        self.ax.set_ylim(self.data.ymin, self.data.ymax)
-        self.ax.set_xlim(self.data.xmin, self.data.xmax)
+        self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
+        self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
         # Draw slicer
         self.figure.canvas.draw()
         self.slicer.update()
 
         # Reset the model on the Edit slicer parameters widget
         self.param_model = self.slicer.model()
-        if self.slicer_widget:
+        if self.slicer_widget and reset:
             self.slicer_widget.setModel(self.param_model)
 
     def onSectorView(self):
@@ -376,8 +388,8 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z += 1
         self.slicer = BoxSumCalculator(self, self.ax, zorder=self.slicer_z)
 
-        self.ax.set_ylim(self.data.ymin, self.data.ymax)
-        self.ax.set_xlim(self.data.xmin, self.data.xmax)
+        self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
+        self.ax.set_xlim(self.data0.xmin, self.data0.xmax)
         self.figure.canvas.draw()
         self.slicer.update()
 
@@ -419,7 +431,7 @@ class Plotter2DWidget(PlotterBase):
         color_map_dialog = ColorMap(self, cmap=self.cmap,
                                     vmin=self.vmin,
                                     vmax=self.vmax,
-                                    data=self.data)
+                                    data=self.data0)
 
         color_map_dialog.apply_signal.connect(self.onApplyMap)
 
@@ -461,8 +473,8 @@ class Plotter2DWidget(PlotterBase):
 
         # get the x and y_bin arrays.
         x_bins, y_bins = PlotUtilities.get_bins(self.qx_data, self.qy_data)
-        self._data.x_bins = x_bins
-        self._data.y_bins = y_bins
+        self.data0.x_bins = x_bins
+        self.data0.y_bins = y_bins
 
         zmin_temp = self.zmin
         # check scale
@@ -522,7 +534,7 @@ class Plotter2DWidget(PlotterBase):
                 self.ax.set_title(label=self._title)
 
             if cbax is None:
-                ax.set_frame_on(False)
+                self.ax.set_frame_on(False)
                 cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
             else:
                 cb = self.figure.colorbar(self.im, cax=cbax)
@@ -542,8 +554,8 @@ class Plotter2DWidget(PlotterBase):
 
             self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
 
-            data_x, data_y = numpy.meshgrid(self._data.x_bins[0:-1],
-                                            self._data.y_bins[0:-1])
+            data_x, data_y = numpy.meshgrid(self.data0.x_bins[0:-1],
+                                            self.data0.y_bins[0:-1])
 
             ax = Axes3D(self.figure)
 
@@ -574,12 +586,6 @@ class Plotter2DWidget(PlotterBase):
         else:
             im = self.ax.imshow(img)
 
-    def update(self):
-        self.figure.canvas.draw()
-
-    def draw(self):
-        self.figure.canvas.draw()
-
     def replacePlot(self, id, new_plot):
         """
         Replace data in current chart.
@@ -607,7 +613,7 @@ class Plotter2DWidget(PlotterBase):
         x_str = GuiUtils.formatNumber(x_click)
         y_str = GuiUtils.formatNumber(y_click)
         coord_str = "x: {}, y: {}".format(x_str, y_str)
-        self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
+        self.manager.communicate.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """

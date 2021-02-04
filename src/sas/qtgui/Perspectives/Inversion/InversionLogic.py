@@ -46,7 +46,6 @@ class InversionLogic(object):
         """
         Create a new 1D data instance based on fitting results
         """
-
         qtemp = pr.x
         if q is not None:
             qtemp = q
@@ -63,19 +62,17 @@ class InversionLogic(object):
             maxq = pr.q_max
 
         x = np.arange(minq, maxq, maxq / 301.0)
-        y = np.zeros(len(x))
-        err = np.zeros(len(x))
-        for i in range(len(x)):
-            value = pr.iq(out, x[i])
-            y[i] = value
-            try:
-                err[i] = math.sqrt(math.fabs(value))
-            except:
-                err[i] = 1.0
-                logger.log(("Error getting error", value, x[i]))
+
+        # Vectorised iq.
+        y = pr.iq(out, x)
+        err = np.sqrt(np.abs(y))
+        index = np.isnan(y)
+        if index.any():
+            y[index] = err[index] = 1.0
+            logger.info("Could not compute I(q) for q =", list((x[index])))
 
         new_plot = Data1D(x, y)
-        new_plot.name = IQ_FIT_LABEL
+        new_plot.name = IQ_FIT_LABEL + f"[{self._data.name}]"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         title = "I(q)"
@@ -86,19 +83,18 @@ class InversionLogic(object):
             new_plot.group_id = pr.info["plot_group_id"]
         new_plot.id = IQ_FIT_LABEL
 
+
         # If we have used slit smearing, plot the smeared I(q) too
         if pr.slit_width > 0 or pr.slit_height > 0:
             x = np.arange(minq, maxq, maxq / 301.0)
-            y = np.zeros(len(x))
-            err = np.zeros(len(x))
-            for i in range(len(x)):
-                value = pr.iq_smeared(pr.out, x[i])
-                y[i] = value
-                try:
-                    err[i] = math.sqrt(math.fabs(value))
-                except:
-                    err[i] = 1.0
-                    logger.log(("Error getting error", value, x[i]))
+
+            # Vectorised iq_smeared.
+            y = pr.get_iq_smeared(out, x)
+            err = np.sqrt(np.abs(y))
+            index = np.isnan(y)
+            if index.any():
+                y[index] = err[index] = 1.0
+                logger.info("Could not compute smeared I(q) for q =", list((x[index])))
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL
@@ -121,36 +117,20 @@ class InversionLogic(object):
         # Show P(r)
         x = np.arange(0.0, pr.d_max, pr.d_max / PR_PLOT_PTS)
 
-        y = np.zeros(len(x))
-        dy = np.zeros(len(x))
-
-        total = 0.0
-        pmax = 0.0
-        cov2 = np.ascontiguousarray(cov)
-
-        for i in range(len(x)):
-            if cov2 is None:
-                value = pr.pr(out, x[i])
-            else:
-                (value, dy[i]) = pr.pr_err(out, cov2, x[i])
-            total += value * pr.d_max / len(x)
-
-            # keep track of the maximum P(r) value
-            if value > pmax:
-                pmax = value
-
-            y[i] = value
-
-        if cov2 is None:
+        if cov is None:
+            y = pr.pr(out, x)
             new_plot = Data1D(x, y)
         else:
+            (y, dy) = pr.pr_err(out, cov, x)
             new_plot = Data1D(x, y, dy=dy)
-        new_plot.name = PR_FIT_LABEL
+
+        new_plot.name = PR_FIT_LABEL + f"[{self._data.name}]"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
         new_plot.title = "P(r) fit"
         new_plot.id = PR_FIT_LABEL
-        new_plot.scale = "linear"
+        new_plot.xtransform = "x"
+        new_plot.ytransform = "y"
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot

@@ -43,7 +43,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS, ILL and ANSTO.</string>
+      <string>This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

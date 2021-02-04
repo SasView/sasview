@@ -6,15 +6,17 @@
 #See the license text in license.txt
 #copyright 2010, University of Tennessee
 ######################################################################
-
 """
 This module implements invariant and its related computations.
 
 :author: Gervaise B. Alina/UTK
 :author: Mathieu Doucet/UTK
 :author: Jae Cho/UTK
+:author: Paul Butler/NIST/UD/UTK -- refactor in 2020
 
 """
+from __future__ import division
+
 import math
 import numpy as np
 
@@ -146,8 +148,11 @@ class Guinier(Transform):
         return [self.radius, self.scale], [self.dradius, self.dscale]
 
     def evaluate_model(self, x):
-        """
-        return F(x)= scale* e-((radius*x)**2/3)
+        r"""
+        return calculated I(q) for the model
+
+        Calculates the Guinier expression
+        $F(x)= s * \exp\left(-(r x)^{2/3}\right)$
         """
         return self._guinier(x)
 
@@ -165,14 +170,16 @@ class Guinier(Transform):
         return np.array([math.sqrt(err) for err in diq2])
 
     def _guinier(self, x):
-        """
+        r"""
         Retrieve the guinier function after apply an inverse guinier function
         to x
-        Compute a F(x) = scale* e-((radius*x)**2/3).
+        Compute $F(x) = s * \exp\left(-(r x)^{2/3}\right)$.
 
         :param x: a vector of q values
-        :param scale: the scale value
-        :param radius: the guinier radius value
+
+        Also uses:
+         - self.scale: $s$, the scale value
+         - self.radius: $r$, the guinier radius value
 
         :return: F(x)
         """
@@ -202,7 +209,7 @@ class PowerLaw(Transform):
 
         :param value: q-value
 
-        :return: log(q)
+        :return: $\log(q)$
         """
         return math.log(value)
 
@@ -289,7 +296,7 @@ class Extrapolator(object):
 
     def fit(self, power=None, qmin=None, qmax=None):
         """
-        Fit data for y = ax + b  return a and b
+        Fit data for $y = ax + b$  return $a$ and $b$
 
         :param power: a fixed, otherwise None
         :param qmin: Minimum Q-value
@@ -417,6 +424,25 @@ class InvariantCalculator(object):
         # Extrapolation range
         self._low_q_limit = Q_MINIMUM
 
+    @property
+    def background(self):
+        return self._background
+
+    @background.setter
+    def background(self, value):
+        self._background = value
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, value):
+        self._scale = value
+
+    def set_data(self, data):
+        self._data = self._get_data(data)
+
     def _get_data(self, data):
         """
         :note: this function must be call before computing any type
@@ -528,7 +554,7 @@ class InvariantCalculator(object):
         dyn: error on dy
 
         :param data:
-        :note: if data doesn't contain dy assume dy= math.sqrt(data.y)
+        :note: if data doesn't contain dy return "None"
         """
         if len(data.x) <= 1 or len(data.y) <= 1 or \
             len(data.x) != len(data.y) or \
@@ -537,11 +563,13 @@ class InvariantCalculator(object):
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
             raise ValueError(msg)
         else:
-            #Create error for data without dy error
+            # For reduced data sqrt(I) is incorrect! if the data has no dy
+            # then we should not invent it and then propogate that completely
+            # bogus value.  So changed behaviour on Mar 23, 2020 to return
+            # None instead
             if data.dy is None:
-                dy = math.sqrt(data.y)
-            else:
-                dy = data.dy
+                return None
+            dy = data.dy
             # Take care of smeared data
             if self._smeared is None:
                 gx = data.x * data.x
@@ -600,19 +628,26 @@ class InvariantCalculator(object):
             return self._low_extrapolation_power_fitted
         return self._high_extrapolation_power_fitted
 
-    def get_qstar_low(self):
+    def get_qstar_low(self, low_q_limit=None):
         """
         Compute the invariant for extrapolated data at low q range.
 
-        Implementation:
+        Implementation: ::
+
             data = self._get_extra_data_low()
             return self._get_qstar()
 
         :return q_star: the invariant for data extrapolated at low q.
         """
         # Data boundaries for fitting
-        qmin = self._data.x[0]
         qmax = self._data.x[int(self._low_extrapolation_npts - 1)]
+        # Allow minimum q to be passed as an argument
+        if not low_q_limit or low_q_limit < self._data.x[0] or low_q_limit >= qmax:
+            qmin = self._data.x[0]
+        else:
+            qmin = low_q_limit
+        # Distribution starting point
+        self._low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
 
         # Extrapolate the low-Q data
         p, _ = self._fit(model=self._low_extrapolation_function,
@@ -621,38 +656,37 @@ class InvariantCalculator(object):
                          power=self._low_extrapolation_power)
         self._low_extrapolation_power_fitted = p[0]
 
-        # Distribution starting point
-        self._low_q_limit = Q_MINIMUM
-        if Q_MINIMUM >= qmin:
-            self._low_q_limit = qmin / 10
-
-        data = self._get_extrapolated_data(\
-                                    model=self._low_extrapolation_function,
-                                    npts=INTEGRATION_NSTEPS,
-                                    q_start=self._low_q_limit, q_end=qmin)
+        data = self._get_extrapolated_data(
+            model=self._low_extrapolation_function,
+            npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin)
 
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
         # may not be a Guinier or simple power law. The following is
         # a conservative estimation for the systematic error.
-        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * \
-                                  (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
+        err = qmin * qmin * math.fabs((qmin - self._low_q_limit) * (data.y[0] - data.y[INTEGRATION_NSTEPS - 1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data) + err
 
-    def get_qstar_high(self):
+    def get_qstar_high(self, high_q_limit=None):
         """
         Compute the invariant for extrapolated data at high q range.
 
-        Implementation:
+        Implementation: ::
+
             data = self._get_extra_data_high()
             return self._get_qstar()
 
         :return q_star: the invariant for data extrapolated at high q.
         """
         # Data boundaries for fitting
-        x_len = len(self._data.x) - 1
-        qmin = self._data.x[int(x_len - (self._high_extrapolation_npts - 1))]
-        qmax = self._data.x[int(x_len)]
+        x_len = int(len(self._data.x) - 1)
+        qmin = self._data.x[int(x_len - self._high_extrapolation_npts)]
+        if not high_q_limit or high_q_limit > self._data.x[x_len] or high_q_limit <= qmin:
+            qmax = self._data.x[x_len]
+        else:
+            qmax = high_q_limit
+
+        high_q_limit = high_q_limit if high_q_limit else Q_MAXIMUM
 
         # fit the data with a model to get the appropriate parameters
         p, _ = self._fit(model=self._high_extrapolation_function,
@@ -662,10 +696,9 @@ class InvariantCalculator(object):
         self._high_extrapolation_power_fitted = p[0]
 
         #create new Data1D to compute the invariant
-        data = self._get_extrapolated_data(\
-                                    model=self._high_extrapolation_function,
-                                    npts=INTEGRATION_NSTEPS,
-                                    q_start=qmax, q_end=Q_MAXIMUM)
+        data = self._get_extrapolated_data(
+            model=self._high_extrapolation_function,
+            npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit)
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
@@ -810,27 +843,47 @@ class InvariantCalculator(object):
         """
         Compute the specific surface from the data.
 
-        Implementation::
+        Historically, Sv was computed with the invariant and the Porod
+        constant so as not to have to know the contrast in order to get the
+        Sv as: ::
 
-          V =  self.get_volume_fraction(contrast, extrapolation)
+            surface = (pi * V * (1- V) * porod_const) / q_star
 
-          Compute the surface given by:
-            surface = (2*pi *V(1- V)*porod_const)/ q_star
+        However, that turns out to be a pointless exercise since it
+        also requires a knowledge of the volume fractions and from the
+        volume fraction and the invariant the contrast can be calculated
+        as: ::
 
-        :param contrast: contrast value to compute the volume
-        :param porod_const: Porod constant to compute the surface
-        :param extrapolation: string to apply optional extrapolation
+            contrast**2 = q_star / (2 * pi**2 * V * (1- V))
+
+        Thus either way, mathematically it is always identical to computing
+        with only the contrast and the Porod Constant. up to and including
+        SasView versions 4.2.2 and 5.0.1 the implementation used the traditional
+        circular approach.
+
+        Implementation: ::
+
+            Given the above, as of SasView 4.3 and 5.0.2 we compute Sv simply
+            from the Porod Constant and the contrast between the two phases as:
+
+            surface = porod_const / (2 * pi contrast**2)
+
+        :param contrast: contrast between the two phases
+        :param porod_const: Porod constant
+        :param extrapolation: string to apply optional extrapolation. This will
+               only be needed if and when the contrast term is calculated from
+               the invariant.
 
         :return: specific surface
         """
-        # Compute the volume
-        volume = self.get_volume_fraction(contrast, extrapolation)
-        return 2 * math.pi * volume * (1 - volume) * \
-            float(porod_const) / self._qstar
+        # convert porod_const to units of A^-5 instead of cm^-1 A^-4 so that
+        # s is returned in units of 1/A.
+        _porod_const = 1.0e-8 * porod_const
+        return _porod_const / (2 * math.pi * math.fabs(contrast)**2)
 
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
-        Compute volume fraction is deduced as follow: ::
+        Compute volume fraction is deduced as follows: ::
 
             q_star = 2*(pi*contrast)**2* volume( 1- volume)
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
@@ -903,13 +956,21 @@ class InvariantCalculator(object):
         Compute uncertainty on volume value as well as the volume fraction
         This uncertainty is given by the following equation: ::
 
-            dV = 0.5 * (4*k* dq_star) /(2* math.sqrt(1-k* q_star))
+            sigV = dV/dq_star * sigq_star
+            
+        so that: ::
+
+            sigV = (k * sigq_star) /(q_star * math.sqrt(1 - 4 * k))
 
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
 
-            q_star: the invariant value including extrapolated value if existing
-            dq_star: the invariant uncertainty
-            dV: the volume uncertainty
+        Notes:
+
+        - 10^(-8) converts from cm^-1 to A^-1
+        - q_star: the invariant, in cm^-1A^-3, including extrapolated values
+          if they have been requested
+        - dq_star: the invariant uncertainty
+        - dV: the volume uncertainty
 
         The uncertainty will be set to -1 if it can't be computed.
 
@@ -921,45 +982,72 @@ class InvariantCalculator(object):
         volume = self.get_volume_fraction(contrast, extrapolation)
 
         # Compute error
-        k = 1.e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
+        k = 1.e-8 * self._qstar / (2 * (math.pi * \
+                                        math.fabs(float(contrast)))** 2)
         # Check value inside the sqrt function
         value = 1 - k * self._qstar
         if (value) <= 0:
             uncertainty = -1
-        # Compute uncertainty
-        uncertainty = math.fabs((0.5 * 4 * k * \
-                        self._qstar_err) / (2 * math.sqrt(1 - k * self._qstar)))
+        else:
+            # Compute uncertainty
+            uncertainty = math.fabs((k * self._qstar_err)
+                                    / (self._qstar * math.sqrt(1 - 4 * k)))
 
         return volume, uncertainty
 
     def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
         """
-        Compute uncertainty of the surface value as well as the surface value.
-        The uncertainty is given as follow: ::
+        As of SasView 4.3 and 5.0.3, the specific surface is computed directly
+        from the contrast and porod_constant wich are currently user inputs
+        with no option for any uncertainty so no uncertainty can be calculated.
+        However we include the uncertainty computation for future use if and
+        when these values get an uncertainty. This is given as: ::
 
-            dS = porod_const *2*pi[( dV -2*V*dV)/q_star
-                 + dq_star(v-v**2)
+            ds = sqrt[(s\'_cp)**2 * dcp**2 + (s\'_contrast)**2 * dcontrast**2]
 
-            q_star: the invariant value
-            dq_star: the invariant uncertainty
-            V: the volume fraction value
-            dV: the volume uncertainty
+        where s'_x is the partial derivative of S with respect to x
 
-        :param contrast: contrast value
-        :param porod_const: porod constant value
-        :param extrapolation: string to apply optional extrapolation
+        which gives (this should be checked before using in anger): ::
 
-        :return S, dS: the surface, with its uncertainty
+            ds = sqrt((dporod_const**2 * contrast**2 + 4 * (porod_const *
+                          dcontrast)**2) / (4 * pi**2 * contrast**6))
+
+        We also assume some users will never enter a value for uncertainty so
+        allow for None even when it is an option.
+
+        :param contrast: contrast value eventually with the error
+        :param porod_const: porod constant value eventually with the error
+        :param extrapolation: string to apply optional extrapolation. This will
+               only be needed if and when the contrast term is calculated from
+               the invariant.
+
+        :return s, ds: the surface, with its uncertainty
         """
-        # We get the volume fraction, with error
-        #   get_volume_fraction_with_error calls get_volume_fraction
-        #   get_volume_fraction calls get_qstar
-        #   which computes Qstar and dQstar
-        v, dv = self.get_volume_fraction_with_error(contrast, extrapolation)
-
-        s = self.get_surface(contrast=contrast, porod_const=porod_const,
-                             extrapolation=extrapolation)
-        ds = porod_const * 2 * math.pi * ((dv - 2 * v * dv) / self._qstar\
-                 + self._qstar_err * (v - v ** 2))
-
+        # until contrast and porod_constant are given with uncertainties set
+        # them to 0
+        dcontrast = None
+        dporod_const = None
+        # IMPORTATN: the porod constant (and eventually its uncertainty) are
+        # given in units of cm^-1 A^-4.  We need to be mindfult of units when
+        # writing equations. Thus for computing ds both the porod constant and
+        # its uncertainty need to be converted to A^-5 so they play well with
+        # the contrast which is in A-2.
+        # Note that the porod constant is converted in self.get_surface method
+        #so do NOT convert before calling here
+        s = self.get_surface(contrast=contrast, porod_const=porod_const)
+        # Until uncertainties in contrast and the Porod Constant are provided
+        # just return nothing.
+        ds = None
+        # When they are available, use the following:
+        # if dporod_const is None:
+        #     _dporod_const = 0.
+        # else:
+        #     _dporod_const = dporod_const * 1e-8 
+        # if dcontrast is None:
+        #    dcontrast = 0.
+        # For this new computation we DO need to convert the units
+        # _porod_const = porod_const * 1e-8
+        #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const * 
+        #                 dcontrast)**2 / (4 * math.pi**2 * constrast**6))
+   
         return s, ds
