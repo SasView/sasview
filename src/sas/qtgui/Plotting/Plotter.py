@@ -70,7 +70,7 @@ class PlotterWidget(PlotterBase):
 
         # Data container for the linear fit
         self.fit_result = Data1D(x=[], y=[], dy=None)
-        self.fit_result.symbol = 13
+        self.fit_result.symbol = 17
         self.fit_result.name = "Fit"
 
         parent.geometry()
@@ -507,9 +507,14 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
+        x_bounds = (self.ax.viewLim.xmin, self.ax.viewLim.xmax)
+        y_bounds = (self.ax.viewLim.ymin, self.ax.viewLim.ymax)
 
         self.removePlot(id)
         self.plot(data=new_plot)
+
+        self.ax.set_xbound(x_bounds[0], x_bounds[1])
+        self.ax.set_ybound(y_bounds[0], y_bounds[1])
 
     def onRemovePlot(self, id):
         """
@@ -652,9 +657,6 @@ class PlotterWidget(PlotterBase):
         self.fit_result.dx = None
         self.fit_result.dy = None
 
-        #Remove another Fit, if exists
-        self.removePlot("Fit")
-
         self.fit_result.reset_view()
         #self.offset_graph()
 
@@ -663,8 +665,12 @@ class PlotterWidget(PlotterBase):
         self.fit_result.title = 'Fit'
         self.fit_result.name = 'Fit'
 
-        # Plot the line
-        self.plot(data=self.fit_result, marker='-', hide_error=True)
+        if self.fit_result.name in self.plot_dict.keys():
+            # Replace an existing Fit
+            self.replacePlot("Fit", new_plot=self.fit_result)
+        else:
+            # Otherwise, Plot a new line
+            self.plot(data=self.fit_result, marker='-', hide_error=True)
 
     def onToggleLegend(self):
         """
