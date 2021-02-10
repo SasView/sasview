@@ -39,6 +39,9 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.parent = parent
 
         self.max_range = max_range
+        # Set fit minimum to 0.0 if below zero
+        if fit_range[0] < 0.0:
+            fit_range = (0.0, fit_range[1])
         self.fit_range = fit_range
         self.xLabel = xlabel
         self.yLabel = ylabel
@@ -110,7 +113,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.lblRange.setText(label)
 
     def range(self):
-        return (float(self.txtFitRangeMin.text()), float(self.txtFitRangeMax.text()))
+        return (float(self.txtFitRangeMin.text()) if float(self.txtFitRangeMin.text()) > 0 else 0.0,
+                float(self.txtFitRangeMax.text()))
 
     def fit(self, event):
         """
