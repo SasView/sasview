@@ -551,6 +551,15 @@ class PlotterWidget(PlotterBase):
         self.ax.set_ylabel(yl)
         self.canvas.draw_idle()
 
+    # TODO: Create way to do this from context menu
+    def removeAllSliders(self):
+        for id in self.sliders.keys():
+            self.removeSlider(id)
+
+    def removeSlider(self, id):
+        if id in self.sliders.keys():
+            slider = self.sliders.pop(id)
+
     def onFreeze(self, id):
         """
         Freezes the selected plot to a separate chart

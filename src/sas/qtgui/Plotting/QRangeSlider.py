@@ -145,8 +145,10 @@ class LineInteractor(BaseInteractor):
         """
         Clear this slicer and its markers
         """
-        self.inner_marker.remove()
-        self.line.remove()
+        if self.inner_marker:
+            self.inner_marker.remove()
+        if self.line:
+            self.line.remove()
 
     def _set_q(self, value):
         """

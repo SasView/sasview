@@ -12,11 +12,13 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.LineModel import LineModel
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
+
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
     updatePlot = QtCore.pyqtSignal(tuple)
@@ -26,7 +28,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
                  fit_range=(0.0, 0.0),
                  xlabel="",
                  ylabel=""):
-        super(LinearFit, self).__init__()
+        super(LinearFit, self).__init__(parent)
 
         self.setupUi(self)
         # disable the context help icon
@@ -96,6 +98,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.cstA = Fittings.Parameter(self.model, 'A', self.default_A)
         self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
+
+        self.q_sliders = None
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -235,6 +239,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         tempx = numpy.array(tempx)
         tempy = numpy.array(tempy)
 
+        self.data.show_q_range_sliders = True
+        self.data.slider_low_q_input = self.txtRangeMin
+        self.data.slider_high_q_input = self.txtRangeMax
+        self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
+
         self.updatePlot.emit((tempx, tempy))
 
     def origData(self):
@@ -310,4 +319,16 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
         return x
 
+    def clearSliders(self):
+        if self.q_sliders:
+            self.q_sliders.clear()
+        self.parent.removeSlider(self.data.id)
 
+    def closeEvent(self, ev):
+        self.clearSliders()
+
+    def accept(self, ev):
+        self.close()
+
+    def reject(self, ev):
+        self.close()
