@@ -1104,23 +1104,16 @@ users may wish to be aware of can be viewed at the following links:
 
 [sasmodels](https://github.com/SasView/sasmodels/milestones)
 
-All versions upto and including 5.0.2 - All systems
----------------------------------------------------
-A very long-standing error has been identified in the Invariant Analysis
-perspective. The value of the specific surface $Sv$ that is being returned
-is in fact *twice* the value that it should be.
+All 5.0.x versions / 4.2.2 - All systems
+----------------------------------------
+A problem has been identified in Version 4.2.2 which also affects all 5.0.x
+versions. The Easy Add/Multiply Editor dialog should not be used to combine
+a plugin model with a built-in model, or to combine two plugin models. In
+5.0.x the operation will fail, generating an error message in the Log Explorer
+similar to
 
-5.0.0 / 5.0.1 / 5.0.2 - All systems
------------------------------------
-In these versions, and unlike version 4.x, only fitting sessions can be saved as project files.
+     ModuleNotFoundError: No module named 'plugin_module_name'
 
-4.2.2 / 5.0.0 / 5.0.1 - All systems
------------------------------------
-A problem has been identified in Version 4.2.2 which also affects versions
-5.0.0 and 5.0.1. The Easy Add/Multiply Editor dialog should not be used to
-combine a plugin model with a built-in model, or to combine two plugin models.
-In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
-Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
 If it is necessary to generate a plugin model from more than two built-in models,
 please edit the plugin model .py file directly and specify the combination of
 built-in models directly. For example::
@@ -1131,6 +1124,16 @@ built-in models directly. For example::
      model_info.name = 'MyBigPluginModel'
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)
+     
+All versions upto and including 5.0.2 - All systems
+---------------------------------------------------
+A very long-standing error has been identified in the Invariant Analysis
+perspective. The value of the specific surface $Sv$ that is being returned
+is in fact *twice* the value that it should be.
+     
+5.0.0 / 5.0.1 / 5.0.2 - All systems
+-----------------------------------
+In these versions, and unlike version 4.x, only fitting sessions can be saved as project files.
 
 4.2.0 - All systems
 -------------------
