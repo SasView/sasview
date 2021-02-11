@@ -51,14 +51,14 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.bg_on = False
 
         # Scale dependent content
-        self.guiner_box.setVisible(False)
+        self.guinier_box.setVisible(False)
         if (self.yLabel == "ln(y)" or self.yLabel == "ln(y*x)") and \
                 (self.xLabel == "x^(2)"):
             if self.yLabel == "ln(y*x)":
                 self.label_12.setText('<html><head/><body><p>Rod diameter [Å]</p></body></html>')
                 self.rg_yx = True
             self.rg_on = True
-            self.guiner_box.setVisible(True)
+            self.guinier_box.setVisible(True)
 
         if (self.xLabel == "x^(4)") and (self.yLabel == "y*x^(4)"):
             self.bg_on = True
@@ -205,11 +205,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText(formatNumber(self.ErrBvalue))
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
-        # Possibly Guiner analysis
+        # Possibly Guinier analysis
         i0 = numpy.exp(cstB)
-        self.txtGuiner_1.setText(formatNumber(i0))
+        self.txtGuinier_1.setText(formatNumber(i0))
         err = numpy.abs(numpy.exp(cstB) * errB)
-        self.txtGuiner1_Err.setText(formatNumber(err))
+        self.txtGuinier1_Err.setText(formatNumber(err))
 
         if self.rg_yx:
             rg = numpy.sqrt(-2 * float(cstA))
@@ -228,13 +228,13 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             else:
                 err = ''
 
-        self.txtGuiner_2.setText(value)
-        self.txtGuiner2_Err.setText(err)
+        self.txtGuinier_2.setText(value)
+        self.txtGuinier2_Err.setText(err)
 
         value = formatNumber(rg * self.floatInvTransform(self.xminFit))
-        self.txtGuiner_3.setText(value)
+        self.txtGuinier_4.setText(value)
         value = formatNumber(rg * self.floatInvTransform(self.xmaxFit))
-        self.txtGuiner_4.setText(value)
+        self.txtGuinier_3.setText(value)
 
         tempx = numpy.array(tempx)
         tempy = numpy.array(tempy)
