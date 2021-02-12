@@ -62,6 +62,9 @@ IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 # case of a product model; the identifier for this is held in square brackets, as in the example above.
 theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
+logger = logging.getLogger(__name__)
+
+
 def get_app_dir():
     """
         The application directory is the one where the default custom_config.py
@@ -770,10 +773,11 @@ def retrieveData2d(data):
 
     return text
 
-def onTXTSave(data, path):
+def onTXTSave(data, path, sep=" "):
     """
     Save file as formatted txt
     """
+    # FIXME: This could be greatly simplified...
     with open(path,'w') as out:
         has_errors = True
         if data.dy is None or not data.dy.any():
@@ -787,32 +791,27 @@ def onTXTSave(data, path):
                 has_errors = False
         if has_errors:
             if data.dx is not None and data.dx.any():
-                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>"+" "*20+"<dX>\n")
-                #out.write("<X>   <Y>   <dY>   <dX>\n")
+                out.write("<X>"+sep+"<Y>"+sep+"<dY>"+sep+"<dX>\n")
             else:
-                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>\n")
+                out.write("<X>"+sep+"<Y>"+sep+"<dY>\n")
         else:
-            out.write("<X>"+" "*20+ "<Y>\n")
+            out.write("<X>"+sep+"<Y>\n")
 
         for i in range(len(data.x)):
             if has_errors:
                 if data.dx is not None and data.dx.any():
-                    if  data.dx[i] is not None:
-                        out.write("%.15e  %.15e  %.15e  %.15e\n" % (data.x[i],
-                                                        data.y[i],
-                                                        data.dy[i],
-                                                        data.dx[i]))
+                    if data.dx[i] is not None:
+                        out.write("%.15e%s%.15e%s%.15e%s%.15e\n" % (
+                            data.x[i], sep, data.y[i], sep, data.dy[i], sep, data.dx[i]))
                     else:
-                        out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
-                                                    data.y[i],
-                                                    data.dy[i]))
+                        out.write("%.15e%s%.15e%s%.15e\n" % (
+                            data.x[i], sep, data.y[i], sep, data.dy[i]))
                 else:
-                    out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
-                                                data.y[i],
-                                                data.dy[i]))
+                    out.write("%.15e%s%.15e%s%.15e\n" % (
+                        data.x[i], sep, data.y[i], sep, data.dy[i]))
             else:
-                out.write("%.15e  %.15e\n" % (data.x[i],
-                                        data.y[i]))
+                out.write("%.15e%s%.15e\n" % (
+                    data.x[i], sep, data.y[i]))
 
 def saveData1D(data):
     """
@@ -825,8 +824,10 @@ def saveData1D(data):
     default_name += "_out" + extension
 
     wildcard = "Text files (*.txt);;"\
-                "CanSAS 1D files(*.xml);;"\
-                "NXcanSAS files (*.h5)"
+               "Comma separated value files (*.csv);;"\
+               "CanSAS 1D files(*.xml);;"\
+               "NXcanSAS files (*.h5);;"\
+               "All files (*.*)"
     kwargs = {
         'caption'   : 'Save As',
         #'directory' : default_name,
@@ -842,27 +843,31 @@ def saveData1D(data):
     if not filename:
         return
 
-    # Check/add extension
-    if not os.path.splitext(filename)[1]:
-        ext = filename_tuple[1]
-        if 'Text files' in ext:
-            filename += '.txt'
-        elif 'CanSAS' in ext:
-            filename += '.xml'
-        elif 'NXcanSAS' in ext:
-            filename += '.h5'
-        else:
-            pass
+    # Check/add extension regardless
+    ext = filename_tuple[1]
+    if 'Text files' in ext:
+        filename += '.txt'
+    elif 'Comma separated' in ext:
+        filename += '.csv'
+    elif 'CanSAS' in ext:
+        filename += '.xml'
+    elif 'NXcanSAS' in ext:
+        filename += '.h5'
+    else:
+        # Default to text writer
+        pass
 
-    #Instantiate a loader
-    loader = Loader()
-    if os.path.splitext(filename)[1].lower() == ".txt":
+    # FIXME: Test and add unit tests.
+    if os.path.splitext(filename)[1].lower() in [".txt", ".csv"]:
+        sep = " " if os.path.splitext(filename)[1].lower() == '.txt' else ", "
+        onTXTSave(data, filename, sep)
+    elif os.path.splitext(filename)[1].lower() in [".xml", ".h5"]:
+        #Instantiate a loader
+        loader = Loader()
+        loader.save(filename, data, os.path.splitext(filename)[1].lower())
+    else:
         onTXTSave(data, filename)
-    elif os.path.splitext(filename)[1].lower() == ".xml":
-        loader.save(filename, data, ".xml")
-    elif os.path.splitext(filename)[1].lower() == ".h5":
-        nxcansaswriter = NXcanSASWriter()
-        nxcansaswriter.write([data], filename)
+        logger.warning("Unexpected file extension found on saving. Saving as text")
 
 def saveData2D(data):
     """

@@ -362,7 +362,8 @@ class GuiUtilsTest(unittest.TestCase):
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData1D(data)
-        self.assertFalse(os.path.isfile(file_name))
+        # Will save as text
+        self.assertTrue(os.path.isfile(file_name))
 
     def testSaveData2D(self):
         """
@@ -386,7 +387,8 @@ class GuiUtilsTest(unittest.TestCase):
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData2D(data)
-        self.assertFalse(os.path.isfile(file_name))
+        # Will save as a text file
+        self.assertTrue(os.path.isfile(file_name))
 
     def testXYTransform(self):
         """ Assure the unit/legend transformation is correct"""
