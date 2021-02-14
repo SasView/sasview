@@ -398,6 +398,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data is None: continue
             # Now, all plots under this item
             name = data.name
+            ######################################################
+            # Reset all slider values in data so save/load does not choke on them
+            # Remove once slider definition moved out of PlotterData
+            data.slider_low_q_setter = None
+            data.slider_high_q_setter = None
+            data.slider_low_q_input = None
+            data.slider_high_q_input = None
+            data.slider_update_on_move = False
+            data.slider_low_q_getter = None
+            data.slider_high_q_getter = None
+            ######################################################
             is_checked = item.checkState()
             properties['checked'] = is_checked
             other_datas = []
@@ -405,6 +416,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
+            for datas in other_datas:
+                ######################################################
+                # Reset all slider values in data so save/load does not choke on them
+                # Remove once slider definition moved out of PlotterData
+                datas.slider_low_q_setter = None
+                datas.slider_high_q_setter = None
+                datas.slider_low_q_input = None
+                datas.slider_high_q_input = None
+                datas.slider_update_on_move = False
+                datas.slider_low_q_getter = None
+                datas.slider_high_q_getter = None
+                ######################################################
             all_data[data.id] = [data, properties, other_datas]
         return all_data
 
@@ -1346,7 +1369,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(str(ex) + sys.exc_info()[1])
+                logging.error(str(ex) + str(sys.exc_info()[1]))
 
                 any_error = True
             if any_error or data_error or error_message != "":
@@ -1678,7 +1701,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg.exec_()
                 return
         except Exception as ex:
-            logging.error(str(ex) + sys.exc_info()[1])
+            logging.error(str(ex) + str(sys.exc_info()[1]))
             msg.exec_()
             return
 
@@ -1750,6 +1773,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         deleted_items += deleted_theory_items
         deleted_names = [item.text() for item in deleted_items]
         deleted_names += deleted_theory_items
+        # Close all active plots
+        self.closeAllPlots()
         # Let others know we deleted data
         self.communicator.dataDeletedSignal.emit(deleted_items)
         # update stored_data

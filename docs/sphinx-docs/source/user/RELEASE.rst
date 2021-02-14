@@ -11,6 +11,90 @@ Release Notes
 Features
 ========
 
+New in Version 5.0.4
+--------------------
+
+New features/improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^
+sasview #1725: Horizontal line at y=0 needed in P(r) plots
+sasview #1702: Allow for a choice of how data is named in the Data Explorer
+sasview #1699: Allow check/uncheck of sub-selected data in Data Explorer
+sasview #1676: Checkbox of highlighted row is checked also when clicking another checkbox
+sasview #1303: CanSAS XML Reader refactor
+sasmodels #429: Create model for superparamagnetic relaxing particles
+sasmodels #390: Re-describe Source intensity in model parameter tables
+sasmodels #253: use new orientation for magnetic models (Trac #910)
+
+Bug fixes
+^^^^^^^^^
+Fixes sasview #1738: Conflicting definition of displayData()
+Fixes sasview #1711: sasview 5, Q resolution smearing issues with broad_peak model
+Fixes sasview #1710: sasview fails to open .h5 files using h5py 3.1
+Fixes sasview #1701: Issue with slashes in data titles in CanSAS1D (and probably NXcanSAS)
+Fixes sasview #1698: Provide P(Q) separately when fitting
+Fixes sasview #1696: Failure in getSymbolDict on selecting parameters for constraints
+Fixes sasview #1681: Generic Scattering Calculator produces empty 2D map on sld file
+Fixes sasview #1674: Reloading a project in the same session duplicates the model/residuals in the Data Explorer
+Fixes sasview #1671: pdh data loader bug in 4.x and ESS_GUI 5.x
+Fixes sasview #1657: Loading project without fit_params entry causes empty fit window (v5.0.3)
+Fixes sasview #1655: Corfunc and Invariant Perspectives not able to remove/swap data (5.x)
+Fixes sasview #1654: 5.0.4 disable rather than remove constraints if do a fit on a single FitPage
+Fixes sasview #1653: 5.0.4 new constraints checks over zealous on load project
+Fixes sasview #1649: 4.x/5.x: Slicer Parameters control only appears in context menu once you have sliced
+Fixes sasview #1648: 5.0.3 not updating radius_effective in GUI
+Fixes sasview #1647: 4.x/5.x: Sector slicer tool Q plot could do with better resolution
+Fixes sasview #1646: 4.x/5.x: Annulus slicer tool phi plot could do with better resolution
+Fixes sasview #1640: Linux: SasView >5.0.1 binary cannot copy default custom_config.py
+Fixes sasview #1616: ESS_GUI: Model label on plot keeps being reset
+Fixes sasview #1611: Inconsistent behaviour of extrapolation Fit/Fix radio buttons in Invariant Perspective
+Fixes sasview #1610: Chart in Invariant Perspective Status Dialog not displaying the low-Q contribution to Q*
+Fixes sasview #1609: Changing Q-range limits in Invariant Perspective has no effect on extrapolations
+Fixes sasview #1608: No Q-limit bars in Invariant Perspective
+Fixes sasview #1607: Once extrapolation is turned on in the invariant it cannot be turned off
+Fixes sasview #1606: Invariant does not report the total invariant
+Fixes sasview #1605: Problem loading canSAS data into Invariant
+Fixes sasview #1604: The Invariant low Q extrapolation choice is not honored
+Fixes sasview #1600: v5 constrained value within single FitPage not being returned to gui
+Fixes sasview #1589: 5.0 turn off or remove constraint ?
+Fixes sasview #1583: calc.py throws erros after building SasView
+Fixes sasview #1574: Invariant perspective fixes need to be ported to 5.x
+Fixes sasview #1566: Default Checkboxes in data manager need changing
+Fixes sasview #1557: GUI losing track of fitpage and plot associations
+Fixes sasview #1547: Resolution is incorrectly handled in 5.x
+Fixes sasview #1544: Need to examine 2D data pixel sizes
+Fixes sasview #1542: Crosstalk between Corfunc and Invariant perspectives
+Fixes sasview #1541: Invariant and the infinite multiplication of plots
+Fixes sasview #1539: Corfunc requires two shots to populate the data name box
+Fixes sasview #1537: Allow for replacing data in a Fit Page
+Fixes sasview #1535: ESS_GUI: Existing common parameters not preserved between models in 5.x
+Fixes sasview #1534: ESS_GUI: Something strange with 5.x and the .sasview folder
+Fixes sasview #1532: Add a constraint checking mechanism
+Fixes sasview #1526: Project Save/Load functionality of 4.x needs to be restored
+Fixes sasview #1478: v5 & v4 TEst that P(Q)S(Q) plugin works
+Fixes sasview #1472: Sort out the Invariant Perspective & Documentation (#1434 & #1461)
+Fixes sasview #1469: 2D tools
+Fixes sasview #1453: 5.1 gui initialisation issue for Onion model
+Fixes sasview #1408: Magnetic model documentation is inconsistent with code
+Fixes sasview #1381: Slicer in 5.0 doesn't contain the batch, fitting, log/linear etc features
+Fixes sasview #1340: 5.0 invariant mac not plotting
+Fixes sasview #1243: Display title rather than filename in data browser (Trac #1213)
+Fixes sasview #1137: verify and document up_frac_i and up_frac_f calculations for magnetic models (Trac #1086)
+Fixes sasview #863: Make it easier to use the same fit set-up with different data sets (Trac #747)
+
+Fixes sasmodels #430: Model describing anisotropic iron oxide particles in magnetic field
+Fixes sasmodels #367: Correlation length model documentation is wrong
+Fixes sasmodels #210: show all failing tests rather than stopping at the first
+
+Known Issues
+^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+
+[sasview](https://github.com/SasView/sasview/milestones)
+
+[sasmodels](https://github.com/SasView/sasmodels/milestones)
+
+
 New in Version 5.0.3
 --------------------
 This is a point release which fixes several issues, but in particular:
@@ -1020,23 +1104,16 @@ users may wish to be aware of can be viewed at the following links:
 
 [sasmodels](https://github.com/SasView/sasmodels/milestones)
 
-All versions upto and including 5.0.2 - All systems
----------------------------------------------------
-A very long-standing error has been identified in the Invariant Analysis
-perspective. The value of the specific surface $Sv$ that is being returned
-is in fact *twice* the value that it should be.
+All 5.0.x versions / 4.2.2 - All systems
+----------------------------------------
+A problem has been identified in Version 4.2.2 which also affects all 5.0.x
+versions. The Easy Add/Multiply Editor dialog should not be used to combine
+a plugin model with a built-in model, or to combine two plugin models. In
+5.0.x the operation will fail, generating an error message in the Log Explorer
+similar to
 
-5.0.0 / 5.0.1 / 5.0.2 - All systems
------------------------------------
-In these versions, and unlike version 4.x, only fitting sessions can be saved as project files.
+     ModuleNotFoundError: No module named 'plugin_module_name'
 
-4.2.2 / 5.0.0 / 5.0.1 - All systems
------------------------------------
-A problem has been identified in Version 4.2.2 which also affects versions
-5.0.0 and 5.0.1. The Easy Add/Multiply Editor dialog should not be used to
-combine a plugin model with a built-in model, or to combine two plugin models.
-In 5.0.0 the operation will fail (generating an error message in the Log Explorer).
-Whilst in 5.0.1 the operation has been blocked until the problem can be fixed.
 If it is necessary to generate a plugin model from more than two built-in models,
 please edit the plugin model .py file directly and specify the combination of
 built-in models directly. For example::
@@ -1047,6 +1124,16 @@ built-in models directly. For example::
      model_info.name = 'MyBigPluginModel'
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)
+     
+All versions upto and including 5.0.2 - All systems
+---------------------------------------------------
+A very long-standing error has been identified in the Invariant Analysis
+perspective. The value of the specific surface $Sv$ that is being returned
+is in fact *twice* the value that it should be.
+     
+5.0.0 / 5.0.1 / 5.0.2 - All systems
+-----------------------------------
+In these versions, and unlike version 4.x, only fitting sessions can be saved as project files.
 
 4.2.0 - All systems
 -------------------
