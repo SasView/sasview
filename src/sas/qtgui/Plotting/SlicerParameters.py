@@ -340,7 +340,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         items_for_fit = []
         for plot in plots:
             for item in self.active_plots.keys():
-                data = self.active_plots[item].data[0]
+                data = self.active_plots[item].data[-1]
                 if not isinstance(data, Data1D):
                     continue
                 if plot not in data.name:
