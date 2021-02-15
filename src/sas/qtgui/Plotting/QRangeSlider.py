@@ -174,9 +174,9 @@ class LineInteractor(BaseInteractor):
         """ Track the input linked to the x value for this slider and update as needed """
         self._get_q()
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
-        self.update()
+        self.update(draw=True)
 
-    def update(self, x=None, y=None):
+    def update(self, x=None, y=None, draw=False):
         """
         Update the line position on the graph.
         """
@@ -189,6 +189,8 @@ class LineInteractor(BaseInteractor):
         self.inner_marker.set_xdata([self.x])
         self.inner_marker.set_ydata([self.y_marker])
         self.line.set_xdata([self.x])
+        if draw:
+            self.base.draw()
 
     def save(self, ev):
         """
@@ -216,7 +218,7 @@ class LineInteractor(BaseInteractor):
             else:
                 self.input.setText(f"{self.x:.3}")
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
-        self.update()
+        self.update(draw=self.base.updateOnMove)
 
     def onRelease(self, ev):
         """
@@ -226,7 +228,7 @@ class LineInteractor(BaseInteractor):
             self._set_q(self.x)
         else:
             self.input.setText(f"{self.x:.3}")
-        self.update()
+        self.update(draw=True)
         self.moveend(ev)
         return True
 
