@@ -309,10 +309,10 @@ class GuiUtilsTest(unittest.TestCase):
         with open(path,'r') as out:
             data_read = out.read()
             expected = \
-            "<X>                    <Y>\n"+\
-            "1.000000000000000e+00  1.000000000000000e+01\n" +\
-            "2.000000000000000e+00  1.100000000000000e+01\n" +\
-            "3.000000000000000e+00  1.200000000000000e+01\n"
+            "<X> <Y>\n"+\
+            "1.000000000000000e+00 1.000000000000000e+01\n" +\
+            "2.000000000000000e+00 1.100000000000000e+01\n" +\
+            "3.000000000000000e+00 1.200000000000000e+01\n"
 
             self.assertEqual(expected, data_read)
 
@@ -326,10 +326,10 @@ class GuiUtilsTest(unittest.TestCase):
         onTXTSave(data, path)
         with open(path,'r') as out:
             data_read = out.read()
-            self.assertIn("<X>                    <Y>                    <dY>                    <dX>\n", data_read)
-            self.assertIn("1.000000000000000e+00  1.000000000000000e+01  1.000000000000000e-01  1.000000000000000e-01\n", data_read)
-            self.assertIn("2.000000000000000e+00  1.100000000000000e+01  2.000000000000000e-01  2.000000000000000e-01\n", data_read)
-            self.assertIn("3.000000000000000e+00  1.200000000000000e+01  3.000000000000000e-01  3.000000000000000e-01\n", data_read)
+            self.assertIn("<X> <Y> <dY> <dX>\n", data_read)
+            self.assertIn("1.000000000000000e+00 1.000000000000000e+01 1.000000000000000e-01 1.000000000000000e-01\n", data_read)
+            self.assertIn("2.000000000000000e+00 1.100000000000000e+01 2.000000000000000e-01 2.000000000000000e-01\n", data_read)
+            self.assertIn("3.000000000000000e+00 1.200000000000000e+01 3.000000000000000e-01 3.000000000000000e-01\n", data_read)
 
         if os.path.isfile(path):
             os.remove(path)
@@ -338,6 +338,7 @@ class GuiUtilsTest(unittest.TestCase):
         """
         Test the 1D file save method
         """
+        # FIXME: Move/create tests to sascalc for txt save
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 

@@ -12,6 +12,7 @@
 # copyright 2008, University of Tennessee
 #############################################################################
 
+import os
 import logging
 from sas.sascalc.dataloader.file_reader_base_class import FileReader
 from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D
@@ -161,3 +162,21 @@ class Reader(FileReader):
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name
         self.send_to_output()
+
+    def write(self, filename, dataset):
+        sep = ", " if os.path.splitext(filename)[1].lower() == '.csv' else " "
+        with open(filename, 'w') as out:
+            dx = dy = dy_i = dx_i = ""
+            # Sanity check
+            if dataset.dy is not None and dataset.dy.any() and len(dataset.y) == len(dataset.dy):
+                dy = f"{sep}<dY>"
+            if dataset.dx is not None and dataset.dx.any() and len(dataset.x) == len(dataset.dx):
+                dx = f"{sep}<dX>"
+            out.write(f"<X>{sep}<Y>{dy}{dx}\n")
+
+            for i in range(len(dataset.x)):
+                if dy != "" and len(dataset.dy) > i:
+                    dy_i = f"{sep}{dataset.dy[i]:.15e}"
+                if dx != "" and len(dataset.dx) > i:
+                    dx_i = f"{sep}{dataset.dx[i]:.15e}"
+                out.write(f"{dataset.x[i]:.15e}{sep}{dataset.y[i]:.15e}{dy_i}{dx_i}\n")
