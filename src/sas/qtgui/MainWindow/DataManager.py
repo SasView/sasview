@@ -149,10 +149,11 @@ class DataManager(object):
         name = name[0:max_char]
 
         if name not in self.data_name_dict:
-            self.data_name_dict[name] = 0
+            self.data_name_dict[name] = [0]
         else:
-            self.data_name_dict[name] += 1
-            name = name + " [" + str(self.data_name_dict[name]) + "]"
+            number = max(self.data_name_dict[name]) + 1
+            self.data_name_dict[name].append(number)
+            name = f"{name} [{number}]"
         return name
 
 
@@ -263,14 +264,21 @@ class DataManager(object):
         for d_id in data_id:
             if d_id in list(self.stored_data.keys()):
                 data_state = self.stored_data[d_id]
-                if data_state.data.name in self.data_name_dict:
-                    del self.data_name_dict[data_state.data.name]
+                self.remove_item_from_data_name_dict(data_state.data.name)
                 del self.stored_data[d_id]
 
         self.delete_theory(data_id, theory_id)
         if delete_all:
             self.stored_data = {}
             self.data_name_dict = {}
+
+    def remove_item_from_data_name_dict(self, name):
+        data_name_split = name.split()
+        if data_name_split[0] in self.data_name_dict:
+            number = int(data_name_split[1][1:-1]) if len(data_name_split) > 1 else 0
+            self.data_name_dict[data_name_split[0]].remove(number)
+            if len(self.data_name_dict[data_name_split[0]]) == 0:
+                del self.data_name_dict[data_name_split[0]]
 
     def delete_theory(self, data_id, theory_id):
         """
@@ -318,8 +326,11 @@ class DataManager(object):
             # Take the copy of current, possibly shorter stored_data dict
             stored_data = copy.deepcopy(self.stored_data)
             for idx in list(stored_data.keys()):
-                if str(selected_name) in str(idx):
+                idx_split = str(idx).split("]")
+                if ((len(idx_split) == 1 and str(idx).startswith(str(selected_name)))
+                        or (len(idx_split) > 1 and str(selected_name).startswith(str(idx_split[0])))):
                     del self.stored_data[idx]
+                    self.remove_item_from_data_name_dict(selected_name)
 
     def get_data_state(self, data_id):
         """

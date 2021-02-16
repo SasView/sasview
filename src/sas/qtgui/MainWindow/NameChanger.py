@@ -82,9 +82,10 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         textValues = [self.txtDataName.text(), self.txtFileName.text(), self.txtNewCategory.text()]
         newValues = [textValues[i] for i, value in enumerate(textValues) if buttonStates[i]]
         # Create a unique name based on the value set - Set name to "" if multiple boxes somehow checked
-        new_name = self.manager.rename(newValues[0]) if len(newValues) == 1 else ""
         # Only rename if there is something to add.
-        if new_name:
+        if len(newValues) == 1:
+            self.manager.remove_item_from_data_name_dict(self._data.name)
+            new_name = self.manager.rename(newValues[0])
             self._data.name = new_name
             self._model_item.setData(self._data)
             self._model_item.setText(new_name)
