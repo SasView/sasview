@@ -148,6 +148,7 @@ class DataManager(object):
             max_char = len(name)
         name = name[0:max_char]
 
+        # data_name_dict: {'baseName': [0, 1, .. n]}
         if name not in self.data_name_dict:
             self.data_name_dict[name] = [0]
         else:
@@ -273,6 +274,10 @@ class DataManager(object):
             self.data_name_dict = {}
 
     def remove_item_from_data_name_dict(self, name):
+        """
+        Remove 'name' or 'name [n]' from data_name_dict
+        """
+        # Split on whitespace - split 'name [n]<id>' into list of len() == 2
         data_name_split = name.split()
         if data_name_split[0] in self.data_name_dict:
             number = int(data_name_split[1][1:-1]) if len(data_name_split) > 1 else 0
@@ -327,8 +332,10 @@ class DataManager(object):
             stored_data = copy.deepcopy(self.stored_data)
             for idx in list(stored_data.keys()):
                 idx_split = str(idx).split("]")
+                # Ensure 'name' does not match 'name [1]'
                 if ((len(idx_split) == 1 and str(idx).startswith(str(selected_name)))
                         or (len(idx_split) > 1 and str(selected_name).startswith(str(idx_split[0])))):
+                    # Delete data if name matches
                     del self.stored_data[idx]
                     self.remove_item_from_data_name_dict(selected_name)
 
