@@ -780,7 +780,6 @@ class DataExplorerTest(unittest.TestCase):
         """
         # Define Constants
         FILE_NAME = "cyl_400_20.txt"
-        FILE_NAME_APPENDED = FILE_NAME + " [1]"
         TEST_STRING_1 = "test value change"
         TEST_STRING_2 = "TEST VALUE CHANGE"
         # Test base state of the name change window
@@ -826,14 +825,14 @@ class DataExplorerTest(unittest.TestCase):
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME_APPENDED)
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
 
         # Take the user-defined name, which is empty - should retain existing value
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME_APPENDED)
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
 
         # Take a different user-defined name
         self.form.nameChangeBox.rbNew.setChecked(True)
