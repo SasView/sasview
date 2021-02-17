@@ -924,7 +924,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.saveDataAs()
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5)',
+                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5);;All files (*.*)',
                                 options=16,
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()

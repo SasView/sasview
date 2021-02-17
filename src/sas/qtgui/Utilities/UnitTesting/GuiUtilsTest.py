@@ -338,7 +338,6 @@ class GuiUtilsTest(unittest.TestCase):
         """
         Test the 1D file save method
         """
-        # FIXME: Move/create tests to sascalc for txt save
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 
@@ -349,6 +348,7 @@ class GuiUtilsTest(unittest.TestCase):
         saveData1D(data)
         self.assertTrue(os.path.isfile(file_name))
         os.remove(file_name)
+        self.assertFalse(os.path.isfile(file_name))
 
         # Test the .xml format
         file_name = "test123_out.xml"
@@ -357,6 +357,7 @@ class GuiUtilsTest(unittest.TestCase):
         saveData1D(data)
         self.assertTrue(os.path.isfile(file_name))
         os.remove(file_name)
+        self.assertFalse(os.path.isfile(file_name))
 
         # Test the wrong format
         file_name = "test123_out.mp3"
@@ -365,6 +366,8 @@ class GuiUtilsTest(unittest.TestCase):
         saveData1D(data)
         # Will save as text
         self.assertTrue(os.path.isfile(file_name))
+        os.remove(file_name)
+        self.assertFalse(os.path.isfile(file_name))
 
     def testSaveData2D(self):
         """
@@ -388,8 +391,10 @@ class GuiUtilsTest(unittest.TestCase):
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData2D(data)
-        # Will save as a text file
+        # Will save in IGOR Red2D format
         self.assertTrue(os.path.isfile(file_name))
+        os.remove(file_name)
+        self.assertFalse(os.path.isfile(file_name))
 
     def testXYTransform(self):
         """ Assure the unit/legend transformation is correct"""

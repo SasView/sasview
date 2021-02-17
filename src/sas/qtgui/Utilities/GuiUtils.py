@@ -773,13 +773,26 @@ def retrieveData2d(data):
 
     return text
 
+
 def onTXTSave(data, path):
     """
     Save file as formatted txt
     """
-    from sas.sascalc.dataloader.readers.ascii_reader import Reader as ASCIIReader
-    reader = ASCIIReader()
-    reader.write(path, data)
+    reader = None
+    append_format = len(path.split(".")) == 1
+    if isinstance(data, Data1D):
+        from sas.sascalc.dataloader.readers.ascii_reader import Reader as ASCIIReader
+        path += ".txt" if append_format else ""
+        reader = ASCIIReader()
+    elif isinstance(data, Data2D):
+        from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DReader
+        path += ".dat" if append_format else ""
+        reader = Red2DReader()
+    if reader:
+        reader.write(path, data)
+    else:
+        logger.error(f"Data must be of type Data1D or Data2D, {type(data)} given.")
+
 
 def saveData1D(data):
     """
@@ -792,7 +805,22 @@ def saveData1D(data):
         "CanSAS 1D files": ".xml",
         "NXcanSAS files": ".h5"
     }
+    saveAnyData(data, wildcard_dict)
 
+
+def saveData2D(data):
+    """
+    Save data2d dialog
+    """
+
+    wildcard_dict = {
+        "IGOR/DAT 2D file in Q_map": ".dat",
+        "NXcanSAS files": ".h5"
+    }
+    saveAnyData(data, wildcard_dict)
+
+
+def saveAnyData(data, wildcard_dict):
     wildcards = ""
     for wildcard in list(wildcard_dict.keys()):
         wildcards += f"{wildcard} (*{wildcard_dict[wildcard]});;"
@@ -832,52 +860,9 @@ def saveData1D(data):
         loader.save(filename, data, file_format)
     except (KeyError, ValueError):
         # If the base loader is unable to save the file, fallback to text file.
-        logger.warning(f"Unknown file type specified when saving {filename}. Saving as text.")
+        format_based_on_data = "IGOR" if isinstance(data, Data2D) else "ASCII"
+        logger.warning(f"Unknown file type specified when saving {filename}. Saving in {format_based_on_data} format.")
         onTXTSave(data, filename)
-
-def saveData2D(data):
-    """
-    Save data2d dialog
-    """
-    default_name = os.path.basename(data.filename)
-    default_name, _ = os.path.splitext(default_name)
-    ext_format = ".dat"
-    default_name += "_out" + ext_format
-
-    wildcard = "IGOR/DAT 2D file in Q_map (*.dat);;"\
-                "NXcanSAS files (*.h5)"
-    kwargs = {
-        'caption'   : 'Save As',
-        'filter'    : wildcard,
-        'parent'    : None,
-        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
-    }
-    # Query user for filename.
-    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
-    filename = filename_tuple[0]
-
-    # User cancelled.
-    if not filename:
-        return
-
-    # Check/add extension
-    if not os.path.splitext(filename)[1]:
-        ext = filename_tuple[1]
-        if 'IGOR' in ext:
-            filename += '.dat'
-        elif 'NXcanSAS' in ext:
-            filename += '.h5'
-        else:
-            pass
-
-    #Instantiate a loader
-    loader = Loader()
-
-    if os.path.splitext(filename)[1].lower() == ext_format:
-        loader.save(filename, data, ext_format)
-    elif os.path.splitext(filename)[1].lower() == ".h5":
-        nxcansaswriter = NXcanSASWriter()
-        nxcansaswriter.write([data], filename)
 
 
 class FormulaValidator(QtGui.QValidator):
