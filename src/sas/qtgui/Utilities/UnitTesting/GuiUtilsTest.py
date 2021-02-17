@@ -337,6 +337,32 @@ class GuiUtilsTest(unittest.TestCase):
         if os.path.isfile(save_path):
             os.remove(save_path)
 
+    def testSaveAnyData(self):
+        """
+        Test the generic GUIUtils.saveAnyData method
+        """
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
+                      dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
+
+        # Test the .txt format
+        file_name = "test123_out"
+        file_name_save = "test123_out.txt"
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        data.filename = "test123.txt"
+        self.genericFileSaveTest(data, file_name, file_name_save, "ASCII", True)
+
+        data = Data2D(image=[1.0, 2.0, 3.0],
+                      err_image=[0.01, 0.02, 0.03],
+                      qx_data=[0.1, 0.2, 0.3],
+                      qy_data=[0.1, 0.2, 0.3])
+
+        # Test the .txt format
+        file_name = "test123_out"
+        file_name_save = "test123_out.dat"
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        data.filename = "test123.dat"
+        self.genericFileSaveTest(data, file_name, file_name_save, "IGOR", True)
+
     def testSaveData1D(self):
         """
         Test the 1D file save method
@@ -348,29 +374,19 @@ class GuiUtilsTest(unittest.TestCase):
         file_name = "test123_out.txt"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.txt"
-        saveData1D(data)
-        self.assertTrue(os.path.isfile(file_name))
-        os.remove(file_name)
-        self.assertFalse(os.path.isfile(file_name))
+        self.genericFileSaveTest(data, file_name)
 
         # Test the .xml format
         file_name = "test123_out.xml"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.xml"
-        saveData1D(data)
-        self.assertTrue(os.path.isfile(file_name))
-        os.remove(file_name)
-        self.assertFalse(os.path.isfile(file_name))
+        self.genericFileSaveTest(data, file_name)
 
         # Test the wrong format
         file_name = "test123_out.mp3"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
-        saveData1D(data)
-        # Will save as text
-        self.assertTrue(os.path.isfile(file_name))
-        os.remove(file_name)
-        self.assertFalse(os.path.isfile(file_name))
+        self.genericFileSaveTest(data, file_name, file_name, "ASCII", True, "1D")
 
     def testSaveData2D(self):
         """
@@ -385,19 +401,37 @@ class GuiUtilsTest(unittest.TestCase):
         file_name = "test123_out.dat"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.dat"
-        saveData2D(data)
-        self.assertTrue(os.path.isfile(file_name))
-        os.remove(file_name)
+        self.genericFileSaveTest(data, file_name)
 
         # Test the wrong format
         file_name = "test123_out.mp3"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
-        saveData2D(data)
-        # Will save in IGOR Red2D format
-        self.assertTrue(os.path.isfile(file_name))
-        os.remove(file_name)
-        self.assertFalse(os.path.isfile(file_name))
+        self.genericFileSaveTest(data, file_name, file_name, "IGOR", True, "2D")
+
+    def genericFileSaveTest(self, data, name, name_full="", file_format="ASCII", catch_logs=False, level=None):
+        if level == '1D':
+            saveMethod = saveData1D
+        elif level == "2D":
+            saveMethod = saveData2D
+        else:
+            saveMethod = saveAnyData
+
+        name_full = name if name_full == "" else name_full
+
+        if catch_logs:
+            with self.assertLogs(logger.name) as cm:
+                saveMethod(data)
+                self.assertEqual(len(cm.output), 1)
+                self.assertEqual(
+                    cm.output[0],
+                    (f"WARNING:sas.qtgui.Utilities.GuiUtils:Unknown file type specified when saving {name}."
+                     + f" Saving in {file_format} format."))
+        else:
+            saveMethod(data)
+        self.assertTrue(os.path.isfile(name_full))
+        os.remove(name_full)
+        self.assertFalse(os.path.isfile(name_full))
 
     def testXYTransform(self):
         """ Assure the unit/legend transformation is correct"""
