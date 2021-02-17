@@ -898,9 +898,10 @@ class DataExplorerTest(unittest.TestCase):
 
         # Call the tested method
         self.form.saveDataAs()
+        filter = 'Text files (*.txt);;Comma separated value files (*.csv);;CanSAS 1D files (*.xml);;NXcanSAS files (*.h5);;All files (*.*)'
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                filter='Text files (*.txt);;CanSAS 1D files(*.xml);;NXcanSAS files (*.h5)',
+                                filter=filter,
                                 options=16,
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()

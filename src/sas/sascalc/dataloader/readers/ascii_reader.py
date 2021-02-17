@@ -163,8 +163,7 @@ class Reader(FileReader):
         self.current_datainfo.meta_data['loader'] = self.type_name
         self.send_to_output()
 
-    def write(self, filename, dataset):
-        sep = ", " if os.path.splitext(filename)[1].lower() == '.csv' else " "
+    def write(self, filename, dataset, sep=" "):
         with open(filename, 'w') as out:
             dx = dy = dy_i = dx_i = ""
             # Sanity check

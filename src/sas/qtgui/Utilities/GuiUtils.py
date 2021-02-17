@@ -790,13 +790,13 @@ def saveData1D(data):
         "Text files": ".txt",
         "Comma separated value files": ".csv",
         "CanSAS 1D files": ".xml",
-        "NXcanSAS file": ".h5"
+        "NXcanSAS files": ".h5"
     }
 
     wildcards = ""
     for wildcard in list(wildcard_dict.keys()):
         wildcards += f"{wildcard} (*{wildcard_dict[wildcard]});;"
-    wildcards += "All Files (*.*)"
+    wildcards += "All files (*.*)"
 
     kwargs = {
         'caption'   : 'Save As',
@@ -816,16 +816,23 @@ def saveData1D(data):
     ext = filename_tuple[1]
     for wildcard in list(wildcard_dict.keys()):
         if wildcard in ext:
-            filename += wildcard_dict[wildcard]
+            # Specify save format, while allowing free-form file extensions
+            file_format = wildcard_dict[wildcard]
+            # Append extension if not typed into box by user
+            if len(filename.split(".")) == 1:
+                filename += wildcard_dict[wildcard]
             break
+    else:
+        # Set file_format to None if 'All files (*.*)' selected
+        file_format = None
 
     # Instantiate a loader
     loader = Loader()
     try:
-        loader.save(filename, data, os.path.splitext(filename)[1].lower())
-    except KeyError:
+        loader.save(filename, data, file_format)
+    except (KeyError, ValueError):
         # If the base loader is unable to save the file, fallback to text file.
-        logger.warning("Unexpected file extension found on saving. Saving as text")
+        logger.warning(f"Unknown file type specified when saving {filename}. Saving as text.")
         onTXTSave(data, filename)
 
 def saveData2D(data):

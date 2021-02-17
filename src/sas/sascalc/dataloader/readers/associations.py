@@ -25,6 +25,7 @@ FILE_ASSOCIATIONS = {
     ".hdf": "cansas_reader_HDF5",
     ".nxs": "cansas_reader_HDF5",
     ".txt": "ascii_reader",
+    ".csv": "csv_reader",
     ".dat": "red2d_reader",
     ".abs": "abs_reader",
     ".cor": "abs_reader",
