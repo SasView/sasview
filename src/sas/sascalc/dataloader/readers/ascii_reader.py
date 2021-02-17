@@ -164,6 +164,14 @@ class Reader(FileReader):
         self.send_to_output()
 
     def write(self, filename, dataset, sep=" "):
+        """
+        Output data in ascii or similar format, depending on the separator provided
+
+        :param filename: Full file name and path where the file will be saved
+        :param dataset: Data1D object that will be saved
+        :param sep: Separator between data items, default is a single space
+        """
+        assert isinstance(dataset, plottable_1D)
         with open(filename, 'w') as out:
             dx = dy = dy_i = dx_i = ""
             # Sanity check

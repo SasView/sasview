@@ -292,8 +292,11 @@ class GuiUtilsTest(unittest.TestCase):
         Test the file writer for saving 1d/2d data
         """
         path = "test123"
+        save_path = path + ".txt"
         if os.path.isfile(path):
             os.remove(path)
+        if os.path.isfile(save_path):
+            os.remove(save_path)
 
         # Broken data
         data = Data1D(x=[1.0, 2.0, 3.0], y=[])
@@ -305,8 +308,8 @@ class GuiUtilsTest(unittest.TestCase):
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
         onTXTSave(data, path)
 
-        self.assertTrue(os.path.isfile(path))
-        with open(path,'r') as out:
+        self.assertTrue(os.path.isfile(save_path))
+        with open(save_path,'r') as out:
             data_read = out.read()
             expected = \
             "<X> <Y>\n"+\
@@ -316,23 +319,23 @@ class GuiUtilsTest(unittest.TestCase):
 
             self.assertEqual(expected, data_read)
 
-        if os.path.isfile(path):
-            os.remove(path)
+        if os.path.isfile(save_path):
+            os.remove(save_path)
 
         # Good data - with dX/dY
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 
         onTXTSave(data, path)
-        with open(path,'r') as out:
+        with open(save_path,'r') as out:
             data_read = out.read()
             self.assertIn("<X> <Y> <dY> <dX>\n", data_read)
             self.assertIn("1.000000000000000e+00 1.000000000000000e+01 1.000000000000000e-01 1.000000000000000e-01\n", data_read)
             self.assertIn("2.000000000000000e+00 1.100000000000000e+01 2.000000000000000e-01 2.000000000000000e-01\n", data_read)
             self.assertIn("3.000000000000000e+00 1.200000000000000e+01 3.000000000000000e-01 3.000000000000000e-01\n", data_read)
 
-        if os.path.isfile(path):
-            os.remove(path)
+        if os.path.isfile(save_path):
+            os.remove(save_path)
 
     def testSaveData1D(self):
         """

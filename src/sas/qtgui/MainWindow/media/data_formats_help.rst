@@ -18,23 +18,22 @@ SasView reads several different 1D SAS (*I(Q) vs Q*), 2D SAS(*I(Qx,Qy) vs (Qx,Qy
 1D SAS Formats
 --------------
 
-SasView will read ASCII ('text') files with 2 to 4 columns of numbers in the following order: 
-
-    *Q, I(Q), ( dI(Q), dQ(Q) )*
-    
-where *dQ(Q)* is the instrumental resolution in *Q* and assumed to have originated 
-from pinhole geometry.
-
-Numbers can be separated by spaces or commas.
-
-SasView recognises the following file extensions which are not case-sensitive:
+SasView recognizes 1D data in ASCII, CSV, CanSAS XML, NXCanSAS, and AntonPaar SAXSESS formats with the following extensions:
 
 *  .TXT
 *  .ASC
 *  .DAT
-*  .XML (in canSAS format v1.0 and 1.1)
+*  .XML, or .COR (in canSAS XML v1.0 and v1.1 formats)
+*  .CSV
+*  .H5, .NXS, or .HDF (in NXcanSAS v1.0 and v1.1 formats)
+*  .PDH
 
-If using CSV output from, for example, a spreadsheet, ensure that it is not using commas as delimiters for thousands.
+SasView will read ASCII ('text') files with 2 to 4 columns of numbers in the following order:
+
+    *Q, I(Q), ( dI(Q), dQ(Q) )*
+    
+where *dQ(Q)* is the instrumental resolution in *Q* and assumed to have originated 
+from pinhole geometry. Numbers can be separated by spaces or commas. If using CSV output from, for example, a spreadsheet, ensure that it is not using commas as delimiters for thousands.
 
 The SasView :ref:`File_Converter_Tool` available in SasView 4.1 onwards can be used to convert data sets with separated *I(Q)* and *Q* files (for example, BSL/OTOKO, and some output from FIT2D and other SAXS-oriented software) into either the canSAS SASXML (XML) format or the NeXus NXcanSAS (HDF5) format.
 
@@ -60,9 +59,9 @@ http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/SAXS-Softwa
 2D SAS Formats
 --------------
 
-SasView will read ASCII ('text') files in the NIST 2D format (with the extensions .ASC or .DAT) or files in the NeXus NXcanSAS (HDF5) format (with the extension .H5). File extensions are not case-sensitive. Both of these formats are written by the `Mantid Framework <http://www.mantidproject.org/>`_.
+SasView will read ASCII ('text') files in the NIST 2D format (with the extensions .ASC or .DAT) or files in the NeXus NXcanSAS (HDF5) format (with the extension .H5, .HDF, or .NXS). File extensions are not case-sensitive. Both of these formats are written by the `Mantid Framework <http://www.mantidproject.org/>`_.
 
-Most of the header lines in the NIST 2D format can actually be removed except the last line, and only the first three columns (*Qx, Qy,* and *I(Qx,Qy)*) are actually required.
+Most of the header lines in the NIST 2D format can be removed except the last line, and only the first three columns (*Qx, Qy,* and *I(Qx,Qy)*) are required.
 
 The SasView :ref:`File_Converter_Tool` available in SasView 4.1 onwards can be used to convert data sets in the 2D BSL/OTOKO format into the NeXus NXcanSAS (HDF5) format.
 

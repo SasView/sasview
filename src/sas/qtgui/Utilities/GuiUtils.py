@@ -797,8 +797,9 @@ def onTXTSave(data, path):
 def saveData1D(data):
     """
     Save 1D data points
-    """
 
+    :param data: Data1D object the data will be taken from
+    """
     wildcard_dict = {
         "Text files": ".txt",
         "Comma separated value files": ".csv",
@@ -810,9 +811,10 @@ def saveData1D(data):
 
 def saveData2D(data):
     """
-    Save data2d dialog
-    """
+    Save data2d data points
 
+    :param data: Data2D object the data will be taken from
+    """
     wildcard_dict = {
         "IGOR/DAT 2D file in Q_map": ".dat",
         "NXcanSAS files": ".h5"
@@ -820,7 +822,17 @@ def saveData2D(data):
     saveAnyData(data, wildcard_dict)
 
 
-def saveAnyData(data, wildcard_dict):
+def saveAnyData(data, wildcard_dict=None):
+    """
+    Generic file save routine called by SaveData1D and SaveData2D
+
+    :param data: Data 1D or Data2D object the data will be taken from
+    :param wildcard_dict: Dictionary in format {"Display Text": ".ext"}
+    """
+    # Ensure wildcard_dict is a dictionary
+    if wildcard_dict is None or not isinstance(wildcard_dict, dict):
+        wildcard_dict = {}
+    # Construct wildcard string based on dictionary passed in
     wildcards = ""
     for wildcard in list(wildcard_dict.keys()):
         wildcards += f"{wildcard} (*{wildcard_dict[wildcard]});;"
@@ -836,17 +848,18 @@ def saveAnyData(data, wildcard_dict):
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
     filename = filename_tuple[0]
 
-    # User cancelled.
+    # User cancelled or did not enter a filename
     if not filename:
         return
 
-    # Check/add extension regardless
+    # Check for selected file format
     ext = filename_tuple[1]
     for wildcard in list(wildcard_dict.keys()):
         if wildcard in ext:
             # Specify save format, while allowing free-form file extensions
             file_format = wildcard_dict[wildcard]
-            # Append extension if not typed into box by user
+            # Append selected extension if no extension typed into box by user
+            # Do not append if any extension typed to allow freeform extensions
             if len(filename.split(".")) == 1:
                 filename += wildcard_dict[wildcard]
             break
