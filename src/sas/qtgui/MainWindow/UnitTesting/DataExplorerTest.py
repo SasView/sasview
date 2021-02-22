@@ -1,6 +1,7 @@
 import sys
 import time
 import unittest
+import random
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -774,6 +775,53 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(self.form.nameChangeBox.txtFileName.text(), "")
         self.assertEqual(self.form.nameChangeBox.txtNewCategory.text(), "")
 
+    def testNameDictionary(self):
+        """
+        Testing the name dictionary self.form.manager.data_name_dict to catch edge cases
+        """
+        names_to_delete = []
+        names_with_brackets = ["test", "test [brackets]", "test [brackets", "test brackets]"]
+        names_numbered = ["test [1]", "test [2]"]
+        names_edge_cases = ["test [1] [2]", "test [2] [1]"]
+        # Ensure items not of type() == str return empty string
+        self.assertEqual("", self.form.manager.rename(names_with_brackets))
+        self.assertEqual("", self.form.manager.rename(self))
+        self.assertNotIn("", self.form.manager.data_name_dict)
+        # Test names with brackets
+        for i, name in enumerate(names_with_brackets):
+            # Send to rename method which populates data_name_dict
+            names_to_delete.append(self.form.manager.rename(name))
+            # Ensure each name is unique
+            self.assertEqual(i + 1, len(self.form.manager.data_name_dict))
+            self.assertEqual(1, len(self.form.manager.data_name_dict[name]))
+        for i, name in enumerate(names_with_brackets):
+            names_to_delete.append(self.form.manager.rename(name))
+            self.assertEqual(4, len(self.form.manager.data_name_dict))
+            self.assertEqual(2, len(self.form.manager.data_name_dict[name]))
+            self.assertEqual(self.form.manager.data_name_dict[name], [0,1])
+        for i, name in enumerate(names_numbered):
+            return_name = self.form.manager.rename(name)
+            names_to_delete.append(return_name)
+            self.assertEqual(return_name, f"test [{i+2}]")
+            self.assertEqual(4, len(self.form.manager.data_name_dict))
+            self.assertNotIn(name, self.form.manager.data_name_dict)
+        self.assertEqual([0,1,2,3], self.form.manager.data_name_dict['test'])
+        for i, name in enumerate(names_edge_cases):
+            names_to_delete.append(self.form.manager.rename(name))
+            self.assertEqual(5 + i, len(self.form.manager.data_name_dict))
+            self.assertIn(name, self.form.manager.data_name_dict)
+        # Names will be truncated when matching numbers
+        # Shuffle the list to be sure deletion order doesn't matter
+        random.shuffle(names_to_delete)
+        for i, name in enumerate(names_to_delete):
+            items_left = 0
+            self.form.manager.remove_item_from_data_name_dict(name)
+            for value in self.form.manager.data_name_dict.values():
+                items_left += len(value)
+            self.assertLess(items_left, len(names_to_delete))
+        # Data name dictionary should be empty at this point
+        self.assertEqual(0, len(self.form.manager.data_name_dict))
+
     def testNameChange(self):
         """
         Test the display name change routines
@@ -983,6 +1031,9 @@ class DataExplorerTest(unittest.TestCase):
         # Populate the model
         filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
         self.form.readData(filename)
+        self.assertEqual(len(self.form.manager.data_name_dict), 1)
+        self.assertEqual(len(self.form.manager.data_name_dict["cyl_400_20.txt"]), 3)
+        self.assertEqual(max(self.form.manager.data_name_dict["cyl_400_20.txt"]), 2)
 
         # Assure the model contains three items
         self.assertEqual(self.form.model.rowCount(), 3)
