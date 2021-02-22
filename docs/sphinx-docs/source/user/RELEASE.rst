@@ -171,6 +171,11 @@ Known Issues
 ^^^^^^^^^^^^
 At this time, and unlike version 4.x, only fitting and P(r) inversion sessions can be saved as project files.
 
+There is also a bug which is stopping Batch Fitting from using the intensity uncertainty (dI) data if this 
+is present in the files being processed. As the default behaviour of normal Single Fitting is to automatically 
+use the dI data in the file if it is present, this means that the results of Single Fitting and Batch Fitting 
+the same data will differ.
+
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
 
@@ -1125,6 +1130,14 @@ built-in models directly. For example::
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)
      
+5.0.0 / 5.0.1 / 5.0.2 / 5.0.3 - All systems
+-------------------------------------------
+There is a bug which is stopping Batch Fitting from using the intensity 
+uncertainty (dI) data if this is present in the files being processed. 
+As the default behaviour of normal Single Fitting is to automatically 
+use the dI data in the file if it is present, this means that the results 
+of Single Fitting and Batch Fitting the same data will differ.
+
 All versions upto and including 5.0.2 - All systems
 ---------------------------------------------------
 A very long-standing error has been identified in the Invariant Analysis
