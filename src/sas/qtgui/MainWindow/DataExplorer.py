@@ -23,6 +23,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
+from sas.qtgui.Plotting.QRangeSlider import QRangeIntermediate
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
@@ -1164,12 +1165,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Call show on requested plots
         # All same-type charts in one plot
+        plot_backup = plots.copy()
+        q_sliders_map = {}
+        for item, plot_set in plot_backup:
+            if isinstance(plot_set, QRangeIntermediate):
+                q_sliders_map[plot_set.name] = plot_set
+                plots.remove((item, plot_set))
         for item, plot_set in plots:
-            if isinstance(plot_set, Data1D):
+            if isinstance(plot_set, (Data1D, tuple)):
                 if 'new_plot' not in locals():
                     new_plot = Plotter(self)
                     new_plot.item = item
-                new_plot.plot(plot_set, transform=transform)
+                new_plot.plot(plot_set, transform=transform, q_slider=q_sliders_map.get(plot_set.name, None))
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
             elif isinstance(plot_set, Data2D):
@@ -1264,6 +1271,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = data[0]
         except TypeError:
             pass
+        if type(data).__name__ in ['QRangeIntermediate']:
+            return False
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())

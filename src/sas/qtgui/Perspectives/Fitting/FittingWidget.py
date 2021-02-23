@@ -30,6 +30,7 @@ from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
+from sas.qtgui.Plotting.QRangeSlider import QRangeIntermediate
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
@@ -2941,16 +2942,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         residuals = self.calculateResiduals(fitted_data)
 
-        fitted_data.show_q_range_sliders = True
-        # Suppress the GUI update until the move is finished to limit model calculations
-        fitted_data.slider_update_on_move = False
-        fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
-        fitted_data.slider_high_q_setter = self.options_widget.updateMaxQ
-        fitted_data.slider_low_q_input = self.options_widget.txtMinRange
-        fitted_data.slider_low_q_setter = self.options_widget.updateMinQ
+        # Generate Q-Range sliders
+        q_range_sliders = QRangeIntermediate(
+            data=fitted_data, low_q_setter=self.options_widget.updateMinQ, high_q_setter=self.options_widget.updateMaxQ,
+            low_q_input=self.options_widget.txtMinRange, high_q_input=self.options_widget.txtMaxRange,
+            update_on_move=False)
 
         self.model_data = fitted_data
-        new_plots = [fitted_data]
+        new_plots = [fitted_data, q_range_sliders]
         if residuals is not None:
             new_plots.append(residuals)
 

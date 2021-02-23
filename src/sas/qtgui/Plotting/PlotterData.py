@@ -20,6 +20,7 @@ class Data1D(PlottableData1D, LoadData1D):
     ROLE_DEFAULT=1
     ROLE_DELETABLE=2
     ROLE_RESIDUAL=3
+    ROLE_SLIDER=4
     def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
@@ -44,6 +45,7 @@ class Data1D(PlottableData1D, LoadData1D):
         # 2: deletable on model change (Q(I), S(I)...)
         # 3: separate chart on Show Plot (residuals)
         self.plot_role = Data1D.ROLE_DEFAULT
+        # TODO: Get rid of these once the sliders are done elsewhere
         # Q-range slider definitions
         self.show_q_range_sliders = False  # Should sliders be shown?
         self.slider_update_on_move = True  # Should the gui update during the move?

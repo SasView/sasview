@@ -62,8 +62,8 @@ class QRangeSlider(BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        self.line_min.update(x, y)
-        self.line_max.update(x, y)
+        self.line_min.update(x, y, draw=True)
+        self.line_max.update(x, y, draw=True)
         self.base.update()
 
     def save(self, ev):
@@ -123,13 +123,40 @@ class LineInteractor(BaseInteractor):
                                       label=None, zorder=zorder, visible=True)
         self.has_move = True
         # Map GUI input to x value so slider and input update each other
+        self._input = None
         self.input = input
-        if self.input:
-            self.input.textChanged.connect(self.inputChanged)
-        self.setter = setter if callable(setter) else None
-        self.getter = getter if callable(getter) else None
+        self._setter = None
+        self.setter = setter
+        self._getter = None
+        self.getter = getter
         self.connect_markers([self.line, self.inner_marker])
-        self.update()
+        self.update(draw=True)
+
+    @property
+    def input(self):
+        return self._input
+
+    @input.setter
+    def input(self, input):
+        self._input = input
+        if self._input:
+            self._input.textChanged.connect(self.inputChanged)
+
+    @property
+    def setter(self):
+        return self._setter
+
+    @setter.setter
+    def setter(self, setter):
+        self._setter = setter if callable(setter) else None
+
+    @property
+    def getter(self):
+        return self._getter
+
+    @getter.setter
+    def getter(self, getter):
+        self._getter = getter if callable(getter) else None
 
     def validate(self, param_name, param_value):
         """
@@ -241,3 +268,23 @@ class LineInteractor(BaseInteractor):
         self.setter = None
         self.getter = None
         self.input = None
+
+
+class QRangeIntermediate:
+    """
+    Intermediate plotter class to pass slider information for plotting
+    """
+
+    def __init__(self, data, low_q_setter=None, low_q_getter=None, low_q_input=None, high_q_setter=None,
+                 high_q_getter=None, high_q_input=None, update_on_move=True):
+        self.data = data
+        self.id = "QRangeSlider"
+        self.name = self.data.name if self.data else ""
+        self.plot_role = Data1D.ROLE_SLIDER
+        self.low_q_setter = low_q_setter
+        self.low_q_getter = low_q_getter
+        self.low_q_input = low_q_input
+        self.high_q_setter = high_q_setter
+        self.high_q_getter = high_q_getter
+        self.high_q_input = high_q_input
+        self.update_on_move = update_on_move
