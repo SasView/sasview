@@ -331,15 +331,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
                                             and not self.isCalculating)
-        self.removeButton.setEnabled(self.logic.data_is_loaded)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded)
+        self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
-        self.regConstantSuggestionButton.setEnabled(
-            self.logic.data_is_loaded and
-            self._calculator.suggested_alpha != self._calculator.alpha)
-        self.noOfTermsSuggestionButton.setEnabled(
-            self.logic.data_is_loaded and
-            self._calculator.nfunc != self.nTermsSuggested)
+        self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
 
     def populateDataComboBox(self, name, data_ref):
         """
@@ -377,7 +373,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.set_background(self.backgroundInput.text())
 
     def set_background(self, value):
-        self._calculator.background = is_float(value)
+        self._calculator.background = float(value)
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -409,16 +405,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Toggle the background between manual and estimated
         """
-        if self.estimateBgd.isChecked():
-            self.manualBgd.setChecked(False)
-            self.backgroundInput.setEnabled(False)
-            self._calculator.set_est_bck = True
-        elif self.manualBgd.isChecked():
-            self.estimateBgd.setChecked(False)
-            self.backgroundInput.setEnabled(True)
-            self._calculator.set_est_bck = False
-        else:
-            pass
+        self.model.blockSignals(True)
+        value = 1 if self.estimateBgd.isChecked() else 0
+        itemt = QtGui.QStandardItem(str(value == 1).lower())
+        self.model.setItem(WIDGETS.W_ESTIMATE, itemt)
+        itemt = QtGui.QStandardItem(str(value == 0).lower())
+        self.model.setItem(WIDGETS.W_MANUAL_INPUT, itemt)
+        self._calculator.set_est_bck(value)
+        self.backgroundInput.setEnabled(self._calculator.est_bck == 0)
+        self.model.blockSignals(False)
 
     def openExplorerWindow(self):
         """
