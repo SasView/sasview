@@ -174,7 +174,8 @@ At this time, and unlike version 4.x, only fitting and P(r) inversion sessions c
 There is also a bug which is stopping Batch Fitting from using the intensity uncertainty (dI) data if this 
 is present in the files being processed. As the default behaviour of normal Single Fitting is to automatically 
 use the dI data in the file if it is present, this means that the results of Single Fitting and Batch Fitting 
-the same data will differ.
+the same data will differ. In addition, Batch Fitting is also operating on the full data range of each dataset 
+irrespective of any specific Q limits that have been set in the GUI.
 
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
@@ -1136,7 +1137,9 @@ There is a bug which is stopping Batch Fitting from using the intensity
 uncertainty (dI) data if this is present in the files being processed. 
 As the default behaviour of normal Single Fitting is to automatically 
 use the dI data in the file if it is present, this means that the results 
-of Single Fitting and Batch Fitting the same data will differ.
+of Single Fitting and Batch Fitting the same data will differ. In addition, 
+Batch Fitting is also operating on the full data range of each dataset 
+irrespective of any specific Q limits that have been set in the GUI.
 
 All versions upto and including 5.0.2 - All systems
 ---------------------------------------------------
