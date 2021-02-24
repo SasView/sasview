@@ -1624,7 +1624,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # see if radius is the same as set
-        self.assertTrue(self.widget._model_model.item(5, 1).text() == "333.0")
+        row = self.widget.getRowFromName("radius")
+        self.assertEqual(self.widget._model_model.item(row, 1).text(), "333")
 
         # Now, change not just model but a category as well
         # cylinder / cylinder
@@ -1635,7 +1636,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # see if radius is still the same
-        self.assertTrue(int(self.widget._model_model.item(5, 1).text()) == 333)
+        row = self.widget.getRowFromName("radius")
+        self.assertEqual(int(self.widget._model_model.item(row, 1).text()), 333)
 
     def testOnParameterPaste(self):
         """

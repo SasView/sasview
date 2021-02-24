@@ -109,6 +109,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
     Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
     Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
+    keyPressedSignal = QtCore.pyqtSignal(QtCore.QEvent)
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
@@ -555,6 +556,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
+        self.cmdCompute.setEnabled(False)
         self.chkPolydispersity.setEnabled(True)
         self.chkPolydispersity.setCheckState(False)
         self.chk2DView.setEnabled(True)
@@ -589,6 +591,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Buttons
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
+        self.cmdCompute.clicked.connect(self.recalculatePlotData)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
 
@@ -616,6 +619,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
         self.communicate.updateMaskedDataSignal.connect(self.onMaskedData)
+
+        # Catch all key press events
+        self.keyPressedSignal.connect(self.onKey)
+
+    def keyPressEvent(self, event):
+        super(FittingWidget, self).keyPressEvent(event)
+        self.keyPressedSignal.emit(event)
 
     def modelName(self):
         """
@@ -1230,6 +1240,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.cbModel.setCurrentIndex(self._previous_model_index)
                 self.cbModel.blockSignals(False)
             return
+        if self.model_data is not None:
+            # Store any old parameters before switching to a new model
+            self.page_parameters = self.getParameterDict()
 
         # Assure the control is active
         if not self.cbModel.isEnabled():
@@ -1435,6 +1448,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.model_parameters = None
             self._model_model.clear()
             return
+
+        if self.model_data is not None:
+            # Store any old parameters before switching to a new category
+            self.page_parameters = self.getParameterDict()
         # Wipe out the parameter model
         self._model_model.clear()
         # Safely clear and enable the model combo
@@ -1574,7 +1591,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.magnet_params[parameter_name] = value
             #self.kernel_module.setParam(parameter_name) = value
             # Force the chart update when actual parameters changed
-            self.recalculatePlotData()
+            #self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
@@ -2171,6 +2188,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
 
+    def onKey(self, event):
+        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdCompute.isEnabled():
+            self.recalculatePlotData()
+
     def recalculatePlotData(self):
         """
         Generate a new dataset for model
@@ -2228,7 +2249,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        self.recalculatePlotData()
+        #self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
@@ -2641,8 +2662,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.processEffectiveRadius()
 
         # Force the chart update when actual parameters changed
-        if model_column == 1:
-            self.recalculatePlotData()
+        #if model_column == 1:
+            #self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
@@ -3607,10 +3628,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cbStructureFactor.setEnabled(enabled)
 
         self.cmdPlot.setEnabled(enabled)
+        self.cmdCompute.setEnabled(enabled)
 
     def enableInteractiveElements(self):
         """
-        Set buttion caption on fitting/calculate finish
+        Set button caption on fitting/calculate finish
         Enable the param table(s)
         """
         # Notify the user that fitting is available
@@ -3621,7 +3643,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableInteractiveElements(self):
         """
-        Set buttion caption on fitting/calculate start
+        Set button caption on fitting/calculate start
         Disable the param table(s)
         """
         # Notify the user that fitting is being run
@@ -3632,7 +3654,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableInteractiveElementsOnCalculate(self):
         """
-        Set buttion caption on fitting/calculate start
+        Set button caption on fitting/calculate start
         Disable the param table(s)
         """
         # Notify the user that fitting is being run
