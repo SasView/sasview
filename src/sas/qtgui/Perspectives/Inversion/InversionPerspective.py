@@ -452,10 +452,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def check_q_low(self, q_value=None):
         """ Validate the low q value """
         if not q_value:
-            q_value = float(self.minQInput.text()) if self.minQInput.text() else ''
-        if q_value == '':
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(q_value))
-            return
+            q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
         q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
         q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
@@ -472,10 +469,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def check_q_high(self, q_value=None):
         """ Validate the value of high q sent by the slider """
         if not q_value:
-            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else ''
-        if q_value == '':
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(q_value))
-            return
+            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
         q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
         q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
         if q_value > q_max:
@@ -621,10 +615,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         cov = self._calculator.cov
         elapsed = self._calculator.elapsed
         alpha = self._calculator.suggested_alpha
-        self.model.setItem(WIDGETS.W_QMIN,
-                           QtGui.QStandardItem("{:.4g}".format(pr.get_qmin())))
-        self.model.setItem(WIDGETS.W_QMAX,
-                           QtGui.QStandardItem("{:.4g}".format(pr.get_qmax())))
+        self.check_q_high(pr.get_qmax())
+        self.check_q_low(pr.get_qmin())
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
@@ -633,6 +625,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:.2g}".format(alpha))
 
         if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
@@ -675,6 +668,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.closeDMax()
         for data in data_list:
             self._dataList.pop(data, None)
+        if self.dataPlot:
+            # Reset dataplot sliders
+            self.dataPlot.slider_low_q_input = None
+            self.dataPlot.slider_high_q_input = None
+            self.dataPlot.slider_low_q_setter = None
+            self.dataPlot.slider_high_q_setter = None
         self._data = None
         length = len(self.dataList)
         for index in reversed(range(length)):
@@ -737,26 +736,30 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         return tab_id
 
     def updateFromParameters(self, params):
-        self._calculator.suggested_alpha = params['alpha']
+        self._calculator.q_max = params['q_max']
+        self.check_q_high(self._calculator.get_qmax())
+        self._calculator.q_min = params['q_min']
+        self.check_q_low(self._calculator.get_qmin())
+        self._calculator.alpha = params['alpha']
+        self._calculator.suggested_alpha = params['suggested_alpha']
+        self._calculator.d_max = params['d_max']
+        self._calculator.nfunc = params['nfunc']
+        self.nTermsSuggested = self._calculator.nfunc
         self.updateDynamicGuiValues()
         self.acceptAlpha()
-        self.backgroundInput.setText(str(params['background']))
+        self.acceptNoTerms()
+        self._calculator.background = params['background']
         self._calculator.chi2 = params['chi2']
         self._calculator.cov = params['cov']
-        self._calculator.d_max = params['d_max']
         self._calculator.elapsed = params['elapsed']
         self._calculator.err = params['err']
         self._calculator.set_est_bck = bool(params['est_bck'])
         self._calculator.nerr = params['nerr']
-        self.noOfTermsInput.setText(str(params['nfunc']))
         self._calculator.npoints = params['npoints']
         self._calculator.ny = params['ny']
         self._calculator.out = params['out']
-        self._calculator.q_max = params['q_max']
-        self._calculator.q_min = params['q_min']
         self._calculator.slit_height = params['slit_height']
         self._calculator.slit_width = params['slit_width']
-        self._calculator.suggested_alpha = params['suggested_alpha']
         self._calculator.x = params['x']
         self._calculator.y = params['y']
         self.updateGuiValues()
