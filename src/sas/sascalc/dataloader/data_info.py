@@ -28,6 +28,42 @@ import copy
 import numpy as np
 
 from sas.sascalc.data_util.uncertainty import Uncertainty
+from sas.sascalc.data_util.nxsunit import Converter, standardize_units
+
+
+def set_loaded_units(obj, axis='', loaded_unit=None):
+    if loaded_unit is None:
+        loaded_unit = ""
+    if axis.lower() == 'x':
+        obj.x_converter = Converter(loaded_unit)
+        if hasattr(obj, 'Q_unit'):
+            obj.Q_unit = obj.x_converter.base
+        elif hasattr(obj, 'x_unit'):
+            obj.x_unit = obj.x_converter.base
+        else:
+            obj._xunit = obj.x_converter.base
+        obj.x_loaded_unit = obj.x_converter.base
+    elif axis.lower() == 'y':
+        obj.y_converter = Converter(loaded_unit)
+        if hasattr(obj, 'Q_unit'):
+            obj.Q_unit = obj.y_converter.base
+        elif hasattr(obj, 'y_unit'):
+            obj.y_unit = obj.y_converter.base
+        else:
+            obj._yunit = obj.y_converter.base
+        obj.y_loaded_unit = obj.y_converter.base
+    elif axis.lower() == 'z':
+        obj.z_converter = Converter(loaded_unit)
+        if hasattr(obj, 'I_unit'):
+            obj.I_unit = obj.z_converter.base
+        elif hasattr(obj, 'z_unit'):
+            obj.z_unit = obj.z_converter.base
+        else:
+            obj._zunit = obj.z_converter.base
+        obj.z_loaded_unit = obj.z_converter.base
+    else:
+        raise ValueError(
+            "The axis {0} was not found.".format(axis))
 
 
 class plottable_1D(object):
@@ -51,13 +87,17 @@ class plottable_1D(object):
     # Units
     _xaxis = ''
     _xunit = ''
+    x_loaded_unit = ''
     _yaxis = ''
     _yunit = ''
+    y_loaded_unit = ''
 
     def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None,
                  lam=None, dlam=None):
         self.x = np.asarray(x)
         self.y = np.asarray(y)
+        self.x_converter = None
+        self.y_converter = None
         if dx is not None:
             self.dx = np.asarray(dx)
         if dy is not None:
@@ -71,19 +111,105 @@ class plottable_1D(object):
         if dlam is not None:
             self.dlam = np.asarray(dlam)
 
-    def xaxis(self, label, unit):
+    @property
+    def x_unit(self):
+        return self._xunit
+
+    @x_unit.setter
+    def x_unit(self, x_unit):
+        self._xunit = x_unit
+        if hasattr(self, 'x_converter') and self.x_converter:
+            self.convert_q_units(x_unit)
+        else:
+            set_loaded_units(self, 'x', x_unit)
+
+    @property
+    def y_unit(self):
+        return self._yunit
+
+    @y_unit.setter
+    def y_unit(self, y_unit):
+        self._yunit = y_unit
+        if hasattr(self, 'y_converter') and self.y_converter:
+            self.convert_i_units(y_unit)
+        else:
+            set_loaded_units(self, 'y', y_unit)
+
+    @property
+    def x_axis(self):
+        return self._xaxis
+
+    @x_axis.setter
+    def x_axis(self, x_axis):
+        self._xaxis = x_axis
+
+    @property
+    def y_axis(self):
+        return self._yaxis
+
+    @y_axis.setter
+    def y_axis(self, y_axis):
+        self._yaxis = y_axis
+
+    def xaxis(self, label, unit=None):
         """
         set the x axis label and unit
         """
         self._xaxis = label
-        self._xunit = unit
+        if self.x_converter is None and unit is not None:
+            set_loaded_units(self, 'x', unit)
+        if self._xunit == '':
+            self._xunit = unit
+        elif unit is not None:
+            self.convert_q_units(unit)
 
-    def yaxis(self, label, unit):
+    def yaxis(self, label, unit=None):
         """
         set the y axis label and unit
         """
         self._yaxis = label
-        self._yunit = unit
+        if self.y_converter is None and unit is not None:
+            set_loaded_units(self, 'y', unit)
+        if self._yunit == '':
+            self._yunit = unit
+        elif unit is not None:
+            self.convert_i_units(unit)
+
+    def convert_q_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
+            # Converter is built off units loaded from file
+            # Need to scale between current units and desired units
+            unit = standardize_units(convert_to_unit)
+            base_scale = float(self.x_converter.scale(self.x_unit))
+            scale = float(self.x_converter.scale(unit))
+            if self.x is not None and self.x.all():
+                self.x = self.x * scale / base_scale
+            if self.dx is not None and self.dx.all():
+                self.dx = self.dx * scale / base_scale
+            if self.dxl is not None and self.dxl.all():
+                self.dxl = self.dxl * scale / base_scale
+            if self.dxw is not None and self.dxw.all():
+                self.dxw = self.dxw * scale / base_scale
+            # Only set instance variable once conversion is successful
+            self._xunit = unit
+
+    def convert_i_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
+            # Converter is built off units loaded from file
+            # Need to scale between current units and desired units
+            unit = standardize_units(convert_to_unit)
+            base_scale = float(self.y_converter.scale(self.y_unit))
+            scale = float(self.y_converter.scale(unit))
+            if self.y is not None and self.y.all():
+                self.y = self.y * scale / base_scale
+            if self.dy is not None and self.dy.all():
+                self.dy = self.dy * scale / base_scale
+            # Only set instance variable once conversion is successful
+            self._yunit = unit
+
+    def convert_to_native_units(self):
+        self.convert_i_units(self.x_loaded_unit)
+        self.convert_q_units(self.y_loaded_unit)
 
 
 class plottable_2D(object):
@@ -108,10 +234,13 @@ class plottable_2D(object):
     # Units
     _xaxis = ''
     _xunit = ''
+    x_loaded_unit = ''
     _yaxis = ''
     _yunit = ''
+    y_loaded_unit = ''
     _zaxis = ''
     _zunit = ''
+    z_loaded_unit = ''
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
@@ -122,6 +251,9 @@ class plottable_2D(object):
         self.qx_data = np.asarray(qx_data)
         self.qy_data = np.asarray(qy_data)
         self.q_data = np.asarray(q_data)
+        self.x_converter = None
+        self.y_converter = None
+        self.z_converter = None
         if mask is not None:
             self.mask = np.asarray(mask)
         else:
@@ -144,19 +276,116 @@ class plottable_2D(object):
         self.y_bins = x_bins if x_bins else []
         self.x_bins = y_bins if y_bins else []
 
-    def xaxis(self, label, unit):
+    @property
+    def Q_unit(self):
+        return self._xunit
+
+    @Q_unit.setter
+    def Q_unit(self, Q_unit):
+        self._xunit = Q_unit
+        self._yunit = Q_unit
+        if hasattr(self, 'x_converter') and self.x_converter:
+            self.convert_q_units(Q_unit)
+        else:
+            set_loaded_units(self, 'x', Q_unit)
+            set_loaded_units(self, 'y', Q_unit)
+
+    @property
+    def I_unit(self):
+        return self._zunit
+
+    @I_unit.setter
+    def I_unit(self, I_unit):
+        self._zunit = I_unit
+        if hasattr(self, 'z_converter') and self.z_converter:
+            self.convert_i_units(I_unit)
+        else:
+            set_loaded_units(self, 'z', I_unit)
+
+    @property
+    def x_unit(self):
+        return self._xunit
+
+    @x_unit.setter
+    def x_unit(self, x_unit):
+        self._xunit = x_unit
+        if hasattr(self, 'x_converter') and self.x_converter:
+            self.convert_q_units(x_unit)
+        else:
+            set_loaded_units(self, 'x', x_unit)
+
+    @property
+    def x_axis(self):
+        return self._xaxis
+
+    @x_axis.setter
+    def x_axis(self, x_axis):
+        self._xaxis = x_axis
+
+    @property
+    def y_unit(self):
+        return self._yunit
+
+    @y_unit.setter
+    def y_unit(self, y_unit):
+        self._yunit = y_unit
+        if hasattr(self, 'y_converter') and self.y_converter:
+            self.convert_q_units(y_unit)
+        else:
+            set_loaded_units(self, 'y', y_unit)
+
+    @property
+    def y_axis(self):
+        return self._yaxis
+
+    @y_axis.setter
+    def y_axis(self, y_axis):
+        self._yaxis = y_axis
+
+    @property
+    def z_axis(self):
+        return self._zaxis
+
+    @z_axis.setter
+    def z_axis(self, z_axis):
+        self._zaxis = z_axis
+
+    @property
+    def z_unit(self):
+        return self._zunit
+
+    @y_unit.setter
+    def z_unit(self, z_unit):
+        self._yunit = z_unit
+        if hasattr(self, 'z_converter') and self.z_converter:
+            self.convert_i_units(z_unit)
+        else:
+            set_loaded_units(self, 'z', z_unit)
+
+    def xaxis(self, label, unit=None):
         """
         set the x axis label and unit
         """
         self._xaxis = label
-        self._xunit = unit
+        if self.x_converter is None and unit is not None:
+            set_loaded_units(self, 'x', unit)
+        if self._xunit == '':
+            self._xunit = unit
+        elif unit is not None:
+            self.convert_q_units(unit)
 
-    def yaxis(self, label, unit):
+    def yaxis(self, label, unit=None):
         """
         set the y axis label and unit
         """
         self._yaxis = label
         self._yunit = unit
+        if self.y_converter is None and unit is not None:
+            set_loaded_units(self, 'y', unit)
+        if self._yunit == '':
+            self._yunit = unit
+        elif unit is not None:
+            self.convert_q_units(unit)
 
     def zaxis(self, label, unit):
         """
@@ -164,6 +393,48 @@ class plottable_2D(object):
         """
         self._zaxis = label
         self._zunit = unit
+        if self.z_converter is None and unit is not None:
+            set_loaded_units(self, 'z', unit)
+        if self._zunit == '':
+            self._zunit = unit
+        elif unit is not None:
+            self.convert_i_units(unit)
+
+    def convert_q_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
+            # Converter based off units loaded from file
+            # Need to scale between current units and desired units
+            unit = standardize_units(convert_to_unit)
+            scale = float(self.x_converter.scale(unit))
+            if self.qx_data is not None and self.qx_data.all():
+                self.qx_data = scale * self.qx_data
+            if self.dqx_data is not None and self.dqx_data.all():
+                self.dqx_data = scale * self.dqx_data
+            # Only set instance variable once conversion is successful
+            self._xunit = unit
+            if self.qy_data is not None and self.qy_data.all():
+                self.qy_data = self.qy_data * scale
+            if self.dqy_data is not None and self.dqy_data.all():
+                self.dqy_data = self.dqy_data * scale
+            # Only set instance variable once conversion is successful
+            self._yunit = unit
+
+    def convert_i_units(self, convert_to_unit=None):
+        if convert_to_unit is not None:
+            # Converter based off units loaded from file
+            # Need to scale between current units and desired units
+            unit = standardize_units(convert_to_unit)
+            scale = float(self.z_converter.scale(unit))
+            if self.data is not None and self.data.all():
+                self.data = self.data * scale
+            if self.err_data is not None and self.err_data.all():
+                self.err_data = self.err_data * scale
+            # Only set instance variable once conversion is successful
+            self._zunit = unit
+
+    def convert_to_native_units(self):
+        self.convert_i_units(self.x_loaded_unit)
+        self.convert_q_units(self.z_loaded_unit)
 
 
 class Vector(object):
@@ -1253,10 +1524,8 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.dy = data.dy
         final_dataset.dxl = data.dxl
         final_dataset.dxw = data.dxw
-        final_dataset.x_unit = data._xunit
-        final_dataset.y_unit = data._yunit
-        final_dataset.xaxis(data._xaxis, data._xunit)
-        final_dataset.yaxis(data._yaxis, data._yunit)
+        final_dataset.xaxis(data._xaxis, data.x_unit)
+        final_dataset.yaxis(data._yaxis, data.y_unit)
     elif isinstance(data, plottable_2D):
         final_dataset = Data2D(data.data, data.err_data, data.qx_data,
                                data.qy_data, data.q_data, data.mask,

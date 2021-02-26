@@ -11,11 +11,9 @@ import logging
 from abc import abstractmethod
 
 import numpy as np
-from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
-    DataReaderException, DefaultReaderException
-from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
-    combine_data_info_with_plottable
-from sas.sascalc.data_util.nxsunit import Converter
+from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException, FileContentsException, DataReaderException
+from sas.sascalc.dataloader.data_info import (Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,
+                                              combine_data_info_with_plottable, set_loaded_units)
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +110,7 @@ class FileReader(object):
                         # Sort the data that's been loaded
                         self.convert_data_units()
                         self.sort_data()
+                        self.define_loaded_units()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
@@ -183,11 +182,6 @@ class FileReader(object):
         """
         for data in self.output:
             if isinstance(data, Data1D):
-                # Normalize the units for
-                data.x_unit = self.format_unit(data.x_unit)
-                data._xunit = data.x_unit
-                data.y_unit = self.format_unit(data.y_unit)
-                data._yunit = data.y_unit
                 # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
                 data.x = self._reorder_1d_array(data.x, ind)
@@ -217,12 +211,6 @@ class FileReader(object):
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
             elif isinstance(data, Data2D):
-                # Normalize the units for
-                data.Q_unit = self.format_unit(data.Q_unit)
-                data.I_unit = self.format_unit(data.I_unit)
-                data._xunit = data.Q_unit
-                data._yunit = data.Q_unit
-                data._zunit = data.I_unit
                 data.data = data.data.astype(np.float64)
                 data.qx_data = data.qx_data.astype(np.float64)
                 data.xmin = np.min(data.qx_data)
@@ -303,7 +291,9 @@ class FileReader(object):
         :param data: 1D data set
         :return:
         """
+        set_loaded_units(data, 'x', '1/A')
         data.xaxis(r"\rm{Q}", '1/A')
+        set_loaded_units(data, 'y', '1/cm')
         data.yaxis(r"\rm{Intensity}", "1/cm")
         return data
 
@@ -314,70 +304,20 @@ class FileReader(object):
         :param data: 2D data set
         :return:
         """
+        set_loaded_units(data, 'x', '1/A')
         data.xaxis("\\rm{Q_{x}}", '1/A')
+        set_loaded_units(data, 'y', '1/A')
         data.yaxis("\\rm{Q_{y}}", '1/A')
+        set_loaded_units(data, 'z', '1/cm')
         data.zaxis("\\rm{Intensity}", "1/cm")
         return data
 
-    def convert_data_units(self, default_q_unit="1/A"):
+    def define_loaded_units(self):
         """
-        Converts al; data to the sasview default of units of A^{-1} for Q and
-        cm^{-1} for I.
-        :param default_q_unit: The default Q unit used by Sasview
+        Defines the units for the as-loaded data - Units can be arbitrary
         """
-        convert_q = True
-        new_output = []
         for data in self.output:
-            if data.isSesans:
-                new_output.append(data)
-                continue
-            try:
-                file_x_unit = data._xunit
-                data_conv_x = Converter(file_x_unit)
-            except KeyError:
-                logger.info("Unrecognized Q units in data file. No data "
-                            "conversion attempted")
-                convert_q = False
-            try:
-
-                if isinstance(data, Data1D):
-                        if convert_q:
-                            data.x = data_conv_x(data.x, units=default_q_unit)
-                            data._xunit = default_q_unit
-                            data.x_unit = default_q_unit
-                            if data.dx is not None:
-                                data.dx = data_conv_x(data.dx,
-                                                      units=default_q_unit)
-                            if data.dxl is not None:
-                                data.dxl = data_conv_x(data.dxl,
-                                                       units=default_q_unit)
-                            if data.dxw is not None:
-                                data.dxw = data_conv_x(data.dxw,
-                                                       units=default_q_unit)
-                elif isinstance(data, Data2D):
-                    if convert_q:
-                        data.qx_data = data_conv_x(data.qx_data,
-                                                   units=default_q_unit)
-                        if data.dqx_data is not None:
-                            data.dqx_data = data_conv_x(data.dqx_data,
-                                                        units=default_q_unit)
-                        try:
-                            file_y_unit = data._yunit
-                            data_conv_y = Converter(file_y_unit)
-                            data.qy_data = data_conv_y(data.qy_data,
-                                                       units=default_q_unit)
-                            if data.dqy_data is not None:
-                                data.dqy_data = data_conv_y(data.dqy_data,
-                                                            units=default_q_unit)
-                        except KeyError:
-                            logger.info("Unrecognized Qy units in data file. No"
-                                        " data conversion attempted")
-            except KeyError:
-                message = "Unable to convert Q units from {0} to 1/A."
-                message.format(default_q_unit)
-                data.errors.append(message)
-            new_output.append(data)
-        self.output = new_output
+            set_loaded_units(data, 'x', data.x_unit)
 
     def format_unit(self, unit=None):
         """
