@@ -51,19 +51,19 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
 
         self.assertEqual(self.data.y_unit, 'cm^{-1}')
-        self.assertEqual(self.data.x[0], 0.008082)
-        self.assertEqual(self.data.x[1], 0.0275)
-        self.assertEqual(self.data.x[2], 0.02762)
-        self.assertEqual(self.data.x[126], 0.5828)
+        self.assertAlmostEqual(self.data.x[0], 0.008082, 6)
+        self.assertAlmostEqual(self.data.x[1], 0.0275, 5)
+        self.assertAlmostEqual(self.data.x[2], 0.02762, 5)
+        self.assertAlmostEqual(self.data.x[126], 0.5828, 5)
 
-        self.assertEqual(self.data.y[0], 0.02198)
-        self.assertEqual(self.data.y[1], 0.02201)
-        self.assertEqual(self.data.y[2], 0.02695)
-        self.assertEqual(self.data.y[126], 0.2958)
+        self.assertAlmostEqual(self.data.y[0], 0.02198, 5)
+        self.assertAlmostEqual(self.data.y[1], 0.02201, 5)
+        self.assertAlmostEqual(self.data.y[2], 0.02695, 5)
+        self.assertAlmostEqual(self.data.y[126], 0.2958, 5)
 
-        self.assertEqual(self.data.dy[0], 0.002704)
-        self.assertEqual(self.data.dy[1], 0.001643)
-        self.assertEqual(self.data.dy[2], 0.002452)
+        self.assertAlmostEqual(self.data.dy[0], 0.002704, 5)
+        self.assertAlmostEqual(self.data.dy[1], 0.001643, 5)
+        self.assertAlmostEqual(self.data.dy[2], 0.002452, 5)
         self.assertEqual(self.data.dy[126], 1)
 
     def test_checkdata2(self):
@@ -78,9 +78,9 @@ class abs_reader(unittest.TestCase):
         data_abs = Loader().load(find("sam14_cor.ABS"))[0]
         data_cor = Loader().load(find("sam14_cor.txt"))[0]
         for i in range(0, len(data_abs.x) - 1):
-            self.assertEqual(data_abs.x[i], data_cor.x[i])
-            self.assertEqual(data_abs.y[i], data_cor.y[i])
-            self.assertEqual(data_abs.dxl[i], -data_cor.dx[i])
+            self.assertAlmostEqual(data_abs.x[i], data_cor.x[i], 2)
+            self.assertAlmostEqual(data_abs.y[i], data_cor.y[i], 2)
+            self.assertAlmostEqual(data_abs.dxl[i], -data_cor.dx[i], 2)
             self.assertTrue(data_abs.dxl[i] > 0)
 
 

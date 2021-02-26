@@ -3,6 +3,7 @@
 """
 import os
 import sys
+import math
 import unittest
 import logging
 import warnings
@@ -341,14 +342,10 @@ class cansas_reader_xml(unittest.TestCase):
             self.assertEqual(item.size_unit,'mm')
             self.assertEqual(item.distance_unit,'mm')
 
-            if item.size.x == 50 \
-                and item.distance == 11000.0 \
-                and item.name == 'source' \
-                and item.type == 'radius':
+            if (math.isclose(item.size.x, 50) and math.isclose(item.distance, 11000.0)
+                    and item.name == 'source' and item.type == 'radius'):
                 _found1 = True
-            elif item.size.x == 1.0 \
-                and item.name == 'sample' \
-                and item.type == 'radius':
+            elif math.isclose(item.size.x, 1.0) and item.name == 'sample' and item.type == 'radius':
                 _found2 = True
 
         if not _found1 or not _found2:

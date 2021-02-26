@@ -228,15 +228,15 @@ def _build_all_units():
     DIMENSIONS['resistance'] = resistance
 
     sld = _build_inv2_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.)
-    sld.update(_build_inv2_units(('nm',), 100.))
+    sld.update(_build_inv2_units(('nm',), 1.0e-2))
     sld['10^-6 Angstrom^-2'] = 1e-6
     DIMENSIONS['sld'] = sld
 
     Q = _build_inv_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.)
-    Q.update(_build_inv_units(('nanometer', 'nanometre', 'nm'), 10.))
-    Q.update(_build_inv_units(('millimeter', 'millimetre', 'mm'), 1.0e8))
-    Q.update(_build_inv_units(('centimeter', 'centimetre', 'cm'), 1.0e9))
-    Q.update(_build_inv_units(('meter', 'metre', 'm'), 1.0e10))
+    Q.update(_build_inv_units(('nanometer', 'nanometre', 'nm'), 0.1))
+    Q.update(_build_inv_units(('millimeter', 'millimetre', 'mm'), 1.0e-7))
+    Q.update(_build_inv_units(('centimeter', 'centimetre', 'cm'), 1.0e-8))
+    Q.update(_build_inv_units(('meter', 'metre', 'm'), 1.0e-10))
     Q['10^-3 Angstrom^-1'] = 1e-3
     DIMENSIONS['Q'] = Q
 
@@ -261,8 +261,8 @@ def _build_all_units():
     # writing the units attributes.
     unknown = {}  # type: Dict[str, ConversionType]
     unknown.update(
-        {None: 1, '???': 1, '': 1, 'A.U.': 1,  'a.u.': 1, 'Counts': 1, 'counts': 1, 'arbitrary': 1, 'arbitrary units': 1,
-         'unitless': 1, 'unknown': 1, 'Unknown': 1}
+        {None: 1, '???': 1, '': 1, 'A.U.': 1,  'a.u.': 1, 'arbitrary': 1, 'arbitrary units': 1,
+         'Counts': 1, 'counts': 1, 'Cts': 1, 'cts': 1, 'unitless': 1, 'unknown': 1, 'Unknown': 1, 'Unk': 1}
     )
     DIMENSIONS['dimensionless'] = unknown
 
@@ -420,30 +420,3 @@ class Converter(object):
             # For temperatures, a type error is raised because the conversion
             # factor is (scale, offset) rather than scale.
             return self.scale_with_offset(units, value)  # type: ignore
-
-
-def _check(expect,get):
-    if expect != get:
-        raise ValueError("Expected %s but got %s"%(expect, get))
-     #print expect,"==",get
-
-
-def test():
-    _check(1,Converter('n_m^-1')(0.1,'invA')) # 10 nm^-1 = 1 inv Angstroms
-    _check(2,Converter('mm')(2000,'m')) # 2000 mm -> 2 m
-    _check(2.011e-10,Converter('1/A')(2.011,"1/m")) # 2.011 1/A -> 2.011 * 10^10 1/m
-    _check(0.003,Converter('microseconds')(3,units='ms')) # 3 us -> 0.003 ms
-    _check(45,Converter('nanokelvin')(45))  # 45 nK -> 45 nK
-    _check(0.5,Converter('seconds')(1800,units='hours')) # 1800 s -> 0.5 hr\
-    try:
-        Converter('help')
-    except ValueError:
-        pass
-    else:
-        raise Exception("unknown unit did not raise an error")
-
-    # TODO: move tests to their own unit test suite
-
-
-if __name__ == "__main__":
-    test()
