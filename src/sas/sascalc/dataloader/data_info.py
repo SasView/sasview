@@ -37,30 +37,30 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
     if axis.lower() == 'x':
         obj.x_converter = Converter(loaded_unit)
         if hasattr(obj, 'Q_unit'):
-            obj.Q_unit = obj.x_converter.base
+            obj.Q_unit = obj.x_converter.units
         elif hasattr(obj, 'x_unit'):
-            obj.x_unit = obj.x_converter.base
+            obj.x_unit = obj.x_converter.units
         else:
-            obj._xunit = obj.x_converter.base
-        obj.x_loaded_unit = obj.x_converter.base
+            obj._xunit = obj.x_converter.units
+        obj.x_loaded_unit = obj.x_converter.units
     elif axis.lower() == 'y':
         obj.y_converter = Converter(loaded_unit)
         if hasattr(obj, 'Q_unit'):
-            obj.Q_unit = obj.y_converter.base
+            obj.Q_unit = obj.y_converter.units
         elif hasattr(obj, 'y_unit'):
-            obj.y_unit = obj.y_converter.base
+            obj.y_unit = obj.y_converter.units
         else:
-            obj._yunit = obj.y_converter.base
-        obj.y_loaded_unit = obj.y_converter.base
+            obj._yunit = obj.y_converter.units
+        obj.y_loaded_unit = obj.y_converter.units
     elif axis.lower() == 'z':
         obj.z_converter = Converter(loaded_unit)
         if hasattr(obj, 'I_unit'):
-            obj.I_unit = obj.z_converter.base
+            obj.I_unit = obj.z_converter.units
         elif hasattr(obj, 'z_unit'):
-            obj.z_unit = obj.z_converter.base
+            obj.z_unit = obj.z_converter.units
         else:
-            obj._zunit = obj.z_converter.base
-        obj.z_loaded_unit = obj.z_converter.base
+            obj._zunit = obj.z_converter.units
+        obj.z_loaded_unit = obj.z_converter.units
     else:
         raise ValueError(
             "The axis {0} was not found.".format(axis))
@@ -180,16 +180,14 @@ class plottable_1D(object):
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
-            base_scale = float(self.x_converter.scale(self.x_unit))
-            scale = float(self.x_converter.scale(unit))
             if self.x is not None and self.x.all():
-                self.x = self.x * scale / base_scale
+                self.x = self.x_converter.scale(unit, self.x)
             if self.dx is not None and self.dx.all():
-                self.dx = self.dx * scale / base_scale
+                self.dx = self.x_converter.scale(unit, self.dx)
             if self.dxl is not None and self.dxl.all():
-                self.dxl = self.dxl * scale / base_scale
+                self.dxl = self.x_converter.scale(unit, self.dxl)
             if self.dxw is not None and self.dxw.all():
-                self.dxw = self.dxw * scale / base_scale
+                self.dxw = self.x_converter.scale(unit, self.dxw)
             # Only set instance variable once conversion is successful
             self._xunit = unit
 
@@ -198,12 +196,10 @@ class plottable_1D(object):
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
-            base_scale = float(self.y_converter.scale(self.y_unit))
-            scale = float(self.y_converter.scale(unit))
             if self.y is not None and self.y.all():
-                self.y = self.y * scale / base_scale
+                self.y = self.y_converter.scale(unit, self.y)
             if self.dy is not None and self.dy.all():
-                self.dy = self.dy * scale / base_scale
+                self.dy = self.y_converter.scale(unit, self.dy)
             # Only set instance variable once conversion is successful
             self._yunit = unit
 
@@ -282,13 +278,8 @@ class plottable_2D(object):
 
     @Q_unit.setter
     def Q_unit(self, Q_unit):
-        self._xunit = Q_unit
-        self._yunit = Q_unit
-        if hasattr(self, 'x_converter') and self.x_converter:
-            self.convert_q_units(Q_unit)
-        else:
-            set_loaded_units(self, 'x', Q_unit)
-            set_loaded_units(self, 'y', Q_unit)
+        self.x_unit = Q_unit
+        self.y_unit = Q_unit
 
     @property
     def I_unit(self):
@@ -296,11 +287,7 @@ class plottable_2D(object):
 
     @I_unit.setter
     def I_unit(self, I_unit):
-        self._zunit = I_unit
-        if hasattr(self, 'z_converter') and self.z_converter:
-            self.convert_i_units(I_unit)
-        else:
-            set_loaded_units(self, 'z', I_unit)
+        self.z_unit = I_unit
 
     @property
     def x_unit(self):
@@ -354,9 +341,9 @@ class plottable_2D(object):
     def z_unit(self):
         return self._zunit
 
-    @y_unit.setter
+    @z_unit.setter
     def z_unit(self, z_unit):
-        self._yunit = z_unit
+        self._zunit = z_unit
         if hasattr(self, 'z_converter') and self.z_converter:
             self.convert_i_units(z_unit)
         else:
@@ -405,17 +392,16 @@ class plottable_2D(object):
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
-            scale = float(self.x_converter.scale(unit))
-            if self.qx_data is not None and self.qx_data.all():
-                self.qx_data = scale * self.qx_data
-            if self.dqx_data is not None and self.dqx_data.all():
-                self.dqx_data = scale * self.dqx_data
+            if self.qx_data is not None and self.qx_data.all() and self.x_converter is not None:
+                self.qx_data = self.x_converter.scale(unit, self.qx_data)
+            if self.dqx_data is not None and self.dqx_data.all() and self.x_converter is not None:
+                self.dqx_data = self.x_converter.scale(unit, self.dqx_data)
             # Only set instance variable once conversion is successful
             self._xunit = unit
-            if self.qy_data is not None and self.qy_data.all():
-                self.qy_data = self.qy_data * scale
-            if self.dqy_data is not None and self.dqy_data.all():
-                self.dqy_data = self.dqy_data * scale
+            if self.qy_data is not None and self.qy_data.all() and self.y_converter is not None:
+                self.qy_data = self.y_converter.scale(unit, self.qy_data)
+            if self.dqy_data is not None and self.dqy_data.all() and self.y_converter is not None:
+                self.dqy_data = self.y_converter.scale(unit, self.dqy_data)
             # Only set instance variable once conversion is successful
             self._yunit = unit
 
@@ -424,17 +410,16 @@ class plottable_2D(object):
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
-            scale = float(self.z_converter.scale(unit))
             if self.data is not None and self.data.all():
-                self.data = self.data * scale
+                self.data = self.z_converter.scale(unit, self.data)
             if self.err_data is not None and self.err_data.all():
-                self.err_data = self.err_data * scale
+                self.err_data = self.z_converter.scale(unit, self.err_data)
             # Only set instance variable once conversion is successful
             self._zunit = unit
 
     def convert_to_native_units(self):
-        self.convert_i_units(self.x_loaded_unit)
-        self.convert_q_units(self.z_loaded_unit)
+        self.convert_q_units(self.x_loaded_unit)
+        self.convert_i_units(self.z_loaded_unit)
 
 
 class Vector(object):
@@ -1014,15 +999,6 @@ class Data1D(plottable_1D, DataInfo):
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy, None, None, lam, dlam)
         self.isSesans = isSesans
-        try:
-            if self.isSesans:  # the data is SESANS
-                self.x_unit = 'A'
-                self.y_unit = 'pol'
-            elif not self.isSesans:  # the data is SANS
-                self.x_unit = '1/A'
-                self.y_unit = '1/cm'
-        except Exception:  # the data is not recognized, notifying user
-            raise TypeError('Check documentation for supported 1D data formats')
 
     def __str__(self):
         """
@@ -1524,15 +1500,10 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.dy = data.dy
         final_dataset.dxl = data.dxl
         final_dataset.dxw = data.dxw
-        final_dataset.xaxis(data._xaxis, data.x_unit)
-        final_dataset.yaxis(data._yaxis, data.y_unit)
     elif isinstance(data, plottable_2D):
         final_dataset = Data2D(data.data, data.err_data, data.qx_data,
                                data.qy_data, data.q_data, data.mask,
                                data.dqx_data, data.dqy_data)
-        final_dataset.xaxis(data._xaxis, data._xunit)
-        final_dataset.yaxis(data._yaxis, data._yunit)
-        final_dataset.zaxis(data._zaxis, data._zunit)
         final_dataset.x_bins = data.x_bins
         final_dataset.y_bins = data.y_bins
     else:
@@ -1549,6 +1520,10 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xmin = data.xmin
     if hasattr(data, "ymin"):
         final_dataset.ymin = data.ymin
+    final_dataset.x_unit = data.x_unit
+    final_dataset.y_unit = data.y_unit
+    if hasattr(data, 'z_unit'):
+        final_dataset.z_unit = data.z_unit
     final_dataset.isSesans = datainfo.isSesans
     final_dataset.title = datainfo.title
     final_dataset.run = datainfo.run

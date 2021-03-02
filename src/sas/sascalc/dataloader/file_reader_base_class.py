@@ -108,7 +108,6 @@ class FileReader(object):
                         self.handle_error_message(DEPRECATION_MESSAGE)
                     if len(self.output) > 0:
                         # Sort the data that's been loaded
-                        self.convert_data_units()
                         self.sort_data()
                         self.define_loaded_units()
         else:
@@ -318,6 +317,10 @@ class FileReader(object):
         """
         for data in self.output:
             set_loaded_units(data, 'x', data.x_unit)
+            set_loaded_units(data, 'y', data.y_unit)
+            if hasattr(data, 'z_unit'):
+                set_loaded_units(data, 'z', data.z_unit)
+
 
     def format_unit(self, unit=None):
         """
