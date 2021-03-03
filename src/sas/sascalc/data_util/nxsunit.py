@@ -401,6 +401,14 @@ class Converter(object):
         outscale, outoffset = self.scalemap[units]
         return (value + inoffset) * inscale / outscale - outoffset
 
+    def get_compatible_units(self):
+        unique_units = []
+        for item in list(self.scalemap.keys()):
+            unit = _format_unit_structure(item)
+            if unit not in unique_units:
+                unique_units.append(unit)
+        return unique_units
+
     def __call__(self, value, units=""):
         # type: (T, str) -> T
         # Note: calculating a*1 rather than simply returning a would produce

@@ -189,6 +189,7 @@ class plottable_1D(object):
             if self.dxw is not None and self.dxw.all():
                 self.dxw = self.x_converter.scale(unit, self.dxw)
             # Only set instance variable once conversion is successful
+            self.x_converter.scalebase = self.x_converter.scalemap[unit]
             self._xunit = unit
 
     def convert_i_units(self, convert_to_unit=None):
@@ -202,6 +203,7 @@ class plottable_1D(object):
                 self.dy = self.y_converter.scale(unit, self.dy)
             # Only set instance variable once conversion is successful
             self._yunit = unit
+            self.y_converter.scalebase = self.y_converter.scalemap[unit]
 
     def convert_to_native_units(self):
         self.convert_i_units(self.x_loaded_unit)
