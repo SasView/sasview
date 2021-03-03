@@ -86,7 +86,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -383,7 +383,7 @@
              <widget class="QLineEdit" name="txtBackgd"/>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="label_8">
+             <widget class="QLabel" name="lblBackgroundUnits">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>

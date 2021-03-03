@@ -973,6 +973,22 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                   data.name
             raise ValueError(msg)
 
+        # Update labels to match native units
+        q_units_raw = self._data.x_unit
+        i_units_raw = self._data.y_unit
+        q_units = f"<html><body><p>{q_units_raw.replace('^{', '<sup>').replace('}', '</sup>')}</p></body></html>"
+        i_units = f"<html><body><p>{i_units_raw.replace('^{', '<sup>').replace('}', '</sup>')}</p></body></html>"
+        contrast_unit = q_units.replace('-1', '-2')
+        invariant_unit = f"<html><body><p>({i_units_raw.split('^')[0]} {q_units_raw.split('^')[0]}<sup>3</sup>)<sup>-1</sup></p></body></html>"
+        porod_unit = f"<html><body><p>({i_units_raw.split('^')[0]} {q_units_raw.split('^')[0]}<sup>4</sup>)<sup>-1</sup></p></body></html>"
+        self.lblTotalQUnits.setText(q_units)
+        self.lblSpecificSurfaceUnits.setText(q_units)
+        self.lblBackgroundUnits.setText(i_units)
+        self.lblExtrapolQUnits.setText(q_units)
+        self.lblInvariantTotalQUnits.setText(invariant_unit)
+        self.lblContrastUnits.setText(contrast_unit)
+        self.lblPorodCstUnits.setText(porod_unit)
+
         # update model with input form files: name, qmin, qmax
         self.model.item(WIDGETS.W_NAME).setText(name)
         self.model.item(WIDGETS.W_QMIN).setText(str(qmin))
