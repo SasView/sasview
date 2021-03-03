@@ -540,6 +540,14 @@
     <string>Change Display Name</string>
    </property>
   </action>
+  <action name="actionSelectUnits">
+   <property name="text">
+    <string>Change Units</string>
+   </property>
+   <property name="toolTip">
+    <string>Change X and Y units for this data set</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

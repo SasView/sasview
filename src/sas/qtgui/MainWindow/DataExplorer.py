@@ -17,6 +17,7 @@ from sas.sascalc.dataloader.loader import Loader
 
 # QTGUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.UnitChange import UnitChange
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -1474,6 +1475,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addAction(self.actionDeselect)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionChangeName)
+        self.context_menu.addAction(self.actionSelectUnits)
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1489,6 +1491,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionSelect.triggered.connect(self.onFileListSelected)
         self.actionDeselect.triggered.connect(self.onFileListDeselected)
         self.actionChangeName.triggered.connect(self.changeName)
+        self.actionSelectUnits.triggered.connect(self.changeUnits)
         self.actionDataInfo.triggered.connect(self.showDataInfo)
         self.actionSaveAs.triggered.connect(self.saveDataAs)
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
@@ -1554,6 +1557,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.nameChangeBox.model_item = model_item
             # Open the window
             self.nameChangeBox.show()
+
+    def changeUnits(self):
+        """
+        Show a dialog allowing unit conversions for each axis
+        """
+        # Create the Unit conversion dialog on the fly
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        # Get the model item and update the name change box
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        data = GuiUtils.dataFromItem(model_item)
+        self.units = UnitChange(self, [data])
+        if self.units.exec_() == QtWidgets.QDialog.Accepted:
+            data.convert_q_units(self.units.cbX.currentText())
+            data.xaxis(data.x_axis, self.units.cbX.currentText())
+            data.convert_i_units(self.units.cbY.currentText())
+            data.yaxis(data.y_axis, self.units.cbY.currentText())
+            model_item.data = data
 
     def showDataInfo(self):
         """

@@ -14,11 +14,11 @@ from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
-from sas.qtgui.Plotting.PlotterUnits import PlotterUnits
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.UnitChange import UnitChange
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
 def _legendResize(width, parent):
@@ -397,7 +397,7 @@ class PlotterWidget(PlotterBase):
         Show a dialog allowing unit conversions for each axis
         """
         # Create the Unit conversion dialog on the fly
-        self.units = PlotterUnits(self, self.data)
+        self.units = UnitChange(self, self.data)
         if self.units.exec_() == QtWidgets.QDialog.Accepted:
             for id in list(self.plot_dict.keys()):
                 plot = self.plot_dict[id]

@@ -5,11 +5,11 @@ from sas.sascalc.dataloader.data_info import set_loaded_units
 from sas.qtgui.Plotting.UI.UnitPropertiesUI import Ui_unitPropertiesUI
 
 
-class PlotterUnits(QtWidgets.QDialog, Ui_unitPropertiesUI):
+class UnitChange(QtWidgets.QDialog, Ui_unitPropertiesUI):
 
     def __init__(self, parent=None, data=None, x_converter=None,
                  y_converter=None):
-        super(PlotterUnits, self).__init__(parent)
+        super(UnitChange, self).__init__(parent)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
