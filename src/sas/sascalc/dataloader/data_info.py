@@ -176,7 +176,7 @@ class plottable_1D(object):
             self.convert_i_units(unit)
 
     def convert_q_units(self, convert_to_unit=None):
-        if convert_to_unit is not None:
+        if convert_to_unit is not None and self.x_converter:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
@@ -193,7 +193,7 @@ class plottable_1D(object):
             self._xunit = unit
 
     def convert_i_units(self, convert_to_unit=None):
-        if convert_to_unit is not None:
+        if convert_to_unit is not None and self.y_converter:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
@@ -390,7 +390,7 @@ class plottable_2D(object):
             self.convert_i_units(unit)
 
     def convert_q_units(self, convert_to_unit=None):
-        if convert_to_unit is not None:
+        if convert_to_unit is not None and self.x_converter:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)
@@ -400,15 +400,16 @@ class plottable_2D(object):
                 self.dqx_data = self.x_converter.scale(unit, self.dqx_data)
             # Only set instance variable once conversion is successful
             self._xunit = unit
-            if self.qy_data is not None and self.qy_data.all() and self.y_converter is not None:
-                self.qy_data = self.y_converter.scale(unit, self.qy_data)
-            if self.dqy_data is not None and self.dqy_data.all() and self.y_converter is not None:
-                self.dqy_data = self.y_converter.scale(unit, self.dqy_data)
-            # Only set instance variable once conversion is successful
-            self._yunit = unit
+            if self.y_converter:
+                if self.qy_data is not None and self.qy_data.all() and self.y_converter is not None:
+                    self.qy_data = self.y_converter.scale(unit, self.qy_data)
+                if self.dqy_data is not None and self.dqy_data.all() and self.y_converter is not None:
+                    self.dqy_data = self.y_converter.scale(unit, self.dqy_data)
+                # Only set instance variable once conversion is successful
+                self._yunit = unit
 
     def convert_i_units(self, convert_to_unit=None):
-        if convert_to_unit is not None:
+        if convert_to_unit is not None and self.z_converter:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
             unit = standardize_units(convert_to_unit)

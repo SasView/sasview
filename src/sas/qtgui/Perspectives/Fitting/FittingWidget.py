@@ -2926,6 +2926,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
         if return_data is None:
             return
+        if hasattr(return_data['data'], 'convert_to_native_units'):
+            return_data['data'].convert_to_native_units()
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
         # Fits of Sesans data are in real space
@@ -2989,7 +2991,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if return_data is None:
             return
-
+        if hasattr(return_data['data'], 'convert_to_native_units'):
+            return_data['data'].convert_to_native_units()
         fitted_data = self.logic.new2DPlot(return_data)
         # assure the current index is set properly for batch
         if len(self._logic) > 1:

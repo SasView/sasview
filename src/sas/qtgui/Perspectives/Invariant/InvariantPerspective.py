@@ -437,6 +437,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             title = f"Low-Q extrapolation [{self._data.name}]"
 
             # Convert the data into plottable
+            if hasattr(extrapolated_data, 'convert_to_native_units'):
+                extrapolated_data.convert_to_native_units()
             self.low_extrapolation_plot = self._manager.createGuiData(extrapolated_data)
 
             self.low_extrapolation_plot.name = title
@@ -466,6 +468,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             title = f"High-Q extrapolation [{self._data.name}]"
 
             # Convert the data into plottable
+            if hasattr(high_out_data, 'convert_to_native_units'):
+                high_out_data.convert_to_native_units()
             self.high_extrapolation_plot = self._manager.createGuiData(high_out_data)
             self.high_extrapolation_plot.name = title
             self.high_extrapolation_plot.title = title

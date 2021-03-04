@@ -758,9 +758,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
 
         # Figure out which rows are checked
-        selected_items = [self.model.item(index)
-                          for index in range(self.model.rowCount())
-                          if isItemReady(index)]
+        selected_items = [self.convert_to_calculator_units(self.model.item(index))
+                          for index in range(self.model.rowCount()) if isItemReady(index)]
 
         if len(selected_items) < 1:
             return
@@ -793,6 +792,27 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setText(msg)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
+
+    @staticmethod
+    def convert_to_calculator_units(qtGuiStdItem):
+        # Convert data from raw units to sasmodels compatible units
+        data = GuiUtils.dataFromItem(qtGuiStdItem)
+        try:
+            data.convert_q_units('1/A')
+        except KeyError:
+            msg = "Unable to convert Q units to native sasmodels unit of 1/A:"
+            msg += " Fit parameters will be in units relative to the data "
+            msg += "Q units {0}".format(data.xunit)
+            logger.warning(msg)
+        try:
+            data.convert_i_units('1/cm')
+        except KeyError:
+            msg = "Unable to convert I units to native sasmodels unit of 1/cm:"
+            msg += " Fit parameters will be in units relative to the data "
+            msg += "I units {0}".format(data.xunit)
+            logger.warning(msg)
+        qtGuiStdItem.setData(data)
+        return qtGuiStdItem
 
     def sendItemToPerspective(self, item, tab_index=None):
         """

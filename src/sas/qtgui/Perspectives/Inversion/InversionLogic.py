@@ -133,6 +133,9 @@ class InversionLogic(object):
         new_plot.ytransform = "y"
         new_plot.group_id = GROUP_ID_PR_FIT
 
+        if hasattr(new_plot, 'convert_to_native_units'):
+            new_plot.convert_to_native_units()
+
         return new_plot
 
     def add_errors(self, sigma=0.05):
