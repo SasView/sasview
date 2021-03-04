@@ -24,23 +24,23 @@ class NXSUnitTests(unittest.TestCase):
 
     def testBasicUnits(self):
         # 10 nm^-1 = 1 inv Angstroms
-        self.assertEqual(1, Converter('n_m^-1')(10, 'invA'))
+        self.assertAlmostEqual(1, Converter('n_m^-1')(10, 'invA'))
         # Test different 1/A representations
-        self.assertEqual(1, Converter('/A')(1, 'invA'))
+        self.assertAlmostEqual(1, Converter('/A')(1, 'invA'))
         # 1.65 1/A = 1.65e10 1/m
         self.assertAlmostEqual(1.65e10, Converter('/A')(1.65, '/m'), 2)
         # 2000 mm = 2 m
-        self.assertEqual(2.0, Converter('mm')(2000, 'm'))
+        self.assertAlmostEqual(2.0, Converter('mm')(2000, 'm'))
         # 2.011 1/A = 2.011e10 1/m
-        self.assertEqual(2.011e10, Converter('1/A')(2.011, "1/m"))
+        self.assertAlmostEqual(2.011e10, Converter('1/A')(2.011, "1/m"))
         # 3 us = 0.003 ms
-        self.assertEqual(0.003, Converter('microseconds')(3, units='ms'))
+        self.assertAlmostEqual(0.003, Converter('microseconds')(3, units='ms'))
         # 45 nK = 45 nK
-        self.assertEqual(45, self.k_conv(45))
+        self.assertAlmostEqual(45, self.k_conv(45))
         # 1 K = 1e9 nK
-        self.assertEqual(1, self.k_conv(1e9, 'K'))
+        self.assertAlmostEqual(1, self.k_conv(1e9, 'K'))
         # 1800 s = 0.5 hr
-        self.assertEqual(0.5, Converter('seconds')(1800, units='hours'))
+        self.assertAlmostEqual(0.5, Converter('seconds')(1800, units='hours'))
 
     def test_known_unknown_units(self):
         self.assertEqual(self.base_value,
@@ -62,10 +62,10 @@ class NXSUnitTests(unittest.TestCase):
         self.assertEqual(1, self.converter.scalebase)
 
     def test_se_units(self):
-        self.assertEqual(1, Converter('A-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
-        self.assertEqual(1, Converter('A^-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
-        self.assertEqual(1, Converter('A-2 cm^-1')(1, 'Å^{-2} cm^{-1}'))
-        self.assertEqual(1, Converter('A^-2 cm^-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertAlmostEqual(1, Converter('A-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertAlmostEqual(1, Converter('A^-2 cm-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertAlmostEqual(1, Converter('A-2 cm^-1')(1, 'Å^{-2} cm^{-1}'))
+        self.assertAlmostEqual(1, Converter('A^-2 cm^-1')(1, 'Å^{-2} cm^{-1}'))
 
     def test_unit_structures(self):
         # Both should return None

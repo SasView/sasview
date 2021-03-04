@@ -128,6 +128,22 @@ def _build_inv_units(names, conversion):
     return map
 
 
+def _build_inv_metric_units(unit, abbr):
+    # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
+    """
+    Using the return from _build_metric_units, build inverse variations on all units (1/x, invx, x^{-1} and x^-1)
+    """
+    map = {}  # type: Dict[str, ConversionType]
+    meter_map = _build_metric_units(unit, abbr)
+    for s, c in meter_map.items():
+        conversion = 1/float(c)
+        map['1/' + s] = conversion
+        map['inv' + s] = conversion
+        map[s + '^-1'] = conversion
+        map[s + '^{-1}'] = conversion
+    return map
+
+
 def _build_inv2_units(names, conversion):
     # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
     """
@@ -135,6 +151,22 @@ def _build_inv2_units(names, conversion):
     """
     map = {}  # type: Dict[str, ConversionType]
     for s in names:
+        map['1/' + s + '^2'] = conversion
+        map['inv' + s + '^2'] = conversion
+        map[s + '^-2'] = conversion
+        map[s + '^{-2}'] = conversion
+    return map
+
+
+def _build_inv2_metric_units(unit, abbr):
+    # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
+    """
+    Using the return from _build_metric_units, build inverse square variations on all units (1/x, invx, x^{-1} and x^-1)
+    """
+    map = {}  # type: Dict[str, ConversionType]
+    meter_map = _build_metric_units(unit, abbr)
+    for s, c in meter_map.items():
+        conversion = 1/(float(c) * float(c))
         map['1/' + s + '^2'] = conversion
         map['inv' + s + '^2'] = conversion
         map[s + '^-2'] = conversion
@@ -203,7 +235,7 @@ def _build_all_units():
     frequency = _build_metric_units('hertz', 'Hz')
     frequency.update(_build_metric_units('Hertz', 'Hz'))
     frequency.update(_build_plural_units(rpm=1 / 60.))
-    frequency.update(_build_inv_units(('s',), 1.))
+    frequency.update(_build_inv_metric_units('second', 's'))
     DIMENSIONS['frequency'] = frequency
 
     # Note: degrees are used for angle
@@ -227,16 +259,13 @@ def _build_all_units():
     resistance = _build_metric_units('ohm', 'Ω')
     DIMENSIONS['resistance'] = resistance
 
-    sld = _build_inv2_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.)
-    sld.update(_build_inv2_units(('nm',), 1.0e-2))
+    sld = _build_inv2_metric_units('meter', 'm')
+    sld.update(_build_inv2_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10))
     sld['10^-6 Angstrom^-2'] = 1e-6
     DIMENSIONS['sld'] = sld
 
-    Q = _build_inv_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.)
-    Q.update(_build_inv_units(('nanometer', 'nanometre', 'nm'), 0.1))
-    Q.update(_build_inv_units(('millimeter', 'millimetre', 'mm'), 1.0e-7))
-    Q.update(_build_inv_units(('centimeter', 'centimetre', 'cm'), 1.0e-8))
-    Q.update(_build_inv_units(('meter', 'metre', 'm'), 1.0e-10))
+    Q = _build_inv_metric_units('meter', 'm')
+    Q.update(_build_inv_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10))
     Q['10^-3 Angstrom^-1'] = 1e-3
     DIMENSIONS['Q'] = Q
 
@@ -403,10 +432,13 @@ class Converter(object):
 
     def get_compatible_units(self):
         unique_units = []
-        for item in list(self.scalemap.keys()):
-            unit = _format_unit_structure(item)
+        conv_list = []
+        for item, conv in self.scalemap.items():
+            conv_list.append(conv)
+            unit = standardize_units(item)
             if unit not in unique_units:
                 unique_units.append(unit)
+        unique_units = [x for _, x in sorted(zip(conv_list, unique_units))]
         return unique_units
 
     def __call__(self, value, units=""):
