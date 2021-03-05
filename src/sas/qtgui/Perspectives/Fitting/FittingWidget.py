@@ -556,7 +556,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
-        self.cmdCompute.setEnabled(False)
         self.chkPolydispersity.setEnabled(True)
         self.chkPolydispersity.setCheckState(False)
         self.chk2DView.setEnabled(True)
@@ -591,7 +590,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Buttons
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
-        self.cmdCompute.clicked.connect(self.recalculatePlotData)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
 
@@ -1392,7 +1390,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Update the chart
         if self.data_is_loaded:
-            self.cmdPlot.setText("Show Plot")
+            self.cmdPlot.setText("Compute/Plot")
             self.calculateQGridForModel()
         else:
             self.cmdPlot.setText("Calculate")
@@ -1589,9 +1587,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.kernel_module.details[parameter_name][pos] = value
         else:
             self.magnet_params[parameter_name] = value
-            #self.kernel_module.setParam(parameter_name) = value
-            # Force the chart update when actual parameters changed
-            #self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
@@ -2167,7 +2162,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current set of data
         """
         # Regardless of previous state, this should now be `plot show` functionality only
-        self.cmdPlot.setText("Show Plot")
+        self.cmdPlot.setText("Compute/Plot")
         # Force data recalculation so existing charts are updated
         if not self.data_is_loaded:
             self.showTheoryPlot()
@@ -2177,7 +2172,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # This allows charts to be properly updated in order
         # of plots being applied.
         QtWidgets.QApplication.processEvents()
-        self.recalculatePlotData() # recalc+plot theory again (2nd)
+        self.recalculatePlotData()  # recalc+plot theory again (2nd)
 
     def onSmearingOptionsUpdate(self):
         """
@@ -2189,7 +2184,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.calculateQGridForModel()
 
     def onKey(self, event):
-        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdCompute.isEnabled():
+        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
             self.recalculatePlotData()
 
     def recalculatePlotData(self):
@@ -2249,7 +2244,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        #self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
@@ -2660,10 +2654,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
         # necessary
         self.processEffectiveRadius()
-
-        # Force the chart update when actual parameters changed
-        #if model_column == 1:
-            #self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
@@ -3628,7 +3618,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cbStructureFactor.setEnabled(enabled)
 
         self.cmdPlot.setEnabled(enabled)
-        self.cmdCompute.setEnabled(enabled)
 
     def enableInteractiveElements(self):
         """
