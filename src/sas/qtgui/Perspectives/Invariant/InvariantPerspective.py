@@ -10,6 +10,7 @@ from twisted.internet import threads
 from twisted.internet import reactor
 
 # sas-global
+from sas.sascalc.dataloader.data_info import set_loaded_units
 from sas.sascalc.invariant import invariant
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -437,8 +438,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             title = f"Low-Q extrapolation [{self._data.name}]"
 
             # Convert the data into plottable
-            if hasattr(extrapolated_data, 'convert_to_native_units'):
-                extrapolated_data.convert_to_native_units()
+            set_loaded_units(extrapolated_data, 'x', self._data.x_loaded_unit)
+            set_loaded_units(extrapolated_data, 'y', self._data.y_loaded_unit)
             self.low_extrapolation_plot = self._manager.createGuiData(extrapolated_data)
 
             self.low_extrapolation_plot.name = title
@@ -468,8 +469,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             title = f"High-Q extrapolation [{self._data.name}]"
 
             # Convert the data into plottable
-            if hasattr(high_out_data, 'convert_to_native_units'):
-                high_out_data.convert_to_native_units()
+            set_loaded_units(high_out_data, 'x', self.data.x_loaded_unit)
+            set_loaded_units(high_out_data, 'y', self.data.y_loaded_unit)
             self.high_extrapolation_plot = self._manager.createGuiData(high_out_data)
             self.high_extrapolation_plot.name = title
             self.high_extrapolation_plot.title = title

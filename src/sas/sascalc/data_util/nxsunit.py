@@ -144,33 +144,35 @@ def _build_inv_metric_units(unit, abbr):
     return map
 
 
-def _build_inv2_units(names, conversion):
+def _build_inv_n_units(names, conversion, n=2):
     # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
     """
     Builds variations on inverse square units, including 1/x^2, invx^-2 and x^-2.
     """
     map = {}  # type: Dict[str, ConversionType]
+    n = int(n)
     for s in names:
-        map['1/' + s + '^2'] = conversion
-        map['inv' + s + '^2'] = conversion
-        map[s + '^-2'] = conversion
-        map[s + '^{-2}'] = conversion
+        map[f'1/{s}^{n}'] = conversion
+        map[f'inv{s}^{n}'] = conversion
+        map[f'{s}^-{n}'] = conversion
+        map[s + '^{-' + str(n) + '}'] = conversion
     return map
 
 
-def _build_inv2_metric_units(unit, abbr):
+def _build_inv_n_metric_units(unit, abbr, n=2):
     # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
     """
     Using the return from _build_metric_units, build inverse square variations on all units (1/x, invx, x^{-1} and x^-1)
     """
     map = {}  # type: Dict[str, ConversionType]
     meter_map = _build_metric_units(unit, abbr)
+    n = int(n)
     for s, c in meter_map.items():
-        conversion = 1/(float(c) * float(c))
-        map['1/' + s + '^2'] = conversion
-        map['inv' + s + '^2'] = conversion
-        map[s + '^-2'] = conversion
-        map[s + '^{-2}'] = conversion
+        conversion = 1/(math.pow(float(c), n))
+        map[f'1/{s}^{n}'] = conversion
+        map[f'inv{s}^{n}'] = conversion
+        map[f'{s}^-{n}'] = conversion
+        map[s + '^{-' + str(n) + '}'] = conversion
     return map
 
 
@@ -259,8 +261,8 @@ def _build_all_units():
     resistance = _build_metric_units('ohm', 'Ω')
     DIMENSIONS['resistance'] = resistance
 
-    sld = _build_inv2_metric_units('meter', 'm')
-    sld.update(_build_inv2_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10))
+    sld = _build_inv_n_metric_units('meter', 'm', 2)
+    sld.update(_build_inv_n_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10, 2))
     sld['10^-6 Angstrom^-2'] = 1e-6
     DIMENSIONS['sld'] = sld
 
@@ -268,6 +270,10 @@ def _build_all_units():
     Q.update(_build_inv_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10))
     Q['10^-3 Angstrom^-1'] = 1e-3
     DIMENSIONS['Q'] = Q
+
+    scattering_volume = _build_inv_n_metric_units('meter', 'm', 3)
+    scattering_volume.update(_build_inv_n_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10, 3))
+    DIMENSIONS['scattering_volume'] = scattering_volume
 
     # TODO: break into separate dimension blocks to allow scaling of complex units
     #  SANS units => ['A^{-2}']

@@ -793,23 +793,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
 
-    @staticmethod
-    def convert_to_calculator_units(qtGuiStdItem):
+    def convert_to_calculator_units(self, qtGuiStdItem):
         # Convert data from raw units to sasmodels compatible units
         data = GuiUtils.dataFromItem(qtGuiStdItem)
         try:
             data.convert_q_units('1/A')
         except KeyError:
-            msg = "Unable to convert Q units to native sasmodels unit of 1/A:"
-            msg += " Fit parameters will be in units relative to the data "
-            msg += "Q units {0}".format(data.xunit)
+            msg = f"Unable to convert Q units to native {self._perspective().name} units of A^-1:"
+            msg += f" Parameters will be in units relative to the data Q units {data.x_unit}"
             logger.warning(msg)
         try:
             data.convert_i_units('1/cm')
         except KeyError:
-            msg = "Unable to convert I units to native sasmodels unit of 1/cm:"
-            msg += " Fit parameters will be in units relative to the data "
-            msg += "I units {0}".format(data.xunit)
+            unit = data.z_unit if isinstance(data, Data2D) else data.y_unit
+            msg = f"Unable to convert I units to native {self._perspective().name} units of cm^-1:"
+            msg += f" Parameters will be in units relative to the data Q units {unit}"
             logger.warning(msg)
         qtGuiStdItem.setData(data)
         return qtGuiStdItem
@@ -1367,7 +1365,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(str(ex) + sys.exc_info()[1])
+                logging.error(str(ex))
 
                 any_error = True
             if any_error or data_error or error_message != "":

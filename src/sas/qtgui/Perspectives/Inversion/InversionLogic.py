@@ -2,6 +2,7 @@ import math
 import logging
 import numpy as np
 
+from sas.sascalc.dataloader.data_info import set_loaded_units
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
@@ -73,8 +74,8 @@ class InversionLogic(object):
 
         new_plot = Data1D(x, y)
         new_plot.name = IQ_FIT_LABEL + f"[{self._data.name}]"
-        new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        set_loaded_units(new_plot, 'x', self._data.x_loaded_unit)
+        set_loaded_units(new_plot, 'y', self._data.y_loaded_unit)
         title = "I(q)"
         new_plot.title = title
 
@@ -98,8 +99,6 @@ class InversionLogic(object):
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL
-            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
             # If we have a group ID, use it
             if 'plot_group_id' in pr.info:
                 new_plot.group_id = pr.info["plot_group_id"]
@@ -132,9 +131,6 @@ class InversionLogic(object):
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
         new_plot.group_id = GROUP_ID_PR_FIT
-
-        if hasattr(new_plot, 'convert_to_native_units'):
-            new_plot.convert_to_native_units()
 
         return new_plot
 

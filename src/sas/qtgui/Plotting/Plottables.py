@@ -467,28 +467,6 @@ class Plottable(object):
         self.dx = dx
         self.transformView()
 
-    def xaxis(self, name, units):
-        """
-        Set the name and unit of x_axis
-
-        :param name: the name of x-axis
-        :param units: the units of x_axis
-
-        """
-        self._xaxis = name
-        self._xunit = units
-
-    def yaxis(self, name, units):
-        """
-        Set the name and unit of y_axis
-
-        :param name: the name of y-axis
-        :param units: the units of y_axis
-
-        """
-        self._yaxis = name
-        self._yunit = units
-
     def get_xaxis(self):
         """Return the units and name of x-axis"""
         return self._xaxis, self._xunit
@@ -924,39 +902,6 @@ class PlottableData2D(Plottable):
         self.zmax = zmax
         self.id = None
 
-    def xaxis(self, label, unit):
-        """
-        set x-axis
-
-        :param label: x-axis label
-        :param unit: x-axis unit
-
-        """
-        self._xaxis = label
-        self._xunit = unit
-
-    def yaxis(self, label, unit):
-        """
-        set y-axis
-
-        :param label: y-axis label
-        :param unit: y-axis unit
-
-        """
-        self._yaxis = label
-        self._yunit = unit
-
-    def zaxis(self, label, unit):
-        """
-        set z-axis
-
-        :param label: z-axis label
-        :param unit: z-axis unit
-
-        """
-        self._zaxis = label
-        self._zunit = unit
-
     def setValues(self, datainfo=None):
         """
         Use datainfo object to initialize data2D
@@ -973,8 +918,6 @@ class PlottableData2D(Plottable):
         self.z_unit = datainfo.I_unit
         self._zaxis = datainfo._zaxis
 
-        self.xaxis(datainfo._xunit, datainfo._xaxis)
-        self.yaxis(datainfo._yunit, datainfo._yaxis)
         # x and y boundaries
         self.xmin = datainfo.xmin
         self.xmax = datainfo.xmax
@@ -1042,8 +985,6 @@ class PlottableData1D(Plottable):
         self.dy = dy
         self.source = None
         self.detector = None
-        self.xaxis('', '')
-        self.yaxis('', '')
         self.view = View(self.x, self.y, self.dx, self.dy)
         self.symbol = 0
         self.custom_color = None

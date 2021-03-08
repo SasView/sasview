@@ -23,6 +23,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit.pagestate import PageState
 from sas.sascalc.fit import models
+from sas.sascalc.dataloader.data_info import set_loaded_units
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -2926,8 +2927,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
         if return_data is None:
             return
-        if hasattr(return_data['data'], 'convert_to_native_units'):
-            return_data['data'].convert_to_native_units()
+        set_loaded_units(return_data['data'], 'x', self.data.x_loaded_unit)
+        set_loaded_units(return_data['data'], 'y', self.data.y_loaded_unit)
+        if isinstance(self.data, Data2D):
+            set_loaded_units(return_data['data'], 'z', self.data.z_loaded_unit)
         fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
 
         # Fits of Sesans data are in real space
