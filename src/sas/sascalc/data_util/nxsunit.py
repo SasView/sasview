@@ -296,7 +296,7 @@ def _build_all_units():
     # writing the units attributes.
     unknown = {}  # type: Dict[str, ConversionType]
     unknown.update(
-        {None: 1, '???': 1, '': 1, 'A.U.': 1,  'a.u.': 1, 'arbitrary': 1, 'arbitrary units': 1,
+        {'None': 1, '???': 1, '': 1, 'A.U.': 1,  'a.u.': 1, 'arbitrary': 1, 'arbitrary units': 1,
          'Counts': 1, 'counts': 1, 'Cts': 1, 'cts': 1, 'unitless': 1, 'unknown': 1, 'Unknown': 1, 'Unk': 1}
     )
     DIMENSIONS['dimensionless'] = unknown
@@ -308,8 +308,7 @@ def standardize_units(unit):
     :param unit: Raw unit as supplied
     :return: Unit with known, reduced values
     """
-    if not unit:
-        return None
+    unit = str(unit)
     # Catch ang, angstrom, ANG, ANGSTROM, and any capitalization in between
     # Replace with 'Å'
     unit = re.sub(r'[Åa]ng(str[oö]m)?(s)?', 'Å', unit, flags=re.IGNORECASE)
@@ -343,8 +342,7 @@ def _format_unit_structure(unit=None):
     :param unit: Unit string to be formatted
     :return: Formatted unit string
     """
-    if not unit:
-        return
+    unit = str(unit)
     # a-m[ /?]b-n ... -> a^m b^-n
     unit = re.sub('([℃ÅA-Za-z_ ]+)([-0-9]+)', r"\1^\2", unit)
     # a^-m*b^-n -> a^-m b^-n
@@ -440,10 +438,10 @@ class Converter(object):
         unique_units = []
         conv_list = []
         for item, conv in self.scalemap.items():
-            conv_list.append(conv)
             unit = standardize_units(item)
-            if unit not in unique_units:
+            if unit not in unique_units and unit is not None:
                 unique_units.append(unit)
+                conv_list.append(conv)
         unique_units = [x for _, x in sorted(zip(conv_list, unique_units))]
         return unique_units
 

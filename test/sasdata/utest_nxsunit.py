@@ -17,7 +17,7 @@ class NXSUnitTests(unittest.TestCase):
         self.assertEqual(self.converter.units, '')
         self.assertEqual(self.converter.scalebase, 1)
         self.assertTrue(isinstance(self.converter.scalemap, dict))
-        self.assertIn(None, self.converter.scalemap.keys())
+        self.assertIn('None', self.converter.scalemap.keys())
         self.assertEqual(self.k_conv.units, 'nanoK')
         self.assertEqual(self.k_conv.scalebase, (1e-9, 0.0))
         self.assertEqual(len(self.k_conv.scalemap.keys()), 313)
@@ -69,7 +69,7 @@ class NXSUnitTests(unittest.TestCase):
 
     def test_unit_structures(self):
         # Both should return None
-        self.assertEqual(standardize_units(None), standardize_units(''))
+        self.assertEqual(standardize_units(None), standardize_units('None'))
         # Test substitutions
         self.assertEqual('nK', standardize_units('nKelvin'))
         # Capitalization standardization
