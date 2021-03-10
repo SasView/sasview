@@ -1590,9 +1590,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.units = UnitChange(self, [data])
         if self.units.exec_() == QtWidgets.QDialog.Accepted:
             data.convert_q_units(self.units.cbX.currentText())
-            data.xaxis(data.x_axis, self.units.cbX.currentText())
             data.convert_i_units(self.units.cbY.currentText())
-            data.yaxis(data.y_axis, self.units.cbY.currentText())
             model_item.data = data
 
     def showDataInfo(self):

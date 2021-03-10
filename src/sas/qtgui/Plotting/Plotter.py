@@ -402,9 +402,7 @@ class PlotterWidget(PlotterBase):
             for id in list(self.plot_dict.keys()):
                 plot = self.plot_dict[id]
                 plot.convert_q_units(self.units.cbX.currentText())
-                plot.xaxis(plot.x_axis, self.units.cbX.currentText())
                 plot.convert_i_units(self.units.cbY.currentText())
-                plot.yaxis(plot.y_axis, self.units.cbY.currentText())
                 self.replacePlot(id, plot)
 
     def onAddText(self):

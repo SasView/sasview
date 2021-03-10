@@ -320,22 +320,8 @@ class FileReader(object):
             set_loaded_units(data, 'y', data.y_unit)
             if hasattr(data, 'z_unit'):
                 set_loaded_units(data, 'z', data.z_unit)
-
-
-    def format_unit(self, unit=None):
-        """
-        Format units a common way
-        :param unit:
-        :return:
-        """
-        if unit:
-            split = unit.split("/")
-            if len(split) == 1:
-                return unit
-            elif split[0] == '1':
-                return "{0}^".format(split[1]) + "{-1}"
-            else:
-                return "{0}*{1}^".format(split[0], split[1]) + "{-1}"
+                data.Q_unit = data.x_unit
+                data.I_unit = data.z_unit
 
     def set_all_to_none(self):
         """
