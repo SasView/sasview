@@ -56,11 +56,6 @@ class Reader(FileReader):
         is_center = False
         is_data_started = False
 
-        base_q_unit = '1/A'
-        base_i_unit = '1/cm'
-        data_conv_q = Converter(base_q_unit)
-        data_conv_i = Converter(base_i_unit)
-
         for line in lines:
             # Information line 1
             if line.find(".bt5") > 0:
@@ -178,14 +173,6 @@ class Reader(FileReader):
                     _dy = float(toks[2])
                     _dx = float(toks[3])
 
-                    if data_conv_q is not None:
-                        _x = data_conv_q(_x, units=base_q_unit)
-                        _dx = data_conv_q(_dx, units=base_q_unit)
-
-                    if data_conv_i is not None:
-                        _y = data_conv_i(_y, units=base_i_unit)
-                        _dy = data_conv_i(_dy, units=base_i_unit)
-
                     self.current_dataset.x[data_line] = _x
                     self.current_dataset.y[data_line] = _y
                     self.current_dataset.dy[data_line] = _dy
@@ -228,10 +215,6 @@ class Reader(FileReader):
             raise ValueError("ascii_reader: could not load file")
 
         self.current_dataset = self.set_default_1d_units(self.current_dataset)
-        if data_conv_q is not None:
-            self.current_dataset.xaxis("\\rm{Q}", base_q_unit)
-        if data_conv_i is not None:
-            self.current_dataset.yaxis("\\rm{Intensity}", base_i_unit)
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

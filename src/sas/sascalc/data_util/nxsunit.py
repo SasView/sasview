@@ -147,7 +147,7 @@ def _build_inv_metric_units(unit, abbr):
 def _build_inv_n_units(names, conversion, n=2):
     # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
     """
-    Builds variations on inverse square units, including 1/x^2, invx^-2 and x^-2.
+    Builds variations on inverse to the nth power units, including 1/x^n, invx^-n and x^-n.
     """
     map = {}  # type: Dict[str, ConversionType]
     n = int(n)
@@ -162,7 +162,8 @@ def _build_inv_n_units(names, conversion, n=2):
 def _build_inv_n_metric_units(unit, abbr, n=2):
     # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
     """
-    Using the return from _build_metric_units, build inverse square variations on all units (1/x, invx, x^{-1} and x^-1)
+    Using the return from _build_metric_units, build inverse to the nth power variations on all units
+    (1/x^n, invx^n, x^{-n} and x^-n)
     """
     map = {}  # type: Dict[str, ConversionType]
     meter_map = _build_metric_units(unit, abbr)
@@ -254,23 +255,28 @@ def _build_all_units():
     temperature['℉'] = temperature['degF']
     DIMENSIONS['temperature'] = temperature
 
+    # Charge
     charge = _build_metric_units('coulomb', 'C')
     charge['microAmp*hour'] = 0.0036
     DIMENSIONS['charge'] = charge
 
+    # Resistance Units
     resistance = _build_metric_units('ohm', 'Ω')
     DIMENSIONS['resistance'] = resistance
 
+    # Scattering length densities and inverse area units
     sld = _build_inv_n_metric_units('meter', 'm', 2)
     sld.update(_build_inv_n_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10, 2))
     sld['10^-6 Angstrom^-2'] = 1e-6
     DIMENSIONS['sld'] = sld
 
+    # Q units (also inverse lengths)
     Q = _build_inv_metric_units('meter', 'm')
     Q.update(_build_inv_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10))
     Q['10^-3 Angstrom^-1'] = 1e-3
     DIMENSIONS['Q'] = Q
 
+    # Inverse volume units
     scattering_volume = _build_inv_n_metric_units('meter', 'm', 3)
     scattering_volume.update(_build_inv_n_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10, 3))
     DIMENSIONS['scattering_volume'] = scattering_volume
@@ -281,10 +287,12 @@ def _build_all_units():
     #  Will require more complexity to scale calculations
     DIMENSIONS['SESANS'] = {'Å^{-2} cm^{-1}': 1, 'A^{-2} cm^{-1}': 1}
 
+    # Energy units
     energy = _build_metric_units('electronvolt', 'eV')
     DIMENSIONS['energy'] = energy
     # Note: energy <=> wavelength <=> velocity requires a probe type
 
+    # Magnetic moment units
     magnetism = _build_metric_units('tesla', 'T')
     gauss = _build_metric_units('gauss', 'G')
     gauss = dict((k, v * 1e-4) for k, v in gauss.items())
@@ -308,6 +316,8 @@ def standardize_units(unit):
     :param unit: Raw unit as supplied
     :return: Unit with known, reduced values
     """
+    # Convert value to a string -> Sets None to 'None'
+    # Useful for GUI elements that require string values
     unit = str(unit)
     # Catch ang, angstrom, ANG, ANGSTROM, and any capitalization in between
     # Replace with 'Å'
@@ -342,6 +352,8 @@ def _format_unit_structure(unit=None):
     :param unit: Unit string to be formatted
     :return: Formatted unit string
     """
+    # Convert value to a string -> Sets None to 'None'
+    # Useful for GUI elements that require string values
     unit = str(unit)
     # a-m[ /?]b-n ... -> a^m b^-n
     unit = re.sub('([℃ÅA-Za-z_ ]+)([-0-9]+)', r"\1^\2", unit)
@@ -424,12 +436,16 @@ class Converter(object):
         if not units or self.scalemap is None or value is None:
             return value
         units = standardize_units(units)
+        if isinstance(value, list):
+            return [self.scale(units, i) for i in value]
         return value * self.scalebase / self.scalemap[units]
 
     def scale_with_offset(self, units="", value=None):
         if not units or self.scalemap is None or value is None:
             return value
         units = standardize_units(units)
+        if isinstance(value, list):
+            return [self.scale_with_offset(units, i) for i in value]
         inscale, inoffset = self.scalebase
         outscale, outoffset = self.scalemap[units]
         return (value + inoffset) * inscale / outscale - outoffset

@@ -22,8 +22,8 @@ class UnitPropertiesTest(unittest.TestCase):
             widget = self.widget
         x_units_loaded = [widget.cbX.itemText(i) for i in range(widget.cbX.count())]
         y_units_loaded = [widget.cbY.itemText(i) for i in range(widget.cbY.count())]
-        x_units_method = widget.getAllowedXUnits()
-        y_units_method = widget.getAllowedYUnits()
+        x_units_method = widget.getAllowedQUnits()
+        y_units_method = widget.getAllowedIUnits()
         # Check the number of possible units is > 0
         self.assertNotEqual(len(x_units_loaded), 0)
         self.assertNotEqual(len(y_units_loaded), 0)
@@ -35,10 +35,10 @@ class UnitPropertiesTest(unittest.TestCase):
         if not widget:
             widget = self.widget
         if x_unit:
-            x_units = widget.getAllowedXUnits()
+            x_units = widget.getAllowedQUnits()
             self.assertIn(x_unit, x_units)
         if y_unit:
-            y_units = widget.getAllowedYUnits()
+            y_units = widget.getAllowedIUnits()
             self.assertIn(y_unit, y_units)
 
     def testDefaults(self):
@@ -53,8 +53,8 @@ class UnitPropertiesTest(unittest.TestCase):
         self.assertEqual(self.widget.cbY.objectName(), 'cbY')
         self.assertEqual(len([self.widget.cbY.itemText(i) for i in range(self.widget.cbY.count())]), 0)
         # Assure Labels are X and Y
-        self.assertEqual(self.widget.label.text(), 'X')
-        self.assertEqual(self.widget.label_2.text(), 'Y')
+        self.assertEqual(self.widget.label.text(), 'Q Units')
+        self.assertEqual(self.widget.label_2.text(), 'Intensity Units')
         # Check the buttons exist
         okWidget = self.widget.buttonBox.button(self.widget.buttonBox.Ok)
         cancelWidget = self.widget.buttonBox.button(self.widget.buttonBox.Cancel)
@@ -78,8 +78,8 @@ class UnitPropertiesTest(unittest.TestCase):
         self.commonTests()
         self.commonTests(self.widget_multi)
         # Compare single data set to multiple datas - should only use the first data to populate the dropdowns
-        x_units_method_single = self.widget.getAllowedXUnits()
-        y_units_method_single = self.widget.getAllowedYUnits()
+        x_units_method_single = self.widget.getAllowedQUnits()
+        y_units_method_single = self.widget.getAllowedIUnits()
         self.assertEqual(len(x_units_loaded), len(x_units_method_single))
         self.assertEqual(len(y_units_loaded), len(y_units_method_single))
         # Check for real units - both lists should be the same

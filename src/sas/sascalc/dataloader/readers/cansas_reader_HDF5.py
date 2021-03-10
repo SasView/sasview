@@ -321,16 +321,18 @@ class Reader(FileReader):
         elif key == self.i_uncertainties_name:
             self.current_dataset.err_data = data_set.flatten()
         elif key in self.q_names:
-            self.current_dataset.xaxis("Q_x", unit)
-            self.current_dataset.yaxis("Q_y", unit)
             if self.q_names[0] == self.q_names[1]:
                 # All q data in a single array
                 self.current_dataset.qx_data = data_set[0]
                 self.current_dataset.qy_data = data_set[1]
+                self.current_dataset.xaxis("Q_x", unit)
+                self.current_dataset.yaxis("Q_y", unit)
             elif self.q_names.index(key) == 0:
                 self.current_dataset.qx_data = data_set
+                self.current_dataset.xaxis("Q_x", unit)
             elif self.q_names.index(key) == 1:
                 self.current_dataset.qy_data = data_set
+                self.current_dataset.yaxis("Q_y", unit)
         elif key in self.q_resolution_names:
             if (len(self.q_resolution_names) == 1
                     or (self.q_resolution_names[0]
