@@ -760,6 +760,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Delete these rows from the model
                 deleted_names.append(str(self.theory_model.item(ind).text()))
                 deleted_items.append(item)
+                self.closePlotsForItem(item)
 
                 self.theory_model.removeRow(ind)
                 # Decrement index since we just deleted it

@@ -246,12 +246,12 @@ class DataExplorerTest(unittest.TestCase):
         QMessageBox.question = MagicMock(return_value=QMessageBox.No)
 
         # Populate the model
-        item1 = QStandardItem(True)
+        item1 = HashableStandardItem(True)
         item1.setCheckable(True)
         item1.setCheckState(Qt.Checked)
         item1.setText("item 1")
         self.form.theory_model.appendRow(item1)
-        item2 = QStandardItem(True)
+        item2 = HashableStandardItem(True)
         item2.setCheckable(True)
         item2.setCheckState(Qt.Unchecked)
         item2.setText("item 2")
