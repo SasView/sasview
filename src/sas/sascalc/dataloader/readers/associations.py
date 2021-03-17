@@ -23,6 +23,7 @@ FILE_ASSOCIATIONS = {
     ".ses": "sesans_reader",
     ".h5": "cansas_reader_HDF5",
     ".hdf": "cansas_reader_HDF5",
+    ".hdf5": "cansas_reader_HDF5",
     ".nxs": "cansas_reader_HDF5",
     ".txt": "ascii_reader",
     ".csv": "csv_reader",
