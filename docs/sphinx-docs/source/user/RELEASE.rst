@@ -13,6 +13,8 @@ Features
 
 New in Version 5.0.4
 --------------------
+This is a point release which fixes several issues reported in versions 5.0.x, however
+there are also some new features:
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -24,9 +26,15 @@ New features/improvements
 * sasmodels #429: Create model for superparamagnetic relaxing particles
 * sasmodels #390: Re-describe Source intensity in model parameter tables
 * sasmodels #253: use new orientation for magnetic models (Trac #910)
+* sasmodels #443: Update to polydispersity.rst
 
 Bug fixes
 ^^^^^^^^^
+* Fixes sasview #1754: Delete Data does not remove data or plots from Fitting, P(r) or Inversion
+* Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode
+* Fixes sasview #1794: Batch fitting in 5.x returns different parameters to single fits in 5.x
+* Fixes sasview #1795: Display of batch fitting results is broken in 5.0.4
+* Fixes sasview #1782: RgQmax and RgQmin are inverted in the Gunier linear fit
 * Fixes sasview #1738: Conflicting definition of displayData()
 * Fixes sasview #1711: sasview 5, Q resolution smearing issues with broad_peak model
 * Fixes sasview #1710: sasview fails to open .h5 files using h5py 3.1
