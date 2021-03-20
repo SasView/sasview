@@ -13,8 +13,21 @@ Features
 
 New in Version 5.0.4
 --------------------
-This is a point release which fixes several issues reported in versions 5.0.x, however
-there are also some new features:
+This is a point release which fixes several issues reported in earlier versions
+of 5.0.x:
+
+* A bug that had been around since 4.2.2 and which prevented Batch Fitting from
+  using any dI values in the data file has finally been fixed. And the bug
+  introduced in 5.0.3 which prevented the plotting of Batch Fit results has also
+  been corrected.
+
+There are also some new features:
+
+* The slider bars for selecting the q-range for fitting that featured in earlier
+  versions of SasView have been re-introduced by popular request.
+* It is now possible to assign custom names to loaded datasets, rather than just
+  identifying the data by its filename. Right-click on a dataset in the Data Explorer
+  to activate.
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -23,6 +36,7 @@ New features/improvements
 * sasview #1699: Allow check/uncheck of sub-selected data in Data Explorer
 * sasview #1676: Checkbox of highlighted row is checked also when clicking another checkbox
 * sasview #1303: CanSAS XML Reader refactor
+
 * sasmodels #429: Create model for superparamagnetic relaxing particles
 * sasmodels #390: Re-describe Source intensity in model parameter tables
 * sasmodels #253: use new orientation for magnetic models (Trac #910)
@@ -30,13 +44,12 @@ New features/improvements
 
 Bug fixes
 ^^^^^^^^^
-* Fixes sasview #1754: Delete Data does not remove data or plots from Fitting, P(r) or Inversion
-* Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode
-* Fixes sasview #1794: Batch fitting in 5.x returns different parameters to single fits in 5.x
 * Fixes sasview #1796: Batch Fitting does not respect Q-range for fitting 
 * Fixes sasview #1795: Display of batch fitting results is broken in 5.0.4
+* Fixes sasview #1794: Batch fitting in 5.x returns different parameters to single fits in 5.x
 * Fixes sasview #1782: RgQmax and RgQmin are inverted in the Gunier linear fit
 * Fixes sasview #1776: Slicers Using Masked Data Points in Calculation
+* Fixes sasview #1754: Delete Data does not remove data or plots from Fitting, P(r) or Inversion
 * Fixes sasview #1738: Conflicting definition of displayData()
 * Fixes sasview #1711: sasview 5, Q resolution smearing issues with broad_peak model
 * Fixes sasview #1710: sasview fails to open .h5 files using h5py 3.1
@@ -82,19 +95,20 @@ Bug fixes
 * Fixes sasview #1526: Project Save/Load functionality of 4.x needs to be restored
 * Fixes sasview #1478: v5 & v4 TEst that P(Q)S(Q) plugin works
 * Fixes sasview #1472: Sort out the Invariant Perspective & Documentation (#1434 & #1461)
-* Fixes sasview #1446 5.0 dI uncertainty unavailable in batch mode 
+* Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode 
 * Fixes sasview #1469: 2D tools
 * Fixes sasview #1453: 5.1 gui initialisation issue for Onion model
+* Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode
 * Fixes sasview #1408: Magnetic model documentation is inconsistent with code
 * Fixes sasview #1381: Slicer in 5.0 doesn't contain the batch, fitting, log/linear etc features
 * Fixes sasview #1340: 5.0 invariant mac not plotting
 * Fixes sasview #1243: Display title rather than filename in data browser (Trac #1213)
-* Fixes sasview #1137: verify and document up_frac_i and up_frac_f calculations for magnetic models (Trac #1086)
+* Fixes sasview #1137: Verify and document up_frac_i and up_frac_f calculations for magnetic models (Trac #1086)
 * Fixes sasview #863: Make it easier to use the same fit set-up with different data sets (Trac #747)
 
 * Fixes sasmodels #430: Model describing anisotropic iron oxide particles in magnetic field
 * Fixes sasmodels #367: Correlation length model documentation is wrong
-* Fixes sasmodels #210: show all failing tests rather than stopping at the first
+* Fixes sasmodels #210: Show all failing tests rather than stopping at the first
 
 Known Issues
 ^^^^^^^^^^^^
@@ -185,8 +199,7 @@ At this time, and unlike version 4.x, only fitting and P(r) inversion sessions c
 There is also a bug which is stopping Batch Fitting from using the intensity uncertainty (dI) data if this 
 is present in the files being processed. As the default behaviour of normal Single Fitting is to automatically 
 use the dI data in the file if it is present, this means that the results of Single Fitting and Batch Fitting 
-the same data will differ. In addition, Batch Fitting is also operating on the full data range of each dataset 
-irrespective of any specific Q limits that have been set in the GUI.
+the same data will differ.
 
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
