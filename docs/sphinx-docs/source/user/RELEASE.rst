@@ -33,8 +33,10 @@ Bug fixes
 * Fixes sasview #1754: Delete Data does not remove data or plots from Fitting, P(r) or Inversion
 * Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode
 * Fixes sasview #1794: Batch fitting in 5.x returns different parameters to single fits in 5.x
+* Fixes sasview #1796: Batch Fitting does not respect Q-range for fitting 
 * Fixes sasview #1795: Display of batch fitting results is broken in 5.0.4
 * Fixes sasview #1782: RgQmax and RgQmin are inverted in the Gunier linear fit
+* Fixes sasview #1776: Slicers Using Masked Data Points in Calculation
 * Fixes sasview #1738: Conflicting definition of displayData()
 * Fixes sasview #1711: sasview 5, Q resolution smearing issues with broad_peak model
 * Fixes sasview #1710: sasview fails to open .h5 files using h5py 3.1
@@ -80,6 +82,7 @@ Bug fixes
 * Fixes sasview #1526: Project Save/Load functionality of 4.x needs to be restored
 * Fixes sasview #1478: v5 & v4 TEst that P(Q)S(Q) plugin works
 * Fixes sasview #1472: Sort out the Invariant Perspective & Documentation (#1434 & #1461)
+* Fixes sasview #1446 5.0 dI uncertainty unavailable in batch mode 
 * Fixes sasview #1469: 2D tools
 * Fixes sasview #1453: 5.1 gui initialisation issue for Onion model
 * Fixes sasview #1408: Magnetic model documentation is inconsistent with code
