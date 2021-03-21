@@ -13,19 +13,36 @@ Features
 
 New in Version 5.0.4
 --------------------
-This is a point release which fixes several issues reported in earlier versions
+This is a point release which fixes some issues reported in earlier versions
 of 5.0.x:
 
 * A bug that had been around since 4.2.2 and which prevented Batch Fitting from
-  using any dI values in the data file has finally been fixed. And the bug
-  introduced in 5.0.3 which prevented the plotting of Batch Fit results has also
-  been corrected.
+  using any dI values in the data file has finally been fixed. The consequence of
+  this bug was that Single Fits and Batch Fits on the same datasets could return
+  different parameters. Now, where present, dI values will always be used by default
+  in both cases.
+* The bug introduced in 5.0.3 which prevented the plotting of Batch Fit results has also
+  been fixed.
+* An issue with the behaviour of the 1D pinhole resolution smearing routine in cases of
+  large divergence has been addressed.
+* A number of improvements have been made to plotting and plot management.
+* Several usability issues in the P(r) Inversion and Invariant Analysis perspectives
+  have been addressed.
+* Improvements have also been made to the functioning of Project Save/Load.
 
-There are also some new features:
+There are also some new features in this version:
 
+* A new generalized 3D description of magnetic SANS with an arbitrary field/polarisation
+  axis is introduced. In particular, this facilitates the description of crystals with
+  strong magnetic anisotropy, or data from experiments where only a small magnetic field
+  is used to set the polarisation, or where an AC field configuration is used for time-resolved
+  SANS (TISANE).
 * The slider bars for selecting the q-range for fitting that featured in earlier
   versions of SasView have been re-introduced by popular request.
-* It is now possible to assign custom names to loaded datasets, rather than just
+* It is now possible to swap the dataset used to create an existing FitPage for a different
+  dataset. This removes the need to re-generate a complex model (eg, featuring many parameters
+  and/or constraints) many times over to use it to fit several datasets.
+* It is now also possible to assign custom names to loaded datasets, rather than just
   identifying the data by its filename. Right-click on a dataset in the Data Explorer
   to activate.
 
@@ -37,10 +54,11 @@ New features/improvements
 * sasview #1676: Checkbox of highlighted row is checked also when clicking another checkbox
 * sasview #1303: CanSAS XML Reader refactor
 
+* sasmodels #443: Update to polydispersity.rst
 * sasmodels #429: Create model for superparamagnetic relaxing particles
 * sasmodels #390: Re-describe Source intensity in model parameter tables
 * sasmodels #253: use new orientation for magnetic models (Trac #910)
-* sasmodels #443: Update to polydispersity.rst
+
 
 Bug fixes
 ^^^^^^^^^
@@ -104,11 +122,40 @@ Bug fixes
 * Fixes sasview #1340: 5.0 invariant mac not plotting
 * Fixes sasview #1243: Display title rather than filename in data browser (Trac #1213)
 * Fixes sasview #1137: Verify and document up_frac_i and up_frac_f calculations for magnetic models (Trac #1086)
-* Fixes sasview #863: Make it easier to use the same fit set-up with different data sets (Trac #747)
+* Fixes sasview #863:  Make it easier to use the same fit set-up with different data sets (Trac #747)
 
 * Fixes sasmodels #430: Model describing anisotropic iron oxide particles in magnetic field
 * Fixes sasmodels #367: Correlation length model documentation is wrong
 * Fixes sasmodels #210: Show all failing tests rather than stopping at the first
+
+New Models
+^^^^^^^^^^
+The following models have been added to the [Model Marketplace](http://marketplace.sasview.org/) since v5.0.0 was released:
+
+* Magnetic vortex in a disc
+* Field-dependent magnetic SANS of misaligned magnetic moments in bulk ferromagnets
+* SANS of bulk ferromagnets
+* Core_shell_ellipsoid_tied and core_shell_ellipsoid_repar
+* Lamellar_Slab_APL_nW
+* 5 Layer Core Shell Disc
+* Superparamagnetic Core-Shell Spheres with 3D field orientation
+* Superparamagnetic Core-Shell Spheres
+* Octahedron
+* Magnetically oriented, rotating and precessing anisometric particle (MORP)
+* Cumulants
+* Cumulants DLS
+* Peak Voigt
+* Long Cylinder
+* Sphere Concentration A
+* Binary Blend
+* Exponential
+* 2 Layer General Guinier Porod
+* Core double shell sphere filled with many cylinders in the core
+* Fractal S(q)
+* Mass Fractal S(q)
+* Core shell cuboid
+* Core shell sphere filled with a cylinder in the core
+* Correlated_spheres
 
 Known Issues
 ^^^^^^^^^^^^
