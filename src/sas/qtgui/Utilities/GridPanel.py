@@ -356,11 +356,11 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         for i_row, row in enumerate(data):
             # each row corresponds to a single fit
             chi2 = row[0].fitness
-            filename = ""
+            name = ""
             if hasattr(row[0].data, "sas_data"):
-                filename = row[0].data.sas_data.filename
+                name = row[0].data.sas_data.name
             widget.setItem(i_row, 0, QtWidgets.QTableWidgetItem(GuiUtils.formatNumber(chi2, high=True)))
-            widget.setItem(i_row, 1, QtWidgets.QTableWidgetItem(str(filename)))
+            widget.setItem(i_row, 1, QtWidgets.QTableWidgetItem(str(name)))
             # Now, all the parameters
             for i_col, param in enumerate(param_list[2:]):
                 if param in row[0].param_list:

@@ -70,7 +70,7 @@ class PlotterWidget(PlotterBase):
 
         # Data container for the linear fit
         self.fit_result = Data1D(x=[], y=[], dy=None)
-        self.fit_result.symbol = 13
+        self.fit_result.symbol = 17
         self.fit_result.name = "Fit"
 
         parent.geometry()
@@ -466,6 +466,7 @@ class PlotterWidget(PlotterBase):
         if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
+            self.setRange.rangeModified = True
             if x_range is not None and y_range is not None:
                 self.ax.set_xlim(x_range)
                 self.ax.set_ylim(y_range)
@@ -502,7 +503,7 @@ class PlotterWidget(PlotterBase):
         if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
-    def replacePlot(self, id, new_plot):
+    def replacePlot(self, id, new_plot, retain_dimensions=False):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
@@ -517,9 +518,18 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
-
+        # Store user-defined plot range on replot
+        retain_dimensions = retain_dimensions or self.setRange.rangeModified
+        if retain_dimensions:
+            x_bounds = (self.ax.viewLim.xmin, self.ax.viewLim.xmax)
+            y_bounds = (self.ax.viewLim.ymin, self.ax.viewLim.ymax)
         self.removePlot(id)
         self.plot(data=new_plot)
+        # Apply user-defined plot range
+        if retain_dimensions:
+            self.ax.set_xbound(x_bounds[0], x_bounds[1])
+            self.ax.set_ybound(y_bounds[0], y_bounds[1])
+            self.setRange.rangeModified = True
 
     def onRemovePlot(self, id):
         """
@@ -671,9 +681,6 @@ class PlotterWidget(PlotterBase):
         self.fit_result.dx = None
         self.fit_result.dy = None
 
-        #Remove another Fit, if exists
-        self.removePlot("Fit")
-
         self.fit_result.reset_view()
         #self.offset_graph()
 
@@ -682,8 +689,12 @@ class PlotterWidget(PlotterBase):
         self.fit_result.title = 'Fit'
         self.fit_result.name = 'Fit'
 
-        # Plot the line
-        self.plot(data=self.fit_result, marker='-', hide_error=True)
+        if self.fit_result.name in self.plot_dict.keys():
+            # Replace an existing Fit and ensure the plot range is not reset
+            self.replacePlot("Fit", new_plot=self.fit_result, retain_dimensions=True)
+        else:
+            # Otherwise, Plot a new line
+            self.plot(data=self.fit_result, marker='-', hide_error=True)
 
     def onToggleLegend(self):
         """

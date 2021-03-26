@@ -257,12 +257,12 @@
     </widget>
    </item>
    <item row="3" column="0" colspan="2">
-    <widget class="QGroupBox" name="guiner_box">
+    <widget class="QGroupBox" name="guinier_box">
      <property name="enabled">
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Guiner analysis </string>
+      <string>Guinier analysis </string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">
@@ -275,7 +275,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="txtGuiner_1">
+         <widget class="QLineEdit" name="txtGuinier_1">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -292,7 +292,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="txtGuiner_2">
+         <widget class="QLineEdit" name="txtGuinier_2">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -309,7 +309,7 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="txtGuiner_3">
+         <widget class="QLineEdit" name="txtGuinier_3">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -326,7 +326,7 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="txtGuiner_4">
+         <widget class="QLineEdit" name="txtGuinier_4">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -347,7 +347,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="txtGuiner1_Err">
+         <widget class="QLineEdit" name="txtGuinier1_Err">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -370,7 +370,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="txtGuiner2_Err">
+         <widget class="QLineEdit" name="txtGuinier2_Err">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -446,7 +446,7 @@
     </layout>
    </item>
   </layout>
-  <zorder>guiner_box</zorder>
+  <zorder>guinier_box</zorder>
   <zorder>label</zorder>
   <zorder>groupBox_2</zorder>
   <zorder>groupBox</zorder>

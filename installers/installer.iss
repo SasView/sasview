@@ -21,6 +21,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName=c:\{#MyAppName}-{#MyAppVersion}
 DefaultGroupName={#MyAppName}-{#MyAppVersion}
 DisableProgramGroupPage=yes
+DisableDirPage=no
 UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64

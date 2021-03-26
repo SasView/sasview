@@ -211,6 +211,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for data_item in value:
                 logic = FittingLogic(data=GuiUtils.dataFromItem(data_item))
                 self._logic.append(logic)
+            # Option widget logic was destroyed - reestablish
+            self.options_widget.logic = self._logic[0]
             # update the ordering tab
             self.order_widget.updateData(self.all_data)
 
@@ -1759,9 +1761,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Switch indexes
             self.data_index = res_index
-            # Recompute Q ranges
-            if self.data_is_loaded:
-                self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
 
             # Recalculate theories
             method = self.complete1D if isinstance(self.data, Data1D) else self.complete2D
