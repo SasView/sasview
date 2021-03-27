@@ -32,13 +32,12 @@ of 5.0.x:
 
 There are also some new features in this version:
 
-* A new generalized 3D description of magnetic SANS with an arbitrary field/polarisation
-  axis is introduced. In particular, this facilitates the description of crystals with
-  strong magnetic anisotropy, or data from experiments where only a small magnetic field
-  is used to set the polarisation, or where an AC field configuration is used for time-resolved
-  SANS (TISANE).
-* The slider bars for selecting the q-range for fitting that featured in earlier
-  versions of SasView have been re-introduced by popular request.
+* Though not strictly a new feature, the functionality and operation of parameter
+  constraints has been significantly overhauled for this version.
+* The slicer functionality has been significantly overhauled and made to work properly.
+* The slider bars on plots for selecting the q-range for fitting that featured in earlier
+  versions of SasView have been re-introduced by popular request, although they do not
+  yet work on linearized plots.
 * It is now possible to swap the dataset used to create an existing FitPage for a different
   dataset. This removes the need to re-generate a complex model (eg, featuring many parameters
   and/or constraints) many times over to use it to fit several datasets.
@@ -113,7 +112,6 @@ Bug fixes
 * Fixes sasview #1526: Project Save/Load functionality of 4.x needs to be restored
 * Fixes sasview #1478: v5 & v4 TEst that P(Q)S(Q) plugin works
 * Fixes sasview #1472: Sort out the Invariant Perspective & Documentation (#1434 & #1461)
-* Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode 
 * Fixes sasview #1469: 2D tools
 * Fixes sasview #1453: 5.1 gui initialisation issue for Onion model
 * Fixes sasview #1446: 5.0 dI uncertainty unavailable in batch mode
@@ -124,7 +122,6 @@ Bug fixes
 * Fixes sasview #1137: Verify and document up_frac_i and up_frac_f calculations for magnetic models (Trac #1086)
 * Fixes sasview #863:  Make it easier to use the same fit set-up with different data sets (Trac #747)
 
-* Fixes sasmodels #430: Model describing anisotropic iron oxide particles in magnetic field
 * Fixes sasmodels #367: Correlation length model documentation is wrong
 * Fixes sasmodels #210: Show all failing tests rather than stopping at the first
 
@@ -159,6 +156,9 @@ The following models have been added to the [Model Marketplace](http://marketpla
 
 Known Issues
 ^^^^^^^^^^^^
+At this time, the reinstated slider bars on plots for selecting the
+q-range for fitting do not work on linearized plots.
+
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
 
