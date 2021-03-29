@@ -21,7 +21,8 @@ dependencies:
  - numba=0.39
  - setuptools=44.0.0
  - numpy=1.14.2
- - qtconsole
+ - qtconsole=4.75
+ - pyzmq=19.0.1
  - mkl=2020.0
  - pip:
    - matplotlib==2.2.3
