@@ -25,7 +25,7 @@ SasView recognizes 1D data in ASCII, CSV, CanSAS XML, NXCanSAS, and AntonPaar SA
 *  .DAT
 *  .XML, or .COR (in canSAS XML v1.0 and v1.1 formats)
 *  .CSV
-*  .H5, .NXS, or .HDF (in NXcanSAS v1.0 and v1.1 formats)
+*  .H5, .NXS, .HDF, or .HDF5 (in NXcanSAS v1.0 and v1.1 formats)
 *  .PDH
 
 SasView will read ASCII ('text') files with 2 to 4 columns of numbers in the following order:
