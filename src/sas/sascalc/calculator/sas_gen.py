@@ -1381,7 +1381,7 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         rho, points = shape.sample(sampling_density)
         rho = rho*1e-6
         mx = my = mz = None
-        up_i, up_f, up_angle, up_phi = 1.0, 1.0, 0.0, 0.0
+        up_i, up_f, up_angle, up_phi = 1.0, 1.0, 0.5, 0.5
     points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
     #print("shape, pixel volume", shape.volume, shape.volume/len(points))

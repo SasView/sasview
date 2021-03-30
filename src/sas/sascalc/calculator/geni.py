@@ -189,7 +189,7 @@ def _calc_Iqxy_magnetic(
 
     # Precompute helper values
     up_angle = np.radians(up_angle)
-    cos_spin, sin_spin = np.cos(-up_angle), np.sin(-up_angle)
+    cos_spin, sin_spin = np.cos(up_angle), np.sin(up_angle)
    
     up_phi = np.radians(up_phi)
     cos_phi, sin_phi = np.cos(up_phi), np.sin(up_phi)
@@ -219,35 +219,31 @@ def _calc_Iqxy_magnetic_helper(
         # If q is near 0 then set px and py to zero.
         # Note: norm is computed as a separate scalar so that the numba jit
         # can figure out the proper type for perp even for q = 0
-        qsq = qxk**2 + qyk**2
-        norm = 1./qsq if qsq > 1e-16 else 0.
-        
+        norm = 1/sqrt(qxk**2 + qyk**2) if qx != 0. or qy != 0. else 0.
 
-        px = sin_spin*cos_phi
-        py = sin_spin*sin_phi
-        pz = cos_spin  
+        p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
+        q_hat = np.array([qx, qy, 0]) * norm
+        Mvector = np.array([mx, my, mz])
 
+        M_perp = orth(M,q_hat)
+        M_perpP = orth(M_perp, p_hat)
+        M_perpP_perpQ = orth(M_perpP, q_hat)
 
-        qvector = [qxk*norm, qyk*norm, 0]
-        Mvector = [mx, my, mz]
-        Pvector = [px, py, pz]
-
-        
-        Mperp = Mvector-norm*np.dot(Mvector, qvector)*qvector 
-        MperpP = Mperp-np.dot(Mperp, Pvector)*Pvector
-        MperpPperpQ = MperpP- norm * np.dot(MperpP, qvector) * qvector 
+        perpx = np.dot(p_hat, M_perp)
+        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
+        perpz = np.dot(q_hat, M_perpP)
 
 
 
-        ephase = vol*np.exp(1j*(qxk*x + qyk*y))
+        ephase = vol * np.exp(1j * (qxk * x + qyk * y))
         if dd > 1e-10:
-            Iq[k] += dd * abs(np.sum(rho-np.dot(Pvector,Mperp))*ephase)**2
+            Iq[k] += dd * abs(np.sum(rho - perpx) * ephase)**2
         if uu > 1e-10:
-            Iq[k] += uu * abs(np.sum(rho+np.dot(Pvector,Mperp))*ephase)**2
+            Iq[k] += uu * abs(np.sum(rho + perpx) * ephase)**2
         if du > 1e-10:
-            Iq[k] += du * abs(np.sum(np.sqrt(MperpPperpQ.dot(MperpPperpQ))-1j*np.dot(MperpP,qvector))*ephase)**2
+            Iq[k] += du * abs(np.sum(perpy - 1j * perpz) * ephase)**2
         if ud > 1e-10:
-            Iq[k] += ud * abs(np.sum(np.sqrt(MperpPperpQ.dot(MperpPperpQ))+1j*np.dot(MperpP,qvector))*ephase)**2
+            Iq[k] += ud * abs(np.sum(perpy + 1j * perpz) * ephase)**2
 
 def _spin_weights(in_spin, out_spin):
     """
@@ -288,3 +284,6 @@ def _spin_weights(in_spin, out_spin):
         in_spin * out_spin / norm,             # uu
     )
     return weight
+
+def orth(A, b_hat): # A = 3 x n, and b_hat unit vector
+ return A - np.sum(A*b_hat[:, None], axis=0)[None, :]*b_hat[:, None] 

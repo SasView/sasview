@@ -166,6 +166,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     self.txtUpFracIn.setEnabled(False)
                     self.txtUpFracOut.setEnabled(False)
                     self.txtUpTheta.setEnabled(False)
+                    self.txtUpPhi.setEnabled(False)
 
                 if self.reader is not None and self.reader.isrunning():
                     self.reader.stop()
@@ -295,6 +296,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtUpFracIn.setText(str(self.model.params['Up_frac_in']))
         self.txtUpFracOut.setText(str(self.model.params['Up_frac_out']))
         self.txtUpTheta.setText(str(self.model.params['Up_theta']))
+        self.txtUpTheta.setText(str(self.model.params['Up_phi']))
 
         self.txtNoPixels.setText(str(len(self.sld_data.sld_n)))
         self.txtNoPixels.setEnabled(False)
@@ -359,6 +361,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.txtUpTheta.isModified():
             self.model.params['Up_theta'] = float(self.txtUpTheta.text())
 
+        if self.txtUpPhi.isModified():
+            self.model.params['Up_phi'] = float(self.txtUpPhi.text())    
+
         if self.txtMx.isModified():
             self.sld_data.sld_mx = float(self.txtMx.text())*\
                                    numpy.ones(len(self.sld_data.sld_mx))
@@ -413,6 +418,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtUpFracIn.setText("1.0")
             self.txtUpFracOut.setText("1.0")
             self.txtUpTheta.setText("0.0")
+            self.txtUpPhi.setText("0.0")
             self.txtBackground.setText("0.0")
             self.txtScale.setText("1.0")
             self.txtSolventSLD.setText("0.0")
