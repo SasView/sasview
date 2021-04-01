@@ -59,7 +59,7 @@ http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/SAXS-Softwa
 2D SAS Formats
 --------------
 
-SasView will read ASCII ('text') files in the NIST 2D format (with the extensions .ASC or .DAT) or files in the NeXus NXcanSAS (HDF5) format (with the extension .H5, .HDF, or .NXS). File extensions are not case-sensitive. Both of these formats are written by the `Mantid Framework <http://www.mantidproject.org/>`_.
+SasView will read ASCII ('text') files in the NIST 2D format (with the extensions .ASC or .DAT) or files in the NeXus NXcanSAS (HDF5) format (with the extension .H5, .NXS, .HDF, or .HDF5). File extensions are not case-sensitive. Both of these formats are written by the `Mantid Framework <http://www.mantidproject.org/>`_.
 
 Most of the header lines in the NIST 2D format can be removed except the last line, and only the first three columns (*Qx, Qy,* and *I(Qx,Qy)*) are required.
 
