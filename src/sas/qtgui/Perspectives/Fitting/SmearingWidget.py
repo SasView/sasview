@@ -150,7 +150,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             return
         # Find out if data has dQ
         self.current_smearer = smear_selection(self.data, self.kernel_model)
-        self.getSmearInfo()
+        self.setSmearInfo()
         if self.smear_type is not None:
             self.cbSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
@@ -420,16 +420,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
         self.current_smearer = smear_selection(data, self.kernel_model)
 
-    def getSmearInfo(self):
+    def setSmearInfo(self):
         """
-        Get the smear info from data.
-
-        :return: self.smear_type, self.dq_l and self.dq_r,
-            respectively the type of the smear, the average <dq/q> radial(p)
-            and <dq/q> theta (s)s for 2D pinhole resolution in % (slit is not
-            currently supported in 2D), (dq/q)_min and (dq/q)_max for 1D pinhole
-            smeared data, again in %, and dxl and/or dxw for slit smeared data
-            given in 1/A and assumed constant.
+        Set default smear_type, dq_l, and dq_r based on the q-resolution information found in the data.
         """
         # default
         self.smear_type = None
@@ -438,22 +431,19 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         data = self.data
         if self.data is None:
             return
-        # First check if data is 2D
-        # If so check that data set has smearing info and that none are zero.
-        # Otherwise no smearing can be applied using smear from data (a Gaussian
-        # width of zero will cause a divide by zero error)
+        # First check if data is 2D - If so check that data set has smearing info.
         elif isinstance(data, Data2D):
             if isinstance(self.smearer(), PySmear2D):
                 self.smear_type = "Pinhole2d"
                 self.dq_l = GuiUtils.formatNumber(np.average(data.dqx_data/np.abs(data.qx_data))*100., high=True)
                 self.dq_r = GuiUtils.formatNumber(np.average(data.dqy_data/np.abs(data.qy_data))*100., high=True)
-        # check if it is pinhole smear and get min max if it is.
+        # Check for pinhole smearing and get min max if it is.
         elif (isinstance(self.smearer(), PySmear)
               and isinstance(self.smearer().resolution, (Pinhole1D, SesansTransform))):
             self.smear_type = "Pinhole"
             self.dq_r = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
             self.dq_l = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)
-        # check if it is slit smear and get min max if it is.
+        # Check for slit smearing and get min max if it is.
         elif isinstance(self.smearer(), PySmear) and isinstance(self.smearer().resolution, Slit1D):
             self.smear_type = "Slit"
             if data.dxl is not None and np.all(data.dxl, 0):
