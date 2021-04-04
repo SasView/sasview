@@ -229,9 +229,9 @@ def _calc_Iqxy_magnetic_helper(
         M_perpP = orth(M_perp, p_hat)
         M_perpP_perpQ = orth(M_perpP, q_hat)
 
-        perpx = np.dot(p_hat, M_perp)
-        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
-        perpz = np.dot(q_hat, M_perpP)
+        perpx = p_hat @ M_perp
+        perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ)) #faster than np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
+        perpz = q_hat @ M_perpP
 
 
 
@@ -286,4 +286,5 @@ def _spin_weights(in_spin, out_spin):
     return weight
 
 def orth(A, b_hat): # A = 3 x n, and b_hat unit vector
- return A - np.sum(A*b_hat[:, None], axis=0)[None, :]*b_hat[:, None] 
+ return A - np.outer(b, b)@A
+ 
