@@ -36,15 +36,6 @@ except ImportError:
 import periodictable
 add_data(periodictable.data_files())
 
-try:
-    import arabic_reshaper
-    path = Path(arabic_reshaper.__file__).parent
-    datas.append((path / '__version__.py', 'arabic_reshaper'))
-    datas.append((path / 'default-config.ini', 'arabic_reshaper'))
-except ImportError:
-    warnings.warn("xml2pdf dependency arabic_rehaper not found")
-
-
 hiddenimports = [
     'sas.sascalc.dataloader.readers.abs_reader',
     'sas.sascalc.dataloader.readers.anton_paar_saxs_reader',
