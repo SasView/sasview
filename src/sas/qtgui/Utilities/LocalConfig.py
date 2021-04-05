@@ -85,7 +85,7 @@ _delft_url = "http://www.tudelft.nl/en/tnw/business/facilities/reactor-instituut
 _diamond_url = "http://www.diamond.ac.uk"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "Copyright (c) 2009-2020 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO"
+_copyright = "Copyright (c) 2009-2021 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO"
 
 
 #edit the list of file state your plugin can read
