@@ -104,6 +104,15 @@ for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     datas.append((f, os.path.split(dirname)[0]))
 
+# scipy hook
+from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_submodules
+
+for item in collect_data_files('scipy'):
+    datas.append(item)
+for item in collect_data_files("scipy.special"):
+    datas.append(item)
+
 binaries = []
 
 # EXCLUDED FILES ############################################################
@@ -124,6 +133,9 @@ hiddenimports = [
  'SocketServer',
  'logging',
  'logging.config',
+ 'ordered_set',
+ 'packaging',
+ 'packaging.specifiers',
  'reportlab', 'reportlab.graphics',
  'reportlab.graphics.barcode.common',
  'reportlab.graphics.barcode.code128',
@@ -147,6 +159,8 @@ hiddenimports = [
  'scipy._lib.messagestream',
  'numba',
 ]
+for item in collect_submodules('scipy'):
+    hiddenimports.append(item)
 
 a = Analysis([SCRIPT_TO_SOURCE],
              pathex=[WORK_DIR],

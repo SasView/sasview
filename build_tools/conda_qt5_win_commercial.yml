@@ -8,24 +8,25 @@ dependencies:
  - ipython
  - jupyter
  - nbformat
- - pyopencl=2018.2.2
- - scipy=1.2.0
+ - pyopencl=2021.1.6
+ - scipy=1.5.3
  - hdf5=1.10.4
  - h5py=2.9.0
- - lxml=4.6.2
- - twisted=18.9.0
+ - lxml=4.6.3
+ - twisted=21.2.0
  - sphinx=1.8.5
  - pytest=4.2.0
- - cython=0.29.4
+ - cython=0.29.22
  - sip
  - numba=0.39
- - setuptools=44.0.0
- - numpy=1.14.2
- - qtconsole=4.7.5
- - pyzmq=19.0.1
- - mkl=2020.0
+ - setuptools=49.6.0
+ - numpy=1.19.5
+ - qtconsole=5.0.3
+ - pyzmq=19.0.1   # issues with qtconsole when upgrading!
+ - mkl=2021.2.0
  - pip:
-   - matplotlib==2.2.3
+   - ordered-set==4.0.2
+   - matplotlib==3.1.0
    - bumps==0.7.11
    - pyinstaller==3.3.1
    - periodictable==1.5.0
