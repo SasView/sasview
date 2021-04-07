@@ -106,9 +106,9 @@ is taken into account.*
 Using PDB/OMF or SLD files
 --------------------------
 
-The SANS Calculator tool can read some PDB, OMF or SLD files but ignores
-polarized/magnetic scattering when doing so, thus related parameters such as
-*Up_frac_in*, etc, will be ignored.
+The SANS Calculator tool can read some PDB, OMF or SLD files. PDB and SLD files ignore
+polarized/magnetic scattering, thus related parameters such as
+*Up_frac_in*, etc, are greyed out.
 
 The calculation for fixed orientation uses Equation 1 above resulting in a 2D
 output, whereas the scattering calculation averaged over all the orientations

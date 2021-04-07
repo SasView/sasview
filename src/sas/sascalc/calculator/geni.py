@@ -219,31 +219,35 @@ def _calc_Iqxy_magnetic_helper(
         # If q is near 0 then set px and py to zero.
         # Note: norm is computed as a separate scalar so that the numba jit
         # can figure out the proper type for perp even for q = 0
-        norm = 1/sqrt(qxk**2 + qyk**2) if qx != 0. or qy != 0. else 0.
+        norm = 1/np.sqrt(qxk**2 + qyk**2) if qxk != 0. or qyk != 0. else 0.
 
         p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
-        q_hat = np.array([qx, qy, 0]) * norm
-        Mvector = np.array([mx, my, mz])
+        q_hat = np.array([qxk, qyk, 0]) * norm
+        M = np.array([mx, my, mz])
 
-        M_perp = orth(M,q_hat)
+        M_perp = orth(M, q_hat)
         M_perpP = orth(M_perp, p_hat)
         M_perpP_perpQ = orth(M_perpP, q_hat)
 
         perpx = p_hat @ M_perp
-        perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ)) #faster than np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
+        perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
+        #faster than perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
         perpz = q_hat @ M_perpP
 
 
 
         ephase = vol * np.exp(1j * (qxk * x + qyk * y))
+        
         if dd > 1e-10:
-            Iq[k] += dd * abs(np.sum(rho - perpx) * ephase)**2
+            Iq[k] += dd * abs(np.sum((rho - perpx) * ephase))**2
         if uu > 1e-10:
-            Iq[k] += uu * abs(np.sum(rho + perpx) * ephase)**2
+            Iq[k] += uu * abs(np.sum((rho + perpx) * ephase))**2
         if du > 1e-10:
-            Iq[k] += du * abs(np.sum(perpy - 1j * perpz) * ephase)**2
+            Iq[k] += du * abs(np.sum((perpy - 1j * perpz) * ephase))**2
         if ud > 1e-10:
-            Iq[k] += ud * abs(np.sum(perpy + 1j * perpz) * ephase)**2
+            Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
+
+
 
 def _spin_weights(in_spin, out_spin):
     """
@@ -285,6 +289,5 @@ def _spin_weights(in_spin, out_spin):
     )
     return weight
 
-def orth(A, b_hat): # A = 3 x n, and b_hat unit vector
+def orth(A, b): # A = 3 x n, and b_hat unit vector
  return A - np.outer(b, b)@A
- 

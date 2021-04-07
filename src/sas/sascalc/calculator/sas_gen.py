@@ -84,9 +84,9 @@ class GenSAS(object):
         self.params['background'] = 0.0
         self.params['solvent_SLD'] = 0.0
         self.params['total_volume'] = 1.0
-        self.params['Up_frac_in'] = 1.0
-        self.params['Up_frac_out'] = 1.0
-        self.params['Up_theta'] = 0.0
+        self.params['Up_frac_in'] = 0.5
+        self.params['Up_frac_out'] = 0.5
+        self.params['Up_theta'] = 90.0
         self.params['Up_phi'] = 0.0
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
@@ -97,8 +97,8 @@ class GenSAS(object):
         self.details['total_volume'] = ['A^(3)', 0.0, np.inf]
         self.details['Up_frac_in'] = ['[u/(u+d)]', 0.0, 1.0]
         self.details['Up_frac_out'] = ['[u/(u+d)]', 0.0, 1.0]
-        self.details['Up_theta'] = ['[deg]', -np.inf, np.inf]
-        self.details['Up_phi'] = ['[deg]', -np.inf, np.inf]
+        self.details['Up_theta'] = ['[deg]', -90, 90]
+        self.details['Up_phi'] = ['[deg]', -180, 180]
         # fixed parameters
         self.fixed = []
 
@@ -1103,7 +1103,7 @@ def sas_gen_c(self, qx, qy=None):
         # WARNING: 
         # To compare new to old need to swap the inputs.  Also need to
         # reverse the sign.
-        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta, s_phi)
+        x, y, z, sld, mx, mz, my, vol, in_spin, out_spin, s_theta, s_phi)
     model = _sld2i.new_GenI(*args)
     I_out = np.empty_like(qx)
     if qy is not None and len(qy) > 0:
@@ -1381,7 +1381,7 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         rho, points = shape.sample(sampling_density)
         rho = rho*1e-6
         mx = my = mz = None
-        up_i, up_f, up_angle, up_phi = 1.0, 1.0, 0.5, 0.5
+        up_i, up_f, up_angle, up_phi = 0.5, 0.5, 90.0, 0.0
     points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
     #print("shape, pixel volume", shape.volume, shape.volume/len(points))

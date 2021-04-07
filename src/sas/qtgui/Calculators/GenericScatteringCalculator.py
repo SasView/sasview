@@ -162,7 +162,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     loader = None
                 # disable some entries depending on type of loaded file
                 # (according to documentation)
-                if self.ext.lower() in ['.sld', '.omf', '.pdb']:
+                if self.ext.lower() in ['.sld', '.pdb']:
                     self.txtUpFracIn.setEnabled(False)
                     self.txtUpFracOut.setEnabled(False)
                     self.txtUpTheta.setEnabled(False)
@@ -172,6 +172,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     self.reader.stop()
                 self.cmdLoad.setEnabled(False)
                 self.cmdLoad.setText('Loading...')
+                self.cmdCompute.setEnabled(False)
+                self.cmdCompute.setText('Loading...')
                 self.communicator.statusBarUpdateSignal.emit(
                     "Loading File {}".format(os.path.basename(
                         str(self.datafile))))
@@ -234,6 +236,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         logging.info("Load Complete")
         self.cmdLoad.setEnabled(True)
         self.cmdLoad.setText('Load')
+        self.cmdCompute.setEnabled(True)
+        self.cmdCompute.setText('Compute')
         self.trigger_plot_3d.emit()
 
     def check_units(self):
@@ -415,9 +419,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """ Reset the inputs of textEdit to default values """
         try:
             # reset values in textedits
-            self.txtUpFracIn.setText("1.0")
-            self.txtUpFracOut.setText("1.0")
-            self.txtUpTheta.setText("0.0")
+            self.txtUpFracIn.setText("0.5")
+            self.txtUpFracOut.setText("0.5")
+            self.txtUpTheta.setText("90.0")
             self.txtUpPhi.setText("0.0")
             self.txtBackground.setText("0.0")
             self.txtScale.setText("1.0")
@@ -850,8 +854,10 @@ class Plotter3DWidget(PlotterBase):
                         ax.add_artist(arrows)
                 except:
                     pass
+  
                 log_msg = "Arrow Drawing completed.\n"
                 logging.info(log_msg)
+  
             log_msg = "Arrow Drawing is in progress..."
             logging.info(log_msg)
 
