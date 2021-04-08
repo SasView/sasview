@@ -1410,6 +1410,10 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     theory = model.params['scale']*theory + model.params['background']
     compare(model, qx, qy, plot_points=False, theory=theory)
 
+
+
+
+
 def demo():
     """
     Run a GenSAS operation demo.
