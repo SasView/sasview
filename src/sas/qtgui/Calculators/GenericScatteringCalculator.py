@@ -268,15 +268,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             value = float(str(text_edit.text()))
             if text_edit == self.txtQxMax:
                 try:
-                    max_step = 2 * max(self.sld_data.xstepsize, self.sld_data.ystepsize, self.sld_data.zstepsize)                    
+                    max_q = numpy.pi / (2 * max(self.sld_data.xstepsize, self.sld_data.ystepsize, self.sld_data.zstepsize) )                   
                 except:
-                    max_step = 0.003 
-                if value <= 0 or value > numpy.pi / max_step:
+                    max_q = 1000
+                if value <= 0 or value > max_q:
                     text_edit.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
                     text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
             elif text_edit == self.txtNoQBins:
-                if value < 2 or value > 1000:
+                try:
+                    max_step =  max(self.sld_data.xnodes, self.sld_data.ynodes, self.sld_data.znodes) 
+                    #limits qmin > maxq / nodes                
+                except:
+                    max_step = 1000 
+                if value < 2 or value > max_step:
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
@@ -423,9 +428,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """ Reset the inputs of textEdit to default values """
         try:
             # reset values in textedits
-            self.txtUpFracIn.setText("0.5")
-            self.txtUpFracOut.setText("0.5")
-            self.txtUpTheta.setText("90.0")
+            self.txtUpFracIn.setText("1.0")
+            self.txtUpFracOut.setText("1.0")
+            self.txtUpTheta.setText("0.0")
             self.txtUpPhi.setText("0.0")
             self.txtBackground.setText("0.0")
             self.txtScale.setText("1.0")

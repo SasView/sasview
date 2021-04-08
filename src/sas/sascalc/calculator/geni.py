@@ -172,7 +172,7 @@ _calc_Iqxy.__doc__ = """
 
 def _calc_Iqxy_magnetic(
         qx, qy, x, y, rho, vol, rho_m,
-        up_frac_i=0, up_frac_f=0, up_angle=0., up_phi=0.):
+        up_frac_i=1, up_frac_f=1, up_angle=0., up_phi=0.):
     """
     Compute I(q) for a set of points (x, y), with magnetism on each point.
     Uses::
