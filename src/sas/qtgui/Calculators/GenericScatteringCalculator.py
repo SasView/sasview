@@ -268,7 +268,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             value = float(str(text_edit.text()))
             if text_edit == self.txtQxMax:
                 try:
-                    max_q = numpy.pi / (2 * max(self.sld_data.xstepsize, self.sld_data.ystepsize, self.sld_data.zstepsize) )                   
+                    max_q = numpy.pi / (max(self.sld_data.xstepsize, self.sld_data.ystepsize, self.sld_data.zstepsize) )                   
                 except:
                     max_q = 1000
                 if value <= 0 or value > max_q:
@@ -277,7 +277,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
             elif text_edit == self.txtNoQBins:
                 try:
-                    max_step =  max(self.sld_data.xnodes, self.sld_data.ynodes, self.sld_data.znodes) 
+                    max_step =  3*max(self.sld_data.xnodes, self.sld_data.ynodes, self.sld_data.znodes) 
                     #limits qmin > maxq / nodes                
                 except:
                     max_step = 1000 

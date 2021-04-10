@@ -445,7 +445,11 @@ class OMFReader(object):
                 if s_line[0].lower().count("zmax") > 0:
                     zmax = s_line[1].lstrip()
                 if s_line[0].lower().count("valueunit") > 0:
-                    valueunit = s_line[1].lstrip().rstrip()
+                    valueunit = s_line[1].lstrip()
+                    if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
+                        msg = "Error: \n"
+                        msg += "We accept only mT or A/m as valueunit"
+                        raise ValueError(msg)    
                 if s_line[0].lower().count("valuemultiplier") > 0:
                     valuemultiplier = s_line[1].lstrip()
                 if s_line[0].lower().count("valuerangeminmag") > 0:
