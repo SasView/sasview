@@ -228,6 +228,7 @@ LATEX_PREAMBLE=r"""
 \newcommand{\gt}{>}              % HTML needs \gt rather than >
 \renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
 \DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
+\DeclareUnicodeCharacter {0393} {\ensuremath{\Gamma}}  % Gamma
 \DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
 \DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
 """

@@ -549,7 +549,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Returns the tab with with attribute name *name*
         """
-        assert(name, str)
+        assert isinstance(name, str)
         for tab in self.tabs:
             if tab.modelName() == name:
                 return tab
