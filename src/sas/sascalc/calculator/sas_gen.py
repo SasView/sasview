@@ -422,16 +422,28 @@ class OMFReader(object):
                     zbase = s_line[1].lstrip()
                 if s_line[0].lower().count("xstepsize") > 0:
                     xstepsize = s_line[1].lstrip()
+                else:
+                    xstepsize = 5    
                 if s_line[0].lower().count("ystepsize") > 0:
                     ystepsize = s_line[1].lstrip()
+                else:
+                    ystepsize = 5    
                 if s_line[0].lower().count("zstepsize") > 0:
                     zstepsize = s_line[1].lstrip()
+                else:
+                    zstepsize = 5
                 if s_line[0].lower().count("xnodes") > 0:
                     xnodes = s_line[1].lstrip()
+                else:
+                    xnodes = 0    
                 if s_line[0].lower().count("ynodes") > 0:
                     ynodes = s_line[1].lstrip()
+                else:
+                    ynodes=0    
                 if s_line[0].lower().count("znodes") > 0:
                     znodes = s_line[1].lstrip()
+                else:
+                    znodes = 0    
                 if s_line[0].lower().count("xmin") > 0:
                     xmin = s_line[1].lstrip()
                 if s_line[0].lower().count("ymin") > 0:
