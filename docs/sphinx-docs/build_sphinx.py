@@ -70,14 +70,14 @@ def inplace_change(filename, old_string, new_string):
 # Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
         s=open(filename).read()
         if old_string in s:
-                print('Changing "{old_string}" to "{new_string}"'.format(**locals()))
+                print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
                 s=s.replace(old_string, new_string)
                 f=open(filename, 'w')
                 f.write(s)
                 f.flush()
                 f.close()
         else:
-                print('No occurrences of "{old_string}" found.'.format(**locals()))
+                print('No occurrences of "{old_string}" found in {filename}.'.format(**locals()))
 
 def _remove_dir(dir_path):
     """Removes the given directory."""

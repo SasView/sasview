@@ -10,12 +10,12 @@ dependencies:
  - ipykernel=4.9
  - jupyter
  - twisted=18.4.0
- - lxml=4.6.2
+ - lxml=4.6.3
  - sphinx=1.8.5
  - cython=0.28.3
  - pytest
  - mako=1.0.7
- - pyinstaller=3.3.1 
+ - pyinstaller=3.3.1
  - pyqt>=5.9 # required for GTK themes to work correctly
  - testpath=0.3.1
  - numpy=1.14.3  # NEED TO DOWNGRADE NUMPY!!!
@@ -26,7 +26,7 @@ dependencies:
  - pip:
    - pytools==2018.4
    - periodictable==1.5.0
-   - bumps==0.7.11
+   - bumps
    - xhtml2pdf==0.2.2
    - qt5reactor==0.5
    - pillow==8.1.2

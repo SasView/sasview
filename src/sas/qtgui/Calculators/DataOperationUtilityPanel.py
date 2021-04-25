@@ -267,7 +267,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         if self.txtNumber.isModified():
             input_to_check = str(self.txtNumber.text())
 
-            if input_to_check is None or input_to_check is '':
+            if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logging.warning(msg)
                 self.txtNumber.setStyleSheet(BG_RED)

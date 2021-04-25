@@ -228,6 +228,7 @@ LATEX_PREAMBLE=r"""
 \newcommand{\gt}{>}              % HTML needs \gt rather than >
 \renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
 \DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
+\DeclareUnicodeCharacter {0393} {\ensuremath{\Gamma}}  % Gamma
 \DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
 \DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
 """
@@ -312,3 +313,15 @@ if os.path.exists('rst_prolog'):
         rst_prolog = fid.read()
 
 numfig = True
+
+import sphinx
+if sphinx.version_info[0] >= 3:   # CRUFT
+
+    # Skip the monkey-patched 'sas.models' which grafts the sasmodels classes
+    # back into their old location in sasview, but causes autodoc to explode.
+    def autodoc_skip_member_handler(app, what, name, obj, skip, options):
+        return name.startswith("sas.models")
+
+    def setup(app):
+        # Connect the autodoc-skip-member event from apidoc to the callback
+        app.connect('autodoc-skip-member', autodoc_skip_member_handler)
