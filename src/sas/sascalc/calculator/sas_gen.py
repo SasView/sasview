@@ -320,6 +320,7 @@ class OMF2SLD(object):
         :Params length: data length
         """
         parts = (self.pos_x, self.pos_y, self.pos_z, self.mx, self.my, self.mz)
+
         if any(len(v) != length for v in parts):
             raise ValueError("Error: Inconsistent data length.")
 
@@ -396,104 +397,95 @@ class OMFReader(object):
                         mz = np.append(mz, _mz)
                     except Exception as exc:
                         # Skip non-data lines
-                        logger.error(str(exc)+" when processing %r"%line)
+                        logger.error(str(exc)+" when processing %r"%line)  
+                elif line:                           
                 #Reading Header; Segment count ignored
-                s_line = line.split(":", 1)
-                if s_line[0].lower().count("oommf") > 0:
-                    oommf = s_line[1].lstrip()
-                if s_line[0].lower().count("title") > 0:
-                    title = s_line[1].lstrip()
-                if s_line[0].lower().count("desc") > 0:
-                    desc += s_line[1].lstrip()
-                    desc += '\n'
-                if s_line[0].lower().count("meshtype") > 0:
-                    meshtype = s_line[1].lstrip()
-                if s_line[0].lower().count("meshunit") > 0:
-                    meshunit = s_line[1].lstrip()
-                    if meshunit.count("m") < 1:
-                        msg = "Error: \n"
-                        msg += "We accept only m as meshunit"
-                        raise ValueError(msg)
-                if s_line[0].lower().count("xbase") > 0:
-                    xbase = s_line[1].lstrip()
-                if s_line[0].lower().count("ybase") > 0:
-                    ybase = s_line[1].lstrip()
-                if s_line[0].lower().count("zbase") > 0:
-                    zbase = s_line[1].lstrip()
-                if s_line[0].lower().count("xstepsize") > 0:
-                    xstepsize = s_line[1].lstrip()
-                else:
-                    xstepsize = 5    
-                if s_line[0].lower().count("ystepsize") > 0:
-                    ystepsize = s_line[1].lstrip()
-                else:
-                    ystepsize = 5    
-                if s_line[0].lower().count("zstepsize") > 0:
-                    zstepsize = s_line[1].lstrip()
-                else:
-                    zstepsize = 5
-                if s_line[0].lower().count("xnodes") > 0:
-                    xnodes = s_line[1].lstrip()
-                else:
-                    xnodes = 0    
-                if s_line[0].lower().count("ynodes") > 0:
-                    ynodes = s_line[1].lstrip()
-                else:
-                    ynodes=0    
-                if s_line[0].lower().count("znodes") > 0:
-                    znodes = s_line[1].lstrip()
-                else:
-                    znodes = 0    
-                if s_line[0].lower().count("xmin") > 0:
-                    xmin = s_line[1].lstrip()
-                if s_line[0].lower().count("ymin") > 0:
-                    ymin = s_line[1].lstrip()
-                if s_line[0].lower().count("zmin") > 0:
-                    zmin = s_line[1].lstrip()
-                if s_line[0].lower().count("xmax") > 0:
-                    xmax = s_line[1].lstrip()
-                if s_line[0].lower().count("ymax") > 0:
-                    ymax = s_line[1].lstrip()
-                if s_line[0].lower().count("zmax") > 0:
-                    zmax = s_line[1].lstrip()
-                if s_line[0].lower().count("valueunit") > 0:
-                    valueunit = s_line[1].lstrip()
-                    if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
-                        msg = "Error: \n"
-                        msg += "We accept only mT or A/m as valueunit"
-                        raise ValueError(msg)    
-                if s_line[0].lower().count("valuemultiplier") > 0:
-                    valuemultiplier = s_line[1].lstrip()
-                if s_line[0].lower().count("valuerangeminmag") > 0:
-                    valuerangeminmag = s_line[1].lstrip()
-                if s_line[0].lower().count("valuerangemaxmag") > 0:
-                    valuerangemaxmag = s_line[1].lstrip()
-                if s_line[0].lower().count("end") > 0:
-                    output.filename = os.path.basename(path)
-                    output.oommf = oommf
-                    output.title = title
-                    output.desc = desc
-                    output.meshtype = meshtype
-                    output.xbase = float(xbase) * METER2ANG
-                    output.ybase = float(ybase) * METER2ANG
-                    output.zbase = float(zbase) * METER2ANG
-                    output.xstepsize = float(xstepsize) * METER2ANG
-                    output.ystepsize = float(ystepsize) * METER2ANG
-                    output.zstepsize = float(zstepsize) * METER2ANG
-                    output.xnodes = float(xnodes)
-                    output.ynodes = float(ynodes)
-                    output.znodes = float(znodes)
-                    output.xmin = float(xmin) * METER2ANG
-                    output.ymin = float(ymin) * METER2ANG
-                    output.zmin = float(zmin) * METER2ANG
-                    output.xmax = float(xmax) * METER2ANG
-                    output.ymax = float(ymax) * METER2ANG
-                    output.zmax = float(zmax) * METER2ANG
-                    output.valuemultiplier = valuemultiplier
-                    output.valuerangeminmag = mag2sld(float(valuerangeminmag), \
-                                                      valueunit)
-                    output.valuerangemaxmag = mag2sld(float(valuerangemaxmag), \
-                                                      valueunit)
+                    s_line = line.split(":", 1)
+                    if s_line[0].lower().count("oommf") > 0:
+                        oommf = s_line[1].lstrip()
+                    if s_line[0].lower().count("title") > 0:
+                        title = s_line[1].lstrip()
+                    if s_line[0].lower().count("desc") > 0:
+                        desc += s_line[1].lstrip()
+                        desc += '\n'
+                    if s_line[0].lower().count("meshtype") > 0:
+                        meshtype = s_line[1].lstrip()
+                    if s_line[0].lower().count("meshunit") > 0:
+                        meshunit = s_line[1].lstrip()
+                        if meshunit.count("m") < 1:
+                            msg = "Error: \n"
+                            msg += "We accept only m as meshunit"
+                            raise ValueError(msg)
+                    if s_line[0].lower().count("xbase") > 0:
+                        xbase = s_line[1].lstrip()
+                    if s_line[0].lower().count("ybase") > 0:
+                        ybase = s_line[1].lstrip()
+                    if s_line[0].lower().count("zbase") > 0:
+                        zbase = s_line[1].lstrip()
+                    if s_line[0].lower().count("xstepsize") > 0:
+                        xstepsize = s_line[1].lstrip() 
+                    if s_line[0].lower().count("ystepsize") > 0:
+                        ystepsize = s_line[1].lstrip()   
+                    if s_line[0].lower().count("zstepsize") > 0:
+                        zstepsize = s_line[1].lstrip()
+                    if s_line[0].lower().count("xnodes") > 0:
+                        xnodes = s_line[1].lstrip()   
+                    print(s_line[0].lower().count("ynodes"))    
+                    if s_line[0].lower().count("ynodes") > 0:
+                        ynodes = s_line[1].lstrip()
+                        print(ynodes)   
+                    if s_line[0].lower().count("znodes") > 0:
+                        znodes = s_line[1].lstrip()  
+                    if s_line[0].lower().count("xmin") > 0:
+                        xmin = s_line[1].lstrip()
+                    if s_line[0].lower().count("ymin") > 0:
+                        ymin = s_line[1].lstrip()
+                    if s_line[0].lower().count("zmin") > 0:
+                        zmin = s_line[1].lstrip()
+                    if s_line[0].lower().count("xmax") > 0:
+                        xmax = s_line[1].lstrip()
+                    if s_line[0].lower().count("ymax") > 0:
+                        ymax = s_line[1].lstrip()
+                    if s_line[0].lower().count("zmax") > 0:
+                        zmax = s_line[1].lstrip()
+                    if s_line[0].lower().count("valueunit") > 0:
+                        valueunit = s_line[1].lstrip()
+                        if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
+                            msg = "Error: \n"
+                            msg += "We accept only mT or A/m as valueunit"
+                            raise ValueError(msg)    
+                    if s_line[0].lower().count("valuemultiplier") > 0:
+                        valuemultiplier = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangeminmag") > 0:
+                        valuerangeminmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangemaxmag") > 0:
+                        valuerangemaxmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("end") > 0:
+                        output.filename = os.path.basename(path)
+                        output.oommf = oommf
+                        output.title = title
+                        output.desc = desc
+                        output.meshtype = meshtype
+                        output.xbase = float(xbase) * METER2ANG
+                        output.ybase = float(ybase) * METER2ANG
+                        output.zbase = float(zbase) * METER2ANG
+                        output.xstepsize = float(xstepsize) * METER2ANG
+                        output.ystepsize = float(ystepsize) * METER2ANG
+                        output.zstepsize = float(zstepsize) * METER2ANG
+                        output.xnodes = float(xnodes)
+                        output.ynodes = float(ynodes)
+                        output.znodes = float(znodes)
+                        output.xmin = float(xmin) * METER2ANG
+                        output.ymin = float(ymin) * METER2ANG
+                        output.zmin = float(zmin) * METER2ANG
+                        output.xmax = float(xmax) * METER2ANG
+                        output.ymax = float(ymax) * METER2ANG
+                        output.zmax = float(zmax) * METER2ANG
+                        output.valuemultiplier = valuemultiplier
+                        output.valuerangeminmag = mag2sld(float(valuerangeminmag), \
+                                                          valueunit)
+                        output.valuerangemaxmag = mag2sld(float(valuerangemaxmag), \
+                                                          valueunit)
             output.set_m(mx, my, mz)
             return output
         except Exception:
