@@ -34,4 +34,3 @@ dependencies:
    - qt5reactor==0.5
    - tinycc==1.1
    - pillow==8.1.2
-

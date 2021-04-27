@@ -196,7 +196,8 @@ class GuiManager(object):
             for name, perspective in self.loadedPerspectives.items():
                 try:
                     perspective.setClosable(True)
-                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    if self.subwindow in self._workspace.workspace.subWindowList():
+                        self._workspace.workspace.removeSubWindow(self.subwindow)
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
@@ -667,6 +668,8 @@ class GuiManager(object):
         Menu Save Project
         """
         filename = self.filesWidget.saveProject()
+        if not filename:
+            return
 
         # datasets
         all_data = self.filesWidget.getSerializedData()
