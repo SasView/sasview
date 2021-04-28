@@ -397,8 +397,8 @@ class OMFReader(object):
                         mz = np.append(mz, _mz)
                     except Exception as exc:
                         # Skip non-data lines
-                        logger.error(str(exc)+" when processing %r"%line)  
-                elif line:                           
+                        logger.error(str(exc)+" when processing %r"%line)
+                elif line:
                 #Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
@@ -430,10 +430,10 @@ class OMFReader(object):
                         zstepsize = s_line[1].lstrip()
                     if s_line[0].lower().count("xnodes") > 0:
                         xnodes = s_line[1].lstrip()   
-                    print(s_line[0].lower().count("ynodes"))    
+                    #print(s_line[0].lower().count("ynodes"))
                     if s_line[0].lower().count("ynodes") > 0:
                         ynodes = s_line[1].lstrip()
-                        print(ynodes)   
+                        #print(ynodes)
                     if s_line[0].lower().count("znodes") > 0:
                         znodes = s_line[1].lstrip()  
                     if s_line[0].lower().count("xmin") > 0:
@@ -482,10 +482,10 @@ class OMFReader(object):
                         output.ymax = float(ymax) * METER2ANG
                         output.zmax = float(zmax) * METER2ANG
                         output.valuemultiplier = valuemultiplier
-                        output.valuerangeminmag = mag2sld(float(valuerangeminmag), \
-                                                          valueunit)
-                        output.valuerangemaxmag = mag2sld(float(valuerangemaxmag), \
-                                                          valueunit)
+                        output.valuerangeminmag \
+                            = mag2sld(float(valuerangeminmag), valueunit)
+                        output.valuerangemaxmag \
+                            = mag2sld(float(valuerangemaxmag), valueunit)
             output.set_m(mx, my, mz)
             return output
         except Exception:

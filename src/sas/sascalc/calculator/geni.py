@@ -9,6 +9,10 @@ import numpy as np
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
         from numba import njit, prange
+        # Suppress numba debug info
+        import logging
+        numba_logger = logging.getLogger('numba')
+        numba_logger.setLevel(logging.WARNING)
         USE_NUMBA = True
     else:
         raise ImportError("fail")
@@ -190,7 +194,7 @@ def _calc_Iqxy_magnetic(
     # Precompute helper values
     up_angle = np.radians(up_angle)
     cos_spin, sin_spin = np.cos(up_angle), np.sin(up_angle)
-   
+
     up_phi = np.radians(up_phi)
     cos_phi, sin_phi = np.cos(up_phi), np.sin(up_phi)
     mx, my, mz = rho_m
@@ -202,43 +206,47 @@ def _calc_Iqxy_magnetic(
     shape = qx.shape
     qx, qy = (np.asarray(v, 'd').flatten() for v in (qx, qy))
     Iq = np.zeros(shape=qx.shape, dtype='d')
+    M = np.array([mx, my, mz])
     #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
     _calc_Iqxy_magnetic_helper(
-        Iq, qx, qy, x, y, rho, vol, mx, my, mz,
+        Iq, qx, qy, x, y, rho, vol, M,
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
     return Iq.reshape(shape)
 
-#@njit("(" + "f8[:], "*10 + "f8, "*8 + ")") Numba has issues with Mn=p.array([mx, my, mz])
+@njit
+def orth(A, b): # A = 3 x n, and b_hat unit vector
+    return A - np.outer(b, b)@A
+
+@njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
 def _calc_Iqxy_magnetic_helper(
-        Iq, qx, qy, x, y, rho, vol, mx, my, mz, cos_spin, sin_spin, cos_phi, sin_phi,
+        Iq, qx, qy, x, y, rho, vol, M, cos_spin, sin_spin, cos_phi, sin_phi,
         dd, du, ud, uu):
     # Process each qx, qy
     # Note: enumerating a pair is slower than direct indexing in numba
     for k in range(len(qx)):
         qxk, qyk = qx[k], qy[k]
-        # If q is near 0 then discard intensity to zero. What should be the correct result for q=0?
 
         if abs(qxk) > 1.e-16 or abs(qyk) > 1.e-16:
-            norm = 1/np.sqrt(qxk**2 + qyk**2) 
-            q_hat = np.array([qxk, qyk, 0]) * norm    
+            norm = 1/np.sqrt(qxk**2 + qyk**2)
+            q_hat = np.array([qxk, qyk, 0]) * norm
         else:
-            q_hat = np.array([0.5, 0.5, 0]) # for homogeneously magnetised disc. Mperp can be
-        #associated to the magnetsation corrected for demag factorfield q->0, i.e. M-Nij M 
-        #with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).    
+            # For homogeneously magnetised disc Mperp can be associated to the
+            # magnetsation corrected for demag factorfield q->0, i.e. M-Nij M
+            # with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).
+            q_hat = np.array([0.5, 0.5, 0])
 
         p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
-
-        M = np.array([mx, my, mz])
 
         M_perp = orth(M, q_hat)
         M_perpP = orth(M_perp, p_hat)
         M_perpP_perpQ = orth(M_perpP, q_hat)
 
         perpx = p_hat @ M_perp
-        perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
-        #faster than perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
+        # einsum is faster than sumsq in numpy but not supported in numba
+        #perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
+        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
         perpz = q_hat @ M_perpP
-               
+
         ephase = vol * np.exp(1j * (qxk * x + qyk * y))
         if dd > 1e-10:
             Iq[k] += dd * abs(np.sum((rho - perpx) * ephase))**2
@@ -248,8 +256,6 @@ def _calc_Iqxy_magnetic_helper(
             Iq[k] += du * abs(np.sum((perpy - 1j * perpz) * ephase))**2
         if ud > 1e-10:
             Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
-
-
 
 def _spin_weights(in_spin, out_spin):
     """
@@ -291,5 +297,6 @@ def _spin_weights(in_spin, out_spin):
     )
     return weight
 
+@njit
 def orth(A, b): # A = 3 x n, and b_hat unit vector
- return A - np.outer(b, b)@A
+    return A - np.outer(b, b)@A
