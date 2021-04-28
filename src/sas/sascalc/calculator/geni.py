@@ -208,7 +208,7 @@ def _calc_Iqxy_magnetic(
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
     return Iq.reshape(shape)
 
-@njit("(" + "f8[:], "*10 + "f8, "*6 + ")")
+#@njit("(" + "f8[:], "*10 + "f8, "*8 + ")") Numba has issues with Mn=p.array([mx, my, mz])
 def _calc_Iqxy_magnetic_helper(
         Iq, qx, qy, x, y, rho, vol, mx, my, mz, cos_spin, sin_spin, cos_phi, sin_phi,
         dd, du, ud, uu):
@@ -218,12 +218,16 @@ def _calc_Iqxy_magnetic_helper(
         qxk, qyk = qx[k], qy[k]
         # If q is near 0 then discard intensity to zero. What should be the correct result for q=0?
 
-        #if abs(qxk) > 1.e-16 or abs(qyk) > 1.e-16:
-        norm = 1/np.sqrt(qxk**2 + qyk**2) 
-        # Note: norm is computed as a separate scalar so that the numba jit
-        # can figure out the proper type for perp even for q = 0
+        if abs(qxk) > 1.e-16 or abs(qyk) > 1.e-16:
+            norm = 1/np.sqrt(qxk**2 + qyk**2) 
+            q_hat = np.array([qxk, qyk, 0]) * norm    
+        else:
+            q_hat = np.array([0.5, 0.5, 0]) # for homogeneously magnetised disc. Mperp can be
+        #associated to the magnetsation corrected for demag factorfield q->0, i.e. M-Nij M 
+        #with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).    
+
         p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
-        q_hat = np.array([qxk, qyk, 0]) * norm
+
         M = np.array([mx, my, mz])
 
         M_perp = orth(M, q_hat)
