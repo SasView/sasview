@@ -233,7 +233,7 @@ def _calc_Iqxy_magnetic_helper(
             # For homogeneously magnetised disc Mperp can be associated to the
             # magnetsation corrected for demag factorfield q->0, i.e. M-Nij M
             # with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).
-            q_hat = np.array([0.5, 0.5, 0])
+            q_hat = np.sqrt(np.array([0.5, 0.5, 0]))
 
         p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
 
@@ -297,6 +297,4 @@ def _spin_weights(in_spin, out_spin):
     )
     return weight
 
-@njit
-def orth(A, b): # A = 3 x n, and b_hat unit vector
-    return A - np.outer(b, b)@A
+
