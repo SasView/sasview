@@ -92,16 +92,52 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtUpFracOut.setValidator(
             QtGui.QRegExpValidator(validat_regexbetween0_1, self.txtUpFracOut))
 
+        # angles, SLD must be float values
+        validat_regex_float = QtCore.QRegExp('[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)')
+        self.txtUpTheta.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtUpTheta))
+        self.txtUpPhi.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtUpPhi))
+
+        self.txtSolventSLD.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSolventSLD))
+        self.txtNucl.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtNucl))        
+
+        self.txtMx.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtMx))
+        self.txtMy.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtMy))
+        self.txtMz.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtMz))                
+
+        self.txtXstepsize.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtXstepsize))
+        self.txtYstepsize.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtYstepsize))
+        self.txtZstepsize.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtZstepsize))            
+
         # 0 < Qmax <= 1000
         validat_regex_q = QtCore.QRegExp('^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
         self.txtQxMax.setValidator(QtGui.QRegExpValidator(validat_regex_q,
                                                           self.txtQxMax))
-        self.txtQxMax.textChanged.connect(self.check_value)
+        #check for max q cut-off
+        self.txtQxMax.textChanged.connect(self.check_value) 
 
-        # 2 <= Qbin <= 1000
-        self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_q,
+        # 2 <= Qbin and nodes integers < 1000
+        validat_regex_int = QtCore.QRegExp('^[1-9]\d{3}$')        
+        self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_int,
                                                             self.txtNoQBins))
-        self.txtNoQBins.textChanged.connect(self.check_value)
+        #check for min q resolution
+        self.txtNoQBins.textChanged.connect(self.check_value) 
+
+        self.txtXnodes.setValidator(
+            QtGui.QRegExpValidator(validat_regex_int, self.txtXnodes))
+        self.txtYnodes.setValidator(
+            QtGui.QRegExpValidator(validat_regex_int, self.txtYnodes))
+        self.txtZnodes.setValidator(
+            QtGui.QRegExpValidator(validat_regex_int, self.txtZnodes))         
 
         # plots - 3D in real space
         self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
@@ -162,15 +198,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     loader = None
                 # disable some entries depending on type of loaded file
                 # (according to documentation)
-                if self.ext.lower() in ['.sld', '.omf', '.pdb']:
+                if self.ext.lower() in ['.sld', '.pdb']:
                     self.txtUpFracIn.setEnabled(False)
                     self.txtUpFracOut.setEnabled(False)
                     self.txtUpTheta.setEnabled(False)
+                    self.txtUpPhi.setEnabled(False)
 
                 if self.reader is not None and self.reader.isrunning():
                     self.reader.stop()
                 self.cmdLoad.setEnabled(False)
                 self.cmdLoad.setText('Loading...')
+                self.cmdCompute.setEnabled(False)
+                self.cmdCompute.setText('Loading...')
                 self.communicator.statusBarUpdateSignal.emit(
                     "Loading File {}".format(os.path.basename(
                         str(self.datafile))))
@@ -233,6 +272,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         logging.info("Load Complete")
         self.cmdLoad.setEnabled(True)
         self.cmdLoad.setText('Load')
+        self.cmdCompute.setEnabled(True)
+        self.cmdCompute.setText('Compute')
         self.trigger_plot_3d.emit()
 
     def check_units(self):
@@ -259,15 +300,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Check range of text edits for QMax and Number of Qbins """
         text_edit = self.sender()
         text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
-        if text_edit.text():
+        if (text_edit.text() and self.sld_data != None):
             value = float(str(text_edit.text()))
             if text_edit == self.txtQxMax:
-                if value <= 0 or value > 1000:
+                max_q = numpy.pi / (max(self.sld_data.xstepsize, self.sld_data.ystepsize, self.sld_data.zstepsize) )                   
+                if value <= 0 or value > max_q:
                     text_edit.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
                     text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
             elif text_edit == self.txtNoQBins:
-                if value < 2 or value > 1000:
+                max_step =  3*max(self.sld_data.xnodes, self.sld_data.ynodes, self.sld_data.znodes) 
+                    #limits qmin > maxq / nodes                 
+                if value < 2 or value > max_step:
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
@@ -295,6 +339,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtUpFracIn.setText(str(self.model.params['Up_frac_in']))
         self.txtUpFracOut.setText(str(self.model.params['Up_frac_out']))
         self.txtUpTheta.setText(str(self.model.params['Up_theta']))
+        self.txtUpPhi.setText(str(self.model.params['Up_phi']))
 
         self.txtNoPixels.setText(str(len(self.sld_data.sld_n)))
         self.txtNoPixels.setEnabled(False)
@@ -359,6 +404,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.txtUpTheta.isModified():
             self.model.params['Up_theta'] = float(self.txtUpTheta.text())
 
+        if self.txtUpPhi.isModified():
+            self.model.params['Up_phi'] = float(self.txtUpPhi.text())    
+
         if self.txtMx.isModified():
             self.sld_data.sld_mx = float(self.txtMx.text())*\
                                    numpy.ones(len(self.sld_data.sld_mx))
@@ -413,6 +461,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtUpFracIn.setText("1.0")
             self.txtUpFracOut.setText("1.0")
             self.txtUpTheta.setText("0.0")
+            self.txtUpPhi.setText("0.0")
             self.txtBackground.setText("0.0")
             self.txtScale.setText("1.0")
             self.txtSolventSLD.setText("0.0")
@@ -567,7 +616,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             #d.addCallback(self.plot_1_2d)
             d.addCallback(self.calculateComplete)
             d.addErrback(self.calculateFailed)
-        except:
+        except Exception:
             log_msg = "{}. stop".format(sys.exc_info()[1])
             logging.info(log_msg)
         return
@@ -644,7 +693,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 if not extension:
                     filename = '.'.join((filename, 'sld'))
                 sas_gen.SLDReader().write(filename, self.sld_data)
-            except:
+            except Exception:
                 raise
 
     def plot3d(self, has_arrow=False):
@@ -816,10 +865,7 @@ class Plotter3DWidget(PlotterBase):
                 max_my = max(numpy.fabs(sld_my))
                 max_mz = max(numpy.fabs(sld_mz))
                 max_m = max(max_mx, max_my, max_mz)
-                try:
-                    max_step = max(data.xstepsize, data.ystepsize, data.zstepsize)
-                except:
-                    max_step = 0
+                max_step = max(data.xstepsize, data.ystepsize, data.zstepsize)
                 if max_step <= 0:
                     max_step = 5
                 try:
@@ -842,10 +888,12 @@ class Plotter3DWidget(PlotterBase):
                                         colors, mutation_scale=10, lw=1,
                                         arrowstyle="->", alpha=0.5)
                         ax.add_artist(arrows)
-                except:
+                except Exception:
                     pass
+  
                 log_msg = "Arrow Drawing completed.\n"
                 logging.info(log_msg)
+  
             log_msg = "Arrow Drawing is in progress..."
             logging.info(log_msg)
 

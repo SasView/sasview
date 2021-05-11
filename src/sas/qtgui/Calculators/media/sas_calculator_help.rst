@@ -57,70 +57,8 @@ of the neutrons as follows.
 Magnetic Scattering
 ^^^^^^^^^^^^^^^^^^^
 
-For magnetic scattering, only the magnetization component, $M_\perp$,
-perpendicular to the scattering vector $Q$ contributes to the magnetic
-scattering length.
-
-.. image:: mag_vector.png
-
-The magnetic scattering length density is then
-
-.. image:: dm_eq.png
-
-where the gyromagnetic ratio is $\gamma = -1.913$, $\mu_B$ is the Bohr
-magneton, $r_0$ is the classical radius of electron, and $\sigma$ is the
-Pauli spin.
-
-For a polarized neutron, the magnetic scattering is depending on the spin states.
-
-Let us consider that the incident neutrons are polarised both parallel (+) and
-anti-parallel (-) to the x' axis (see below). The possible states after
-scattering from the sample are then
-
-*  Non-spin flips: (+ +) and (- -)
-*  Spin flips:     (+ -) and (- +)
-
-.. image:: gen_mag_pic.png
-
-Now let us assume that the angles of the *Q* vector and the spin-axis (x')
-to the x-axis are $\phi$ and $\theta_\text{up}$ respectively (see above). Then,
-depending upon the polarization (spin) state of neutrons, the scattering
-length densities, including the nuclear scattering length density ($\beta_N$)
-are given as
-
-*  for non-spin-flips
-
-   .. image:: sld1.png
-
-*  for spin-flips
-
-   .. image:: sld2.png
-
-where
-
-.. image:: mxp.png
-
-
-
-.. image:: myp.png
-
-
-
-.. image:: mzp.png
-
-
-
-.. image:: mqx.png
-
-
-
-.. image:: mqy.png
-
-Here the $M_{0x}$, $M_{0y}$ and $M_{0z}$ are the $x$, $y$ and $z$
-components of the magnetisation vector in the laboratory $xyz$ frame.
-
-
-.. .. image:: Mxyzp.png
+For information about polarised and magnetic scattering, see
+the :ref:`magnetism` documentation.
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -168,9 +106,9 @@ is taken into account.*
 Using PDB/OMF or SLD files
 --------------------------
 
-The SANS Calculator tool can read some PDB, OMF or SLD files but ignores
-polarized/magnetic scattering when doing so, thus related parameters such as
-*Up_frac_in*, etc, will be ignored.
+The SANS Calculator tool can read some PDB, OMF or SLD files. PDB and SLD files ignore
+polarized/magnetic scattering, thus related parameters such as
+*Up_frac_in*, etc, are greyed out.
 
 The calculation for fixed orientation uses Equation 1 above resulting in a 2D
 output, whereas the scattering calculation averaged over all the orientations
