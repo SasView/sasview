@@ -33,7 +33,7 @@ dependencies:
  - docutils=0.14=py36_1001
  - entrypoints=0.3=py36_1000
  - freetype=2.9.1=h597ad8a_1005
- - h5py=2.8.0=py36h470a237_0
+ - h5py>=2.10.0=0
  - hdf5=1.10.1=2
  - hyperlink=17.3.1=py_0
  - hypothesis=3.57.0=py36h24bf2e0_0

@@ -26,7 +26,7 @@ dependencies:
   - glib=2.56.1=h000015b_0
   - gst-plugins-base=1.14.0=hbbd80ab_1
   - gstreamer=1.14.0=hb453b48_1
-  - h5py=2.7.1=py36h3585f63_0
+  - h5py>=2.10.0=0
   - hdf5=1.10.1=h9caa474_1
   - icu=58.2=h9c2bf20_1
   - idna=2.6=py36h82fb2a8_1
