@@ -13,6 +13,7 @@ dependencies:
  - lxml=4.6.3
  - sphinx=1.8.5
  - cython=0.28.3
+ - pip
  - pytest
  - mako=1.0.7
  - pyinstaller=3.3.1

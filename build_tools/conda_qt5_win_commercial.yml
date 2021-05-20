@@ -2,6 +2,7 @@ name: qt5_win
 channels:
   - conda-forge
 dependencies:
+ - pip
  - alabaster
  - colorama
  - ipykernel
