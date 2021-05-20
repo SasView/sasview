@@ -2292,6 +2292,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             plugin_list.append([name, True])
         if plugin_list:
             self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
+        # Adding plugins classified as structure factor to 'CATEGORY_STRUCTURE' list
+        plugin_structure_list = [[name, True] for name, plug in self.custom_models.items() if plug.is_structure_factor]
+        if plugin_structure_list:
+            self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
 
     def regenerateModelDict(self):
         """
