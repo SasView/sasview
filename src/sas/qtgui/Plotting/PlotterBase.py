@@ -18,6 +18,7 @@ from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 from sas.qtgui.Plotting.Binder import BindArtist
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.UnitChange import UnitChange
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 
@@ -439,3 +440,16 @@ class PlotterBase(QtWidgets.QWidget):
             GuiUtils.saveData1D(plot_data)
         else:
             GuiUtils.saveData2D(plot_data)
+
+    def onUnitsChange(self):
+        """
+        Show a dialog allowing unit conversions for each axis
+        """
+        # Create the Unit conversion dialog on the fly
+        self.units = UnitChange(self, self.data)
+        if self.units.exec_() == QtWidgets.QDialog.Accepted:
+            for id in list(self.plot_dict.keys()):
+                plot = self.plot_dict[id]
+                plot.convert_q_units(self.units.cbX.currentText())
+                plot.convert_i_units(self.units.cbY.currentText())
+                self.replacePlot(id, plot)

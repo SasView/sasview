@@ -14,7 +14,6 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from  sas.qtgui.Utilities.UnitChange import UnitChange
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
@@ -224,18 +223,6 @@ class Plotter2DWidget(PlotterBase):
         self.slicer = None
         if self.slicer_widget:
             self.slicer_widget.setModel(None)
-
-    def onUnitsChange(self):
-        """
-        Show a dialog allowing unit conversions for each axis
-        """
-        # Create the Unit conversion dialog on the fly
-        self.units = UnitChange(self, self.data)
-        if self.units.exec_() == QtWidgets.QDialog.Accepted:
-            plot = self.data0
-            plot.convert_q_units(self.units.cbX.currentText())
-            plot.convert_i_units(self.units.cbY.currentText())
-            self.replacePlot(id, plot)
 
     def getActivePlots(self):
         ''' utility method for manager query of active plots '''

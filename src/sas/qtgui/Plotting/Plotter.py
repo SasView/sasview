@@ -18,7 +18,6 @@ from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.UnitChange import UnitChange
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
 def _legendResize(width, parent):
@@ -391,19 +390,6 @@ class PlotterWidget(PlotterBase):
                 d.xtransform = self.xLogLabel
                 d.ytransform = self.yLogLabel
             self.xyTransform(self.xLogLabel, self.yLogLabel)
-
-    def onUnitsChange(self):
-        """
-        Show a dialog allowing unit conversions for each axis
-        """
-        # Create the Unit conversion dialog on the fly
-        self.units = UnitChange(self, self.data)
-        if self.units.exec_() == QtWidgets.QDialog.Accepted:
-            for id in list(self.plot_dict.keys()):
-                plot = self.plot_dict[id]
-                plot.convert_q_units(self.units.cbX.currentText())
-                plot.convert_i_units(self.units.cbY.currentText())
-                self.replacePlot(id, plot)
 
     def onAddText(self):
         """
