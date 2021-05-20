@@ -23,8 +23,6 @@ from .InvariantUtils import WIDGETS
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
 Q_MAXIMUM = 10
-# the ratio of maximum q value/(qmax of data) to plot the theory data
-Q_MAXIMUM_PLOT = 3
 # Default number of points of interpolation: high and low range
 NPOINTS_Q_INTERP = 10
 # Default power law for interpolation
@@ -455,9 +453,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         if high_calculation_pass:
             # for presentation in InvariantDetails
-            qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
             qmax_input = float(self.txtExtrapolQMax.text())
-            qmax_plot = qmax_input if qmax_plot > qmax_input else qmax_plot
+            qmax_plot = qmax_input
 
             power_high = self._calculator.get_extrapolation_power(range='high')
             high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
