@@ -542,7 +542,7 @@ def residualsData1D(reference_data, current_data, weights):
             pass
 
     residuals.x = current_data.x[index][0]
-    residuals.dy = numpy.ones(len(residuals.y))
+    residuals.dy = None
     residuals.dx = None
     residuals.dxl = None
     residuals.dxw = None
@@ -572,7 +572,7 @@ def residualsData2D(reference_data, current_data, weight):
     residuals.qx_data = current_data.qx_data
     residuals.qy_data = current_data.qy_data
     residuals.q_data = current_data.q_data
-    residuals.err_data = numpy.ones(len(residuals.data))
+    residuals.err_data = None
     residuals.xmin = min(residuals.qx_data)
     residuals.xmax = max(residuals.qx_data)
     residuals.ymin = min(residuals.qy_data)
