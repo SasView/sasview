@@ -2,6 +2,8 @@ import sys
 import unittest
 import time
 import logging
+import os
+import inspect
 
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -24,6 +26,9 @@ from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+
+from sasmodels.sasview_model import load_custom_model
+from sas.sascalc.fit.models import ModelManagerBase, ModelManager
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -54,12 +59,79 @@ class dummy_perspective(object):
     def getConstraintTab(self):
         return self.constraint_tab
 
+def find_plugin_models_mod():
+    """
+    Modification to sas.sascalc.fit.models.find_plugin_models().
+    Instead of searching for user's plugin directory, the path is set at:
+    'sas/qtgui/Perspectives/Fitting/plugin_models'
+    Modified to test handling of plugin models.
+    """
+    qtgui_dir = os.getcwd()[:os.getcwd().find('qtgui')]
+    plugins_dir = os.path.abspath(os.path.join(qtgui_dir, 'qtgui/Perspectives/Fitting/plugin_models'))
+
+    plugins = {}
+    for filename in os.listdir(plugins_dir):
+        name, ext = os.path.splitext(filename)
+        if ext == '.py' and not name == '__init__':
+            path = os.path.abspath(os.path.join(plugins_dir, filename))
+            model = load_custom_model(path)
+            plugins[model.name] = model
+
+    return plugins
+
+class ModelManagerBaseMod(ModelManagerBase):
+    """
+    Inherits from ModelManagerBase class and is the base class for the ModelManagerMod.
+    Modified to test handling of plugin models.
+    """
+    def _is_plugin_dir_changed(self):
+        """
+        Originally checked if the plugin directory has changed, returning True if so.
+        Now returns False in all cases to test handling of plugin models.
+        """
+        is_modified = False
+        return is_modified
+
+    def plugins_reset(self):
+        """
+        Returns a dictionary of the models, but will now utilize the find_plugin_models_mod function.
+        """
+        self.plugin_models = find_plugin_models_mod()
+        self.model_dictionary.clear()
+        self.model_dictionary.update(self.standard_models)
+        self.model_dictionary.update(self.plugin_models)
+        return self.get_model_list()
+
+class ModelManagerMod(ModelManager):
+    """
+    Inherits from ModelManager class which manages the list of available models.
+    Modified to test handling of plugin models.
+    """
+    base = None
+
+    def __init__(self):
+        if ModelManagerMod.base is None:
+            ModelManagerMod.base = ModelManagerBaseMod()
+
+class FittingWidgetMod(FittingWidget):
+    """
+    Inherits from FittingWidget class which is the main widget for selecting form and structure factor models.
+    Modified to test handling of plugin models.
+    """
+    def customModels(cls):
+        """
+        Reads in file names from the modified plugin directory to test handling of plugin models.
+        """
+        manager = ModelManagerMod()
+        manager.update()
+        return manager.base.plugin_models
+
 class FittingWidgetTest(unittest.TestCase):
     """Test the fitting widget GUI"""
 
     def setUp(self):
         """Create the GUI"""
-        self.widget = FittingWidget(dummy_manager())
+        self.widget = FittingWidgetMod(dummy_manager())
         FittingUtilities.checkConstraints = MagicMock(return_value=None)
 
     def tearDown(self):
@@ -104,7 +176,7 @@ class FittingWidgetTest(unittest.TestCase):
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         item = QtGui.QStandardItem("test")
 
-        widget_with_data = FittingWidget(dummy_manager(), data=item, tab_id=3)
+        widget_with_data = FittingWidgetMod(dummy_manager(), data=item, tab_id=3)
 
         self.assertEqual(widget_with_data.data, data)
         self.assertTrue(widget_with_data.data_is_loaded)
@@ -168,7 +240,7 @@ class FittingWidgetTest(unittest.TestCase):
 
     def testSelectStructureFactor(self):
         """
-        Test if structure factors have been loaded properly
+        Test if structure factors have been loaded properly, including plugins also classified as a structure factor.
         """
         fittingWindow =  self.widget
 
@@ -177,6 +249,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertNotEqual(fittingWindow.cbStructureFactor.findText("hayter_msa"),-1)
         self.assertNotEqual(fittingWindow.cbStructureFactor.findText("squarewell"),-1)
         self.assertNotEqual(fittingWindow.cbStructureFactor.findText("hardsphere"),-1)
+        self.assertNotEqual(fittingWindow.cbStructureFactor.findText("plugin_structure_template"),-1)
+        self.assertEqual(fittingWindow.cbStructureFactor.findText("plugin_template"),-1)
 
         #Test what is current text in the combobox
         self.assertTrue(fittingWindow.cbCategory.currentText(), "None")
