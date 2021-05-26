@@ -8,7 +8,7 @@ defaults:
     shell: bash
 
 jobs:
-  windows-installer:
+  osx-installer:
 
     runs-on: ${{ matrix.os }}
     strategy:
