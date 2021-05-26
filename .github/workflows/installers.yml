@@ -159,11 +159,13 @@ jobs:
         if-no-files-found: error
 
     - name: Create dmg file
+      if: ${{ matrix.os == 'macos-latest' }}
       run: |
         cd installers/dist
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
 
     - name: Publish installer package
+      if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v2
       with:
         name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
