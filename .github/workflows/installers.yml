@@ -167,5 +167,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
-        path: installers/Output/SasView5.dmg
+        path: installers/dist/SasView5.dmg
         if-no-files-found: error
