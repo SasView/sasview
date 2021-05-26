@@ -125,7 +125,6 @@ jobs:
       run: |
         cd installers/dist
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-        iscc installers/installer.iss
 
     - name: Publish installer package
       uses: actions/upload-artifact@v2
