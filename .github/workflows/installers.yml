@@ -121,10 +121,17 @@ jobs:
 
     ### Build the installer
 
-    - name: Build sasview pyinstaller
+    - name: Build sasview pyinstaller (OSX)
+      if: ${{ matrix.os == 'macos-latest' }}
       run: |
         cd installers
-        pyinstaller -y --clean --onefile --windowed --debug sasview_qt5_osx.spec
+        pyinstaller sasview_qt5_osx.spec
+
+    - name: Build sasview pyinstaller (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        cd installers
+        pyinstaller.exe sasview.spec
 
     - name: Make tarball of sasview pyinstaller output directory
       run: |
