@@ -63,12 +63,12 @@ datas.append(('../src/sas/sasview/local_config.py','sas/sasview'))
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
 datas.append((os.path.join('..', '..','sasmodels','sasmodels'),'sasmodels'))
 datas.append((os.path.join('..', 'src','sas','qtgui','Perspectives','Fitting','plugin_models'),'plugin_models'))
-datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
+datas.append((os.path.join(PYTHON_LOC,'lib','python3.7', 'site-packages','jedi'),'jedi'))
 print("HW------WH")
 datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
 #datas.append((os.path.join(PYTHON_LOC,'plugins','platforms'),'platforms'))
 #TRN datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','zmq','libzmq.cp36-win_amd64.pyd'),'.'))
-datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
+datas.append((os.path.join(PYTHON_LOC,'lib','python3.7', 'site-packages','zmq'),'.'))
 # These depend on whether we have MKL or Atlas numpy
 #if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
 #    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
