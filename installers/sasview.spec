@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import warnings
+import platform
 
 block_cipher = None
 
