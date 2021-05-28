@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
-        python-version: [3.9]
+        python-version: [3.8]
 
     steps:
 
@@ -125,7 +125,7 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
         cd installers
-        pyinstaller sasview_qt5_osx.spec
+        pyinstaller sasview.spec
 
     - name: Build sasview pyinstaller (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
