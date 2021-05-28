@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
-        python-version: [3.8]
+        python-version: [3.7]
 
     steps:
 
@@ -118,6 +118,13 @@ jobs:
         cd docs/sphinx-docs/
         python build_sphinx.py || true
 
+
+    - name: Publish pyinstaller components
+      uses: actions/upload-artifact@v2
+      with:
+        name: SasView-PyInstaller-Dist-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
+        path:dist/sasview-5.0.4-py3.7.egg
+        if-no-files-found: error
 
     ### Build the installer
 
