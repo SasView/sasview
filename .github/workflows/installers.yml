@@ -123,7 +123,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: SasView-PyInstaller-Dist-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
-        path:dist/sasview-5.0.4-py3.7.egg
+        path: dist/sasview-5.0.4-py3.7.egg
         if-no-files-found: error
 
     ### Build the installer
