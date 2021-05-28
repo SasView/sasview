@@ -3,8 +3,10 @@
 from pathlib import Path
 import warnings
 import platform
+import sys
 
 block_cipher = None
+PYTHON_LOC = sys.exec_prefix
 
 datas = [
     ('../src/sas/sasview/images', 'images'),
@@ -18,6 +20,10 @@ datas = [
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
 ]
+#TODO: Hopefully we can get away from here
+if platform.system() == 'Darwin':
+    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
+    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
 
 def add_data(data):
     for component in data:
@@ -110,18 +116,29 @@ pyz = PYZ(
     cipher=block_cipher
 )
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    [],
-    exclude_binaries=True,
-    name='sasview',
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    console=True
-)
+if platform.system() == 'Darwin':
+    exe = EXE(pyz,
+          a.scripts,
+          exclude_binaries=True,
+          name='sasview',
+          debug=False,
+          upx=UPX,
+          icon=os.path.join("../src/sas/sasview/images","ball.icns"),
+          version="version.txt",
+          console=False )
+else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name='sasview',
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=True,
+        console=True
+    )
 
 coll = COLLECT(
     exe,
