@@ -122,7 +122,7 @@ if platform.system() == 'Darwin':
           exclude_binaries=True,
           name='sasview',
           debug=False,
-          upx=UPX,
+          upx=False,
           icon=os.path.join("../src/sas/sasview/images","ball.icns"),
           version="version.txt",
           console=False )
