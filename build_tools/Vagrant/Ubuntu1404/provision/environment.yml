@@ -21,7 +21,7 @@ dependencies:
 - reportlab=3.3.0
 - scipy=0.17.1
 - sphinx=1.4.8
-- h5py=3.10.0
+- h5py=3.1
 - pip:
   - bumps==0.7.6
   - periodictable==1.4.1
