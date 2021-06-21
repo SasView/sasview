@@ -1,6 +1,7 @@
 # global
 import sys
 import os
+import ast
 import datetime
 import logging
 import traceback
@@ -274,7 +275,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # disable "Apply"
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
-        # test the model
 
         # Run the model test in sasmodels
         if not self.isModelCorrect(full_path):
@@ -298,6 +298,36 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msg = "Custom model "+filename + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
+
+    def checkModel(self, model_str):
+        """
+        Run the ast check
+        and return True if the model is good.
+        False otherwise.
+        """
+        successfulCheck = True
+        try:
+            ast.parse(model_str)
+
+        except SyntaxError as ex:
+            msg = "Error building model: " + str(ex)
+            logging.error(msg)
+            # print three last lines of the stack trace
+            # this will point out the exact line failing
+            last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            logging.error(traceback_to_show)
+
+            # Set the status bar message
+            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+
+            # Put a thick, red border around the mini-editor
+            self.tabWidget.currentWidget().txtEditor.setStyleSheet("border: 5px solid red")
+            # last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            self.tabWidget.currentWidget().txtEditor.setToolTip(traceback_to_show)
+            successfulCheck = False
+        return successfulCheck
 
     def isModelCorrect(self, full_path):
         """
@@ -347,6 +377,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         assert(filename != "")
         # Retrieve model string
         model_str = self.getModel()['text']
+        if self.tabWidget.currentWidget().is_python:
+            if not self.checkModel(model_str):
+                return
+
+        # change the frame colours back
+        self.tabWidget.currentWidget().txtEditor.setStyleSheet("")
+        self.tabWidget.currentWidget().txtEditor.setToolTip("")
         # Save the file
         self.writeFile(filename, model_str)
         # Update the tab title
