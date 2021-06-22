@@ -120,7 +120,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             if saveCancelled:
                 return
             self.is_modified = False
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
 
         plugin_location = models.find_plugins_dir()
         filename = QtWidgets.QFileDialog.getOpenFileName(
@@ -146,16 +145,22 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Performs the load operation and updates the view
         """
         self.editor_widget.blockSignals(True)
+        plugin_text = ""
         with open(filename, 'r', encoding="utf-8") as plugin:
-            self.editor_widget.txtEditor.setPlainText(plugin.read())
+            plugin_text = plugin.read()
+            self.editor_widget.txtEditor.setPlainText(plugin_text)
         self.editor_widget.setEnabled(True)
         self.editor_widget.blockSignals(False)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.filename = filename
         display_name, _ = os.path.splitext(os.path.basename(filename))
         self.setWindowTitle(self.window_title + " - " + display_name)
         # Name the tab with .py filename
         display_name = os.path.basename(filename)
         self.tabWidget.setTabText(0, display_name)
+        # Check the validity of loaded model
+        if not self.checkModel(plugin_text):
+            return
 
         # See if there is filename.c present
         c_path = self.filename.replace(".py", ".c")
