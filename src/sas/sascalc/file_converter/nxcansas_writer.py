@@ -276,7 +276,7 @@ class NXcanSASWriter:
             trans_entry.attrs['signal'] = 'T'
             trans_entry.attrs['T_axes'] = 'T'
             trans_entry.attrs['name'] = trans.name
-            if trans.timestamp is not '':
+            if trans.timestamp != '':
                 trans_entry.attrs['timestamp'] = trans.timestamp
             transmission = trans_entry.create_dataset('T',
                                                       data=trans.transmission)
