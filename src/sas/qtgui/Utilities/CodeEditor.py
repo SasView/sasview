@@ -23,7 +23,7 @@ class QCodeEditor(QPlainTextEdit):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
-        self.updateLineNumberAreaWidth(0)
+        self.updateLineNumberAreaWidth()
 
     def lineNumberAreaWidth(self):
         digits = 1
@@ -31,10 +31,12 @@ class QCodeEditor(QPlainTextEdit):
         while max_value >= 10:
             max_value /= 10
             digits += 1
+        # line number display width padded with extra pixels.
+        # Chosen to "look nice", hence magic numbers
         space = 3 + self.fontMetrics().width('9') * digits
         return space
 
-    def updateLineNumberAreaWidth(self, _):
+    def updateLineNumberAreaWidth(self):
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
 
     def updateLineNumberArea(self, rect, dy):
@@ -43,7 +45,7 @@ class QCodeEditor(QPlainTextEdit):
         else:
             self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height())
         if rect.contains(self.viewport().rect()):
-            self.updateLineNumberAreaWidth(0)
+            self.updateLineNumberAreaWidth()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
