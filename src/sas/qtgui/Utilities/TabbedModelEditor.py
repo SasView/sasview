@@ -1,12 +1,13 @@
 # global
 import sys
 import os
+import re
 import ast
 import datetime
 import logging
 import traceback
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from sas.sascalc.fit import models
 
@@ -159,7 +160,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         display_name = os.path.basename(filename)
         self.tabWidget.setTabText(0, display_name)
         # Check the validity of loaded model
-        if not self.checkModel(plugin_text):
+        error_line = self.checkModel(plugin_text)
+        if error_line > 0:
+            # select bad line
+            cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
+            self.editor_widget.txtEditor.setTextCursor(cursor)
             return
 
         # See if there is filename.c present
@@ -310,16 +315,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         and return True if the model is good.
         False otherwise.
         """
-        successfulCheck = True
+        # successfulCheck = True
+        error_line = 0
         try:
             ast.parse(model_str)
 
         except SyntaxError as ex:
             msg = "Error building model: " + str(ex)
             logging.error(msg)
-            # print three last lines of the stack trace
+            # print four last lines of the stack trace
             # this will point out the exact line failing
-            last_lines = traceback.format_exc().split('\n')[-4:]
+            all_lines = traceback.format_exc().split('\n')
+            last_lines = all_lines[-4:]
             traceback_to_show = '\n'.join(last_lines)
             logging.error(traceback_to_show)
 
@@ -331,8 +338,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
             self.tabWidget.currentWidget().txtEditor.setToolTip(traceback_to_show)
-            successfulCheck = False
-        return successfulCheck
+            # attempt to find the failing command line number
+            for line in all_lines:
+                if 'File' in line and 'line' in line:
+                    error_line = re.split('line ', line)[1]
+                    try:
+                        error_line = int(error_line)
+                    except ValueError:
+                        error_line = 0
+        return error_line
 
     def isModelCorrect(self, full_path):
         """
@@ -374,7 +388,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Save the current state of the Model Editor
         """
         filename = self.filename
-        if not self.tabWidget.currentWidget().is_python:
+        w = self.tabWidget.currentWidget()
+        if not w.is_python:
             base, _ = os.path.splitext(filename)
             filename = base + '.c'
 
@@ -382,13 +397,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         assert(filename != "")
         # Retrieve model string
         model_str = self.getModel()['text']
-        if self.tabWidget.currentWidget().is_python:
-            if not self.checkModel(model_str):
+        if w.is_python:
+            error_line = self.checkModel(model_str)
+            if error_line > 0:
+                # select bad line
+                cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
+                w.txtEditor.setTextCursor(cursor)
                 return
 
         # change the frame colours back
-        self.tabWidget.currentWidget().txtEditor.setStyleSheet("")
-        self.tabWidget.currentWidget().txtEditor.setToolTip("")
+        w.txtEditor.setStyleSheet("")
+        w.txtEditor.setToolTip("")
         # Save the file
         self.writeFile(filename, model_str)
         # Update the tab title
