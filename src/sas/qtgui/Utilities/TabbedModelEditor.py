@@ -167,6 +167,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.editor_widget.txtEditor.setTextCursor(cursor)
             return
 
+        # In case previous model was incorrect, change the frame colours back
+        self.editor_widget.txtEditor.setStyleSheet("")
+        self.editor_widget.txtEditor.setToolTip("")
+
         # See if there is filename.c present
         c_path = self.filename.replace(".py", ".c")
         if not os.path.isfile(c_path): return
@@ -338,12 +342,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
             self.tabWidget.currentWidget().txtEditor.setToolTip(traceback_to_show)
-            # attempt to find the failing command line number
-            for line in all_lines:
+            # attempt to find the failing command line number, usually the last line with
+            # `File ... line` syntax
+            for line in reversed(all_lines):
                 if 'File' in line and 'line' in line:
                     error_line = re.split('line ', line)[1]
                     try:
                         error_line = int(error_line)
+                        break
                     except ValueError:
                         error_line = 0
         return error_line
