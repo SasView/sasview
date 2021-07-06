@@ -214,7 +214,8 @@ class Reader(XMLreader):
                     if isinstance(self.current_dataset, plottable_2D):
                         x_bins = attr.get("x_bins", "")
                         y_bins = attr.get("y_bins", "")
-                        if x_bins is not "" and y_bins is not "":
+                        # x_bins and y_bins can be strings, floats, or integers: Set shape if both non-zero
+                        if x_bins and y_bins:
                             self.current_dataset.shape = (x_bins, y_bins)
                         else:
                             self.current_dataset.shape = ()
