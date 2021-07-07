@@ -598,6 +598,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.dataChanged.connect(self.onPolyModelChange)
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.lstParams.installEventFilter(self)
+        self.lstPoly.installEventFilter(self)
+        self.lstMagnetic.installEventFilter(self)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -624,6 +627,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def keyPressEvent(self, event):
         super(FittingWidget, self).keyPressEvent(event)
         self.keyPressedSignal.emit(event)
+
+    def eventFilter(self, obj, event):
+        # Catch enter key presses when editing model params
+        if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
+            if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+                self.onKey(event)
+        return True
 
     def modelName(self):
         """
