@@ -2185,7 +2185,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def onKey(self, event):
         if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
-            self.recalculatePlotData()
+            self.onPlot()
 
     def recalculatePlotData(self):
         """
