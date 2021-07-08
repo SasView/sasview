@@ -16,7 +16,7 @@ class QRangeSlider(BaseInteractor):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
-        assert isinstance(data, Data1D)
+        assert isinstance(data, (Data1D, QRangeIntermediate))
         self.base = base
         self.markers = []
         self.axes = axes
@@ -234,6 +234,7 @@ class LineInteractor(BaseInteractor):
         self.y_marker = self.save_y
 
     def move(self, x, y, ev):
+        # type: ([float], [float], event) -> ()
         """
         Process move to a new position, making sure that the move is allowed.
         """
@@ -277,6 +278,7 @@ class QRangeIntermediate:
 
     def __init__(self, data, low_q_setter=None, low_q_getter=None, low_q_input=None, high_q_setter=None,
                  high_q_getter=None, high_q_input=None, update_on_move=True):
+        # type: (PlotterData, classmethod, classmethod, input, classmethod, classmethod, input, bool) -> ()
         self.data = data
         self.id = "QRangeSlider"
         self.name = self.data.name if self.data else ""
@@ -288,3 +290,10 @@ class QRangeIntermediate:
         self.high_q_getter = high_q_getter
         self.high_q_input = high_q_input
         self.update_on_move = update_on_move
+
+    def generate_sliders_from_intermediate(self, base, axes):
+        # type: (Plotter, Plotter.axes) -> QRangeSlider
+        """
+        Helper method that generates a QRangeSlider object using the information in QRangeIntermediate
+        """
+        return QRangeSlider(base, axes, data=self)
