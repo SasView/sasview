@@ -148,7 +148,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
             self.qmin, self.qmax, self.npts = self.logic.computeDataRange()
         else:
             self.qmin, self.qmax, self.npts = (self.QMIN_DEFAULT,
-                                               self.QMIN_DEFAULT,
+                                               self.QMAX_DEFAULT,
                                                self.NPTS_DEFAULT)
         self.updateQRange(self.qmin, self.qmax, self.npts)
 
