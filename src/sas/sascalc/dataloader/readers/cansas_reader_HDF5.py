@@ -9,11 +9,12 @@ import re
 import os
 import traceback
 
-from ..data_info import plottable_1D, plottable_2D,\
+from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
-from ..loader_exceptions import FileContentsException, DefaultReaderException
-from ..file_reader_base_class import FileReader, decode
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
+from sas.sascalc.dataloader.file_reader_base_class import FileReader, decode
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 
 try:
   basestring
@@ -760,3 +761,14 @@ class Reader(FileReader):
         if unit is None:
             unit = h5attr(value, u'unit')
         return unit
+
+    def write(self, filename, dataset):
+        """
+        Export data in NXcanSAS format
+
+        :param filename: File path where the data will be saved
+        :param dataset: DataInfo object that will be converted to NXcanSAS
+        :return: None
+        """
+        writer = NXcanSASWriter()
+        writer.write(dataset=[dataset], filename=filename)

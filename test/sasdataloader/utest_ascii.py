@@ -147,6 +147,34 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(data_set.x_unit, 'A^{-1}')
         self.assertEqual(data_set.y_unit, 'cm^{-1}')
 
+    def test_save_ascii(self):
+        f_name = "test_f1_output.txt"
+        f_name_csv = "test_f1_output.csv"
+        # Save and load text file
+        self.loader.save(f_name, self.f1, None)
+        self.assertTrue(os.path.isfile(f_name))
+        reload = self.loader.load(f_name)
+        f1_reload = reload[0]
+        # Compare data from saved text file to previously loaded data
+        self.assertEqual(len(self.f1.x), len(f1_reload.x))
+        self.assertEqual(len(self.f1.y), len(f1_reload.y))
+        self.assertEqual(self.f1.y[0], f1_reload.y[0])
+        # Save and load csv file
+        self.loader.save(f_name_csv, self.f1, None)
+        self.assertTrue(os.path.isfile(f_name_csv))
+        reload_csv = self.loader.load(f_name_csv)
+        f1_reload_csv = reload_csv[0]
+        # Compare data from saved csv file to previously loaded data
+        self.assertEqual(len(self.f1.x), len(f1_reload_csv.x))
+        self.assertEqual(len(self.f1.y), len(f1_reload_csv.y))
+        self.assertEqual(self.f1.y[0], f1_reload_csv.y[0])
+        # Destroy generated files
+        os.remove(f_name)
+        self.assertFalse(os.path.isfile(f_name))
+        os.remove(f_name_csv)
+        self.assertFalse(os.path.isfile(f_name_csv))
+
+
 if __name__ == '__main__':
     unittest.main()
    
