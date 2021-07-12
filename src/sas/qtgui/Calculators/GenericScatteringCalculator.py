@@ -33,7 +33,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     trigger_plot_3d = QtCore.pyqtSignal()
     calculationFinishedSignal = QtCore.pyqtSignal()
-    loadingFinishedSignal = QtCore.pyqtSignal(list)
+    loadingFinishedSignal = QtCore.pyqtSignal(list, bool)
 
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
@@ -48,7 +48,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.sld_reader = sas_gen.SLDReader()
         self.pdb_reader = sas_gen.PDBReader()
         self.reader = None
-        self.sld_data = None
+        self.nuc_sld_data = None
+        self.mag_sld_data = None
 
         self.parameters = []
         self.data = None
@@ -57,23 +58,36 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.ext = None
         self.default_shape = str(self.cbShape.currentText())
         self.is_avg = False
+        self.is_nuc = False
+        self.is_mag = False
         self.data_to_plot = None
         self.graph_num = 1  # index for name of graph
 
         # combox box
         self.cbOptionsCalc.setVisible(False)
+        self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
 
         # push buttons
         self.cmdClose.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
 
-        self.cmdLoad.clicked.connect(self.loadFile)
+        self.cmdNucLoad.clicked.connect(lambda: self.loadFile(load_nuc=True))
+        self.cmdMagLoad.clicked.connect(lambda: self.loadFile(load_nuc=False))
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdReset.clicked.connect(self.onReset)
         self.cmdSave.clicked.connect(self.onSaveFile)
 
+        #checkboxes
+        self.checkboxNucData.stateChanged.connect(self.change_data_type)
+        self.checkboxMagData.stateChanged.connect(self.change_data_type)
+
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
+
+        #setup initial configuration
+        self.checkboxNucData.setEnabled(False)
+        self.checkboxMagData.setEnabled(False)
+        self.change_data_type()
 
         # validators
         # scale, volume and background must be positive
@@ -172,49 +186,99 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
-    def loadFile(self):
+    def change_data_type(self):
+        """
+        Set up the configuration of the interface after checkboxes to
+        alter whether nuclear and/or magnetic data is used are changed
+        """
+        self.is_nuc = self.checkboxNucData.isChecked()
+        self.is_mag = self.checkboxMagData.isChecked()
+
+        self.txtNucData.setEnabled(self.is_nuc)
+        self.txtMagData.setEnabled(self.is_mag)
+        self.cmdDraw.setEnabled(self.is_nuc or self.is_mag)
+        #only display mean Mx,y,z if no magnetic data loaded, but
+        #nuclear data present to allow user to set a constant magnetic field
+        self.txtMx.setEnabled(not self.is_mag)
+        self.txtMy.setEnabled(not self.is_mag)
+        self.txtMz.setEnabled(not self.is_mag)
+        self.txtNucl.setEnabled(not self.is_nuc)
+        #The ability to change the number of nodes and stepsizes only if no laoded data file enabled
+        both_disabled =  (not self.is_mag) and (not self.is_nuc)
+        self.txtXnodes.setEnabled(both_disabled)
+        self.txtYnodes.setEnabled(both_disabled)
+        self.txtZnodes.setEnabled(both_disabled)
+        self.txtXstepsize.setEnabled(both_disabled)
+        self.txtYstepsize.setEnabled(both_disabled)
+        self.txtZstepsize.setEnabled(both_disabled)
+        #Only allow 1D averaging if no magnetic data
+        self.cbOptionsCalc.setVisible(not self.is_mag)
+        if (not self.is_mag):
+            self.change_is_avg()
+        else:
+            self.is_avg = False
+        self.update_gui()
+        
+    def change_is_avg(self):
+        self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
+        if self.is_avg:
+            self.txtMx.setEnabled(False)
+            self.txtMy.setEnabled(False)
+            self.txtMz.setEnabled(False)
+            self.txtMx.setText("0")
+            self.txtMy.setText("0")
+            self.txtMz.setText("0")
+        else:
+            self.txtMx.setEnabled(True)
+            self.txtMy.setEnabled(True)
+            self.txtMz.setEnabled(True)
+
+    def loadFile(self, load_nuc=True):
         """
         Open menu to choose the datafile to load
         Only extensions .SLD, .PDB, .OMF, .sld, .pdb, .omf
         """
         try:
-            self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld *.pdb *.PDB);;"
-                                          "OMF files (*.OMF *.omf);;"
-                                          "SLD files (*.SLD *.sld);;"
-                                          "PDB files (*.pdb *.PDB);;"
-                                          "All files (*.*)")[0]
+            if load_nuc:
+                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
+                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB);;"
+                                            "SLD files (*.SLD *.sld);;"
+                                            "PDB files (*.pdb *.PDB);;"
+                                            "All files (*.*)")[0]
+            else:
+                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
+                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld);;"
+                                            "OMF files (*.OMF *.omf);;"
+                                            "SLD files (*.SLD *.sld);;"
+                                            "All files (*.*)")[0]
             if self.datafile:
                 self.default_shape = str(self.cbShape.currentText())
                 self.file_name = os.path.basename(str(self.datafile))
                 self.ext = os.path.splitext(str(self.datafile))[1]
-                if self.ext in self.omf_reader.ext:
+                if self.ext in self.omf_reader.ext and (not load_nuc):
+                    #only load omf files for magnetic data
                     loader = self.omf_reader
                 elif self.ext in self.sld_reader.ext:
                     loader = self.sld_reader
-                elif self.ext in self.pdb_reader.ext:
+                elif self.ext in self.pdb_reader.ext and load_nuc:
+                    #only load pdb files for nuclear data
                     loader = self.pdb_reader
                 else:
                     loader = None
-                # disable some entries depending on type of loaded file
-                # (according to documentation)
-                if self.ext.lower() in ['.sld', '.pdb']:
-                    self.txtUpFracIn.setEnabled(False)
-                    self.txtUpFracOut.setEnabled(False)
-                    self.txtUpTheta.setEnabled(False)
-                    self.txtUpPhi.setEnabled(False)
 
                 if self.reader is not None and self.reader.isrunning():
                     self.reader.stop()
-                self.cmdLoad.setEnabled(False)
-                self.cmdLoad.setText('Loading...')
+                self.cmdNucLoad.setEnabled(False)
+                self.cmdNucLoad.setText('Loading...')
+                self.cmdMagLoad.setEnabled(False)
+                self.cmdMagLoad.setText('Loading...')
                 self.cmdCompute.setEnabled(False)
                 self.cmdCompute.setText('Loading...')
                 self.communicator.statusBarUpdateSignal.emit(
                     "Loading File {}".format(os.path.basename(
                         str(self.datafile))))
                 self.reader = GenReader(path=str(self.datafile), loader=loader,
-                                        completefn=self.complete_loading_ex,
+                                        completefn=lambda data=None: self.complete_loading_ex(data=data, load_nuc=load_nuc),
                                         updatefn=self.load_update)
                 self.reader.queue()
         except (RuntimeError, IOError):
@@ -231,13 +295,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             status_type = "stop"
         logging.info(status_type)
 
-    def complete_loading_ex(self, data=None):
+    def complete_loading_ex(self, data=None, load_nuc=True):
         """
         Send the finish message from calculate threads to main thread
         """
-        self.loadingFinishedSignal.emit(data)
+        self.loadingFinishedSignal.emit(data, load_nuc)
 
-    def complete_loading(self, data=None):
+    def complete_loading(self, data=None, load_nuc=True):
         """ Function used in GenRead"""
         assert isinstance(data, list)
         assert len(data)==1
@@ -245,21 +309,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbShape.setEnabled(False)
         try:
             is_pdbdata = False
-            self.txtData.setText(os.path.basename(str(self.datafile)))
-            self.is_avg = False
+            if load_nuc:
+                self.txtNucData.setText(os.path.basename(str(self.datafile)))
+            else:
+                self.txtMagData.setText(os.path.basename(str(self.datafile)))
             if self.ext in self.omf_reader.ext:
                 gen = sas_gen.OMF2SLD()
                 gen.set_data(data)
-                self.sld_data = gen.get_magsld()
+                #only magnetic data can be read from omf files
+                self.mag_sld_data = gen.get_magsld()
                 self.check_units()
             elif self.ext in self.sld_reader.ext:
-                self.sld_data = data
+                if load_nuc:
+                    self.nuc_sld_data = data
+                else:
+                    self.mag_sld_data = data
             elif self.ext in self.pdb_reader.ext:
-                self.sld_data = data
+                #only nuclear data can be read from pdb files
+                self.nuc_sld_data = data
                 is_pdbdata = True
-            # Display combobox of orientation only for pdb data
-            self.cbOptionsCalc.setVisible(is_pdbdata)
-            self.update_gui()
         except IOError:
             log_msg = "Loading Error: " \
                       "This file format is not supported for GenSAS."
@@ -270,11 +338,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             logging.info(log_msg)
             raise
         logging.info("Load Complete")
-        self.cmdLoad.setEnabled(True)
-        self.cmdLoad.setText('Load')
+        self.cmdNucLoad.setEnabled(True)
+        self.cmdNucLoad.setText('Load')
+        self.cmdMagLoad.setEnabled(True)
+        self.cmdMagLoad.setText('Load')
         self.cmdCompute.setEnabled(True)
         self.cmdCompute.setText('Compute')
-        self.trigger_plot_3d.emit()
+        #Once data files are loaded allow them to be enabled
+        if load_nuc:
+            self.checkboxNucData.setEnabled(True)
+        else:
+            self.checkboxMagData.setEnabled(True)
 
     def check_units(self):
         """
@@ -316,32 +390,53 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 else:
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
 
+    def format_value(self, value):
+        """ formats a value for the GUI - used in update_gui """
+        if value is None:
+            return "NaN"
+        else:
+            if isinstance(value, numpy.ndarray):
+                value = str(GuiUtils.formatNumber(numpy.average(value), True))
+            else:
+                value = str(GuiUtils.formatNumber(value, True))
+            return value
+
     def update_gui(self):
         """ Update the interface with values from loaded data """
-        self.model.set_is_avg(self.is_avg)
-        self.model.set_sld_data(self.sld_data)
-        self.model.params['total_volume'] = len(self.sld_data.sld_n)*self.sld_data.vol_pix[0]
+        if self.is_nuc:
+            self.model.params['total_volume'] = len(self.nuc_sld_data.sld_n)*self.nuc_sld_data.vol_pix[0]
+        elif self.is_mag:
+            self.model.params['total_volume'] = len(self.mag_sld_data.sld_n)*self.mag_sld_data.vol_pix[0]
+        else:
+            # use same calculation of total volume as when converting OMF to SLD
+            self.model.params['total_volume'] = (float(self.txtXstepsize.text()) * float(self.txtYstepsize.text())
+                                                 * float(self.txtZstepsize.text()) * float(self.txtXnodes.text())
+                                                 * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))
 
         # add condition for activation of save button
         self.cmdSave.setEnabled(True)
 
         # activation of 3D plots' buttons (with and without arrows)
-        self.cmdDraw.setEnabled(self.sld_data is not None)
-        self.cmdDrawpoints.setEnabled(self.sld_data is not None)
 
         self.txtScale.setText(str(self.model.params['scale']))
         self.txtBackground.setText(str(self.model.params['background']))
         self.txtSolventSLD.setText(str(self.model.params['solvent_SLD']))
 
         # Volume to write to interface: npts x volume of first pixel
-        self.txtTotalVolume.setText(str(len(self.sld_data.sld_n)*self.sld_data.vol_pix[0]))
+        self.txtTotalVolume.setText(str(self.model.params['total_volume']))
 
         self.txtUpFracIn.setText(str(self.model.params['Up_frac_in']))
         self.txtUpFracOut.setText(str(self.model.params['Up_frac_out']))
         self.txtUpTheta.setText(str(self.model.params['Up_theta']))
         self.txtUpPhi.setText(str(self.model.params['Up_phi']))
 
-        self.txtNoPixels.setText(str(len(self.sld_data.sld_n)))
+        if self.is_nuc:
+            self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
+        elif self.is_mag:
+            self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
+        else:
+            self.txtNoPixels.setText(str(float(self.txtXnodes.text())
+                                         * float(self.txtYnodes.text()) * float(self.txtZnodes.text())))
         self.txtNoPixels.setEnabled(False)
 
         list_parameters = ['sld_mx', 'sld_my', 'sld_mz', 'sld_n', 'xnodes',
@@ -353,31 +448,33 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                            self.txtZstepsize]
 
         # Fill right hand side of GUI
-        for indx, item in enumerate(list_parameters):
-            if getattr(self.sld_data, item) is None:
-                list_gui_button[indx].setText('NaN')
-            else:
-                value = getattr(self.sld_data, item)
-                if isinstance(value, numpy.ndarray):
-                    item_for_gui = str(GuiUtils.formatNumber(numpy.average(value), True))
-                else:
-                    item_for_gui = str(GuiUtils.formatNumber(value, True))
-                list_gui_button[indx].setText(item_for_gui)
-
-        # Enable / disable editing of right hand side of GUI
-        for indx, item in enumerate(list_parameters):
-            if indx < 4:
-                # this condition only applies to Mx,y,z and Nucl
-                value = getattr(self.sld_data, item)
-                enable = self.sld_data.pix_type == 'pixel' \
-                         and numpy.min(value) == numpy.max(value)
-            else:
-                enable = not self.sld_data.is_data
-            list_gui_button[indx].setEnabled(enable)
+        if self.is_mag:
+            self.txtMx.setText(self.format_value(self.mag_sld_data.sld_mx))
+            self.txtMy.setText(self.format_value(self.mag_sld_data.sld_my))
+            self.txtMz.setText(self.format_value(self.mag_sld_data.sld_mz))
+        if self.is_nuc:
+            self.txtNucl.setText(self.format_value(self.nuc_sld_data.sld_n))
+        if self.is_nuc:
+            self.txtXnodes.setText(self.format_value(self.nuc_sld_data.xnodes))
+            self.txtYnodes.setText(self.format_value(self.nuc_sld_data.ynodes))
+            self.txtZnodes.setText(self.format_value(self.nuc_sld_data.znodes))
+            self.txtXstepsize.setText(self.format_value(self.nuc_sld_data.xstepsize))
+            self.txtYstepsize.setText(self.format_value(self.nuc_sld_data.ystepsize))
+            self.txtZstepsize.setText(self.format_value(self.nuc_sld_data.zstepsize))
+        if self.is_mag and ((not self.is_nuc) or self.txtXnodes.text() == "NaN"):
+            # If unable to get node data from nuclear system (not enabled or not present)
+            self.txtXnodes.setText(self.format_value(self.mag_sld_data.xnodes))
+            self.txtYnodes.setText(self.format_value(self.mag_sld_data.ynodes))
+            self.txtZnodes.setText(self.format_value(self.mag_sld_data.znodes))
+            self.txtXstepsize.setText(self.format_value(self.mag_sld_data.xstepsize))
+            self.txtYstepsize.setText(self.format_value(self.mag_sld_data.ystepsize))
+            self.txtZstepsize.setText(self.format_value(self.mag_sld_data.zstepsize))
+        #otherwise leave as set since editable by user
+        
 
     def write_new_values_from_gui(self):
         """
-        update parameters using modified inputs from GUI
+        update parameters to model using modified inputs from GUI
         used before computing
         """
         if self.txtScale.isModified():
@@ -405,44 +502,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.model.params['Up_theta'] = float(self.txtUpTheta.text())
 
         if self.txtUpPhi.isModified():
-            self.model.params['Up_phi'] = float(self.txtUpPhi.text())    
-
-        if self.txtMx.isModified():
-            self.sld_data.sld_mx = float(self.txtMx.text())*\
-                                   numpy.ones(len(self.sld_data.sld_mx))
-
-        if self.txtMy.isModified():
-            self.sld_data.sld_my = float(self.txtMy.text())*\
-                                   numpy.ones(len(self.sld_data.sld_my))
-
-        if self.txtMz.isModified():
-            self.sld_data.sld_mz = float(self.txtMz.text())*\
-                                   numpy.ones(len(self.sld_data.sld_mz))
-
-        if self.txtNucl.isModified():
-            self.sld_data.sld_n = float(self.txtNucl.text())*\
-                                  numpy.ones(len(self.sld_data.sld_n))
-
-        if self.txtXnodes.isModified():
-            self.sld_data.xnodes = int(self.txtXnodes.text())
-
-        if self.txtYnodes.isModified():
-            self.sld_data.ynodes = int(self.txtYnodes.text())
-
-        if self.txtZnodes.isModified():
-            self.sld_data.znodes = int(self.txtZnodes.text())
-
-        if self.txtXstepsize.isModified():
-            self.sld_data.xstepsize = float(self.txtXstepsize.text())
-
-        if self.txtYstepsize.isModified():
-            self.sld_data.ystepsize = float(self.txtYstepsize.text())
-
-        if self.txtZstepsize.isModified():
-            self.sld_data.zstepsize = float(self.txtZstepsize.text())
-
-        if self.cbOptionsCalc.isVisible():
-            self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
+            self.model.params['Up_phi'] = float(self.txtUpPhi.text())
 
     def onHelp(self):
         """
@@ -492,8 +552,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # reset compute button
             self.cmdCompute.setText('Compute')
             self.cmdCompute.setEnabled(True)
-            # TODO reload default data set
-            self._create_default_sld_data()
 
         finally:
             pass
@@ -553,6 +611,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def _create_default_sld_data(self):
         """
+        :DEPRECIATED:
         Copied from previous version
         Making default sld-data
         """
@@ -590,17 +649,64 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data = Data1D(x=x, y=y)
         self.data.dx = dx
         self.data.dy = dy
+    
+    def create_full_sld_data(self):
+        """
+        This function creates an instance of MagSLD which contains
+        the required data for sas_gen and 3D plotting.
+
+        It uses the curernt setup of the interface 
+        """
+        #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
+        # Set default data when nothing loaded yet
+        omfdata = sas_gen.OMFData()
+        #load in user chosen position data if no file given
+        if (not self.is_mag) and (not self.is_nuc):
+            omfdata.xnodes = int(self.txtXnodes.text())
+            omfdata.ynodes = int(self.txtYnodes.text())
+            omfdata.znodes = int(self.txtZnodes.text())
+            omfdata.xstepsize = float(self.txtXstepsize.text())
+            omfdata.ystepsize = float(self.txtYstepsize.text())
+            omfdata.zstepsize = float(self.txtZstepsize.text())
+        #convert into sld format
+        omf2sld = sas_gen.OMF2SLD()
+        omf2sld.set_data(omfdata, self.default_shape)
+        sld_data = omf2sld.get_output()
+
+        #only to be done once
+        if self.is_nuc:
+            sld_data.vol_pix = self.nuc_sld_data.vol_pix #should this be from nuc?
+            sld_data.pos_x = self.nuc_sld_data.pos_x
+            sld_data.pos_y = self.nuc_sld_data.pos_y
+            sld_data.pos_z = self.nuc_sld_data.pos_z
+        elif self.is_mag:
+            sld_data.vol_pix = self.mag_sld_data.vol_pix
+            sld_data.pos_x = self.mag_sld_data.pos_x
+            sld_data.pos_y = self.mag_sld_data.pos_y
+            sld_data.pos_z = self.mag_sld_data.pos_z
+
+        #those corresponding to models activated modelfiles are fixed anyway - do not need to update here
+        if (self.is_nuc):
+            sld_data.set_sldn(self.nuc_sld_data.sld_n)
+        else:
+            sld_data.set_sldn(float(self.txtNucl.text()))
+        if (self.is_mag):
+            sld_data.set_sldms(self.mag_sld_data.sld_mx, self.mag_sld_data.sld_my, self.mag_sld_data.sld_mz)
+        else:
+            sld_data.set_sldms(float(self.txtMx.text()),
+                               float(self.txtMy.text()),
+                               float(self.txtMz.text()))
+        
+        return sld_data
 
     def onCompute(self):
         """
         Copied from previous version
         Execute the computation of I(qx, qy)
         """
-        # Set default data when nothing loaded yet
-        if self.sld_data is None:
-            self._create_default_sld_data()
+        sld_data = self.create_full_sld_data()
         try:
-            self.model.set_sld_data(self.sld_data)
+            self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()
             if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()

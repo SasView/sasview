@@ -839,15 +839,16 @@ class MagSLD(object):
         """
         self.pix_type = pix_type
 
-    def set_sldn(self, sld_n):
+    def set_sldn(self, sld_n, non_mag_only=True):
         """
         Sets neutron SLD.
 
         Warning: if *sld_n* is a scalar and attribute *is_data* is True, then
-        only pixels with non-zero magnetism will be set.
+        only pixels with non-zero magnetism will be set by default. Use
+        the argument non_Mag_only=False to change this
         """
         if isinstance(sld_n, float):
-            if self.is_data:
+            if self.is_data and non_mag_only:
                 # For data, put the value to only the pixels w non-zero M
                 is_nonzero = (np.fabs(self.sld_mx) +
                               np.fabs(self.sld_my) +
