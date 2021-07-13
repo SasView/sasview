@@ -64,7 +64,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.graph_num = 1  # index for name of graph
 
         # combox box
-        self.cbOptionsCalc.setVisible(False)
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
 
         # push buttons
@@ -542,19 +541,31 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtXstepsize.setText("6")
             self.txtYstepsize.setText("6")
             self.txtZstepsize.setText("6")
-            # reset Load button and textedit
-            self.txtData.setText('Default SLD Profile')
-            self.cmdLoad.setEnabled(True)
-            self.cmdLoad.setText('Load')
             # reset option for calculation
             self.cbOptionsCalc.setCurrentIndex(0)
-            self.cbOptionsCalc.setVisible(False)
             # reset shape button
             self.cbShape.setCurrentIndex(0)
             self.cbShape.setEnabled(True)
             # reset compute button
             self.cmdCompute.setText('Compute')
             self.cmdCompute.setEnabled(True)
+            # reset Load button and textedit
+            self.txtNucData.setText('No File Loaded')
+            self.cmdNucLoad.setEnabled(True)
+            self.cmdNucLoad.setText('Load')
+            self.txtMagData.setText('No File Loaded')
+            self.cmdMagLoad.setEnabled(True)
+            self.cmdMagLoad.setText('Load')
+            self.checkboxNucData.setEnabled(False)
+            self.checkboxMagData.setEnabled(False)
+            self.checkboxNucData.setChecked(False)
+            self.checkboxMagData.setChecked(False)
+            self.is_nuc = False
+            self.is_mag = False
+            self.nuc_sld_data = None
+            self.mag_sld_data = None
+            self.change_data_type()
+
 
         finally:
             pass
@@ -659,8 +670,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         the required data for sas_gen and 3D plotting.
 
         It uses the current setup of the interface 
-
-        :returns: MagSLD
         """
         #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
         # Set default data when nothing loaded yet
@@ -822,8 +831,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 _, extension = os.path.splitext(filename)
                 if not extension:
                     filename = '.'.join((filename, 'sld'))
-                sld_data = self.create_full_sld_data()
-                sas_gen.SLDReader().write(filename, sld_data)
+                sas_gen.SLDReader().write(filename, self.sld_data)
             except Exception:
                 raise
 

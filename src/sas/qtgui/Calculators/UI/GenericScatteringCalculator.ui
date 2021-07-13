@@ -97,7 +97,7 @@
            <string>Display name of loaded datafile.</string>
           </property>
           <property name="text">
-           <string>Default SLD Profile</string>
+           <string>No File Loaded</string>
           </property>
          </widget>
         </item>
@@ -179,7 +179,7 @@
            <string>Display name of loaded datafile.</string>
           </property>
           <property name="text">
-           <string>Default SLD Profile</string>
+           <string>No File Loaded</string>
           </property>
          </widget>
         </item>
