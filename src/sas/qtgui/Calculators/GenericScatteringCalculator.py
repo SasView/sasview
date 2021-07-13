@@ -196,7 +196,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         self.txtNucData.setEnabled(self.is_nuc)
         self.txtMagData.setEnabled(self.is_mag)
-        self.cmdDraw.setEnabled(self.is_nuc or self.is_mag)
         #only display mean Mx,y,z if no magnetic data loaded, but
         #nuclear data present to allow user to set a constant magnetic field
         self.txtMx.setEnabled(not self.is_mag)
@@ -478,7 +477,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def write_new_values_from_gui(self):
         """
-        update parameters to model using modified inputs from GUI
+        update parameters in model using modified inputs from GUI
         used before computing
         """
         if self.txtScale.isModified():
@@ -659,7 +658,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         This function creates an instance of MagSLD which contains
         the required data for sas_gen and 3D plotting.
 
-        It uses the curernt setup of the interface 
+        It uses the current setup of the interface 
         """
         #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
         # Set default data when nothing loaded yet
@@ -689,7 +688,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pos_y = self.mag_sld_data.pos_y
             sld_data.pos_z = self.mag_sld_data.pos_z
 
-        #those corresponding to models activated modelfiles are fixed anyway - do not need to update here
+        #those corresponding to activated modelfiles are fixed anyway - do not need to update here
         if (self.is_nuc):
             sld_data.set_sldn(self.nuc_sld_data.sld_n)
         else:
@@ -700,7 +699,26 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.set_sldms(float(self.txtMx.text()),
                                float(self.txtMy.text()),
                                float(self.txtMz.text()))
-        
+        if self.is_nuc:
+            if self.nuc_sld_data.has_conect:
+                sld_data.has_conect=True
+                sld_data.line_x = self.nuc_sld_data.line_x
+                sld_data.line_y = self.nuc_sld_data.line_y
+                sld_data.line_z = self.nuc_sld_data.line_z
+            elif self.is_mag:
+                if self.mag_sld_data.has_conect:
+                    sld_data.has_conect=True
+                    sld_data.line_x = self.mag_sld_data.line_x
+                    sld_data.line_y = self.mag_sld_data.line_y
+                    sld_data.line_z = self.mag_sld_data.line_z
+        #take pixel data from nuclear sld as may contatin atom types from pdb files
+        if self.is_nuc:
+            sld_data.pix_type = self.nuc_sld_data.pix_type
+            sld_data.pix_symbol = self.nuc_sld_data.pix_symbol
+        elif self.is_mag:
+            sld_data.pix_type = self.mag_sld_data.pix_type
+            sld_data.pix_symbol = self.mag_sld_data.pix_symbol
+
         return sld_data
 
     def onCompute(self):
@@ -808,6 +826,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def plot3d(self, has_arrow=False):
         """ Generate 3D plot in real space with or without arrows """
+        sld_data = self.create_full_sld_data()
         self.write_new_values_from_gui()
         graph_title = " Graph {}: {} 3D SLD Profile".format(self.graph_num,
                                                             self.file_name)
@@ -815,7 +834,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             graph_title += ' - Magnetic Vector as Arrow'
 
         plot3D = Plotter3D(self, graph_title)
-        plot3D.plot(self.sld_data, has_arrow=has_arrow)
+        plot3D.plot(sld_data, has_arrow=has_arrow)
         plot3D.show()
         self.graph_num += 1
 
