@@ -349,6 +349,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxNucData.setEnabled(True)
         else:
             self.checkboxMagData.setEnabled(True)
+        # update GUI if these files are already enabled
+        if (load_nuc and self.is_nuc) or ((not load_nuc) and self.is_mag):
+            self.update_gui()
 
     def check_units(self):
         """
@@ -374,16 +377,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Check range of text edits for QMax and Number of Qbins """
         text_edit = self.sender()
         text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
-        if (text_edit.text() and self.sld_data != None):
+        sld_data = self.create_full_sld_data()
+        if (text_edit.text() and sld_data != None):
             value = float(str(text_edit.text()))
             if text_edit == self.txtQxMax:
-                max_q = numpy.pi / (max(self.sld_data.xstepsize, self.sld_data.ystepsize, self.sld_data.zstepsize) )                   
+                max_q = numpy.pi / (max(sld_data.xstepsize, sld_data.ystepsize, sld_data.zstepsize) )                   
                 if value <= 0 or value > max_q:
                     text_edit.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
                     text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
             elif text_edit == self.txtNoQBins:
-                max_step =  3*max(self.sld_data.xnodes, self.sld_data.ynodes, self.sld_data.znodes) 
+                max_step =  3*max(sld_data.xnodes, sld_data.ynodes, sld_data.znodes) 
                     #limits qmin > maxq / nodes                 
                 if value < 2 or value > max_step:
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
