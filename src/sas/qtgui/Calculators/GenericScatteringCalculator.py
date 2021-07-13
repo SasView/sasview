@@ -659,6 +659,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         the required data for sas_gen and 3D plotting.
 
         It uses the current setup of the interface 
+
+        :returns: MagSLD
         """
         #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
         # Set default data when nothing loaded yet
@@ -820,7 +822,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 _, extension = os.path.splitext(filename)
                 if not extension:
                     filename = '.'.join((filename, 'sld'))
-                sas_gen.SLDReader().write(filename, self.sld_data)
+                sld_data = self.create_full_sld_data()
+                sas_gen.SLDReader().write(filename, sld_data)
             except Exception:
                 raise
 
