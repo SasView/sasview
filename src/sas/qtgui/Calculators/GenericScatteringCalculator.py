@@ -853,8 +853,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Copied from previous version
         Execute the computation of I(qx, qy)
         """
-        sld_data = self.create_full_sld_data()
         try:
+            sld_data = self.create_full_sld_data()
             self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()
             if self.is_avg or self.is_avg is None:
