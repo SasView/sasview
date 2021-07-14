@@ -1682,6 +1682,28 @@ Number of Qbins &amp;isin; [2, 1000].</string>
      </item>
     </layout>
    </item>
+   <item row="7" column="5">
+    <widget class="QLabel" name="lblVerifyError">
+      <property name="font">
+        <font>
+        <weight>50</weight>
+        <bold>false</bold>
+        </font>
+      </property>
+      <property name="toolTip">
+        <string>Verification Error</string>
+      </property>
+      <property name="text">
+        <string></string>
+      </property>
+      <property name="wordWrap">
+        <bool>true</bool>
+      </property>
+      <property name="alignment">
+        <enum>Qt::AlignHCenter</enum>
+      </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

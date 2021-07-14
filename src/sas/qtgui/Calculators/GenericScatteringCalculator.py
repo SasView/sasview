@@ -48,8 +48,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.sld_reader = sas_gen.SLDReader()
         self.pdb_reader = sas_gen.PDBReader()
         self.reader = None
+        #sld data for nuclear and magnetic cases
         self.nuc_sld_data = None
         self.mag_sld_data = None
+        #verification information to avoid recalculating
+        #verification carried out whenever files are selected/deselected
+        #verification reset whenever a new files loaded
+        self.verification_occurred = False # has verification happened on these files
+        self.verified = False # was the verification successsful
+        # verification error label
+        #prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
+        sizePolicy = self.lblVerifyError.sizePolicy()
+        sizePolicy.setRetainSizeWhenHidden(True)
+        self.lblVerifyError.setSizePolicy(sizePolicy)
+        self.lblVerifyError.setVisible(False)
 
         self.parameters = []
         self.data = None
@@ -65,6 +77,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # combox box
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
+        #prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
+        sizePolicy = self.cbOptionsCalc.sizePolicy()
+        sizePolicy.setRetainSizeWhenHidden(True)
+        self.cbOptionsCalc.setSizePolicy(sizePolicy)
+
 
         # push buttons
         self.cmdClose.clicked.connect(self.accept)
@@ -185,6 +202,101 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
+    def disable_verification_error_functionality(self, msg=None):
+        """
+        disable the compute/draw/save capability if the data does not match
+        from the two loaded files.
+        Only change the error message if one is provided.
+        """
+        self.cmdDraw.setEnabled(False)
+        self.cmdDrawpoints.setEnabled(False)
+        self.cmdSave.setEnabled(False)
+        self.cmdCompute.setEnabled(False)
+        if msg is not None:
+            self.lblVerifyError.setText('<font color="#FF0000">' + msg + '</font>')
+        self.lblVerifyError.setVisible(True)
+
+    def enable_verification_error_functionality(self):
+        """
+        (re)-enable the compute/draw/save capability if the verification errors
+        have been fixed, or a file deselected
+        """
+        self.cmdDraw.setEnabled(True)
+        self.cmdDrawpoints.setEnabled(True)
+        self.cmdSave.setEnabled(True)
+        self.cmdCompute.setEnabled(True)
+        self.lblVerifyError.setVisible(False)
+
+    def verify_files_match(self):
+        """
+        Carry out the necessary verification on the loaded magnetic and nuclear
+        data and disable compute/draw/save capability if the data does not match.
+        Re-enable this functionality once the problem is resolved.
+        """
+        if not (self.is_mag and self.is_nuc):
+            #no conflicts if only 1 file loaded - therefore restore functionality
+            self.enable_verification_error_functionality()
+            return
+        # check if files already verified
+        if self.verification_occurred:
+            if self.verified:
+                self.enable_verification_error_functionality()
+            else:
+                self.disable_verification_error_functionality()
+            return
+        # check each file has the same number of coords
+        if self.nuc_sld_data.pos_x.size != self.mag_sld_data.pos_x.size:
+            self.disable_verification_error_functionality("ERROR: files have a different number of data points")
+            self.verification_occurred = True
+            self.verified = False
+            return
+        #check the coords match up 1-to-1
+        nuc_coords = numpy.array(numpy.column_stack((self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z)))
+        mag_coords = numpy.array(numpy.column_stack((self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z)))
+        if numpy.array_equal(nuc_coords, mag_coords): #should this have a floating point tolerance??
+            #arrays are already sorted in the same order, so files match
+            self.enable_verification_error_functionality()
+            self.verification_occurred = True
+            self.verified = True
+            return
+        # now check if coords are in wrong order or don't match
+        nuc_sort_order = numpy.lexsort((self.nuc_sld_data.pos_z, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_x))
+        mag_sort_order = numpy.lexsort((self.mag_sld_data.pos_z, self.mag_sld_data.pos_y, self.mag_sld_data.pos_x))
+        nuc_coords = nuc_coords[nuc_sort_order]
+        mag_coords = mag_coords[mag_sort_order]
+        #check if sorted data points are equal
+        if numpy.array_equal(nuc_coords, mag_coords):
+            #if data points are equal then resort both lists into the same order
+            #is this too time consuming for long lists? logging info?
+            #1) coords
+            self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.hsplit(nuc_coords, 3)
+            self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.hsplit(mag_coords, 3)
+            #2) other array params that must be in same order as coords
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
+            for item in params:
+                nuc_val = getattr(self.nuc_sld_data, item)
+                if nuc_val is not None:
+                    #data should already be a numpy array, we cast to an ndarray as a check
+                    #very fast if data is already an instance of ndarray as expected as function
+                    #returns the array as-is
+                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
+                mag_val = getattr(self.mag_sld_data, item)
+                if nuc_val is not None:
+                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
+            #Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
+            #absolute positions not references to pos_x, pos_y, pos_z).
+            self.enable_verification_error_functionality()
+            self.verification_occurred = True
+            self.verified = True
+            return
+        else:
+            # if sorted lists not equal then data points aren't equal
+            self.disable_verification_error_functionality("ERROR: files have different real space position data")
+            self.verification_occurred = True
+            self.verified = False
+            return
+        
+
     def change_data_type(self):
         """
         Set up the configuration of the interface after checkboxes to
@@ -216,8 +328,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         else:
             self.is_avg = False
         self.update_gui()
+        self.verify_files_match()
         
     def change_is_avg(self):
+        """
+        A small helper method to set up the GUI when 1D averaging is enabled/disabled
+        """
         self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
         if self.is_avg:
             self.txtMx.setEnabled(False)
@@ -350,6 +466,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update GUI if these files are already enabled
         if (load_nuc and self.is_nuc) or ((not load_nuc) and self.is_mag):
             self.update_gui()
+        # reset verification now we have loaded new files
+        self.verification_occurred = False
+        self.verified = False
+        self.verify_files_match()
 
     def check_units(self):
         """
@@ -440,14 +560,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtNoPixels.setText(str(float(self.txtXnodes.text())
                                          * float(self.txtYnodes.text()) * float(self.txtZnodes.text())))
         self.txtNoPixels.setEnabled(False)
-
-        list_parameters = ['sld_mx', 'sld_my', 'sld_mz', 'sld_n', 'xnodes',
-                           'ynodes', 'znodes', 'xstepsize', 'ystepsize',
-                           'zstepsize']
-        list_gui_button = [self.txtMx, self.txtMy, self.txtMz, self.txtNucl,
-                           self.txtXnodes, self.txtYnodes, self.txtZnodes,
-                           self.txtXstepsize, self.txtYstepsize,
-                           self.txtZstepsize]
 
         # Fill right hand side of GUI
         if self.is_mag:
@@ -541,6 +653,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtXstepsize.setText("6")
             self.txtYstepsize.setText("6")
             self.txtZstepsize.setText("6")
+            #re-enable any options disabled by failed verification
+            self.verification_occurred = False
+            self.verified = False
+            self.enable_verification_error_functionality()
             # reset option for calculation
             self.cbOptionsCalc.setCurrentIndex(0)
             # reset shape button
