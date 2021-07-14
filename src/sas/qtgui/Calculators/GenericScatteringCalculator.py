@@ -819,7 +819,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if (self.is_nuc):
             sld_data.set_sldn(self.nuc_sld_data.sld_n)
         else:
-            sld_data.set_sldn(float(self.txtNucl.text()))
+            sld_data.set_sldn(float(self.txtNucl.text()), non_zero_mag_only=False)
         if (self.is_mag):
             sld_data.set_sldms(self.mag_sld_data.sld_mx, self.mag_sld_data.sld_my, self.mag_sld_data.sld_mz)
         else:
