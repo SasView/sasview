@@ -100,6 +100,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
 
+        #update pixel no./total volume when changed in GUI
+        self.txtXnodes.textChanged.connect(self.update_geometry_effects)
+        self.txtYnodes.textChanged.connect(self.update_geometry_effects)
+        self.txtZnodes.textChanged.connect(self.update_geometry_effects)
+        self.txtXstepsize.textChanged.connect(self.update_geometry_effects)
+        self.txtYstepsize.textChanged.connect(self.update_geometry_effects)
+        self.txtZstepsize.textChanged.connect(self.update_geometry_effects)
+
         #setup initial configuration
         self.checkboxNucData.setEnabled(False)
         self.checkboxMagData.setEnabled(False)
@@ -577,26 +585,38 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.lbl_unitz.setText(mesh_unit)
             self.lbl_unitVolume.setText(mesh_unit+"^3")
 
-    def check_value(self):
+    def check_value(self, update_all=False):
         """Check range of text edits for QMax and Number of Qbins
         
         This function checks that QMax and the number of Qbins is suitable
         given the user chosen values. Unlike the hard limits imposed by the
         regex, this does not prevent the user using the given value, but warns
         them that it may be unsuitable with a red back-color.
+
+        :params update_all: If this value is set to true then both values will be checked
+            verified - useful when the call is being made generally and not due to one of the
+            values being changed by the user directly. Defaults to `False`
+        :type update_all: bool
         """
+
         text_edit = self.sender()
-        text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
         sld_data = self.create_full_sld_data()
-        if (text_edit.text() and sld_data != None):
-            value = float(str(text_edit.text()))
-            if text_edit == self.txtQxMax:
+        if update_all:
+            self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
+            self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
+        else:
+            text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
+        if (sld_data != None):
+            print(bool(self.txtQxMax.text()))
+            if (text_edit == self.txtQxMax or update_all) and self.txtQxMax.text():
+                value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(sld_data.xstepsize, sld_data.ystepsize, sld_data.zstepsize) )                   
                 if value <= 0 or value > max_q:
-                    text_edit.setStyleSheet('background-color: rgb(255, 182, 193);')
+                    self.txtQxMax.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
-                    text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
-            elif text_edit == self.txtNoQBins:
+                    self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
+            if (text_edit == self.txtNoQBins or update_all) and self.txtNoQBins.text():
+                value = float(str(self.txtNoQBins.text()))
                 max_step =  3*max(sld_data.xnodes, sld_data.ynodes, sld_data.znodes) 
                     #limits qmin > maxq / nodes                 
                 if value < 2 or value > max_step:
@@ -665,8 +685,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif self.is_mag:
             self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
         else:
-            self.txtNoPixels.setText(str(float(self.txtXnodes.text())
-                                         * float(self.txtYnodes.text()) * float(self.txtZnodes.text())))
+            self.txtNoPixels.setText(str(int(float(self.txtXnodes.text())
+                                         * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))))
         self.txtNoPixels.setEnabled(False)
 
         # Fill right hand side of GUI
@@ -692,7 +712,35 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtYstepsize.setText(self.format_value(self.mag_sld_data.ystepsize))
             self.txtZstepsize.setText(self.format_value(self.mag_sld_data.zstepsize))
         #otherwise leave as set since editable by user
-        
+
+        #If nodes or stepsize changed then this may effect what values are allowed
+        self.check_value(update_all=True)
+    
+    def update_geometry_effects(self):
+        """This function updates the number of pixels and total volume when the number of nodes/stepsize is changed
+
+        This function only has an effect if no files are enabled otherwise the number of pixels and total
+        volume may be set differently by the data from the file.
+        """
+        if self.is_mag or self.is_nuc:
+            #don't change the number if this is being set from a file as then the number of pixels may differ
+            return
+        if self.txtXnodes.text() == "" or self.txtYnodes.text() == "" or self.txtZnodes.text() == "":
+            #do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
+            #user is most likely just removing the value to change it
+            return
+        self.txtNoPixels.setText(str(int(float(self.txtXnodes.text())
+                                         * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))))
+        if self.txtXstepsize.text() == "" or self.txtYstepsize.text() == "" or self.txtZstepsize.text() == "":
+            #do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
+            #user is most likely just removing the value to change it
+            return
+        self.model.params['total_volume'] = (float(self.txtXstepsize.text()) * float(self.txtYstepsize.text())
+                                                 * float(self.txtZstepsize.text()) * float(self.txtXnodes.text())
+                                                 * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))
+        self.txtTotalVolume.setText(str(self.model.params['total_volume']))
+        #If nodes or stepsize changed then this may effect what values are allowed
+        self.check_value(update_all=True)
 
     def write_new_values_from_gui(self):
         """Update parameters in model using modified inputs from GUI
@@ -883,7 +931,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Create 1D data by default
 
         :warning: This data is never plotted.
-        
+
                     residuals.x = data_copy.x[index]
             residuals.dy = numpy.ones(len(residuals.y))
             residuals.dx = None
@@ -921,14 +969,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
         # Set default data when nothing loaded yet
         omfdata = sas_gen.OMFData()
-        #load in user chosen position data if no file given
-        if (not self.is_mag) and (not self.is_nuc):
-            omfdata.xnodes = int(self.txtXnodes.text())
-            omfdata.ynodes = int(self.txtYnodes.text())
-            omfdata.znodes = int(self.txtZnodes.text())
-            omfdata.xstepsize = float(self.txtXstepsize.text())
-            omfdata.ystepsize = float(self.txtYstepsize.text())
-            omfdata.zstepsize = float(self.txtZstepsize.text())
+        #load in user chosen position data
+        #If no file given this will be used to generate the position data
+        #Otherwise it is still used as part of the verification process in check_value()
+        omfdata.xnodes = int(self.txtXnodes.text())
+        omfdata.ynodes = int(self.txtYnodes.text())
+        omfdata.znodes = int(self.txtZnodes.text())
+        omfdata.xstepsize = float(self.txtXstepsize.text())
+        omfdata.ystepsize = float(self.txtYstepsize.text())
+        omfdata.zstepsize = float(self.txtZstepsize.text())
         #convert into sld format
         omf2sld = sas_gen.OMF2SLD()
         omf2sld.set_data(omfdata, self.default_shape)
