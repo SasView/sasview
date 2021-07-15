@@ -600,28 +600,32 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
 
         text_edit = self.sender()
-        sld_data = self.create_full_sld_data()
         if update_all:
             self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
             self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
         else:
             text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
-        if (sld_data != None):
-            if (text_edit == self.txtQxMax or update_all) and self.txtQxMax.text():
-                value = float(str(self.txtQxMax.text()))
-                max_q = numpy.pi / (max(sld_data.xstepsize, sld_data.ystepsize, sld_data.zstepsize) )                   
-                if value <= 0 or value > max_q:
-                    self.txtQxMax.setStyleSheet('background-color: rgb(255, 182, 193);')
-                else:
-                    self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
-            if (text_edit == self.txtNoQBins or update_all) and self.txtNoQBins.text():
-                value = float(str(self.txtNoQBins.text()))
-                max_step =  3*max(sld_data.xnodes, sld_data.ynodes, sld_data.znodes) 
-                    #limits qmin > maxq / nodes                 
-                if value < 2 or value > max_step:
-                    self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
-                else:
-                    self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
+        if (text_edit == self.txtQxMax or update_all) and self.txtQxMax.text():
+            xstepsize = float(self.txtXstepsize.text())
+            ystepsize = float(self.txtYstepsize.text())
+            zstepsize = float(self.txtZstepsize.text())
+            value = float(str(self.txtQxMax.text()))
+            max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
+            if value <= 0 or value > max_q:
+                self.txtQxMax.setStyleSheet('background-color: rgb(255, 182, 193);')
+            else:
+                self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
+        if (text_edit == self.txtNoQBins or update_all) and self.txtNoQBins.text():
+            xnodes = int(self.txtXnodes.text())
+            ynodes = int(self.txtYnodes.text())
+            znodes = int(self.txtZnodes.text())
+            value = float(str(self.txtNoQBins.text()))
+            max_step =  3*max(xnodes, ynodes, znodes) 
+                #limits qmin > maxq / nodes                 
+            if value < 2 or value > max_step:
+                self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
+            else:
+                self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
 
     def format_value(self, value):
         """Formats certain data for the GUI.
@@ -970,13 +974,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         omfdata = sas_gen.OMFData()
         #load in user chosen position data
         #If no file given this will be used to generate the position data
-        #Otherwise it is still used as part of the verification process in check_value()
-        omfdata.xnodes = int(self.txtXnodes.text())
-        omfdata.ynodes = int(self.txtYnodes.text())
-        omfdata.znodes = int(self.txtZnodes.text())
-        omfdata.xstepsize = float(self.txtXstepsize.text())
-        omfdata.ystepsize = float(self.txtYstepsize.text())
-        omfdata.zstepsize = float(self.txtZstepsize.text())
+        if (not self.is_mag) and (not self.is_nuc):
+            omfdata.xnodes = int(self.txtXnodes.text())
+            omfdata.ynodes = int(self.txtYnodes.text())
+            omfdata.znodes = int(self.txtZnodes.text())
+            omfdata.xstepsize = float(self.txtXstepsize.text())
+            omfdata.ystepsize = float(self.txtYstepsize.text())
+            omfdata.zstepsize = float(self.txtZstepsize.text())
         #convert into sld format
         omf2sld = sas_gen.OMF2SLD()
         omf2sld.set_data(omfdata, self.default_shape)
