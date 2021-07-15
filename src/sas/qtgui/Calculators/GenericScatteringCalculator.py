@@ -607,7 +607,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         else:
             text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
         if (sld_data != None):
-            print(bool(self.txtQxMax.text()))
             if (text_edit == self.txtQxMax or update_all) and self.txtQxMax.text():
                 value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(sld_data.xstepsize, sld_data.ystepsize, sld_data.zstepsize) )                   
