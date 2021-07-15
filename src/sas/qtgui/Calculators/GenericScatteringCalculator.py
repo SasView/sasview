@@ -203,38 +203,64 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             "The option Ellipsoid has not been implemented yet.")
 
     def disable_verification_error_functionality(self, msg=None):
+        """Disables some functionality if verification fails.
+
+        This function is called during the verification process for combining
+        two different files for nuclear and magnetic data. It is called when
+        verification fails, in order to disable the functionality of the GUI
+        which requires the files to be compatible (save, draw and compute). It
+        also optionally alters the error message for the user.
+
+        :param msg: The error message which should be displayed to the user on
+            the GUI. Defaults to `None` in which case the error message is not
+            changed.
+        :type msg: str or None
         """
-        disable the compute/draw/save capability if the data does not match
-        from the two loaded files.
-        Only change the error message if one is provided.
-        """
+        #disable necessary buttons to prevent the attempted merging of incompatible files
         self.cmdDraw.setEnabled(False)
         self.cmdDrawpoints.setEnabled(False)
         self.cmdSave.setEnabled(False)
         self.cmdCompute.setEnabled(False)
+        #alter the error message if a new message is provided
+        #verification is only carried out once so if msg=None do not set the msg to ""
+        #   but simply don't alter it - this means the message is preserved and re-verification
+        #   is not called when the files have not been changed
         if msg is not None:
             self.lblVerifyError.setText('<font color="#FF0000">' + msg + '</font>')
+        #display the message
         self.lblVerifyError.setVisible(True)
 
     def enable_verification_error_functionality(self):
+        """(Re-)enables some functionality if verification succeeds or is unnecessary
+
+        This function is called during the verification process for combining
+        two different files for nuclear and magnetic data. It is called when
+        verification succeeds, or is no longer necessary as fewer than two files are
+        now under consideration. It re-enables all of the functionality disabled
+        by disable_verification_error_functionality(), i.e. save, draw and compute.
+        It also hides the error message from the user.
         """
-        (re)-enable the compute/draw/save capability if the verification errors
-        have been fixed, or a file deselected
-        """
+        #reenable necessary buttons
         self.cmdDraw.setEnabled(True)
         self.cmdDrawpoints.setEnabled(True)
         self.cmdSave.setEnabled(True)
         self.cmdCompute.setEnabled(True)
+        #hide error message
         self.lblVerifyError.setVisible(False)
 
     def verify_files_match(self):
-        """
-        Carry out the necessary verification on the loaded magnetic and nuclear
-        data and disable compute/draw/save capability if the data does not match.
-        Re-enable this functionality once the problem is resolved.
+        """Verifies that enabled files are compatible and can be combined
+
+        When the user wishes to combine two different files for nuclear and magnetic
+        data they must have the same 3D data points in real-space. This function
+        decides whther verification of this is necessary and if so carries it out.
+        In the case that the two files have the same real-space data points in different
+        orders this function re-orders the stored data within the MagSLD objects to make
+        them align. The full verification is only carried out once for any pair of loaded
+        files.
         """
         if not (self.is_mag and self.is_nuc):
-            #no conflicts if only 1 file loaded - therefore restore functionality
+            #no conflicts if only 1/0 file(s) loaded - therefore restore functionality
             self.enable_verification_error_functionality()
             return
         # check if files already verified
@@ -277,7 +303,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 nuc_val = getattr(self.nuc_sld_data, item)
                 if nuc_val is not None:
                     #data should already be a numpy array, we cast to an ndarray as a check
-                    #very fast if data is already an instance of ndarray as expected as function
+                    #very fast if data is already an instance of ndarray as expected becuase function
                     #returns the array as-is
                     setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
                 mag_val = getattr(self.mag_sld_data, item)
@@ -298,17 +324,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
 
     def change_data_type(self):
+        """Adjusts the GUI for the enabled nuclear/magnetic data files
+
+        When different combinations of nuclear and magnetic data files are loaded
+        various options must be enabled/disabled or hidden/made visible. This function
+        controls that behaviour and is called whenever the checkboxes for enabling files
+        are altered. If the data file for a given type of data is not loaded then the
+        average value textbox is enabled to allow the user to give a constant value for
+        all points. If no data files are loaded then the node and stepsize textboxes are
+        enabled to allow the user to specify a simple rectangular lattice.
         """
-        Set up the configuration of the interface after checkboxes to
-        alter whether nuclear and/or magnetic data is used are changed
-        """
+        #update information on which files are enabled
         self.is_nuc = self.checkboxNucData.isChecked()
         self.is_mag = self.checkboxMagData.isChecked()
-
+        #enable the corresponding text displays to show this to the user clearly
         self.txtNucData.setEnabled(self.is_nuc)
         self.txtMagData.setEnabled(self.is_mag)
-        #only display mean Mx,y,z if no magnetic data loaded, but
-        #nuclear data present to allow user to set a constant magnetic field
+        #only allow editing of mean values if no data file for that vlaue has been loaded
+        #user provided mean values are taken as a constant across all points
         self.txtMx.setEnabled(not self.is_mag)
         self.txtMy.setEnabled(not self.is_mag)
         self.txtMz.setEnabled(not self.is_mag)
@@ -324,17 +357,31 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         #Only allow 1D averaging if no magnetic data
         self.cbOptionsCalc.setVisible(not self.is_mag)
         if (not self.is_mag):
+            #A helper function to set up the averaging system
             self.change_is_avg()
         else:
+            #If magnetic data present then no averaging is allowed
             self.is_avg = False
+        # update the gui with new values - sets the average values from enabled files
         self.update_gui()
+        # verify that the new enabled files are compatible
         self.verify_files_match()
         
     def change_is_avg(self):
+        """Adjusts the GUI for whether 1D averaging is enabled
+
+        If the user has chosen to carry out Debye full averaging then the magnetic sld
+        values must be set to 0, and made uneditable - because the calculator in geni.py
+        is incapable of averaging systems with non-zero magnetic slds or polarisation.
+
+        This function is called whenever different files are enabled or the user edits the
+        averaging combobox.
         """
-        A small helper method to set up the GUI when 1D averaging is enabled/disabled
-        """
+        #update the averaging option fromthe button on the GUI
+        #required as the button may have been previously hidden with
+        #any value, and preserves this - we must update the variable to match the GUI
         self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
+        #If averaging then set to 0 and diable the magnetic SLD textboxes
         if self.is_avg:
             self.txtMx.setEnabled(False)
             self.txtMy.setEnabled(False)
@@ -342,17 +389,32 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setText("0")
             self.txtMy.setText("0")
             self.txtMz.setText("0")
+        #If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtMx.setEnabled(True)
             self.txtMy.setEnabled(True)
             self.txtMz.setEnabled(True)
 
     def loadFile(self, load_nuc=True):
-        """
-        Open menu to choose the datafile to load
-        Only extensions .SLD, .PDB, .OMF, .sld, .pdb, .omf
+        """Opens a menu to choose the datafile to load
+
+        Opens a file dialog to allow the user to select a datafile to be loaded.
+        If a nuclear sld datafile is loaded then the allowed file types are:
+            .SLD .sld .PDB .pdb
+        If a magnetic sld datafile is loaded then the allowed file types are:
+            .SLD .sld .OMF .omf
+        This function then loads in the requested datafile, but does not enable it.
+        If no previous datafile of this type was loaded then the checkbox to enable
+        this file is enabled.
+
+        :param load_nuc: Specifies whether the loaded file is nuclear or magnetic
+            data. Defaults to `True`.
+            `load_nuc=True` gives nuclear sld data.
+            `load_nuc=False` gives magnetic sld data.
+        :type load_nuc: bool
         """
         try:
+            #request a file from the user
             if load_nuc:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
                     self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB);;"
@@ -365,10 +427,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                             "OMF files (*.OMF *.omf);;"
                                             "SLD files (*.SLD *.sld);;"
                                             "All files (*.*)")[0]
+            # If a file has been sucessfully chosen
             if self.datafile:
+                #set basic data about the file
                 self.default_shape = str(self.cbShape.currentText())
                 self.file_name = os.path.basename(str(self.datafile))
                 self.ext = os.path.splitext(str(self.datafile))[1]
+                #select the required loader for the data format
                 if self.ext in self.omf_reader.ext and (not load_nuc):
                     #only load omf files for magnetic data
                     loader = self.omf_reader
@@ -410,13 +475,34 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         logging.info(status_type)
 
     def complete_loading_ex(self, data=None, load_nuc=True):
-        """
-        Send the finish message from calculate threads to main thread
+        """Send the finish message from calculate threads to main thread
+
+        :param data: The data loaded from the requested file.
+        :type data: OMFData, MagSLD depending on filetype
+        :param load_nuc: Specifies whether the loaded file is nuclear or magnetic
+            data. Defaults to `True`.
+            `load_nuc=True` gives nuclear sld data.
+            `load_nuc=False` gives magnetic sld data.
+        :type load_nuc: bool
         """
         self.loadingFinishedSignal.emit(data, load_nuc)
 
     def complete_loading(self, data=None, load_nuc=True):
-        """ Function used in GenRead"""
+        """Function which handles the datafiles once they have been loaded in - used in GenRead
+
+        Once the data has been loaded in by the required reader it is necessary to do a small
+        amount of final processing to put them in the required form. This involves converting
+        all the data to instances of MagSLD and reporting any errors. Additionally verification
+        of the newly loaded file is carried out.
+
+        :param data: The data loaded from the requested file.
+        :type data: OMFData, MagSLD depending on filetype
+        :param load_nuc: Specifies whether the loaded file is nuclear or magnetic
+            data. Defaults to `True`.
+            `load_nuc=True` gives nuclear sld data.
+            `load_nuc=False` gives magnetic sld data.
+        :type load_nuc: bool
+        """
         assert isinstance(data, list)
         assert len(data)==1
         data = data[0]
@@ -492,7 +578,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.lbl_unitVolume.setText(mesh_unit+"^3")
 
     def check_value(self):
-        """Check range of text edits for QMax and Number of Qbins """
+        """Check range of text edits for QMax and Number of Qbins
+        
+        This function checks that QMax and the number of Qbins is suitable
+        given the user chosen values. Unlike the hard limits imposed by the
+        regex, this does not prevent the user using the given value, but warns
+        them that it may be unsuitable with a red back-color.
+        """
         text_edit = self.sender()
         text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
         sld_data = self.create_full_sld_data()
@@ -513,7 +605,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
 
     def format_value(self, value):
-        """ formats a value for the GUI - used in update_gui """
+        """Formats certain data for the GUI.
+        
+        Some data stored by the sld file is a numpy array - in which case the average is formatted.
+        Other data is a single value in which case the value is formatted. The formatting is done
+        by GuiUtils.formatNumber(). If the value is `None` then the string "NaN" is returned
+
+        :param value: The value to be formatted
+        :type value: int, float, numpy.array
+        :return: The formatted value
+        :rtype: str
+        """
         if value is None:
             return "NaN"
         else:
@@ -524,7 +626,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             return value
 
     def update_gui(self):
-        """ Update the interface with values from loaded data """
+        """Update the interface and model with values from loaded data
+        
+        This function updates the model parameter 'total_volume' with values from the loaded data
+        and then updates all values in the gui with either model paramters or paramaters from the
+        loaded data.
+        """
         if self.is_nuc:
             self.model.params['total_volume'] = len(self.nuc_sld_data.sld_n)*self.nuc_sld_data.vol_pix[0]
         elif self.is_mag:
@@ -552,6 +659,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtUpTheta.setText(str(self.model.params['Up_theta']))
         self.txtUpPhi.setText(str(self.model.params['Up_phi']))
 
+        #update the number of pixels with values from the loaded data or GUI if no datafiles enabled
         if self.is_nuc:
             self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
         elif self.is_mag:
@@ -587,9 +695,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
 
     def write_new_values_from_gui(self):
-        """
-        update parameters in model using modified inputs from GUI
-        used before computing
+        """Update parameters in model using modified inputs from GUI
+
+        Before the model is used to calculate any scattering patterns it needs
+        to be updated with values from the gui. This does not affect any fixed values,
+        whose textboxes are disabled, and means that any user chosen changes are made.
+        It also ensure that at all times the values in the GUI reflect the data output.
         """
         if self.txtScale.isModified():
             self.model.params['scale'] = float(self.txtScale.text())
@@ -629,7 +740,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.manager.showHelp(location)
 
     def onReset(self):
-        """ Reset the inputs of textEdit to default values """
+        """ Reset the GUI to its default state
+        
+        This resets all GUI parameters to their default values and also resets
+        all GUI states such as loaded files, stored data, verification and disabled/enabled
+        widgets.
+        """
         try:
             # reset values in textedits
             self.txtUpFracIn.setText("1.0")
@@ -672,14 +788,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMagData.setText('No File Loaded')
             self.cmdMagLoad.setEnabled(True)
             self.cmdMagLoad.setText('Load')
+            #disable all file checkboxes, as no files are now loaded
             self.checkboxNucData.setEnabled(False)
             self.checkboxMagData.setEnabled(False)
             self.checkboxNucData.setChecked(False)
             self.checkboxMagData.setChecked(False)
+            #reset all file data to its default empty state
             self.is_nuc = False
             self.is_mag = False
             self.nuc_sld_data = None
             self.mag_sld_data = None
+            #update the gui for the no files loaded case
             self.change_data_type()
 
 
@@ -687,9 +806,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             pass
 
     def _create_default_2d_data(self):
-        """
+        """Create the 2D data range for qx,qy
+
         Copied from previous version
         Create 2D data by default
+
         :warning: This data is never plotted.
         """
         self.qmax_x = float(self.txtQxMax.text())
@@ -740,10 +861,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data.ymax = ymax
 
     def _create_default_sld_data(self):
-        """
-        :DEPRECIATED:
+        """Creates default sld data for use if no file has been loaded
+
         Copied from previous version
-        Making default sld-data
+
+        :deprecated:
         """
         sld_n_default = 6.97e-06  # what is this number??
         omfdata = sas_gen.OMFData()
@@ -755,10 +877,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.sld_data.set_sldn(sld_n_default)
 
     def _create_default_1d_data(self):
-        """
+        """Create the 1D data range for q
+
         Copied from previous version
         Create 1D data by default
+
         :warning: This data is never plotted.
+        
                     residuals.x = data_copy.x[index]
             residuals.dy = numpy.ones(len(residuals.y))
             residuals.dx = None
@@ -781,11 +906,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data.dy = dy
     
     def create_full_sld_data(self):
-        """
-        This function creates an instance of MagSLD which contains
-        the required data for sas_gen and 3D plotting.
+        """Create the sld data to be used in the final calculation
 
-        It uses the current setup of the interface 
+        This function creates an instance of MagSLD which contains
+        the required data for sas_gen and 3D plotting. It is the suitable combination of
+        data from the magnetic data, nuclear data and set GUI parameters. Where nuclear
+        and magnetic files are enabled it sometimes has to make a choice regarding which
+        version of a parameter to keep. This is usually the nuclear data version, as in
+        the case of .pdb files being used this version will contain more complete data.
+
+        :return: The full sld data created from the various different sources
+        :rtype: MagSLD
         """
         #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
         # Set default data when nothing loaded yet
@@ -803,9 +934,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         omf2sld.set_data(omfdata, self.default_shape)
         sld_data = omf2sld.get_output()
 
-        #only to be done once
+        #only to be done once - load in the position data of the atoms
+        #verification ensures that this is the same across nuclear and magnetic datafiles
         if self.is_nuc:
-            sld_data.vol_pix = self.nuc_sld_data.vol_pix #should this be from nuc?
+            sld_data.vol_pix = self.nuc_sld_data.vol_pix
             sld_data.pos_x = self.nuc_sld_data.pos_x
             sld_data.pos_y = self.nuc_sld_data.pos_y
             sld_data.pos_z = self.nuc_sld_data.pos_z
@@ -815,7 +947,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pos_y = self.mag_sld_data.pos_y
             sld_data.pos_z = self.mag_sld_data.pos_z
 
-        #those corresponding to activated modelfiles are fixed anyway - do not need to update here
+        #set the sld data from the required model file/GUI textbox
         if (self.is_nuc):
             sld_data.set_sldn(self.nuc_sld_data.sld_n)
         else:
@@ -826,6 +958,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.set_sldms(float(self.txtMx.text()),
                                float(self.txtMy.text()),
                                float(self.txtMz.text()))
+        #Provide data giving connections between atoms for 3D drawing
+        #This SHOULD only occur in nuclear data files as it is a feature of
+        #pdb files - however the option for it to be drawn from magnetic files
+        #if present is given in case the sld file format is expanded to include them
         if self.is_nuc:
             if self.nuc_sld_data.has_conect:
                 sld_data.has_conect=True
@@ -838,7 +974,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     sld_data.line_x = self.mag_sld_data.line_x
                     sld_data.line_y = self.mag_sld_data.line_y
                     sld_data.line_z = self.mag_sld_data.line_z
-        #take pixel data from nuclear sld as may contatin atom types from pdb files
+        
+        #take pixel data from nuclear sld as preference because may contatin atom types from pdb files
         if self.is_nuc:
             sld_data.pix_type = self.nuc_sld_data.pix_type
             sld_data.pix_symbol = self.nuc_sld_data.pix_symbol
@@ -849,14 +986,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         return sld_data
 
     def onCompute(self):
-        """
+        """Execute the computation of I(qx, qy)
+
         Copied from previous version
-        Execute the computation of I(qx, qy)
         """
         try:
+            #create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
             self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()
+            #create 2D or 1D data as appropriate
             if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()
                 inputs = [self.data.x, []]
@@ -899,9 +1038,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.calculationFinishedSignal.emit()
 
     def complete(self, input, update=None):
-        """
+        """Carry out the compuation of I(qx, qy) in a new thread
+
         Gen compute complete function
-        :Param input: input list [qx_data, qy_data, i_out]
+
+        This function separates the range of q or (qx,qy) into chunks and then
+        calculates each chunk with calls to the model.
+
+        :param input: input list [qx_data, qy_data, i_out]
+        :type input: list
         """
         timer = timeit.default_timer
         update_rate = 1.0 # seconds between updates
@@ -953,7 +1098,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 raise
 
     def plot3d(self, has_arrow=False):
-        """ Generate 3D plot in real space with or without arrows """
+        """ Generate 3D plot in real space with or without arrows
+        
+        :param has_arrow: Whether to plot arrows for the magnetic field on the plot.
+            Defaults to `False`
+        :type has_arrow: bool
+        """
         sld_data = self.create_full_sld_data()
         self.write_new_values_from_gui()
         graph_title = " Graph {}: {} 3D SLD Profile".format(self.graph_num,
