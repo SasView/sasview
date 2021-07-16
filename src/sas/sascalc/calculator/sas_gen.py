@@ -622,8 +622,14 @@ class SLDReader(object):
     """
     SLD reader for text files.
 
-    7 columns: x, y, z, sld, mx, my, mz
-    8 columns: x, y, z, sld, mx, my, mz, volume
+    format:
+    1 line of header - may give any information
+    n lines of data points of the form:
+        4 columns: x        y       z       sld
+    or: 6 columns: x        y       z       mx      my      mz
+    or: 7 columns: x        y       z       sld     mx      my      mz
+    or: 8 columns: x        y       z       sld     mx      my      mz      volume
+    where all n lines have the same format.
     """
     ## File type
     type_name = "SLD ASCII"
@@ -646,9 +652,18 @@ class SLDReader(object):
                               ndmin=1, unpack=True)
         except Exception:
             data = None
-        if data is None or data.shape[0] not in (7, 8):
+        if data is None or data.shape[0] not in (4, 6, 7, 8):
             raise RuntimeError("%r is not a sld file" % path)
-        x, y, z, sld, mx, my, mz = data[:7]
+        if data.shape[0] == 4:
+            x, y, z, sld = data[:4]
+            mx = np.zeros_like(sld)
+            my = np.zeros_like(sld)
+            mz = np.zeros_like(sld)
+        elif data.shape[0] == 6:
+            x, y, z, mx, my, mz = data[:6]
+            sld = np.zeros_like(mx)
+        else:
+            x, y, z, sld, mx, my, mz = data[:7]
         vol = data[7] if data.shape[0] > 7 else None
         output = MagSLD(x, y, z, sld, mx, my, mz, vol)
         output.filename = os.path.basename(path)
