@@ -14,10 +14,9 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
-        python-version: [3.9]
+        python-version: [3.8]
 
     steps:
-
     - name: Obtain SasView source from git
       uses: actions/checkout@v1
 
