@@ -83,6 +83,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbOptionsCalc.setSizePolicy(sizePolicy)
 
 
+        #code to automatically restore the last valid value if a user leaves a textbox blank (or otherwise in an invalid state)
+        self.textEdited = False # variable to ensure only programmatic changes are automatically allowed
+        #list of lineEdits to be checked
+        self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
+                            self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
+                            self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
+                            self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize]
+        self.last_acceptable_values = {} #dictionary of the last set of valid values
+        for lineEdit in self.lineEdits:
+            self.last_acceptable_values[lineEdit] = lineEdit.text()
+            lineEdit.textEdited.connect(self.set_text_edited) # when user edits the text - called before textChanged signal
+            lineEdit.textChanged.connect(self.gui_text_changed)#when text is changed
+            lineEdit.editingFinished.connect(self.gui_text_changed)
+            # event filter catches when a widget loses focus - required because editingFinished only
+            # catches the user exiting the box if the validation is acceptable, because we want to catch
+            # intermediate cases we also need to detect if the user leaves the widget
+            lineEdit.installEventFilter(self)
+
+
         # push buttons
         self.cmdClose.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
@@ -131,7 +150,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             QtGui.QRegExpValidator(validat_regexbetween0_1, self.txtUpFracOut))
 
         # angles, SLD must be float values
-        validat_regex_float = QtCore.QRegExp('[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)')
+        validat_regex_float = QtCore.QRegExp('^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$')
         self.txtUpTheta.setValidator(
             QtGui.QRegExpValidator(validat_regex_float, self.txtUpTheta))
         self.txtUpPhi.setValidator(
@@ -164,7 +183,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtQxMax.textChanged.connect(self.check_value) 
 
         # 2 <= Qbin and nodes integers < 1000
-        validat_regex_int = QtCore.QRegExp('^[1-9]\d{3}$')        
+        validat_regex_int = QtCore.QRegExp('^[2-9]|[1-9]\d{1,2}$')        
         self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_int,
                                                             self.txtNoQBins))
         #check for min q resolution
@@ -201,6 +220,42 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitx.setStyleSheet(new_font)
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
+
+    def eventFilter(self, target, event):
+        """A function to catch FocusOut on QLineEdit widgets in the GUI
+
+        This function checks whether the text in a textbox is valid when the user clicks out of it
+        or in some other way loses focus to the widget (e.g. TAB, pressing the compute button). If the
+        text contained is not accpetable to the validator (intermediate state, e.g. empty) it restores
+        the previous last accepted value.
+
+
+        :param target: The widget which lost focus and triggered the eventFilter
+        :type target: QObject
+        :param event: the event which triggered the eventFilter
+        :type event: QEvent
+        """
+        if target in self.lineEdits and event.type() == QtCore.QEvent.FocusOut:
+            if target.hasAcceptableInput():
+                self.last_acceptable_values[target] = target.text()
+            else:
+                target.setText(self.last_acceptable_values[target])
+        #return false so that event is still handled by widget
+        return False
+
+    def gui_text_changed(self):
+        """update the last valid value stored in a lineEdit if it is updated programmatically
+        """
+        #if text changed programatically then update value
+        if not self.textEdited:
+            self.last_acceptable_values[self.sender()] = self.sender().text()
+        self.textEdited = False
+    
+    def set_text_edited(self):
+        """prevent gui_text_changed() from running if the lineEdit text has been changed by the user
+        """
+        self.textEdited = True
+            
 
     def selectedshapechange(self):
         """
