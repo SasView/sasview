@@ -1251,7 +1251,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
-        if name in plot.plot_dict.keys():
+        if isinstance(plot, Plotter2D) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:
             plot.plot(data)
@@ -1297,7 +1297,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Choose files',
             'filter'    : wlist,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog |
+                          QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
             'directory' : self.default_load_location
         }
         paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
