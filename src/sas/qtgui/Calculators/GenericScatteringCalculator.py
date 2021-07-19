@@ -671,9 +671,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             else:
                 self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
         if (text_edit == self.txtNoQBins or update_all) and self.txtNoQBins.text():
-            xnodes = int(self.txtXnodes.text())
-            ynodes = int(self.txtYnodes.text())
-            znodes = int(self.txtZnodes.text())
+            xnodes = float(self.txtXnodes.text())
+            ynodes = float(self.txtYnodes.text())
+            znodes = float(self.txtZnodes.text())
             value = float(str(self.txtNoQBins.text()))
             max_step =  3*max(xnodes, ynodes, znodes) 
                 #limits qmin > maxq / nodes                 
