@@ -145,13 +145,6 @@ jobs:
         cd installers/dist
         tar zcf sasview-pyinstaller-dist.tar.gz sasview
 
-    - name: Publish pyinstaller components
-      uses: actions/upload-artifact@v2
-      with:
-        name: SasView-PyInstaller-Dist-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
-        path: installers/dist/sasview-pyinstaller-dist.tar.gz
-        if-no-files-found: error
-
     - name: Build sasview INNO setup package
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
