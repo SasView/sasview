@@ -16,8 +16,6 @@ from periodictable import formula, nsf
 
 from .geni import Iq, Iqxy
 
-logger = logging.getLogger(__name__)
-
 if sys.version_info[0] < 3:
     def decode(s):
         return s
@@ -295,7 +293,7 @@ class OMF2SLD(object):
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except Exception as exc:
-                logger.error(exc)
+                logging.error(exc)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
@@ -397,7 +395,7 @@ class OMFReader(object):
                         mz = np.append(mz, _mz)
                     except Exception as exc:
                         # Skip non-data lines
-                        logger.error(str(exc)+" when processing %r"%line)
+                        logging.error(str(exc)+" when processing %r"%line)
                 elif line:
                 #Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
@@ -491,7 +489,8 @@ class OMFReader(object):
         except Exception:
             msg = "%s is not supported: \n" % path
             msg += "We accept only Text format OMF file."
-            raise RuntimeError(msg)
+            logging.error(msg)
+            return None
 
 class PDBReader(object):
     """
@@ -565,7 +564,7 @@ class PDBReader(object):
                             vol = 1.0e+24 * atom.mass / atom.density / NA
                             vol_pix = np.append(vol_pix, vol)
                         except Exception:
-                            logger.error("Error: set the sld of %s to zero"% atom_name)
+                            logging.info("Error: set the sld of %s to zero"% atom_name)
                             sld_n = np.append(sld_n, 0.0)
                         sld_mx = np.append(sld_mx, 0)
                         sld_my = np.append(sld_my, 0)
@@ -598,7 +597,7 @@ class PDBReader(object):
                         y_lines.append(y_line)
                         z_lines.append(z_line)
                 except Exception as exc:
-                    logger.error(exc)
+                    logging.error(exc)
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
@@ -610,7 +609,8 @@ class PDBReader(object):
             output.sld_unit = '1/A^(2)'
             return output
         except Exception:
-            raise RuntimeError("%s is not a sld file" % path)
+            logging.error("%s is not a pdb file" % path)
+            return None
 
     def write(self, path, data):
         """
@@ -653,7 +653,8 @@ class SLDReader(object):
         except Exception:
             data = None
         if data is None or data.shape[0] not in (4, 6, 7, 8):
-            raise RuntimeError("%r is not a sld file" % path)
+            logging.error("%r is not an sld file" % path)
+            return None
         if data.shape[0] == 4:
             x, y, z, sld = data[:4]
             mx = np.zeros_like(sld)
@@ -1485,7 +1486,7 @@ def _setup_realspace_path():
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))
         sys.path.insert(0, path)
-        logger.info("inserting %r into python path for realspace", path)
+        logging.info("inserting %r into python path for realspace", path)
 
 if __name__ == "__main__":
     _setup_realspace_path()

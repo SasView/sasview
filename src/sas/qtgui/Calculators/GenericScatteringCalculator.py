@@ -570,6 +570,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         assert len(data)==1
         data = data[0]
         self.cbShape.setEnabled(False)
+        self.cmdNucLoad.setEnabled(True)
+        self.cmdNucLoad.setText('Load')
+        self.cmdMagLoad.setEnabled(True)
+        self.cmdMagLoad.setText('Load')
+        self.cmdCompute.setEnabled(True)
+        self.cmdCompute.setText('Compute')
+        if data is None:
+            return
         try:
             is_pdbdata = False
             if load_nuc:
@@ -601,12 +609,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             logging.info(log_msg)
             raise
         logging.info("Load Complete")
-        self.cmdNucLoad.setEnabled(True)
-        self.cmdNucLoad.setText('Load')
-        self.cmdMagLoad.setEnabled(True)
-        self.cmdMagLoad.setText('Load')
-        self.cmdCompute.setEnabled(True)
-        self.cmdCompute.setText('Compute')
         #Once data files are loaded allow them to be enabled
         if load_nuc:
             self.checkboxNucData.setEnabled(True)
