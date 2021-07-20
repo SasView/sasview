@@ -673,7 +673,7 @@ class SLDReader(object):
         else:
             mx, my, mz = data.sld_mx, data.sld_my, data.sld_mz
         vol = data.vol_pix if data.vol_pix is not None else np.ones_like(x)
-        columns = np.vstack((x, y, z, sld_n, mx, my, mz, vol))
+        columns = np.column_stack((x, y, z, sld_n, mx, my, mz, vol))
         with open(path, 'w') as out:
             # First Line: Column names
             out.write("X  Y  Z  SLDN SLDMx  SLDMy  SLDMz VOLUMEpix\n")
