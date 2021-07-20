@@ -1234,8 +1234,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
             self.graph_num += 1
         else:
-            numpy.nan_to_num(self.data_to_plot)
-            data = Data2D(image=self.data_to_plot,
+            data = Data2D(image=numpy.nan_to_num(self.data_to_plot),
                           qx_data=self.data.qx_data,
                           qy_data=self.data.qy_data,
                           q_data=self.data.q_data,
