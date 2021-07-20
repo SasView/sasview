@@ -31,6 +31,27 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(f.pos_x[0], -40.5)
         self.assertEqual(f.pos_y[0], -13.5)
         self.assertEqual(f.pos_z[0], -13.5)
+    
+    def test_sldwriter(self):
+        """
+        Test .sld file is written correctly
+        """
+        # load in a sample sld file then resave it
+        f = self.sldloader.read(find("sld_file.sld"))
+        self.sldloader.write(find("write_test.sld"), f)
+        # load in the saved file to confirm that Sasview does not reject it within its
+        # own loading function
+        g = self.sldloader.read(find("write_test.sld"))
+        # confirm that the first row of data is as expected
+        self.assertEqual(f.pos_x[0], g.pos_x[0])
+        self.assertEqual(f.pos_y[0], g.pos_y[0])
+        self.assertEqual(f.pos_z[0], g.pos_z[0])
+        self.assertEqual(f.sld_n[0], g.sld_n[0])
+        self.assertEqual(f.sld_mx[0], g.sld_mx[0])
+        self.assertEqual(f.sld_my[0], g.sld_my[0])
+        self.assertEqual(f.sld_mz[0], g.sld_mz[0])
+        self.assertEqual(f.vol_pix[0], g.vol_pix[0])
+
 
     def test_pdbreader(self):
         """
