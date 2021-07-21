@@ -245,7 +245,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.model.item(self.MODEL.index('MAX_RANGE')).setText(qmax)
         self.model.item(self.MODEL.index('NPTS')).setText(str(npts))
         self.qmin, self.qmax, self.npts = q_range_min, q_range_max, npts
-        npts_fit = self.npts2fit(self.logic.data)
+        npts_fit = self.npts2fit(self.logic.data, self.qmin, self.qmax, self.npts)
         self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
 
     def state(self):
