@@ -182,8 +182,18 @@ class PlotterWidget(PlotterBase):
         ax.set_yscale(self.yscale, nonposy='clip')
 
         # define the ranges
-        self.setRange = SetGraphRange(parent=self,
-            x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
+        if hasattr(self, 'setRange') and self.setRange.rangeModified:
+            # Assume the range has changed and retain the current and default ranges for future use
+            modified = self.setRange.rangeModified
+            x_range = self.setRange.xrange()
+            y_range = self.setRange.yrange()
+        else:
+            # Use default ranges given by matplotlib
+            x_range = self.ax.get_xlim()
+            y_range = self.ax.get_ylim()
+            modified = False
+        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
+        self.setRange.rangeModified = modified
 
         # Draw non-standard markers
         l_width = markersize * 0.4
@@ -249,6 +259,10 @@ class PlotterWidget(PlotterBase):
             ax.set_ylabel(self.yLabel)
         if self.xLabel and not is_fit:
             ax.set_xlabel(self.xLabel)
+
+        # Go to expected range
+        self.ax.set_xbound(x_range[0], x_range[1])
+        self.ax.set_ybound(y_range[0], y_range[1])
 
         # Add q-range sliders
         if data.show_q_range_sliders:
@@ -466,13 +480,14 @@ class PlotterWidget(PlotterBase):
         """
         Resets the chart X and Y ranges to their original values
         """
-        for d in self.data:
-            x_range = (d.x.min(), d.x.max())
-            y_range = (d.y.min(), d.y.max())
-        if x_range is not None and y_range is not None:
-            self.ax.set_xlim(x_range)
-            self.ax.set_ylim(y_range)
-            self.canvas.draw_idle()
+        # Clear graph and plot everything again
+        mpl.pyplot.cla()
+        self.ax.cla()
+        for ids in self.plot_dict:
+            self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
+
+        # Redraw
+        self.canvas.draw_idle()
 
     def onLinearFit(self, id):
         """
@@ -519,7 +534,6 @@ class PlotterWidget(PlotterBase):
         if retain_dimensions:
             self.ax.set_xbound(x_bounds[0], x_bounds[1])
             self.ax.set_ybound(y_bounds[0], y_bounds[1])
-            self.setRange.rangeModified = True
 
     def onRemovePlot(self, id):
         """
@@ -595,7 +609,7 @@ class PlotterWidget(PlotterBase):
             selected_plot.symbol = plotPropertiesWidget.marker()
             selected_plot.title = plotPropertiesWidget.legend()
             # Redraw the plot
-            self.replacePlot(id, selected_plot)
+            self.replacePlot(id, selected_plot, retain_dimensions=True)
 
     def onToggleHideError(self, id):
         """
