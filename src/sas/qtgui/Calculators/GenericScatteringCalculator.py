@@ -700,12 +700,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # Volume to write to interface: npts x volume of first pixel
         self.txtTotalVolume.setText(str(self.model.params['total_volume']))
+        # Chagne capitalisation for consistency with other values
+        if self.txtTotalVolume.text() == "nan":
+            self.txtTotalVolume.setText("NaN")
 
         # update the number of pixels with values from the loaded data or GUI if no datafiles enabled
         if self.is_nuc:
             self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
         elif self.is_mag:
             self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
+        elif not(self.txtXnodes.hasAcceptableInput() and self.txtYnodes.hasAcceptableInput() and self.txtZnodes.hasAcceptableInput()):
+            self.txtNoPixels.setText("NaN")
         else:
             self.txtNoPixels.setText(str(int(float(self.txtXnodes.text())
                                          * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))))
@@ -747,15 +752,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.is_mag or self.is_nuc:
             # don't change the number if this is being set from a file as then the number of pixels may differ
             return
-        if self.txtXnodes.text() == "" or self.txtYnodes.text() == "" or self.txtZnodes.text() == "":
-            # do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
-            # user is most likely just removing the value to change it
+        if not(self.txtXnodes.hasAcceptableInput() and self.txtYnodes.hasAcceptableInput() and self.txtZnodes.hasAcceptableInput()):
+            # do not try to update if textbox invalid - this cannot be used for computation anyway
+            self.txtNoPixels.setText("NaN")
+            self.txtTotalVolume.setText("NaN")
             return
         self.txtNoPixels.setText(str(int(float(self.txtXnodes.text())
                                          * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))))
-        if self.txtXstepsize.text() == "" or self.txtYstepsize.text() == "" or self.txtZstepsize.text() == "":
-            # do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
-            # user is most likely just removing the value to change it
+        if not(self.txtXstepsize.hasAcceptableInput() and self.txtYstepsize.hasAcceptableInput() and self.txtZstepsize.hasAcceptableInput()):
+            # do not try to update if textbox invalid - this cannot be used for computation anyway
+            self.txtTotalVolume.setText("NaN")
             return
         self.model.params['total_volume'] = (float(self.txtXstepsize.text()) * float(self.txtYstepsize.text())
                                                  * float(self.txtZstepsize.text()) * float(self.txtXnodes.text())
