@@ -373,7 +373,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     # returns the array as-is
                     setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
                 mag_val = getattr(self.mag_sld_data, item)
-                if nuc_val is not None:
+                if mag_val is not None:
                     setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
             # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
             # absolute positions not references to pos_x, pos_y, pos_z).
