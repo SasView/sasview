@@ -1702,6 +1702,12 @@ Number of Qbins &amp;isin; [2, 1000].</string>
       <property name="alignment">
         <enum>Qt::AlignHCenter</enum>
       </property>
+      <property name="minimumSize">
+        <size>
+        <width>0</width>
+        <height>30</height>
+        </size>
+      </property>
     </widget>
    </item>
   </layout>

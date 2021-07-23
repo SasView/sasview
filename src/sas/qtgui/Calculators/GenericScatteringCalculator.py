@@ -78,7 +78,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # combox box
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
-        # prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
+        # prevent layout shifting when widget hidden
+        # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.cbOptionsCalc.sizePolicy()
         sizePolicy.setRetainSizeWhenHidden(True)
         self.cbOptionsCalc.setSizePolicy(sizePolicy)
