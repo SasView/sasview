@@ -35,6 +35,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     calculationFinishedSignal = QtCore.pyqtSignal()
     loadingFinishedSignal = QtCore.pyqtSignal(list, bool)
 
+    TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
+    TEXTBOX_ERROR_STYLESTRING = 'background-color: rgb(255, 182, 193);'
+
     def __init__(self, parent=None):
         super(GenericScatteringCalculator, self).__init__()
         self.setupUi(self)
@@ -661,10 +664,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         text_edit = self.sender()
         if update_all:
-            self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
-            self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
+            self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+            self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
         else:
-            text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
+            text_edit.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
         if (text_edit == self.txtQxMax or update_all) and self.txtQxMax.text():
             xstepsize = float(self.txtXstepsize.text())
             ystepsize = float(self.txtYstepsize.text())
@@ -672,9 +675,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             value = float(str(self.txtQxMax.text()))
             max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
             if value <= 0 or value > max_q:
-                self.txtQxMax.setStyleSheet('background-color: rgb(255, 182, 193);')
+                self.txtQxMax.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
             else:
-                self.txtQxMax.setStyleSheet('background-color: rgb(255, 255, 255);')
+                self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
         if (text_edit == self.txtNoQBins or update_all) and self.txtNoQBins.text():
             xnodes = float(self.txtXnodes.text())
             ynodes = float(self.txtYnodes.text())
@@ -683,9 +686,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             max_step =  3*max(xnodes, ynodes, znodes) 
                 # limits qmin > maxq / nodes                 
             if value < 2 or value > max_step:
-                self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
+                self.txtNoQBins.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
             else:
-                self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
+                self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
 
     def format_value(self, value):
         """Formats certain data for the GUI.
