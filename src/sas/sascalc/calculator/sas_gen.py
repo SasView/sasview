@@ -26,7 +26,7 @@ else:
 MFACTOR_AM = 2.90636E-12
 MFACTOR_MT = 2.3128E-9
 METER2ANG = 1.0E+10
-#Avogadro constant [1/mol]
+# Avogadro constant [1/mol]
 NA = 6.02214129e+23
 
 def mag2sld(mag, v_unit=None):
@@ -72,7 +72,7 @@ class GenSAS(object):
         self.data_mx = None
         self.data_my = None
         self.data_mz = None
-        self.data_vol = None #[A^3]
+        self.data_vol = None # [A^3]
         self.is_avg = False
         ## Name of the model
         self.name = "GenSAS"
@@ -271,7 +271,7 @@ class OMF2SLD(object):
             self.mz = np.zeros(length)
 
         self._check_data_length(length)
-        #self.remove_null_points(True, False)
+        # self.remove_null_points(True, False)
         mask = np.ones(len(self.sld_n), dtype=bool)
         if shape.lower() == 'ellipsoid':
             try:
@@ -397,7 +397,7 @@ class OMFReader(object):
                         # Skip non-data lines
                         logging.error(str(exc)+" when processing %r"%line)
                 elif line:
-                #Reading Header; Segment count ignored
+                # Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
                         oommf = s_line[1].lstrip()
@@ -582,7 +582,7 @@ class PDBReader(object):
                             if int_val == 0:
                                 break
                             val_list.append(int_val)
-                        #need val_list ordered
+                        # need val_list ordered
                         for val in val_list:
                             index = val - 1
                             if (pos_x[index], pos_x[num]) in x_line and \
@@ -980,7 +980,7 @@ class MagSLD(object):
                     if zpos_pre != z_pos:
                         self.zstepsize = np.fabs(z_pos - zpos_pre)
                         break
-                #default pix volume
+                # default pix volume
                 self.vol_pix = np.ones(len(self.pos_x))
                 vol = self.xstepsize * self.ystepsize * self.zstepsize
                 self.set_pixel_volumes(vol)

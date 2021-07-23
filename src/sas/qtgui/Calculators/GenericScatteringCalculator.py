@@ -48,16 +48,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.sld_reader = sas_gen.SLDReader()
         self.pdb_reader = sas_gen.PDBReader()
         self.reader = None
-        #sld data for nuclear and magnetic cases
+        # sld data for nuclear and magnetic cases
         self.nuc_sld_data = None
         self.mag_sld_data = None
-        #verification information to avoid recalculating
-        #verification carried out whenever files are selected/deselected
-        #verification reset whenever a new files loaded
+        # verification information to avoid recalculating
+        # verification carried out whenever files are selected/deselected
+        # verification reset whenever a new files loaded
         self.verification_occurred = False # has verification happened on these files
         self.verified = False # was the verification successsful
         # verification error label
-        #prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
+        # prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
         sizePolicy = self.lblVerifyError.sizePolicy()
         sizePolicy.setRetainSizeWhenHidden(True)
         self.lblVerifyError.setSizePolicy(sizePolicy)
@@ -73,28 +73,28 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.is_nuc = False
         self.is_mag = False
         self.data_to_plot = None
-        self.graph_num = 1  # index for name of graph
+        self.graph_num = 1      # index for name of graph
 
         # combox box
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
-        #prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
+        # prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
         sizePolicy = self.cbOptionsCalc.sizePolicy()
         sizePolicy.setRetainSizeWhenHidden(True)
         self.cbOptionsCalc.setSizePolicy(sizePolicy)
 
 
-        #code to automatically restore the last valid value if a user leaves a textbox blank (or otherwise in an invalid state)
+        # code to automatically restore the last valid value if a user leaves a textbox blank (or otherwise in an invalid state)
         self.textEdited = False # variable to ensure only programmatic changes are automatically allowed
-        #list of lineEdits to be checked
+        # list of lineEdits to be checked
         self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
                             self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
                             self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
                             self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize]
-        self.last_acceptable_values = {} #dictionary of the last set of valid values
+        self.last_acceptable_values = {}        # dictionary of the last set of valid values
         for lineEdit in self.lineEdits:
             self.last_acceptable_values[lineEdit] = lineEdit.text()
-            lineEdit.textEdited.connect(self.set_text_edited) # when user edits the text - called before textChanged signal
-            lineEdit.textChanged.connect(self.gui_text_changed)#when text is changed
+            lineEdit.textEdited.connect(self.set_text_edited)       # when user edits the text - called before textChanged signal
+            lineEdit.textChanged.connect(self.gui_text_changed)     # when text is changed
             lineEdit.editingFinished.connect(self.gui_text_changed)
             # event filter catches when a widget loses focus - required because editingFinished only
             # catches the user exiting the box if the validation is acceptable, because we want to catch
@@ -112,14 +112,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdReset.clicked.connect(self.onReset)
         self.cmdSave.clicked.connect(self.onSaveFile)
 
-        #checkboxes
+        # checkboxes
         self.checkboxNucData.stateChanged.connect(self.change_data_type)
         self.checkboxMagData.stateChanged.connect(self.change_data_type)
 
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
 
-        #update pixel no./total volume when changed in GUI
+        # update pixel no./total volume when changed in GUI
         self.txtXnodes.textChanged.connect(self.update_geometry_effects)
         self.txtYnodes.textChanged.connect(self.update_geometry_effects)
         self.txtZnodes.textChanged.connect(self.update_geometry_effects)
@@ -127,7 +127,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtYstepsize.textChanged.connect(self.update_geometry_effects)
         self.txtZstepsize.textChanged.connect(self.update_geometry_effects)
 
-        #setup initial configuration
+        # setup initial configuration
         self.checkboxNucData.setEnabled(False)
         self.checkboxMagData.setEnabled(False)
         self.change_data_type()
@@ -179,14 +179,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         validat_regex_q = QtCore.QRegExp('^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
         self.txtQxMax.setValidator(QtGui.QRegExpValidator(validat_regex_q,
                                                           self.txtQxMax))
-        #check for max q cut-off
+        # check for max q cut-off
         self.txtQxMax.textChanged.connect(self.check_value) 
 
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegExp('^[2-9]|[1-9]\d{1,2}$')        
         self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_int,
                                                             self.txtNoQBins))
-        #check for min q resolution
+        # check for min q resolution
         self.txtNoQBins.textChanged.connect(self.check_value) 
 
         self.txtXnodes.setValidator(
@@ -240,13 +240,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.last_acceptable_values[target] = target.text()
             else:
                 target.setText(self.last_acceptable_values[target])
-        #return false so that event is still handled by widget
+        # return false so that event is still handled by widget
         return False
 
     def gui_text_changed(self):
         """update the last valid value stored in a lineEdit if it is updated programmatically
         """
-        #if text changed programatically then update value
+        # if text changed programatically then update value
         if not self.textEdited:
             self.last_acceptable_values[self.sender()] = self.sender().text()
         self.textEdited = False
@@ -279,18 +279,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             changed.
         :type msg: str or None
         """
-        #disable necessary buttons to prevent the attempted merging of incompatible files
+        # disable necessary buttons to prevent the attempted merging of incompatible files
         self.cmdDraw.setEnabled(False)
         self.cmdDrawpoints.setEnabled(False)
         self.cmdSave.setEnabled(False)
         self.cmdCompute.setEnabled(False)
-        #alter the error message if a new message is provided
-        #verification is only carried out once so if msg=None do not set the msg to ""
-        #   but simply don't alter it - this means the message is preserved and re-verification
-        #   is not called when the files have not been changed
+        # alter the error message if a new message is provided
+        # verification is only carried out once so if msg=None do not set the msg to ""
+        # but simply don't alter it - this means the message is preserved and re-verification
+        # s not called when the files have not been changed
         if msg is not None:
             self.lblVerifyError.setText('<font color="#FF0000">' + msg + '</font>')
-        #display the message
+        # display the message
         self.lblVerifyError.setVisible(True)
 
     def enable_verification_error_functionality(self):
@@ -303,12 +303,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         by disable_verification_error_functionality(), i.e. save, draw and compute.
         It also hides the error message from the user.
         """
-        #reenable necessary buttons
+        # reenable necessary buttons
         self.cmdDraw.setEnabled(True)
         self.cmdDrawpoints.setEnabled(True)
         self.cmdSave.setEnabled(True)
         self.cmdCompute.setEnabled(True)
-        #hide error message
+        # hide error message
         self.lblVerifyError.setVisible(False)
 
     def verify_files_match(self):
@@ -323,7 +323,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         files.
         """
         if not (self.is_mag and self.is_nuc):
-            #no conflicts if only 1/0 file(s) loaded - therefore restore functionality
+            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality
             self.enable_verification_error_functionality()
             return
         # check if files already verified
@@ -339,11 +339,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.verification_occurred = True
             self.verified = False
             return
-        #check the coords match up 1-to-1
+        # check the coords match up 1-to-1
         nuc_coords = numpy.array(numpy.column_stack((self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z)))
         mag_coords = numpy.array(numpy.column_stack((self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z)))
-        if numpy.array_equal(nuc_coords, mag_coords): #should this have a floating point tolerance??
-            #arrays are already sorted in the same order, so files match
+        # TODO: should this have a floating point tolerance??
+        if numpy.array_equal(nuc_coords, mag_coords):
+            # arrays are already sorted in the same order, so files match
             self.enable_verification_error_functionality()
             self.verification_occurred = True
             self.verified = True
@@ -353,27 +354,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         mag_sort_order = numpy.lexsort((self.mag_sld_data.pos_z, self.mag_sld_data.pos_y, self.mag_sld_data.pos_x))
         nuc_coords = nuc_coords[nuc_sort_order]
         mag_coords = mag_coords[mag_sort_order]
-        #check if sorted data points are equal
+        # check if sorted data points are equal
         if numpy.array_equal(nuc_coords, mag_coords):
-            #if data points are equal then resort both lists into the same order
-            #is this too time consuming for long lists? logging info?
-            #1) coords
+            # if data points are equal then resort both lists into the same order
+            # is this too time consuming for long lists? logging info?
+            # 1) coords
             self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.hsplit(nuc_coords, 3)
             self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.hsplit(mag_coords, 3)
-            #2) other array params that must be in same order as coords
+            # 2) other array params that must be in same order as coords
             params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
             for item in params:
                 nuc_val = getattr(self.nuc_sld_data, item)
                 if nuc_val is not None:
-                    #data should already be a numpy array, we cast to an ndarray as a check
-                    #very fast if data is already an instance of ndarray as expected becuase function
-                    #returns the array as-is
+                    # data should already be a numpy array, we cast to an ndarray as a check
+                    # very fast if data is already an instance of ndarray as expected becuase function
+                    # returns the array as-is
                     setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
                 mag_val = getattr(self.mag_sld_data, item)
                 if nuc_val is not None:
                     setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
-            #Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
-            #absolute positions not references to pos_x, pos_y, pos_z).
+            # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
+            # absolute positions not references to pos_x, pos_y, pos_z).
             self.enable_verification_error_functionality()
             self.verification_occurred = True
             self.verified = True
@@ -397,19 +398,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         all points. If no data files are loaded then the node and stepsize textboxes are
         enabled to allow the user to specify a simple rectangular lattice.
         """
-        #update information on which files are enabled
+        # update information on which files are enabled
         self.is_nuc = self.checkboxNucData.isChecked()
         self.is_mag = self.checkboxMagData.isChecked()
-        #enable the corresponding text displays to show this to the user clearly
+        # enable the corresponding text displays to show this to the user clearly
         self.txtNucData.setEnabled(self.is_nuc)
         self.txtMagData.setEnabled(self.is_mag)
-        #only allow editing of mean values if no data file for that vlaue has been loaded
-        #user provided mean values are taken as a constant across all points
+        # only allow editing of mean values if no data file for that vlaue has been loaded
+        # user provided mean values are taken as a constant across all points
         self.txtMx.setEnabled(not self.is_mag)
         self.txtMy.setEnabled(not self.is_mag)
         self.txtMz.setEnabled(not self.is_mag)
         self.txtNucl.setEnabled(not self.is_nuc)
-        #The ability to change the number of nodes and stepsizes only if no laoded data file enabled
+        # The ability to change the number of nodes and stepsizes only if no laoded data file enabled
         both_disabled =  (not self.is_mag) and (not self.is_nuc)
         self.txtXnodes.setEnabled(both_disabled)
         self.txtYnodes.setEnabled(both_disabled)
@@ -417,13 +418,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtXstepsize.setEnabled(both_disabled)
         self.txtYstepsize.setEnabled(both_disabled)
         self.txtZstepsize.setEnabled(both_disabled)
-        #Only allow 1D averaging if no magnetic data
+        # Only allow 1D averaging if no magnetic data
         self.cbOptionsCalc.setVisible(not self.is_mag)
         if (not self.is_mag):
-            #A helper function to set up the averaging system
+            # A helper function to set up the averaging system
             self.change_is_avg()
         else:
-            #If magnetic data present then no averaging is allowed
+            # If magnetic data present then no averaging is allowed
             self.is_avg = False
         # update the gui with new values - sets the average values from enabled files
         self.update_gui()
@@ -440,11 +441,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         This function is called whenever different files are enabled or the user edits the
         averaging combobox.
         """
-        #update the averaging option fromthe button on the GUI
-        #required as the button may have been previously hidden with
-        #any value, and preserves this - we must update the variable to match the GUI
+        # update the averaging option fromthe button on the GUI
+        # required as the button may have been previously hidden with
+        # any value, and preserves this - we must update the variable to match the GUI
         self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
-        #If averaging then set to 0 and diable the magnetic SLD textboxes
+        # If averaging then set to 0 and diable the magnetic SLD textboxes
         if self.is_avg:
             self.txtMx.setEnabled(False)
             self.txtMy.setEnabled(False)
@@ -452,7 +453,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setText("0")
             self.txtMy.setText("0")
             self.txtMz.setText("0")
-        #If not averaging then re-enable the magnetic sld textboxes
+        # If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtMx.setEnabled(True)
             self.txtMy.setEnabled(True)
@@ -477,7 +478,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         :type load_nuc: bool
         """
         try:
-            #request a file from the user
+            # request a file from the user
             if load_nuc:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
                     self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB);;"
@@ -492,18 +493,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                             "All files (*.*)")[0]
             # If a file has been sucessfully chosen
             if self.datafile:
-                #set basic data about the file
+                # set basic data about the file
                 self.default_shape = str(self.cbShape.currentText())
                 self.file_name = os.path.basename(str(self.datafile))
                 self.ext = os.path.splitext(str(self.datafile))[1]
-                #select the required loader for the data format
+                # select the required loader for the data format
                 if self.ext in self.omf_reader.ext and (not load_nuc):
-                    #only load omf files for magnetic data
+                    # only load omf files for magnetic data
                     loader = self.omf_reader
                 elif self.ext in self.sld_reader.ext:
                     loader = self.sld_reader
                 elif self.ext in self.pdb_reader.ext and load_nuc:
-                    #only load pdb files for nuclear data
+                    # only load pdb files for nuclear data
                     loader = self.pdb_reader
                 else:
                     loader = None
@@ -587,7 +588,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.ext in self.omf_reader.ext:
                 gen = sas_gen.OMF2SLD()
                 gen.set_data(data)
-                #only magnetic data can be read from omf files
+                # only magnetic data can be read from omf files
                 self.mag_sld_data = gen.get_magsld()
                 self.check_units()
             elif self.ext in self.sld_reader.ext:
@@ -596,7 +597,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 else:
                     self.mag_sld_data = data
             elif self.ext in self.pdb_reader.ext:
-                #only nuclear data can be read from pdb files
+                # only nuclear data can be read from pdb files
                 self.nuc_sld_data = data
                 is_pdbdata = True
         except IOError:
@@ -609,7 +610,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             logging.info(log_msg)
             raise
         logging.info("Load Complete")
-        #Once data files are loaded allow them to be enabled
+        # Once data files are loaded allow them to be enabled
         if load_nuc:
             self.checkboxNucData.setEnabled(True)
         else:
@@ -628,7 +629,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         displayed on the interface.
         If not, modify the GUI with the correct unit
         """
-        #  TODO: adopt the convention of font and symbol for the updated values
+        # TODO: adopt the convention of font and symbol for the updated values
         if sas_gen.OMFData().valueunit != 'A^(-2)':
             value_unit = sas_gen.OMFData().valueunit
             self.lbl_unitMx.setText(value_unit)
@@ -678,7 +679,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             znodes = float(self.txtZnodes.text())
             value = float(str(self.txtNoQBins.text()))
             max_step =  3*max(xnodes, ynodes, znodes) 
-                #limits qmin > maxq / nodes                 
+                # limits qmin > maxq / nodes                 
             if value < 2 or value > max_step:
                 self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
             else:
@@ -739,7 +740,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtUpTheta.setText(str(self.model.params['Up_theta']))
         self.txtUpPhi.setText(str(self.model.params['Up_phi']))
 
-        #update the number of pixels with values from the loaded data or GUI if no datafiles enabled
+        # update the number of pixels with values from the loaded data or GUI if no datafiles enabled
         if self.is_nuc:
             self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
         elif self.is_mag:
@@ -771,9 +772,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtXstepsize.setText(self.format_value(self.mag_sld_data.xstepsize))
             self.txtYstepsize.setText(self.format_value(self.mag_sld_data.ystepsize))
             self.txtZstepsize.setText(self.format_value(self.mag_sld_data.zstepsize))
-        #otherwise leave as set since editable by user
+        # otherwise leave as set since editable by user
 
-        #If nodes or stepsize changed then this may effect what values are allowed
+        # If nodes or stepsize changed then this may effect what values are allowed
         self.check_value(update_all=True)
     
     def update_geometry_effects(self):
@@ -783,23 +784,23 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         volume may be set differently by the data from the file.
         """
         if self.is_mag or self.is_nuc:
-            #don't change the number if this is being set from a file as then the number of pixels may differ
+            # don't change the number if this is being set from a file as then the number of pixels may differ
             return
         if self.txtXnodes.text() == "" or self.txtYnodes.text() == "" or self.txtZnodes.text() == "":
-            #do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
-            #user is most likely just removing the value to change it
+            # do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
+            # user is most likely just removing the value to change it
             return
         self.txtNoPixels.setText(str(int(float(self.txtXnodes.text())
                                          * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))))
         if self.txtXstepsize.text() == "" or self.txtYstepsize.text() == "" or self.txtZstepsize.text() == "":
-            #do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
-            #user is most likely just removing the value to change it
+            # do not try to update if textbox blank - this will throw an error in update_gui() anyway if left blank
+            # user is most likely just removing the value to change it
             return
         self.model.params['total_volume'] = (float(self.txtXstepsize.text()) * float(self.txtYstepsize.text())
                                                  * float(self.txtZstepsize.text()) * float(self.txtXnodes.text())
                                                  * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))
         self.txtTotalVolume.setText(str(self.model.params['total_volume']))
-        #If nodes or stepsize changed then this may effect what values are allowed
+        # If nodes or stepsize changed then this may effect what values are allowed
         self.check_value(update_all=True)
 
     def write_new_values_from_gui(self):
@@ -877,7 +878,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtXstepsize.setText("6")
             self.txtYstepsize.setText("6")
             self.txtZstepsize.setText("6")
-            #re-enable any options disabled by failed verification
+            # re-enable any options disabled by failed verification
             self.verification_occurred = False
             self.verified = False
             self.enable_verification_error_functionality()
@@ -896,17 +897,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMagData.setText('No File Loaded')
             self.cmdMagLoad.setEnabled(True)
             self.cmdMagLoad.setText('Load')
-            #disable all file checkboxes, as no files are now loaded
+            # disable all file checkboxes, as no files are now loaded
             self.checkboxNucData.setEnabled(False)
             self.checkboxMagData.setEnabled(False)
             self.checkboxNucData.setChecked(False)
             self.checkboxMagData.setChecked(False)
-            #reset all file data to its default empty state
+            # reset all file data to its default empty state
             self.is_nuc = False
             self.is_mag = False
             self.nuc_sld_data = None
             self.mag_sld_data = None
-            #update the gui for the no files loaded case
+            # update the gui for the no files loaded case
             self.change_data_type()
 
 
@@ -925,7 +926,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.npts_x = int(self.txtNoQBins.text())
         self.data = Data2D()
         self.data.is_data = False
-        # # Default values
+        # Default values
         self.data.detector.append(Detector())
         index = len(self.data.detector) - 1
         self.data.detector[index].distance = 8000  # mm
@@ -1000,7 +1001,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         self.qmax_x = float(self.txtQxMax.text())
         self.npts_x = int(self.txtNoQBins.text())
-        #  Default values
+        # Default values
         xmax = self.qmax_x
         xmin = self.qmax_x * _Q1D_MIN
         qstep = self.npts_x
@@ -1026,11 +1027,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         :return: The full sld data created from the various different sources
         :rtype: MagSLD
         """
-        #CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
+        # CARRY OUT COMPATIBILITY CHECK - ELSE RETURN None
         # Set default data when nothing loaded yet
         omfdata = sas_gen.OMFData()
-        #load in user chosen position data
-        #If no file given this will be used to generate the position data
+        # load in user chosen position data
+        # If no file given this will be used to generate the position data
         if (not self.is_mag) and (not self.is_nuc):
             omfdata.xnodes = int(self.txtXnodes.text())
             omfdata.ynodes = int(self.txtYnodes.text())
@@ -1038,13 +1039,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             omfdata.xstepsize = float(self.txtXstepsize.text())
             omfdata.ystepsize = float(self.txtYstepsize.text())
             omfdata.zstepsize = float(self.txtZstepsize.text())
-        #convert into sld format
+        # convert into sld format
         omf2sld = sas_gen.OMF2SLD()
         omf2sld.set_data(omfdata, self.default_shape)
         sld_data = omf2sld.get_output()
 
-        #only to be done once - load in the position data of the atoms
-        #verification ensures that this is the same across nuclear and magnetic datafiles
+        # only to be done once - load in the position data of the atoms
+        # verification ensures that this is the same across nuclear and magnetic datafiles
         if self.is_nuc:
             sld_data.vol_pix = self.nuc_sld_data.vol_pix
             sld_data.pos_x = self.nuc_sld_data.pos_x
@@ -1056,7 +1057,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pos_y = self.mag_sld_data.pos_y
             sld_data.pos_z = self.mag_sld_data.pos_z
 
-        #set the sld data from the required model file/GUI textbox
+        # set the sld data from the required model file/GUI textbox
         if (self.is_nuc):
             sld_data.set_sldn(self.nuc_sld_data.sld_n)
         else:
@@ -1067,10 +1068,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.set_sldms(float(self.txtMx.text()),
                                float(self.txtMy.text()),
                                float(self.txtMz.text()))
-        #Provide data giving connections between atoms for 3D drawing
-        #This SHOULD only occur in nuclear data files as it is a feature of
-        #pdb files - however the option for it to be drawn from magnetic files
-        #if present is given in case the sld file format is expanded to include them
+        # Provide data giving connections between atoms for 3D drawing
+        # This SHOULD only occur in nuclear data files as it is a feature of
+        # pdb files - however the option for it to be drawn from magnetic files
+        # if present is given in case the sld file format is expanded to include them
         if self.is_nuc:
             if self.nuc_sld_data.has_conect:
                 sld_data.has_conect=True
@@ -1084,7 +1085,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     sld_data.line_y = self.mag_sld_data.line_y
                     sld_data.line_z = self.mag_sld_data.line_z
         
-        #take pixel data from nuclear sld as preference because may contatin atom types from pdb files
+        # take pixel data from nuclear sld as preference because may contatin atom types from pdb files
         if self.is_nuc:
             sld_data.pix_type = self.nuc_sld_data.pix_type
             sld_data.pix_symbol = self.nuc_sld_data.pix_symbol
@@ -1100,11 +1101,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Copied from previous version
         """
         try:
-            #create the combined sld data and update from gui
+            # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
             self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()
-            #create 2D or 1D data as appropriate
+            # create 2D or 1D data as appropriate
             if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()
                 inputs = [self.data.x, []]
@@ -1116,7 +1117,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.cmdCompute.setEnabled(False)
             d = threads.deferToThread(self.complete, inputs, self._update)
             # Add deferred callback for call return
-            #d.addCallback(self.plot_1_2d)
+            # d.addCallback(self.plot_1_2d)
             d.addCallback(self.calculateComplete)
             d.addErrback(self.calculateFailed)
         except Exception:
@@ -1158,7 +1159,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         :type input: list
         """
         timer = timeit.default_timer
-        update_rate = 1.0 # seconds between updates
+        update_rate = 1.0       # seconds between updates
         next_update = timer() + update_rate if update is not None else numpy.inf
         nq = len(input[0])
         chunk_size = 32 if self.is_avg else 256
@@ -1281,7 +1282,7 @@ class Plotter3DWidget(PlotterBase):
         if not data:
             return
         self.data = data
-        #assert(self._data)
+        # assert(self._data)
         # Prepare and show the plot
         self.showPlot(data=self.data, has_arrow=has_arrow)
 
