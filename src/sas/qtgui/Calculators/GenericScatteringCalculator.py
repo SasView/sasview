@@ -35,7 +35,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     calculationFinishedSignal = QtCore.pyqtSignal()
     loadingFinishedSignal = QtCore.pyqtSignal(list, bool)
 
+    # class constants for textbox background colours
     TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
+    TEXTBOX_WARNING_STYLESTRING = 'background-color: rgb(255, 226, 110);'
     TEXTBOX_ERROR_STYLESTRING = 'background-color: rgb(255, 182, 193);'
 
     def __init__(self, parent=None):
@@ -87,25 +89,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         sizePolicy.setRetainSizeWhenHidden(True)
         self.cbOptionsCalc.setSizePolicy(sizePolicy)
 
-
-        # code to automatically restore the last valid value if a user leaves a textbox blank (or otherwise in an invalid state)
-        self.textEdited = False # variable to ensure only programmatic changes are automatically allowed
+        # code to highlight incompleted values in the GUI and prevent calculation
         # list of lineEdits to be checked
         self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
                             self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
                             self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
                             self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize]
-        self.last_acceptable_values = {}        # dictionary of the last set of valid values
+        self.invalidLineEdits = []
         for lineEdit in self.lineEdits:
-            self.last_acceptable_values[lineEdit] = lineEdit.text()
-            lineEdit.textEdited.connect(self.set_text_edited)       # when user edits the text - called before textChanged signal
-            lineEdit.textChanged.connect(self.gui_text_changed)     # when text is changed
-            lineEdit.editingFinished.connect(self.gui_text_changed)
-            # event filter catches when a widget loses focus - required because editingFinished only
-            # catches the user exiting the box if the validation is acceptable, because we want to catch
-            # intermediate cases we also need to detect if the user leaves the widget
-            lineEdit.installEventFilter(self)
-
+            lineEdit.textChanged.connect(self.gui_text_changed_slot)     # when text is changed
+            lineEdit.installEventFilter(self)                            # when textbox enabled/disabled
 
         # push buttons
         self.cmdClose.clicked.connect(self.accept)
@@ -184,15 +177,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         validat_regex_q = QtCore.QRegExp('^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
         self.txtQxMax.setValidator(QtGui.QRegExpValidator(validat_regex_q,
                                                           self.txtQxMax))
-        # check for max q cut-off
-        self.txtQxMax.textChanged.connect(self.check_value) 
 
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegExp('^[2-9]|[1-9]\d{1,2}$')        
         self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_int,
                                                             self.txtNoQBins))
-        # check for min q resolution
-        self.txtNoQBins.textChanged.connect(self.check_value) 
 
         self.txtXnodes.setValidator(
             QtGui.QRegExpValidator(validat_regex_int, self.txtXnodes))
@@ -225,41 +214,78 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitx.setStyleSheet(new_font)
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
-
+    
+    def gui_text_changed_slot(self):
+        """Catches the signal that a textbox has beeen altered"""
+        self.gui_text_changed(self.sender())
+    
     def eventFilter(self, target, event):
-        """A function to catch FocusOut on QLineEdit widgets in the GUI
-
-        This function checks whether the text in a textbox is valid when the user clicks out of it
-        or in some other way loses focus to the widget (e.g. TAB, pressing the compute button). If the
-        text contained is not accpetable to the validator (intermediate state, e.g. empty) it restores
-        the previous last accepted value.
-
-
-        :param target: The widget which lost focus and triggered the eventFilter
-        :type target: QObject
-        :param event: the event which triggered the eventFilter
-        :type event: QEvent
-        """
-        if target in self.lineEdits and event.type() == QtCore.QEvent.FocusOut:
-            if target.hasAcceptableInput():
-                self.last_acceptable_values[target] = target.text()
-            else:
-                target.setText(self.last_acceptable_values[target])
-        # return false so that event is still handled by widget
+        """Catches the event that a textbox has been enabled/disabled"""
+        if target in self.lineEdits and event.type() == QtCore.QEvent.EnabledChange:
+            self.gui_text_changed(target)
         return False
 
-    def gui_text_changed(self):
-        """update the last valid value stored in a lineEdit if it is updated programmatically
+    def gui_text_changed(self, sender):
+        """check whether lineEdit values are valid
+
+        This function checks whether lineEdits are valid, and if not highlights them and
+        calls for functionality to be disabled.
+        It checks for both errors and warnings. Error states highlight red and disable
+        functionality. These are 'intermediate' states which do not match the regex.
+        Warning states are highlighted orange and warn the user the value may be problematic.
+        Warnings were previously checked for in the check_value() method.
+
+        For warnings this checks that QMax and the number of Qbins is suitable
+        given the user chosen values. Unlike the hard limits imposed by the
+        regex, this does not prevent the user using the given value, but warns
+        them that it may be unsuitable with a backcolour.
+
+        :param sender: The QLineEdit in question
+        :type sender: QWidget
         """
-        # if text changed programatically then update value
-        if not self.textEdited:
-            self.last_acceptable_values[self.sender()] = self.sender().text()
-        self.textEdited = False
-    
-    def set_text_edited(self):
-        """prevent gui_text_changed() from running if the lineEdit text has been changed by the user
-        """
-        self.textEdited = True
+
+        senderInvalid = sender in self.invalidLineEdits
+        # If the LineEdit is disabled (i.e. value set programmatically) we trust the value
+        if (not sender.isEnabled()):
+            if senderInvalid:
+                self.invalidLineEdits.remove(sender)
+            self.toggle_error_functionality()
+            sender.setStyleSheet("")
+        # If the LineEdit has been corrected from an invalid value restore functionality
+        elif sender.hasAcceptableInput() and senderInvalid:
+            self.invalidLineEdits.remove(sender)
+            self.toggle_error_functionality()
+            sender.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+        # If the LineEdit has had an invalid value stored then remove functionality
+        elif (not sender.hasAcceptableInput()) and (not senderInvalid):
+            self.invalidLineEdits.append(sender)
+            self.toggle_error_functionality()
+            sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
+        # If the LineEdit is an acceptable value according to the regex apply warnings
+        # This functionality was previously found in check_value()
+        if not(sender in self.invalidLineEdits):
+            if sender == self.txtNoQBins :
+                xnodes = float(self.txtXnodes.text())
+                ynodes = float(self.txtYnodes.text())
+                znodes = float(self.txtZnodes.text())
+                value = float(str(self.txtNoQBins.text()))
+                max_step =  3*max(xnodes, ynodes, znodes) 
+                    # limits qmin > maxq / nodes                 
+                if value < 2 or value > max_step:
+                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                else:
+                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+            elif sender == self.txtQxMax:
+                xstepsize = float(self.txtXstepsize.text())
+                ystepsize = float(self.txtYstepsize.text())
+                zstepsize = float(self.txtZstepsize.text())
+                value = float(str(self.txtQxMax.text()))
+                max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
+                if value <= 0 or value > max_q:
+                    self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                else:
+                    self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+
             
 
     def selectedshapechange(self):
@@ -270,29 +296,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
-    def toggle_error_functionality(self, verificationMsg=None, overload_verification=False):
+    def toggle_error_functionality(self, verificationMsg=None):
         """Disables/Enables some functionality if the state of the GUI means calculation cannot proceed
 
-        This function is called during the verification process for combining
-        two different files for nuclear and magnetic data, in order to 
-        enable/disable the functionality of the GUI which requires the files 
-        to be compatible (save, draw and compute). It also optionally alters
-        the error message for the user.
+        This function is called during any process whenever there is a risk that the state
+        of the GUI will make the data invalid for plotting, drawing or saving. If that is the 
+        case then this functionality is disabled. This function is currently called when two
+        files are being verified for compatibility, and when textboxes enter 'intermediate' states.
+        It also optionally changes the validation error message for the user.
 
         :param msg: The error message due to file verification which should be displayed
             to the user on the GUI. Defaults to `None` in which case the error message is
             not changed.
         :type msg: str or None
-        :param overload_verification: Whether a failed file verification should be overloaded.
-            This is used when only one file is selected for example. Defaults to False.
-        :type overload_verification: bool
         """
-        enable = self.verified or overload_verification
+        verificationEnable = self.verified or not (self.is_mag and self.is_nuc)
+        lineEditsEnable = len(self.invalidLineEdits) == 0
         # disable necessary buttons to prevent the attempted merging of incompatible files
-        self.cmdDraw.setEnabled(enable)
-        self.cmdDrawpoints.setEnabled(enable)
-        self.cmdSave.setEnabled(enable)
-        self.cmdCompute.setEnabled(enable)
+        self.cmdDraw.setEnabled(verificationEnable and lineEditsEnable)
+        self.cmdDrawpoints.setEnabled(verificationEnable and lineEditsEnable)
+        self.cmdSave.setEnabled(verificationEnable and lineEditsEnable)
+        self.cmdCompute.setEnabled(verificationEnable and lineEditsEnable)
         # alter the error message if a new message is provided
         # verification is only carried out once so if msg=None do not set the msg to ""
         # but simply don't alter it - this means the message is preserved and re-verification
@@ -300,7 +324,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if verificationMsg is not None:
             self.lblVerifyError.setText('<font color="#FF0000">' + verificationMsg + '</font>')
         # display the message
-        self.lblVerifyError.setVisible(not enable)
+        self.lblVerifyError.setVisible(not verificationEnable)
 
     def verify_files_match(self):
         """Verifies that enabled files are compatible and can be combined
@@ -314,8 +338,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         files.
         """
         if not (self.is_mag and self.is_nuc):
-            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality
-            self.toggle_error_functionality(overload_verification=True)
+            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality immediately
+            self.toggle_error_functionality()
             return
         # check if files already verified
         if self.verification_occurred:
@@ -633,48 +657,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.lbl_unitz.setText(mesh_unit)
             self.lbl_unitVolume.setText(mesh_unit+"^3")
 
-    def check_value(self, update_all=False):
-        """Check range of text edits for QMax and Number of Qbins
-        
-        This function checks that QMax and the number of Qbins is suitable
-        given the user chosen values. Unlike the hard limits imposed by the
-        regex, this does not prevent the user using the given value, but warns
-        them that it may be unsuitable with a red back-color.
-
-        :params update_all: If this value is set to true then both values will be checked
-            verified - useful when the call is being made generally and not due to one of the
-            values being changed by the user directly. Defaults to `False`
-        :type update_all: bool
-        """
-
-        text_edit = self.sender()
-        if update_all:
-            self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
-            self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
-        else:
-            text_edit.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
-        if (text_edit == self.txtQxMax or update_all) and self.txtQxMax.text():
-            xstepsize = float(self.txtXstepsize.text())
-            ystepsize = float(self.txtYstepsize.text())
-            zstepsize = float(self.txtZstepsize.text())
-            value = float(str(self.txtQxMax.text()))
-            max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
-            if value <= 0 or value > max_q:
-                self.txtQxMax.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
-            else:
-                self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
-        if (text_edit == self.txtNoQBins or update_all) and self.txtNoQBins.text():
-            xnodes = float(self.txtXnodes.text())
-            ynodes = float(self.txtYnodes.text())
-            znodes = float(self.txtZnodes.text())
-            value = float(str(self.txtNoQBins.text()))
-            max_step =  3*max(xnodes, ynodes, znodes) 
-                # limits qmin > maxq / nodes                 
-            if value < 2 or value > max_step:
-                self.txtNoQBins.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
-            else:
-                self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
-
     def format_value(self, value):
         """Formats certain data for the GUI.
         
@@ -716,19 +698,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # add condition for activation of save button
         self.cmdSave.setEnabled(True)
 
-        # activation of 3D plots' buttons (with and without arrows)
-
-        self.txtScale.setText(str(self.model.params['scale']))
-        self.txtBackground.setText(str(self.model.params['background']))
-        self.txtSolventSLD.setText(str(self.model.params['solvent_SLD']))
-
         # Volume to write to interface: npts x volume of first pixel
         self.txtTotalVolume.setText(str(self.model.params['total_volume']))
-
-        self.txtUpFracIn.setText(str(self.model.params['Up_frac_in']))
-        self.txtUpFracOut.setText(str(self.model.params['Up_frac_out']))
-        self.txtUpTheta.setText(str(self.model.params['Up_theta']))
-        self.txtUpPhi.setText(str(self.model.params['Up_phi']))
 
         # update the number of pixels with values from the loaded data or GUI if no datafiles enabled
         if self.is_nuc:
@@ -764,7 +735,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # otherwise leave as set since editable by user
 
         # If nodes or stepsize changed then this may effect what values are allowed
-        self.check_value(update_all=True)
+        self.gui_text_changed(sender=self.txtNoQBins)
+        self.gui_text_changed(sender=self.txtQxMax)
     
     def update_geometry_effects(self):
         """This function updates the number of pixels and total volume when the number of nodes/stepsize is changed
@@ -790,7 +762,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                  * float(self.txtYnodes.text()) * float(self.txtZnodes.text()))
         self.txtTotalVolume.setText(str(self.model.params['total_volume']))
         # If nodes or stepsize changed then this may effect what values are allowed
-        self.check_value(update_all=True)
+        self.gui_text_changed(sender=self.txtNoQBins)
+        self.gui_text_changed(sender=self.txtQxMax)
 
     def write_new_values_from_gui(self):
         """Update parameters in model using modified inputs from GUI
