@@ -757,7 +757,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMz.setText(self.format_value(self.mag_sld_data.sld_mz))
         if self.is_nuc:
             self.txtNucl.setText(self.format_value(self.nuc_sld_data.sld_n))
-        if self.is_nuc:
             self.txtXnodes.setText(self.format_value(self.nuc_sld_data.xnodes))
             self.txtYnodes.setText(self.format_value(self.nuc_sld_data.ynodes))
             self.txtZnodes.setText(self.format_value(self.nuc_sld_data.znodes))
