@@ -57,7 +57,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.verification_occurred = False # has verification happened on these files
         self.verified = False # was the verification successsful
         # verification error label
-        # prevent layout shifting when widget hidden (could this be placed i nthe .ui file?)
+        # prevent layout shifting when widget hidden
+        # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.lblVerifyError.sizePolicy()
         sizePolicy.setRetainSizeWhenHidden(True)
         self.lblVerifyError.setSizePolicy(sizePolicy)
@@ -1077,6 +1078,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 sld_data.line_x = self.nuc_sld_data.line_x
                 sld_data.line_y = self.nuc_sld_data.line_y
                 sld_data.line_z = self.nuc_sld_data.line_z
+            # If the nuclear data does not contain conect data try to find it in the magnetic data.
+            # TODO: combine both lists properly. Probably only necessary if a filetype for magnetic data
+            #       is used which can contain such data.
             elif self.is_mag:
                 if self.mag_sld_data.has_conect:
                     sld_data.has_conect=True
