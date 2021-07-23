@@ -111,8 +111,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdClose.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
 
-        self.cmdNucLoad.clicked.connect(lambda: self.loadFile(load_nuc=True))
-        self.cmdMagLoad.clicked.connect(lambda: self.loadFile(load_nuc=False))
+        self.cmdNucLoad.clicked.connect(self.loadFile)
+        self.cmdMagLoad.clicked.connect(self.loadFile)
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdReset.clicked.connect(self.onReset)
         self.cmdSave.clicked.connect(self.onSaveFile)
@@ -464,7 +464,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMy.setEnabled(True)
             self.txtMz.setEnabled(True)
 
-    def loadFile(self, load_nuc=True):
+    def loadFile(self):
         """Opens a menu to choose the datafile to load
 
         Opens a file dialog to allow the user to select a datafile to be loaded.
@@ -483,6 +483,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         :type load_nuc: bool
         """
         try:
+            load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
