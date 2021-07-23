@@ -165,9 +165,16 @@ jobs:
         MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       run: |
         cd installers/dist
-        cp SasView5.app/Contents/MacOS/ libz.1.2.11.dylib  SasView5.app/Contents/Frameworks/
-        install_name_tool -change @rpath/ libz.1.2.11.dylib  @executable_path/../Frameworks/ libz.1.2.11.dylib  SasView5.app/Contents/MacOS/sasview
+        cp SasView5.app/Contents/MacOS/libz.1.2.11.dylib  SasView5.app/Contents/Frameworks/
+        install_name_tool -change @rpath/libz.1.2.11.dylib  @executable_path/../Frameworks/libz.1.2.11.dylib  SasView5.app/Contents/MacOS/sasview
+
+        echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+        security create-keychain -p DloaAcYP build.keychain security default-keychain -s build.keychain
+        security unlock-keychain -p DloaAcYP build.keychain
+        security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
         cd ../../build_tools
+
         python  code_sign_osx.py
         #codesign --verify  --entitlements entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
 
