@@ -270,51 +270,37 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
-    def disable_verification_error_functionality(self, msg=None):
-        """Disables some functionality if verification fails.
+    def toggle_error_functionality(self, verificationMsg=None, overload_verification=False):
+        """Disables/Enables some functionality if the state of the GUI means calculation cannot proceed
 
         This function is called during the verification process for combining
-        two different files for nuclear and magnetic data. It is called when
-        verification fails, in order to disable the functionality of the GUI
-        which requires the files to be compatible (save, draw and compute). It
-        also optionally alters the error message for the user.
+        two different files for nuclear and magnetic data, in order to 
+        enable/disable the functionality of the GUI which requires the files 
+        to be compatible (save, draw and compute). It also optionally alters
+        the error message for the user.
 
-        :param msg: The error message which should be displayed to the user on
-            the GUI. Defaults to `None` in which case the error message is not
-            changed.
+        :param msg: The error message due to file verification which should be displayed
+            to the user on the GUI. Defaults to `None` in which case the error message is
+            not changed.
         :type msg: str or None
+        :param overload_verification: Whether a failed file verification should be overloaded.
+            This is used when only one file is selected for example. Defaults to False.
+        :type overload_verification: bool
         """
+        enable = self.verified or overload_verification
         # disable necessary buttons to prevent the attempted merging of incompatible files
-        self.cmdDraw.setEnabled(False)
-        self.cmdDrawpoints.setEnabled(False)
-        self.cmdSave.setEnabled(False)
-        self.cmdCompute.setEnabled(False)
+        self.cmdDraw.setEnabled(enable)
+        self.cmdDrawpoints.setEnabled(enable)
+        self.cmdSave.setEnabled(enable)
+        self.cmdCompute.setEnabled(enable)
         # alter the error message if a new message is provided
         # verification is only carried out once so if msg=None do not set the msg to ""
         # but simply don't alter it - this means the message is preserved and re-verification
         # s not called when the files have not been changed
-        if msg is not None:
-            self.lblVerifyError.setText('<font color="#FF0000">' + msg + '</font>')
+        if verificationMsg is not None:
+            self.lblVerifyError.setText('<font color="#FF0000">' + verificationMsg + '</font>')
         # display the message
-        self.lblVerifyError.setVisible(True)
-
-    def enable_verification_error_functionality(self):
-        """(Re-)enables some functionality if verification succeeds or is unnecessary
-
-        This function is called during the verification process for combining
-        two different files for nuclear and magnetic data. It is called when
-        verification succeeds, or is no longer necessary as fewer than two files are
-        now under consideration. It re-enables all of the functionality disabled
-        by disable_verification_error_functionality(), i.e. save, draw and compute.
-        It also hides the error message from the user.
-        """
-        # reenable necessary buttons
-        self.cmdDraw.setEnabled(True)
-        self.cmdDrawpoints.setEnabled(True)
-        self.cmdSave.setEnabled(True)
-        self.cmdCompute.setEnabled(True)
-        # hide error message
-        self.lblVerifyError.setVisible(False)
+        self.lblVerifyError.setVisible(not enable)
 
     def verify_files_match(self):
         """Verifies that enabled files are compatible and can be combined
@@ -329,20 +315,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         if not (self.is_mag and self.is_nuc):
             # no conflicts if only 1/0 file(s) loaded - therefore restore functionality
-            self.enable_verification_error_functionality()
+            self.toggle_error_functionality(overload_verification=True)
             return
         # check if files already verified
         if self.verification_occurred:
-            if self.verified:
-                self.enable_verification_error_functionality()
-            else:
-                self.disable_verification_error_functionality()
+            self.toggle_error_functionality()
             return
         # check each file has the same number of coords
         if self.nuc_sld_data.pos_x.size != self.mag_sld_data.pos_x.size:
-            self.disable_verification_error_functionality("ERROR: files have a different number of data points")
             self.verification_occurred = True
             self.verified = False
+            self.toggle_error_functionality("ERROR: files have a different number of data points")
             return
         # check the coords match up 1-to-1
         nuc_coords = numpy.array(numpy.column_stack((self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z)))
@@ -350,9 +333,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # TODO: should this have a floating point tolerance??
         if numpy.array_equal(nuc_coords, mag_coords):
             # arrays are already sorted in the same order, so files match
-            self.enable_verification_error_functionality()
             self.verification_occurred = True
             self.verified = True
+            self.toggle_error_functionality()
             return
         # now check if coords are in wrong order or don't match
         nuc_sort_order = numpy.lexsort((self.nuc_sld_data.pos_z, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_x))
@@ -380,15 +363,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
             # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
             # absolute positions not references to pos_x, pos_y, pos_z).
-            self.enable_verification_error_functionality()
             self.verification_occurred = True
             self.verified = True
+            self.toggle_error_functionality()
             return
         else:
             # if sorted lists not equal then data points aren't equal
-            self.disable_verification_error_functionality("ERROR: files have different real space position data")
             self.verification_occurred = True
             self.verified = False
+            self.toggle_error_functionality("ERROR: files have different real space position data")
             return
         
 
@@ -887,7 +870,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # re-enable any options disabled by failed verification
             self.verification_occurred = False
             self.verified = False
-            self.enable_verification_error_functionality()
+            self.toggle_error_functionality()
             # reset option for calculation
             self.cbOptionsCalc.setCurrentIndex(0)
             # reset shape button
