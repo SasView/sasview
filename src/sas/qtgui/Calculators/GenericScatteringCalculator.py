@@ -513,7 +513,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     # only load pdb files for nuclear data
                     loader = self.pdb_reader
                 else:
-                    loader = None
+                    logging.error("The selected file does not have a suitable file extension")
+                    return
 
                 if self.reader is not None and self.reader.isrunning():
                     self.reader.stop()
