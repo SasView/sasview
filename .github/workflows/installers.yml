@@ -158,6 +158,14 @@ jobs:
         path: installers/Output/setupSasView.exe
         if-no-files-found: error
 
+    - name: Sign executable
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: |
+        cd installers/dist/
+        cp SasView5.app/Contents/MacOS/libz.1.dylib SasView5.app/Contents/Frameworks/
+        install_name_tool -change @rpath/libz.1.dylib @executable_path/../Frameworks/libz.1.dylib SasView5.app/Contents/MacOS/sasview
+        cd ../../build_tools
+
     - name: Create dmg file
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
