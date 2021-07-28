@@ -1,5 +1,4 @@
 import numpy as np
-import math
 import matplotlib.pyplot as plt
 import logging
 from sas_gen import *
@@ -66,7 +65,7 @@ def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
 
 
 reader = VTKReader()
-data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\originals\\basic_cube_test.vtk")
+data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\originals\\basic_interpolation_test.vtk")
 if not data.are_elements_identical:
     logging.error("currently require all cells to be of the same type")
     quit()
@@ -86,16 +85,10 @@ qy = np.linspace(-10, 10, 40)
 qxs, qys = np.meshgrid(qx, qy)
 
 output = np.zeros_like(qxs, dtype="complex")
-errors = np.zeros_like(qxs, dtype=complex)
 for i in range(len(qx)):
     for j in range(len(qy)):
         output[j, i] = sub_volume_transform(geometry, normals, rn_norm, qx[i], qy[j])[0]
-        correct_value = 8*math.sin(qx[i])*math.sin(qy[i])/(qx[i]*qy[i])
-        errors[j,i] = (math.real(output[j,i]) - correct_value)/correct_value
         #print(i, j)
-
-mean_error = np.mean(errors)
-print(mean_error*100 , "%")
 
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
