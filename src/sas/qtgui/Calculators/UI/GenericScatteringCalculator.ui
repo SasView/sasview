@@ -51,7 +51,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="lblData">
+         <widget class="QLabel" name="lblNucData">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -59,15 +59,22 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data used to simulate SANS.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nuclear data used to simulate SANS.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
-           <string>Data</string>
+           <string>Nuclear Data</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="txtData">
+         <widget class="QCheckBox" name="checkboxNucData">
+          <property name="text">
+           <string></string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="txtNucData">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -90,12 +97,12 @@
            <string>Display name of loaded datafile.</string>
           </property>
           <property name="text">
-           <string>Default SLD Profile</string>
+           <string>No File Loaded</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="cmdLoad">
+        <item row="0" column="3">
+         <widget class="QPushButton" name="cmdNucLoad">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -115,7 +122,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .omf, .sld and .pdb datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load data and generate 3D plots in real space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .sld and .pdb datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load Nuclear sld data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Load</string>
@@ -126,6 +133,88 @@
          </widget>
         </item>
         <item row="1" column="0">
+         <widget class="QLabel" name="lblMagData">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Magnetic data used to simulate SANS.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Magnetic Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="checkboxMagData">
+          <property name="text">
+           <string></string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="txtMagData">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>151</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Display name of loaded datafile.</string>
+          </property>
+          <property name="text">
+           <string>No File Loaded</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="cmdMagLoad">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>23</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .omf and.sld datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load Magnetic sld data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Load</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
          <widget class="QLabel" name="lblShape">
           <property name="font">
            <font>
@@ -141,7 +230,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="2" column="2">
          <widget class="QComboBox" name="cbShape">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -165,10 +254,10 @@
           </item>
          </widget>
         </item>
-        <item row="1" column="2">
+        <item row="2" column="3">
          <widget class="QPushButton" name="cmdDraw">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -770,7 +859,7 @@ Not editable.</string>
       <item row="5" column="0" colspan="2">
        <widget class="QPushButton" name="cmdDrawpoints">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1221,7 +1310,7 @@ Not editable.</string>
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default total volume calculated from the pizel information (or natural density for pdb file)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default total volume calculated from the pixel information (or natural density for pdb file)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>216000.0</string>
@@ -1592,6 +1681,34 @@ Number of Qbins &amp;isin; [2, 1000].</string>
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="7" column="5">
+    <widget class="QLabel" name="lblVerifyError">
+      <property name="font">
+        <font>
+        <weight>50</weight>
+        <bold>false</bold>
+        </font>
+      </property>
+      <property name="toolTip">
+        <string>Verification Error</string>
+      </property>
+      <property name="text">
+        <string></string>
+      </property>
+      <property name="wordWrap">
+        <bool>true</bool>
+      </property>
+      <property name="alignment">
+        <enum>Qt::AlignHCenter</enum>
+      </property>
+      <property name="minimumSize">
+        <size>
+        <width>0</width>
+        <height>30</height>
+        </size>
+      </property>
+    </widget>
    </item>
   </layout>
  </widget>
