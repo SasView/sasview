@@ -14,7 +14,7 @@ import logging
 import numpy as np
 from periodictable import formula, nsf
 
-from .geni import Iq, Iqxy
+#from .geni import Iq, Iqxy
 
 logger = logging.getLogger(__name__)
 
@@ -313,6 +313,7 @@ class VTKReader:
             celltypes += [int(item) for item in next(lines).split()]
         # rewrite cells as list of faces with vertices
         # TODO: remove None type cells along with attributes
+        # cells has form elements x faces x vertex_indices
         cells = [self.get_faces(cells_sorted[i], celltypes[i]) for i in range(num_cells)]
         attribute_data = self.load_data_attributes(lines, num_points, num_cells)
         if attribute_data is None:
@@ -373,8 +374,12 @@ class VTKReader:
             return None
         output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
         output.filename = os.path.basename(path)
+        # check if cells can be written as numpy array
+        if all(celltypes[0] == x for x in celltypes):
+            cells = np.array(cells)
+            output.are_elements_identical = True
         output.set_elements(cells)
-        return
+        return output
 
     def load_data_attributes(self, lines, num_points, num_cells):
         # get data attributes
@@ -1039,6 +1044,7 @@ class MagSLD(object):
         """
         self.is_data = True
         self.is_elements = False
+        self.are_elements_identical = False # are all elements of the same type
         self.elements = []
         self.filename = ''
         self.xstepsize = 6.0

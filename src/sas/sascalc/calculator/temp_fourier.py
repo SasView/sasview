@@ -1,5 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
+from sas_gen import *
+
+# main test file for fourier transform code - requires mesh to have all cells identical in type
 
 def get_normal_vec(geometry):
     """return array of normal vectors of elements"""
@@ -11,11 +15,8 @@ def get_normal_vec(geometry):
     return normals
 
 
-def sub_volume_transform(pos_x, pos_y, pos_z, elements, qx, qy):
+def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
     """carries out fourier transform
-    accepts pos_x, pos_y, pos_z, elements
-    pos_x/y/z = 1D array of x/y/z positions
-    elements is a 3D array: subvolumes x faces x vertices
     qx, qy are floats
 
     returns an array of fourier transforms for each of the subvolumes provided
@@ -28,10 +29,7 @@ def sub_volume_transform(pos_x, pos_y, pos_z, elements, qx, qy):
     # small value used in case where a fraction should limit to a finite answer with 0 on top and bottom
     # used in 2nd/3rd terms in sum over vertices
     eps = 1e-6
-    # create the geometry as an array (subvolumes x faces x vertices x coordinates)
-    geometry = np.column_stack((pos_x, pos_y, pos_z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
-    # create normal vectors (subvolumes x faces x normal_vector_coords)
-    normals = get_normal_vec(geometry)
+
     # create the Q vector
     Q = np.array([qx+eps, qy+eps, 0+eps])
     # create the Q normal vector as the dot product of Q with the normal vector * the normal vector:
@@ -44,8 +42,6 @@ def sub_volume_transform(pos_x, pos_y, pos_z, elements, qx, qy):
     # extract the parallel component of the Q vector
     # (1 x 1 x Q_coords) - (subvolumes x faces x Qn_coords)
     Qp = Q[None, None, :] - Qn
-    # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
-    rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
     # calculate the face-dependent prefactor for the sum over vertices (subvolumes x faces) 
     # TODO: divide by zero error - can nan and inf handle this?
     prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q)
@@ -68,34 +64,31 @@ def sub_volume_transform(pos_x, pos_y, pos_z, elements, qx, qy):
     return np.sum(prefactor*sub_sum, axis=-1)
 
 
+reader = VTKReader()
+data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\originals\\basic_interpolation_test.vtk")
+if not data.are_elements_identical:
+    logging.error("currently require all cells to be of the same type")
+    quit()
+pos_x = data.pos_x
+pos_y = data.pos_y
+pos_z = data.pos_z
+elements = data.elements
+# create the geometry as an array (subvolumes x faces x vertices x coordinates)
+geometry = np.column_stack((pos_x, pos_y, pos_z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
+# create normal vectors (subvolumes x faces x normal_vector_coords)
+normals = get_normal_vec(geometry)
+# extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
+rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
 
-
-
-#sasview geometry - vol=8 cube
-#                  0  1  2  3  4  5  6  7
-#pos_x = np.array([ 1,-1,-1, 1,-1, 1, 1,-1])
-#pos_y = np.array([ 1,-1, 1,-1, 1,-1, 1,-1])
-#pos_z = np.array([ 1, 1,-1,-1, 1, 1,-1,-1])
-#elements = np.array([[
-#                        [0, 5, 3, 6],
-#                        [1, 4, 2, 7],
-#                        [0, 2, 4, 6],
-#                        [1, 3, 5, 7],
-#                        [0, 4, 1, 5],
-#                        [2, 6, 3, 7]
-#                    ]])
-pos_x = np.loadtxt("C:\\Users\\Robert\\Documents\\STFC\\fourier test code\\sphere_data.txt", dtype=float, usecols=0, max_rows=83)
-pos_y = np.loadtxt("C:\\Users\\Robert\\Documents\\STFC\\fourier test code\\sphere_data.txt", dtype=float, usecols=1, max_rows=83)
-pos_z = np.loadtxt("C:\\Users\\Robert\\Documents\\STFC\\fourier test code\\sphere_data.txt", dtype=float, usecols=2, max_rows=83)
-elements = np.loadtxt("C:\\Users\\Robert\\Documents\\STFC\\fourier test code\\sphere_data.txt", dtype=int, skiprows=83)[None,...] - 1
-qx = np.linspace(-10, 10, 100)
-qy = np.linspace(-10, 10, 100)
+qx = np.linspace(-10, 10, 40)
+qy = np.linspace(-10, 10, 40)
 qxs, qys = np.meshgrid(qx, qy)
 
 output = np.zeros_like(qxs, dtype="complex")
 for i in range(len(qx)):
     for j in range(len(qy)):
-        output[j, i] = sub_volume_transform(pos_x, pos_y, pos_z, elements, qx[i], qy[j])[0]
+        output[j, i] = sub_volume_transform(geometry, normals, rn_norm, qx[i], qy[j])[0]
+        #print(i, j)
 
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
@@ -109,7 +102,7 @@ plt.ylabel('$Q_y$', size='large')
 plt.axis
 plt.colorbar()
 fig2 = plt.figure()
-plt.imshow(np.imag(output), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
+plt.imshow(np.real(output), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
 plt.title('Real FT')
 plt.xlabel('$Q_x$', size='large')
 plt.ylabel('$Q_y$', size='large')
