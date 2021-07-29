@@ -14,7 +14,7 @@ import logging
 import numpy as np
 from periodictable import formula, nsf
 
-#from .geni import Iq, Iqxy
+from .geni import Iq, Iqxy
 
 if sys.version_info[0] < 3:
     def decode(s):
@@ -222,6 +222,12 @@ def _vec(v):
 
 class VTKReader:
 
+    type_name = "VTK"
+    ## Wildcards
+    type = ["vtk files (*.VTK, *.vtk)|*.vtk"]
+    ## List of allowed extensions
+    ext = ['.vtk', '.VTK']
+
     def read(self, path):
         try:
             #load in the file
@@ -261,6 +267,7 @@ class VTKReader:
                 return None
         except Exception as error:
             logging.exception(error)
+            return None
     
     def unstructured_grid_read(self, lines, path):
         # get information on points
@@ -313,10 +320,22 @@ class VTKReader:
         # TODO: remove None type cells along with attributes
         # cells has form elements x faces x vertex_indices
         cells = [self.get_faces(cells_sorted[i], celltypes[i]) for i in range(num_cells)]
+        vols = np.array([self.get_vols(cells_sorted[i], celltypes[i], points) for i in range(num_cells)])
         attribute_data = self.load_data_attributes(lines, num_points, num_cells)
         if attribute_data is None:
             return None
         point_data, cell_data = attribute_data
+        # remove None type cells
+        if None in cells:
+            i = 0
+            while i < len(cells):
+                if cells[i] is None:
+                    for data in cell_data:
+                        del data[0][i]
+                    del cells[i]
+                    del vols[i]
+                else:
+                    i += 1
         #convert point data to cell data - for now a standard mean function
         if len(point_data) > 0:
             logging.info("Attributes provided per point - averaging to produce 'per cell' data")
@@ -344,10 +363,10 @@ class VTKReader:
                 vals = attr[0][cells_sorted_adj]
                 val_means = np.sum(vals*weights[..., None], axis=1)/np.sum(weights[..., None], axis=1)
                 cell_data.append([val_means, attr[1], attr[2]])
-        #identify data
+        # identify data
         if len(cell_data) == 1:
             if cell_data[0][2] == 1:
-                sld_n = np.hsplit(cell_data[0][0], 1)
+                sld_n = cell_data[0][0]
                 sld_mx = np.zeros_like(sld_n)
                 sld_my = np.zeros_like(sld_n)
                 sld_mz = np.zeros_like(sld_n)
@@ -359,10 +378,10 @@ class VTKReader:
                 return None
         elif len(cell_data) == 2:
             if cell_data[0][2] == 1 and cell_data[1][2] == 3:
-                sld_n = np.hsplit(cell_data[0][0], 1)
+                sld_n = cell_data[0][0]
                 sld_mx, sld_my, sld_mz = np.hsplit(cell_data[1][0], 3)
             elif cell_data[0][2] == 3 and cell_data[1][2] == 1:
-                sld_n = np.hsplit(cell_data[1][0], 1)
+                sld_n = cell_data[1][0]
                 sld_mx, sld_my, sld_mz = np.hsplit(cell_data[0][0], 3)
             else:
                 logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear and magnetic SLDs")
@@ -370,13 +389,15 @@ class VTKReader:
         else:
             logging.error("Data attributes cannot be interpreted as nuclear and/or magnetic SLDs")
             return None
-        output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
+        output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
         output.filename = os.path.basename(path)
         # check if cells can be written as numpy array
         if all(celltypes[0] == x for x in celltypes):
             cells = np.array(cells)
             output.are_elements_identical = True
         output.set_elements(cells)
+        output.set_pixel_symbols('pixel') # draw points as pixels
+        output.set_pixel_volumes(vols)
         return output
 
     def load_data_attributes(self, lines, num_points, num_cells):
@@ -473,7 +494,34 @@ class VTKReader:
                     [e[2], e[3], e[4]],
                     [e[1], e[2], e[4]]]
         else:
-            logging.error("cell type " + celltype + " is not supported - skipping cell")
+            logging.error("cell type " + str(celltype) + " is not supported - skipping cell")
+            return None
+
+    def get_vols(self, e, celltype, v):
+        if celltype == 10:
+            return np.abs(np.dot(v[e[0]]-v[e[3]], np.cross(v[e[1]]-v[e[3]], v[e[2]]-v[e[3]])))/6
+        elif celltype == 11:
+            return np.abs(np.dot(v[e[0]]-v[e[2]], np.cross(v[e[0]]-v[e[1]], v[e[0]]-v[e[4]])))
+        elif celltype == 12:
+            vals = np.array([[e[2], e[4], e[7], e[1]],
+                             [e[0], e[1], e[2], e[4]],
+                             [e[1], e[4], e[7], e[5]],
+                             [e[1], e[2], e[3], e[7]],
+                             [e[2], e[4], e[6], e[7]]])
+            vert = v[vals]
+            return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
+        elif celltype == 13:
+            vals = np.array([[e[0], e[1], e[2], e[5]],
+                             [e[0], e[1], e[3], e[5]],
+                             [e[1], e[3], e[4], e[5]]])
+            vert = v[vals]
+            return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
+        elif celltype == 14:
+            vals = np.array([[e[0], e[1], e[2], e[4]],
+                             [e[0], e[3], e[2], e[4]]])
+            vert = v[vals]
+            return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
+        else:
             return None
 
 class OMF2SLD(object):
@@ -938,6 +986,9 @@ class SLDReader(object):
             raise ValueError("Missing the file path.")
         if data is None:
             raise ValueError("Missing the data to save.")
+        if data.is_elements:
+            logging.error("cannot save finite element data as a .sld file")
+            return
         x, y, z = data.pos_x, data.pos_y, data.pos_z
         sld_n = data.sld_n if data.sld_n is not None else np.zeros_like(x)
         if data.sld_mx is None:
@@ -1129,13 +1180,13 @@ class MagSLD(object):
                               np.fabs(self.sld_my) +
                               np.fabs(self.sld_mz)).nonzero()
                 if len(is_nonzero[0]) > 0:
-                    self.sld_n = np.zeros_like(self.pos_x)
+                    self.sld_n = np.zeros_like(self.sld_mx)
                     self.sld_n[is_nonzero] = sld_n
                 else:
-                    self.sld_n = np.full_like(self.pos_x, sld_n)
+                    self.sld_n = np.full_like(self.sld_mx, sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n = np.full_like(self.pos_x, sld_n)
+                self.sld_n = np.full_like(self.sld_mx, sld_n)
         else:
             self.sld_n = sld_n
 
@@ -1144,15 +1195,15 @@ class MagSLD(object):
         Sets mx, my, mz and abs(m).
         """ # Note: escaping
         if isinstance(sld_mx, float):
-            self.sld_mx = np.full_like(self.pos_x, sld_mx)
+            self.sld_mx = np.full_like(self.sld_n, sld_mx)
         else:
             self.sld_mx = sld_mx
         if isinstance(sld_my, float):
-            self.sld_my = np.full_like(self.pos_x, sld_my)
+            self.sld_my = np.full_like(self.sld_n, sld_my)
         else:
             self.sld_my = sld_my
         if isinstance(sld_mz, float):
-            self.sld_mz = np.full_like(self.pos_x, sld_mz)
+            self.sld_mz = np.full_like(self.sld_n, sld_mz)
         else:
             self.sld_mz = sld_mz
 
@@ -1170,7 +1221,7 @@ class MagSLD(object):
         if self.sld_n is None:
             return
         if symbol.__class__.__name__ == 'str':
-            self.pix_symbol = np.repeat(symbol, len(self.sld_n))
+            self.pix_symbol = np.repeat(symbol, len(self.pos_x))
         else:
             self.pix_symbol = symbol
 
@@ -1206,7 +1257,7 @@ class MagSLD(object):
         """
         self.is_elements = True
         self.elements = elements
-        self.set_pixel_symbols("element")
+        self.pix_type = "elements"
         self.set_nodes()
 
     def get_sldn(self):

@@ -4,6 +4,7 @@ import numpy
 import logging
 import time
 import timeit
+from copy import deepcopy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -52,6 +53,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.omf_reader = sas_gen.OMFReader()
         self.sld_reader = sas_gen.SLDReader()
         self.pdb_reader = sas_gen.PDBReader()
+        self.vtk_reader = sas_gen.VTKReader()
         self.reader = None
         # sld data for nuclear and magnetic cases
         self.nuc_sld_data = None
@@ -345,6 +347,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.verification_occurred:
             self.toggle_error_functionality()
             return
+        # ensure both files are point or element type- not a mixture
+        if (self.nuc_sld_data.is_elements and not self.mag_sld_data.is_elements) or \
+           (not self.nuc_sld_data.is_elements and self.mag_sld_data.is_elements):
+            self.verification_occurred = True
+            self.verified = False
+            self.toggle_error_functionality("ERROR: files must both be point-wise or element-wise")
+            return
         # check each file has the same number of coords
         if self.nuc_sld_data.pos_x.size != self.mag_sld_data.pos_x.size:
             self.verification_occurred = True
@@ -356,47 +365,166 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         mag_coords = numpy.array(numpy.column_stack((self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z)))
         # TODO: should this have a floating point tolerance??
         if numpy.array_equal(nuc_coords, mag_coords):
-            # arrays are already sorted in the same order, so files match
+            if not self.nuc_sld_data.is_elements:
+                # arrays are already sorted in the same order, so files match
+                self.verification_occurred = True
+                self.verified = True
+                self.toggle_error_functionality()
+                return
+            else:
+                points_already_match = True
+        else:
+            # now check if coords are in wrong order or don't match
+            nuc_sort_order = numpy.lexsort((self.nuc_sld_data.pos_z, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_x))
+            mag_sort_order = numpy.lexsort((self.mag_sld_data.pos_z, self.mag_sld_data.pos_y, self.mag_sld_data.pos_x))
+            nuc_coords = nuc_coords[nuc_sort_order]
+            mag_coords = mag_coords[mag_sort_order]
+            # check if sorted data points are equal
+            if numpy.array_equal(nuc_coords, mag_coords):
+                # if data points are equal then resort both lists into the same order
+                # is this too time consuming for long lists? logging info?
+                # 1) coords
+                self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.transpose(nuc_coords)
+                self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.transpose(mag_coords)
+                # 2) other array params that must be in same order as coords
+                if not self.nuc_sld_data.is_elements:
+                    params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
+                else:
+                    params = ["pix_symbol"]
+                for item in params:
+                    nuc_val = getattr(self.nuc_sld_data, item)
+                    if nuc_val is not None:
+                        # data should already be a numpy array, we cast to an ndarray as a check
+                        # very fast if data is already an instance of ndarray as expected becuase function
+                        # returns the array as-is
+                        setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
+                    mag_val = getattr(self.mag_sld_data, item)
+                    if mag_val is not None:
+                        setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
+                # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
+                # absolute positions not references to pos_x, pos_y, pos_z).
+                if not self.nuc_sld_data.is_elements:
+                    self.verification_occurred = True
+                    self.verified = True
+                    self.toggle_error_functionality()
+                    return
+                else:
+
+                    points_already_match = False
+            else:
+                # if sorted lists not equal then data points aren't equal
+                self.verification_occurred = True
+                self.verified = False
+                self.toggle_error_functionality("ERROR: files have different real space position data")
+                return
+        if self.nuc_sld_data.are_elements_identical != self.nuc_sld_data.are_elements_identical:
             self.verification_occurred = True
-            self.verified = True
-            self.toggle_error_functionality()
-            return
-        # now check if coords are in wrong order or don't match
-        nuc_sort_order = numpy.lexsort((self.nuc_sld_data.pos_z, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_x))
-        mag_sort_order = numpy.lexsort((self.mag_sld_data.pos_z, self.mag_sld_data.pos_y, self.mag_sld_data.pos_x))
-        nuc_coords = nuc_coords[nuc_sort_order]
-        mag_coords = mag_coords[mag_sort_order]
-        # check if sorted data points are equal
-        if numpy.array_equal(nuc_coords, mag_coords):
-            # if data points are equal then resort both lists into the same order
-            # is this too time consuming for long lists? logging info?
-            # 1) coords
-            self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.hsplit(nuc_coords, 3)
-            self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.hsplit(mag_coords, 3)
-            # 2) other array params that must be in same order as coords
-            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
+            self.verified = False
+            self.toggle_error_functionality("ERROR: files must contain the same elements")
+        if self.nuc_sld_data.are_elements_identical: # already in numpy array - can check rapidly
+            if points_already_match:
+                if numpy.array_equal(self.nuc_sld_data.elements, self.mag_sld_data.elements): # straight match - immediately confirm
+                    self.verification_occurred = True
+                    self.verified = True
+                    self.toggle_error_functionality()
+                    return
+                # unique also sorts 
+                nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
+                mag_elements_sort = numpy.unique(self.mag_sld_data.elements.reshape((self.mag_sld_data.elements.shape[0], -1)), axis=-1)
+            else:
+                # get reverse permutation, i.e. position each index was moved to
+                nuc_permutation = numpy.argsort(nuc_sort_order)
+                mag_permutation = numpy.argsort(mag_sort_order)
+                nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
+                mag_elements_sort = numpy.unique(self.mag_sld_data.elements.reshape((self.mag_sld_data.elements.shape[0], -1)), axis=-1)
+                # must resort after point positions changed
+                nuc_elements_sort = numpy.sort(nuc_permutation[nuc_elements_sort], axis=1)
+                mag_elements_sort = numpy.sort(mag_permutation[mag_elements_sort], axis=1)
+            nuc_elements_sort_order = numpy.lexsort(numpy.transpose(nuc_elements_sort))
+            mag_elements_sort_order = numpy.lexsort(numpy.transpose(mag_elements_sort))
+            if not numpy.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
+                self.verification_occurred = True
+                self.verified = False
+                self.toggle_error_functionality("ERROR: files must contain the same elements")
+                return
+            # carry out position changes
+            self.nuc_sld_data.elements = self.nuc_sld_data.elements[nuc_elements_sort_order, ...]
+            self.mag_sld_data.elements = self.mag_sld_data.elements[mag_elements_sort_order, ...]
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
             for item in params:
                 nuc_val = getattr(self.nuc_sld_data, item)
                 if nuc_val is not None:
                     # data should already be a numpy array, we cast to an ndarray as a check
                     # very fast if data is already an instance of ndarray as expected becuase function
                     # returns the array as-is
-                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
+                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_elements_sort_order])
                 mag_val = getattr(self.mag_sld_data, item)
                 if mag_val is not None:
-                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
-            # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
-            # absolute positions not references to pos_x, pos_y, pos_z).
+                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_elements_sort_order])
+            if not points_already_match:
+                self.nuc_sld_data.elements = nuc_permutation[self.nuc_sld_data.elements]
+                self.mag_sld_data.elements = mag_permutation[self.mag_sld_data.elements]
             self.verification_occurred = True
             self.verified = True
             self.toggle_error_functionality()
             return
         else:
-            # if sorted lists not equal then data points aren't equal
+            nuc_elements = []
+            mag_elements = []
+            if points_already_match:
+                for element in self.nuc_sld_data.elements:
+                    nuc_elements.append(numpy.sort(list(set([vertex for face in element for vertex in face]))))
+                for element in self.mag_sld_data.elements:
+                    mag_elements.append(numpy.sort(list(set([vertex for face in element for vertex in face]))))
+            else:
+                nuc_permutation = numpy.argsort(nuc_sort_order)
+                mag_permutation = numpy.argsort(mag_sort_order)
+                for element in self.nuc_sld_data.elements:
+                    nuc_elements.append(numpy.sort(list(set([nuc_permutation[vertex] for face in element for vertex in face]))))
+                for element in self.mag_sld_data.elements:
+                    mag_elements.append(numpy.sort(list(set([mag_permutation[vertex] for face in element for vertex in face]))))
+            nuc_lengths = [len(i) for i in nuc_elements]
+            mag_lengths = [len(i) for i in mag_elements]
+            if max(nuc_lengths) != max(mag_lengths):
+                self.verification_occurred = True
+                self.verified = False
+                self.toggle_error_functionality("ERROR: files must contain the same elements")
+                return
+            r = numpy.arange(max(nuc_lengths))
+            nuc_elements_sort = -numpy.ones((len(nuc_elements), max(nuc_lengths)))
+            for i in range(len(nuc_elements)):
+                nuc_elements_sort[i, :nuc_lengths[i]] = nuc_elements[i]
+            mag_elements_sort = -numpy.ones((len(mag_elements), max(mag_lengths)))
+            for i in range(len(mag_elements)):
+                mag_elements_sort[i, :mag_lengths[i]] = mag_elements[i]
+            nuc_elements_sort_order = numpy.lexsort(numpy.transpose(nuc_elements_sort))
+            mag_elements_sort_order = numpy.lexsort(numpy.transpose(mag_elements_sort))
+            if not numpy.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
+                self.verification_occurred = True
+                self.verified = False
+                self.toggle_error_functionality("ERROR: files must contain the same elements")
+                return
+            # carry out position changes
+            self.nuc_sld_data.elements = [self.nuc_sld_data.elements[i] for i in nuc_elements_sort_order]
+            self.mag_sld_data.elements = [self.mag_sld_data.elements[i] for i in mag_elements_sort_order]
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
+            for item in params:
+                nuc_val = getattr(self.nuc_sld_data, item)
+                if nuc_val is not None:
+                    # data should already be a numpy array, we cast to an ndarray as a check
+                    # very fast if data is already an instance of ndarray as expected becuase function
+                    # returns the array as-is
+                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_elements_sort_order])
+                mag_val = getattr(self.mag_sld_data, item)
+                if mag_val is not None:
+                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_elements_sort_order])
+            if not points_already_match:
+                self.nuc_sld_data.elements = [[[nuc_permutation[v] for v in f] for f in e] for e in self.nuc_sld_data.elements]
+                self.mag_sld_data.elements = [[[mag_permutation[v] for v in f] for f in e] for e in self.mag_sld_data.elements]
             self.verification_occurred = True
-            self.verified = False
-            self.toggle_error_functionality("ERROR: files have different real space position data")
-            return
+            self.verified = True
+            self.toggle_error_functionality()
+        return
         
 
     def change_data_type(self):
@@ -418,9 +546,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMagData.setEnabled(self.is_mag)
         # only allow editing of mean values if no data file for that vlaue has been loaded
         # user provided mean values are taken as a constant across all points
-        self.txtMx.setEnabled(not self.is_mag)
-        self.txtMy.setEnabled(not self.is_mag)
-        self.txtMz.setEnabled(not self.is_mag)
+        # magnetic mean boxes chagned in self.update_cbOptionsCalc_visibility as also depends on combobox
         self.txtNucl.setEnabled(not self.is_nuc)
         # The ability to change the number of nodes and stepsizes only if no laoded data file enabled
         both_disabled =  (not self.is_mag) and (not self.is_nuc)
@@ -430,18 +556,26 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtXstepsize.setEnabled(both_disabled)
         self.txtYstepsize.setEnabled(both_disabled)
         self.txtZstepsize.setEnabled(both_disabled)
-        # Only allow 1D averaging if no magnetic data
-        self.cbOptionsCalc.setVisible(not self.is_mag)
-        if (not self.is_mag):
+        # update the gui with new values - sets the average values from enabled files
+        self.update_gui()
+        # verify that the new enabled files are compatible
+        self.verify_files_match()
+    
+    def update_cbOptionsCalc_visibility(self):
+        # Only allow 1D averaging if no magnetic data and not elements
+        allow = not self.is_mag
+        if self.is_nuc and allow:
+            allow = not self.nuc_sld_data.is_elements
+        self.cbOptionsCalc.setVisible(allow)
+        if (allow):
             # A helper function to set up the averaging system
             self.change_is_avg()
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
-        # update the gui with new values - sets the average values from enabled files
-        self.update_gui()
-        # verify that the new enabled files are compatible
-        self.verify_files_match()
+            self.txtMx.setEnabled(not self.is_mag)
+            self.txtMy.setEnabled(not self.is_mag)
+            self.txtMz.setEnabled(not self.is_mag)
         
     def change_is_avg(self):
         """Adjusts the GUI for whether 1D averaging is enabled
@@ -494,15 +628,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # request a file from the user
             if load_nuc:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB);;"
+                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;"
                                             "SLD files (*.SLD *.sld);;"
                                             "PDB files (*.pdb *.PDB);;"
+                                            "VTK files (*.vtk *.VTK);;"
                                             "All files (*.*)")[0]
             else:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld);;"
+                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;"
                                             "OMF files (*.OMF *.omf);;"
                                             "SLD files (*.SLD *.sld);;"
+                                            "VTK files (*.vtk *.VTK);;"
                                             "All files (*.*)")[0]
             # If a file has been sucessfully chosen
             if self.datafile:
@@ -516,6 +652,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     loader = self.omf_reader
                 elif self.ext in self.sld_reader.ext:
                     loader = self.sld_reader
+                elif self.ext in self.vtk_reader.ext:
+                    loader = self.vtk_reader
                 elif self.ext in self.pdb_reader.ext and load_nuc:
                     # only load pdb files for nuclear data
                     loader = self.pdb_reader
@@ -605,7 +743,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 # only magnetic data can be read from omf files
                 self.mag_sld_data = gen.get_magsld()
                 self.check_units()
-            elif self.ext in self.sld_reader.ext:
+            elif self.ext in self.sld_reader.ext or self.ext in self.vtk_reader.ext:
                 if load_nuc:
                     self.nuc_sld_data = data
                 else:
@@ -685,10 +823,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         and then updates all values in the gui with either model paramters or paramaters from the
         loaded data.
         """
+        self.update_cbOptionsCalc_visibility()
         if self.is_nuc:
-            self.model.params['total_volume'] = len(self.nuc_sld_data.sld_n)*self.nuc_sld_data.vol_pix[0]
+            if self.nuc_sld_data.is_elements:
+                self.model.params['total_volume'] = numpy.sum(self.nuc_sld_data.vol_pix)
+            else:
+                self.model.params['total_volume'] = len(self.nuc_sld_data.sld_n)*self.nuc_sld_data.vol_pix[0]
         elif self.is_mag:
-            self.model.params['total_volume'] = len(self.mag_sld_data.sld_n)*self.mag_sld_data.vol_pix[0]
+            if self.mag_sld_data.is_elements:
+                self.model.params['total_volume'] = numpy.sum(self.mag_sld_data.vol_pix)
+            else:
+                self.model.params['total_volume'] = len(self.mag_sld_data.sld_n)*self.mag_sld_data.vol_pix[0]
         else:
             # use same calculation of total volume as when converting OMF to SLD
             self.model.params['total_volume'] = (float(self.txtXstepsize.text()) * float(self.txtYstepsize.text())
@@ -706,9 +851,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # update the number of pixels with values from the loaded data or GUI if no datafiles enabled
         if self.is_nuc:
-            self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
+            if self.nuc_sld_data.is_elements:
+                self.txtNoPixels.setText(str(len(self.nuc_sld_data.elements)))
+            else:
+                self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
         elif self.is_mag:
-            self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
+            if self.mag_sld_data.is_elements:
+                self.txtNoPixels.setText(str(len(self.mag_sld_data.elements)))
+            else:
+                self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
         elif not(self.txtXnodes.hasAcceptableInput() and self.txtYnodes.hasAcceptableInput() and self.txtZnodes.hasAcceptableInput()):
             self.txtNoPixels.setText("NaN")
         else:
@@ -1063,6 +1214,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif self.is_mag:
             sld_data.pix_type = self.mag_sld_data.pix_type
             sld_data.pix_symbol = self.mag_sld_data.pix_symbol
+        
+        if self.nuc_sld_data.is_elements:
+            sld_data.is_elements = True
+            sld_data.are_elements_identical = self.nuc_sld_data.are_elements_identical
+            sld_data.elements = self.nuc_sld_data.elements
+        elif self.mag_sld_data.is_elements:
+            sld_data.is_elements = True
+            sld_data.are_elements_identical = self.mag_sld_data.are_elements_identical
+            sld_data.elements = self.mag_sld_data.elements
 
         return sld_data
 
@@ -1274,14 +1434,18 @@ class Plotter3DWidget(PlotterBase):
         pos_x = data.pos_x
         pos_y = data.pos_y
         pos_z = data.pos_z
-        sld_mx = data.sld_mx
-        sld_my = data.sld_my
-        sld_mz = data.sld_mz
+        if data.is_elements: # Do not assign values to points if values are element-wise
+            is_nonzero = numpy.ones_like(pos_x, dtype=bool)
+            is_zero = numpy.zeros_like(pos_x, dtype=bool)
+        else:
+            sld_mx = data.sld_mx
+            sld_my = data.sld_my
+            sld_mz = data.sld_mz
+            sld_tot = numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
+                    numpy.fabs(sld_mz) + numpy.fabs(data.sld_n)
+            is_nonzero = sld_tot > 0.0
+            is_zero = sld_tot == 0.0
         pix_symbol = data.pix_symbol
-        sld_tot = numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
-                  numpy.fabs(sld_mz) + numpy.fabs(data.sld_n)
-        is_nonzero = sld_tot > 0.0
-        is_zero = sld_tot == 0.0
 
         if data.pix_type == 'atom':
             marker = 'o'
@@ -1341,7 +1505,8 @@ class Plotter3DWidget(PlotterBase):
                              data.line_y[ind], '-', lw=0.6, c="grey",
                              alpha=0.3)
         # V. Draws magnetic vectors
-        if has_arrow and len(pos_x) > 0:
+        # TODO: draw arrows for elements
+        if has_arrow and len(pos_x) > 0 and not data.is_elements:
             def _draw_arrow(input=None, update=None):
                 # import moved here for performance reasons
                 from sas.qtgui.Plotting.Arrow3D import Arrow3D
