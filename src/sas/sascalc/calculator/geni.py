@@ -49,7 +49,7 @@ def Iq(q, x, y, z, sld, vol, is_avg=False):
         _calc_Iq(I_out, q, coords, sld, vol)
     return I_out * (1.0E+8/np.sum(vol))
 
-def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_phi):
+def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_phi, elements=None, is_elements=False):
     """
     Computes 2D anisotropic.
     *in_spin* and *out_spin* indicate portion of polarizer and analyzer
@@ -66,18 +66,31 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
         is_magnetic = False
     if is_magnetic:
         index = (sld != 0.) | magnetic_index
-        if not index.all():
-            x, y, mx, my, mz, sld, vol \
-                = (v[index] for v in (x, y, mx, my, mz, sld, vol))
-        I_out = _calc_Iqxy_magnetic(
-            qx, qy, x, y, sld, vol, (mx, my, mz),
-            in_spin, out_spin, s_theta, s_phi)
+        if is_elements:
+            if not index.all():
+                mx, my, mz, sld, elements = (v[index] for v in (mx, my, mz, sld, elements))
+            I_out = _calc_Iqxy_magnetic_elements(
+                qx, qy, x, y, z, sld, mx, my, mz, elements,
+                in_spin, out_spin, s_theta, s_phi)
+        else:
+            if not index.all():
+                x, y, mx, my, mz, sld, vol \
+                    = (v[index] for v in (x, y, mx, my, mz, sld, vol))
+            I_out = _calc_Iqxy_magnetic(
+                qx, qy, x, y, sld, vol, (mx, my, mz),
+                in_spin, out_spin, s_theta, s_phi)
     else:
         index = (sld != 0.)
-        if not index.all():
-            x, y, sld, vol = (v[index] for v in (x, y, sld, vol))
-        I_out = _calc_Iqxy(sld*vol, x, y, qx.flatten(), qy.flatten())
-        I_out = I_out.reshape(qx.shape)
+        if is_elements:
+            if not index.all():
+                sld, elements = (v[index] for v in (sld, elements))
+            I_out = _calc_Iqxy_elements(sld, x, y, z, elements, qx.flatten(), qy.flatten())
+            I_out = I_out.reshape(qx.shape)
+        else:
+            if not index.all():
+                x, y, sld, vol = (v[index] for v in (x, y, sld, vol))
+            I_out = _calc_Iqxy(sld*vol, x, y, qx.flatten(), qy.flatten())
+            I_out = I_out.reshape(qx.shape)
     return I_out * (1.0E+8/np.sum(vol))
 
 @njit('(f8[:], f8[:], f8[:], f8[:], f8[:])')
@@ -173,6 +186,16 @@ _calc_Iqxy.__doc__ = """
     Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
     """
 
+def _calc_Iqxy_elements(sld, x, y, z, elements, qx, qy):
+    # create the geometry as an array (subvolumes x faces x vertices x coordinates)
+    geometry = np.column_stack((x, y, z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
+    # create normal vectors (subvolumes x faces x normal_vector_coords)
+    normals = _get_normal_vec(geometry)
+    # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
+    rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
+    Iq = [abs(np.sum(sld*sub_volume_transform(geometry, normals, rn_norm, qx_k, qy_k)))**2
+            for qx_k, qy_k in zip(qx.flat, qy.flat)]
+    return np.asarray(Iq).reshape(qx.shape)
 
 def _calc_Iqxy_magnetic(
         qx, qy, x, y, rho, vol, rho_m,
@@ -256,6 +279,135 @@ def _calc_Iqxy_magnetic_helper(
             Iq[k] += du * abs(np.sum((perpy - 1j * perpz) * ephase))**2
         if ud > 1e-10:
             Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
+
+def _get_normal_vec(geometry):
+    """return array of normal vectors of elements"""
+    v1 = geometry[:, :, 1] - geometry[:, :, 0]
+    v2 = geometry[:, :, 2] - geometry[:, :, 0]
+    normals = np.cross(v1, v2)
+    temp = np.linalg.norm(normals, axis=-1)
+    normals = normals / np.linalg.norm(normals, axis=-1)[..., None]
+    return normals
+
+def _calc_Iqxy_magnetic_elements(
+                qx, qy, x, y, z, sld, mx, my, mz, elements,
+                up_frac_i=1, up_frac_f=1, up_angle=0., up_phi=0.):
+    # Determine contribution from each cross section
+    dd, du, ud, uu = _spin_weights(up_frac_i, up_frac_f)
+
+    # Precompute helper values
+    up_angle = np.radians(up_angle)
+    cos_spin, sin_spin = np.cos(up_angle), np.sin(up_angle)
+
+    up_phi = np.radians(up_phi)
+    cos_phi, sin_phi = np.cos(up_phi), np.sin(up_phi)
+    ## NOTE: sasview calculator uses the opposite sign for mx, my, mz.
+    ## Uncomment the following to match its output.
+    #mx, my, mz = -mx, -my, -mz
+    # create the geometry as an array (subvolumes x faces x vertices x coordinates)
+    geometry = np.column_stack((x, y, z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
+    # create normal vectors (subvolumes x faces x normal_vector_coords)
+    normals = _get_normal_vec(geometry)
+    # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
+    rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
+    # Flatten arrays so everything is 1D
+    shape = qx.shape
+    qx, qy = (np.asarray(v, 'd').flatten() for v in (qx, qy))
+    Iq = np.zeros(shape=qx.shape, dtype='d')
+    M = np.array([mx, my, mz])
+    #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
+    _calc_Iqxy_magnetic_elements_helper(
+        Iq, qx, qy, geometry, normals, rn_norm, sld, M, elements,
+        cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
+    return Iq.reshape(shape)
+
+# TODO: currently doesn't use numba - can this be integrated with fourier transform method
+def _calc_Iqxy_magnetic_elements_helper(
+        Iq, qx, qy, geometry, normals, rn_norm, rho, M, elements, cos_spin, sin_spin, cos_phi, sin_phi,
+        dd, du, ud, uu):
+    # Process each qx, qy
+    # Note: enumerating a pair is slower than direct indexing in numba
+    for k in range(len(qx)):
+        qxk, qyk = qx[k], qy[k]
+
+        if abs(qxk) > 1.e-16 or abs(qyk) > 1.e-16:
+            norm = 1/np.sqrt(qxk**2 + qyk**2)
+            q_hat = np.array([qxk, qyk, 0]) * norm
+        else:
+            # For homogeneously magnetised disc Mperp can be associated to the
+            # magnetsation corrected for demag factorfield q->0, i.e. M-Nij M
+            # with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).
+            q_hat = np.sqrt(np.array([0.5, 0.5, 0]))
+
+        p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
+
+        M_perp = orth(M, q_hat)
+        M_perpP = orth(M_perp, p_hat)
+        M_perpP_perpQ = orth(M_perpP, q_hat)
+
+        perpx = p_hat @ M_perp
+        # einsum is faster than sumsq in numpy but not supported in numba
+        #perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
+        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
+        perpz = q_hat @ M_perpP
+
+        ephase = sub_volume_transform(geometry, normals, rn_norm, qxk, qyk)
+        if dd > 1e-10:
+            Iq[k] += dd * abs(np.sum((rho - perpx) * ephase))**2
+        if uu > 1e-10:
+            Iq[k] += uu * abs(np.sum((rho + perpx) * ephase))**2
+        if du > 1e-10:
+            Iq[k] += du * abs(np.sum((perpy - 1j * perpz) * ephase))**2
+        if ud > 1e-10:
+            Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
+
+def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
+    """carries out fourier transform
+    qx, qy are floats
+
+    returns an array of fourier transforms for each of the subvolumes provided
+
+    algorithm based off: An implementation of an efficient direct Fourier transform of polygonal areas and
+                        volumes
+                        Brian B. Maranville
+                        https://arxiv.org/abs/2104.08309
+    """
+    # small value used in case where a fraction should limit to a finite answer with 0 on top and bottom
+    # used in 2nd/3rd terms in sum over vertices
+    eps = 1e-6
+
+    # create the Q vector
+    Q = np.array([qx+eps, qy+eps, 0+eps])
+    # create the Q normal vector as the dot product of Q with the normal vector * the normal vector:
+    # separately store the component of the Qn vector for later use
+    # np.dot: (subvolumes x faces x normal_vector_coords) * (Q_coords) -> (subvolumes x faces)
+    Qn_comp = np.dot(normals, Q)
+    # Qn is the vector PARALLEL to the surface normal Q// in the referenced paper eq. (14)
+    # np (*) (subvolumes x faces x 1) * (subvolumes x faces x normal_vector_coords) -> (subvolumes x faces x Qn_coords)
+    Qn = Qn_comp[..., None] * normals
+    # extract the parallel component of the Q vector
+    # (1 x 1 x Q_coords) - (subvolumes x faces x Qn_coords)
+    Qp = Q[None, None, :] - Qn
+    # calculate the face-dependent prefactor for the sum over vertices (subvolumes x faces) 
+    # TODO: divide by zero error - can nan and inf handle this?
+    prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q)
+    # calculate the sum over vertices term
+    # TODO: divide by zero error - can nan and inf handle this?
+    # the sub sum over the vertices in eq (14) (subvolumes x faces)
+    sub_sum = np.zeros_like(prefactor, dtype="complex")
+    for i in range(geometry.shape[2]-1):
+        # calculate the separation vector (subvolumes x faces x vector_coords)
+        v = geometry[:,:,i+1] - geometry[:,:,i]
+        # the terms in the expr (subvolumes x faces)
+        # WARNING: this uses the opposite sign convention as the article's code but agrees with the sign convention of the
+        # main text - it takes line segment normals as pointing OUTWARDS from the surface - giving the 'standard' fourier transform
+        # e.g. fourier transform of a box gives a *positive* sinc function
+        term = (np.sum(Qp * np.cross(v, normals), axis=-1)) / np.sum(Qp * Qp, axis=-1)
+        term = term * (np.exp(1j * np.sum(Qp * geometry[:,:,i+1], axis=-1)) - np.exp(1j * np.sum(Qp * geometry[:,:,i], axis=-1)))
+        term = term / np.sum(Qp*v, axis=-1)
+        sub_sum += term
+    # sum over all the faces in each subvolume to return an array of transforms of sub_volumes
+    return np.sum(prefactor*sub_sum, axis=-1)
 
 def _spin_weights(in_spin, out_spin):
     """

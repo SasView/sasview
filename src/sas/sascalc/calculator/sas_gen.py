@@ -74,6 +74,7 @@ class GenSAS(object):
         self.data_mz = None
         self.data_vol = None # [A^3]
         self.is_avg = False
+        self.is_elements = False
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -133,10 +134,16 @@ class GenSAS(object):
             out_spin = self.params['Up_frac_out']
             s_theta = self.params['Up_theta']
             s_phi = self.params['Up_phi']
-            I_out = Iqxy(
-                qx, qy, x, y, z, sld, vol, mx, my, mz,
-                in_spin, out_spin, s_theta, s_phi,
-                )
+            if self.is_elements:
+                I_out = Iqxy(
+                    qx, qy, x, y, z, sld, vol, mx, my, mz,
+                    in_spin, out_spin, s_theta, s_phi,
+                    self.data_elements, self.is_elements)
+            else:
+                I_out = Iqxy(
+                    qx, qy, x, y, z, sld, vol, mx, my, mz,
+                    in_spin, out_spin, s_theta, s_phi,
+                    )
         else:
             # 1-D calculation
             q = _vec(qx)
@@ -155,6 +162,9 @@ class GenSAS(object):
         Sets sld_data
         """
         self.sld_data = sld_data
+        self.is_elements = sld_data.is_elements
+        if self.is_elements:
+            self.data_elements = sld_data.elements
         self.data_pos_unit = sld_data.pos_unit
         self.data_x = _vec(sld_data.pos_x)
         self.data_y = _vec(sld_data.pos_y)

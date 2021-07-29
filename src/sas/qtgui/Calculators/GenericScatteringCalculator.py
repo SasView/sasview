@@ -1215,14 +1215,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pix_type = self.mag_sld_data.pix_type
             sld_data.pix_symbol = self.mag_sld_data.pix_symbol
         
-        if self.nuc_sld_data.is_elements:
-            sld_data.is_elements = True
-            sld_data.are_elements_identical = self.nuc_sld_data.are_elements_identical
-            sld_data.elements = self.nuc_sld_data.elements
-        elif self.mag_sld_data.is_elements:
-            sld_data.is_elements = True
-            sld_data.are_elements_identical = self.mag_sld_data.are_elements_identical
-            sld_data.elements = self.mag_sld_data.elements
+        if self.is_nuc:
+            if self.nuc_sld_data.is_elements:
+                sld_data.is_elements = True
+                sld_data.are_elements_identical = self.nuc_sld_data.are_elements_identical
+                sld_data.elements = self.nuc_sld_data.elements
+        elif self.is_mag:
+            if self.mag_sld_data.is_elements:
+                sld_data.is_elements = True
+                sld_data.are_elements_identical = self.mag_sld_data.are_elements_identical
+                sld_data.elements = self.mag_sld_data.elements
 
         return sld_data
 
@@ -1234,6 +1236,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+            #TODO: implement full fourier transform method for this
+            if sld_data.is_elements:
+                if not sld_data.are_elements_identical:
+                    logging.error("SasView does not currently support computation of meshes with multiple element types")
+                    return
             self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()
             # create 2D or 1D data as appropriate

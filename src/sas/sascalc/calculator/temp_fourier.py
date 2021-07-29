@@ -65,7 +65,7 @@ def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
 
 
 reader = VTKReader()
-data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\originals\\basic_interpolation_test.vtk")
+data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\originals\\basic_cube_test.vtk")
 if not data.are_elements_identical:
     logging.error("currently require all cells to be of the same type")
     quit()
@@ -80,14 +80,14 @@ normals = get_normal_vec(geometry)
 # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
 rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
 
-qx = np.linspace(-10, 10, 40)
-qy = np.linspace(-10, 10, 40)
+qx = np.linspace(-10, 10, 50)
+qy = np.linspace(-10, 10, 50)
 qxs, qys = np.meshgrid(qx, qy)
 
 output = np.zeros_like(qxs, dtype="complex")
 for i in range(len(qx)):
     for j in range(len(qy)):
-        output[j, i] = sub_volume_transform(geometry, normals, rn_norm, qx[i], qy[j])[0]
+        output[j, i] = np.sum(sub_volume_transform(geometry, normals, rn_norm, qx[i], qy[j]))
         #print(i, j)
 
 import matplotlib.pyplot as plt
@@ -95,8 +95,8 @@ from matplotlib import colors, cm
 
 extent = (qx.min(), qx.max(), qy.min(), qy.max())
 fig1 = plt.figure()
-plt.imshow(abs(output), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
-plt.title('$Abs(FT)$')
+plt.imshow(np.log10(np.square(np.abs(output))* 1E8/8.0), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
+plt.title('$log(Abs(FT)^2)$')
 plt.xlabel('$Q_x$', size='large')
 plt.ylabel('$Q_y$', size='large')
 plt.axis
