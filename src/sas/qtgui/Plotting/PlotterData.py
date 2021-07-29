@@ -45,6 +45,21 @@ class Data1D(PlottableData1D, LoadData1D):
         # 2: deletable on model change (Q(I), S(I)...)
         # 3: separate chart on Show Plot (residuals)
         self.plot_role = Data1D.ROLE_DEFAULT
+        # Q-range slider definitions
+        self.show_q_range_sliders = False  # Should sliders be shown?
+        self.slider_update_on_move = True  # Should the gui update during the move?
+        self.slider_perspective_name = ""  # Name of the perspective that this slider is associated with
+        self.slider_tab_name = ""          # Name of the tab where the data set is
+        # The following q-range slider variables are optional but help tie
+        #   the slider to a GUI element for 2-way updates
+        self.slider_low_q_input = []  # List of attributes that lead to a Qt input to tie a low Q input to the slider
+        self.slider_high_q_input = []  # List of attributes that lead to a Qt input to tie a high Q input to the slider
+        # Setters and getters are only needed for inputs that aren't Q values
+        #   e.g. Invariant perspective nPts
+        self.slider_low_q_setter = []  # List of attributes that lead to a setter to tie a low Q method to the slider
+        self.slider_low_q_getter = []  # List of attributes that lead to a getter to tie a low Q method to the slider
+        self.slider_high_q_setter = []  # List of attributes that lead to a setter to tie a high Q method to the slider
+        self.slider_high_q_getter = []  # List of attributes that lead to a getter to tie a high Q method to the slider
         
     def copy_from_datainfo(self, data1d):
         """

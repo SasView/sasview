@@ -98,7 +98,7 @@ class PlotterWidget(PlotterBase):
             self.yscale = 'linear'
         self.title(title=value.name)
 
-    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True, q_slider=None):
+    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
         """
         Add a new plot of self._data to the chart.
         """
@@ -251,9 +251,9 @@ class PlotterWidget(PlotterBase):
             ax.set_xlabel(self.xLabel)
 
         # Add q-range sliders
-        if q_slider:
-            slider = q_slider.generate_sliders_from_intermediate(self, self.ax)
-            self.sliders[slider.data.name] = slider
+        if data.show_q_range_sliders:
+            sliders = QRangeSlider(self, self.ax, data=data)
+            self.sliders[data.name] = sliders
 
         # refresh canvas
         self.canvas.draw_idle()

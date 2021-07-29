@@ -16,7 +16,7 @@ class QRangeSlider(BaseInteractor):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
-        assert isinstance(data, (Data1D, QRangeIntermediate))
+        assert isinstance(data, Data1D)
         self.base = base
         self.markers = []
         self.axes = axes
@@ -28,11 +28,13 @@ class QRangeSlider(BaseInteractor):
         self.y_marker_max = self.data.y[np.where(self.data.x == self.x_max)[0][-1]]
         self.updateOnMove = data.slider_update_on_move
         self.line_min = LineInteractor(self, axes, zorder=zorder, x=self.x_min, y=self.y_marker_min,
-                                       input=self.data.slider_low_q_input, setter=self.data.slider_low_q_setter,
-                                       getter=self.data.slider_low_q_getter)
+                                       input=data.slider_low_q_input, setter=data.slider_low_q_setter,
+                                       getter=data.slider_low_q_getter, perspective=data.slider_perspective_name,
+                                       tab=data.slider_tab_name)
         self.line_max = LineInteractor(self, axes, zorder=zorder, x=self.x_max, y=self.y_marker_max,
-                                       input=self.data.slider_high_q_input, setter=self.data.slider_high_q_setter,
-                                       getter=self.data.slider_high_q_getter)
+                                       input=data.slider_high_q_input, setter=data.slider_high_q_setter,
+                                       getter=data.slider_high_q_getter, perspective=data.slider_perspective_name,
+                                       tab=data.slider_tab_name)
         self.has_move = True
         self.update()
 
@@ -104,11 +106,15 @@ class LineInteractor(BaseInteractor):
     """
     Draw a single vertical line that can be dragged on a plot
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5, input=None, setter=None, getter=None):
+    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
+                 input=None, setter=None, getter=None, perspective=None, tab=None):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
         self.base = base
+        self._input = None
+        self._setter = None
+        self._getter = None
         self.markers = []
         self.axes = axes
         self.x = x
@@ -122,13 +128,17 @@ class LineInteractor(BaseInteractor):
         self.line = self.axes.axvline(self.x, linestyle='-', color=self.color, marker='', pickradius=5,
                                       label=None, zorder=zorder, visible=True)
         self.has_move = True
+        if not perspective:
+            self.perspective = None
+            return
         # Map GUI input to x value so slider and input update each other
-        self._input = None
-        self.input = input
-        self._setter = None
-        self.setter = setter
-        self._getter = None
-        self.getter = getter
+        self.perspective = base.base.parent.manager.parent.loadedPerspectives.get(perspective, None)
+        if tab and hasattr(self.perspective, 'getTabByName'):
+            self.perspective = self.perspective.getTabByName(tab)
+        if self.perspective:
+            self.input = self._get_input_or_callback(input)
+            self.setter = self._get_input_or_callback(setter)
+            self.getter = self._get_input_or_callback(getter)
         self.connect_markers([self.line, self.inner_marker])
         self.update(draw=True)
 
@@ -176,6 +186,18 @@ class LineInteractor(BaseInteractor):
             self.inner_marker.remove()
         if self.line:
             self.line.remove()
+
+    def _get_input_or_callback(self, connection_list=None):
+        """Returns an input or callback method based on a list of inputs/commands"""
+        connection = None
+        if isinstance(connection_list, list):
+            connection = self.perspective
+            for item in connection_list:
+                try:
+                    connection = getattr(connection, item)
+                except Exception:
+                    return None
+        return connection
 
     def _set_q(self, value):
         """
@@ -269,31 +291,3 @@ class LineInteractor(BaseInteractor):
         self.setter = None
         self.getter = None
         self.input = None
-
-
-class QRangeIntermediate:
-    """
-    Intermediate plotter class to pass slider information for plotting
-    """
-
-    def __init__(self, data, low_q_setter=None, low_q_getter=None, low_q_input=None, high_q_setter=None,
-                 high_q_getter=None, high_q_input=None, update_on_move=True):
-        # type: (PlotterData, classmethod, classmethod, input, classmethod, classmethod, input, bool) -> ()
-        self.data = data
-        self.id = "QRangeSlider"
-        self.name = self.data.name if self.data else ""
-        self.plot_role = Data1D.ROLE_SLIDER
-        self.low_q_setter = low_q_setter
-        self.low_q_getter = low_q_getter
-        self.low_q_input = low_q_input
-        self.high_q_setter = high_q_setter
-        self.high_q_getter = high_q_getter
-        self.high_q_input = high_q_input
-        self.update_on_move = update_on_move
-
-    def generate_sliders_from_intermediate(self, base, axes):
-        # type: (Plotter, Plotter.axes) -> QRangeSlider
-        """
-        Helper method that generates a QRangeSlider object using the information in QRangeIntermediate
-        """
-        return QRangeSlider(base, axes, data=self)

@@ -23,7 +23,6 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.QRangeSlider import QRangeIntermediate
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
@@ -399,36 +398,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data is None: continue
             # Now, all plots under this item
             name = data.name
-            ######################################################
-            # Reset all slider values in data so save/load does not choke on them
-            # Remove once slider definition moved out of PlotterData
-            data.slider_low_q_setter = None
-            data.slider_high_q_setter = None
-            data.slider_low_q_input = None
-            data.slider_high_q_input = None
-            data.slider_update_on_move = False
-            data.slider_low_q_getter = None
-            data.slider_high_q_getter = None
-            ######################################################
             is_checked = item.checkState()
             properties['checked'] = is_checked
-            other_datas = []
             # save underlying theories
             other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
-            for datas in other_datas:
-                ######################################################
-                # Reset all slider values in data so save/load does not choke on them
-                # Remove once slider definition moved out of PlotterData
-                datas.slider_low_q_setter = None
-                datas.slider_high_q_setter = None
-                datas.slider_low_q_input = None
-                datas.slider_high_q_input = None
-                datas.slider_update_on_move = False
-                datas.slider_low_q_getter = None
-                datas.slider_high_q_getter = None
-                ######################################################
             all_data[data.id] = [data, properties, other_datas]
         return all_data
 
@@ -1167,17 +1142,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Call show on requested plots
         # All same-type charts in one plot
         plot_backup = plots.copy()
-        q_sliders_map = {}
-        for item, plot_set in plot_backup:
-            if isinstance(plot_set, QRangeIntermediate):
-                q_sliders_map[plot_set.name] = plot_set
-                plots.remove((item, plot_set))
         for item, plot_set in plots:
-            if isinstance(plot_set, (Data1D, tuple)):
+            if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():
                     new_plot = Plotter(self)
                     new_plot.item = item
-                new_plot.plot(plot_set, transform=transform, q_slider=q_sliders_map.get(plot_set.name, None))
+                new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
             elif isinstance(plot_set, Data2D):
@@ -1272,8 +1242,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             data = data[0]
         except TypeError:
             pass
-        if type(data).__name__ in ['QRangeIntermediate']:
-            return False
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         ids_keys = list(self.active_plots.keys())
