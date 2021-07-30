@@ -187,13 +187,13 @@ _calc_Iqxy.__doc__ = """
     """
 
 def _calc_Iqxy_elements(sld, x, y, z, elements, qx, qy):
-    # create the geometry as an array (subvolumes x faces x vertices x coordinates)
+    # create the geometry as an array (elements x faces x vertices x coordinates)
     geometry = np.column_stack((x, y, z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
-    # create normal vectors (subvolumes x faces x normal_vector_coords)
+    # create normal vectors (elements x faces x normal_vector_coords)
     normals = _get_normal_vec(geometry)
-    # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
+    # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
-    Iq = [abs(np.sum(sld*sub_volume_transform(geometry, normals, rn_norm, qx_k, qy_k)))**2
+    Iq = [abs(np.sum(sld*element_transform(geometry, normals, rn_norm, qx_k, qy_k)))**2
             for qx_k, qy_k in zip(qx.flat, qy.flat)]
     return np.asarray(Iq).reshape(qx.shape)
 
@@ -304,11 +304,11 @@ def _calc_Iqxy_magnetic_elements(
     ## NOTE: sasview calculator uses the opposite sign for mx, my, mz.
     ## Uncomment the following to match its output.
     #mx, my, mz = -mx, -my, -mz
-    # create the geometry as an array (subvolumes x faces x vertices x coordinates)
+    # create the geometry as an array (elements x faces x vertices x coordinates)
     geometry = np.column_stack((x, y, z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
-    # create normal vectors (subvolumes x faces x normal_vector_coords)
+    # create normal vectors (elements x faces x normal_vector_coords)
     normals = _get_normal_vec(geometry)
-    # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
+    # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
     # Flatten arrays so everything is 1D
     shape = qx.shape
@@ -351,7 +351,7 @@ def _calc_Iqxy_magnetic_elements_helper(
         perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
         perpz = q_hat @ M_perpP
 
-        ephase = sub_volume_transform(geometry, normals, rn_norm, qxk, qyk)
+        ephase = element_transform(geometry, normals, rn_norm, qxk, qyk)
         if dd > 1e-10:
             Iq[k] += dd * abs(np.sum((rho - perpx) * ephase))**2
         if uu > 1e-10:
@@ -361,16 +361,29 @@ def _calc_Iqxy_magnetic_elements_helper(
         if ud > 1e-10:
             Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
 
-def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
-    """carries out fourier transform
-    qx, qy are floats
+def element_transform(geometry, normals, rn_norm, qx, qy):
+    """carries out fourier transform on elements
+    
+    This function carries out the polyhedral transformation on the elements that make up the mesh.
+    This algorithm only works on meshes where all the elements have the same number of faces, and
+    each face has the same number of vertices. It is heavily based on the algorithm in:
 
-    returns an array of fourier transforms for each of the subvolumes provided
+    An implementation of an efficient direct Fourier transform of polygonal areas and volumes.
+    Brian B. Maranville.
+    https://arxiv.org/abs/2104.08309
 
-    algorithm based off: An implementation of an efficient direct Fourier transform of polygonal areas and
-                        volumes
-                        Brian B. Maranville
-                        https://arxiv.org/abs/2104.08309
+    :param geometry: A 4D numpy array of the form elements x faces x vertices x vertex_coordinates.
+    :type geometry: numpy.ndarray
+    :param normals: A 3D numpy array of the form elements x faces x normal_coordinates. The normals
+                    provided should be normalised.
+    :type normals: numpy.ndarray
+    :param rn_normals: A 2D numpy array of the form elements x faces containing the perpendicular
+                        distances from each face to the origin of the co-ordinate system.
+    :type rn_norm: numpy.ndarray
+    :param qx: the x component of the Q vector which represents the position in fourier space.
+    :type qx: float
+    :param qy: the y component of the Q vector which represents the position in fourier space.
+    :type qy: float
     """
     # small value used in case where a fraction should limit to a finite answer with 0 on top and bottom
     # used in 2nd/3rd terms in sum over vertices
@@ -380,25 +393,25 @@ def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
     Q = np.array([qx+eps, qy+eps, 0+eps])
     # create the Q normal vector as the dot product of Q with the normal vector * the normal vector:
     # separately store the component of the Qn vector for later use
-    # np.dot: (subvolumes x faces x normal_vector_coords) * (Q_coords) -> (subvolumes x faces)
+    # np.dot: (elements x faces x normal_vector_coords) * (Q_coords) -> (elements x faces)
     Qn_comp = np.dot(normals, Q)
     # Qn is the vector PARALLEL to the surface normal Q// in the referenced paper eq. (14)
-    # np (*) (subvolumes x faces x 1) * (subvolumes x faces x normal_vector_coords) -> (subvolumes x faces x Qn_coords)
+    # np (*) (elements x faces x 1) * (elements x faces x normal_vector_coords) -> (elements x faces x Qn_coords)
     Qn = Qn_comp[..., None] * normals
     # extract the parallel component of the Q vector
-    # (1 x 1 x Q_coords) - (subvolumes x faces x Qn_coords)
+    # (1 x 1 x Q_coords) - (elements x faces x Qn_coords)
     Qp = Q[None, None, :] - Qn
-    # calculate the face-dependent prefactor for the sum over vertices (subvolumes x faces) 
+    # calculate the face-dependent prefactor for the sum over vertices (elements x faces) 
     # TODO: divide by zero error - can nan and inf handle this?
     prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q)
     # calculate the sum over vertices term
     # TODO: divide by zero error - can nan and inf handle this?
-    # the sub sum over the vertices in eq (14) (subvolumes x faces)
+    # the sub sum over the vertices in eq (14) (elements x faces)
     sub_sum = np.zeros_like(prefactor, dtype="complex")
     for i in range(geometry.shape[2]-1):
-        # calculate the separation vector (subvolumes x faces x vector_coords)
+        # calculate the separation vector (elements x faces x vector_coords)
         v = geometry[:,:,i+1] - geometry[:,:,i]
-        # the terms in the expr (subvolumes x faces)
+        # the terms in the expr (elements x faces)
         # WARNING: this uses the opposite sign convention as the article's code but agrees with the sign convention of the
         # main text - it takes line segment normals as pointing OUTWARDS from the surface - giving the 'standard' fourier transform
         # e.g. fourier transform of a box gives a *positive* sinc function

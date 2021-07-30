@@ -231,6 +231,9 @@ def _vec(v):
     return np.ascontiguousarray(v, 'd') if v is not None else None
 
 class VTKReader:
+    """
+    Class to read and process .vtk files
+    """
 
     type_name = "VTK"
     ## Wildcards
@@ -239,6 +242,13 @@ class VTKReader:
     ext = ['.vtk', '.VTK']
 
     def read(self, path):
+        """This function reads in a vtk file
+
+        :param path: The filepath to be loaded
+        :type path: string
+        :return: A MagSLD instance containing the loaded data or None if loading failed
+        :rtype: MagSLD or None
+        """
         try:
             #load in the file
             # for standard see https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
@@ -280,12 +290,22 @@ class VTKReader:
             return None
     
     def unstructured_grid_read(self, lines, path):
+        """Processes .vtk files in ASCII unstructured_grid format
+
+        :param lines: an iterator with the (non-empty) lines of the file, starting one line
+                        after the DATASET marker
+        :type lines: iterator
+        :param path: The filepath to be loaded
+        :type path: string
+        :return: A MagSLD instance containing the loaded data or None if loading failed
+        :rtype: MagSLD or None
+        """
         # get information on points
         point_data = next(lines).split()
         if point_data[0].upper() != "POINTS":
             logging.error("Expected POINTS as next section in vtk file format unstructured grid")
         num_points = int(point_data[1])
-        # ignore datatype  - all can be reaad as float in python
+        # ignore datatype  - all can be read as float in python
         # cannot read in with numpy as data not guaranteed to be on a grid with new lines after each point - although this is standard
         points = []
         while len(points) < 3*num_points:
@@ -293,140 +313,164 @@ class VTKReader:
             points += [float(item) for item in next(lines).split()]
         points = np.array(points).reshape((num_points, 3))
         pos_x, pos_y, pos_z = np.hsplit(points, 3)
-        cell_data = next(lines).split()
-        if cell_data[0].upper() != "CELLS":
+        # read in the element data
+        element_data = next(lines).split()
+        if element_data[0].upper() != "CELLS":
             logging.error("Expected CELLS as next section in vtk file format unstructured grid")
-        num_cells = int(cell_data[1])
-        len_cells = int(cell_data[2])
-        # must load and store carfeully: filetype does not guarantee that cells are line by line
+        num_elements = int(element_data[1])
+        len_elements = int(element_data[2])
+        # must load and store carfeully: filetype does not guarantee that elements are line by line
         # or all of the same type, cannot immediately cast to numpy array as cannot support potential jagged arrays
-        cells_raw = []
-        while len(cells_raw) < len_cells:
-            cells_raw += [int(item) for item in next(lines).split()]
-        cells_sorted = []
-        cells_sizes = []
+        elements_raw = []
+        while len(elements_raw) < len_elements:
+            elements_raw += [int(item) for item in next(lines).split()]
+        # convert element data from a list of integers into a list of lists of element vertices 
+        elements_sorted = []
+        elements_sizes = []
         index = 0
-        while index < len(cells_raw):
-            cell_size = cells_raw[index]
-            cells_sorted.append(cells_raw[index+1:(index+cell_size+1)])
-            cells_sizes.append(cell_size)
-            index+=cell_size+1
-        #sanity check the file
-        if num_cells != len(cells_sorted):
+        while index < len(elements_raw):
+            element_size = elements_raw[index]
+            elements_sorted.append(elements_raw[index+1:(index+element_size+1)])
+            elements_sizes.append(element_size)
+            index+=element_size+1
+        #sanity check the file has the same number of elements as stated
+        if num_elements != len(elements_sorted):
             logging.error("error while reading cells - specified number is inconsistent with data")
             return None
-        #get information on the cell types
-        celltype_data = next(lines).split()
-        if celltype_data[0].upper() != "CELL_TYPES":
+        #get information on the element types
+        element_type_data = next(lines).split()
+        if element_type_data[0].upper() != "CELL_TYPES":
             logging.error("Expected CELL_TYPES as next section in vtk file format unstructured grid")
-        num_celltypes = int(celltype_data[1])
-        if num_celltypes != num_cells:
+        num_element_types = int(element_type_data[1])
+        # sanity check same number of element types as elements
+        if num_element_types != num_elements:
             logging.error("error while reading cell types - specified number is inconsistent with cells")
             return None
-        celltypes = []
-        while len(celltypes) < num_celltypes:
-            celltypes += [int(item) for item in next(lines).split()]
-        # rewrite cells as list of faces with vertices
-        # TODO: remove None type cells along with attributes
-        # cells has form elements x faces x vertex_indices
-        cells = [self.get_faces(cells_sorted[i], celltypes[i]) for i in range(num_cells)]
-        vols = np.array([self.get_vols(cells_sorted[i], celltypes[i], points) for i in range(num_cells)])
-        attribute_data = self.load_data_attributes(lines, num_points, num_cells)
+        element_types = []
+        while len(element_types) < num_element_types:
+            element_types += [int(item) for item in next(lines).split()]
+        # rewrite elements as list of faces with vertices
+        # elements has form elements x faces x vertex_indices
+        elements = [self.get_faces(elements_sorted[i], element_types[i]) for i in range(num_elements)]
+        # get the volumes of each element
+        vols = np.array([self.get_vols(elements_sorted[i], element_types[i], points) for i in range(num_elements)])
+        # get the element attributes - nuclear/magnetic sld data
+        attribute_data = self.load_data_attributes(lines, num_points, num_elements)
         if attribute_data is None:
             return None
-        point_data, cell_data = attribute_data
-        # remove None type cells
-        if None in cells:
+        point_data, element_data = attribute_data
+        # remove None type elements
+        if None in elements:
             i = 0
-            while i < len(cells):
-                if cells[i] is None:
-                    for data in cell_data:
+            while i < len(elements):
+                if elements[i] is None:
+                    for data in element_data:
                         del data[0][i]
-                    del cells[i]
+                    del elements[i]
                     del vols[i]
                 else:
                     i += 1
-        #convert point data to cell data - for now a standard mean function
+        #convert point data to element data - for now a standard mean function
         if len(point_data) > 0:
             logging.info("Attributes provided per point - averaging to produce 'per cell' data")
-            if max(cells_sizes) != min(cells_sizes):
+            if max(elements_sizes) != min(elements_sizes):
                 # If the number of vertices per cell is not constant then add 'dummy values'
                 # so that array is not jagged - even with additional points numpy can calulate
                 # much faster - so we need non-jagged arrays
-                max_size = max(cells_sizes)
+                max_size = max(elements_sizes)
                 points_adj = np.concatenate((points, [[0,0,0]]), axis=0) # add null point to make array non-jagged
                 for attr in point_data: # add null value for new vertices to point to
                     attr[0] = np.concatenate((attr[0], [np.zeros(attr[2])]))
                 new_index = len(points)
-                cells_sorted_adj = np.array([i + [new_index]*(max_size-j) for i,j in zip(cells_sorted, cells_sizes)])
+                cells_sorted_adj = np.array([i + [new_index]*(max_size-j) for i,j in zip(elements_sorted, elements_sizes)])
             else:
-                points_adj = points
-                cells_sorted_adj = np.array(cells_sorted)
+                points_adj = points # if aray already non-jagged no need to alter it
+                cells_sorted_adj = np.array(elements_sorted)
             vertices = points_adj[cells_sorted_adj]
             means = np.mean(vertices, axis=1)
             dists = means[:, None, :]-vertices
             weights = 1/(np.sum(dists*dists, axis=2)) # use inverse distance weighting with power factor 2
             # If we added dummy values set their weights to 0 so they are not used in calulation
-            if max(cells_sizes) != min(cells_sizes):
+            if max(elements_sizes) != min(elements_sizes):
                 weights[cells_sorted_adj == len(points_adj)-1] = 0
             for attr in point_data:
                 vals = attr[0][cells_sorted_adj]
                 val_means = np.sum(vals*weights[..., None], axis=1)/np.sum(weights[..., None], axis=1)
-                cell_data.append([val_means, attr[1], attr[2]])
-        # identify data
-        if len(cell_data) == 1:
-            if cell_data[0][2] == 1:
-                sld_n = cell_data[0][0]
+                element_data.append([val_means, attr[1], attr[2]])
+        # identify data read in as nuclear and magnetic data - for now uses sizes rather than names
+        # so the user doesn't have to get exactly the right names on the data
+        if len(element_data) == 1:
+            if element_data[0][2] == 1:
+                sld_n = element_data[0][0]
                 sld_mx = np.zeros_like(sld_n)
                 sld_my = np.zeros_like(sld_n)
                 sld_mz = np.zeros_like(sld_n)
-            elif cell_data[0][2] == 3:
-                sld_mx, sld_my, sld_mz = np.hsplit(cell_data[0][0], 3)
+            elif element_data[0][2] == 3:
+                sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
                 nuc_data = np.zeros_like(sld_mx)
             else:
                 logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
                 return None
-        elif len(cell_data) == 2:
-            if cell_data[0][2] == 1 and cell_data[1][2] == 3:
-                sld_n = cell_data[0][0]
-                sld_mx, sld_my, sld_mz = np.hsplit(cell_data[1][0], 3)
-            elif cell_data[0][2] == 3 and cell_data[1][2] == 1:
-                sld_n = cell_data[1][0]
-                sld_mx, sld_my, sld_mz = np.hsplit(cell_data[0][0], 3)
+        elif len(element_data) == 2:
+            if element_data[0][2] == 1 and element_data[1][2] == 3:
+                sld_n = element_data[0][0]
+                sld_mx, sld_my, sld_mz = np.hsplit(element_data[1][0], 3)
+            elif element_data[0][2] == 3 and element_data[1][2] == 1:
+                sld_n = element_data[1][0]
+                sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
             else:
                 logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear and magnetic SLDs")
                 return None
         else:
             logging.error("Data attributes cannot be interpreted as nuclear and/or magnetic SLDs")
             return None
+        # need to flatten as hsplit leaves a length 1 axis
         output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
         output.filename = os.path.basename(path)
-        # check if cells can be written as numpy array
-        if all(celltypes[0] == x for x in celltypes):
-            cells = np.array(cells)
+        # check if elements can be written as numpy array
+        if all(element_types[0] == x for x in element_types):
+            elements = np.array(elements)
             output.are_elements_identical = True
-        output.set_elements(cells)
+        output.set_elements(elements)
         output.set_pixel_symbols('pixel') # draw points as pixels
         output.set_pixel_volumes(vols)
         return output
 
-    def load_data_attributes(self, lines, num_points, num_cells):
+    def load_data_attributes(self, lines, num_points, num_elements):
+        """Extract the data attributes from the file
+        
+        In the vtk file format the data attributes (POINT_DATA and CELL_DATA) are the last part of
+        the file. This function processes that data and returns it.
+
+        :param lines: The lines from the file - with the next line being either POINT_DATA or CELL_DATA.
+        :type lines: iterator
+        :param num_points: The number of points in the loaded file.
+        :type num_points: int
+        :param num_elements: The number of elements in the loaded file.
+        :type num_elements: int
+        :return: Either the loaded data attributes of None if loading failed. The data is a 2-tuple of lists 
+                of attributes - each attribute being a list of length 3 containing:
+                the data as a list, the name of the attribute and the number of components of the attribute.
+                The first list in the tuple is data associated with points, and the second is data
+                associated with elements.
+        :rtype: 2-tuple
+        """
         # get data attributes
         data_type_info = next(lines).split()
         #cell and point data can come in either order
         if data_type_info[0].strip().upper() == "CELL_DATA":
-            first_set = [num_cells, "CELL_DATA", "cells"]
+            first_set = [num_elements, "CELL_DATA", "cells"]
             second_set = [num_points, "POINT_DATA", "points"]
         elif data_type_info[0].strip().upper() == "POINT_DATA":
             first_set = [num_points, "POINT_DATA", "points"]
-            second_set = [num_cells, "CELL_DATA", "cells"]
+            second_set = [num_elements, "CELL_DATA", "cells"]
         else:
             logging.error("error while reading file line: " + data_type_info + ". Expected data attributes POINT_DATA or CELL_DATA")
             return None
         if int(data_type_info[1]) != first_set[0]:
             logging.error("error while reading " + first_set[1] + " attributes - incompatible with number of " + first_set[2])
             return None
-        first_data, nextLine = self.load_attribute(lines, num_cells)
+        first_data, nextLine = self.load_attribute(lines, num_elements)
         if first_data is None:
             return None
         if int(nextLine.split()[1]) != second_set[0]:
@@ -441,6 +485,17 @@ class VTKReader:
             return (first_data, second_data)
 
     def load_attribute(self, lines, size):
+        """Returns a single set of data - either point data or element data
+
+        :param lines: The lines of the file - with the next lines being the first after the descriptor
+                        POINT_DATA or CELL_DATA.
+        :type lines: iterator
+        :param size: The expected length of each attribute - either the number of points or number of elements.
+        :type size: int
+        :return: a tuple containg both the data loaded - and the next lines in the file - which is None
+                    if the file is ended.
+        :rtype: 2-tuple
+        """
         # loop over lines - no need to worry about infinite loop as will stop at end of file if required
         data = []
         while True:
@@ -476,43 +531,73 @@ class VTKReader:
             attribute = np.reshape(np.array(attribute), (size, components))
             data.append([attribute, dataName, components])
     
-    def get_faces(self, e, celltype):
+    def get_faces(self, e, element_type):
+        """Returns the faces of the elements
+
+        This function takes in the vertices and element type of an element and returns
+        a list of faces - with the vertices going in the standard diretion i.e. they go
+        anticlockwise arounds the outward facing normal vector. e.g the bottom (xy) face of the
+        unit cube would go (0,0,0) , (0,1,0) , (1,1,0) , (1,0,0).
+
+        :param e: The vertices (as indices) of the element in the order as given in the .vtk file
+                    specification.
+        :type e: list of int
+        :param element_type: The element_type (as given in the file specification).
+        :type element_type: int
+        :return: A list of faces which is in turn a list of vertex indices, None if the element type is not supported
+        :rtype: list of list of int or None
+        """
         # e = cell_elements - shortened for brevity in code
         #returns points inf aces in anticlockwise order   
-        if celltype == 10:
+        if element_type == 10: # tetrahedron
             return [[e[0], e[2], e[1]], 
                     [e[0], e[1], e[3]], 
                     [e[0], e[3], e[2]], 
                     [e[1], e[2], e[3]]]
-        elif celltype == 11 or celltype == 12:
+        elif element_type == 11 or element_type == 12: # voxel (rectangular cuboid) or hexahedron
             return [[e[0], e[2], e[3], e[1]],
                     [e[0], e[1], e[5], e[4]],
                     [e[1], e[3], e[7], e[5]],
                     [e[3], e[2], e[6], e[7]],
                     [e[2], e[0], e[4], e[6]],
                     [e[4], e[5], e[7], e[6]]]
-        elif celltype == 13:
+        elif element_type == 13: # wedge
             return [[e[0], e[3], e[4], e[1]],
                     [e[0]. e[2], e[5], e[3]],
                     [e[1], e[4], e[5], e[2]],
                     [e[0], e[1], e[2]],
                     [e[3], e[5], e[4]]]
-        elif celltype == 14:
+        elif element_type == 14: # quadrilateral based pyramid
             return [[e[0], e[3], e[2], e[1]],
                     [e[0], e[1], e[4]],
                     [e[3], e[0], e[4]],
                     [e[2], e[3], e[4]],
                     [e[1], e[2], e[4]]]
         else:
-            logging.error("cell type " + str(celltype) + " is not supported - skipping cell")
+            logging.error("element type (CELL_TYPE=" + str(element_type) + ") is not supported - skipping element")
             return None
 
-    def get_vols(self, e, celltype, v):
-        if celltype == 10:
+    def get_vols(self, e, element_type, v):
+        """Returns the volumes of the elements
+
+        This function takes in the vertices and element type of an element and returns
+        the real space volume of each element.
+
+        :param e: the vertices (as indexes) of the element in the order as given in the .vtk file
+                    specification.
+        :type e: list of int
+        :param element_type: The element_type (as given in the file specification).
+        :type element_type: int
+        :param v: A list of real space positions which are indexed by `e`.
+        :type v: list
+        :return: The volume of the element.
+        :rtype: float
+        """
+        if element_type == 10: # tetrahedron
             return np.abs(np.dot(v[e[0]]-v[e[3]], np.cross(v[e[1]]-v[e[3]], v[e[2]]-v[e[3]])))/6
-        elif celltype == 11:
+        elif element_type == 11: # voxel
             return np.abs(np.dot(v[e[0]]-v[e[2]], np.cross(v[e[0]]-v[e[1]], v[e[0]]-v[e[4]])))
-        elif celltype == 12:
+        elif element_type == 12: # hexahedron
             vals = np.array([[e[2], e[4], e[7], e[1]],
                              [e[0], e[1], e[2], e[4]],
                              [e[1], e[4], e[7], e[5]],
@@ -520,13 +605,13 @@ class VTKReader:
                              [e[2], e[4], e[6], e[7]]])
             vert = v[vals]
             return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
-        elif celltype == 13:
+        elif element_type == 13: # wedge
             vals = np.array([[e[0], e[1], e[2], e[5]],
                              [e[0], e[1], e[3], e[5]],
                              [e[1], e[3], e[4], e[5]]])
             vert = v[vals]
             return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
-        elif celltype == 14:
+        elif element_type == 14: # quadrilateral based pyramid
             vals = np.array([[e[0], e[1], e[2], e[4]],
                              [e[0], e[3], e[2], e[4]]])
             vert = v[vals]
@@ -1120,7 +1205,7 @@ class MagSLD(object):
         :params : All should be numpy 1D array
         """
         self.is_data = True
-        self.is_elements = False
+        self.is_elements = False # is this a finite-element based mesh
         self.are_elements_identical = False # are all elements of the same type
         self.elements = []
         self.filename = ''

@@ -418,6 +418,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.toggle_error_functionality("ERROR: files have different real space position data")
                 return
         if self.nuc_sld_data.are_elements_identical != self.nuc_sld_data.are_elements_identical:
+            # If files don't have the same value for this they do not match anyway.
             self.verification_occurred = True
             self.verified = False
             self.toggle_error_functionality("ERROR: files must contain the same elements")
@@ -428,11 +429,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     self.verified = True
                     self.toggle_error_functionality()
                     return
+                # convert each element in a list of vertices - do not bother comparing each face
+                # while technically with a large number of points one could describe multiple diiferent
+                # elements, this is not possible from .vtk files - and would massively slow down verification.
                 # unique also sorts 
                 nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
                 mag_elements_sort = numpy.unique(self.mag_sld_data.elements.reshape((self.mag_sld_data.elements.shape[0], -1)), axis=-1)
             else:
-                # get reverse permutation, i.e. position each index was moved to
+                # get reverse permutation
+                # when positions were changed each index was sent to a new position - this finds the 
+                # position each index was sent to by inverting the permuation
                 nuc_permutation = numpy.argsort(nuc_sort_order)
                 mag_permutation = numpy.argsort(mag_sort_order)
                 nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
@@ -440,6 +446,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 # must resort after point positions changed
                 nuc_elements_sort = numpy.sort(nuc_permutation[nuc_elements_sort], axis=1)
                 mag_elements_sort = numpy.sort(mag_permutation[mag_elements_sort], axis=1)
+            # elements in each file should now be described by the same real space point indices
+            # we sort them into order and directly compare them
             nuc_elements_sort_order = numpy.lexsort(numpy.transpose(nuc_elements_sort))
             mag_elements_sort_order = numpy.lexsort(numpy.transpose(mag_elements_sort))
             if not numpy.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
@@ -447,7 +455,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.verified = False
                 self.toggle_error_functionality("ERROR: files must contain the same elements")
                 return
-            # carry out position changes
+            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
             self.nuc_sld_data.elements = self.nuc_sld_data.elements[nuc_elements_sort_order, ...]
             self.mag_sld_data.elements = self.mag_sld_data.elements[mag_elements_sort_order, ...]
             params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
@@ -462,6 +470,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 if mag_val is not None:
                     setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_elements_sort_order])
             if not points_already_match:
+                # if the points were moved we must also update all indices
                 self.nuc_sld_data.elements = nuc_permutation[self.nuc_sld_data.elements]
                 self.mag_sld_data.elements = mag_permutation[self.mag_sld_data.elements]
             self.verification_occurred = True
@@ -469,14 +478,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.toggle_error_functionality()
             return
         else:
+            # the files have different cell types within themselves - the elements are not already in a numpy array
+            # as numpy does not support jagged arrays
             nuc_elements = []
             mag_elements = []
+            # get the unique vertices of each element - see the note above about how this is not technically
+            # a perfect validation.
             if points_already_match:
                 for element in self.nuc_sld_data.elements:
                     nuc_elements.append(numpy.sort(list(set([vertex for face in element for vertex in face]))))
                 for element in self.mag_sld_data.elements:
                     mag_elements.append(numpy.sort(list(set([vertex for face in element for vertex in face]))))
             else:
+                # ensure the real space point indices match if they were also sorted
                 nuc_permutation = numpy.argsort(nuc_sort_order)
                 mag_permutation = numpy.argsort(mag_sort_order)
                 for element in self.nuc_sld_data.elements:
@@ -485,11 +499,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     mag_elements.append(numpy.sort(list(set([mag_permutation[vertex] for face in element for vertex in face]))))
             nuc_lengths = [len(i) for i in nuc_elements]
             mag_lengths = [len(i) for i in mag_elements]
-            if max(nuc_lengths) != max(mag_lengths):
+            if max(nuc_lengths) != max(mag_lengths): # if files have different lengthed elements cannot match
                 self.verification_occurred = True
                 self.verified = False
                 self.toggle_error_functionality("ERROR: files must contain the same elements")
                 return
+            # sort element vertices into a numpy array with '-1' filling up the empty slots
             r = numpy.arange(max(nuc_lengths))
             nuc_elements_sort = -numpy.ones((len(nuc_elements), max(nuc_lengths)))
             for i in range(len(nuc_elements)):
@@ -497,6 +512,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             mag_elements_sort = -numpy.ones((len(mag_elements), max(mag_lengths)))
             for i in range(len(mag_elements)):
                 mag_elements_sort[i, :mag_lengths[i]] = mag_elements[i]
+            # sort the elements and directly compare them against each other
             nuc_elements_sort_order = numpy.lexsort(numpy.transpose(nuc_elements_sort))
             mag_elements_sort_order = numpy.lexsort(numpy.transpose(mag_elements_sort))
             if not numpy.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
@@ -504,7 +520,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.verified = False
                 self.toggle_error_functionality("ERROR: files must contain the same elements")
                 return
-            # carry out position changes
+            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
             self.nuc_sld_data.elements = [self.nuc_sld_data.elements[i] for i in nuc_elements_sort_order]
             self.mag_sld_data.elements = [self.mag_sld_data.elements[i] for i in mag_elements_sort_order]
             params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
@@ -1093,7 +1109,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Copied from previous version
 
-        :deprecated:
+        .. warning:: deprecated
         """
         sld_n_default = 6.97e-06  # what is this number??
         omfdata = sas_gen.OMFData()
