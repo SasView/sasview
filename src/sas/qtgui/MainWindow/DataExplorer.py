@@ -1141,7 +1141,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Call show on requested plots
         # All same-type charts in one plot
-        plot_backup = plots.copy()
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():

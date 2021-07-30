@@ -20,7 +20,6 @@ class Data1D(PlottableData1D, LoadData1D):
     ROLE_DEFAULT=1
     ROLE_DELETABLE=2
     ROLE_RESIDUAL=3
-    ROLE_SLIDER=4
     def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
