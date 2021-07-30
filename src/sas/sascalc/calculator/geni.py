@@ -68,7 +68,7 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
         index = (sld != 0.) | magnetic_index
         if is_elements:
             if not index.all():
-                mx, my, mz, sld, elements = (v[index] for v in (mx, my, mz, sld, elements))
+                mx, my, mz, sld, elements, vol = (v[index] for v in (mx, my, mz, sld, elements, vol))
             I_out = _calc_Iqxy_magnetic_elements(
                 qx, qy, x, y, z, sld, mx, my, mz, elements,
                 in_spin, out_spin, s_theta, s_phi)
@@ -83,7 +83,7 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
         index = (sld != 0.)
         if is_elements:
             if not index.all():
-                sld, elements = (v[index] for v in (sld, elements))
+                sld, elements, vol = (v[index] for v in (sld, elements, vol))
             I_out = _calc_Iqxy_elements(sld, x, y, z, elements, qx.flatten(), qy.flatten())
             I_out = I_out.reshape(qx.shape)
         else:
