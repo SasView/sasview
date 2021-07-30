@@ -21,6 +21,7 @@ class QRangeSlider(BaseInteractor):
         self.markers = []
         self.axes = axes
         self.data = data
+        self.is_visible = False
         self.connect = self.base.connect
         self.x_min = np.fabs(min(self.data.x))
         self.y_marker_min = self.data.y[np.where(self.data.x == self.x_min)[0][0]]
@@ -60,6 +61,16 @@ class QRangeSlider(BaseInteractor):
         """
         self.clear_markers()
 
+    def show(self):
+        self.line_max.draw()
+        self.line_min.draw()
+        self.update()
+
+    def remove(self):
+        self.line_max.remove()
+        self.line_min.remove()
+        self.is_visible = False
+
     def update(self, x=None, y=None):
         """
         Draw the new roughness on the graph.
@@ -67,6 +78,7 @@ class QRangeSlider(BaseInteractor):
         self.line_min.update(x, y, draw=True)
         self.line_max.update(x, y, draw=True)
         self.base.update()
+        self.is_visible = True
 
     def save(self, ev):
         """
@@ -82,6 +94,13 @@ class QRangeSlider(BaseInteractor):
         """
         self.line_max.restore(ev)
         self.line_min.restore(ev)
+
+    def toggle(self):
+        if self.is_visible:
+            self.remove()
+        else:
+            self.show()
+        pass
 
     def move(self, x, y, ev):
         """
@@ -121,12 +140,7 @@ class LineInteractor(BaseInteractor):
         self.save_x = self.x
         self.y_marker = y
         self.save_y = self.y_marker
-        # Inner circle marker
-        self.inner_marker = self.axes.plot([self.x], [self.y_marker], linestyle='', marker='o', markersize=4,
-                                           color=self.color, alpha=0.6, pickradius=5, label=None, zorder=zorder,
-                                           visible=True)[0]
-        self.line = self.axes.axvline(self.x, linestyle='-', color=self.color, marker='', pickradius=5,
-                                      label=None, zorder=zorder, visible=True)
+        self.draw(zorder)
         self.has_move = True
         if not perspective:
             self.perspective = None
@@ -186,6 +200,14 @@ class LineInteractor(BaseInteractor):
             self.inner_marker.remove()
         if self.line:
             self.line.remove()
+
+    def draw(self, zorder=5):
+        # Inner circle marker
+        self.inner_marker = self.axes.plot([self.x], [self.y_marker], linestyle='', marker='o', markersize=4,
+                                           color=self.color, alpha=0.6, pickradius=5, label=None, zorder=zorder,
+                                           visible=True)[0]
+        self.line = self.axes.axvline(self.x, linestyle='-', color=self.color, marker='', pickradius=5,
+                                      label=None, zorder=zorder, visible=True)
 
     def _get_input_or_callback(self, connection_list=None):
         """Returns an input or callback method based on a list of inputs/commands"""

@@ -338,6 +338,11 @@ class PlotterWidget(PlotterBase):
             self.actionRemovePlot.triggered.connect(
                                 functools.partial(self.onRemovePlot, id))
 
+            if plot.show_q_range_sliders:
+                self.actionToggleSlider = plot_menu.addAction("Toggle Q-Range Slider Visibility")
+                self.actionToggleSlider.triggered.connect(
+                                    functools.partial(self.toggleSlider, id))
+
             if not plot.is_data:
                 self.actionFreeze = plot_menu.addAction('&Freeze')
                 self.actionFreeze.triggered.connect(
@@ -561,14 +566,10 @@ class PlotterWidget(PlotterBase):
         self.ax.set_ylabel(yl)
         self.canvas.draw_idle()
 
-    # TODO: Create way to do this from context menu
-    def removeAllSliders(self):
-        for id in self.sliders.keys():
-            self.removeSlider(id)
-
-    def removeSlider(self, id):
+    def toggleSlider(self, id):
         if id in self.sliders.keys():
-            slider = self.sliders.pop(id)
+            slider = self.sliders.get(id)
+            slider.toggle()
 
     def onFreeze(self, id):
         """
