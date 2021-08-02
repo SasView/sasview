@@ -148,6 +148,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         n_pts = (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(n_pts))
         self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
+        self.txtNptsLowQ.setText(str(n_pts))
 
     def get_high_q_extrapolation_lower_limit(self):
         q_value = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text()) - 1]
@@ -157,6 +158,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         n_pts = len(self._data.x) - (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(int(n_pts)))
         self.model.setItem(WIDGETS.W_NPTS_HIGHQ, item)
+        self.txtNptsHighQ.setText(str(n_pts))
 
     def enabling(self):
         """ """
@@ -572,12 +574,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.txtNptsHighQ.textChanged.connect(self.checkLength)
 
         self.txtExtrapolQMin.editingFinished.connect(self.checkQMinRange)
+        self.txtExtrapolQMin.textChanged.connect(self.checkQMinRange)
 
         self.txtExtrapolQMax.editingFinished.connect(self.checkQMaxRange)
+        self.txtExtrapolQMax.textChanged.connect(self.checkQMaxRange)
 
         self.txtNptsLowQ.editingFinished.connect(self.checkQRange)
+        self.txtNptsLowQ.textChanged.connect(self.checkQRange)
 
         self.txtNptsHighQ.editingFinished.connect(self.checkQRange)
+        self.txtNptsHighQ.textChanged.connect(self.checkQRange)
 
     def stateChanged(self):
         """
