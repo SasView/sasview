@@ -5,15 +5,24 @@ from sas_gen import *
 
 # main test file for fourier transform code - requires mesh to have all cells identical in type
 
-def get_normal_vec(geometry):
-    """return array of normal vectors of elements"""
+def _get_normal_vec(geometry):
+    """return array of normal vectors of elements
+    
+    :param geometry: an array of the position data for the mesh which goes as
+                        (elements x faces x vertices x coordinates)
+    :type geometry: numpy.ndarray
+    """
     v1 = geometry[:, :, 1] - geometry[:, :, 0]
     v2 = geometry[:, :, 2] - geometry[:, :, 0]
+    # (elements x faces x coords)
     normals = np.cross(v1, v2)
-    temp = np.linalg.norm(normals, axis=-1)
     normals = normals / np.linalg.norm(normals, axis=-1)[..., None]
-    return normals
-
+    disps = np.mean(geometry, axis=(1,2))[:, None, :] - geometry[:, :, 0]
+    signs = np.sign(np.sum(disps*normals, axis=-1))
+    normals = normals * (-signs)[..., None] # arrange normals outwards
+    flips = signs == 1
+    geometry[flips, :, :] = geometry[flips, ::-1, :]
+    return normals, geometry
 
 def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
     """carries out fourier transform
@@ -65,7 +74,7 @@ def sub_volume_transform(geometry, normals, rn_norm, qx, qy):
 
 
 reader = VTKReader()
-data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\box and sphere\\box.vtk")
+data = reader.read("C:\\Users\\Robert\\Documents\\STFC\\VTK_testdata\\box and sphere\\box_first_element.vtk")
 if not data.are_elements_identical:
     logging.error("currently require all cells to be of the same type")
     quit()
@@ -76,7 +85,7 @@ elements = data.elements
 # create the geometry as an array (subvolumes x faces x vertices x coordinates)
 geometry = np.column_stack((pos_x, pos_y, pos_z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
 # create normal vectors (subvolumes x faces x normal_vector_coords)
-normals = get_normal_vec(geometry)
+normals, geometry = _get_normal_vec(geometry)
 # extract the normal component of the displacement of the plane using the first point (subvolumes x faces)
 rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
 
@@ -84,33 +93,30 @@ qx = np.linspace(-10, 10, 1)
 qy = np.linspace(-10, 10, 1)
 qxs, qys = np.meshgrid(qx, qy)
 
-output = np.zeros_like(qxs, dtype="complex")
-for i in range(len(qx)):
-    for j in range(len(qy)):
-        output[j, i] = np.sum(sub_volume_transform(geometry, normals, rn_norm, qx[i], qy[j]))
-        #print(i, j)
+#output = np.zeros_like(qxs, dtype="complex")
+#for i in range(len(qx)):
+#    for j in range(len(qy)):
+#        output[j, i] = np.sum(sub_volume_transform(geometry, normals, rn_norm, qx[i], qy[j]))
+#        #print(i, j)
 
-temp = np.sum(sub_volume_transform(geometry, normals, rn_norm, 0, 0))
-
-import matplotlib.pyplot as plt
-from matplotlib import colors, cm
-
-extent = (qx.min(), qx.max(), qy.min(), qy.max())
-fig1 = plt.figure()
-plt.imshow(np.log10(np.square(np.abs(output))* 1E8/8.0), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
-plt.title('$log(Abs(FT)^2)$')
-plt.xlabel('$Q_x$', size='large')
-plt.ylabel('$Q_y$', size='large')
-plt.axis
-plt.colorbar()
-fig2 = plt.figure()
-plt.imshow(np.real(output), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
-plt.title('Real FT')
-plt.xlabel('$Q_x$', size='large')
-plt.ylabel('$Q_y$', size='large')
-plt.colorbar()
-plt.show()
-
+temp = sub_volume_transform(geometry, normals, rn_norm, 0, 0)
+print(temp)
+#extent = (qx.min(), qx.max(), qy.min(), qy.max())
+#fig1 = plt.figure()
+#plt.imshow(np.log10(np.square(np.abs(output))* 1E8/8.0), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
+#plt.title('$log(Abs(FT)^2)$')
+#plt.xlabel('$Q_x$', size='large')
+#plt.ylabel('$Q_y$', size='large')
+#plt.axis
+#plt.colorbar()
+#fig2 = plt.figure()
+#plt.imshow(np.real(output), extent=extent, aspect=1, cmap=cm.get_cmap("jet"))
+#plt.title('Real FT')
+#plt.xlabel('$Q_x$', size='large')
+#plt.ylabel('$Q_y$', size='large')
+#plt.colorbar()
+#plt.show()
+#
 
 #print(sub_volume_transform(pos_x, pos_y, pos_z, elements, 0.1, 0))
 #plt.plot(qx, np.abs(output))

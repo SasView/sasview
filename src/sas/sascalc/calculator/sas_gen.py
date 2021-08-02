@@ -535,9 +535,8 @@ class VTKReader:
         """Returns the faces of the elements
 
         This function takes in the vertices and element type of an element and returns
-        a list of faces - with the vertices going in the standard diretion i.e. they go
-        anticlockwise arounds the outward facing normal vector. e.g the bottom (xy) face of the
-        unit cube would go (0,0,0) , (0,1,0) , (1,1,0) , (1,0,0).
+        a list of faces - the orientation of the vertices in each face does not appear 
+        to be guaranteed in the vtk file format.
 
         :param e: The vertices (as indices) of the element in the order as given in the .vtk file
                     specification.
@@ -548,7 +547,7 @@ class VTKReader:
         :rtype: list of list of int or None
         """
         # e = cell_elements - shortened for brevity in code
-        #returns points inf aces in anticlockwise order   
+        #returns points in faces
         if element_type == 10: # tetrahedron
             return [[e[0], e[2], e[1]], 
                     [e[0], e[1], e[3]], 

@@ -187,10 +187,13 @@ _calc_Iqxy.__doc__ = """
     """
 
 def _calc_Iqxy_elements(sld, x, y, z, elements, qx, qy):
+    """
+    Compute I(q) for a set of elements, without magnetism.
+    """
     # create the geometry as an array (elements x faces x vertices x coordinates)
     geometry = np.column_stack((x, y, z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
     # create normal vectors (elements x faces x normal_vector_coords)
-    normals = _get_normal_vec(geometry)
+    normals, geometry = _get_normal_vec(geometry)
     # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
     Iq = [abs(np.sum(sld*element_transform(geometry, normals, rn_norm, qx_k, qy_k)))**2
@@ -281,17 +284,41 @@ def _calc_Iqxy_magnetic_helper(
             Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
 
 def _get_normal_vec(geometry):
-    """return array of normal vectors of elements"""
+    """return array of normal vectors of elements
+
+    This function returns an array of unit normal vectors to faces, pointing out
+    of the elements, as well as altering the geometry to ensure the vertices are ordered
+    the correct way around
+
+    .. warning:: This function alters geometry in place as well as returning it - so when this
+                    function is called the geometry array will always be re-ordered.
+    
+    :param geometry: an array of the position data for the mesh which goes as
+                        (elements x faces x vertices x coordinates)
+    :type geometry: numpy.ndarray
+    :return: normals, geometry - where geometry has been adjusted to ensure all vertices
+            go anticlockwise around the unit normal vector, and the unit normal vectors
+            are pointed out of the element.
+    :rtype: tuple
+    """
     v1 = geometry[:, :, 1] - geometry[:, :, 0]
     v2 = geometry[:, :, 2] - geometry[:, :, 0]
+    # (elements x faces x coords)
     normals = np.cross(v1, v2)
-    temp = np.linalg.norm(normals, axis=-1)
     normals = normals / np.linalg.norm(normals, axis=-1)[..., None]
-    return normals
+    disps = np.mean(geometry, axis=(1,2))[:, None, :] - geometry[:, :, 0]
+    signs = np.sign(np.sum(disps*normals, axis=-1))
+    normals = normals * (-signs)[..., None] # arrange normals outwards
+    flips = signs == 1
+    geometry[flips, :, :] = geometry[flips, ::-1, :]
+    return normals, geometry
 
 def _calc_Iqxy_magnetic_elements(
                 qx, qy, x, y, z, sld, mx, my, mz, elements,
                 up_frac_i=1, up_frac_f=1, up_angle=0., up_phi=0.):
+    """
+    Compute I(q) for a set of elements, with magnetism.
+    """
     # Determine contribution from each cross section
     dd, du, ud, uu = _spin_weights(up_frac_i, up_frac_f)
 
@@ -307,7 +334,7 @@ def _calc_Iqxy_magnetic_elements(
     # create the geometry as an array (elements x faces x vertices x coordinates)
     geometry = np.column_stack((x, y, z))[np.concatenate((elements, elements[:,:,:1]), axis=2)]
     # create normal vectors (elements x faces x normal_vector_coords)
-    normals = _get_normal_vec(geometry)
+    normals, geometry = _get_normal_vec(geometry)
     # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
     # Flatten arrays so everything is 1D
@@ -387,7 +414,7 @@ def element_transform(geometry, normals, rn_norm, qx, qy):
     """
     # small value used in case where a fraction should limit to a finite answer with 0 on top and bottom
     # used in 2nd/3rd terms in sum over vertices
-    eps = 1e-6
+    eps = 1e-5
 
     # create the Q vector
     Q = np.array([qx+eps, qy+eps, 0+eps])
