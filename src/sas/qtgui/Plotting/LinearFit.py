@@ -102,7 +102,10 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
 
-        self.q_sliders = None
+        self.data.show_q_range_sliders = True
+        self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
+        self.q_sliders.line_min.input = self.txtFitRangeMin
+        self.q_sliders.line_max.input = self.txtFitRangeMax
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -243,11 +246,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         tempx = numpy.array(tempx)
         tempy = numpy.array(tempy)
 
-        self.data.show_q_range_sliders = True
-        self.data.slider_low_q_input = self.txtRangeMin
-        self.data.slider_high_q_input = self.txtRangeMax
-        self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
-
         self.updatePlot.emit((tempx, tempy))
 
     def origData(self):
@@ -326,7 +324,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
     def clearSliders(self):
         if self.q_sliders:
             self.q_sliders.clear()
-        self.parent.removeSlider(self.data.id)
+        self.data.show_q_range_sliders = False
 
     def closeEvent(self, ev):
         self.clearSliders()
