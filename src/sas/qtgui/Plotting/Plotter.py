@@ -181,20 +181,6 @@ class PlotterWidget(PlotterBase):
         ax.set_xscale(self.xscale, nonposx='clip')
         ax.set_yscale(self.yscale, nonposy='clip')
 
-        # define the ranges
-        if hasattr(self, 'setRange') and self.setRange.rangeModified:
-            # Assume the range has changed and retain the current and default ranges for future use
-            modified = self.setRange.rangeModified
-            x_range = self.setRange.xrange()
-            y_range = self.setRange.yrange()
-        else:
-            # Use default ranges given by matplotlib
-            x_range = self.ax.get_xlim()
-            y_range = self.ax.get_ylim()
-            modified = False
-        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
-        self.setRange.rangeModified = modified
-
         # Draw non-standard markers
         l_width = markersize * 0.4
         if marker == '-' or marker == '--':
@@ -260,6 +246,23 @@ class PlotterWidget(PlotterBase):
         if self.xLabel and not is_fit:
             ax.set_xlabel(self.xLabel)
 
+        # define the ranges
+        if hasattr(self, 'setRange') and self.setRange.rangeModified:
+            # Assume the range has changed and retain the current and default ranges for future use
+            modified = self.setRange.rangeModified
+            default_x_range = self.setRange.defaultXRange
+            default_y_range = self.setRange.defaultYRange
+            x_range = self.setRange.xrange()
+            y_range = self.setRange.yrange()
+        else:
+            # Use default ranges given by matplotlib
+            x_range = default_x_range = self.ax.get_xlim()
+            y_range = default_y_range = self.ax.get_ylim()
+            modified = False
+        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
+        self.setRange.rangeModified = modified
+        self.setRange.defaultXRange = default_x_range
+        self.setRange.defaultYRange = default_y_range
         # Go to expected range
         self.ax.set_xbound(x_range[0], x_range[1])
         self.ax.set_ybound(y_range[0], y_range[1])
@@ -470,8 +473,9 @@ class PlotterWidget(PlotterBase):
         if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
-            self.setRange.rangeModified = True
             if x_range is not None and y_range is not None:
+                self.setRange.rangeModified = (self.setRange.defaultXRange != x_range
+                                               and self.setRange.defaultYRange != y_range)
                 self.ax.set_xlim(x_range)
                 self.ax.set_ylim(y_range)
                 self.canvas.draw_idle()
@@ -480,11 +484,12 @@ class PlotterWidget(PlotterBase):
         """
         Resets the chart X and Y ranges to their original values
         """
-        # Clear graph and plot everything again
-        mpl.pyplot.cla()
-        self.ax.cla()
-        for ids in self.plot_dict:
-            self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
+        x_range = self.setRange.defaultXRange
+        y_range = self.setRange.defaultYRange
+        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
+        # Go to expected range
+        self.ax.set_xbound(x_range[0], x_range[1])
+        self.ax.set_ybound(y_range[0], y_range[1])
 
         # Redraw
         self.canvas.draw_idle()

@@ -33,6 +33,8 @@ class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
         self.txtYmax.setText(str(y_range[1]))
 
         self.rangeModified = False
+        self.defaultXRange = x_range
+        self.defaultYRange = y_range
 
     def xrange(self):
         """
