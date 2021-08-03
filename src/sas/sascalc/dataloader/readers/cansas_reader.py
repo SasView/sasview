@@ -110,7 +110,13 @@ class Reader(XMLreader):
                         bad_xml = INVALID_XML.format(basename + self.extension)
                         bad_xml += invalid_xml
                         self.current_datainfo.errors.append(bad_xml)
-                self.data_cleanup()
+                # Store datainfo locally to use for multiple SASdata entries - it is destroyed in data_cleanup()
+                datainfo = self.current_datainfo
+                # Combine all plottable_1D data sets in self.data with current_datainfo and put Data1D into self.output
+                for data in self.data:
+                    self.current_datainfo = datainfo
+                    self.current_dataset = data
+                    self.data_cleanup()
         except Exception as e:
             # Convert all other exceptions to FileContentsExceptions
             raise FileContentsException(str(e))
