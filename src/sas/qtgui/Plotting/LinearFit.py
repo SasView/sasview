@@ -328,6 +328,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
     def closeEvent(self, ev):
         self.clearSliders()
+        self.parent.update()
 
     def accept(self, ev):
         self.close()
