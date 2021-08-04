@@ -252,7 +252,12 @@ class PlotterWidget(PlotterBase):
 
         # Add q-range sliders
         if data.show_q_range_sliders:
+            # Grab existing slider if it exists
+            existing_slider = self.sliders.pop(data.name, None)
             sliders = QRangeSlider(self, self.ax, data=data)
+            # New sliders should be visible but existing sliders that were turned off should remain off
+            if existing_slider is not None and not existing_slider.is_visible:
+                sliders.toggle()
             self.sliders[data.name] = sliders
 
         # refresh canvas
@@ -545,7 +550,6 @@ class PlotterWidget(PlotterBase):
 
         # Remove the plot from the list of plots
         self.plot_dict.pop(id)
-        self.sliders.pop(id, None)
 
         # Labels might have been changed
         xl = self.ax.xaxis.label.get_text()

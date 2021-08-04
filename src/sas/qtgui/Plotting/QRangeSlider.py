@@ -100,7 +100,6 @@ class QRangeSlider(BaseInteractor):
             self.remove()
         else:
             self.show()
-        pass
 
     def move(self, x, y, ev):
         """
