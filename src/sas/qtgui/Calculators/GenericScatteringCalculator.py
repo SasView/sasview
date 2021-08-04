@@ -1055,7 +1055,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Copied from previous version
         Create 2D data by default
 
-        :warning: This data is never plotted.
+        .. warning:: This data is never plotted.
         """
         self.qmax_x = float(self.txtQxMax.text())
         self.npts_x = int(self.txtNoQBins.text())
@@ -1126,7 +1126,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Copied from previous version
         Create 1D data by default
 
-        :warning: This data is never plotted.
+        .. warning:: This data is never plotted.
 
                     residuals.x = data_copy.x[index]
             residuals.dy = numpy.ones(len(residuals.y))

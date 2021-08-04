@@ -70,7 +70,7 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
             if not index.all():
                 mx, my, mz, sld, elements, vol = (v[index] for v in (mx, my, mz, sld, elements, vol))
             I_out = _calc_Iqxy_magnetic_elements(
-                qx, qy, x, y, z, sld, mx, my, mz, elements,
+                qx, qy, x, y, z, sld, mx, my, mz, elements, vol,
                 in_spin, out_spin, s_theta, s_phi)
         else:
             if not index.all():
@@ -84,7 +84,7 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
         if is_elements:
             if not index.all():
                 sld, elements, vol = (v[index] for v in (sld, elements, vol))
-            I_out = _calc_Iqxy_elements(sld, x, y, z, elements, qx.flatten(), qy.flatten())
+            I_out = _calc_Iqxy_elements(sld, x, y, z, elements, vol, qx.flatten(), qy.flatten())
             I_out = I_out.reshape(qx.shape)
         else:
             if not index.all():
@@ -186,7 +186,7 @@ _calc_Iqxy.__doc__ = """
     Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
     """
 
-def _calc_Iqxy_elements(sld, x, y, z, elements, qx, qy):
+def _calc_Iqxy_elements(sld, x, y, z, elements, vol, qx, qy):
     """
     Compute I(q) for a set of elements, without magnetism.
     """
@@ -196,7 +196,7 @@ def _calc_Iqxy_elements(sld, x, y, z, elements, qx, qy):
     normals, geometry = _get_normal_vec(geometry)
     # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
-    Iq = [abs(np.sum(sld*element_transform(geometry, normals, rn_norm, qx_k, qy_k)))**2
+    Iq = [abs(np.sum(sld*element_transform(geometry, normals, rn_norm, vol, qx_k, qy_k)))**2
             for qx_k, qy_k in zip(qx.flat, qy.flat)]
     return np.asarray(Iq).reshape(qx.shape)
 
@@ -314,7 +314,7 @@ def _get_normal_vec(geometry):
     return normals, geometry
 
 def _calc_Iqxy_magnetic_elements(
-                qx, qy, x, y, z, sld, mx, my, mz, elements,
+                qx, qy, x, y, z, sld, mx, my, mz, elements, vol,
                 up_frac_i=1, up_frac_f=1, up_angle=0., up_phi=0.):
     """
     Compute I(q) for a set of elements, with magnetism.
@@ -344,14 +344,14 @@ def _calc_Iqxy_magnetic_elements(
     M = np.array([mx, my, mz])
     #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
     _calc_Iqxy_magnetic_elements_helper(
-        Iq, qx, qy, geometry, normals, rn_norm, sld, M, elements,
+        Iq, qx, qy, geometry, normals, rn_norm, sld, M, elements, vol,
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
     return Iq.reshape(shape)
 
 # TODO: currently doesn't use numba - can this be integrated with fourier transform method
 def _calc_Iqxy_magnetic_elements_helper(
-        Iq, qx, qy, geometry, normals, rn_norm, rho, M, elements, cos_spin, sin_spin, cos_phi, sin_phi,
-        dd, du, ud, uu):
+        Iq, qx, qy, geometry, normals, rn_norm, rho, M, elements, vol,
+        cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu):
     # Process each qx, qy
     # Note: enumerating a pair is slower than direct indexing in numba
     for k in range(len(qx)):
@@ -378,7 +378,7 @@ def _calc_Iqxy_magnetic_elements_helper(
         perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
         perpz = q_hat @ M_perpP
 
-        ephase = element_transform(geometry, normals, rn_norm, qxk, qyk)
+        ephase = element_transform(geometry, normals, rn_norm, vol, qxk, qyk)
         if dd > 1e-10:
             Iq[k] += dd * abs(np.sum((rho - perpx) * ephase))**2
         if uu > 1e-10:
@@ -388,7 +388,7 @@ def _calc_Iqxy_magnetic_elements_helper(
         if ud > 1e-10:
             Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
 
-def element_transform(geometry, normals, rn_norm, qx, qy):
+def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     """carries out fourier transform on elements
     
     This function carries out the polyhedral transformation on the elements that make up the mesh.
@@ -415,36 +415,52 @@ def element_transform(geometry, normals, rn_norm, qx, qy):
     # small value used in case where a fraction should limit to a finite answer with 0 on top and bottom
     # used in 2nd/3rd terms in sum over vertices
     eps = 1e-5
+    # If Q is the zero vector then the fourier transform is just the volume of the subelements
+    if abs(qx) < eps and abs(qy) < eps:
+        return volumes
 
-    # create the Q vector
-    Q = np.array([qx+eps, qy+eps, 0+eps])
+    # create the Q vector (elements x Q)
+    Q = np.array([[qx, qy, 0]])*np.ones((len(geometry), 3))
     # create the Q normal vector as the dot product of Q with the normal vector * the normal vector:
     # separately store the component of the Qn vector for later use
-    # np.dot: (elements x faces x normal_vector_coords) * (Q_coords) -> (elements x faces)
-    Qn_comp = np.dot(normals, Q)
+    # np.dot: (elements x faces x normal_vector_coords) * (elements x 1 x Q_coords) -> (elements x faces)
+    Qn_comp = np.sum(normals * Q[:, None, :], axis=-1)
     # Qn is the vector PARALLEL to the surface normal Q// in the referenced paper eq. (14)
     # np (*) (elements x faces x 1) * (elements x faces x normal_vector_coords) -> (elements x faces x Qn_coords)
     Qn = Qn_comp[..., None] * normals
-    # extract the parallel component of the Q vector
-    # (1 x 1 x Q_coords) - (elements x faces x Qn_coords)
-    Qp = Q[None, None, :] - Qn
+    # extract the parallel component of the Q vector to the face i.e. PERPENDICULAR to the surface normal
+    # (elements x 1 x Q_coords) - (elements x faces x Qn_coords) -> (elements x faces x Qp_coords)
+    Qp = Q[:, None, :] - Qn
+    # find any elements for which Qp is the 0 vector on one face and add an epsilon value
+    # apply change to whole element becuase if Qp=0 on one face the other faces
+    # will have one v vector which dots to 0 with it
+    # do we need consitent Q over each element for cancelling?
+    # TODO: test whether this is better or worse than using a correction for Qp.v on other faces
+    # TODO: Not just use eps*(1,1,1) as the vector but find the correct vector
+    problem_elements = np.any(np.all(np.abs(Qp)<eps, axis=-1) , axis=-1)
+    Qp[problem_elements, ...] += eps
+    Q[problem_elements, ...] += eps
     # calculate the face-dependent prefactor for the sum over vertices (elements x faces) 
-    # TODO: divide by zero error - can nan and inf handle this?
-    prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q)
+    prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q, axis=-1)[..., None]
     # calculate the sum over vertices term
-    # TODO: divide by zero error - can nan and inf handle this?
     # the sub sum over the vertices in eq (14) (elements x faces)
     sub_sum = np.zeros_like(prefactor, dtype="complex")
     for i in range(geometry.shape[2]-1):
         # calculate the separation vector (elements x faces x vector_coords)
         v = geometry[:,:,i+1] - geometry[:,:,i]
+        #calculate the dot product of Qp and v (elements x faces)
+        Qp_dot_v = np.sum(Qp*v, axis=-1)
+        zero = np.abs(Qp_dot_v) == 0
+        nzero = np.invert(zero)
         # the terms in the expr (elements x faces)
         # WARNING: this uses the opposite sign convention as the article's code but agrees with the sign convention of the
         # main text - it takes line segment normals as pointing OUTWARDS from the surface - giving the 'standard' fourier transform
         # e.g. fourier transform of a box gives a *positive* sinc function
-        term = (np.sum(Qp * np.cross(v, normals), axis=-1)) / np.sum(Qp * Qp, axis=-1)
-        term = term * (np.exp(1j * np.sum(Qp * geometry[:,:,i+1], axis=-1)) - np.exp(1j * np.sum(Qp * geometry[:,:,i], axis=-1)))
-        term = term / np.sum(Qp*v, axis=-1)
+        term = (np.sum(Qp * np.cross(v, normals), axis=-1)) / np.sum(Qp * Qp, axis=-1).astype(complex)
+        # if Qp.v is non-zero can use standard code as in paper
+        term[nzero] = term[nzero] * (np.exp(1j * np.sum(Qp[nzero, ...] * geometry[nzero,i+1], axis=-1)) \
+                            - np.exp(1j * np.sum(Qp[nzero, ...] * geometry[nzero,i], axis=-1))) / Qp_dot_v[nzero]
+        term[zero] = term[zero] * 1j * np.exp(1j * np.sum(Qp[zero, ...] * geometry[zero,i], axis=-1))
         sub_sum += term
     # sum over all the faces in each subvolume to return an array of transforms of sub_volumes
     return np.sum(prefactor*sub_sum, axis=-1)
