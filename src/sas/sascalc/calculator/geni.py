@@ -196,6 +196,10 @@ def _calc_Iqxy_elements(sld, x, y, z, elements, vol, qx, qy):
     normals, geometry = _get_normal_vec(geometry)
     # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
+    #temp = element_transform(geometry, normals, rn_norm, vol, 6.292585170340679, -6.292585170340683)
+    #temp = element_transform(geometry, normals, rn_norm, vol, 6.29259, -6.29259)
+    #temp2 = np.sum(sld*temp)
+    #temp3 = abs(temp2)**2*1e8/8
     Iq = [abs(np.sum(sld*element_transform(geometry, normals, rn_norm, vol, qx_k, qy_k)))**2
             for qx_k, qy_k in zip(qx.flat, qy.flat)]
     return np.asarray(Iq).reshape(qx.shape)
@@ -434,8 +438,8 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     # find any elements for which Qp is the 0 vector on one face and add an epsilon value
     # apply change to whole element becuase if Qp=0 on one face the other faces
     # will have one v vector which dots to 0 with it
-    # do we need consitent Q over each element for cancelling?
-    # TODO: test whether this is better or worse than using a correction for Qp.v on other faces
+    # seems to be very little difference to just using eps on the problematic face and letting
+    # the Qp.v method sort out the other faces
     # TODO: Not just use eps*(1,1,1) as the vector but find the correct vector
     problem_elements = np.any(np.all(np.abs(Qp)<eps, axis=-1) , axis=-1)
     Qp[problem_elements, ...] += eps
@@ -450,7 +454,7 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
         v = geometry[:,:,i+1] - geometry[:,:,i]
         #calculate the dot product of Qp and v (elements x faces)
         Qp_dot_v = np.sum(Qp*v, axis=-1)
-        zero = np.abs(Qp_dot_v) == 0
+        zero = np.abs(Qp_dot_v) < 1e-10
         nzero = np.invert(zero)
         # the terms in the expr (elements x faces)
         # WARNING: this uses the opposite sign convention as the article's code but agrees with the sign convention of the
