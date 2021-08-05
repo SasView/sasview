@@ -657,27 +657,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.lbl_unitz.setText(mesh_unit)
             self.lbl_unitVolume.setText(mesh_unit+"^3")
 
-    def format_value(self, value):
-        """Formats certain data for the GUI.
-        
-        Some data stored by the sld file is a numpy array - in which case the average is formatted.
-        Other data is a single value in which case the value is formatted. The formatting is done
-        by GuiUtils.formatNumber(). If the value is `None` then the string "NaN" is returned
-
-        :param value: The value to be formatted
-        :type value: int, float, numpy.array
-        :return: The formatted value
-        :rtype: str
-        """
-        if value is None:
-            return "NaN"
-        else:
-            if isinstance(value, numpy.ndarray):
-                value = str(GuiUtils.formatNumber(numpy.average(value), True))
-            else:
-                value = str(GuiUtils.formatNumber(value, True))
-            return value
-
     def update_gui(self):
         """Update the interface and model with values from loaded data
         
@@ -718,25 +697,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # Fill right hand side of GUI
         if self.is_mag:
-            self.txtMx.setText(self.format_value(self.mag_sld_data.sld_mx))
-            self.txtMy.setText(self.format_value(self.mag_sld_data.sld_my))
-            self.txtMz.setText(self.format_value(self.mag_sld_data.sld_mz))
+            self.txtMx.setText(GuiUtils.formatValue(self.mag_sld_data.sld_mx))
+            self.txtMy.setText(GuiUtils.formatValue(self.mag_sld_data.sld_my))
+            self.txtMz.setText(GuiUtils.formatValue(self.mag_sld_data.sld_mz))
         if self.is_nuc:
-            self.txtNucl.setText(self.format_value(self.nuc_sld_data.sld_n))
-            self.txtXnodes.setText(self.format_value(self.nuc_sld_data.xnodes))
-            self.txtYnodes.setText(self.format_value(self.nuc_sld_data.ynodes))
-            self.txtZnodes.setText(self.format_value(self.nuc_sld_data.znodes))
-            self.txtXstepsize.setText(self.format_value(self.nuc_sld_data.xstepsize))
-            self.txtYstepsize.setText(self.format_value(self.nuc_sld_data.ystepsize))
-            self.txtZstepsize.setText(self.format_value(self.nuc_sld_data.zstepsize))
+            self.txtNucl.setText(GuiUtils.formatValue(self.nuc_sld_data.sld_n))
+            self.txtXnodes.setText(GuiUtils.formatValue(self.nuc_sld_data.xnodes))
+            self.txtYnodes.setText(GuiUtils.formatValue(self.nuc_sld_data.ynodes))
+            self.txtZnodes.setText(GuiUtils.formatValue(self.nuc_sld_data.znodes))
+            self.txtXstepsize.setText(GuiUtils.formatValue(self.nuc_sld_data.xstepsize))
+            self.txtYstepsize.setText(GuiUtils.formatValue(self.nuc_sld_data.ystepsize))
+            self.txtZstepsize.setText(GuiUtils.formatValue(self.nuc_sld_data.zstepsize))
         if self.is_mag and ((not self.is_nuc) or self.txtXnodes.text() == "NaN"):
             # If unable to get node data from nuclear system (not enabled or not present)
-            self.txtXnodes.setText(self.format_value(self.mag_sld_data.xnodes))
-            self.txtYnodes.setText(self.format_value(self.mag_sld_data.ynodes))
-            self.txtZnodes.setText(self.format_value(self.mag_sld_data.znodes))
-            self.txtXstepsize.setText(self.format_value(self.mag_sld_data.xstepsize))
-            self.txtYstepsize.setText(self.format_value(self.mag_sld_data.ystepsize))
-            self.txtZstepsize.setText(self.format_value(self.mag_sld_data.zstepsize))
+            self.txtXnodes.setText(GuiUtils.formatValue(self.mag_sld_data.xnodes))
+            self.txtYnodes.setText(GuiUtils.formatValue(self.mag_sld_data.ynodes))
+            self.txtZnodes.setText(GuiUtils.formatValue(self.mag_sld_data.znodes))
+            self.txtXstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.xstepsize))
+            self.txtYstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.ystepsize))
+            self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
 
         # If nodes or stepsize changed then this may effect what values are allowed
