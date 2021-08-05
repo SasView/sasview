@@ -812,7 +812,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtScale.setText("1.0")
             self.txtSolventSLD.setText("0.0")
             self.txtTotalVolume.setText("216000.0")
-            self.txtNoQBins.setText("50")
+            self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
             self.txtNoPixels.setText("1000")
             self.txtMx.setText("0")
