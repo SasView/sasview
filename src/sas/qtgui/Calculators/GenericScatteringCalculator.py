@@ -624,14 +624,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             logging.info(log_msg)
             raise
         logging.info("Load Complete")
-        # Once data files are loaded allow them to be enabled
+        # Once data files are loaded allow them to be enabled and then enable them
         if load_nuc:
             self.checkboxNucData.setEnabled(True)
+            self.checkboxNucData.setChecked(True)
         else:
             self.checkboxMagData.setEnabled(True)
-        # update GUI if these files are already enabled
-        if (load_nuc and self.is_nuc) or ((not load_nuc) and self.is_mag):
-            self.update_gui()
+            self.checkboxMagData.setChecked(True)
+        self.update_gui()
         # reset verification now we have loaded new files
         self.verification_occurred = False
         self.verified = False
