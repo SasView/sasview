@@ -124,6 +124,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtYstepsize.textChanged.connect(self.update_geometry_effects)
         self.txtZstepsize.textChanged.connect(self.update_geometry_effects)
 
+        #check for presence of magnetism
+        self.txtMx.textChanged.connect(self.check_for_magnetic_controls)
+        self.txtMy.textChanged.connect(self.check_for_magnetic_controls)
+        self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
+
         # setup initial configuration
         self.checkboxNucData.setEnabled(False)
         self.checkboxMagData.setEnabled(False)
@@ -439,6 +444,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.is_avg = False
         # update the gui with new values - sets the average values from enabled files
         self.update_gui()
+        self.check_for_magnetic_controls()
         # verify that the new enabled files are compatible
         self.verify_files_match()
         
@@ -469,6 +475,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(True)
             self.txtMy.setEnabled(True)
             self.txtMz.setEnabled(True)
+    
+    def check_for_magnetic_controls(self):
+        if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
+            if (not self.is_mag) and float(self.txtMx.text()) == 0 and float(self.txtMy.text()) == 0 and float(self.txtMy.text()) == 0:
+                self.txtUpFracIn.setEnabled(False)
+                self.txtUpFracOut.setEnabled(False)
+                self.txtUpTheta.setEnabled(False)
+                self.txtUpPhi.setEnabled(False)
+                return
+        self.txtUpFracIn.setEnabled(True)
+        self.txtUpFracOut.setEnabled(True)
+        self.txtUpTheta.setEnabled(True)
+        self.txtUpPhi.setEnabled(True)
 
     def loadFile(self):
         """Opens a menu to choose the datafile to load
