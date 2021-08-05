@@ -72,7 +72,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.parameters = []
         self.data = None
         self.datafile = None
-        self.file_name = ''
         self.ext = None
         self.default_shape = str(self.cbShape.currentText())
         self.is_avg = False
@@ -371,8 +370,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # if data points are equal then resort both lists into the same order
             # is this too time consuming for long lists? logging info?
             # 1) coords
-            self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.hsplit(nuc_coords, 3)
-            self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.hsplit(mag_coords, 3)
+            self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.transpose(nuc_coords)
+            self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.transpose(mag_coords)
             # 2) other array params that must be in same order as coords
             params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
             for item in params:
@@ -508,7 +507,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.datafile:
                 # set basic data about the file
                 self.default_shape = str(self.cbShape.currentText())
-                self.file_name = os.path.basename(str(self.datafile))
                 self.ext = os.path.splitext(str(self.datafile))[1]
                 # select the required loader for the data format
                 if self.ext in self.omf_reader.ext and (not load_nuc):
@@ -1156,6 +1154,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 sas_gen.SLDReader().write(filename, sld_data)
             except Exception:
                 raise
+    
+    def file_name(self):
+        """Creates a suitable filename for display on graphs depending on which files are enabled
+
+        :return: the filename
+        :rtype: str
+        """
+        if self.is_nuc:
+            if self.is_mag:
+                if self.nuc_sld_data.filename == self.mag_sld_data.filename:
+                    return self.nuc_sld_data.filename
+                else:
+                    return self.nuc_sld_data.filename + " & " + self.mag_sld_data.filename
+            else:
+                return self.nuc_sld_data.filename
+        else:
+            if self.is_mag:
+                return self.mag_sld_data.filename
+            else:
+                return "Rectangular grid from GUI"
+
 
     def plot3d(self, has_arrow=False):
         """ Generate 3D plot in real space with or without arrows
@@ -1167,7 +1186,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         sld_data = self.create_full_sld_data()
         self.write_new_values_from_gui()
         graph_title = " Graph {}: {} 3D SLD Profile".format(self.graph_num,
-                                                            self.file_name)
+                                                            self.file_name())
         if has_arrow:
             graph_title += ' - Magnetic Vector as Arrow'
 
@@ -1180,7 +1199,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """ Generate 1D or 2D plot, called in Compute"""
         if self.is_avg or self.is_avg is None:
             data = Data1D(x=self.data.x, y=self.data_to_plot)
-            data.title = "GenSAS {}  #{} 1D".format(self.file_name,
+            data.title = "GenSAS {}  #{} 1D".format(self.file_name(),
                                                     int(self.graph_num))
             data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
             data.yaxis('\\rm{Intensity}', 'cm^{-1}')
@@ -1194,7 +1213,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           xmin=self.data.xmin, xmax=self.data.ymax,
                           ymin=self.data.ymin, ymax=self.data.ymax,
                           err_image=self.data.err_data)
-            data.title = "GenSAS {}  #{} 2D".format(self.file_name,
+            data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
                                                     int(self.graph_num))
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
