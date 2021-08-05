@@ -15,8 +15,8 @@ class QRangeSlider(BaseInteractor):
     def __init__(self, base, axes, color='black', zorder=5, data=None):
         """
         """
-        BaseInteractor.__init__(self, base, axes, color=color)
         assert isinstance(data, Data1D)
+        BaseInteractor.__init__(self, base, axes, color=color)
         self.base = base
         self.markers = []
         self.axes = axes
