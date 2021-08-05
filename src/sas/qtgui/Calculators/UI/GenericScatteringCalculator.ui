@@ -1434,7 +1434,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
            </font>
           </property>
           <property name="text">
-           <string>50</string>
+           <string>30</string>
           </property>
          </widget>
         </item>

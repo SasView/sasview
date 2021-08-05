@@ -697,6 +697,7 @@ class OMF2SLD(object):
                              self.mx[mask], self.my[mask], self.mz[mask])
         self.output.set_pix_type('pixel')
         self.output.set_pixel_symbols('pixel')
+        self.output.filename = omfdata.filename
 
     def get_omfdata(self):
         """

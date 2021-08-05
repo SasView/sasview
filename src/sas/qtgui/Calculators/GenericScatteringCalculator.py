@@ -74,7 +74,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.parameters = []
         self.data = None
         self.datafile = None
-        self.file_name = ''
         self.ext = None
         self.default_shape = str(self.cbShape.currentText())
         self.is_avg = False
@@ -126,6 +125,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtXstepsize.textChanged.connect(self.update_geometry_effects)
         self.txtYstepsize.textChanged.connect(self.update_geometry_effects)
         self.txtZstepsize.textChanged.connect(self.update_geometry_effects)
+
+        #check for presence of magnetism
+        self.txtMx.textChanged.connect(self.check_for_magnetic_controls)
+        self.txtMy.textChanged.connect(self.check_for_magnetic_controls)
+        self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
 
         # setup initial configuration
         self.checkboxNucData.setEnabled(False)
@@ -589,9 +593,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
-            self.txtMx.setEnabled(not self.is_mag)
-            self.txtMy.setEnabled(not self.is_mag)
-            self.txtMz.setEnabled(not self.is_mag)
+        # update the gui with new values - sets the average values from enabled files
+        self.update_gui()
+        self.check_for_magnetic_controls()
+        # verify that the new enabled files are compatible
+        self.verify_files_match()
         
     def change_is_avg(self):
         """Adjusts the GUI for whether 1D averaging is enabled
@@ -620,6 +626,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(True)
             self.txtMy.setEnabled(True)
             self.txtMz.setEnabled(True)
+    
+    def check_for_magnetic_controls(self):
+        if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
+            if (not self.is_mag) and float(self.txtMx.text()) == 0 and float(self.txtMy.text()) == 0 and float(self.txtMy.text()) == 0:
+                self.txtUpFracIn.setEnabled(False)
+                self.txtUpFracOut.setEnabled(False)
+                self.txtUpTheta.setEnabled(False)
+                self.txtUpPhi.setEnabled(False)
+                return
+        self.txtUpFracIn.setEnabled(True)
+        self.txtUpFracOut.setEnabled(True)
+        self.txtUpTheta.setEnabled(True)
+        self.txtUpPhi.setEnabled(True)
 
     def loadFile(self):
         """Opens a menu to choose the datafile to load
@@ -660,7 +679,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.datafile:
                 # set basic data about the file
                 self.default_shape = str(self.cbShape.currentText())
-                self.file_name = os.path.basename(str(self.datafile))
                 self.ext = os.path.splitext(str(self.datafile))[1]
                 # select the required loader for the data format
                 if self.ext in self.omf_reader.ext and (not load_nuc):
@@ -778,14 +796,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             logging.info(log_msg)
             raise
         logging.info("Load Complete")
-        # Once data files are loaded allow them to be enabled
+        # Once data files are loaded allow them to be enabled and then enable them
         if load_nuc:
             self.checkboxNucData.setEnabled(True)
+            self.checkboxNucData.setChecked(True)
         else:
             self.checkboxMagData.setEnabled(True)
-        # update GUI if these files are already enabled
-        if (load_nuc and self.is_nuc) or ((not load_nuc) and self.is_mag):
-            self.update_gui()
+            self.checkboxMagData.setChecked(True)
+        self.update_gui()
         # reset verification now we have loaded new files
         self.verification_occurred = False
         self.verified = False
@@ -810,27 +828,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.lbl_unity.setText(mesh_unit)
             self.lbl_unitz.setText(mesh_unit)
             self.lbl_unitVolume.setText(mesh_unit+"^3")
-
-    def format_value(self, value):
-        """Formats certain data for the GUI.
-        
-        Some data stored by the sld file is a numpy array - in which case the average is formatted.
-        Other data is a single value in which case the value is formatted. The formatting is done
-        by GuiUtils.formatNumber(). If the value is `None` then the string "NaN" is returned
-
-        :param value: The value to be formatted
-        :type value: int, float, numpy.array
-        :return: The formatted value
-        :rtype: str
-        """
-        if value is None:
-            return "NaN"
-        else:
-            if isinstance(value, numpy.ndarray):
-                value = str(GuiUtils.formatNumber(numpy.average(value), True))
-            else:
-                value = str(GuiUtils.formatNumber(value, True))
-            return value
 
     def update_gui(self):
         """Update the interface and model with values from loaded data
@@ -885,25 +882,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # Fill right hand side of GUI
         if self.is_mag:
-            self.txtMx.setText(self.format_value(self.mag_sld_data.sld_mx))
-            self.txtMy.setText(self.format_value(self.mag_sld_data.sld_my))
-            self.txtMz.setText(self.format_value(self.mag_sld_data.sld_mz))
+            self.txtMx.setText(GuiUtils.formatValue(self.mag_sld_data.sld_mx))
+            self.txtMy.setText(GuiUtils.formatValue(self.mag_sld_data.sld_my))
+            self.txtMz.setText(GuiUtils.formatValue(self.mag_sld_data.sld_mz))
         if self.is_nuc:
-            self.txtNucl.setText(self.format_value(self.nuc_sld_data.sld_n))
-            self.txtXnodes.setText(self.format_value(self.nuc_sld_data.xnodes))
-            self.txtYnodes.setText(self.format_value(self.nuc_sld_data.ynodes))
-            self.txtZnodes.setText(self.format_value(self.nuc_sld_data.znodes))
-            self.txtXstepsize.setText(self.format_value(self.nuc_sld_data.xstepsize))
-            self.txtYstepsize.setText(self.format_value(self.nuc_sld_data.ystepsize))
-            self.txtZstepsize.setText(self.format_value(self.nuc_sld_data.zstepsize))
+            self.txtNucl.setText(GuiUtils.formatValue(self.nuc_sld_data.sld_n))
+            self.txtXnodes.setText(GuiUtils.formatValue(self.nuc_sld_data.xnodes))
+            self.txtYnodes.setText(GuiUtils.formatValue(self.nuc_sld_data.ynodes))
+            self.txtZnodes.setText(GuiUtils.formatValue(self.nuc_sld_data.znodes))
+            self.txtXstepsize.setText(GuiUtils.formatValue(self.nuc_sld_data.xstepsize))
+            self.txtYstepsize.setText(GuiUtils.formatValue(self.nuc_sld_data.ystepsize))
+            self.txtZstepsize.setText(GuiUtils.formatValue(self.nuc_sld_data.zstepsize))
         if self.is_mag and ((not self.is_nuc) or self.txtXnodes.text() == "NaN"):
             # If unable to get node data from nuclear system (not enabled or not present)
-            self.txtXnodes.setText(self.format_value(self.mag_sld_data.xnodes))
-            self.txtYnodes.setText(self.format_value(self.mag_sld_data.ynodes))
-            self.txtZnodes.setText(self.format_value(self.mag_sld_data.znodes))
-            self.txtXstepsize.setText(self.format_value(self.mag_sld_data.xstepsize))
-            self.txtYstepsize.setText(self.format_value(self.mag_sld_data.ystepsize))
-            self.txtZstepsize.setText(self.format_value(self.mag_sld_data.zstepsize))
+            self.txtXnodes.setText(GuiUtils.formatValue(self.mag_sld_data.xnodes))
+            self.txtYnodes.setText(GuiUtils.formatValue(self.mag_sld_data.ynodes))
+            self.txtZnodes.setText(GuiUtils.formatValue(self.mag_sld_data.znodes))
+            self.txtXstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.xstepsize))
+            self.txtYstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.ystepsize))
+            self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
 
         # If nodes or stepsize changed then this may effect what values are allowed
@@ -1000,7 +997,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtScale.setText("1.0")
             self.txtSolventSLD.setText("0.0")
             self.txtTotalVolume.setText("216000.0")
-            self.txtNoQBins.setText("50")
+            self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
             self.txtNoPixels.setText("1000")
             self.txtMx.setText("0")
@@ -1360,6 +1357,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 sas_gen.SLDReader().write(filename, sld_data)
             except Exception:
                 raise
+    
+    def file_name(self):
+        """Creates a suitable filename for display on graphs depending on which files are enabled
+
+        :return: the filename
+        :rtype: str
+        """
+        if self.is_nuc:
+            if self.is_mag:
+                if self.nuc_sld_data.filename == self.mag_sld_data.filename:
+                    return self.nuc_sld_data.filename
+                else:
+                    return self.nuc_sld_data.filename + " & " + self.mag_sld_data.filename
+            else:
+                return self.nuc_sld_data.filename
+        else:
+            if self.is_mag:
+                return self.mag_sld_data.filename
+            else:
+                return "Rectangular grid from GUI"
+
 
     def plot3d(self, has_arrow=False):
         """ Generate 3D plot in real space with or without arrows
@@ -1371,7 +1389,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         sld_data = self.create_full_sld_data()
         self.write_new_values_from_gui()
         graph_title = " Graph {}: {} 3D SLD Profile".format(self.graph_num,
-                                                            self.file_name)
+                                                            self.file_name())
         if has_arrow:
             graph_title += ' - Magnetic Vector as Arrow'
 
@@ -1384,7 +1402,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """ Generate 1D or 2D plot, called in Compute"""
         if self.is_avg or self.is_avg is None:
             data = Data1D(x=self.data.x, y=self.data_to_plot)
-            data.title = "GenSAS {}  #{} 1D".format(self.file_name,
+            data.title = "GenSAS {}  #{} 1D".format(self.file_name(),
                                                     int(self.graph_num))
             data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
             data.yaxis('\\rm{Intensity}', 'cm^{-1}')
@@ -1398,7 +1416,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           xmin=self.data.xmin, xmax=self.data.ymax,
                           ymin=self.data.ymin, ymax=self.data.ymax,
                           err_image=self.data.err_data)
-            data.title = "GenSAS {}  #{} 2D".format(self.file_name,
+            data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
                                                     int(self.graph_num))
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
