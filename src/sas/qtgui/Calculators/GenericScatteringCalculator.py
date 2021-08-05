@@ -4,7 +4,6 @@ import numpy
 import logging
 import time
 import timeit
-from copy import deepcopy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -578,6 +577,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtZstepsize.setEnabled(both_disabled)
         # update the gui with new values - sets the average values from enabled files
         self.update_gui()
+        self.check_for_magnetic_controls()
         # verify that the new enabled files are compatible
         self.verify_files_match()
     
@@ -593,11 +593,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
-        # update the gui with new values - sets the average values from enabled files
-        self.update_gui()
-        self.check_for_magnetic_controls()
-        # verify that the new enabled files are compatible
-        self.verify_files_match()
+            self.txtMx.setEnabled(not self.is_mag)
+            self.txtMy.setEnabled(not self.is_mag)
+            self.txtMz.setEnabled(not self.is_mag)
+
         
     def change_is_avg(self):
         """Adjusts the GUI for whether 1D averaging is enabled
