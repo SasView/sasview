@@ -144,8 +144,10 @@ class LineInteractor(BaseInteractor):
         if not perspective:
             self.perspective = None
             return
+        # Import on demand to prevent circular import
+        from sas.qtgui.MainWindow.GuiManager import LOADED_PERSPECTIVES
         # Map GUI input to x value so slider and input update each other
-        self.perspective = base.base.parent.manager.parent.loadedPerspectives.get(perspective, None)
+        self.perspective = LOADED_PERSPECTIVES.get(perspective, None)
         if tab and hasattr(self.perspective, 'getTabByName'):
             self.perspective = self.perspective.getTabByName(tab)
         if self.perspective:
