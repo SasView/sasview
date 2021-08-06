@@ -428,10 +428,11 @@ class VTKReader:
         output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
         output.filename = os.path.basename(path)
         # check if elements can be written as numpy array
+        are_elements_identical = False
         if all(element_types[0] == x for x in element_types):
             elements = np.array(elements)
-            output.are_elements_identical = True
-        output.set_elements(elements)
+            are_elements_identical = True
+        output.set_elements(elements, are_elements_identical)
         output.set_pixel_symbols('pixel') # draw points as pixels
         output.set_pixel_volumes(vols)
         return output
@@ -1231,6 +1232,7 @@ class MagSLD(object):
         self.sld_my = sld_my
         self.sld_mz = sld_mz
         self.vol_pix = vol_pix
+        self.data_length = len(pos_x)
         #self.sld_m = None
         #self.sld_phi = None
         #self.sld_theta = None
@@ -1275,13 +1277,13 @@ class MagSLD(object):
                               np.fabs(self.sld_my) +
                               np.fabs(self.sld_mz)).nonzero()
                 if len(is_nonzero[0]) > 0:
-                    self.sld_n = np.zeros_like(self.sld_mx)
+                    self.sld_n = np.zeros((self.data_length))
                     self.sld_n[is_nonzero] = sld_n
                 else:
-                    self.sld_n = np.full_like(self.sld_mx, sld_n)
+                    self.sld_n = np.full((self.data_length), sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n = np.full_like(self.sld_mx, sld_n)
+                self.sld_n = np.full((self.data_length), sld_n)
         else:
             self.sld_n = sld_n
 
@@ -1290,15 +1292,15 @@ class MagSLD(object):
         Sets mx, my, mz and abs(m).
         """ # Note: escaping
         if isinstance(sld_mx, float):
-            self.sld_mx = np.full_like(self.sld_n, sld_mx)
+            self.sld_mx = np.full((self.data_length), sld_mx)
         else:
             self.sld_mx = sld_mx
         if isinstance(sld_my, float):
-            self.sld_my = np.full_like(self.sld_n, sld_my)
+            self.sld_my = np.full((self.data_length), sld_my)
         else:
             self.sld_my = sld_my
         if isinstance(sld_mz, float):
-            self.sld_mz = np.full_like(self.sld_n, sld_mz)
+            self.sld_mz = np.full((self.data_length), sld_mz)
         else:
             self.sld_mz = sld_mz
 
@@ -1316,7 +1318,7 @@ class MagSLD(object):
         if self.sld_n is None:
             return
         if symbol.__class__.__name__ == 'str':
-            self.pix_symbol = np.repeat(symbol, len(self.pos_x))
+            self.pix_symbol = np.repeat(symbol, self.data_length)
         else:
             self.pix_symbol = symbol
 
@@ -1330,12 +1332,12 @@ class MagSLD(object):
         if isinstance(vol, np.ndarray):
             self.vol_pix = vol
         elif vol.__class__.__name__.count('float') > 0:
-            self.vol_pix = np.repeat(vol, len(self.sld_n))
+            self.vol_pix = np.repeat(vol, self.data_length)
         else:
             # TODO: raise error rather than silently ignore
             self.vol_pix = None
     
-    def set_elements(self, elements):
+    def set_elements(self, elements, are_elements_identical):
         """Set elements for a non-rectangular grid
 
         This sets element data for the object allowing non rectangular grids to be used.
@@ -1351,8 +1353,10 @@ class MagSLD(object):
         :type elements: list
         """
         self.is_elements = True
+        self.are_elements_identical = are_elements_identical
         self.elements = elements
         self.pix_type = "elements"
+        self.data_length = len(elements)
         self.set_nodes()
 
     def get_sldn(self):

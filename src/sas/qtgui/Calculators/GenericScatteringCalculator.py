@@ -1188,6 +1188,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pos_y = self.mag_sld_data.pos_y
             sld_data.pos_z = self.mag_sld_data.pos_z
 
+        if self.is_nuc:
+            if self.nuc_sld_data.is_elements:
+                sld_data.set_elements(self.nuc_sld_data.elements, self.nuc_sld_data.are_elements_identical)
+        elif self.is_mag:
+            if self.mag_sld_data.is_elements:
+                sld_data.set_elements(self.mag_sld_data.elements, self.mag_sld_data.are_elements_identical)
+
         # set the sld data from the required model file/GUI textbox
         if (self.is_nuc):
             sld_data.set_sldn(self.nuc_sld_data.sld_n)
@@ -1226,17 +1233,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif self.is_mag:
             sld_data.pix_type = self.mag_sld_data.pix_type
             sld_data.pix_symbol = self.mag_sld_data.pix_symbol
-        
-        if self.is_nuc:
-            if self.nuc_sld_data.is_elements:
-                sld_data.is_elements = True
-                sld_data.are_elements_identical = self.nuc_sld_data.are_elements_identical
-                sld_data.elements = self.nuc_sld_data.elements
-        elif self.is_mag:
-            if self.mag_sld_data.is_elements:
-                sld_data.is_elements = True
-                sld_data.are_elements_identical = self.mag_sld_data.are_elements_identical
-                sld_data.elements = self.mag_sld_data.elements
+    
 
         return sld_data
 
