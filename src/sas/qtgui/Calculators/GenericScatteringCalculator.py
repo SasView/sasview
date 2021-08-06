@@ -425,7 +425,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMx.setEnabled(not self.is_mag)
         self.txtMy.setEnabled(not self.is_mag)
         self.txtMz.setEnabled(not self.is_mag)
+        if not self.is_mag:
+            self.txtMx.setText("0")
+            self.txtMy.setText("0")
+            self.txtMz.setText("0")
         self.txtNucl.setEnabled(not self.is_nuc)
+        if not self.is_nuc:
+            self.txtNucl.setText("0")
         # The ability to change the number of nodes and stepsizes only if no laoded data file enabled
         both_disabled =  (not self.is_mag) and (not self.is_nuc)
         if both_disabled:
