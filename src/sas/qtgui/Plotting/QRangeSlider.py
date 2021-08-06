@@ -69,6 +69,7 @@ class QRangeSlider(BaseInteractor):
     def remove(self):
         self.line_max.remove()
         self.line_min.remove()
+        self.draw()
         self.is_visible = False
 
     def update(self, x=None, y=None):
