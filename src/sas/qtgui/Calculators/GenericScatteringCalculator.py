@@ -565,10 +565,29 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMagData.setEnabled(self.is_mag)
         # only allow editing of mean values if no data file for that vlaue has been loaded
         # user provided mean values are taken as a constant across all points
-        # magnetic mean boxes chagned in self.update_cbOptionsCalc_visibility as also depends on combobox
+        self.txtMx.setEnabled(not self.is_mag)
+        self.txtMy.setEnabled(not self.is_mag)
+        self.txtMz.setEnabled(not self.is_mag)
+        if not self.is_mag:
+            self.txtMx.setText("0")
+            self.txtMy.setText("0")
+            self.txtMz.setText("0")
         self.txtNucl.setEnabled(not self.is_nuc)
+        if not self.is_nuc:
+            self.txtNucl.setText("0")
         # The ability to change the number of nodes and stepsizes only if no laoded data file enabled
         both_disabled =  (not self.is_mag) and (not self.is_nuc)
+        if both_disabled:
+            self.txtMx.setText("0")
+            self.txtMy.setText("0")
+            self.txtMz.setText("0")
+            self.txtNucl.setText("6.97e-06")
+            self.txtXnodes.setText("10")
+            self.txtYnodes.setText("10")
+            self.txtZnodes.setText("10")
+            self.txtXstepsize.setText("6")
+            self.txtYstepsize.setText("6")
+            self.txtZstepsize.setText("6")
         self.txtXnodes.setEnabled(both_disabled)
         self.txtYnodes.setEnabled(both_disabled)
         self.txtZnodes.setEnabled(both_disabled)
