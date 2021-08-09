@@ -35,7 +35,7 @@ class QRangeSlidersTest(unittest.TestCase):
 
         self.manager = GuiManager(MainWindow(None))
         self.plotter = Plotter.Plotter(None, quickplot=True)
-        self.data = Data1D(x=[0,0.1,0.2,0.3,0.4], y=[1000,100,10,1,0.1])
+        self.data = Data1D(x=[0.001,0.1,0.2,0.3,0.4], y=[1000,100,10,1,0.1])
         self.data.name = "Test QRangeSliders class"
         self.data.show_q_range_sliders = True
         self.data.slider_update_on_move = True
@@ -79,13 +79,12 @@ class QRangeSlidersTest(unittest.TestCase):
         self.data.slider_low_q_input = ['options_widget', 'txtMinRange']
         self.data.slider_low_q_setter = ['options_widget', 'updateMinQ']
         self.plotter.plot(self.data)
-        q_sliders = self.plotter.sliders.get(self.data.name)
+        self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
         self.assertEqual(len(self.plotter.sliders), 1)
-        self.assertEqual(q_sliders.line_min.setter, widget.options_widget.updateMinQ)
-        self.assertEqual(q_sliders.line_max.setter, widget.options_widget.updateMaxQ)
-        # Move slider and ensure text input matches
-        self.moveSliderAndInputs(q_sliders, widget.options_widget.txtMinRange, widget.options_widget.txtMaxRange)
+        self.assertEqual(self.slider.line_min.setter, widget.options_widget.updateMinQ)
+        self.assertEqual(self.slider.line_max.setter, widget.options_widget.updateMaxQ)
+        self.moveSliderAndInputs(widget.options_widget.txtMinRange, widget.options_widget.txtMaxRange)
 
     def testInvariantSliders(self):
         '''Test the QRangeSlider class within the context of the Invariant perspective'''
@@ -93,20 +92,25 @@ class QRangeSlidersTest(unittest.TestCase):
         self.current_perspective = 'Invariant'
         self.manager.perspectiveChanged(self.current_perspective)
         widget = self.manager.perspective()
-        self.manager.filesWidget.sendData()
+        widget._data = self.data
         # Create slider on base data set
-        self.data.slider_update_on_move = False
         self.data.slider_perspective_name = self.current_perspective
         self.data.slider_low_q_input = ['txtNptsHighQ']
         self.data.slider_low_q_setter = ['set_high_q_extrapolation_lower_limit']
         self.data.slider_low_q_getter = ['get_high_q_extrapolation_lower_limit']
         self.data.slider_high_q_input = ['txtExtrapolQMax']
         self.plotter.plot(self.data)
-        q_sliders = self.plotter.sliders.get(self.data.name)
+        self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
         self.assertEqual(len(self.plotter.sliders), 1)
-        # Move slider and ensure text input matches
-        self.moveSliderAndInputs(q_sliders, widget.txtNptsHighQ, widget.txtExtrapolQMax)
+        # Move slider and ensure text input matches - Npts needs to be checked differently
+        self.moveSliderAndInputs(None, widget.txtExtrapolQMax)
+        # Check npts after moving line
+        self.slider.line_min.move(self.data.x[1], self.data.y[1], None)
+        self.assertAlmostEqual(5, float(widget.txtNptsHighQ.text()))
+        # Move npts and check slider
+        widget.txtNptsHighQ.setText('2')
+        self.assertAlmostEqual(self.data.x[2], self.slider.line_min.x)
 
     def testInversionSliders(self):
         '''Test the QRangeSlider class within the context of the Inversion perspective'''
@@ -114,7 +118,6 @@ class QRangeSlidersTest(unittest.TestCase):
         self.current_perspective = 'Inversion'
         self.manager.perspectiveChanged(self.current_perspective)
         widget = self.manager.perspective()
-        self.manager.filesWidget.sendData()
         # Create slider on base data set
         self.data.slider_perspective_name = self.current_perspective
         self.data.slider_low_q_input = ['minQInput']
@@ -122,11 +125,11 @@ class QRangeSlidersTest(unittest.TestCase):
         self.data.slider_high_q_input = ['maxQInput']
         self.data.slider_high_q_setter = ['check_q_high']
         self.plotter.plot(self.data)
-        q_sliders = self.plotter.sliders.get(self.data.name)
+        self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
         self.assertEqual(len(self.plotter.sliders), 1)
         # Move slider and ensure text input matches
-        self.moveSliderAndInputs(q_sliders, widget.minQInput, widget.maxQInput)
+        self.moveSliderAndInputs(widget.minQInput, widget.maxQInput)
 
     def testLinearFitSliders(self):
         '''Test the QRangeSlider class within the context of the Linear Fit tool'''
@@ -134,33 +137,34 @@ class QRangeSlidersTest(unittest.TestCase):
         linearFit = LinearFit(self.plotter, self.data, (min(self.data.x), max(self.data.x)),
                               (min(self.data.x), max(self.data.x)))
         linearFit.fit(None)
-        q_sliders = linearFit.q_sliders
+        self.slider = linearFit.q_sliders
         # Ensure base values match
         self.assertAlmostEqual(min(self.data.x), float(linearFit.txtFitRangeMin.text()))
         # Move inputs and sliders and ensure values match
-        self.moveSliderAndInputs(q_sliders, linearFit.txtFitRangeMin, linearFit.txtFitRangeMax)
+        self.moveSliderAndInputs(linearFit.txtFitRangeMin, linearFit.txtFitRangeMax)
 
-    def moveSliderAndInputs(self, q_sliders, minInput, maxInput):
+    def moveSliderAndInputs(self, minInput, maxInput):
         '''Helper method to minimize repeated code'''
         # Check QRangeSlider defaults and connections
-        self.assertIsNotNone(q_sliders)
-        self.assertIsNotNone(minInput)
-        self.assertIsNotNone(maxInput)
-        self.assertEqual(q_sliders.line_min.input, minInput)
-        self.assertEqual(q_sliders.line_max.input, maxInput)
+        self.assertIsNotNone(self.slider)
 
         # Move slider and ensure text input matches
-        q_sliders.line_min.move(self.data.x[1], self.data.y[1], None)
-        self.assertAlmostEqual(q_sliders.line_min.x, float(minInput.text()))
-        q_sliders.line_max.move(self.data.x[-2], self.data.y[-2], None)
-        self.assertAlmostEqual(q_sliders.line_max.x, float(maxInput.text()))
+        if minInput:
+            self.assertEqual(self.slider.line_min.input, minInput)
+            self.slider.line_min.move(self.data.x[1], self.data.y[1], None)
+            self.assertAlmostEqual(self.slider.line_min.x, float(minInput.text()))
+        if maxInput:
+            self.assertEqual(self.slider.line_max.input, maxInput)
+            self.slider.line_max.move(self.data.x[-2], self.data.y[-2], None)
+            self.assertAlmostEqual(self.slider.line_max.x, float(maxInput.text()))
 
         # Edit text input and ensure QSlider position matches
-        minInput.setText(f'{self.data.x[1]}')
-        self.assertAlmostEqual(q_sliders.line_min.x, float(minInput.text()))
-        maxInput.setText(f'{self.data.x[-2]}')
-        self.assertAlmostEqual(q_sliders.line_max.x, float(maxInput.text()))
-
+        if minInput:
+            minInput.setText(f'{self.data.x[1]}')
+            self.assertAlmostEqual(self.slider.line_min.x, float(minInput.text()))
+        if maxInput:
+            maxInput.setText(f'{self.data.x[-2]}')
+            self.assertAlmostEqual(self.slider.line_max.x, float(maxInput.text()))
 
 
 if __name__ == "__main__":
