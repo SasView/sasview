@@ -71,7 +71,6 @@ class QRangeSlidersTest(unittest.TestCase):
         self.manager.filesWidget.sendData()
         widget = fitting.currentTab
         # Create slider on base data set
-        self.data.slider_update_on_move = False
         self.data.slider_tab_name = widget.modelName()
         self.data.slider_perspective_name = self.current_perspective
         self.data.slider_high_q_input = ['options_widget', 'txtMaxRange']
