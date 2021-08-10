@@ -440,7 +440,7 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     # will have one v vector which dots to 0 with it
     # seems to be very little difference to just using eps on the problematic face and letting
     # the Qp.v method sort out the other faces
-    # TODO: Not just use eps*(1,1,1) as the vector but find the correct vector
+    # ensuring that the epsilon vector is within the plance of the face appers to be uneccessary
     problem_elements = np.any(np.all(np.abs(Qp)<eps, axis=-1) , axis=-1)
     Qp[problem_elements, ...] += eps
     Q[problem_elements, ...] += eps

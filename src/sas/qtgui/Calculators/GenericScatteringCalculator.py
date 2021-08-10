@@ -1594,7 +1594,7 @@ class Plotter3DWidget(PlotterBase):
                         color_y = numpy.fabs(unit_y2 * 0.8)
                         color_z = numpy.fabs(unit_z2 * 0.8)
                         if data.is_elements: # convert positions to match elements
-                            # TODO: pos_x does not exist within the function, sld_mx etc. do, why?
+                            # TODO: pos_x does not exist within the function - have to relocate from data, sld_mx etc. do carry through, why?
                             if data.are_elements_identical:
                                 vertices = numpy.unique(data.elements.reshape((data.elements.shape[0], -1)), axis=-1)
                                 pos_x = numpy.mean(data.pos_x[vertices], axis=-1)
