@@ -1318,7 +1318,7 @@ class MagSLD(object):
         if self.sld_n is None:
             return
         if symbol.__class__.__name__ == 'str':
-            self.pix_symbol = np.repeat(symbol, self.data_length)
+            self.pix_symbol = np.repeat(symbol, len(self.pos_x))
         else:
             self.pix_symbol = symbol
 

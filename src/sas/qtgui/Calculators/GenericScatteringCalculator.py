@@ -1201,11 +1201,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pos_x = self.nuc_sld_data.pos_x
             sld_data.pos_y = self.nuc_sld_data.pos_y
             sld_data.pos_z = self.nuc_sld_data.pos_z
+            sld_data.data_length = len(self.nuc_sld_data.pos_x)
         elif self.is_mag:
             sld_data.vol_pix = self.mag_sld_data.vol_pix
             sld_data.pos_x = self.mag_sld_data.pos_x
             sld_data.pos_y = self.mag_sld_data.pos_y
             sld_data.pos_z = self.mag_sld_data.pos_z
+            sld_data.data_length = len(self.mag_sld_data.pos_x)
 
         if self.is_nuc:
             if self.nuc_sld_data.is_elements:
@@ -1490,15 +1492,15 @@ class Plotter3DWidget(PlotterBase):
         pos_x = data.pos_x
         pos_y = data.pos_y
         pos_z = data.pos_z
+        sld_mx = data.sld_mx
+        sld_my = data.sld_my
+        sld_mz = data.sld_mz
+        sld_tot = numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
+                numpy.fabs(sld_mz) + numpy.fabs(data.sld_n)
         if data.is_elements: # Do not assign values to points if values are element-wise
             is_nonzero = numpy.ones_like(pos_x, dtype=bool)
             is_zero = numpy.zeros_like(pos_x, dtype=bool)
         else:
-            sld_mx = data.sld_mx
-            sld_my = data.sld_my
-            sld_mz = data.sld_mz
-            sld_tot = numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
-                    numpy.fabs(sld_mz) + numpy.fabs(data.sld_n)
             is_nonzero = sld_tot > 0.0
             is_zero = sld_tot == 0.0
         pix_symbol = data.pix_symbol
@@ -1561,8 +1563,7 @@ class Plotter3DWidget(PlotterBase):
                              data.line_y[ind], '-', lw=0.6, c="grey",
                              alpha=0.3)
         # V. Draws magnetic vectors
-        # TODO: draw arrows for elements
-        if has_arrow and len(pos_x) > 0 and not data.is_elements:
+        if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):
                 # import moved here for performance reasons
                 from sas.qtgui.Plotting.Arrow3D import Arrow3D
@@ -1573,9 +1574,16 @@ class Plotter3DWidget(PlotterBase):
                 max_my = max(numpy.fabs(sld_my))
                 max_mz = max(numpy.fabs(sld_mz))
                 max_m = max(max_mx, max_my, max_mz)
-                max_step = max(data.xstepsize, data.ystepsize, data.zstepsize)
-                if max_step <= 0:
-                    max_step = 5
+                if data.xstepsize is None or data.ystepsize is None or data.zstepsize is None:
+                    if data.is_elements:
+                        vol_per_element = numpy.sum(data.vol_pix)/len(data.elements)
+                    else:
+                        vol_per_element = numpy.sum(data.vol_pix)/len(data.pos_x)
+                    max_step = numpy.cbrt(vol_per_element)
+                else:
+                    max_step = max(data.xstepsize, data.ystepsize, data.zstepsize)
+                    if max_step <= 0:
+                        max_step = 5
                 try:
                     if max_m != 0:
                         unit_x2 = sld_mx / max_m
@@ -1585,6 +1593,18 @@ class Plotter3DWidget(PlotterBase):
                         color_x = numpy.fabs(unit_x2 * 0.8)
                         color_y = numpy.fabs(unit_y2 * 0.8)
                         color_z = numpy.fabs(unit_z2 * 0.8)
+                        if data.is_elements: # convert positions to match elements
+                            # TODO: pos_x does not exist within the function, sld_mx etc. do, why?
+                            if data.are_elements_identical:
+                                vertices = numpy.unique(data.elements.reshape((data.elements.shape[0], -1)), axis=-1)
+                                pos_x = numpy.mean(data.pos_x[vertices], axis=-1)
+                                pos_y = numpy.mean(data.pos_y[vertices], axis=-1)
+                                pos_z = numpy.mean(data.pos_z[vertices], axis=-1)
+                            else:
+                                vertices = [list(set([vertex for face in element for vertex in face])) for element in data.elements]
+                                pos_x = numpy.array([numpy.mean([data.pos_x[vertex] for vertex in element]) for element in vertices])
+                                pos_y = numpy.array([numpy.mean([data.pos_y[vertex] for vertex in element]) for element in vertices])
+                                pos_z = numpy.array([numpy.mean([data.pos_z[vertex] for vertex in element]) for element in vertices])
                         x2 = pos_x + unit_x2 * max_step
                         y2 = pos_y + unit_y2 * max_step
                         z2 = pos_z + unit_z2 * max_step
