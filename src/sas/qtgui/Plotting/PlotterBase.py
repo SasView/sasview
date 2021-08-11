@@ -316,6 +316,7 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Overwrite the close event adding helper notification
         """
+        self.clearQRangeSliders()
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
@@ -323,6 +324,13 @@ class PlotterBase(QtWidgets.QWidget):
         self.manager.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
+
+    def clearQRangeSliders(self):
+        # Destroy the Q-range sliders in 1D plots
+        if hasattr(self, 'sliders') and isinstance(self.sliders, dict):
+            for slider in self.sliders.values():
+                slider.clear()
+            self.sliders = {}
 
     def onImageSave(self):
         """

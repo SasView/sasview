@@ -296,8 +296,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         # Clear data plots
         self._canvas.data = None
         self._canvas.extrap = None
+        self._canvas.draw_q_space()
         self._realplot.data = None
         self._realplot.extrap = None
+        self._realplot.draw_real_space()
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
@@ -305,12 +307,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
-        # Disable buttons to return to base state
-        self.cmdExtrapolate.setEnabled(False)
-        self.cmdTransform.setEnabled(False)
-        self.cmdExtract.setEnabled(False)
-        self.cmdSave.setEnabled(False)
-        self.cmdCalculateBg.setEnabled(False)
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
@@ -700,9 +696,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdCalculateBg.setEnabled(params.get('background', '0') != '0')
         self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
         self.cmdExtrapolate.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0.0')
-        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0.0')
+        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0')
+        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
         if params.get('guinier_a', '0.0') != '0.0':
             self.extrapolate()
-        if params.get('long_period', '0') != '0.0':
+        if params.get('long_period', '0') != '0':
             self.transform()

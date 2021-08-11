@@ -250,7 +250,10 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         for option in options.keys():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
-            widget_name = 'self.'+option+'_'+fitter_id
+            attribute = option + '_' + fitter_id
+            if not hasattr(self, attribute):
+                continue
+            widget_name = 'self.'+attribute
             if option not in bumps.options.FIT_FIELDS:
                 return
             if isinstance(bumps.options.FIT_FIELDS[option][1], bumps.options.ChoiceList):
