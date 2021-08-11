@@ -352,7 +352,7 @@ def _calc_Iqxy_magnetic_elements(
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
     return Iq.reshape(shape)
 
-# TODO: currently doesn't use numba - can this be integrated with fourier transform method
+# TODO: currently doesn't use numba
 def _calc_Iqxy_magnetic_elements_helper(
         Iq, qx, qy, geometry, normals, rn_norm, rho, M, elements, vol,
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu):
@@ -464,6 +464,7 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
         # if Qp.v is non-zero can use standard code as in paper
         term[nzero] = term[nzero] * (np.exp(1j * np.sum(Qp[nzero, ...] * geometry[nzero,i+1], axis=-1)) \
                             - np.exp(1j * np.sum(Qp[nzero, ...] * geometry[nzero,i], axis=-1))) / Qp_dot_v[nzero]
+        # If Qp.v -> 0 then the difference of the exponentials also goes to zero - use L'Hôpital's rule as Qp.r1 -> Qp.r2
         term[zero] = term[zero] * 1j * np.exp(1j * np.sum(Qp[zero, ...] * geometry[zero,i], axis=-1))
         sub_sum += term
     # sum over all the faces in each subvolume to return an array of transforms of sub_volumes

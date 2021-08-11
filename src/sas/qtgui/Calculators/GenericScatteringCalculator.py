@@ -420,22 +420,22 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.verified = False
                 self.toggle_error_functionality("ERROR: files have different real space position data")
                 return
-        if self.nuc_sld_data.are_elements_identical != self.nuc_sld_data.are_elements_identical:
+        if self.nuc_sld_data.are_elements_array != self.nuc_sld_data.are_elements_array:
             # If files don't have the same value for this they do not match anyway.
             self.verification_occurred = True
             self.verified = False
             self.toggle_error_functionality("ERROR: files must contain the same elements")
-        if self.nuc_sld_data.are_elements_identical: # already in numpy array - can check rapidly
+        if self.nuc_sld_data.are_elements_array: # already in numpy array - can check rapidly
             if points_already_match:
                 if numpy.array_equal(self.nuc_sld_data.elements, self.mag_sld_data.elements): # straight match - immediately confirm
                     self.verification_occurred = True
                     self.verified = True
                     self.toggle_error_functionality()
                     return
-                # convert each element in a list of vertices - do not bother comparing each face
-                # while technically with a large number of points one could describe multiple diiferent
-                # elements, this is not possible from .vtk files - and would massively slow down verification.
-                # unique also sorts 
+                # convert each element into a list of vertices - do not bother comparing each face separately
+                # while technically with a large number of points one could describe multiple different
+                # elements, this is not possible from .vtk element types - and would massively slow down verification.
+                # numpy.unique also sorts the vertices
                 nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
                 mag_elements_sort = numpy.unique(self.mag_sld_data.elements.reshape((self.mag_sld_data.elements.shape[0], -1)), axis=-1)
             else:
@@ -1211,10 +1211,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         if self.is_nuc:
             if self.nuc_sld_data.is_elements:
-                sld_data.set_elements(self.nuc_sld_data.elements, self.nuc_sld_data.are_elements_identical)
+                sld_data.set_elements(self.nuc_sld_data.elements, self.nuc_sld_data.are_elements_array)
         elif self.is_mag:
             if self.mag_sld_data.is_elements:
-                sld_data.set_elements(self.mag_sld_data.elements, self.mag_sld_data.are_elements_identical)
+                sld_data.set_elements(self.mag_sld_data.elements, self.mag_sld_data.are_elements_array)
 
         # set the sld data from the required model file/GUI textbox
         if (self.is_nuc):
@@ -1266,10 +1266,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
-            #TODO: implement full fourier transform method for this
+            # TODO: implement fourier transform for meshes with multiple element or face types
+            # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
+            # increase the calculation time.
             if sld_data.is_elements:
-                if not sld_data.are_elements_identical:
-                    logging.error("SasView does not currently support computation of meshes with multiple element types")
+                if not sld_data.are_elements_array:
+                    logging.error("SasView does not currently support computation of meshes with multiple element or face types")
                     return
             self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()
@@ -1595,7 +1597,7 @@ class Plotter3DWidget(PlotterBase):
                         color_z = numpy.fabs(unit_z2 * 0.8)
                         if data.is_elements: # convert positions to match elements
                             # TODO: pos_x does not exist within the function - have to relocate from data, sld_mx etc. do carry through, why?
-                            if data.are_elements_identical:
+                            if data.are_elements_array:
                                 vertices = numpy.unique(data.elements.reshape((data.elements.shape[0], -1)), axis=-1)
                                 pos_x = numpy.mean(data.pos_x[vertices], axis=-1)
                                 pos_y = numpy.mean(data.pos_y[vertices], axis=-1)

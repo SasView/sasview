@@ -427,12 +427,12 @@ class VTKReader:
         # need to flatten as hsplit leaves a length 1 axis
         output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
         output.filename = os.path.basename(path)
-        # check if elements can be written as numpy array
-        are_elements_identical = False
-        if all(element_types[0] == x for x in element_types):
+        # check if elements can be written as numpy array - all elements have same number of faces - all faces have same number of vertices
+        are_elements_array = False
+        if all(element_types[0] == x for x in element_types) and not (element_types[0] == 13) and not (element_types[0] == 14):
             elements = np.array(elements)
-            are_elements_identical = True
-        output.set_elements(elements, are_elements_identical)
+            are_elements_array = True
+        output.set_elements(elements, are_elements_array)
         output.set_pixel_symbols('pixel') # draw points as pixels
         output.set_pixel_volumes(vols)
         return output
@@ -1207,7 +1207,7 @@ class MagSLD(object):
         """
         self.is_data = True
         self.is_elements = False # is this a finite-element based mesh
-        self.are_elements_identical = False # are all elements of the same type
+        self.are_elements_array = False # are all elements of the same type
         self.elements = []
         self.filename = ''
         self.xstepsize = 6.0
@@ -1337,7 +1337,7 @@ class MagSLD(object):
             # TODO: raise error rather than silently ignore
             self.vol_pix = None
     
-    def set_elements(self, elements, are_elements_identical):
+    def set_elements(self, elements, are_elements_array):
         """Set elements for a non-rectangular grid
 
         This sets element data for the object allowing non rectangular grids to be used.
@@ -1353,7 +1353,7 @@ class MagSLD(object):
         :type elements: list
         """
         self.is_elements = True
-        self.are_elements_identical = are_elements_identical
+        self.are_elements_array = are_elements_array
         self.elements = elements
         self.pix_type = "elements"
         self.data_length = len(elements)
