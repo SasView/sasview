@@ -610,6 +610,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 inputs = [self.data.qx_data, self.data.qy_data]
             logging.info("Computation is in progress...")
             self.cmdCompute.setText('Cancel')
+            self.cmdCompute.setToolTip("<html><head/><body><p>Cancel the computation of the scattering calculation.</p></body></html>")
             self.cmdCompute.clicked.disconnect()
             self.cmdCompute.clicked.connect(self.onCancel)
             self.cancelCalculation = False
@@ -682,15 +683,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.data_to_plot = numpy.full(nq, numpy.nan)
                 self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
                 logging.info('Gen computation cancelled.')
-                self.cmdCompute.setText('Compute')
-                self.cmdCompute.clicked.disconnect()
-                self.cmdCompute.clicked.connect(self.onCompute)
-                self.cmdCompute.setEnabled(True)
-                return
-        out = numpy.hstack(out)
-        self.data_to_plot = out
-        logging.info('Gen computation completed.')
+                break
+        else:
+            out = numpy.hstack(out)
+            self.data_to_plot = out
+            logging.info('Gen computation completed.')
         self.cmdCompute.setText('Compute')
+        self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
         self.cmdCompute.clicked.disconnect()
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdCompute.setEnabled(True)
