@@ -51,6 +51,9 @@ import re
 __all__ = ['Converter']
 DIMENSIONS = {}  # type: Dict[str, Dict[str, ConversionType]]
 AMBIGUITIES = {}  # type: Dict[str, str]
+PREFIX = dict(peta=1e15, tera=1e12, giga=1e9, mega=1e6, kilo=1e3, deci=1e-1, centi=1e-2, milli=1e-3, mili=1e-3,
+              micro=1e-6, nano=1e-9, pico=1e-12, femto=1e-15)
+SHORT_PREFIX = dict(P=1e15, T=1e12, G=1e9, M=1e6, k=1e3, d=1e-1, c=1e-2, m=1e-3, u=1e-6, n=1e-9, p=1e-12, f=1e-15)
 
 
 # Limited form of units for returning objects of a specific type.
@@ -70,12 +73,9 @@ def _build_metric_units(unit, abbr):
 
     Returns a dictionary of names and scales.
     """
-    prefix = dict(peta=1e15, tera=1e12, giga=1e9, mega=1e6, kilo=1e3, deci=1e-1, centi=1e-2, milli=1e-3, mili=1e-3,
-                  micro=1e-6, nano=1e-9, pico=1e-12, femto=1e-15)
-    short_prefix = dict(P=1e15, T=1e12, G=1e9, M=1e6, k=1e3, d=1e-1, c=1e-2, m=1e-3, u=1e-6, n=1e-9, p=1e-12, f=1e-15)
     map = {abbr: 1}
     for name in [unit, unit.capitalize(), unit.lower(), abbr]:
-        for items in [prefix, short_prefix]:
+        for items in [PREFIX, SHORT_PREFIX]:
             map.update({name: 1, name+'s': 1})
             map.update([(P + name, scale) for (P, scale) in items.items()])
             map.update([(P + '*'+name, scale) for (P, scale) in items.items()])
@@ -104,13 +104,12 @@ def _build_degree_units(name, symbol, conversion):
     for s in symbol, symbol.lower():
         map['deg' + s] = conversion
         map['deg_' + s] = conversion
-        map['deg ' + s] = conversion
         map['°' + s] = conversion
     for s in name, name.capitalize(), symbol, symbol.lower():
         map[s] = conversion
         map['degree_' + s] = conversion
-        map['degree ' + s] = conversion
-        map['degrees ' + s] = conversion
+        map['degree' + s] = conversion
+        map['degrees' + s] = conversion
     return map
 
 
@@ -357,6 +356,11 @@ def _format_unit_structure(unit=None):
     unit = str(unit)
     # a-m[ /?]b-n ... -> a^m b^-n
     unit = re.sub('([℃ÅA-Za-z_ ]+)([-0-9]+)', r"\1^\2", unit)
+    # centi*metre -> centimetre (before converting * -> ' ')
+    all_prefixes = list(PREFIX.keys())
+    all_prefixes.extend(list(SHORT_PREFIX.keys()))
+    for prefix in all_prefixes:
+        unit = unit.replace(prefix + "*", prefix)
     # a^-m*b^-n -> a^-m b^-n
     unit = unit.replace('*', ' ')
     # invUnit or 1/unit -> /unit

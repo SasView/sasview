@@ -20,7 +20,7 @@ class NXSUnitTests(unittest.TestCase):
         self.assertIn('None', self.converter.scalemap.keys())
         self.assertEqual(self.k_conv.units, 'nanoK')
         self.assertEqual(self.k_conv.scalebase, (1e-9, 0.0))
-        self.assertEqual(len(self.k_conv.scalemap.keys()), 313)
+        self.assertEqual(len(self.k_conv.scalemap.keys()), 307)
 
     def testBasicUnits(self):
         # 10 nm^-1 = 1 inv Angstroms
@@ -75,6 +75,14 @@ class NXSUnitTests(unittest.TestCase):
         # Capitalization standardization
         self.assertEqual(standardize_units('seconds'),
                          standardize_units('SECONDS'))
+        # Underscore standardization
+        self.assertEqual(standardize_units('n_m'),
+                         standardize_units('nm'))
+        # Different '*' standardizations
+        self.assertEqual(standardize_units('pico*meter'),
+                         standardize_units('picometer'))
+        self.assertEqual(standardize_units('Å^2 Kelvin^4'),
+                         standardize_units('Ang^{2}*K^{4}'))
         # US vs. European spellings
         self.assertEqual(standardize_units('meters'),
                          standardize_units('metres'))
