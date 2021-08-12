@@ -221,7 +221,8 @@ correctly. Additionally the data must be stored as 'Text' (ASCII format), Sasvie
 VTK Files
 ^^^^^^^^^
 
-The VTK file format is a very broad set of file formats, specifically Sasview currently reads in "legacy" .vtk files.
+The VTK file format is a very broad set of file formats, specifically Sasview currently reads in "legacy" .vtk files,
+up to version 3.0.
 The file specification is available `here <https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf>`_. Currently
 Sasview only reads in the 'unstructured grid' dataset format, and while any file of this form can be loaded, only
 files in which all cells are of the same type (type=10 (tetrahedron), 11 (voxel), 12 (hexahedron)) can be used to
