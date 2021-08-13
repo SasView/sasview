@@ -471,13 +471,13 @@ class VTKReader:
         if int(data_type_info[1]) != first_set[0]:
             logging.error("error while reading " + first_set[1] + " attributes - incompatible with number of " + first_set[2])
             return None
-        first_data, nextLine = self.load_attribute(lines, num_elements)
+        first_data, nextLine = self.load_attribute(lines, first_set[0])
         if first_data is None:
             return None
         if int(nextLine.split()[1]) != second_set[0]:
             logging.error("error while reading " + second_set[1] + " attributes - incompatible with number of " + second_set[2])
             return None
-        second_data, _ = self.load_attribute(lines, num_points) # cell_data already read by prev. function so starts from correct position
+        second_data, _ = self.load_attribute(lines, second_set[0]) # cell_data already read by prev. function so starts from correct position
         if second_data is None:
             return None
         if data_type_info[0].strip().upper() == "CELL_DATA":

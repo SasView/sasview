@@ -22,6 +22,7 @@ class sas_gen_test(unittest.TestCase):
         self.sldloader = sas_gen.SLDReader()
         self.pdbloader = sas_gen.PDBReader()
         self.omfloader = sas_gen.OMFReader()
+        self.vtkloader = sas_gen.VTKReader()
 
     def test_sldreader(self):
         """
@@ -75,6 +76,35 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(output.pos_x[0], 0.0)
         self.assertEqual(output.pos_y[0], 0.0)
         self.assertEqual(output.pos_z[0], 0.0)
+    
+    def test_vtkreader(self):
+        """
+        Test .vtkfile loaded
+        """
+        f = self.vtkloader.read(find("five_tetrahedra_cube.vtk"))
+        points = np.array([
+            [-1,  -1,   -1],
+            [1 , -1 ,  -1 ],
+            [-1,   1,   -1],
+            [1 ,  1 ,  -1 ],
+            [-1,  -1,    1],
+            [1 , -1 ,   1 ],
+            [-1,   1,    1],
+            [1 ,  1 ,   1 ]])
+        element_0 = np.array([[1, 4, 2], 
+                              [1, 2, 7], 
+                              [1, 7, 4], 
+                              [2, 4, 7]])
+        self.assertTrue(np.array_equal(f.pos_x, points[:, 0]))
+        self.assertTrue(np.array_equal(f.pos_y, points[:, 1]))
+        self.assertTrue(np.array_equal(f.pos_z, points[:, 2]))
+        self.assertEqual(f.sld_mx[0], 1)
+        self.assertEqual(f.sld_my[0], 0)
+        self.assertEqual(f.sld_mz[0], 0)
+        self.assertEqual(f.sld_n[0], 1)
+        self.assertTrue(np.array_equal(f.elements[0], element_0))
+
+
 
     def test_calculator(self):
         """
