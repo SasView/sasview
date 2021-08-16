@@ -196,7 +196,7 @@ def _calc_Iqxy_elements(sld, x, y, z, elements, vol, qx, qy):
     normals, geometry = _get_normal_vec(geometry)
     # extract the normal component of the displacement of the plane using the first point (elements x faces)
     rn_norm = np.sum(geometry[:,:,0] * normals, axis=-1)
-    #temp = element_transform(geometry, normals, rn_norm, vol, 6.292585170340679, -6.292585170340683)
+    temp = element_transform(geometry, normals, rn_norm, vol, 0.5, 0)
     #temp = element_transform(geometry, normals, rn_norm, vol, 6.29259, -6.29259)
     #temp2 = np.sum(sld*temp)
     #temp3 = abs(temp2)**2*1e8/8
@@ -440,10 +440,13 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     # will have one v vector which dots to 0 with it
     # seems to be very little difference to just using eps on the problematic face and letting
     # the Qp.v method sort out the other faces
-    # ensuring that the epsilon vector is within the plance of the face appers to be uneccessary
+    # ensure that epsilon lies within the plane of the face
     problem_elements = np.any(np.all(np.abs(Qp)<eps, axis=-1) , axis=-1)
-    Qp[problem_elements, ...] += eps
-    Q[problem_elements, ...] += eps
+    problem_faces = np.argmax(np.all(np.abs(Qp)<eps, axis=-1), axis=-1)
+    vs = geometry[np.arange(len(geometry)), problem_faces, 1] - geometry[np.arange(len(geometry)), problem_faces, 0]
+    vs = vs / np.sqrt(np.sum(vs*vs, axis=-1))[..., None]
+    Qp[problem_elements, ...] += eps * vs[problem_elements, None, ...]
+    Q[problem_elements, ...] += eps * vs[problem_elements, ...]
     # calculate the face-dependent prefactor for the sum over vertices (elements x faces) 
     prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q, axis=-1)[..., None]
     # calculate the sum over vertices term

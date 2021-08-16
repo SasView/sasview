@@ -8,6 +8,7 @@ warnings.simplefilter("ignore")
 
 import unittest
 import numpy as np
+import math
 
 from sas.sascalc.calculator import sas_gen
 
@@ -104,19 +105,116 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(f.sld_n[0], 1)
         self.assertTrue(np.array_equal(f.elements[0], element_0))
 
+    def get_box_transform(self, sld, qx, qy, x, y, z):
+        """Return the fourier transform of a box at qx, qy with dimensions x by y by z
 
+        """
+        return x*y*z * np.sinc(x/2*qx/math.pi)*np.sinc(y/2*qy/math.pi) * sld
 
-    def test_calculator(self):
+    def test_calculator_2D(self):
         """
-        Test that the calculator calculates.
+        Test that the calculator calculates 2D grid type data - both nuclear only and magnetic
         """
-        f = self.omfloader.read(find("A_Raw_Example-1.omf"))
+        f = sas_gen.OMFData() # create default initialisation data - 60x60x60 angstrom cube
+        f.xstepsize = 0.6
+        f.ystepsize = 0.3 # convert to 60x30x60 cuboid to test orientation is correct
+        f.zstepsize = 0.6
+        f.xnodes = 100
+        f.ynodes = 100
+        f.znodes = 100
         omf2sld = sas_gen.OMF2SLD()
         omf2sld.set_data(f)
+        sld = omf2sld.output
+        sld.set_sldn(0.1, False)
         model = sas_gen.GenSAS()
-        model.set_sld_data(omf2sld.output)
-        q = np.linspace(0, 0.1, 11)[1:]
-        model.runXY([q, q])
+        model.set_sld_data(sld)
+        # test: point at centre, point near a zero x2, point on the diagonal (for orientation)
+        # do not measure at exact centre so arctan2 gives correct value
+        qx = np.array([0.0001,    0.105,  0,      0.015])
+        qy = np.array([0.0001,    0,      0.21,   0.3])
+        # TEST nuclear data only
+        output = model.runXY([qx, qy])
+        analytical = np.float_power(self.get_box_transform(0.1, qx, qy, 60, 30, 60), 2) * 1E8 / 108000
+        # require that percentage error is < 0.1%
+        errs = np.abs(output - analytical)/analytical
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 1e-3)
+        # TEST magnetic angular anisotropy
+        sld.set_sldms(1.0, 0.0, 0.0)
+        theta = np.arctan2(qy, qx)
+        N_f = self.get_box_transform(0.1, qx, qy, 60, 30, 60)
+        Mx_f = self.get_box_transform(1, qx, qy, 60, 30, 60)
+        analytical = np.float_power(N_f, 2) + np.float_power(Mx_f, 2)*np.float_power(np.sin(theta), 4) \
+                     - 2*Mx_f*N_f*np.float_power(np.sin(theta), 2)
+        analytical = analytical * 1E8 / 108000
+        model.set_sld_data(sld)
+        model.params['Up_frac_in'] = 0.0
+        model.params['Up_frac_out'] = 0.0
+        model.params['Up_theta'] = 90.0
+        output = model.runXY([qx, qy])
+        errs = (output - analytical)/analytical
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 1e-3)
+    
+    def test_calculator_1D(self):
+        """
+        Test the calculator correctly calculates 1D averages. 
+        """
+        # TEST 1D debye averaging
+        # use only a 10x10x10 grid because this algorithm scales quickly
+        # use very small Q values otherwise numerical errors appear due to discretisation
+        # As pixel size decreases - averaging becomes more accurate at higher Q values
+        f = sas_gen.OMFData()
+        f.ystepsize = 3 # convert to 60x30x60 cuboid to test orientation is correct
+        omf2sld = sas_gen.OMF2SLD()
+        omf2sld.set_data(f)
+        sld = omf2sld.output
+        sld.set_sldn(0.1, False)
+        model = sas_gen.GenSAS()
+        model.set_sld_data(sld)
+        output = model.run([[0.01, 0.03], []])
+        # numerical integration to average the analytical solution give the following results:
+        analytical = np.array([1.056e11, 8.8100e10])
+        errs = (output - analytical)/analytical
+        # only require errors <1% due to larger discretisation
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 1e-2)
+    
+    def test_calculator_elements(self):
+        """
+        Test that the calculator correctly calculates scattering for element type data.
+        """
+        f = self.vtkloader.read(find("five_tetrahedra_cube.vtk"))
+        model = sas_gen.GenSAS()
+        model.set_sld_data(f)
+        # close to centre, a zero, and a diagonal (requires l'hopitals rule)
+        # TEST angula anisotropy
+        qx = np.array([0.0001,    1.57,  1,   ])
+        qy = np.array([0.0001,    0,     1,   ])
+        theta = np.arctan2(qy, qx)
+        N_f = self.get_box_transform(1, qx, qy, 2, 2, 2)
+        Mx_f = self.get_box_transform(1, qx, qy, 2, 2, 2)
+        analytical = np.float_power(N_f, 2) + np.float_power(Mx_f, 2)*np.float_power(np.sin(theta), 4) \
+                     - 2*Mx_f*N_f*np.float_power(np.sin(theta), 2)
+        analytical = analytical * 1E8 / 8.0
+        model.set_sld_data(f)
+        model.params['Up_frac_in'] = 0.0
+        model.params['Up_frac_out'] = 0.0
+        model.params['Up_theta'] = 90.0
+        output = model.runXY([qx, qy])
+        errs = (output - analytical)/analytical
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 1e-3)
+        # TEST nuclear data only
+        f.set_sldms(0.0, 0.0, 0.0)
+        model.set_sld_data(f)
+        output = model.runXY([qx, qy])
+        analytical = np.float_power(self.get_box_transform(1, qx, qy, 2, 2, 2), 2) * 1E8 / 8.0
+        # require that percentage error is < 0.1%
+        errs = np.abs(output - analytical)/analytical
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 1e-3)
+
 
 
 if __name__ == '__main__':

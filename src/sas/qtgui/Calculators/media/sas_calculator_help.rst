@@ -144,8 +144,8 @@ Using The Tool
    
    
 For example the default starting values with no files enabled (as shown) specify a rectangular grid of 10x10x10 pixels, with 
-each pixel being $6x6x6\require{unicode}\unicode{x212B}$. Each pixel has a constant nuclear SLD of $6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$
-and no magnetic SLD.
+each pixel being $6\times6\times6\require{unicode}\unicode{x212B}$. Each pixel has a constant nuclear SLD of 
+$6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$ and no magnetic SLD.
 
 .. After computation the result will appear in the *Theory* box in the SasView *Data Explorer* panel.
 
