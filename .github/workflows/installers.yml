@@ -188,6 +188,7 @@ jobs:
       uses: devbotsxyz/xcode-notarize@v1
       with:
           product-path: "installers/dist/SasView5.dmg"
+          primary-bundle-id: "org.sasview.SasView5"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
 
