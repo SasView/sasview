@@ -88,9 +88,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             list_datafiles = []
 
             for key_id in list(filenames.keys()):
-                if filenames[key_id].title:
+                if filenames[key_id].name:
                     # filenames with titles
-                    new_title = filenames[key_id].title
+                    new_title = filenames[key_id].name
                     list_datafiles.append(new_title)
                     self.list_data_items.append(new_title)
 
@@ -267,7 +267,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         if self.txtNumber.isModified():
             input_to_check = str(self.txtNumber.text())
 
-            if input_to_check is None or input_to_check is '':
+            if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logging.warning(msg)
                 self.txtNumber.setStyleSheet(BG_RED)
@@ -355,8 +355,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         for key_id in list(self.filenames.keys()):
             # data with title
-            if self.filenames[key_id].title:
-                input = self.filenames[key_id].title
+            if self.filenames[key_id].name:
+                input = self.filenames[key_id].name
             # data without title
             else:
                 input = str(key_id)

@@ -32,6 +32,7 @@ OutputBaseFilename = local_config.OutputBaseFilename
 SetupIconFile = local_config.SetupIconFile_win
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
+DisableDirPage = 'no'
 Compression = 'lzma'
 SolidCompression = 'yes'
 PrivilegesRequired = 'none'
@@ -201,9 +202,9 @@ def write_file():
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\sasview\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\sasview\plugin_models\*";\tDestDir: "{userdesktop}\..\.sasview\plugin_models";\t"""
+    msg += """Source: "dist\sasview\plugin_models\*";\tDestDir: "{%%USERPROFILE}\.sasview\plugin_models";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\sasview\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t"""
+    msg += """Source: "dist\sasview\custom_config.py";\tDestDir: "{%%USERPROFILE}\.sasview\config";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n"""
     #msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t"""
     #msg += """DestName: "categories.json";\n"""
@@ -345,6 +346,7 @@ def generate_installer():
     TEMPLATE += "DefaultDirName=%s\n" % str(DefaultDirName)
     TEMPLATE += "DefaultGroupName=%s\n" % str(DefaultGroupName)
     TEMPLATE += "DisableProgramGroupPage=%s\n" % str(DisableProgramGroupPage)
+    TEMPLATE += "DisableDirPage=%s\n" % str(DisableDirPage)
     TEMPLATE += "LicenseFile=%s\n" % str(LicenseFile)
     TEMPLATE += "OutputBaseFilename=%s\n" % str(OutputBaseFilename)
     TEMPLATE += "SetupIconFile=%s\n" % str(SetupIconFile)

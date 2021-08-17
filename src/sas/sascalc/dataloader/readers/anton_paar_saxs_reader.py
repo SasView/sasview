@@ -82,7 +82,6 @@ class Reader(XMLreader):
             self.lower = 5
             self.upper = self.lower + self.data_points
             self.source.radiation = 'x-ray'
-            normal = float(line4[3])
             self.current_datainfo.source.radiation = "x-ray"
             self.current_datainfo.source.name = "Anton Paar SAXSess Instrument"
             self.current_datainfo.source.wavelength = float(line4[4])
@@ -92,12 +91,11 @@ class Reader(XMLreader):
             for i in range(self.lower, self.upper):
                 index = i - self.lower
                 data = self.raw_data[i].split()
-                xvals.insert(index, normal * float(data[0]))
-                yvals.insert(index, normal * float(data[1]))
-                dyvals.insert(index, normal * float(data[2]))
+                xvals.insert(index, float(data[0]))
+                yvals.insert(index, float(data[1]))
+                dyvals.insert(index, float(data[2]))
         except Exception as e:
-            error_message = f"Couldn't load {self.f_open.name}.\n"
-            error_message += e.message
+            error_message = f"Couldn't load {self.f_open.name}.\n{e}"
             raise FileContentsException(error_message)
         self.current_dataset.x = np.append(self.current_dataset.x, xvals)
         self.current_dataset.y = np.append(self.current_dataset.y, yvals)

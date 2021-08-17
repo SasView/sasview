@@ -211,6 +211,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
         # Instantiate data object
         output = Data2D()
         output.filename = self.filename
+        output.name, _ = os.path.splitext(self.filename)
         output.id = output.filename
         detector = Detector()
         detector.pixel_size.x = None

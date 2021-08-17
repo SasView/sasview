@@ -5,7 +5,6 @@
 import h5py
 import numpy as np
 
-from sas.sascalc.dataloader.readers.cansas_reader_HDF5 import Reader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 
 PROBES = ['neutron', 'x-ray', 'muon', 'electron', 'ultraviolet',
@@ -16,7 +15,7 @@ TYPES = ['Spallation Neutron Source', 'UV Plasma Source', 'Free-Electron Laser',
          'Rotating Anode X-ray', 'Optical Laser', 'Fixed Tube X-ray']
 
 
-class NXcanSASWriter(Reader):
+class NXcanSASWriter:
     """
     A class for writing in NXcanSAS data files. Any number of data sets may be
     written to the file. Currently 1D and 2D SAS data sets are supported
@@ -277,7 +276,8 @@ class NXcanSASWriter(Reader):
             trans_entry.attrs['signal'] = 'T'
             trans_entry.attrs['T_axes'] = 'T'
             trans_entry.attrs['name'] = trans.name
-            if trans.timestamp is not '':
+            # Timestamp can be a string or a date-like object. Only write if set
+            if trans.timestamp:
                 trans_entry.attrs['timestamp'] = trans.timestamp
             transmission = trans_entry.create_dataset('T',
                                                       data=trans.transmission)

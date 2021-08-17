@@ -9,6 +9,7 @@ import numpy as np
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+# The preceding 2 imports *ARE* used. Do not remove either.
 
 from lxml import etree
 
@@ -79,83 +80,48 @@ class Reader(XMLreader):
         self.logging = []
         self.encoding = None
 
-    def _read(self, xml_file, schema_path="", invalid=True):
-        if schema_path != "" or not invalid:
-            # read has been called from self.get_file_contents because xml file doens't conform to schema
-            _, self.extension = os.path.splitext(os.path.basename(xml_file))
-            return self.get_file_contents(xml_file=xml_file, schema_path=schema_path, invalid=invalid)
-
-        # Otherwise, read has been called by the data loader - file_reader_base_class handles this
-        return super(XMLreader, self).read(xml_file)
-
     def get_file_contents(self):
-        return self._get_file_contents(xml_file=None, schema_path="", invalid=True)
-
-    def _get_file_contents(self, xml_file=None, schema_path="", invalid=True):
-        # Reset everything since we're loading a new file
         self.reset_state()
-        self.invalid = invalid
-        if xml_file is None:
-            xml_file = self.f_open.name
-        # We don't sure f_open since lxml handles opnening/closing files
+        xml_file = self.f_open.name
         try:
             # Raises FileContentsException
-            self.load_file_and_schema(xml_file, schema_path)
+            is_valid_cansas = self.load_file_and_schema(xml_file, '')
+        except FileContentsException as fc_exc:
+            msg = "CanSAS Reader could not load {}".format(xml_file)
+            if self.extension not in self.ext:
+                # If the file has no associated loader
+                raise DefaultReaderException(msg)
+            raise FileContentsException(msg)
+        try:
             # Parse each SASentry
-            entry_list = self.xmlroot.xpath('/ns:SASroot/ns:SASentry',
-                                            namespaces={
-                                                'ns': self.cansas_defaults.get(
-                                                    "ns")
-                                            })
-            self.is_cansas(self.extension)
+            entry_list = self.xmlroot.xpath(
+                '/ns:SASroot/ns:SASentry',
+                namespaces={'ns': self.cansas_defaults.get("ns")})
             self.set_processing_instructions()
             for entry in entry_list:
                 self._parse_entry(entry)
-                self.data_cleanup()
-        except FileContentsException as fc_exc:
-            # File doesn't meet schema - try loading with a less strict schema
-            base_name = xml_reader.__file__
-            base_name = base_name.replace("\\", "/")
-            base = base_name.split("/sas/")[0]
-            if self.cansas_version == "1.1":
-                invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
-            else:
-                invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
-            self.set_schema(invalid_schema)
-            if self.invalid:
-                try:
-                    # Load data with less strict schema
-                    self._get_file_contents(xml_file, invalid_schema, False)
-
-                    # File can still be read but doesn't match schema, so raise exception
-                    self.load_file_and_schema(xml_file) # Reload strict schema so we can find where error are in file
+                if not is_valid_cansas:
+                    # Set schema back to default canSAS XML for comparison
+                    self.set_default_schema()
                     invalid_xml = self.find_invalid_xml()
-                    if invalid_xml != "":
+                    if invalid_xml:
                         basename, _ = os.path.splitext(
                             os.path.basename(self.f_open.name))
-                        invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
-                        raise DataReaderException(invalid_xml) # Handled by base class
-                except FileContentsException as fc_exc:
-                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
-                    if fc_exc.message is not None: # Propagate error messages from earlier
-                        msg = fc_exc.message
-                    if not self.extension in self.ext: # If the file has no associated loader
-                        raise DefaultReaderException(msg)
-                    raise FileContentsException(msg)
-                    pass
-            else:
-                raise fc_exc
-        except Exception as e: # Convert all other exceptions to FileContentsExceptions
+                        bad_xml = INVALID_XML.format(basename + self.extension)
+                        bad_xml += invalid_xml
+                        self.current_datainfo.errors.append(bad_xml)
+                # Store datainfo locally to use for multiple SASdata entries - it is destroyed in data_cleanup()
+                datainfo = self.current_datainfo
+                # Combine all plottable_1D data sets in self.data with current_datainfo and put Data1D into self.output
+                for data in self.data:
+                    self.current_datainfo = datainfo
+                    self.current_dataset = data
+                    self.data_cleanup()
+        except Exception as e:
+            # Convert all other exceptions to FileContentsExceptions
             raise FileContentsException(str(e))
-        finally:
-            if not self.f_open.closed:
-                self.f_open.close()
 
     def load_file_and_schema(self, xml_file, schema_path=""):
-        base_name = xml_reader.__file__
-        base_name = base_name.replace("\\", "/")
-        base = base_name.split("/sas/")[0]
-
         # Try and parse the XML file
         try:
             self.set_xml_file(xml_file)
@@ -163,14 +129,12 @@ class Reader(XMLreader):
             msg = "SasView cannot load {}.\nInvalid XML syntax".format(xml_file)
             raise FileContentsException(msg)
 
-        self.cansas_version = self.xmlroot.get("version", "1.0")
-        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
+        self.cansas_version = self.xmlroot.get("version", "1.1")
+        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.1")
 
         if schema_path == "":
-            schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
-                base, self.cansas_defaults.get("schema").replace("\\", "/")
-            )
-        self.set_schema(schema_path)
+            self.set_default_schema()
+        return self.is_cansas(self.extension)
 
     def is_cansas(self, ext="xml"):
         """
@@ -179,25 +143,45 @@ class Reader(XMLreader):
         :param ext: The file extension of the data file
         :raises FileContentsException: Raised if XML file isn't valid CanSAS
         """
-        if self.validate_xml(): # Check file is valid XML
+        if self.validate_xml():
             name = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
             value = self.xmlroot.get(name)
             # Check schema CanSAS version matches file CanSAS version
             if CANSAS_NS.get(self.cansas_version).get("ns") == value.rsplit(" ")[0]:
                 return True
         if ext == "svs":
-            return True # Why is this required?
+            # Skip check if saved file
+            return True
+        # File doesn't meet schema - try loading with a less strict schema
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+        if self.cansas_version == "1.1":
+            invalid_schema = INVALID_SCHEMA_PATH_1_1.format(
+                base, self.cansas_defaults.get("schema"))
+        else:
+            invalid_schema = INVALID_SCHEMA_PATH_1_0.format(
+                base, self.cansas_defaults.get("schema"))
+        self.set_schema(invalid_schema)
+        if self.validate_xml():
+            return False
         # If we get to this point then file isn't valid CanSAS
-        logger.warning("File doesn't meet CanSAS schema. Trying to load anyway.")
         raise FileContentsException("The file is not valid CanSAS")
+
+    def set_default_schema(self):
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+        schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
+            base, self.cansas_defaults.get("schema").replace("\\", "/")
+        )
+        self.set_schema(schema_path)
 
     def _parse_entry(self, dom, recurse=False):
         if not self._is_call_local() and not recurse:
             self.reset_state()
         if not recurse:
             self.current_datainfo = DataInfo()
-            # Raises FileContentsException if file doesn't meet CanSAS schema
-            self.invalid = False
             # Look for a SASentry
             self.data = []
             self.parent_class = "SASentry"
@@ -205,6 +189,7 @@ class Reader(XMLreader):
             self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
             self.current_datainfo.meta_data[
                 PREPROCESS] = self.processing_instructions
+            self.base_ns = "{" + CANSAS_NS.get(self.cansas_version).get("ns") + "}"
         if self._is_call_local() and not recurse:
             basename, _ = os.path.splitext(os.path.basename(self.f_open.name))
             self.current_datainfo.filename = basename + self.extension
@@ -235,7 +220,8 @@ class Reader(XMLreader):
                     if isinstance(self.current_dataset, plottable_2D):
                         x_bins = attr.get("x_bins", "")
                         y_bins = attr.get("y_bins", "")
-                        if x_bins is not "" and y_bins is not "":
+                        # x_bins and y_bins can be strings, floats, or integers: Set shape if both non-zero
+                        if x_bins and y_bins:
                             self.current_dataset.shape = (x_bins, y_bins)
                         else:
                             self.current_dataset.shape = ()
@@ -252,7 +238,6 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self._add_intermediate()
             else:
-                # TODO: Clean this up to make it faster (fewer if/elifs)
                 if isinstance(self.current_dataset, plottable_2D):
                     data_point = node.text
                     unit = attr.get('unit', '')
@@ -268,225 +253,50 @@ class Reader(XMLreader):
                 elif tagname == 'SASnote':
                     self.current_datainfo.notes.append(data_point)
 
-                # I and Q points
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.yaxis("Intensity", unit)
-                    self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
-                elif tagname == 'Q':
-                    self.current_dataset.xaxis("Q", unit)
-                    self.current_dataset.x = np.append(self.current_dataset.x, data_point)
-                elif tagname == 'Qdev':
-                    self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
-                elif tagname == 'dQw':
-                   self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
-                elif tagname == 'dQl':
-                    self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
-                elif tagname == 'Qmean':
-                    pass
-                elif tagname == 'Shadowfactor':
-                    pass
-                elif tagname == 'Sesans':
-                    self.current_datainfo.isSesans = bool(data_point)
-                    self.current_dataset.xaxis(attr.get('x_axis'),
-                                                attr.get('x_unit'))
-                    self.current_dataset.yaxis(attr.get('y_axis'),
-                                                attr.get('y_unit'))
-                elif tagname == 'yacceptance':
-                    self.current_datainfo.sample.yacceptance = (data_point, unit)
-                elif tagname == 'zacceptance':
-                    self.current_datainfo.sample.zacceptance = (data_point, unit)
+                # I and Q points - 1D data
+                elif ((self.parent_class == 'SASdata' or 'SASdata' in self.names)
+                      and isinstance(self.current_dataset, plottable_1D)):
+                    self.process_1d_data_object(tagname, data_point, unit, attr)
 
                 # I and Qx, Qy - 2D data
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.yaxis("Intensity", unit)
-                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qx':
-                    self.current_dataset.xaxis("Qx", unit)
-                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qy':
-                    self.current_dataset.yaxis("Qy", unit)
-                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qxdev':
-                    self.current_dataset.xaxis("Qxdev", unit)
-                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qydev':
-                    self.current_dataset.yaxis("Qydev", unit)
-                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Mask':
-                    inter = [item == "1" for item in data_point.split(",")]
-                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
+                elif ((self.parent_class == 'SASdata' or 'SASdata' in self.names)
+                      and isinstance(self.current_dataset, plottable_2D)):
+                    self.process_2d_data_object(tagname, data_point, unit)
 
                 # Sample Information
-                elif tagname == 'ID' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.ID = data_point
-                elif tagname == 'Title' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.name = data_point
-                elif tagname == 'thickness' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.thickness = data_point
-                    self.current_datainfo.sample.thickness_unit = unit
-                elif tagname == 'transmission' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.transmission = data_point
-                elif tagname == 'temperature' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.temperature = data_point
-                    self.current_datainfo.sample.temperature_unit = unit
-                elif tagname == 'details' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.details.append(data_point)
-                elif tagname == 'x' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.x = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'y' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.y = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'z' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.z = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.x = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.y = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.z = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
+                elif self.parent_class == 'SASsample' or 'SASsample' in self.names:
+                    self.process_sample_data_object(tagname, data_point, unit)
 
                 # Instrumental Information
                 elif tagname == 'name' and self.parent_class == 'SASinstrument':
                     self.current_datainfo.instrument = data_point
 
                 # Detector Information
-                elif tagname == 'name' and self.parent_class == 'SASdetector':
-                    self.detector.name = data_point
-                elif tagname == 'SDD' and self.parent_class == 'SASdetector':
-                    self.detector.distance = data_point
-                    self.detector.distance_unit = unit
-                elif tagname == 'slit_length' and self.parent_class == 'SASdetector':
-                    self.detector.slit_length = data_point
-                    self.detector.slit_length_unit = unit
-                elif tagname == 'x' and self.parent_class == 'offset':
-                    self.detector.offset.x = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'y' and self.parent_class == 'offset':
-                    self.detector.offset.y = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'z' and self.parent_class == 'offset':
-                    self.detector.offset.z = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.x = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.y = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'z' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.z = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'x' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.x = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.y = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.z = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.x = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.y = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.z = data_point
-                    self.detector.orientation_unit = unit
+                elif self.parent_class == 'SASdetector' or 'SASdetector' in self.names:
+                    self.process_detector_data_object(tagname, data_point, unit)
 
                 # Collimation and Aperture
-                elif tagname == 'length' and self.parent_class == 'SAScollimation':
-                    self.collimation.length = data_point
-                    self.collimation.length_unit = unit
-                elif tagname == 'name' and self.parent_class == 'SAScollimation':
-                    self.collimation.name = data_point
-                elif tagname == 'distance' and self.parent_class == 'aperture':
-                    self.aperture.distance = data_point
-                    self.aperture.distance_unit = unit
-                elif tagname == 'x' and self.parent_class == 'size':
-                    self.aperture.size.x = data_point
-                    self.collimation.size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'size':
-                    self.aperture.size.y = data_point
-                    self.collimation.size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'size':
-                    self.aperture.size.z = data_point
-                    self.collimation.size_unit = unit
+                elif self.parent_class == 'SAScollimation' or 'SAScollimation' in self.names:
+                    self.process_collimation_data_object(tagname, data_point, unit)
 
                 # Process Information
-                elif tagname == 'name' and self.parent_class == 'SASprocess':
-                    self.process.name = data_point
-                elif tagname == 'description' and self.parent_class == 'SASprocess':
-                    self.process.description = data_point
-                elif tagname == 'date' and self.parent_class == 'SASprocess':
-                    try:
-                        self.process.date = datetime.datetime.fromtimestamp(data_point)
-                    except:
-                        self.process.date = data_point
-                elif tagname == 'SASprocessnote':
-                    self.process.notes.append(data_point)
-                elif tagname == 'term' and self.parent_class == 'SASprocess':
-                    unit = attr.get("unit", "")
-                    dic = { "name": name, "value": data_point, "unit": unit }
-                    self.process.term.append(dic)
+                elif self.parent_class == 'SASprocess':
+                    self.process_process_data_object(tagname, data_point, attr)
 
                 # Transmission Spectrum
-                elif tagname == 'T' and self.parent_class == 'Tdata':
-                    self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
-                    self.transspectrum.transmission_unit = unit
-                elif tagname == 'Tdev' and self.parent_class == 'Tdata':
-                    self.transspectrum.transmission_deviation = np.append(self.transspectrum.transmission_deviation, data_point)
-                    self.transspectrum.transmission_deviation_unit = unit
-                elif tagname == 'Lambda' and self.parent_class == 'Tdata':
-                    self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
-                    self.transspectrum.wavelength_unit = unit
+                elif self.parent_class == 'Tdata':
+                    self.process_trans_spec_data_object(tagname, data_point, unit)
 
                 # Source Information
-                elif tagname == 'wavelength' and (self.parent_class == 'SASsource' or self.parent_class == 'SASData'):
-                    self.current_datainfo.source.wavelength = data_point
-                    self.current_datainfo.source.wavelength_unit = unit
-                elif tagname == 'wavelength_min' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_min = data_point
-                    self.current_datainfo.source.wavelength_min_unit = unit
-                elif tagname == 'wavelength_max' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_max = data_point
-                    self.current_datainfo.source.wavelength_max_unit = unit
-                elif tagname == 'wavelength_spread' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_spread = data_point
-                    self.current_datainfo.source.wavelength_spread_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_size':
-                    self.current_datainfo.source.beam_size.x = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_size':
-                    self.current_datainfo.source.beam_size.y = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.current_datainfo.source.data_point.z = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'radiation' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.radiation = data_point
-                elif tagname == 'beam_shape' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.beam_shape = data_point
+                elif self.parent_class == 'SASsource' or 'SASsource' in self.names:
+                    self.process_source_data_object(tagname, data_point, unit)
 
                 # Everything else goes in meta_data
                 else:
-                    new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
-                    self.current_datainfo.meta_data[new_key] = data_point
+                    self.process_meta_data(tagname, data_point)
 
             self.names.remove(tagname_original)
-            length = 0
-            if len(self.names) > 1:
-                length = len(self.names) - 1
+            length = 0 if len(self.names) < 1 else len(self.names) - 1
             self.parent_class = self.names[length]
         if not self._is_call_local() and not recurse:
             self.frm = ""
@@ -497,6 +307,303 @@ class Reader(XMLreader):
             self.sort_data()
             self.reset_data_list()
             return self.output[0], None
+
+    def process_1d_data_object(self, tagname, data_point, unit, attr):
+        """
+        Assign a 1D data variable to the appropriate plottable value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :param attr: Extra attributes
+        :return: None
+        """
+        if tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
+            self.current_dataset.yaxis("Intensity", unit)
+            self.current_dataset.y = np.append(self.current_dataset.y, data_point)
+        elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
+            self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
+        elif tagname == 'Q':
+            self.current_dataset.xaxis("Q", unit)
+            self.current_dataset.x = np.append(self.current_dataset.x, data_point)
+        elif tagname == 'Qdev':
+            self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
+        elif tagname == 'dQw':
+            self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
+        elif tagname == 'dQl':
+            self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
+        elif tagname == 'Qmean':
+            pass
+        elif tagname == 'Shadowfactor':
+            pass
+        elif tagname == 'Sesans':
+            self.current_datainfo.isSesans = bool(data_point)
+            self.current_dataset.xaxis(attr.get('x_axis'),
+                                       attr.get('x_unit'))
+            self.current_dataset.yaxis(attr.get('y_axis'),
+                                       attr.get('y_unit'))
+        elif tagname == 'yacceptance':
+            self.current_datainfo.sample.yacceptance = (data_point, unit)
+        elif tagname == 'zacceptance':
+            self.current_datainfo.sample.zacceptance = (data_point, unit)
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_2d_data_object(self, tagname, data_point, unit):
+        """
+        Assign a 2D data variable to the appropriate plottable value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
+        if tagname == 'I':
+            self.current_dataset.yaxis("Intensity", unit)
+            self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
+        elif tagname == 'Idev':
+            self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
+        elif tagname == 'Qx':
+            self.current_dataset.xaxis("Qx", unit)
+            self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
+        elif tagname == 'Qy':
+            self.current_dataset.yaxis("Qy", unit)
+            self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
+        elif tagname == 'Qxdev':
+            self.current_dataset.xaxis("Qxdev", unit)
+            self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
+        elif tagname == 'Qydev':
+            self.current_dataset.yaxis("Qydev", unit)
+            self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
+        elif tagname == 'Mask':
+            inter = [item == "1" for item in data_point.split(",")]
+            self.current_dataset.mask = np.asarray(inter, dtype=bool)
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_sample_data_object(self, tagname, data_point, unit):
+        """
+        Assign a sample data variable to the appropriate Sample value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
+        if tagname == 'ID':
+            self.current_datainfo.sample.ID = data_point
+        elif tagname == 'Title':
+            self.current_datainfo.sample.name = data_point
+        elif tagname == 'thickness':
+            self.current_datainfo.sample.thickness = data_point
+            self.current_datainfo.sample.thickness_unit = unit
+        elif tagname == 'transmission':
+            self.current_datainfo.sample.transmission = data_point
+        elif tagname == 'temperature':
+            self.current_datainfo.sample.temperature = data_point
+            self.current_datainfo.sample.temperature_unit = unit
+        elif tagname == 'details':
+            self.current_datainfo.sample.details.append(data_point)
+        elif self.parent_class == 'position':
+            if tagname == 'x':
+                self.current_datainfo.sample.position.x = data_point
+                self.current_datainfo.sample.position_unit = unit
+            elif tagname == 'y':
+                self.current_datainfo.sample.position.y = data_point
+                self.current_datainfo.sample.position_unit = unit
+            elif tagname == 'z':
+                self.current_datainfo.sample.position.z = data_point
+                self.current_datainfo.sample.position_unit = unit
+        elif self.parent_class == 'orientation':
+            if tagname == 'roll':
+                self.current_datainfo.sample.orientation.x = data_point
+                self.current_datainfo.sample.orientation_unit = unit
+            elif tagname == 'pitch':
+                self.current_datainfo.sample.orientation.y = data_point
+                self.current_datainfo.sample.orientation_unit = unit
+            elif tagname == 'yaw':
+                self.current_datainfo.sample.orientation.z = data_point
+                self.current_datainfo.sample.orientation_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_detector_data_object(self, tagname, data_point, unit):
+        """
+        Assign a detector variable to the appropriate Detector value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
+        if tagname == 'name':
+            self.detector.name = data_point
+        elif tagname == 'SDD':
+            self.detector.distance = data_point
+            self.detector.distance_unit = unit
+        elif tagname == 'slit_length':
+            self.detector.slit_length = data_point
+            self.detector.slit_length_unit = unit
+        elif self.parent_class == 'offset':
+            if tagname == 'x':
+                self.detector.offset.x = data_point
+                self.detector.offset_unit = unit
+            elif tagname == 'y':
+                self.detector.offset.y = data_point
+                self.detector.offset_unit = unit
+            elif tagname == 'z':
+                self.detector.offset.z = data_point
+                self.detector.offset_unit = unit
+        elif self.parent_class == 'beam_center':
+            if tagname == 'x':
+                self.detector.beam_center.x = data_point
+                self.detector.beam_center_unit = unit
+            elif tagname == 'y':
+                self.detector.beam_center.y = data_point
+                self.detector.beam_center_unit = unit
+            elif tagname == 'z':
+                self.detector.beam_center.z = data_point
+                self.detector.beam_center_unit = unit
+        elif self.parent_class == 'pixel_size':
+            if tagname == 'x':
+                self.detector.pixel_size.x = data_point
+                self.detector.pixel_size_unit = unit
+            elif tagname == 'y':
+                self.detector.pixel_size.y = data_point
+                self.detector.pixel_size_unit = unit
+            elif tagname == 'z':
+                self.detector.pixel_size.z = data_point
+                self.detector.pixel_size_unit = unit
+        elif self.parent_class == 'orientation':
+            if tagname == 'roll':
+                self.detector.orientation.x = data_point
+                self.detector.orientation_unit = unit
+            elif tagname == 'pitch':
+                self.detector.orientation.y = data_point
+                self.detector.orientation_unit = unit
+            elif tagname == 'yaw':
+                self.detector.orientation.z = data_point
+                self.detector.orientation_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_collimation_data_object(self, tagname, data_point, unit):
+        """
+        Assign a collimation variable to the appropriate Collimation value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
+        if tagname == 'length':
+            self.collimation.length = data_point
+            self.collimation.length_unit = unit
+        elif tagname == 'name':
+            self.collimation.name = data_point
+        elif tagname == 'distance':
+            self.aperture.distance = data_point
+            self.aperture.distance_unit = unit
+        elif self.parent_class == 'size':
+            if tagname == 'x':
+                self.aperture.size.x = data_point
+                self.collimation.size_unit = unit
+            elif tagname == 'y':
+                self.aperture.size.y = data_point
+                self.collimation.size_unit = unit
+            elif tagname == 'z':
+                self.aperture.size.z = data_point
+                self.collimation.size_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_process_data_object(self, tagname, data_point, attr):
+        """
+        Assign a process variable to the appropriate Process value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param attr: XML attributes
+        :return: None
+        """
+        name = attr.get('name', '')
+        if tagname == 'name' and self.parent_class == 'SASprocess':
+            self.process.name = data_point
+        elif tagname == 'description' and self.parent_class == 'SASprocess':
+            self.process.description = data_point
+        elif tagname == 'date' and self.parent_class == 'SASprocess':
+            try:
+                self.process.date = datetime.datetime.fromtimestamp(data_point)
+            except Exception as e:
+                self.process.date = data_point
+        elif tagname == 'SASprocessnote':
+            self.process.notes.append(data_point)
+        elif tagname == 'term' and self.parent_class == 'SASprocess':
+            unit = attr.get("unit", "")
+            dic = {"name": name, "value": data_point, "unit": unit}
+            self.process.term.append(dic)
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_source_data_object(self, tagname, data_point, unit):
+        """
+        Assign a source  variable to the appropriate Source value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
+        if tagname == 'wavelength':
+            self.current_datainfo.source.wavelength = data_point
+            self.current_datainfo.source.wavelength_unit = unit
+        elif tagname == 'wavelength_min':
+            self.current_datainfo.source.wavelength_min = data_point
+            self.current_datainfo.source.wavelength_min_unit = unit
+        elif tagname == 'wavelength_max':
+            self.current_datainfo.source.wavelength_max = data_point
+            self.current_datainfo.source.wavelength_max_unit = unit
+        elif tagname == 'wavelength_spread':
+            self.current_datainfo.source.wavelength_spread = data_point
+            self.current_datainfo.source.wavelength_spread_unit = unit
+        elif tagname == 'x' and self.parent_class == 'beam_size':
+            self.current_datainfo.source.beam_size.x = data_point
+            self.current_datainfo.source.beam_size_unit = unit
+        elif tagname == 'y' and self.parent_class == 'beam_size':
+            self.current_datainfo.source.beam_size.y = data_point
+            self.current_datainfo.source.beam_size_unit = unit
+        elif tagname == 'z' and self.parent_class == 'pixel_size':
+            self.current_datainfo.source.data_point.z = data_point
+            self.current_datainfo.source.beam_size_unit = unit
+        elif tagname == 'radiation':
+            self.current_datainfo.source.radiation = data_point
+        elif tagname == 'beam_shape':
+            self.current_datainfo.source.beam_shape = data_point
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_trans_spec_data_object(self, tagname, data_point, unit):
+        """
+        Assign a transmission spectrum data variable to the appropriate datainfo value
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :param unit: Unit of the data_point
+        :return: None
+        """
+        if tagname == 'T':
+            self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
+            self.transspectrum.transmission_unit = unit
+        elif tagname == 'Tdev':
+            self.transspectrum.transmission_deviation = np.append(self.transspectrum.transmission_deviation, data_point)
+            self.transspectrum.transmission_deviation_unit = unit
+        elif tagname == 'Lambda':
+            self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
+            self.transspectrum.wavelength_unit = unit
+        else:
+            self.process_meta_data(tagname, data_point)
+
+    def process_meta_data(self, tagname, data_point):
+        """
+        Any unrecognized tag should still be loaded - add to meta_data
+        :param tagname: Name of the XML tag
+        :param data_point: Data to be assigned
+        :return: None
+        """
+        new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
+        self.current_datainfo.meta_data[new_key] = data_point
 
     def _is_call_local(self):
         if self.frm == "":

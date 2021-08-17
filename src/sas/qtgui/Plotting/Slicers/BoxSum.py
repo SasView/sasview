@@ -102,6 +102,12 @@ class BoxSumCalculator(BaseInteractor):
         self.update_model = True
         self._model.itemChanged.connect(self.setParamsFromModel)
 
+    def validate(self, param_name, param_value):
+        """
+        Validate input from user
+        """
+        return True
+
     def setModelFromParams(self):
         """
         Set up the Qt model for data handling between controls

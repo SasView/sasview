@@ -18,7 +18,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        #connecting artist
+        # connecting artist
         self.connect = self.base.connect
         # which direction is the preferred interaction direction
         self.direction = None
@@ -168,13 +168,13 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = str(self.averager.__name__) + \
-                        "(" + self.data.name + ")"
+            "(" + self.data.name + ")"
         new_plot.title = str(self.averager.__name__) + \
-                        "(" + self.data.name + ")"
+            "(" + self.data.name + ")"
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
-        # # If the data file does not tell us what the axes are, just assume...
+        # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
@@ -184,7 +184,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        #new_plot. = "2daverage" + self.data.name
         new_plot.id = (self.averager.__name__) + self.data.name
         new_plot.group_id = new_plot.id
         new_plot.is_data = True
@@ -233,6 +232,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         params["x_max"] = numpy.fabs(self.vertical_lines.x)
         params["y_max"] = numpy.fabs(self.horizontal_lines.y)
         params["nbins"] = self.nbins
+        params["fold"] = self.fold
         return params
 
     def setParams(self, params):
@@ -246,6 +246,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.x = float(numpy.fabs(params["x_max"]))
         self.y = float(numpy.fabs(params["y_max"]))
         self.nbins = params["nbins"]
+        self.fold = params["fold"]
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
@@ -488,6 +489,13 @@ class BoxInteractorX(BoxInteractor):
         from sas.sascalc.dataloader.manipulations import SlabX
         self.post_data(SlabX, direction="X")
 
+    def validate(self, param_name, param_value):
+        """
+        Validate input from user.
+        Values get checked at apply time.
+        """
+        return True
+
 
 class BoxInteractorY(BoxInteractor):
     """
@@ -505,3 +513,9 @@ class BoxInteractorY(BoxInteractor):
         from sas.sascalc.dataloader.manipulations import SlabY
         self.post_data(SlabY, direction="Y")
 
+    def validate(self, param_name, param_value):
+        """
+        Validate input from user
+        Values get checked at apply time.
+        """
+        return True

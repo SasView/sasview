@@ -1,6 +1,7 @@
 import sys
 import time
 import unittest
+import random
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -246,12 +247,12 @@ class DataExplorerTest(unittest.TestCase):
         QMessageBox.question = MagicMock(return_value=QMessageBox.No)
 
         # Populate the model
-        item1 = QStandardItem(True)
+        item1 = HashableStandardItem(True)
         item1.setCheckable(True)
         item1.setCheckState(Qt.Checked)
         item1.setText("item 1")
         self.form.theory_model.appendRow(item1)
-        item2 = QStandardItem(True)
+        item2 = HashableStandardItem(True)
         item2.setCheckable(True)
         item2.setCheckState(Qt.Unchecked)
         item2.setText("item 2")
@@ -755,6 +756,154 @@ class DataExplorerTest(unittest.TestCase):
         # See that the menu has been shown
         self.form.context_menu.exec_.assert_called_once()
 
+    def baseNameStateCheck(self):
+        """
+        Helper method for the Name Change Tests Below - Check the base state of the window
+        """
+        self.assertTrue(hasattr(self.form, "nameChangeBox"))
+        self.assertTrue(self.form.nameChangeBox.isModal())
+        self.assertEqual(self.form.nameChangeBox.windowTitle(), "Display Name Change")
+        self.assertFalse(self.form.nameChangeBox.isVisible())
+        self.assertIsNone(self.form.nameChangeBox.data)
+        self.assertIsNone(self.form.nameChangeBox.model_item)
+        self.assertFalse(self.form.nameChangeBox.txtCurrentName.isEnabled())
+        self.assertFalse(self.form.nameChangeBox.txtDataName.isEnabled())
+        self.assertFalse(self.form.nameChangeBox.txtFileName.isEnabled())
+        self.assertFalse(self.form.nameChangeBox.txtNewCategory.isEnabled())
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), "")
+        self.assertEqual(self.form.nameChangeBox.txtDataName.text(), "")
+        self.assertEqual(self.form.nameChangeBox.txtFileName.text(), "")
+        self.assertEqual(self.form.nameChangeBox.txtNewCategory.text(), "")
+
+    def testNameDictionary(self):
+        """
+        Testing the name dictionary self.form.manager.data_name_dict to catch edge cases
+        """
+        names_to_delete = []
+        names_with_brackets = ["test", "test [brackets]", "test [brackets", "test brackets]"]
+        names_numbered = ["test [1]", "test [2]"]
+        names_edge_cases = ["test [1] [2]", "test [2] [1]"]
+        # Ensure items not of type() == str return empty string
+        self.assertEqual("", self.form.manager.rename(names_with_brackets))
+        self.assertEqual("", self.form.manager.rename(self))
+        self.assertNotIn("", self.form.manager.data_name_dict)
+        # Test names with brackets
+        for i, name in enumerate(names_with_brackets):
+            # Send to rename method which populates data_name_dict
+            names_to_delete.append(self.form.manager.rename(name))
+            # Ensure each name is unique
+            self.assertEqual(i + 1, len(self.form.manager.data_name_dict))
+            self.assertEqual(1, len(self.form.manager.data_name_dict[name]))
+        for i, name in enumerate(names_with_brackets):
+            names_to_delete.append(self.form.manager.rename(name))
+            self.assertEqual(4, len(self.form.manager.data_name_dict))
+            self.assertEqual(2, len(self.form.manager.data_name_dict[name]))
+            self.assertEqual(self.form.manager.data_name_dict[name], [0,1])
+        for i, name in enumerate(names_numbered):
+            return_name = self.form.manager.rename(name)
+            names_to_delete.append(return_name)
+            self.assertEqual(return_name, f"test [{i+2}]")
+            self.assertEqual(4, len(self.form.manager.data_name_dict))
+            self.assertNotIn(name, self.form.manager.data_name_dict)
+        self.assertEqual([0,1,2,3], self.form.manager.data_name_dict['test'])
+        for i, name in enumerate(names_edge_cases):
+            names_to_delete.append(self.form.manager.rename(name))
+            self.assertEqual(5 + i, len(self.form.manager.data_name_dict))
+            self.assertIn(name, self.form.manager.data_name_dict)
+        # Names will be truncated when matching numbers
+        # Shuffle the list to be sure deletion order doesn't matter
+        random.shuffle(names_to_delete)
+        for i, name in enumerate(names_to_delete):
+            items_left = 0
+            self.form.manager.remove_item_from_data_name_dict(name)
+            for value in self.form.manager.data_name_dict.values():
+                items_left += len(value)
+            self.assertLess(items_left, len(names_to_delete))
+        # Data name dictionary should be empty at this point
+        self.assertEqual(0, len(self.form.manager.data_name_dict))
+
+    def testNameChange(self):
+        """
+        Test the display name change routines
+        """
+        # Define Constants
+        FILE_NAME = "cyl_400_20.txt"
+        TEST_STRING_1 = "test value change"
+        TEST_STRING_2 = "TEST VALUE CHANGE"
+        # Test base state of the name change window
+        self.baseNameStateCheck()
+        # Get Data1D
+        p_file=[FILE_NAME]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        key = list(output.keys())
+        output[key[0]].title = TEST_STRING_1
+        self.form.loadComplete((output, message))
+
+        # select the data and run name change routine
+        self.form.treeView.selectAll()
+        self.form.changeName()
+
+        # Test window state after adding data
+        self.assertTrue(self.form.nameChangeBox.isVisible())
+        self.assertIsNotNone(self.form.nameChangeBox.data)
+        self.assertIsNotNone(self.form.nameChangeBox.model_item)
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        self.assertEqual(self.form.nameChangeBox.txtDataName.text(), TEST_STRING_1)
+        self.assertEqual(self.form.nameChangeBox.txtFileName.text(), FILE_NAME)
+        self.assertTrue(self.form.nameChangeBox.rbExisting.isChecked())
+        self.assertFalse(self.form.nameChangeBox.rbDataName.isChecked())
+        self.assertFalse(self.form.nameChangeBox.rbFileName.isChecked())
+        self.assertFalse(self.form.nameChangeBox.rbNew.isChecked())
+
+        # Take the existing name
+        self.form.nameChangeBox.cmdOK.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+
+        # Take the title
+        self.form.nameChangeBox.rbDataName.setChecked(True)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_1)
+
+        # Take the file name again
+        self.form.nameChangeBox.rbFileName.setChecked(True)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+
+        # Take the user-defined name, which is empty - should retain existing value
+        self.form.nameChangeBox.rbNew.setChecked(True)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+
+        # Take a different user-defined name
+        self.form.nameChangeBox.rbNew.setChecked(True)
+        self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_2)
+        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        self.form.nameChangeBox.cmdOK.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+
+        # Test cancel button
+        self.form.nameChangeBox.rbNew.setChecked(True)
+        self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_1)
+        self.form.nameChangeBox.cmdCancel.click()
+        self.form.changeName()
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        self.form.nameChangeBox.cmdOK.click()
+
+        # Test delete data
+        self.form.nameChangeBox.removeData(None)  # Nothing should happen
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        self.form.nameChangeBox.removeData([self.form.nameChangeBox.model_item])  # Should return to base state
+        self.baseNameStateCheck()
+
     def testShowDataInfo(self):
         """
         Test of the showDataInfo method
@@ -796,9 +945,10 @@ class DataExplorerTest(unittest.TestCase):
 
         # Call the tested method
         self.form.saveDataAs()
+        filter = 'Text files (*.txt);;Comma separated value files (*.csv);;CanSAS 1D files (*.xml);;NXcanSAS files (*.h5);;All files (*.*)'
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                filter='Text files (*.txt);;CanSAS 1D files(*.xml);;NXcanSAS files (*.h5)',
+                                filter=filter,
                                 options=16,
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
@@ -821,7 +971,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.saveDataAs()
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5)',
+                                filter='IGOR/DAT 2D file in Q_map (*.dat);;NXcanSAS files (*.h5);;All files (*.*)',
                                 options=16,
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
@@ -882,6 +1032,9 @@ class DataExplorerTest(unittest.TestCase):
         # Populate the model
         filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
         self.form.readData(filename)
+        self.assertEqual(len(self.form.manager.data_name_dict), 1)
+        self.assertEqual(len(self.form.manager.data_name_dict["cyl_400_20.txt"]), 3)
+        self.assertEqual(max(self.form.manager.data_name_dict["cyl_400_20.txt"]), 2)
 
         # Assure the model contains three items
         self.assertEqual(self.form.model.rowCount(), 3)

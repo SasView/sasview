@@ -47,6 +47,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.cansas1d_slit = find("cansas1d_slit.xml")
         self.cansas1d_units = find("cansas1d_units.xml")
         self.cansas1d_notitle = find("cansas1d_notitle.xml")
+        self.datafile_multiplesasdata_multiplesasentry = find("cansas_xml_multisasentry_multisasdata.xml")
         self.isis_1_0 = find("ISIS_1_0.xml")
         self.isis_1_1 = find("ISIS_1_1.xml")
         self.isis_1_1_notrans = find("ISIS_1_1_notrans.xml")
@@ -472,6 +473,19 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertEqual(self.data.dy[1], 4)
         self.assertEqual(self.data.run_name['1234'], 'run name')
         self.assertEqual(self.data.title, "Test title")
+
+    def test_multiple_sasentries_multiplesasdatas(self):
+        self.data = self.loader.load(self.datafile_multiplesasdata_multiplesasentry)
+        self.assertTrue(len(self.data) == 19)
+        for data in self.data:
+            self.assertEqual(find(data.filename), self.datafile_multiplesasdata_multiplesasentry)
+            self.assertEqual(data.source.radiation, 'neutron')
+            self.assertAlmostEqual(data.source.wavelength, 8.5)
+            self.assertEqual(data.source.wavelength_unit, 'A')
+            self.assertAlmostEqual(data.source.wavelength_spread, 25)
+            data_len = len(data.x)
+            self.assertTrue(data_len >= 69)
+            self.assertTrue(data_len <= 77)
 
 
 class cansas_reader_hdf5(unittest.TestCase):

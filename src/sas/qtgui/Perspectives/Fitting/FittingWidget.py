@@ -109,6 +109,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
     Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
     Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
+    keyPressedSignal = QtCore.pyqtSignal(QtCore.QEvent)
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
@@ -210,6 +211,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for data_item in value:
                 logic = FittingLogic(data=GuiUtils.dataFromItem(data_item))
                 self._logic.append(logic)
+            # Option widget logic was destroyed - reestablish
+            self.options_widget.logic = self._logic[0]
             # update the ordering tab
             self.order_widget.updateData(self.all_data)
 
@@ -353,7 +356,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
         labl = QtWidgets.QLabel(self.magneticAnglesWidget)
-        pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION + '/M_angles_pic.png')
+        pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION + '/mag_vector.png')
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
 
@@ -597,6 +600,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.dataChanged.connect(self.onPolyModelChange)
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.lstParams.installEventFilter(self)
+        self.lstPoly.installEventFilter(self)
+        self.lstMagnetic.installEventFilter(self)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -606,6 +612,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
+        self.options_widget.txtMinRange.editingFinished.connect(self.options_widget.updateMinQ)
+        self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
@@ -614,6 +622,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
         self.communicate.updateMaskedDataSignal.connect(self.onMaskedData)
+
+        # Catch all key press events
+        self.keyPressedSignal.connect(self.onKey)
+
+    def keyPressEvent(self, event):
+        super(FittingWidget, self).keyPressEvent(event)
+        self.keyPressedSignal.emit(event)
+
+    def eventFilter(self, obj, event):
+        # Catch enter key presses when editing model params
+        if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
+            if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+                self.onKey(event)
+        return True
 
     def modelName(self):
         """
@@ -790,7 +812,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for column in range(0, self._model_model.columnCount()):
             self._model_model.item(row, column).setForeground(brush)
             self._model_model.item(row, column).setFont(font)
+            # Allow the user to interact or not with the fields depending on
+            # whether the parameter is constrained or not
             self._model_model.item(row, column).setEditable(fields_enabled)
+        # Force checkbox selection when parameter is constrained and disable
+        # checkbox interaction
+        if not fields_enabled and self._model_model.item(row, 0).isCheckable():
+            self._model_model.item(row, 0).setCheckState(2)
+            self._model_model.item(row, 0).setEnabled(False)
+        else:
+            # Enable checkbox interaction
+            self._model_model.item(row, 0).setEnabled(True)
         self._model_model.blockSignals(False)
 
     def addConstraintToRow(self, constraint=None, row=0):
@@ -837,6 +869,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         font.setItalic(True)
         brush = QtGui.QBrush(QtGui.QColor('blue'))
         self.modifyViewOnRow(row, font=font, brush=brush)
+        # update the main parameter list so the constrained parameter gets
+        # updated when fitting
+        self.checkboxSelected(self._model_model.item(row, 0))
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
         if constraint_tab:
             # Set the constraint_accepted flag to True to inform the
@@ -1047,25 +1082,35 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        self.setParameterSelection(status)
+        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item)
 
     def deselectParameters(self):
         """
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        self.setParameterSelection(status)
+        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item)
 
     def selectedParameters(self):
         """ Returns list of selected (highlighted) parameters """
         return [s.row() for s in self.lstParams.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
 
-    def setParameterSelection(self, status=QtCore.Qt.Unchecked):
+    def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None):
         """
         Selected parameters are chosen for fitting
         """
         # Convert to proper indices and set requested enablement
+        if item is None:
+            return
+        # We only want to select/deselect all items if
+        # `item` is also selected!
+        # Otherwise things get confusing.
+        # https://github.com/SasView/sasview/issues/1676
+        if item.row() not in self.selectedParameters():
+            return
         for row in self.selectedParameters():
             self._model_model.item(row, 0).setCheckState(status)
 
@@ -1205,6 +1250,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.cbModel.setCurrentIndex(self._previous_model_index)
                 self.cbModel.blockSignals(False)
             return
+        if self.model_data is not None:
+            # Store any old parameters before switching to a new model
+            self.page_parameters = self.getParameterDict()
 
         # Assure the control is active
         if not self.cbModel.isEnabled():
@@ -1354,7 +1402,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Update the chart
         if self.data_is_loaded:
-            self.cmdPlot.setText("Show Plot")
+            self.cmdPlot.setText("Compute/Plot")
             self.calculateQGridForModel()
         else:
             self.cmdPlot.setText("Calculate")
@@ -1410,6 +1458,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.model_parameters = None
             self._model_model.clear()
             return
+
+        if self.model_data is not None:
+            # Store any old parameters before switching to a new category
+            self.page_parameters = self.getParameterDict()
         # Wipe out the parameter model
         self._model_model.clear()
         # Safely clear and enable the model combo
@@ -1547,9 +1599,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.kernel_module.details[parameter_name][pos] = value
         else:
             self.magnet_params[parameter_name] = value
-            #self.kernel_module.setParam(parameter_name) = value
-            # Force the chart update when actual parameters changed
-            self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
@@ -1733,9 +1782,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             # Switch indexes
             self.data_index = res_index
-            # Recompute Q ranges
-            if self.data_is_loaded:
-                self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
 
             # Recalculate theories
             method = self.complete1D if isinstance(self.data, Data1D) else self.complete2D
@@ -2125,7 +2171,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current set of data
         """
         # Regardless of previous state, this should now be `plot show` functionality only
-        self.cmdPlot.setText("Show Plot")
+        self.cmdPlot.setText("Compute/Plot")
         # Force data recalculation so existing charts are updated
         if not self.data_is_loaded:
             self.showTheoryPlot()
@@ -2135,7 +2181,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # This allows charts to be properly updated in order
         # of plots being applied.
         QtWidgets.QApplication.processEvents()
-        self.recalculatePlotData() # recalc+plot theory again (2nd)
+        self.recalculatePlotData()  # recalc+plot theory again (2nd)
 
     def onSmearingOptionsUpdate(self):
         """
@@ -2145,6 +2191,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
         self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
+
+    def onKey(self, event):
+        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
+            self.onPlot()
 
     def recalculatePlotData(self):
         """
@@ -2203,7 +2253,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
@@ -2615,10 +2664,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # necessary
         self.processEffectiveRadius()
 
-        # Force the chart update when actual parameters changed
-        if model_column == 1:
-            self.recalculatePlotData()
-
         # Update state stack
         self.updateUndo()
         self.page_parameters = self.getParameterDict()
@@ -2706,7 +2751,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # If multiple rows selected - toggle all of them, filtering uncheckable
         # Convert to proper indices and set requested enablement
-        self.setParameterSelection(status)
+        # Careful with `item` NOT being selected. This means we only want to
+        # select that one item.
+        self.setParameterSelection(status, item=item)
 
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel(self._model_model)
@@ -2913,6 +2960,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     self.data_index = i
 
         residuals = self.calculateResiduals(fitted_data)
+
+        fitted_data.show_q_range_sliders = True
+        # Suppress the GUI update until the move is finished to limit model calculations
+        fitted_data.slider_update_on_move = False
+        fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
+        fitted_data.slider_high_q_setter = self.options_widget.updateMaxQ
+        fitted_data.slider_low_q_input = self.options_widget.txtMinRange
+        fitted_data.slider_low_q_setter = self.options_widget.updateMinQ
+
         self.model_data = fitted_data
         new_plots = [fitted_data]
         if residuals is not None:
@@ -3574,7 +3630,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def enableInteractiveElements(self):
         """
-        Set buttion caption on fitting/calculate finish
+        Set button caption on fitting/calculate finish
         Enable the param table(s)
         """
         # Notify the user that fitting is available
@@ -3585,7 +3641,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableInteractiveElements(self):
         """
-        Set buttion caption on fitting/calculate start
+        Set button caption on fitting/calculate start
         Disable the param table(s)
         """
         # Notify the user that fitting is being run
@@ -3596,7 +3652,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableInteractiveElementsOnCalculate(self):
         """
-        Set buttion caption on fitting/calculate start
+        Set button caption on fitting/calculate start
         Disable the param table(s)
         """
         # Notify the user that fitting is being run
@@ -4372,6 +4428,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         and their values, e.g. {'M1.scale':1, 'M1.background': 0.001}
         """
         sym_dict = {}
+        # return an empty dict if no model has been selected
+        if self.kernel_module == None:
+            return sym_dict
         model_name = self.kernel_module.name
         for param in self.getParamNames():
             sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(

@@ -35,7 +35,7 @@ class OrderWidget(QtWidgets.QWidget, Ui_OrderWidgetUI):
             if not hasattr(item, 'data'): continue
             dataset = GuiUtils.dataFromItem(item)
             if dataset is None: continue
-            dataset_name = dataset.filename
+            dataset_name = dataset.name
             self.order[dataset_name] = item
             self.lstOrder.addItem(dataset_name)
 

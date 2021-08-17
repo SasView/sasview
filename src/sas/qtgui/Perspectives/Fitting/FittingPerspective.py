@@ -221,8 +221,9 @@ class FittingWindow(QtWidgets.QTabWidget):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
-            # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
             event.accept()
         else:
             # Maybe we should just minimize
@@ -246,15 +247,14 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        #self.maxIndex += 1
-        self.maxIndex = tab_index + 1
+        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
 
         icon = QtGui.QIcon()
         if is_batch:
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
-        self.setCurrentWidget(tab);
+        self.setCurrentWidget(tab)
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -303,14 +303,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         page_name = "Const. & Simul. Fit"
         return page_name
-
-    def deleteAllTabs(self):
-        """
-        Explicitly deletes all the fittabs, leaving nothing.
-        This is in preparation for the project load step.
-        """
-        for tab_index in range(len(self.tabs)):
-            self.closeTabByIndex(tab_index)
 
     def closeTabByIndex(self, index):
         """
@@ -417,9 +409,14 @@ class FittingWindow(QtWidgets.QTabWidget):
             # Find the first unassigned tab.
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
+            tab_ids = [tab.tab_id for tab in self.tabs]
 
             if tab_index is not None:
-                self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                if tab_index not in tab_ids:
+                    self.addFit(data, is_batch=is_batch, tab_index=tab_index)
+                else:
+                    self.setCurrentIndex(tab_index-1)
+                    self.swapData(data)
                 return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
@@ -553,7 +550,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Returns the tab with with attribute name *name*
         """
-        assert(name, str)
+        assert isinstance(name, str)
         for tab in self.tabs:
             if tab.modelName() == name:
                 return tab

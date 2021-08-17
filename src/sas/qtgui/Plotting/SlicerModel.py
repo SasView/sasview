@@ -3,6 +3,7 @@ from PyQt5 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
+
 class SlicerModel(object):
     def __init__(self):
         # Model representation of local parameters
@@ -16,11 +17,16 @@ class SlicerModel(object):
         Set up the Qt model for data handling between controls
         """
         parameters = self.getParams()
-        self._model.removeRows( 0, self._model.rowCount() )
+        self._model.removeRows(0, self._model.rowCount())
         # Crete/overwrite model items
         for parameter in list(parameters.keys()):
             item1 = QtGui.QStandardItem(parameter)
-            item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
+            if isinstance(parameters[parameter], bool):
+                item2 = QtGui.QStandardItem(parameters[parameter])
+                item2.setCheckable(True)
+                item2.setCheckState(QtCore.Qt.Checked if parameters[parameter] else QtCore.Qt.Unchecked)
+            else:
+                item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
             self._model.appendRow([item1, item2])
         self._model.setHeaderData(0, QtCore.Qt.Horizontal, "Parameter")
         self._model.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
@@ -31,10 +37,13 @@ class SlicerModel(object):
         """
         params = self.getParams()
         for row_index in range(self._model.rowCount()):
-            #index = self._model.indexFromItem(item)
-            #row_index = index.row()
+            # index = self._model.indexFromItem(item)
+            # row_index = index.row()
             param_name = str(self._model.item(row_index, 0).text())
-            params[param_name] = float(self._model.item(row_index, 1).text())
+            if self._model.item(row_index, 1).isCheckable():
+                params[param_name] = True if self._model.item(row_index, 1).checkState() == QtCore.Qt.Checked else False
+            else:
+                params[param_name] = float(self._model.item(row_index, 1).text())
 
         self.update_model = False
         self.setParams(params)
@@ -48,7 +57,10 @@ class SlicerModel(object):
         index = self._model.indexFromItem(item)
         row_index = index.row()
         param_name = str(self._model.item(row_index, 0).text())
-        params[param_name] = float(self._model.item(row_index, 1).text())
+        if self._model.item(row_index, 1).isCheckable():
+            params[param_name] = True if self._model.item(row_index, 1).checkState() == QtCore.Qt.Checked else False
+        else:
+            params[param_name] = float(self._model.item(row_index, 1).text())
 
         self.update_model = False
         self.setParams(params)
@@ -69,4 +81,3 @@ class SlicerModel(object):
     def validate(self):
         ''' pure virtual '''
         raise NotImplementedError("Validator must be implemented in derived class.")
-

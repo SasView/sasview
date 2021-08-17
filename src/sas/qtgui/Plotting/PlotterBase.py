@@ -12,15 +12,14 @@ import matplotlib as mpl
 from matplotlib import rcParams
 
 DEFAULT_CMAP = mpl.cm.jet
-from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
+from sas.qtgui.Plotting.Binder import BindArtist
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
-import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
+
 
 class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):
@@ -81,6 +80,9 @@ class PlotterBase(QtWidgets.QWidget):
         # Annotations
         self.selectedText = None
         self.textList = []
+
+        # Create Artist and bind it
+        self.connect = BindArtist(self.figure)
 
         # Pre-define the Scale properties dialog
         self.properties = ScaleProperties(self,
@@ -203,6 +205,12 @@ class PlotterBase(QtWidgets.QWidget):
         """ Legend visibility setter """
         self.show_legend = show
 
+    def update(self):
+        self.figure.canvas.draw()
+
+    def draw(self):
+        self.figure.canvas.draw()
+
     def upatePlotHelper(self):
         """
         Notify the plot helper about the new plot
@@ -307,6 +315,7 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Overwrite the close event adding helper notification
         """
+        self.clearQRangeSliders()
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
@@ -314,6 +323,13 @@ class PlotterBase(QtWidgets.QWidget):
         self.manager.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
+
+    def clearQRangeSliders(self):
+        # Destroy the Q-range sliders in 1D plots
+        if hasattr(self, 'sliders') and isinstance(self.sliders, dict):
+            for slider in self.sliders.values():
+                slider.clear()
+            self.sliders = {}
 
     def onImageSave(self):
         """

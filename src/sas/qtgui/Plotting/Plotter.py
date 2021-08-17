@@ -1,4 +1,3 @@
-from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
@@ -12,8 +11,10 @@ from matplotlib.font_manager import FontProperties
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
+from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
@@ -56,8 +57,10 @@ class PlotterWidget(PlotterBase):
         # Dictionary of {plot_id:Data1d}
         self.plot_dict = {}
         # Dictionaty of {plot_id:line}
-
         self.plot_lines = {}
+        # Dictionary of slider interactors {plot_id:interactor}
+        self.sliders = {}
+
         # Window for text add
         self.addText = AddText(self)
 
@@ -67,7 +70,7 @@ class PlotterWidget(PlotterBase):
 
         # Data container for the linear fit
         self.fit_result = Data1D(x=[], y=[], dy=None)
-        self.fit_result.symbol = 13
+        self.fit_result.symbol = 17
         self.fit_result.name = "Fit"
 
         parent.geometry()
@@ -222,6 +225,10 @@ class PlotterWidget(PlotterBase):
                             zorder=1,
                             picker=True)
 
+        # Display horizontal axis if requested
+        if data.show_yzero:
+            ax.axhline(color='black', linewidth=1)
+
         # Update the list of data sets (plots) in chart
         self.plot_dict[data.name] = data
 
@@ -242,6 +249,11 @@ class PlotterWidget(PlotterBase):
             ax.set_ylabel(self.yLabel)
         if self.xLabel and not is_fit:
             ax.set_xlabel(self.xLabel)
+
+        # Add q-range sliders
+        if data.show_q_range_sliders:
+            sliders = QRangeSlider(self, self.ax, data=data)
+            self.sliders[data.name] = sliders
 
         # refresh canvas
         self.canvas.draw_idle()
@@ -444,6 +456,7 @@ class PlotterWidget(PlotterBase):
         if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
+            self.setRange.rangeModified = True
             if x_range is not None and y_range is not None:
                 self.ax.set_xlim(x_range)
                 self.ax.set_ylim(y_range)
@@ -480,7 +493,7 @@ class PlotterWidget(PlotterBase):
         if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
-    def replacePlot(self, id, new_plot):
+    def replacePlot(self, id, new_plot, retain_dimensions=False):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
@@ -490,9 +503,23 @@ class PlotterWidget(PlotterBase):
         selected_plot = self.plot_dict[id]
         new_plot.xtransform = selected_plot.xtransform
         new_plot.ytransform = selected_plot.ytransform
-
+        #Adding few properties ftom ModifyPlot to preserve them in future changes
+        new_plot.title = selected_plot.title
+        new_plot.custom_color = selected_plot.custom_color
+        new_plot.markersize = selected_plot.markersize
+        new_plot.symbol = selected_plot.symbol
+        # Store user-defined plot range on replot
+        retain_dimensions = retain_dimensions or self.setRange.rangeModified
+        if retain_dimensions:
+            x_bounds = (self.ax.viewLim.xmin, self.ax.viewLim.xmax)
+            y_bounds = (self.ax.viewLim.ymin, self.ax.viewLim.ymax)
         self.removePlot(id)
         self.plot(data=new_plot)
+        # Apply user-defined plot range
+        if retain_dimensions:
+            self.ax.set_xbound(x_bounds[0], x_bounds[1])
+            self.ax.set_ybound(y_bounds[0], y_bounds[1])
+            self.setRange.rangeModified = True
 
     def onRemovePlot(self, id):
         """
@@ -511,22 +538,23 @@ class PlotterWidget(PlotterBase):
         if id not in list(self.plot_dict.keys()):
             return
 
-        selected_plot = self.plot_dict[id]
-
-        plot_dict = copy.deepcopy(self.plot_dict)
+        # Remove the plot from the list of plots
+        self.plot_dict.pop(id)
+        self.sliders.pop(id, None)
 
         # Labels might have been changed
         xl = self.ax.xaxis.label.get_text()
         yl = self.ax.yaxis.label.get_text()
 
-        self.plot_dict = {}
-
         mpl.pyplot.cla()
         self.ax.cla()
 
-        for ids in plot_dict:
+        # Recreate Artist bindings after plot clear
+        self.connect = BindArtist(self.figure)
+
+        for ids in self.plot_dict:
             if ids != id:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
+                self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
 
         # Reset the labels
         self.ax.set_xlabel(xl)
@@ -547,7 +575,6 @@ class PlotterWidget(PlotterBase):
         Allows for MPL modifications to the selected plot
         """
         selected_plot = self.plot_dict[id]
-        selected_line = self.plot_lines[id]
         # Old style color - single integer for enum color
         # New style color - #hhhhhh
         color = selected_plot.custom_color
@@ -556,7 +583,6 @@ class PlotterWidget(PlotterBase):
         marker_size = selected_plot.markersize
         # plot name
         legend = selected_plot.title
-
         plotPropertiesWidget = PlotProperties(self,
                                 color=color,
                                 marker=marker,
@@ -568,7 +594,6 @@ class PlotterWidget(PlotterBase):
             selected_plot.custom_color = plotPropertiesWidget.color()
             selected_plot.symbol = plotPropertiesWidget.marker()
             selected_plot.title = plotPropertiesWidget.legend()
-
             # Redraw the plot
             self.replacePlot(id, selected_plot)
 
@@ -594,7 +619,7 @@ class PlotterWidget(PlotterBase):
             if ids == id:
                 self.plot(data=plot_dict[ids], hide_error=(not current))
             else:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
+                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
 
     def xyTransform(self, xLabel="", yLabel=""):
         """
@@ -637,9 +662,6 @@ class PlotterWidget(PlotterBase):
         self.fit_result.dx = None
         self.fit_result.dy = None
 
-        #Remove another Fit, if exists
-        self.removePlot("Fit")
-
         self.fit_result.reset_view()
         #self.offset_graph()
 
@@ -648,8 +670,12 @@ class PlotterWidget(PlotterBase):
         self.fit_result.title = 'Fit'
         self.fit_result.name = 'Fit'
 
-        # Plot the line
-        self.plot(data=self.fit_result, marker='-', hide_error=True)
+        if self.fit_result.name in self.plot_dict.keys():
+            # Replace an existing Fit and ensure the plot range is not reset
+            self.replacePlot("Fit", new_plot=self.fit_result, retain_dimensions=True)
+        else:
+            # Otherwise, Plot a new line
+            self.plot(data=self.fit_result, marker='-', hide_error=True)
 
     def onToggleLegend(self):
         """
@@ -841,5 +867,3 @@ class Plotter(QtWidgets.QDialog, PlotterWidget):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
-
-
