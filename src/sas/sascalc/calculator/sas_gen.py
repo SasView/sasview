@@ -12,6 +12,7 @@ import sys
 import logging
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
 
 from .geni import Iq, Iqxy
@@ -150,19 +151,36 @@ class GenSAS(object):
         return result
 
     # TODO: rename set_sld_data() since it does more than set sld
-    def set_sld_data(self, sld_data=None):
+    def set_sld_data(self, sld_data=None, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity()):
         """
-        Sets sld_data
+        Sets sld_data and applies rotations
+
+        The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW
+        transforms the components of a vector from the xyz to UVW frame. This is the same rotation that
+        transforms the basis vectors from UVW to xyz (because basis vectors transform covariantly and components
+        transform contravariantly).
         """
         self.sld_data = sld_data
         self.data_pos_unit = sld_data.pos_unit
-        self.data_x = _vec(sld_data.pos_x)
-        self.data_y = _vec(sld_data.pos_y)
-        self.data_z = _vec(sld_data.pos_z)
+        position_data = np.column_stack((sld_data.pos_x, sld_data.pos_y, sld_data.pos_z))
+        pos_x, pos_y, pos_z = np.transpose(xyz_to_UVW.apply(position_data))
+        magnetic_data = np.column_stack((sld_data.sld_mx, sld_data.sld_my, sld_data.sld_mz))
+        sld_mx, sld_my, sld_mz = np.transpose(xyz_to_UVW.apply(magnetic_data))
+        s_theta = np.radians(self.params['Up_theta'])
+        s_phi = np.radians(self.params['Up_phi'])
+        p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
+        p_hat = uvw_to_UVW.apply(p_hat)
+        # remove floating point errors in rotation giving |value| > 1 with max and min
+        self.params['Up_theta'] = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
+        # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
+        self.params['Up_phi'] = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
+        self.data_x = _vec(pos_x)
+        self.data_y = _vec(pos_y)
+        self.data_z = _vec(pos_z)
         self.data_sldn = _vec(sld_data.sld_n)
-        self.data_mx = _vec(sld_data.sld_mx)
-        self.data_my = _vec(sld_data.sld_my)
-        self.data_mz = _vec(sld_data.sld_mz)
+        self.data_mx = _vec(sld_mx)
+        self.data_my = _vec(sld_my)
+        self.data_mz = _vec(sld_mz)
         self.data_vol = _vec(sld_data.vol_pix)
         self.data_total_volume = np.sum(sld_data.vol_pix)
         self.params['total_volume'] = self.data_total_volume

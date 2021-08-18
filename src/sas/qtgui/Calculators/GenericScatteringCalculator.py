@@ -5,9 +5,13 @@ import logging
 import time
 import timeit
 
+from scipy.spatial.transform import Rotation
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+from PyQt5 import QtQuick
+from PyQt5 import QtQuick3D
 
 from twisted.internet import threads
 
@@ -93,7 +97,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
                             self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
                             self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
-                            self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize]
+                            self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize, self.txtEnvYaw,
+                            self.txtEnvPitch, self.txtEnvRoll, self.txtSampleYaw, self.txtSamplePitch, self.txtSampleRoll]
         self.invalidLineEdits = []
         for lineEdit in self.lineEdits:
             lineEdit.textChanged.connect(self.gui_text_changed_slot)     # when text is changed
@@ -128,6 +133,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMx.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMy.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
+
+        #update coord display
+        self.txtEnvYaw.textChanged.connect(self.updateCoords)
+        self.txtEnvPitch.textChanged.connect(self.updateCoords)
+        self.txtEnvRoll.textChanged.connect(self.updateCoords)
+        self.txtSampleYaw.textChanged.connect(self.updateCoords)
+        self.txtSamplePitch.textChanged.connect(self.updateCoords)
+        self.txtSampleRoll.textChanged.connect(self.updateCoords)
 
         # setup initial configuration
         self.checkboxNucData.setEnabled(False)
@@ -175,7 +188,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtYstepsize.setValidator(
             QtGui.QRegExpValidator(validat_regex_float, self.txtYstepsize))
         self.txtZstepsize.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtZstepsize))            
+            QtGui.QRegExpValidator(validat_regex_float, self.txtZstepsize))  
+
+        self.txtEnvYaw.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvYaw))
+        self.txtEnvPitch.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvPitch))   
+        self.txtEnvRoll.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvRoll)) 
+        self.txtSampleYaw.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSampleYaw))
+        self.txtSamplePitch.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSamplePitch))   
+        self.txtSampleRoll.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSampleRoll))   
 
         # 0 < Qmax <= 1000
         validat_regex_q = QtCore.QRegExp('^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
@@ -218,7 +244,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitx.setStyleSheet(new_font)
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
+
+        self.coordView = QtQuick.QQuickView()
+        self.coordDisplay = QtWidgets.QWidget.createWindowContainer(self.coordView)
+        self.gridLayout_13.addWidget(self.coordDisplay, 1, 0, 4, 8) # replace widget fully in layout
+        self.coordView.setSource(QtCore.QUrl.fromLocalFile("src/sas/qtgui/Calculators/UI/testSample.qml"))
+        rootObject = self.coordView.rootObject()
+        self.uvwAxes = rootObject.findChild(QtCore.QObject, "uvw")
+        self.xyzAxes = rootObject.findChild(QtCore.QObject, "xyz")
     
+    def updateCoords(self):
+        if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
+           and self.txtSampleYaw.hasAcceptableInput() and self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
+            UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
+            q_to_uvw = UVW_to_uvw.as_quat()
+            q_to_xyz = UVW_to_xyz.as_quat()
+            # note that q is in x, y, z, scalar order whereas qt expects scalar, x, y, z
+            self.uvwAxes.setProperty("rotation", QtGui.QQuaternion(q_to_uvw[3], q_to_uvw[0], q_to_uvw[1], q_to_uvw[2]))
+            self.xyzAxes.setProperty("rotation", QtGui.QQuaternion(q_to_xyz[3], q_to_xyz[0], q_to_xyz[1], q_to_xyz[2]))
+
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
         self.gui_text_changed(self.sender())
@@ -859,6 +903,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtXstepsize.setText("6")
             self.txtYstepsize.setText("6")
             self.txtZstepsize.setText("6")
+            self.txtEnvYaw.setText("0.0")
+            self.txtEnvPitch.setText("0.0")
+            self.txtEnvRoll.setText("0.0")
+            self.txtSampleYaw.setText("0.0")
+            self.txtSamplePitch.setText("0.0")
+            self.txtSampleRoll.setText("0.0")
             # re-enable any options disabled by failed verification
             self.verification_occurred = False
             self.verified = False
@@ -1079,34 +1129,78 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         return sld_data
 
+    def create_rotation_matrices(self):
+        """Create the rotation matrices between different coordinate systems
+
+        UVW coords: beamline coords
+        uvw coords: environment coords
+        xyz coords: sample coords
+
+        The GUI contains values of yaw, pitch and roll from uvw to xyz coordinates and
+        from UVW to uvw. These are right handed coordinate systems with UVW being the beamline
+        coordinate system with:
+
+        U: horizonatal axis
+
+        V: vertical axis
+
+        W: axis back from detector to sample
+
+        The rotation given by the user transforms the BASIS VECTORS - the user gives
+        the trasformation from beamline coords to samplecoords for example - so from there perspective the
+        beamline is the fixed object and the environment and sample rotate. The rotation is first a yaw angle 
+        about the V axis (UVW -> U'V'W') then a pitch angle about the U' axis (U'V'W' -> U''V''W'') and 
+        finally a roll rotation abot the W' axis (U''V''W'' -> uvw).
+
+        This function expects that the textbox values are correct.
+
+        :return: two rotations, the first from UVW to xyz coords, the second from UVW to uvw coords
+        :rtype: tuple of scipy.spatial.transform.Rotation
+        """
+        # in reverse
+        # NOTE: If scipy version is updated above 1.4.0 in the future then this conversion can be replaced with the degrees=True argument
+        # UVW to uvw
+        env = Rotation.from_euler("YXZ", [numpy.radians(float(self.txtEnvYaw.text())),
+                                          numpy.radians(float(self.txtEnvPitch.text())),
+                                          numpy.radians(float(self.txtEnvRoll.text()))])
+        # uvw to xyz
+        sample = Rotation.from_euler("YXZ", [numpy.radians(float(self.txtSampleYaw.text())),
+                                             numpy.radians(float(self.txtSamplePitch.text())),
+                                             numpy.radians(float(self.txtSampleRoll.text()))])
+        return env, sample*env
+
     def onCompute(self):
         """Execute the computation of I(qx, qy)
 
         Copied from previous version
         """
-        try:
-            # create the combined sld data and update from gui
-            sld_data = self.create_full_sld_data()
-            self.model.set_sld_data(sld_data)
-            self.write_new_values_from_gui()
-            # create 2D or 1D data as appropriate
-            if self.is_avg or self.is_avg is None:
-                self._create_default_1d_data()
-                inputs = [self.data.x, []]
-            else:
-                self._create_default_2d_data()
-                inputs = [self.data.qx_data, self.data.qy_data]
-            logging.info("Computation is in progress...")
-            self.cmdCompute.setText('Wait...')
-            self.cmdCompute.setEnabled(False)
-            d = threads.deferToThread(self.complete, inputs, self._update)
-            # Add deferred callback for call return
-            # d.addCallback(self.plot_1_2d)
-            d.addCallback(self.calculateComplete)
-            d.addErrback(self.calculateFailed)
-        except Exception:
-            log_msg = "{}. stop".format(sys.exc_info()[1])
-            logging.info(log_msg)
+        #try:
+        # create the combined sld data and update from gui
+        sld_data = self.create_full_sld_data()
+        UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
+        # NOTE: If scipy version is below 1.4.0 _matrix is replaced by _dcm
+        self.write_new_values_from_gui()
+        # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
+        # and therefore xyz to UVW for the components of the vectors - as we desire
+        self.model.set_sld_data(sld_data, UVW_to_uvw, UVW_to_xyz)
+        # create 2D or 1D data as appropriate
+        if self.is_avg or self.is_avg is None:
+            self._create_default_1d_data()
+            inputs = [self.data.x, []]
+        else:
+            self._create_default_2d_data()
+            inputs = [self.data.qx_data, self.data.qy_data]
+        logging.info("Computation is in progress...")
+        self.cmdCompute.setText('Wait...')
+        self.cmdCompute.setEnabled(False)
+        d = threads.deferToThread(self.complete, inputs, self._update)
+        # Add deferred callback for call return
+        # d.addCallback(self.plot_1_2d)
+        d.addCallback(self.calculateComplete)
+        d.addErrback(self.calculateFailed)
+        #except Exception:
+        #    log_msg = "{}. stop".format(sys.exc_info()[1])
+        #    logging.info(log_msg)
         return
 
     def _update(self, time=None, percentage=None):
