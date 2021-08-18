@@ -1022,16 +1022,17 @@ class PDBReader(object):
         print("Not implemented... ")
 
 class SLDReader(object):
-    """
-    SLD reader for text files.
+    """SLD reader for text files.
 
     format:
     1 line of header - may give any information
     n lines of data points of the form:
-        4 columns: x        y       z       sld
-    or: 6 columns: x        y       z       mx      my      mz
-    or: 7 columns: x        y       z       sld     mx      my      mz
-    or: 8 columns: x        y       z       sld     mx      my      mz      volume
+
+    4 columns: x        y       z       sld
+    6 columns: x        y       z       mx      my      mz
+    7 columns: x        y       z       sld     mx      my      mz
+    8 columns: x        y       z       sld     mx      my      mz      volume
+    
     where all n lines have the same format.
     """
     ## File type
