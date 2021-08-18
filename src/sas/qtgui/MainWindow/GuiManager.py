@@ -13,6 +13,9 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
+from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+
 from twisted.internet import reactor
 # General SAS imports
 from sas import get_local_config, get_custom_config
@@ -100,9 +103,12 @@ class GuiManager(object):
         handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        logging.info(" --- SasView session started ---")
+        version = f"{SASVIEW_VERSION.split('.')[0]}.{SASVIEW_VERSION.split('.')[1]}"
+        logging.info(f" --- SasView {version} session started ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+        # Log the SasView release version and release date
+        logging.info(f"SasView release: {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE}")
 
         # Set up the status bar
         self.statusBarSetup()
