@@ -570,18 +570,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Opens a menu to choose the datafile to load
 
         Opens a file dialog to allow the user to select a datafile to be loaded.
-        If a nuclear sld datafile is loaded then the allowed file types are:
-            .SLD .sld .PDB .pdb
-        If a magnetic sld datafile is loaded then the allowed file types are:
-            .SLD .sld .OMF .omf
+        If a nuclear sld datafile is loaded then the allowed file types are: .SLD .sld .PDB .pdb
+        If a magnetic sld datafile is loaded then the allowed file types are: .SLD .sld .OMF .omf
         This function then loads in the requested datafile, but does not enable it.
         If no previous datafile of this type was loaded then the checkbox to enable
         this file is enabled.
 
-        :param load_nuc: Specifies whether the loaded file is nuclear or magnetic
-            data. Defaults to `True`.
-            `load_nuc=True` gives nuclear sld data.
-            `load_nuc=False` gives magnetic sld data.
+        :param load_nuc: Specifies whether the loaded file is nuclear or magnetic data. Defaults to `True`.
+                        `load_nuc=True` gives nuclear sld data.
+                        `load_nuc=False` gives magnetic sld data.
         :type load_nuc: bool
         """
         try:
@@ -1041,11 +1038,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         :warning: This data is never plotted.
 
-                    residuals.x = data_copy.x[index]
-            residuals.dy = numpy.ones(len(residuals.y))
-            residuals.dx = None
-            residuals.dxl = None
-            residuals.dxw = None
+        residuals.x = data_copy.x[index]
+        residuals.dy = numpy.ones(len(residuals.y))
+        residuals.dx = None
+        residuals.dxl = None
+        residuals.dxw = None
         """
         self.qmax_x = float(self.txtQxMax.text())
         self.npts_x = int(self.txtNoQBins.text())
