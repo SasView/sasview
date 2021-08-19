@@ -2,6 +2,9 @@ import QtQuick 2.15
 import QtQuick3D 1.15
 import QtQuick3D.Helpers 1.15
 
+// This file contains the Axes object used to display coordinate systems - it displays a set of right handed
+// axes with default names {x,y,z} in colours {R,G,B}. The axes labels can be set with the properties axis_1, axis_2, axis_3
+
 Node {
     id: mainNode
     objectName: ""
@@ -15,13 +18,13 @@ Node {
     Model {
         // after scaling cylinder is 10x10x100
         source: "#Cylinder"
-        scale: Qt.vector3d(0.1, 1, 0.1)
+        scale: Qt.vector3d(0.05, 2, 0.05)
         materials: DefaultMaterial {
             diffuseColor: "red"
             emissiveFactor: 0.5
         }
         eulerRotation: Qt.vector3d(0, 0, -90)
-        position: Qt.vector3d(50, 0, 0)
+        position: Qt.vector3d(0, 0, 0)
     }
 
     Model {
@@ -49,13 +52,13 @@ Node {
 
     Model {
         source: "#Cylinder"
-        scale: Qt.vector3d(0.1, 1, 0.1)
+        scale: Qt.vector3d(0.05, 2, 0.05)
         materials: DefaultMaterial {
             diffuseColor: "green"
             emissiveFactor: 0.5
         }
         eulerRotation: Qt.vector3d(0, 0, 0)
-        position: Qt.vector3d(0, 50, 0)
+        position: Qt.vector3d(0, 0, 0)
     }
 
     Model {
@@ -82,13 +85,13 @@ Node {
 
     Model {
         source: "#Cylinder"
-        scale: Qt.vector3d(0.1, 1, 0.1)
+        scale: Qt.vector3d(0.05, 2, 0.05)
         materials: DefaultMaterial {
             diffuseColor: "blue"
             emissiveFactor: 0.5
         }
         eulerRotation: Qt.vector3d(90, 0, 0)
-        position: Qt.vector3d(0, 0, 50)
+        position: Qt.vector3d(0, 0, 0)
     }
 
     Model {

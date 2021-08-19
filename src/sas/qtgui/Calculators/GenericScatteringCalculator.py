@@ -84,6 +84,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data_to_plot = None
         self.graph_num = 1      # index for name of graph
 
+        # finish UI setup - install qml window
+        self.coordView = QtQuick.QQuickView()
+        self.coordWindow = QtWidgets.QWidget.createWindowContainer(self.coordView)
+        self.coordDisplay.addWidget(self.coordWindow)
+        self.coordView.setSource(QtCore.QUrl.fromLocalFile("src/sas/qtgui/Calculators/UI/CoordinateView.qml"))
+        rootObject = self.coordView.rootObject()
+        self.uvwAxes = rootObject.findChild(QtCore.QObject, "uvw")
+        self.xyzAxes = rootObject.findChild(QtCore.QObject, "xyz")
+        self.pVector = rootObject.findChild(QtCore.QObject, "polarisation")
+        self.pVector.setProperty("visible", False)
+        self.camera = rootObject.findChild(QtCore.QObject, "camera")
+
         # combox box
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
         # prevent layout shifting when widget hidden
@@ -141,6 +153,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtSampleYaw.textChanged.connect(self.updateCoords)
         self.txtSamplePitch.textChanged.connect(self.updateCoords)
         self.txtSampleRoll.textChanged.connect(self.updateCoords)
+        self.txtUpTheta.textChanged.connect(self.updatePolarisationCoords)
+        self.txtUpPhi.textChanged.connect(self.updatePolarisationCoords)
 
         # setup initial configuration
         self.checkboxNucData.setEnabled(False)
@@ -244,14 +258,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitx.setStyleSheet(new_font)
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
-
-        self.coordView = QtQuick.QQuickView()
-        self.coordDisplay = QtWidgets.QWidget.createWindowContainer(self.coordView)
-        self.gridLayout_13.addWidget(self.coordDisplay, 1, 0, 4, 8) # replace widget fully in layout
-        self.coordView.setSource(QtCore.QUrl.fromLocalFile("src/sas/qtgui/Calculators/UI/testSample.qml"))
-        rootObject = self.coordView.rootObject()
-        self.uvwAxes = rootObject.findChild(QtCore.QObject, "uvw")
-        self.xyzAxes = rootObject.findChild(QtCore.QObject, "xyz")
     
     def updateCoords(self):
         if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
@@ -262,6 +268,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # note that q is in x, y, z, scalar order whereas qt expects scalar, x, y, z
             self.uvwAxes.setProperty("rotation", QtGui.QQuaternion(q_to_uvw[3], q_to_uvw[0], q_to_uvw[1], q_to_uvw[2]))
             self.xyzAxes.setProperty("rotation", QtGui.QQuaternion(q_to_xyz[3], q_to_xyz[0], q_to_xyz[1], q_to_xyz[2]))
+
+    def updatePolarisationCoords(self):
+        if self.txtUpTheta.hasAcceptableInput() and self.txtUpPhi.hasAcceptableInput():
+            theta = numpy.radians(float(self.txtUpTheta.text()))
+            phi = numpy.radians(float(self.txtUpPhi.text()))
+            q_rot = Rotation.from_euler("ZY", [phi, theta]).as_quat()
+            self.pVector.setProperty("rotation", QtGui.QQuaternion(q_rot[3], q_rot[0], q_rot[1], q_rot[2]))
 
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
@@ -470,18 +483,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMy.setEnabled(not self.is_mag)
         self.txtMz.setEnabled(not self.is_mag)
         if not self.is_mag:
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
         self.txtNucl.setEnabled(not self.is_nuc)
         if not self.is_nuc:
-            self.txtNucl.setText("0")
+            self.txtNucl.setText("0.0")
         # The ability to change the number of nodes and stepsizes only if no laoded data file enabled
         both_disabled =  (not self.is_mag) and (not self.is_nuc)
         if both_disabled:
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
             self.txtNucl.setText("6.97e-06")
             self.txtXnodes.setText("10")
             self.txtYnodes.setText("10")
@@ -528,9 +541,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(False)
             self.txtMy.setEnabled(False)
             self.txtMz.setEnabled(False)
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
         # If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtMx.setEnabled(True)
@@ -544,11 +557,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.txtUpFracOut.setEnabled(False)
                 self.txtUpTheta.setEnabled(False)
                 self.txtUpPhi.setEnabled(False)
+                self.pVector.setProperty("visible", False)
                 return
         self.txtUpFracIn.setEnabled(True)
         self.txtUpFracOut.setEnabled(True)
         self.txtUpTheta.setEnabled(True)
         self.txtUpPhi.setEnabled(True)
+        self.pVector.setProperty("visible", True)
 
     def loadFile(self):
         """Opens a menu to choose the datafile to load
@@ -893,9 +908,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
             self.txtNoPixels.setText("1000")
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
             self.txtNucl.setText("6.97e-06")
             self.txtXnodes.setText("10")
             self.txtYnodes.setText("10")
@@ -909,6 +924,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtSampleYaw.setText("0.0")
             self.txtSamplePitch.setText("0.0")
             self.txtSampleRoll.setText("0.0")
+            QtCore.QMetaObject.invokeMethod(self.camera, "reset", QtCore.Qt.AutoConnection)
             # re-enable any options disabled by failed verification
             self.verification_occurred = False
             self.verified = False
@@ -1178,7 +1194,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # create the combined sld data and update from gui
         sld_data = self.create_full_sld_data()
         UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
-        # NOTE: If scipy version is below 1.4.0 _matrix is replaced by _dcm
         self.write_new_values_from_gui()
         # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
         # and therefore xyz to UVW for the components of the vectors - as we desire
