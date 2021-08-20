@@ -880,11 +880,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraint_names = fit_page.getComplexConstraintsForAllModels()
         constraints = fit_page.getConstraintObjectsForAllModels()
 
-        #active_constraint_names = fit_page.getComplexConstraintsForModel()
-        #constraint_names = fit_page.getFullConstraintNameListForModel()
-        #constraints = fit_page.getConstraintObjectsForModel()
+        # these three assignments need proper extension to all models, not just main model
+        active_constraint_names = fit_page.getComplexConstraintsForModel()
+        constraint_names = fit_page.getFullConstraintNameListForModel()
+        constraints = fit_page.getConstraintObjectsForModel()
 
-        if not constraints: 
+        if not constraints:
             return
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
@@ -894,7 +895,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             if constraint_name[0] is None or constraint_name[1] is None:
                 continue
             # Create the text for widget item
-            label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
+            label = moniker + ":" + constraint_name[0] + " = " + constraint_name[1]
             pos = self.tblConstraints.rowCount()
             self.available_constraints[pos] = constraint
 
@@ -1027,7 +1028,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.selectCheckbox(constrained_row, model=model)
+        # constrained_tab.selectCheckbox(constrained_row, model=model)
 
 
     def showMultiConstraint(self):

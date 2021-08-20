@@ -817,9 +817,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Return list of all active parameters for the current model
         """
         main_model_params = self.getParamNamesMain()
-        poly_model_params = self.getParamNamesPoly()
-        magnet_model_params = self.getParamNamesMagnet()
-        return main_model_params + poly_model_params + magnet_model_params
+        # poly_model_params = self.getParamNamesPoly()
+        # magnet_model_params = self.getParamNamesMagnet()
+        return main_model_params # + poly_model_params + magnet_model_params
 
     def getParamNamesMain(self):
         """
@@ -4183,6 +4183,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             current_list = self.tabToList[self.tabFitting.currentIndex()]
             model = current_list.model()
 
+            if model.item(row, 0) is None:
+                return
             # Assure this is a parameter - must contain a checkbox
             if not model.item(row, 0).isCheckable():
                 # maybe it is a combobox item (multiplicity)
@@ -4616,4 +4618,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for param in self.getParamNames():
             sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
                 self._model_model.item(self.getRowFromName(param), 1).text())
+        for param in self.getParamNamesPoly():
+            sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
+                self._poly_model.item(self.getRowFromName(param), 1).text())
         return sym_dict
