@@ -85,6 +85,35 @@ and other regions to have much smaller finite elements, and hence more detail.
 In Sasview this fourier transform is calculated using the divergence theorem, in an
 algorithm heavily based on that given by Maranville [#MARANVILLE1]_
 
+Coordinate Systems
+^^^^^^^^^^^^^^^^^^
+
+The general scattering calculator deals in 3 different coordinate systems:
+
+.. figure:: gen_coords.png
+
+The {U,V,W} coordinates are the beamline coordinates - they define the coordinate system of the target
+and source. The Qx and Qy axes align with the U and V axes, and the W axis points back from the target towards the source.
+
+The {u,v,w} coordinates are the environment coordinates - they define the coordinate system of the sample environment - such
+as the cryostat and the neutron polarisation vector (p)
+
+The {x,y,z} coordinates are the sample coordinates - they define the position vectors and magnetisation vectors of
+individual pixels or elements in the sample.
+
+Within the generic scattering calculator all three of these coordinate systems are initially aligned. By altering the
+yaw, pitch and roll values their relative rotations can be set. The environment is rotated relative to the beamline,
+and the sample is rotated relative to the environment. The rotations are carried out in the order yaw, pitch then roll,
+intrinsically. For example when rotating the environment coordinates relative to the beamline:
+   - the {u,v,w} and {U,V,W} coordinates are initially aligned
+   - a rotation of angle yaw about the V axis takes {U,V,W} -> {U',V',W'}
+   - a rotation of angle pitch about the U' axis takes {U',V',W'} -> {U'',V'',W''}
+   - a rotation of angle roll about the W'' axis takes {U'',V'',W''} -> {u,v,w}
+
+The polarisation vector defines the direction of the neutron polarisation. It can be set in the environment coordinates
+with the values up_theta and up_phi, where theta is the polar angle from the w axis to the uv plane, and phi is
+the azimuthal angle directed anticlockwise in the uv plane from the positive u axis.
+   
 Magnetic Scattering
 ^^^^^^^^^^^^^^^^^^^
 
@@ -131,20 +160,28 @@ Using The Tool
        is enabled then the nuclear/magnetic SLD textboxes are read only. If no file is enabled then the
        respective textboxes can be edited - and the value supplied is taken to be a constant across all
        pixels/elements.
-   12) For grid type data these values specify the number of pixels in the x,y and z directions respectively.
-   13) For grid type data these values specify the spacing between pixels in the x,y and z directions.
-   14) Draw the pixels/atoms without magnetisation arrows.
-   15) Save the current data into a .sld file. This combines the currently enabled files with any values altered
+   12) Draw the pixels/atoms without magnetisation arrows.
+   13) Save the current data into a .sld file. This combines the currently enabled files with any values altered
        in the GUI, and saves it to a file for later reuse. This functionality only works with grid type data.
-   16) Whether to compute the full 2D scattering pattern, or calculate the average intensity at magnitude Q. Note
+   14) For grid type data these values specify the number of pixels in the x,y and z directions respectively.
+   15) For grid type data these values specify the spacing between pixels in the x,y and z directions.
+   16) These variables define the yaw, pitch and roll rotation of the environment coordinates relative to the
+       beamline coordinates (see theory section above).
+   17) These variables define the yaw, pitch and roll rotation of the sample coordinates relative to the
+       environment coordinates (see theory section above).
+   18) This 3D display shows the relative orientation of the three different coordinate systems, with a grey square
+       representing the beamline target. When magnetic SLDs are present a polarisation vector is also shown in
+       the environment coordinates. The display can be dragged around with the mouse, and the mousewheel used to
+       zoom in and out.
+   19) Whether to compute the full 2D scattering pattern, or calculate the average intensity at magnitude Q. Note
        that the ability to directly produce a 1D average plot with this tool is only available for grid type data 
        with no magnetic SLD.
-   17) Compute the scattering pattern.
-   18) Reset GUI to initial state.
+   20) Compute the scattering pattern.
+   21) Reset GUI to initial state.
    
    
-For example the default starting values with no files enabled (as shown) specify a rectangular grid of 10x10x10 pixels, with 
-each pixel being $6x6x6\require{unicode}\unicode{x212B}$. Each pixel has a constant nuclear SLD of $6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$
+As an example the default starting values with no files enabled (as shown) specify a rectangular grid of 10x10x10 pixels, with 
+each pixel being $6\times6\times6\require{unicode}\unicode{x212B}$. Each pixel has a constant nuclear SLD of $6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$
 and no magnetic SLD.
 
 .. After computation the result will appear in the *Theory* box in the SasView *Data Explorer* panel.
@@ -255,4 +292,4 @@ References
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Robert Bourne, 12 August 2021
+.. note::  This help document was last changed by Robert Bourne, 20 August 2021
