@@ -171,10 +171,10 @@ jobs:
         security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
-        #cd build_tools
-        #python  code_sign_osx.py
+        cd build_tools
+        python  code_sign_osx.py
 
-        cd installers/dist
+        cd ../installers/dist
         codesign --verify  --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
         codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
