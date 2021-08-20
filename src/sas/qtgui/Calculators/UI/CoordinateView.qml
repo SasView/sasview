@@ -69,6 +69,15 @@ View3D {
             position: Qt.vector3d(0, 200, -400)
             eulerRotation.y: 90
         }
+        Model {
+            source: "#Cube"
+            scale: Qt.vector3d(1, 1, 0.01)
+            position: Qt.vector3d(0, 0, -400)
+            materials: DefaultMaterial {
+                diffuseColor: "#444444"
+                emissiveFactor: 0.5
+            }
+        }
         // environment coordinates
         // separate node so that the polarisation vector rotates with the frame
         Node {
