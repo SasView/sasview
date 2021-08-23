@@ -1166,7 +1166,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         the trasformation from beamline coords to samplecoords for example - so from there perspective the
         beamline is the fixed object and the environment and sample rotate. The rotation is first a yaw angle 
         about the V axis (UVW -> U'V'W') then a pitch angle about the U' axis (U'V'W' -> U''V''W'') and 
-        finally a roll rotation abot the W' axis (U''V''W'' -> uvw).
+        finally a roll rotation abot the W'' axis (U''V''W'' -> uvw).
 
         This function expects that the textbox values are correct.
 
