@@ -140,6 +140,9 @@ class sas_gen_test(unittest.TestCase):
         for val in np.abs(errs):
             self.assertLessEqual(val, 1e-3)
         # TEST magnetic angular anisotropy
+        # formula obtained from: Observation of cross-shaped anisotropy in spin-resolved small-angle neutron scattering
+        #                        PHYSICAL REVIEW B 85, 184417 (2012)
+        #                        Andreas Michels, Dirk Honecker, Frank Döbrich, Charles D. Dewhurst, Kiyonori Suzuki, André Heinemann
         sld.set_sldms(1.0, 0.0, 0.0)
         theta = np.arctan2(qy, qx)
         N_f = self.get_box_transform(0.1, qx, qy, 60, 30, 60)
@@ -189,6 +192,9 @@ class sas_gen_test(unittest.TestCase):
         model.set_sld_data(f)
         # close to centre, a zero, and a diagonal (requires l'hopitals rule)
         # TEST angula anisotropy
+        # formula obtained from: Observation of cross-shaped anisotropy in spin-resolved small-angle neutron scattering
+        #                        PHYSICAL REVIEW B 85, 184417 (2012)
+        #                        Andreas Michels, Dirk Honecker, Frank Döbrich, Charles D. Dewhurst, Kiyonori Suzuki, André Heinemann
         qx = np.array([0.0001,    1.57,  1,   ])
         qy = np.array([0.0001,    0,     1,   ])
         theta = np.arctan2(qy, qx)
