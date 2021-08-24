@@ -145,39 +145,16 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menuILoadUnits">
-     <property name="title">
-      <string>Default I Units on Loading</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuIPlotUnits">
-     <property name="title">
-      <string>Default I Units on Plotting</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuQLoadUnits">
-     <property name="title">
-      <string>Default Q Units on Loading</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuQPlotUnits">
-     <property name="title">
-      <string>Default Q Units on Plotting</string>
-     </property>
-    </widget>
     <addaction name="actionLoadData"/>
     <addaction name="actionLoad_Data_Folder"/>
-    <addaction name="separator"/>
-    <addaction name="menuILoadUnits"/>
-    <addaction name="menuQLoadUnits"/>
-    <addaction name="menuIPlotUnits"/>
-    <addaction name="menuQPlotUnits"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionOpen_Analysis"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_Analysis"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -630,6 +607,15 @@
   <action name="actionModel_Marketplace">
    <property name="text">
     <string>Model Marketplace</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/settings.png</normaloff>:/res/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences...</string>
    </property>
   </action>
  </widget>

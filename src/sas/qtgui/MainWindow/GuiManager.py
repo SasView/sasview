@@ -29,6 +29,7 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 from sas.qtgui.Utilities.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.PreferencesPanel import PreferencesPanel
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -150,6 +151,7 @@ class GuiManager(object):
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
+        self.preferences = PreferencesPanel(self._parent)
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
@@ -567,6 +569,7 @@ class GuiManager(object):
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
         self._workspace.actionUndo.triggered.connect(self.actionUndo)
@@ -716,6 +719,9 @@ class GuiManager(object):
             self.filesWidget.saveAnalysis(analysis, tab_id, per.ext)
         else:
             logger.warning('No analysis was available to be saved.')
+
+    def actionOpen_Preferences(self):
+        self.preferences.show()
 
     def actionQuit(self):
         """
