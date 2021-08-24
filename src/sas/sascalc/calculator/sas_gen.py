@@ -157,13 +157,14 @@ class GenSAS(object):
 
         The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW
         transforms the components of a vector from the xyz to UVW frame. This is the same rotation that
-        transforms the basis vectors from UVW to xyz (because basis vectors transform covariantly and components
-        transform contravariantly).
+        transforms the basis vectors from UVW to xyz.
         """
         self.sld_data = sld_data
         self.data_pos_unit = sld_data.pos_unit
         position_data = np.column_stack((sld_data.pos_x, sld_data.pos_y, sld_data.pos_z))
         pos_x, pos_y, pos_z = np.transpose(xyz_to_UVW.apply(position_data))
+        # MagSLD can have sld_m = None, although in practice usually a zero array - set to zero array here to allow rotations
+        self.sld_data.set_sldms(*[sld if sld is not None else 0.0 for sld in [sld_data.sld_mx, sld_data.sld_my, sld_data.sld_mz]])
         magnetic_data = np.column_stack((sld_data.sld_mx, sld_data.sld_my, sld_data.sld_mz))
         sld_mx, sld_my, sld_mz = np.transpose(xyz_to_UVW.apply(magnetic_data))
         s_theta = np.radians(self.params['Up_theta'])

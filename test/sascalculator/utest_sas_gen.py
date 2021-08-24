@@ -8,6 +8,8 @@ warnings.simplefilter("ignore")
 
 import unittest
 import numpy as np
+import math
+from scipy.spatial.transform import Rotation
 
 from sas.sascalc.calculator import sas_gen
 
@@ -75,6 +77,22 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(output.pos_x[0], 0.0)
         self.assertEqual(output.pos_y[0], 0.0)
         self.assertEqual(output.pos_z[0], 0.0)
+    
+    def test_rotations(self):
+        pos_x = np.array([1, 0, 0])
+        pos_y = np.array([0, 1, 0])
+        pos_z = np.array([0, 0, 1])
+        data = sas_gen.MagSLD(pos_x, pos_y, pos_z)
+        R1 = Rotation.from_rotvec((2*math.pi/3)*np.array([1,1,1])/math.sqrt(3))
+        R2 = Rotation.from_rotvec(np.array([0,1,0])*math.pi/2)
+        model = sas_gen.GenSAS()
+        model.set_sld_data(data, R2, R1)
+        # assert almost equal due to floating point errors from rotations
+        self.assertTrue(np.allclose(np.array([0, 0, 1]), model.data_x))
+        self.assertTrue(np.allclose(np.array([1, 0, 0]), model.data_y))
+        self.assertTrue(np.allclose(np.array([0, 1, 0]), model.data_z))
+        self.assertAlmostEqual(model.params["Up_theta"], 90)
+        self.assertAlmostEqual(model.params["Up_phi"], 0)
 
     def test_calculator(self):
         """

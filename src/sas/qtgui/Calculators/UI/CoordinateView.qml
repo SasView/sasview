@@ -74,7 +74,7 @@ View3D {
             scale: Qt.vector3d(1, 1, 0.01)
             position: Qt.vector3d(0, 0, -400)
             materials: DefaultMaterial {
-                diffuseColor: "#444444"
+                diffuseColor: "#888888"
                 emissiveFactor: 0.5
             }
         }
