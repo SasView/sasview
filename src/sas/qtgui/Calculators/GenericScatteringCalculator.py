@@ -1191,32 +1191,32 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Copied from previous version
         """
-        #try:
-        # create the combined sld data and update from gui
-        sld_data = self.create_full_sld_data()
-        UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
-        self.write_new_values_from_gui()
-        # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
-        # and therefore xyz to UVW for the components of the vectors - as we desire
-        self.model.set_sld_data(sld_data, UVW_to_uvw, UVW_to_xyz)
-        # create 2D or 1D data as appropriate
-        if self.is_avg or self.is_avg is None:
-            self._create_default_1d_data()
-            inputs = [self.data.x, []]
-        else:
-            self._create_default_2d_data()
-            inputs = [self.data.qx_data, self.data.qy_data]
-        logging.info("Computation is in progress...")
-        self.cmdCompute.setText('Wait...')
-        self.cmdCompute.setEnabled(False)
-        d = threads.deferToThread(self.complete, inputs, self._update)
-        # Add deferred callback for call return
-        # d.addCallback(self.plot_1_2d)
-        d.addCallback(self.calculateComplete)
-        d.addErrback(self.calculateFailed)
-        #except Exception:
-        #    log_msg = "{}. stop".format(sys.exc_info()[1])
-        #    logging.info(log_msg)
+        try:
+            # create the combined sld data and update from gui
+            sld_data = self.create_full_sld_data()
+            UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
+            self.write_new_values_from_gui()
+            # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
+            # and therefore xyz to UVW for the components of the vectors - as we desire
+            self.model.set_sld_data(sld_data, UVW_to_uvw, UVW_to_xyz)
+            # create 2D or 1D data as appropriate
+            if self.is_avg or self.is_avg is None:
+                self._create_default_1d_data()
+                inputs = [self.data.x, []]
+            else:
+                self._create_default_2d_data()
+                inputs = [self.data.qx_data, self.data.qy_data]
+            logging.info("Computation is in progress...")
+            self.cmdCompute.setText('Wait...')
+            self.cmdCompute.setEnabled(False)
+            d = threads.deferToThread(self.complete, inputs, self._update)
+            # Add deferred callback for call return
+            # d.addCallback(self.plot_1_2d)
+            d.addCallback(self.calculateComplete)
+            d.addErrback(self.calculateFailed)
+        except Exception:
+            log_msg = "{}. stop".format(sys.exc_info()[1])
+            logging.info(log_msg)
         return
 
     def _update(self, time=None, percentage=None):
