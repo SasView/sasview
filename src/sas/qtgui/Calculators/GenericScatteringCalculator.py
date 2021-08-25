@@ -89,7 +89,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.coordWindow = QtWidgets.QWidget.createWindowContainer(self.coordView)
         self.coordDisplay.addWidget(self.coordWindow)
         os.path.dirname(os.path.abspath(__file__))
-        self.coordView.setSource(QtCore.QUrl.fromLocalFile(os.path.dirname(os.path.abspath(__file__)) + "/UI/CoordinateView.qml"))
+        self.coordView.setSource(QtCore.QUrl.fromLocalFile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "UI/CoordinateView.qml")))
         rootObject = self.coordView.rootObject()
         self.uvwAxes = rootObject.findChild(QtCore.QObject, "uvw")
         self.xyzAxes = rootObject.findChild(QtCore.QObject, "xyz")
