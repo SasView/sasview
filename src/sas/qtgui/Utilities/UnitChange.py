@@ -12,6 +12,7 @@ from sas.sascalc.dataloader.data_info import set_loaded_units
 from sas.qtgui.Utilities.UI.UnitPropertiesUI import Ui_unitPropertiesUI
 
 
+
 class UnitChange(QtWidgets.QDialog, Ui_unitPropertiesUI):
 
     def __init__(self, parent=None, data=None, q_converter=None, i_converter=None):
