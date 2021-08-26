@@ -87,6 +87,8 @@ class GenSAS(object):
         self.params['Up_frac_out'] = 1.0
         self.params['Up_theta'] = 0.0
         self.params['Up_phi'] = 0.0
+        self.uvw_to_UVW=Rotation.identity()
+        self.xyz_to_UVW=Rotation.identity()
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
@@ -123,17 +125,38 @@ class GenSAS(object):
         :Param y: array of y-values
         :return: function value
         """
-        x, y, z = self.data_x, self.data_y, self.data_z
+        position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
+        x, y, z = np.transpose(self.xyz_to_UVW.apply(position_data))
         sld = self.data_sldn - self.params['solvent_SLD']
         vol = self.data_vol
         if qy is not None and len(qy) > 0:
             # 2-D calculation
             qx, qy = _vec(qx), _vec(qy)
-            mx, my, mz = self.data_mx, self.data_my, self.data_mz
+            # MagSLD can have sld_m = None, although in practice usually a zero array - set to zero array here to allow rotations
+            if self.data_mx is None and self.data_my is None and self.data_mz is None:
+                mx = None
+                my = None
+                mz = None
+            else:
+                if self.data_mx is not None:
+                    data_len = len(self.data_mx)
+                elif self.data_mx is not None:
+                    data_len = len(self.data_my)
+                else:
+                    data_len = len(self.data_mz)
+                sld_mx, sld_my, sld_mz = [sld if sld is not None else np.zeros(data_len) for sld in (self.data_mx, self.data_my, self.data_mz)]
+                magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
+                mx, my, mz = np.transpose(self.xyz_to_UVW.apply(magnetic_data))
             in_spin = self.params['Up_frac_in']
             out_spin = self.params['Up_frac_out']
-            s_theta = self.params['Up_theta']
-            s_phi = self.params['Up_phi']
+            s_theta = np.radians(self.params['Up_theta'])
+            s_phi = np.radians(self.params['Up_phi'])
+            p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
+            p_hat = self.uvw_to_UVW.apply(p_hat)
+            # remove floating point errors in rotation giving |value| > 1 with max and min
+            s_theta = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
+            # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
+            s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
             I_out = Iqxy(
                 qx, qy, x, y, z, sld, vol, mx, my, mz,
                 in_spin, out_spin, s_theta, s_phi,
@@ -150,8 +173,12 @@ class GenSAS(object):
                   + self.params['background'])
         return result
 
+    def set_rotations(self, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity()):
+        self.uvw_to_UVW = uvw_to_UVW
+        self.xyz_to_UVW = xyz_to_UVW
+
     # TODO: rename set_sld_data() since it does more than set sld
-    def set_sld_data(self, sld_data=None, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity(), override_total_volume=True):
+    def set_sld_data(self, sld_data=None):
         """
         Sets sld_data and applies rotations
 
@@ -161,31 +188,16 @@ class GenSAS(object):
         """
         self.sld_data = sld_data
         self.data_pos_unit = sld_data.pos_unit
-        position_data = np.column_stack((sld_data.pos_x, sld_data.pos_y, sld_data.pos_z))
-        pos_x, pos_y, pos_z = np.transpose(xyz_to_UVW.apply(position_data))
-        # MagSLD can have sld_m = None, although in practice usually a zero array - set to zero array here to allow rotations
-        self.sld_data.set_sldms(*[sld if sld is not None else 0.0 for sld in [sld_data.sld_mx, sld_data.sld_my, sld_data.sld_mz]])
-        magnetic_data = np.column_stack((sld_data.sld_mx, sld_data.sld_my, sld_data.sld_mz))
-        sld_mx, sld_my, sld_mz = np.transpose(xyz_to_UVW.apply(magnetic_data))
-        s_theta = np.radians(self.params['Up_theta'])
-        s_phi = np.radians(self.params['Up_phi'])
-        p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
-        p_hat = uvw_to_UVW.apply(p_hat)
-        # remove floating point errors in rotation giving |value| > 1 with max and min
-        self.params['Up_theta'] = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
-        # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
-        self.params['Up_phi'] = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
-        self.data_x = _vec(pos_x)
-        self.data_y = _vec(pos_y)
-        self.data_z = _vec(pos_z)
+        self.data_x = _vec(sld_data.pos_x)
+        self.data_y = _vec(sld_data.pos_y)
+        self.data_z = _vec(sld_data.pos_z)
         self.data_sldn = _vec(sld_data.sld_n)
-        self.data_mx = _vec(sld_mx)
-        self.data_my = _vec(sld_my)
-        self.data_mz = _vec(sld_mz)
+        self.data_mx = _vec(sld_data.sld_mx)
+        self.data_my = _vec(sld_data.sld_my)
+        self.data_mz = _vec(sld_data.sld_mz)
         self.data_vol = _vec(sld_data.vol_pix)
         self.data_total_volume = np.sum(sld_data.vol_pix)
-        if override_total_volume:
-            self.params['total_volume'] = self.data_total_volume
+        self.params['total_volume'] = self.data_total_volume
 
     def getProfile(self):
         """
