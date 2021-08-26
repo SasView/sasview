@@ -67,7 +67,7 @@ but this will not affect the scattering computation if the
 correction of the total volume V is made.*
 
 Element Type Data
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 The simulation box can be described by a collection of finite elements, forming a
 mesh. Each element occupying space $V_j$ has an associated scattering length density 
@@ -105,10 +105,10 @@ Within the generic scattering calculator all three of these coordinate systems a
 yaw, pitch and roll values their relative rotations can be set. The environment is rotated relative to the beamline,
 and the sample is rotated relative to the environment. The rotations are carried out in the order yaw, pitch then roll,
 intrinsically. For example when rotating the environment coordinates relative to the beamline:
-   - the {u,v,w} and {U,V,W} coordinates are initially aligned
-   - a rotation of angle yaw about the V axis takes {U,V,W} -> {U',V',W'}
-   - a rotation of angle pitch about the U' axis takes {U',V',W'} -> {U'',V'',W''}
-   - a rotation of angle roll about the W'' axis takes {U'',V'',W''} -> {u,v,w}
+- the {u,v,w} and {U,V,W} coordinates are initially aligned
+- a rotation of angle yaw about the V axis takes {U,V,W} -> {U',V',W'}
+- a rotation of angle pitch about the U' axis takes {U',V',W'} -> {U'',V'',W''}
+- a rotation of angle roll about the W'' axis takes {U'',V'',W''} -> {u,v,w}
 
 The polarisation vector defines the direction of the neutron polarisation. It can be set in the environment coordinates
 with the values up_theta and up_phi, where theta is the polar angle from the w axis to the uv plane, and phi is
@@ -140,18 +140,18 @@ Using The Tool
       pixels/elements).
    4) Variables describing the instrument setup for polarisation. These options are only enabled
       when magnetic SLDs are non-zero - because otherwise they have no effect.
-       * up_frac_in describes the fraction of neutrons polarised up (+/total) before the sample
-       * up_frac_out describes the fraction of neutrons polarised up (+/total) after the analyser
-       * up_theta is the polar angle of the polarisation in degrees from z axis to x-y plane
-       * up_phi is the azimuthal angle of the polarisation in degrees around the x-y plane
+      * up_frac_in describes the fraction of neutrons polarised up (+/total) before the sample
+      * up_frac_out describes the fraction of neutrons polarised up (+/total) after the analyser
+      * up_theta is the polar angle of the polarisation in degrees from z axis to x-y plane
+      * up_phi is the azimuthal angle of the polarisation in degrees around the x-y plane
    5) The background intensity of the detector.
    6) A relative scaling factor for the output intensity.
    7) The SLD of the solvent for the sample.
    8) The default volume calculated from the pixel info
       (or natural density of pdb file).
    9) Set the resolution of the scattering pattern.
-       * No. of Qx (Qy) bins is the number of 'pixels' (bins) in Q space on each axis
-       * Qx (Qy) Max is the maximum value of Q to calculate on each axis
+      * No. of Qx (Qy) bins is the number of 'pixels' (bins) in Q space on each axis
+      * Qx (Qy) Max is the maximum value of Q to calculate on each axis
       In some circumstances these textboxes will be highlighted orange, a warning that with
       the values chosen numerical artifacts may appear due to the Nyquist criterion, or simulation box
       size.
@@ -213,7 +213,7 @@ is taken into account.*
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 File Types
---------------------------
+----------
 
 SLD Files
 ^^^^^^^^^
@@ -236,18 +236,18 @@ PDB Files
 ^^^^^^^^^
 
 A PDB file is a text file format which can store atomic structure data. The specification is given
-`here <https://www.wwpdb.org/documentation/file-format>`_. This format is read as grid type data and can be used
+`here <https://www.wwpdb.org/documentation/file-format>`__. This format is read as grid type data and can be used
 to create nuclear SLDs only.
 
 Note that Sasview only reads ATOM and CONECT records from these files. ATOM records are used to create
-suitable nuclear SLDs and pixel volumes using data from the `periodictable <https://pypi.org/project/periodictable/>`_ 
+suitable nuclear SLDs and pixel volumes using data from the `periodictable <https://pypi.org/project/periodictable/>`__ 
 python package. CONECT records are only used when drawing the structure.
 
 OMF Files
 ^^^^^^^^^
 
 An OMF file is a file format capable of storing spatial fields for grid type data. The specification can be found
-`here <https://math.nist.gov/oommf/doc/userguide20a2/userguide/Vector_Field_File_Format_OV.html>`_. While the OVF 2.0
+`here <https://math.nist.gov/oommf/doc/userguide20a2/userguide/Vector_Field_File_Format_OV.html>`__. While the OVF 2.0
 format could technically store both nuclear and magnetic sld data, Sasview currently reads all OMF files as if they were 
 OVF 1.0 or lower, and as such OMF files can only be used to read in data to create magnetic SLDs. Unlike SLD files, OMF
 files are expected to store the magnetisation vector $\mathbf{M}$, not the magentic SLD. 
@@ -260,7 +260,7 @@ VTK Files
 
 The VTK file format is a very broad set of file formats, specifically Sasview currently reads in "legacy" .vtk files,
 up to version 3.0.
-The file specification is available `here <https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf>`_. Currently
+The file specification is available `here <https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf>`__. Currently
 Sasview only reads in the 'unstructured grid' dataset format, and while any file of this form can be loaded, only
 files in which all cells are of the same type (type=10 (tetrahedron), 11 (voxel), 12 (hexahedron)) can be used to
 compute scattering patterns. While this may seem restrictive it merely requires that every element has the same number
@@ -284,12 +284,198 @@ centre of the element of each of the n vertices of the element respectively. $r'
 
 where $\mathbf{r_k}$ are the position vectors of the n vertices of the element.
 
+Scripting
+---------
+
+For more advanced uses the GUI version of the scattering calculator may not suffice. For example the orientational
+average of a magnetic structure, or specific rocking curves. In these cases it maybe desirable to instead use a 
+python script to access the functionality of the calculator. For full details of the scripting interface reference
+can be made to the developer documentation: https://www.sasview.org/docs/dev/sasview-api/sas.sascalc.calculator.html#module-sas.sascalc.calculator.sas_gen.
+Provided here is a short introduction to the most useful elements of this interface.
+
+To begin a python script we must import the sas_gen module of sasview. If python does not know the location of this module
+it can be imported as follows::
+
+      import sys
+      sys.path.append("filepath to sasview/src")
+      from sas.sascalc.calculator import sas_gen
+
+If python does know the location of the sasview installation only the final line is necessary.
+
+The `sas_gen` module contains several useful classes for reading and processing data. The most important of these are:
+
+ - `GenSAS`: This class provides the actual interface to the calculation of scattering patterns. It stores all the required
+      data and paramters, and has methods which can return scattering intensities. I will be referred to hereafter also
+      as 'the model', since it is the overarching object which models the scattering.
+ - `MagSLD`: This class stores all the data associated with a sample, such as scattering length densities. An instance of this class
+      is provided to the model to set the sample data.
+ - `OMFData`: This class stores sample data from OMF files. It must be converted via an `OMF2SLD` object into a MagSLD object before
+      it can be used by the model.
+ - `VTKReader`: This class reads in legacy VTK files and returns a MagSLD object with the associated data.
+ - `PDBReader`: This class reads in PDB files and returns a MagSLD object with the associated data.
+ - `SLDReader`: This class reads in SLD files and returns a MagSLD object with the associated data.
+ - `OMFReader`: This class reads in OMF files and returns a OMFData object with the associated data.
+
+The general stages in a script are:
+
+1) Create a `MagSLD` object storing the sample data, either programatically or by loading in a file.
+2) Create a `GenSAS` model, load in the data, and set the parameters along with any relevent information
+   about the coordinate systems used.
+3) Generate the scattering intensity data from the model and display/process/save it.
+
+4) Data creation
+^^^^^^^^^^^^^^^^
+
+Loading data from vtk, pdb or sld files is easy::
+
+      vtkloader = sas_gen.VTKReader()
+      vtkData = vtkloader.read("filepath to vtk file") # a MagSLD object
+
+::
+
+      pdbloader = sas_gen.PDBReader()
+      pdbData = pdbloader.read("filepath to pdb file") # a MagSLD object
+
+::
+
+      sldloader = sas_gen.SLDReader()
+      sldData = sldloader.read("filepath to sld file") # a MagSLD object
+
+Loading data from OMF files requires an extra conversion step::
+
+      omfloader = sas_gen.OMFReader()
+      omfIntermediateData = omfloader.read("filepath to omf file") # an OMFData object
+      omfConverter = sas_gen.OMF2SLD()
+      omfConverter.set_data(omfIntermediateData)
+      omfData = OMFConverter.get_output() # a MagSLD object
+
+Alternatively a `MagSLD` object can be directly created with custom data, which may have been generated programatically.
+The `MagSLD` obejct can be created with the following constructor::
+
+      def __init__(self, pos_x, pos_y, pos_z, sld_n=None, sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None):
+
+The arguments are all 1D numpy arrays. For grid type data these should all be of the same length, or left as None. While
+element type data can be programatically generated and stored in a `MagSLD` object it is significantly more complicated
+and the details are not given here. The arguments are respectively:
+
+ - The x, y and z coordinates of the realspace positions of the pixels
+ - The nuclear SLD
+ - The x, y and z components of the magnetic SLD
+ - The volume of each pixel. Note that grid type data is expected to be on a regular grid - so if vol_pix is None the
+   volumes are all taken to be the same.
+
+The following code recreates the default data of the scattering calculator GUI, a rectangular grid of 10x10x10 pixels, with 
+each pixel being $6\times6\times6\require{unicode}\unicode{x212B}$. Each pixel has a constant nuclear SLD of 
+$6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$ and no magnetic SLD::
+
+      import numpy as np
+      STEPSIZE=6
+      NODES=10
+      points = np.linspace(0, STEPSIZE*NODES, NODES, endpoint=False)
+      pos_x, pos_y, pos_z = np.meshgrid(points, points, points)
+      pos_x = pos_x.flatten()
+      pos_y = pos_y.flatten()
+      pos_z = pos_z.flatten()
+      data = sas_gen.MagSLD(pos_x, pos_y, pos_z, np.full_like(pos_x, 6.97e-06))
+
+2) Model creation
+^^^^^^^^^^^^^^^^^
+
+Once we have created our data we need to create a `GenSAS` model to carry out the computation. This is very easy.
+We can simply create an instance of the `GenSAS` class and load in our `MagSLD` object::
+
+      model = sas_gen.GenSAS()
+      model.set_sld_data(data)
+
+We can also set a number of parameters stored in a dictionary as follows::
+
+      model.params["Up_theta"] = 90
+      model.params["Up_phi"] = 45
+      ...
+
+The parameters available to be set correspond exactly to options in the GUI and are (with their defaults):
+
+   - `"scale"` = 1.0
+   - `"background"` = 0.0
+   - `"solvent_SLD"` = 0.0
+   - `"total_volume"` = 1.0 (but recalculated when data loaded)
+   - `"Up_frac_in"` = 1.0
+   - `"Up_frac_out"` = 1.0
+   - `"Up_theta"` = 0.0
+   - `"Up_phi"` = 0.0
+
+The meanings are identical to those given above in the GUI description, although the following should be noted:
+
+ - The `total_volume` parameter will be reset to a calculated value in the `GenSAS.set_sld_data()` method
+   described above. If `GenSAS.set_sld_data()` is re-called, and a volume correction is needed then the 
+   `total_volume` parameter must be reset.
+ - `Up_theta` and `Up_phi` remain in degrees as in the GUI - the conversion to radians is handled within the model.
+
+The rotations between different coordinate systems can also be set using the `GenSAS.set_rotations()` method which takes
+optional arguments uvw_to_UVW and xyz_to_UVW, which are the rotations between the xyz, uvw, and UVW coordinates as given
+above. The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW transforms the components 
+of a vector from the xyz to UVW frame. This is the same rotation that transforms the basis vectors from UVW to xyz. The
+rotations are given as instances of `scipy.spatial.transform.Rotation`, and default to the identity. For example if we
+know the rotation of the sample coordinates as (intrinsic ZYZ convention) euler angles::
+
+      from scipy.spatial.transform import Rotation
+      import math
+      theta = math.pi/2.0
+      phi = math.pi/2.0
+      chi = 0.0
+      r = Rotation.from_euler("ZYZ", [theta, phi, chi])
+      model.set_rotations(xyz_to_UVW=r)
+
+3) Intensity calculation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+As in the GUI two different types of calculation can be carried out. A full 2D scattering pattern can be calculated
+in the UV plane with $Q_x$ along the U axis and $Q_y$ along the V axis, or a 1D Debye average can be calculated. Unlike
+in the GUI, while scripting we have precise control over which points are evaluated.
+
+In order to calculate the scattering intensity at a set of $\mathbf{Q}$ values (Q_x1, Q_y1), (Q_x2, Q_y2), ...
+we create two lists `Qx = [Q_x1, Q_x2, ...]` and `Qy = [Q_y1, Q_y2, ...]` and pass these into `model.runXY([Qx, Qy])`.
+Note that we are passing in the two lists as a list. We should pass in a list of length two, where each element is a list
+of the same length giving Qx and Qy values. For example to evaluate the scattering intensity on a grid::
+
+      x_vals = np.linspace(-5, 5, 10)
+      y_vals = np.linspace(-5, 5, 10)
+      xs, ys = np.meshgrid(x_vals, y_vals)
+      xs = xs.flatten()
+      ys = ys.flatten()
+      output = model.runXY([xs, ys])
+
+The output will be the scattering intensities as an array corresponding to the given Q coordinates.
+
+If we have grid type data with no magnetic component we can calculate the Debye full average at any magnitude Q.
+Similarly we pass these magnitudes into the model as a list of lists. The first element should be a list of magnitudes,
+and the second element an empty list::
+
+      mag_vals = np.linspace(0, 5, 10)
+      output = model.run([mag_vals, []])
+
+Note the difference between the following two code snippets::
+
+      Qs = np.linspace(0, 5, 10)
+      output = model.runXY([Qs, np.zeros_like(Qs)])
+
+::
+
+      Qs = np.linspace(0, 5, 10)
+      output = model.runXY([Qs, []])
+
+The first calculates the values of the scattering intensity along the positive Qx axis. The second calculates
+the orientational average intensity at various magnitudes of Q.
+
 References 
 ----------
 
     .. [#MARANVILLE1] An implementation of an efficient direct Fourier transform of polygonal areas and volumes
-         (2021) `arXiv:2104.08309 <https://arxiv.org/abs/2104.08309>`_
+         (2021) `arXiv:2104.08309 <https://arxiv.org/abs/2104.08309>`__
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Robert Bourne, 20 August 2021
+*Document History*
+
+| 2015-05-01 Steve King 
+| 2021-08-26 Robert Bourne
