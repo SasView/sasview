@@ -89,6 +89,9 @@ class GenSAS(object):
         self.params['Up_phi'] = 0.0
         self.uvw_to_UVW=Rotation.identity()
         self.xyz_to_UVW=Rotation.identity()
+        self.transformed_positions = None
+        self.transformed_magnetic_slds = None
+        self.transformed_angles = None
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
@@ -118,12 +121,24 @@ class GenSAS(object):
         """
         self.is_avg = bool(is_avg)
     
+    def reset_transformations(self):
+        """Set previous transformations as invalid
+        """
+        self.transformed_positions = None
+        self.transformed_magnetic_slds = None
+        self.transformed_angles = None
+    
     def transform_positions(self):
         """Transform position data"""
+        if self.transformed_positions is not None:
+            return self.transformed_positions
         position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
-        return np.transpose(self.xyz_to_UVW.apply(position_data))
+        self.transformed_positions = np.transpose(self.xyz_to_UVW.apply(position_data))
+        return self.transformed_positions
     
     def transform_magnetic_slds(self):
+        if self.transformed_magnetic_slds is not None:
+            return self.transformed_magnetic_slds
         if self.data_mx is None and self.data_my is None and self.data_mz is None:
             return None, None, None
         else:
@@ -136,9 +151,12 @@ class GenSAS(object):
             sld_mx, sld_my, sld_mz = [sld if sld is not None else np.zeros(data_len) for sld in (self.data_mx, self.data_my, self.data_mz)]
             # apply transformation from sample coords to beamline coords
             magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
-            return np.transpose(self.xyz_to_UVW.apply(magnetic_data))
+            self.transformed_magnetic_slds = np.transpose(self.xyz_to_UVW.apply(magnetic_data))
+            return self.transformed_magnetic_slds
     
     def transform_angles(self):
+        if self.transformed_angles is not None:
+            return self.transformed_angles
         s_theta = np.radians(self.params['Up_theta'])
         s_phi = np.radians(self.params['Up_phi'])
         p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
@@ -147,7 +165,8 @@ class GenSAS(object):
         s_theta = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
         # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
         s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
-        return s_theta, s_phi
+        self.transformed_angles = (s_theta, s_phi)
+        return self.transformed_angles
 
     def calculate_Iq(self, qx, qy=None):
         """
@@ -195,6 +214,7 @@ class GenSAS(object):
         """
         self.uvw_to_UVW = uvw_to_UVW
         self.xyz_to_UVW = xyz_to_UVW
+        self.reset_transformations()
 
     # TODO: rename set_sld_data() since it does more than set sld
     def set_sld_data(self, sld_data=None):
@@ -213,6 +233,7 @@ class GenSAS(object):
         self.data_vol = _vec(sld_data.vol_pix)
         self.data_total_volume = np.sum(sld_data.vol_pix)
         self.params['total_volume'] = self.data_total_volume
+        self.reset_transformations()
 
     def getProfile(self):
         """
