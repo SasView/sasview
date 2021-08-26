@@ -151,7 +151,7 @@ class GenSAS(object):
         return result
 
     # TODO: rename set_sld_data() since it does more than set sld
-    def set_sld_data(self, sld_data=None, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity()):
+    def set_sld_data(self, sld_data=None, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity(), override_total_volume=True):
         """
         Sets sld_data and applies rotations
 
@@ -184,7 +184,8 @@ class GenSAS(object):
         self.data_mz = _vec(sld_mz)
         self.data_vol = _vec(sld_data.vol_pix)
         self.data_total_volume = np.sum(sld_data.vol_pix)
-        self.params['total_volume'] = self.data_total_volume
+        if override_total_volume:
+            self.params['total_volume'] = self.data_total_volume
 
     def getProfile(self):
         """
