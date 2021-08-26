@@ -190,6 +190,9 @@ class GenSAS(object):
         :param x: simple value
         :return: (I value)
         """
+        if self.is_elements:
+            msg = "The data must be a grid of pixels - not elements"
+            raise ValueError(msg)
         if isinstance(x, list):
             if len(x[1]) > 0:
                 raise ValueError("Not a 1D vector.")
