@@ -125,6 +125,7 @@ class GenSAS(object):
         :Param y: array of y-values
         :return: function value
         """
+        # transform position data from sample to beamline coords
         position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
         x, y, z = np.transpose(self.xyz_to_UVW.apply(position_data))
         sld = self.data_sldn - self.params['solvent_SLD']
@@ -132,7 +133,8 @@ class GenSAS(object):
         if qy is not None and len(qy) > 0:
             # 2-D calculation
             qx, qy = _vec(qx), _vec(qy)
-            # MagSLD can have sld_m = None, although in practice usually a zero array - set to zero array here to allow rotations
+            # MagSLD can have sld_m = None, although in practice usually a zero array
+            # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
             if self.data_mx is None and self.data_my is None and self.data_mz is None:
                 mx = None
                 my = None
@@ -145,10 +147,12 @@ class GenSAS(object):
                 else:
                     data_len = len(self.data_mz)
                 sld_mx, sld_my, sld_mz = [sld if sld is not None else np.zeros(data_len) for sld in (self.data_mx, self.data_my, self.data_mz)]
+                # apply transformation from sample coords to beamline coords
                 magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
                 mx, my, mz = np.transpose(self.xyz_to_UVW.apply(magnetic_data))
             in_spin = self.params['Up_frac_in']
             out_spin = self.params['Up_frac_out']
+            # transform angles from environment to beamline coords
             s_theta = np.radians(self.params['Up_theta'])
             s_phi = np.radians(self.params['Up_phi'])
             p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
@@ -174,17 +178,19 @@ class GenSAS(object):
         return result
 
     def set_rotations(self, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity()):
+        """Set the rotations for the coordinate systems
+
+        The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW
+        transforms the components of a vector from the xyz to UVW frame. This is the same rotation that
+        transforms the basis vectors from UVW to xyz.
+        """
         self.uvw_to_UVW = uvw_to_UVW
         self.xyz_to_UVW = xyz_to_UVW
 
     # TODO: rename set_sld_data() since it does more than set sld
     def set_sld_data(self, sld_data=None):
         """
-        Sets sld_data and applies rotations
-
-        The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW
-        transforms the components of a vector from the xyz to UVW frame. This is the same rotation that
-        transforms the basis vectors from UVW to xyz.
+        Sets sld_data
         """
         self.sld_data = sld_data
         self.data_pos_unit = sld_data.pos_unit

@@ -1196,10 +1196,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data = self.create_full_sld_data()
             self.model.set_sld_data(sld_data)
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
-            self.model.set_rotations(UVW_to_uvw, UVW_to_xyz)
-            self.write_new_values_from_gui()
             # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
             # and therefore xyz to UVW for the components of the vectors - as we desire
+            self.model.set_rotations(UVW_to_uvw, UVW_to_xyz)
+            self.write_new_values_from_gui()
             # create 2D or 1D data as appropriate
             if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()
