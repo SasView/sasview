@@ -117,6 +117,37 @@ class GenSAS(object):
         Sets is_avg: [bool]
         """
         self.is_avg = bool(is_avg)
+    
+    def transform_positions(self):
+        """Transform position data"""
+        position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
+        return np.transpose(self.xyz_to_UVW.apply(position_data))
+    
+    def transform_magnetic_slds(self):
+        if self.data_mx is None and self.data_my is None and self.data_mz is None:
+            return None, None, None
+        else:
+            if self.data_mx is not None:
+                data_len = len(self.data_mx)
+            elif self.data_mx is not None:
+                data_len = len(self.data_my)
+            else:
+                data_len = len(self.data_mz)
+            sld_mx, sld_my, sld_mz = [sld if sld is not None else np.zeros(data_len) for sld in (self.data_mx, self.data_my, self.data_mz)]
+            # apply transformation from sample coords to beamline coords
+            magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
+            return np.transpose(self.xyz_to_UVW.apply(magnetic_data))
+    
+    def transform_angles(self):
+        s_theta = np.radians(self.params['Up_theta'])
+        s_phi = np.radians(self.params['Up_phi'])
+        p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
+        p_hat = self.uvw_to_UVW.apply(p_hat)
+        # remove floating point errors in rotation giving |value| > 1 with max and min
+        s_theta = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
+        # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
+        s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
+        return s_theta, s_phi
 
     def calculate_Iq(self, qx, qy=None):
         """
@@ -126,8 +157,7 @@ class GenSAS(object):
         :return: function value
         """
         # transform position data from sample to beamline coords
-        position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
-        x, y, z = np.transpose(self.xyz_to_UVW.apply(position_data))
+        x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
         vol = self.data_vol
         if qy is not None and len(qy) > 0:
@@ -135,32 +165,11 @@ class GenSAS(object):
             qx, qy = _vec(qx), _vec(qy)
             # MagSLD can have sld_m = None, although in practice usually a zero array
             # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
-            if self.data_mx is None and self.data_my is None and self.data_mz is None:
-                mx = None
-                my = None
-                mz = None
-            else:
-                if self.data_mx is not None:
-                    data_len = len(self.data_mx)
-                elif self.data_mx is not None:
-                    data_len = len(self.data_my)
-                else:
-                    data_len = len(self.data_mz)
-                sld_mx, sld_my, sld_mz = [sld if sld is not None else np.zeros(data_len) for sld in (self.data_mx, self.data_my, self.data_mz)]
-                # apply transformation from sample coords to beamline coords
-                magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
-                mx, my, mz = np.transpose(self.xyz_to_UVW.apply(magnetic_data))
+            mx, my, mz = self.transform_magnetic_slds()
             in_spin = self.params['Up_frac_in']
             out_spin = self.params['Up_frac_out']
             # transform angles from environment to beamline coords
-            s_theta = np.radians(self.params['Up_theta'])
-            s_phi = np.radians(self.params['Up_phi'])
-            p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
-            p_hat = self.uvw_to_UVW.apply(p_hat)
-            # remove floating point errors in rotation giving |value| > 1 with max and min
-            s_theta = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
-            # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
-            s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
+            s_theta, s_phi = self.transform_angles()
             I_out = Iqxy(
                 qx, qy, x, y, z, sld, vol, mx, my, mz,
                 in_spin, out_spin, s_theta, s_phi,

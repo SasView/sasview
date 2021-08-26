@@ -86,13 +86,16 @@ class sas_gen_test(unittest.TestCase):
         R1 = Rotation.from_rotvec((2*math.pi/3)*np.array([1,1,1])/math.sqrt(3))
         R2 = Rotation.from_rotvec(np.array([0,1,0])*math.pi/2)
         model = sas_gen.GenSAS()
-        model.set_sld_data(data, R2, R1)
+        model.set_rotations(R2, R1)
+        model.set_sld_data(data)
         # assert almost equal due to floating point errors from rotations
-        self.assertTrue(np.allclose(np.array([0, 0, 1]), model.data_x))
-        self.assertTrue(np.allclose(np.array([1, 0, 0]), model.data_y))
-        self.assertTrue(np.allclose(np.array([0, 1, 0]), model.data_z))
-        self.assertAlmostEqual(model.params["Up_theta"], 90)
-        self.assertAlmostEqual(model.params["Up_phi"], 0)
+        x,y,z = model.transform_positions()
+        theta, phi = model.transform_angles()
+        self.assertTrue(np.allclose(np.array([0, 0, 1]), x))
+        self.assertTrue(np.allclose(np.array([1, 0, 0]), y))
+        self.assertTrue(np.allclose(np.array([0, 1, 0]), z))
+        self.assertAlmostEqual(theta, 90)
+        self.assertAlmostEqual(phi, 0)
 
     def test_calculator(self):
         """
