@@ -14,6 +14,15 @@ DEFAULT_Q_CATEGORY = "Inverse Length"
 DEFAULT_I_CATEGORY = "Absolute Units"
 
 
+def cb_replace_all_items_with_new(cb, new_items, default_item=None):
+    # type: (QtWidgets.QComboBox, [], str) -> None
+    """Helper method that removes any existing ComboBox values, replaces them and sets a default item, if defined"""
+    cb.clear()
+    cb.addItems(new_items)
+    if default_item:
+        cb.setCurrentIndex(cb.findText(default_item))
+
+
 class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
     """A preferences panel to house all SasView related settings. The left side of the window is a listWidget with a
     list of the options menus available. The right side of the window is a stackedWidget object that houses the options
@@ -64,8 +73,7 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             default = value.get(config_locale)
             i_unit = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
             i_units = Converter(i_unit).get_compatible_units()
-            index.addItems(i_units)
-            index.setCurrentIndex(index.findText(i_unit))
+            cb_replace_all_items_with_new(index, i_units, i_unit)
             index.currentIndexChanged.connect(self.set_plotting_values)
             setattr(custom_config, config_locale, i_unit)
 
@@ -82,11 +90,11 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
 
     def setupDataLoaderWidget(self):
         custom_config = get_custom_config()
-        type_selectors = {
+        self.type_selectors = {
             self.cbLoadIUnitType: {"LOADER_I_UNIT_TYPE": DEFAULT_I_CATEGORY},
             self.cbLoadQUnitType: {"LOADER_Q_UNIT_TYPE": DEFAULT_Q_CATEGORY},
         }
-        unit_selectors = {
+        self.unit_selectors = {
             self.cbLoadIUnitSelector: {
                 "LOADER_I_UNIT_ON_LOAD": {
                     DEFAULT_I_CATEGORY: DEFAULT_I_UNIT,
@@ -99,28 +107,40 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
                 "LOADER_Q_UNIT_ON_LOAD": {DEFAULT_Q_CATEGORY: DEFAULT_Q_UNIT, "Length": DEFAULT_Q_LENGTH_UNIT}
             }
         }
-        for index, value in type_selectors.items():
+        for index, value in self.type_selectors.items():
             config_locale = list(value.keys())[0]
             default = value.get(config_locale)
             selection = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
             index.setCurrentIndex(index.findText(selection))
             index.currentIndexChanged.connect(self.set_loading_type_value)
-        for index, value in unit_selectors.items():
+        for index, value in self.unit_selectors.items():
             config_locale = list(value.keys())[0]
             default_map = list(value.values())[0]
             selection = (self.cbLoadIUnitType.currentText() if self.cbLoadIUnitType.currentText() in default_map.keys()
                          else self.cbLoadQUnitType.currentText())
             default = default_map.get(selection)
             unit = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
-            index.addItems(Converter(unit).get_compatible_units())
-            index.setCurrentIndex(index.findText(unit))
+            cb_replace_all_items_with_new(index, Converter(unit).get_compatible_units(), unit)
             index.currentIndexChanged.connect(self.set_loading_unit_value)
             setattr(custom_config, config_locale, unit)
 
     def set_loading_type_value(self):
         """Update the custom config whenever a value is changed to ensure the values propagate through SasView"""
-        # TODO: Update type values when input boxes are modified
-        pass
+        sender = self.sender()
+        custom_config = get_custom_config()
+        if sender == self.cbLoadQUnitType:
+            new_type = self.cbLoadQUnitType.currentText()
+            input = self.cbLoadQUnitSelector
+        elif sender == self.cbLoadIUnitType:
+            new_type = self.cbLoadIUnitType.currentText()
+            input = self.cbLoadIUnitSelector
+        else:
+            return
+        config_locale = list(self.unit_selectors[input].keys())[0]
+        types = list(self.unit_selectors[input].values())[0]
+        default_unit = types.get(new_type)
+        cb_replace_all_items_with_new(input, Converter(default_unit).get_compatible_units(), default_unit)
+        setattr(custom_config, config_locale, default_unit)
 
     def set_loading_unit_value(self):
         # TODO: Update unit values when input boxes are modified
