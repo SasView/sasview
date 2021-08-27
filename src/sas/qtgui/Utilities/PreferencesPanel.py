@@ -50,7 +50,7 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
     def setupPlottingWidget(self):
         custom_config = get_custom_config()
         # Map defaults to each combo box
-        unit_constants = {
+        self.unit_constants = {
             self.cbPlotIAbs: {"PLOTTER_I_ABS_UNIT": DEFAULT_I_UNIT},
             self.cbPlotIAbsSquared: {"PLOTTER_I_ABS_SQUARE_UNIT": DEFAULT_I_ABS2_UNIT},
             self.cbPlotISesans: {"PLOTTER_I_SESANS": DEFAULT_I_SESANS_UNIT},
@@ -59,7 +59,7 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             self.cbPlotQInvLength: {"PLOTTER_Q_INV_LENGTH": DEFAULT_Q_UNIT}
         }
         # Populate combo boxes and add triggers to
-        for index, value in unit_constants.items():
+        for index, value in self.unit_constants.items():
             config_locale = list(value.keys())[0]
             default = value.get(config_locale)
             i_unit = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
@@ -70,8 +70,12 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             setattr(custom_config, config_locale, i_unit)
 
     def set_plotting_values(self):
-        # TODO: Update the plotting constants when any of the combo boxes change
-        pass
+        """Update the custom config whenever a value is changed to ensure the values propagate through SasView"""
+        for input, map in self.unit_constants.items():
+            custom_config = get_custom_config()
+            config_locale = list(map.keys())[0]
+            unit = input.currentText()
+            setattr(custom_config, config_locale, unit)
 
     ###################################################
     # Data Loading options Widget initialization and callbacks
@@ -114,6 +118,7 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             setattr(custom_config, config_locale, unit)
 
     def set_loading_type_value(self):
+        """Update the custom config whenever a value is changed to ensure the values propagate through SasView"""
         # TODO: Update type values when input boxes are modified
         pass
 

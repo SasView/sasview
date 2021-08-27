@@ -12,6 +12,7 @@ import matplotlib as mpl
 from matplotlib import rcParams
 
 DEFAULT_CMAP = mpl.cm.jet
+from sas import get_custom_config
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
@@ -20,6 +21,8 @@ from sas.qtgui.Plotting.Binder import BindArtist
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UnitChange import UnitChange
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
+
+from sas.sascalc.data_util.nxsunit import Converter
 
 
 class PlotterBase(QtWidgets.QWidget):
@@ -64,6 +67,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.scale = 'linear'
         self.x_label = "log10(x)"
         self.y_label = "log10(y)"
+        self.use_window_units = False
 
         # Mouse click related
         self._scale_xlo = None
@@ -449,6 +453,36 @@ class PlotterBase(QtWidgets.QWidget):
         else:
             GuiUtils.saveData2D(plot_data)
 
+    def useDefaultPlottingUnits(self, data=None):
+        config = get_custom_config()
+        i_defaults = ["PLOTTER_I_ABS_UNIT", "PLOTTER_I_ABS_SQUARE_UNIT", "PLOTTER_I_SESANS", "PLOTTER_I_ARB"]
+        q_defaults = ["PLOTTER_Q_LENGTH", "PLOTTER_Q_INV_LENGTH"]
+        if data:
+            # Units Hierarchy: UnitChange window > global preferences > plotted data set
+            i_unit = base_i_unit = data.z_unit if hasattr(data, 'z_unit') else data.y_unit
+            compatible_i_units = Converter(i_unit).get_compatible_units()
+            q_unit = base_q_unit = data.x_unit
+            compatible_q_units = Converter(q_unit).get_compatible_units()
+            if self.use_window_units and hasattr(self, 'units'):
+                # 1st Priority: Use UnitChange units
+                q_unit = self.units.cbX.currentText()
+                i_unit = self.units.cbY.currentText()
+            else:
+                # 2nd Priority: Use global preferences units if they exist
+                for config_key in i_defaults:
+                    unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
+                    if unit in compatible_i_units:
+                        i_unit = unit
+                        break
+                for config_key in q_defaults:
+                    unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
+                    if unit in compatible_q_units:
+                        q_unit = unit
+                        break
+            # Convert units when data plotted if data not already at same
+            if base_q_unit != q_unit or base_i_unit != i_unit:
+                self.setUnits(q_unit, i_unit)
+
     def onUnitsChange(self):
         """
         Show a dialog allowing unit conversions for each axis
@@ -456,8 +490,14 @@ class PlotterBase(QtWidgets.QWidget):
         # Create the Unit conversion dialog on the fly
         self.units = UnitChange(self, self.data)
         if self.units.exec_() == QtWidgets.QDialog.Accepted:
-            for id in list(self.plot_dict.keys()):
-                plot = self.plot_dict[id]
-                plot.convert_q_units(self.units.cbX.currentText())
-                plot.convert_i_units(self.units.cbY.currentText())
-                self.replacePlot(id, plot)
+            self.use_window_units = True
+            q_unit = self.units.cbX.currentText()
+            i_unit = self.units.cbY.currentText()
+            self.setUnits(q_unit, i_unit)
+
+    def setUnits(self, q_unit, i_unit):
+        for id in list(self.plot_dict.keys()):
+            plot = self.plot_dict[id]
+            plot.convert_q_units(q_unit)
+            plot.convert_i_units(i_unit)
+            self.replacePlot(id, plot)
