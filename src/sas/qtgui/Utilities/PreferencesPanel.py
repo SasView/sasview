@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMessageBox, QComboBox, QDialog
 
 from sas import get_custom_config
 from sas.sascalc.data_util.nxsunit import Converter
@@ -25,7 +25,7 @@ def get_config_value(attr, default=None):
 
 
 def cb_replace_all_items_with_new(cb, new_items, default_item=None):
-    # type: (QtWidgets.QComboBox, [], str) -> None
+    # type: (QComboBox, [], str) -> None
     """Helper method that removes any existing ComboBox values, replaces them and sets a default item, if defined"""
     cb.clear()
     cb.addItems(new_items)
@@ -33,7 +33,7 @@ def cb_replace_all_items_with_new(cb, new_items, default_item=None):
         cb.setCurrentIndex(cb.findText(default_item))
 
 
-class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
+class PreferencesPanel(QDialog, Ui_preferencesUI):
     """A preferences panel to house all SasView related settings. The left side of the window is a listWidget with a
     list of the options menus available. The right side of the window is a stackedWidget object that houses the options
     associated with each listWidget item.
@@ -54,7 +54,10 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
         self.listWidget.setCurrentRow(0)
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
+
+        ######################################################
         # Setup each widget separately
+        ######################################################
 
         # Plotting preferences
         # Mapping default values to each combo box
@@ -88,6 +91,8 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             }
         }
         self.setupDataLoaderWidget()
+        self.checkBoxLoadQOverride.toggled.connect(self.override_file_units)
+        self.checkBoxLoadIOverride.toggled.connect(self.override_file_units)
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
@@ -164,3 +169,27 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             return
         config_locale = list(self.data_unit_selectors[sender].keys())[0]
         set_config_value(config_locale, new_unit)
+
+    def override_file_units(self):
+        sender = self.sender()
+        if sender == self.checkBoxLoadQOverride:
+            config_locale = "LOAD_Q_OVERRIDE"
+            axis = "Q"
+            unit = self.cbLoadQUnitSelector.currentText()
+        else:
+            config_locale = "LOAD_I_OVERRIDE"
+            axis = "Intensity"
+            unit = self.cbLoadIUnitSelector.currentText()
+        if sender.isChecked():
+            message = f"By selecting to override {axis} units, the data loader system will ignore any units found in "
+            message += f"**all** data files and, instead, will assume the units are {unit}. No data scaling will occur."
+            message += "\r\tE.g. you selected 'm^{-1}' as your Intensity unit is but the dataset is '[0.1, 0.2, 0.3] "
+            message += "cm^{-1}', the as-loaded data will be treated as '[0.1, 0.2, 0.3] m^{-1}'."
+            message += "\r\r**Are you certain you want to do this?**"
+
+            warning = QMessageBox(QMessageBox.Warning, "", message, QMessageBox.Yes | QMessageBox.No, self)
+            button = warning.exec()
+            # Uncheck the checkbox if rejected
+            if button == QMessageBox.No:
+                sender.setChecked(0)
+        set_config_value(config_locale, sender.isChecked())

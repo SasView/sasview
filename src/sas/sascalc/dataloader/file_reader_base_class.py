@@ -285,44 +285,60 @@ class FileReader(object):
         return data
 
     @staticmethod
-    def set_default_1d_units(data):
+    def set_default_1d_units(data, use_q_units_default=True, use_i_units_default=True):
         """
         Set the x and y axes to the default 1D units
         :param data: 1D data set
+        :param use_q_units_default: Boolean to use Q unit default
+        :param use_i_units_default: Boolean to use Intensity unit default
         :return:
         """
         custom_config = get_custom_config()
-        default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
-        default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
-        set_loaded_units(data, 'x', default_q_units)
-        data.xaxis(r"\rm{Q}", default_q_units)
-        set_loaded_units(data, 'y', default_i_units)
-        data.yaxis(r"\rm{Intensity}", default_i_units)
+        if use_q_units_default:
+            default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
+            set_loaded_units(data, 'x', default_q_units)
+            data.xaxis(r"\rm{Q}", default_q_units)
+        if use_i_units_default:
+            default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
+            set_loaded_units(data, 'y', default_i_units)
+            data.yaxis(r"\rm{Intensity}", default_i_units)
         return data
 
     @staticmethod
-    def set_default_2d_units(data):
+    def set_default_2d_units(data, use_q_units_default=True, use_i_units_default=True):
         """
         Set the x and y axes to the default 2D units
         :param data: 2D data set
+        :param use_q_units_default: Boolean to use Q unit default
+        :param use_i_units_default: Boolean to use Intensity unit default
         :return:
         """
         custom_config = get_custom_config()
-        default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
-        default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
-        set_loaded_units(data, 'x', default_q_units)
-        data.xaxis("\\rm{Q_{x}}", default_q_units)
-        set_loaded_units(data, 'y', default_q_units)
-        data.yaxis("\\rm{Q_{y}}", default_q_units)
-        set_loaded_units(data, 'z', default_i_units)
-        data.zaxis("\\rm{Intensity}", default_i_units)
+        if use_q_units_default:
+            default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
+            set_loaded_units(data, 'x', default_q_units)
+            data.xaxis("\\rm{Q_{x}}", default_q_units)
+            set_loaded_units(data, 'y', default_q_units)
+            data.yaxis("\\rm{Q_{y}}", default_q_units)
+        if use_i_units_default:
+            default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
+            set_loaded_units(data, 'z', default_i_units)
+            data.zaxis("\\rm{Intensity}", default_i_units)
         return data
 
     def define_loaded_units(self):
         """
         Defines the units for the as-loaded data - Units can be arbitrary
         """
+        custom_config = get_custom_config()
+        override_q_units = getattr(custom_config, 'LOAD_Q_OVERRIDE', False)
+        override_i_units = getattr(custom_config, 'LOAD_I_OVERRIDE', False)
         for data in self.output:
+            # Override as-loaded units if the user selected that option
+            if isinstance(data, Data1D):
+                data = self.set_default_1d_units(data, override_q_units, override_i_units)
+            elif isinstance(data, Data2D):
+                data = self.set_default_2d_units(data, override_q_units, override_i_units)
             set_loaded_units(data, 'x', data.x_unit)
             set_loaded_units(data, 'y', data.y_unit)
             if hasattr(data, 'z_unit'):

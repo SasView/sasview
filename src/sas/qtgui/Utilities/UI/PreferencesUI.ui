@@ -96,53 +96,13 @@
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Q Units</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QComboBox" name="cbPlotQLength"/>
-              </item>
               <item row="6" column="1">
                <widget class="QComboBox" name="cbPlotIAbsSquared"/>
-              </item>
-              <item row="3" column="0">
-               <widget class="QComboBox" name="cbPlotQInvLength"/>
-              </item>
-              <item row="6" column="3">
-               <widget class="QComboBox" name="cbPlotIArbitrary"/>
-              </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_15">
-                <property name="text">
-                 <string>Absolute Units</string>
-                </property>
-               </widget>
               </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_3">
                 <property name="text">
                  <string>Inverse length</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_8">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>I Units</string>
                 </property>
                </widget>
               </item>
@@ -160,6 +120,18 @@
                 </property>
                </widget>
               </item>
+              <item row="6" column="0">
+               <widget class="QComboBox" name="cbPlotIAbs"/>
+              </item>
+              <item row="3" column="1">
+               <widget class="QComboBox" name="cbPlotQLength"/>
+              </item>
+              <item row="6" column="3">
+               <widget class="QComboBox" name="cbPlotIArbitrary"/>
+              </item>
+              <item row="3" column="0">
+               <widget class="QComboBox" name="cbPlotQInvLength"/>
+              </item>
               <item row="5" column="1">
                <widget class="QLabel" name="label">
                 <property name="text">
@@ -170,13 +142,61 @@
               <item row="6" column="2">
                <widget class="QComboBox" name="cbPlotISesans"/>
               </item>
-              <item row="6" column="0">
-               <widget class="QComboBox" name="cbPlotIAbs"/>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Absolute Units</string>
+                </property>
+               </widget>
               </item>
               <item row="1" column="1">
                <widget class="QLabel" name="label_16">
                 <property name="text">
                  <string>Length</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2" colspan="2">
+               <widget class="QCheckBox" name="checkBoxPlotQAsLoaded">
+                <property name="text">
+                 <string>Plot Q As Loaded</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2" colspan="2">
+               <widget class="QCheckBox" name="checkBoxPlotIAsLoaded">
+                <property name="text">
+                 <string>Plot I As Loaded</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QLabel" name="label_8">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Intensity Units</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QLabel" name="label_6">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Q Units</string>
                 </property>
                </widget>
               </item>
@@ -236,7 +256,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>I Units</string>
+                 <string>Intensity Units</string>
                 </property>
                </widget>
               </item>
@@ -309,6 +329,20 @@
               <item row="2" column="1">
                <widget class="QComboBox" name="cbLoadQUnitSelector"/>
               </item>
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="checkBoxLoadQOverride">
+                <property name="text">
+                 <string>Override File Q Units</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QCheckBox" name="checkBoxLoadIOverride">
+                <property name="text">
+                 <string>Override File I Units</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
            </layout>
@@ -326,7 +360,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Apply|QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Help|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
      </property>
     </widget>
    </item>
