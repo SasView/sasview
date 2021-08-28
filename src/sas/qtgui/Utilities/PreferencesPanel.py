@@ -136,12 +136,20 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             input = self.cbLoadIUnitSelector
         else:
             return
-        config_locale = list(self.unit_selectors[input].keys())[0]
+        config_locale = list(self.type_selectors[sender].keys())[0]
         types = list(self.unit_selectors[input].values())[0]
         default_unit = types.get(new_type)
         cb_replace_all_items_with_new(input, Converter(default_unit).get_compatible_units(), default_unit)
         setattr(custom_config, config_locale, default_unit)
 
     def set_loading_unit_value(self):
-        # TODO: Update unit values when input boxes are modified
-        pass
+        sender = self.sender()
+        custom_config = get_custom_config()
+        if sender == self.cbLoadQUnitSelector:
+            new_unit = self.cbLoadQUnitSelector.currentText()
+        elif sender == self.cbLoadIUnitSelector:
+            new_unit = self.cbLoadIUnitSelector.currentText()
+        else:
+            return
+        config_locale = list(self.unit_selectors[sender].keys())[0]
+        setattr(custom_config, config_locale, new_unit)

@@ -11,6 +11,7 @@ import logging
 from abc import abstractmethod
 
 import numpy as np
+from sas import get_custom_config
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException, FileContentsException, DataReaderException
 from sas.sascalc.dataloader.data_info import (Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,
                                               combine_data_info_with_plottable, set_loaded_units)
@@ -290,10 +291,13 @@ class FileReader(object):
         :param data: 1D data set
         :return:
         """
-        set_loaded_units(data, 'x', '1/A')
-        data.xaxis(r"\rm{Q}", '1/A')
-        set_loaded_units(data, 'y', '1/cm')
-        data.yaxis(r"\rm{Intensity}", "1/cm")
+        custom_config = get_custom_config()
+        default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
+        default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
+        set_loaded_units(data, 'x', default_q_units)
+        data.xaxis(r"\rm{Q}", default_q_units)
+        set_loaded_units(data, 'y', default_i_units)
+        data.yaxis(r"\rm{Intensity}", default_i_units)
         return data
 
     @staticmethod
@@ -303,12 +307,15 @@ class FileReader(object):
         :param data: 2D data set
         :return:
         """
-        set_loaded_units(data, 'x', '1/A')
-        data.xaxis("\\rm{Q_{x}}", '1/A')
-        set_loaded_units(data, 'y', '1/A')
-        data.yaxis("\\rm{Q_{y}}", '1/A')
-        set_loaded_units(data, 'z', '1/cm')
-        data.zaxis("\\rm{Intensity}", "1/cm")
+        custom_config = get_custom_config()
+        default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
+        default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
+        set_loaded_units(data, 'x', default_q_units)
+        data.xaxis("\\rm{Q_{x}}", default_q_units)
+        set_loaded_units(data, 'y', default_q_units)
+        data.yaxis("\\rm{Q_{y}}", default_q_units)
+        set_loaded_units(data, 'z', default_i_units)
+        data.zaxis("\\rm{Intensity}", default_i_units)
         return data
 
     def define_loaded_units(self):
