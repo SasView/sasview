@@ -453,10 +453,12 @@ class PlotterBase(QtWidgets.QWidget):
         else:
             GuiUtils.saveData2D(plot_data)
 
-    def useDefaultPlottingUnits(self, data=None):
+    def setPlottedUnits(self, data=None):
         config = get_custom_config()
         i_defaults = ["PLOTTER_I_ABS_UNIT", "PLOTTER_I_ABS_SQUARE_UNIT", "PLOTTER_I_SESANS", "PLOTTER_I_ARB"]
         q_defaults = ["PLOTTER_Q_LENGTH", "PLOTTER_Q_INV_LENGTH"]
+        plot_q_as_loaded = getattr(config, "PLOTTER_PLOT_Q_AS_LOADED", True)
+        plot_i_as_loaded = getattr(config, "PLOTTER_PLOT_I_AS_LOADED", True)
         if data:
             # Units Hierarchy: UnitChange window > global preferences > plotted data set
             i_unit = base_i_unit = data.z_unit if hasattr(data, 'z_unit') else data.y_unit
@@ -469,16 +471,18 @@ class PlotterBase(QtWidgets.QWidget):
                 i_unit = self.units.cbY.currentText()
             else:
                 # 2nd Priority: Use global preferences units if they exist
-                for config_key in i_defaults:
-                    unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
-                    if unit in compatible_i_units:
-                        i_unit = unit
-                        break
-                for config_key in q_defaults:
-                    unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
-                    if unit in compatible_q_units:
-                        q_unit = unit
-                        break
+                if not plot_i_as_loaded:
+                    for config_key in i_defaults:
+                        unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
+                        if unit in compatible_i_units:
+                            i_unit = unit
+                            break
+                if not plot_q_as_loaded:
+                    for config_key in q_defaults:
+                        unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
+                        if unit in compatible_q_units:
+                            q_unit = unit
+                            break
             # Convert units when data plotted if data not already at same
             if base_q_unit != q_unit or base_i_unit != i_unit:
                 self.setUnits(q_unit, i_unit)

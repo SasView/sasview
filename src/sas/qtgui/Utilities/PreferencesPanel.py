@@ -70,6 +70,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             self.cbPlotQInvLength: {"PLOTTER_Q_INV_LENGTH": DEFAULT_Q_UNIT}
         }
         self.setupPlottingWidget()
+        self.checkBoxPlotQAsLoaded.toggled.connect(self.disable_scaling_on_plot)
+        self.checkBoxPlotIAsLoaded.toggled.connect(self.disable_scaling_on_plot)
 
         # Data loading preferences
         # Mapping default values to each combo box
@@ -110,6 +112,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             i_unit = get_config_value(config_locale, default)
             i_units = Converter(i_unit).get_compatible_units()
             cb_replace_all_items_with_new(index, i_units, i_unit)
+            index.setDisabled(True)
             index.currentIndexChanged.connect(self.set_plotting_values)
             set_config_value(config_locale, i_unit)
 
@@ -119,6 +122,19 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             config_locale = list(defaults.keys())[0]
             unit = cBox.currentText()
             set_config_value(config_locale, unit)
+
+    def disable_scaling_on_plot(self):
+        sender = self.sender()
+        toggle = sender.isChecked()
+        if sender == self.checkBoxPlotQAsLoaded:
+            toggle_enabled_list = list(self.plotting_unit_constants.keys())[4:]
+            config_locale = "PLOTTER_PLOT_Q_AS_LOADED"
+        elif sender == self.checkBoxPlotIAsLoaded:
+            toggle_enabled_list = list(self.plotting_unit_constants.keys())[:4]
+            config_locale = "PLOTTER_PLOT_I_AS_LOADED"
+        for combo_box in toggle_enabled_list:
+            combo_box.setDisabled(toggle)
+        set_config_value(config_locale, toggle)
 
     ###################################################
     # Data Loading options Widget initialization and callbacks

@@ -255,7 +255,7 @@ class PlotterWidget(PlotterBase):
             sliders = QRangeSlider(self, self.ax, data=data)
             self.sliders[data.name] = sliders
 
-        self.useDefaultPlottingUnits(data)
+        self.setPlottedUnits(data)
 
         # refresh canvas
         self.canvas.draw_idle()
