@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QMessageBox, QComboBox, QDialog
+from typing import Optional
 
 from sas import get_custom_config
 from sas.sascalc.data_util.nxsunit import Converter
@@ -15,27 +16,41 @@ DEFAULT_I_CATEGORY = "Absolute Units"
 
 
 def set_config_value(attr, value):
+    # type: (str, Any) -> None
+    """Helper method to set any config value, regardless if it exists or not
+    :param attr: The configuration attribute that will be set
+    :param value: The value the attribute will be set to. This could be a str, int, bool, a class instance, or any other
+    """
     custom_config = get_custom_config()
     setattr(custom_config, attr, value)
 
 
 def get_config_value(attr, default=None):
+    # type: (str, Any) -> None
+    """Helper method to get any config value, regardless if it exists or not
+    :param attr: The configuration attribute that will be returned
+    :param default: The assumed value, if the attribute cannot be found
+    """
     custom_config = get_custom_config()
     return custom_config.get(attr, default) if hasattr(custom_config, attr) else default
 
 
 def cb_replace_all_items_with_new(cb, new_items, default_item=None):
-    # type: (QComboBox, [], str) -> None
-    """Helper method that removes any existing ComboBox values, replaces them and sets a default item, if defined"""
+    # type: (QComboBox, [str], Optional[str]) -> None
+    """Helper method that removes existing ComboBox values, replaces them and sets a default item, if defined
+    :param cb: A QComboBox object
+    :param new_items: A list of strings that will be used to populate the QComboBox
+    :param default_item: The value to set the QComboBox to, if set
+    """
     cb.clear()
     cb.addItems(new_items)
-    if default_item:
+    if default_item and default_item in new_items:
         cb.setCurrentIndex(cb.findText(default_item))
 
 
 class PreferencesPanel(QDialog, Ui_preferencesUI):
     """A preferences panel to house all SasView related settings. The left side of the window is a listWidget with a
-    list of the options menus available. The right side of the window is a stackedWidget object that houses the options
+    options menus available. The right side of the window is a stackedWidget object that houses the options
     associated with each listWidget item.
 
     **Important Note** When adding new preference widgets, the index for the listWidget and stackedWidget *must* match
@@ -49,16 +64,17 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupUi(self)
         self.parent = parent
         self.setWindowTitle("Preferences")
-        # Set defaults
+        # Set defaults values for the list and stacked widgets
         self.stackedWidget.setCurrentIndex(0)
         self.listWidget.setCurrentRow(0)
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
 
         ######################################################
-        # Setup each widget separately
+        # Setup each widget separately below here
         ######################################################
 
+        ######################################################
         # Plotting preferences
         # Mapping default values to each combo box
         self.plotting_unit_constants = {
@@ -70,9 +86,11 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             self.cbPlotQInvLength: {"PLOTTER_Q_INV_LENGTH": DEFAULT_Q_UNIT}
         }
         self.setupPlottingWidget()
-        self.checkBoxPlotQAsLoaded.toggled.connect(self.disable_scaling_on_plot)
-        self.checkBoxPlotIAsLoaded.toggled.connect(self.disable_scaling_on_plot)
+        self.checkBoxPlotQAsLoaded.toggled.connect(self.toggle_scaling_on_plot)
+        self.checkBoxPlotIAsLoaded.toggled.connect(self.toggle_scaling_on_plot)
+        ######################################################
 
+        ######################################################
         # Data loading preferences
         # Mapping default values to each combo box
         self.data_type_selectors = {
@@ -95,6 +113,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupDataLoaderWidget()
         self.checkBoxLoadQOverride.toggled.connect(self.override_file_units)
         self.checkBoxLoadIOverride.toggled.connect(self.override_file_units)
+        ######################################################
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
@@ -103,9 +122,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     ###################################################
     # Plotting options Widget initialization and callbacks
-
     def setupPlottingWidget(self):
-        # Populate combo boxes and add triggers to
+        """Populate plotting preferences widget, set default state, and add triggers"""
         for index, value in self.plotting_unit_constants.items():
             config_locale = list(value.keys())[0]
             default = value.get(config_locale)
@@ -123,7 +141,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             unit = cBox.currentText()
             set_config_value(config_locale, unit)
 
-    def disable_scaling_on_plot(self):
+    def toggle_scaling_on_plot(self):
+        """Toggle the plot scaling whenever either of the checkboxes is clicked"""
         sender = self.sender()
         toggle = sender.isChecked()
         if sender == self.checkBoxPlotQAsLoaded:
@@ -132,14 +151,17 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         elif sender == self.checkBoxPlotIAsLoaded:
             toggle_enabled_list = list(self.plotting_unit_constants.keys())[:4]
             config_locale = "PLOTTER_PLOT_I_AS_LOADED"
+        else:
+            return
         for combo_box in toggle_enabled_list:
             combo_box.setDisabled(toggle)
         set_config_value(config_locale, toggle)
+    ###################################################
 
     ###################################################
     # Data Loading options Widget initialization and callbacks
-
     def setupDataLoaderWidget(self):
+        """Populate data loading preferences widget, set default state, and add triggers"""
         for index, value in self.data_type_selectors.items():
             config_locale = list(value.keys())[0]
             default = value.get(config_locale)
@@ -187,16 +209,20 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         set_config_value(config_locale, new_unit)
 
     def override_file_units(self):
+        """Allow the user to override any units found in the data file, but warn the user before allowing this"""
         sender = self.sender()
         if sender == self.checkBoxLoadQOverride:
+            # Q checkbox toggled
             config_locale = "LOAD_Q_OVERRIDE"
             axis = "Q"
             unit = self.cbLoadQUnitSelector.currentText()
         else:
+            # I checkbox toggled
             config_locale = "LOAD_I_OVERRIDE"
             axis = "Intensity"
             unit = self.cbLoadIUnitSelector.currentText()
         if sender.isChecked():
+            # Warn the user if checking the checkbox
             message = f"By selecting to override {axis} units, the data loader system will ignore any units found in "
             message += f"**all** data files and, instead, will assume the units are {unit}. No data scaling will occur."
             message += "\r\tE.g. you selected 'm^{-1}' as your Intensity unit is but the dataset is '[0.1, 0.2, 0.3] "
@@ -209,3 +235,4 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             if button == QMessageBox.No:
                 sender.setChecked(0)
         set_config_value(config_locale, sender.isChecked())
+    ###################################################

@@ -24,6 +24,7 @@ from __future__ import print_function
 import math
 from math import fabs
 import copy
+from typing import Optional
 
 import numpy as np
 
@@ -32,9 +33,21 @@ from sas.sascalc.data_util.nxsunit import Converter, standardize_units
 
 
 def set_loaded_units(obj, axis='', loaded_unit=None):
+    # type: (Data1D|Data2D, Optional[str], Optional[str]) -> None
+    """A helper method that sets the default units for a specific axis of a the included dataset
+
+    :param obj: A Data(1|2)D instance that will be modified
+    :param axis: The axis ('x', 'y', 'z') that will be set
+    :param loaded_unit: The as-loaded units for the axis of the dataset
+    """
+    # Ensure the obj parameter is a Data1D or Data2D data object
+    assert isinstance(obj, (Data1D, Data2D))
+
+    # Set the loaded_unit to an empty string, otherwise Converter will stringify 'None'
     if loaded_unit is None:
         loaded_unit = ""
     if axis.lower() == 'x':
+        # Set the x-axis for the data set
         obj.x_converter = Converter(loaded_unit)
         if hasattr(obj, 'x_unit'):
             obj.x_unit = obj.x_converter.units
@@ -42,6 +55,7 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
             obj._xunit = obj.x_converter.units
         obj.x_loaded_unit = obj.x_converter.units
     elif axis.lower() == 'y':
+        # Set the y-axis for the data set
         obj.y_converter = Converter(loaded_unit)
         if hasattr(obj, 'y_unit'):
             obj.y_unit = obj.y_converter.units
@@ -49,6 +63,7 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
             obj._yunit = obj.y_converter.units
         obj.y_loaded_unit = obj.y_converter.units
     elif axis.lower() == 'z':
+        # Set the z-axis for the data set (Data2D only)
         obj.z_converter = Converter(loaded_unit)
         if hasattr(obj, 'z_unit'):
             obj.z_unit = obj.z_converter.units
@@ -111,6 +126,11 @@ class plottable_1D(object):
 
     @x_unit.setter
     def x_unit(self, x_unit):
+        # type: (str) -> None
+        """Unit conversion for the x data, including all resolutions
+
+        :param x_unit: A str representation of the new unit to be used for self.x and associated resolutions
+        """
         self._xunit = x_unit
         if hasattr(self, 'x_converter') and self.x_converter:
             if self.x is not None:
@@ -132,6 +152,11 @@ class plottable_1D(object):
 
     @y_unit.setter
     def y_unit(self, y_unit):
+        # type: (str) -> None
+        """Unit conversion for the y data, including all resolutions
+
+        :param y_unit: A str representation of the new unit to be used for self.y and associated resolutions
+        """
         self._yunit = y_unit
         if hasattr(self, 'y_converter') and self.y_converter:
             if self.y is not None:
@@ -149,6 +174,11 @@ class plottable_1D(object):
 
     @x_axis.setter
     def x_axis(self, x_axis):
+        # type: (str) -> None
+        """Setter of the private class variable _xaxis, which is displayed on plotting
+
+        :param x_axis: A str with an appropriate x_axis title for the data
+        """
         self._xaxis = x_axis
 
     @property
@@ -157,11 +187,19 @@ class plottable_1D(object):
 
     @y_axis.setter
     def y_axis(self, y_axis):
+        # type: (str) -> None
+        """Setter of the private class variable _yaxis, which is displayed on plotting
+
+        :param y_axis: A str with an appropriate y_axis title for the data
+        """
         self._yaxis = y_axis
 
     def xaxis(self, label, unit=None):
-        """
-        set the x axis label and unit
+        # type: (str, str) -> None
+        """Set the x axis label and unit
+
+        :param label: A label that is displayed when the data set is plotted
+        :param unit: A str representation of the units the data should be converted to
         """
         self._xaxis = label
         if self.x_converter is None and unit is not None:
@@ -169,8 +207,11 @@ class plottable_1D(object):
         self._xunit = unit
 
     def yaxis(self, label, unit=None):
-        """
-        set the y axis label and unit
+        # type: (str, str) -> None
+        """Set the y axis label and unit
+
+        :param label: A label that is displayed when the data set is plotted
+        :param unit: A str representation of the units the data should be converted to
         """
         self._yaxis = label
         if self.y_converter is None and unit is not None:
@@ -178,6 +219,11 @@ class plottable_1D(object):
         self._yunit = unit
 
     def convert_q_units(self, convert_to_unit=None):
+        # type: (str) -> None
+        """Convert the Q units to a new unit value
+
+        :param convert_to_unit: A str representation of the units the data should be converted to
+        """
         if convert_to_unit is not None and self.x_converter:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
@@ -185,6 +231,11 @@ class plottable_1D(object):
             self.x_unit = unit
 
     def convert_i_units(self, convert_to_unit=None):
+        # type: (str) -> None
+        """Convert the Intensity units to a new unit value
+
+        :param convert_to_unit: A str representation of the units the data should be converted to
+        """
         if convert_to_unit is not None and self.y_converter:
             # Converter is built off units loaded from file
             # Need to scale between current units and desired units
@@ -192,6 +243,7 @@ class plottable_1D(object):
             self.y_unit = unit
 
     def convert_to_native_units(self):
+        """Convert the data units to the as-loaded data units"""
         self.convert_i_units(self.x_loaded_unit)
         self.convert_q_units(self.y_loaded_unit)
 
@@ -380,6 +432,11 @@ class plottable_2D(object):
             set_loaded_units(self, 'z', unit)
 
     def convert_q_units(self, convert_to_unit=None):
+        # type: (str) -> None
+        """Convert the Q units to a new unit value
+
+        :param convert_to_unit: A str representation of the units the data should be converted to
+        """
         if convert_to_unit is not None:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
@@ -387,6 +444,11 @@ class plottable_2D(object):
             self.Q_unit = unit
 
     def convert_i_units(self, convert_to_unit=None):
+        # type: (str) -> None
+        """Convert the Intensity units to a new unit value
+
+        :param convert_to_unit: A str representation of the units the data should be converted to
+        """
         if convert_to_unit is not None and self.z_converter:
             # Converter based off units loaded from file
             # Need to scale between current units and desired units
@@ -394,6 +456,7 @@ class plottable_2D(object):
             self.I_unit = unit
 
     def convert_to_native_units(self):
+        """Convert the data units to the as-loaded data units"""
         self.convert_q_units(self.x_loaded_unit)
         self.convert_i_units(self.z_loaded_unit)
 

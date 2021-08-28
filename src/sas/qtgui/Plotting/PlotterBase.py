@@ -13,7 +13,7 @@ from matplotlib import rcParams
 
 DEFAULT_CMAP = mpl.cm.jet
 from sas import get_custom_config
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
@@ -454,6 +454,9 @@ class PlotterBase(QtWidgets.QWidget):
             GuiUtils.saveData2D(plot_data)
 
     def setPlottedUnits(self, data=None):
+        # type: (Data1D|Data2D) -> None
+        """Set the plotted units for the data set as it's plotted"""
+        # Check the custom config for ant changes needed
         config = get_custom_config()
         i_defaults = ["PLOTTER_I_ABS_UNIT", "PLOTTER_I_ABS_SQUARE_UNIT", "PLOTTER_I_SESANS", "PLOTTER_I_ARB"]
         q_defaults = ["PLOTTER_Q_LENGTH", "PLOTTER_Q_INV_LENGTH"]
@@ -466,11 +469,11 @@ class PlotterBase(QtWidgets.QWidget):
             q_unit = base_q_unit = data.x_unit
             compatible_q_units = Converter(q_unit).get_compatible_units()
             if self.use_window_units and hasattr(self, 'units'):
-                # 1st Priority: Use UnitChange units
+                # 1st Priority: Use units set in the plot UnitChange window
                 q_unit = self.units.cbX.currentText()
                 i_unit = self.units.cbY.currentText()
             else:
-                # 2nd Priority: Use global preferences units if they exist
+                # 2nd Priority: Use global preferences, if they exist
                 if not plot_i_as_loaded:
                     for config_key in i_defaults:
                         unit = getattr(config, str(config_key)) if hasattr(config, str(config_key)) else None
@@ -483,15 +486,12 @@ class PlotterBase(QtWidgets.QWidget):
                         if unit in compatible_q_units:
                             q_unit = unit
                             break
-            # Convert units when data plotted if data not already at same
+            # Convert units when data plotted if data not already at same units
             if base_q_unit != q_unit or base_i_unit != i_unit:
                 self.setUnits(q_unit, i_unit)
 
     def onUnitsChange(self):
-        """
-        Show a dialog allowing unit conversions for each axis
-        """
-        # Create the Unit conversion dialog on the fly
+        """Show a dialog allowing unit conversions for each axis. Dialog is only created once this option is selected"""
         self.units = UnitChange(self, self.data)
         if self.units.exec_() == QtWidgets.QDialog.Accepted:
             self.use_window_units = True
@@ -500,6 +500,8 @@ class PlotterBase(QtWidgets.QWidget):
             self.setUnits(q_unit, i_unit)
 
     def setUnits(self, q_unit, i_unit):
+        # type: (str, str) -> None
+        """Change the units for all plotted data so they are the same"""
         for id in list(self.plot_dict.keys()):
             plot = self.plot_dict[id]
             plot.convert_q_units(q_unit)
