@@ -14,6 +14,16 @@ DEFAULT_Q_CATEGORY = "Inverse Length"
 DEFAULT_I_CATEGORY = "Absolute Units"
 
 
+def set_config_value(attr, value):
+    custom_config = get_custom_config()
+    setattr(custom_config, attr, value)
+
+
+def get_config_value(attr, default=None):
+    custom_config = get_custom_config()
+    return custom_config.get(attr, default) if hasattr(custom_config, attr) else default
+
+
 def cb_replace_all_items_with_new(cb, new_items, default_item=None):
     # type: (QtWidgets.QComboBox, [], str) -> None
     """Helper method that removes any existing ComboBox values, replaces them and sets a default item, if defined"""
@@ -45,21 +55,10 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
         # Setup each widget separately
-        self.setupPlottingWidget()
-        self.setupDataLoaderWidget()
 
-    def prefMenuChanged(self):
-        """When the preferences menu selection changes, change to the appropriate preferences widget """
-        row = self.listWidget.currentRow()
-        self.stackedWidget.setCurrentIndex(row)
-
-    ###################################################
-    # Plotting options Widget initialization and callbacks
-
-    def setupPlottingWidget(self):
-        custom_config = get_custom_config()
-        # Map defaults to each combo box
-        self.unit_constants = {
+        # Plotting preferences
+        # Mapping default values to each combo box
+        self.plotting_unit_constants = {
             self.cbPlotIAbs: {"PLOTTER_I_ABS_UNIT": DEFAULT_I_UNIT},
             self.cbPlotIAbsSquared: {"PLOTTER_I_ABS_SQUARE_UNIT": DEFAULT_I_ABS2_UNIT},
             self.cbPlotISesans: {"PLOTTER_I_SESANS": DEFAULT_I_SESANS_UNIT},
@@ -67,34 +66,15 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             self.cbPlotQLength: {"PLOTTER_Q_LENGTH": DEFAULT_Q_LENGTH_UNIT},
             self.cbPlotQInvLength: {"PLOTTER_Q_INV_LENGTH": DEFAULT_Q_UNIT}
         }
-        # Populate combo boxes and add triggers to
-        for index, value in self.unit_constants.items():
-            config_locale = list(value.keys())[0]
-            default = value.get(config_locale)
-            i_unit = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
-            i_units = Converter(i_unit).get_compatible_units()
-            cb_replace_all_items_with_new(index, i_units, i_unit)
-            index.currentIndexChanged.connect(self.set_plotting_values)
-            setattr(custom_config, config_locale, i_unit)
+        self.setupPlottingWidget()
 
-    def set_plotting_values(self):
-        """Update the custom config whenever a value is changed to ensure the values propagate through SasView"""
-        for input, map in self.unit_constants.items():
-            custom_config = get_custom_config()
-            config_locale = list(map.keys())[0]
-            unit = input.currentText()
-            setattr(custom_config, config_locale, unit)
-
-    ###################################################
-    # Data Loading options Widget initialization and callbacks
-
-    def setupDataLoaderWidget(self):
-        custom_config = get_custom_config()
-        self.type_selectors = {
+        # Data loading preferences
+        # Mapping default values to each combo box
+        self.data_type_selectors = {
             self.cbLoadIUnitType: {"LOADER_I_UNIT_TYPE": DEFAULT_I_CATEGORY},
             self.cbLoadQUnitType: {"LOADER_Q_UNIT_TYPE": DEFAULT_Q_CATEGORY},
         }
-        self.unit_selectors = {
+        self.data_unit_selectors = {
             self.cbLoadIUnitSelector: {
                 "LOADER_I_UNIT_ON_LOAD": {
                     DEFAULT_I_CATEGORY: DEFAULT_I_UNIT,
@@ -107,27 +87,58 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
                 "LOADER_Q_UNIT_ON_LOAD": {DEFAULT_Q_CATEGORY: DEFAULT_Q_UNIT, "Length": DEFAULT_Q_LENGTH_UNIT}
             }
         }
-        for index, value in self.type_selectors.items():
+        self.setupDataLoaderWidget()
+
+    def prefMenuChanged(self):
+        """When the preferences menu selection changes, change to the appropriate preferences widget """
+        row = self.listWidget.currentRow()
+        self.stackedWidget.setCurrentIndex(row)
+
+    ###################################################
+    # Plotting options Widget initialization and callbacks
+
+    def setupPlottingWidget(self):
+        # Populate combo boxes and add triggers to
+        for index, value in self.plotting_unit_constants.items():
             config_locale = list(value.keys())[0]
             default = value.get(config_locale)
-            selection = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
+            i_unit = get_config_value(config_locale, default)
+            i_units = Converter(i_unit).get_compatible_units()
+            cb_replace_all_items_with_new(index, i_units, i_unit)
+            index.currentIndexChanged.connect(self.set_plotting_values)
+            set_config_value(config_locale, i_unit)
+
+    def set_plotting_values(self):
+        """Update the custom config whenever a value is changed to ensure the values propagate through SasView"""
+        for cBox, defaults in self.plotting_unit_constants.items():
+            config_locale = list(defaults.keys())[0]
+            unit = cBox.currentText()
+            set_config_value(config_locale, unit)
+
+    ###################################################
+    # Data Loading options Widget initialization and callbacks
+
+    def setupDataLoaderWidget(self):
+        for index, value in self.data_type_selectors.items():
+            config_locale = list(value.keys())[0]
+            default = value.get(config_locale)
+            selection = get_config_value(config_locale, default)
             index.setCurrentIndex(index.findText(selection))
             index.currentIndexChanged.connect(self.set_loading_type_value)
-        for index, value in self.unit_selectors.items():
+        for index, value in self.data_unit_selectors.items():
             config_locale = list(value.keys())[0]
             default_map = list(value.values())[0]
             selection = (self.cbLoadIUnitType.currentText() if self.cbLoadIUnitType.currentText() in default_map.keys()
                          else self.cbLoadQUnitType.currentText())
             default = default_map.get(selection)
-            unit = custom_config.get(config_locale, default) if hasattr(custom_config, config_locale) else default
+            unit = get_config_value(config_locale, default)
             cb_replace_all_items_with_new(index, Converter(unit).get_compatible_units(), unit)
             index.currentIndexChanged.connect(self.set_loading_unit_value)
-            setattr(custom_config, config_locale, unit)
+            set_config_value(config_locale, unit)
 
     def set_loading_type_value(self):
         """Update the custom config whenever a value is changed to ensure the values propagate through SasView"""
         sender = self.sender()
-        custom_config = get_custom_config()
         if sender == self.cbLoadQUnitType:
             new_type = self.cbLoadQUnitType.currentText()
             input = self.cbLoadQUnitSelector
@@ -136,20 +147,20 @@ class PreferencesPanel(QtWidgets.QDialog, Ui_preferencesUI):
             input = self.cbLoadIUnitSelector
         else:
             return
-        config_locale = list(self.type_selectors[sender].keys())[0]
-        types = list(self.unit_selectors[input].values())[0]
+        config_locale = list(self.data_type_selectors[sender].keys())[0]
+        types = list(self.data_unit_selectors[input].values())[0]
         default_unit = types.get(new_type)
         cb_replace_all_items_with_new(input, Converter(default_unit).get_compatible_units(), default_unit)
-        setattr(custom_config, config_locale, default_unit)
+        set_config_value(config_locale, default_unit)
 
     def set_loading_unit_value(self):
+        """Define the assumed units of the data on loading"""
         sender = self.sender()
-        custom_config = get_custom_config()
         if sender == self.cbLoadQUnitSelector:
             new_unit = self.cbLoadQUnitSelector.currentText()
         elif sender == self.cbLoadIUnitSelector:
             new_unit = self.cbLoadIUnitSelector.currentText()
         else:
             return
-        config_locale = list(self.unit_selectors[sender].keys())[0]
-        setattr(custom_config, config_locale, new_unit)
+        config_locale = list(self.data_unit_selectors[sender].keys())[0]
+        set_config_value(config_locale, new_unit)
