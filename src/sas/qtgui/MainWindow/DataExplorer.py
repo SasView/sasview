@@ -818,7 +818,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             _ = msgbox.exec_()
 
     def convert_to_calculator_units(self, qtGuiStdItem):
-        # Convert data from raw units to sasmodels compatible units
+        # type: (QStandardItem) -> QStandardItem
+        """Convert data from as-loaded data units to sasmodels compatible units
+
+        :param qtGuiStdItem: A QStandardItem that is selected for analysis
+        :return: A QStandardItem where an attempt was made to convert the data to units used in calculations.
+        """
         data = GuiUtils.dataFromItem(qtGuiStdItem)
         try:
             data.convert_q_units('1/A')

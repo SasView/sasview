@@ -36,7 +36,7 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
     # type: (plottable_1D|plottable_2D, Optional[str], Optional[str]) -> None
     """A helper method that sets the default units for a specific axis of a the included dataset
 
-    :param obj: A Data(1|2)D instance that will be modified
+    :param obj: A plottable_(1|2)D instance that will be modified
     :param axis: The axis ('x', 'y', 'z') that will be set
     :param loaded_unit: The as-loaded units for the axis of the dataset
     """
