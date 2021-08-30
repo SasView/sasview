@@ -60,12 +60,13 @@ SHORT_PREFIX = dict(P=1e15, T=1e12, G=1e9, M=1e6, k=1e3, d=1e-1, c=1e-2, m=1e-3,
 # Maybe want to do full units handling with e.g., pyre's
 # unit class. For now lets keep it simple.  Note that
 def _build_metric_units(unit, abbr):
+    # type: (str, str) -> dict[str, float]
     """
     Construct standard SI names for the given unit.
     Builds e.g.,
-        s, ns
-        second, nanosecond, nano*second
-        seconds, nanoseconds
+        s, ns, n*s, n_s
+        second, nanosecond, nano*second, nano_second
+        seconds, nanoseconds, nano*seconds, nano_seconds
     Includes prefixes for femto through peta.
 
     Ack! Allows, e.g., Coulomb and coulomb even though Coulomb is not
@@ -73,17 +74,23 @@ def _build_metric_units(unit, abbr):
 
     Returns a dictionary of names and scales.
     """
-    map = {abbr: 1}
+    map = {}
     for name in [unit, unit.capitalize(), unit.lower(), abbr]:
         for items in [PREFIX, SHORT_PREFIX]:
-            map.update({name: 1, name+'s': 1})
-            map.update([(P + name, scale) for (P, scale) in items.items()])
-            map.update([(P + '*'+name, scale) for (P, scale) in items.items()])
-            map.update([(P + name + 's', scale) for (P, scale) in items.items()])
+            names = {}
+            names.update({name: 1})
+            names.update([(P + name, scale) for (P, scale) in items.items()])
+            names.update([(P + '*' + name, scale) for (P, scale) in items.items()])
+            names.update([(P + '_' + name, scale) for (P, scale) in items.items()])
+            # Exclude pluralized abbrevs., e.g. create m(illi)(?)(*|_)(?)meters, but not milli(*|_)(?)ms or m(*|_)(?)ms
+            if name != abbr:
+                names.update(_build_plural_units(**names))
+            map.update(names)
     return map
 
 
 def _build_plural_units(**kw):
+    # type: (dict[str, float]) -> dict[str, float]
     """
     Construct names for the given units.  Builds singular and plural form.
     """
@@ -113,40 +120,10 @@ def _build_degree_units(name, symbol, conversion):
     return map
 
 
-def _build_inv_units(names, conversion):
-    # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
-    """
-    Builds variations on inverse units, including 1/x, invx and x^-1.
-    """
-    map = {}  # type: Dict[str, ConversionType]
-    for s in names:
-        map['1/' + s] = conversion
-        map['inv' + s] = conversion
-        map[s + '^-1'] = conversion
-        map[s + '^{-1}'] = conversion
-    return map
-
-
-def _build_inv_metric_units(unit, abbr):
-    # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
-    """
-    Using the return from _build_metric_units, build inverse variations on all units (1/x, invx, x^{-1} and x^-1)
-    """
-    map = {}  # type: Dict[str, ConversionType]
-    meter_map = _build_metric_units(unit, abbr)
-    for s, c in meter_map.items():
-        conversion = 1/float(c)
-        map['1/' + s] = conversion
-        map['inv' + s] = conversion
-        map[s + '^-1'] = conversion
-        map[s + '^{-1}'] = conversion
-    return map
-
-
 def _build_inv_n_units(names, conversion, n=2):
-    # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
+    # type: (Sequence[str], ConversionType, int) -> Dict[str, ConversionType]
     """
-    Builds variations on inverse to the nth power units, including 1/x^n, invx^-n and x^-n.
+    Builds variations on inverse x to the nth power units, including 1/x^n, invx^n, x^-n and x^{-n}.
     """
     map = {}  # type: Dict[str, ConversionType]
     n = int(n)
@@ -159,7 +136,7 @@ def _build_inv_n_units(names, conversion, n=2):
 
 
 def _build_inv_n_metric_units(unit, abbr, n=2):
-    # type: (Sequence[str], ConversionType) -> Dict[str, ConversionType]
+    # type: (Sequence[str], ConversionType, int) -> Dict[str, ConversionType]
     """
     Using the return from _build_metric_units, build inverse to the nth power variations on all units
     (1/x^n, invx^n, x^{-n} and x^-n)
@@ -169,20 +146,8 @@ def _build_inv_n_metric_units(unit, abbr, n=2):
     n = int(n)
     for s, c in meter_map.items():
         conversion = 1/(math.pow(float(c), n))
-        map[f'1/{s}^{n}'] = conversion
-        map[f'inv{s}^{n}'] = conversion
-        map[f'{s}^-{n}'] = conversion
-        map[s + '^{-' + str(n) + '}'] = conversion
+        map.update(_build_inv_n_units([s], conversion, n))
     return map
-
-
-def _caret_optional(s):
-    """
-    Strip '^' from unit names.
-    * WARNING * this will incorrectly transform 10^3 to 103.
-    """
-    stripped = [(k.replace('^', ''), v) for k, v in s.items() if '^' in k]
-    s.update(stripped)
 
 
 def _build_all_units():
@@ -237,7 +202,7 @@ def _build_all_units():
     frequency = _build_metric_units('hertz', 'Hz')
     frequency.update(_build_metric_units('Hertz', 'Hz'))
     frequency.update(_build_plural_units(rpm=1 / 60.))
-    frequency.update(_build_inv_metric_units('second', 's'))
+    frequency.update(_build_inv_n_metric_units('second', 's', 1))
     DIMENSIONS['frequency'] = frequency
 
     # Note: degrees are used for angle
@@ -270,8 +235,8 @@ def _build_all_units():
     DIMENSIONS['sld'] = sld
 
     # Q units (also inverse lengths)
-    Q = _build_inv_metric_units('meter', 'm')
-    Q.update(_build_inv_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10))
+    Q = _build_inv_n_metric_units('meter', 'm', 1)
+    Q.update(_build_inv_n_units(('Å', 'A', 'Ang', 'Angstrom', 'ang', 'angstrom'), 1.0e10, 1))
     Q['10^-3 Angstrom^-1'] = 1e-3
     DIMENSIONS['Q'] = Q
 
@@ -310,6 +275,7 @@ def _build_all_units():
 
 
 def standardize_units(unit):
+    # type: (str) -> str
     """
     Convert supplied units to a standard format for maintainability
     :param unit: Raw unit as supplied
@@ -320,7 +286,7 @@ def standardize_units(unit):
     unit = str(unit)
     # Catch ang, angstrom, ANG, ANGSTROM, and any capitalization in between
     # Replace with 'Å'
-    unit = re.sub(r'[Åa]ng(str[oö]m)?(s)?', 'Å', unit, flags=re.IGNORECASE)
+    unit = re.sub(r'[ÅAa]ng(str[oö]m)?(s)?', 'Å', unit, flags=re.IGNORECASE)
     # Catch meter, metre, METER, METRE, and any capitalization in between
     # Replace with 'm'
     unit = re.sub(r'(met(er|re)(s)?)', 'm', unit, flags=re.IGNORECASE)
@@ -409,8 +375,8 @@ class Converter(object):
     #: Scale base for the source units
     scalebase = None  # type: ConversionType
 
-    def __init__(self, units, dimension=None):
-        # type: (Optional[str], Optional[str]) -> None
+    def __init__(self, units=None, dimension=None):
+        # type: (Optional[str], Optional[str]) -> self
         self.units = standardize_units(units) if units is not None else ''  # type: str
 
         # Lookup dimension if not given
@@ -437,6 +403,8 @@ class Converter(object):
             raise exc
 
     def scale(self, units="", value=None):
+        # type: (str, T) -> T
+        """Scale the given value using the units string supplied"""
         if not units or self.scalemap is None or value is None:
             return value
         units = standardize_units(units)
@@ -445,6 +413,8 @@ class Converter(object):
         return value * self.scalebase / self.scalemap[units]
 
     def scale_with_offset(self, units="", value=None):
+        # type: (str, T) -> T
+        """Scale the given value and add the offset using the units string supplied"""
         if not units or self.scalemap is None or value is None:
             return value
         units = standardize_units(units)
@@ -455,6 +425,8 @@ class Converter(object):
         return (value + inoffset) * inscale / outscale - outoffset
 
     def get_compatible_units(self):
+        # type: () -> [str]
+        """Return a list of compatible units for the current Convertor object"""
         unique_units = []
         conv_list = []
         for item, conv in self.scalemap.items():

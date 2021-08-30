@@ -20,7 +20,7 @@ class NXSUnitTests(unittest.TestCase):
         self.assertIn('None', self.converter.scalemap.keys())
         self.assertEqual(self.k_conv.units, 'nanoK')
         self.assertEqual(self.k_conv.scalebase, (1e-9, 0.0))
-        self.assertEqual(len(self.k_conv.scalemap.keys()), 307)
+        self.assertEqual(len(self.k_conv.scalemap.keys()), 456)
 
     def testBasicUnits(self):
         # 10 nm^-1 = 1 inv Angstroms
