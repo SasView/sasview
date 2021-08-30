@@ -33,7 +33,7 @@ from sas.sascalc.data_util.nxsunit import Converter, standardize_units
 
 
 def set_loaded_units(obj, axis='', loaded_unit=None):
-    # type: (Data1D|Data2D, Optional[str], Optional[str]) -> None
+    # type: (plottable_1D|plottable_2D, Optional[str], Optional[str]) -> None
     """A helper method that sets the default units for a specific axis of a the included dataset
 
     :param obj: A Data(1|2)D instance that will be modified
@@ -41,7 +41,7 @@ def set_loaded_units(obj, axis='', loaded_unit=None):
     :param loaded_unit: The as-loaded units for the axis of the dataset
     """
     # Ensure the obj parameter is a Data1D or Data2D data object
-    assert isinstance(obj, (Data1D, Data2D))
+    assert isinstance(obj, (plottable_1D, plottable_2D))
 
     # Set the loaded_unit to an empty string, otherwise Converter will stringify 'None'
     if loaded_unit is None:
