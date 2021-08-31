@@ -33,6 +33,7 @@ from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
+from sas.qtgui.MainWindow.ModuleGatherer import ModuleGatherer
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -103,6 +104,18 @@ class GuiManager(object):
         logging.info(" --- SasView session started ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+
+        import subprocess, json
+        installed_modules = {'python': sys.version}
+
+        # Get python modules installed locally
+        installed_modules_json = json.loads(subprocess.check_output("pip list -l --format=json"))
+        for mod in installed_modules_json:
+            installed_modules[mod['name']] = mod['version']
+
+        f = open("temp/installed_modules.txt", 'w')
+        f.write(str(installed_modules))
+        f.close()
 
         # Set up the status bar
         self.statusBarSetup()
@@ -446,6 +459,13 @@ class GuiManager(object):
 
         # Exit if yes
         if reply == QMessageBox.Yes:
+
+            imported_modules = ModuleGatherer().get_imported_modules()
+
+            f = open("temp/imported_modules.txt", 'w')
+            f.write(str(imported_modules))
+            f.close()
+
             # save the paths etc.
             self.saveCustomConfig()
             reactor.callFromThread(reactor.stop)
