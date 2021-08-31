@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5.QtWidgets import QMessageBox, QComboBox, QDialog
 from typing import Optional
 
@@ -13,6 +15,8 @@ DEFAULT_Q_UNIT = 'A^{-1}'
 DEFAULT_Q_LENGTH_UNIT = 'A'
 DEFAULT_Q_CATEGORY = "Inverse Length"
 DEFAULT_I_CATEGORY = "Absolute Units"
+
+logger = logging.getLogger(__name__)
 
 
 def set_config_value(attr, value):
@@ -64,11 +68,14 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupUi(self)
         self.parent = parent
         self.setWindowTitle("Preferences")
+        # A list of callables used to restore the default values for each item in StackedWidget
+        self.restoreDefaultMethods = []
         # Set defaults values for the list and stacked widgets
         self.stackedWidget.setCurrentIndex(0)
         self.listWidget.setCurrentRow(0)
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
+        self.buttonBox.clicked.connect(self.onClick)
 
         ######################################################
         # Setup each widget separately below here
@@ -88,6 +95,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupPlottingWidget()
         self.checkBoxPlotQAsLoaded.toggled.connect(self.toggle_scaling_on_plot)
         self.checkBoxPlotIAsLoaded.toggled.connect(self.toggle_scaling_on_plot)
+        self.restoreDefaultMethods.append(self.restorePlottingPrefs)
         ######################################################
 
         ######################################################
@@ -113,12 +121,29 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupDataLoaderWidget()
         self.checkBoxLoadQOverride.toggled.connect(self.override_file_units)
         self.checkBoxLoadIOverride.toggled.connect(self.override_file_units)
+        self.restoreDefaultMethods.append(self.restoreDataLoaderPrefs)
         ######################################################
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
         row = self.listWidget.currentRow()
         self.stackedWidget.setCurrentIndex(row)
+
+    def onClick(self, btn):
+        # type: (QPushButton) -> None
+        """Handle button click events in one area"""
+        # Reset to the default preferences
+        if btn.text() == 'Restore Defaults':
+            self.restoreDefaultPrefs()
+
+    def restoreDefaultPrefs(self):
+        """Reset all preferences to their default preferences"""
+        for method in self.restoreDefaultMethods:
+            if callable(method):
+                method()
+            else:
+                logger.warning(f'While restoring defaults, {str(method)} of type {type(method)}'
+                               + ' was given. A method or other callable object was expected.')
 
     ###################################################
     # Plotting options Widget initialization and callbacks
@@ -156,6 +181,17 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         for combo_box in toggle_enabled_list:
             combo_box.setDisabled(toggle)
         set_config_value(config_locale, toggle)
+
+    def restorePlottingPrefs(self):
+        """Restore the default plotting preferences"""
+        self.cbPlotIAbs.setCurrentIndex(self.cbPlotIAbs.findText(DEFAULT_I_UNIT))
+        self.cbPlotIAbsSquared.setCurrentIndex(self.cbPlotIAbsSquared.findText(DEFAULT_I_ABS2_UNIT))
+        self.cbPlotISesans.setCurrentIndex(self.cbPlotISesans.findText(DEFAULT_I_SESANS_UNIT))
+        self.cbPlotIArbitrary.setCurrentIndex(self.cbPlotIArbitrary.findText(DEFAULT_I_ARBITRARY_UNIT))
+        self.cbPlotQLength.setCurrentIndex(self.cbPlotQLength.findText(DEFAULT_Q_LENGTH_UNIT))
+        self.cbPlotQInvLength.setCurrentIndex(self.cbPlotQInvLength.findText(DEFAULT_Q_UNIT))
+        self.checkBoxLoadIOverride.setChecked(False)
+        self.checkBoxLoadQOverride.setChecked(False)
     ###################################################
 
     ###################################################
@@ -235,4 +271,13 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             if button == QMessageBox.No:
                 sender.setChecked(0)
         set_config_value(config_locale, sender.isChecked())
+
+    def restoreDataLoaderPrefs(self):
+        """Restore the default data loading preferences"""
+        self.cbLoadIUnitType.setCurrentIndex(self.cbLoadIUnitType.findText(DEFAULT_I_CATEGORY))
+        self.cbLoadQUnitType.setCurrentIndex(self.cbLoadQUnitType.findText(DEFAULT_Q_CATEGORY))
+        self.cbLoadIUnitSelector.setCurrentIndex(self.cbLoadIUnitSelector.findText(DEFAULT_I_UNIT))
+        self.cbLoadQUnitSelector.setCurrentIndex(self.cbLoadQUnitSelector.findText(DEFAULT_Q_UNIT))
+        self.checkBoxPlotQAsLoaded.setChecked(True)
+        self.checkBoxPlotIAsLoaded.setChecked(True)
     ###################################################
