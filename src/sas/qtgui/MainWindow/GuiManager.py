@@ -103,12 +103,9 @@ class GuiManager(object):
         handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        version = f"{SASVIEW_VERSION.split('.')[0]}.{SASVIEW_VERSION.split('.')[1]}"
-        logging.info(f" --- SasView {version} session started ---")
+        logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
-        # Log the SasView release version and release date
-        logging.info(f"SasView release: {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE}")
 
         # Set up the status bar
         self.statusBarSetup()

@@ -24,8 +24,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.setupUi(self)
 
         # Add the version number to window title
-        version = f"{SASVIEW_VERSION.split('.')[0]}.{SASVIEW_VERSION.split('.')[1]}"
-        self.setWindowTitle(f"SasView {version}")
+        self.setWindowTitle(f"SasView {SASVIEW_VERSION}")
 
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
