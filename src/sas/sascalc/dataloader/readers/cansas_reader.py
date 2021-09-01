@@ -654,8 +654,7 @@ class Reader(XMLreader):
             if node_value is None or node_value.isspace() \
                                     or node_value.lower() == "nan":
                 node_value = "0.0"
-            #Convert the value to the base units
-            node_value, units = self._unit_conversion(node, tagname, node_value)
+            node_value, units = self._get_unit(node, node_value)
 
         # If the value is a timestamp, convert to a datetime object
         elif self.ns_list.ns_datatype == "timestamp":
@@ -669,82 +668,27 @@ class Reader(XMLreader):
                     node_value = None
         return node_value, units
 
-    def _unit_conversion(self, node, tagname, node_value):
+    def _get_unit(self, node, node_value):
         """
-        A unit converter method used to convert the data included in the file
-        to the default units listed in data_info
+        A method to get the units of the node
 
         :param node: XML node
-        :param tagname: name of the node
         :param node_value: The value of the current dom node
         """
         attr = node.attrib
         value_unit = ''
-        err_msg = None
-        default_unit = None
-        if not isinstance(node_value, float):
+        try:
             node_value = float(node_value)
+        except ValueError:
+            return node_value, value_unit
         if 'unit' in attr and attr.get('unit') is not None:
-            try:
-                unit = attr['unit']
-                # Split the units to retain backwards compatibility with
-                # projects, analyses, and saved data from v4.1.0
-                unit_list = unit.split("|")
-                if len(unit_list) > 1:
-                    local_unit = unit_list[1]
-                else:
-                    local_unit = unit
-                unitname = self.ns_list.current_level.get("unit", "")
-                if "SASdetector" in self.names:
-                    save_in = "detector"
-                elif "aperture" in self.names:
-                    save_in = "aperture"
-                elif "SAScollimation" in self.names:
-                    save_in = "collimation"
-                elif "SAStransmission_spectrum" in self.names:
-                    save_in = "transspectrum"
-                elif "SASdata" in self.names:
-                    x = np.zeros(1)
-                    y = np.zeros(1)
-                    self.current_data1d = Data1D(x, y)
-                    save_in = "current_data1d"
-                elif "SASsource" in self.names:
-                    save_in = "current_datainfo.source"
-                elif "SASsample" in self.names:
-                    save_in = "current_datainfo.sample"
-                elif "SASprocess" in self.names:
-                    save_in = "process"
-                else:
-                    save_in = "current_datainfo"
-                default_unit = getattrchain(self, '.'.join((save_in, unitname)))
-                if (local_unit and default_unit
-                        and local_unit.lower() != default_unit.lower()
-                        and local_unit.lower() != "none"):
-                    # Check local units - bad units raise KeyError
-                    #print("loading", tagname, node_value, local_unit, default_unit)
-                    data_conv_q = Converter(local_unit)
-                    value_unit = default_unit
-                    node_value = data_conv_q(node_value, units=default_unit)
-                else:
-                    value_unit = local_unit
-            except KeyError:
-                # Do not throw an error for loading Sesans data in cansas xml
-                # This is a temporary fix.
-                if local_unit != "A" and local_unit != 'pol':
-                    err_msg = "CanSAS reader: unexpected "
-                    err_msg += "\"{0}\" unit [{1}]; "
-                    err_msg = err_msg.format(tagname, local_unit)
-                    err_msg += "expecting [{0}]".format(default_unit)
-                value_unit = local_unit
-            except Exception:
-                err_msg = "CanSAS reader: unknown error converting "
-                err_msg += "\"{0}\" unit [{1}]"
-                err_msg = err_msg.format(tagname, local_unit)
-                value_unit = local_unit
+            unit = attr['unit']
+            # Split the units to retain backwards compatibility with
+            # projects, analyses, and saved data from v4.1.0
+            unit_list = unit.split("|")
+            value_unit = unit if len(unit_list) <= 1 else unit_list[1]
         elif 'unit' in attr:
             value_unit = attr['unit']
-        if err_msg:
-            self.errors.add(err_msg)
         return node_value, value_unit
 
     def _initialize_new_data_set(self, node=None):

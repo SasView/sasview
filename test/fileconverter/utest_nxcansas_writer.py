@@ -59,7 +59,7 @@ class nxcansas_writer(unittest.TestCase):
         for i in range(len(written.detector)):
             written_det = written.detector[i]
             correct_det = correct.detector[i]
-            self.assertAlmostEqual(written_det.distance, correct_det.distance)
+            self.assertAlmostEqual(written_det.distance, correct_det.distance, 5)
             self.assertTrue(written_det.name == correct_det.name)
         self.assertTrue(written.source.probe == correct.source.radiation)
 
