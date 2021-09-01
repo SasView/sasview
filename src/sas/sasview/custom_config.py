@@ -19,3 +19,13 @@ MARKETPLACE_URL = "http://marketplace.sasview.org/"
 
 # Logging options
 FILTER_DEBUG_LOGS = True
+
+# Preferences Panel Options
+PLOTTER_I_ABS_UNIT = "cm^{-1}"
+PLOTTER_I_ABS_SQUARE_UNIT = "cm^{-2}"
+PLOTTER_I_SESANS = "A^{-2} cm^{-1}"
+PLOTTER_I_ARB = "a.u."
+PLOTTER_Q_LENGTH = "A"
+PLOTTER_Q_INV_LENGTH = "A^{-1}"
+LOADER_I_UNIT_ON_LOAD = "cm^{-1}"
+LOADER_Q_UNIT_ON_LOAD = "A^{-1}"

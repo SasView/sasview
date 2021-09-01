@@ -138,6 +138,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             self.restoreDefaultPrefs()
         elif btn.text() == 'OK':
             self.close()
+        elif btn.text() == 'Help':
+            self.help()
 
     def restoreDefaultPrefs(self):
         """Reset all preferences to their default preferences"""
@@ -153,6 +155,11 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         if hasattr(self.parent, 'guiManager'):
             self.parent.guiManager.writeCustomConfig(get_custom_config())
         super(PreferencesPanel, self).close()
+
+    def help(self):
+        """Open the help window associated with the preferences window"""
+        # TODO: Write the help file and then link to it here
+        pass
 
     ###################################################
     # Plotting options Widget initialization and callbacks
