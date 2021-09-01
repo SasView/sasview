@@ -28,32 +28,15 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     ### Caching of pip downloads and local wheel builds
+    - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
 
     - name: Obtain pip cache (Linux)
       uses: actions/cache@v2
-      if: startsWith(runner.os, 'Linux')
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
-
-    - name: Obtain pip cache (macOS)
-      uses: actions/cache@v2
-      if: startsWith(runner.os, 'macOS')
-      with:
-        path: ~/Library/Caches/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
-
-    - name: Obtain pip cache (Windows)
-      uses: actions/cache@v2
-      if: startsWith(runner.os, 'Windows')
-      with:
-        path: ~\AppData\Local\pip\Cache
+        path: ${{ steps.pip-cache.outputs.dir }}
         key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
         restore-keys: |
           ${{ runner.os }}-pip-${{ matrix.python-version }}-
