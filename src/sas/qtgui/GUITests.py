@@ -78,6 +78,7 @@ from Utilities.UnitTesting import AddMultEditorTest
 from Utilities.UnitTesting import ReportDialogTest
 from Utilities.UnitTesting import FileConverterTest
 from Utilities.UnitTesting import UnitPropertiesTest
+from Utilities.UnitTesting import PreferencesPanelTest
 
 # Unit Testing
 from UnitTesting import TestUtilsTest
@@ -153,6 +154,7 @@ def utilitiesSuite():
         unittest.makeSuite(ReportDialogTest.ReportDialogTest,     'test'),
         unittest.makeSuite(FileConverterTest.FileConverterTest, 'test'),
         unittest.makeSuite(UnitPropertiesTest.UnitPropertiesTest, 'test'),
+        unittest.makeSuite(PreferencesPanelTest.PreferencesPanelTest, 'test'),
         )
     return unittest.TestSuite(suites)
 
