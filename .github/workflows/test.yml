@@ -68,28 +68,33 @@ jobs:
         choco install opencl-intel-cpu-runtime
         python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
 
-    - name: Fetch sources for sibling projects
+    - name: Install sibling projects
       run: |
-        git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-        git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+        pip install git+https://github.com/bumps/bumps.git
+        pip install git+https://github.com/SasView/sasmodels.git
 
-    - name: Build and install sasmodels
-      run: |
-        cd ../sasmodels
-        rm -rf build
-        rm -rf dist
-        python setup.py clean
-        python setup.py build
-        python -m pip install .
-
-    - name: Build and install bumps
-      run: |
-        cd ../bumps
-        rm -rf build
-        rm -rf dist
-        python setup.py clean
-        python setup.py build
-        python -m pip install .
+#    - name: Fetch sources for sibling projects
+#      run: |
+#        git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
+#        git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+#
+#    - name: Build and install sasmodels
+#      run: |
+#        cd ../sasmodels
+#        rm -rf build
+#        rm -rf dist
+#        python setup.py clean
+#        python setup.py build
+#        python -m pip install .
+#
+#    - name: Build and install bumps
+#      run: |
+#        cd ../bumps
+#        rm -rf build
+#        rm -rf dist
+#        python setup.py clean
+#        python setup.py build
+#        python -m pip install .
 
     ### Actual building/testing of sasview
 
