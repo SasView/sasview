@@ -36,7 +36,7 @@ def get_config_value(attr, default=None):
     :param default: The assumed value, if the attribute cannot be found
     """
     custom_config = get_custom_config()
-    return custom_config.get(attr, default) if hasattr(custom_config, attr) else default
+    return getattr(custom_config, attr, default) if hasattr(custom_config, attr) else default
 
 
 def cb_replace_all_items_with_new(cb, new_items, default_item=None):
@@ -68,6 +68,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupUi(self)
         self.parent = parent
         self.setWindowTitle("Preferences")
+        self.warning = None
         # A list of callables used to restore the default values for each item in StackedWidget
         self.restoreDefaultMethods = []
         # Set defaults values for the list and stacked widgets
@@ -135,6 +136,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         # Reset to the default preferences
         if btn.text() == 'Restore Defaults':
             self.restoreDefaultPrefs()
+        elif btn.text() == 'OK':
+            self.close()
 
     def restoreDefaultPrefs(self):
         """Reset all preferences to their default preferences"""
@@ -144,6 +147,12 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             else:
                 logger.warning(f'While restoring defaults, {str(method)} of type {type(method)}'
                                + ' was given. A method or other callable object was expected.')
+
+    def close(self):
+        """Save the configuration values when the preferences window is closed"""
+        if hasattr(self.parent, 'guiManager'):
+            self.parent.guiManager.writeCustomConfig(get_custom_config())
+        super(PreferencesPanel, self).close()
 
     ###################################################
     # Plotting options Widget initialization and callbacks
@@ -265,8 +274,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             message += "cm^{-1}', the as-loaded data will be treated as '[0.1, 0.2, 0.3] m^{-1}'."
             message += "\r\r**Are you certain you want to do this?**"
 
-            warning = QMessageBox(QMessageBox.Warning, "", message, QMessageBox.Yes | QMessageBox.No, self)
-            button = warning.exec()
+            self.warning = QMessageBox(QMessageBox.Warning, "", message, QMessageBox.Yes | QMessageBox.No, self)
+            button = self.warning.exec()
             # Uncheck the checkbox if rejected
             if button == QMessageBox.No:
                 sender.setChecked(0)
