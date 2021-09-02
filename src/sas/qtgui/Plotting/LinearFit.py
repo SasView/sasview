@@ -3,6 +3,8 @@ Adds a linear fit plot to the chart
 """
 import re
 import numpy
+from numbers import Number
+from typing import Optional
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -102,10 +104,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
 
-        self.data.show_q_range_sliders = True
-        self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
-        self.q_sliders.line_min.input = self.txtFitRangeMin
-        self.q_sliders.line_max.input = self.txtFitRangeMax
+        self.q_sliders = None
+        self.drawSliders()
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -246,7 +246,9 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         tempx = numpy.array(tempx)
         tempy = numpy.array(tempy)
 
+        self.clearSliders()
         self.updatePlot.emit((tempx, tempy))
+        self.drawSliders()
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit
@@ -321,10 +323,22 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
         return x
 
+    def drawSliders(self):
+        """Show new Q-range sliders"""
+        self.data.show_q_range_sliders = True
+        self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
+        self.q_sliders.line_min.input = self.txtFitRangeMin
+        self.q_sliders.line_max.input = self.txtFitRangeMax
+        # Ensure values are updated on redraw of plots
+        self.q_sliders.line_min.inputChanged()
+        self.q_sliders.line_max.inputChanged()
+
     def clearSliders(self):
+        """Clear existing sliders"""
         if self.q_sliders:
             self.q_sliders.clear()
         self.data.show_q_range_sliders = False
+        self.q_sliders = None
 
     def closeEvent(self, ev):
         self.clearSliders()
