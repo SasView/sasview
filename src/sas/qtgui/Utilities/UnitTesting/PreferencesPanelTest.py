@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtTest import QTest
 
-from sas import get_custom_config
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.PreferencesPanel import *
 
@@ -39,7 +38,6 @@ class PreferencesPanelTest(unittest.TestCase):
         self.dummy_parent = QWidget()
         self.dummy_parent.guiManager = DummyClass()
         self.pref_panel = PreferencesPanel(self.dummy_parent)
-        self.custom_config = get_custom_config()
         self.data = [Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])]
 
     def tearDown(self) -> None:
@@ -64,10 +62,17 @@ class PreferencesPanelTest(unittest.TestCase):
         self.assertEqual(self.pref_panel.cbLoadIUnitType.currentText(), DEFAULT_I_CATEGORY)
         self.assertEqual(self.pref_panel.cbLoadQUnitType.currentText(), DEFAULT_Q_CATEGORY)
         self.assertEqual(self.pref_panel.cbLoadIUnitSelector.currentText(), DEFAULT_I_UNIT)
+        self.assertEqual(get_config_value('LOADER_Q_UNIT_ON_LOAD'), DEFAULT_Q_UNIT)
         self.assertEqual(self.pref_panel.cbLoadQUnitSelector.currentText(), DEFAULT_Q_UNIT)
+        self.assertEqual(get_config_value('LOADER_I_UNIT_ON_LOAD'), DEFAULT_I_UNIT)
         self.assertEqual(self.pref_panel.cbPlotIAbs.currentText(), DEFAULT_I_UNIT)
+        self.assertEqual(get_config_value('PLOTTER_I_ABS_UNIT'), DEFAULT_I_UNIT)
         self.assertEqual(self.pref_panel.cbPlotIAbsSquared.currentText(), DEFAULT_I_ABS2_UNIT)
+        self.assertEqual(get_config_value('PLOTTER_I_ABS_SQUARE_UNIT'), DEFAULT_I_ABS2_UNIT)
         self.assertEqual(self.pref_panel.cbPlotISesans.currentText(), DEFAULT_I_SESANS_UNIT)
+        self.assertEqual(get_config_value('PLOTTER_I_SESANS'), DEFAULT_I_SESANS_UNIT)
+        self.assertEqual(self.pref_panel.cbPlotIArbitrary.currentText(), DEFAULT_I_ARBITRARY_UNIT)
+        self.assertEqual(get_config_value('PLOTTER_I_ARB'), DEFAULT_I_ARBITRARY_UNIT)
         # Check number of widgets equals the number of list items and the list is set to the first element
         self.assertEqual(self.pref_panel.stackedWidget.count(), self.pref_panel.listWidget.count())
         self.assertEqual(0, self.pref_panel.stackedWidget.currentIndex())
@@ -101,14 +106,13 @@ class PreferencesPanelTest(unittest.TestCase):
         self.pref_panel.checkBoxLoadQOverride.setChecked(True)
         while not self.pref_panel.warning:
             pass
-        cancel_button = self.pref_panel.warning.button(QMessageBox.Cancel)
-        cancel_button.click()
-        self.assertFalse(self.pref_panel.checkBoxLoadQOverride.isChecked())
+        cancel_button = self.pref_panel.warning.button(QMessageBox.No)
+        QTest.mouseClick(cancel_button, Qt.LeftButton)
         # Allow the override behavior
         self.pref_panel.checkBoxLoadQOverride.setChecked(True)
         while not self.pref_panel.warning:
             pass
-        ok_button = self.pref_panel.warning.button(QMessageBox.Ok)
+        ok_button = self.pref_panel.warning.button(QMessageBox.Yes)
         QTest.mouseClick(ok_button, Qt.LeftButton)
         self.assertTrue(self.pref_panel.checkBoxLoadQOverride.isChecked())
 

@@ -285,7 +285,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             button = self.warning.exec()
             # Uncheck the checkbox if rejected
             if button == QMessageBox.No:
-                sender.setChecked(0)
+                sender.setChecked(False)
         set_config_value(config_locale, sender.isChecked())
 
     def restoreDataLoaderPrefs(self):
