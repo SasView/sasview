@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from PyQt5.QtCore import Qt
@@ -15,9 +16,9 @@ class PreferencesPanelTest(unittest.TestCase):
         """
         Prepare the unit test window
         """
-        class DummyClass():
+        class DummyClass:
             def __init__(self):
-                pass
+                self.path = None
 
             def writeCustomConfig(self, config):
                 """
@@ -26,6 +27,7 @@ class PreferencesPanelTest(unittest.TestCase):
                 path = './custom_config.py'
                 # Just clobber the file - we already have its content read in
                 with open(path, 'w') as out_f:
+                    self.path = os.path.abspath(path)
                     out_f.write("#Application appearance custom configuration\n")
                     for key, item in config.__dict__.items():
                         if key[:2] == "__":
@@ -42,8 +44,11 @@ class PreferencesPanelTest(unittest.TestCase):
 
     def tearDown(self) -> None:
         """Close the panel and reset class variables"""
-        self.dummy_parent = None
         self.pref_panel.close()
+        if self.dummy_parent.guiManager.path:
+            os.remove(self.dummy_parent.guiManager.path)
+        self.dummy_parent.close()
+        self.dummy_parent = None
         self.pref_panel = None
 
     def testDefaults(self):
