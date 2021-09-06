@@ -4,6 +4,7 @@ Widget for simple add / multiply editor.
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
+import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -11,8 +12,6 @@ from PyQt5 import QtWidgets
 import webbrowser
 
 import os
-import numpy as np
-import re
 import logging
 import traceback
 
@@ -189,8 +188,11 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     def onOperatorChange(self, index):
         """ Respond to operator combo box changes """
 
-        self.lblEquation.setText("Plugin_model = scale_factor * "
-                                 "(model_1 {} model_2) + background".
+        self.lblEquation.setText('<html><head/><body><p><span style=" font-weight:600;">'
+                                 'Plugin_model = scale_factor * '
+                                 '(model_1 {} model_2) + background</span></p><p>'
+                                 '<p>To add/multiply plugin models, or combine more than two models, '
+                                 'please check Help below.<br/></p></body></html>'.
                                  format(self.cbOperator.currentText()))
 
     def onApply(self):

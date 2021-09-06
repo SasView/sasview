@@ -3,6 +3,8 @@
 import os
 import sys
 
+from sas.sasview import __version__ as SASVIEW_VERSION
+
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
@@ -18,7 +20,11 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
     def __init__(self, screen_resolution, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
+
         self.setupUi(self)
+
+        # Add the version number to window title
+        self.setWindowTitle(f"SasView {SASVIEW_VERSION}")
 
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
