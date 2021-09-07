@@ -125,6 +125,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.cbParam2.clear()
         tab_index2 = self.cbModel2.currentIndex()
         items2 = [param for param in self.params[tab_index2] if not self.tabs[tab_index2].paramHasConstraint(param)]
+
         self.cbParam2.addItems(items2)
         # Show the previously selected parameter if available
         if previous_param2 in items2:

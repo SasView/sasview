@@ -817,9 +817,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Return list of all active parameters for the current model
         """
         main_model_params = self.getParamNamesMain()
-        # poly_model_params = self.getParamNamesPoly()
+        poly_model_params = self.getParamNamesPoly()
         # magnet_model_params = self.getParamNamesMagnet()
-        return main_model_params # + poly_model_params + magnet_model_params
+        return main_model_params  + poly_model_params # + magnet_model_params
 
     def getParamNamesMain(self):
         """
@@ -836,15 +836,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if not self.chkPolydispersity.isChecked():
             return []
-
-        poly_model_params = []
-        for row in range(self._poly_model.rowCount()):
-            if not self.isCheckablePoly(row):
-                continue
-            param_name = self._poly_model.item(row).text()
-            param_name = self.polyNameToParam(param_name)
-            poly_model_params.append(param_name)
-
+        poly_model_params = [self.polyNameToParam(self._poly_model.item(row).text())
+                             for row in range(self._poly_model.rowCount())
+                             if self.chkPolydispersity.isChecked()]
         return poly_model_params
 
     def getParamNamesMagnet(self):
