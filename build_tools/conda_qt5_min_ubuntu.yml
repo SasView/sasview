@@ -29,5 +29,6 @@ dependencies:
    - bumps
    - xhtml2pdf==0.2.2
    - qt5reactor==0.5
+   - uncertainties==3.1.6
    - pillow==8.1.2
    - h5py==3.1
