@@ -261,12 +261,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         This is one of four functions affecting the coordinate system visualisation which should be updated if
         a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
         """
+        self.view_azim = 45
+        self.view_elev = 45
+        self.mouse_down = False
         sampleWindow = FigureCanvas(Figure())
-        axes_sample = Axes3D(sampleWindow.figure, azim=45, elev=45)
+        axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev)
         envWindow = FigureCanvas(Figure())
-        axes_env = Axes3D(envWindow.figure, azim=45, elev=45)
+        axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev)
         beamWindow = FigureCanvas(Figure())
-        axes_beam = Axes3D(beamWindow.figure, azim=45, elev=45)
+        axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev)
         self.coord_windows = [sampleWindow, envWindow, beamWindow]
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
@@ -276,7 +279,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if int(mpl_version.split(".")[0]) >= 3: # how mpl plots 3D graphs changed in 3.3.0 to allow better aspect ratios
                 if int(mpl_version.split(".")[1]) >= 3:
                     self.coord_axes[i].set_box_aspect((1,1,1))
-            #self.coord_windows[i].installEventFilter(self)
+            self.coord_windows[i].installEventFilter(self)
             # stack in order zs, xs, ys to match the coord system used in sasview
             self.coord_arrows.append(Arrow3D(self.coord_axes[i].figure, [[0, 0],[0, 0],[0, 1]], [[0, 1],[0, 0],[0, 0]], [[0, 0],[0, 1],[0, 0]], [[1, 0 ,0],[0, 1, 0],[0, 0, 1]], arrowstyle = "->", mutation_scale=10, lw=2))
             self.coord_arrows[i].set_realtime(True)
@@ -288,7 +291,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.coord_axes[i].set_title(titles[i])
             self.coord_axes[i].disable_mouse_rotation()
         self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0 ,0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
+        self.polarisation_arrow.set_realtime(True)
         self.coord_axes[1].add_artist(self.polarisation_arrow)
+        self.coord_axes[0].text2D(0.75, 0.01, 'x', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.85, 0.01, 'y', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.95, 0.01, 'z', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.p_text = self.coord_axes[1].text2D(0.65, 0.01, 'p', verticalalignment='bottom', horizontalalignment='right', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.p_text.set_visible(False)
+        self.coord_axes[1].text2D(0.75, 0.01, 'u', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.85, 0.01, 'v', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.95, 0.01, 'w', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[2].text2D(0.75, 0.01, 'U', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.85, 0.01, 'V', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.95, 0.01, 'W', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
 
 
     def update_coords(self):
@@ -331,6 +346,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
         """
         self.polarisation_arrow.set_visible(visible)
+        self.p_text.set_visible(visible)
         self.polarisation_arrow.base.canvas.draw()
 
     def gui_text_changed_slot(self):
@@ -341,9 +357,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Catches the event that a textbox has been enabled/disabled"""
         if target in self.lineEdits and event.type() == QtCore.QEvent.EnabledChange:
             self.gui_text_changed(target)
-        #elif target in self.coord_windows and event.type() == QtCore.QEvent.Resize:
-            #target.figure.set_size_inches(target.figure.get_figwidth(), target.figure.get_figwidth(), forward=False)
-            #print(target.figure.get_figwidth(), target.figure.get_figheight())
+        elif target in self.coord_windows:
+            if event.type() == QtCore.QEvent.MouseButtonPress:
+                mEvent = QtGui.QMouseEvent(event)
+                self.mouse_x = mEvent.x()
+                self.mouse_y = mEvent.y()
+                self.mouse_down = True
+            elif event.type() == QtCore.QEvent.MouseButtonRelease:
+                self.mouse_down = False
+            elif event.type() == QtCore.QEvent.MouseMove and self.mouse_down:
+                mEvent = QtGui.QMouseEvent(event)
+                self.view_azim = (self.view_azim - mEvent.x() + self.mouse_x) % 360
+                self.view_elev = min(max(self.view_elev + mEvent.y() - self.mouse_y, -90), 90)
+                self.mouse_x = mEvent.x()
+                self.mouse_y = mEvent.y()
+                for axes in self.coord_axes:
+                    axes.view_init(elev=self.view_elev, azim=self.view_azim)
+                    axes.figure.canvas.draw()
+
         return False
 
     def gui_text_changed(self, sender):
