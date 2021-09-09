@@ -87,8 +87,8 @@ class GenSAS(object):
         self.params['Up_frac_out'] = 1.0
         self.params['Up_theta'] = 0.0
         self.params['Up_phi'] = 0.0
-        self.uvw_to_UVW=Rotation.identity()
-        self.xyz_to_UVW=Rotation.identity()
+        self.uvw_to_UVW=Rotation.from_rotvec([0,0,0])
+        self.xyz_to_UVW=Rotation.from_rotvec([0,0,0])
         self.transformed_positions = None
         self.transformed_magnetic_slds = None
         self.transformed_angles = None
@@ -205,7 +205,7 @@ class GenSAS(object):
                   + self.params['background'])
         return result
 
-    def set_rotations(self, uvw_to_UVW=Rotation.identity(), xyz_to_UVW=Rotation.identity()):
+    def set_rotations(self, uvw_to_UVW=Rotation.from_rotvec([0,0,0]), xyz_to_UVW=Rotation.from_rotvec([0,0,0])):
         """Set the rotations for the coordinate systems
 
         The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW

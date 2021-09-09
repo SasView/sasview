@@ -10,8 +10,6 @@ from scipy.spatial.transform import Rotation
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import QtQuick
-from PyQt5 import QtQuick3D
 
 from twisted.internet import threads
 
@@ -85,17 +83,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.graph_num = 1      # index for name of graph
 
         # finish UI setup - install qml window
-        self.coordView = QtQuick.QQuickView()
-        self.coordWindow = QtWidgets.QWidget.createWindowContainer(self.coordView)
-        self.coordDisplay.addWidget(self.coordWindow)
-        os.path.dirname(os.path.abspath(__file__))
-        self.coordView.setSource(QtCore.QUrl.fromLocalFile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "UI/CoordinateView.qml")))
-        rootObject = self.coordView.rootObject()
-        self.uvwAxes = rootObject.findChild(QtCore.QObject, "uvw")
-        self.xyzAxes = rootObject.findChild(QtCore.QObject, "xyz")
-        self.pVector = rootObject.findChild(QtCore.QObject, "polarisation")
-        self.pVector.setProperty("visible", False)
-        self.camera = rootObject.findChild(QtCore.QObject, "camera")
+        self.setup_display()
 
         # combox box
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
@@ -148,14 +136,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
 
         #update coord display
-        self.txtEnvYaw.textChanged.connect(self.updateCoords)
-        self.txtEnvPitch.textChanged.connect(self.updateCoords)
-        self.txtEnvRoll.textChanged.connect(self.updateCoords)
-        self.txtSampleYaw.textChanged.connect(self.updateCoords)
-        self.txtSamplePitch.textChanged.connect(self.updateCoords)
-        self.txtSampleRoll.textChanged.connect(self.updateCoords)
-        self.txtUpTheta.textChanged.connect(self.updatePolarisationCoords)
-        self.txtUpPhi.textChanged.connect(self.updatePolarisationCoords)
+        self.txtEnvYaw.textChanged.connect(self.update_coords)
+        self.txtEnvPitch.textChanged.connect(self.update_coords)
+        self.txtEnvRoll.textChanged.connect(self.update_coords)
+        self.txtSampleYaw.textChanged.connect(self.update_coords)
+        self.txtSamplePitch.textChanged.connect(self.update_coords)
+        self.txtSampleRoll.textChanged.connect(self.update_coords)
+        self.txtUpTheta.textChanged.connect(self.update_polarisation_coords)
+        self.txtUpPhi.textChanged.connect(self.update_polarisation_coords)
 
         # setup initial configuration
         self.checkboxNucData.setEnabled(False)
@@ -259,23 +247,33 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitx.setStyleSheet(new_font)
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
-    
-    def updateCoords(self):
+
+    def setup_display(self):
+        #TODO
+        # add the widget to the container which contains the visualisation of the coordinate systems
+        #self.coordDisplay.addWidget()
+        pass
+
+    def update_coords(self):
+        #TODO
         if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
            and self.txtSampleYaw.hasAcceptableInput() and self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
-            q_to_uvw = UVW_to_uvw.as_quat()
-            q_to_xyz = UVW_to_xyz.as_quat()
-            # note that q is in x, y, z, scalar order whereas qt expects scalar, x, y, z
-            self.uvwAxes.setProperty("rotation", QtGui.QQuaternion(q_to_uvw[3], q_to_uvw[0], q_to_uvw[1], q_to_uvw[2]))
-            self.xyzAxes.setProperty("rotation", QtGui.QQuaternion(q_to_xyz[3], q_to_xyz[0], q_to_xyz[1], q_to_xyz[2]))
+            # set the rotations in the GUI
+            pass
 
-    def updatePolarisationCoords(self):
+    def update_polarisation_coords(self):
+        #TODO
         if self.txtUpTheta.hasAcceptableInput() and self.txtUpPhi.hasAcceptableInput():
             theta = numpy.radians(float(self.txtUpTheta.text()))
             phi = numpy.radians(float(self.txtUpPhi.text()))
-            q_rot = Rotation.from_euler("ZY", [phi, theta]).as_quat()
-            self.pVector.setProperty("rotation", QtGui.QQuaternion(q_rot[3], q_rot[0], q_rot[1], q_rot[2]))
+            q_rot = Rotation.from_euler("ZY", [phi, theta]) # rotation relative to environment coords
+            # set the rotation in the gui
+            pass
+    
+    def set_polarisation_visible(self, visible):
+        #TODO
+        pass
 
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
@@ -558,13 +556,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.txtUpFracOut.setEnabled(False)
                 self.txtUpTheta.setEnabled(False)
                 self.txtUpPhi.setEnabled(False)
-                self.pVector.setProperty("visible", False)
+                self.set_polarisation_visible(False)
                 return
         self.txtUpFracIn.setEnabled(True)
         self.txtUpFracOut.setEnabled(True)
         self.txtUpTheta.setEnabled(True)
         self.txtUpPhi.setEnabled(True)
-        self.pVector.setProperty("visible", True)
+        self.set_polarisation_visible(True)
 
     def loadFile(self):
         """Opens a menu to choose the datafile to load
