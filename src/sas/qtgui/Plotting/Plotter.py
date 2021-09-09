@@ -484,12 +484,11 @@ class PlotterWidget(PlotterBase):
         """
         Resets the chart X and Y ranges to their original values
         """
-        x_range = self.setRange.defaultXRange
-        y_range = self.setRange.defaultYRange
-        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
-        # Go to expected range
-        self.ax.set_xbound(x_range[0], x_range[1])
-        self.ax.set_ybound(y_range[0], y_range[1])
+        # Clear graph and plot everything again
+        mpl.pyplot.cla()
+        self.ax.cla()
+        for ids in self.plot_dict:
+            self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
 
         # Redraw
         self.canvas.draw_idle()
@@ -513,7 +512,7 @@ class PlotterWidget(PlotterBase):
         if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
-    def replacePlot(self, id, new_plot, retain_dimensions=False):
+    def replacePlot(self, id, new_plot, retain_dimensions=True):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
@@ -614,7 +613,7 @@ class PlotterWidget(PlotterBase):
             selected_plot.symbol = plotPropertiesWidget.marker()
             selected_plot.title = plotPropertiesWidget.legend()
             # Redraw the plot
-            self.replacePlot(id, selected_plot, retain_dimensions=True)
+            self.replacePlot(id, selected_plot)
 
     def onToggleHideError(self, id):
         """
@@ -691,7 +690,7 @@ class PlotterWidget(PlotterBase):
 
         if self.fit_result.name in self.plot_dict.keys():
             # Replace an existing Fit and ensure the plot range is not reset
-            self.replacePlot("Fit", new_plot=self.fit_result, retain_dimensions=True)
+            self.replacePlot("Fit", new_plot=self.fit_result)
         else:
             # Otherwise, Plot a new line
             self.plot(data=self.fit_result, marker='-', hide_error=True)
