@@ -83,7 +83,9 @@ hiddenimports = [
     #'scipy._lib.messagestream',
     #'numba',
     'xmlrpc',
+    'xmlrpc.server',
     'debugpy',
+    'debugpy._vendored',
 ]
 
 a = Analysis(
