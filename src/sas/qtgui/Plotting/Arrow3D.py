@@ -23,6 +23,7 @@ class Arrow3D(FancyArrowPatch):
         """
         FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
         self.leftdown = False
+        self.realtime = False
         self.t_click = 0
         self._verts3d = xs, ys, zs
         self.colors = colors
@@ -32,6 +33,13 @@ class Arrow3D(FancyArrowPatch):
             # To turn the updating off during dragging
             base.canvas.mpl_connect('button_press_event', self.on_left_down)
             base.canvas.mpl_connect('button_release_event', self.on_left_up)
+    
+    def set_realtime(self, realtime):
+        """
+            Bool specifying whether arrows should be shown rotating while dragging is in progress
+            May be slow for large numbers of arrows
+        """
+        self.realtime = realtime
 
     def on_left_down(self, event):
         """
@@ -49,13 +57,17 @@ class Arrow3D(FancyArrowPatch):
         if t_up > 0.1:
             self.leftdown = False
             self.base.canvas.draw()
+    
+    def update_data(self, xs, ys, zs):
+        self._verts3d = xs, ys, zs
+        self.base.canvas.draw()
 
     def draw(self, renderer, rasterized=True):
         """
         Drawing actually happens here
         """
         # Draws only when the dragging finished
-        if self.leftdown:
+        if self.leftdown and not self.realtime:
             return
         xs3d, ys3d, zs3d = self._verts3d
         for i in range(len(xs3d)):

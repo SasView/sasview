@@ -1,5 +1,6 @@
 import sys
 import os
+from matplotlib.figure import Figure
 import numpy
 import logging
 import time
@@ -11,6 +12,10 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from matplotlib import __version__ as mpl_version
+
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -21,6 +26,7 @@ from sas.sascalc.calculator import sas_gen
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Plotter import Plotter
+from sas.qtgui.Plotting.Arrow3D import Arrow3D
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -249,31 +255,83 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitz.setStyleSheet(new_font)
 
     def setup_display(self):
-        #TODO
-        # add the widget to the container which contains the visualisation of the coordinate systems
-        #self.coordDisplay.addWidget()
-        pass
+        """
+        This function sets up the GUI display of the different coordinate systems.
+        Since these cannot be set in the .ui file they should be QWidgets added to the self.coord_display layout.
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
+        sampleWindow = FigureCanvas(Figure())
+        axes_sample = Axes3D(sampleWindow.figure, azim=45, elev=45)
+        envWindow = FigureCanvas(Figure())
+        axes_env = Axes3D(envWindow.figure, azim=45, elev=45)
+        beamWindow = FigureCanvas(Figure())
+        axes_beam = Axes3D(beamWindow.figure, azim=45, elev=45)
+        self.coord_windows = [sampleWindow, envWindow, beamWindow]
+        self.coord_axes = [axes_sample, axes_env, axes_beam]
+        self.coord_arrows = []
+        titles = ["sample", "environment", "beamline"]
+        for i in range(len(self.coord_windows)):
+            self.coordDisplay.addWidget(self.coord_windows[i])
+            if int(mpl_version.split(".")[0]) >= 3: # how mpl plots 3D graphs changed in 3.3.0 to allow better aspect ratios
+                if int(mpl_version.split(".")[1]) >= 3:
+                    self.coord_axes[i].set_box_aspect((1,1,1))
+            #self.coord_windows[i].installEventFilter(self)
+            # stack in order zs, xs, ys to match the coord system used in sasview
+            self.coord_arrows.append(Arrow3D(self.coord_axes[i].figure, [[0, 0],[0, 0],[0, 1]], [[0, 1],[0, 0],[0, 0]], [[0, 0],[0, 1],[0, 0]], [[1, 0 ,0],[0, 1, 0],[0, 0, 1]], arrowstyle = "->", mutation_scale=10, lw=2))
+            self.coord_arrows[i].set_realtime(True)
+            self.coord_axes[i].add_artist(self.coord_arrows[i])
+            self.coord_axes[i].set_xlim3d(-1, 1)
+            self.coord_axes[i].set_ylim3d(-1, 1)
+            self.coord_axes[i].set_zlim3d(-1, 1)
+            self.coord_axes[i].set_axis_off()
+            self.coord_axes[i].set_title(titles[i])
+            self.coord_axes[i].disable_mouse_rotation()
+        self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0 ,0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
+        self.coord_axes[1].add_artist(self.polarisation_arrow)
+
 
     def update_coords(self):
-        #TODO
+        """
+        This function rotates the visualisation of the coordinate systems
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
         if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
            and self.txtSampleYaw.hasAcceptableInput() and self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
-            # set the rotations in the GUI
-            pass
+            basis_vectors = numpy.array([[1,0,0],[0,1,0],[0,0,1]])
+            #TODO: when scipy version updated can just use Rotation.as_matrix() to get new basis vectors - function name currently varies between versions used.
+            uvw_matrix = UVW_to_uvw.apply(basis_vectors)
+            xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(uvw_matrix), uvw_matrix)), axes=(2, 1, 0))
+            self.coord_arrows[1].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            xyz_matrix = UVW_to_xyz.apply(basis_vectors)
+            xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(xyz_matrix), xyz_matrix)), axes=(2, 1, 0))
+            self.coord_arrows[0].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            self.update_polarisation_coords()
+
 
     def update_polarisation_coords(self):
-        #TODO
+        """
+        This function rotates the visualisation of the polarisation vector
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
         if self.txtUpTheta.hasAcceptableInput() and self.txtUpPhi.hasAcceptableInput():
             theta = numpy.radians(float(self.txtUpTheta.text()))
             phi = numpy.radians(float(self.txtUpPhi.text()))
-            q_rot = Rotation.from_euler("ZY", [phi, theta]) # rotation relative to environment coords
-            # set the rotation in the gui
-            pass
+            UVW_to_uvw, _ = self.create_rotation_matrices()
+            p_vec = (UVW_to_uvw * Rotation.from_euler("ZY", [phi, theta])).apply(numpy.array([0, 0, 0.8])) # vector relative to beamline coords
+            self.polarisation_arrow.update_data([[0, p_vec[2]]], [[0, p_vec[0]]], [[0, p_vec[1]]])
     
     def set_polarisation_visible(self, visible):
-        #TODO
-        pass
+        """
+        This function updates the visibility of the polarisation vector
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
+        self.polarisation_arrow.set_visible(visible)
+        self.polarisation_arrow.base.canvas.draw()
 
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
@@ -283,6 +341,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Catches the event that a textbox has been enabled/disabled"""
         if target in self.lineEdits and event.type() == QtCore.QEvent.EnabledChange:
             self.gui_text_changed(target)
+        #elif target in self.coord_windows and event.type() == QtCore.QEvent.Resize:
+            #target.figure.set_size_inches(target.figure.get_figwidth(), target.figure.get_figwidth(), forward=False)
+            #print(target.figure.get_figwidth(), target.figure.get_figheight())
         return False
 
     def gui_text_changed(self, sender):
@@ -1503,8 +1564,6 @@ class Plotter3DWidget(PlotterBase):
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):
-                # import moved here for performance reasons
-                from sas.qtgui.Plotting.Arrow3D import Arrow3D
                 """
                 draw magnetic vectors w/arrow
                 """
