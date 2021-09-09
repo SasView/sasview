@@ -33,5 +33,7 @@ dependencies:
    - ../../../PyQt5_commercial-5.12.2-5.12.3-cp35.cp36.cp37.cp38-none-win_amd64.whl
    - qt5reactor==0.5
    - tinycc==1.1
+   - uncertainties==3.1.6
    - pillow==8.1.2
-   - h5py==3.1
+   - h5py==3.1   
+

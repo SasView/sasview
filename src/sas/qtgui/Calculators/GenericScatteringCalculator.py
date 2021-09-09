@@ -1205,8 +1205,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self._create_default_2d_data()
                 inputs = [self.data.qx_data, self.data.qy_data]
             logging.info("Computation is in progress...")
-            self.cmdCompute.setText('Wait...')
-            self.cmdCompute.setEnabled(False)
+            self.cmdCompute.setText('Cancel')
+            self.cmdCompute.setToolTip("<html><head/><body><p>Cancel the computation of the scattering calculation.</p></body></html>")
+            self.cmdCompute.clicked.disconnect()
+            self.cmdCompute.clicked.connect(self.onCancel)
+            self.cancelCalculation = False
+            #self.cmdCompute.setEnabled(False)
             d = threads.deferToThread(self.complete, inputs, self._update)
             # Add deferred callback for call return
             # d.addCallback(self.plot_1_2d)
@@ -1216,6 +1220,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             log_msg = "{}. stop".format(sys.exc_info()[1])
             logging.info(log_msg)
         return
+    
+    def onCancel(self):
+        """Notify the calculation thread that the user has cancelled the calculation.
+        """
+        self.cancelCalculation = True
+        self.cmdCompute.setEnabled(False) # don't allow user to start a new calculation until this one finishes cancelling
 
     def _update(self, time=None, percentage=None):
         """
@@ -1270,10 +1280,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           input[1][ind:ind + chunk_size]]
                 outi = self.model.runXY(inputi)
             out.append(outi)
-        out = numpy.hstack(out)
-        self.data_to_plot = out
-        logging.info('Gen computation completed.')
+            if self.cancelCalculation:
+                update(time=t, percentage=100*(ind + chunk_size)/nq) # ensure final progress shown
+                self.data_to_plot = numpy.full(nq, numpy.nan)
+                self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
+                logging.info('Gen computation cancelled.')
+                break
+        else:
+            out = numpy.hstack(out)
+            self.data_to_plot = out
+            logging.info('Gen computation completed.')
         self.cmdCompute.setText('Compute')
+        self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
+        self.cmdCompute.clicked.disconnect()
+        self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdCompute.setEnabled(True)
         return
 

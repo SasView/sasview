@@ -148,3 +148,4 @@ dependencies:
    - qt5reactor==0.5
    - unittest-xml-reporting
    - lxml==4.6.3
+   - uncertainties==3.1.6
