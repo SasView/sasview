@@ -82,11 +82,9 @@ hiddenimports = [
     #'site','lxml._elementpath','lxml.etree',
     #'scipy._lib.messagestream',
     #'numba',
+    'xmlrpc',
+    'debugpy',
 ]
-
-
-
-
 
 a = Analysis(
     ['sasview.py'],
@@ -117,6 +115,7 @@ exe = EXE(
     name='sasview',
     debug=False,
     bootloader_ignore_signals=False,
+    icon=os.path.join("../src/sas/sasview/images","ball.ico"),
     strip=False,
     upx=True,
     console=True

@@ -44,7 +44,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
-        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5
+        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5 debugpy
 
     - name: Install pyopencl (Windows)
       run: |
