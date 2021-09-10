@@ -480,8 +480,8 @@ class cansas_reader_xml(unittest.TestCase):
         for data in self.data:
             self.assertEqual(find(data.filename), self.datafile_multiplesasdata_multiplesasentry)
             self.assertEqual(data.source.radiation, 'neutron')
-            self.assertAlmostEqual(data.source.wavelength, 8.5)
-            self.assertEqual(data.source.wavelength_unit, 'A')
+            self.assertAlmostEqual(data.source.wavelength, 0.85)
+            self.assertEqual(data.source.wavelength_unit, 'nm')
             self.assertAlmostEqual(data.source.wavelength_spread, 25)
             data_len = len(data.x)
             self.assertTrue(data_len >= 69)
