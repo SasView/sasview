@@ -1,9 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
 from pathlib import Path
 import warnings
 
 block_cipher = None
+PYTHON_LOC = sys.exec_prefix
 
 datas = [
     ('../src/sas/sasview/images', 'images'),
@@ -16,6 +18,7 @@ datas = [
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
+    (os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'),
 ]
 
 def add_data(data):
@@ -86,6 +89,7 @@ hiddenimports = [
     'xmlrpc.server',
     'debugpy',
     'debugpy._vendored',
+    'uncertainties',
 ]
 
 a = Analysis(
