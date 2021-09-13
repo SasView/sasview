@@ -290,7 +290,7 @@ Scripting
 For more advanced uses the GUI version of the scattering calculator may not suffice. For example the orientational
 average of a magnetic structure, or specific rocking curves. In these cases it maybe desirable to instead use a 
 python script to access the functionality of the calculator. For full details of the scripting interface reference
-can be made to the developer documentation: https://www.sasview.org/docs/dev/sasview-api/sas.sascalc.calculator.html#module-sas.sascalc.calculator.sas_gen.
+can be made to the developer documentation: :py:meth:`sas.sascalc.calculator.sas_gen`.
 Provided here is a short introduction to the most useful elements of this interface.
 
 To begin a python script we must import the sas_gen module of sasview. If python does not know the location of this module
@@ -322,6 +322,7 @@ The general stages in a script are:
 2) Create a `GenSAS` model, load in the data, and set the parameters along with any relevent information
    about the coordinate systems used.
 3) Generate the scattering intensity data from the model and display/process/save it.
+
 
 4) Data creation
 ^^^^^^^^^^^^^^^^
@@ -466,6 +467,14 @@ Note the difference between the following two code snippets::
 
 The first calculates the values of the scattering intensity along the positive Qx axis. The second calculates
 the orientational average intensity at various magnitudes of Q.
+
+Examples
+--------
+
+.. toctree::
+   :maxdepth: 1
+
+   Example 1: The Default Data <gsc_ex_default_data>
 
 References 
 ----------
