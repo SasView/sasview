@@ -348,6 +348,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.polarisation_arrow.set_visible(visible)
         self.p_text.set_visible(visible)
         self.polarisation_arrow.base.canvas.draw()
+    
+    def reset_camera(self):
+        self.view_azim = 45
+        self.view_elev = 45
+        self.mouse_down = False
+        for axes in self.coord_axes:
+            axes.view_init(elev=self.view_elev, azim=self.view_azim)
+            axes.figure.canvas.draw()
 
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
@@ -1012,7 +1020,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtSampleYaw.setText("0.0")
             self.txtSamplePitch.setText("0.0")
             self.txtSampleRoll.setText("0.0")
-            QtCore.QMetaObject.invokeMethod(self.camera, "reset", QtCore.Qt.AutoConnection)
+            self.reset_camera()
             # re-enable any options disabled by failed verification
             self.verification_occurred = False
             self.verified = False
