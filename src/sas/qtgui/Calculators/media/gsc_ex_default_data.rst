@@ -47,8 +47,17 @@ Pressing compute again gives:
 
 For such a simple structure as a cube, the analytical result is well known, and we can compare the calculator's simulation to the fitting tool. In the main window we select the most
 recent dataset (the Debye full average) and select `Send data to` with `Fitting` mode selected in the adjacent drop down. We can now select the `Parallelepiped` model category and then
-the `Parallelepiped` model in the fitting window. We also adjust all the paramters in the window to match those of the default data in the scattering calculator. If we now press `Compute/Plot`
-at the bottom of the fitting window we see a plot of our data and the analytical result.
+the `Parallelepiped` model in the fitting window. We also adjust all the paramters in the window to match those of the default data in the scattering calculator. 
+
+ - scale: 1
+ - background: 0
+ - sld: 6.97 ($\times 10^{-6}$ in units)
+ - sld_solvent: 0
+ - length_a: 60
+ - length_b: 60
+ - length_c: 60
+
+If we now press `Compute/Plot` at the bottom of the fitting window we see a plot of our data and the analytical result.
 
 .. figure:: gsc_ex_default_data_images/gsc_ex_default_data_7.png
 .. figure:: gsc_ex_default_data_images/gsc_ex_default_data_7b.png
@@ -68,4 +77,4 @@ that this fit is much closer to the analytical result.
 
 *Document History*
 
-| 2021-09-13 Robert Bourne
+| 2021-09-14 Robert Bourne

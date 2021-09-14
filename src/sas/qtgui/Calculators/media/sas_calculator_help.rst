@@ -324,7 +324,7 @@ The general stages in a script are:
 3) Generate the scattering intensity data from the model and display/process/save it.
 
 
-4) Data creation
+1) Data creation
 ^^^^^^^^^^^^^^^^
 
 Loading data from vtk, pdb or sld files is easy::
@@ -476,7 +476,9 @@ Examples
 
    Example 1: The Default Data <gsc_ex_default_data>
 
-References 
+   Example 2: A Magnetic Cylinder <gsc_ex_magnetic_cylinder>
+
+References
 ----------
 
     .. [#MARANVILLE1] An implementation of an efficient direct Fourier transform of polygonal areas and volumes
@@ -487,4 +489,4 @@ References
 *Document History*
 
 | 2015-05-01 Steve King 
-| 2021-08-26 Robert Bourne
+| 2021-09-14 Robert Bourne
