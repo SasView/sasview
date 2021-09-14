@@ -41,7 +41,8 @@ class PreferencesPanelTest(unittest.TestCase):
         self.data = [Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])]
 
     def tearDown(self) -> None:
-        """Close the panel and reset class variables"""
+        """Restore global defaults, close the panel and reset class variables"""
+        self.pref_panel.restoreDefaultPrefs()
         self.pref_panel.close()
         if self.dummy_parent.guiManager.path:
             os.remove(self.dummy_parent.guiManager.path)
@@ -129,13 +130,3 @@ class PreferencesPanelTest(unittest.TestCase):
         # Select last item in list widget and check the stacked widget moves too
         self.pref_panel.listWidget.setCurrentRow(self.pref_panel.listWidget.count() - 1)
         self.assertEqual(self.pref_panel.stackedWidget.currentIndex(), self.pref_panel.listWidget.currentRow())
-
-    def testConfigChangesLocal(self):
-        """Test changes to custom config that happen in a single instance of the preferences window"""
-        # TODO: Change preferences and check config is changed accordingly
-        pass
-
-    def testConfigChangesGlobal(self):
-        """Test changes to custom config between instances of the preferences window"""
-        # TODO: Change config items, open new preferences window, check preferences match
-        pass
