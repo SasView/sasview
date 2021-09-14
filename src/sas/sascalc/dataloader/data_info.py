@@ -1264,10 +1264,6 @@ class Data2D(plottable_2D, DataInfo):
     """
     2D data class
     """
-    # Units for Q-values
-    Q_unit = '1/A'
-    # Units for I(Q) values
-    I_unit = '1/cm'
     # No 2D SESANS data as of yet. Always set it to False
     isSesans = False
 

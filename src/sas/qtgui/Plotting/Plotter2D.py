@@ -99,6 +99,10 @@ class Plotter2DWidget(PlotterBase):
         # Toggle the scale
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
 
+        if not update:
+            # Set the plotted units if this is not an update
+            self.setPlottedUnits(self.data0)
+
         # Prepare and show the plot
         self.showPlot(data=self.data0.data,
                       qx_data=self.qx_data,
@@ -588,12 +592,12 @@ class Plotter2DWidget(PlotterBase):
         else:
             im = self.ax.imshow(img)
 
-    def replacePlot(self, id, new_plot):
+    def replacePlot(self, id, new_plot, update=False):
         """
         Replace data in current chart.
         This effectively refreshes the chart with changes to one of its plots
         """
-        self.plot(data=new_plot)
+        self.plot(data=new_plot, update=update)
 
     def onMplMouseDown(self, event):
         """

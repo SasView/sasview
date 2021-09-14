@@ -502,8 +502,15 @@ class PlotterBase(QtWidgets.QWidget):
     def setUnits(self, q_unit, i_unit):
         # type: (str, str) -> None
         """Change the units for all plotted data so they are the same"""
-        for id in list(self.plot_dict.keys()):
-            plot = self.plot_dict[id]
-            plot.convert_q_units(q_unit)
-            plot.convert_i_units(i_unit)
-            self.replacePlot(id, plot)
+        if hasattr(self, 'plot_dict'):
+            # 1D data - update all data sets with new units
+            for id in list(self.plot_dict.keys()):
+                plot = self.plot_dict[id]
+                plot.convert_q_units(q_unit)
+                plot.convert_i_units(i_unit)
+                self.replacePlot(id, plot)
+        else:
+            # 2D data
+            self.data0.convert_q_units(q_unit)
+            self.data0.convert_i_units(i_unit)
+            self.replacePlot(self.data0.id, self.data0, True)

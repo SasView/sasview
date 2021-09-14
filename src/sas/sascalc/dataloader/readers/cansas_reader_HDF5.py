@@ -357,13 +357,13 @@ class Reader(FileReader):
         elif key == self.mask_name:
             self.current_dataset.mask = data_set.flatten()
         elif key == u'Qy':
-            self.current_dataset.yaxis("Q_y", unit)
             self.current_dataset.qy_data = data_set.flatten()
+            self.current_dataset.yaxis("Q_y", unit)
         elif key == u'Qydev':
             self.current_dataset.dqy_data = data_set.flatten()
         elif key == u'Qx':
-            self.current_dataset.xaxis("Q_x", unit)
             self.current_dataset.qx_data = data_set.flatten()
+            self.current_dataset.xaxis("Q_x", unit)
         elif key == u'Qxdev':
             self.current_dataset.dqx_data = data_set.flatten()
 
