@@ -83,6 +83,10 @@ class plottable_1D(object):
     # exclusive with the presence of Qdev (dx)
     x = None
     y = None
+    xmin = None
+    xmax = None
+    ymin = None
+    ymax = None
     dx = None
     dy = None
     # Slit smearing length
@@ -141,7 +145,7 @@ class plottable_1D(object):
                 self.dxl = self.x_converter(self.dxl, x_unit)
             if self.dxw is not None:
                 self.dxw = self.x_converter(self.dxw, x_unit)
-            self.x_converter.scalebase = self.x_converter.scalemap[x_unit]
+            self.x_converter.scalebase = self.x_converter.scalemap.get(x_unit, 1.0)
         else:
             set_loaded_units(self, 'x', x_unit)
         self.xaxis(self.x_axis, x_unit)
@@ -163,7 +167,7 @@ class plottable_1D(object):
                 self.y = self.y_converter(self.y, y_unit)
             if self.dy is not None:
                 self.dy = self.y_converter(self.dy, y_unit)
-            self.y_converter.scalebase = self.y_converter.scalemap[y_unit]
+            self.y_converter.scalebase = self.y_converter.scalemap.get(y_unit, 1.0)
         else:
             set_loaded_units(self, 'y', y_unit)
         self.yaxis(self.y_axis, y_unit)
@@ -301,14 +305,6 @@ class plottable_2D(object):
         if dqy_data is not None:
             self.dqy_data = np.asarray(dqy_data)
 
-        # plot limits
-        self.xmin = xmin
-        self.xmax = xmax
-        self.ymin = ymin
-        self.ymax = ymax
-        self.zmin = zmin
-        self.zmax = zmax
-
         self.y_bins = x_bins if x_bins else []
         self.x_bins = y_bins if y_bins else []
 
@@ -341,7 +337,7 @@ class plottable_2D(object):
                 self.qx_data = self.x_converter(self.qx_data, x_unit)
             if self.dqx_data is not None:
                 self.dqx_data = self.x_converter(self.dqx_data, x_unit)
-            self.x_converter.scalebase = self.x_converter.scalemap[x_unit]
+            self.x_converter.scalebase = self.x_converter.scalemap.get(x_unit, 1.0)
         else:
             set_loaded_units(self, 'x', x_unit)
         self.xaxis(self.x_axis, x_unit)
@@ -366,7 +362,7 @@ class plottable_2D(object):
                 self.qy_data = self.y_converter(self.qy_data, y_unit)
             if self.dqy_data is not None:
                 self.dqy_data = self.y_converter(self.dqy_data, y_unit)
-            self.y_converter.scalebase = self.y_converter.scalemap[y_unit]
+            self.y_converter.scalebase = self.y_converter.scalemap.get(y_unit, 1.0)
         else:
             set_loaded_units(self, 'y', y_unit)
         self.yaxis(self.y_axis, y_unit)
@@ -399,7 +395,7 @@ class plottable_2D(object):
                 self.data = self.z_converter(self.data, z_unit)
             if self.err_data is not None:
                 self.err_data = self.z_converter(self.err_data, z_unit)
-            self.z_converter.scalebase = self.z_converter.scalemap[z_unit]
+            self.z_converter.scalebase = self.z_converter.scalemap.get(z_unit, 1.0)
         else:
             set_loaded_units(self, 'z', z_unit)
         self.zaxis(self.z_axis, z_unit)

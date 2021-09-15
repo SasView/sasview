@@ -390,24 +390,18 @@ class Converter(object):
                     self.dimension = k
                     break
             else:
-                self.dimension = 'unknown'
+                self.dimension = 'dimensionless'
 
-        # Find the scale for the given units
-        try:
-            self.scalemap = DIMENSIONS[self.dimension]
-            self.scalebase = self.scalemap[self.units]
-        except KeyError:
-            exc = ValueError('Unable to find %s in dimension %s'
-                             % (self.units, self.dimension))
-            exc.__cause__ = None
-            raise exc
+        # Find the scale for the given units - default to dimensionless
+        self.scalemap = DIMENSIONS.get(self.dimension, DIMENSIONS['dimensionless'])
+        self.scalebase = self.scalemap.get(self.units) if self.scalemap else 1.0
 
     def scale(self, units="", value=None):
         # type: (str, T) -> T
         """Scale the given value using the units string supplied"""
-        if not units or self.scalemap is None or value is None:
+        units = standardize_units(units) if units is not None else ''
+        if units and units not in self.scalemap or value is None:
             return value
-        units = standardize_units(units)
         if isinstance(value, list):
             return [self.scale(units, i) for i in value]
         return value * self.scalebase / self.scalemap[units]
@@ -415,9 +409,9 @@ class Converter(object):
     def scale_with_offset(self, units="", value=None):
         # type: (str, T) -> T
         """Scale the given value and add the offset using the units string supplied"""
-        if not units or self.scalemap is None or value is None:
+        units = standardize_units(units) if units is not None else ''
+        if units and units not in self.scalemap or value is None:
             return value
-        units = standardize_units(units)
         if isinstance(value, list):
             return [self.scale_with_offset(units, i) for i in value]
         inscale, inoffset = self.scalebase
@@ -444,7 +438,7 @@ class Converter(object):
         # counts array would be bad.  Sometimes copying and other times
         # not copying is also bad, but copy on modify semantics isn't
         # supported.
-        if not units or self.scalemap is None:
+        if not units:
             return value
         try:
             return self.scale(units, value)  # type: ignore
