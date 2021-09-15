@@ -156,6 +156,38 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(len(self.plotter.ax.collections), 1)
         self.plotter.figure.clf()
 
+    def testUnitChange(self):
+        """ Test the various unit change methods """
+        x_unit_default = 'A^{-1}'
+        y_unit_default = 'cm^{-1}'
+        x_unit_new = 'nm^{-1}'
+        y_unit_new = 'm^{-1}'
+        self.data.x_unit = x_unit_default
+        self.data.y_unit = y_unit_default
+        x0 = self.data.x[0]
+        y0 = self.data.y[0]
+        assert self.data.x_converter is not None
+        assert self.data.y_converter is not None
+        # Ensure units are compatible
+        self.assertTrue(x_unit_new in self.data.x_converter.get_compatible_units())
+        self.assertTrue(y_unit_new in self.data.y_converter.get_compatible_units())
+        # Plot base data set with default units
+        self.plotter.plot(self.data)
+        # Change units of plot and check values changed
+        self.plotter.setUnits(x_unit_new, y_unit_new)
+        self.assertTrue(x_unit_new in str(self.plotter.ax.xaxis.label))
+        self.assertTrue(y_unit_new in str(self.plotter.ax.yaxis.label))
+        for id, plot in self.plotter.plot_dict.items():
+            self.assertNotEqual(x0, plot.x[0])
+            self.assertNotEqual(y0, plot.y[0])
+        # Change units of plot back to original values and ensure x and y values restored
+        self.plotter.setUnits(x_unit_default, y_unit_default)
+        self.assertTrue(x_unit_default in str(self.plotter.ax.xaxis.label))
+        self.assertTrue(y_unit_default in str(self.plotter.ax.yaxis.label))
+        for id, plot in self.plotter.plot_dict.items():
+            self.assertEqual(x0, plot.x[0])
+            self.assertEqual(y0, plot.y[0])
+
     def testAddText(self):
         """ Checks the functionality of adding text to graph """
 

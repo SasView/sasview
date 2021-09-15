@@ -242,6 +242,41 @@ class Plotter2DTest(unittest.TestCase):
         self.assertTrue(FigureCanvas.draw_idle.called)
         self.plotter.figure.clf()
 
+    def testUnitChange(self):
+        """ Test the various unit change methods """
+        xy_unit_default = 'A^{-1}'
+        z_unit_default = 'cm^{-1}'
+        xy_unit_new = 'nm^{-1}'
+        z_unit_new = 'm^{-1}'
+        self.data.x_unit = xy_unit_default
+        self.data.y_unit = xy_unit_default
+        self.data.z_unit = z_unit_default
+        x0 = self.data.qx_data[0]
+        y0 = self.data.qy_data[0]
+        z0 = self.data.data[0]
+        assert self.data.x_converter is not None
+        assert self.data.y_converter is not None
+        assert self.data.z_converter is not None
+        # Ensure units are compatible
+        self.assertTrue(xy_unit_new in self.data.x_converter.get_compatible_units())
+        self.assertTrue(z_unit_new in self.data.z_converter.get_compatible_units())
+        # Plot base data set with default units
+        self.plotter.plot(self.data)
+        # Change units of plot and check values changed
+        self.plotter.setUnits(xy_unit_new, z_unit_new)
+        self.assertTrue(xy_unit_new in str(self.plotter.ax.xaxis.label))
+        self.assertTrue(xy_unit_new in str(self.plotter.ax.yaxis.label))
+        self.assertNotEqual(x0, self.plotter.data0.qx_data[0])
+        self.assertNotEqual(y0, self.plotter.data0.qy_data[0])
+        self.assertNotEqual(z0, self.plotter.data0.data[0])
+        # Change units of plot back to original values and ensure x and y values restored
+        self.plotter.setUnits(xy_unit_default, z_unit_default)
+        self.assertTrue(xy_unit_default in str(self.plotter.ax.xaxis.label))
+        self.assertTrue(xy_unit_default in str(self.plotter.ax.yaxis.label))
+        self.assertEqual(x0, self.plotter.data0.qx_data[0])
+        self.assertEqual(y0, self.plotter.data0.qy_data[0])
+        self.assertEqual(z0, self.plotter.data0.data[0])
+
 
 if __name__ == "__main__":
     unittest.main()

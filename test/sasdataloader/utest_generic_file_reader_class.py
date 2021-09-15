@@ -7,6 +7,7 @@ import unittest
 import logging
 import numpy as np
 
+from sas import get_custom_config
 from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D, Data1D
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
@@ -77,6 +78,28 @@ class GenericFileReaderTests(unittest.TestCase):
         self.assertEqual(len(data.x), 138)
         self.assertEqual(data.sample.ID, "TK49 c10_SANS")
         self.assertEqual(data.meta_data["loader"], "CanSAS XML 1D")
+
+    def testConfigurationUnits(self):
+        """ Test different default units for """
+        custom_config = get_custom_config()
+        xml_native = find("TestExtensions.xml")
+        # Load file using native units
+        default_units = self.generic_reader.load(xml_native)[0]
+        # override units in config
+        setattr(custom_config, 'LOAD_Q_OVERRIDE', True)
+        setattr(custom_config, 'LOAD_I_OVERRIDE', True)
+        setattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/m')
+        setattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/nm')
+        # Load file using custom units
+        override_units = self.generic_reader.load(xml_native)[0]
+        # Values in x and y should be the same
+        self.assertEqual(default_units.x[0], override_units.x[0])
+        self.assertEqual(default_units.x[-1], override_units.x[-1])
+        self.assertEqual(default_units.y[0], override_units.y[0])
+        self.assertEqual(default_units.y[-1], override_units.y[-1])
+        # Units should be different
+        self.assertNotEqual(default_units.x_unit, override_units.x_unit)
+        self.assertNotEqual(default_units.y_unit, override_units.y_unit)
 
     def tearDown(self):
         if os.path.isfile(self.bad_file):
