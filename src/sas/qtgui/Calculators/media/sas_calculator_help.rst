@@ -482,7 +482,7 @@ References
 ----------
 
     .. [#MARANVILLE1] An implementation of an efficient direct Fourier transform of polygonal areas and volumes
-         (2021) `arXiv:2104.08309 <https://arxiv.org/abs/2104.08309>`__
+         (2021) Brian B. Maranville `arXiv:2104.08309 <https://arxiv.org/abs/2104.08309>`__
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
