@@ -452,22 +452,17 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     # the sub sum over the vertices in eq (14) (elements x faces)
     sub_sum = np.zeros_like(prefactor, dtype="complex")
     for i in range(geometry.shape[2]-1):
-        # calculate the separation vector (elements x faces x vector_coords)
-        v = geometry[:,:,i+1] - geometry[:,:,i]
-        #calculate the dot product of Qp and v (elements x faces)
-        Qp_dot_v = np.sum(Qp*v, axis=-1)
-        zero = np.abs(Qp_dot_v) < 1e-10
-        nzero = np.invert(zero)
+        # calculate the separation vector and sum vector of the two vertices on each edge (elements x faces x vector_coords)
+        v_diff = geometry[:,:,i+1] - geometry[:,:,i]
+        v_sum = geometry[:,:,i+1] + geometry[:,:,i]
         # the terms in the expr (elements x faces)
         # WARNING: this uses the opposite sign convention as the article's code but agrees with the sign convention of the
         # main text - it takes line segment normals as pointing OUTWARDS from the surface - giving the 'standard' fourier transform
         # e.g. fourier transform of a box gives a *positive* sinc function
-        term = (np.sum(Qp * np.cross(v, normals), axis=-1)) / np.sum(Qp * Qp, axis=-1).astype(complex)
-        # if Qp.v is non-zero can use standard code as in paper
-        term[nzero] = term[nzero] * (np.exp(1j * np.sum(Qp[nzero, ...] * geometry[nzero,i+1], axis=-1)) \
-                            - np.exp(1j * np.sum(Qp[nzero, ...] * geometry[nzero,i], axis=-1))) / Qp_dot_v[nzero]
-        # If Qp.v -> 0 then the difference of the exponentials also goes to zero - use L'Hôpital's rule as Qp.r1 -> Qp.r2
-        term[zero] = term[zero] * 1j * np.exp(1j * np.sum(Qp[zero, ...] * geometry[zero,i], axis=-1))
+        term = (np.sum(Qp * np.cross(v_diff, normals), axis=-1)) / np.sum(Qp * Qp, axis=-1).astype(complex)
+        dot_diff = np.sum(Qp[...] * v_diff, axis=-1)/2.0
+        dot_sum = np.sum(Qp[...] * v_sum, axis=-1)/2.0
+        term = term * 1j * np.sinc(dot_diff/np.pi) * np.exp(1j * dot_sum)
         sub_sum += term
     # sum over all the faces in each subvolume to return an array of transforms of sub_volumes
     return np.sum(prefactor*sub_sum, axis=-1)
