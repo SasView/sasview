@@ -20,12 +20,14 @@ datas = [
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
-    (os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'),
 ]
 #TODO: Hopefully we can get away from here
 if platform.system() == 'Darwin':
     datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
     datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
+    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','debugpy'),'debugpy'))
+else:
+    (os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'),
 
 def add_data(data):
     for component in data:
