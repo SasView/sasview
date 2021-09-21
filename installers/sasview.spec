@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
 from pathlib import Path
 import warnings
 import platform
@@ -19,6 +20,7 @@ datas = [
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
+    (os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'),
 ]
 #TODO: Hopefully we can get away from here
 if platform.system() == 'Darwin':
@@ -89,11 +91,12 @@ hiddenimports = [
     #'site','lxml._elementpath','lxml.etree',
     #'scipy._lib.messagestream',
     #'numba',
+    'xmlrpc',
+    'xmlrpc.server',
+    'debugpy',
+    'debugpy._vendored',
+    'uncertainties',
 ]
-
-
-
-
 
 a = Analysis(
     ['sasview.py'],
@@ -117,7 +120,8 @@ pyz = PYZ(
 )
 
 if platform.system() == 'Darwin':
-    exe = EXE(pyz,
+    exe = EXE(
+          pyz,
           a.scripts,
           exclude_binaries=True,
           name='sasview',
@@ -135,10 +139,10 @@ else:
         name='sasview',
         debug=False,
         bootloader_ignore_signals=False,
+        icon=os.path.join("../src/sas/sasview/images","ball.ico"),
         strip=False,
         upx=True,
-        console=True
-    )
+        console=True)
 
 coll = COLLECT(
     exe,
