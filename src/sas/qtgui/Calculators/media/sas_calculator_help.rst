@@ -610,6 +610,11 @@ Examples
 
    Example 2: A Magnetic Cylinder <gsc_ex_magnetic_cylinder>
 
+   Example 3: Magnetic Spheres <gsc_ex_magnetic_spheres>
+
+| :download:`Scripting Example: Orientational Averaging of the Default Data (Jupyter Notebook) <gensas_orientational_average.ipynb>`
+| :download:`Scripting Example: Orientational Averaging of the Default Data (PDF) <gensas_orientational_average.pdf>`
+
 References
 ----------
 

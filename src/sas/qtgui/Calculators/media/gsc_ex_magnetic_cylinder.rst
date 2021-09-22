@@ -23,7 +23,7 @@ $1\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$ and
 a constant magnetic scattering length density of 
 $(0, 0, 1\times10^{-6})\require{unicode}\unicode{x212B}^{-2}$:
 
-.. figure:: gsc_ex_magnetic_cylinder_images/cylinder_graphic.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/cylinder_graphic.png
 
 The following code generates a SLD file describing such a sample, using the SLD
 file format as given in the documentation for the generic scattering
@@ -62,14 +62,14 @@ the scattering calculator and use the nuclear datafile `load` button to load
 the nuclear SLD for this sample into the calculator.
 
 
-.. figure:: gsc_ex_magnetic_cylinder_images/gsc_tool_1.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/gsc_tool_1.png
 
 By pressing the `draw` button we can see a view of the pixels describing the
 sample. Pixels with 0 SLD are coloured in yellow, all others are given a colour
 related
 to their SLD, which in this case is a constant.
 
-.. figure:: gsc_ex_magnetic_cylinder_images/cylinder_draw_output.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/cylinder_draw_output.png
 
 In order to set the cylinder at an angle of 60° to the $z$ axis we use the
 sample coordinates highlighted in red below. We also want a 100x100 pixel
@@ -78,11 +78,11 @@ Unlike the default data in example 1, this value is not given a warning orange
 background, due to the higher discretisation of the real space data for the
 cylinder.
 
-.. figure:: gsc_ex_magnetic_cylinder_images/gsc_tool_2.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/gsc_tool_2.png
 
 Pressing compute gives us the following output in the main window:
 
-.. figure:: gsc_ex_magnetic_cylinder_images/nuclear_output.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/nuclear_output.png
 
 This relatively simple system can be compared with the analytical model in the
 fitting calculator to test the correctness of our results.
@@ -102,7 +102,7 @@ scattering calculator settings:
 
 Computing this gives us the model and residual plots:
 
-.. figure:: gsc_ex_magnetic_cylinder_images/main_window_3.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/main_window_3.png
 
 The value of $\chi^2 = 5.65\times 10^{-6}$ demonstrates that the calculator has
 produced very accurate results.
@@ -111,7 +111,7 @@ For a better comparison of the results, we can adjust the colour scales by
 right-clicking on each of the scattering intensity plots and selecting `2D
 Color Map` to set the maximum and minimum ranges of the plots: 
 
-.. figure:: gsc_ex_magnetic_cylinder_images/color_map_4.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/color_map_4.png
 
 We also need to adjust the scale for the residuals plot. Since the residuals
 for this fit include negative values we need to change from a log to a linear
@@ -120,7 +120,7 @@ by right clicking the plot and selecting `Toggle Linear/Log Scale`. We can then
 adjust the range of the color map as before - in this case to the range from
 -0.01 to 0.01.
 
-.. figure:: gsc_ex_magnetic_cylinder_images/main_window_5.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/main_window_5.png
 
 Magnetic Scattering
 ^^^^^^^^^^^^^^^^^^^^^
@@ -132,11 +132,11 @@ to put the polarisation direction along the $U$ axis (the horizontal direction)
 and to record the ++ cross-section ("+" state as defined in Moon, Riste, and
 Koehler, 1969 [#MRK1969]_ corresponds to 0 in the textbox for up_frac).
 
-.. figure:: gsc_ex_magnetic_cylinder_images/gsc_tool_5b.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/gsc_tool_5b.png
 
 Running the calculation gives us the following output in the main window:
 
-.. figure:: gsc_ex_magnetic_cylinder_images/magnetic_output.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/magnetic_output.png
 
 Additional to the structural scattering pattern now an angular anisotropy due
 to the magnetisation occurs.
@@ -158,12 +158,12 @@ tab and set the following settings to match with the scattering calculator:
  - *sld_solvent_mtheta*: 0
  - *sld_solvent_mphi*: 0
 
-.. figure:: gsc_ex_magnetic_cylinder_images/magnetism_fitting.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/magnetism_fitting.png
   
 Carrying out the fitting gives the following results (after adjusting scales to
 match):
 
-.. figure:: gsc_ex_magnetic_cylinder_images/main_window_6.png
+.. figure:: gsc_ex_magnetic_cylinder_assets/main_window_6.png
 
 Again the value of $\chi^2 = 1.92\times 10^{-7}$ shows an excellent fit.
 
