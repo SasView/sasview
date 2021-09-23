@@ -18,8 +18,18 @@ We define the ratio of the two SLDs as:
 .. math::
     R = \frac{\left\|N\right\|^2}{b_H^2\left\|M_x\right\|^2}
 
-Using the formula from the paper we can write a python script 
+Where $N$ is the nuclear SLD and $M_x$ the x component of the magnetisation.
+$b_H = 2.70\times 10^{-15}m$
+
+Using the formulas from the paper we can write a python script 
 to generate analytical results for the scattering pattern in the ++ cross-section.
+
+.. math::
+    I^{++}(\mathbf{q}) = \frac{8\pi^3}{V}\left(
+    \left\|\widetilde{N}\right\|^2 + b_H^2\left\|\widetilde{M}_x\right\|^2\sin^4\theta - 
+    b_h\left( \widetilde{N}\widetilde{M}_x^* + \widetilde{N}^*\widetilde{M}_x \right)\sin^2\theta \right)
+
+Where $\widetilde{N}$ and $\widetilde{M}_x$ are the fourier transforms of $N$ and $M_x$ respectively.
 
 We will use the same R values as in the paper referenced above and hence require:
 
@@ -44,7 +54,8 @@ The code is as follows::
             Q = math.sqrt(math.pow(Qx, 2) + math.pow(Qy, 2))
             term = np.square(np.abs(fourier(n, Q)))
             term += np.square(np.abs(fourier(m, Q)))*math.pow(math.sin(theta), 4)
-            term += -(fourier(n, Q)*fourier(m, Q).conjugate() + fourier(m, Q)*fourier(n, Q).conjugate())*math.pow(math.sin(theta), 2)
+            term += -(fourier(n, Q)*fourier(m, Q).conjugate() + \
+                      fourier(m, Q)*fourier(n, Q).conjugate()   ) * math.pow(math.sin(theta), 2)
             # the factor of 1E8 is to correspond with Sasview's intensity units
             return term*1E8/(4*math.pi*math.pow(0.5,3)/3.0)
 
@@ -69,7 +80,7 @@ The code is as follows::
         plt.ylabel("$Q_y / Å^{-2}$")
         plt.show()
 
-This code gives us the following patterns:
+This code gives us the following scattering patterns:
 
 .. figure:: gsc_ex_magnetic_spheres_assets/analytical.png
 
@@ -106,8 +117,8 @@ spheres. For this we will use netgen, and the following python script::
         vtk = VTKOutput(ma=mesh,coefs=[mur,mag],names=["M-field","Nuclear"],filename="sphere_refined",subdivision=3)
         vtk.Do()
 
-This script sets the nuclear SLD to $2\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$
-and the magnetic SLD to $(1\times10^{-6}, 0, 0)\require{unicode}\unicode{x212B}^{-2}$ giving
+This script sets the nuclear SLD to 2x10\ :sup:`-6`\ |Ang|:sup:`-2`
+and the magnetic SLD to (1x10\ :sup:`-6`, 0, 0)\ |Ang|:sup:`-2` giving
 $R=4$.
 
 To obtain the required R values the code above should be altered where indicated 
@@ -157,9 +168,31 @@ The rescaled outputs are shown below - with a repeat of the analytical results b
 Qualitatively we see a very good match between the analytical results and the outputs from the
 generic scattering calculator. If we wished to make a quantitative analysis we could adapt the
 code used to generate the analytical plots to compare the results pixel by pixel. We can save the
-output from the scattering calculator by right clicking the plot and selecting `Save Points as a File`::
+output from the scattering calculator by right clicking the plot and selecting `Save Points as a File`,
+and then read this data into a python script::
 
-        file_data = np.loadtxt("filepath to saved data", skiprows = 4)
+        import numpy as np
+        import math
+        from scipy.special import jv, gamma
+        import matplotlib.pyplot as plt
+        from matplotlib.ticker import MaxNLocator
+
+        def fourier(mag, Q): # F.T. of sphere radius 0.5
+            return mag*((4*math.pi/3.0)*gamma(5/2.0) * jv(3/2.0, Q/2.0)/np.float_power(Q/4.0, 3/2.0)/8.0)
+
+        def cross_section(Qx, Qy, n, m): # the result for the ++ cross-section
+            theta = math.atan2(Qy, Qx)
+            Q = math.sqrt(math.pow(Qx, 2) + math.pow(Qy, 2))
+            term = np.square(np.abs(fourier(n, Q)))
+            term += np.square(np.abs(fourier(m, Q)))*math.pow(math.sin(theta), 4)
+            term += -(fourier(n, Q)*fourier(m, Q).conjugate() + \
+                      fourier(m, Q)*fourier(n, Q).conjugate()   ) * math.pow(math.sin(theta), 2)
+            # the factor of 1E8 is to correspond with Sasview's intensity units
+            return term*1E8/(4*math.pi*math.pow(0.5,3)/3.0)
+
+        R = 2500
+
+        file_data = np.loadtxt("filepath to saved data for R=2500 sphere", skiprows = 4)
 
         vals = np.zeros_like(file_data[:, 2])
         for i in range(len(vals)):
@@ -175,14 +208,14 @@ output from the scattering calculator by right clicking the plot and selecting `
 
 We find the following comparison:
 
-====== ================ ================
-R      max \|err\|      mean \|err\|
-====== ================ ================
-0.0025 0.743%           0.165%
-0.2025 0.996%           0.167%
-4      0.743%           0.165%
-2500   0.743%           0.165%
-====== ================ ================
+================ ================ ================
+R                max \|err\|      mean \|err\|
+================ ================ ================
+0.0025           0.743%           0.165%
+0.2025           0.996%           0.167%
+4                0.743%           0.165%
+2500             0.743%           0.165%
+================ ================ ================
 
 
 References

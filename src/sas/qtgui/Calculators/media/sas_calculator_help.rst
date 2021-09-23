@@ -41,7 +41,7 @@ data), in a variety of shapes, such as tetrahedra, cubes or hexahedra.
 
 The scattering length density (SLD) is assumed uniform for each pixel or
 element. Depending on the data format the property is either nuclear (in units
-of $10^{-6}\require{unicode}\unicode{x212B}^{-2}$) (`PDB <PDB Files_>`_ file) or 
+of 10\ :sup:`-6`\ |Ang|:sup:`-2`) (`PDB <PDB Files_>`_ file) or 
 magnetic SLDs (`OMF <OMF Files_>`_ file) or a combination of both 
 (`SLD <SLD Files_>`_ and `VTK <VTK Files_>`_ files). For magnetic neutron
 scattering, the :ref:`magnetism` documentation gives further details and
@@ -59,8 +59,7 @@ discretized with $N$ 3-dimensional rectangular pixels.
 The elastic scattering intensity is defined as
 
 .. math::
-
-    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^Nv_j\beta_j\exp(i\mathbf{Q}\cdot\mathbf{r_j})\right\rvert^2\tag{Eq. 1}
+    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^Nv_j\beta_j\exp(i\mathbf{Q}\cdot\mathbf{r_j})\right\rvert^2
 
 where $\beta_j$ and $\mathbf{r}_j$ are the scattering length density and
 the position of the $j^\text{th}$ pixel respectively.
@@ -83,7 +82,15 @@ $V_s$ can be corrected by users (input parameter *Total volume*). This
 correction is useful especially for an atomic structure (such as taken from a
 PDB file) to get the right normalization.
 
-*NOTE!* $\beta_j$ *displayed in the GUI may be incorrect (input
+For non-magnetic, grid-type data the 1D orientationally averaged scatting intensity profile 
+can also be calculated using the *Debye full average* option which uses the Debye formula:
+
+.. math::
+   I(\left\lvert\mathbf{Q}\right\rvert) = \frac{1}{V}\sum_j^N v_j\beta_j \sum_k^N v_k\beta_k 
+   \frac{\sin\left(\left\lvert\mathbf{Q}\right\rvert\left\lvert\mathbf{r_j}-\mathbf{r_k}\right\rvert\right)}
+   {\left\lvert\mathbf{Q}\right\rvert\left\lvert\mathbf{r_j}-\mathbf{r_k}\right\rvert}
+
+*NOTE:* $\beta_j$ *displayed in the GUI may be incorrect (input
 parameter* solvent_SLD *) but this will not affect the scattering computation if
 the correction of the total volume V is made.*
 
@@ -101,8 +108,7 @@ density ($\beta_j$) for the occupied space $V_j$ and the elastic scattering
 intensity is calculated as
 
 .. math::
-
-    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^N\beta_j\iiint\limits_{V_j}\exp(i\mathbf{Q}\cdot\mathbf{r_j})\text{d}V\right\rvert^2\tag{Eq. 2}
+    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^N\beta_j\iiint\limits_{V_j}\exp(i\mathbf{Q}\cdot\mathbf{r_j})\text{d}V\right\rvert^2
 
 
 Note that the Fourier transform is calculated over each element - allowing
@@ -479,8 +485,8 @@ respectively:
 
 The following code recreates the default data of the scattering calculator GUI,
 a rectangular grid of 10x10x10 pixels, with each pixel being
-$6\times6\times6\require{unicode}\unicode{x212B}$. Each pixel has a constant
-nuclear SLD of $6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$ and no
+6x6x6\ |Ang|. Each pixel has a constant
+nuclear SLD of 6.97x10\ :sup:`-6`\ |Ang|:sup:`-2` and no
 magnetic SLD::
 
       import numpy as np

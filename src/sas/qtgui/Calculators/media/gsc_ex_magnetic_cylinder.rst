@@ -10,8 +10,8 @@ cylinder, with both nuclear and magnetic scattering length densities (SLDs).
 We will then use the calculator to create scattering intensity patterns for
 both a non-magnetised and magnetised cylinder.
 
-Our cylinder will have a radius of $20\require{unicode}\unicode{x212B}$ and a
-length of $40\require{unicode}\unicode{x212B}$, with its axis
+Our cylinder will have a radius of 20\ |Ang| and a
+length of 40\ |Ang|, with its axis
 at a 60° polar angle to the $z$-axis. The cylinder will have equal nuclear and
 magnetic SLDs, with the magnetic SLD along the cylinder's axis. 
 We will write first an SLD file for an cylinder aligned along the $z$ axis -
@@ -19,9 +19,9 @@ and perform the rotation within the calculator.
 
 The file should describe a cylinder as below, with a constant nuclear
 scattering length density of
-$1\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$ and
+1x10\ :sup:`-6`\ |Ang|:sup:`-2` and
 a constant magnetic scattering length density of 
-$(0, 0, 1\times10^{-6})\require{unicode}\unicode{x212B}^{-2}$:
+(0, 0, 1x10\ :sup:`-6`)\ |Ang|:sup:`-2`:
 
 .. figure:: gsc_ex_magnetic_cylinder_assets/cylinder_graphic.png
 

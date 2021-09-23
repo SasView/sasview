@@ -5,22 +5,24 @@
 Example 1: Default Calculator Data
 ==================================
 
-In this example we will use the default data in the generic scattering calculator to find the scattering intensity of a $60\times60\times60\require{unicode}\unicode{x212B}$ cube with constant
-scattering length density of $6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$. We begin by selecting Tool>Generic Scattering Calculator from the top menu.
+In this example we will use the default data in the generic scattering calculator to find 
+the scattering intensity of a 60x60x60\ |Ang| cube with constant
+scattering length density of 6.97x10\ :sup:`-6`\ |Ang|:sup:`-2`. We begin by 
+selecting Tool>Generic Scattering Calculator from the top menu.
 
 Upon loading the calculator we are shown the following interface:
 
 .. figure:: gsc_ex_default_data_assets/gsc_ex_default_data_1.png
 
 The default data within the generic scattering calculator (highlighted in red) describes a rectangular grid of 10x10x10 pixels, with 
-each pixel being $6\times6\times6\require{unicode}\unicode{x212B}$. Each pixel has a constant nuclear SLD of $6.97\times10^{-6}\require{unicode}\unicode{x212B}^{-2}$
+each pixel being 6x6x6\ |Ang|. Each pixel has a constant nuclear SLD of 6.97x10\ :sup:`-6`\ |Ang|:sup:`-2`
 and no magnetic SLD.
 
 To calculate the scattering pattern we press the `compute` button, and the following image appears in the main window:
 
 .. figure:: gsc_ex_default_data_assets/gsc_ex_default_data_2.png
 
-This shows the scattering intensity on a 30x30 grid of pixels, up to a maximum value of $0.3\require{unicode}\unicode{x212B}^{-1}$ in each axis, as
+This shows the scattering intensity on a 30x30 grid of pixels, up to a maximum value of 0.3\ |Ang|:sup:`-1` in each axis, as
 specified in the Q Range settings in the calculator. In order to see a higher resolution image we can adjust the number of Qx (Qy) bins. For a smooth image here we will set
 this value to 100.
 
