@@ -464,8 +464,8 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
         # main text - it takes line segment normals as pointing OUTWARDS from the surface - giving the 'standard' fourier transform
         # e.g. fourier transform of a box gives a *positive* sinc function
         term = (np.sum(Qp * np.cross(v_diff, normals), axis=-1)) / np.sum(Qp * Qp, axis=-1).astype(complex)
-        dot_diff = np.sum(Qp[...] * v_diff, axis=-1)/2.0
-        dot_sum = np.sum(Qp[...] * v_sum, axis=-1)/2.0
+        dot_diff = np.sum(Qp * v_diff, axis=-1)/2.0
+        dot_sum = np.sum(Qp * v_sum, axis=-1)/2.0
         term = term * 1j * np.sinc(dot_diff/np.pi) * np.exp(1j * dot_sum)
         sub_sum += term
     # sum over all the faces in each subvolume to return an array of transforms of sub_volumes
