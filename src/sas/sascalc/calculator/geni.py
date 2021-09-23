@@ -410,10 +410,14 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     :param rn_normals: A 2D numpy array of the form elements x faces containing the perpendicular
                         distances from each face to the origin of the co-ordinate system.
     :type rn_norm: numpy.ndarray
-    :param qx: the x component of the Q vector which represents the position in fourier space.
+    :param volumes: A 1D numpy array containing the volumes of the elements
+    :type volumes: nump.ndarray
+    :param qx: The x component of the Q vector which represents the position in fourier space.
     :type qx: float
-    :param qy: the y component of the Q vector which represents the position in fourier space.
+    :param qy: The y component of the Q vector which represents the position in fourier space.
     :type qy: float
+    :return: A 1D numpy array of the fourier transforms of each element at the given Q value
+    :rtype: numpy.ndarray
     """
     # small value used in case where a fraction should limit to a finite answer with 0 on top and bottom
     # used in 2nd/3rd terms in sum over vertices
