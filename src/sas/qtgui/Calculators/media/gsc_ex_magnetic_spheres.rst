@@ -27,7 +27,7 @@ to generate analytical results for the scattering pattern in the ++ cross-sectio
 .. math::
     I^{++}(\mathbf{q}) = \frac{8\pi^3}{V}\left(
     \left\|\widetilde{N}\right\|^2 + b_H^2\left\|\widetilde{M}_x\right\|^2\sin^4\theta - 
-    b_h\left( \widetilde{N}\widetilde{M}_x^* + \widetilde{N}^*\widetilde{M}_x \right)\sin^2\theta \right)
+    b_H\left( \widetilde{N}\widetilde{M}_x^* + \widetilde{N}^*\widetilde{M}_x \right)\sin^2\theta \right)
 
 Where $\widetilde{N}$ and $\widetilde{M}_x$ are the fourier transforms of $N$ and $M_x$ respectively.
 
