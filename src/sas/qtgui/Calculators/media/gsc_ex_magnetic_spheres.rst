@@ -18,7 +18,7 @@ We define the ratio of the two SLDs as:
 .. math::
     R = \frac{\left\|N\right\|^2}{b_H^2\left\|M_x\right\|^2}
 
-Where $N$ is the nuclear SLD and $M_x$ the x component of the magnetisation.
+Where $N$ is the nuclear SLD and $M_x$ the $x$ component of the magnetisation.
 $b_H = 2.70\times 10^{-15}m$
 
 Using the formulas from the paper we can write a python script 
@@ -31,7 +31,7 @@ to generate analytical results for the scattering pattern in the ++ cross-sectio
 
 Where $\widetilde{N}$ and $\widetilde{M}_x$ are the fourier transforms of $N$ and $M_x$ respectively.
 
-We will use the same R values as in the paper referenced above and hence require:
+We will use the same $R$ values as in the paper referenced above and hence require:
 
  - $R=0.0025$
  - $R=0.2025$
@@ -121,7 +121,7 @@ This script sets the nuclear SLD to 2x10\ :sup:`-6`\ |Ang|:sup:`-2`
 and the magnetic SLD to (1x10\ :sup:`-6`, 0, 0)\ |Ang|:sup:`-2` giving
 $R=4$.
 
-To obtain the required R values the code above should be altered where indicated 
+To obtain the required $R$ values the code above should be altered where indicated 
 to use nuclear SLDs of:
 
  - $R=0.0025$:  $N=0.05$
@@ -147,7 +147,7 @@ We load each of these datafiles into the generic scattering calculator and set t
      - *No. of Qx (Qy) bins*: 50
      - *Qx (Qy) Max*: 5.0
 
-The interface for the R=2500 sphere is shown below:
+The interface for the $R=2500$ sphere is shown below:
 
 .. figure:: gsc_ex_magnetic_spheres_assets/interface.png
 
