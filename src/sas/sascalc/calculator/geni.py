@@ -347,13 +347,13 @@ def _calc_Iqxy_magnetic_elements(
     M = np.array([mx, my, mz])
     #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
     _calc_Iqxy_magnetic_elements_helper(
-        Iq, qx, qy, geometry, normals, rn_norm, sld, M, elements, vol,
+        Iq, qx, qy, geometry, normals, rn_norm, sld, M, vol,
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
     return Iq.reshape(shape)
 
 # TODO: currently doesn't use numba
 def _calc_Iqxy_magnetic_elements_helper(
-        Iq, qx, qy, geometry, normals, rn_norm, rho, M, elements, vol,
+        Iq, qx, qy, geometry, normals, rn_norm, rho, M, vol,
         cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu):
     # Process each qx, qy
     # Note: enumerating a pair is slower than direct indexing in numba
