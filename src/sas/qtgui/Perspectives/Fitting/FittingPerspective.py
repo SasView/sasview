@@ -247,7 +247,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        self.maxIndex = tab_index + 1
+        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
 
         icon = QtGui.QIcon()
         if is_batch:
@@ -409,9 +409,10 @@ class FittingWindow(QtWidgets.QTabWidget):
             # Find the first unassigned tab.
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
+            tab_ids = [tab.tab_id for tab in self.tabs]
 
             if tab_index is not None:
-                if tab_index >= self.maxIndex:
+                if tab_index not in tab_ids:
                     self.addFit(data, is_batch=is_batch, tab_index=tab_index)
                 else:
                     self.setCurrentIndex(tab_index-1)
@@ -549,7 +550,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Returns the tab with with attribute name *name*
         """
-        assert(name, str)
+        assert isinstance(name, str)
         for tab in self.tabs:
             if tab.modelName() == name:
                 return tab

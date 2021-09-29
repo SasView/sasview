@@ -13,6 +13,9 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
+from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+
 from twisted.internet import reactor
 # General SAS imports
 from sas import get_local_config, get_custom_config
@@ -29,7 +32,7 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 from sas.qtgui.Utilities.ReportDialog import ReportDialog
-from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
+from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
@@ -56,13 +59,6 @@ from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 logger = logging.getLogger(__name__)
-
-class Acknowledgements(QDialog, Ui_Acknowledgements):
-    def __init__(self, parent=None):
-        QDialog.__init__(self, parent)
-        self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 
 
 class GuiManager(object):
@@ -107,7 +103,7 @@ class GuiManager(object):
         handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        logging.info(" --- SasView session started ---")
+        logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
 
@@ -203,7 +199,8 @@ class GuiManager(object):
             for name, perspective in self.loadedPerspectives.items():
                 try:
                     perspective.setClosable(True)
-                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    if self.subwindow in self._workspace.workspace.subWindowList():
+                        self._workspace.workspace.removeSubWindow(self.subwindow)
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
@@ -674,6 +671,8 @@ class GuiManager(object):
         Menu Save Project
         """
         filename = self.filesWidget.saveProject()
+        if not filename:
+            return
 
         # datasets
         all_data = self.filesWidget.getSerializedData()

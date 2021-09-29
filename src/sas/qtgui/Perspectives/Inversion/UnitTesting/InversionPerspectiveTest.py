@@ -1,8 +1,5 @@
-import time
 import unittest
 from unittest.mock import MagicMock
-
-from PyQt5 import QtGui, QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
@@ -52,7 +49,7 @@ class InversionTest(unittest.TestCase):
 
     def removeAllData(self):
         """ Cleanup method to restore widget to its base state """
-        if len(self.widget.dataList) > 0:
+        while len(self.widget.dataList) > 0:
             remove_me = list(self.widget._dataList.keys())
             self.widget.removeData(remove_me)
 
@@ -221,7 +218,7 @@ class InversionTest(unittest.TestCase):
     def testGetNFunc(self):
         """ test nfunc getter """
         # Float
-        self.widget.noOfTermsInput.setText("10.0")
+        self.widget.noOfTermsInput.setText("10")
         self.assertEqual(self.widget.getNFunc(), 10)
         # Int
         self.widget.noOfTermsInput.setText("980")
@@ -267,30 +264,29 @@ class InversionTest(unittest.TestCase):
         self.assertEqual(self.widget._calculator.slit_width, 0.0)
         self.assertEqual(self.widget._calculator.alpha, 0.0001)
         # Set new values
-        self.widget.maxDistanceInput.setText("1.0")
-        self.widget.maxQInput.setText("3.0")
-        self.widget.minQInput.setText("5.0")
+        # Min Q must always be less than max Q - Set max Q first
+        self.widget.maxQInput.setText("5.0")
+        self.widget.check_q_high()
+        self.widget.minQInput.setText("3.0")
+        self.widget.check_q_low()
         self.widget.slitHeightInput.setText("7.0")
         self.widget.slitWidthInput.setText("9.0")
         self.widget.regularizationConstantInput.setText("11.0")
+        self.widget.maxDistanceInput.setText("1.0")
         # Check new values
         self.assertEqual(self.widget._calculator.get_dmax(), 1.0)
-        self.assertEqual(self.widget._calculator.get_qmax(), 3.0)
-        self.assertEqual(self.widget._calculator.get_qmin(), 5.0)
+        self.assertEqual(self.widget._calculator.get_qmin(), 3.0)
+        self.assertEqual(self.widget._calculator.get_qmax(), 5.0)
         self.assertEqual(self.widget._calculator.slit_height, 7.0)
         self.assertEqual(self.widget._calculator.slit_width, 9.0)
         self.assertEqual(self.widget._calculator.alpha, 11.0)
         # Change model directly
         self.widget.model.setItem(WIDGETS.W_MAX_DIST, QtGui.QStandardItem("2.0"))
-        self.widget.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("4.0"))
-        self.widget.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("6.0"))
         self.widget.model.setItem(WIDGETS.W_SLIT_HEIGHT, QtGui.QStandardItem("8.0"))
         self.widget.model.setItem(WIDGETS.W_SLIT_WIDTH, QtGui.QStandardItem("10.0"))
         self.widget.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem("12.0"))
         # Check values
         self.assertEqual(self.widget._calculator.get_dmax(), 2.0)
-        self.assertEqual(self.widget._calculator.get_qmin(), 4.0)
-        self.assertEqual(self.widget._calculator.get_qmax(), 6.0)
         self.assertEqual(self.widget._calculator.slit_height, 8.0)
         self.assertEqual(self.widget._calculator.slit_width, 10.0)
         self.assertEqual(self.widget._calculator.alpha, 12.0)

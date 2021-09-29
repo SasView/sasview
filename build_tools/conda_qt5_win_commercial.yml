@@ -2,6 +2,7 @@ name: qt5_win
 channels:
   - conda-forge
 dependencies:
+ - pip
  - alabaster
  - colorama
  - ipykernel
@@ -11,8 +12,7 @@ dependencies:
  - pyopencl=2018.2.2
  - scipy=1.2.0
  - hdf5=1.10.4
- - h5py=2.9.0
- - lxml=4.6.2
+ - lxml=4.6.3
  - twisted=18.9.0
  - sphinx=1.8.5
  - pytest=4.2.0
@@ -21,14 +21,19 @@ dependencies:
  - numba=0.39
  - setuptools=44.0.0
  - numpy=1.14.2
- - qtconsole
+ - qtconsole=4.7.5
+ - pyzmq=19.0.1
  - mkl=2020.0
  - pip:
    - matplotlib==2.2.3
-   - bumps==0.7.11
+   - bumps
    - pyinstaller==3.3.1
    - periodictable==1.5.0
    - xhtml2pdf==0.2.3
    - ../../../PyQt5_commercial-5.12.2-5.12.3-cp35.cp36.cp37.cp38-none-win_amd64.whl
    - qt5reactor==0.5
    - tinycc==1.1
+   - uncertainties==3.1.6
+   - pillow==8.1.2
+   - h5py==3.1   
+

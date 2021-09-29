@@ -148,16 +148,18 @@ class FittingWidgetTest(unittest.TestCase):
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
         self.assertEqual(mag_index.data(), "up_angle")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
-        self.assertEqual(mag_index.data(), "sld_M0")
+        self.assertEqual(mag_index.data(), "up_phi")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)
-        self.assertEqual(mag_index.data(), "sld_mtheta")
+        self.assertEqual(mag_index.data(), "sld_M0")
         mag_index = fittingWindow.lstMagnetic.model().index(5,0)
-        self.assertEqual(mag_index.data(), "sld_mphi")
+        self.assertEqual(mag_index.data(), "sld_mtheta")
         mag_index = fittingWindow.lstMagnetic.model().index(6,0)
-        self.assertEqual(mag_index.data(), "sld_solvent_M0")
+        self.assertEqual(mag_index.data(), "sld_mphi")
         mag_index = fittingWindow.lstMagnetic.model().index(7,0)
-        self.assertEqual(mag_index.data(), "sld_solvent_mtheta")
+        self.assertEqual(mag_index.data(), "sld_solvent_M0")
         mag_index = fittingWindow.lstMagnetic.model().index(8,0)
+        self.assertEqual(mag_index.data(), "sld_solvent_mtheta")
+        mag_index = fittingWindow.lstMagnetic.model().index(9,0)
         self.assertEqual(mag_index.data(), "sld_solvent_mphi")
 
         # test the delegate a bit
@@ -1624,7 +1626,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # see if radius is the same as set
-        self.assertTrue(self.widget._model_model.item(5, 1).text() == "333.0")
+        row = self.widget.getRowFromName("radius")
+        self.assertEqual(self.widget._model_model.item(row, 1).text(), "333")
 
         # Now, change not just model but a category as well
         # cylinder / cylinder
@@ -1635,7 +1638,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # see if radius is still the same
-        self.assertTrue(int(self.widget._model_model.item(5, 1).text()) == 333)
+        row = self.widget.getRowFromName("radius")
+        self.assertEqual(int(self.widget._model_model.item(row, 1).text()), 333)
 
     def testOnParameterPaste(self):
         """

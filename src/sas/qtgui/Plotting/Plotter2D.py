@@ -18,7 +18,6 @@ from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
-from sas.qtgui.Plotting.Binder import BindArtist
 
 # TODO: move to sas.qtgui namespace
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
@@ -50,8 +49,6 @@ class Plotter2DWidget(PlotterBase):
         # Reference to the current slicer
         self.slicer = None
         self.slicer_widget = None
-        # Create Artist and bind it
-        self.connect = BindArtist(self.figure)
         self.vmin = None
         self.vmax = None
         self.im = None
@@ -246,7 +243,7 @@ class Plotter2DWidget(PlotterBase):
 
         self.param_model = None
         validator = None
-        if self.slicer is not None:
+        if self.slicer is not None and not isinstance(self.slicer, BoxSumCalculator):
             self.param_model = self.slicer.model()
             validator = self.slicer.validate
         # Pass the model to the Slicer Parameters widget
@@ -588,12 +585,6 @@ class Plotter2DWidget(PlotterBase):
             im = self.ax.imshow(img, origin=origin)
         else:
             im = self.ax.imshow(img)
-
-    def update(self):
-        self.figure.canvas.draw()
-
-    def draw(self):
-        self.figure.canvas.draw()
 
     def replacePlot(self, id, new_plot):
         """

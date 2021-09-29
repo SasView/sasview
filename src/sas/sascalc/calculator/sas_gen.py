@@ -16,8 +16,6 @@ from periodictable import formula, nsf
 
 from .geni import Iq, Iqxy
 
-logger = logging.getLogger(__name__)
-
 if sys.version_info[0] < 3:
     def decode(s):
         return s
@@ -25,17 +23,17 @@ else:
     def decode(s):
         return s.decode() if isinstance(s, bytes) else s
 
-MFACTOR_AM = 2.853E-12
-MFACTOR_MT = 2.3164E-9
+MFACTOR_AM = 2.90636E-12
+MFACTOR_MT = 2.3128E-9
 METER2ANG = 1.0E+10
-#Avogadro constant [1/mol]
+# Avogadro constant [1/mol]
 NA = 6.02214129e+23
 
 def mag2sld(mag, v_unit=None):
     """
     Convert magnetization to magnatic SLD
     sldm = Dm * mag where Dm = gamma * classical elec. radius/(2*Bohr magneton)
-    Dm ~ 2.853E-12 [A^(-2)] ==> Shouldn't be 2.90636E-12 [A^(-2)]???
+    Dm ~ 2.90636E8 [(A m)^(-1)]= 2.90636E-12 [to Ang^(-2)]
     """
     if v_unit == "A/m":
         factor = MFACTOR_AM
@@ -74,7 +72,7 @@ class GenSAS(object):
         self.data_mx = None
         self.data_my = None
         self.data_mz = None
-        self.data_vol = None #[A^3]
+        self.data_vol = None # [A^3]
         self.is_avg = False
         ## Name of the model
         self.name = "GenSAS"
@@ -87,6 +85,7 @@ class GenSAS(object):
         self.params['Up_frac_in'] = 1.0
         self.params['Up_frac_out'] = 1.0
         self.params['Up_theta'] = 0.0
+        self.params['Up_phi'] = 0.0
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
@@ -96,7 +95,8 @@ class GenSAS(object):
         self.details['total_volume'] = ['A^(3)', 0.0, np.inf]
         self.details['Up_frac_in'] = ['[u/(u+d)]', 0.0, 1.0]
         self.details['Up_frac_out'] = ['[u/(u+d)]', 0.0, 1.0]
-        self.details['Up_theta'] = ['[deg]', -np.inf, np.inf]
+        self.details['Up_theta'] = ['[deg]', -90, 90]
+        self.details['Up_phi'] = ['[deg]', -180, 180]
         # fixed parameters
         self.fixed = []
 
@@ -132,9 +132,10 @@ class GenSAS(object):
             in_spin = self.params['Up_frac_in']
             out_spin = self.params['Up_frac_out']
             s_theta = self.params['Up_theta']
+            s_phi = self.params['Up_phi']
             I_out = Iqxy(
                 qx, qy, x, y, z, sld, vol, mx, my, mz,
-                in_spin, out_spin, s_theta,
+                in_spin, out_spin, s_theta, s_phi,
                 )
         else:
             # 1-D calculation
@@ -270,7 +271,7 @@ class OMF2SLD(object):
             self.mz = np.zeros(length)
 
         self._check_data_length(length)
-        #self.remove_null_points(True, False)
+        # self.remove_null_points(True, False)
         mask = np.ones(len(self.sld_n), dtype=bool)
         if shape.lower() == 'ellipsoid':
             try:
@@ -292,12 +293,13 @@ class OMF2SLD(object):
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except Exception as exc:
-                logger.error(exc)
+                logging.error(exc)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
         self.output.set_pix_type('pixel')
         self.output.set_pixel_symbols('pixel')
+        self.output.filename = omfdata.filename
 
     def get_omfdata(self):
         """
@@ -317,6 +319,7 @@ class OMF2SLD(object):
         :Params length: data length
         """
         parts = (self.pos_x, self.pos_y, self.pos_z, self.mx, self.my, self.mz)
+
         if any(len(v) != length for v in parts):
             raise ValueError("Error: Inconsistent data length.")
 
@@ -393,94 +396,102 @@ class OMFReader(object):
                         mz = np.append(mz, _mz)
                     except Exception as exc:
                         # Skip non-data lines
-                        logger.error(str(exc)+" when processing %r"%line)
-                #Reading Header; Segment count ignored
-                s_line = line.split(":", 1)
-                if s_line[0].lower().count("oommf") > 0:
-                    oommf = s_line[1].lstrip()
-                if s_line[0].lower().count("title") > 0:
-                    title = s_line[1].lstrip()
-                if s_line[0].lower().count("desc") > 0:
-                    desc += s_line[1].lstrip()
-                    desc += '\n'
-                if s_line[0].lower().count("meshtype") > 0:
-                    meshtype = s_line[1].lstrip()
-                if s_line[0].lower().count("meshunit") > 0:
-                    meshunit = s_line[1].lstrip()
-                    if meshunit.count("m") < 1:
-                        msg = "Error: \n"
-                        msg += "We accept only m as meshunit"
-                        raise ValueError(msg)
-                if s_line[0].lower().count("xbase") > 0:
-                    xbase = s_line[1].lstrip()
-                if s_line[0].lower().count("ybase") > 0:
-                    ybase = s_line[1].lstrip()
-                if s_line[0].lower().count("zbase") > 0:
-                    zbase = s_line[1].lstrip()
-                if s_line[0].lower().count("xstepsize") > 0:
-                    xstepsize = s_line[1].lstrip()
-                if s_line[0].lower().count("ystepsize") > 0:
-                    ystepsize = s_line[1].lstrip()
-                if s_line[0].lower().count("zstepsize") > 0:
-                    zstepsize = s_line[1].lstrip()
-                if s_line[0].lower().count("xnodes") > 0:
-                    xnodes = s_line[1].lstrip()
-                if s_line[0].lower().count("ynodes") > 0:
-                    ynodes = s_line[1].lstrip()
-                if s_line[0].lower().count("znodes") > 0:
-                    znodes = s_line[1].lstrip()
-                if s_line[0].lower().count("xmin") > 0:
-                    xmin = s_line[1].lstrip()
-                if s_line[0].lower().count("ymin") > 0:
-                    ymin = s_line[1].lstrip()
-                if s_line[0].lower().count("zmin") > 0:
-                    zmin = s_line[1].lstrip()
-                if s_line[0].lower().count("xmax") > 0:
-                    xmax = s_line[1].lstrip()
-                if s_line[0].lower().count("ymax") > 0:
-                    ymax = s_line[1].lstrip()
-                if s_line[0].lower().count("zmax") > 0:
-                    zmax = s_line[1].lstrip()
-                if s_line[0].lower().count("valueunit") > 0:
-                    valueunit = s_line[1].lstrip().rstrip()
-                if s_line[0].lower().count("valuemultiplier") > 0:
-                    valuemultiplier = s_line[1].lstrip()
-                if s_line[0].lower().count("valuerangeminmag") > 0:
-                    valuerangeminmag = s_line[1].lstrip()
-                if s_line[0].lower().count("valuerangemaxmag") > 0:
-                    valuerangemaxmag = s_line[1].lstrip()
-                if s_line[0].lower().count("end") > 0:
-                    output.filename = os.path.basename(path)
-                    output.oommf = oommf
-                    output.title = title
-                    output.desc = desc
-                    output.meshtype = meshtype
-                    output.xbase = float(xbase) * METER2ANG
-                    output.ybase = float(ybase) * METER2ANG
-                    output.zbase = float(zbase) * METER2ANG
-                    output.xstepsize = float(xstepsize) * METER2ANG
-                    output.ystepsize = float(ystepsize) * METER2ANG
-                    output.zstepsize = float(zstepsize) * METER2ANG
-                    output.xnodes = float(xnodes)
-                    output.ynodes = float(ynodes)
-                    output.znodes = float(znodes)
-                    output.xmin = float(xmin) * METER2ANG
-                    output.ymin = float(ymin) * METER2ANG
-                    output.zmin = float(zmin) * METER2ANG
-                    output.xmax = float(xmax) * METER2ANG
-                    output.ymax = float(ymax) * METER2ANG
-                    output.zmax = float(zmax) * METER2ANG
-                    output.valuemultiplier = valuemultiplier
-                    output.valuerangeminmag = mag2sld(float(valuerangeminmag), \
-                                                      valueunit)
-                    output.valuerangemaxmag = mag2sld(float(valuerangemaxmag), \
-                                                      valueunit)
+                        logging.error(str(exc)+" when processing %r"%line)
+                elif line:
+                # Reading Header; Segment count ignored
+                    s_line = line.split(":", 1)
+                    if s_line[0].lower().count("oommf") > 0:
+                        oommf = s_line[1].lstrip()
+                    if s_line[0].lower().count("title") > 0:
+                        title = s_line[1].lstrip()
+                    if s_line[0].lower().count("desc") > 0:
+                        desc += s_line[1].lstrip()
+                        desc += '\n'
+                    if s_line[0].lower().count("meshtype") > 0:
+                        meshtype = s_line[1].lstrip()
+                    if s_line[0].lower().count("meshunit") > 0:
+                        meshunit = s_line[1].lstrip()
+                        if meshunit.count("m") < 1:
+                            msg = "Error: \n"
+                            msg += "We accept only m as meshunit"
+                            raise ValueError(msg)
+                    if s_line[0].lower().count("xbase") > 0:
+                        xbase = s_line[1].lstrip()
+                    if s_line[0].lower().count("ybase") > 0:
+                        ybase = s_line[1].lstrip()
+                    if s_line[0].lower().count("zbase") > 0:
+                        zbase = s_line[1].lstrip()
+                    if s_line[0].lower().count("xstepsize") > 0:
+                        xstepsize = s_line[1].lstrip() 
+                    if s_line[0].lower().count("ystepsize") > 0:
+                        ystepsize = s_line[1].lstrip()   
+                    if s_line[0].lower().count("zstepsize") > 0:
+                        zstepsize = s_line[1].lstrip()
+                    if s_line[0].lower().count("xnodes") > 0:
+                        xnodes = s_line[1].lstrip()   
+                    #print(s_line[0].lower().count("ynodes"))
+                    if s_line[0].lower().count("ynodes") > 0:
+                        ynodes = s_line[1].lstrip()
+                        #print(ynodes)
+                    if s_line[0].lower().count("znodes") > 0:
+                        znodes = s_line[1].lstrip()  
+                    if s_line[0].lower().count("xmin") > 0:
+                        xmin = s_line[1].lstrip()
+                    if s_line[0].lower().count("ymin") > 0:
+                        ymin = s_line[1].lstrip()
+                    if s_line[0].lower().count("zmin") > 0:
+                        zmin = s_line[1].lstrip()
+                    if s_line[0].lower().count("xmax") > 0:
+                        xmax = s_line[1].lstrip()
+                    if s_line[0].lower().count("ymax") > 0:
+                        ymax = s_line[1].lstrip()
+                    if s_line[0].lower().count("zmax") > 0:
+                        zmax = s_line[1].lstrip()
+                    if s_line[0].lower().count("valueunit") > 0:
+                        valueunit = s_line[1].lstrip()
+                        if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
+                            msg = "Error: \n"
+                            msg += "We accept only mT or A/m as valueunit"
+                            raise ValueError(msg)    
+                    if s_line[0].lower().count("valuemultiplier") > 0:
+                        valuemultiplier = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangeminmag") > 0:
+                        valuerangeminmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangemaxmag") > 0:
+                        valuerangemaxmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("end") > 0:
+                        output.filename = os.path.basename(path)
+                        output.oommf = oommf
+                        output.title = title
+                        output.desc = desc
+                        output.meshtype = meshtype
+                        output.xbase = float(xbase) * METER2ANG
+                        output.ybase = float(ybase) * METER2ANG
+                        output.zbase = float(zbase) * METER2ANG
+                        output.xstepsize = float(xstepsize) * METER2ANG
+                        output.ystepsize = float(ystepsize) * METER2ANG
+                        output.zstepsize = float(zstepsize) * METER2ANG
+                        output.xnodes = float(xnodes)
+                        output.ynodes = float(ynodes)
+                        output.znodes = float(znodes)
+                        output.xmin = float(xmin) * METER2ANG
+                        output.ymin = float(ymin) * METER2ANG
+                        output.zmin = float(zmin) * METER2ANG
+                        output.xmax = float(xmax) * METER2ANG
+                        output.ymax = float(ymax) * METER2ANG
+                        output.zmax = float(zmax) * METER2ANG
+                        output.valuemultiplier = valuemultiplier
+                        output.valuerangeminmag \
+                            = mag2sld(float(valuerangeminmag), valueunit)
+                        output.valuerangemaxmag \
+                            = mag2sld(float(valuerangemaxmag), valueunit)
             output.set_m(mx, my, mz)
             return output
         except Exception:
             msg = "%s is not supported: \n" % path
             msg += "We accept only Text format OMF file."
-            raise RuntimeError(msg)
+            logging.error(msg)
+            return None
 
 class PDBReader(object):
     """
@@ -554,7 +565,7 @@ class PDBReader(object):
                             vol = 1.0e+24 * atom.mass / atom.density / NA
                             vol_pix = np.append(vol_pix, vol)
                         except Exception:
-                            logger.error("Error: set the sld of %s to zero"% atom_name)
+                            logging.info("Error: set the sld of %s to zero"% atom_name)
                             sld_n = np.append(sld_n, 0.0)
                         sld_mx = np.append(sld_mx, 0)
                         sld_my = np.append(sld_my, 0)
@@ -572,7 +583,7 @@ class PDBReader(object):
                             if int_val == 0:
                                 break
                             val_list.append(int_val)
-                        #need val_list ordered
+                        # need val_list ordered
                         for val in val_list:
                             index = val - 1
                             if (pos_x[index], pos_x[num]) in x_line and \
@@ -587,7 +598,7 @@ class PDBReader(object):
                         y_lines.append(y_line)
                         z_lines.append(z_line)
                 except Exception as exc:
-                    logger.error(exc)
+                    logging.error(exc)
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
@@ -599,7 +610,8 @@ class PDBReader(object):
             output.sld_unit = '1/A^(2)'
             return output
         except Exception:
-            raise RuntimeError("%s is not a sld file" % path)
+            logging.error("%s is not a pdb file" % path)
+            return None
 
     def write(self, path, data):
         """
@@ -608,11 +620,18 @@ class PDBReader(object):
         print("Not implemented... ")
 
 class SLDReader(object):
-    """
-    SLD reader for text files.
+    """SLD reader for text files.
 
-    7 columns: x, y, z, sld, mx, my, mz
-    8 columns: x, y, z, sld, mx, my, mz, volume
+    format:
+    1 line of header - may give any information
+    n lines of data points of the form:
+
+    4 columns: x        y       z       sld
+    6 columns: x        y       z       mx      my      mz
+    7 columns: x        y       z       sld     mx      my      mz
+    8 columns: x        y       z       sld     mx      my      mz      volume
+    
+    where all n lines have the same format.
     """
     ## File type
     type_name = "SLD ASCII"
@@ -635,9 +654,19 @@ class SLDReader(object):
                               ndmin=1, unpack=True)
         except Exception:
             data = None
-        if data is None or data.shape[0] not in (7, 8):
-            raise RuntimeError("%r is not a sld file" % path)
-        x, y, z, sld, mx, my, mz = data[:7]
+        if data is None or data.shape[0] not in (4, 6, 7, 8):
+            logging.error("%r is not an sld file" % path)
+            return None
+        if data.shape[0] == 4:
+            x, y, z, sld = data[:4]
+            mx = np.zeros_like(sld)
+            my = np.zeros_like(sld)
+            mz = np.zeros_like(sld)
+        elif data.shape[0] == 6:
+            x, y, z, mx, my, mz = data[:6]
+            sld = np.zeros_like(mx)
+        else:
+            x, y, z, sld, mx, my, mz = data[:7]
         vol = data[7] if data.shape[0] > 7 else None
         output = MagSLD(x, y, z, sld, mx, my, mz, vol)
         output.filename = os.path.basename(path)
@@ -662,7 +691,7 @@ class SLDReader(object):
         else:
             mx, my, mz = data.sld_mx, data.sld_my, data.sld_mz
         vol = data.vol_pix if data.vol_pix is not None else np.ones_like(x)
-        columns = np.vstack((x, y, z, sld_n, mx, my, mz, vol))
+        columns = np.column_stack((x, y, z, sld_n, mx, my, mz, vol))
         with open(path, 'w') as out:
             # First Line: Column names
             out.write("X  Y  Z  SLDN SLDMx  SLDMy  SLDMz VOLUMEpix\n")
@@ -802,6 +831,7 @@ class MagSLD(object):
         #self.sld_m = None
         #self.sld_phi = None
         #self.sld_theta = None
+        #self.sld_phi = None
         self.pix_symbol = None
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
@@ -827,15 +857,16 @@ class MagSLD(object):
         """
         self.pix_type = pix_type
 
-    def set_sldn(self, sld_n):
+    def set_sldn(self, sld_n, non_zero_mag_only=True):
         """
         Sets neutron SLD.
 
         Warning: if *sld_n* is a scalar and attribute *is_data* is True, then
-        only pixels with non-zero magnetism will be set.
+        only pixels with non-zero magnetism will be set by default. Use
+        the argument non_zero_mag_only=False to change this
         """
         if isinstance(sld_n, float):
-            if self.is_data:
+            if self.is_data and non_zero_mag_only:
                 # For data, put the value to only the pixels w non-zero M
                 is_nonzero = (np.fabs(self.sld_mx) +
                               np.fabs(self.sld_my) +
@@ -951,7 +982,7 @@ class MagSLD(object):
                     if zpos_pre != z_pos:
                         self.zstepsize = np.fabs(z_pos - zpos_pre)
                         break
-                #default pix volume
+                # default pix volume
                 self.vol_pix = np.ones(len(self.pos_x))
                 vol = self.xstepsize * self.ystepsize * self.zstepsize
                 self.set_pixel_volumes(vol)
@@ -1086,6 +1117,7 @@ def sas_gen_c(self, qx, qy=None):
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
+    s_phi = self.params['Up_phi']
     scale = self.params['scale']
     total_volume = self.params['total_volume']
     background = self.params['background']
@@ -1095,10 +1127,10 @@ def sas_gen_c(self, qx, qy=None):
         mx = my = mz = np.zeros_like(x)
     args = (
         (1 if self.is_avg else 0),
-        # WARNING: calc_msld in libfunc.c at line 174-175 swaps mz and my.
+        # WARNING: 
         # To compare new to old need to swap the inputs.  Also need to
         # reverse the sign.
-        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta)
+        x, y, z, sld, mx, mz, my, vol, in_spin, out_spin, s_theta, s_phi)
     model = _sld2i.new_GenI(*args)
     I_out = np.empty_like(qx)
     if qy is not None and len(qy) > 0:
@@ -1128,6 +1160,7 @@ def realspace_Iq(self, qx, qy):
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
+    s_phi = self.params['Up_phi']
     scale = self.params['scale']
     total_volume = self.params['total_volume']
     background = self.params['background']
@@ -1152,7 +1185,7 @@ def realspace_Iq(self, qx, qy):
         if is_magnetic:
             I_out = calc_Iq_magnetic(
                 qx, qy, rho, rho_m, points, volume,
-                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
+                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta, up_phi=s_phi,
                 )
         else:
             I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
@@ -1370,12 +1403,12 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         rho, rho_m, points = shape.sample_magnetic(sampling_density)
         rho, rho_m = rho*1e-6, rho_m*1e-6
         mx, my, mz = rho_m
-        up_i, up_f, up_angle = shape.spin
+        up_i, up_f, up_angle, up_phi = shape.spin
     else:
         rho, points = shape.sample(sampling_density)
         rho = rho*1e-6
         mx = my = mz = None
-        up_i, up_f, up_angle = 1.0, 1.0, 0.0
+        up_i, up_f, up_angle, up_phi = 0.5, 0.5, 90.0, 0.0
     points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
     #print("shape, pixel volume", shape.volume, shape.volume/len(points))
@@ -1391,6 +1424,7 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     model.params['Up_frac_in'] = up_i
     model.params['Up_frac_out'] = up_f
     model.params['Up_theta'] = up_angle
+    model.params['Up_phi'] = up_phi
     if use_2d or shape.is_magnetic:
         q = np.linspace(-qmax, qmax, nq)
         qx, qy = np.meshgrid(q, q)
@@ -1402,6 +1436,10 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         theory = fx(qx)
     theory = model.params['scale']*theory + model.params['background']
     compare(model, qx, qy, plot_points=False, theory=theory)
+
+
+
+
 
 def demo():
     """
@@ -1421,7 +1459,7 @@ def demo():
         # Shape + qrange + magnetism (only for ellip).
         #shape='ellip', rab=125, rc=50, qmax=0.1,
         #shape='ellip', rab=25, rc=50, qmax=0.1,
-        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
+        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35, up_phi=35,
 
         # 1D or 2D curve (ignored for magnetism).
         #use_2d=False,
@@ -1450,7 +1488,7 @@ def _setup_realspace_path():
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))
         sys.path.insert(0, path)
-        logger.info("inserting %r into python path for realspace", path)
+        logging.info("inserting %r into python path for realspace", path)
 
 if __name__ == "__main__":
     _setup_realspace_path()
