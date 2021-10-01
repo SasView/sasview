@@ -290,6 +290,13 @@ class BumpsFit(FitEngine):
             'covariance']
         assert values is not None and errs is not None
 
+        # Propagate uncertainty through the parameter expressions
+        # We are going to abuse bumps a little here and stuff uncertainty
+        # objects into the parameter values, then update all the
+        # derived parameters with uncertainty propagation. We need to
+        # avoid triggering a model recalc since the uncertainty objects
+        # will not be working with sasmodels
+
         if len(varying) < 2:
             # Use the standard error as the error in the parameter
             for param, val, err in zip(varying, values, errs):
@@ -297,7 +304,7 @@ class BumpsFit(FitEngine):
                 param.value = uncertainties.ufloat(val, err)
         else:
             try:
-                fitted = uncertainties.correlated_values(values, cov)
+                uncertainties.correlated_values(values, cov)
             except:
                 # No convergance 
                 for param, val, err in zip(varying, values, errs):
@@ -356,14 +363,15 @@ class BumpsFit(FitEngine):
                         reference_params = [v for v in varying if str(v.name) in str(constraints[param_name])]
                         err_exp = str(constraints[param_name])
                         # Convert string entries into variable names within the code.
-                        for i in enumerate(reference_params):
-                            index = i[0]
+                        for i, index in enumerate(reference_params):
                             err_exp = err_exp.replace(reference_params[index].name, f"reference_params[{index}].value")
                         try:
                             # Evaluate a string containing constraints as if it where a line of code
                             pvec.append(eval(err_exp).n)
                             stderr.append(eval(err_exp).s)
                         except NameError as e:
+                            pvec.append(p.value)
+                            stderr.append(0)
                             # Get model causing error
                             name_error = e.args[0].split()[1].strip("'")
                             # Safety net if following code does not work
@@ -378,6 +386,10 @@ class BumpsFit(FitEngine):
                                           f"because {error_param} is also constrained.\n"
                                           f"The fitting will continue, but {name_error} will be incorrect.")
                             logging.error(e)
+                        except Exception as e:
+                            logging.error(e)
+                            pvec.append(p.value)
+                            stderr.append(0)
 
                 R.pvec = (np.array(pvec))
                 R.stderr = (np.array(stderr))
