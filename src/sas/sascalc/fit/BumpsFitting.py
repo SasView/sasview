@@ -6,8 +6,11 @@ from datetime import timedelta, datetime
 import traceback
 
 import numpy as np
+from uncertainties import ufloat, correlated_values
 
 from bumps import fitters
+from bumps.parameter import unique as unique_parameters
+
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
@@ -279,35 +282,73 @@ class BumpsFit(FitEngine):
         result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
             handler.update_fit(last=True)
+        propagate_errors = all(model.constraints for model in models)
+        uncertainty_error = None
+        if propagate_errors:
+            # TODO: shouldn't reference internal parameters of fit problem
+            varying = problem._parameters
+            # Propagate uncertainty through the parameter expressions
+            # We are going to abuse bumps a little here and stuff uncertainty
+            # objects into the parameter values, then update all the
+            # derived parameters with uncertainty propagation. We need to
+            # avoid triggering a model recalc since the uncertainty objects
+            # will not be working with sasmodels.
+            # TODO: if dream then use forward MC to evaluate uncertainty
+            # TODO: move uncertainty propagation into bumps
+            # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
+            values, errs, cov = result['value'], result["stderr"], result[
+                'covariance']
+            assert values is not None
+            # Turn all parameters (fixed and varying) into uncertainty objects with
+            # zero uncertainty.
+            for p in unique_parameters(problem.model_parameters()):
+                p.value = ufloat(p.value, 0)
+            # then update the computed standard deviation of fitted parameters
+            if len(varying) < 2:
+                varying[0].value = ufloat(values[0], errs[0])
+            else:
+                fitted = (correlated_values(values, cov) if not errs else
+                          [ufloat(value, np.nan) for value in values])
 
-        # TODO: shouldn't reference internal parameters of fit problem
-        varying = problem._parameters
+                for p, v in zip(varying, fitted):
+                    p.value = v
+            try:
+                problem.setp_hook()
+            except np.linalg.LinAlgError:
+                fitted = [ufloat(value, err) for value, err in zip(
+                    values, errs)]
+                uncertainty_error = True
+                for p, v in zip(varying, fitted):
+                    p.value = v
+                problem.setp_hook()
+            except TypeError:
+                propagate_errors = False
+                uncertainty_error = True
+
         # collect the results
         all_results = []
         for M in problem.models:
             fitness = M.fitness
-            fitted_index = [varying.index(p) for p in fitness.fitted_pars]
-            param_list = fitness.fitted_par_names + fitness.computed_par_names
-            R = FResult(model=fitness.model, data=fitness.data,
-                        param_list=param_list)
+            par_names = fitness.fitted_par_names + fitness.computed_par_names
+            pars = fitness.fitted_pars + fitness.computed_pars
+            R = FResult(model=fitness.model,
+                        data=fitness.data,
+                        param_list=par_names)
             R.theory = fitness.theory()
             R.residuals = fitness.residuals()
             R.index = fitness.data.idx
             R.fitter_id = self.fitter_id
-            # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             R.success = result['success']
             if R.success:
-                if result['stderr'] is None:
-                    R.stderr = np.NaN*np.ones(len(param_list))
-                else:
-                    R.stderr = np.hstack((result['stderr'][fitted_index],
-                                          np.NaN*np.ones(len(fitness.computed_pars))))
-                R.pvec = np.hstack((result['value'][fitted_index],
-                                    [p.value for p in fitness.computed_pars]))
-                R.fitness = np.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
+                R.pvec = (np.array([p.value.n for p in pars]) if
+                    propagate_errors else result['value'])
+                R.stderr = (np.array([p.value.s for p in pars]) if
+                    propagate_errors else result["stderr"])
+                DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
+                R.fitness = np.sum(R.residuals ** 2) / DOF
             else:
-                R.stderr = np.NaN*np.ones(len(param_list))
-                R.pvec = np.asarray([p.value for p in fitness.fitted_pars+fitness.computed_pars])
+                R.pvec = np.asarray([p.value for p in pars])
+                R.stderr = np.NaN * np.ones(len(pars))
                 R.fitness = np.NaN
             R.convergence = result['convergence']
             if result['uncertainty'] is not None:
@@ -367,10 +408,13 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
+        cov = (fitdriver.cov() if not hasattr(fitdriver.fitter, 'state') else
+               np.cov(fitdriver.fitter.state.draw().points.T))
     except Exception as exc:
         errors.append(str(exc))
         errors.append(traceback.format_exc())
         stderr = None
+        cov = None
     return {
         'value': best if success else None,
         'stderr': stderr,
@@ -378,4 +422,5 @@ def run_bumps(problem, handler, curr_thread):
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
         'errors': '\n'.join(errors),
+        'covariance': cov,
         }

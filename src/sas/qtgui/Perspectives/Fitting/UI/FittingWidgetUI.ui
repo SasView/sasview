@@ -461,8 +461,11 @@ angles</string>
          <height>28</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform a single computation of the model using the parameters as-entered and subsequently plot the result.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
-        <string>Show Plot</string>
+        <string>Compute/Plot</string>
        </property>
       </widget>
      </item>
