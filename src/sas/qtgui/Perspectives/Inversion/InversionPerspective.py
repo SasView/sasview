@@ -1047,6 +1047,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dataPlot.filename = self.logic.data.filename
 
         self.dataPlot.show_q_range_sliders = True
+        self.dataPlot.slider_update_on_move = False
         self.dataPlot.slider_perspective_name = "Inversion"
         self.dataPlot.slider_low_q_input = ['minQInput']
         self.dataPlot.slider_low_q_setter = ['check_q_low']
