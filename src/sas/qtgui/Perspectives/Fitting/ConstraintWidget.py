@@ -518,6 +518,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # parameter, delete the old constraint
             if (self.constraint_accepted and new_model != model or
                     new_param != param):
+                print(1, param)
                 tab.deleteConstraintOnParameter(param)
             # Reload the view
             self.initializeFitList()
@@ -829,6 +830,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             moniker = constraint[:constraint.index(':')]
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
+            print(2, param)
             tab.deleteConstraintOnParameter(param)
 
         # Constraints removed - refresh the table widget

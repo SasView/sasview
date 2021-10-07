@@ -254,7 +254,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.models = {}
         # Dictionary of QModels
         self.model_dict = {}
+        self.lst_dict = {}
         self.tabToList = {} # tab_id -> list widget
+        self.tabToKey = {} # tab_id -> model key
 
         # Parameters to fit
         self.main_params_to_fit = []
@@ -376,8 +378,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.model_dict["poly"] = self._poly_model
         self.model_dict["magnet"] = self._magnet_model
 
+        self.lst_dict["standard"] = self.lstParams
+        self.lst_dict["poly"] = self.lstPoly
+        self.lst_dict["magnet"] = self.lstMagnetic
+
         self.tabToList[0] = self.lstParams
         self.tabToList[3] = self.lstPoly
+        self.tabToList[4] = self.lstMagnetic
+
+        self.tabToKey[0] = "standard"
+        self.tabToKey[3] = "poly"
+        self.tabToKey[4] = "magnet"
 
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
@@ -674,9 +685,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if num_rows < 1:
             return menu
         current_list = self.tabToList[self.tabFitting.currentIndex()]
-        for key, val in self.model_dict.items():
-            if val == current_list.model():
-                model_key = key
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         # Select for fitting
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
@@ -976,11 +985,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds a constraint on a single parameter.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model = self.model_dict[model_key]
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
         for row in self.selectedParameters(model_key=model_key):
@@ -1016,10 +1022,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Delete constraints from selected parameters.
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
         params_list = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
@@ -1064,58 +1067,57 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Delete constraints from selected parameters.
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
-
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
-            self.deleteConstraintOnParameter(param=param, param_list=current_list)
 
-    def deleteConstraintOnParameter(self, param=None, param_list=None):
+            self.deleteConstraintOnParameter(param=param, model_key=model_key)
+
+    def deleteConstraintOnParameter(self, param=None, model_key="standard"):
         """
         Delete the constraint on model parameter 'param'
         """
-        if param_list is not None:
-            param_lists = [param_list]
-        else:
-            param_lists = [self.lstParams, self.lstPoly, self.lstMagnetic]
+        param_list = self.lst_dict[model_key]
+        model = self.model_dict[model_key]
 
-        for param_list in param_lists:
-            model = param_list.model()
-            for key, val in self.model_dict.items():
-                if val == model:
-                    model_key = key
-
-            if hasattr(param_list.itemDelegate(), 'param_min'):
-                min_col = param_list.itemDelegate().param_min
-                max_col = param_list.itemDelegate().param_max
-            for row in range(model.rowCount()):
-                if not self.isCheckable(row, model_key=model_key):
-                    continue
-                if not self.rowHasConstraint(row, model_key=model_key):
-                    continue
-                # Get the Constraint object from of the model item
-                item = model.item(row, 1)
-                constraint = self.getConstraintForRow(row, model_key=model_key)
-                if constraint is None:
-                    continue
-                if not isinstance(constraint, Constraint):
-                    continue
-                if param and constraint.param != param:
-                    continue
-                # Now we got the right row. Delete the constraint and clean up
-                # Retrieve old values and put them on the model
-                if constraint.min is not None:
-                    model.item(row, min_col).setText(constraint.min)
-                if constraint.max is not None:
-                    model.item(row, max_col).setText(constraint.max)
-                # Remove constraint item
-                item.removeRow(0)
-                self.constraintAddedSignal.emit([row], model_key)
-                self.modifyViewOnRow(row, model_key=model_key)
+        for row in range(model.rowCount()):
+            if not self.isCheckable(row, model_key=model_key):
+                continue
+            if not self.rowHasConstraint(row, model_key=model_key):
+                continue
+            # Get the Constraint object from of the model item
+            item = model.item(row, 1)
+            constraint = self.getConstraintForRow(row, model_key=model_key)
+            if constraint is None:
+                continue
+            if not isinstance(constraint, Constraint):
+                continue
+            if "Distribution of" in constraint.param:
+                cons_param = self.polyNameToParam(constraint.param)
+            else:
+                cons_param = constraint.param
+            if param and cons_param != param:
+                continue
+            # Now we got the right row. Delete the constraint and clean up
+            # Retrieve old values and put them on the model
+            if constraint.min is not None:
+                try:
+                    min_col = param_list.itemDelegate().param_min
+                except AttributeError:
+                    min_col = 2
+                model.item(row, min_col).setText(constraint.min)
+            if constraint.max is not None:
+                try:
+                    max_col = param_list.itemDelegate().param_max
+                except AttributeError:
+                    max_col = 3
+                print("max_col", max_col)
+                model.item(row, max_col).setText(constraint.max)
+            # Remove constraint item
+            item.removeRow(0)
+            self.constraintAddedSignal.emit([row], model_key)
+            self.modifyViewOnRow(row, model_key=model_key)
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
 
@@ -1217,11 +1219,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model = self.model_dict[model_key]
         item = model.itemFromIndex(self.lstParams.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
@@ -1230,18 +1229,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model = self.model_dict[model_key]
         item = model.itemFromIndex(self.lstParams.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def selectedParameters(self, model_key="standard"):
         """ Returns list of selected (highlighted) parameters """
 
-        return [s.row() for s in self.lstParams.selectionModel().selectedRows()
+        return [s.row() for s in self.lst_dict[model_key].selectionModel().selectedRows()
                 if self.isCheckable(s.row(), model_key=model_key)]
 
     def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None, model_key="standard"):
@@ -1528,10 +1524,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         React to parameter selection
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
-        for key, val in self.model_dict.items():
-            if val == model:
-                model_key = key
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
         rows = current_list.selectionModel().selectedRows()
         # Clean previous messages
