@@ -179,7 +179,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Single Fit is the default, so disable chainfit
         self.chkChain.setVisible(False)
 
-        # disabled constraint 
+        # disabled constraint
         labels = ['Constraint']
         self.tblConstraints.setColumnCount(len(labels))
         self.tblConstraints.setHorizontalHeaderLabels(labels)
@@ -466,6 +466,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         # Then check if the parameter is correctly defined with colons
         # separating model and parameter name
+
         lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
         if ":" not in lhs:
             msg = ("Incorrect constrained parameter definition. Please use "
@@ -501,6 +502,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         new_function = rhs
         new_tab = self.available_tabs[new_model]
+        model_key = tab.getModelKey(param)
         # Make sure we are dealing with fit tabs
         assert isinstance(tab, FittingWidget)
         assert isinstance(new_tab, FittingWidget)
@@ -509,8 +511,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Apply the new constraint
             constraint = Constraint(param=new_param, func=new_function,
                                     value_ex=new_model + "." + new_param)
+            model_key = tab.getModelKey(new_param)
             new_tab.addConstraintToRow(constraint=constraint,
-                                       row=tab.getRowFromName(new_param))
+                                       row=tab.getRowFromName(new_param), model_key=model_key)
             # If the constraint is valid and we are changing model or
             # parameter, delete the old constraint
             if (self.constraint_accepted and new_model != model or
@@ -529,9 +532,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             font.setItalic(True)
             brush = QtGui.QBrush(QtGui.QColor('blue'))
             tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
-                                brush=brush)
+                                brush=brush, model_key=model_key)
         else:
-            tab.modifyViewOnRow(tab.getRowFromName(new_param))
+            tab.modifyViewOnRow(tab.getRowFromName(new_param), model_key=model_key)
         # reload the view so the user gets a consistent feedback on the
         # constraints
         self.initializeFitList()
@@ -839,14 +842,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         return item
 
-    def updateFitLine(self, tab):
+    def updateFitLine(self, tab, model_key="standard"):
         """
         Update a single line of the table widget with tab info
         """
         fit_page = ObjectLibrary.getObject(tab)
         model = fit_page.kernel_module
-        if model is None:
-            return
         tab_name = tab
         model_name = model.id
         moniker = model.name
@@ -881,9 +882,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraints = fit_page.getConstraintObjectsForAllModels()
 
         # these three assignments need proper extension to all models, not just main model
-        active_constraint_names = fit_page.getComplexConstraintsForModel()
-        constraint_names = fit_page.getFullConstraintNameListForModel()
-        constraints = fit_page.getConstraintObjectsForModel()
+        active_constraint_names = fit_page.getComplexConstraintsForModel(model_key=model_key)
+        constraint_names = fit_page.getFullConstraintNameListForModel(model_key=model_key)
+        constraints = fit_page.getConstraintObjectsForModel(model_key=model_key)
 
         if not constraints:
             return
@@ -914,7 +915,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.tblConstraints.setItem(pos, 0, item)
         self.tblConstraints.blockSignals(False)
 
-    def initializeFitList(self):
+    def initializeFitList(self, row=0, model_key="standard"):
         """
         Fill the list of model/data sets for fitting/constraining
         """
@@ -953,7 +954,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self._row_order = tabs
 
         for tab in tabs:
-            self.updateFitLine(tab)
+            self.updateFitLine(tab, model_key=model_key)
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
             self.cmdFit.setEnabled(True)
@@ -1020,10 +1021,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
-        model = constrained_tab.getModelFromName(constraint.param)
+        model_key = constrained_tab.getModelKey(constraint.param)
 
         # Update the tab
-        constrained_tab.addConstraintToRow(constraint, constrained_row, model=model)
+        constrained_tab.addConstraintToRow(constraint, constrained_row, model_key=model_key)
         if not self.constraint_accepted:
             return
 
@@ -1149,4 +1150,5 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 # deactivate the constraint
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
-                tab.getConstraintForRow(row).active = False
+                model_key = tab.getModelKey(constraint)
+                tab.getConstraintForRow(row, model_key=model_key).active = False

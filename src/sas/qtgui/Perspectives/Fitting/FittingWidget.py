@@ -103,7 +103,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    constraintAddedSignal = QtCore.pyqtSignal(list)
+    constraintAddedSignal = QtCore.pyqtSignal(list, str)
     newModelSignal = QtCore.pyqtSignal()
     fittingFinishedSignal = QtCore.pyqtSignal(tuple)
     batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
@@ -372,9 +372,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model = ToolTippedItemModel()
         self._magnet_model = ToolTippedItemModel()
 
-        self.model_dict[0] = self._model_model
-        self.model_dict[1] = self._poly_model
-        self.model_dict[2] = self._magnet_model
+        self.model_dict["standard"] = self._model_model
+        self.model_dict["poly"] = self._poly_model
+        self.model_dict["magnet"] = self._magnet_model
 
         self.tabToList[0] = self.lstParams
         self.tabToList[3] = self.lstPoly
@@ -673,13 +673,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         num_rows = len(rows)
         if num_rows < 1:
             return menu
-        # Select for fitting
         current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == current_list.model():
+                model_key = key
+        # Select for fitting
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
-        has_constraints = any([self.rowHasConstraint(i, model=model) for i in rows])
-        has_real_constraints = any([self.rowHasActiveConstraint(i, model=model) for i in rows])
+        has_constraints = any([self.rowHasConstraint(i, model_key=model_key) for i in rows])
+        has_real_constraints = any([self.rowHasActiveConstraint(i, model_key=model_key) for i in rows])
 
         self.actionSelect = QtWidgets.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
@@ -718,10 +720,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if num_rows == 1 and has_real_constraints:
                 menu.addAction(self.actionEditConstraint)
         else:
-            if model == self._model_model:
-                menu.addAction(self.actionConstrain)
             if num_rows == 2:
                 menu.addAction(self.actionMutualMultiConstrain)
+            else:
+                menu.addAction(self.actionConstrain)
 
         # Define the callbacks
         self.actionConstrain.triggered.connect(self.addSimpleConstraint)
@@ -739,6 +741,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if current_list is None:
             current_list = self.lstParams
         model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
 
         selected_rows = current_list.selectionModel().selectedRows()
         # There have to be only two rows selected. The caller takes care of that
@@ -779,29 +784,29 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint.validate = mc_widget.validate
 
         # Create a new item and add the Constraint object as a child
-        self.addConstraintToRow(constraint=constraint, row=row, model=model)
+        self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
 
-    def getModelFromName(self, name):
+
+    def getModelKeyFromName(self, name):
         """
         Given parameter name get the model index.
         """
         if name in self.getParamNamesMain():
-            return self._model_model
+            return "standard"
         elif name in self.getParamNamesPoly():
-            return self._poly_model
+            return "poly"
         elif name in self.getParamNamesMagnet():
-            return self._magnet_model
+            return "magnet"
         else:
-            return None
+            return "standard"
 
     def getRowFromName(self, name):
         """
         Given parameter name get the row number in a model.
         The model is the main _model_model by default
         """
-        model = self.getModelFromName(name)
-        if model is None:
-            model = self._model_model
+        model_key = self.getModelKeyFromName(name)
+        model = self.model_dict[model_key]
 
         # special case for polydisp
         if model == self._poly_model:
@@ -827,7 +832,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         main_model_params = [self._model_model.item(row).text()
                             for row in range(self._model_model.rowCount())
-                            if self.isCheckable(row)]
+                            if self.isCheckable(row, model_key="standard")]
         return main_model_params
 
     def getParamNamesPoly(self):
@@ -838,7 +843,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return []
         poly_model_params = [self.polyNameToParam(self._poly_model.item(row).text())
                              for row in range(self._poly_model.rowCount())
-                             if self.chkPolydispersity.isChecked()]
+                             if self.chkPolydispersity.isChecked() and
+                             self.isCheckable(row, model_key="poly")]
         return poly_model_params
 
     def getParamNamesMagnet(self):
@@ -849,7 +855,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return []
         magnetic_model_params = [self._magnet_model.item(row).text()
                             for row in range(self._magnet_model.rowCount())
-                            if self.isCheckableMagnet(row)]
+                            if self.isCheckable(row, model_key="magnet")]
         return magnetic_model_params
 
     def polyParamToName(self, param_name):
@@ -868,12 +874,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_name += '.width'
         return param_name
 
-    def modifyViewOnRow(self, row, font=None, brush=None, model=None):
+    def modifyViewOnRow(self, row, font=None, brush=None, model_key="standard"):
         """
         Change how the given row of the main model is shown
         """
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
         fields_enabled = False
         if font is None:
             font = QtGui.QFont()
@@ -883,23 +888,36 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fields_enabled = True
         model.blockSignals(True)
         # Modify font and foreground of affected rows
-        for column in range(0, self._model_model.columnCount()):
-            self._model_model.item(row, column).setForeground(brush)
-            self._model_model.item(row, column).setFont(font)
+        for column in range(0, model.columnCount()):
+            model.item(row, column).setForeground(brush)
+            model.item(row, column).setFont(font)
             # Allow the user to interact or not with the fields depending on
             # whether the parameter is constrained or not
-            self._model_model.item(row, column).setEditable(fields_enabled)
+            model.item(row, column).setEditable(fields_enabled)
         # Force checkbox selection when parameter is constrained and disable
         # checkbox interaction
-        if not fields_enabled and self._model_model.item(row, 0).isCheckable():
-            self._model_model.item(row, 0).setCheckState(2)
-            self._model_model.item(row, 0).setEnabled(False)
+        if not fields_enabled and model.item(row, 0).isCheckable():
+            model.item(row, 0).setCheckState(2)
+            model.item(row, 0).setEnabled(False)
         else:
             # Enable checkbox interaction
-            self._model_model.item(row, 0).setEnabled(True)
-        self._model_model.blockSignals(False)
+            model.item(row, 0).setEnabled(True)
+        model.blockSignals(False)
 
-    def addConstraintToRow(self, constraint=None, row=0, model=None):
+    def getModelKey(self, constraint):
+        """
+        Given parameter name get the model index.
+        """
+        if constraint in self.getParamNamesMain():
+            return "standard"
+        elif constraint in self.getParamNamesPoly():
+            return "poly"
+        elif constraint in self.getParamNamesMagnet():
+            return "magnet"
+        else:
+            return None
+
+    def addConstraintToRow(self, constraint=None, row=0, model_key="standard"):
         """
         Adds the constraint object to requested row. The constraint is first
         checked for errors, and a  message box interrupting flow is
@@ -907,10 +925,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Create a new item and add the Constraint object as a child
         assert isinstance(constraint, Constraint)
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
         assert 0 <= row <= model.rowCount()
-        assert self.isCheckable(row, model)
+        assert self.isCheckable(row, model_key=model_key)
 
         # Error checking
         # First, get a list of constraints and symbols
@@ -935,19 +952,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # constraint tab that the constraint was not accepted
                 constraint_tab.constraint_accepted = False
             return
+
         item = QtGui.QStandardItem()
         item.setData(constraint)
         model.item(row, 1).setChild(0, item)
         # Set min/max to the value constrained
-        self.constraintAddedSignal.emit([row])
-        # Show visual hints for the constraint
+        self.constraintAddedSignal.emit([row], model_key)
+        # Show visual hints for the coself.constraintAddedSignal.emit([row], model_key)nstraint
         font = QtGui.QFont()
         font.setItalic(True)
         brush = QtGui.QBrush(QtGui.QColor('blue'))
-        self.modifyViewOnRow(row, font=font, brush=brush, model=model)
+        self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
         # update the main parameter list so the constrained parameter gets
         # updated when fitting
-        self.checkboxSelected(self._model_model.item(row, 0))
+        self.checkboxSelected(model.item(row, 0), model_key=model_key)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
         if constraint_tab:
             # Set the constraint_accepted flag to True to inform the
@@ -958,34 +976,39 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds a constraint on a single parameter.
         """
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
-        for row in self.selectedParameters():
-            assert(self.isCheckable(row))
-            param = self._model_model.item(row, 0).text()
-            value = self._model_model.item(row, 1).text()
-            min_t = self._model_model.item(row, min_col).text()
-            max_t = self._model_model.item(row, max_col).text()
+        for row in self.selectedParameters(model_key=model_key):
+            # assert(self.isCheckable(row, model_key=model_key))
+            param = model.item(row, 0).text()
+            value = model.item(row, 1).text()
+            min_t = model.item(row, min_col).text()
+            max_t = model.item(row, max_col).text()
             # Create a Constraint object
             constraint = Constraint(param=param, value=value, min=min_t, max=max_t)
             # Create a new item and add the Constraint object as a child
             item = QtGui.QStandardItem()
             item.setData(constraint)
-            self._model_model.item(row, 1).setChild(0, item)
+            model.item(row, 1).setChild(0, item)
             # Assumed correctness from the validator
             value = float(value)
             # BUMPS calculates log(max-min) without any checks, so let's assign minor range
             min_v = value - (value/10000.0)
             max_v = value + (value/10000.0)
             # Set min/max to the value constrained
-            self._model_model.item(row, min_col).setText(str(min_v))
-            self._model_model.item(row, max_col).setText(str(max_v))
-            self.constraintAddedSignal.emit([row])
+            model.item(row, min_col).setText(str(min_v))
+            model.item(row, max_col).setText(str(max_v))
+            self.constraintAddedSignal.emit([row], model_key)
             # Show visual hints for the constraint
             font = QtGui.QFont()
             font.setItalic(True)
             brush = QtGui.QBrush(QtGui.QColor('blue'))
-            self.modifyViewOnRow(row, font=font, brush=brush)
+            self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
 
     def editConstraint(self):
@@ -994,12 +1017,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
 
         params_list = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
-                   if self.isCheckable(s.row())]
+                   if self.isCheckable(s.row(), model_key=model_key)]
         assert len(params_list) == 1
         row = current_list.selectionModel().selectedRows()[0].row()
-        constraint = self.getConstraintForRow(row, model=model)
+        constraint = self.getConstraintForRow(row, model_key=model_key)
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list, constraint=constraint)
         # Check if any of the parameters are polydisperse
@@ -1031,7 +1057,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         row = self.getRowFromName(constraint.param)
 
         # Create a new item and add the Constraint object as a child
-        self.addConstraintToRow(constraint=constraint, row=row, model=model)
+        self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
 
     def deleteConstraint(self):
         """
@@ -1039,9 +1065,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
 
         params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
-                   if self.isCheckable(s.row())]
+                   if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
             self.deleteConstraintOnParameter(param=param, param_list=current_list)
 
@@ -1056,17 +1085,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         for param_list in param_lists:
             model = param_list.model()
+            for key, val in self.model_dict.items():
+                if val == model:
+                    model_key = key
+
             if hasattr(param_list.itemDelegate(), 'param_min'):
                 min_col = param_list.itemDelegate().param_min
                 max_col = param_list.itemDelegate().param_max
             for row in range(model.rowCount()):
-                if not self.isCheckable(row):
+                if not self.isCheckable(row, model_key=model_key):
                     continue
-                if not self.rowHasConstraint(row, model=model):
+                if not self.rowHasConstraint(row, model_key=model_key):
                     continue
                 # Get the Constraint object from of the model item
                 item = model.item(row, 1)
-                constraint = self.getConstraintForRow(row, model=model)
+                constraint = self.getConstraintForRow(row, model_key=model_key)
                 if constraint is None:
                     continue
                 if not isinstance(constraint, Constraint):
@@ -1081,19 +1114,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     model.item(row, max_col).setText(constraint.max)
                 # Remove constraint item
                 item.removeRow(0)
-                self.constraintAddedSignal.emit([row])
-                self.modifyViewOnRow(row, model=model)
+                self.constraintAddedSignal.emit([row], model_key)
+                self.modifyViewOnRow(row, model_key=model_key)
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
 
-    def getConstraintForRow(self, row, model=None):
+    def getConstraintForRow(self, row, model_key="standard"):
         """
         For the given row, return its constraint, if any (otherwise None)
         """
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
 
-        if not self.isCheckable(row):
+        if not self.isCheckable(row, model_key=model_key):
             return None
         item = model.item(row, 1)
         try:
@@ -1116,34 +1148,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #    all_param_names.append('background')
         return all_params
 
-    def paramHasConstraint(self, param=None, model=None):
+    def paramHasConstraint(self, param=None):
         """
         Finds out if the given parameter in all the models has a constraint child
         """
-        if param is None: return False
-        if param not in self.allParamNames(): return False
-        models = []
-        if model is not None:
-            models.append(model)
-        else:
-            models = [m for m in self.model_dict.values()]
+        if param is None:
+            return False
+        if param not in self.allParamNames():
+            return False
 
-        for model in models:
-            for row in range(model.rowCount()):
-                if model.item(row,0).data(role=QtCore.Qt.UserRole) != param: continue
-                return self.rowHasConstraint(row, model=model)
+        for model_key in self.model_dict.keys():
+            for row in range(self.model_dict[model_key].rowCount()):
+                if self.model_dict[model_key].item(row,0).data(role=QtCore.Qt.UserRole) != param:
+                    continue
+                return self.rowHasConstraint(row, model_key=model_key)
 
         # nothing found
         return False
 
-    def rowHasConstraint(self, row, model=None):
+    def rowHasConstraint(self, row, model_key="standard"):
         """
         Finds out if row of the main model has a constraint child
         """
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
 
-        if not self.isCheckable(row):
+        if not self.isCheckable(row, model_key=model_key):
             return False
         item = model.item(row, 1)
         if not item.hasChildren():
@@ -1153,13 +1182,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def rowHasActiveConstraint(self, row, model=None):
+    def rowHasActiveConstraint(self, row, model_key="standard"):
         """
         Finds out if row of the main model has an active constraint child
         """
-        if model is None:
-            model = self._model_model
-        if not self.isCheckable(row):
+        model = self.model_dict[model_key]
+        if not self.isCheckable(row, model_key=model_key):
             return False
         item = model.item(row, 1)
         if not item.hasChildren():
@@ -1169,13 +1197,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def rowHasActiveComplexConstraint(self, row, model=None):
+    def rowHasActiveComplexConstraint(self, row, model_key="standard"):
         """
         Finds out if row of the main model has an active, nontrivial constraint child
         """
-        if model is None:
-            model = self._model_model
-        if not self.isCheckable(row):
+        model = self.model_dict[model_key]
+        if not self.isCheckable(row, model_key=model_key):
             return False
         item = model.item(row, 1)
         if not item.hasChildren():
@@ -1190,23 +1217,34 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
-        self.setParameterSelection(status, item=item)
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
+        item = model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item, model_key=model_key)
 
     def deselectParameters(self):
         """
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        item = self._model_model.itemFromIndex(self.lstParams.currentIndex())
-        self.setParameterSelection(status, item=item)
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
+        item = model.itemFromIndex(self.lstParams.currentIndex())
+        self.setParameterSelection(status, item=item, model_key=model_key)
 
-    def selectedParameters(self):
+    def selectedParameters(self, model_key="standard"):
         """ Returns list of selected (highlighted) parameters """
-        return [s.row() for s in self.lstParams.selectionModel().selectedRows()
-                if self.isCheckable(s.row())]
 
-    def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None):
+        return [s.row() for s in self.lstParams.selectionModel().selectedRows()
+                if self.isCheckable(s.row(), model_key=model_key)]
+
+    def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None, model_key="standard"):
         """
         Selected parameters are chosen for fitting
         """
@@ -1217,81 +1255,85 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # `item` is also selected!
         # Otherwise things get confusing.
         # https://github.com/SasView/sasview/issues/1676
-        if item.row() not in self.selectedParameters():
+        if item.row() not in self.selectedParameters(model_key=model_key):
             return
-        for row in self.selectedParameters():
-            self._model_model.item(row, 0).setCheckState(status)
+        for row in self.selectedParameters(model_key=model_key):
+            self.model_dict[model_key].item(row, 0).setCheckState(status)
 
-    def getConstraintsForModel(self, model=None):
+    def getConstraintsForAllModels(self):
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*sld_solvent')]
         """
-        if model is None:
-            model = self._model_model
-        param_number = self._model_model.rowCount()
-        params = [(model.item(s, 0).text(),
-                    model.item(s, 1).child(0).data().func)
-                    for s in range(param_number) if self.rowHasActiveConstraint(s)]
+        params = []
+        for model_key in self.model_dict.keys():
+            model = self.model_dict[model_key]
+            param_number = model.rowCount()
+            params += [(model.item(s, 0).text(),
+                        model.item(s, 1).child(0).data().func)
+                        for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
         return params
 
     def getComplexConstraintsForAllModels(self):
         """
         """
         constraints = []
-        for model in self.model_dict.values():
-            constraints += self.getComplexConstraintsForModel(model=model)
+        for model_key in self.model_dict.keys():
+            constraints += self.getComplexConstraintsForModel(model_key=model_key)
 
         return constraints
             
-    def getComplexConstraintsForModel(self, model=None):
+    def getComplexConstraintsForModel(self, model_key):
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*M2.sld_solvent')].
         Only for constraints with defined VALUE
         """
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
         params = []
         param_number = model.rowCount()
         params += [(model.item(s, 0).data(role=QtCore.Qt.UserRole),
                     model.item(s, 1).child(0).data().func)
-                    for s in range(param_number) if self.rowHasActiveComplexConstraint(s, model)]
+                    for s in range(param_number) if self.rowHasActiveComplexConstraint(s, model_key)]
         return params
 
-    def getFullConstraintNameListForModel(self):
+    def getFullConstraintNameListForModel(self, model_key):
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*M2.sld_solvent')].
         Returns a list of all constraints, not only active ones
         """
-        param_number = self._model_model.rowCount()
-        params = [(self._model_model.item(s, 0).text(),
-                    self._model_model.item(s, 1).child(0).data().func)
-                    for s in range(param_number) if self.rowHasConstraint(s)]
+        model = self.model_dict[model_key]
+        param_number = model.rowCount()
+        params = list()
+        for s in range(param_number):
+            if self.rowHasConstraint(s, model_key=model_key):
+                param_name = model.item(s, 0).text()
+                if 'Distribution of ' in param_name:
+                    param_name = self.polyNameToParam(model.item(s, 0).text())
+                params.append((param_name, model.item(s, 1).child(0).data().func))
         return params
 
     def getConstraintObjectsForAllModels(self):
         """
         """
         constraints = []
-        for model in self.model_dict.values():
-            constraints += self.getConstraintObjectsForModel(model=model)
+        for model_key in self.model_dict.keys():
+            constraints += self.getConstraintObjectsForModel(model_key=model_key)
 
         return constraints
 
-    def getConstraintObjectsForModel(self, model=None):
+    def getConstraintObjectsForModel(self, model_key):
         """
         Returns Constraint objects present on the whole model
         """
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
         param_number = model.rowCount()
         constraints = [model.item(s, 1).child(0).data()
-                       for s in range(param_number) if self.rowHasConstraint(s, model=model)]
+                       for s in range(param_number) if self.rowHasConstraint(s, model_key=model_key)]
 
         return constraints
 
@@ -1301,8 +1343,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Get constraints
         constraints = []
-        for model in self.model_dict.values():
-            constraints += self.getComplexConstraintsForModel(model=model)
+        for model_key in self.model_dict.keys():
+            constraints += self.getComplexConstraintsForModel(model_key=model_key)
         # See if there are any constraints across models
         multi_constraints = [cons for cons in constraints if self.isConstraintMultimodel(cons[1])]
 
@@ -1331,13 +1373,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 for cons in multi_constraints:
                     # deactivate the constraint
                     row = self.getRowFromName(cons[0])
-                    self.getConstraintForRow(row).active = False
+                    model_key = self.getModelKeyFromName(cons[0])
+                    self.getConstraintForRow(row, model_key=model_key).active = False
                     # uncheck in the constraint tab
                     if constraint_tab:
                         constraint_tab.uncheckConstraint(
                             self.kernel_module.name + ':' + cons[0])
                 # re-read the constraints
-                constraints = self.getComplexConstraintsForModel()
+                constraints = self.getComplexConstraintsForModel(model_key=model_key)
 
         return constraints
 
@@ -1486,6 +1529,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model = current_list.model()
+        for key, val in self.model_dict.items():
+            if val == model:
+                model_key = key
 
         rows = current_list.selectionModel().selectedRows()
         # Clean previous messages
@@ -1493,10 +1539,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if len(rows) == 1:
             # Show constraint, if present
             row = rows[0].row()
-            if not self.rowHasConstraint(row, model=model):
+            if not self.rowHasConstraint(row, model_key=model_key):
                 return
-            constr = self.getConstraintForRow(row, model=model)
-            func = self.getConstraintForRow(row, model=model).func
+            constr = self.getConstraintForRow(row, model_key=model_key)
+            func = self.getConstraintForRow(row, model_key=model_key).func
             if constr.func is not None:
                 # inter-parameter constraint
                 update_text = "Active constraint: "+func
@@ -1632,6 +1678,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column == delegate.poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
+
             if value == QtCore.Qt.Checked:
                 self.poly_params_to_fit.append(parameter_name_w)
             else:
@@ -1640,7 +1687,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cmdFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
-
         elif model_column in [delegate.poly_min, delegate.poly_max]:
             try:
                 value = GuiUtils.toDouble(item.text())
@@ -2023,7 +2069,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
-            params_to_fit += self.poly_params_to_fit
+            for p in self.poly_params_to_fit:
+                if "Distribution of" in p:
+                    params_to_fit += [self.polyNameToParam(p)]
+                else:
+                    params_to_fit += [p]
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
             params_to_fit += self.magnet_params_to_fit
         if not params_to_fit:
@@ -2031,8 +2081,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Get the constraints.
         constraints = []
-        for m in self.model_dict.values():
-            constraints += self.getComplexConstraintsForModel(model=m)
+        for model_key in self.model_dict.keys():
+            constraints += self.getComplexConstraintsForModel(model_key=model_key)
         if fitter is None:
             # For single fits - check for inter-model constraints
             constraints = self.getConstraintsForFitting()
@@ -2755,7 +2805,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model_column = item.column()
 
         if model_column == 0:
-            self.checkboxSelected(item)
+            self.checkboxSelected(item, model_key="standard")
             self.cmdFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
@@ -2871,37 +2921,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             item_name.setCheckState(QtCore.Qt.Unchecked)
             item_name.setCheckable(False)
 
-    def isCheckable(self, row, model=None):
-        if model is None:
-            model = self._model_model
+    def isCheckable(self, row, model_key="standard"):
+        model = self.model_dict[model_key]
         if model.item(row,0) is None:
             return False
         return model.item(row, 0).isCheckable()
 
-        #if model == self._model_model:
-        #    self.isCheckableMain(row)
-        #elif model == self._poly_model:
-        #    self.isCheckablePoly(row)
-        #elif model == self._magnet_model:
-        #    self.isCheckableMagnet(row)
-        #else:
-        #    raise NotImplementedError("Incorrect model used")
-
-    def isCheckableMain(self, row):
-        return self._model_model.item(row, 0).isCheckable()
-
-    def isCheckablePoly(self, row):
-        return self._poly_model.item(row, 0).isCheckable()
-
-    def isCheckableMagnet(self, row):
-        return self._magnet_model.item(row, 0).isCheckable()
-
-    def changeCheckboxStatus(self, row, checkbox_status, model=None):
+    def changeCheckboxStatus(self, row, checkbox_status, model_key="standard"):
         """
         Checks/unchecks the checkbox at given row
         """
-        if model is None:
-            model = self._model_model
+        model = self.model_dict[model_key]
 
         assert 0<= row <= model.rowCount()
         index = model.index(row, 0)
@@ -2911,7 +2941,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             item.setCheckState(QtCore.Qt.Unchecked)
 
-    def checkboxSelected(self, item):
+    def checkboxSelected(self, item, model_key="standard"):
         # Assure we're dealing with checkboxes
         if not item.isCheckable():
             return
@@ -2921,18 +2951,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Convert to proper indices and set requested enablement
         # Careful with `item` NOT being selected. This means we only want to
         # select that one item.
-        self.setParameterSelection(status, item=item)
+        self.setParameterSelection(status, item=item, model_key=model_key)
 
         # update the list of parameters to fit
-        self.main_params_to_fit = self.checkedListFromModel(self._model_model)
+        self.main_params_to_fit = self.checkedListFromModel("standard")
+        self.poly_params_to_fit = self.checkedListFromModel("poly")
+        self.magnet_params_to_fit = self.checkedListFromModel("magnet")
 
-    def checkedListFromModel(self, model):
+    def checkedListFromModel(self, model_key):
         """
         Returns list of checked parameters for given model
         """
         def isChecked(row):
+            model = self.model_dict[model_key]
             return model.item(row, 0).checkState() == QtCore.Qt.Checked
 
+        model = self.model_dict[model_key]
         return [str(model.item(row_index, 0).text())
                 for row_index in range(model.rowCount())
                 if isChecked(row_index)]
@@ -4175,8 +4209,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             param_name = str(self._model_model.item(row, 0).text())
             current_list = self.tabToList[self.tabFitting.currentIndex()]
-            model = current_list.model()
-
+            model = self._model_model
             if model.item(row, 0) is None:
                 return
             # Assure this is a parameter - must contain a checkbox
@@ -4211,7 +4244,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             except:
                 pass
             # Do we have any constraints on this parameter?
-            constraint = self.getConstraintForRow(row, model=model)
+            constraint = self.getConstraintForRow(row, model_key="standard")
             cons = ()
             if constraint is not None:
                 value = constraint.value

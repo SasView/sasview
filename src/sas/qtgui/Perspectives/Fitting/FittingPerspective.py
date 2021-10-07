@@ -206,9 +206,11 @@ class FittingWindow(QtWidgets.QTabWidget):
                     constraint.param = constraint_param[1]
                     constraint.value_ex = constraint_param[2]
                     constraint.validate = constraint_param[3]
+                    model_key = tab.getModelKey(constraint)
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
-                                               constraint_param[1]))
+                                               constraint_param[1]),
+                                           model_key=model_key)
 
     def onParamSave(self):
         self.currentTab.onCopyToClipboard("Save")
@@ -518,9 +520,10 @@ class FittingWindow(QtWidgets.QTabWidget):
         constraints = []
         for tab in self.getFitTabs():
             tab_name = tab.modelName()
-            tab_constraints = tab.getConstraintsForModel()
-            constraints.extend((tab_name + "." + par, expr)
-                               for par, expr in tab_constraints)
+            tab_constraints = tab.getConstraintsForAllModels()
+            for par, expr in tab_constraints:
+                constraints.extend((tab_name + "." + par, expr))
+
         return constraints
 
     def getSymbolDictForConstraints(self):
