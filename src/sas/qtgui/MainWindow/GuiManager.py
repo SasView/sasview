@@ -60,6 +60,9 @@ from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 logger = logging.getLogger(__name__)
 
+# Expose the loaded perspectives for easy linking between perspective methods/inputs and plots
+LOADED_PERSPECTIVES = {}
+
 
 class GuiManager(object):
     """
@@ -192,6 +195,8 @@ class GuiManager(object):
             except Exception as e:
                 logger.warning(f"Unable to load {name} perspective.\n{e}")
         self.loadedPerspectives = loaded_dict
+        global LOADED_PERSPECTIVES
+        LOADED_PERSPECTIVES = self.loadedPerspectives
 
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
@@ -205,6 +210,8 @@ class GuiManager(object):
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
+        global LOADED_PERSPECTIVES
+        LOADED_PERSPECTIVES = self.loadedPerspectives
         self._current_perspective = None
 
     def addCategories(self):
