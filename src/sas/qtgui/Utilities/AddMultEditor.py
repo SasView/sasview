@@ -72,7 +72,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.setupSignals()
 
         self.list_models = self.readModels()
-        self.list_standard_models = self.readStandardModels()
+        self.list_standard_models = self.readModels(std_only=True)
 
         # Fill models' comboboxes
         self.setupModels()
@@ -109,23 +109,14 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         else:
             self.cbModel2.setCurrentIndex(0)
 
-    def readStandardModels(self):
-        """ Generate list of standard models """
-        s_models = load_standard_models()
-        models_dict = {}
-        for model in s_models:
-            if model.category is None or 'custom' in model.category:
-                continue
-            models_dict[model.name] = model
-
-        return sorted([model_name for model_name in models_dict])
-
-    def readModels(self):
+    def readModels(self, std_only=False):
         """ Generate list of all models """
         s_models = load_standard_models()
         models_dict = {}
         for model in s_models:
             if model.category is None:
+                continue
+            if std_only and 'custom' in model.category:
                 continue
             models_dict[model.name] = model
 
@@ -294,7 +285,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel2.clear()
         self.cbModel2.blockSignals(False)
         # Retrieve the list of models
-        model_list = self.readStandardModels()
+        model_list = self.readModels(std_only=True)
         # Populate the models comboboxes
         self.cbModel1.addItems(model_list)
         self.cbModel2.addItems(model_list)
