@@ -178,8 +178,8 @@ class PlotterWidget(PlotterBase):
         markersize = data.markersize
 
         # Include scaling (log vs. linear)
-        ax.set_xscale(self.xscale, nonpositive='clip')
-        ax.set_yscale(self.yscale, nonpositive='clip')
+        ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
 
         # define the ranges
         self.setRange = SetGraphRange(parent=self,
