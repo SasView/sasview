@@ -322,25 +322,23 @@ class BumpsFit(FitEngine):
         # collect the results
         all_results = []
 
-        for M in problem.models:
-            fitness = M.fitness
+        for fitting_module in problem.models:
+            fitness = fitting_module.fitness
             pars = fitness.fitted_pars + fitness.computed_pars
             par_names = fitness.fitted_par_names + fitness.computed_par_names
 
-            R = FResult(model=fitness.model,
-                        data=fitness.data,
-                        param_list=par_names)
-            R.theory = fitness.theory()
-            R.residuals = fitness.residuals()
-            R.index = fitness.data.idx
-            R.fitter_id = self.fitter_id
+            fitting_result = FResult(model=fitness.model, data=fitness.data, param_list=par_names)
+            fitting_result.theory = fitness.theory()
+            fitting_result.residuals = fitness.residuals()
+            fitting_result.index = fitness.data.idx
+            fitting_result.fitter_id = self.fitter_id
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-            R.success = result['success']
-            R.convergence = result['convergence']
+            fitting_result.success = result['success']
+            fitting_result.convergence = result['convergence']
             if result['uncertainty'] is not None:
-                R.uncertainty_state = result['uncertainty']
+                fitting_result.uncertainty_state = result['uncertainty']
 
-            if R.success:
+            if fitting_result.success:
                 pvec = list()
                 stderr = list()
                 for p in pars:
@@ -391,16 +389,16 @@ class BumpsFit(FitEngine):
                             pvec.append(p.value)
                             stderr.append(0)
 
-                R.pvec = (np.array(pvec))
-                R.stderr = (np.array(stderr))
+                fitting_result.pvec = (np.array(pvec))
+                fitting_result.stderr = (np.array(stderr))
                 DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
-                R.fitness = np.sum(R.residuals ** 2) / DOF
+                fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
             else:
-                R.pvec = np.asarray([p.value for p in pars])
-                R.stderr = np.NaN * np.ones(len(pars))
-                R.fitness = np.NaN
+                fitting_result.pvec = np.asarray([p.value for p in pars])
+                fitting_result.stderr = np.NaN * np.ones(len(pars))
+                fitting_result.fitness = np.NaN
 
-            all_results.append(R)
+            all_results.append(fitting_result)
         all_results[0].mesg = result['errors']
 
         if q is not None:

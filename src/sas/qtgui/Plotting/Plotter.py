@@ -252,7 +252,12 @@ class PlotterWidget(PlotterBase):
 
         # Add q-range sliders
         if data.show_q_range_sliders:
+            # Grab existing slider if it exists
+            existing_slider = self.sliders.pop(data.name, None)
             sliders = QRangeSlider(self, self.ax, data=data)
+            # New sliders should be visible but existing sliders that were turned off should remain off
+            if existing_slider is not None and not existing_slider.is_visible:
+                sliders.toggle()
             self.sliders[data.name] = sliders
 
         # refresh canvas
@@ -337,6 +342,11 @@ class PlotterWidget(PlotterBase):
             self.actionRemovePlot = plot_menu.addAction("Remove")
             self.actionRemovePlot.triggered.connect(
                                 functools.partial(self.onRemovePlot, id))
+
+            if plot.show_q_range_sliders:
+                self.actionToggleSlider = plot_menu.addAction("Toggle Q-Range Slider Visibility")
+                self.actionToggleSlider.triggered.connect(
+                                    functools.partial(self.toggleSlider, id))
 
             if not plot.is_data:
                 self.actionFreeze = plot_menu.addAction('&Freeze')
@@ -540,7 +550,6 @@ class PlotterWidget(PlotterBase):
 
         # Remove the plot from the list of plots
         self.plot_dict.pop(id)
-        self.sliders.pop(id, None)
 
         # Labels might have been changed
         xl = self.ax.xaxis.label.get_text()
@@ -560,6 +569,11 @@ class PlotterWidget(PlotterBase):
         self.ax.set_xlabel(xl)
         self.ax.set_ylabel(yl)
         self.canvas.draw_idle()
+
+    def toggleSlider(self, id):
+        if id in self.sliders.keys():
+            slider = self.sliders.get(id)
+            slider.toggle()
 
     def onFreeze(self, id):
         """

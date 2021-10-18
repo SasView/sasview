@@ -2964,10 +2964,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data.show_q_range_sliders = True
         # Suppress the GUI update until the move is finished to limit model calculations
         fitted_data.slider_update_on_move = False
-        fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
-        fitted_data.slider_high_q_setter = self.options_widget.updateMaxQ
-        fitted_data.slider_low_q_input = self.options_widget.txtMinRange
-        fitted_data.slider_low_q_setter = self.options_widget.updateMinQ
+        fitted_data.slider_tab_name = self.modelName()
+        fitted_data.slider_perspective_name = 'Fitting'
+        fitted_data.slider_high_q_input = ['options_widget', 'txtMaxRange']
+        fitted_data.slider_high_q_setter = ['options_widget', 'updateMaxQ']
+        fitted_data.slider_low_q_input = ['options_widget', 'txtMinRange']
+        fitted_data.slider_low_q_setter = ['options_widget', 'updateMinQ']
 
         self.model_data = fitted_data
         new_plots = [fitted_data]
