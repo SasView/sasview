@@ -20,14 +20,15 @@ datas = [
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
+    ('../docs/sphinx-docs/build/html'.'doc')
 ]
-#TODO: Hopefully we can get away from here
+#TODO: Hopefully we can get away from version specific packages
 if platform.system() == 'Darwin':
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','debugpy'),'debugpy'))
+    datas.append(os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi')
+    datas.append(os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.')
+    datas.append(os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','debugpy'),'debugpy')
 else:
-    (os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'),
+    datas.append(os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy')
 
 def add_data(data):
     for component in data:
