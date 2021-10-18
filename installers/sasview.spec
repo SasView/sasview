@@ -20,7 +20,7 @@ datas = [
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
-    ('../docs/sphinx-docs/build/html'.'doc')
+    ('../docs/sphinx-docs/build/html','doc')
 ]
 #TODO: Hopefully we can get away from version specific packages
 if platform.system() == 'Darwin':
