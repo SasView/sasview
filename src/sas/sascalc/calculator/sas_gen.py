@@ -369,9 +369,9 @@ class OMFReader(object):
         :return: x, y, z, sld_n, sld_mx, sld_my, sld_mz
         """
         desc = ""
-        mx = np.zeros(0)
-        my = np.zeros(0)
-        mz = np.zeros(0)
+        mx = []
+        my = []
+        mz = []
         try:
             input_f = open(path, 'rb')
             buff = decode(input_f.read())
@@ -391,9 +391,9 @@ class OMFReader(object):
                         _mx = mag2sld(_mx, valueunit)
                         _my = mag2sld(_my, valueunit)
                         _mz = mag2sld(_mz, valueunit)
-                        mx = np.append(mx, _mx)
-                        my = np.append(my, _my)
-                        mz = np.append(mz, _mz)
+                        mx.append(_mx)
+                        my.append(_my)
+                        mz.append(_mz)
                     except Exception as exc:
                         # Skip non-data lines
                         logging.error(str(exc)+" when processing %r"%line)
@@ -485,6 +485,9 @@ class OMFReader(object):
                             = mag2sld(float(valuerangeminmag), valueunit)
                         output.valuerangemaxmag \
                             = mag2sld(float(valuerangemaxmag), valueunit)
+            mx = np.reshape(mx, (len(mx),))
+            my = np.reshape(my, (len(my),))
+            mz = np.reshape(mz, (len(mz),))
             output.set_m(mx, my, mz)
             return output
         except Exception:
