@@ -22,7 +22,7 @@ from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
     apply_signal = QtCore.pyqtSignal(tuple, str)
-    def __init__(self, parent=None, cmap=None, xmin=-1,xmax=10, ymin=-1.0, ymax=15.0, vmin=0.0, vmax=100.0, data=None):
+    def __init__(self, parent=None, cmap=None, vmin=0.0, vmax=100.0, data=None):
         super(ColorMap, self).__init__()
 
         self.setupUi(self)
@@ -38,12 +38,6 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         self.vmin = self.vmin_orig = vmin
         self.vmax = self.vmax_orig = vmax
-
-        self.data.xmin = xmin
-        self.data.xmax = xmax
-
-        self.data.ymin = ymin
-        self.data.ymax = ymax
 
         # Initialize detector labels
         self.initDetectorData()
