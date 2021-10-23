@@ -119,7 +119,8 @@ spheres. For this we will use netgen, and the following python script::
 
 This script sets the nuclear SLD to 2x10\ :sup:`-6`\ |Ang|:sup:`-2`
 and the magnetic SLD to (1x10\ :sup:`-6`, 0, 0)\ |Ang|:sup:`-2` giving
-$R=4$.
+$R=4$.Note: For some versions of netgen, you may need a key "legacy =True" in
+VTKOutput to generate a file.
 
 To obtain the required $R$ values the code above should be altered where indicated 
 to use nuclear SLDs of:
