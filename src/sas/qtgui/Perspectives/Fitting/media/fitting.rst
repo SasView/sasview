@@ -24,9 +24,11 @@ Fitting Documentation
 
    Information on the SasView Optimisers <optimizer>
 
-   Converting SANS to SESANS for Fitting <sesans/sans_to_sesans>
+   Conversion of SANS to SESANS for Fitting <sesans/sans_to_sesans>
 
-   Fitting SESANS Data <sesans/sesans_fitting>
+   Fitting SESANS Data in Sasmodels <sesans/sesans_fitting>
+
+   Fitting SESANS Data in SasView <fitting_sesans>
 
    Writing a Plugin Model <plugin>
 
