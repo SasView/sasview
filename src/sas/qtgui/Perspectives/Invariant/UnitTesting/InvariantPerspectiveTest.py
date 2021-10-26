@@ -266,6 +266,9 @@ class InvariantPerspectiveTest(unittest.TestCase):
         # Change value and be sure model updates
         self.widget.txtPowerHighQ.setText("11")
         self.assertEqual(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text(), '11')
+        # Check Qmax of plot
+        self.widget.txtExtrapolQMax.setText('100')
+        self.assertEqual(self.widget.txtExtrapolQMax.text(),'100')
         # Run the calculation
         self.widget.calculateInvariant()
         # Ensure radio buttons unchanged
