@@ -247,7 +247,7 @@ class PlotterWidget(PlotterBase):
             ax.set_xlabel(self.xLabel)
 
         # define the ranges
-        if hasattr(self, 'setRange') and self.setRange.rangeModified:
+        if hasattr(self, 'setRange') and self.setRange and self.setRange.rangeModified:
             # Assume the range has changed and retain the current and default ranges for future use
             modified = self.setRange.rangeModified
             default_x_range = self.setRange.defaultXRange
@@ -475,7 +475,7 @@ class PlotterWidget(PlotterBase):
             y_range = self.setRange.yrange()
             if x_range is not None and y_range is not None:
                 self.setRange.rangeModified = (self.setRange.defaultXRange != x_range
-                                               and self.setRange.defaultYRange != y_range)
+                                               or self.setRange.defaultYRange != y_range)
                 self.ax.set_xlim(x_range)
                 self.ax.set_ylim(y_range)
                 self.canvas.draw_idle()
@@ -487,6 +487,7 @@ class PlotterWidget(PlotterBase):
         # Clear graph and plot everything again
         mpl.pyplot.cla()
         self.ax.cla()
+        self.setRange = None
         for ids in self.plot_dict:
             self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
 
@@ -527,15 +528,12 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
-        # Store user-defined plot range on replot
-        retain_dimensions = retain_dimensions or self.setRange.rangeModified
-        if retain_dimensions:
-            x_bounds = (self.ax.viewLim.xmin, self.ax.viewLim.xmax)
-            y_bounds = (self.ax.viewLim.ymin, self.ax.viewLim.ymax)
         self.removePlot(id)
         self.plot(data=new_plot)
         # Apply user-defined plot range
-        if retain_dimensions:
+        if retain_dimensions or self.setRange.rangeModified:
+            x_bounds = self.setRange.xrange()
+            y_bounds = self.setRange.yrange()
             self.ax.set_xbound(x_bounds[0], x_bounds[1])
             self.ax.set_ybound(y_bounds[0], y_bounds[1])
 
