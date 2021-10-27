@@ -38,8 +38,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         # center of the box
         # puts the center of box at the middle of the q-range (??)
-        self.center_x = self.qmax/2
-        self.center_y = self.qmax/2
+
+        self.center_x = 0.0002
+        self.center_y = 0.0003
 
         # Number of points on the plot
         self.nbins = 30
@@ -110,20 +111,31 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.vertical_lines.clear()
         self.base.connect.clearall()
 
+
     def update(self):
         """
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
-        # #Update the slicer if an horizontal line is dragged
+        # check if the center point has moved and update the figure accordingly
+        if self.center.has_move:
+            self.center.update()
+            self.horizontal_lines.update(center=self.center)
+            self.vertical_lines.update(center=self.center)
+        # check if the horizontal lines have moved and
+        # update the figure accordingly
         if self.horizontal_lines.has_move:
             self.horizontal_lines.update()
-            self.vertical_lines.update(y=self.horizontal_lines.y)
-        # #Update the slicer if a vertical line is dragged
+            self.vertical_lines.update(y1=self.horizontal_lines.y1,
+                                       y2=self.horizontal_lines.y2,
+                                       height=self.horizontal_lines.half_height)
+        # check if the vertical lines have moved and
+        # update the figure accordingly
         if self.vertical_lines.has_move:
             self.vertical_lines.update()
-            self.horizontal_lines.update(x=self.vertical_lines.x)
-
+            self.horizontal_lines.update(x1=self.vertical_lines.x1,
+                                         x2=self.vertical_lines.x2,
+                                         width=self.vertical_lines.half_width)
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -147,11 +159,16 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.direction is None:
             self.direction = direction
 
-        x_min = -1 * numpy.fabs(self.vertical_lines.x)
-        x_max = numpy.fabs(self.vertical_lines.x)
-        y_min = -1 * numpy.fabs(self.horizontal_lines.y)
-        y_max = numpy.fabs(self.horizontal_lines.y)
+#        x_min = -1 * numpy.fabs(self.vertical_lines.x)
+#        x_max = numpy.fabs(self.vertical_lines.x)
+#        y_min = -1 * numpy.fabs(self.horizontal_lines.y)
+#        y_max = numpy.fabs(self.horizontal_lines.y)
 
+        x_min = self.horizontal_lines.x2
+        x_max = self.horizontal_lines.x1
+        y_min = self.vertical_lines.y2
+        y_max = self.vertical_lines.y1
+        
         if nbins is not None:
             self.nbins = nbins
         if self.averager is None:
@@ -254,8 +271,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         """
         params = {}
-        params["x_max"] = numpy.fabs(self.vertical_lines.x)
-        params["y_max"] = numpy.fabs(self.horizontal_lines.y)
+        params["x_max"] = numpy.fabs(self.vertical_lines.x1)
+        params["y_max"] = numpy.fabs(self.horizontal_lines.y1)
         params["nbins"] = self.nbins
         return params
 
