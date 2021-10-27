@@ -68,9 +68,9 @@ datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','PyQt5','Qt','plugin
 datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','jedi'),'jedi'))
 
 # These depend on whether we have MKL or Atlas numpy
-if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
-    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
-    datas.append(add_binary(LIBPREFIX + 'mkl_def.' + LIBSUFFIX))
+if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.1.' + LIBSUFFIX)):
+    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.1.' + LIBSUFFIX))
+    datas.append(add_binary(LIBPREFIX + 'mkl_def.1.' + LIBSUFFIX))
 elif os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX)):
     datas.append(add_binary(LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX))
 else:
