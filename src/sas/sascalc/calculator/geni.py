@@ -1,6 +1,5 @@
 """
 Compute scattering from a set of points.
-
 For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
 import os
@@ -10,6 +9,10 @@ import numpy as np
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
         from numba import njit, prange
+        # Suppress numba debug info
+        import logging
+        numba_logger = logging.getLogger('numba')
+        numba_logger.setLevel(logging.WARNING)
         USE_NUMBA = True
     else:
         raise ImportError("fail")
@@ -26,13 +29,9 @@ except ImportError:
 def Iq(q, x, y, z, sld, vol, is_avg=False):
     """
     Computes 1D isotropic.
-
     Isotropic: Assumes all slds are real (no magnetic)
-
     Also assumes there is no polarization: No dependency on spin.
-
     All values must be numpy vectors of the correct size.
-
     Returns *I(q)*
     """
     coords = np.vstack((x, y, z))
@@ -50,15 +49,12 @@ def Iq(q, x, y, z, sld, vol, is_avg=False):
         _calc_Iq(I_out, q, coords, sld, vol)
     return I_out * (1.0E+8/np.sum(vol))
 
-def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta):
+def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_phi):
     """
     Computes 2D anisotropic.
-
     *in_spin* and *out_spin* indicate portion of polarizer and analyzer
-    transmission that are spin up.  *s_theta* is the polarization direction.
-
+    transmission that are spin up.  *s_theta* and *s_phi* are the polarization direction angles.
     All other values must be numpy vectors of the correct size.
-
     Returns *I(qx, qy)*
     """
     qx, qy = np.broadcast_arrays(qx, qy)
@@ -75,7 +71,7 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta):
                 = (v[index] for v in (x, y, mx, my, mz, sld, vol))
         I_out = _calc_Iqxy_magnetic(
             qx, qy, x, y, sld, vol, (mx, my, mz),
-            in_spin, out_spin, s_theta)
+            in_spin, out_spin, s_theta, s_phi)
     else:
         index = (sld != 0.)
         if not index.all():
@@ -96,7 +92,6 @@ def _calc_Iq_avg(Iq, q, r, sld, vol):
 def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
     """
     Compute Iq as sum rho_j rho_k j0(q ||x_j - x_k||)
-
     Chunk the calculation so that the q x r intermediate matrix has fewer
     than worksize elements.
     """
@@ -111,13 +106,9 @@ def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
 def _calc_Iq_batch(Iq, q_pi, coords, weight):
     """
     Helper function for _calc_Iq which operates on a batch of q values.
-
     *Iq* is accumulated within each batch, and should be initialized to zero.
-
     *q_pi* is q/pi, needed because np.sinc computes sin(pi x)/(pi x).
-
     *coords* are the sample points.
-
     *weights* is volume*rho for each point.
     """
     for j in range(len(weight)):
@@ -136,10 +127,8 @@ def _calc_Iq_batch(Iq, q_pi, coords, weight):
 def _calc_Iq_numba(Iq, q, coords, sld, vol):
     """
     **DEPRECATED**
-
     Numba version of the _calc_Iq since the pure numpy version is too
     difficult for numpy to handle.
-
     Even with with numba this code is slower than the pure numpy version.
     Without numba it is much much slower. Test for a few examples with
     smallish numbers of points.  The algorithm is O(n^2) which makes it
@@ -179,31 +168,23 @@ else:
         return np.asarray(Iq).reshape(qx.shape)
 _calc_Iqxy.__doc__ = """
     Compute I(q) for a set of points (x, y).
-
-    Uses::
-
-        I(q) = |sum V(r) rho(r) e^(1j q.r)|^2 / sum V(r)
-
+    
+    Uses: I(q) = \|sum V(r) rho(r) e^(1j q.r)\|^2 / sum V(r)
     Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
     """
 
 
 def _calc_Iqxy_magnetic(
         qx, qy, x, y, rho, vol, rho_m,
-        up_frac_i=0, up_frac_f=0, up_angle=0.):
-    """
-    Compute I(q) for a set of points (x, y), with magnetism on each point.
+        up_frac_i=1, up_frac_f=1, up_angle=0., up_phi=0.):
+    """Compute I(q) for a set of points (x, y), with magnetism on each point.
 
-    Uses::
-
-        I(q) = sum_xs w_xs |sum V(r) rho(q, r, xs) e^(1j q.r)|^2 / sum V(r)
-
+    Uses: I(q) = sum_xs w_xs \|sum V(r) rho(q, r, xs) e^(1j q.r)\|^2 / sum V(r)
     where rho is adjusted for the particular q and polarization cross section.
     The cross section weights depends on the polarizer and analyzer
     efficiency of the measurement.  For example, with polarization up at 100%
     efficiency and no analyzer, (up_frac_i=1, up_frac_f=0.5), then uu and ud
     will both be 0.5.
-
     Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
     """
     # Determine contribution from each cross section
@@ -211,7 +192,10 @@ def _calc_Iqxy_magnetic(
 
     # Precompute helper values
     up_angle = np.radians(up_angle)
-    cos_spin, sin_spin = np.cos(-up_angle), np.sin(-up_angle)
+    cos_spin, sin_spin = np.cos(up_angle), np.sin(up_angle)
+
+    up_phi = np.radians(up_phi)
+    cos_phi, sin_phi = np.cos(up_phi), np.sin(up_phi)
     mx, my, mz = rho_m
     ## NOTE: sasview calculator uses the opposite sign for mx, my, mz.
     ## Uncomment the following to match its output.
@@ -221,44 +205,60 @@ def _calc_Iqxy_magnetic(
     shape = qx.shape
     qx, qy = (np.asarray(v, 'd').flatten() for v in (qx, qy))
     Iq = np.zeros(shape=qx.shape, dtype='d')
+    M = np.array([mx, my, mz])
     #print("mag", [v.shape for v in (x, y, rho, vol, mx, my, mz)])
     _calc_Iqxy_magnetic_helper(
-        Iq, qx, qy, x, y, rho, vol, mx, my, mz,
-        cos_spin, sin_spin, dd, du, ud, uu)
+        Iq, qx, qy, x, y, rho, vol, M,
+        cos_spin, sin_spin, cos_phi, sin_phi, dd, du, ud, uu)
     return Iq.reshape(shape)
 
-@njit("(" + "f8[:], "*10 + "f8, "*6 + ")")
+@njit
+def orth(A, b): # A = 3 x n, and b_hat unit vector
+    return A - np.outer(b, b)@A
+
+@njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
 def _calc_Iqxy_magnetic_helper(
-        Iq, qx, qy, x, y, rho, vol, mx, my, mz, cos_spin, sin_spin,
+        Iq, qx, qy, x, y, rho, vol, M, cos_spin, sin_spin, cos_phi, sin_phi,
         dd, du, ud, uu):
     # Process each qx, qy
     # Note: enumerating a pair is slower than direct indexing in numba
     for k in range(len(qx)):
         qxk, qyk = qx[k], qy[k]
-        # If q is near 0 then set px and py to zero.
-        # Note: norm is computed as a separate scalar so that the numba jit
-        # can figure out the proper type for perp even for q = 0
-        qsq = qxk**2 + qyk**2
-        norm = 1./qsq if qsq > 1e-16 else 0.
-        perp = norm*(qyk*mx - qxk*my)
-        px = perp*(qyk*cos_spin + qxk*sin_spin)
-        py = perp*(qyk*sin_spin - qxk*cos_spin)
-        pz = mz
 
-        ephase = vol*np.exp(1j*(qxk*x + qyk*y))
+        if abs(qxk) > 1.e-16 or abs(qyk) > 1.e-16:
+            norm = 1/np.sqrt(qxk**2 + qyk**2)
+            q_hat = np.array([qxk, qyk, 0]) * norm
+        else:
+            # For homogeneously magnetised disc Mperp can be associated to the
+            # magnetsation corrected for demag factorfield q->0, i.e. M-Nij M
+            # with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).
+            q_hat = np.sqrt(np.array([0.5, 0.5, 0]))
+
+        p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
+
+        M_perp = orth(M, q_hat)
+        M_perpP = orth(M_perp, p_hat)
+        M_perpP_perpQ = orth(M_perpP, q_hat)
+
+        perpx = p_hat @ M_perp
+        # einsum is faster than sumsq in numpy but not supported in numba
+        #perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
+        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
+        perpz = q_hat @ M_perpP
+
+        ephase = vol * np.exp(1j * (qxk * x + qyk * y))
         if dd > 1e-10:
-            Iq[k] += dd * abs(np.sum((rho-px)*ephase))**2
+            Iq[k] += dd * abs(np.sum((rho - perpx) * ephase))**2
         if uu > 1e-10:
-            Iq[k] += uu * abs(np.sum((rho+px)*ephase))**2
+            Iq[k] += uu * abs(np.sum((rho + perpx) * ephase))**2
         if du > 1e-10:
-            Iq[k] += du * abs(np.sum((py-1j*pz)*ephase))**2
+            Iq[k] += du * abs(np.sum((perpy - 1j * perpz) * ephase))**2
         if ud > 1e-10:
-            Iq[k] += ud * abs(np.sum((py+1j*pz)*ephase))**2
+            Iq[k] += ud * abs(np.sum((perpy + 1j * perpz) * ephase))**2
 
 def _spin_weights(in_spin, out_spin):
     """
     Compute spin cross weights given in_spin and out_spin
-
     Returns weights (dd, du, ud, uu)
     """
     in_spin = np.clip(in_spin, 0.0, 1.0)
@@ -295,3 +295,5 @@ def _spin_weights(in_spin, out_spin):
         in_spin * out_spin / norm,             # uu
     )
     return weight
+
+

@@ -398,36 +398,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data is None: continue
             # Now, all plots under this item
             name = data.name
-            ######################################################
-            # Reset all slider values in data so save/load does not choke on them
-            # Remove once slider definition moved out of PlotterData
-            data.slider_low_q_setter = None
-            data.slider_high_q_setter = None
-            data.slider_low_q_input = None
-            data.slider_high_q_input = None
-            data.slider_update_on_move = False
-            data.slider_low_q_getter = None
-            data.slider_high_q_getter = None
-            ######################################################
             is_checked = item.checkState()
             properties['checked'] = is_checked
-            other_datas = []
             # save underlying theories
             other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
             other_datas = list(other_datas.values())[1:]
-            for datas in other_datas:
-                ######################################################
-                # Reset all slider values in data so save/load does not choke on them
-                # Remove once slider definition moved out of PlotterData
-                datas.slider_low_q_setter = None
-                datas.slider_high_q_setter = None
-                datas.slider_low_q_input = None
-                datas.slider_high_q_input = None
-                datas.slider_update_on_move = False
-                datas.slider_low_q_getter = None
-                datas.slider_high_q_getter = None
-                ######################################################
             all_data[data.id] = [data, properties, other_datas]
         return all_data
 
@@ -1251,7 +1227,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
-        if name in plot.plot_dict.keys():
+        if isinstance(plot, Plotter2D) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:
             plot.plot(data)
@@ -1297,7 +1273,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Choose files',
             'filter'    : wlist,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog |
+                          QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
             'directory' : self.default_load_location
         }
         paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]

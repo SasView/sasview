@@ -21,7 +21,7 @@ dependencies:
   - cycler=0.10.0=py36_0
   - decorator=4.1.2=py36_0
   - freetype=2.7=1
-  - h5py=2.7.1=py36_1
+  - h5py=3.1=0
   - hdf5=1.8.18=3
   - hyperlink=17.3.1=py_0
   - hypothesis=3.56.0=py36_0
@@ -114,3 +114,4 @@ dependencies:
     - reportlab==3.4.0
     - webencodings==0.5.1
     - xhtml2pdf==0.2.2
+    - uncertainties==3.1.6

@@ -12,6 +12,7 @@ import webbrowser
 import urllib.parse
 import json
 import types
+import numpy
 from io import BytesIO
 
 import numpy as np
@@ -61,6 +62,9 @@ IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 # Useful for determining whether the plot in question is for an intermediate result, such as P(Q) or S(Q) in the
 # case of a product model; the identifier for this is held in square brackets, as in the example above.
 theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
+
+logger = logging.getLogger(__name__)
+
 
 def get_app_dir():
     """
@@ -770,114 +774,74 @@ def retrieveData2d(data):
 
     return text
 
+
 def onTXTSave(data, path):
     """
     Save file as formatted txt
     """
-    with open(path,'w') as out:
-        has_errors = True
-        if data.dy is None or not data.dy.any():
-            has_errors = False
-        # Sanity check
-        if has_errors:
-            try:
-                if len(data.y) != len(data.dy):
-                    has_errors = False
-            except:
-                has_errors = False
-        if has_errors:
-            if data.dx is not None and data.dx.any():
-                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>"+" "*20+"<dX>\n")
-                #out.write("<X>   <Y>   <dY>   <dX>\n")
-            else:
-                out.write("<X>"+" "*20+ "<Y>"+" "*20+"<dY>\n")
-        else:
-            out.write("<X>"+" "*20+ "<Y>\n")
+    reader = None
+    append_format = len(path.split(".")) == 1
+    if isinstance(data, Data1D):
+        from sas.sascalc.dataloader.readers.ascii_reader import Reader as ASCIIReader
+        path += ".txt" if append_format else ""
+        reader = ASCIIReader()
+    elif isinstance(data, Data2D):
+        from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DReader
+        path += ".dat" if append_format else ""
+        reader = Red2DReader()
+    if reader:
+        reader.write(path, data)
+    else:
+        logger.error(f"Data must be of type Data1D or Data2D, {type(data)} given.")
 
-        for i in range(len(data.x)):
-            if has_errors:
-                if data.dx is not None and data.dx.any():
-                    if  data.dx[i] is not None:
-                        out.write("%.15e  %.15e  %.15e  %.15e\n" % (data.x[i],
-                                                        data.y[i],
-                                                        data.dy[i],
-                                                        data.dx[i]))
-                    else:
-                        out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
-                                                    data.y[i],
-                                                    data.dy[i]))
-                else:
-                    out.write("%.15e  %.15e  %.15e\n" % (data.x[i],
-                                                data.y[i],
-                                                data.dy[i]))
-            else:
-                out.write("%.15e  %.15e\n" % (data.x[i],
-                                        data.y[i]))
 
 def saveData1D(data):
     """
     Save 1D data points
+
+    :param data: Data1D object the data will be taken from
     """
-    default_name = os.path.basename(data.filename)
-    default_name, extension = os.path.splitext(default_name)
-    if not extension:
-        extension = ".txt"
-    default_name += "_out" + extension
-
-    wildcard = "Text files (*.txt);;"\
-                "CanSAS 1D files(*.xml);;"\
-                "NXcanSAS files (*.h5)"
-    kwargs = {
-        'caption'   : 'Save As',
-        #'directory' : default_name,
-        'filter'    : wildcard,
-        'parent'    : None,
-        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+    wildcard_dict = {
+        "Text files": ".txt",
+        "Comma separated value files": ".csv",
+        "CanSAS 1D files": ".xml",
+        "NXcanSAS files": ".h5"
     }
-    # Query user for filename.
-    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
-    filename = filename_tuple[0]
+    saveAnyData(data, wildcard_dict)
 
-    # User cancelled.
-    if not filename:
-        return
-
-    # Check/add extension
-    if not os.path.splitext(filename)[1]:
-        ext = filename_tuple[1]
-        if 'Text files' in ext:
-            filename += '.txt'
-        elif 'CanSAS' in ext:
-            filename += '.xml'
-        elif 'NXcanSAS' in ext:
-            filename += '.h5'
-        else:
-            pass
-
-    #Instantiate a loader
-    loader = Loader()
-    if os.path.splitext(filename)[1].lower() == ".txt":
-        onTXTSave(data, filename)
-    elif os.path.splitext(filename)[1].lower() == ".xml":
-        loader.save(filename, data, ".xml")
-    elif os.path.splitext(filename)[1].lower() == ".h5":
-        nxcansaswriter = NXcanSASWriter()
-        nxcansaswriter.write([data], filename)
 
 def saveData2D(data):
     """
-    Save data2d dialog
-    """
-    default_name = os.path.basename(data.filename)
-    default_name, _ = os.path.splitext(default_name)
-    ext_format = ".dat"
-    default_name += "_out" + ext_format
+    Save data2d data points
 
-    wildcard = "IGOR/DAT 2D file in Q_map (*.dat);;"\
-                "NXcanSAS files (*.h5)"
+    :param data: Data2D object the data will be taken from
+    """
+    wildcard_dict = {
+        "IGOR/DAT 2D file in Q_map": ".dat",
+        "NXcanSAS files": ".h5"
+    }
+    saveAnyData(data, wildcard_dict)
+
+
+def saveAnyData(data, wildcard_dict=None):
+    """
+    Generic file save routine called by SaveData1D and SaveData2D
+
+    :param data: Data 1D or Data2D object the data will be taken from
+    :param wildcard_dict: Dictionary in format {"Display Text": ".ext"}
+    """
+    # Ensure wildcard_dict is a dictionary
+    if wildcard_dict is None or not isinstance(wildcard_dict, dict):
+        wildcard_dict = {}
+    # Construct wildcard string based on dictionary passed in
+    wildcards = ""
+    for wildcard in list(wildcard_dict.keys()):
+        wildcards += f"{wildcard} (*{wildcard_dict[wildcard]});;"
+    wildcards += "All files (*.*)"
+
     kwargs = {
         'caption'   : 'Save As',
-        'filter'    : wildcard,
+        'filter'    : wildcards,
         'parent'    : None,
         'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
     }
@@ -885,28 +849,34 @@ def saveData2D(data):
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
     filename = filename_tuple[0]
 
-    # User cancelled.
+    # User cancelled or did not enter a filename
     if not filename:
         return
 
-    # Check/add extension
-    if not os.path.splitext(filename)[1]:
-        ext = filename_tuple[1]
-        if 'IGOR' in ext:
-            filename += '.dat'
-        elif 'NXcanSAS' in ext:
-            filename += '.h5'
-        else:
-            pass
+    # Check for selected file format
+    ext = filename_tuple[1]
+    for wildcard in list(wildcard_dict.keys()):
+        if wildcard in ext:
+            # Specify save format, while allowing free-form file extensions
+            file_format = wildcard_dict[wildcard]
+            # Append selected extension if no extension typed into box by user
+            # Do not append if any extension typed to allow freeform extensions
+            if len(filename.split(".")) == 1:
+                filename += wildcard_dict[wildcard]
+            break
+    else:
+        # Set file_format to None if 'All files (*.*)' selected
+        file_format = None
 
-    #Instantiate a loader
+    # Instantiate a loader
     loader = Loader()
-
-    if os.path.splitext(filename)[1].lower() == ext_format:
-        loader.save(filename, data, ext_format)
-    elif os.path.splitext(filename)[1].lower() == ".h5":
-        nxcansaswriter = NXcanSASWriter()
-        nxcansaswriter.write([data], filename)
+    try:
+        loader.save(filename, data, file_format)
+    except (KeyError, ValueError):
+        # If the base loader is unable to save the file, fallback to text file.
+        format_based_on_data = "IGOR" if isinstance(data, Data2D) else "ASCII"
+        logger.warning(f"Unknown file type specified when saving {filename}. Saving in {format_based_on_data} format.")
+        onTXTSave(data, filename)
 
 
 class FormulaValidator(QtGui.QValidator):
@@ -1057,6 +1027,29 @@ def formatNumber(value, high=False):
     else:
         output = "%-5.3g" % value
     return output.lstrip().rstrip()
+
+def formatValue(value):
+    """Formats specific data types for the GUI.
+    
+    This function accepts three types of data: numeric data castable to float, a numpy.ndarray of type
+    castable to float, or None. Numeric data is returned in human-readable format by formatNumber(), numpy
+    arrays are averaged over all axes, and the mean returned in human-readable format. If `value=None` then
+    the string "NaN" is returned.
+
+    :param value: The value to be formatted
+    :type value: float, numeric type castable to float, numpy.ndarray, None
+    :return: The formatted value
+    :rtype: str
+    """
+    # type must be castable to float because this is what is required by formatNumber()
+    if value is None:
+        return "NaN"
+    else:
+        if isinstance(value, numpy.ndarray):
+            value = str(formatNumber(numpy.average(value), True))
+        else:
+            value = str(formatNumber(value, True))
+        return value
 
 def replaceHTMLwithUTF8(html):
     """

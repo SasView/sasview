@@ -13,6 +13,9 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
+from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+
 from twisted.internet import reactor
 # General SAS imports
 from sas import get_local_config, get_custom_config
@@ -57,6 +60,9 @@ from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 logger = logging.getLogger(__name__)
 
+# Expose the loaded perspectives for easy linking between perspective methods/inputs and plots
+LOADED_PERSPECTIVES = {}
+
 
 class GuiManager(object):
     """
@@ -100,7 +106,7 @@ class GuiManager(object):
         handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        logging.info(" --- SasView session started ---")
+        logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
 
@@ -189,6 +195,8 @@ class GuiManager(object):
             except Exception as e:
                 logger.warning(f"Unable to load {name} perspective.\n{e}")
         self.loadedPerspectives = loaded_dict
+        global LOADED_PERSPECTIVES
+        LOADED_PERSPECTIVES = self.loadedPerspectives
 
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
@@ -202,6 +210,8 @@ class GuiManager(object):
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
+        global LOADED_PERSPECTIVES
+        LOADED_PERSPECTIVES = self.loadedPerspectives
         self._current_perspective = None
 
     def addCategories(self):

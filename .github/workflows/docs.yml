@@ -1,4 +1,4 @@
-name: Tests
+name: Docs
 
 on:
   [push, pull_request]
@@ -8,44 +8,38 @@ defaults:
     shell: bash
 
 jobs:
-  unit-test:
+  doc-build:
 
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.7, 3.8, 3.9]
-      fail-fast: false
+        os: [ubuntu-latest]
+        python-version: [3.9]
 
     steps:
 
     - name: Obtain SasView source from git
       uses: actions/checkout@v1
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
 
     ### Caching of pip downloads and local wheel builds
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "::set-output name=dir::$(pip cache dir)"
 
-    - name: Obtain pip cache (Linux)
+    - name: Obtain pip cache
       uses: actions/cache@v2
       with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
+        path: ~/.cache/pip
+        key: ${{ matrix.OS }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
         restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
+          ${{ matrix.OS }}-pip-${{ matrix.python-version }}-
+          ${{ matrix.OS }}-pip-
 
     ### Installation of build-dependencies
 
-    - name: Install packaged dependencies (Linux)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: Install packaged dependencies
       run: |
         sudo apt-get update
         sudo apt-get install opencl-headers ocl-icd-opencl-dev libpocl2 xvfb pyqt5-dev-tools
@@ -56,17 +50,9 @@ jobs:
         python -m pip install wheel setuptools
         python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5
 
-    - name: Install pyopencl (Linux + macOS)
-      if: ${{ matrix.os != 'windows-latest' }}
+    - name: Install pyopencl
       run: |
         python -m pip install pyopencl
-
-    - name: Install pyopencl (Windows)
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        python -m pip install pytools mako cffi
-        choco install opencl-intel-cpu-runtime
-        python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
 
     - name: Fetch sources for sibling projects
       run: |
@@ -103,16 +89,13 @@ jobs:
         python setup.py build
         python -m pip install .
 
-    - name: Test with pytest
-      env:
-        PYOPENCL_COMPILER_OUTPUT: 1
+    - name: Build sasmodels and bumps docs
       run: |
-        python -m pytest -v -s test
+        make -C ../bumps/doc html || true
+        mkdir -p ~/.sasmodels/compiled_models
+        make -j4 -C ../sasmodels/doc html || true
 
-    - name: Test GUI (Linux)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      env:
-        PYOPENCL_COMPILER_OUTPUT: 1
+    - name: Build sasview docs
       run: |
-        cd src/sas/qtgui
-        xvfb-run -a --server-args="-screen 0 1024x768x24" python GUITests.py || true
+        cd docs/sphinx-docs/
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python build_sphinx.py || true
