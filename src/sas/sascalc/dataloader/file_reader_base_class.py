@@ -296,11 +296,9 @@ class FileReader(object):
         custom_config = get_custom_config()
         if use_q_units_default:
             default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
-            set_loaded_units(data, 'x', default_q_units)
             data.xaxis(r"\rm{Q}", default_q_units)
         if use_i_units_default:
             default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
-            set_loaded_units(data, 'y', default_i_units)
             data.yaxis(r"\rm{Intensity}", default_i_units)
         return data
 
@@ -316,13 +314,10 @@ class FileReader(object):
         custom_config = get_custom_config()
         if use_q_units_default:
             default_q_units = getattr(custom_config, 'LOADER_Q_UNIT_ON_LOAD', '1/A')
-            set_loaded_units(data, 'x', default_q_units)
             data.xaxis("\\rm{Q_{x}}", default_q_units)
-            set_loaded_units(data, 'y', default_q_units)
             data.yaxis("\\rm{Q_{y}}", default_q_units)
         if use_i_units_default:
             default_i_units = getattr(custom_config, 'LOADER_I_UNIT_ON_LOAD', '1/cm')
-            set_loaded_units(data, 'z', default_i_units)
             data.zaxis("\\rm{Intensity}", default_i_units)
         return data
 
