@@ -82,4 +82,4 @@ cd installers
 :: READY FOR INNO
 %INNO% installer.iss
 cd Output
-xcopy setupSasView.exe %WORKSPACE%\sasview\dist
+copy setupSasView.exe %WORKSPACE%\sasview\dist
