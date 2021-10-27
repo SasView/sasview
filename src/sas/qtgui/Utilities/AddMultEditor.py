@@ -72,6 +72,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.setupSignals()
 
         self.list_models = self.readModels()
+        self.list_standard_models = self.readModels(std_only=True)
 
         # Fill models' comboboxes
         self.setupModels()
@@ -90,8 +91,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     def setupModels(self):
         """ Add list of models to 'Model1' and 'Model2' comboboxes """
         # Load the model dict
-        self.cbModel1.addItems(self.list_models)
-        self.cbModel2.addItems(self.list_models)
+        self.cbModel1.addItems(self.list_standard_models)
+        self.cbModel2.addItems(self.list_standard_models)
 
         # set the default initial value of Model1 and Model2
         index_ini_model1 = self.cbModel1.findText('sphere', QtCore.Qt.MatchFixedString)
@@ -108,12 +109,14 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         else:
             self.cbModel2.setCurrentIndex(0)
 
-    def readModels(self):
-        """ Generate list of models """
-        models = load_standard_models()
+    def readModels(self, std_only=False):
+        """ Generate list of all models """
+        s_models = load_standard_models()
         models_dict = {}
-        for model in models:
-            if model.category is None or 'custom' in model.category:
+        for model in s_models:
+            if model.category is None:
+                continue
+            if std_only and 'custom' in model.category:
                 continue
             models_dict[model.name] = model
 
@@ -282,7 +285,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel2.clear()
         self.cbModel2.blockSignals(False)
         # Retrieve the list of models
-        model_list = self.readModels()
+        model_list = self.readModels(std_only=True)
         # Populate the models comboboxes
         self.cbModel1.addItems(model_list)
         self.cbModel2.addItems(model_list)
