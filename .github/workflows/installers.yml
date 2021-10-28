@@ -137,22 +137,17 @@ jobs:
 
     ### Build the installer
 
-    - name: Build sasview pyinstaller (OSX)
+    - name: Build sasview with pyinstaller
       run: |
         cd installers
         pyinstaller sasview.spec
 
-    - name: Make tarball of sasview pyinstaller output directory
-      run: |
-        cd installers/dist
-        tar zcf sasview-pyinstaller-dist.tar.gz sasview
-
-    - name: Build sasview INNO setup package
+    - name: Build sasview with INNO setup package (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         iscc installers/installer.iss
 
-    - name: Publish installer package
+    - name: Publish installer package (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-artifact@v2
       with:
@@ -160,13 +155,13 @@ jobs:
         path: installers/Output/setupSasView.exe
         if-no-files-found: error
 
-    - name: Create dmg
+    - name: Create dmg file (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
         cd installers/dist
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
 
-    - name: Publish installer package
+    - name: Publish installer package (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v2
       with:
