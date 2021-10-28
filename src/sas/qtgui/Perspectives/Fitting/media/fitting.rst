@@ -26,14 +26,10 @@ Fitting Documentation
 
    Conversion of SANS to SESANS for Fitting <sesans/sans_to_sesans>
 
-   Fitting SESANS Data in Sasmodels <sesans/sesans_fitting>
-
-   Fitting SESANS Data in SasView <fitting_sesans>
-
    Writing a Plugin Model <plugin>
 
    Computations with a GPU <gpu_setup>
 
-   Scripting interface to sasmodels <scripting>
+   Scripting Interface to sasmodels <scripting>
 
    References <refs>
