@@ -138,39 +138,19 @@ jobs:
         python build_sphinx.py || true
 
 
-    - name: Publish pyinstaller components
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: SasView-PyInstaller-Dist-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
-        path: build/
-        if-no-files-found: error
-
     ### Build the installer
 
-    - name: Build sasview pyinstaller (OSX)
-      if: ${{ matrix.os == 'macos-latest' }}
+    - name: Build sasview pyinstaller
       run: |
         cd installers
         pyinstaller sasview.spec
 
-    - name: Build sasview pyinstaller (Windows)
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        cd installers
-        pyinstaller.exe sasview.spec
-
-    - name: Make tarball of sasview pyinstaller output directory
-      run: |
-        cd installers/dist
-        tar zcf sasview-pyinstaller-dist.tar.gz sasview
-
-    - name: Build sasview INNO setup package
+    - name: Build sasview with INNO setup package (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         iscc installers/installer.iss
 
-    - name: Publish installer package
+    - name: Publish installer package (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-artifact@v2
       with:
@@ -178,13 +158,13 @@ jobs:
         path: installers/Output/setupSasView.exe
         if-no-files-found: error
 
-    - name: Create dmg
+    - name: Create dmg file (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
         cd installers/dist
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
 
-    - name: Sign executable and create dmg
+    - name: Sign executable and create dmg (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       env:
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -203,7 +183,7 @@ jobs:
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
         codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
-    - name: Notarize Release Build
+    - name: Notarize Release Build (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: devbotsxyz/xcode-notarize@v1
       with:
@@ -212,13 +192,13 @@ jobs:
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
 
-    - name: Staple Release Build
+    - name: Staple Release Build (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: devbotsxyz/xcode-staple@v1
       with:
           product-path: "installers/dist/SasView5.dmg"
 
-    - name: Publish installer package
+    - name: Publish installer package (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v2
       with:
