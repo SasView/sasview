@@ -48,8 +48,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # center of the box
         # puts the center of box at the middle of the q-range (??)
 
-        self.center_x = 0.0002
-        self.center_y = 0.0003
+        self.center_x = (self.data.xmin + self.data.xmax) /2
+        self.center_y = (self.data.ymin + self.data.ymax) /2
 
         # Number of points on the plot
         self.nbins = 100
@@ -121,6 +121,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.horizontal_lines.clear()
         self.vertical_lines.clear()
         self.base.connect.clearall()
+        self.center.clear()
 
 
     def update(self):
@@ -133,6 +134,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.center.update()
             self.horizontal_lines.update(center=self.center)
             self.vertical_lines.update(center=self.center)
+
         # check if the horizontal lines have moved and
         # update the figure accordingly
         if self.horizontal_lines.has_move:
@@ -147,6 +149,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.horizontal_lines.update(x1=self.vertical_lines.x1,
                                          x2=self.vertical_lines.x2,
                                          width=self.vertical_lines.half_width)
+
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
