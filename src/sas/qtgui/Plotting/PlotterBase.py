@@ -112,6 +112,9 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar._actions['home'].triggered.connect(self._zoom_pan_handler)
+        self.toolbar._actions['back'].triggered.connect(self._zoom_pan_handler)
+        self.toolbar._actions['forward'].triggered.connect(self._zoom_pan_handler)
         self.canvas.mpl_connect('button_release_event', self._zoom_pan_handler)
         cid = self.canvas.mpl_connect('resize_event', self.onResize)
 
