@@ -650,6 +650,13 @@ The DREAM optimiser is the most sophisticated, but may not necessarily be the be
 option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
 initially.
 
+Some model parameters, for example, radii/lengths or orientation angles can be
+polydisperse; i.e. they can have a distribution of possible values. Polydisperse
+parameters are defined as such when the model is coded, and can be activated by
+clicking the *Polydispersity* checkbox on the *Fit Page*.
+
+
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Simultaneous Fit Mode
@@ -978,4 +985,4 @@ finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 05 Feb 2020
+.. note::  This help document was last changed by Steve King, 28Oct2021
