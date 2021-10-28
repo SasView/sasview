@@ -1,7 +1,9 @@
 name: Create release
 
 on:
-   [push, pull_request]
+  push
+  tags:
+    - 'v*' # Push events matching v*, i.e. v5.0.5
 
 defaults:
   run:
