@@ -112,6 +112,7 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
+        self.canvas.mpl_connect('button_release_event', self._zoom_pan_handler)
         cid = self.canvas.mpl_connect('resize_event', self.onResize)
 
         layout.addWidget(self.toolbar)
@@ -252,6 +253,12 @@ class PlotterBase(QtWidgets.QWidget):
     def onResize(self, event):
         """
         Redefine default resize event
+        """
+        pass
+
+    def _zoom_pan_handler(self, event):
+        """
+        Catch zoom and pan events for graph range
         """
         pass
 

@@ -465,20 +465,34 @@ class PlotterWidget(PlotterBase):
 
         self.canvas.draw_idle()
 
+    def _zoom_pan_handler(self, event):
+        if not self.setRange:
+            self.setRange = SetGraphRange(parent=self)
+        x_range = self.ax.get_xlim()
+        y_range = self.ax.get_ylim()
+        self.setRange.txtXmin.setText(str(x_range[0]))
+        self.setRange.txtXmax.setText(str(x_range[1]))
+        self.setRange.txtYmin.setText(str(y_range[0]))
+        self.setRange.txtYmax.setText(str(y_range[1]))
+        self._setGraphRange()
+
     def onSetGraphRange(self):
         """
         Show a dialog allowing setting the chart ranges
         """
         # min and max of data
         if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
-            x_range = self.setRange.xrange()
-            y_range = self.setRange.yrange()
-            if x_range is not None and y_range is not None:
-                self.setRange.rangeModified = (self.setRange.defaultXRange != x_range
-                                               or self.setRange.defaultYRange != y_range)
-                self.ax.set_xlim(x_range)
-                self.ax.set_ylim(y_range)
-                self.canvas.draw_idle()
+            self._setGraphRange()
+
+    def _setGraphRange(self):
+        x_range = self.setRange.xrange()
+        y_range = self.setRange.yrange()
+        if x_range is not None and y_range is not None:
+            self.setRange.rangeModified = (self.setRange.defaultXRange != x_range
+                                           or self.setRange.defaultYRange != y_range)
+            self.ax.set_xlim(x_range)
+            self.ax.set_ylim(y_range)
+            self.canvas.draw_idle()
 
     def onResetGraphRange(self):
         """
