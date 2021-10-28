@@ -655,7 +655,35 @@ polydisperse; i.e. they can have a distribution of possible values. Polydisperse
 parameters are defined as such when the model is coded, and can be activated by
 clicking the *Polydispersity* checkbox on the *Fit Page*.
 
+.. image:: enable_pd.png
 
+Clicking on the *Polydispersity* tab then provides access to the polydisperse
+parameters and allows the type (i.e. the *function* to be used) and 'width'
+the (*PD[ratio]*) to be adjusted. If necessary the 'step size' (*Npts*) and
+'range' (*Nsigs*) of the function can also be adjusted.
+
+.. image:: pd_tab.png
+
+For more information, see the descriptions of :ref:`polydispersityhelp` . In
+particular, pay attention to the Suggested Applications and Usage Notes therein.
+Note that SasView defaults to Gaussian distributions, but these will not always
+be the best choice. Also, the definition of *PD[ratio]* varies depending on
+the chosen distribution!
+
+It is possible to optimise a *PD[ratio]* parameter during fitting by checking
+the accompanying checkbox. However, this is usually only effective in the
+latter stages of a converging fit.
+
+Incoporating polydispersity in a fit can certainly improve the overall solution
+and add a dose of realism to it (few real systems are monodisperse!). But doing
+so will slow the fitting process, sometimes quite dramatically. In these
+circumstances enabling a GPU, if present, will help.
+
+.. image::gpu_options.png
+
+If a *potential* GPU device is present the dialog will show it. The *Test*
+button can then be used to check if your system has the necessary drivers to
+use it. But also see :ref:`gpu-setup` .
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
