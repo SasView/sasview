@@ -39,8 +39,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # center of the box
         # puts the center of box at the middle of the q-range (??)
 
-        self.center_x = 0.0002
-        self.center_y = 0.0003
+        self.center_x = (self.data.xmin + self.data.xmax) /2
+        self.center_y = (self.data.ymin + self.data.ymax) /2
 
         # Number of points on the plot
         self.nbins = 30
@@ -110,6 +110,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.horizontal_lines.clear()
         self.vertical_lines.clear()
         self.base.connect.clearall()
+        self.center.clear()
 
 
     def update(self):
@@ -122,6 +123,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.center.update()
             self.horizontal_lines.update(center=self.center)
             self.vertical_lines.update(center=self.center)
+
         # check if the horizontal lines have moved and
         # update the figure accordingly
         if self.horizontal_lines.has_move:
@@ -136,6 +138,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.horizontal_lines.update(x1=self.vertical_lines.x1,
                                          x2=self.vertical_lines.x2,
                                          width=self.vertical_lines.half_width)
+
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -274,6 +277,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         params["x_max"] = numpy.fabs(self.vertical_lines.x1)
         params["y_max"] = numpy.fabs(self.horizontal_lines.y1)
         params["nbins"] = self.nbins
+        params["fold"] = self.fold
         return params
 
     def setParams(self, params):
@@ -287,6 +291,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.x = float(numpy.fabs(params["x_max"]))
         self.y = float(numpy.fabs(params["y_max"]))
         self.nbins = params["nbins"]
+        self.fold = params["fold"]
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
