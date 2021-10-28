@@ -180,7 +180,10 @@ class PlotterBase(QtWidgets.QWidget):
     @yscale.setter
     def yscale(self, scale='linear'):
         """ Y-axis scale setter """
-        self.ax.set_yscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_yscale(scale)
+        if mpl.__version__ < "3.3":
+            self.ax.set_yscale(scale, nonposy='clip') if scale != 'linear' else self.ax.set_yscale(scale)
+        else:
+            self.ax.set_yscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_yscale(scale)
         self._yscale = scale
 
     @property
