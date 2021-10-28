@@ -13,7 +13,7 @@ dylib_list_resources = glob.glob(
 )
 
 sign_command = ['codesign', '--timestamp', '--options=runtime', '--verify', '--verbose=4', '--force',
-                '--sign \"Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)\"']
+                '--sign', '\"Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)\"']
 
 for sfile in list(itertools.chain(so_list, dylib_list, dylib_list_resources)):
     exec_command = sign_command
