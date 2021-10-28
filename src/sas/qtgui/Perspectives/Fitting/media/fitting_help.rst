@@ -657,9 +657,9 @@ clicking the *Polydispersity* checkbox on the *Fit Page*.
 
 .. image:: enable_pd.png
 
-Clicking on the *Polydispersity* tab then provides access to the polydisperse
+Clicking on the *Polydispersity* tab then provides access to these polydisperse
 parameters and allows the type (i.e. the *function* to be used) and 'width'
-the (*PD[ratio]*) to be adjusted. If necessary the 'step size' (*Npts*) and
+(the *PD[ratio]*) to be adjusted. If necessary the 'step size' (*Npts*) and
 'range' (*Nsigs*) of the function can also be adjusted.
 
 .. image:: pd_tab.png
@@ -679,7 +679,7 @@ and add a dose of realism to it (few real systems are monodisperse!). But doing
 so will slow the fitting process, sometimes quite dramatically. In these
 circumstances enabling a GPU, if present, will help.
 
-.. image::gpu_options.png
+.. image:: gpu_options.png
 
 If a *potential* GPU device is present the dialog will show it. The *Test*
 button can then be used to check if your system has the necessary drivers to
