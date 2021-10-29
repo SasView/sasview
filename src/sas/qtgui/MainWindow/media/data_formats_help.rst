@@ -180,17 +180,13 @@ For a description of the NXcanSAS format see:
 
 - http://cansas-org.github.io/NXcanSAS/classes/contributed_definitions/NXcanSAS.html
 
+For descriptions of the NIST 1D & 2D formats see:
+
+- https://github.com/sansigormacros/ncnrsansigormacros/wiki 
+
 For descriptions of the ISIS COLETTE (or 'RKH') 1D & 2D formats see:
 
 - https://www.isis.stfc.ac.uk/Pages/colette-ascii-file-format-descriptions.pdf
-
-For a description of the NIST 1D format see:
-
-- http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_IQ
-
-For a description of the NIST 2D format see:
-
-- http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_2DQxQy 
 
 For a description of the BSL/OTOKO format see:
 
@@ -198,4 +194,4 @@ For a description of the BSL/OTOKO format see:
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 27Oct2021
+.. note::  This help document was last changed by Steve King, 29Oct2021
