@@ -171,7 +171,7 @@ exe = EXE(pyz,
           upx=UPX,
           icon=os.path.join("../src/sas/sasview/images","ball.ico"),
           version="version.txt",
-          console=False )
+          console=True )
 
 # COLLECT creates a directory instead of a single file.
 coll = COLLECT(exe,
