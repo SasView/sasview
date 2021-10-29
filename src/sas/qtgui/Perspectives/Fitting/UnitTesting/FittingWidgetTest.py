@@ -4,6 +4,7 @@ import time
 import logging
 import os
 import inspect
+import glob
 
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -66,8 +67,10 @@ def find_plugin_models_mod():
     'sas/qtgui/Perspectives/Fitting/plugin_models'
     Modified to test handling of plugin models.
     """
-    qtgui_dir = os.getcwd()[:os.getcwd().find('qtgui')]
-    plugins_dir = os.path.abspath(os.path.join(qtgui_dir, 'qtgui/Perspectives/Fitting/plugin_models'))
+    plugins_dir = [
+        os.path.abspath(path) for path in glob.glob("**/plugin_models",recursive=True)
+        if os.path.normpath("qtgui/Perspectives/Fitting/plugin_models") in os.path.abspath(path)
+    ][0]
 
     plugins = {}
     for filename in os.listdir(plugins_dir):
