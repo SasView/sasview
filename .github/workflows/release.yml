@@ -2,7 +2,8 @@ name: Create release
 
 on:
   push
-
+  tags:
+    - 'v*' # Push events matching v*, i.e. v5.0.5
 
 defaults:
   run:
