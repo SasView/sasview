@@ -997,11 +997,6 @@ finding the peak.
 Fitting SESANS Data
 -------------------
 
-.. note::
-
-    To fit SESANS data from the command line in Python,
-    please see :ref:`sesans_fitting`.
-
 Since SasView version 4.1.1 it has been possible to fit SESANS data using
 the same fitting perspective as used to fit SANS data. This is accomplished
 using an on-the-fly :ref:`SESANS` from *Q*-space to real-space.
