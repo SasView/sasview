@@ -310,7 +310,7 @@ class LineInteractor(BaseInteractor):
         # type: () -> None
         """ Disconnect the input and clear the callbacks """
         if self.input:
-            self.input.textChanged.disconnect(self.inputChanged)
+            self.input.editingFinished.disconnect(self.inputChanged)
         self.setter = None
         self.getter = None
         self.input = None
