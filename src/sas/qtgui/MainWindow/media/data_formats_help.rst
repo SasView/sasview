@@ -26,13 +26,14 @@ mislabelled).
 --------------
 
 SasView recognizes 1D data either arranged in separated columns in ASCII
-('text') or XML files, or in arrays in binary HDF5 files, if the files have the
-following extensions (which are not case-sensitive):
+('text') or XML files, or in arrays in binary HDF5 files. This *includes* files
+with the following extensions (which are not case-sensitive) but which are
+expected to have particular formatting:
 
 *  .ABS
 *  .ASC
 *  .COR (in canSAS XML v1.0 and v1.1 formats *only*)
-*  .CSV
+*  .CSV (comma-separated)
 *  .DAT
 *  .H5, .NXS, .HDF, or .HDF5 (in NXcanSAS v1.0 and v1.1 formats *only*)
 *  .PDH (Anton Paar SAXSess format)
