@@ -4636,9 +4636,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return sym_dict
         model_name = self.kernel_module.name
         for param in self.getParamNames():
+            model_key = self.getModelKeyFromName(param)
             sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
-                self._model_model.item(self.getRowFromName(param), 1).text())
-        for param in self.getParamNamesPoly():
-            sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
-                self._poly_model.item(self.getRowFromName(param), 1).text())
+                self.model_dict[model_key].item(self.getRowFromName(param), 1).text())
         return sym_dict
+
+
