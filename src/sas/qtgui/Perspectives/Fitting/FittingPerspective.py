@@ -521,8 +521,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         for tab in self.getFitTabs():
             tab_name = tab.modelName()
             tab_constraints = tab.getConstraintsForAllModels()
-            for par, expr in tab_constraints:
-                constraints.extend((tab_name + "." + par, expr))
+            constraints.extend((tab_name + "." + par, expr) for par, expr in tab_constraints)
 
         return constraints
 
