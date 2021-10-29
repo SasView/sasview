@@ -16,31 +16,32 @@ and analyse other data adhering to the same file formats (e.g. DLS or NR data)
 but not necessarily recognise what that data represents (e.g. plot axes may be
 mislabelled).
 
-.. note:: From SasView 4.1 onwards, the :ref:`File_Converter_Tool` allows some
-          legacy formats to be converted into either the canSAS SASXML format
-          or the NeXus NXcanSAS format. These legacy formats include BSL/OTOKO,
-          output from FIT2D and some other SAXS-oriented software, and the ISIS
-          COLETTE (or 'RKH') 2D format.
+.. note:: From SasView 4.1 onwards (but not versions 5.0.0 or 5.0.1), the
+          :ref:`File_Converter_Tool` allows some legacy formats to be converted
+          into either the canSAS SASXML format or the NeXus NXcanSAS format.
+          These legacy formats include BSL/OTOKO, output from FIT2D and some
+          other SAXS-oriented software, and the ISIS COLETTE (or 'RKH') 2D format.
 
 1D SAS Formats
 --------------
 
 SasView recognizes 1D data either arranged in separated columns in ASCII
-('text') files, or in binary arrays in HDF5 files, if the files have the
+('text') or XML files, or in arrays in binary HDF5 files, if the files have the
 following extensions (which are not case-sensitive):
 
 *  .ABS
 *  .ASC
-*  .COR (in canSAS XML v1.0 and v1.1 formats)
+*  .COR (in canSAS XML v1.0 and v1.1 formats *only*)
 *  .CSV
 *  .DAT
+*  .H5, .NXS, .HDF, or .HDF5 (in NXcanSAS v1.0 and v1.1 formats *only*)
 *  .PDH (Anton Paar SAXSess format)
 *  .TXT
-*  .XML (in canSAS XML v1.0 and v1.1 formats)
+*  .XML (in canSAS XML v1.0 and v1.1 formats *only*)
 
-*  .H5, .NXS, .HDF, or .HDF5 (in NXcanSAS v1.0 and v1.1 formats)
-
-The CanSAS & NXcanSAS formats are both output by the `Mantid data reduction framework <http://www.mantidproject.org/>`_.
+The CanSAS & NXcanSAS formats are both output by the
+`Mantid data reduction framework <http://www.mantidproject.org/>`_ and the
+`NIST Igor data reduction routines <https://github.com/sansigormacros/ncnrsansigormacros/wiki/DataOutputFormats>`_.
 
 The ASCII formats can be viewed in any text editor (Notepad, vi, etc) but the
 HDF formats require a viewer, such as `HDFView <https://www.hdfgroup.org/downloads/hdfview/>`_.
@@ -74,9 +75,11 @@ extensions .ASC or .DAT) or HDF files in the NeXus NXcanSAS (HDF5) format
 (with the extension .H5, .NXS, .HDF, or .HDF5). The file extensions are not
 case-sensitive.
 
-The NXcanSAS format is output by the `Mantid data reduction framework <http://www.mantidproject.org/>`_.
+The NXcanSAS format is output by the 
+`Mantid data reduction framework <http://www.mantidproject.org/>`_ and the
+`NIST Igor data reduction routines <https://github.com/sansigormacros/ncnrsansigormacros/wiki/DataOutputFormats>`_.
 
-Most of the header lines in the `NIST 2D format <http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_2DQxQy>`_
+Most of the header lines in the `NIST 2D format <https://github.com/sansigormacros/ncnrsansigormacros/wiki/NCNROutput2D_QxQy>`_
 can be removed *except the last line*, and only the first three columns
 (*Qx, Qy,* and *I(Qx,Qy)*) are actually required.
 
@@ -136,7 +139,7 @@ Slit-Smeared Data
 SasView will only account for slit smearing if the data being processed are
 recognized as slit-smeared.
 
-Currently, only the canSAS \*.XML and NIST \*.ABS formats facilitate
+Currently, only the canSAS \*.XML, NIST \*.ABS and NXcanSAS formats facilitate
 slit-smeared data. The easiest way to include $\Delta q_v$ in a way
 recognizable by SasView is to mimic the \*.ABS format. The data must follow
 the normal rules for general ASCII files **but include 6 columns**, not 4
