@@ -489,8 +489,8 @@ Duplicate a model
 ^^^^^^^^^^^^^^^^^
 
 Clicking the "Duplicate" button will create a copy of the selected model(s).
-Naming of the duplicate follows the standard, with added * (n)* to the plugin
-model name, with *n* being the first unused yet integer.
+Naming of the duplicate follows the standard, with an *n* added to the
+plugin model name, where *n* is the first unused integer.
 
 Edit a model
 ^^^^^^^^^^^^
@@ -1029,6 +1029,10 @@ The model parameters can then be optimised by checking them as required
 and clicking the Fit button as is normal.
 
 .. image:: fitting_sesans_3.png
+
+Note that SESANS data is not subject to an incoherent background signal in the
+way that normal SANS data is. For this reason the *background* parameter in
+any model being used to fit SESANS data should be fixed at zero.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
