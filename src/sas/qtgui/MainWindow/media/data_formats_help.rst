@@ -4,16 +4,17 @@
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 .. WG Bouwman, DUT, added during CodeCamp-V in Oct 2016 the SESANS data format
 .. WG Bouwman, DUT, updated during CodeCamp-VI in Apr 2017 the SESANS data format
+.. J Krzywon, P Butler, S King, overhauled during PR Hackathon in Oct 2021
 
 .. _Formats:
 
 Data Formats
 ============
 
-SasView recognises 1D SAS (*I(Q) vs Q*), 2D SAS(*I(Qx,Qy) vs (Qx,Qy)*) and 1D
+SasView recognizes 1D SAS (*I(Q) vs Q*), 2D SAS(*I(Qx,Qy) vs (Qx,Qy)*) and 1D
 SESANS (*P(z) vs z*) data in several different file formats. It will also read
 and analyse other data adhering to the same file formats (e.g. DLS or NR data)
-but not necessarily recognise what that data represents (e.g. plot axes may be
+but not necessarily recognise what those data represent (e.g. plot axes may be
 mislabelled).
 
 .. note:: From SasView 4.1 onwards (but not versions 5.0.0 or 5.0.1), the
@@ -25,22 +26,24 @@ mislabelled).
 1D SAS Formats
 --------------
 
-SasView recognizes 1D data either arranged in separated columns in ASCII
-('text') or XML files, or in arrays in binary HDF5 files. This *includes* files
-with the following extensions (which are not case-sensitive) but which are
-expected to have particular formatting:
+SasView recognizes 1D data supplied in a number of specific formats, as identified
+by the file extensions below. It also incorporates a 'generic loader' which is
+called if all else fails. The generic loader will attempt to read data files of
+any extension *provided* the file is in ASCII ('text') format (i.e. not binary).
+So this includes, for example, comma-separated variable (CSV) files from a
+spreadsheet.
 
-*  .ABS
-*  .ASC
+The file extensions (which are not case sensitive) with specific meaning are:
+
+*  .ABS (NIST format)
+*  .ASC (NIST format)
 *  .COR (in canSAS XML v1.0 and v1.1 formats *only*)
-*  .CSV (comma-separated)
-*  .DAT
+*  .DAT (NIST format)
 *  .H5, .NXS, .HDF, or .HDF5 (in NXcanSAS v1.0 and v1.1 formats *only*)
 *  .PDH (Anton Paar SAXSess format)
-*  .TXT
 *  .XML (in canSAS XML v1.0 and v1.1 formats *only*)
 
-The CanSAS & NXcanSAS formats are both output by the
+The CanSAS & NXcanSAS standard formats are both output by the
 `Mantid data reduction framework <http://www.mantidproject.org/>`_ and the
 `NIST Igor data reduction routines <https://github.com/sansigormacros/ncnrsansigormacros/wiki/DataOutputFormats>`_.
 
@@ -48,20 +51,24 @@ The ASCII formats can be viewed in any text editor (Notepad, vi, etc) but the
 HDF formats require a viewer, such as `HDFView <https://www.hdfgroup.org/downloads/hdfview/>`_.
 
 The ASCII ('text') files are expected to have 2, 3, or 4 columns of values,
-separated by spaces or commas, in the following order:
+separated by whitespaces or commas or semicolons, in the following order:
 
     *Q, I(Q), ( dI(Q), dQ(Q) )*
     
-where dI(Q) is the uncertainty on the intensity value, and *dQ(Q)* **is the
-instrumental resolution in** *Q*, **assumed to have arisen from pinhole
-geometry**. If the data are slit-smeared, see `Slit-Smeared Data`_.
+where *Q* is assumed to have units of 1/Angstrom, *I(Q)* is assumed to have
+units of 1/cm, *dI(Q)* is the uncertainty on the intensity value (also as 1/cm),
+and *dQ(Q)* **is the one-sigma FWHM Gaussian instrumental resolution in** *Q*,
+**assumed to have arisen from pinhole geometry**. If the data are slit-smeared,
+see `Slit-Smeared Data`_.
 
-If using CSV output from, for example, a spreadsheet, ensure that it is not
-using commas as delimiters for the thousands. Also note that with some computer
-language settings commas in CSV files can be replaced by semi-colons!
+There must be a minimum of 5 lines of data in the file, and each line of data
+**must** contain the same number of entries (i.e. columns of data values).
 
 As a general rule, SasView will provide better fits when it is provided with
 more information (i.e. more columns) about each observation (i.e. data point).
+
+If using CSV output, ensure that it is not using commas as delimiters for the
+thousands.
 
 **Examples of these formats can be found in the \\test\\1d_data sub-folder
 in the SasView installation folder.**
@@ -76,13 +83,15 @@ extensions .ASC or .DAT) or HDF files in the NeXus NXcanSAS (HDF5) format
 (with the extension .H5, .NXS, .HDF, or .HDF5). The file extensions are not
 case-sensitive.
 
-The NXcanSAS format is output by the 
+The NXcanSAS standard format is output by the 
 `Mantid data reduction framework <http://www.mantidproject.org/>`_ and the
 `NIST Igor data reduction routines <https://github.com/sansigormacros/ncnrsansigormacros/wiki/DataOutputFormats>`_.
 
 Most of the header lines in the `NIST 2D format <https://github.com/sansigormacros/ncnrsansigormacros/wiki/NCNROutput2D_QxQy>`_
 can be removed *except the last line*, and only the first three columns
 (*Qx, Qy,* and *I(Qx,Qy)*) are actually required.
+
+Data values have the same meanings and units as for `1D SAS Formats`_.
 
 **Examples of these formats can be found in the \\test\\2d_data sub-folder
 in the SasView installation folder.**
