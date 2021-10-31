@@ -1281,13 +1281,13 @@ class MagSLD(object):
                               np.fabs(self.sld_my) +
                               np.fabs(self.sld_mz)).nonzero()
                 if len(is_nonzero[0]) > 0:
-                    self.sld_n = np.zeros((self.data_length))
+                    self.sld_n = np.zeros(self.data_length)
                     self.sld_n[is_nonzero] = sld_n
                 else:
-                    self.sld_n = np.full((self.data_length), sld_n)
+                    self.sld_n = np.full(self.data_length, sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n = np.full((self.data_length), sld_n)
+                self.sld_n = np.full(self.data_length, sld_n)
         else:
             self.sld_n = sld_n
 
@@ -1296,15 +1296,15 @@ class MagSLD(object):
         Sets mx, my, mz and abs(m).
         """ # Note: escaping
         if isinstance(sld_mx, float):
-            self.sld_mx = np.full((self.data_length), sld_mx)
+            self.sld_mx = np.full(self.data_length, sld_mx)
         else:
             self.sld_mx = sld_mx
         if isinstance(sld_my, float):
-            self.sld_my = np.full((self.data_length), sld_my)
+            self.sld_my = np.full(self.data_length, sld_my)
         else:
             self.sld_my = sld_my
         if isinstance(sld_mz, float):
-            self.sld_mz = np.full((self.data_length), sld_mz)
+            self.sld_mz = np.full(self.data_length, sld_mz)
         else:
             self.sld_mz = sld_mz
 
