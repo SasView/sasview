@@ -3,6 +3,8 @@
 import sys
 from pathlib import Path
 import warnings
+import platform
+import sys
 
 block_cipher = None
 PYTHON_LOC = sys.exec_prefix
@@ -18,8 +20,15 @@ datas = [
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
-    (os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'),
+    ('../docs/sphinx-docs/build/html','doc')
 ]
+#TODO: Hopefully we can get away from version specific packages
+if platform.system() == 'Darwin':
+    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
+    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
+    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','debugpy'),'debugpy'))
+else:
+    datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'))
 
 def add_data(data):
     for component in data:
@@ -113,19 +122,30 @@ pyz = PYZ(
     cipher=block_cipher
 )
 
-exe = EXE(
-    pyz,
-    a.scripts,
-    [],
-    exclude_binaries=True,
-    name='sasview',
-    debug=False,
-    bootloader_ignore_signals=False,
-    icon=os.path.join("../src/sas/sasview/images","ball.ico"),
-    strip=False,
-    upx=True,
-    console=True
-)
+if platform.system() == 'Darwin':
+    exe = EXE(
+          pyz,
+          a.scripts,
+          exclude_binaries=True,
+          name='sasview',
+          debug=False,
+          upx=False,
+          icon=os.path.join("../src/sas/sasview/images","ball.icns"),
+          version="version.txt",
+          console=False )
+else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name='sasview',
+        debug=False,
+        bootloader_ignore_signals=False,
+        icon=os.path.join("../src/sas/sasview/images","ball.ico"),
+        strip=False,
+        upx=True,
+        console=False)
 
 coll = COLLECT(
     exe,
@@ -137,3 +157,10 @@ coll = COLLECT(
     upx_exclude=[],
     name='sasview'
 )
+
+if platform.system() == 'Darwin':
+    app = BUNDLE(coll,
+        name='SasView5.app',
+        icon='../src/sas/sasview/images/ball.icns',
+        bundle_identifier='org.sasview.SasView5',
+        info_plist={'NSHighResolutionCapable': 'True'})

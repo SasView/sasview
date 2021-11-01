@@ -56,7 +56,7 @@ class ColorMapTest(unittest.TestCase):
 
         self.assertEqual(self.widget.lblWidth.text(), "0")
         self.assertEqual(self.widget.lblHeight.text(), "0")
-        self.assertEqual(self.widget.lblQmax.text(), "15.8")
+        self.assertEqual(self.widget.lblQmax.text(), "18")
         self.assertEqual(self.widget.lblStopRadius.text(), "-1")
         self.assertFalse(self.widget.chkReverse.isChecked())
         self.assertEqual(self.widget.cbColorMap.count(), 75)
@@ -139,7 +139,7 @@ class ColorMapTest(unittest.TestCase):
         # Emit new high value
         self.widget.slider.highValueChanged.emit(45)
         # Assure the widget received changes
-        self.assertEqual(self.widget.txtMinAmplitude.text(), "45")
+        self.assertEqual(self.widget.txtMaxAmplitude.text(), "45")
 
     def testOnMapIndexChange(self):
         '''Test the response to the combo box index change'''
