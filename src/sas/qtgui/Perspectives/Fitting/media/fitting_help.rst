@@ -650,6 +650,9 @@ The DREAM optimiser is the most sophisticated, but may not necessarily be the be
 option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
 initially.
 
+Polydisperse Parameters
+^^^^^^^^^^^^^^^^^^^^^^^
+
 Some model parameters, for example, radii/lengths or orientation angles can be
 polydisperse; i.e. they can have a distribution of possible values. Polydisperse
 parameters are defined as such when the model is coded, and can be activated by
@@ -667,12 +670,22 @@ parameters and allows the type (i.e. the *function* to be used) and 'width'
 For more information, see the descriptions of :ref:`polydispersityhelp` . In
 particular, pay attention to the Suggested Applications and Usage Notes therein.
 Note that SasView defaults to Gaussian distributions, but these will not always
-be the best choice. Also, the definition of *PD[ratio]* varies depending on
-the chosen distribution!
+be the best choice. Also, the definitions of the centre (e.g. whether it is the
+mean or median value, for example) and the actual width of the function will
+vary depending on the chosen distribution! For orientation distributions the
+*PD[ratio]* parameter is absolute. But for distributions applied to 'volume'
+(size) parameters the *PD[ratio]* parameter will always be relative to the
+current centre value.
+
+.. note:: **SasView distributions are implemented as number distributions
+          not volume distributions.**
 
 It is possible to optimise a *PD[ratio]* parameter during fitting by checking
 the accompanying checkbox. However, this is usually only effective in the
 latter stages of a converging fit.
+
+Using a GPU
+^^^^^^^^^^^
 
 Incoporating polydispersity in a fit can certainly improve the overall solution
 and add a dose of realism to it (few real systems are monodisperse!). But doing
