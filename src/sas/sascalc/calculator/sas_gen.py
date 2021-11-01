@@ -414,7 +414,8 @@ class OMFReader(object):
                         if meshunit.count("m") < 1:
                             msg = "Error: \n"
                             msg += "We accept only m as meshunit"
-                            raise ValueError(msg)
+                            logging.error(msg)
+                            return None
                     if s_line[0].lower().count("xbase") > 0:
                         xbase = s_line[1].lstrip()
                     if s_line[0].lower().count("ybase") > 0:
@@ -452,7 +453,8 @@ class OMFReader(object):
                         if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
                             msg = "Error: \n"
                             msg += "We accept only mT or A/m as valueunit"
-                            raise ValueError(msg)    
+                            logging.error(msg)    
+                            return None
                     if s_line[0].lower().count("valuemultiplier") > 0:
                         valuemultiplier = s_line[1].lstrip()
                     if s_line[0].lower().count("valuerangeminmag") > 0:
