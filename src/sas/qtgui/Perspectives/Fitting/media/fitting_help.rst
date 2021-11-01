@@ -102,7 +102,7 @@ SasView offers the flexibility to automatically constrain (tie) some of these
 parameters together so that, for example, *radius_effective* = *radius*. See
 :ref:`Add/Multiply_Models`.
 
-Also see :ref:`Interaction_and_Mixture_Models` for further information.
+Also see :ref:`Interaction_Models` for further information.
 
 Mixture Models
 ^^^^^^^^^^^^^^
@@ -667,8 +667,11 @@ parameters and allows the type (i.e. the *function* to be used) and 'width'
 
 .. image:: pd_tab.png
 
-For more information, see the descriptions of :ref:`polydispersityhelp` . In
+For more information, see the descriptions of :ref:`polydispersityhelp`. In
 particular, pay attention to the Suggested Applications and Usage Notes therein.
+The detail of how SasView computes the scattering from polydisperse systems is
+described in the :ref:`PStheory` section.
+
 Note that SasView defaults to Gaussian distributions, but these will not always
 be the best choice. Also, the definitions of the centre (e.g. whether it is the
 mean or median value, for example) and the actual width of the function will
@@ -677,12 +680,28 @@ vary depending on the chosen distribution! For orientation distributions the
 (size) parameters the *PD[ratio]* parameter will always be relative to the
 current centre value.
 
-.. note:: **SasView distributions are implemented as number distributions
-          not volume distributions.**
+.. note:: **Polydispersity distributions in SasView define the number density
+           of the given population of scatterers. The resulting scattering is
+           then the number average over the distribution.**
 
 It is possible to optimise a *PD[ratio]* parameter during fitting by checking
 the accompanying checkbox. However, this is usually only effective in the
 latter stages of a converging fit.
+
+.. note:: Neither the *PD[ratio]*, or the parameter to which it is applied, can
+          be optimised if using an Array Distribution. See
+          :ref:`polydispersityhelp`.
+
+Reparameterizing Models
+^^^^^^^^^^^^^^^^^^^^^^^
+
+It is also possible to reparameterize a particle model, for instance, to give
+greater control over polydispersity due to intra-particle constraints, see
+:ref:`Reparameterized_Models`. For example, if the particles aspect ratio is
+constrained but not its volume, or if its volume must be preserved but a range
+of aspect ratios are permitted for each volume. This may require a User-Defined
+distribution function to fully describe the model (see
+:ref:`polydispersityhelp`).
 
 Using a GPU
 ^^^^^^^^^^^
