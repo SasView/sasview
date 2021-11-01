@@ -20,8 +20,9 @@ mislabelled).
 .. note:: From SasView 4.1 onwards (but not versions 5.0.0 or 5.0.1), the
           :ref:`File_Converter_Tool` allows some legacy formats to be converted
           into either the canSAS SASXML format or the NeXus NXcanSAS format.
-          These legacy formats include BSL/OTOKO, output from FIT2D and some
-          other SAXS-oriented software, and the ISIS COLETTE (or 'RKH') 2D format.
+          These legacy formats include 1D/2D BSL/OTOKO, 1D output from FIT2D
+          and some other SAXS-oriented software, and the ISIS COLETTE (or
+          'RKH') 2D format.
 
 1D SAS Formats
 --------------
@@ -78,10 +79,11 @@ in the SasView installation folder.**
 2D SAS Formats
 --------------
 
-SasView will read ASCII ('text') files in the NIST 2D format (with the
-extensions .ASC or .DAT) or HDF files in the NeXus NXcanSAS (HDF5) format
-(with the extension .H5, .NXS, .HDF, or .HDF5). The file extensions are not
-case-sensitive.
+SasView recognizes 2D data only when supplied in ASCII ('text') files in the
+NIST 2D format (with the extensions .ASC or .DAT) or HDF files in the NeXus
+NXcanSAS (HDF5) format (with the extension .H5, .NXS, .HDF, or .HDF5). The file
+extensions are not case-sensitive. Data in the old ISIS 2D format must be
+converted using the :ref:`File_Converter_Tool`.
 
 The NXcanSAS standard format is output by the 
 `Mantid data reduction framework <http://www.mantidproject.org/>`_ and the
@@ -92,6 +94,10 @@ can be removed *except the last line*, and only the first three columns
 (*Qx, Qy,* and *I(Qx,Qy)*) are actually required.
 
 Data values have the same meanings and units as for `1D SAS Formats`_.
+
+*2D image data* can be translated into 2D 'pseudo-data' using the
+:ref:`Image_Viewer_Tool`, but this should only be done with an abundance of
+caution.
 
 **Examples of these formats can be found in the \\test\\2d_data sub-folder
 in the SasView installation folder.**
@@ -131,12 +137,18 @@ Coordinate Formats
 ------------------
 
 The :ref:`SANS_Calculator_Tool` in SasView recognises ASCII ('text') files
-containing coordinate data with the following extensions (which are not
-case-sensitive):
+containing coordinate data (a grid of 'voxels') with the following extensions
+(which are not case-sensitive):
 
-*  .PDB (Protein Data Bank format)
-*  .OMF (OOMMF micromagnetic simulation format)
+*  .PDB (`Protein Data Bank format <https://www.wwpdb.org/documentation/file-format>`_)
+*  .OMF (`OOMMF micromagnetic simulation format <https://math.nist.gov/oommf/doc/userguide20a2/userguide/Vector_Field_File_Format_OV.html>`_)
 *  .SLD (Spin-Lattice Dynamics simulation format)
+
+In essence, coordinate formats specify a location and one or more properties of
+that location (e.g. what it represents, its volume, or magnetisation, etc). The
+PDB/OMF/SLD formats all use a rectangular grid of voxels.
+
+Coordinate formats such as .VTK or .STL are not currently supported by SasView.
 
 **Examples of these formats can be found in the \\test\\coordinate_data
 sub-folder in the SasView installation folder.**
