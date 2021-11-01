@@ -105,7 +105,6 @@ spheres. For this we will use netgen, and the following python script::
         geo.Draw()
         mesh = Mesh(geo.GenerateMesh(maxh=3, curvaturesafety=1))
         mesh.Curve(3)
-        mesh.Refine()
         mesh.GetMaterials(), mesh.GetBoundaries()
         mur = mesh.MaterialCF({"magnet" : 2}, default=0)
         # alter the nuclear SLD here      ^
@@ -119,8 +118,8 @@ spheres. For this we will use netgen, and the following python script::
 
 This script sets the nuclear SLD to 2x10\ :sup:`-6`\ |Ang|:sup:`-2`
 and the magnetic SLD to (1x10\ :sup:`-6`, 0, 0)\ |Ang|:sup:`-2` giving
-$R=4$.Note: For some versions of netgen, you may need a key "legacy =True" in
-VTKOutput to generate a file.
+$R=4$.Note: The data have been produced with Netgen 6.2. For some versions of netgen, 
+you may need a key "legacy =True" in VTKOutput to generate a file.
 
 To obtain the required $R$ values the code above should be altered where indicated 
 to use nuclear SLDs of:
