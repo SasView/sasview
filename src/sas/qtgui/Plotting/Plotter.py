@@ -7,6 +7,7 @@ import sys
 import matplotlib as mpl
 import numpy as np
 from matplotlib.font_manager import FontProperties
+from packaging import version
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
@@ -178,7 +179,7 @@ class PlotterWidget(PlotterBase):
         markersize = data.markersize
 
         # Include scaling (log vs. linear)
-        if mpl.__version__ < "3.3":
+        if version.parse(mpl.__version__) < version.parse("3.3"):
             ax.set_xscale(self.xscale, nonposx='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
             ax.set_yscale(self.yscale, nonposy='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
         else:
