@@ -113,13 +113,14 @@ spheres. For this we will use netgen, and the following python script::
         Draw (mag, mesh, "M-field", draw_surf=False)   
         Draw (mur, mesh, "Nuclear", draw_surf=False)   
         # output as vtk
-        vtk = VTKOutput(ma=mesh,coefs=[mur,mag],names=["M-field","Nuclear"],filename="sphere_refined",subdivision=3)
+        vtk = VTKOutput(ma=mesh,coefs=[mur,mag],names=["M-field","Nuclear"],filename="sphere_refined",subdivision=3,legacy=True)
         vtk.Do()
 
 This script sets the nuclear SLD to 2x10\ :sup:`-6`\ |Ang|:sup:`-2`
 and the magnetic SLD to (1x10\ :sup:`-6`, 0, 0)\ |Ang|:sup:`-2` giving
-$R=4$.Note: The data have been produced with Netgen 6.2. For some versions of netgen, 
-you may need a key "legacy =True" in VTKOutput to generate a file.
+$R=4$.Note: The data have been produced with Netgen 6.2, which creates .vtu 
+files by default. The key "legacy=True" is used in VTKOutput to produce legacy .vtk files.
+For older versions of netgen, this argument may not be required.
 
 To obtain the required $R$ values the code above should be altered where indicated 
 to use nuclear SLDs of:
