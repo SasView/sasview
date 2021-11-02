@@ -1,4 +1,12 @@
-import sys, logging, subprocess, pkg_resources, json
+import sys
+import logging
+import subprocess
+import pkg_resources
+import json
+import pathlib
+
+import sas
+
 
 
 class PackageGatherer:
@@ -66,84 +74,95 @@ class PackageGatherer:
 
         Use a variaty of method, for example a module.version call, to attempt to get the module version of each
         module that has been imported in this instance of running SasView. The sys.modules command lists the
-        imported modules. A list of modules who's version number cannot be found is also included.
+        imported modules. A list of modules whose version number cannot be found is also included.
 
         Returns
         -------
         module_versions_dict : dict
             A dictionary with the module names as the key, with their respective version numbers as the value.
         """
-
-        module_versions_dict = {'python': sys.version}
+        module_versions_dict = {'python': sys.version, 'SasView': sas.sasview.__version__}
         unattainable_modules = []
+        # Generate a list of standard modules by looking at the local python library
+        standard_lib = [path.stem.split('.')[0] for path in pathlib.Path(pathlib.__file__).parent.absolute().glob('*')]
 
         for mod in sys.modules.keys():
 
-            # Not a built in python module, which has no version, only the python version
-            if mod not in sys.builtin_module_names:
+            # A built in python module or a local file, which have no version, only the python/SasView version
+            if mod in sys.builtin_module_names or mod.split('.')[0] in standard_lib or mod.split('.')[0] == 'sas':
+                continue
 
-                # if starts with sas, it's a local file so skip
-                if mod.split('.')[0] != 'sas':
+            # Modules that require specific methods to get the version number
+            if "PyQt5" in mod:
+                try:
+                    from PyQt5.QtCore import QT_VERSION_STR, PYQT_VERSION_STR
+                except:
+                    unattainable_modules.append(["Qt", "PyQt"])
+                else:
+                    module_versions_dict["Qt"] = QT_VERSION_STR
+                    module_versions_dict["PyQt"] = PYQT_VERSION_STR
+                continue
 
-                    # Different attempts of retrieving the modules version
-                    try:
-                        module_versions_dict[mod] = __import__(mod).__version__
-                    except AttributeError:
+            # Different attempts of retrieving the modules version
+            try:
+                module_versions_dict[mod] = __import__(mod).__version__
+            except AttributeError:
+                # Module has no __version__ attribute
+                pass
+            except Exception as x:
+                # Unable to access module
+                logging.error(f"{x} when attempting to access {mod} version using .__version__")
+                pass
+            else:
+                continue
 
-                        try:
-                            module_versions_dict[mod] = __import__(mod).version
-                        except AttributeError:
+            try:
+                module_versions_dict[mod] = __import__(mod).version
+            except AttributeError:
+                # Module has no .version attribute
+                pass
+            except Exception as x:
+                # Unable to access module
+                logging.error(f"{x} when attempting to access {mod} version using .version")
+                pass
+            else:
+                continue
 
-                            # Unreliable, so last option
-                            try:
-                                module_versions_dict[mod] = pkg_resources.get_distribution(mod).version
-                            except:
-                                # Modules without a formatted version, and that cannot be found by pkg_resources
-                                unattainable_modules.append(mod)
-                                pass
+            # Unreliable, so last option
+            try:
+                module_versions_dict[mod] = pkg_resources.get_distribution(mod).version
+            except:
+                # Modules that cannot be found by pkg_resources
+                pass
+            else:
+                continue
 
-                                # Below is code that calculates the version of each module using pip, however it is
-                                # very time consuming, and only is useful for a handful of modules, like PyQt5
+            # Below is code that calculates the version of each module using pip, however it is
+            # very time consuming, and only is useful for a handful of modules
+            # try:
+            #     pip_module_show = str(subprocess.check_output(f"pip show {mod}"), 'utf-8')
+            #     show_list = pip_module_show.replace("\r\n", ",").split(",")
+            #     for sec in show_list:
+            #         if sec.startswith("Version"):
+            #             module_versions_dict[mod] = sec.split(":")[1].strip()
+            #         else:
+            #             # Unalbe to get  version for this specific module
+            #             pass
+            # except Exception as x:
+            #     # Module not available through pip
+            #     logging.error(f"{x} when attempting to get the version of {mod} through pip")
+            #     pass
+            # else:
+            #     continue
 
-                                # try:
-                                #     pip_module_show = str(subprocess.check_output(f"pip show {mod}"), 'utf-8')
-                                #     show_list = pip_module_show.replace("\r\n", ",").split(",")
-                                #     for sec in show_list:
-                                #         if sec.startswith("Version"):
-                                #             module_versions_dict[mod] = sec.split(":")[1].strip()
-                                #         else:
-                                #             # Unalbe to get  version for this specific module
-                                #             pass
-                                # except Exception as x:
-                                #     # Module not available through pip
-                                #     logging.error(f"{x} when attempting to get the version of {mod} through pip")
-                                #     pass
-
-                        except Exception as x:
-                            # Unable to access module
-                            logging.error(f"{x} when attempting to access {mod} version using .version")
-                            pass
-
-                    except Exception as x:
-                        # Unable to access module
-                        logging.error(f"{x} when attempting to access {mod} version using .__version__")
-                        pass
-
-                    # Modules that require specific methods to get the version number
-                    if "PyQt5" in mod:
-                        try:
-                            from PyQt5.QtCore import QT_VERSION_STR, PYQT_VERSION_STR
-                            module_versions_dict["Qt"] = QT_VERSION_STR
-                            module_versions_dict["PyQt"] = PYQT_VERSION_STR
-                        except:
-                            unattainable_modules.append(["Qt", "PyQt"])
-                            pass
+            # Modules version number could not be attained by any of the previous methods
+            unattainable_modules.append(mod)
 
         # Clean up
         module_versions_dict = self.remove_duplicate_modules(module_versions_dict)
         unattainable_modules = self.format_unattainable_modules_list(module_versions_dict, unattainable_modules)
 
-        # Modules who's version number could not be found
+        # Modules whose version number could not be found
         module_versions_dict["Can't get version number for following modules"] = unattainable_modules
 
         return module_versions_dict
@@ -191,7 +210,7 @@ class PackageGatherer:
     def format_unattainable_modules_list(self, modules_dict, unattainable_modules):
         """Format module names in the unattainable_modules list
 
-        The unattainable_modules is a list of modules who's version number could not be found. This method rename each
+        The unattainable_modules is a list of modules whose version number could not be found. This method rename each
         module in the unattainable_modules to it's parent modules name, remove modules that already have a version
         number and remove duplicate modules from the unattainable_modules list. Entries may appear in the
         unattainable_modules if they are a class in a module, and the version number could not be ascertained from
@@ -202,12 +221,12 @@ class PackageGatherer:
         modules_dict : dict
             A dictionary with the module names as the key, with their respective version numbers as the value.
         unattainable_modules : list
-            A list of modules who's version number could not be found.
+            A list of modules whose version number could not be found.
 
         Returns
         -------
         output_list : list
-            A reduced / clean list of modules who's version number could not be found
+            A reduced / clean list of modules whose version number could not be found
 
         """
 
