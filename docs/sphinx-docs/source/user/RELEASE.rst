@@ -45,6 +45,12 @@ There are also some new features in this version:
   identifying the data by its filename. Right-click on a dataset in the Data Explorer
   to activate.
 
+There has also been a technical change in this version to how the volume
+normalisation is computed. The change was made in Sasmodels 1.0.5 with which
+this version is built and will affect all future versions of SasView. The
+technical details of the change are described
+`here <https://github.com/SasView/sasview/issues/1698#issuecomment-718979190>`_.
+
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 * sasview #1725: Horizontal line at y=0 needed in P(r) plots
