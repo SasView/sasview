@@ -148,7 +148,7 @@ In essence, coordinate formats specify a location and one or more properties of
 that location (e.g. what it represents, its volume, or magnetisation, etc). The
 PDB/OMF/SLD formats all use a rectangular grid of voxels.
 
-Coordinate formats such as .VTK or .STL are not currently supported by SasView.
+The .STL coordinate format is not currently supported by SasView.
 
 **Examples of these formats can be found in the \\test\\coordinate_data
 sub-folder in the SasView installation folder.**
