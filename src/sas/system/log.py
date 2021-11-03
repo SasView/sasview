@@ -6,7 +6,7 @@ import os
 import sys
 import os.path
 
-import pkg_resources
+import importlib.resources
 
 '''
 Module that manages the global logging
@@ -19,6 +19,7 @@ class SetupLogger(object):
     '''
 
     def __init__(self, logger_name):
+        self._config_file = None
         self._find_config_file()
         self.name = logger_name
 
@@ -42,8 +43,8 @@ class SetupLogger(object):
         return logger
 
     def _read_config_file(self):
-        if self.config_file is not None:
-            logging.config.fileConfig(self.config_file)
+        if self._config_file is not None:
+            logging.config.fileConfig(self._config_file)
 
     def _update_all_logs_to_debug(self, logger):
         '''
@@ -60,27 +61,13 @@ class SetupLogger(object):
         Debug ./sasview/
         Packaging: sas/sasview/
         Packaging / production does not work well with absolute paths
-        thus the multiple paths below
+        thus importlib is used to find a filehandle to the resource
+        wherever it is actually located.
+
+        Returns a TextIO instance that is open for reading the resource.
         '''
-        places_to_look_for_conf_file = [
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
-            filename,
-            os.path.join("sas", "system", filename),
-            os.path.join(os.getcwd(), "sas", "system", filename),
-            os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), filename) #For OSX app
-        ]
-
-        # To avoid the exception in OSx
-        # NotImplementedError: resource_filename() only supported for .egg, not .zip
+        self._config_file = None
         try:
-            places_to_look_for_conf_file.append(
-                pkg_resources.resource_filename(__name__, filename))
-        except NotImplementedError:
-            pass
-
-        for filepath in places_to_look_for_conf_file:
-            if os.path.exists(filepath):
-                self.config_file = filepath
-                return
-        print(f"'{filename}' not found.", file=sys.stderr)
-        self.config_file = None
+            self._config_file = importlib.resources.open_text('sas', filename)
+        except FileNotFoundError:
+            print(f"ERROR: '{filename}' not found...", file=sys.stderr)
