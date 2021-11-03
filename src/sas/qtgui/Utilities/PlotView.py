@@ -65,12 +65,14 @@ class EmbeddedPylab(object):
     def __exit__(self, *args, **kw):
         # delay loading pylab until matplotlib.use() is called
         from matplotlib._pylab_helpers import Gcf
-        Gcf._activeQue = [f for f in Gcf._activeQue if f is not self.fm]
-        try:
-            del Gcf.figs[-1]
-        except KeyError:
-            pass
-
+        if hasattr(Gcf, '_activeQue'):  # CRUFT: MPL < 3.3.1
+            Gcf._activeQue = [f for f in Gcf._activeQue if f is not self.fm]
+            try:
+                del Gcf.figs[-1]
+            except KeyError:
+                pass
+        else:
+            Gcf.figs.pop(self.fm.num, None)
 
 class _PlotViewShared(object):
     title = 'Plot'
