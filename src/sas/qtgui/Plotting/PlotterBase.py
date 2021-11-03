@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib import rcParams
 
+from packaging import version
+
 DEFAULT_CMAP = mpl.cm.jet
 from sas.qtgui.Plotting.PlotterData import Data1D
 
@@ -180,7 +182,7 @@ class PlotterBase(QtWidgets.QWidget):
     @yscale.setter
     def yscale(self, scale='linear'):
         """ Y-axis scale setter """
-        if mpl.__version__ < "3.3":
+        if version.parse(mpl.__version__) < version.parse("3.3"):
             self.ax.set_yscale(scale, nonposy='clip') if scale != 'linear' else self.ax.set_yscale(scale)
         else:
             self.ax.set_yscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_yscale(scale)
@@ -195,7 +197,10 @@ class PlotterBase(QtWidgets.QWidget):
     def xscale(self, scale='linear'):
         """ X-axis scale setter """
         self.ax.cla()
-        self.ax.set_xscale(scale)
+        if version.parse(mpl.__version__) < version.parse("3.3"):
+            self.ax.set_xscale(scale, nonposx='clip') if scale != 'linear' else self.ax.set_xscale(scale)
+        else:
+            self.ax.set_xscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_xscale(scale)
         self._xscale = scale
 
     @property
