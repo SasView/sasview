@@ -437,9 +437,9 @@ class OMFReader(object):
         :return: x, y, z, sld_n, sld_mx, sld_my, sld_mz
         """
         desc = ""
-        mx = np.zeros(0)
-        my = np.zeros(0)
-        mz = np.zeros(0)
+        mx = []
+        my = []
+        mz = []
         try:
             input_f = open(path, 'rb')
             buff = decode(input_f.read())
@@ -459,9 +459,9 @@ class OMFReader(object):
                         _mx = mag2sld(_mx, valueunit)
                         _my = mag2sld(_my, valueunit)
                         _mz = mag2sld(_mz, valueunit)
-                        mx = np.append(mx, _mx)
-                        my = np.append(my, _my)
-                        mz = np.append(mz, _mz)
+                        mx.append(_mx)
+                        my.append(_my)
+                        mz.append(_mz)
                     except Exception as exc:
                         # Skip non-data lines
                         logging.error(str(exc)+" when processing %r"%line)
@@ -482,7 +482,8 @@ class OMFReader(object):
                         if meshunit.count("m") < 1:
                             msg = "Error: \n"
                             msg += "We accept only m as meshunit"
-                            raise ValueError(msg)
+                            logging.error(msg)
+                            return None
                     if s_line[0].lower().count("xbase") > 0:
                         xbase = s_line[1].lstrip()
                     if s_line[0].lower().count("ybase") > 0:
@@ -520,7 +521,8 @@ class OMFReader(object):
                         if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
                             msg = "Error: \n"
                             msg += "We accept only mT or A/m as valueunit"
-                            raise ValueError(msg)    
+                            logging.error(msg)    
+                            return None
                     if s_line[0].lower().count("valuemultiplier") > 0:
                         valuemultiplier = s_line[1].lstrip()
                     if s_line[0].lower().count("valuerangeminmag") > 0:
@@ -553,6 +555,9 @@ class OMFReader(object):
                             = mag2sld(float(valuerangeminmag), valueunit)
                         output.valuerangemaxmag \
                             = mag2sld(float(valuerangemaxmag), valueunit)
+            mx = np.reshape(mx, (len(mx),))
+            my = np.reshape(my, (len(my),))
+            mz = np.reshape(mz, (len(mz),))
             output.set_m(mx, my, mz)
             return output
         except Exception:
@@ -620,25 +625,25 @@ class PDBReader(object):
                         _pos_x = float(line[30:38].strip())
                         _pos_y = float(line[38:46].strip())
                         _pos_z = float(line[46:54].strip())
-                        pos_x = np.append(pos_x, _pos_x)
-                        pos_y = np.append(pos_y, _pos_y)
-                        pos_z = np.append(pos_z, _pos_z)
+                        pos_x.append(_pos_x)
+                        pos_y.append(_pos_y)
+                        pos_z.append(_pos_z)
                         try:
                             val = nsf.neutron_sld(atom_name)[0]
                             # sld in Ang^-2 unit
                             val *= 1.0e-6
-                            sld_n = np.append(sld_n, val)
+                            sld_n.append(val)
                             atom = formula(atom_name)
                             # cm to A units
                             vol = 1.0e+24 * atom.mass / atom.density / NA
-                            vol_pix = np.append(vol_pix, vol)
+                            vol_pix.append(vol)
                         except Exception:
                             logging.info("Error: set the sld of %s to zero"% atom_name)
-                            sld_n = np.append(sld_n, 0.0)
-                        sld_mx = np.append(sld_mx, 0)
-                        sld_my = np.append(sld_my, 0)
-                        sld_mz = np.append(sld_mz, 0)
-                        pix_symbol = np.append(pix_symbol, atom_name)
+                            sld_n.append(0.0)
+                        sld_mx.append(0)
+                        sld_my.append(0)
+                        sld_mz.append(0)
+                        pix_symbol.append(atom_name)
                     elif line[0:6] == 'CONECT':
                         toks = line.split()
                         num = int(toks[1]) - 1
@@ -667,7 +672,15 @@ class PDBReader(object):
                         z_lines.append(z_line)
                 except Exception as exc:
                     logging.error(exc)
-
+            pos_x = np.reshape(pos_x, (len(pos_x),))
+            pos_y = np.reshape(pos_y, (len(pos_y),))
+            pos_z = np.reshape(pos_z, (len(pos_z),))    
+            sld_n = np.reshape(sld_n, (len(sld_n),)) 
+            sld_mx = np.reshape(sld_mx, (len(sld_mx),))    
+            sld_my = np.reshape(sld_my, (len(sld_my),)) 
+            sld_mz = np.reshape(sld_mz, (len(sld_mz),))  
+            vol_pix = np.reshape(vol_pix, (len(vol_pix),))   
+            pix_symbol = np.reshape(pix_symbol, (len(pix_symbol),))                                                             
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
             output.filename = os.path.basename(path)
