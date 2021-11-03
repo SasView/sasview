@@ -1,13 +1,20 @@
 import sys
 import os
+from matplotlib.figure import Figure
 import numpy
 import logging
 import time
 import timeit
 
+from scipy.spatial.transform import Rotation
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+
+from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from matplotlib import __version__ as mpl_version
 
 from twisted.internet import threads
 
@@ -19,6 +26,7 @@ from sas.sascalc.calculator import sas_gen
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Plotter import Plotter
+from sas.qtgui.Plotting.Arrow3D import Arrow3D
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -80,6 +88,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data_to_plot = None
         self.graph_num = 1      # index for name of graph
 
+        # finish UI setup - install qml window
+        self.setup_display()
+
         # combox box
         self.cbOptionsCalc.currentIndexChanged.connect(self.change_is_avg)
         # prevent layout shifting when widget hidden
@@ -93,7 +104,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
                             self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
                             self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
-                            self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize]
+                            self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize, self.txtEnvYaw,
+                            self.txtEnvPitch, self.txtEnvRoll, self.txtSampleYaw, self.txtSamplePitch, self.txtSampleRoll]
         self.invalidLineEdits = []
         for lineEdit in self.lineEdits:
             lineEdit.textChanged.connect(self.gui_text_changed_slot)     # when text is changed
@@ -128,6 +140,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMx.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMy.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
+
+        #update coord display
+        self.txtEnvYaw.textChanged.connect(self.update_coords)
+        self.txtEnvPitch.textChanged.connect(self.update_coords)
+        self.txtEnvRoll.textChanged.connect(self.update_coords)
+        self.txtSampleYaw.textChanged.connect(self.update_coords)
+        self.txtSamplePitch.textChanged.connect(self.update_coords)
+        self.txtSampleRoll.textChanged.connect(self.update_coords)
+        self.txtUpTheta.textChanged.connect(self.update_polarisation_coords)
+        self.txtUpPhi.textChanged.connect(self.update_polarisation_coords)
 
         # setup initial configuration
         self.checkboxNucData.setEnabled(False)
@@ -175,7 +197,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtYstepsize.setValidator(
             QtGui.QRegExpValidator(validat_regex_float, self.txtYstepsize))
         self.txtZstepsize.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtZstepsize))            
+            QtGui.QRegExpValidator(validat_regex_float, self.txtZstepsize))  
+
+        self.txtEnvYaw.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvYaw))
+        self.txtEnvPitch.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvPitch))   
+        self.txtEnvRoll.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvRoll)) 
+        self.txtSampleYaw.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSampleYaw))
+        self.txtSamplePitch.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSamplePitch))   
+        self.txtSampleRoll.setValidator(
+            QtGui.QRegExpValidator(validat_regex_float, self.txtSampleRoll))   
 
         # 0 < Qmax <= 1000
         validat_regex_q = QtCore.QRegExp('^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
@@ -218,7 +253,110 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnitx.setStyleSheet(new_font)
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
+
+    def setup_display(self):
+        """
+        This function sets up the GUI display of the different coordinate systems.
+        Since these cannot be set in the .ui file they should be QWidgets added to the self.coord_display layout.
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
+        self.view_azim = 45
+        self.view_elev = 45
+        self.mouse_down = False
+        sampleWindow = FigureCanvas(Figure())
+        axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        envWindow = FigureCanvas(Figure())
+        axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        beamWindow = FigureCanvas(Figure())
+        axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        self.coord_windows = [sampleWindow, envWindow, beamWindow]
+        self.coord_axes = [axes_sample, axes_env, axes_beam]
+        self.coord_arrows = []
+        titles = ["sample", "environment", "beamline"]
+        for i in range(len(self.coord_windows)):
+            self.coordDisplay.addWidget(self.coord_windows[i])
+            if int(mpl_version.split(".")[0]) >= 3: # how mpl plots 3D graphs changed in 3.3.0 to allow better aspect ratios
+                if int(mpl_version.split(".")[1]) >= 3:
+                    self.coord_axes[i].set_box_aspect((1,1,1))
+            self.coord_windows[i].installEventFilter(self)
+            # stack in order zs, xs, ys to match the coord system used in sasview
+            self.coord_arrows.append(Arrow3D(self.coord_axes[i].figure, [[0, 0],[0, 0],[0, 1]], [[0, 1],[0, 0],[0, 0]], [[0, 0],[0, 1],[0, 0]], [[1, 0 ,0],[0, 1, 0],[0, 0, 1]], arrowstyle = "->", mutation_scale=10, lw=2))
+            self.coord_arrows[i].set_realtime(True)
+            self.coord_axes[i].add_artist(self.coord_arrows[i])
+            self.coord_axes[i].set_xlim3d(-1, 1)
+            self.coord_axes[i].set_ylim3d(-1, 1)
+            self.coord_axes[i].set_zlim3d(-1, 1)
+            self.coord_axes[i].set_axis_off()
+            self.coord_axes[i].set_title(titles[i])
+            self.coord_axes[i].disable_mouse_rotation()
+        self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0 ,0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
+        self.polarisation_arrow.set_realtime(True)
+        self.coord_axes[1].add_artist(self.polarisation_arrow)
+        self.coord_axes[0].text2D(0.75, 0.01, 'x', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.85, 0.01, 'y', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.95, 0.01, 'z', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.p_text = self.coord_axes[1].text2D(0.65, 0.01, 'p', verticalalignment='bottom', horizontalalignment='right', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.p_text.set_visible(False)
+        self.coord_axes[1].text2D(0.75, 0.01, 'u', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.85, 0.01, 'v', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.95, 0.01, 'w', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[2].text2D(0.75, 0.01, 'U', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.85, 0.01, 'V', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.95, 0.01, 'W', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
+
+
+    def update_coords(self):
+        """
+        This function rotates the visualisation of the coordinate systems
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
+        if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
+           and self.txtSampleYaw.hasAcceptableInput() and self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
+            UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
+            basis_vectors = numpy.array([[1,0,0],[0,1,0],[0,0,1]])
+            #TODO: when scipy version updated can just use Rotation.as_matrix() to get new basis vectors - function name currently varies between versions used.
+            uvw_matrix = UVW_to_uvw.apply(basis_vectors)
+            xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(uvw_matrix), uvw_matrix)), axes=(2, 1, 0))
+            self.coord_arrows[1].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            xyz_matrix = UVW_to_xyz.apply(basis_vectors)
+            xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(xyz_matrix), xyz_matrix)), axes=(2, 1, 0))
+            self.coord_arrows[0].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            self.update_polarisation_coords()
+
+
+    def update_polarisation_coords(self):
+        """
+        This function rotates the visualisation of the polarisation vector
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
+        if self.txtUpTheta.hasAcceptableInput() and self.txtUpPhi.hasAcceptableInput():
+            theta = numpy.radians(float(self.txtUpTheta.text()))
+            phi = numpy.radians(float(self.txtUpPhi.text()))
+            UVW_to_uvw, _ = self.create_rotation_matrices()
+            p_vec = (UVW_to_uvw * Rotation.from_euler("ZY", [phi, theta])).apply(numpy.array([0, 0, 0.8])) # vector relative to beamline coords
+            self.polarisation_arrow.update_data([[0, p_vec[2]]], [[0, p_vec[0]]], [[0, p_vec[1]]])
     
+    def set_polarisation_visible(self, visible):
+        """
+        This function updates the visibility of the polarisation vector
+        This is one of four functions affecting the coordinate system visualisation which should be updated if
+        a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
+        """
+        self.polarisation_arrow.set_visible(visible)
+        self.p_text.set_visible(visible)
+        self.polarisation_arrow.base.canvas.draw()
+    
+    def reset_camera(self):
+        self.view_azim = 45
+        self.view_elev = 45
+        self.mouse_down = False
+        for axes in self.coord_axes:
+            axes.view_init(elev=self.view_elev, azim=self.view_azim)
+            axes.figure.canvas.draw()
+
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
         self.gui_text_changed(self.sender())
@@ -227,6 +365,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Catches the event that a textbox has been enabled/disabled"""
         if target in self.lineEdits and event.type() == QtCore.QEvent.EnabledChange:
             self.gui_text_changed(target)
+        elif target in self.coord_windows:
+            if event.type() == QtCore.QEvent.MouseButtonPress:
+                mEvent = QtGui.QMouseEvent(event)
+                self.mouse_x = mEvent.x()
+                self.mouse_y = mEvent.y()
+                self.mouse_down = True
+            elif event.type() == QtCore.QEvent.MouseButtonRelease:
+                self.mouse_down = False
+            elif event.type() == QtCore.QEvent.MouseMove and self.mouse_down:
+                mEvent = QtGui.QMouseEvent(event)
+                self.view_azim = (self.view_azim - mEvent.x() + self.mouse_x) % 360
+                self.view_elev = min(max(self.view_elev + mEvent.y() - self.mouse_y, -90), 90)
+                self.mouse_x = mEvent.x()
+                self.mouse_y = mEvent.y()
+                for axes in self.coord_axes:
+                    axes.view_init(elev=self.view_elev, azim=self.view_azim)
+                    axes.figure.canvas.draw()
+
         return False
 
     def gui_text_changed(self, sender):
@@ -426,18 +582,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMy.setEnabled(not self.is_mag)
         self.txtMz.setEnabled(not self.is_mag)
         if not self.is_mag:
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
         self.txtNucl.setEnabled(not self.is_nuc)
         if not self.is_nuc:
-            self.txtNucl.setText("0")
+            self.txtNucl.setText("0.0")
         # The ability to change the number of nodes and stepsizes only if no laoded data file enabled
         both_disabled =  (not self.is_mag) and (not self.is_nuc)
         if both_disabled:
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
             self.txtNucl.setText("6.97e-06")
             self.txtXnodes.setText("10")
             self.txtYnodes.setText("10")
@@ -484,9 +640,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(False)
             self.txtMy.setEnabled(False)
             self.txtMz.setEnabled(False)
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
         # If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtMx.setEnabled(True)
@@ -500,11 +656,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.txtUpFracOut.setEnabled(False)
                 self.txtUpTheta.setEnabled(False)
                 self.txtUpPhi.setEnabled(False)
+                self.set_polarisation_visible(False)
                 return
         self.txtUpFracIn.setEnabled(True)
         self.txtUpFracOut.setEnabled(True)
         self.txtUpTheta.setEnabled(True)
         self.txtUpPhi.setEnabled(True)
+        self.set_polarisation_visible(True)
 
     def loadFile(self):
         """Opens a menu to choose the datafile to load
@@ -846,9 +1004,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
             self.txtNoPixels.setText("1000")
-            self.txtMx.setText("0")
-            self.txtMy.setText("0")
-            self.txtMz.setText("0")
+            self.txtMx.setText("0.0")
+            self.txtMy.setText("0.0")
+            self.txtMz.setText("0.0")
             self.txtNucl.setText("6.97e-06")
             self.txtXnodes.setText("10")
             self.txtYnodes.setText("10")
@@ -856,6 +1014,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtXstepsize.setText("6")
             self.txtYstepsize.setText("6")
             self.txtZstepsize.setText("6")
+            self.txtEnvYaw.setText("0.0")
+            self.txtEnvPitch.setText("0.0")
+            self.txtEnvRoll.setText("0.0")
+            self.txtSampleYaw.setText("0.0")
+            self.txtSamplePitch.setText("0.0")
+            self.txtSampleRoll.setText("0.0")
+            self.reset_camera()
             # re-enable any options disabled by failed verification
             self.verification_occurred = False
             self.verified = False
@@ -1076,6 +1241,46 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         return sld_data
 
+    def create_rotation_matrices(self):
+        """Create the rotation matrices between different coordinate systems
+
+        UVW coords: beamline coords
+        uvw coords: environment coords
+        xyz coords: sample coords
+
+        The GUI contains values of yaw, pitch and roll from uvw to xyz coordinates and
+        from UVW to uvw. These are right handed coordinate systems with UVW being the beamline
+        coordinate system with:
+
+        U: horizonatal axis
+
+        V: vertical axis
+
+        W: axis back from detector to sample
+
+        The rotation given by the user transforms the BASIS VECTORS - the user gives
+        the trasformation from beamline coords to samplecoords for example - so from there perspective the
+        beamline is the fixed object and the environment and sample rotate. The rotation is first a yaw angle 
+        about the V axis (UVW -> U'V'W') then a pitch angle about the U' axis (U'V'W' -> U''V''W'') and 
+        finally a roll rotation abot the W'' axis (U''V''W'' -> uvw).
+
+        This function expects that the textbox values are correct.
+
+        :return: two rotations, the first from UVW to xyz coords, the second from UVW to uvw coords
+        :rtype: tuple of scipy.spatial.transform.Rotation
+        """
+        # in reverse
+        # NOTE: If scipy version is updated above 1.4.0 in the future then this conversion can be replaced with the degrees=True argument
+        # UVW to uvw
+        env = Rotation.from_euler("YXZ", [numpy.radians(float(self.txtEnvYaw.text())),
+                                          numpy.radians(float(self.txtEnvPitch.text())),
+                                          numpy.radians(float(self.txtEnvRoll.text()))])
+        # uvw to xyz
+        sample = Rotation.from_euler("YXZ", [numpy.radians(float(self.txtSampleYaw.text())),
+                                             numpy.radians(float(self.txtSamplePitch.text())),
+                                             numpy.radians(float(self.txtSampleRoll.text()))])
+        return env, sample*env
+
     def onCompute(self):
         """Execute the computation of I(qx, qy)
 
@@ -1085,6 +1290,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
             self.model.set_sld_data(sld_data)
+            UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
+            # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
+            # and therefore xyz to UVW for the components of the vectors - as we desire
+            self.model.set_rotations(UVW_to_uvw, UVW_to_xyz)
             self.write_new_values_from_gui()
             # create 2D or 1D data as appropriate
             if self.is_avg or self.is_avg is None:
@@ -1394,8 +1603,6 @@ class Plotter3DWidget(PlotterBase):
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):
-                # import moved here for performance reasons
-                from sas.qtgui.Plotting.Arrow3D import Arrow3D
                 """
                 draw magnetic vectors w/arrow
                 """
