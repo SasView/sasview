@@ -26,7 +26,7 @@ Fitting Documentation
 
    Conversion of SANS to SESANS for Fitting <sesans/sans_to_sesans>
    
-   Fitting SESANS using the Old GUI from he <sesans/sesans_fitting.rst>
+   Fitting SESANS using the Old GUI <sesans/sesans_fitting.rst>
 
    Writing a Plugin Model <plugin>
 
