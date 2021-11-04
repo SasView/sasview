@@ -2,8 +2,9 @@
 
 Model Marketplace
 =================
-The Model Marketplace allows members of the SAS Community to contribute
-plug-in fitting models for *SasView* for all to use.
+The `Model Marketplace <http://marketplace.sasview.org/>`_ allows members
+of the SAS Community to contribute plug-in fitting models for *SasView*
+for all to use.
 
 .. note:: 
     These plug-in models require SasView version 4.0 or later. However, 

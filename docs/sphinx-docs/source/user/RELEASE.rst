@@ -471,7 +471,7 @@ Other Work
 ^^^^^^^^^^
 * A Third-Party initiative has recently succeeded in getting SasView to
   run on Debian. More details at
-  http://trac.sasview.org/wiki/DevNotes/Projects/Debian
+  https://github.com/SasView/sasview/wiki/DevNotes_Projects_Debian
 * With this release we have started to prepare for the inevitable move
   to Python 3, which will occur with the release of 5.0
 * SasView 5.0 is currently in development. The two most significant
@@ -1121,10 +1121,10 @@ Downloading and Installing
 
 The easiest approach to setting up the proper environment to build from source 
 is to use Conda. Instructions for setting up and using Conda can be found at 
-http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
+https://github.com/SasView/sasview/wiki/DevNotes_DevEnviroment
                     
 Additional information is available at http://www.sasview.org/download/ under 
-the 'For Developers' section, and on our Trac site at http://trac.sasview.org/
+the 'For Developers' section, and on our Trac site at https://github.com/SasView/sasview/wiki/
 
 System Requirements
 -------------------

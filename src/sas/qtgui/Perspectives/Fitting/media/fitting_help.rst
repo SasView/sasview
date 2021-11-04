@@ -663,6 +663,8 @@ initially.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Simultaneous_Fit_Mode:
+
 Simultaneous Fit Mode
 ---------------------
 
