@@ -204,7 +204,7 @@ class PlotView(QtWidgets.QWidget, _PlotViewShared):
             self.title = kw['title']
 
         # Instantiate a figure object that will contain our plots.
-        figure = Figure(figsize=(1,1), dpi=72)
+        figure = Figure(figsize=(10,10), dpi=72)
 
         # Initialize the figure canvas, mapping the figure object to the plot
         # engine backend.
