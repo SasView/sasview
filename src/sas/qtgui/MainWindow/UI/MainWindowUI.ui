@@ -155,9 +155,6 @@
     <addaction name="actionWelcomeWidget"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
-    <addaction name="separator"/>
-    <addaction name="actionLog_installed_packages"/>
-    <addaction name="actionLog_imported_packages"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -515,16 +512,6 @@
   <action name="actionCheck_for_update">
    <property name="text">
     <string>Check for update</string>
-   </property>
-  </action>
-  <action name="actionLog_installed_packages">
-   <property name="text">
-    <string>Log installed packages</string>
-   </property>
-  </action>
-  <action name="actionLog_imported_packages">
-   <property name="text">
-    <string>Log imported packages</string>
    </property>
   </action>
   <action name="actionExcel">
