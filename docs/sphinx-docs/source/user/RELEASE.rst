@@ -1,5 +1,7 @@
 .. RELEASE.rst
 
+.. _Release_Notes:
+
 Release Notes
 =============
 
