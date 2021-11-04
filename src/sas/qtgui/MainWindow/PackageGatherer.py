@@ -139,6 +139,7 @@ class PackageGatherer:
 
             # Below is code that calculates the version of each module using pip, however it is
             # very time consuming, and only is useful for a handful of modules
+            #
             # try:
             #     pip_module_show = str(subprocess.check_output(f"pip show {mod}"), 'utf-8')
             #     show_list = pip_module_show.replace("\r\n", ",").split(",")
