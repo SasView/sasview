@@ -46,10 +46,16 @@ There are also some new features in this version:
   to activate.
 
 There has also been a technical change in this version to how the volume
-normalisation is computed. The change was made in Sasmodels 1.0.5 with which
-this version is built and will affect all future versions of SasView. The
-technical details of the change are described
-`here <https://github.com/SasView/sasview/issues/1698#issuecomment-718979190>`_.
+normalisation is incorporated in the interaction calculator that computes $I(Q)$
+from $P(Q) S(Q)$. The change was made in Sasmodels 1.0.5 with which this version
+is built and will affect all future versions of SasView. Prior to the change
+the scaling of the $P(Q)$ function that might appear in the *Data Explorer* was
+incorrect. This was easily seen if $P(Q)$ and $I(Q)$ were plotted together but
+had apparently escaped notice for some time. But this does, of course, mean that 
+comparisons of the $P(Q)$ contributions to models between this version of SasView
+and previous versions will differ. Further details of the change can be found
+`here <https://github.com/SasView/sasview/issues/1698>`_.
+
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
