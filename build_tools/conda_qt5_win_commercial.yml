@@ -30,7 +30,7 @@ dependencies:
    - pyinstaller==3.3.1
    - periodictable==1.5.0
    - xhtml2pdf==0.2.3
-   - ../../../PyQt5_commercial-5.13.2-5.13.0-cp35.cp36.cp37.cp38-none-win_amd64.whl
+   - ../../../PyQt5_commercial-5.15.6-cp36-abi3-win_amd64.whl
    - qt5reactor==0.5
    - tinycc==1.1
    - uncertainties==3.1.6
