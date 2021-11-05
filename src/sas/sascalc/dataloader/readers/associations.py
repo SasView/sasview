@@ -15,7 +15,6 @@ The readers are tried in order they appear when reading a file.
 #############################################################################
 import importlib
 import logging
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -52,17 +51,16 @@ def read_associations(loader, settings=None):
     # For each FileType entry, get the associated reader and extension
     if not settings:
         settings = FILE_ASSOCIATIONS
-    path = 'sas.sascalc.dataloader.readers.'
     for ext, reader in settings.items():
-        if reader is not None and ext is not None:
-            # Associate the extension with a particular reader
-            try:
-                local_reader = importlib.import_module(path + reader)
-                loader.associate_file_type(ext.lower(), local_reader)
-            except Exception as exc:
-                msg = "read_associations: skipping association"
-                msg += " for %s\n  %s" % (ext.lower(), exc)
-                logger.error(msg)
+        # Associate the extension with a particular reader
+        try:
+            exec("from . import %s" % reader)
+            exec("loader.associate_file_type('%s', %s)"
+                 % (ext.lower(), reader))
+        except Exception as exc:
+            msg = "read_associations: skipping association"
+            msg += " for %s\n  %s" % (ext.lower(), exc)
+            logger.error(msg)
 
 
 def get_generic_readers(settings=None):
