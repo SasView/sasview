@@ -9,7 +9,7 @@ Tutorials
 
 :download:`Getting Started with Sasview <sasview/getting_started_with_sasview_v5.pdf>`
 
-:download:`Subtracting a Model Calculation from Experimental Data <sasview/subtracting_a_model_calculation_from_real_data_v5x.pdf>`
+:download:`Subtracting a Model Calculation from Experimental Data <sasview/subtracting_a_model_calculation_from_real_data_v5.pdf>`
 
 :download:`Basic 1D Fitting in Sasview <sasview/basic_1d_fitting_in_sasview_v5.pdf>`
 
