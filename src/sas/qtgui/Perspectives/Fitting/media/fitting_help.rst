@@ -104,6 +104,13 @@ parameters together so that, for example, *radius_effective* = *radius*. See
 
 Also see :ref:`Interaction_and_Mixture_Models` for further information.
 
+.. note::
+
+    SasView v5.0.4 incorporated a technical change to how the volume
+    normalisation is incorporated in the interaction calculator that computes
+    $I(Q)$ from $P(Q) S(Q)$. The change will affect all future versions of
+    SasView. For more details, please see the :ref:`Release_Notes`.
+
 Mixture Models
 ^^^^^^^^^^^^^^
 
