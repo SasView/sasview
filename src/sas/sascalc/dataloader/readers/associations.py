@@ -15,6 +15,7 @@ The readers are tried in order they appear when reading a file.
 #############################################################################
 import importlib
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ GENERIC_ASSOCIATIONS = {
 }
 
 
-def read_associations(loader, settings=FILE_ASSOCIATIONS):
+def read_associations(loader, settings=None):
     """
     Read the specified settings file to associate
     default readers to file extension.
@@ -49,6 +50,8 @@ def read_associations(loader, settings=FILE_ASSOCIATIONS):
     :param settings: path to the json settings file [string]
     """
     # For each FileType entry, get the associated reader and extension
+    if not settings:
+        settings = FILE_ASSOCIATIONS
     path = 'sas.sascalc.dataloader.readers.'
     for ext, reader in settings.items():
         if reader is not None and ext is not None:
@@ -62,12 +65,14 @@ def read_associations(loader, settings=FILE_ASSOCIATIONS):
                 logger.error(msg)
 
 
-def get_generic_readers(settings=GENERIC_ASSOCIATIONS):
+def get_generic_readers(settings=None):
     """
     Find and load the default loaders used by the program
     :param settings: path to the json settings file [string]
     :return: list of default loaders every file can potentially try to use
     """
+    if not settings:
+        settings = GENERIC_ASSOCIATIONS
     path = 'sas.sascalc.dataloader.readers.'
     defaults = [importlib.import_module(path + reader) for ext, reader in
                 settings.items() if reader is not None]
