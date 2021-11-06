@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 FILE_ASSOCIATIONS = {
     ".xml": "cansas_reader",
     ".ses": "sesans_reader",
+    ".sesans": "sesans_reader",
     ".h5": "cansas_reader_HDF5",
     ".hdf": "cansas_reader_HDF5",
     ".hdf5": "cansas_reader_HDF5",
