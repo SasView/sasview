@@ -26,7 +26,7 @@ UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=setupSasView
-SetupIconFile=dist\sasview\images\ball.ico
+; SetupIconFile=dist\sasview\images\ball.ico
 
 
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
