@@ -81,8 +81,8 @@ class PackageGatherer:
         # Generate a list of standard modules by looking at the local python library
         try:
             standard_lib = [path.stem.split('.')[0] for path in pathlib.Path(pathlib.__file__)
-                .parent.absolute().glob('*')]
-        except:
+                            .parent.absolute().glob('*')]
+        except Exception:
             standard_lib = ['abc', 'aifc', 'antigravity', 'argparse', 'ast', 'asynchat', 'asyncio', 'asyncore',
                             'base64', 'bdb', 'binhex', 'bisect', 'bz2', 'calendar', 'cgi', 'cgitb', 'chunk', 'cmd',
                             'code', 'codecs', 'codeop', 'collections', 'colorsys', 'compileall', 'concurrent',
@@ -118,9 +118,6 @@ class PackageGatherer:
             package_name = module_name.split('.')[0]
 
             # A built in python module or a local file, which have no version, only the python/SasView version
-            if module_name in standard_lib or module_name in package_versions_dict:
-                continue
-            # A built in python module or a local file, which have no version, only the python/SasView version
             if package_name in standard_lib or package_name in package_versions_dict:
                 continue
 
@@ -128,17 +125,17 @@ class PackageGatherer:
             if "PyQt5" in module_name:
                 try:
                     from PyQt5.QtCore import PYQT_VERSION_STR
-                except Exception as x:
+                except Exception as e:
                     # Unable to access PyQt5
-                    err_version_dict[module_name] = f"Unknown: {x} when attempting to get PyQt5 version"
+                    err_version_dict[module_name] = f"Unknown: {e} when attempting to get PyQt5 version"
                     pass
                 else:
                     package_versions_dict["PyQt"] = PYQT_VERSION_STR
                 try:
                     from PyQt5.QtCore import QT_VERSION_STR
-                except Exception as x:
+                except Exception as e:
                     # Unable to access Qt
-                    err_version_dict[module_name] = f"Unknown: {x} when attempting to get Qt version"
+                    err_version_dict[module_name] = f"Unknown: {e} when attempting to get Qt version"
                     pass
                 else:
                     package_versions_dict["Qt"] = QT_VERSION_STR
@@ -147,8 +144,8 @@ class PackageGatherer:
             # Import module
             try:
                 package = __import__(package_name)
-            except Exception as x:
-                err_version_dict[package_name] = f"Unknown: {x} when attempting to import module"
+            except Exception as e:
+                err_version_dict[package_name] = f"Unknown: {e} when attempting to import module"
                 continue
 
             # Different attempts of retrieving the modules version
@@ -156,9 +153,9 @@ class PackageGatherer:
                 # Module has __version__ attribute
                 try:
                     package_versions_dict[package_name] = package.__version__
-                except Exception as x:
+                except Exception as e:
                     # Unable to access module
-                    err_version_dict[package_name] = f"Unknown: {x} when attempting to access {package_name} " \
+                    err_version_dict[package_name] = f"Unknown: {e} when attempting to access {package_name} " \
                                                      f"version using .__version__"
                     pass
                 continue
@@ -166,10 +163,11 @@ class PackageGatherer:
             if hasattr(package, '.version'):
                 # Module has .version attribute
                 try:
-                    package_versions_dict[package_name] = package.version
-                except Exception as x:
+                    if isinstance(package.version, str) or isinstance(package.version, float):
+                        package_versions_dict[package_name] = package.version
+                except Exception as e:
                     # Unable to access module
-                    err_version_dict[package_name] = f"Unknown: {x} when attempting to access {package_name} " \
+                    err_version_dict[package_name] = f"Unknown: {e} when attempting to access {package_name} " \
                                                      f"version using .version"
                     pass
                 continue
@@ -177,7 +175,7 @@ class PackageGatherer:
             # Unreliable, so last option
             try:
                 package_versions_dict[package_name] = pkg_resources.get_distribution(package_name).version
-            except:
+            except Exception:
                 # Modules that cannot be found by pkg_resources
                 pass
             else:
@@ -205,7 +203,7 @@ class PackageGatherer:
             no_version_list.append(package_name)
 
         # Clean up
-        package_versions_dict = self.remove_duplicate_packages(package_versions_dict)
+        package_versions_dict = self.remove_duplicate_modules(package_versions_dict)
         no_version_dict = self.format_no_version_list(package_versions_dict, no_version_list)
 
         return {"results": package_versions_dict, "no_results": no_version_dict, "errors": err_version_dict}
