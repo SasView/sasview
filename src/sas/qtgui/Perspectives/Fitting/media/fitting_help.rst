@@ -102,7 +102,7 @@ SasView offers the flexibility to automatically constrain (tie) some of these
 parameters together so that, for example, *radius_effective* = *radius*. See
 :ref:`Add/Multiply_Models`.
 
-Also see :ref:`Interaction_and_Mixture_Models` for further information.
+Also see :ref:`Interaction_Models` for further information.
 
 .. note::
 
@@ -667,6 +667,73 @@ SasView has a number of different optimisers (see the section :ref:`Fitting_Opti
 The DREAM optimiser is the most sophisticated, but may not necessarily be the best
 option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
 initially.
+
+Polydisperse Parameters
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Some model parameters, for example, radii/lengths or orientation angles can be
+polydisperse; i.e. they can have a distribution of possible values. Polydisperse
+parameters are defined as such when the model is coded, and can be activated by
+clicking the *Polydispersity* checkbox on the *Fit Page*.
+
+.. image:: enable_pd.png
+
+Clicking on the *Polydispersity* tab then provides access to these polydisperse
+parameters and allows the type (i.e. the *function* to be used) and 'width'
+(the *PD[ratio]*) to be adjusted. If necessary the 'step size' (*Npts*) and
+'range' (*Nsigs*) of the function can also be adjusted.
+
+.. image:: pd_tab.png
+
+For more information, see the descriptions of :ref:`polydispersityhelp`. In
+particular, pay attention to the Suggested Applications and Usage Notes therein.
+The detail of how SasView computes the scattering from polydisperse systems is
+described in the :ref:`PStheory` section.
+
+Note that SasView defaults to Gaussian distributions, but these will not always
+be the best choice. Also, the definitions of the centre (e.g. whether it is the
+mean or median value, for example) and the actual width of the function will
+vary depending on the chosen distribution! For orientation distributions the
+*PD[ratio]* parameter is absolute. But for distributions applied to 'volume'
+(size) parameters the *PD[ratio]* parameter will always be relative to the
+current centre value.
+
+.. note:: **Polydispersity distributions in SasView define the number density
+           of the given population of scatterers. The resulting scattering is
+           then the number average over the distribution.**
+
+It is possible to optimise a *PD[ratio]* parameter during fitting by checking
+the accompanying checkbox. However, this is usually only effective in the
+latter stages of a converging fit.
+
+.. note:: Neither the *PD[ratio]*, or the parameter to which it is applied, can
+          be optimised if using an Array Distribution. See
+          :ref:`polydispersityhelp`.
+
+Reparameterizing Models
+^^^^^^^^^^^^^^^^^^^^^^^
+
+It is also possible to reparameterize a particle model, for instance, to give
+greater control over polydispersity due to intra-particle constraints, see
+:ref:`Reparameterized_Models`. For example, if the particles aspect ratio is
+constrained but not its volume, or if its volume must be preserved but a range
+of aspect ratios are permitted for each volume. This may require a User-Defined
+distribution function to fully describe the model (see
+:ref:`polydispersityhelp`).
+
+Using a GPU
+^^^^^^^^^^^
+
+Incoporating polydispersity in a fit can certainly improve the overall solution
+and add a dose of realism to it (few real systems are monodisperse!). But doing
+so will slow the fitting process, sometimes quite dramatically. In these
+circumstances enabling a GPU, if present, will help.
+
+.. image:: gpu_options.png
+
+If a *potential* GPU device is present the dialog will show it. The *Test*
+button can then be used to check if your system has the necessary drivers to
+use it. But also see :ref:`gpu-setup` .
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
