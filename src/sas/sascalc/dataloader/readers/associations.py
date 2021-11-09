@@ -44,17 +44,25 @@ FILE_ASSOCIATIONS = {
     ".pdh": anton_paar_saxs_reader
 }
 
+GENERIC_READERS_LIST = [
+    ascii_reader,
+    cansas_reader,
+    cansas_reader_HDF5
+]
+
 
 def read_associations(loader, settings=None):
+    # type: (Registry, {str: FileReader}) -> None
     """
-    Read the specified settings file to associate
-    default readers to file extension.
+    Use the specified settings dictionary to associate readers to file extension.
     :param loader: Loader object
-    :param settings: path to the json settings file [string]
+    :param settings: A dictionary in the format {str(file extension): data_loader_class} that is used to associate a
+    file extension to a data loader class
     """
-    # For each FileType entry, get the associated reader and extension
+    # Default to a known list of extensions
     if not settings:
         settings = FILE_ASSOCIATIONS
+    # For each FileType entry, get the associated reader and extension
     for ext, reader in settings.items():
         # Associate the extension with a particular reader
         try:
@@ -65,10 +73,17 @@ def read_associations(loader, settings=None):
             logger.error(msg)
 
 
-def get_generic_readers(settings=None):
+def get_generic_readers(settings=None, use_generic_readers=True):
+    # type: ([FileReader], bool) -> []
     """
-    Find and load the default loaders used by the program
-    :param settings: path to the json settings file [string]
-    :return: list of default loaders every file can potentially try to use
+    Returns a list of default readers that the data loader system will use in an attempt to load a data file.
+    A list of loaders can be passed as an argument to append (if use_generic is True) or override the the list of
+    generic readers.
+    :param settings: A list of modules to use as default readers. If None is passed, a default list will be used.
+    :param use_generic_readers: Boolean to say if the generic readers should be added to the list of readers returned.
+    :return: Final list of default loader modules the dataloader system will try if necessary
     """
-    return [ascii_reader, cansas_reader, cansas_reader_HDF5]
+    default_readers = GENERIC_READERS_LIST if use_generic_readers else []
+    if settings is not None and isinstance(settings, list):
+        default_readers.extend(settings)
+    return default_readers
