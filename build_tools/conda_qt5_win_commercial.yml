@@ -26,7 +26,7 @@ dependencies:
  - pyqt=5.15.6
  - mkl=2020.0
  - pip:
-   - matplotlib==3.4.3
+   - matplotlib==3.3.4
    - bumps
    - pyinstaller==3.3.1
    - periodictable==1.5.0
