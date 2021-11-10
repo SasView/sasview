@@ -44,7 +44,7 @@ FILE_ASSOCIATIONS = {
     ".pdh": anton_paar_saxs_reader
 }
 
-GENERIC_READERS_LIST = [
+GENERIC_READERS = [
     ascii_reader,
     cansas_reader,
     cansas_reader_HDF5
@@ -65,25 +65,22 @@ def read_associations(loader, settings=None):
     # For each FileType entry, get the associated reader and extension
     for ext, reader in settings.items():
         # Associate the extension with a particular reader
-        try:
-            loader.associate_file_type(ext.lower(), reader)
-        except Exception as exc:
-            msg = "read_associations: skipping association"
-            msg += " for %s\n  %s" % (ext.lower(), exc)
-            logger.error(msg)
+        if not loader.associate_file_type(ext.lower(), reader):
+            msg = f"read_associations: skipping association for {ext.lower()}"
+            logger.warning(msg)
 
 
 def get_generic_readers(settings=None, use_generic_readers=True):
     # type: ([FileReader], bool) -> []
     """
     Returns a list of default readers that the data loader system will use in an attempt to load a data file.
-    A list of loaders can be passed as an argument to append (if use_generic is True) or override the the list of
-    generic readers.
+    A list of loaders can be passed as an argument which will be appended to (if use_generic is True) or override the
+    list of generic readers.
     :param settings: A list of modules to use as default readers. If None is passed, a default list will be used.
     :param use_generic_readers: Boolean to say if the generic readers should be added to the list of readers returned.
     :return: Final list of default loader modules the dataloader system will try if necessary
     """
-    default_readers = GENERIC_READERS_LIST if use_generic_readers else []
-    if settings is not None and isinstance(settings, list):
+    default_readers = GENERIC_READERS.copy() if use_generic_readers else []
+    if isinstance(settings, (list, set, tuple)):
         default_readers.extend(settings)
     return default_readers
