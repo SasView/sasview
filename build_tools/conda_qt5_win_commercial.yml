@@ -23,6 +23,7 @@ dependencies:
  - numpy=1.14.2
  - qtconsole=4.7.5
  - pyzmq=19.0.1
+ - pyqt=5.15.6
  - mkl=2020.0
  - pip:
    - matplotlib==3.4.3
@@ -30,7 +31,6 @@ dependencies:
    - pyinstaller==3.3.1
    - periodictable==1.5.0
    - xhtml2pdf==0.2.3
-   - ../../../PyQt5_commercial-5.12.2-5.12.3-cp35.cp36.cp37.cp38-none-win_amd64.whl
    - qt5reactor==0.5
    - tinycc==1.1
    - uncertainties==3.1.6
