@@ -178,5 +178,5 @@ jobs:
         allowUpdates: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "${{ env.DISTRIBUTION_PATH }}/SasView-Installer-*.zip"
+        artifacts: "${{ env.DISTRIBUTION_PATH }}/$SasView-Installer-*.zip"
         name: ${{ env.BRANCH_NAME }}
