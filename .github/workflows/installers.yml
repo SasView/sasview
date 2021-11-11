@@ -180,3 +180,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: "SasView-Installer-*.zip"
         name: ${{ env.BRANCH_NAME }}
+        tag: ${{ env.BRANCH_NAME }}
