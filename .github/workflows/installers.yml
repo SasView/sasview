@@ -168,3 +168,16 @@ jobs:
         name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
+
+    - name: Upload zipped offline app installer to GitHub releases (non-master branch)
+      if: github.event_name == 'push' && env.BRANCH_NAME != 'master'
+      uses: ncipollo/release-action@v1
+      with:
+        draft: true
+        prerelease: true
+        allowUpdates: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "${{ env.DISTRIBUTION_PATH }}/SasView-Installer-*.zip"
+        tag: ${{ env.BRANCH_NAME }}
+        name: ${{ env.BRANCH_NAME }}
