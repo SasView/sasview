@@ -59,6 +59,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.fold = True
         # reference of the current  Slab averaging
         self.averager = None
+        # Flag to determine if the current figure has moved
+        # set to False == no motion , set to True== motion
+        self.has_move = False
         # Create vertical and horizaontal lines for the rectangle
         self.horizontal_lines = HorizontalDoubleLine(self,
                                                      self.axes,
@@ -157,6 +160,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self.vertical_lines.save(ev)
         self.horizontal_lines.save(ev)
+        self.center.save(ev)
 
     def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
@@ -170,10 +174,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.direction is None:
             self.direction = direction
 
-#        x_min = -1 * numpy.fabs(self.vertical_lines.x)
-#        x_max = numpy.fabs(self.vertical_lines.x)
-#        y_min = -1 * numpy.fabs(self.horizontal_lines.y)
-#        y_max = numpy.fabs(self.horizontal_lines.y)
 
         x_min = self.horizontal_lines.x2
         x_max = self.horizontal_lines.x1
@@ -263,6 +263,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self.horizontal_lines.restore(ev)
         self.vertical_lines.restore(ev)
+        self.center.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -284,6 +285,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         params["x_max"] = numpy.fabs(self.vertical_lines.x1)
         params["y_max"] = numpy.fabs(self.horizontal_lines.y1)
         params["nbins"] = self.nbins
+        params["center_x"] = self.center.x
+        params["center_y"] = self.center.y
         params["fold"] = self.fold
         return params
 
@@ -295,14 +298,24 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        self.x = float(numpy.fabs(params["x_max"]))
-        self.y = float(numpy.fabs(params["y_max"]))
+        x_max = float(numpy.fabs(params["x_max"]))
+        y_max = float(numpy.fabs(params["y_max"]))
         self.nbins = params["nbins"]
         self.fold = params["fold"]
+        self.center_x = params["center_x"]
+        self.center_y = params["center_y"]
 
-        self.horizontal_lines.update(x=self.x, y=self.y)
-        self.vertical_lines.update(x=self.x, y=self.y)
+        self.center.update(center_x=self.center_x, center_y=self.center_y)
+        self.horizontal_lines.update(center=self.center,
+                                     width=x_max, height=y_max)
+        self.vertical_lines.update(center=self.center,
+                                   width=x_max, height=y_max)
+        # compute the new error and sum given values of params
         self._post_data()
+
+        #self.horizontal_lines.update(x=self.x, y=self.y)
+        #self.vertical_lines.update(x=self.x, y=self.y)
+        #self._post_data()
         self.draw()
 
     def draw(self):
