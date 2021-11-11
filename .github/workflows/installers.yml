@@ -170,7 +170,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload zipped offline app installer to GitHub releases (non-master branch)
-      if: github.event_name == 'push' && env.BRANCH_NAME != 'master'
+      if: github.event_name == 'push' && env.BRANCH_NAME != 'main'
       uses: ncipollo/release-action@v1
       with:
         draft: true
