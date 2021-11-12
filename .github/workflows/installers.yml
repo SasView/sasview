@@ -169,7 +169,17 @@ jobs:
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
 
-    - name: Upload zipped offline app installer to GitHub releases (non-master branch)
+    - name: Declare env variables on push only
+      if: github.event_name == 'push'
+      shell: bash
+      run: echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Declare env variables on pull_request only
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+
+    - name: Upload zipped offline app installer to GitHub releases
       uses: ncipollo/release-action@v1
       with:
         draft: true
@@ -178,3 +188,5 @@ jobs:
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: "SasView-Installer-*.zip"
+        name: ${{ env.BRANCH_NAME }}
+        tag: ${{ env.BRANCH_NAME }}
