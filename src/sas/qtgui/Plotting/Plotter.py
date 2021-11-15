@@ -476,6 +476,54 @@ class PlotterWidget(PlotterBase):
         self.setRange.txtYmax.setText(str(y_range[1]))
         self._setGraphRange()
 
+    def _zoom_handler(self, event):
+        """
+        Explicitly call toolbar method to ensure range is changed. In MPL 2.2, local events take precedence over the
+        toolbar events, so the range isn't zoomed until after _zoom_pan_handler is run.
+        """
+        self.toolbar.release_zoom(event)
+        self._zoom_pan_handler(event)
+
+    def _pan_handler(self, event):
+        """
+        Explicitly call toolbar method to ensure range is changed. In MPL 2.2, local events take precedence over the
+        toolbar events, so the range isn't panned until after _zoom_pan_handler is run.
+        """
+        self.toolbar.release_pan(event)
+        self._zoom_pan_handler(event)
+
+    def _home(self, event):
+        """
+        Catch home button click events
+        """
+        self.onResetGraphRange()
+
+    def _back(self, event):
+        """
+        Catch back button click events
+        """
+        self.toolbar.back()
+        self._zoom_pan_handler(event)
+
+    def _forward(self, event):
+        """
+        Catch forward button click events
+        """
+        self.toolbar.forward()
+        self._zoom_pan_handler(event)
+
+    def _pan(self, event):
+        """
+        Catch pan button click events
+        """
+        self.canvas.mpl_connect('button_release_event', self._pan_handler)
+
+    def _zoom(self, event):
+        """
+        Catch zoom button click events
+        """
+        self.canvas.mpl_connect('button_release_event', self._zoom_handler)
+
     def onSetGraphRange(self):
         """
         Show a dialog allowing setting the chart ranges
