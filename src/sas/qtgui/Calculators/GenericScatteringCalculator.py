@@ -57,12 +57,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # sld data for nuclear and magnetic cases
         self.nuc_sld_data = None
         self.mag_sld_data = None
-        # verification information to avoid recalculating
-        # verification carried out whenever files are selected/deselected
-        # verification reset whenever a new files loaded
-        self.verification_occurred = False # has verification happened on these files
-        self.verified = False # was the verification successsful
-        # verification error label
+        self.verified = False
         # prevent layout shifting when widget hidden
         # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.lblVerifyError.sizePolicy()
@@ -134,6 +129,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxNucData.setEnabled(False)
         self.checkboxMagData.setEnabled(False)
         self.change_data_type()
+        # verify that the new enabled files are compatible
+        
+        self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
+        self.toggle_error_functionality()
 
         # validators
         # scale, volume and background must be positive
@@ -301,19 +300,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
-    def toggle_error_functionality(self, verificationMsg=None):
+    def toggle_error_functionality(self):
         """Disables/Enables some functionality if the state of the GUI means calculation cannot proceed
 
         This function is called during any process whenever there is a risk that the state
         of the GUI will make the data invalid for plotting, drawing or saving. If that is the 
         case then this functionality is disabled. This function is currently called when two
         files are being verified for compatibility, and when textboxes enter 'intermediate' states.
-        It also optionally changes the validation error message for the user.
-
-        :param msg: The error message due to file verification which should be displayed
-            to the user on the GUI. Defaults to `None` in which case the error message is
-            not changed.
-        :type msg: str or None
         """
         verificationEnable = self.verified or not (self.is_mag and self.is_nuc)
         lineEditsEnable = len(self.invalidLineEdits) == 0
@@ -322,229 +315,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdDrawpoints.setEnabled(verificationEnable and lineEditsEnable)
         self.cmdSave.setEnabled(verificationEnable and lineEditsEnable)
         self.cmdCompute.setEnabled(verificationEnable and lineEditsEnable)
-        # alter the error message if a new message is provided
-        # verification is only carried out once so if msg=None do not set the msg to ""
-        # but simply don't alter it - this means the message is preserved and re-verification
-        # s not called when the files have not been changed
-        if verificationMsg is not None:
-            self.lblVerifyError.setText('<font color="#FF0000">' + verificationMsg + '</font>')
-        # display the message
-        self.lblVerifyError.setVisible(not verificationEnable)
 
-    def verify_files_match(self):
-        """Verifies that enabled files are compatible and can be combined
 
-        When the user wishes to combine two different files for nuclear and magnetic
-        data they must have the same 3D data points in real-space. This function
-        decides whther verification of this is necessary and if so carries it out.
-        In the case that the two files have the same real-space data points in different
-        orders this function re-orders the stored data within the MagSLD objects to make
-        them align. The full verification is only carried out once for any pair of loaded
-        files.
-        """
-        if not (self.is_mag and self.is_nuc):
-            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality immediately
-            self.toggle_error_functionality()
-            return
-        # check if files already verified
-        if self.verification_occurred:
-            self.toggle_error_functionality()
-            return
-        # ensure both files are point or element type- not a mixture
-        if (self.nuc_sld_data.is_elements and not self.mag_sld_data.is_elements) or \
-           (not self.nuc_sld_data.is_elements and self.mag_sld_data.is_elements):
-            self.verification_occurred = True
-            self.verified = False
-            self.toggle_error_functionality("ERROR: files must both be point-wise or element-wise")
-            return
-        # check each file has the same number of coords
-        if self.nuc_sld_data.pos_x.size != self.mag_sld_data.pos_x.size:
-            self.verification_occurred = True
-            self.verified = False
-            self.toggle_error_functionality("ERROR: files have a different number of data points")
-            return
-        # check the coords match up 1-to-1
-        nuc_coords = numpy.array(numpy.column_stack((self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z)))
-        mag_coords = numpy.array(numpy.column_stack((self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z)))
-        # TODO: should this have a floating point tolerance??
-        if numpy.array_equal(nuc_coords, mag_coords):
-            if not self.nuc_sld_data.is_elements:
-                # arrays are already sorted in the same order, so files match
-                self.verification_occurred = True
-                self.verified = True
-                self.toggle_error_functionality()
-                return
-            else:
-                points_already_match = True
-        else:
-            # now check if coords are in wrong order or don't match
-            nuc_sort_order = numpy.lexsort((self.nuc_sld_data.pos_z, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_x))
-            mag_sort_order = numpy.lexsort((self.mag_sld_data.pos_z, self.mag_sld_data.pos_y, self.mag_sld_data.pos_x))
-            nuc_coords = nuc_coords[nuc_sort_order]
-            mag_coords = mag_coords[mag_sort_order]
-            # check if sorted data points are equal
-            if numpy.array_equal(nuc_coords, mag_coords):
-                # if data points are equal then resort both lists into the same order
-                # is this too time consuming for long lists? logging info?
-                # 1) coords
-                self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.transpose(nuc_coords)
-                self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.transpose(mag_coords)
-                # 2) other array params that must be in same order as coords
-                if not self.nuc_sld_data.is_elements:
-                    params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
-                else:
-                    params = ["pix_symbol"]
-                for item in params:
-                    nuc_val = getattr(self.nuc_sld_data, item)
-                    if nuc_val is not None:
-                        # data should already be a numpy array, we cast to an ndarray as a check
-                        # very fast if data is already an instance of ndarray as expected becuase function
-                        # returns the array as-is
-                        setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
-                    mag_val = getattr(self.mag_sld_data, item)
-                    if mag_val is not None:
-                        setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
-                # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
-                # absolute positions not references to pos_x, pos_y, pos_z).
-                if not self.nuc_sld_data.is_elements:
-                    self.verification_occurred = True
-                    self.verified = True
-                    self.toggle_error_functionality()
-                    return
-                else:
 
-                    points_already_match = False
-            else:
-                # if sorted lists not equal then data points aren't equal
-                self.verification_occurred = True
-                self.verified = False
-                self.toggle_error_functionality("ERROR: files have different real space position data")
-                return
-        if self.nuc_sld_data.are_elements_array != self.nuc_sld_data.are_elements_array:
-            # If files don't have the same value for this they do not match anyway.
-            self.verification_occurred = True
-            self.verified = False
-            self.toggle_error_functionality("ERROR: files must contain the same elements")
-        if self.nuc_sld_data.are_elements_array: # already in numpy array - can check rapidly
-            if points_already_match:
-                if numpy.array_equal(self.nuc_sld_data.elements, self.mag_sld_data.elements): # straight match - immediately confirm
-                    self.verification_occurred = True
-                    self.verified = True
-                    self.toggle_error_functionality()
-                    return
-                # convert each element into a list of vertices - do not bother comparing each face separately
-                # while technically with a large number of points one could describe multiple different
-                # elements, this is not possible from .vtk element types - and would massively slow down verification.
-                # numpy.unique also sorts the vertices
-                nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
-                mag_elements_sort = numpy.unique(self.mag_sld_data.elements.reshape((self.mag_sld_data.elements.shape[0], -1)), axis=-1)
-            else:
-                # get reverse permutation
-                # when positions were changed each index was sent to a new position - this finds the 
-                # position each index was sent to by inverting the permuation
-                nuc_permutation = numpy.argsort(nuc_sort_order)
-                mag_permutation = numpy.argsort(mag_sort_order)
-                nuc_elements_sort = numpy.unique(self.nuc_sld_data.elements.reshape((self.nuc_sld_data.elements.shape[0], -1)), axis=-1)
-                mag_elements_sort = numpy.unique(self.mag_sld_data.elements.reshape((self.mag_sld_data.elements.shape[0], -1)), axis=-1)
-                # must resort after point positions changed
-                nuc_elements_sort = numpy.sort(nuc_permutation[nuc_elements_sort], axis=1)
-                mag_elements_sort = numpy.sort(mag_permutation[mag_elements_sort], axis=1)
-            # elements in each file should now be described by the same real space point indices
-            # we sort them into order and directly compare them
-            nuc_elements_sort_order = numpy.lexsort(numpy.transpose(nuc_elements_sort))
-            mag_elements_sort_order = numpy.lexsort(numpy.transpose(mag_elements_sort))
-            if not numpy.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
-                self.verification_occurred = True
-                self.verified = False
-                self.toggle_error_functionality("ERROR: files must contain the same elements")
-                return
-            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
-            self.nuc_sld_data.elements = self.nuc_sld_data.elements[nuc_elements_sort_order, ...]
-            self.mag_sld_data.elements = self.mag_sld_data.elements[mag_elements_sort_order, ...]
-            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
-            for item in params:
-                nuc_val = getattr(self.nuc_sld_data, item)
-                if nuc_val is not None:
-                    # data should already be a numpy array, we cast to an ndarray as a check
-                    # very fast if data is already an instance of ndarray as expected becuase function
-                    # returns the array as-is
-                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_elements_sort_order])
-                mag_val = getattr(self.mag_sld_data, item)
-                if mag_val is not None:
-                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_elements_sort_order])
-            if not points_already_match:
-                # if the points were moved we must also update all indices
-                self.nuc_sld_data.elements = nuc_permutation[self.nuc_sld_data.elements]
-                self.mag_sld_data.elements = mag_permutation[self.mag_sld_data.elements]
-            self.verification_occurred = True
-            self.verified = True
-            self.toggle_error_functionality()
-            return
-        else:
-            # the files have different cell types within themselves - the elements are not already in a numpy array
-            # as numpy does not support jagged arrays
-            nuc_elements = []
-            mag_elements = []
-            # get the unique vertices of each element - see the note above about how this is not technically
-            # a perfect validation.
-            if points_already_match:
-                for element in self.nuc_sld_data.elements:
-                    nuc_elements.append(numpy.sort(list(set([vertex for face in element for vertex in face]))))
-                for element in self.mag_sld_data.elements:
-                    mag_elements.append(numpy.sort(list(set([vertex for face in element for vertex in face]))))
-            else:
-                # ensure the real space point indices match if they were also sorted
-                nuc_permutation = numpy.argsort(nuc_sort_order)
-                mag_permutation = numpy.argsort(mag_sort_order)
-                for element in self.nuc_sld_data.elements:
-                    nuc_elements.append(numpy.sort(list(set([nuc_permutation[vertex] for face in element for vertex in face]))))
-                for element in self.mag_sld_data.elements:
-                    mag_elements.append(numpy.sort(list(set([mag_permutation[vertex] for face in element for vertex in face]))))
-            nuc_lengths = [len(i) for i in nuc_elements]
-            mag_lengths = [len(i) for i in mag_elements]
-            if max(nuc_lengths) != max(mag_lengths): # if files have different lengthed elements cannot match
-                self.verification_occurred = True
-                self.verified = False
-                self.toggle_error_functionality("ERROR: files must contain the same elements")
-                return
-            # sort element vertices into a numpy array with '-1' filling up the empty slots
-            r = numpy.arange(max(nuc_lengths))
-            nuc_elements_sort = -numpy.ones((len(nuc_elements), max(nuc_lengths)))
-            for i in range(len(nuc_elements)):
-                nuc_elements_sort[i, :nuc_lengths[i]] = nuc_elements[i]
-            mag_elements_sort = -numpy.ones((len(mag_elements), max(mag_lengths)))
-            for i in range(len(mag_elements)):
-                mag_elements_sort[i, :mag_lengths[i]] = mag_elements[i]
-            # sort the elements and directly compare them against each other
-            nuc_elements_sort_order = numpy.lexsort(numpy.transpose(nuc_elements_sort))
-            mag_elements_sort_order = numpy.lexsort(numpy.transpose(mag_elements_sort))
-            if not numpy.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
-                self.verification_occurred = True
-                self.verified = False
-                self.toggle_error_functionality("ERROR: files must contain the same elements")
-                return
-            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
-            self.nuc_sld_data.elements = [self.nuc_sld_data.elements[i] for i in nuc_elements_sort_order]
-            self.mag_sld_data.elements = [self.mag_sld_data.elements[i] for i in mag_elements_sort_order]
-            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
-            for item in params:
-                nuc_val = getattr(self.nuc_sld_data, item)
-                if nuc_val is not None:
-                    # data should already be a numpy array, we cast to an ndarray as a check
-                    # very fast if data is already an instance of ndarray as expected becuase function
-                    # returns the array as-is
-                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_elements_sort_order])
-                mag_val = getattr(self.mag_sld_data, item)
-                if mag_val is not None:
-                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_elements_sort_order])
-            if not points_already_match:
-                self.nuc_sld_data.elements = [[[nuc_permutation[v] for v in f] for f in e] for e in self.nuc_sld_data.elements]
-                self.mag_sld_data.elements = [[[mag_permutation[v] for v in f] for f in e] for e in self.mag_sld_data.elements]
-            self.verification_occurred = True
-            self.verified = True
-            self.toggle_error_functionality()
-        return
-        
 
     def change_data_type(self):
         """Adjusts the GUI for the enabled nuclear/magnetic data files
@@ -597,8 +370,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update the gui with new values - sets the average values from enabled files
         self.update_gui()
         self.check_for_magnetic_controls()
-        # verify that the new enabled files are compatible
-        self.verify_files_match()
+
+
     
     def update_cbOptionsCalc_visibility(self):
         # Only allow 1D averaging if no magnetic data and not elements
@@ -707,7 +480,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     # only load pdb files for nuclear data
                     loader = self.pdb_reader
                 else:
-                    logging.error("The selected file does not have a suitable file extension")
+                    logging.warning("The selected file does not have a suitable file extension")
                     return
 
                 if self.reader is not None and self.reader.isrunning():
@@ -787,10 +560,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             else:
                 self.txtMagData.setText(os.path.basename(str(self.datafile)))
             if self.ext in self.omf_reader.ext:
-                gen = sas_gen.OMF2SLD()
-                gen.set_data(data)
                 # only magnetic data can be read from omf files
-                self.mag_sld_data = gen.get_magsld()
+                self.mag_sld_data = data 
                 self.check_units()
             elif self.ext in self.sld_reader.ext or self.ext in self.vtk_reader.ext:
                 if load_nuc:
@@ -804,7 +575,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         except IOError:
             log_msg = "Loading Error: " \
                       "This file format is not supported for GenSAS."
-            logging.info(log_msg)
+            logging.warning(log_msg)
             raise
         except ValueError:
             log_msg = "Could not find any data"
@@ -820,15 +591,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxMagData.setChecked(True)
         self.update_gui()
         # reset verification now we have loaded new files
-        self.verification_occurred = False
-        self.verified = False
-        self.verify_files_match()
+        self.verify = False
+        self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
+        self.toggle_error_functionality()
 
     def check_units(self):
         """
         Check if the units from the OMF file correspond to the default ones
         displayed on the interface.
-        If not, modify the GUI with the correct unit
+        If not, modify the GUI with the correct units
         """
         # TODO: adopt the convention of font and symbol for the updated values
         if sas_gen.OMFData().valueunit != 'A^(-2)':
@@ -1026,7 +797,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtYstepsize.setText("6")
             self.txtZstepsize.setText("6")
             # re-enable any options disabled by failed verification
-            self.verification_occurred = False
+
             self.verified = False
             self.toggle_error_functionality()
             # reset option for calculation
@@ -1056,6 +827,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.mag_sld_data = None
             # update the gui for the no files loaded case
             self.change_data_type()
+            # verify that the new enabled files are compatible
+            
+            self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
+            self.toggle_error_functionality()
 
 
         finally:
@@ -1266,7 +1041,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # increase the calculation time.
             if sld_data.is_elements:
                 if not sld_data.are_elements_array:
-                    logging.error("SasView does not currently support computation of meshes with multiple element or face types")
+                    logging.warning("SasView does not currently support computation of meshes with multiple element or face types")
                     return
             self.model.set_sld_data(sld_data)
             self.write_new_values_from_gui()

@@ -29,6 +29,9 @@ METER2ANG = 1.0E+10
 # Avogadro constant [1/mol]
 NA = 6.02214129e+23
 
+def _vec(v):
+    return np.ascontiguousarray(v, 'd') if v is not None else None
+
 def mag2sld(mag, v_unit=None):
     """
     Convert magnetization to magnatic SLD
@@ -230,8 +233,200 @@ class GenSAS(object):
             mesg += "a list [qx,qy] where qx,qy are arrays."
             raise RuntimeError(mesg)
 
-def _vec(v):
-    return np.ascontiguousarray(v, 'd') if v is not None else None
+
+    def file_verification(self, nuc_data, mag_data):
+        """Verifies that enabled files are compatible and can be combined
+
+        When the user wishes to combine two different files for nuclear (nuc_data) and magnetic
+        (mag_data) data they must have the same 3D data points in real-space. This function
+        decides whther verification of this is necessary and if so carries it out.
+        In the case that the two files have the same real-space data points in different
+        orders this function re-orders the stored data within the MagSLD objects to make
+        them align. The full verification is only carried out once for any pair of loaded
+        files.
+        """
+
+
+        if not (nuc_data is not None and mag_data is not None):
+            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality immediately
+            return True
+
+        # ensure both files are point or element type- not a mixture
+        if (nuc_data.is_elements and not mag_data.is_elements) or \
+           (not nuc_data.is_elements and mag_data.is_elements):
+            logging.error("ERROR: files must both be point-wise or element-wise")
+            return False
+            
+        # check each file has the same number of coords
+        if nuc_data.pos_x.size != mag_data.pos_x.size:
+            logging.error("ERROR: files have a different number of data points")
+            return False
+            
+        # check the coords match up 1-to-1
+        nuc_coords = np.array(np.column_stack((nuc_data.pos_x, nuc_data.pos_y, nuc_data.pos_z)))
+        mag_coords = np.array(np.column_stack((mag_data.pos_x, mag_data.pos_y, mag_data.pos_z)))
+        # TODO: should this have a floating point tolerance??
+        if np.array_equal(nuc_coords, mag_coords):
+            if not nuc_data.is_elements:
+                # arrays are already sorted in the same order, so files match
+                return True
+            else:
+                points_already_match = True
+        else:
+            # now check if coords are in wrong order or don't match
+            nuc_sort_order = np.lexsort((nuc_data.pos_z, nuc_data.pos_y, nuc_data.pos_x))
+            mag_sort_order = np.lexsort((mag_data.pos_z, mag_data.pos_y, mag_data.pos_x))
+            nuc_coords = nuc_coords[nuc_sort_order]
+            mag_coords = mag_coords[mag_sort_order]
+            # check if sorted data points are equal
+            if np.array_equal(nuc_coords, mag_coords):
+                # if data points are equal then resort both lists into the same order
+                # is this too time consuming for long lists? logging info?
+                # 1) coords
+                nuc_data.pos_x, nuc_data.pos_y, nuc_data.pos_z = np.transpose(nuc_coords)
+                mag_data.pos_x, mag_data.pos_y, mag_data.pos_z = np.transpose(mag_coords)
+                # 2) mag_data array params that must be in same order as coords
+                if not nuc_data.is_elements:
+                    params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
+                else:
+                    params = ["pix_symbol"]
+                for item in params:
+                    nuc_val = getattr(nuc_data, item)
+                    if nuc_val is not None:
+                        # data should already be a np array, we cast to an ndarray as a check
+                        # very fast if data is already an instance of ndarray as expected because function
+                        # returns the array as-is
+                        setattr(nuc_data, item, np.asanyarray(nuc_val)[nuc_sort_order])
+                    mag_val = getattr(mag_data, item)
+                    if mag_val is not None:
+                        setattr(mag_data, item, np.asanyarray(mag_val)[mag_sort_order])
+                # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
+                # absolute positions not references to pos_x, pos_y, pos_z).
+                if not nuc_data.is_elements:
+                    return True
+                else:
+
+                    points_already_match = False
+            else:
+                # if sorted lists not equal then data points aren't equal
+                logging.error("ERROR: files have different real space position data")
+                return False
+                
+        if nuc_data.are_elements_array != mag_data.are_elements_array:
+            # If files don't have the same value for this they do not match anyway.
+            logging.error("ERROR: files must contain the same elements")
+            return False
+        if nuc_data.are_elements_array: # already in np array - can check rapidly
+            if points_already_match:
+                if np.array_equal(nuc_data.elements, mag_data.elements): # straight match - immediately confirm
+                    return True
+                # convert each element into a list of vertices - do not bmag_data comparing each face separately
+                # while technically with a large number of points one could describe multiple different
+                # elements, this is not possible from .vtk element types - and would massively slow down verification.
+                # np.unique also sorts the vertices
+                nuc_elements_sort = np.unique(nuc_data.elements.reshape((nuc_data.elements.shape[0], -1)), axis=-1)
+                mag_elements_sort = np.unique(mag_data.elements.reshape((mag_data.elements.shape[0], -1)), axis=-1)
+            else:
+                # get reverse permutation
+                # when positions were changed each index was sent to a new position - this finds the 
+                # position each index was sent to by inverting the permuation
+                nuc_permutation = np.argsort(nuc_sort_order)
+                mag_permutation = np.argsort(mag_sort_order)
+                nuc_elements_sort = np.unique(nuc_data.elements.reshape((nuc_data.elements.shape[0], -1)), axis=-1)
+                mag_elements_sort = np.unique(mag_data.elements.reshape((mag_data.elements.shape[0], -1)), axis=-1)
+                # must resort after point positions changed
+                nuc_elements_sort = np.sort(nuc_permutation[nuc_elements_sort], axis=1)
+                mag_elements_sort = np.sort(mag_permutation[mag_elements_sort], axis=1)
+            # elements in each file should now be described by the same real space point indices
+            # we sort them into order and directly compare them
+            nuc_elements_sort_order = np.lexsort(np.transpose(nuc_elements_sort))
+            mag_elements_sort_order = np.lexsort(np.transpose(mag_elements_sort))
+            if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
+                logging.error("ERROR: files must contain the same elements")
+                return False
+                
+            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
+            nuc_data.elements = nuc_data.elements[nuc_elements_sort_order, ...]
+            mag_data.elements = mag_data.elements[mag_elements_sort_order, ...]
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
+            for item in params:
+                nuc_val = getattr(nuc_data, item)
+                if nuc_val is not None:
+                    # data should already be a np array, we cast to an ndarray as a check
+                    # very fast if data is already an instance of ndarray as expected becuase function
+                    # returns the array as-is
+                    setattr(nuc_data, item, np.asanyarray(nuc_val)[nuc_elements_sort_order])
+                mag_val = getattr(mag_data, item)
+                if mag_val is not None:
+                    setattr(mag_data, item, np.asanyarray(mag_val)[mag_elements_sort_order])
+            if not points_already_match:
+                # if the points were moved we must also update all indices
+                nuc_data.elements = nuc_permutation[nuc_data.elements]
+                mag_data.elements = mag_permutation[mag_data.elements]
+            return True
+            
+        else:
+            # the files have different cell types within themselves - the elements are not already in a np array
+            # as np does not support jagged arrays
+            nuc_elements = []
+            mag_elements = []
+            # get the unique vertices of each element - see the note above about how this is not technically
+            # a perfect validation.
+            if points_already_match:
+                for element in nuc_data.elements:
+                    nuc_elements.append(np.sort(list(set([vertex for face in element for vertex in face]))))
+                for element in mag_data.elements:
+                    mag_elements.append(np.sort(list(set([vertex for face in element for vertex in face]))))
+            else:
+                # ensure the real space point indices match if they were also sorted
+                nuc_permutation = np.argsort(nuc_sort_order)
+                mag_permutation = np.argsort(mag_sort_order)
+                for element in nuc_data.elements:
+                    nuc_elements.append(np.sort(list(set([nuc_permutation[vertex] for face in element for vertex in face]))))
+                for element in mag_data.elements:
+                    mag_elements.append(np.sort(list(set([mag_permutation[vertex] for face in element for vertex in face]))))
+            nuc_lengths = [len(i) for i in nuc_elements]
+            mag_lengths = [len(i) for i in mag_elements]
+            if max(nuc_lengths) != max(mag_lengths): # if files have different lengthed elements cannot match
+                logging.error("ERROR: files must contain the same elements")
+                return False
+                
+            # sort element vertices into a np array with '-1' filling up the empty slots
+            r = np.arange(max(nuc_lengths))
+            nuc_elements_sort = -np.ones((len(nuc_elements), max(nuc_lengths)))
+            for i in range(len(nuc_elements)):
+                nuc_elements_sort[i, :nuc_lengths[i]] = nuc_elements[i]
+            mag_elements_sort = -np.ones((len(mag_elements), max(mag_lengths)))
+            for i in range(len(mag_elements)):
+                mag_elements_sort[i, :mag_lengths[i]] = mag_elements[i]
+            # sort the elements and directly compare them against each mag_data
+            nuc_elements_sort_order = np.lexsort(np.transpose(nuc_elements_sort))
+            mag_elements_sort_order = np.lexsort(np.transpose(mag_elements_sort))
+            if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
+                logging.error("ERROR: files must contain the same elements")
+                return False
+                
+            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
+            nuc_data.elements = [nuc_data.elements[i] for i in nuc_elements_sort_order]
+            mag_data.elements = [mag_data.elements[i] for i in mag_elements_sort_order]
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
+            for item in params:
+                nuc_val = getattr(nuc_data, item)
+                if nuc_val is not None:
+                    # data should already be a np array, we cast to an ndarray as a check
+                    # very fast if data is already an instance of ndarray as expected becuase function
+                    # returns the array as-is
+                    setattr(nuc_data, item, np.asanyarray(nuc_val)[nuc_elements_sort_order])
+                mag_val = getattr(mag_data, item)
+                if mag_val is not None:
+                    setattr(mag_data, item, np.asanyarray(mag_val)[mag_elements_sort_order])
+            if not points_already_match:
+                nuc_data.elements = [[[nuc_permutation[v] for v in f] for f in e] for e in nuc_data.elements]
+                mag_data.elements = [[[mag_permutation[v] for v in f] for f in e] for e in mag_data.elements]
+            
+        return True
+
+
 
 class VTKReader:
     """
@@ -309,7 +504,7 @@ class VTKReader:
             logging.error("Expected POINTS as next section in vtk file format unstructured grid")
         num_points = int(point_data[1])
         # ignore datatype  - all can be read as float in python
-        # cannot read in with numpy as data not guaranteed to be on a grid with new lines after each point - although this is standard
+        # cannot read in with np as data not guaranteed to be on a grid with new lines after each point - although this is standard
         points = []
         while len(points) < 3*num_points:
             #casting to int and float can handle whitespace - shouldn't need to strip()
@@ -323,7 +518,7 @@ class VTKReader:
         num_elements = int(element_data[1])
         len_elements = int(element_data[2])
         # must load and store carfeully: filetype does not guarantee that elements are line by line
-        # or all of the same type, cannot immediately cast to numpy array as cannot support potential jagged arrays
+        # or all of the same type, cannot immediately cast to np array as cannot support potential jagged arrays
         elements_raw = []
         while len(elements_raw) < len_elements:
             elements_raw += [int(item) for item in next(lines).split()]
@@ -378,7 +573,7 @@ class VTKReader:
             logging.info("Attributes provided per point - averaging to produce 'per cell' data")
             if max(elements_sizes) != min(elements_sizes):
                 # If the number of vertices per cell is not constant then add 'dummy values'
-                # so that array is not jagged - even with additional points numpy can calulate
+                # so that array is not jagged - even with additional points np can calulate
                 # much faster - so we need non-jagged arrays
                 max_size = max(elements_sizes)
                 points_adj = np.concatenate((points, [[0,0,0]]), axis=0) # add null point to make array non-jagged
@@ -430,7 +625,7 @@ class VTKReader:
         # need to flatten as hsplit leaves a length 1 axis
         output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
         output.filename = os.path.basename(path)
-        # check if elements can be written as numpy array - all elements have same number of faces - all faces have same number of vertices
+        # check if elements can be written as np array - all elements have same number of faces - all faces have same number of vertices
         are_elements_array = False
         if all(element_types[0] == x for x in element_types) and not (element_types[0] == 13) and not (element_types[0] == 14):
             elements = np.array(elements)
@@ -745,11 +940,7 @@ class OMF2SLD(object):
             self.pos_y -= (min(self.pos_y) + max(self.pos_y)) / 2.0
             self.pos_z -= (min(self.pos_z) + max(self.pos_z)) / 2.0
 
-    def get_magsld(self):
-        """
-        return MagSLD
-        """
-        return self.output
+
 
 
 class OMFReader(object):
@@ -888,11 +1079,14 @@ class OMFReader(object):
                         output.valuerangemaxmag \
                             = mag2sld(float(valuerangemaxmag), valueunit)
             output.set_m(mx, my, mz)
+            omf2sld = OMF2SLD()
+            omf2sld.set_data(output)
+            output = omf2sld.get_output()
             return output
         except Exception:
             msg = "%s is not supported: \n" % path
             msg += "We accept only Text format OMF file."
-            logging.error(msg)
+            logging.warning(msg)
             return None
 
 class PDBReader(object):
@@ -967,7 +1161,7 @@ class PDBReader(object):
                             vol = 1.0e+24 * atom.mass / atom.density / NA
                             vol_pix = np.append(vol_pix, vol)
                         except Exception:
-                            logging.info("Error: set the sld of %s to zero"% atom_name)
+                            logging.warning("Warning: setting the sld of %s to zero"% atom_name)
                             sld_n = np.append(sld_n, 0.0)
                         sld_mx = np.append(sld_mx, 0)
                         sld_my = np.append(sld_my, 0)
@@ -1207,7 +1401,7 @@ class MagSLD(object):
                  sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None):
         """
         Init for mag SLD
-        :params : All should be numpy 1D array
+        :params : All should be np 1D array
         """
         self.is_data = True
         self.is_elements = False # is this a finite-element based mesh
@@ -1456,10 +1650,9 @@ def test():
         raise ValueError("file(s) not found: %r"%(ofpath,))
     oreader = OMFReader()
     omfdata = oreader.read(ofpath)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
+
     model = GenSAS()
-    model.set_sld_data(omf2sld.output)
+    model.set_sld_data(omfdata.output)
     q = np.linspace(0, 0.1, 11)[1:]
     return model.runXY([q, q])
 
@@ -1487,8 +1680,7 @@ def demo_load():
     oreader = OMFReader()
     output = reader.read(tfpath)
     ooutput = oreader.read(ofpath)
-    foutput = OMF2SLD()
-    foutput.set_data(ooutput)
+
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
@@ -1525,10 +1717,9 @@ def demo_save():
         raise ValueError("file(s) not found: %r"%(ofpath,))
     oreader = OMFReader()
     omfdata = oreader.read(ofpath)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
+
     writer = SLDReader()
-    writer.write("out.txt", omf2sld.output)
+    writer.write("out.txt", omfdata.output)
 
 def sas_gen_c(self, qx, qy=None):
     """
@@ -1781,9 +1972,8 @@ def demo_oommf():
     path = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
     reader = OMFReader()
     omfdata = reader.read(path)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
-    data = omf2sld.output
+
+    data = omfdata.output
     model = GenSAS()
     model.set_sld_data(data)
     model.params['background'] = 1e-7
