@@ -264,6 +264,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
         self.q_range_max = OptionsWidget.QMAX_DEFAULT
         self.npts = OptionsWidget.NPTS_DEFAULT
+        self.I_exponent = OptionsWidget.I_EXP_DEFAULT
+        # TEMPORARY
+        self.I_exponent = 2.0
         self.log_points = False
         self.weighting = 0
         self.chi2 = None
@@ -614,6 +617,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
         self.options_widget.txtMinRange.editingFinished.connect(self.options_widget.updateMinQ)
         self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
+        self.options_widget.txtIntensityExponent.editingFinished.connect(self.options_widget.updateIExp)
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
@@ -1883,6 +1887,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model = copy.deepcopy(self.kernel_module)
         qmin = self.q_range_min
         qmax = self.q_range_max
+        I_exp = self.I_exponent
 
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
@@ -1913,11 +1918,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             data = GuiUtils.dataFromItem(fit_index)
             # Potential weights added directly to data
             weighted_data = self.addWeightingToData(data)
+            # import PyQt5
+            # PyQt5.QtCore.pyqtRemoveInputHook()
+            # import pdb;
+            # pdb.set_trace()
             try:
                 fitter_single.set_model(model, fit_id, params_to_fit, data=weighted_data,
-                             constraints=constraints)
+                             constraints=constraints, I_exp=I_exp)
             except ValueError as ex:
                 raise ValueError("Setting model parameters failed with: %s" % ex)
+
+            # import PyQt5
+            # PyQt5.QtCore.pyqtRemoveInputHook()
+            # import pdb;
+            # pdb.set_trace()
 
             fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
@@ -2896,7 +2910,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                completefn=completefn,
                                                update_chisqr=True,
                                                exception_handler=self.calcException,
-                                               source=None)
+                                               source=None,
+                                               I_exp=self.I_exponent)
         if use_threads:
             if LocalConfig.USING_TWISTED:
                 # start the thread with twisted
@@ -3697,6 +3712,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.npts = fp.fit_options[fp.NPTS]
         self.log_points = fp.fit_options[fp.LOG_POINTS]
         self.weighting = fp.fit_options[fp.WEIGHTING]
+        self.I_exponent = fp.fit_options[fp.I_EXP]
 
         # Models
         self._model_model = fp.model_model
@@ -3753,9 +3769,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.fit_options[fp.MIN_RANGE] = self.q_range_min
         fp.fit_options[fp.MAX_RANGE] = self.q_range_max
         fp.fit_options[fp.NPTS] = self.npts
-        #fp.fit_options[fp.NPTS_FIT] = self.npts_fit
+        fp.fit_options[fp.NPTS_FIT] = self.npts_fit
         fp.fit_options[fp.LOG_POINTS] = self.log_points
         fp.fit_options[fp.WEIGHTING] = self.weighting
+        fp.fit_options[fp.I_EXP] = self.I_exponent
 
         # Resolution tab
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
@@ -3976,6 +3993,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list.append(['q_range_max', str(self.q_range_max)])
         param_list.append(['q_weighting', str(self.weighting)])
         param_list.append(['weighting', str(self.options_widget.weighting)])
+        param_list.append(['I_exponent', str(self.I_exponent)])
 
         # resolution
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
@@ -4426,6 +4444,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.qmin = self.q_range_min
         state.qmax = self.q_range_max
         state.npts = self.npts
+        state.I_exp = self.I_exponent
 
         p = self.model_parameters
         # save checkbutton state and txtcrtl values

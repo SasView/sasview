@@ -359,6 +359,10 @@ class GuiManager(object):
                 self._current_perspective.name] = self._current_perspective
             self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._workspace.workspace.removeSubWindow(self.subwindow)
+        import PyQt5
+        PyQt5.QtCore.pyqtRemoveInputHook()
+        import pdb;
+        pdb.set_trace()
         # Get new perspective
         self._current_perspective = self.loadedPerspectives[str(perspective_name)]
 

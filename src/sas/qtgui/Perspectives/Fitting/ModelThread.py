@@ -33,6 +33,7 @@ class Calc2D(CalcThread):
                             exception_handler=exception_handler)
         self.qmin = qmin
         self.qmax = qmax
+        self.I_exp = 2.0
         self.weight = weight
         self.fid = fid
         #self.qstep = qstep
@@ -134,7 +135,7 @@ class Calc1D(CalcThread):
                  yieldtime=0.01,
                  worktime=0.01,
                  exception_handler=None,
-                 ):
+                 I_exp=0.0):
         """
         """
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
@@ -154,14 +155,20 @@ class Calc1D(CalcThread):
         self.source = source
         self.out = None
         self.index = None
+        self.I_exp = I_exp
 
     def compute(self):
         """
         Compute model 1d value given qmin , qmax , x value
         """
+        # import PyQt5
+        # PyQt5.QtCore.pyqtRemoveInputHook()
+        # import pdb;
+        # pdb.set_trace()
         self.starttime = time.time()
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
+        self.model.set_exponent(2.0)
 
         intermediate_results = None
 

@@ -396,7 +396,7 @@ class FitEngine:
         self.fit_arrange_dict = {}
         self.fitter_id = None
 
-    def set_model(self, model, id, pars=[], constraints=[], data=None):
+    def set_model(self, model, id, pars=[], constraints=[], data=None, I_exp=0):
         """
         set a model on a given  in the fit engine.
 
@@ -438,6 +438,8 @@ class FitEngine:
         self.fit_arrange_dict[id].pars = pars
         self.fit_arrange_dict[id].vals = [sasmodel.getParam(name) for name in pars]
         self.fit_arrange_dict[id].constraints = constraints
+        self.fit_arrange_dict[id].model.model.set_exponent(I_exp)
+
 
     def set_data(self, data, id, smearer=None, qmin=None, qmax=None):
         """

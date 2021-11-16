@@ -36,12 +36,14 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
     QMIN_DEFAULT = 0.0005
     QMAX_DEFAULT = 0.5
     NPTS_DEFAULT = 50
+    I_EXP_DEFAULT = 0
     MODEL = [
         'MIN_RANGE',
         'MAX_RANGE',
         'NPTS',
         'NPTS_FIT',
-        'LOG_SPACED']
+        'LOG_SPACED',
+        'I_EXP']
 
     def __init__(self, parent=None, logic=None):
         super(OptionsWidget, self).__init__()
@@ -68,6 +70,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         # Let only floats in the range edits
         self.txtMinRange.setValidator(GuiUtils.DoubleValidator())
         self.txtMaxRange.setValidator(GuiUtils.DoubleValidator())
+        self.txtIntensityExponent.setValidator(GuiUtils.DoubleValidator())
         # Let only ints in the number of points edit
         self.txtNpts.setValidator(QtGui.QIntValidator())
 
@@ -85,6 +88,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.qmax = self.QMAX_DEFAULT
         self.npts = self.NPTS_DEFAULT
         self.npts_fit = self.NPTS_DEFAULT
+        self.I_exp = self.I_EXP_DEFAULT
         if self.logic.data_is_loaded:
             self.qmin, self.qmax, self.npts = self.logic.computeDataRange()
             self.npts_fit = self.npts2fit(data=self.logic.data)
@@ -96,6 +100,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.txtMinRange.setText(str(self.qmin))
         self.txtNpts.setText(str(self.npts))
         self.txtNptsFit.setText(str(self.npts_fit))
+        self.txtIntensityExponent.setText(str(self.I_exp))
         self.model.blockSignals(False)
 
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -126,6 +131,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtNpts,     self.MODEL.index('NPTS'))
         self.mapper.addMapping(self.txtNptsFit,  self.MODEL.index('NPTS_FIT'))
         self.mapper.addMapping(self.chkLogData,  self.MODEL.index('LOG_SPACED'))
+        self.mapper.addMapping(self.txtIntensityExponent, self.MODEL.index('I_EXP'))
 
         self.mapper.toFirst()
 
@@ -165,7 +171,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
             return
         # Update the npts/fit value
         if top.row() in [0, 1, 2]:
-            qmin, qmax, npts, _, _ = self.state()
+            qmin, qmax, npts, _, _, _ = self.state()
             # if this is a Q value, update NPt/fit
             value = float(item_text)
             if top.row() == 0:
@@ -242,6 +248,11 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         npts_fit = self.npts2fit(self.logic.data)
         self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
 
+    def updateIExp(self, I_exp=0.0):
+        self.txtIntensityExponent.setText(I_exp)
+        self.model.item(self.MODEL.index('I_EXP'))
+        self.I_exp = I_exp
+
     def state(self):
         """
         Returns current state of controls
@@ -251,8 +262,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         npts = int(self.model.item(self.MODEL.index('NPTS')).text())
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
         log_points = str(self.model.item(self.MODEL.index('LOG_SPACED')).text()) == 'true'
+        I_exponent = float(self.model.item(self.MODEL.index('I_EXP')).text())
 
-        return (q_range_min, q_range_max, npts, log_points, self.weighting)
+        return (q_range_min, q_range_max, npts, log_points, self.weighting, I_exponent)
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):
         """
