@@ -10,7 +10,6 @@ import sas
 
 
 class PackageGatherer:
-
     """ A class used to gather packages/modules  used by SasView and their current installed version
 
     :method log_installed_packages: Log version number of locally installed python packages
@@ -20,8 +19,7 @@ class PackageGatherer:
     :method format_unattainable_packages_list: Format module names in the unattainable_modules list
     """
 
-
-    def log_installed_packages(self):
+    def log_installed_modules(self):
         """ Log version number of locally installed python packages
 
         Use pip list to create a dictionary of installed modules as the keys, with their respective version numbers
@@ -171,6 +169,7 @@ class PackageGatherer:
                 continue
 
             # Modules version number could not be attained by any of the previous methods
+
             no_version_list.append(package_name)
 
             # Currently not required for any packages used by SasView
@@ -195,7 +194,6 @@ class PackageGatherer:
         return {"results": package_versions_dict, "no_results": no_version_dict, "errors": err_version_dict}
 
 
-
     def remove_duplicate_modules(self, modules_dict):
         """ Strip duplicate instances of each module
 
@@ -213,12 +211,10 @@ class PackageGatherer:
             numbers as the value.
         :rtype : dict
         """
-
         output_dict = dict()
-
+        
         for module_name in modules_dict.keys():
             parent_module = module_name.split('.')[0]
-
             # Save one instance of each module
             if parent_module not in output_dict.keys():
                 output_dict[parent_module] = modules_dict[module_name]
@@ -230,7 +226,7 @@ class PackageGatherer:
 
         return output_dict
 
-
+      
     def format_no_version_list(self, modules_dict, no_version_list):
         """ Format module names in the no_version_list list
 
