@@ -69,14 +69,13 @@ class sas_gen_test(unittest.TestCase):
         Test .omf file loaded
         """
         f = self.omfloader.read(find("A_Raw_Example-1.omf"))
-        output = sas_gen.OMF2SLD()
-        output.set_data(f)
-        self.assertEqual(f.mx[0], 0)
-        self.assertEqual(f.my[0], 0)
-        self.assertEqual(f.mz[0], 0)
-        self.assertEqual(output.pos_x[0], 0.0)
-        self.assertEqual(output.pos_y[0], 0.0)
-        self.assertEqual(output.pos_z[0], 0.0)
+
+        self.assertEqual(f.sld_mx[0], 0)
+        self.assertEqual(f.sld_my[0], 0)
+        self.assertEqual(f.sld_mz[0], 0)
+        self.assertEqual(f.pos_x[0], 0.0)
+        self.assertEqual(f.pos_y[0], 0.0)
+        self.assertEqual(f.pos_z[0], 0.0)
     
     def test_vtkreader(self):
         """
