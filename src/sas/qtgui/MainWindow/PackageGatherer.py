@@ -146,32 +146,20 @@ class PackageGatherer:
                 err_version_dict[package_name] = f"Unknown: {e} when attempting to import module"
                 continue
 
-            # Different attempts of retrieving the modules version
+            # Retrieving the modules version using the __version__ attribute
             if hasattr(package, '__version__'):
                 # Module has __version__ attribute
                 try:
                     package_versions_dict[package_name] = package.__version__
+                    continue
                 except Exception as e:
                     # Unable to access module
                     err_version_dict[package_name] = f"Unknown: {e} when attempting to access {package_name} " \
                                                      f"version using .__version__"
                     pass
-                continue
 
-            if hasattr(package, '.version'):
-                # Module has .version attribute
-                try:
-                    if isinstance(package.version, str) or isinstance(package.version, float):
-                        package_versions_dict[package_name] = package.version
-                except Exception as e:
-                    # Unable to access module
-                    err_version_dict[package_name] = f"Unknown: {e} when attempting to access {package_name} " \
-                                                     f"version using .version"
-                    pass
-
-                continue
-
-            # Unreliable, so last option
+            # Retrieving the modules version using the pkg_resources package
+            # Unreliable, so second option
             try:
                 package_versions_dict[package_name] = pkg_resources.get_distribution(package_name).version
             except Exception:
@@ -180,27 +168,24 @@ class PackageGatherer:
             else:
                 continue
 
-            # Below is code that calculates the version of each module using pip, however it is
-            # very time consuming, and only is useful for a handful of modules
-            # try:
-            #     pip_module_show = str(subprocess.check_output(f"pip show {mod}"), 'utf-8')
-            #     show_list = pip_module_show.replace("\r\n", ",").split(",")
-            #     for sec in show_list:
-            #         if sec.startswith("Version"):
-            #             module_versions_dict[mod] = sec.split(":")[1].strip()
-            #         else:
-            #             # Unable to get  version for this specific module
-            #             pass
-            # except Exception as x:
-            #     # Module not available through pip
-            #     logging.error(f"{x} when attempting to get the version of {mod} through pip")
-            #     pass
-            # else:
-            #     continue
-
             # Modules version number could not be attained by any of the previous methods
 
             no_version_list.append(package_name)
+
+            # Currently not required for any packages used by SasView
+            # Retrieving the modules version using the version attribute
+            # if hasattr(package, 'version'):
+            #     # Module has version attribute
+            #     try:
+            #         if isinstance(package.version, str):
+            #             print(package)
+            #             package_versions_dict[package_name] = package.version
+            #             continue
+            #     except Exception as e:
+            #         # Unable to access module
+            #         err_version_dict[package_name] = f"Unknown: {e} when attempting to access {package_name} " \
+            #                                          f"version using .version"
+            #         pass
 
         # Clean up
         package_versions_dict = self.remove_duplicate_modules(package_versions_dict)

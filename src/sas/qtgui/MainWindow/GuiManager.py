@@ -490,13 +490,13 @@ class GuiManager(object):
         """
         Log version number of locally installed python packages
         """
-        PackageGatherer().log_installed_modules()
+        PackageGatherer().log_installed_packages()
 
     def log_imported_packages(self):
         """
         Log version number of python packages imported in this instance of SasView.
         """
-        PackageGatherer().log_imported_modules()
+        PackageGatherer().log_imported_packages()
 
     def processVersion(self, version_info):
         """
