@@ -82,7 +82,7 @@ dependencies:
   - qtconsole=4.3.1=py36h8f73b5b_0
   - readline=7.0=ha6073c6_4
   - requests=2.18.4=py36he2e5f8d_1
-  - scipy=1.1.0=py36hfc37229_0
+  - scipy=1.2.0
   - setuptools=39.1.0=py36_0
   - simplegeneric=0.8.1=py36_2
   - sip=4.19.8=py36hf484d3e_0

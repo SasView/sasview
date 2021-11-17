@@ -14,7 +14,6 @@ from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
     TransmissionSpectrum, Detector
 from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
 from sas.sascalc.dataloader.file_reader_base_class import FileReader, decode
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 
 try:
   basestring
@@ -770,5 +769,6 @@ class Reader(FileReader):
         :param dataset: DataInfo object that will be converted to NXcanSAS
         :return: None
         """
+        from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
         writer = NXcanSASWriter()
         writer.write(dataset=[dataset], filename=filename)
