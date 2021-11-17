@@ -250,7 +250,6 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
 
     def updateIExp(self, I_exp=0.0):
-        self.txtIntensityExponent.setText(str(I_exp))
         self.model.item(self.MODEL.index('I_EXP'))
         self.I_exp = I_exp
 

@@ -161,13 +161,10 @@ class Calc1D(CalcThread):
         """
         Compute model 1d value given qmin , qmax , x value
         """
-        # import PyQt5
-        # PyQt5.QtCore.pyqtRemoveInputHook()
-        # import pdb;
-        # pdb.set_trace()
         self.starttime = time.time()
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
+        self.model.set_exponent(self.I_exp)
 
         intermediate_results = None
 
