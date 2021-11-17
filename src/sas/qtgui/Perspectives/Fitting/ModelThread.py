@@ -168,7 +168,6 @@ class Calc1D(CalcThread):
         self.starttime = time.time()
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
-        self.model.set_exponent(2.0)
 
         intermediate_results = None
 

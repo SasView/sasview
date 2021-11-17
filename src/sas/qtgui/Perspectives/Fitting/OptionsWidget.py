@@ -101,6 +101,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.txtNpts.setText(str(self.npts))
         self.txtNptsFit.setText(str(self.npts_fit))
         self.txtIntensityExponent.setText(str(self.I_exp))
+        self.updateIExp(self.I_exp)
         self.model.blockSignals(False)
 
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -249,7 +250,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.model.item(self.MODEL.index('NPTS_FIT')).setText(str(npts_fit))
 
     def updateIExp(self, I_exp=0.0):
-        self.txtIntensityExponent.setText(I_exp)
+        self.txtIntensityExponent.setText(str(I_exp))
         self.model.item(self.MODEL.index('I_EXP'))
         self.I_exp = I_exp
 
@@ -262,9 +263,15 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         npts = int(self.model.item(self.MODEL.index('NPTS')).text())
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
         log_points = str(self.model.item(self.MODEL.index('LOG_SPACED')).text()) == 'true'
-        I_exponent = float(self.model.item(self.MODEL.index('I_EXP')).text())
-
-        return (q_range_min, q_range_max, npts, log_points, self.weighting, I_exponent)
+        # import PyQt5
+        # PyQt5.QtCore.pyqtRemoveInputHook()
+        # import pdb;
+        # pdb.set_trace()
+        if self.model.item(self.MODEL.index('I_EXP')).text() != '':
+            I_exp = float(self.model.item(self.MODEL.index('I_EXP')).text())
+        else:
+            I_exp = self.I_exp
+        return (q_range_min, q_range_max, npts, log_points, self.weighting, I_exp)
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):
         """

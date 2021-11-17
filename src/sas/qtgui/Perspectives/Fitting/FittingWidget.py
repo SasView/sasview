@@ -265,8 +265,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_max = OptionsWidget.QMAX_DEFAULT
         self.npts = OptionsWidget.NPTS_DEFAULT
         self.I_exponent = OptionsWidget.I_EXP_DEFAULT
-        # TEMPORARY
-        self.I_exponent = 2.0
         self.log_points = False
         self.weighting = 0
         self.chi2 = None
@@ -460,6 +458,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
+        self.updateIExp()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
@@ -577,6 +576,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
         self.updateQRange()
+        self.updateIExp()
 
     def initializeSignals(self):
         """
@@ -1290,6 +1290,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.data_index = data_index
         self.updateQRange()
+        self.updateIExp()
 
     def onSelectStructureFactor(self):
         """
@@ -2262,7 +2263,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update local option values and replot
         """
-        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
+        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting, self.I_exponent = \
             self.options_widget.state()
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
@@ -2403,6 +2404,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
+
+    def updateIExp(self):
+        """
+        Updates Q Range display
+        """
+        self.options_widget.updateIExp(self.I_exponent)
 
     def SASModelToQModel(self, model_name, structure_factor=None):
         """
@@ -4249,6 +4256,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                         break
         except ValueError:
             pass
+
+        self.options_widget.updateIExp(self.I_exponent)
 
         self.updateFullModel(context)
         self.updateFullPolyModel(context)

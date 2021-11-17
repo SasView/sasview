@@ -13,8 +13,8 @@
   <property name="windowTitle">
    <string>Fit Options</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_23">
-   <item row="0" column="0">
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_4">
      <property name="title">
       <string>Fitting range</string>
@@ -111,7 +111,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_5">
      <property name="title">
       <string>Data points</string>
@@ -222,7 +222,43 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="3" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Y-axis</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Q Exponent</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="txtIntensityExponent"/>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -230,7 +266,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>312</height>
+       <height>68</height>
       </size>
      </property>
     </spacer>
