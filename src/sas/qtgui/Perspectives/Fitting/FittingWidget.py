@@ -264,7 +264,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
         self.q_range_max = OptionsWidget.QMAX_DEFAULT
         self.npts = OptionsWidget.NPTS_DEFAULT
-        self.I_exponent = OptionsWidget.I_EXP_DEFAULT
+        self.Y_expression = OptionsWidget.Y_EXP_DEFAULT
         self.log_points = False
         self.weighting = 0
         self.chi2 = None
@@ -458,7 +458,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
-        self.updateIExp()
+        self.updateYExp()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
@@ -576,7 +576,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
         self.updateQRange()
-        self.updateIExp()
+        self.updateYExp()
 
     def initializeSignals(self):
         """
@@ -617,7 +617,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
         self.options_widget.txtMinRange.editingFinished.connect(self.options_widget.updateMinQ)
         self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
-        self.options_widget.txtIntensityExponent.editingFinished.connect(self.options_widget.updateIExp)
+        self.options_widget.txtIntensityExponent.editingFinished.connect(self.options_widget.updateYExp)
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
@@ -1290,7 +1290,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         self.data_index = data_index
         self.updateQRange()
-        self.updateIExp()
+        self.updateYExp()
 
     def onSelectStructureFactor(self):
         """
@@ -1888,7 +1888,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model = copy.deepcopy(self.kernel_module)
         qmin = self.q_range_min
         qmax = self.q_range_max
-        I_exp = self.I_exponent
+        Y_exp = self.Y_expression
 
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
@@ -1925,7 +1925,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # pdb.set_trace()
             try:
                 fitter_single.set_model(model, fit_id, params_to_fit, data=weighted_data,
-                             constraints=constraints, I_exp=I_exp)
+                             constraints=constraints, Y_exp=Y_exp)
             except ValueError as ex:
                 raise ValueError("Setting model parameters failed with: %s" % ex)
 
@@ -2263,7 +2263,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update local option values and replot
         """
-        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting, self.I_exponent = \
+        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting, self.Y_expression = \
             self.options_widget.state()
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
@@ -2405,11 +2405,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
 
-    def updateIExp(self):
+    def updateYExp(self):
         """
         Updates Q Range display
         """
-        self.options_widget.updateIExp(self.I_exponent)
+        self.options_widget.updateYExp(self.Y_expression)
 
     def SASModelToQModel(self, model_name, structure_factor=None):
         """
@@ -2905,20 +2905,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.disableInteractiveElementsOnCalculate()
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
-                                               model=model,
-                                               page_id=0,
-                                               qmin=self.q_range_min,
-                                               qmax=self.q_range_max,
-                                               smearer=smearer,
-                                               state=None,
-                                               weight=weight,
-                                               fid=None,
-                                               toggle_mode_on=False,
-                                               completefn=completefn,
-                                               update_chisqr=True,
-                                               exception_handler=self.calcException,
-                                               source=None,
-                                               I_exp=self.I_exponent)
+                                                    model=model,
+                                                    page_id=0,
+                                                    qmin=self.q_range_min,
+                                                    qmax=self.q_range_max,
+                                                    smearer=smearer,
+                                                    state=None,
+                                                    weight=weight,
+                                                    fid=None,
+                                                    toggle_mode_on=False,
+                                                    completefn=completefn,
+                                                    update_chisqr=True,
+                                                    exception_handler=self.calcException,
+                                                    source=None,
+                                                    Y_exp=self.Y_expression)
         if use_threads:
             if LocalConfig.USING_TWISTED:
                 # start the thread with twisted
@@ -3719,7 +3719,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.npts = fp.fit_options[fp.NPTS]
         self.log_points = fp.fit_options[fp.LOG_POINTS]
         self.weighting = fp.fit_options[fp.WEIGHTING]
-        self.I_exponent = fp.fit_options[fp.I_EXP]
+        self.Y_expression = fp.fit_options[fp.Y_EXP]
 
         # Models
         self._model_model = fp.model_model
@@ -3779,7 +3779,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.fit_options[fp.NPTS_FIT] = self.npts_fit
         fp.fit_options[fp.LOG_POINTS] = self.log_points
         fp.fit_options[fp.WEIGHTING] = self.weighting
-        fp.fit_options[fp.I_EXP] = self.I_exponent
+        fp.fit_options[fp.Y_EXP] = self.Y_expression
 
         # Resolution tab
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
@@ -4000,7 +4000,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_list.append(['q_range_max', str(self.q_range_max)])
         param_list.append(['q_weighting', str(self.weighting)])
         param_list.append(['weighting', str(self.options_widget.weighting)])
-        param_list.append(['I_exponent', str(self.I_exponent)])
+        param_list.append(['Y_expression', str(self.Y_expression)])
 
         # resolution
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
@@ -4257,7 +4257,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except ValueError:
             pass
 
-        self.options_widget.updateIExp(self.I_exponent)
+        self.options_widget.updateYExp(self.Y_expression)
 
         self.updateFullModel(context)
         self.updateFullPolyModel(context)
@@ -4453,7 +4453,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.qmin = self.q_range_min
         state.qmax = self.q_range_max
         state.npts = self.npts
-        state.I_exp = self.I_exponent
+        state.Y_exp = self.Y_expression
 
         p = self.model_parameters
         # save checkbutton state and txtcrtl values

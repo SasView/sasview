@@ -33,7 +33,7 @@ class Calc2D(CalcThread):
                             exception_handler=exception_handler)
         self.qmin = qmin
         self.qmax = qmax
-        self.I_exp = 2.0
+        self.Y_exp = "I"
         self.weight = weight
         self.fid = fid
         #self.qstep = qstep
@@ -135,7 +135,7 @@ class Calc1D(CalcThread):
                  yieldtime=0.01,
                  worktime=0.01,
                  exception_handler=None,
-                 I_exp=0.0):
+                 Y_exp="I"):
         """
         """
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
@@ -155,7 +155,7 @@ class Calc1D(CalcThread):
         self.source = source
         self.out = None
         self.index = None
-        self.I_exp = I_exp
+        self.Y_exp = Y_exp
 
     def compute(self):
         """
@@ -164,7 +164,7 @@ class Calc1D(CalcThread):
         self.starttime = time.time()
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
-        self.model.set_exponent(self.I_exp)
+        self.model.set_expression(self.Y_exp)
 
         intermediate_results = None
 
