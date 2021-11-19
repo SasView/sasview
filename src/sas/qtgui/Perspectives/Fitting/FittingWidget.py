@@ -619,6 +619,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
         self.options_widget.txtCustomYaxisExpression.editingFinished.connect(self.options_widget.updateYExp)
 
+        # Hide custom options
+        self.options_widget.txtCustomYaxisExpression.hide()
+        self.options_widget.label_2.hide()
+        self.options_widget.txtYAxisTitle.hide()
+        self.options_widget.label_3.hide()
+
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)

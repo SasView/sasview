@@ -43,7 +43,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         'NPTS',
         'NPTS_FIT',
         'LOG_SPACED',
-        'Y_EXP']
+        'Y_EXP',
+        'CUSTOM_Y_EXP_CHK']
 
     def __init__(self, parent=None, logic=None):
         super(OptionsWidget, self).__init__()
@@ -80,6 +81,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.cmdReset.clicked.connect(self.onRangeReset)
         self.cmdMaskEdit.clicked.connect(self.onMaskEdit)
         self.chkLogData.stateChanged.connect(self.toggleLogData)
+        self.chkCustomYData.stateChanged.connect(self.toggleCustomYData)
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
@@ -132,6 +134,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtNptsFit,  self.MODEL.index('NPTS_FIT'))
         self.mapper.addMapping(self.chkLogData,  self.MODEL.index('LOG_SPACED'))
         self.mapper.addMapping(self.comboBoxYaxisExpression, self.MODEL.index('Y_EXP'))
+        self.mapper.addMapping(self.chkCustomYData, self.MODEL.index('CUSTOM_Y_EXP_CHK'))
         self.mapper.addMapping(self.txtCustomYaxisExpression, self.MODEL.index('Y_EXP'))
 
         self.mapper.toFirst()
@@ -139,6 +142,19 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
         pass
+
+    def toggleCustomYData(self, isChecked):
+        """ Toggles between custom and default Y-axis data """
+        if isChecked == 0:
+            self.txtCustomYaxisExpression.hide()
+            self.label_2.hide()
+            self.txtYAxisTitle.hide()
+            self.label_3.hide()
+        elif isChecked == 2:
+            self.txtCustomYaxisExpression.show()
+            self.label_2.show()
+            self.txtYAxisTitle.show()
+            self.label_3.show()
 
     def onMaskEdit(self):
         """
