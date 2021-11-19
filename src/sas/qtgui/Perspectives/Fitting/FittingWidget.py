@@ -617,7 +617,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
         self.options_widget.txtMinRange.editingFinished.connect(self.options_widget.updateMinQ)
         self.options_widget.txtMaxRange.editingFinished.connect(self.options_widget.updateMaxQ)
-        self.options_widget.txtIntensityExponent.editingFinished.connect(self.options_widget.updateYExp)
+        self.options_widget.txtCustomYaxisExpression.editingFinished.connect(self.options_widget.updateYExp)
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)

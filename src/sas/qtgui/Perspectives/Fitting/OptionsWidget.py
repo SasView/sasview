@@ -99,7 +99,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.txtMinRange.setText(str(self.qmin))
         self.txtNpts.setText(str(self.npts))
         self.txtNptsFit.setText(str(self.npts_fit))
-        self.txtIntensityExponent.setText(str(self.Y_exp))
+        self.txtCustomYaxisExpression.setText("")
         self.updateYExp(self.Y_exp)
         self.model.blockSignals(False)
 
@@ -131,7 +131,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtNpts,     self.MODEL.index('NPTS'))
         self.mapper.addMapping(self.txtNptsFit,  self.MODEL.index('NPTS_FIT'))
         self.mapper.addMapping(self.chkLogData,  self.MODEL.index('LOG_SPACED'))
-        self.mapper.addMapping(self.txtIntensityExponent, self.MODEL.index('Y_EXP'))
+        self.mapper.addMapping(self.comboBoxYaxisExpression, self.MODEL.index('Y_EXP'))
+        self.mapper.addMapping(self.txtCustomYaxisExpression, self.MODEL.index('Y_EXP'))
 
         self.mapper.toFirst()
 
