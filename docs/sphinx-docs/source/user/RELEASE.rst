@@ -13,6 +13,12 @@ Release Notes
 Features
 ========
 
+New in Version 5.0.5
+--------------------
+This is a point release which fixes some issues reported in earlier versions
+of 5.0.x:
+
+
 New in Version 5.0.4
 --------------------
 This is a point release which fixes some issues reported in earlier versions
