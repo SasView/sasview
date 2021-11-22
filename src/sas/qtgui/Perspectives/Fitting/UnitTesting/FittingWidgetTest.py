@@ -221,7 +221,7 @@ class FittingWidgetTest(unittest.TestCase):
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
         self.assertEqual(mag_index.data(), "up_frac_f")
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        self.assertEqual(mag_index.data(), "up_angle")
+        self.assertEqual(mag_index.data(), "up_theta")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
         self.assertEqual(mag_index.data(), "up_phi")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)

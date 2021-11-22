@@ -176,7 +176,7 @@ _calc_Iqxy.__doc__ = """
 
 def _calc_Iqxy_magnetic(
         qx, qy, x, y, rho, vol, rho_m,
-        up_frac_i=1, up_frac_f=1, up_angle=0., up_phi=0.):
+        up_frac_i=1, up_frac_f=1, up_theta=0., up_phi=0.):
     """Compute I(q) for a set of points (x, y), with magnetism on each point.
 
     Uses: I(q) = sum_xs w_xs \|sum V(r) rho(q, r, xs) e^(1j q.r)\|^2 / sum V(r)
@@ -191,8 +191,8 @@ def _calc_Iqxy_magnetic(
     dd, du, ud, uu = _spin_weights(up_frac_i, up_frac_f)
 
     # Precompute helper values
-    up_angle = np.radians(up_angle)
-    cos_spin, sin_spin = np.cos(up_angle), np.sin(up_angle)
+    up_theta = np.radians(up_theta)
+    cos_spin, sin_spin = np.cos(up_theta), np.sin(up_theta)
 
     up_phi = np.radians(up_phi)
     cos_phi, sin_phi = np.cos(up_phi), np.sin(up_phi)
