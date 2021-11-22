@@ -1,4 +1,5 @@
 import copy
+import math
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -645,6 +646,7 @@ def plotPolydispersities(model):
 def binary_encode(i, digits):
     return [i >> d & 1 for d in range(digits)]
 
+
 def getWeight(data, is2d, flag=None):
     """
     Received flag and compute error on data.
@@ -672,7 +674,68 @@ def getWeight(data, is2d, flag=None):
         weight = numpy.sqrt(numpy.abs(data))
     elif flag == 3:
         weight = numpy.abs(data)
+
     return weight
+
+
+def increaseWeight(weight, weight_multiplier=1.0):
+    """ Increase the statistical weight of a dataset
+
+    :param weight: Data for the statistical weight, typical the y axis error
+    :type weight: numpy.ndarray
+    :param weight_multiplier: Factor to increase the weight by
+    :type weight_multiplier: int or float
+    :return: Modified data for the statistical weight
+    :r_type: numpy.ndarray
+    """
+
+    return weight * weight_multiplier
+
+
+def calcWeightIncrease(weights, ratios, flag=None):
+    """ Calculate the factor to increase the data for the statistical weight of each data set by.
+
+    :param weights: Dictionary of data for the statistical weight, typical the y axis error
+    :type weights: dict of numpy.ndarray
+    :param ratios: Desired relative statistical weight ratio between the different datasets.
+    :type ratios: dict
+    :param flag: Type of data used for the statistical weight
+    :type flag: int
+    :return: Weight multiplier for each dataset
+    :rtype: dict
+    """
+
+    stat_weights = {}
+    fixed_stat_weight = None
+    weight_increase = {}
+    num_fits = len(weights.keys())
+
+    # Calc statistical weight for each dataset
+    for id_index in weights.keys():
+        stat_weight = 0.0
+        for v in weights[id_index]:
+            stat_weight += 1.0 / (v ** 2.0)
+        av_stat_weight = stat_weight / len(weights[id_index])
+        stat_weights[id_index] = av_stat_weight
+        if ratios[id_index] == "fixed":
+            fixed_stat_weight = av_stat_weight
+            weight_increase[id_index] = 1.0
+
+    # If no data set defined as fixed, use the average statistical weight as the comparison point.
+    if fixed_stat_weight is None:
+        fixed_stat_weight = sum([v for v in stat_weights.values()]) / num_fits
+
+    for id_index, weight in stat_weights.items():
+        # If dataset is fixed, don't modify
+        if id_index in weight_increase.keys():
+            continue
+        else:
+            desired_stat_weight = fixed_stat_weight * float(ratios[id_index])
+            difference = desired_stat_weight / weight
+            weight_increase[id_index] = num_fits / math.sqrt(difference)
+
+    return weight_increase
+
 
 def updateKernelWithResults(kernel, results):
     """

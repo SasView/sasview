@@ -1871,7 +1871,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-    def prepareFitters(self, fitter=None, fit_id=0):
+
+    def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
         """
         Prepare the Fitter object for use in fitting
         """
@@ -1912,7 +1913,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitter_single = Fit() if fitter is None else fitter
             data = GuiUtils.dataFromItem(fit_index)
             # Potential weights added directly to data
-            weighted_data = self.addWeightingToData(data)
+            weighted_data = self.addWeightingToData(data, weight_increase)
             try:
                 fitter_single.set_model(model, fit_id, params_to_fit, data=weighted_data,
                              constraints=constraints)
@@ -2352,7 +2353,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model.item(last_row, 0).setEditable(False)
         model.item(last_row, 4).setEditable(False)
 
-    def addWeightingToData(self, data):
+    def addWeightingToData(self, data, weight_multiplier=1.0):
         """
         Adds weighting contribution to fitting data
         """
@@ -2363,9 +2364,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
         if self.is2D:
-            new_data.err_data = weight
+            new_data.err_data = FittingUtilities.increaseWeight(weight, weight_multiplier)
         else:
-            new_data.dy = weight
+            new_data.dy = FittingUtilities.increaseWeight(weight, weight_multiplier)
 
         return new_data
 

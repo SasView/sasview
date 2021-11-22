@@ -34,7 +34,6 @@ from bumps.fitproblem import FitProblem
 from sas.sascalc.fit.AbstractFitEngine import FitEngine
 from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.expression import compile_constraints
-from sas.sascalc.fit.weight import WeightingFunctions
 
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
@@ -260,37 +259,11 @@ class BumpsFit(FitEngine):
     def fit(self, msg_q=None,
             q=None, handler=None, curr_thread=None,
             ftol=1.49012e-8, reset_flag=False):
+
         # Build collection of bumps fitness calculators
-
-        # bingo
-        # do the weighting here
-
-        scaling = {
-            90: {0: "fixed", 1: 2}
-        }
-
-        wf = WeightingFunctions()
-
-        x_dict = {tab_id: dataset.get_data().x for tab_id, dataset in self.fit_arrange_dict.items()
-                  if dataset.get_to_fit()}
-        y_error_dict = {tab_id: dataset.get_data().dy for tab_id, dataset in self.fit_arrange_dict.items()
-                        if dataset.get_to_fit()}
-
-        increase_factor_dict = wf.calc_increase_factor(x_dict, y_error_dict, scaling)
-        print(increase_factor_dict)
-
-        models = []
-        for tab_id, dataset in self.fit_arrange_dict.items():
-            if dataset.get_to_fit():
-                data = dataset.get_data()
-                if tab_id in increase_factor_dict.keys():
-                    data.dy = wf.increase_error(data.x, data.y, data.dy, increase_factor_dict[tab_id])
-                    stat_weight = 0
-                    for i in range(len(data.dy)):
-                        err_x = data.dy[i]
-                        stat_weight += 1.0 / (err_x ** 2)
-                models.append(SasFitness(model=dataset.get_model(), data=data, constraints=dataset.constraints,
-                                         fitted=dataset.pars, initial_values=dataset.vals if reset_flag else None))
+        models = [SasFitness(model=M.get_model(), data=M.get_data(), constraints=M.constraints, fitted=M.pars,
+                             initial_values=M.vals if reset_flag else None)
+                  for M in self.fit_arrange_dict.values() if M.get_to_fit()]
 
         if len(models) == 0:
             raise RuntimeError("Nothing to fit")
