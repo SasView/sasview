@@ -1,5 +1,6 @@
 import copy
 import math
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -706,24 +707,33 @@ def calcWeightIncrease(weights, ratios, flag=None):
     """
 
     stat_weights = {}
-    fixed_stat_weight = None
+    fixed_stat_weights = {}
     weight_increase = {}
     num_fits = len(weights.keys())
 
     # Calc statistical weight for each dataset
     for id_index in weights.keys():
         stat_weight = 0.0
-        for v in weights[id_index]:
-            stat_weight += 1.0 / (v ** 2.0)
+        for val in weights[id_index]:
+            stat_weight += 1.0 / (val ** 2.0)
         av_stat_weight = stat_weight / len(weights[id_index])
         stat_weights[id_index] = av_stat_weight
         if ratios[id_index] == "fixed":
-            fixed_stat_weight = av_stat_weight
+            fixed_stat_weights[id_index] = av_stat_weight
             weight_increase[id_index] = 1.0
 
     # If no data set defined as fixed, use the average statistical weight as the comparison point.
-    if fixed_stat_weight is None:
+    if len(fixed_stat_weights.keys()) == 0:
         fixed_stat_weight = sum([v for v in stat_weights.values()]) / num_fits
+    elif len(fixed_stat_weights.keys()) == 1:
+        fixed_stat_weight = list(fixed_stat_weights.values())[0]
+    elif 1 < len(fixed_stat_weights.keys()) < num_fits:
+        fixed_stat_weight_id = list(fixed_stat_weights.keys())[0]
+        logging.warning(f'Multiple fixed data sets specified, will use {fixed_stat_weight_id} for comparison.')
+        fixed_stat_weight = fixed_stat_weights[fixed_stat_weight_id]
+    # If all datasets are fixed, no need to continue
+    elif len(fixed_stat_weights.keys()) == num_fits:
+        return weight_increase
 
     for id_index, weight in stat_weights.items():
         # If dataset is fixed, don't modify
