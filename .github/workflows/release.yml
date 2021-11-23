@@ -3,10 +3,10 @@ name: Create release
 on:
   push:
     branches:
-      - release*
+      - gh_actions_release
   pull_request:
     branches:
-      - release*
+      - gh_actions_release
       
 defaults:
   run:

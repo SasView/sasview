@@ -1,7 +1,13 @@
 name: Installer
 
+#Build all branches except release
 on:
-  [push, pull_request]
+  push:
+    branches-ignore:
+      - gh_actions_release
+  pull_request:
+    branches-ignore:
+      - gh_actions_release
 
 defaults:
   run:
