@@ -216,6 +216,12 @@ def _calc_Iqxy_magnetic(
 def orth(A, b): # A = 3 x n, and b_hat unit vector
     return A - np.outer(b, b)@A
 
+
+@njit
+def basis_vector(A, B): # A = 3 x n, and B = 3 x n
+    vec = np.cross(A, B)
+    return vec / np.sqrt(np.inner(vec, vec))   
+
 @njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
 def _calc_Iqxy_magnetic_helper(
         Iq, qx, qy, x, y, rho, vol, M, cos_spin, sin_spin, cos_phi, sin_phi,
@@ -243,7 +249,7 @@ def _calc_Iqxy_magnetic_helper(
         perpx = p_hat @ M_perp
         # einsum is faster than sumsq in numpy but not supported in numba
         #perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
-        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
+        perpy = basis_vector(q_hat, p_hat) @ M_perpP_perpQ
         perpz = q_hat @ M_perpP
 
         ephase = vol * np.exp(1j * (qxk * x + qyk * y))
