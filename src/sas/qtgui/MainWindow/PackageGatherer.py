@@ -211,7 +211,7 @@ class PackageGatherer:
 
         :return: A reduced / cleaned dictionary with the module names as the key, with their respective version
             numbers as the value.
-        :rtype : dict
+        :rtype: dict
         """
 
         output_dict = dict()
