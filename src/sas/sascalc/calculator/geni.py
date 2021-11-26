@@ -215,12 +215,7 @@ def _calc_Iqxy_magnetic(
 @njit
 def orth(A, b): # A = 3 x n, and b_hat unit vector
     return A - np.outer(b, b)@A
-
-
-@njit
-def basis_vector(A, B): # A = 3 x n, and B = 3 x n
-    vec = np.cross(A, B)
-    return vec / np.sqrt(np.dot(vec, vec))   
+ 
 
 @njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
 def _calc_Iqxy_magnetic_helper(
@@ -241,16 +236,16 @@ def _calc_Iqxy_magnetic_helper(
             q_hat = np.sqrt(np.array([0.5, 0.5, 0]))
 
         p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
-
+        #two unit vectors spanning up the plane perpendicular to polarisation for SF scattering
+        perpy_hat = np.array([-sin_phi, cos_phi, 0 ])
+        perpz_hat = np.array([-cos_spin * cos_phi, -cos_spin * sin_phi, sin_spin ])
         M_perp = orth(M, q_hat)
-        q_perp = orth(q_hat, p_hat)
-        q_perp = q_perp / np.sqrt(np.dot(q_perp, q_perp)) 
 
         perpx = p_hat @ M_perp
         # einsum is faster than sumsq in numpy but not supported in numba
         #perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
-        perpy = basis_vector(q_hat, p_hat) @ M_perp
-        perpz = q_perp @ M_perp
+        perpy = perpy_hat @ M_perp
+        perpz = perpz_hat @ M_perp
 
         ephase = vol * np.exp(1j * (qxk * x + qyk * y))
         if dd > 1e-10:
