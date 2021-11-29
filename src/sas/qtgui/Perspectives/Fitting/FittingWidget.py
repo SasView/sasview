@@ -1923,6 +1923,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
             fitter_single.select_problem_for_fit(id=fit_id, value=1)
+            fitter_single.set_weight_increase(fit_id, weight_increase)
             if fitter is None:
                 # Assign id to the new fitter only
                 fitter_single.fitter_id = [self.page_id]
@@ -2364,9 +2365,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
         if self.is2D:
-            new_data.err_data = FittingUtilities.increaseWeight(weight, weight_multiplier)
+            new_data.err_data = weight
         else:
-            new_data.dy = FittingUtilities.increaseWeight(weight, weight_multiplier)
+            new_data.dy = weight
 
         return new_data
 

@@ -742,7 +742,7 @@ def calcWeightIncrease(weights, ratios, flag=None):
         else:
             desired_stat_weight = fixed_stat_weight * float(ratios[id_index])
             difference = desired_stat_weight / weight
-            weight_increase[id_index] = num_fits / math.sqrt(difference)
+            weight_increase[id_index] = math.sqrt(difference) / num_fits
 
     return weight_increase
 
