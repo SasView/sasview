@@ -4,10 +4,10 @@ name: Installer
 on:
   push:
     branches-ignore:
-      - gh_actions_release
+      - release*
   pull_request:
     branches-ignore:
-      - gh_actions_release
+      - release*
 
 defaults:
   run:
@@ -64,7 +64,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
 
-        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting
+        python -m pip install numpy scipy matplotlib=3.4.3 docutils "pytest<6" sphinx unittest-xml-reporting
         python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
         python -m pip install qt5reactor periodictable PyQt5 uncertainties debugpy
