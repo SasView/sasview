@@ -137,14 +137,13 @@ class LineInteractor(BaseInteractor):
         self.draw(zorder)
         # Is the slider able to move
         self.has_move = True
-        if not perspective:
-            # The perspective this slider is actively tied to
+        try:
+            self.perspective = self.base.base.parent.manager.parent.loadedPerspectives.get(perspective, None)
+        except AttributeError:
+            # QRangeSlider is disconnected from GuiManager for testing
             self.perspective = None
+        if self.perspective is None:
             return
-        # Import on demand to prevent circular import
-        from sas.qtgui.MainWindow.GuiManager import LOADED_PERSPECTIVES
-        # Map GUI input to x value so slider and input update each other
-        self.perspective = LOADED_PERSPECTIVES.get(perspective, None)
         if tab and hasattr(self.perspective, 'getTabByName'):
             # If the perspective is tabbed, set the perspective to the tab this slider in associated with
             self.perspective = self.perspective.getTabByName(tab)
