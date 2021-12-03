@@ -223,7 +223,6 @@ jobs:
       run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
 
     - name: Upload installer to GitHub releases
-      if: env.BRANCH_NAME == 'release*'
       uses: ncipollo/release-action@v1
       with:
           draft: true
