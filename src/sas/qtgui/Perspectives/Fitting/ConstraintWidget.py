@@ -451,7 +451,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 float(new_weighting)
             except ValueError:
                 # Cannot convert string to float
-                if new_weighting == 'fixed':
+                if new_weighting == 'fixed' or new_weighting == 'compare':
                     # Acceptable input
                     pass
                 else:
@@ -460,7 +460,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                     item.setBackground(QtCore.Qt.red)
                     self.tblTabList.blockSignals(False)
                     self.cmdFit.setEnabled(False)
-                    msg = "Weighting must be an integer, a float or the string 'fixed'."
+                    msg = "Weighting must be an integer, a float or the string 'fixed' or 'compare."
                     self.parent.communicate.statusBarUpdateSignal.emit(msg)
                     item.setToolTip(msg)
                     return

@@ -707,7 +707,7 @@ def calcWeightIncrease(weights, ratios, flag=None):
     """
 
     stat_weights = {}
-    fixed_stat_weights = {}
+    comparison_stat_weights = {}
     weight_increase = {}
     num_fits = len(weights.keys())
 
@@ -718,29 +718,32 @@ def calcWeightIncrease(weights, ratios, flag=None):
             stat_weight += 1.0 / (val ** 2.0)
         av_stat_weight = stat_weight / len(weights[id_index])
         stat_weights[id_index] = av_stat_weight
-        if ratios[id_index] == "fixed":
-            fixed_stat_weights[id_index] = av_stat_weight
+        if ratios[id_index] == "compare":
+            comparison_stat_weights[id_index] = av_stat_weight
+            weight_increase[id_index] = 1.0
+        elif ratios[id_index] == "fixed":
             weight_increase[id_index] = 1.0
 
     # If no data set defined as fixed, use the average statistical weight as the comparison point.
-    if len(fixed_stat_weights.keys()) == 0:
-        fixed_stat_weight = sum([v for v in stat_weights.values()]) / num_fits
-    elif len(fixed_stat_weights.keys()) == 1:
-        fixed_stat_weight = list(fixed_stat_weights.values())[0]
-    elif 1 < len(fixed_stat_weights.keys()) < num_fits:
-        fixed_stat_weight_id = list(fixed_stat_weights.keys())[0]
-        logging.warning(f'Multiple fixed data sets specified, will use {fixed_stat_weight_id} for comparison.')
-        fixed_stat_weight = fixed_stat_weights[fixed_stat_weight_id]
+    if len(comparison_stat_weights.keys()) == 0:
+        comparison_stat_weight = sum([v for v in stat_weights.values()]) / num_fits
+    elif len(comparison_stat_weights.keys()) == 1:
+        comparison_stat_weight = list(comparison_stat_weights.values())[0]
+    elif 1 < len(comparison_stat_weights.keys()) < num_fits:
+        fixed_stat_weight_id = list(comparison_stat_weights.keys())[0]
+        logging.warning(f'Multiple data sets specified for comparison using "compare", will use {fixed_stat_weight_id} '
+                        f'for comparison.')
+        comparison_stat_weight = comparison_stat_weights[fixed_stat_weight_id]
     # If all datasets are fixed, no need to continue
-    elif len(fixed_stat_weights.keys()) == num_fits:
+    elif len(comparison_stat_weights.keys()) == num_fits:
         return weight_increase
 
     for id_index, weight in stat_weights.items():
-        # If dataset is fixed, don't modify
+        # If dataset is fixed or compare, don't modify
         if id_index in weight_increase.keys():
             continue
         else:
-            desired_stat_weight = fixed_stat_weight * float(ratios[id_index])
+            desired_stat_weight = comparison_stat_weight * float(ratios[id_index])
             difference = desired_stat_weight / weight
             weight_increase[id_index] = math.sqrt(difference) / num_fits
 
