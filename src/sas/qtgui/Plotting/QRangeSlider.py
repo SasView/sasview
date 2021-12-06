@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QLineEdit, QTextEdit
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+import sas.qtgui.Utilities.ObjectLibrary as ol
 
 
 class QRangeSlider(BaseInteractor):
@@ -138,7 +139,8 @@ class LineInteractor(BaseInteractor):
         # Is the slider able to move
         self.has_move = True
         try:
-            self.perspective = self.base.base.parent.manager.parent.loadedPerspectives.get(perspective, None)
+            data_explorer = ol.getObject('DataExplorer')
+            self.perspective = data_explorer.parent.loadedPerspectives.get(perspective, None)
         except AttributeError:
             # QRangeSlider is disconnected from GuiManager for testing
             self.perspective = None
