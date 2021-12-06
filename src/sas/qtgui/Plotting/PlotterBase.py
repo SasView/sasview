@@ -112,11 +112,6 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar._actions['home'].triggered.connect(self._home)
-        self.toolbar._actions['back'].triggered.connect(self._back)
-        self.toolbar._actions['forward'].triggered.connect(self._forward)
-        self.toolbar._actions['pan'].triggered.connect(self._pan)
-        self.toolbar._actions['zoom'].triggered.connect(self._zoom)
         cid = self.canvas.mpl_connect('resize_event', self.onResize)
 
         layout.addWidget(self.toolbar)
@@ -257,42 +252,6 @@ class PlotterBase(QtWidgets.QWidget):
     def onResize(self, event):
         """
         Redefine default resize event
-        """
-        pass
-
-    def _zoom_pan_handler(self, event):
-        """
-        Catch zoom and pan events for graph range
-        """
-        pass
-
-    def _home(self, event):
-        """
-        Catch home button click events
-        """
-        pass
-
-    def _back(self, event):
-        """
-        Catch back button click events
-        """
-        pass
-
-    def _forward(self, event):
-        """
-        Catch forward button click events
-        """
-        pass
-
-    def _pan(self, event):
-        """
-        Catch pan button click events
-        """
-        pass
-
-    def _zoom(self, event):
-        """
-        Catch zoom button click events
         """
         pass
 

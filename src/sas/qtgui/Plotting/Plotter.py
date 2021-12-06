@@ -73,6 +73,18 @@ class PlotterWidget(PlotterBase):
         self.fit_result.symbol = 17
         self.fit_result.name = "Fit"
 
+        # Range setter - used to store active SetGraphRange instance
+        # Initialize to None so graph range is only stored once data is present.
+        self.setRange = None
+
+        # Connections used to prevent conflict between built in mpl toolbar actions and SasView context menu actions.
+        # Toolbar actions only needed in 1D plots. 2D plots have no such conflicts.
+        self.toolbar._actions['home'].triggered.connect(self._home)
+        self.toolbar._actions['back'].triggered.connect(self._back)
+        self.toolbar._actions['forward'].triggered.connect(self._forward)
+        self.toolbar._actions['pan'].triggered.connect(self._pan)
+        self.toolbar._actions['zoom'].triggered.connect(self._zoom)
+
         parent.geometry()
 
     @property
@@ -247,7 +259,7 @@ class PlotterWidget(PlotterBase):
             ax.set_xlabel(self.xLabel)
 
         # define the ranges
-        if hasattr(self, 'setRange') and self.setRange and self.setRange.rangeModified:
+        if isinstance(self.setRange, SetGraphRange) and self.setRange.rangeModified:
             # Assume the range has changed and retain the current and default ranges for future use
             modified = self.setRange.rangeModified
             default_x_range = self.setRange.defaultXRange
@@ -551,6 +563,7 @@ class PlotterWidget(PlotterBase):
         self.ax.cla()
         self.setRange = None
         for ids in self.plot_dict:
+            # Color, marker, etc. are stored in each data set and will be used to restore visual changes on replot
             self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
 
         # Redraw
