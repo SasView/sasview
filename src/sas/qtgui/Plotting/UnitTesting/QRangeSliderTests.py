@@ -34,7 +34,7 @@ class QRangeSlidersTest(unittest.TestCase):
                 self.setCentralWidget(self.workspace)
 
         self.manager = GuiManager(MainWindow(None))
-        self.plotter = Plotter.Plotter(None, quickplot=True)
+        self.plotter = Plotter.Plotter(self.manager.filesWidget, quickplot=True)
         self.data = Data1D(x=[0.001,0.1,0.2,0.3,0.4], y=[1000,100,10,1,0.1])
         self.data.name = "Test QRangeSliders class"
         self.data.show_q_range_sliders = True
@@ -109,7 +109,7 @@ class QRangeSlidersTest(unittest.TestCase):
         self.assertAlmostEqual(5, float(widget.txtNptsHighQ.text()))
         # Move npts and check slider
         widget.txtNptsHighQ.setText('2')
-        self.assertAlmostEqual(self.data.x[2], self.slider.line_min.x)
+        self.assertAlmostEqual(self.data.x[1], self.slider.line_min.x)
 
     def testInversionSliders(self):
         '''Test the QRangeSlider class within the context of the Inversion perspective'''
@@ -117,6 +117,7 @@ class QRangeSlidersTest(unittest.TestCase):
         self.current_perspective = 'Inversion'
         self.manager.perspectiveChanged(self.current_perspective)
         widget = self.manager.perspective()
+        self.manager.filesWidget.sendData()
         # Create slider on base data set
         self.data.slider_perspective_name = self.current_perspective
         self.data.slider_low_q_input = ['minQInput']
