@@ -412,6 +412,7 @@ def createModelItemWithPlot(update_data, name=""):
     Adds 'update_data' to that row.
     """
     py_update_data = update_data
+    py_update_data.name = name # name must match title due to how plots are referenced
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
