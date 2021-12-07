@@ -245,6 +245,7 @@ def _calc_Iqxy_magnetic(
 @njit
 def orth(A, b): # A = 3 x n, and b_hat unit vector
     return A - np.outer(b, b)@A
+ 
 
 @njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
 def _calc_Iqxy_magnetic_helper(
@@ -252,6 +253,12 @@ def _calc_Iqxy_magnetic_helper(
         dd, du, ud, uu):
     # Process each qx, qy
     # Note: enumerating a pair is slower than direct indexing in numba
+
+    p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
+    #two unit vectors spanning up the plane perpendicular to polarisation for SF scattering
+    perpy_hat = np.array([-sin_phi, cos_phi, 0 ])
+    perpz_hat = np.array([-cos_spin * cos_phi, -cos_spin * sin_phi, sin_spin ])    
+
     for k in range(len(qx)):
         qxk, qyk = qx[k], qy[k]
 
@@ -264,17 +271,13 @@ def _calc_Iqxy_magnetic_helper(
             # with Nij the demagnetisation tensor (Belleggia JMMM 263, L1, 2003).
             q_hat = np.sqrt(np.array([0.5, 0.5, 0]))
 
-        p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
-
         M_perp = orth(M, q_hat)
-        M_perpP = orth(M_perp, p_hat)
-        M_perpP_perpQ = orth(M_perpP, q_hat)
 
         perpx = p_hat @ M_perp
         # einsum is faster than sumsq in numpy but not supported in numba
         #perpy = np.sqrt(np.einsum('ji,ji->i', M_perpP_perpQ, M_perpP_perpQ))
-        perpy = np.sqrt(np.sum(M_perpP_perpQ**2, axis=0))
-        perpz = q_hat @ M_perpP
+        perpy = perpy_hat @ M_perp
+        perpz = perpz_hat @ M_perp
 
         ephase = vol * np.exp(1j * (qxk * x + qyk * y))
         if dd > 1e-10:
