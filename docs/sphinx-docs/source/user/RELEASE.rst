@@ -1,5 +1,7 @@
 .. RELEASE.rst
 
+.. _Release_Notes:
+
 Release Notes
 =============
 
@@ -10,6 +12,12 @@ Release Notes
 
 Features
 ========
+
+New in Version 5.0.5
+--------------------
+This is a point release which fixes some issues reported in earlier versions
+of 5.0.x:
+
 
 New in Version 5.0.4
 --------------------
@@ -44,6 +52,18 @@ There are also some new features in this version:
 * It is now also possible to assign custom names to loaded datasets, rather than just
   identifying the data by its filename. Right-click on a dataset in the Data Explorer
   to activate.
+
+There has also been a technical change in this version to how the volume
+normalisation is incorporated in the interaction calculator that computes $I(Q)$
+from $P(Q) S(Q)$. The change was made in Sasmodels 1.0.5 with which this version
+is built and will affect all future versions of SasView. Prior to the change
+the scaling of the $P(Q)$ function that might appear in the *Data Explorer* was
+incorrect. This was easily seen if $P(Q)$ and $I(Q)$ were plotted together but
+had apparently escaped notice for some time. But this does, of course, mean that 
+comparisons of the $P(Q)$ contributions to models between this version of SasView
+and previous versions will differ. Further details of the change can be found
+`here <https://github.com/SasView/sasview/issues/1698>`_.
+
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -471,7 +491,7 @@ Other Work
 ^^^^^^^^^^
 * A Third-Party initiative has recently succeeded in getting SasView to
   run on Debian. More details at
-  http://trac.sasview.org/wiki/DevNotes/Projects/Debian
+  https://github.com/SasView/sasview/wiki/DevNotes_Projects_Debian
 * With this release we have started to prepare for the inevitable move
   to Python 3, which will occur with the release of 5.0
 * SasView 5.0 is currently in development. The two most significant
@@ -1121,10 +1141,10 @@ Downloading and Installing
 
 The easiest approach to setting up the proper environment to build from source 
 is to use Conda. Instructions for setting up and using Conda can be found at 
-http://trac.sasview.org/wiki/DevNotes/CondaDevSetup
+https://github.com/SasView/sasview/wiki/DevNotes_DevEnviroment
                     
 Additional information is available at http://www.sasview.org/download/ under 
-the 'For Developers' section, and on our Trac site at http://trac.sasview.org/
+the 'For Developers' section, and on our Trac site at https://github.com/SasView/sasview/wiki/
 
 System Requirements
 -------------------

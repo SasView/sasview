@@ -23,8 +23,6 @@ from .InvariantUtils import WIDGETS
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
 Q_MAXIMUM = 10
-# the ratio of maximum q value/(qmax of data) to plot the theory data
-Q_MAXIMUM_PLOT = 3
 # Default number of points of interpolation: high and low range
 NPOINTS_Q_INTERP = 10
 # Default power law for interpolation
@@ -148,15 +146,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         n_pts = (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(n_pts))
         self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
+        self.txtNptsLowQ.setText(str(n_pts))
 
     def get_high_q_extrapolation_lower_limit(self):
         q_value = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text()) - 1]
         return q_value
 
     def set_high_q_extrapolation_lower_limit(self, value):
-        n_pts = (np.abs(self._data.x - value)).argmin() + 1
+        n_pts = len(self._data.x) - (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(int(n_pts)))
         self.model.setItem(WIDGETS.W_NPTS_HIGHQ, item)
+        self.txtNptsHighQ.setText(str(n_pts))
 
     def enabling(self):
         """ """
@@ -260,13 +260,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.show_errors = False
-            # TODO: Fix the link between npts and q and then enable the q-range sliders
-            #self.high_extrapolation_plot.show_q_range_sliders = True
-            #self.high_extrapolation_plot.slider_update_on_move = False
-            #self.high_extrapolation_plot.slider_low_q_input = self.txtNptsHighQ
-            #self.high_extrapolation_plot.slider_low_q_setter = self.set_high_q_extrapolation_lower_limit
-            #self.high_extrapolation_plot.slider_low_q_getter = self.get_high_q_extrapolation_lower_limit
-            #self.high_extrapolation_plot.slider_high_q_input = self.txtExtrapolQMax
+            self.high_extrapolation_plot.show_q_range_sliders = True
+            self.high_extrapolation_plot.slider_update_on_move = False
+            self.high_extrapolation_plot.slider_perspective_name = self.name
+            self.high_extrapolation_plot.slider_low_q_input = ['txtNptsHighQ']
+            self.high_extrapolation_plot.slider_low_q_setter = ['set_high_q_extrapolation_lower_limit']
+            self.high_extrapolation_plot.slider_low_q_getter = ['get_high_q_extrapolation_lower_limit']
+            self.high_extrapolation_plot.slider_high_q_input = ['txtExtrapolQMax']
             GuiUtils.updateModelItemWithPlot(self._model_item, self.high_extrapolation_plot,
                                              self.high_extrapolation_plot.title)
             plots.append(self.high_extrapolation_plot)
@@ -274,13 +274,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.show_errors = False
-            # TODO: Fix the link between npts and q and then enable the q-range sliders
-            #self.low_extrapolation_plot.show_q_range_sliders = True
-            #self.low_extrapolation_plot.slider_update_on_move = False
-            #self.low_extrapolation_plot.slider_high_q_input = self.txtNptsLowQ
-            #self.low_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
-            #self.low_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
-            #self.low_extrapolation_plot.slider_low_q_input = self.txtExtrapolQMin
+            self.low_extrapolation_plot.show_q_range_sliders = True
+            self.low_extrapolation_plot.slider_update_on_move = False
+            self.low_extrapolation_plot.slider_perspective_name = self.name
+            self.low_extrapolation_plot.slider_high_q_input = ['txtNptsLowQ']
+            self.low_extrapolation_plot.slider_high_q_setter = ['set_low_q_extrapolation_upper_limit']
+            self.low_extrapolation_plot.slider_high_q_getter = ['get_low_q_extrapolation_upper_limit']
+            self.low_extrapolation_plot.slider_low_q_input = ['txtExtrapolQMin']
             GuiUtils.updateModelItemWithPlot(self._model_item, self.low_extrapolation_plot,
                                              self.low_extrapolation_plot.title)
             plots.append(self.low_extrapolation_plot)
@@ -455,9 +455,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         if high_calculation_pass:
             # for presentation in InvariantDetails
-            qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
             qmax_input = float(self.txtExtrapolQMax.text())
-            qmax_plot = qmax_input if qmax_plot > qmax_input else qmax_plot
+            qmax_plot = qmax_input
 
             power_high = self._calculator.get_extrapolation_power(range='high')
             high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
@@ -571,12 +570,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.txtNptsHighQ.textChanged.connect(self.checkLength)
 
+        self.txtExtrapolQMin.editingFinished.connect(self.checkQMinRange)
         self.txtExtrapolQMin.textChanged.connect(self.checkQMinRange)
 
+        self.txtExtrapolQMax.editingFinished.connect(self.checkQMaxRange)
         self.txtExtrapolQMax.textChanged.connect(self.checkQMaxRange)
 
+        self.txtNptsLowQ.editingFinished.connect(self.checkQRange)
         self.txtNptsLowQ.textChanged.connect(self.checkQRange)
 
+        self.txtNptsHighQ.editingFinished.connect(self.checkQRange)
         self.txtNptsHighQ.textChanged.connect(self.checkQRange)
 
     def stateChanged(self):
@@ -639,12 +642,22 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                                        self._path, name,
                                        self.sender().checkState())
 
-    def checkQMaxRange(self):
+    def checkQMaxRange(self, value=None):
+        if not value:
+            value = float(self.txtExtrapolQMax.text()) if self.txtExtrapolQMax.text() else ''
+        if value == '':
+            self.model.setItem(WIDGETS.W_EX_QMAX, QtGui.QStandardItem(value))
+            return
         item = QtGui.QStandardItem(self.txtExtrapolQMax.text())
         self.model.setItem(WIDGETS.W_EX_QMAX, item)
         self.checkQRange()
 
-    def checkQMinRange(self):
+    def checkQMinRange(self, value=None):
+        if not value:
+            value = float(self.txtExtrapolQMin.text()) if self.txtExtrapolQMin.text() else ''
+        if value == '':
+            self.model.setItem(WIDGETS.W_EX_QMIN, QtGui.QStandardItem(value))
+            return
         item = QtGui.QStandardItem(self.txtExtrapolQMin.text())
         self.model.setItem(WIDGETS.W_EX_QMIN, item)
         self.checkQRange()

@@ -124,11 +124,11 @@ Data Extrapolation
 The difficulty with using $Q^*$  arises from the fact that experimental data is
 never measured over the range $0 \le q \le \infty$ and it is thus usually
 necessary to extrapolate the experimental data to both low and high $q$.
-Currently, SasView allows extrapolation to a fixed low and high $q$ such that
-$10^{-5} \le q \le 10$ |Ang^-1|. Note that the integrals above are
-weighted by $q^2$ or $q$. Thus the high-$q$ extrapolation is weighted far more
-heavily than the low-$q$ extrapolation so that having data measured to as large
-a value of $q_{max}$ as possible can be surprisingly important.
+Currently, SasView allows extrapolation to any user-defined low and high $q$.
+The default range is $10^{-5} \le q \le 10$ |Ang^-1|. Note that the integrals
+above are weighted by $q^2$ or $q$. Thus the high-$q$ extrapolation is weighted
+far more heavily than the low-$q$ extrapolation so that having data measured to
+as large a value of $q_{max}$ as possible can be surprisingly important.
 
 Low-\ $q$ region (<= $q_{min}$ in data):
 

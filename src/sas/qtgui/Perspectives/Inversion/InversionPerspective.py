@@ -670,10 +670,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self._dataList.pop(data, None)
         if self.dataPlot:
             # Reset dataplot sliders
-            self.dataPlot.slider_low_q_input = None
-            self.dataPlot.slider_high_q_input = None
-            self.dataPlot.slider_low_q_setter = None
-            self.dataPlot.slider_high_q_setter = None
+            self.dataPlot.slider_low_q_input = []
+            self.dataPlot.slider_high_q_input = []
+            self.dataPlot.slider_low_q_setter = []
+            self.dataPlot.slider_high_q_setter = []
         self._data = None
         length = len(self.dataList)
         for index in reversed(range(length)):
@@ -1047,10 +1047,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dataPlot.filename = self.logic.data.filename
 
         self.dataPlot.show_q_range_sliders = True
-        self.dataPlot.slider_low_q_input = self.minQInput
-        self.dataPlot.slider_low_q_setter = self.check_q_low
-        self.dataPlot.slider_high_q_input = self.maxQInput
-        self.dataPlot.slider_high_q_setter = self.check_q_high
+        self.dataPlot.slider_update_on_move = False
+        self.dataPlot.slider_perspective_name = "Inversion"
+        self.dataPlot.slider_low_q_input = ['minQInput']
+        self.dataPlot.slider_low_q_setter = ['check_q_low']
+        self.dataPlot.slider_high_q_input = ['maxQInput']
+        self.dataPlot.slider_high_q_setter = ['check_q_high']
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

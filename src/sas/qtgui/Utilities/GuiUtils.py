@@ -12,6 +12,7 @@ import webbrowser
 import urllib.parse
 import json
 import types
+import numpy
 from io import BytesIO
 
 import numpy as np
@@ -411,6 +412,7 @@ def createModelItemWithPlot(update_data, name=""):
     Adds 'update_data' to that row.
     """
     py_update_data = update_data
+    py_update_data.name = name # name must match title due to how plots are referenced
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
@@ -1026,6 +1028,29 @@ def formatNumber(value, high=False):
     else:
         output = "%-5.3g" % value
     return output.lstrip().rstrip()
+
+def formatValue(value):
+    """Formats specific data types for the GUI.
+    
+    This function accepts three types of data: numeric data castable to float, a numpy.ndarray of type
+    castable to float, or None. Numeric data is returned in human-readable format by formatNumber(), numpy
+    arrays are averaged over all axes, and the mean returned in human-readable format. If `value=None` then
+    the string "NaN" is returned.
+
+    :param value: The value to be formatted
+    :type value: float, numeric type castable to float, numpy.ndarray, None
+    :return: The formatted value
+    :rtype: str
+    """
+    # type must be castable to float because this is what is required by formatNumber()
+    if value is None:
+        return "NaN"
+    else:
+        if isinstance(value, numpy.ndarray):
+            value = str(formatNumber(numpy.average(value), True))
+        else:
+            value = str(formatNumber(value, True))
+        return value
 
 def replaceHTMLwithUTF8(html):
     """
