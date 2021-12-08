@@ -744,7 +744,7 @@ The results of the model-fitting will be returned to each of the individual
 *FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
 Simultaneous Fits with a Modified Weighting
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Selecting the *Modify Weighting* reveals a fifth column in the source choice called 
 weighting. This is demonstrated in the screenshot below.
