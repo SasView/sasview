@@ -731,7 +731,7 @@ def calcWeightIncrease(weights, ratios, flag=None):
         comparison_stat_weight = list(comparison_stat_weights.values())[0]
     elif 1 < len(comparison_stat_weights.keys()) < num_fits:
         fixed_stat_weight_id = list(comparison_stat_weights.keys())[0]
-        logging.warning(f'Multiple data sets specified for comparison using "compare", will use {fixed_stat_weight_id} '
+        logging.warning(f'Multiple data sets specified for comparison using "Subject", will use {fixed_stat_weight_id} '
                         f'for comparison.')
         comparison_stat_weight = comparison_stat_weights[fixed_stat_weight_id]
     # If all datasets are fixed, no need to continue

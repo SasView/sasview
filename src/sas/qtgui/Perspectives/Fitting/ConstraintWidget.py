@@ -469,7 +469,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 float(new_weighting)
             except ValueError:
                 # Cannot convert string to float
-                if new_weighting == 'fixed' or new_weighting == 'compare':
+                if new_weighting == 'Default' or new_weighting == 'Subject':
                     # Acceptable input
                     pass
                 else:
