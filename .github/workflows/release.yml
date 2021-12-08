@@ -65,7 +65,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
 
-        python -m pip install numpy scipy matplotlib==2.2.3 docutils "pytest<6" sphinx unittest-xml-reporting
+        python -m pip install numpy scipy matplotlib==2.2.5 docutils "pytest<6" sphinx unittest-xml-reporting
         python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
         python -m pip install qt5reactor periodictable PyQt5 uncertainties debugpy
