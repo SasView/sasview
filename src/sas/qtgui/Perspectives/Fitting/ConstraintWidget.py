@@ -131,6 +131,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Are we chain fitting?
         self.is_chain_fitting = False
 
+        # Are we modifying weight
+        self.is_weight_modified = False
+
         # Is the fit job running?
         self.is_running = False
         self.calc_fit = None
@@ -167,9 +170,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.label.setVisible(False)
         self.cbCases.setVisible(False)
 
-        self.sim_fit_labels = ['FitPage', 'Model', 'Data', 'Mnemonic', 'Weighting']
+        self.sim_fit_labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
-        self.editable_tab_columns = [self.sim_fit_labels.index('Mnemonic'), self.sim_fit_labels.index('Weighting')]
+        self.editable_tab_columns = [self.sim_fit_labels.index('Mnemonic')]
+
+        if self.is_weight_modified:
+            self.sim_fit_labels.append('Weighting')
+            self.editable_tab_columns.append(self.sim_fit_labels.index('Weighting'))
+
         self.tblTabList.setColumnCount(len(self.sim_fit_labels))
         self.tblTabList.setHorizontalHeaderLabels(self.sim_fit_labels)
         self.tblTabList.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -204,6 +212,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdAdd.clicked.connect(self.showMultiConstraint)
         self.chkChain.toggled.connect(self.onChainFit)
+        self.chkWeight.toggled.connect(self.onWeightModify)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
@@ -244,6 +253,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         source = self.sender().objectName()
         self.currentType = "BatchPage" if source == "btnBatch" else "FitPage"
         self.chkChain.setVisible(source=="btnBatch")
+        self.chkWeight.setVisible(source!="btnBatch")
         self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
@@ -263,6 +273,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to selecting the Chain Fit checkbox
         """
         self.is_chain_fitting = is_checked
+
+    def onWeightModify(self, is_checked):
+        """
+        Respond to selecting the Chain Fit checkbox
+        """
+        self.is_weight_modified = is_checked
+        self.initializeWidgets()
+        self.initializeFitList()
 
     def onFit(self):
         """
@@ -920,7 +938,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.setItem(pos, 3, item)
         # Initial definition
         if tab_name not in self.weighting_ratios.keys():
-            self.weighting_ratios[tab_name] = "fixed"
+            self.weighting_ratios[tab_name] = "Default"
         item = QtWidgets.QTableWidgetItem(self.weighting_ratios[tab_name])
         self.tblTabList.setItem(pos, 4, item)
         self.tblTabList.blockSignals(False)

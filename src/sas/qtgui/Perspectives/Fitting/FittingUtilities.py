@@ -718,10 +718,10 @@ def calcWeightIncrease(weights, ratios, flag=None):
             stat_weight += 1.0 / (val ** 2.0)
         av_stat_weight = stat_weight / len(weights[id_index])
         stat_weights[id_index] = av_stat_weight
-        if ratios[id_index] == "compare":
+        if ratios[id_index] == "Subject":
             comparison_stat_weights[id_index] = av_stat_weight
             weight_increase[id_index] = 1.0
-        elif ratios[id_index] == "fixed":
+        elif ratios[id_index] == "Default":
             weight_increase[id_index] = 1.0
 
     # If no data set defined as fixed, use the average statistical weight as the comparison point.
