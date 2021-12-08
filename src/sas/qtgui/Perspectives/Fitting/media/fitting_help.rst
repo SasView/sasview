@@ -743,6 +743,70 @@ Many constraints can be entered for a single fit.
 The results of the model-fitting will be returned to each of the individual
 *FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
+Simultaneous Fits with a Modified Weighting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Selecting the *Modify Weighting* reveals a fifth column in the source choice called 
+weighting. This is demonstrated in the screenshot below.
+
+.. image:: weighting_scheme_default.png
+
+The weighting column modifies the weight of each data set in the simultaneous 
+fitting. By default the weighting is decided by the number of points of a dataset 
+and the error on each point. 
+
+The pre-filled options in the weighting column is “Default”. A dataset with the 
+“Default” option in the weighting column will not have its statistical weight 
+modified.
+
+The inputs that the weighting column can take are “Default”, “Subject”, and a 
+float(number). If an invalid input is typed in the column box will turn red. 
+The input options are demonstrated in the screenshot below.
+
+.. image:: weighting_scheme_options.png
+
+A dataset with the “Subject” option in the weighting column will not have its 
+statistical weight modified. This dataset will act as the subject of comparison 
+between for the modification of the weighting for other data sets. Only one dataset 
+should have the “Subject” option in the weighting column, having multiple will lead 
+to a warning and only one dataset being used as the subject.
+
+A dataset with a number option in the weighting column will have its statistical 
+weight modified. The number will act as a ration with which to compare the weighting 
+of the dataset. A dataset with 1.0 in the weighting column will be weighted 
+differently to ensure it has the same statistical weighting as the “Subject” dataset. 
+A dataset with a ratio of 2.0 will have double the statistical weighting of the 
+“Subject” dataset, and dataset with a ratio of 0.5 will have half the statistical 
+weighting of the “Subject” dataset. 
+
+A dataset with the “Subject” option in the weighting column is not needed, instead 
+all datasets of interest can have a number in the weighting column. This means both 
+datasets will be modified to attain the desired ratio of statistical weight. Two 
+datasets with 1.0 in the weighting column will be both be weighted differently to 
+ensure they both have the same statistical weight. A dataset with a ratio of 2.0 
+will have double the statistical weighting a dataset with ratio of 1.0, and dataset 
+with a ratio of 0.5 will have half the statistical weighting of a dataset with a 
+ratio of 1.0.
+
+Some examples, if dataset A and B both have 1.0 in the weighting column, and dataset 
+C has “Subject”, then the weight of dataset A and B will be modified to have an equal 
+statistical weight to dataset C. If dataset A, B and C all have 1.0 in the weighting 
+column, then the weighting of all three datasets will be modified to have equal 
+statistical weights. If dataset D with “Default” in the weighting column is introduced 
+to either of these examples, the weighting of dataset D will not be modified or effect 
+the weighting of the other 3 datasets.
+
+*Some notes*
+
+*	The weighting modifications does not fully account for the number of points; so 
+	datasets with a larger number of points may have a larger statistical weight than 
+	expected.
+	
+* 	If the difference in weighting is large, then one dataset could be ignored to such 
+	a degree that it has little effect on the fit. This can lead to unexpected results. 
+	It is not advised to use the weighting option on 2 datasets with difference in 
+	error sizes over 3 orders of magnitude. 
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. _Batch_Fit_Mode:
