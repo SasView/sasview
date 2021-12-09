@@ -823,14 +823,14 @@ less of an influence on the fit due to the datasets lower statistical weight.
 
 **Warnings**
 
-*	The weighting modifications does not fully account for the number of points; so 
+*	The weighting modifications do not fully account for the number of points; so 
 	datasets with a larger number of points may have a larger statistical weight than 
 	expected.
 	
 * 	If the difference in weighting is large, then one dataset could be ignored to such 
 	a degree that it has little effect on the fit. This can lead to unexpected results. 
-	It is not advised to use the weighting option on 2 datasets with difference in 
-	error sizes over 3 orders of magnitude. 
+	It is not advised to use the weighting option on 2 datasets with a difference in 
+	error bounds over 3 orders of magnitude. 
 	
 **Technical details**
 	
