@@ -60,6 +60,12 @@ jobs:
 
     ### Installation of build-dependencies
 
+    - name: Install lxml and MPL (Linux + Win)
+      if: ${{ matrix.os != 'macos-latest' }}
+      run: |
+        python -m pip install matplotlib==2.2.5
+        python -m pip install lxml
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
@@ -70,14 +76,10 @@ jobs:
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
         python -m pip install qt5reactor periodictable PyQt5 uncertainties debugpy
 
-    - name: Install lxml (Linux + Win)
-      if: ${{ matrix.os != 'macos-latest' }}
-      run: |
-        python -m pip install lxml
-
     - name: Install lxml (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        python -m pip install matplotlib
         python -m pip install --no-binary lxml lxml
 
     - name: Install pyopencl (Windows)
