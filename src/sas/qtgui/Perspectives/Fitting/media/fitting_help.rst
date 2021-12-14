@@ -747,14 +747,15 @@ Simultaneous Fits with a Modified Weighting
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When simultaneously fitting different data sets the degree of influence each
-dataset has on the final fit is defined by the statistical weight of each data
-set. Datasets with a higher statistical weight exert greater influence on the
-fit. By default the SasView fitting engine statistically weights each dataset
-in a simultaneous fit by the number of points and the error on each point in
-each dataset. If dataset A has a larger number of points with smaller errors
-than all other datasets being fitted, then dataset A will have a larger
-statistical weight and exert greater influence on the fit. This default
-behaviour can be modified in the *Const. Simul. Fit* page.
+dataset has on the final fit is defined by the statistical weight of each 
+data set. Datasets with a higher statistical weight exert greater influence on 
+the fit. The SasView fitting engine statistically weights each dataset
+in a simultaneous fit by the number of points in a dataset and the inverse 
+value of the weighting variable on each point in each dataset. By default the
+weighting variable is the y axis error, but can be modified in the 
+*Fit Options* tab. By default if dataset A has a larger number of points with 
+smaller errors than all other datasets being fitted, then dataset A will have 
+a larger statistical weight and exert greater influence on the fit.
 
 It is often difficult to simultaneously fit datasets with different numbers of
 points and different errors, as datasets with higher weights will dominate and
@@ -762,7 +763,7 @@ those with lower weights will be almost entirely ignored. This is especially
 true for data gathered using different methods with different associated
 errors. For example attempting to fit SANS and SAXS data often leads to the
 SAXS data dominating the fit. *Modify Weighting* attempts to solve this issue
-by allow the user to change the statistical weight of each dataset and thereby
+by allow the user to change the statistical weight of each dataset and there by
 the influence each dataset has on the fit.
 
 Checking the *Modify Weighting* box reveals a fifth column in the source choice
@@ -773,8 +774,8 @@ dialog called Weighting. This is depicted in the screenshot below.
 The pre-filled option in the weighting column is "Default". A dataset with
 the "Default" option will not have its statistical weight modified.
 
-Valid inputs for the weighting column are "Default", "Subject", and a
-floating point number. If an invalid input is entered the column box will turn
+Valid inputs for the weighting column are "Default", "Subject", and a 
+floating point number. If an invalid input is entered the column box will turn 
 red. The different input options are depicted in the screenshot below.
 
 .. image:: weighting_scheme_options.png
@@ -802,14 +803,17 @@ will have a **less of an influence** on the fit than the "Subject" dataset.
 It is not mandatory to have a dataset with the "Subject" option in the
 weighting column, instead all datasets of interest can have a number in the
 weighting column. This means all datasets will be modified to attain the desired
-ratio of statistical weight. If two datasets have 1.0 in the weighting column
-then the statistical weight of each will be modified to ensure the two datasets
-have the same statistical weight and an equal effect on the simultaneous fit.
-As earlier, a dataset with a ratio of 2.0 will have double the statistical
-weighting a dataset with ratio of 1.0, and so will have a greater influence on
-the fit. A dataset with a ratio of 0.5 will have half the statistical weighting
-of a dataset with a ratio of 1.0, and so will have less of an influence on the
-fit due to the datasets lower statistical weight.
+ratio of statistical weight. 
+
+If two datasets **have 1.0** in the weighting column then the statistical weight 
+of each will be modified to ensure the two datasets have the same statistical 
+weight and an **equal effect** on the simultaneous fit.
+
+As earlier, a dataset with a **ratio of 2.0** will have double the statistical
+weighting a dataset with ratio of 1.0, and so will have a **greater** influence 
+on the fit. A dataset with a **ratio of 0.5** will have half the statistical 
+weighting of a dataset with a ratio of 1.0, and so will have **less** of an 
+influence on the fit due to the datasets lower statistical weight.
 
 **Examples** 
 
