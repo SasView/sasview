@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
  - Version: [e.g. 5.0.4]
 
 **Operating system (please complete the following information):**
- - OS: [e.g. iOS]
+ - OS: [e.g. Windows 10]
 
 **Additional context**
 Add any other context about the problem here.
