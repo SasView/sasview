@@ -763,7 +763,7 @@ those with lower weights will be almost entirely ignored. This is especially
 true for data gathered using different methods with different associated
 errors. For example attempting to fit SANS and SAXS data often leads to the
 SAXS data dominating the fit. *Modify Weighting* attempts to solve this issue
-by allow the user to change the statistical weight of each dataset and there by
+by allowing the user to change the statistical weight of each dataset and there by
 the influence each dataset has on the fit.
 
 Checking the *Modify Weighting* box reveals a fifth column in the source choice
