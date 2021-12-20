@@ -163,4 +163,4 @@ if platform.system() == 'Darwin':
         name='SasView5.app',
         icon='../src/sas/sasview/images/ball.icns',
         bundle_identifier='org.sasview.SasView5',
-        info_plist={'NSHighResolutionCapable': 'True'})
+        info_plist={'NSHighResolutionCapable': 'False'})
