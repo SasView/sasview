@@ -635,7 +635,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
             if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
                 self.onKey(event)
-        return True
+                return True
+        return False
 
     def modelName(self):
         """
