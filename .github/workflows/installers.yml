@@ -77,6 +77,7 @@ jobs:
     - name: Install lxml, matplotlib and PyQt (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        python -m pip install PyQt5==5.13
         python -m pip install matplotlib==3.4.3
         python -m pip install --no-binary lxml lxml
 
