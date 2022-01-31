@@ -72,7 +72,12 @@ jobs:
         python -m pip install numpy scipy docutils "pytest<6" sphinx unittest-xml-reporting
         python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
-        python -m pip install qt5reactor periodictable PyQt5 uncertainties debugpy
+        python -m pip install qt5reactor periodictable uncertainties debugpy
+
+    - name: Install PyQt (Windows + Linux)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: |
+        python -m pip install
 
     - name: Install lxml, matplotlib and PyQt (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
