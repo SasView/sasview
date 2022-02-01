@@ -3913,20 +3913,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             }
             file_path = save_dialog.getSaveFileName(**kwargs)
             filename = file_path[0]
+            if filename:
+                if file_path[1] == 'Text (*.txt)':
+                    Type_output = Text_output
+                    filename = '.'.join((filename, 'txt'))
+                elif file_path[1] == 'Excel (*.xls)':
+                    Type_output = Excel_output
+                    filename = '.'.join((filename, 'xls'))
+                elif file_path[1] == 'Latex (*.log)':
+                    Type_output = Latex_output
+                    filename = '.'.join((filename, 'log'))
 
-            if file_path[1] == 'Text (*.txt)':
-                Type_output = Text_output
-                filename = '.'.join((filename, 'txt'))
-            elif file_path[1] == 'Excel (*.xls)':
-                Type_output = Excel_output
-                filename = '.'.join((filename, 'xls'))
-            elif file_path[1] == 'Latex (*.log)':
-                Type_output = Latex_output
-                filename = '.'.join((filename, 'log'))
-
-            file_open = open(filename, 'w')
-            with file_open:
-                file_open.write(Type_output)
+                file_open = open(filename, 'w')
+                with file_open:
+                    file_open.write(Type_output)
         else:
             cb = QtWidgets.QApplication.clipboard()
             cb.setText(formatted_output)
