@@ -31,7 +31,8 @@ class PackageGatherer:
         installed_packages = {'python': sys.version}
 
         # Get python modules installed locally
-        installed_packages_json = json.loads(subprocess.check_output(['pip', 'list', '-l', '--format=json']))
+        installed_packages_json = json.loads(subprocess.check_output(['python', '-m',
+                                                                      'pip', 'list', '-l', '--format=json']))
         for package in installed_packages_json:
             installed_packages[package['name']] = package['version']
 
