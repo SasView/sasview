@@ -483,7 +483,7 @@ class GuiManager(object):
         """
         Log version number of locally installed python packages
         """
-        PackageGatherer().log_installed_packages()
+        PackageGatherer().log_installed_modules()
 
     def log_imported_packages(self):
         """
