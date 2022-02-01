@@ -1,1 +1,0 @@
-pip install scipy docutils "pytest<6" sphinx unittest-xml-reporting h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable lxml PyQt5==5.13 matplotlib==2.2.5 lxml uncertainties debugpy

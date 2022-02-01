@@ -99,6 +99,7 @@ hiddenimports = [
     'debugpy',
     'debugpy._vendored',
     'uncertainties',
+    'pip',
 ]
 
 a = Analysis(
