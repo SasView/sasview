@@ -5,7 +5,10 @@ import pkg_resources
 import json
 import pathlib
 
+from pip._internal.utils.misc import get_installed_distributions
+
 import sas
+
 
 
 
@@ -28,16 +31,13 @@ class PackageGatherer:
         :returns:Nothing
         :rtype: None
         """
-        installed_packages = {'python': sys.version}
 
         # Get python modules installed locally
-        installed_packages_json = json.loads(subprocess.check_output(['python', '-m',
-                                                                      'pip', 'list', '-l', '--format=json']))
-        for package in installed_packages_json:
-            installed_packages[package['name']] = package['version']
+        installed_packages = get_installed_distributions()
 
-        print_str = "\n".join(f"{key}: {value}" for key, value in installed_packages.items())
-        logging.info(f"Installed packages:\n{print_str}")
+        python_str = f'python:{sys.version}\n'
+        print_str = "\n".join(f"{package.project_name}: {package.version}" for package in installed_packages)
+        logging.info(f"Installed packages:\n{python_str+print_str}")
 
 
     def log_imported_packages(self):
