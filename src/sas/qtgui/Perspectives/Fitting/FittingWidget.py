@@ -1336,9 +1336,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
 
         current_text = self.cbModel.currentText()
-        self.cbModel.blockSignals(True)
         self.cbModel.clear()
-        self.cbModel.blockSignals(False)
         self.enableModelCombo()
         self.disableStructureCombo()
         # Retrieve the list of models
