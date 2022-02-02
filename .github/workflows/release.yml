@@ -87,6 +87,7 @@ jobs:
       run: |
         python -m pip install pytools mako cffi
         choco install opencl-intel-cpu-runtime
+        choco install innosetup
         python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
 
     - name: Install pyopencl (Linux + macOS)
