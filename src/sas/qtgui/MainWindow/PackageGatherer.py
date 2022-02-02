@@ -1,15 +1,9 @@
 import sys
 import logging
-import subprocess
 import pkg_resources
-import json
 import pathlib
 
-import pkg_resources
-
 import sas
-
-
 
 
 class PackageGatherer:
@@ -38,7 +32,8 @@ class PackageGatherer:
 
         python_str = f'python:{sys.version}\n'
         print_str = "\n".join(f"{package.key}: {package.version}" for package in installed_packages)
-        logging.info(f"Installed packages:\n{python_str+print_str}")
+        msg = f"Installed packages:\n{python_str+print_str}"
+        logging.info(msg)
 
 
     def log_imported_packages(self):
@@ -59,10 +54,8 @@ class PackageGatherer:
         errs_res_str = "\n".join(f"{module}: {version_num}" for module, version_num
                                  in imported_packages_dict["errors"].items())
 
-        logging.info(f"Imported modules:\n"
-                     f"{res_str}\n"
-                     f"{no_res_str}\n"
-                     f"{errs_res_str}")
+        msg = f"Imported modules:\n {res_str}\n {no_res_str}\n {errs_res_str}"
+        logging.info(msg)
 
 
     def get_imported_packages(self):
