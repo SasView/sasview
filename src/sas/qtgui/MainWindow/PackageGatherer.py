@@ -5,7 +5,7 @@ import pkg_resources
 import json
 import pathlib
 
-from pip._internal.utils.misc import get_installed_distributions
+import pkg_resources
 
 import sas
 
@@ -33,10 +33,11 @@ class PackageGatherer:
         """
 
         # Get python modules installed locally
-        installed_packages = get_installed_distributions()
+
+        installed_packages = pkg_resources.working_set
 
         python_str = f'python:{sys.version}\n'
-        print_str = "\n".join(f"{package.project_name}: {package.version}" for package in installed_packages)
+        print_str = "\n".join(f"{package.key}: {package.version}" for package in installed_packages)
         logging.info(f"Installed packages:\n{python_str+print_str}")
 
 
