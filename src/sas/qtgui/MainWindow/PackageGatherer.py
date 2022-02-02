@@ -5,6 +5,7 @@ import pathlib
 
 import sas
 
+logger = logging.getLogger(__name__)
 
 class PackageGatherer:
     """ A class used to gather packages/modules  used by SasView and their current installed version
@@ -33,7 +34,7 @@ class PackageGatherer:
         python_str = f'python:{sys.version}\n'
         print_str = "\n".join(f"{package.key}: {package.version}" for package in installed_packages)
         msg = f"Installed packages:\n{python_str+print_str}"
-        logging.info(msg)
+        logger.info(msg)
 
 
     def log_imported_packages(self):
@@ -55,7 +56,7 @@ class PackageGatherer:
                                  in imported_packages_dict["errors"].items())
 
         msg = f"Imported modules:\n {res_str}\n {no_res_str}\n {errs_res_str}"
-        logging.info(msg)
+        logger.info(msg)
 
 
     def get_imported_packages(self):
