@@ -651,9 +651,7 @@ class GuiManager(object):
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-        self._workspace.actionLog_installed_packages.triggered.connect(self.actionLog_installed_packages)
-        self._workspace.actionLog_imported_packages.triggered.connect(self.actionLog_imported_packages)
-
+        
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 
@@ -1173,18 +1171,6 @@ class GuiManager(object):
         Menu Help/Check for Update
         """
         self.checkUpdate()
-
-    def actionLog_installed_packages(self):
-        """
-        Log version number of locally installed python packages
-        """
-        self.log_installed_packages()
-
-    def actionLog_imported_packages(self):
-        """
-        Log version number of python packages imported in this instance of SasView.
-        """
-        self.log_imported_packages()
 
     def updateTheoryFromPerspective(self, index):
         """
