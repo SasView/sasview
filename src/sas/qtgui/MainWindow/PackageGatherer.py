@@ -6,7 +6,6 @@ import pathlib
 import sas
 
 logger = logging.getLogger(__name__)
-sys_modules = sys.modules.keys()
 
 class PackageGatherer:
     """ A class used to gather packages/modules  used by SasView and their current installed version
@@ -108,7 +107,7 @@ class PackageGatherer:
         standard_lib.extend(sys.builtin_module_names)
         standard_lib.append("sas")
 
-        for module_name in sys_modules:
+        for module_name in sys.modules.keys():
 
             package_name = module_name.split('.')[0]
 
