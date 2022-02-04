@@ -3913,7 +3913,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             }
             file_path = save_dialog.getSaveFileName(**kwargs)
             filename = file_path[0]
-
+            if not filename:
+                return
             if file_path[1] == 'Text (*.txt)':
                 Type_output = Text_output
                 filename = '.'.join((filename, 'txt'))
