@@ -2317,13 +2317,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if plugin_list:
             self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
         # Adding plugins classified as structure factor to 'CATEGORY_STRUCTURE' list
-        plugin_structure_list = [
-            [name, True] for name, plug in self.custom_models.items()
-            if plug.is_structure_factor
-            and [name, True] not in self.master_category_dict[CATEGORY_STRUCTURE]
-        ]
-        if plugin_structure_list:
-            self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
+        if CATEGORY_STRUCTURE in self.master_category_dict:
+            plugin_structure_list = [
+                [name, True] for name, plug in self.custom_models.items()
+                if plug.is_structure_factor
+                and [name, True] not in self.master_category_dict[CATEGORY_STRUCTURE]
+            ]
+            if plugin_structure_list:
+                self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
 
     def regenerateModelDict(self):
         """
@@ -3911,7 +3912,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             }
             file_path = save_dialog.getSaveFileName(**kwargs)
             filename = file_path[0]
-
+            if not filename:
+                return
             if file_path[1] == 'Text (*.txt)':
                 Type_output = Text_output
                 filename = '.'.join((filename, 'txt'))
