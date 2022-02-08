@@ -2,7 +2,7 @@
 """
 Global defaults and various utility functions usable by the general GUI
 """
-
+import numbers
 import os
 import re
 import sys
@@ -1265,6 +1265,12 @@ def saveData(fp, data):
             # we have a pure function
             content = o.__dict__.copy()
             return add_type(content, type(o))
+
+        if isinstance(o, numbers.Integral):
+            return int(o)
+
+        if isinstance(o, numbers.Real):
+            return float(o)
 
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
