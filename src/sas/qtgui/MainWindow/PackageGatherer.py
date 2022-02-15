@@ -1,13 +1,11 @@
 import sys
 import logging
-import subprocess
 import pkg_resources
-import json
 import pathlib
 
 import sas
 
-
+logger = logging.getLogger(__name__)
 
 class PackageGatherer:
     """ A class used to gather packages/modules  used by SasView and their current installed version
@@ -28,15 +26,15 @@ class PackageGatherer:
         :returns:Nothing
         :rtype: None
         """
-        installed_packages = {'python': sys.version}
 
         # Get python modules installed locally
-        installed_packages_json = json.loads(subprocess.check_output("pip list -l --format=json"))
-        for package in installed_packages_json:
-            installed_packages[package['name']] = package['version']
 
-        print_str = "\n".join(f"{key}: {value}" for key, value in installed_packages.items())
-        logging.info(f"Installed packages:\n{print_str}")
+        installed_packages = pkg_resources.working_set
+
+        python_str = f'python:{sys.version}\n'
+        print_str = "\n".join(f"{package.key}: {package.version}" for package in installed_packages)
+        msg = f"Installed packages:\n{python_str+print_str}"
+        logger.info(msg)
 
 
     def log_imported_packages(self):
@@ -57,10 +55,8 @@ class PackageGatherer:
         errs_res_str = "\n".join(f"{module}: {version_num}" for module, version_num
                                  in imported_packages_dict["errors"].items())
 
-        logging.info(f"Imported modules:\n"
-                     f"{res_str}\n"
-                     f"{no_res_str}\n"
-                     f"{errs_res_str}")
+        msg = f"Imported modules:\n {res_str}\n {no_res_str}\n {errs_res_str}"
+        logger.info(msg)
 
 
     def get_imported_packages(self):
