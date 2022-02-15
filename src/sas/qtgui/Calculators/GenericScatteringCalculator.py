@@ -608,19 +608,26 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
+
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
                     self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;"
                                             "SLD files (*.SLD *.sld);;"
                                             "PDB files (*.pdb *.PDB);;"
                                             "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)")[0]
+                                            "All files (*.*)",
+                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
+                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
+                                            )[0]
             else:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
                     self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;"
                                             "OMF files (*.OMF *.omf);;"
                                             "SLD files (*.SLD *.sld);;"
                                             "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)")[0]
+                                            "All files (*.*)",
+                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
+                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
+                                            )[0]
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
