@@ -1476,7 +1476,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.blockSignals(True)
         self.cbModel.addItem(MODEL_DEFAULT)
-        self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+        self.cbModel.addItems(sorted([model for (model, _) in model_list if model != 'rpa']))
         self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):
