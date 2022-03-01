@@ -3066,7 +3066,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         # ensure the model does not recompute when updating the value
         self._model_model.blockSignals(True)
-        self._model_model.item(ER_row, 1).setText(str(ER_value))
+        self._model_model.item(ER_row, 1).setText(GuiUtils.formatNumber(ER_value, high=True))
         self._model_model.blockSignals(False)
         # ensure the view is updated immediately
         self._model_model.layoutChanged.emit()

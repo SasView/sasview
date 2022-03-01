@@ -180,7 +180,7 @@ class Calc1D(CalcThread):
             if isinstance(return_data, tuple):
                 # see sasmodels beta_approx: SasviewModel.calculate_Iq
                 # TODO: implement intermediate results in smearers
-                return_data, _ = return_data
+                return_data, intermediate_results = return_data
             unsmeared_output[first_bin:last_bin+1] = return_data
             output = self.smearer(unsmeared_output, first_bin, last_bin)
 
