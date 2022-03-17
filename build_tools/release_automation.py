@@ -57,7 +57,7 @@ sasview_data = {
         {'name': 'Cooper-Benun, Torin', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Durniak, Celine','affiliation': 'European Spallation Source ERIC' },
         {'name': 'Forster, Laura','affiliation': 'Diamond Light Source'},
-        {'name': 'Gilbert, Peter','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Gilbert, Peter','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0003-1707-7517'},
         {'name': 'Gonzalez, Miguel','affiliation': 'Institut Laue-Langevin', 'orcid': '0000-0002-3478-0215'},
         {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory','orcid': '0000-0002-7729-1454'},
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
