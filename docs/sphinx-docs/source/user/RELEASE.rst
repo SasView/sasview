@@ -18,12 +18,15 @@ New in Version 5.0.5
 This is a point release which fixes some issues reported in earlier versions
 of 5.0.x:
 
+* The issue with the optimiser not respecting parameter bounds where set has been
+  resolved by the move to a later version of the Bumps package.
 * ?
 
 There are also some new features in this version:
 
 * ?
 
+This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0. 
 
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -38,7 +41,11 @@ New Models
 ^^^^^^^^^^
 The following models have been added to the [Model Marketplace](http://marketplace.sasview.org/) since v5.0.4 was released:
 
-* ?
+* Magnetic Whirl
+* Maier-Saupe distribution
+* Cyclic Gaussian distribution
+* Superball Model - Neither Sphere nor Cube
+* OrientedMagneticChains
 
 Known Issues
 ^^^^^^^^^^^^
