@@ -3,6 +3,7 @@
 	<name>sasview</name>
 	<comment></comment>
 	<projects>
+		<project>sasmodels</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
