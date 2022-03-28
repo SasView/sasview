@@ -1,6 +1,4 @@
 import copy
-import math
-import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -679,82 +677,85 @@ def getWeight(data, is2d, flag=None):
     return weight
 
 
-def increaseWeight(weight, weight_multiplier=1.0):
-    """ Increase the statistical weight of a dataset
-
-    :param weight: Data for the statistical weight, typical the y axis error
-    :type weight: numpy.ndarray
-    :param weight_multiplier: Factor to increase the weight by
-    :type weight_multiplier: int or float
-    :return: Modified data for the statistical weight
-    :r_type: numpy.ndarray
+def getRelativeError(data, is2d):
     """
+    Return dy/y.
+    """
+    if data is None:
+        return []
+    if is2d:
+        if not hasattr(data, 'err_data'):
+            return []
+        dy_data = data.err_data
+        data = data.data
+    else:
+        if not hasattr(data, 'dy'):
+            return []
+        dy_data = data.dy
+        data = data.y
 
-    return weight * weight_multiplier
+    return dy_data / data
 
 
-def calcWeightIncrease(weights, ratios, flag=None):
-    """ Calculate the factor to increase the data for the statistical weight of each data set by.
+def calcWeightIncrease(weights, ratios, flag=False):
+    """ Calculate the weights to be passed to bumps in order to ensure
+        that each data set contributes to the total residual with a
+        relative weight roughly proportional to the ratios defined by
+        the user when the "Modify weighting" option is employed.
+
+        The influence of each data set in the global fit is approximately
+        proportional to the number of points and to (1/sigma^2), or
+        probably better to (1/relative_error^2) = (intensity/sigma)^2.
+
+        Therefore in order to try to give equal weights to each data set
+        in the global fitting, we can compute the total relative weight
+        of each data set as the sum (y_i/dy_i**2) over all the points in
+        the data set and then renormalize them using:
+
+        user_weight[dataset] * max(relative_weights) /  relative_weights[dataset]
+
+        If all user weights are one (the default), this will increase the weight
+        of the data sets initially contributing less to the global fit, while
+        keeping the weight of the initially larger contributor equal to one.
+
+        These weights are stored for each data set (FitPage) in a dictionary that
+        will be then used by bumps to modify the weights of each set.
+
+        Warning: As bumps uses the data set weights to multiply the residuals
+        calculated as (y-f(x))/sigma, it would probably be more correct to compute
+        sqrt(user_weight[dataset] * max(relative_weights) /  relative_weights[dataset]),
+        but empirically (in the only test case tried until now!) the present
+        approach seems to work better.
 
     :param weights: Dictionary of data for the statistical weight, typical the y axis error
     :type weights: dict of numpy.ndarray
     :param ratios: Desired relative statistical weight ratio between the different datasets.
     :type ratios: dict
-    :param flag: Type of data used for the statistical weight
-    :type flag: int
+    :param flag: Boolean indicating if the weight of the datasets should be modified or not,
+                 which depends on the "Modify weighting" box in the Simultaneous Fit tab
+                 being checked or not
+    :type flag: bool
     :return: Weight multiplier for each dataset
     :rtype: dict
     """
 
     stat_weights = {}
-    subject_stat_weights = {}
     weight_increase = {}
-    num_fits = len(weights.keys())
 
-    # If weighting = None in Fit Options tab
-    if flag == 0:
-        for id_index in weights.keys():
-            weight_increase[id_index]
-        return weight_increase
+    # If "Modify weighting" option not checked
+    if not flag:
+        return {k: 1.0 for k in weights}
 
-    # Calc statistical weight for each dataset
+    # Calc statistical weight for each dataset and maximum
+    # Need to find the best "weighting" scheme
+    max_weight = 0
     for id_index in weights.keys():
-        stat_weight = 0.0
-        for val in weights[id_index]:
-            stat_weight += 1.0 / (val ** 2.0)
-        av_stat_weight = stat_weight / len(weights[id_index])
-        stat_weights[id_index] = av_stat_weight
-        if ratios[id_index] == "Subject":
-            subject_stat_weights[id_index] = av_stat_weight
-            weight_increase[id_index] = 1.0
-        elif ratios[id_index] == "Default":
-            weight_increase[id_index] = 1.0
+        stat_weights[id_index] = numpy.sum(1.0/weights[id_index]**2)
+        if stat_weights[id_index] > max_weight:
+            max_weight = stat_weights[id_index]
 
-    # If all data sets defined, i.e. are "Default" then no need to continue
-    if len(weight_increase.keys()) == len(weights.keys()):
-        return weight_increase
-
-    # If no data set defined as subject, use the average statistical weight as the comparison point.
-    if len(subject_stat_weights.keys()) == 0:
-        subject_stat_weight = sum([v for v in stat_weights.values()]) / num_fits
-    # If one data set defined as subject
-    elif len(subject_stat_weights.keys()) == 1:
-        subject_stat_weight = list(subject_stat_weights.values())[0]
-    # If multiple data set defined as subject, then use first
-    elif len(subject_stat_weights.keys()) > 1:
-        first_subject_stat_weight_id = list(subject_stat_weights.keys())[0]
-        logging.warning(f'Multiple data sets specified for comparison using "Subject", will use '
-                        f'{first_subject_stat_weight_id} for comparison.')
-        subject_stat_weight = subject_stat_weights[first_subject_stat_weight_id]
-
-    for id_index, weight in stat_weights.items():
-        # If dataset is fixed or compare, don't modify
-        if id_index in weight_increase.keys():
-            continue
-        else:
-            desired_stat_weight = subject_stat_weight * float(ratios[id_index])
-            difference = desired_stat_weight / weight
-            weight_increase[id_index] = math.sqrt(difference) / num_fits
+    for id_index in weights.keys():
+            weight_increase[id_index] = float(ratios[id_index]) * max_weight / stat_weights[id_index]
 
     return weight_increase
 

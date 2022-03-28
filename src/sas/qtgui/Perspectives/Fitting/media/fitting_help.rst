@@ -836,106 +836,55 @@ The results of the model-fitting will be returned to each of the individual
 Simultaneous Fits with a Modified Weighting
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When simultaneously fitting different data sets the degree of influence each
-dataset has on the final fit is defined by the statistical weight of each 
-data set. Datasets with a higher statistical weight exert greater influence on 
-the fit. The SasView fitting engine statistically weights each dataset
-in a simultaneous fit by the number of points in a dataset and the inverse 
-value of the weighting variable on each point in each dataset. By default the
-weighting variable is the y axis error, but can be modified in the 
-*Fit Options* tab. By default if dataset A has a larger number of points with 
-smaller errors than all other datasets being fitted, then dataset A will have 
-a larger statistical weight and exert greater influence on the fit.
+When simultaneously fitting different data sets, the degree of influence that each
+of them has on the final fit is defined by their statistical weight, i.e. mainly
+the number of points and their uncertainty in each data set.
+The SasView fitting engine tries to minimize the total $\chi^2$, where the difference
+between the data and the model for each data point is added quadratically using a
+weight that by default is inversely proportional to the y axis error. As a consequence,
+datasets with more points and smaller errors will exert a greater influence on
+the fit. While the weighting scheme can be modified in the *Fit Options* tab,
+even setting the weighting to None (i.e. all data points from all data sets have
+the same weight, equal to 1) will not solve the potential issue of having disparate
+number of data points in different sets. In this case, if one data set has much
+more (less) points than the remaining data sets, it will have a much larger (smaller)
+influence in the global fit.
 
-It is often difficult to simultaneously fit datasets with different numbers of
-points and different errors, as datasets with higher weights will dominate and
-those with lower weights will be almost entirely ignored. This is especially
-true for data gathered using different methods with different associated
-errors. For example attempting to fit SANS and SAXS data often leads to the
-SAXS data dominating the fit. *Modify Weighting* attempts to solve this issue
-by allowing the user to change the statistical weight of each dataset and there by
-the influence each dataset has on the fit.
+This is especially true for data gathered using different methods with different
+associated errors. For example attempting to fit SANS and SAXS data often leads to the
+SAXS data dominating the fit. The *Modify Weighting* option provides a way of getting
+around this issue by allowing the user to multiply the individual weights by a global
+factor that can be adjusted for each data set.
 
 Checking the *Modify Weighting* box reveals a fifth column in the source choice
 dialog called Weighting. This is depicted in the screenshot below.
 
 .. image:: weighting_scheme_default.png
 
-The pre-filled option in the weighting column is "Default". A dataset with
-the "Default" option will not have its statistical weight modified.
+The pre-filled option in the weighting column is 1.0, and only numerical inputs
+(integer or floating point numbers) are allowed. It is important to understand
+that when the *Modify Weighting* box is checked, **the weights of each data set
+will be modified, even when all the weights in the weighting column are equal
+to 1.** Actually, when all the user weights are equal to 1, SasView will try to
+calculate appropriate weights in order to ensure that all the data sets have
+approximately a similar influence in the total fit. This is done by estimating the
+statistical weight of each data set *j* as $W_j = \sum_i^{N_j} (1/e_i)^2$, where at present
+$e_i$ is the relative error of point *i*, i.e. $e_i = \sigma_i / |I_i|$, and then
+the weight to apply to each data set is computed as $Max(W_j)/W_j$. Thus, the weight of the
+initially "heavier" set remains equal to 1, while the remaining sets will be scaled up by
+a factor > 1. Then the user weighting factors multiply this scaling factor, giving the
+final weight for each data set that will be sent to the fitting engine. The final weights
+used in the simultaneous fit are given in the *Log Explorer* window and can provide a useful
+indication of how much each data set has been "modified" with respect to the original data.
 
-Valid inputs for the weighting column are "Default", "Subject", and a 
-floating point number. If an invalid input is entered the column box will turn 
-red. The different input options are depicted in the screenshot below.
-
-.. image:: weighting_scheme_options.png
-
-A dataset with the "Subject" option in the weighting column will not have
-its statistical weight modified. Instead, this dataset will act as the subject
-against which the weighting of the other data sets that are to be modified will
-be compared. Only one dataset should have the "Subject" option in the
-weighting column, attempting to have multiple subjects will lead to a warning
-and only one dataset being used as the subject.
-
-A dataset with a number option in the weighting column will have its statistical 
-weight modified. The number represents a ratio used to compare the weighting 
-of the dataset. For example, a dataset **with 1.0 in the weighting column** will
-be weighted differently to ensure it has the same statistical weighting as the
-"Subject" dataset, so that **both datasets have equal effect** on the
-simultaneous fit.
-
-A dataset with a **ratio of 2.0** will have double the statistical weighting of
-the "Subject" dataset, and so will have a **greater influence** on the fit
-compared to the "Subject" dataset. A dataset with a **ratio of 0.5**
-will have half the statistical weighting of the "Subject" dataset, and so
-will have a **less of an influence** on the fit than the "Subject" dataset.
-
-It is not mandatory to have a dataset with the "Subject" option in the
-weighting column, instead all datasets of interest can have a number in the
-weighting column. This means all datasets will be modified to attain the desired
-ratio of statistical weight. 
-
-If two datasets **have 1.0** in the weighting column then the statistical weight 
-of each will be modified to ensure the two datasets have the same statistical 
-weight and an **equal effect** on the simultaneous fit.
-
-As earlier, a dataset with a **ratio of 2.0** will have double the statistical
-weighting a dataset with ratio of 1.0, and so will have a **greater** influence 
-on the fit. A dataset with a **ratio of 0.5** will have half the statistical 
-weighting of a dataset with a ratio of 1.0, and so will have **less** of an 
-influence on the fit due to the datasets lower statistical weight.
-
-**Examples** 
-
-*  If dataset A and B both have 1.0 in the weighting column, and dataset C has
-   "Subject", then the weight of datasets A and B will be modified to have
-   an equal statistical weight to dataset C. 
-*  If datasets A, B and C all have 1.0 in the weighting column, then the
-   weighting of all three datasets will be modified to have equal statistical
-   weights. 
-*  If dataset D with "Default" in the weighting column is introduced to
-   either of the above examples, the weighting of dataset D will **not** be
-   modified or affect the weighting of the other 3 datasets.
-
-**Warnings**
-
-*  The weighting modifications do not fully account for the number of points
-   in a dataset, so datasets with a much larger number of points may have a
-   larger statistical weight than otherwise anticipated.
-*  If the difference in weighting is very large, then one dataset could be
-   ignored to such a degree that it has little effect on the fit. This can lead
-   to unexpected results. As a guide, it is not advised to use the weighting
-   option on 2 datasets where a difference in error bounds on the datapoints
-   is over 3 orders of magnitude. 
-
-**Technical details**
-
-*  The difference in statistical weight is calculated by SasView, then a weight
-   modification factor is derived with which to modify each dataset in order to
-   influence the simultaneous fit as desired by the user. The weight
-   modification factor is then passed to *Bumps* to change the behaviour of the
-   optimisers. These modifications take place internally within *SasView* and
-   do not change either the as-loaded or plottable data.
+**Warning:** This option gives the user the flexibility to play with the data sets, in order
+to drive the global fit in a desired direction. It can be useful when a particular set contains
+important information to determine one or several model parameters, but it is ignored in the
+global fit because of statistical issues. However, ideally this option should never be needed,
+as difficulties when trying to fit simultaneously several sets are often an indication of
+other problems such as systematic errors, inadequate error/resolution estimation, etc.
+Therefore, users are advised to be extremely careful when using this option and to
+carefully check any result obtained using modified weights.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

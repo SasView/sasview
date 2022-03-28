@@ -20,6 +20,7 @@ from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
+logger = logging.getLogger(__name__)
 
 class DnDTableWidget(QtWidgets.QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -276,7 +277,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onWeightModify(self, is_checked):
         """
-        Respond to selecting the Chain Fit checkbox
+        Respond to selecting the Modify weighting checkbox
         """
         self.is_weight_modified = is_checked
         self.initializeWidgets()
@@ -308,15 +309,22 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         fitter_id = 0
         sim_fitter_list=[fitter]
 
-        # Calc statistical weight of each data-set
+        # Determine weights for each data-set
+        # Need to determine if it is best to use (1/sigma) or (1/relative_error) for this
         weights = {}
         for tab in tabs_to_fit:
             tab_object = ObjectLibrary.getObject(tab)
-            weight = FittingUtilities.getWeight(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
+            #weight = FittingUtilities.getWeight(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
+            weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D)
             weights[tab] = weight
 
         # Calc increase factor for the errors in each dataset
-        weight_increase_dict = FittingUtilities.calcWeightIncrease(weights, self.weighting_ratios)
+        weight_increase_dict = FittingUtilities.calcWeightIncrease(weights,
+                                                                   self.weighting_ratios,
+                                                                   self.is_weight_modified)
+        logger.info("Simultaneous fit - Data set weights: ")
+        for item in weight_increase_dict.items():
+            logger.info(item)
 
         # Prepare the fitter object
         try:
@@ -468,20 +476,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             try:
                 float(new_weighting)
             except ValueError:
-                # Cannot convert string to float
-                if new_weighting == 'Default' or new_weighting == 'Subject':
-                    # Acceptable input
-                    pass
-                else:
-                    # Unacceptable input
-                    self.tblTabList.blockSignals(True)
-                    item.setBackground(QtCore.Qt.red)
-                    self.tblTabList.blockSignals(False)
-                    self.cmdFit.setEnabled(False)
-                    msg = "Weighting must be an integer, a float or the string 'fixed' or 'compare."
-                    self.parent.communicate.statusBarUpdateSignal.emit(msg)
-                    item.setToolTip(msg)
-                    return
+                # Unacceptable input
+                self.tblTabList.blockSignals(True)
+                item.setBackground(QtCore.Qt.red)
+                self.tblTabList.blockSignals(False)
+                self.cmdFit.setEnabled(False)
+                msg = "Weighting must be a numerical value (integer or float)."
+                self.parent.communicate.statusBarUpdateSignal.emit(msg)
+                item.setToolTip(msg)
+                return
 
             # Update value if acceptable input
             self.tblTabList.blockSignals(True)
@@ -938,7 +941,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.setItem(pos, 3, item)
         # Initial definition
         if tab_name not in self.weighting_ratios.keys():
-            self.weighting_ratios[tab_name] = "Default"
+            self.weighting_ratios[tab_name] = "1.0"
         item = QtWidgets.QTableWidgetItem(self.weighting_ratios[tab_name])
         self.tblTabList.setItem(pos, 4, item)
         self.tblTabList.blockSignals(False)
