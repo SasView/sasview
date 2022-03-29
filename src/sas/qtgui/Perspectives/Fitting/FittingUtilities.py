@@ -748,14 +748,9 @@ def calcWeightIncrease(weights, ratios, flag=False):
 
     # Calc statistical weight for each dataset and maximum
     # Need to find the best "weighting" scheme
-    min_weight = numpy.inf
-    for id_index in weights.keys():
-        stat_weights[id_index] = numpy.sum(1.0/weights[id_index]**2)
-        if stat_weights[id_index] < min_weight:
-            min_weight = stat_weights[id_index]
-
-    for id_index in weights.keys():
-            weight_increase[id_index] = float(ratios[id_index]) * min_weight / stat_weights[id_index]
+    stat_weights = {k: numpy.sum(v**-2) for k, v in weights.items()}
+    min_weight = min(v for v in stat_weights.values())
+    weight_increase = {k: float(ratios[k]) * min_weight / v for k, v in stat_weights.items()}
 
     return weight_increase
 
