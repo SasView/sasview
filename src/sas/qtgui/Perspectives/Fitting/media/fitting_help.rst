@@ -870,9 +870,9 @@ calculate appropriate weights in order to ensure that all the data sets have
 approximately a similar influence in the total fit. This is done by estimating the
 statistical weight of each data set *j* as $W_j = \sum_i^{N_j} (1/e_i)^2$, where at present
 $e_i$ is the relative error of point *i*, i.e. $e_i = \sigma_i / |I_i|$, and then
-the weight to apply to each data set is computed as $Max(W_j)/W_j$. Thus, the weight of the
-initially "heavier" set remains equal to 1, while the remaining sets will be scaled up by
-a factor > 1. Then the user weighting factors multiply this scaling factor, giving the
+the weight to apply to each data set is computed as $Min(W_j)/W_j$. Thus, the weight of the
+initially "lighter" set remains equal to 1, while the remaining sets will be scaled down by
+a factor < 1. Then the user weighting factors multiply this scaling factor, giving the
 final weight for each data set that will be sent to the fitting engine. The final weights
 used in the simultaneous fit are given in the *Log Explorer* window and can provide a useful
 indication of how much each data set has been "modified" with respect to the original data.

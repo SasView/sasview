@@ -712,18 +712,18 @@ def calcWeightIncrease(weights, ratios, flag=False):
         of each data set as the sum (y_i/dy_i**2) over all the points in
         the data set and then renormalize them using:
 
-        user_weight[dataset] * max(relative_weights) /  relative_weights[dataset]
+        user_weight[dataset] * min(relative_weights) /  relative_weights[dataset]
 
-        If all user weights are one (the default), this will increase the weight
-        of the data sets initially contributing less to the global fit, while
-        keeping the weight of the initially larger contributor equal to one.
+        If all user weights are one (the default), this will decrease the weight
+        of the data sets initially contributing more to the global fit, while
+        keeping the weight of the initially smaller contributor equal to one.
 
         These weights are stored for each data set (FitPage) in a dictionary that
         will be then used by bumps to modify the weights of each set.
 
         Warning: As bumps uses the data set weights to multiply the residuals
         calculated as (y-f(x))/sigma, it would probably be more correct to compute
-        sqrt(user_weight[dataset] * max(relative_weights) /  relative_weights[dataset]),
+        sqrt(user_weight[dataset] * min(relative_weights) /  relative_weights[dataset]),
         but empirically (in the only test case tried until now!) the present
         approach seems to work better.
 
@@ -748,14 +748,14 @@ def calcWeightIncrease(weights, ratios, flag=False):
 
     # Calc statistical weight for each dataset and maximum
     # Need to find the best "weighting" scheme
-    max_weight = 0
+    min_weight = numpy.inf
     for id_index in weights.keys():
         stat_weights[id_index] = numpy.sum(1.0/weights[id_index]**2)
-        if stat_weights[id_index] > max_weight:
-            max_weight = stat_weights[id_index]
+        if stat_weights[id_index] < min_weight:
+            min_weight = stat_weights[id_index]
 
     for id_index in weights.keys():
-            weight_increase[id_index] = float(ratios[id_index]) * max_weight / stat_weights[id_index]
+            weight_increase[id_index] = float(ratios[id_index]) * min_weight / stat_weights[id_index]
 
     return weight_increase
 
