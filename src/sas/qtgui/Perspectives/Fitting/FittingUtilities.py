@@ -677,24 +677,34 @@ def getWeight(data, is2d, flag=None):
     return weight
 
 
-def getRelativeError(data, is2d):
+def getRelativeError(data, is2d, flag=None):
     """
     Return dy/y.
     """
+    weight = None
     if data is None:
         return []
     if is2d:
         if not hasattr(data, 'err_data'):
-            return []
+            return numpy.ones_like(data.y)
         dy_data = data.err_data
         data = data.data
     else:
         if not hasattr(data, 'dy'):
-            return []
+            return numpy.ones_like(data.y)
         dy_data = data.dy
         data = data.y
 
-    return dy_data / data
+    if flag == 0:
+        weight = numpy.ones_like(data)
+    elif flag == 1:
+        weight = dy_data / data
+    elif flag == 2:
+        weight = 1.0 / numpy.sqrt(numpy.abs(data))
+    elif flag == 3:
+        weight = 1.0 / numpy.abs(data)
+
+    return weight
 
 
 def calcWeightIncrease(weights, ratios, flag=False):
@@ -712,7 +722,7 @@ def calcWeightIncrease(weights, ratios, flag=False):
         of each data set as the sum (y_i/dy_i**2) over all the points in
         the data set and then renormalize them using:
 
-        user_weight[dataset] * min(relative_weights) /  relative_weights[dataset]
+        user_weight[dataset] * sqrt(min(relative_weights) /  relative_weights[dataset])
 
         If all user weights are one (the default), this will decrease the weight
         of the data sets initially contributing more to the global fit, while
@@ -722,10 +732,13 @@ def calcWeightIncrease(weights, ratios, flag=False):
         will be then used by bumps to modify the weights of each set.
 
         Warning: As bumps uses the data set weights to multiply the residuals
-        calculated as (y-f(x))/sigma, it would probably be more correct to compute
-        sqrt(user_weight[dataset] * min(relative_weights) /  relative_weights[dataset]),
-        but empirically (in the only test case tried until now!) the present
-        approach seems to work better.
+        calculated as (y-f(x))/sigma, it would probably make sense to include
+        the value of user_weight[dataset] in the square root, but as in any
+        case this is just a qualitative way of increasing/decreasing the weight
+        of some datasets and there is not a real mathematical justification
+        behind, this provides a more intuitive behaviour for the user, who will
+        see that the final weights of the data sets vary proportionally to changes
+        in the input user weights.
 
     :param weights: Dictionary of data for the statistical weight, typical the y axis error
     :type weights: dict of numpy.ndarray
@@ -739,18 +752,14 @@ def calcWeightIncrease(weights, ratios, flag=False):
     :rtype: dict
     """
 
-    stat_weights = {}
-    weight_increase = {}
-
     # If "Modify weighting" option not checked
     if not flag:
         return {k: 1.0 for k in weights}
 
     # Calc statistical weight for each dataset and maximum
-    # Need to find the best "weighting" scheme
     stat_weights = {k: numpy.sum(v**-2) for k, v in weights.items()}
-    min_weight = min(v for v in stat_weights.values())
-    weight_increase = {k: float(ratios[k]) * min_weight / v for k, v in stat_weights.items()}
+    min_weight = min(stat_weights.values())
+    weight_increase = {k: float(ratios[k]) * numpy.sqrt(min_weight / v) for k, v in stat_weights.items()}
 
     return weight_increase
 

@@ -315,7 +315,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         for tab in tabs_to_fit:
             tab_object = ObjectLibrary.getObject(tab)
             #weight = FittingUtilities.getWeight(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
-            weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D)
+            weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
             weights[tab] = weight
 
         # Calc increase factor for the errors in each dataset
