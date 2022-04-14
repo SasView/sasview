@@ -107,8 +107,8 @@ jobs:
     ### TODO: Bumps and sasmodels branches needs to be setup manually until we find better mechanism
     - name: Fetch sources for sibling projects
       run: |
-        git clone --depth=1 --branch=release_1.0.6 https://github.com/SasView/sasmodels.git ../sasmodels
-        git clone --depth=1 --branch=v0.8.1 https://github.com/bumps/bumps.git ../bumps
+        git clone --depth=1 --branch=v1.0.6 https://github.com/SasView/sasmodels.git ../sasmodels
+        git clone --depth=1 --branch=v0.9.0 https://github.com/bumps/bumps.git ../bumps
 
     - name: Build and install sasmodels
       run: |

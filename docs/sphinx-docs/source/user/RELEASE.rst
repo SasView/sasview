@@ -18,6 +18,44 @@ New in Version 5.0.5
 This is a point release which fixes some issues reported in earlier versions
 of 5.0.x:
 
+* The issue with the optimiser not respecting parameter bounds where set has been
+  resolved by the move to a later version of the Bumps package.
+* ?
+
+There are also some new features in this version:
+
+* ?
+
+This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0. 
+
+New features/improvements
+^^^^^^^^^^^^^^^^^^^^^^^^^
+* ?
+
+
+Bug fixes
+^^^^^^^^^
+* ?
+
+New Models
+^^^^^^^^^^
+The following models have been added to the [Model Marketplace](http://marketplace.sasview.org/) since v5.0.4 was released:
+
+* Magnetic Whirl
+* Maier-Saupe distribution
+* Cyclic Gaussian distribution
+* Superball Model - Neither Sphere nor Cube
+* OrientedMagneticChains
+
+Known Issues
+^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+
+[sasview](https://github.com/SasView/sasview/milestones)
+
+[sasmodels](https://github.com/SasView/sasmodels/milestones)
+
 
 New in Version 5.0.4
 --------------------
@@ -176,8 +214,19 @@ The following models have been added to the [Model Marketplace](http://marketpla
 
 Known Issues
 ^^^^^^^^^^^^
+It has come to our attention that some Mac users get a dialogue box
+saying *“SasView5.app”* is damaged and can’t be opened. You should move
+it to the Trash when they try and install 5.0.4. This seems to affect
+machines running MacOS earlier than 10.15. However, we have found that
+it is possible to install SasView on 10.13, for example, by clearing
+the extended attributes on the package by executing the command:
+xattr -cr /Applications/SasView5.app
+
 At this time, the reinstated slider bars on plots for selecting the
 q-range for fitting do not work on linearized plots.
+
+The button for resetting the Q-range for fitting to the data limits
+(FitPage > Fit Options > Fitting Range) is also not working.
 
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
