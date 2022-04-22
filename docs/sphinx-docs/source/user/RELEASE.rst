@@ -20,11 +20,25 @@ of 5.0.x:
 
 * The issue with the optimiser not respecting parameter bounds where set has been
   resolved by the move to a later version of the Bumps package.
-* ?
+* A bug which prevented radius_effective from being updated in $P(Q)$*$S(Q)$ models
+  when the data were resolution smeared has been fixed.
+* There has also been a technical change to the way in which the volume normalisation
+  in $P(Q)$*$S(Q)$ models is handled by the move to a later version of the Sasmodels
+  package. In most instances this will go un-noticed unless you happen to be plotting
+  the individual contributions of these functions and comparing them with similar
+  calculations from earlier versions of SasView.
+* The button to reset the selected Q-limits for fitting now works! 
 
 There are also some new features in this version:
 
-* ?
+* The Generic Scattering Calculator Tool has been overhauled and its capabilities
+  significantly expanded. Most notably, it will now perform magnetic/polarised SANS
+  computations. As part of this upgrade, coordinate data in some VTK formats are now
+  also supported.
+* The data loaders have also been improved. SasView will now read CanSAS1D XML data
+  files with multiple <SASdata> blocks in a single <SASentry>. And, by popular demand,
+  1D data can now be saved in CSV format. SESANS data files with the extension .sesans
+  are now also recognised.
 
 This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0. 
 
@@ -165,6 +179,13 @@ The following models have been added to the [Model Marketplace](http://marketpla
 
 Known Issues
 ^^^^^^^^^^^^
+The ‘rpa’ (Random Phase Approximation, for polymer scattering) model has been
+temporarily withdrawn. Some gremlins had crept into how the model parameters
+interacted with the Fit Page which meant you were not performing the calculation
+you thought you were. This is being investigated. Should you need it, a separate
+binary blend model (the most performed calculation) is available from the
+[Model Marketplace](http://marketplace.sasview.org/).
+
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
 
