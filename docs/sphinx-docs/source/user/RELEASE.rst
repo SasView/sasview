@@ -16,12 +16,13 @@ Features
 New in Version 5.0.5
 --------------------
 This is a point release which fixes some issues reported in earlier versions
-of 5.0.x:
+of 5.0.x. A few highlights are:
 
-* The issue with the optimiser not respecting parameter bounds where set has been
-  resolved by the move to a later version of the Bumps package.
-* A bug which prevented radius_effective from being updated in $P(Q)$*$S(Q)$ models
-  when the data were resolution smeared has been fixed.
+* The long standing issue with the Levenberg-Marquardt optimiser not respecting
+  parameter bounds where set has been resolved by the move to a later version of
+  the Bumps package.
+* A bug which prevented radius_effective from being updated in $P(Q)$*$S(Q)$
+  models when the data were resolution smeared has been fixed.
 * There has also been a technical change to the way in which the volume normalisation
   in $P(Q)$*$S(Q)$ models is handled by the move to a later version of the Sasmodels
   package. In most instances this will go un-noticed unless you happen to be plotting
@@ -29,21 +30,21 @@ of 5.0.x:
   calculations from earlier versions of SasView.
 * The button to reset the selected Q-limits for fitting now works! 
 
-There are also some new features in this version:
+There are also some new features in this version. Most notably:
 
-* The Generic Scattering Calculator Tool has been overhauled and its capabilities
-  significantly expanded. Most notably, it will now perform magnetic/polarised SANS
-  computations. As part of this upgrade, coordinate data in some VTK formats are now
-  also supported.
-* The data loaders have also been improved. SasView will now read CanSAS1D XML data
-  files with multiple <SASdata> blocks in a single <SASentry>. And, by popular demand,
-  1D data can now be saved in CSV format. SESANS data files with the extension .sesans
-  are now also recognised.
+* The Generic Scattering Calculator Tool has been overhauled and its
+  capabilities significantly expanded. Most notably, it will now perform
+  magnetic/polarised SANS computations. As part of this upgrade, coordinate data
+  in some VTK formats are now also supported.
+* The data loaders have also been improved. SasView will now read CanSAS1D XML
+  data files with multiple <SASdata> blocks in a single <SASentry>. And, by
+  popular demand, 1D data can now be saved in CSV format. SESANS data files
+  with the extension .sesans are now also recognised.
 
 This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0. 
 
-Changes
-^^^^^^^
+Full List of Pull Request Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Try to run tests everywhere rather than fast-fail by @llimeht in [#1771](https://github.com/SasView/sasview/pull/1771)
 * Add CSV Writer and Allow freeform file extensions by @krzywon in https://github.com/SasView/sasview/pull/1793
 * 1804: Remove redundant checks so dx==0 is allowed by @krzywon in https://github.com/SasView/sasview/pull/1807
@@ -128,23 +129,24 @@ Changes
 * Don't show RPA in the list of models #2022 by @rozyczko in https://github.com/SasView/sasview/pull/2025
 * WIP: Pre release fixes by @wpotrzebowski in https://github.com/SasView/sasview/pull/2028
 
-full changlog is available at https://github.com/SasView/sasview/compare/v5.0.4...v5.0.5
+The full sasview and sasmodels changelogs respectively are available at:
+* https://github.com/SasView/sasview/compare/v5.0.4...v5.0.5
+* https://github.com/SasView/sasmodels/compare/v1.0.5...v1.0.6
 
 From sasmodels gitlog
 ^^^^^^^^^^^^^^^^^^^^^
-* Doc Update: P Scaling in Sasmodels by GitHub in Merge pull request #487 from SasView/DocUpdatePscaling
-* Doc Update: Polydispersity in Sasmodels by GitHub in Merge pull request #484 from SasView/DocUpdatePD
-* allow composite mixtures with multiplicity #468 by GitHub in Merge pull request #472 from SasView/ticket_468_multiplicity_mixture
-* Update test.yml by GitHub in Merge pull request #481 from SasView/gh_actions_python_ver
-* Doc Update Formats in Sasmodels we "could" but let's not (write an issue to remove every occurrence of SasView from Sasmodels) merging before somebody gets carried away ðŸ˜ƒ  by GitHub in Merge pull request #479 from SasView/DocUpdateResolution
-* Doc Update: SESANS in Sasmodels by GitHub in Merge pull request #477 from SasView/DocUpdateSESANS
-* FIX: turned magic constants to named magic constants. Refs #468 by GitHub in Merge pull request #470 from SasView/ticket_468_magnetic_mixture
-* Spherical boucher model cherry pick by GitHub in Merge pull request #476 from SasView/SphericalBoucherModel_cherry_pick
-* DOC: remove sphinx warnings by GitHub in Merge pull request #462 from SasView/ticket__doc_build_failures
-* latex typos in fitting_sq.rst by GitHub in Merge pull request #456 from SasView/pkienzle-patch-1-1
-* typo in fitting_sq.rst by GitHub in Merge pull request #455 from SasView/pkienzle-patch-1
-* Miscellaneous typo fixes in models by GitHub in Merge pull request #438 from llimeht/tmp/spelling
-* 3 dpolarisation by GitHub in Merge pull request #437 from SasView/3Dpolarisation
+* Doc Update: P Scaling in Sasmodels by @smk78 in https://github.com/SasView/sasmodels/pull/487
+* Doc Update: Polydispersity in sasmodels by smk78 in https://github.com/SasView/sasmodels/pull/484
+* allow composite mixtures with multiplicity #468 by @pkienzle in https://github.com/SasView/sasmodels/pull/472
+* Doc Update Formats in Sasmodels by @smk78 in https://github.com/SasView/sasmodels/pull/479
+* Doc Update: SESANS in Sasmodels by @smk78 in https://github.com/SasView/sasmodels/pull/477
+* FIX: turned magic constants to named magic constants. Refs #468 by @pkienzle in https://github.com/SasView/sasmodels/pull/470
+* Spherical boucher model cherry pick by @dehoni in https://github.com/SasView/sasmodels/pull/476
+* DOC: remove sphinx warnings by @pkienzle in https://github.com/SasView/sasmodels/pull/462
+* latex typos in fitting_sq.rst by @pkienzle in https://github.com/SasView/sasmodels/pull/456
+* typo in fitting_sq.rst by @pkienzle in https://github.com/SasView/sasmodels/pull/455
+* Miscellaneous typo fixes in models by llimeht in https://github.com/SasView/sasmodels/pull/438
+* 3 dpolarisation by @dehoni in https://github.com/SasView/sasmodels/pull/437
 
 Cleaned up notes on github:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -155,17 +157,6 @@ Cleaned up notes on github:
 * improvements to the superball model
 * fix to bug in magnetic SLD calculations
 * updates to documentation
-
-full changlog is available at https://github.com/SasView/sasmodels/compare/v1.0.5...v1.0.6
-
-New features/improvements
-^^^^^^^^^^^^^^^^^^^^^^^^^
-* ?
-
-
-Bug fixes
-^^^^^^^^^
-* ?
 
 New Models
 ^^^^^^^^^^
