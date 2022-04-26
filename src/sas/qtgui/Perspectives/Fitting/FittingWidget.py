@@ -1871,7 +1871,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-    def prepareFitters(self, fitter=None, fit_id=0):
+
+    def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
         """
         Prepare the Fitter object for use in fitting
         """
@@ -1922,6 +1923,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
             fitter_single.select_problem_for_fit(id=fit_id, value=1)
+            fitter_single.set_weight_increase(fit_id, weight_increase)
             if fitter is None:
                 # Assign id to the new fitter only
                 fitter_single.fitter_id = [self.page_id]
@@ -2365,7 +2367,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Adds weighting contribution to fitting data
         """
         if not self.data_is_loaded:
-            # no weighing for theories (dy = 0)
+            # no weighting for theories (dy = 0)
             return data
         new_data = copy.deepcopy(data)
         # Send original data for weighting
