@@ -21,17 +21,17 @@ of 5.0.x. A few highlights are:
 * The long standing issue with the Levenberg-Marquardt optimiser not respecting
   parameter bounds where set has been resolved by the move to a later version of
   the Bumps package.
-* A bug which prevented radius_effective from being updated in $P(Q)$*$S(Q)$
+* A bug which prevented radius_effective from being updated in $P(Q)*S(Q)$
   models when the data were resolution smeared has been fixed.
 * There has also been a technical change to the way in which the volume normalisation
-  in $P(Q)$*$S(Q)$ models is handled by the move to a later version of the Sasmodels
+  in $P(Q)*S(Q)$ models is handled by the move to a later version of the Sasmodels
   package. In most instances this will go un-noticed unless you happen to be plotting
   the individual contributions of these functions and comparing them with similar
   calculations from earlier versions of SasView.
 * The button to reset the selected Q-limits for fitting now works!
 * A bug that prevented the formation of composite mixture models with multiplicity
   (for example, models such as core_multi_shell*hardsphere + cylinder or
-  core_multi_shell@hardsphere + cylinder) has been fixed.
+  core_multi_shell\@hardsphere + cylinder) has been fixed.
 
 There are also some new features in this version. Most notably:
 
