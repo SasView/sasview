@@ -45,7 +45,7 @@ This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0.
 
 Full List of Pull Request Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* Try to run tests everywhere rather than fast-fail by @llimeht in [#1771](https://github.com/SasView/sasview/pull/1771)
+* Try to run tests everywhere rather than fast-fail by @llimeht in https://github.com/SasView/sasview/pull/1771
 * Add CSV Writer and Allow freeform file extensions by @krzywon in https://github.com/SasView/sasview/pull/1793
 * 1804: Remove redundant checks so dx==0 is allowed by @krzywon in https://github.com/SasView/sasview/pull/1807
 * TST: Lxml dependencies by @wpotrzebowski in https://github.com/SasView/sasview/pull/1815
