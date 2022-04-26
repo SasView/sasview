@@ -77,7 +77,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
         self.fit_options_widget = FittingOptions(self, config=self.fit_options)
-        self.fit_options.selected_id = fitters.LevenbergMarquardtFit.id
+        self.fit_options.selected_id = fitters.MPFit.id
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
