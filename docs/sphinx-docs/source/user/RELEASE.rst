@@ -49,8 +49,8 @@ This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0.
 
 Pull Request Changes
 ^^^^^^^^^^^^^^^^^^^^
-* Add CSV Writer and Allow freeform file extensions by @krzywon in https://github.com/SasView/sasview/pull/1793
-* 1804: Remove redundant checks so dx==0 is allowed by @krzywon in https://github.com/SasView/sasview/pull/1807
+* Add CSV Writer and Allow freeform file extensions by @krzywon in [#1793](https://github.com/SasView/sasview/pull/1793)
+* 1804: Remove redundant checks so dx==0 is allowed by @krzywon in [#1807](https://github.com/SasView/sasview/pull/1807)
 * 3 dpolarisation by @dehoni in https://github.com/SasView/sasview/pull/1714
 * Limit adding [n] to name on data load and name change by @krzywon in https://github.com/SasView/sasview/pull/1790
 * Increment version number by @butlerpd in https://github.com/SasView/sasview/pull/1862
@@ -108,8 +108,8 @@ Pull Request Changes
 * FIX: turned magic constants to named magic constants. Refs #468 by @pkienzle in https://github.com/SasView/sasmodels/pull/470
 * Spherical boucher model cherry pick by @dehoni in https://github.com/SasView/sasmodels/pull/476
 * Miscellaneous typo fixes in models by llimeht in https://github.com/SasView/sasmodels/pull/438
-* 3 dpolarisation by @dehoni in https://github.com/SasView/sasmodels/pull/437
-* WIP: Pre release fixes by @wpotrzebowski in https://github.com/SasView/sasview/pull/2028
+* 3 dpolarisation by @dehoni in [#437](https://github.com/SasView/sasmodels/pull/437)
+* WIP: Pre release fixes by @wpotrzebowski in [#2028](https://github.com/SasView/sasview/pull/2028)
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
