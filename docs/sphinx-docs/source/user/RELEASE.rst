@@ -51,7 +51,7 @@ Pull Request Changes
 ^^^^^^^^^^^^^^^^^^^^
 * Add CSV Writer and Allow freeform file extensions by @krzywon in [#1793](https://github.com/SasView/sasview/pull/1793)
 * 1804: Remove redundant checks so dx==0 is allowed by @krzywon in [#1807](https://github.com/SasView/sasview/pull/1807)
-* 3 dpolarisation by @dehoni in https://github.com/SasView/sasview/pull/1714
+* 3 dpolarisation by @dehoni in `[1714] <https://github.com/SasView/sasview/pull/1714>`_
 * Limit adding [n] to name on data load and name change by @krzywon in https://github.com/SasView/sasview/pull/1790
 * Increment version number by @butlerpd in https://github.com/SasView/sasview/pull/1862
 * Fixing version number by @wpotrzebowski in https://github.com/SasView/sasview/pull/1874
