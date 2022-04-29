@@ -49,107 +49,107 @@ This version of SasView is built with Sasmodels 1.0.6 and Bumps 0.9.0.
 
 Pull Request Changes
 ^^^^^^^^^^^^^^^^^^^^
-* Add CSV Writer and Allow freeform file extensions by @krzywon in [#1793](https://github.com/SasView/sasview/pull/1793)
-* 1804: Remove redundant checks so dx==0 is allowed by @krzywon in [#1807](https://github.com/SasView/sasview/pull/1807)
+* Add CSV Writer and Allow freeform file extensions by @krzywon in `[#1793] <https://github.com/SasView/sasview/pull/1793>`_
+* 1804: Remove redundant checks so dx==0 is allowed by @krzywon in `[#1807] <https://github.com/SasView/sasview/pull/1807>`_
 * 3 dpolarisation by @dehoni in `[1714] <https://github.com/SasView/sasview/pull/1714>`_
-* Limit adding [n] to name on data load and name change by @krzywon in https://github.com/SasView/sasview/pull/1790
-* Increment version number by @butlerpd in https://github.com/SasView/sasview/pull/1862
-* Fixing version number by @wpotrzebowski in https://github.com/SasView/sasview/pull/1874
-* Various P(r) GUI Fixes by @krzywon in https://github.com/SasView/sasview/pull/1799
-* Image Viewer bug fix by @rozyczko in https://github.com/SasView/sasview/pull/1871
-* Optimizer parameters checked against UI fields #1867 by @rozyczko in https://github.com/SasView/sasview/pull/1873
-* Syntax checker in the model editor. by @rozyczko in https://github.com/SasView/sasview/pull/1875
-* Attempt to address file load widget sluggishness issue. #1866 by @rozyczko in https://github.com/SasView/sasview/pull/1876
-* Data import/export syntax fixes by @krzywon in https://github.com/SasView/sasview/pull/1877
-* Add Compute Button and Limit Fitting Computations by @krzywon in https://github.com/SasView/sasview/pull/1798
-* minor change to sas_gen.py which should fix #1886 by @rjbourne in https://github.com/SasView/sasview/pull/1887
-* canSAS XML Reader: Load multiple SASdata in a single SASentry by @krzywon in https://github.com/SasView/sasview/pull/1890
-* Ticket 1406 cancel calculation by @rjbourne in https://github.com/SasView/sasview/pull/1892
-* Uncertainties for constrained parameters by @m2cci-NMZ in https://github.com/SasView/sasview/pull/1682
-* #1861, adding the SasView version number by @Caddy-Jones in https://github.com/SasView/sasview/pull/1893
-* Improved add/multiply editor by @rozyczko in https://github.com/SasView/sasview/pull/1901
-* Ticket 1825 scattering calc by @rjbourne in https://github.com/SasView/sasview/pull/1888
-* python console fix by @rozyczko in https://github.com/SasView/sasview/pull/1913
-* 1728: Finishing the Q-Range Sliders by @krzywon in https://github.com/SasView/sasview/pull/1891
-* Undoing changes from PR #1682 by @Caddy-Jones in https://github.com/SasView/sasview/pull/1915
-* Using the uncertainties module to propagate errors by @Caddy-Jones in https://github.com/SasView/sasview/pull/1916
-* Distinguish standard model list from full list with plugin models. #1906 by @rozyczko in https://github.com/SasView/sasview/pull/1907
-* Fix Color Map Slider in 2D plots by @dehoni in https://github.com/SasView/sasview/pull/1929
-* Re-create toc entry for sesans_fitting in sasview by @smk78 in https://github.com/SasView/sasview/pull/1945
-* Fixes missing plugin models from structure factor combo box by @caitwolf in https://github.com/SasView/sasview/pull/1860
-* Ticket 1882 coordinate systems by @rjbourne in https://github.com/SasView/sasview/pull/1899
-* File loader enhancement of the General Scattering Calculator by @dehoni in https://github.com/SasView/sasview/pull/1930
-* 1869 easily accessible dependencies by @Caddy-Jones in https://github.com/SasView/sasview/pull/1903
-* Revert "1869 easily accessible dependencies" by @wpotrzebowski in https://github.com/SasView/sasview/pull/1958
-* Q-Range slider fix for linear fits by @krzywon in https://github.com/SasView/sasview/pull/1943
-* Fixes to invariant plot high q extrapolation by @phgilbert in https://github.com/SasView/sasview/pull/1859
-* Add .sesans extension to associations.py by @krzywon in https://github.com/SasView/sasview/pull/1942
-* Easily accessible dependencies 2 by @Caddy-Jones in https://github.com/SasView/sasview/pull/1963
-* Responding to feedback by @Caddy-Jones in https://github.com/SasView/sasview/pull/1964
-* Fix for loader modules not found error by @krzywon in https://github.com/SasView/sasview/pull/1962
-* Removing .version check by @Caddy-Jones in https://github.com/SasView/sasview/pull/1968
-* Doc string fix by @Caddy-Jones in https://github.com/SasView/sasview/pull/1978
-* Second attempt for easily accessible dependencies by @wpotrzebowski in https://github.com/SasView/sasview/pull/1961
-* Remove global variable LOADED_PERSPECTIVES by @krzywon in https://github.com/SasView/sasview/pull/1984
-* 1814: Q-range reset by @krzywon in https://github.com/SasView/sasview/pull/1884
-* Allow output of scattering calculator to be used as a theory curve by @rjbourne in https://github.com/SasView/sasview/pull/1912
-* Ticket 1820 polygonal fourier by @rjbourne in https://github.com/SasView/sasview/pull/1898
-* fix handedness of magnetic structures in mag SLD by @dehoni in https://github.com/SasView/sasview/pull/1976
-* Fixing high CPU consumption on MacOSX by @wpotrzebowski in https://github.com/SasView/sasview/pull/2005
-* Added a simple check so cancelling the dialog doesn't throw. #1551 by @rozyczko in https://github.com/SasView/sasview/pull/2014
-* Keyerror fix 1996 by @rozyczko in https://github.com/SasView/sasview/pull/2006
-* Enable model update on adding new plugin. #1597 by @rozyczko in https://github.com/SasView/sasview/pull/2013
-* Save project: Properly handle scalars by @krzywon in https://github.com/SasView/sasview/pull/1994
-* Change default options on file load widget to not display dir icons. by @rozyczko in https://github.com/SasView/sasview/pull/2015
-* Disabling dependency checker from GUI  by @wpotrzebowski in https://github.com/SasView/sasview/pull/2016
-* radius_effective update for smeared data by @rozyczko in https://github.com/SasView/sasview/pull/2024
-* Don't show RPA in the list of models #2022 by @rozyczko in https://github.com/SasView/sasview/pull/2025
-* allow composite mixtures with multiplicity #468 by @pkienzle in https://github.com/SasView/sasmodels/pull/472
-* FIX: turned magic constants to named magic constants. Refs #468 by @pkienzle in https://github.com/SasView/sasmodels/pull/470
-* Spherical boucher model cherry pick by @dehoni in https://github.com/SasView/sasmodels/pull/476
-* Miscellaneous typo fixes in models by llimeht in https://github.com/SasView/sasmodels/pull/438
-* 3 dpolarisation by @dehoni in [#437](https://github.com/SasView/sasmodels/pull/437)
-* WIP: Pre release fixes by @wpotrzebowski in [#2028](https://github.com/SasView/sasview/pull/2028)
+* Limit adding [n] to name on data load and name change by @krzywon in `[#1790] <https://github.com/SasView/sasview/pull/1790>`_
+* Increment version number by @butlerpd in `[#1862] <https://github.com/SasView/sasview/pull/1862>`_
+* Fixing version number by @wpotrzebowski in `[#1874] <https://github.com/SasView/sasview/pull/1874>`_
+* Various P(r) GUI Fixes by @krzywon in `[#1799] <https://github.com/SasView/sasview/pull/1799>`_
+* Image Viewer bug fix by @rozyczko in `[#1871] <https://github.com/SasView/sasview/pull/1871>`_
+* Optimizer parameters checked against UI fields #1867 by @rozyczko in `[#1873] <https://github.com/SasView/sasview/pull/1873>`_
+* Syntax checker in the model editor. by @rozyczko in `[#1875] <https://github.com/SasView/sasview/pull/1875>`_
+* Attempt to address file load widget sluggishness issue. #1866 by @rozyczko in `[#1876] <https://github.com/SasView/sasview/pull/1876>`_
+* Data import/export syntax fixes by @krzywon in `[#1877] <https://github.com/SasView/sasview/pull/1877>`_
+* Add Compute Button and Limit Fitting Computations by @krzywon in `[#1798] <https://github.com/SasView/sasview/pull/1798>`_
+* minor change to sas_gen.py which should fix #1886 by @rjbourne in `[#1887] <https://github.com/SasView/sasview/pull/1887>`_
+* canSAS XML Reader: Load multiple SASdata in a single SASentry by @krzywon in `[#1890] <https://github.com/SasView/sasview/pull/1890>`_
+* Ticket 1406 cancel calculation by @rjbourne in `[#1892] <https://github.com/SasView/sasview/pull/1892>`_
+* Uncertainties for constrained parameters by @m2cci-NMZ in `[#1682] <https://github.com/SasView/sasview/pull/1682>`_
+* #1861, adding the SasView version number by @Caddy-Jones in `[#1893] <https://github.com/SasView/sasview/pull/1893>`_
+* Improved add/multiply editor by @rozyczko in `[#1901] <https://github.com/SasView/sasview/pull/1901>`_
+* Ticket 1825 scattering calc by @rjbourne in `[#1888] <https://github.com/SasView/sasview/pull/1888>`_
+* python console fix by @rozyczko in `[#1913] <https://github.com/SasView/sasview/pull/1913>`_
+* 1728: Finishing the Q-Range Sliders by @krzywon in `[#1891] <https://github.com/SasView/sasview/pull/1891>`_
+* Undoing changes from PR #1682 by @Caddy-Jones in `[#1915] <https://github.com/SasView/sasview/pull/1915>`_
+* Using the uncertainties module to propagate errors by @Caddy-Jones in `[#1916] <https://github.com/SasView/sasview/pull/1916>`_
+* Distinguish standard model list from full list with plugin models. #1906 by @rozyczko in `[#1907] <https://github.com/SasView/sasview/pull/1907>`_
+* Fix Color Map Slider in 2D plots by @dehoni in `[#1929] <https://github.com/SasView/sasview/pull/1929>`_
+* Re-create toc entry for sesans_fitting in sasview by @smk78 in `[#1945] <https://github.com/SasView/sasview/pull/1945>`_
+* Fixes missing plugin models from structure factor combo box by @caitwolf in `[#1860] <https://github.com/SasView/sasview/pull/1860>`_
+* Ticket 1882 coordinate systems by @rjbourne in `[#1899] <https://github.com/SasView/sasview/pull/1899>`_
+* File loader enhancement of the General Scattering Calculator by @dehoni in `[#1930] <https://github.com/SasView/sasview/pull/1930>`_
+* 1869 easily accessible dependencies by @Caddy-Jones in `[#1903] <https://github.com/SasView/sasview/pull/1903>`_
+* Revert "1869 easily accessible dependencies" by @wpotrzebowski in `[#1958] <https://github.com/SasView/sasview/pull/1958>`_
+* Q-Range slider fix for linear fits by @krzywon in `[#1943] <https://github.com/SasView/sasview/pull/1943>`_
+* Fixes to invariant plot high q extrapolation by @phgilbert in `[#1859] <https://github.com/SasView/sasview/pull/1859>`_
+* Add .sesans extension to associations.py by @krzywon in `[#1942] <https://github.com/SasView/sasview/pull/1942>`_
+* Easily accessible dependencies 2 by @Caddy-Jones in `[#1963] <https://github.com/SasView/sasview/pull/1963>`_
+* Responding to feedback by @Caddy-Jones in `[#1964] <https://github.com/SasView/sasview/pull/1964>`_
+* Fix for loader modules not found error by @krzywon in `[#1962] <https://github.com/SasView/sasview/pull/1962>`_
+* Removing .version check by @Caddy-Jones in `[#1968] <https://github.com/SasView/sasview/pull/1968>`_
+* Doc string fix by @Caddy-Jones in `[#1978] <https://github.com/SasView/sasview/pull/1978>`_
+* Second attempt for easily accessible dependencies by @wpotrzebowski in `[#1961] <https://github.com/SasView/sasview/pull/1961>`_
+* Remove global variable LOADED_PERSPECTIVES by @krzywon in `[#1984] <https://github.com/SasView/sasview/pull/1984>`_
+* 1814: Q-range reset by @krzywon in `[#1884] <https://github.com/SasView/sasview/pull/1884>`_
+* Allow output of scattering calculator to be used as a theory curve by @rjbourne in `[#1912] <https://github.com/SasView/sasview/pull/1912>`_
+* Ticket 1820 polygonal fourier by @rjbourne in `[#1898] <https://github.com/SasView/sasview/pull/1898>`_
+* fix handedness of magnetic structures in mag SLD by @dehoni in `[#1976] <https://github.com/SasView/sasview/pull/1976>`_
+* Fixing high CPU consumption on MacOSX by @wpotrzebowski in `[#2005] <https://github.com/SasView/sasview/pull/2005>`_
+* Added a simple check so cancelling the dialog doesn't throw. #1551 by @rozyczko in `[#2014] <https://github.com/SasView/sasview/pull/2014>`_
+* Keyerror fix 1996 by @rozyczko in `[#2006] <https://github.com/SasView/sasview/pull/2006>`_
+* Enable model update on adding new plugin. #1597 by @rozyczko in `[#2013] <https://github.com/SasView/sasview/pull/2013>`_
+* Save project: Properly handle scalars by @krzywon in `[#1994] <https://github.com/SasView/sasview/pull/1994>`_
+* Change default options on file load widget to not display dir icons. by @rozyczko in `[#2015] <https://github.com/SasView/sasview/pull/2015>`_
+* Disabling dependency checker from GUI  by @wpotrzebowski in `[#2016] <https://github.com/SasView/sasview/pull/2016>`_
+* radius_effective update for smeared data by @rozyczko in `[#2024] <https://github.com/SasView/sasview/pull/2024>`_
+* Don't show RPA in the list of models #2022 by @rozyczko in `[#2025] <https://github.com/SasView/sasview/pull/2025>`_
+* allow composite mixtures with multiplicity #468 by @pkienzle in `[#472] <https://github.com/SasView/sasmodels/pull/472>`_
+* FIX: turned magic constants to named magic constants. Refs #468 by @pkienzle in `[#470] <https://github.com/SasView/sasmodels/pull/470>`_
+* Spherical boucher model cherry pick by @dehoni in `[#476] <https://github.com/SasView/sasmodels/pull/476>`_
+* Miscellaneous typo fixes in models by llimeht in `[#438] <https://github.com/SasView/sasmodels/pull/438>`_
+* 3 dpolarisation by @dehoni in `[#437] <https://github.com/SasView/sasmodels/pull/437>`_
+* WIP: Pre release fixes by @wpotrzebowski in `[#2028] <https://github.com/SasView/sasview/pull/2028>`_
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
-* Doc building fixes by @llimeht in https://github.com/SasView/sasview/pull/1744
-* Doc Update: SESANS in SasView by @smk78 in https://github.com/SasView/sasview/pull/1931
-* Eliminate old tutorial from SasView 5x by @smk78 in https://github.com/SasView/sasview/pull/1949
-* Doc Update Formats by @smk78 in https://github.com/SasView/sasview/pull/1933
-* Doc Update: P Scaling by @smk78 in https://github.com/SasView/sasview/pull/1956
-* Doc Update: Polydispersity by @smk78 in https://github.com/SasView/sasview/pull/1938
-* Doc Update: P Scaling in Sasmodels by @smk78 in https://github.com/SasView/sasmodels/pull/487
-* Doc Update: Polydispersity in sasmodels by smk78 in https://github.com/SasView/sasmodels/pull/484
-* Scattering calculator docs by @dehoni in https://github.com/SasView/sasview/pull/1974
-* Doc Update Formats in Sasmodels by @smk78 in https://github.com/SasView/sasmodels/pull/479
-* Doc Update: SESANS in Sasmodels by @smk78 in https://github.com/SasView/sasmodels/pull/477
-* DOC: remove sphinx warnings by @pkienzle in https://github.com/SasView/sasmodels/pull/462
-* latex typos in fitting_sq.rst by @pkienzle in https://github.com/SasView/sasmodels/pull/456
-* typo in fitting_sq.rst by @pkienzle in https://github.com/SasView/sasmodels/pull/455
+* Doc building fixes by @llimeht in `[#1744] <https://github.com/SasView/sasview/pull/1744>`_
+* Doc Update: SESANS in SasView by @smk78 in `[#1931] <https://github.com/SasView/sasview/pull/1931>`_
+* Eliminate old tutorial from SasView 5x by @smk78 in `[#1949] <https://github.com/SasView/sasview/pull/1949>`_
+* Doc Update Formats by @smk78 in `[#1933] <https://github.com/SasView/sasview/pull/1933>`_
+* Doc Update: P Scaling by @smk78 in `[#1956] <https://github.com/SasView/sasview/pull/1956>`_
+* Doc Update: Polydispersity by @smk78 in `[#1938] <https://github.com/SasView/sasview/pull/1938>`_
+* Doc Update: P Scaling in Sasmodels by @smk78 in `[#487] <https://github.com/SasView/sasmodels/pull/487>`_
+* Doc Update: Polydispersity in sasmodels by smk78 in `[#484] <https://github.com/SasView/sasmodels/pull/484>`_
+* Scattering calculator docs by @dehoni in `[#1974] <https://github.com/SasView/sasview/pull/1974>`_
+* Doc Update Formats in Sasmodels by @smk78 in `[#479] <https://github.com/SasView/sasmodels/pull/479>`_
+* Doc Update: SESANS in Sasmodels by @smk78 in `[#477] <https://github.com/SasView/sasmodels/pull/477>`_
+* DOC: remove sphinx warnings by @pkienzle in `[#462] <https://github.com/SasView/sasmodels/pull/462>`_
+* latex typos in fitting_sq.rst by @pkienzle in `[#456] <https://github.com/SasView/sasmodels/pull/456>`_
+* typo in fitting_sq.rst by @pkienzle in `[#455] <https://github.com/SasView/sasmodels/pull/455>`_
 
 Build System Changes
 ^^^^^^^^^^^^^^^^^^^^
-* Try to run tests everywhere rather than fast-fail by @llimeht in https://github.com/SasView/sasview/pull/1771
-* TST: Lxml dependencies by @wpotrzebowski in https://github.com/SasView/sasview/pull/1815
-* Build installer for windows using GitHub actions by @llimeht in https://github.com/SasView/sasview/pull/1747
-* Release 5.0.4 by @wpotrzebowski in https://github.com/SasView/sasview/pull/1829
-* Adding pip dependency to yml file so that conda doesn't complain by @wpotrzebowski in https://github.com/SasView/sasview/pull/1853
-* Updated file for parity with the yml used in build process by @rozyczko in https://github.com/SasView/sasview/pull/1854
-* Add py3.9 remove py3.6 from github actions by @llimeht in https://github.com/SasView/sasview/pull/1856
-* Update h5py version for all operating systems by @krzywon in https://github.com/SasView/sasview/pull/1849
-* Adding h5py=3.1 as a pip package by @wpotrzebowski in https://github.com/SasView/sasview/pull/1880
-* CI: use pip --cache to find dir by @andyfaff in https://github.com/SasView/sasview/pull/1926
-* Github actions for OSX build by @wpotrzebowski in https://github.com/SasView/sasview/pull/1927
-* Fixing syntax in release.yml by @wpotrzebowski in https://github.com/SasView/sasview/pull/1946
-* Use version parsing package for MPL version check by @krzywon in https://github.com/SasView/sasview/pull/1947
-* Fix for removed _activeQue in newer Matplotlib by @bmaranville in https://github.com/SasView/sasview/pull/1951
-* Gh actions artifacts by @wpotrzebowski in https://github.com/SasView/sasview/pull/1969
-* Update to version 5.0.5b1 by @butlerpd in https://github.com/SasView/sasview/pull/1970
-* Increment the installation directory number to 5.0.5 by @krzywon in https://github.com/SasView/sasview/pull/1983
-* Update of the github workflows by @wpotrzebowski in https://github.com/SasView/sasview/pull/1985
-* GitHub: Freezing MPL to 2.2.5 on windows by @rozyczko in https://github.com/SasView/sasview/pull/1989
-* Switching to PyQT 5.13  by @wpotrzebowski in https://github.com/SasView/sasview/pull/2021
+* Try to run tests everywhere rather than fast-fail by @llimeht in `[#1771] <https://github.com/SasView/sasview/pull/1771>`_
+* TST: Lxml dependencies by @wpotrzebowski in `[#1815] <https://github.com/SasView/sasview/pull/1815>`_
+* Build installer for windows using GitHub actions by @llimeht in `[#1747] <https://github.com/SasView/sasview/pull/1747>`_
+* Release 5.0.4 by @wpotrzebowski in `[#1829] <https://github.com/SasView/sasview/pull/1829>`_
+* Adding pip dependency to yml file so that conda doesn't complain by @wpotrzebowski in `[#1853] <https://github.com/SasView/sasview/pull/1853>`_
+* Updated file for parity with the yml used in build process by @rozyczko in `[#1854] <https://github.com/SasView/sasview/pull/1854>`_
+* Add py3.9 remove py3.6 from github actions by @llimeht in `[#1856] <https://github.com/SasView/sasview/pull/1856>`_
+* Update h5py version for all operating systems by @krzywon in `[#1849] <https://github.com/SasView/sasview/pull/1849>`_
+* Adding h5py=3.1 as a pip package by @wpotrzebowski in `[#1880] <https://github.com/SasView/sasview/pull/1880>`_
+* CI: use pip --cache to find dir by @andyfaff in `[#1926] <https://github.com/SasView/sasview/pull/1926>`_
+* Github actions for OSX build by @wpotrzebowski in `[#1927] <https://github.com/SasView/sasview/pull/1927>`_
+* Fixing syntax in release.yml by @wpotrzebowski in `[#1946] <https://github.com/SasView/sasview/pull/1946>`_
+* Use version parsing package for MPL version check by @krzywon in `[#1947] <https://github.com/SasView/sasview/pull/1947>`_
+* Fix for removed _activeQue in newer Matplotlib by @bmaranville in `[#1951] <https://github.com/SasView/sasview/pull/1951>`_
+* Gh actions artifacts by @wpotrzebowski in `[#1969] <https://github.com/SasView/sasview/pull/1969>`_
+* Update to version 5.0.5b1 by @butlerpd in `[#1970] <https://github.com/SasView/sasview/pull/1970>`_
+* Increment the installation directory number to 5.0.5 by @krzywon in `[#1983] <https://github.com/SasView/sasview/pull/1983>`_
+* Update of the github workflows by @wpotrzebowski in `[#1985] <https://github.com/SasView/sasview/pull/1985>`_
+* GitHub: Freezing MPL to 2.2.5 on windows by @rozyczko in `[#1989] <https://github.com/SasView/sasview/pull/1989>`_
+* Switching to PyQT 5.13  by @wpotrzebowski in `[#2021] <https://github.com/SasView/sasview/pull/2021>`_
 
 The full sasview and sasmodels changelogs, respectively, are available at:
 
