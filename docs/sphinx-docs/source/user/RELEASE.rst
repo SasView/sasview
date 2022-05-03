@@ -163,7 +163,7 @@ temporarily withdrawn. Some gremlins had crept into how the model parameters
 interacted with the Fit Page which meant you were not performing the calculation
 you thought you were. This is being investigated. Should you need it, a separate
 binary blend model (the most performed calculation) is available from the
-[Model Marketplace](http://marketplace.sasview.org/).
+`[Model Marketplace] <http://marketplace.sasview.org/>`_ .
 
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
