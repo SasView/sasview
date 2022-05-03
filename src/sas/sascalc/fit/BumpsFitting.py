@@ -14,7 +14,7 @@ from bumps import fitters
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
-    FIT_CONFIG.selected_id = fitters.LevenbergMarquardtFit.id
+    FIT_CONFIG.selected_id = fitters.MPFit.id
     def get_fitter():
         return FIT_CONFIG.selected_fitter, FIT_CONFIG.selected_values
 except ImportError:
