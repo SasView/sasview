@@ -218,7 +218,6 @@ comparisons of the $P(Q)$ contributions to models between this version of SasVie
 and previous versions will differ. Further details of the change can be found
 `here <https://github.com/SasView/sasview/issues/1698>`_.
 
-
 New features/improvements
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 * sasview #1725: Horizontal line at y=0 needed in P(r) plots
@@ -231,7 +230,6 @@ New features/improvements
 * sasmodels #429: Create model for superparamagnetic relaxing particles
 * sasmodels #390: Re-describe Source intensity in model parameter tables
 * sasmodels #253: use new orientation for magnetic models (Trac #910)
-
 
 Bug fixes
 ^^^^^^^^^
@@ -301,7 +299,7 @@ Bug fixes
 
 New Models
 ^^^^^^^^^^
-The following models have been added to the [Model Marketplace](http://marketplace.sasview.org/) since v5.0.0 was released:
+The following models have been added to the `[Model Marketplace] <http://marketplace.sasview.org/>`_ since v5.0.0 was released:
 
 * Magnetic vortex in a disc
 * Field-dependent magnetic SANS of misaligned magnetic moments in bulk ferromagnets
@@ -347,9 +345,9 @@ The button for resetting the Q-range for fitting to the data limits
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
 
-[sasview](https://github.com/SasView/sasview/milestones)
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
 
-[sasmodels](https://github.com/SasView/sasmodels/milestones)
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
 
 
 New in Version 5.0.3
@@ -436,9 +434,9 @@ the same data will differ.
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
 
-[sasview](https://github.com/SasView/sasview/milestones)
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
 
-[sasmodels](https://github.com/SasView/sasmodels/milestones)
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
 
 
 New in Version 5.0.2
@@ -569,7 +567,9 @@ Known Issues
 ^^^^^^^^^^^^
 All the known bugs/feature requests can be found in the issues on github.
 
-[sasview](https://github.com/SasView/sasview/milestones)
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
+
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
 
 
 New in Version 4.2.0
@@ -1355,16 +1355,15 @@ Running SasView
 * if using Conda the above command will also build SasView, but you 
   must issue 'activate sasview' first.
 
-
 Known Issues
 ============
 
 A full list of known bugs and feature requests by release version that 
 users may wish to be aware of can be viewed at the following links:
 
-[sasview](https://github.com/SasView/sasview/milestones)
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
 
-[sasmodels](https://github.com/SasView/sasmodels/milestones)
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
 
 All 5.0.x versions / 4.2.2 - All systems
 ----------------------------------------
