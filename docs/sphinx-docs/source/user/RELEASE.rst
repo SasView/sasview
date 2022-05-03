@@ -148,7 +148,7 @@ The full sasview and sasmodels changelogs, respectively, are available at:
 
 New Models
 ^^^^^^^^^^
-The following models have been added to the [Model Marketplace](http://marketplace.sasview.org/) since v5.0.4 was released:
+The following models have been added to the `[Model Marketplace] <http://marketplace.sasview.org/>`_ since v5.0.4 was released:
 
 * Magnetic Whirl
 * Maier-Saupe distribution
