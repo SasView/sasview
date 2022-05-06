@@ -99,6 +99,7 @@ Pull Request Changes
 * FIX: turned magic constants to named magic constants. Refs #468 by @pkienzle in `[#470] <https://github.com/SasView/sasmodels/pull/470>`_
 * Spherical boucher model cherry pick by @dehoni in `[#476] <https://github.com/SasView/sasmodels/pull/476>`_
 * Pre release fixes by @wpotrzebowski in `[#2028] <https://github.com/SasView/sasview/pull/2028>`_
+* Use MPFit fitter as the default fit engine by @krzywon in `[#2037] <https://github.com/SasView/sasview/pull/2037>`_
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
