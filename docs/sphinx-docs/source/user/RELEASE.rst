@@ -1542,12 +1542,3 @@ to all developer and user information, tools and resources.
 Frequently Asked Questions
 ==========================
 http://www.sasview.org/faq/
-
-
-Installer Download Website
-==========================
-Latest release Version
-https://github.com/SasView/sasview/releases
-
-Latest developer builds
-https://jenkins.esss.dk/sasview/view/Master-Builds/
