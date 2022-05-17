@@ -19,7 +19,7 @@ This is a point release which fixes some issues reported in earlier versions
 of 5.0.x. A few highlights are:
 
 * The long standing issue with the Levenberg-Marquardt optimiser not respecting
-  parameter bounds where set has been resolved by the move to a later version of
+  parameter bounds has been resolved by the move to a later version of
   the Bumps package.
 * A bug which prevented radius_effective from being updated in $P(Q)*S(Q)$
   models when the data were resolution smeared has been fixed.
