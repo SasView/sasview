@@ -21,19 +21,24 @@ of 5.0.x. A few highlights are:
 * The long standing issue with the Levenberg-Marquardt optimiser not respecting
   parameter bounds has been resolved by the move to a later version of
   the Bumps package.
-* A bug which prevented radius_effective from being updated in $P(Q)*S(Q)$
-  models when the data were resolution smeared has been fixed.
-* There has also been a technical change to the way in which the volume normalisation
-  in $P(Q)*S(Q)$ models is handled by the move to a later version of the Sasmodels
-  package. In most instances this will go un-noticed unless you happen to be plotting
-  the individual contributions of these functions and comparing them with similar
-  calculations from earlier versions of SasView.
-* The button to reset the selected Q-limits for fitting now works!
+* A bug which prevented the radius_effective parameter from being updated
+  in $P(Q)*S(Q)$ models when the data were resolution smeared has been fixed.
 * A bug that prevented the formation of composite mixture models with multiplicity
   (for example, models such as core_multi_shell*hardsphere + cylinder or
   core_multi_shell\@hardsphere + cylinder) has been fixed.
+* The button to reset the selected Q-limits for fitting now works again!
+* There has been a technical change to the point in the calculation at which the
+  volume normalisation of $P(Q)*S(Q)$ models is applied by the move to a later
+  version of the Sasmodels package. This change was actually incorporated into
+  v5.0.4 but due to an oversight was omitted from the release notes at the time,
+  although a note was added to the web version after the release (and has been
+  subsequently added below). In most instances this change will go un-noticed
+  unless you happen to be plotting the individual contributions of $P(Q)$ or
+  $S(Q)$ and comparing them with similar calculations performed in versions of
+  SasView before v5.0.4, at which point the scaling of the functions will be
+  seen to be different.
 
-There are also some new features in this version. Most notably:
+There are also some **new features** in this version. Most notably:
 
 * The Generic Scattering Calculator Tool has been overhauled and its
   capabilities significantly expanded. In particular, it will now perform
