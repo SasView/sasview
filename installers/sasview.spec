@@ -8,6 +8,7 @@ import sys
 
 block_cipher = None
 PYTHON_LOC = sys.exec_prefix
+WORK_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 datas = [
     ('../src/sas/sasview/images', 'images'),
@@ -103,7 +104,7 @@ hiddenimports = [
 
 a = Analysis(
     ['sasview.py'],
-    pathex=[],
+    pathex=[WORK_DIR],
     binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,
