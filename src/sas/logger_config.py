@@ -85,7 +85,7 @@ class SetupLogger(object):
             filename,
             os.path.join("sas", "sasview", filename),
             os.path.join(os.getcwd(), "sas", "sasview", filename),
-            os.path.dirname(os.path.realpath(sys.argv[0])) #For OSX app
+            os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), filename) #For OSX app
         ]
 
         # To avoid the exception in OSx
