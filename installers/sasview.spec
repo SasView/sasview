@@ -8,7 +8,6 @@ import sys
 
 block_cipher = None
 PYTHON_LOC = sys.exec_prefix
-WORK_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 datas = [
     ('../src/sas/sasview/images', 'images'),
@@ -66,8 +65,8 @@ hiddenimports = [
     'pyopencl',
     #'tinycc',
     #'SocketServer',
-    'logging',
-    'logging.config',
+    #'logging',
+    #'logging.config',
     'reportlab',
     'reportlab.graphics',
     'reportlab.graphics.barcode.common',
@@ -104,7 +103,7 @@ hiddenimports = [
 
 a = Analysis(
     ['sasview.py'],
-    pathex=[WORK_DIR],
+    pathex=[],
     binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,
