@@ -13,6 +13,7 @@ import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
@@ -23,6 +24,7 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .CorfuncUtils import WIDGETS as W
+
 
 
 class MyMplCanvas(FigureCanvas):
@@ -249,6 +251,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdExtract.setEnabled(False)
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
+        self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
+        self.cmdSaveExtrapolation.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
@@ -354,6 +358,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
+        self.cmdSaveExtrapolation.setEnabled(True)
 
 
     def transform(self):
@@ -594,6 +599,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
+
+    def on_save_extrapolation(self):
+        QMessageBox.about(self, "Title", "Message")
 
     def serializeAll(self):
         """
