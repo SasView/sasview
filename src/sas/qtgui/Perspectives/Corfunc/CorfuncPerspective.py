@@ -23,7 +23,8 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .CorfuncUtils import WIDGETS as W
+from .saveextrapolated import SaveExtrapolatedPopup
+from .corefuncutil import WIDGETS as W
 
 
 
@@ -601,7 +602,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     # pylint: enable=invalid-name
 
     def on_save_extrapolation(self):
-        QMessageBox.about(self, "Title", "Message")
+        window = SaveExtrapolatedPopup()
+        window.exec_()
 
     def serializeAll(self):
         """
