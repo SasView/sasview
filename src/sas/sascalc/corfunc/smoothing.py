@@ -64,8 +64,11 @@ class SmoothJoin:
 
             # Use np.divide
             x_mid = x[mid_indices]
-            h = 1 / (1 + (x_mid - self.stop) ** 2 / (self.start - x_mid) ** 2)
 
+            # This shouldn't have any divide by zero, as x_mid is strictly bigger than start
+            # and strictly less than stop
+            h = 1.0 / (1.0 + ((x_mid - self.stop) / (self.start - x_mid)) ** 2)
+            
             y[mid_indices] = h * self.right_function(x_mid) + \
                              (1 - h) * self.left_function(x_mid)
 
@@ -74,25 +77,22 @@ class SmoothJoin:
         return self._cache.y
 
 
-
-
-def show_plots():
+def show_smoothing_function():
     """ Local sanity-check plots for the joiner"""
     import matplotlib.pyplot as plt
 
-    # Sin example
     xs = np.linspace(0, 10, 100)
-    # Symmetry check
-
-    plt.plot(xs, SmoothJoin(lambda x: 0.0, lambda x: 1.0, 2,8)(xs))
-    #plt.plot(xs[::-1], SmoothJoin(lambda x: 1.0, lambda x: 0.0, 2, 8)(xs))
+    plt.plot(xs, SmoothJoin(lambda x: 0.0, lambda x: 1.0, 2, 8)(xs))
 
     plt.show()
 
 
 def main():
-    show_plots()
+    show_smoothing_function()
 
 
 if __name__ == "__main__":
     main()
+
+
+
