@@ -11,54 +11,17 @@ from numpy.linalg import lstsq
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
+from sas.sascalc.corfunc.smoothing import SmoothJoin
 
-class CorfuncCalculator(object):
+from typing import Optional, Tuple
 
-    class _Interpolator(object):
-        """
-        Interpolates between curve f and curve g over the range start:stop and
-        caches the result of the function when it's called
+class CorfuncCalculator:
 
-        :param f: The first curve to interpolate
-        :param g: The second curve to interpolate
-        :param start: The value at which to start the interpolation
-        :param stop: The value at which to stop the interpolation
-        """
-        def __init__(self, f, g, start, stop):
-            self.f = f
-            self.g = g
-            self.start = start
-            self.stop = stop
-            self._lastx = np.empty(0, dtype='d')
-            self._lasty = None
-
-        def __call__(self, x):
-            # If input is a single number, evaluate the function at that number
-            # and return a single number
-            if isinstance(x, (float, int)):
-                return self._smoothed_function(np.array([x]))[0]
-            # If input is a list, and is different to the last input, evaluate
-            # the function at each point. If the input is the same as last time
-            # the function was called, return the result that was calculated
-            # last time instead of explicity evaluating the function again.
-            if not np.array_equal(x, self._lastx):
-                self._lastx, self._lasty = x, self._smoothed_function(x)
-            return self._lasty
-
-        def _smoothed_function(self,x):
-            ys = np.zeros(x.shape)
-            ys[x <= self.start] = self.f(x[x <= self.start])
-            ys[x >= self.stop] = self.g(x[x >= self.stop])
-            with warnings.catch_warnings():
-                # Ignore divide by zero error
-                warnings.simplefilter('ignore')
-                h = 1/(1+(x-self.stop)**2/(self.start-x)**2)
-            mask = np.logical_and(x > self.start, x < self.stop)
-            ys[mask] = h[mask]*self.g(x[mask])+(1-h[mask])*self.f(x[mask])
-            return ys
-
-
-    def __init__(self, data=None, lowerq=None, upperq=None, scale=1):
+    def __init__(self,
+                 data: Optional[Data1D]=None,
+                 lowerq: Optional[float]=None,
+                 upperq: Optional[Tuple[float, float]]=None,
+                 scale: float=1.0):
         """
         Initialize the class.
 
@@ -76,7 +39,7 @@ class CorfuncCalculator(object):
         self.background = self.compute_background()
         self._transform_thread = None
 
-    def set_data(self, data, scale=1):
+    def set_data(self, data: Optional[Data1D], scale: float=1):
         """
         Prepares the data for analysis
 
@@ -270,8 +233,8 @@ class CorfuncCalculator(object):
         # Smooths between the best-fit porod function and the data to produce a
         # better fitting curve
         data = interp1d(q, iq)
-        s1 = self._Interpolator(data,
-            lambda x: self._porod(x, k, sigma, bg), self.upperq[0], q[-1])
+        s1 = SmoothJoin(data,
+                        lambda x: self._porod(x, k, sigma, bg), self.upperq[0], q[-1])
 
         mask = np.logical_and(q < self.lowerq, 0 < q)
 
@@ -279,8 +242,8 @@ class CorfuncCalculator(object):
         g = self._fit_guinier(q[mask], iq[mask])[0]
 
         # Smooths between the best-fit Guinier function and the Porod curve
-        s2 = self._Interpolator((lambda x: (np.exp(g[1]+g[0]*x**2))), s1, q[0],
-            self.lowerq)
+        s2 = SmoothJoin((lambda x: (np.exp(g[1] + g[0] * x ** 2))), s1, q[0],
+                        self.lowerq)
 
         params = {'A': g[1], 'B': g[0], 'K': k, 'sigma': sigma}
 
