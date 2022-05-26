@@ -120,6 +120,3 @@ def run_sasview():
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
-
-if __name__ == "__main__":
-    run_sasview()
