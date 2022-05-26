@@ -212,9 +212,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item = None
+        self.data = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
+        self.extrapolation_curve = None
 
         self._canvas = MyMplCanvas(self.model)
         self.plotLayout.insertWidget(0, self._canvas)
@@ -333,7 +335,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._update_calculator()
         self.model.itemChanged.disconnect(self.model_changed)
         try:
-            params, extrapolation, _ = self._calculator.compute_extrapolation()
+            params, extrapolation, self.extrapolation_curve = self._calculator.compute_extrapolation()
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
@@ -521,6 +523,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
+        self.data = data
         self._model_item = model_item
         self._calculator.set_data(data)
         self.cmdCalculateBg.setEnabled(True)
@@ -602,8 +605,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
     # pylint: enable=invalid-name
 
     def on_save_extrapolation(self):
-        window = SaveExtrapolatedPopup()
-        window.exec_()
+        q = self.data.x
+        if self.extrapolation_curve is not None:
+            window = SaveExtrapolatedPopup(q, self.extrapolation_curve)
+            window.exec_()
+        else:
+            raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
 
     def serializeAll(self):
         """
