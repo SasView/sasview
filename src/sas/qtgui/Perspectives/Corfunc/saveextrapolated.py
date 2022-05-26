@@ -4,7 +4,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 
-from UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
+from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
 
 from typing import Callable
 
@@ -139,16 +139,3 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
             for q_value, i_value in zip(q, intensity):
                 outfile.write("%.6g\t%.6g\n"%(q_value, i_value))
 
-
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    qs = np.arange(1,100, 0.1)
-
-
-    app = QApplication(sys.argv)
-    window = SaveExtrapolatedPopup(qs, lambda x: x)
-    window.show()
-
-    app.exec()
