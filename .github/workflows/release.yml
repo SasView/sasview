@@ -197,30 +197,28 @@ jobs:
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
         codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
-    - name: Upload installer package before notarization (OSX)
+    - name: Publish installer package (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v2
       with:
-        name: SasView-Installer-Unnotarized-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
+        name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
           
-    - name: Notarize Release Build (OSX)
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: GuillaumeFalourd/xcode-notarize@v1
-      with:
-          product-path: "installers/dist/SasView5.dmg"
-          primary-bundle-id: "org.sasview.SasView5"
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          verbose: True
+#     - name: Notarize Release Build (OSX)
+#       if: ${{ matrix.os == 'macos-latest' }}
+#       uses: devbotsxyz/xcode-notarize@v1
+#       with:
+#           product-path: "installers/dist/SasView5.dmg"
+#           primary-bundle-id: "org.sasview.SasView5"
+#           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+#           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
 
-    - name: Staple Release Build (OSX)
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: devbotsxyz/xcode-staple@v1
-      with:
-          product-path: "installers/dist/SasView5.dmg"
-
+#     - name: Staple Release Build (OSX)
+#       if: ${{ matrix.os == 'macos-latest' }}
+#       uses: devbotsxyz/xcode-staple@v1
+#       with:
+#           product-path: "installers/dist/SasView5.dmg"
 
     - name: Declare env variables on push only
       if: github.event_name == 'push'
