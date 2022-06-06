@@ -1061,9 +1061,15 @@ class OMFReader(object):
                         logging.error(str(exc)+" when processing %r"%line)
                 elif line:
                 # Reading Header; Segment count ignored
+
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
-                        oommf = s_line[1].lstrip()
+                        try:
+                            oommf = s_line[1].lstrip()    
+                        except IndexError:
+                            s_line = line.split(" ", 1)
+                            oommf = s_line[1].lstrip()                            
+
                     if s_line[0].lower().count("title") > 0:
                         title = s_line[1].lstrip()
                     if s_line[0].lower().count("desc") > 0:
@@ -1117,12 +1123,17 @@ class OMFReader(object):
                             msg += "We accept only mT or A/m as valueunit"
                             logging.error(msg)    
                             return None
+                        elif valueunit.count("mT") > 1 or valueunit.count("A/m") > 1:    
+                            valueunit = valueunit.split(" ", 1)
+                            valueunit = valueunit[0].lstrip()
                     if s_line[0].lower().count("valuemultiplier") > 0:
                         valuemultiplier = s_line[1].lstrip()
-                    if s_line[0].lower().count("valuerangeminmag") > 0:
-                        valuerangeminmag = s_line[1].lstrip()
-                    if s_line[0].lower().count("valuerangemaxmag") > 0:
-                        valuerangemaxmag = s_line[1].lstrip()
+                    else: 
+                        valuemultiplier = 1
+                    # if s_line[0].lower().count("valuerangeminmag") > 0:
+                    #     valuerangeminmag = s_line[1].lstrip()
+                    # if s_line[0].lower().count("valuerangemaxmag") > 0:
+                    #     valuerangemaxmag = s_line[1].lstrip()
                     if s_line[0].lower().count("end") > 0:
                         output.filename = os.path.basename(path)
                         output.oommf = oommf
@@ -1145,10 +1156,10 @@ class OMFReader(object):
                         output.ymax = float(ymax) * METER2ANG
                         output.zmax = float(zmax) * METER2ANG
                         output.valuemultiplier = valuemultiplier
-                        output.valuerangeminmag \
-                            = mag2sld(float(valuerangeminmag), valueunit)
-                        output.valuerangemaxmag \
-                            = mag2sld(float(valuerangemaxmag), valueunit)
+                        # output.valuerangeminmag \
+                        #     = mag2sld(float(valuerangeminmag), valueunit)
+                        # output.valuerangemaxmag \
+                        #     = mag2sld(float(valuerangemaxmag), valueunit)
             mx = np.reshape(mx, (len(mx),))
             my = np.reshape(my, (len(my),))
             mz = np.reshape(mz, (len(mz),))
@@ -1416,8 +1427,8 @@ class OMFData(object):
         self.my = None
         self.mz = None
         self.valuemultiplier = 1.
-        self.valuerangeminmag = 0
-        self.valuerangemaxmag = 0
+        # self.valuerangeminmag = 0
+        # self.valuerangemaxmag = 0
 
     def __str__(self):
         """
@@ -1450,10 +1461,10 @@ class OMFData(object):
         _str += "zmax:            %s [%s]\n" % (str(self.zmax), self.meshunit)
         _str += "valueunit:       %s\n" % self.valueunit
         _str += "valuemultiplier: %s\n" % str(self.valuemultiplier)
-        _str += "ValueRangeMinMag:%s [%s]\n" % (str(self.valuerangeminmag),
-                                                self.valueunit)
-        _str += "ValueRangeMaxMag:%s [%s]\n" % (str(self.valuerangemaxmag),
-                                                self.valueunit)
+        # _str += "ValueRangeMinMag:%s [%s]\n" % (str(self.valuerangeminmag),
+        #                                         self.valueunit)
+        # _str += "ValueRangeMaxMag:%s [%s]\n" % (str(self.valuerangemaxmag),
+        #                                         self.valueunit)
         return _str
 
     def set_m(self, mx, my, mz):
