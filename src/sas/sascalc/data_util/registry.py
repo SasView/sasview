@@ -4,12 +4,15 @@ File extension registry.
 This provides routines for opening files based on extension,
 and registers the built-in file extensions.
 """
-from __future__ import print_function
+
+from typing import Optional
+from collections import defaultdict
 
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
 
 
-class ExtensionRegistry(object):
+
+class ExtensionRegistry:
     """
     Associate a file loader with an extension.
 
@@ -59,25 +62,23 @@ class ExtensionRegistry(object):
         registry.load('hello.cx',format='cx3') ->
             return cx3('hello.cx')
     """
-    def __init__(self, **kw):
-        self.loaders = {}
+    def __init__(self):
+        self.loaders = defaultdict(list)
 
     def __setitem__(self, ext, loader):
-        if ext not in self.loaders:
-            self.loaders[ext] = []
-        self.loaders[ext].insert(0, loader)
+        self.loaders[ext].insert(0, loader) # TODO: Why insert at zero, not just append?
 
     def __getitem__(self, ext):
         return self.loaders[ext]
 
-    def __contains__(self, ext):
+    def __contains__(self, ext: str):
         return ext in self.loaders
 
     def formats(self):
         """
         Return a sorted list of the registered formats.
         """
-        names = [a for a in self.loaders.keys() if not a.startswith('.')]
+        names = [a for a in self.loaders.keys() if not a.startswith('.')] # What is this doing?
         names.sort()
         return names
 
@@ -89,32 +90,28 @@ class ExtensionRegistry(object):
         exts.sort()
         return exts
 
-    def lookup(self, path):
+    def lookup(self, path: str):
         """
         Return the loader associated with the file type of path.
 
         :param path: Data file path
         :return: List of available readers for the file extension (maybe empty)
         """
+
         # Find matching lower-case extensions
         path_lower = path.lower()
-        extlist = [ext for ext in self.extensions() if path_lower.endswith(ext)]
-        # Sort matching extensions by decreasing order of length
-        extlist.sort(key=len)
-        # Combine loaders for matching extensions into one big list
-        loaders = []
-        for L in [self.loaders[ext] for ext in extlist]:
-            loaders.extend(L)
-        # Remove duplicates if they exist
-        if len(loaders) != len(set(loaders)):
-            result = []
-            for L in loaders:
-                if L not in result:
-                    result.append(L)
-            loaders = result
-        return loaders
+        extensions = [ext for ext in self.extensions() if path_lower.endswith(ext)]
 
-    def load(self, path, format=None):
+        # Sort matching extensions by decreasing order of length # TODO: Again, why???
+        extensions.sort(key=len)
+
+        # Combine loaders for matching extensions into one big list
+        loaders = [loader for ext in extensions for loader in self.loaders[ext]]
+
+        # Remove duplicates and return
+        return list(set(loaders))
+
+    def load(self, path, format: Optional[str]=None):
         """
         Call the loader for the file type of path.
 
@@ -132,9 +129,9 @@ class ExtensionRegistry(object):
                 raise NoKnownLoaderException("No loaders match format %r"
                                              % format)
         last_exc = None
-        for fn in loaders:
+        for load_function in loaders:
             try:
-                return fn(path)
+                return load_function(path)
             except Exception as e:
                 last_exc = e
                 pass  # give other loaders a chance to succeed

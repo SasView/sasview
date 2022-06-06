@@ -29,6 +29,8 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 from . import readers
 from .loader_exceptions import (NoKnownLoaderException, DefaultReaderException)
 
+from typing import Optional
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,7 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
 
-    def load(self, path, format=None, debug=False, use_defaults=True):
+    def load(self, path, format: Optional[str]=None, debug=False, use_defaults=True):
         """
         Call the loader for the file type of path.
 
@@ -71,7 +73,7 @@ class Registry(ExtensionRegistry):
 
         # Gets set to a string if the file has an associated reader that fails
         try:
-            data_list = super(Registry, self).load(path, format=format)
+            data_list = super().load(path, format=format)
             if data_list:
                 return data_list
             if format:
@@ -120,7 +122,7 @@ class Registry(ExtensionRegistry):
         raise NoKnownLoaderException(
             "Generic readers failed to load %s" % path)
 
-    def find_plugins(self, dir):
+    def find_plugins(self, dir: str):
         """
         Find readers in a given directory. This method
         can be used to inspect user plug-in directories to
@@ -316,28 +318,27 @@ class Registry(ExtensionRegistry):
         :return: the loader associated with the file type of path.
         :Raises ValueError: if file type is not known.
         """
+        # TODO: Verify this code still works, did it ever work?
+
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
-        # Sort matching extensions by decreasing order of length
+
+        # Sort matching extensions by decreasing order of length TODO: WHY????
         extlist.sort(key=len)
+
         # Combine loaders for matching extensions into one big list
-        writers = []
-        for L in [self.writers[ext] for ext in extlist]:
-            writers.extend(L)
-        # Remove duplicates if they exist
-        if len(writers) != len(set(writers)):
-            result = []
-            for L in writers:
-                if L not in result:
-                    result.append(L)
-            writers = L
-        # Raise an error if there are no matching extensions
+
+        writers = [writer for ext in extlist for writer in self.writers[ext]]
+
+        # Remove duplicates
+        writers = list(set(writers))
+
         if len(writers) == 0:
             raise ValueError("Unknown file type for " + path)
-        # All done
+
         return writers
 
-    def save(self, path, data, format=None):
+    def save(self, path: str, data, format: Optional[str]=None):
         """
         Call the writer for the file type of path.
         Raises ValueError if no writer is available.
@@ -348,24 +349,25 @@ class Registry(ExtensionRegistry):
             writers = self.lookup_writers(path)
         else:
             writers = self.writers[format]
-        for fn in writers:
+
+        for writing_function in writers:
             try:
-                return fn(path, data)
+                return writing_function(path, data)
             except Exception as exc:
                 msg = "Saving file {} using the {} writer failed.\n".format(
-                    path, type(fn).__name__)
+                    path, type(writing_function).__name__)
                 msg += str(exc)
                 logger.exception(msg)  # give other loaders a chance to succeed
 
 
-class Loader(object):
+class Loader:
     """
-    Utility class to use the Registry as a singleton.
+    Utility class to use Registry as a singleton.
     """
-    ## Registry instance
+
     __registry = Registry()
 
-    def associate_file_type(self, ext, module):
+    def associate_file_type(self, ext: str, module):
         """
         Look into a module to find whether it contains a
         Reader class. If so, append it to readers and (potentially)
@@ -375,7 +377,7 @@ class Loader(object):
         """
         return self.__registry.associate_file_type(ext, module)
 
-    def associate_file_reader(self, ext, loader):
+    def associate_file_reader(self, ext: str, loader):
         """
         Append a reader object to readers
         :param ext: file extension [string]
@@ -383,7 +385,7 @@ class Loader(object):
         """
         return self.__registry.associate_file_reader(ext, loader)
 
-    def load(self, file, format=None):
+    def load(self, file: str, format: Optional[str]=None):
         """
         Load a file
         :param file: file name (path)
