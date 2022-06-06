@@ -32,7 +32,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # the two scrollbars will help managing the workspace.
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.screen_width =  screen_resolution.width()
+        self.screen_width = screen_resolution.width()
         self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
 

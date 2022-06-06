@@ -64,7 +64,7 @@ logger = logging.getLogger(__name__)
 LOADED_PERSPECTIVES = {}
 
 
-class GuiManager(object):
+class GuiManager:
     """
     Main SasView window functionality
     """
