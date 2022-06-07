@@ -9,7 +9,7 @@ import os
 
 import numpy as np
 
-from ..file_reader_base_class import FileReader
+from ..filereader import FileReader
 from ..data_info import plottable_1D, DataInfo
 from ..loader_exceptions import FileContentsException
 

@@ -28,7 +28,7 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 
 # Default readers are defined in the readers sub-module
 from . import readers
-from .file_reader_base_class import FileReader
+from .filereader import FileReader
 from .loader_exceptions import (NoKnownLoaderException, DefaultReaderException)
 
 from types import ModuleType
