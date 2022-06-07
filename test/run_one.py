@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 
 import os
 import sys
@@ -22,10 +21,13 @@ if len(sys.argv) < 2:
 run_py = joinpath(dirname(dirname(abspath(__file__))), 'run.py')
 run = imp.load_source('sasview_run', run_py)
 run.prepare()
+
 #print("\n".join(sys.path))
+
 test_path,test_file = splitpath(abspath(sys.argv[1]))
 print("=== testing:",sys.argv[1])
 #print(test_path, test_file)
+
 sys.argv = [sys.argv[0]]
 os.chdir(test_path)
 sys.path.insert(0, test_path)

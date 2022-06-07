@@ -20,8 +20,7 @@ from sas.sascalc.data_util.nxsunit import Converter
 logger = logging.getLogger(__name__)
 
 if sys.version_info[0] < 3:
-    def decode(s):
-        return s
+    raise RuntimeError("Python 1 and 2 are no longer supported.")
 else:
     def decode(s):
         # Attempt to decode files using common encodings
@@ -38,10 +37,11 @@ else:
         logger.warning(f"Unable to decode {s}")
 
 # Data 1D fields for iterative purposes
-FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
+FIELDS_1D = 'x', 'y', 'dx', 'dy', 'dxl', 'dxw'
+
 # Data 2D fields for iterative purposes
-FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
-                 'dqx_data', 'dqy_data', 'mask')
+FIELDS_2D = 'data', 'qx_data', 'qy_data', 'q_data', 'err_data', 'dqx_data', 'dqy_data', 'mask'
+
 DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
                        "t not be fully reduced. Support for the reader associat"
                        "ed with this file type has been removed. An attempt to "
@@ -67,9 +67,6 @@ class FileReader:
 
     # Able to import the unit converter
     has_converter = True
-
-    # Default value of zero
-    _ZERO = 1e-16
 
     def __init__(self):
         # List of Data1D and Data2D objects to be sent back to data_loader
