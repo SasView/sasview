@@ -67,7 +67,7 @@ class Reader(XMLreader):
         Resets the class state to a base case when loading a new data file so previous
         data files do not appear a second time
         """
-        super(Reader, self).reset_state()
+        super().reset_state()
         self.data = []
         self.process = Process()
         self.transspectrum = TransmissionSpectrum()

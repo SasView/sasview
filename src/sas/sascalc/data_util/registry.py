@@ -63,22 +63,22 @@ class ExtensionRegistry:
             return cx3('hello.cx')
     """
     def __init__(self):
-        self.loaders = defaultdict(list)
+        self.readers = defaultdict(list)
 
     def __setitem__(self, ext, loader):
-        self.loaders[ext].insert(0, loader) # TODO: Why insert at zero, not just append?
+        self.readers[ext].insert(0, loader) # TODO: Why insert at zero, not just append?
 
     def __getitem__(self, ext):
-        return self.loaders[ext]
+        return self.readers[ext]
 
     def __contains__(self, ext: str):
-        return ext in self.loaders
+        return ext in self.readers
 
     def formats(self):
         """
         Return a sorted list of the registered formats.
         """
-        names = [a for a in self.loaders.keys() if not a.startswith('.')] # What is this doing?
+        names = [a for a in self.readers.keys() if not a.startswith('.')] # What is this doing?
         names.sort()
         return names
 
@@ -86,7 +86,7 @@ class ExtensionRegistry:
         """
         Return a sorted list of registered extensions.
         """
-        exts = [a for a in self.loaders.keys() if a.startswith('.')]
+        exts = [a for a in self.readers.keys() if a.startswith('.')]
         exts.sort()
         return exts
 
@@ -106,7 +106,7 @@ class ExtensionRegistry:
         extensions.sort(key=len)
 
         # Combine loaders for matching extensions into one big list
-        loaders = [loader for ext in extensions for loader in self.loaders[ext]]
+        loaders = [loader for ext in extensions for loader in self.readers[ext]]
 
         # Remove duplicates and return
         return list(set(loaders))
@@ -124,7 +124,7 @@ class ExtensionRegistry:
                 raise NoKnownLoaderException("No loaders match extension in %r"
                                              % path)
         else:
-            loaders = self.loaders.get(format.lower(), [])
+            loaders = self.readers.get(format.lower(), [])
             if not loaders:
                 raise NoKnownLoaderException("No loaders match format %r"
                                              % format)

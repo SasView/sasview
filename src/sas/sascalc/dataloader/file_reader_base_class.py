@@ -49,19 +49,25 @@ DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
                        "SasView cannot guarantee the accuracy of the data.")
 
 
-class FileReader(object):
+class FileReader:
     # String to describe the type of data this reader can load
     type_name = "ASCII"
+
     # Wildcards to display
     type = ["Text files (*.txt|*.TXT)"]
+
     # List of allowed extensions
     ext = ['.txt']
+
     # Deprecated extensions
     deprecated_extensions = ['.asc']
+
     # Bypass extension check and try to load anyway
     allow_all = False
+
     # Able to import the unit converter
     has_converter = True
+
     # Default value of zero
     _ZERO = 1e-16
 
