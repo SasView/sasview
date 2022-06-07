@@ -19,22 +19,21 @@ from sas.sascalc.data_util.nxsunit import Converter
 
 logger = logging.getLogger(__name__)
 
-if sys.version_info[0] < 3:
-    raise RuntimeError("Python 1 and 2 are no longer supported.")
-else:
-    def decode(s):
-        # Attempt to decode files using common encodings
-        # *NB* windows-1252, aka cp1252, overlaps with most ASCII-style encodings
-        for codec in ['utf-8', 'windows-1252']:
-            try:
-                return codecs.decode(s, codec) if isinstance(s, bytes) else s
-            except (ValueError, UnicodeError):
-                # If the specific codec fails, try the next one.
-                pass
-            except Exception as e:
-                logger.warning(e)
-        # Give warning if unable to decode the item using the codecs
-        logger.warning(f"Unable to decode {s}")
+
+def decode(s):
+    # Attempt to decode files using common encodings
+    # *NB* windows-1252, aka cp1252, overlaps with most ASCII-style encodings
+    for codec in ['utf-8', 'windows-1252']:
+        try:
+            return codecs.decode(s, codec) if isinstance(s, bytes) else s
+        except (ValueError, UnicodeError):
+            # If the specific codec fails, try the next one.
+            pass
+        except Exception as e:
+            logger.warning(e)
+    # Give warning if unable to decode the item using the codecs
+    logger.warning(f"Unable to decode {s}")
+
 
 # Data 1D fields for iterative purposes
 FIELDS_1D = 'x', 'y', 'dx', 'dy', 'dxl', 'dxw'
