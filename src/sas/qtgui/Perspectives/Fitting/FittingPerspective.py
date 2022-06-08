@@ -28,8 +28,22 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     fittingStartedSignal = QtCore.pyqtSignal(list)
     fittingStoppedSignal = QtCore.pyqtSignal(list)
 
-    name = "Fitting" # For displaying in the combo box in DataExplorer
-    ext = "fitv"  # Extension used for saving analyses
+    @property
+    def name(self) -> str:
+        """ Name of the perspective"""
+        return "Fitting"
+
+    @property
+    def ext(self) -> str:
+        """ File extension used when saving perspective data"""
+        return "fitv"
+
+    @property
+    def title(self):
+        """ Window title"""
+        return "Fitting Perspective"
+
+
     def __init__(self, parent=None, data=None):
 
         super().__init__()

@@ -15,6 +15,7 @@ class Perspective(ABC):
         """ Name of the perspective"""
         pass
 
+    @property
     @abstractmethod
     def title(self) -> str:
         """ Window title"""
@@ -88,11 +89,9 @@ class Perspective(ABC):
     # Other shared functionality
     #
 
-    @property
-    @abstractmethod
     def getReport(self) -> str: # TODO: Refactor to just report, or report_html
         """ A string containing the HTML to be shown in the report"""
-        pass
+        raise NotImplementedError(f"Report not implemented for {self.name}")
 
 
     #

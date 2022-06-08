@@ -189,8 +189,22 @@ class MyMplCanvas(FigureCanvas):
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
-    name = "Corfunc"  # For displaying in the combo box
-    ext = " crf"  # File extension used for saving analysis files
+
+
+    @property
+    def name(self) -> str:
+        """ Name of the perspective"""
+        return "Corfunc"
+
+    @property
+    def ext(self) -> str:
+        """ File extension used when saving perspective data"""
+        return "crf"
+
+    @property
+    def title(self):
+        """ Window title """
+        return "Corfunc Perspective"
 
     trigger = QtCore.pyqtSignal(tuple)
 
@@ -199,7 +213,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         super(CorfuncWindow, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("Corfunc Perspective")
+        self.setWindowTitle(self.title)
 
         self.parent = parent
         self.mapper = None
@@ -567,13 +581,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             event.ignore()
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
-
-    def title(self):
-        """
-        Window title function used by certain error messages.
-        Check DataExplorer.py, line 355
-        """
-        return "Corfunc Perspective"
 
     def on_save(self):
         """

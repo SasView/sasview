@@ -37,14 +37,28 @@ BG_RED = "background-color: rgb(244, 170, 164);"
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
-    name = "Invariant"  # For displaying in the combo box in DataExplorer
-    ext = 'inv'  # File extension used for saving analyses
+
+    @property
+    def name(self):
+        """ Name of this perspective"""
+        return "Invariant"
+
+    @property
+    def ext(self):
+        """ Extension used for saving perspective data"""
+        return 'inv'
+
+    @property
+    def title(self):
+        """ Perspective name """
+        return "Invariant Perspective"
+
 
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
 
-        self.setWindowTitle(self.title())
+        self.setWindowTitle(self.title)
 
         # initial input params
         self._background = 0.0
@@ -507,10 +521,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         item = QtGui.QStandardItem(str(value))
         self.model.setItem(widget, item)
         self.mapper.toLast()
-
-    def title(self):
-        """ Perspective name """
-        return "Invariant Perspective"
 
     def onStatus(self):
         """

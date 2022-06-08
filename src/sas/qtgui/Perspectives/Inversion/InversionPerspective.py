@@ -41,8 +41,21 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     The main window for the P(r) Inversion perspective.
     """
 
-    name = "Inversion"
-    ext = "pr"  # Extension used for saving analyses
+    @property
+    def name(self) -> str:
+        """ Name of the perspective"""
+        return "Inversion"
+
+    @property
+    def ext(self) -> str:
+        """ File extension used when saving perspective data"""
+        return "pr"
+
+    @property
+    def title(self) -> str:
+        """ Window title"""
+        return "P(r) Inversion Perspective"
+
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
@@ -53,7 +66,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         super().__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("P(r) Inversion Perspective")
+        self.setWindowTitle(self.title)
 
         self._manager = parent
         #Needed for Batch fitting
