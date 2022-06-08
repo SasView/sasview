@@ -767,7 +767,7 @@ class GuiManager:
         Show the Fit Report dialog.
         """
         report_list = None
-        if getattr(self._current_perspective, "currentTab"):
+        if self._current_perspective is not None:
             try:
                 report_list = self._current_perspective.currentTab.getReport()
             except Exception as ex:
