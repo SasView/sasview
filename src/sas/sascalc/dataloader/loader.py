@@ -262,8 +262,8 @@ class Registry(ExtensionRegistry):
                     self.wildcards.append(wcard)
 
         except Exception as e:
-            message = "Loader: Error accessing Reader "
-            message += "in %s\n  %s" % (reader.__name__, e)
+            message = f"Loader: Error accessing Reader in {reader.__name__}\n"
+            message += str(e)
             logger.error(message)
 
         return reader_found
