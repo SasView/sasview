@@ -15,7 +15,7 @@ from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
 from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
 from sas.sascalc.dataloader.filereader import FileReader, decode
 
-from typing import Iterable
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
@@ -654,17 +654,14 @@ class Reader(FileReader):
         self.current_datainfo.filename = self.raw_data.filename
 
     @staticmethod
-    def as_list_or_array(data: Iterable):
+    def as_list_or_array(data: Any) -> Union[list, np.ndarray]:
         """
         Return value as a list if not already a list or array.
         :param data:
         :return:
         """
 
-        if isinstance(data, np.ndarray):
-            return data
-
-        if isinstance(data, list):
+        if isinstance(data, (list, np.ndarray)):
             return data
 
         if isinstance(data, str):

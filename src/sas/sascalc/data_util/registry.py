@@ -66,7 +66,7 @@ class ExtensionRegistry:
         self.readers = defaultdict(list)
 
     def __setitem__(self, ext, loader):
-        self.readers[ext].insert(0, loader) 
+        self.readers[ext].insert(0, loader)
 
     def __getitem__(self, ext):
         return self.readers[ext]
