@@ -66,7 +66,7 @@ class ExtensionRegistry:
         self.readers = defaultdict(list)
 
     def __setitem__(self, ext, loader):
-        self.readers[ext].insert(0, loader) # TODO: Why insert at zero, not just append?
+        self.readers[ext].insert(0, loader) 
 
     def __getitem__(self, ext):
         return self.readers[ext]
@@ -78,7 +78,7 @@ class ExtensionRegistry:
         """
         Return a sorted list of the registered formats.
         """
-        names = [a for a in self.readers.keys() if not a.startswith('.')] # What is this doing?
+        names = [a for a in self.readers.keys() if not a.startswith('.')]
         names.sort()
         return names
 
@@ -102,7 +102,7 @@ class ExtensionRegistry:
         path_lower = path.lower()
         extensions = [ext for ext in self.extensions() if path_lower.endswith(ext)]
 
-        # Sort matching extensions by decreasing order of length # TODO: Again, why???
+        # Sort matching extensions by decreasing order of length
         extensions.sort(key=len)
 
         # Combine loaders for matching extensions into one big list
