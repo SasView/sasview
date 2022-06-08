@@ -9,7 +9,7 @@ from typing import Optional
 from collections import defaultdict
 
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
-
+from sas.sascalc.util import unique_preserve_order
 
 
 class ExtensionRegistry:
@@ -108,8 +108,8 @@ class ExtensionRegistry:
         # Combine loaders for matching extensions into one big list
         loaders = [loader for ext in extensions for loader in self.readers[ext]]
 
-        # Remove duplicates and return
-        return list(set(loaders))
+        # Remove duplicates when returning
+        return unique_preserve_order(loaders)
 
     def load(self, path, format: Optional[str]=None):
         """

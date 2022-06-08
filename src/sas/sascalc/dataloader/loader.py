@@ -25,6 +25,7 @@ from zipfile import ZipFile
 from collections import defaultdict
 
 from sas.sascalc.data_util.registry import ExtensionRegistry
+from sas.sascalc.util import unique_preserve_order
 
 # Default readers are defined in the readers sub-module
 from . import readers
@@ -331,7 +332,7 @@ class Registry(ExtensionRegistry):
         writers = [writer for ext in extlist for writer in self.writers[ext]]
 
         # Remove duplicates
-        writers = list(set(writers))
+        writers = unique_preserve_order(writers)
 
         if len(writers) == 0:
             raise ValueError("Unknown file type for " + path)
