@@ -19,8 +19,9 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
+from sas.qtgui.Perspectives.perspective import Perspective
 
-class FittingWindow(QtWidgets.QTabWidget):
+class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
     """
     tabsModifiedSignal = QtCore.pyqtSignal()
@@ -31,7 +32,7 @@ class FittingWindow(QtWidgets.QTabWidget):
     ext = "fitv"  # Extension used for saving analyses
     def __init__(self, parent=None, data=None):
 
-        super(FittingWindow, self).__init__()
+        super().__init__()
 
         self.parent = parent
         self._data = data

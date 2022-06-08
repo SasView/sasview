@@ -15,6 +15,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
+from ..perspective import Perspective
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS
@@ -33,14 +34,14 @@ BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
-class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
+class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
     name = "Invariant"  # For displaying in the combo box in DataExplorer
     ext = 'inv'  # File extension used for saving analyses
 
     def __init__(self, parent=None):
-        super(InvariantWindow, self).__init__()
+        super().__init__()
         self.setupUi(self)
 
         self.setWindowTitle(self.title())

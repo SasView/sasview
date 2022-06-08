@@ -16,7 +16,7 @@ from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
-
+from sas.qtgui.Perspectives.perspective import Perspective
 
 def str_to_float(string: str):
     """Converts text input values to float.
@@ -36,7 +36,7 @@ DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 logger = logging.getLogger(__name__)
 
 
-class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
+class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     """
     The main window for the P(r) Inversion perspective.
     """
@@ -50,7 +50,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     calculateSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None):
-        super(InversionWindow, self).__init__()
+        super().__init__()
         self.setupUi(self)
 
         self.setWindowTitle("P(r) Inversion Perspective")

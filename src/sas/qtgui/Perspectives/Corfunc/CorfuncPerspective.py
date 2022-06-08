@@ -17,6 +17,7 @@ from PyQt5 import QtGui, QtWidgets
 # sas-global
 # pylint: disable=import-error, no-name-in-module
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.perspective import Perspective
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module
 
@@ -186,7 +187,7 @@ class MyMplCanvas(FigureCanvas):
         self.draw()
 
 
-class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
+class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
     ext = " crf"  # File extension used for saving analysis files
