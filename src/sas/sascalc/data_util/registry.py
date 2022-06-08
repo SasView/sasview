@@ -5,7 +5,7 @@ This provides routines for opening files based on extension,
 and registers the built-in file extensions.
 """
 
-from typing import Optional
+from typing import Optional, List
 from collections import defaultdict
 
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
@@ -90,7 +90,7 @@ class ExtensionRegistry:
         exts.sort()
         return exts
 
-    def lookup(self, path: str):
+    def lookup(self, path: str) -> List[str]:
         """
         Return the loader associated with the file type of path.
 

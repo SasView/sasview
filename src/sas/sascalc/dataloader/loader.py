@@ -305,7 +305,7 @@ class Registry(ExtensionRegistry):
                 # Check whether writing is supported
                 if hasattr(loader, 'write'):
                     for ext in loader.ext:
-                        self.writers[ext].insert(0, loader.write) # TODO: Why insert?
+                        self.writers[ext].insert(0, loader.write)
 
             except Exception as exc:
                 msg = "Loader: Error accessing Reader"
@@ -319,12 +319,11 @@ class Registry(ExtensionRegistry):
         :return: the loader associated with the file type of path.
         :Raises ValueError: if file type is not known.
         """
-        # TODO: Verify this code still works, did it ever work?
 
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
 
-        # Sort matching extensions by decreasing order of length TODO: WHY????
+        # Sort matching extensions by decreasing order of length
         extlist.sort(key=len)
 
         # Combine loaders for matching extensions into one big list
