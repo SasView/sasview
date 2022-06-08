@@ -498,7 +498,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         return state
 
     @property
-    def currentTab(self):
+    def currentTab(self): # TODO: More pythonic name
         """
         Returns the tab widget currently shown
         """

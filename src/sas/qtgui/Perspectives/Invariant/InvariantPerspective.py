@@ -138,21 +138,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.mapper.toFirst()
 
-    def get_low_q_extrapolation_upper_limit(self):
+    def get_low_q_extrapolation_upper_limit(self): # TODO: No usages
         q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
         return q_value
 
-    def set_low_q_extrapolation_upper_limit(self, value):
+    def set_low_q_extrapolation_upper_limit(self, value): # TODO: No usages
         n_pts = (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(n_pts))
         self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
         self.txtNptsLowQ.setText(str(n_pts))
 
-    def get_high_q_extrapolation_lower_limit(self):
+    def get_high_q_extrapolation_lower_limit(self): # TODO: No usgaes
         q_value = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text()) - 1]
         return q_value
 
-    def set_high_q_extrapolation_lower_limit(self, value):
+    def set_high_q_extrapolation_lower_limit(self, value): # TODO: No usages
         n_pts = len(self._data.x) - (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(int(n_pts)))
         self.model.setItem(WIDGETS.W_NPTS_HIGHQ, item)
@@ -162,9 +162,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         """ """
         self.cmdStatus.setEnabled(True)
 
-    def setClosable(self, value=True):
+    def setClosable(self, value: bool=True):
         """ Allow outsiders close this widget """
-        assert isinstance(value, bool)
+        assert isinstance(value, bool) # TODO: Remove
 
         self._allow_close = value
 
@@ -211,7 +211,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true'
         self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
 
-    def calculateInvariant(self):
+    def calculateInvariant(self): # TODO: pythonic name
         """ Use twisted to thread the calculations away """
         # Find out if extrapolation needs to be used.
         extrapolation = None
@@ -233,8 +233,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         d.addCallback(self.deferredPlot)
         d.addErrback(self.calculationFailed)
 
-    def calculationFailed(self, reason):
-        print("calculation failed: ", reason)
+    def calculationFailed(self, reason): # TODO: rename to on_calculation_failed
+        print("calculation failed: ", reason) # TODO: Print to log
         self.allow_calculation()
 
     def deferredPlot(self, model):
@@ -249,7 +249,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
 
-    def plotResult(self, model):
+    def plotResult(self, model): # TODO: Pythonic name, typing
         """ Plot result of calculation """
 
         self.model = model
@@ -290,14 +290,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Update the details dialog in case it is open
         self.updateDetailsWidget(model)
 
-    def updateDetailsWidget(self, model):
+    def updateDetailsWidget(self, model): # TODO: pythonic name, type model
         """
         On demand update of the details widget
         """
         if self.detailsDialog.isVisible():
             self.onStatus()
 
-    def calculateThread(self, extrapolation):
+    def calculateThread(self, extrapolation): # Pythonic name, typing
         """
         Perform Invariant calculations.
         """
@@ -495,12 +495,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         return self.model
 
-    def updateModelFromThread(self, widget, value):
+    def updateModelFromThread(self, widget, value): # TODO: Name, and typing
         """
         Update the model in the main thread
         """
         try:
-            value = float('%.3g' % value)
+            value = float('%.3g' % value) # TODO: Replace with round
         except TypeError:
             pass
         item = QtGui.QStandardItem(str(value))
@@ -1026,7 +1026,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             state[data_id] = {'invar_params': tab_data}
         return state
 
-    def getPage(self):
+    def getPage(self) -> dict: # TODO: Better name, serializePage, pageData
         """
         Serializes full state of this invariant page
         Called by Save Analysis
@@ -1039,7 +1039,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             param_dict['data_id'] = str(self._data.id)
         return param_dict
 
-    def getState(self):
+    def getState(self): # TODO: Better name, serializeState, stateData
         """
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
