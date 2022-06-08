@@ -6,6 +6,8 @@ import json
 import webbrowser
 import traceback
 
+from typing import Optional
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale, QUrl
@@ -47,10 +49,12 @@ from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringC
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 
+
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
+from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
@@ -95,7 +99,7 @@ class GuiManager:
         self.addTriggers()
 
         # Currently displayed perspective
-        self._current_perspective = None
+        self._current_perspective: Optional[Perspective] = None
         self.loadedPerspectives = {}
 
         # Populate the main window with stuff
@@ -769,7 +773,7 @@ class GuiManager:
         report_list = None
         if self._current_perspective is not None:
             try:
-                report_list = self._current_perspective.currentTab.getReport()
+                report_list = self._current_perspective.getReport()
             except Exception as ex:
                 logging.error("Report generation failed with: " + str(ex))
 

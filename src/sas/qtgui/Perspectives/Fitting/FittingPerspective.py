@@ -109,6 +109,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.plusButton.setToolTip("Add a new Fit Page")
         self.plusButton.clicked.connect(lambda: self.addFit(None))
 
+
     def updateWindowTitle(self):
         """
         Update the window title with the current optimizer name
@@ -570,3 +571,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             if tab.modelName() == name:
                 return tab
         return None
+
+    def getReport(self) -> str:
+        """ Get the report from the current tab"""
+        self.currentTab.getReport()
