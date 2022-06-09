@@ -18,9 +18,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, parent=None, report_list=None):
+    def __init__(self, report_list, parent=None):
 
-        super(ReportDialog, self).__init__(parent._parent)
+        super().__init__(parent._parent)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)

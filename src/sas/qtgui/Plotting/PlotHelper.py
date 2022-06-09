@@ -5,6 +5,8 @@ which can not be instantiated repeatedly so IDs are session-specific.
 """
 import sys
 
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+
 this = sys.modules[__name__]
 
 this._plots = {}
@@ -16,12 +18,12 @@ def clear():
     """
     this._plots = {}
 
-def addPlot(plot):
+def addPlot(plot: PlotterBase):
     """
     Adds a new plot to the current dictionary of plots
     """
     this._plot_id += 1
-    this._plots["Graph%s"%str(this._plot_id)] = plot
+    this._plots["Graph%s"%str(this._plot_id)] = plot # TODO: Why???
 
 def deletePlot(plot_id):
     """
@@ -30,7 +32,7 @@ def deletePlot(plot_id):
     if plot_id in this._plots:
         del this._plots[plot_id]
 
-def currentPlots():
+def currentPlotIds():
     """
     Returns a list of IDs for all currently active plots
     """

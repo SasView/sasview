@@ -5,6 +5,8 @@ import re
 import sys
 import tempfile
 
+from typing import List
+
 import logging
 from io import BytesIO
 import urllib.parse
@@ -161,7 +163,7 @@ class ReportPageLogic(object):
 
         return report
 
-    def getImages(self):
+    def getImages(self) -> List[]:
         """
         Create MPL figures for the current fit
         """
@@ -173,7 +175,7 @@ class ReportPageLogic(object):
 
         # Active plots
         import sas.qtgui.Plotting.PlotHelper as PlotHelper
-        shown_plot_names = PlotHelper.currentPlots()
+        shown_plot_names = PlotHelper.currentPlotIds()
 
         # current_plots = list of graph names of currently shown plots
         # which are related to this dataset

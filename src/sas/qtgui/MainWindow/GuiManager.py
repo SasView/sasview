@@ -269,7 +269,7 @@ class GuiManager:
         Set focus on the selected plot
         """
         # loop over all visible plots and find the requested plot
-        for plot in PlotHelper.currentPlots():
+        for plot in PlotHelper.currentPlotIds():
             # take last plot
             if PlotHelper.plotById(plot).data[-1].name == plot_name:
                 # set focus on the plot

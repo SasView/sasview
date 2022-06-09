@@ -89,7 +89,7 @@ class Perspective(ABC):
     # Other shared functionality
     #
 
-    def getReport(self) -> str: # TODO: Refactor to just report, or report_html
+    def getReport(self) -> Optional[ReportData]: # TODO: Refactor to just report, or report_html
         """ A string containing the HTML to be shown in the report"""
         raise NotImplementedError(f"Report not implemented for {self.name}")
 

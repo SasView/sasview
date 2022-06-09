@@ -24,6 +24,8 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 
 class PlotterBase(QtWidgets.QWidget):
+    #TODO: Describe what this class is
+
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterBase, self).__init__(parent)
 
