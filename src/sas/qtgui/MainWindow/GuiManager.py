@@ -776,7 +776,7 @@ class GuiManager:
             if report_data is None:
                 logging.info("Report data is empty, dialog not shown")
             else:
-                self.report_dialog = ReportDialog(report_list=report_data, parent=self._parent)
+                self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
                 self.report_dialog.show()
 
 

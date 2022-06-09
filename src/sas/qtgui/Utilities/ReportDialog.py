@@ -20,20 +20,21 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, report_list: ReportData, parent: Optional[QtCore.QObject]=None):
+    def __init__(self, report_data: ReportData, parent: Optional[QtCore.QObject]=None):
 
         super().__init__(parent)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
-        self.data_html, self.data_txt, self.data_images = report_list
+        self.report_data = report_data
+
         #self.save_location = None
         #if 'ReportDialog_directory' in ObjectLibrary.listObjects():
         self.save_location = ObjectLibrary.getObject('ReportDialog_directory')
 
         # Fill in the table from input data
-        self.setupDialog(self.data_html)
+        self.setupDialog(self.report_data.html)
 
         # Command buttons
         self.cmdPrint.clicked.connect(self.onPrint)
@@ -112,22 +113,22 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
 
         # Create files with charts
         pictures = []
-        if self.data_images is not None:
+        if self.report_data.images is not None:
             pictures = self.getPictures(basename)
 
-        # self.data_html contains all images at the end of the report, in base64 form;
+        # self.report_data.html contains all images at the end of the report, in base64 form;
         # replace them all with their saved on-disk filenames
         cleanr = re.compile('<img src.*$', re.DOTALL)
         replacement_name = ""
-        html = self.data_html
+        html = self.report_data.html
         for picture in pictures:
             replacement_name += '<img src="'+ picture + '"><p></p>'
         replacement_name += '\n'
         # <img src="data:image/png;.*>  => <img src=filename>
-        html = re.sub(cleanr, replacement_name, self.data_html)
+        html = re.sub(cleanr, replacement_name, self.report_data.html)
 
         if ext.lower() == ".txt":
-            txt_ascii = GuiUtils.replaceHTMLwithASCII(self.data_txt)
+            txt_ascii = GuiUtils.replaceHTMLwithASCII(self.report_data.text)
             self.onTXTSave(txt_ascii, filename)
         if ext.lower() == ".html":
             self.onHTMLSave(html, filename)
@@ -155,7 +156,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         """
         # save figures
         pictures = []
-        for num, image in enumerate(self.data_images):
+        for num, image in enumerate(self.report_data.images):
             pic_name = basename + '_img%s.png' % num
             # save the image for use with pdf writer
             image.savefig(pic_name)

@@ -36,7 +36,7 @@ class ReportDialogTest(unittest.TestCase):
         test_txt = "test_txt"
         test_images = []
         self.test_list = [test_html, test_txt, test_images]
-        self.widget = ReportDialog(parent=dummy_manager(), report_list=self.test_list)
+        self.widget = ReportDialog(parent=dummy_manager(), report_data=self.test_list)
 
     def tearDown(self):
         '''Destroy the GUI'''
