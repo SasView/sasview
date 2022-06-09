@@ -27,9 +27,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
-        assert isinstance(report_list, list)
-        assert len(report_list) == 3
-
         self.data_html, self.data_txt, self.data_images = report_list
         #self.save_location = None
         #if 'ReportDialog_directory' in ObjectLibrary.listObjects():
