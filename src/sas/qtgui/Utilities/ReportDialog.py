@@ -12,13 +12,14 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Utilities.UI.ReportDialogUI import Ui_ReportDialogUI
+from sas.qtgui.Utilities.reportdata import ReportData
 
 
 class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, report_list, parent=None):
+    def __init__(self, report_list: ReportData, parent=None):
 
         super().__init__(parent._parent)
         self.setupUi(self)

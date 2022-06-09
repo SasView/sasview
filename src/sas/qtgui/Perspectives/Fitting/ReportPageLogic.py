@@ -15,13 +15,14 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from bumps import options
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.reportdata import ReportData
 
 from sas.sasview import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION
 
 
-class ReportPageLogic(object):
+class ReportPageLogic:
     """
     Logic for the Report Page functionality. Refactored from FittingWidget.
     """
@@ -168,7 +169,7 @@ class ReportPageLogic(object):
 
         return report
 
-    def getImages(self) -> List[]:
+    def getImages(self) -> List[PlotterBase]:
         """
         Create MPL figures for the current fit
         """
