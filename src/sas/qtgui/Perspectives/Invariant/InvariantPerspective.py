@@ -38,15 +38,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
 
-    @property
-    def name(self):
-        """ Name of this perspective"""
-        return "Invariant"
 
-    @property
-    def ext(self):
-        """ Extension used for saving perspective data"""
-        return 'inv'
+    name = "Invariant"
+    ext = 'inv'
 
     @property
     def title(self):

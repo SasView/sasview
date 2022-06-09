@@ -47,6 +47,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         except Exception as ex:
             import logging
             logging.error("Application failed with: "+str(ex))
+            raise ex
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():

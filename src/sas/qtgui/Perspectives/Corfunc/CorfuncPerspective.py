@@ -190,16 +190,8 @@ class MyMplCanvas(FigureCanvas):
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
 
-
-    @property
-    def name(self) -> str:
-        """ Name of the perspective"""
-        return "Corfunc"
-
-    @property
-    def ext(self) -> str:
-        """ File extension used when saving perspective data"""
-        return "crf"
+    name = "Corfunc"
+    ext = "crf"
 
     @property
     def title(self):

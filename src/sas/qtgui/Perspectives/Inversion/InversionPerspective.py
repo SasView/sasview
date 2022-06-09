@@ -41,15 +41,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     The main window for the P(r) Inversion perspective.
     """
 
-    @property
-    def name(self) -> str:
-        """ Name of the perspective"""
-        return "Inversion"
-
-    @property
-    def ext(self) -> str:
-        """ File extension used when saving perspective data"""
-        return "pr"
+    name = "Inversion"
+    ext = "pr"
 
     @property
     def title(self) -> str:

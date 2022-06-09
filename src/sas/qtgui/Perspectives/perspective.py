@@ -1,26 +1,38 @@
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import List, Optional, Union, Dict
+
 from PyQt5.QtGui import QStandardItem
+from PyQt5 import QtCore
+
 from sas.qtgui.Utilities.reportdata import ReportData
 
-class Perspective(ABC):
+
+class PerspectiveMeta(type(QtCore.QObject), ABCMeta):
+    """ Metaclass for both ABC and Qt objects
+
+    This is needed to enable the mixin of Perspective until
+    a future refactoring unified the Qt functionality  of
+    all the perspectives and brings it into the base class
+    """
+
+
+class Perspective(object, metaclass=PerspectiveMeta):
 
     """
     Mixin class for all perspectives,
     all perspectives should have these methods
     """
 
+    @classmethod
     @property
     @abstractmethod
-    def name(self) -> str:
+    def name(cls) -> str:
         """ Name of the perspective"""
-        pass
 
     @property
     @abstractmethod
-    def title(self) -> str:
+    def title(cls) -> str:
         """ Window title"""
-        pass
 
 
     #
@@ -33,9 +45,9 @@ class Perspective(ABC):
         the 'send data' button is pressed"""
         pass # TODO: Should we really be passing Qt objects around, rather than actual data
 
-    @abstractmethod
     def removeData(self, data_list: Optional[Union[QStandardItem, List[QStandardItem]]]):
         """ Remove data from """
+        raise NotImplementedError(f"Remove data not implemented in {self.name}")
 
     def allowBatch(self) -> bool:
         """ Can this perspective handle batch processing, default no"""
@@ -55,11 +67,12 @@ class Perspective(ABC):
     # State loading/saving
     #
 
+    @classmethod
     @property
     @abstractmethod
-    def ext(self) -> str:
+    def ext(cls) -> str:
         """ File extension used when saving perspective data"""
-        pass # TODO: Refactor to save_file_extension
+        # TODO: Refactor to save_file_extension
 
     def isSerializable(self) -> bool:
         """ Can this perspective be serialised - default is no"""
@@ -68,14 +81,13 @@ class Perspective(ABC):
     def serialiseAll(self) -> dict:
         raise NotImplementedError(f"{self.name} perspective is not serializable")
 
-    @ abstractmethod
+    @abstractmethod
     def updateFromParameters(self, params: dict): # TODO: Pythonic name
         """ Update the perspective using a dictionary of parameters
         e.g. those loaded via open project or open analysis menu items"""
         pass
 
     # TODO: Use a more ordered datastructure for constraints
-    @abstractmethod
     def updateFromConstraints(self, constraints: Dict[str, list]):
         """
         Updates all tabs with constraints present in *constraint_dict*, where
@@ -83,7 +95,7 @@ class Perspective(ABC):
         list of constraints. A constraint is represented by a list [value,
         param, value_ex, validate, function] of attributes of a Constraint
         object""" # TODO: Sort out docstring
-        pass
+
 
 
     #
@@ -104,8 +116,7 @@ class Perspective(ABC):
         """ Set whether this perspective can be closed"""
         pass # TODO: refactor to closable property
 
-    @abstractmethod
     def isClosable(self) -> bool:
-        pass # TODO: refactor to closable property
+        return False # TODO: refactor to closable property
 
 
