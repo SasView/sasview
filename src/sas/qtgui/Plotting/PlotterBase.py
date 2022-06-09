@@ -157,8 +157,8 @@ class PlotterBase(QtWidgets.QWidget):
         self._item = item
 
     @property
-    def xLabel(self, xlabel=""):
-        """ x-label setter """
+    def xLabel(self):
+        """ x-label getter """
         return self.x_label
 
     @xLabel.setter
@@ -167,8 +167,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.x_label = r'$%s$'% xlabel if xlabel else ""
 
     @property
-    def yLabel(self, ylabel=""):
-        """ y-label setter """
+    def yLabel(self):
+        """ y-label getter """
         return self.y_label
 
     @yLabel.setter
