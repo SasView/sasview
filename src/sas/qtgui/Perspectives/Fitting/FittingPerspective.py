@@ -40,7 +40,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """ Window title"""
         return "Fitting Perspective"
 
-
     def __init__(self, parent=None, data=None):
 
         super().__init__()
@@ -585,4 +584,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """ Get the report from the current tab"""
         fitting_widget = self.currentFittingWidget
         return None if fitting_widget is None else fitting_widget.getReport()
+
+    @property
+    def supports_fitting_menu(self) -> bool:
+        return True
 

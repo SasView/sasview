@@ -356,34 +356,82 @@ class GuiManager:
         """
         return self._workspace.workspace
 
-    def perspectiveChanged(self, perspective_name: str):
+    def perspectiveChanged(self, new_perspective_name: str):
         """
         Respond to change of the perspective signal
         """
-        # Remove the previous perspective from the menubar
-        self.clearPerspectiveMenubarOptions(self._current_perspective)
+
+        assert new_perspective_name in self.loadedPerspectives # supplied name should always be in loaded perspectives
+
+        # Uncheck all menu items
+        for menuItem in self._workspace.menuAnalysis.actions():
+            menuItem.setChecked(False)
 
         if self._current_perspective is not None:
+
+            # Remove the fitting menu for now, will be replaced later if we move back to a perspective that supports it
+            # I do not like that this requires the menu action to exist to be correct
+            if self._current_perspective.supports_fitting_menu:
+                self._workspace.menubar.removeAction(self._workspace.menuFitting.menuAction())
+
             # Remove perspective and store in Perspective dictionary
             self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
 
             self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._workspace.workspace.removeSubWindow(self.subwindow)
 
-        # Get new perspective
-        self._current_perspective = self.loadedPerspectives[str(perspective_name)]
+        # Get new perspective - note that _current_perspective is of type Optional[Perspective],
+        # but new_perspective is of type Perspective, thus call to Perspective members are safe
+        new_perspective = self.loadedPerspectives[new_perspective_name]
 
-        self.setupPerspectiveMenubarOptions(self._current_perspective)
+        self._workspace.actionReport.setEnabled(new_perspective.supports_reports)
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionSave_Analysis.setEnabled(False)
 
-        self.subwindow = self._workspace.workspace.addSubWindow(
-            self._current_perspective)
+        if new_perspective.isSerializable():
+            self._workspace.actionOpen_Analysis.setEnabled(True)
+            self._workspace.actionSave_Analysis.setEnabled(True)
+
+        if new_perspective.supports_fitting_menu:
+            # Put the fitting menu back in
+            # This is a bit involved but it is needed to preserve the menu ordering
+            self._workspace.menubar.removeAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.removeAction(self._workspace.menuHelp.menuAction())
+
+            self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
+
+            self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+
+        #
+        # Selection on perspective choice menu
+        #
+        if isinstance(new_perspective, FittingWindow):
+            self.checkAnalysisOption(self._workspace.actionFitting)
+
+        elif isinstance(new_perspective, InvariantWindow):
+            self.checkAnalysisOption(self._workspace.actionInvariant)
+
+        elif isinstance(new_perspective, InversionWindow):
+            self.checkAnalysisOption(self._workspace.actionInversion)
+
+        elif isinstance(new_perspective, CorfuncWindow):
+            self.checkAnalysisOption(self._workspace.actionCorfunc)
+
+
+        #
+        # Set up the window
+        #
+        self.subwindow = self._workspace.workspace.addSubWindow(new_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
-        perspective_size = self._current_perspective.sizeHint()
+        perspective_size = new_perspective.sizeHint()
         perspective_width = perspective_size.width()
-        self._current_perspective.resize(perspective_width, workspace_height-10)
+        new_perspective.resize(perspective_width, workspace_height-10)
 
+        # Set the current perspective to new one and show
+        self._current_perspective = new_perspective
         self._current_perspective.show()
 
     def updatePerspective(self, data):
@@ -1241,55 +1289,6 @@ class GuiManager:
         self.uncheckAllMenuItems(self._workspace.menuAnalysis)
         analysisMenuOption.setChecked(True)
 
-    def clearPerspectiveMenubarOptions(self, perspective):
-        """
-        When closing a perspective, clears the menu bar
-        """
-        # Uncheck all menu items
-        for menuItem in self._workspace.menuAnalysis.actions():
-            menuItem.setChecked(False)
-
-        if isinstance(self._current_perspective, Perspectives.PERSPECTIVES["Fitting"]):
-            self._workspace.menubar.removeAction(self._workspace.menuFitting.menuAction())
-
-    def setupPerspectiveMenubarOptions(self, perspective: Perspective):
-        """
-        When setting a perspective, sets up the menu bar
-        """
-        self._workspace.actionReport.setEnabled(perspective.supports_reports)
-        self._workspace.actionOpen_Analysis.setEnabled(False)
-        self._workspace.actionSave_Analysis.setEnabled(False)
-
-        if perspective.isSerializable():
-
-            self._workspace.actionOpen_Analysis.setEnabled(True)
-            self._workspace.actionSave_Analysis.setEnabled(True)
-
-        if perspective.supports_fitting_menu:
-
-            # Put the fitting menu back in
-            # This is a bit involved but it is needed to preserve the menu ordering
-            self._workspace.menubar.removeAction(self._workspace.menuWindow.menuAction())
-            self._workspace.menubar.removeAction(self._workspace.menuHelp.menuAction())
-            self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
-            self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
-            self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
-
-
-        #
-        # Perspective choice menu
-        #
-        if isinstance(perspective, FittingWindow):
-            self.checkAnalysisOption(self._workspace.actionFitting)
-
-        elif isinstance(perspective, InvariantWindow):
-            self.checkAnalysisOption(self._workspace.actionInvariant)
-
-        elif isinstance(perspective, InversionWindow):
-            self.checkAnalysisOption(self._workspace.actionInversion)
-
-        elif isinstance(perspective, CorfuncWindow):
-            self.checkAnalysisOption(self._workspace.actionCorfunc)
 
     def saveCustomConfig(self):
         """

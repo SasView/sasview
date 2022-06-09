@@ -983,11 +983,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Notify the gui manager about the new perspective chosen.
         """
+
+        # Notify via communicator
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
-        self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
-        # Deactivate and uncheck the swap data option if the current perspective does not allow it
-        self.chkSwap.setEnabled(self.parent.perspective().allowSwap())
-        if not self.parent.perspective().allowSwap():
+
+        # Set checkboxes
+        current_perspective = self.parent.perspective()
+
+        allow_batch = False if current_perspective is None else current_perspective.allowBatch()
+        allow_swap = False if current_perspective is None else current_perspective.allowSwap()
+
+        self.chkBatch.setEnabled(allow_batch)
+        self.chkSwap.setEnabled(allow_swap)
+
+        # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
+        if not allow_swap:
             self.chkSwap.setCheckState(False)
 
     def itemFromDisplayName(self, name):
@@ -1883,15 +1893,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         pass  # debugger anchor
 
-    def onAnalysisUpdate(self, new_perspective=""):
+    def onAnalysisUpdate(self, new_perspective_name: str):
         """
         Update the perspective combo index based on passed string
         """
-        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        assert new_perspective_name in Perspectives.PERSPECTIVES.keys()
+
         self.cbFitting.blockSignals(True)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        index = self.cbFitting.findText(new_perspective_name)
+        self.cbFitting.setCurrentIndex(index)
         self.cbFitting.blockSignals(False)
-        pass
+
 
     def loadComplete(self, output):
         """
