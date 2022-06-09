@@ -4,6 +4,7 @@ import re
 import logging
 import traceback
 from xhtml2pdf import pisa
+from typing import Optional
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5 import QtPrintSupport
@@ -19,9 +20,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, report_list: ReportData, parent=None):
+    def __init__(self, report_list: ReportData, parent: Optional[QtCore.QObject]=None):
 
-        super().__init__(parent._parent)
+        super().__init__(parent)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)

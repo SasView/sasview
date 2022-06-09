@@ -7,7 +7,7 @@ from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Source
 
 
-class FittingLogic(object):
+class FittingLogic:
     """
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.

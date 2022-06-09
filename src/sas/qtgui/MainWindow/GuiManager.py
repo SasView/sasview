@@ -770,16 +770,16 @@ class GuiManager:
         """
         Show the Fit Report dialog.
         """
-        report_list = None
         if self._current_perspective is not None:
-            try:
-                report_list = self._current_perspective.getReport()
-            except Exception as ex:
-                logging.error("Report generation failed with: " + str(ex))
+            report_data = self._current_perspective.getReport()
 
-        if report_list is not None:
-            self.report_dialog = ReportDialog(parent=self, report_list=report_list)
-            self.report_dialog.show()
+            if report_data is None:
+                logging.info("Report data is empty, dialog not shown")
+            else:
+                self.report_dialog = ReportDialog(report_list=report_data, parent=self._parent)
+                self.report_dialog.show()
+
+
 
     def actionReset(self):
         """

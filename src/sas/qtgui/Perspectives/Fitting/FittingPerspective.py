@@ -3,6 +3,8 @@ from distutils.command.config import config
 import numpy
 import copy
 
+from typing import Optional
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -20,6 +22,8 @@ from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.perspective import Perspective
+
+from sas.qtgui.Utilities.reportdata import ReportData
 
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
@@ -513,6 +517,14 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         return self.currentWidget()
 
+    @property
+    def currentFittingWidget(self) -> Optional[FittingWidget]:
+        current_tab = self.currentTab
+        if isinstance(current_tab, FittingWidget):
+            return current_tab
+        else:
+            return None
+
     def getFitTabs(self):
         """
         Returns the list of fitting tabs
@@ -565,6 +577,11 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 return tab
         return None
 
-    def getReport(self) -> str:
+    def getReport(self) -> Optional[ReportData]:
         """ Get the report from the current tab"""
-        self.currentTab.getReport()
+        fitting_widget = self.currentFittingWidget
+
+        print(type(fitting_widget))
+
+        return None if fitting_widget is None else fitting_widget.getReport()
+
