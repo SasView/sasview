@@ -15,6 +15,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from bumps import options
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.reportdata import ReportData
+
 from sas.sasview import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION
 
@@ -38,15 +40,18 @@ class ReportPageLogic(object):
         cleantext = re.sub(cleanr, '', raw_html)
         return cleantext
 
-    def reportList(self):
+    def reportList(self) -> ReportData: # TODO: Rename to reference report object
         """
         Return the HTML version of the full report
         """
         if self.kernel_module is None:
-            report_txt = "No model defined"
-            report_html = HEADER % report_txt
-            images = []
-            return [report_html, report_txt, images]
+
+            text = "No model defined"
+
+            return ReportData(
+                html = HEADER % text,
+                text = text,
+                images = [])
 
         # Get plot image from plotpanel
         images = self.getImages()
@@ -63,7 +68,7 @@ class ReportPageLogic(object):
 
         report_txt = self.cleanhtml(report_html)
 
-        report_list = [report_html, report_txt, images]
+        report_list = ReportData(html=report_html, text=report_txt, images=images)
 
         return report_list
 

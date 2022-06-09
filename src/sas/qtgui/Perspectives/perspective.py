@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Union, Dict
 from PyQt5.QtGui import QStandardItem
+from sas.qtgui.Utilities.reportdata import ReportData
 
 class Perspective(ABC):
 
