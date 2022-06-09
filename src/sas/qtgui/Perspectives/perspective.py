@@ -119,4 +119,15 @@ class Perspective(object, metaclass=PerspectiveMeta):
     def isClosable(self) -> bool:
         return False # TODO: refactor to closable property
 
+    #
+    # Menubar option
+    #
+
+    @property
+    def supports_reports(self) -> bool:
+        return False
+
+    @property
+    def supports_fitting_menu(self) -> bool:
+        return False
 

@@ -577,6 +577,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 return tab
         return None
 
+    @property
+    def supports_reports(self) -> bool:
+        return True
+
     def getReport(self) -> Optional[ReportData]:
         """ Get the report from the current tab"""
         fitting_widget = self.currentFittingWidget
