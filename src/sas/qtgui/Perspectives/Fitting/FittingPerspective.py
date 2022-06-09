@@ -580,8 +580,5 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def getReport(self) -> Optional[ReportData]:
         """ Get the report from the current tab"""
         fitting_widget = self.currentFittingWidget
-
-        print(type(fitting_widget))
-
         return None if fitting_widget is None else fitting_widget.getReport()
 
