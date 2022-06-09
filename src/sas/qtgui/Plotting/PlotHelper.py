@@ -5,7 +5,8 @@ which can not be instantiated repeatedly so IDs are session-specific.
 """
 import sys
 
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
+# TODO Refactor to allow typing without circular import
+#from sas.qtgui.Plotting.PlotterBase import PlotterBase
 
 this = sys.modules[__name__]
 
@@ -18,7 +19,8 @@ def clear():
     """
     this._plots = {}
 
-def addPlot(plot: PlotterBase):
+#def addPlot(plot: PlotterBase):
+def addPlot(plot):
     """
     Adds a new plot to the current dictionary of plots
     """
