@@ -21,7 +21,8 @@ from sas.qtgui.Utilities.reportdata import ReportData
 from sas.sasview import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION
 
-
+# TODO: Deal with HTML properly (see top answer at https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags )
+# TODO: Integrate with other reports
 class ReportPageLogic:
     """
     Logic for the Report Page functionality. Refactored from FittingWidget.
@@ -196,6 +197,7 @@ class ReportPageLogic:
 
 
 # Simple html report template
+# TODO Remove microsoft based stuff - probably implicit in the refactoring to come
 HEADER = "<html>\n"
 HEADER += "<head>\n"
 HEADER += "<meta http-equiv=Content-Type content='text/html; "
