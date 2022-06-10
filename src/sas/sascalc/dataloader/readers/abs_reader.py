@@ -14,7 +14,7 @@ import logging
 import numpy as np
 
 from sas.sascalc.data_util.nxsunit import Converter
-from ..file_reader_base_class import FileReader
+from ..filereader import FileReader
 from ..data_info import DataInfo, plottable_1D, Data1D, Detector
 from ..loader_exceptions import FileContentsException, DefaultReaderException
 

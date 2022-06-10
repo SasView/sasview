@@ -19,7 +19,7 @@ import logging
 from lxml import etree
 from lxml.builder import E
 
-from ..file_reader_base_class import FileReader, decode
+from ..filereader import FileReader, decode
 
 logger = logging.getLogger(__name__)
 

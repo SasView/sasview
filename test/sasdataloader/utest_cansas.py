@@ -15,7 +15,7 @@ from lxml import etree
 from lxml.etree import XMLSyntaxError
 from xml.dom import minidom
 
-from sas.sascalc.dataloader.file_reader_base_class import decode
+from sas.sascalc.dataloader.filereader import decode
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader

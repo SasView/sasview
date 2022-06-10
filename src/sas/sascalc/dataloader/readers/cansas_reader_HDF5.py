@@ -13,12 +13,9 @@ from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
 from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
-from sas.sascalc.dataloader.file_reader_base_class import FileReader, decode
+from sas.sascalc.dataloader.filereader import FileReader, decode
 
-try:
-  basestring
-except NameError:  # CRUFT: python 2 support
-  basestring = str
+from typing import Any, Union
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +193,7 @@ class Reader(FileReader):
                         data_point = decode(data_point)
                     # Top Level Meta Data
                     if key == u'definition':
-                        if isinstance(data_set, basestring):
+                        if isinstance(data_set, str):
                             self.current_datainfo.meta_data['reader'] = data_set
                             break
                         else:
@@ -210,14 +207,14 @@ class Reader(FileReader):
                             self.current_datainfo.run_name = run_dict
                         except Exception:
                             pass
-                        if isinstance(data_set, basestring):
+                        if isinstance(data_set, str):
                             self.current_datainfo.run.append(data_set)
                             break
                         else:
                             self.current_datainfo.run.append(data_point)
                     # Title
                     elif key == u'title':
-                        if isinstance(data_set, basestring):
+                        if isinstance(data_set, str):
                             self.current_datainfo.title = data_set
                             break
                         else:
@@ -657,16 +654,21 @@ class Reader(FileReader):
         self.current_datainfo.filename = self.raw_data.filename
 
     @staticmethod
-    def as_list_or_array(iterable):
+    def as_list_or_array(data: Any) -> Union[list, np.ndarray]:
         """
         Return value as a list if not already a list or array.
-        :param iterable:
+        :param data:
         :return:
         """
-        if not (isinstance(iterable, np.ndarray) or isinstance(iterable, list)):
-            iterable = iterable.split(",") if isinstance(iterable, basestring)\
-                else [iterable]
-        return iterable
+
+        if isinstance(data, (list, np.ndarray)):
+            return data
+
+        if isinstance(data, str):
+            return data.split(',')
+
+        return [data]
+
 
     def _find_data_attributes(self, value):
         """
@@ -699,12 +701,12 @@ class Reader(FileReader):
                 uncertainties = h5attr(q_vals, "uncertainties")
                 if uncertainties is None:
                     uncertainties = h5attr(q_vals, "uncertainty")
-                if isinstance(uncertainties, basestring):
+                if isinstance(uncertainties, str):
                     uncertainties = uncertainties.split(",")
                 if uncertainties is not None:
                     self.q_uncertainty_names = uncertainties
                 resolutions = h5attr(q_vals, "resolutions")
-                if isinstance(resolutions, basestring):
+                if isinstance(resolutions, str):
                     resolutions = resolutions.split(",")
                 if resolutions is not None:
                     self.q_resolution_names = resolutions

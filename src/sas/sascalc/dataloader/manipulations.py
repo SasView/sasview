@@ -22,24 +22,25 @@ PYTHONPATH=../src/ python2  -m sasdataloader.test.utest_averaging DataInfoTests.
 # TODO: copy the meta data from the 2D object to the resulting 1D object
 import math
 import numpy as np
-import sys
 
-#from data_info import plottable_2D
 from .data_info import Data1D
 
 
-def get_q(dx, dy, det_dist, wavelength):
+def position_and_wavelength_to_q(dx: float, dy: float, detector_distance: float, wavelength: float):
     """
+    Convert detection position and wavelength to
+
     :param dx: x-distance from beam center [mm]
     :param dy: y-distance from beam center [mm]
+    :param detector_distance: distance from sample to detector
     :return: q-value at the given position
     """
     # Distance from beam center in the plane of detector
     plane_dist = math.sqrt(dx * dx + dy * dy)
-    # Half of the scattering angle
-    theta = 0.5 * math.atan(plane_dist / det_dist)
-    return (4.0 * math.pi / wavelength) * math.sin(theta)
 
+    # Half of the scattering angle
+    theta = 0.5 * math.atan(plane_dist / detector_distance)
+    return (4.0 * math.pi / wavelength) * math.sin(theta)
 
 def get_q_compo(dx, dy, det_dist, wavelength, compo=None):
     """
@@ -55,11 +56,11 @@ def get_q_compo(dx, dy, det_dist, wavelength, compo=None):
         angle_xy = math.atan(dx / dy)
 
     if compo == "x":
-        out = get_q(dx, dy, det_dist, wavelength) * math.cos(angle_xy)
+        out = position_and_wavelength_to_q(dx, dy, det_dist, wavelength) * math.cos(angle_xy)
     elif compo == "y":
-        out = get_q(dx, dy, det_dist, wavelength) * math.sin(angle_xy)
+        out = position_and_wavelength_to_q(dx, dy, det_dist, wavelength) * math.sin(angle_xy)
     else:
-        out = get_q(dx, dy, det_dist, wavelength)
+        out = position_and_wavelength_to_q(dx, dy, det_dist, wavelength)
     return out
 
 
