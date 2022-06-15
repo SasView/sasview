@@ -11,6 +11,8 @@ from matplotlib.figure import Figure
 from numpy.linalg.linalg import LinAlgError
 import numpy as np
 
+from sas.qtgui.Perspectives.reports import ReportBuilder
+
 from typing import Optional
 
 from PyQt5 import QtCore
@@ -21,6 +23,7 @@ from PyQt5 import QtGui, QtWidgets
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.reportdata import ReportData
+from sas.qtgui.Perspectives.reports import ReportBuilder
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module
@@ -713,4 +716,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return True
 
     def getReport(self) -> Optional[ReportData]:
-        report = Report
+        report = ReportBuilder("Correlation Function")
+
+        return ReportData(
+            html=str(report.html_doc),
+            text=str(report.html_doc),
+            images=[])
