@@ -1,6 +1,6 @@
 import datetime
 
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 
 import dominate
@@ -8,6 +8,8 @@ from dominate.tags import *
 
 import sas.sasview
 import sasmodels
+
+from sas.qtgui.Plotting.PlotterBase import Data1D
 
 class ReportBuilder:
     def __init__(self, title: str):
@@ -31,6 +33,7 @@ class ReportBuilder:
 
             div(id="perspective")
             div(id="data")
+            h2("Data")
 
             with div(id="model"):
                 div(id="model-details")
@@ -38,8 +41,26 @@ class ReportBuilder:
 
             div(id="figures")
 
-    def add_data_details(self, data):
-        pass
+    def add_data_details(self, data: Data1D):
+
+        with self.html_doc.getElementById("data"):
+
+            with div(cls="data-file"):
+                h2(data.title)
+                div(data.filename)
+
+                with table():
+
+                    with tr():
+                        td("Q low")
+                        td(getattr(data, "xmin", min(data.x))) # TODO: remove dynamically assigned field, xmin
+                        td(data.x_unit)
+
+                    with tr():
+                        td("Q high")
+                        td(getattr(data, "xmax", max(data.x))) # TODO: remove dynamically assigned field, xmax
+                        td(data.x_unit)
+
 
     def add_table(self, parameters: Dict[str, Any]):
         with self.html_doc.getElementById("model-parameters"):
@@ -52,12 +73,25 @@ class ReportBuilder:
 
 # Debugging tool
 def main():
+    from sas.sascalc.dataloader.loader import Loader
+    import os
+    loader = Loader()
+
+    fileanem = "100nmSpheresNodQ.txt"
+    path_to_data = "../../../sas/sasview/test/1d_data"
+
+    filename = os.path.join(path_to_data, fileanem)
+    data = loader.load(filename)[0]
+
     rb = ReportBuilder("Test Report")
+    rb.add_data_details(data)
     rb.add_table({"A": 10, "B": 0.01, "C": 'stuff', "D": False})
+
     print(rb.html_doc)
 
     with open("report_test.html", 'w') as fid:
         print(rb.html_doc, file=fid)
+
 
 
 if __name__ == "__main__":

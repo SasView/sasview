@@ -29,6 +29,7 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .CorfuncUtils import WIDGETS
 
+from ..perspective import Perspective
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -712,4 +713,4 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return True
 
     def getReport(self) -> Optional[ReportData]:
-        return ReportData()
+        report = Report
