@@ -5,8 +5,9 @@
 Example 2: A Magnetic Cylinder
 ==================================
 
-In this example we will generate an SLD file describing a single solid
+In this example we will use an SLD file describing a single solid
 cylinder, with both nuclear and magnetic scattering length densities (SLDs).
+The mag. cylinder SLD file be found in the test folder for coordinate data.
 We will then use the calculator to create scattering intensity patterns for
 both a non-magnetised and magnetised cylinder.
 
@@ -25,8 +26,7 @@ a constant magnetic scattering length density of
 
 .. figure:: gsc_ex_magnetic_cylinder_assets/cylinder_graphic.png
 
-The following code generates a SLD file describing such a sample, using the SLD
-file format as given in the documentation for the generic scattering
+For completeness, the following code generates the SLD file
 calculator::
 
         import numpy as np
