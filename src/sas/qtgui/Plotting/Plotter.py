@@ -74,6 +74,18 @@ class PlotterWidget(PlotterBase):
         self.fit_result.symbol = 17
         self.fit_result.name = "Fit"
 
+        # Range setter - used to store active SetGraphRange instance
+        # Initialize to None so graph range is only stored once data is present.
+        self.setRange = None
+
+        # Connections used to prevent conflict between built in mpl toolbar actions and SasView context menu actions.
+        # Toolbar actions only needed in 1D plots. 2D plots have no such conflicts.
+        self.toolbar._actions['home'].triggered.connect(self._home)
+        self.toolbar._actions['back'].triggered.connect(self._back)
+        self.toolbar._actions['forward'].triggered.connect(self._forward)
+        self.toolbar._actions['pan'].triggered.connect(self._pan)
+        self.toolbar._actions['zoom'].triggered.connect(self._zoom)
+
         parent.geometry()
 
     @property
@@ -186,10 +198,6 @@ class PlotterWidget(PlotterBase):
             ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
             ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
 
-        # define the ranges
-        self.setRange = SetGraphRange(parent=self,
-            x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
-
         # Draw non-standard markers
         l_width = markersize * 0.4
         if marker == '-' or marker == '--':
@@ -254,6 +262,27 @@ class PlotterWidget(PlotterBase):
             ax.set_ylabel(self.yLabel)
         if self.xLabel and not is_fit:
             ax.set_xlabel(self.xLabel)
+
+        # define the ranges
+        if isinstance(self.setRange, SetGraphRange) and self.setRange.rangeModified:
+            # Assume the range has changed and retain the current and default ranges for future use
+            modified = self.setRange.rangeModified
+            default_x_range = self.setRange.defaultXRange
+            default_y_range = self.setRange.defaultYRange
+            x_range = self.setRange.xrange()
+            y_range = self.setRange.yrange()
+        else:
+            # Use default ranges given by matplotlib
+            x_range = default_x_range = self.ax.get_xlim()
+            y_range = default_y_range = self.ax.get_ylim()
+            modified = False
+        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
+        self.setRange.rangeModified = modified
+        self.setRange.defaultXRange = default_x_range
+        self.setRange.defaultYRange = default_y_range
+        # Go to expected range
+        self.ax.set_xbound(x_range[0], x_range[1])
+        self.ax.set_ybound(y_range[0], y_range[1])
 
         # Add q-range sliders
         if data.show_q_range_sliders:
@@ -463,31 +492,97 @@ class PlotterWidget(PlotterBase):
 
         self.canvas.draw_idle()
 
+    def _zoom_pan_handler(self, event):
+        if not self.setRange:
+            self.setRange = SetGraphRange(parent=self)
+        x_range = self.ax.get_xlim()
+        y_range = self.ax.get_ylim()
+        self.setRange.txtXmin.setText(str(x_range[0]))
+        self.setRange.txtXmax.setText(str(x_range[1]))
+        self.setRange.txtYmin.setText(str(y_range[0]))
+        self.setRange.txtYmax.setText(str(y_range[1]))
+        self._setGraphRange()
+
+    def _zoom_handler(self, event):
+        """
+        Explicitly call toolbar method to ensure range is changed. In MPL 2.2, local events take precedence over the
+        toolbar events, so the range isn't zoomed until after _zoom_pan_handler is run.
+        """
+        self.toolbar.release_zoom(event)
+        self._zoom_pan_handler(event)
+
+    def _pan_handler(self, event):
+        """
+        Explicitly call toolbar method to ensure range is changed. In MPL 2.2, local events take precedence over the
+        toolbar events, so the range isn't panned until after _zoom_pan_handler is run.
+        """
+        self.toolbar.release_pan(event)
+        self._zoom_pan_handler(event)
+
+    def _home(self, event):
+        """
+        Catch home button click events
+        """
+        self.onResetGraphRange()
+
+    def _back(self, event):
+        """
+        Catch back button click events
+        """
+        self.toolbar.back()
+        self._zoom_pan_handler(event)
+
+    def _forward(self, event):
+        """
+        Catch forward button click events
+        """
+        self.toolbar.forward()
+        self._zoom_pan_handler(event)
+
+    def _pan(self, event):
+        """
+        Catch pan button click events
+        """
+        self.canvas.mpl_connect('button_release_event', self._pan_handler)
+
+    def _zoom(self, event):
+        """
+        Catch zoom button click events
+        """
+        self.canvas.mpl_connect('button_release_event', self._zoom_handler)
+
     def onSetGraphRange(self):
         """
         Show a dialog allowing setting the chart ranges
         """
         # min and max of data
         if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
-            x_range = self.setRange.xrange()
-            y_range = self.setRange.yrange()
-            self.setRange.rangeModified = True
-            if x_range is not None and y_range is not None:
-                self.ax.set_xlim(x_range)
-                self.ax.set_ylim(y_range)
-                self.canvas.draw_idle()
+            self._setGraphRange()
+
+    def _setGraphRange(self):
+        x_range = self.setRange.xrange()
+        y_range = self.setRange.yrange()
+        if x_range is not None and y_range is not None:
+            self.setRange.rangeModified = (self.setRange.defaultXRange != x_range
+                                           or self.setRange.defaultYRange != y_range)
+            self.ax.set_xlim(x_range)
+            self.ax.set_ylim(y_range)
+            self.canvas.draw_idle()
 
     def onResetGraphRange(self):
         """
         Resets the chart X and Y ranges to their original values
         """
-        for d in self.data:
-            x_range = (d.x.min(), d.x.max())
-            y_range = (d.y.min(), d.y.max())
-        if x_range is not None and y_range is not None:
-            self.ax.set_xlim(x_range)
-            self.ax.set_ylim(y_range)
-            self.canvas.draw_idle()
+        # Clear graph and plot everything again
+        mpl.pyplot.cla()
+        self.ax.cla()
+        self.setRange = None
+        for ids in self.plot_dict:
+            # Color, marker, etc. are stored in each data set and will be used to restore visual changes on replot
+            self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
+
+        # Redraw
+        self.canvas.draw_idle()
 
     def onLinearFit(self, id):
         """
@@ -508,7 +603,7 @@ class PlotterWidget(PlotterBase):
         if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
-    def replacePlot(self, id, new_plot, retain_dimensions=False):
+    def replacePlot(self, id, new_plot, retain_dimensions=True):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
@@ -523,18 +618,14 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
-        # Store user-defined plot range on replot
-        retain_dimensions = retain_dimensions or self.setRange.rangeModified
-        if retain_dimensions:
-            x_bounds = (self.ax.viewLim.xmin, self.ax.viewLim.xmax)
-            y_bounds = (self.ax.viewLim.ymin, self.ax.viewLim.ymax)
         self.removePlot(id)
         self.plot(data=new_plot)
         # Apply user-defined plot range
-        if retain_dimensions:
+        if retain_dimensions or self.setRange.rangeModified:
+            x_bounds = self.setRange.xrange()
+            y_bounds = self.setRange.yrange()
             self.ax.set_xbound(x_bounds[0], x_bounds[1])
             self.ax.set_ybound(y_bounds[0], y_bounds[1])
-            self.setRange.rangeModified = True
 
     def onRemovePlot(self, id):
         """
@@ -691,7 +782,7 @@ class PlotterWidget(PlotterBase):
 
         if self.fit_result.name in self.plot_dict.keys():
             # Replace an existing Fit and ensure the plot range is not reset
-            self.replacePlot("Fit", new_plot=self.fit_result, retain_dimensions=True)
+            self.replacePlot("Fit", new_plot=self.fit_result)
         else:
             # Otherwise, Plot a new line
             self.plot(data=self.fit_result, marker='-', hide_error=True)

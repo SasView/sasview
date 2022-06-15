@@ -3,6 +3,7 @@ from __future__ import print_function
 import logging
 import logging.config
 import os
+import sys
 import os.path
 
 import pkg_resources
@@ -84,6 +85,7 @@ class SetupLogger(object):
             filename,
             os.path.join("sas", "sasview", filename),
             os.path.join(os.getcwd(), "sas", "sasview", filename),
+            os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), filename) #For OSX app
         ]
 
         # To avoid the exception in OSx
