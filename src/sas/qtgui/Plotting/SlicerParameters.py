@@ -398,7 +398,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             _ = msgbox.exec_()
             return
         # icky way to go up the tree
-        self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
+        self.parent.manager._perspective().setData(data_items=items_for_fit, is_batch=isBatch)
 
     def keyPressEvent(self, event):
         """

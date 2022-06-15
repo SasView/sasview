@@ -4,6 +4,7 @@ This module provides the intelligence behind the gui interface for Corfunc.
 # pylint: disable=E1101
 
 # global
+from PyQt5.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
     as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
@@ -13,7 +14,7 @@ import numpy as np
 
 from sas.qtgui.Perspectives.reports import ReportBuilder
 
-from typing import Optional
+from typing import Optional, List, Tuple
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
@@ -44,7 +45,7 @@ class MyMplCanvas(FigureCanvas):
 
         FigureCanvas.__init__(self, self.fig)
 
-        self.data = None
+        self.data: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
         self.extrap = None
         self.dragging = None
         self.draggable = False
@@ -223,7 +224,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self._calculator = CorfuncCalculator()
         self._allow_close = False
-        self._model_item = None
+        self._model_item: Optional[QStandardItem] = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
@@ -231,7 +232,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._canvas = MyMplCanvas(self.model)
         self.plotLayout.insertWidget(0, self._canvas)
         self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._canvas, self))
-        self._realplot = MyMplCanvas(self.model)
+        self._realplot = MyMplCanvas(self.model) # TODO: This is not a good name, or structure either
         self.plotLayout.insertWidget(2, self._realplot)
         self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
 
@@ -506,18 +507,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         return False
 
-    def setData(self, data_item, is_batch=False):
+    def setData(self, data_items: List[QStandardItem], is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
         """
-        if not isinstance(data_item, list):
-            msg = "Incorrect type passed to the Corfunc Perpsective"
-            raise AttributeError(msg)
 
-        if not isinstance(data_item[0], QtGui.QStandardItem):
-            msg = "Incorrect type passed to the Corfunc Perspective"
-            raise AttributeError(msg)
 
         if self.has_data:
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
@@ -528,7 +523,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             if retval == QtWidgets.QMessageBox.Cancel:
                 return
 
-        model_item = data_item[0]
+        model_item = data_items[0]
         data = GuiUtils.dataFromItem(model_item)
         self._model_item = model_item
         self._calculator.set_data(data)
@@ -716,6 +711,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return True
 
     def getReport(self) -> Optional[ReportData]:
+        if not self.has_data:
+            return None
+
         report = ReportBuilder("Correlation Function")
 
         # Format keys
@@ -723,8 +721,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         fancy_parameters = {}
 
         for key in parameters:
-            nice_key = " ".join(key.split("_")).capitalize()
+            nice_key = " ".join([s.capitalize() for s in key.split("_")])
             fancy_parameters[nice_key] = parameters[key]
+
+        report.add_table(fancy_parameters)
 
         return ReportData(
             html=str(report.html_doc),
