@@ -718,6 +718,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def getReport(self) -> Optional[ReportData]:
         report = ReportBuilder("Correlation Function")
 
+        # Format keys
+        parameters = self.getState()
+        fancy_parameters = {}
+
+        for key in parameters:
+            nice_key = " ".join(key.split("_")).capitalize()
+            fancy_parameters[nice_key] = parameters[key]
+
         return ReportData(
             html=str(report.html_doc),
             text=str(report.html_doc),
