@@ -19,29 +19,28 @@ from sas.sascalc.data_util.nxsunit import Converter
 
 logger = logging.getLogger(__name__)
 
-if sys.version_info[0] < 3:
-    def decode(s):
-        return s
-else:
-    def decode(s):
-        # Attempt to decode files using common encodings
-        # *NB* windows-1252, aka cp1252, overlaps with most ASCII-style encodings
-        for codec in ['utf-8', 'windows-1252']:
-            try:
-                return codecs.decode(s, codec) if isinstance(s, bytes) else s
-            except (ValueError, UnicodeError):
-                # If the specific codec fails, try the next one.
-                pass
-            except Exception as e:
-                logger.warning(e)
-        # Give warning if unable to decode the item using the codecs
-        logger.warning(f"Unable to decode {s}")
+
+def decode(s):
+    # Attempt to decode files using common encodings
+    # *NB* windows-1252, aka cp1252, overlaps with most ASCII-style encodings
+    for codec in ['utf-8', 'windows-1252']:
+        try:
+            return codecs.decode(s, codec) if isinstance(s, bytes) else s
+        except (ValueError, UnicodeError):
+            # If the specific codec fails, try the next one.
+            pass
+        except Exception as e:
+            logger.warning(e)
+    # Give warning if unable to decode the item using the codecs
+    logger.warning(f"Unable to decode {s}")
+
 
 # Data 1D fields for iterative purposes
-FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
+FIELDS_1D = 'x', 'y', 'dx', 'dy', 'dxl', 'dxw'
+
 # Data 2D fields for iterative purposes
-FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
-                 'dqx_data', 'dqy_data', 'mask')
+FIELDS_2D = 'data', 'qx_data', 'qy_data', 'q_data', 'err_data', 'dqx_data', 'dqy_data', 'mask'
+
 DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
                        "t not be fully reduced. Support for the reader associat"
                        "ed with this file type has been removed. An attempt to "
@@ -49,21 +48,24 @@ DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
                        "SasView cannot guarantee the accuracy of the data.")
 
 
-class FileReader(object):
+class FileReader:
     # String to describe the type of data this reader can load
     type_name = "ASCII"
+
     # Wildcards to display
     type = ["Text files (*.txt|*.TXT)"]
+
     # List of allowed extensions
     ext = ['.txt']
+
     # Deprecated extensions
     deprecated_extensions = ['.asc']
+
     # Bypass extension check and try to load anyway
     allow_all = False
+
     # Able to import the unit converter
     has_converter = True
-    # Default value of zero
-    _ZERO = 1e-16
 
     def __init__(self):
         # List of Data1D and Data2D objects to be sent back to data_loader

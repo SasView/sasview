@@ -38,6 +38,7 @@ from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
+from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -68,9 +69,6 @@ from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 logger = logging.getLogger(__name__)
-
-# Expose the loaded perspectives for easy linking between perspective methods/inputs and plots
-LOADED_PERSPECTIVES = {}
 
 
 class GuiManager:
@@ -204,8 +202,6 @@ class GuiManager:
             except Exception as e:
                 logger.warning(f"Unable to load {name} perspective.\n{e}")
         self.loadedPerspectives = loaded_dict
-        global LOADED_PERSPECTIVES
-        LOADED_PERSPECTIVES = self.loadedPerspectives
 
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
@@ -219,8 +215,6 @@ class GuiManager:
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
-        global LOADED_PERSPECTIVES
-        LOADED_PERSPECTIVES = self.loadedPerspectives
         self._current_perspective = None
 
     def addCategories(self):
@@ -515,6 +509,7 @@ class GuiManager:
 
         # Exit if yes
         if reply == QMessageBox.Yes:
+
             # save the paths etc.
             self.saveCustomConfig()
             reactor.callFromThread(reactor.stop)
@@ -542,6 +537,18 @@ class GuiManager:
             self.processVersion(version_info)
         except ValueError as ex:
             logging.info("Failed to connect to www.sasview.org:", ex)
+
+    def log_installed_packages(self):
+        """
+        Log version number of locally installed python packages
+        """
+        PackageGatherer().log_installed_modules()
+
+    def log_imported_packages(self):
+        """
+        Log version number of python packages imported in this instance of SasView.
+        """
+        PackageGatherer().log_imported_packages()
 
     def processVersion(self, version_info):
         """
@@ -703,7 +710,7 @@ class GuiManager:
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-
+        
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 

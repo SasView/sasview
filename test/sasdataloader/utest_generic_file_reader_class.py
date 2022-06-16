@@ -10,7 +10,7 @@ import numpy as np
 from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D, Data1D
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
+from sas.sascalc.dataloader.filereader import FileReader
 
 logger = logging.getLogger(__name__)
 

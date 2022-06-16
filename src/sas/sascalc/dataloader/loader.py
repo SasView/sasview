@@ -22,15 +22,20 @@ import sys
 import logging
 import time
 from zipfile import ZipFile
+from collections import defaultdict
 
 from sas.sascalc.data_util.registry import ExtensionRegistry
+from sas.sascalc.util import unique_preserve_order
 
 # Default readers are defined in the readers sub-module
 from . import readers
+from .filereader import FileReader
 from .loader_exceptions import (NoKnownLoaderException, DefaultReaderException)
 
-logger = logging.getLogger(__name__)
+from types import ModuleType
+from typing import Optional
 
+logger = logging.getLogger(__name__)
 
 class Registry(ExtensionRegistry):
     """
@@ -38,10 +43,10 @@ class Registry(ExtensionRegistry):
     Readers and writers are supported.
     """
     def __init__(self):
-        super(Registry, self).__init__()
+        super().__init__()
 
         # Writers
-        self.writers = {}
+        self.writers = defaultdict(list)
 
         # List of wildcards
         self.wildcards = ['All (*.*)|*.*']
@@ -52,7 +57,7 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
 
-    def load(self, path, format=None, debug=False, use_defaults=True):
+    def load(self, path, format: Optional[str]=None, debug=False, use_defaults=True):
         """
         Call the loader for the file type of path.
 
@@ -71,7 +76,7 @@ class Registry(ExtensionRegistry):
 
         # Gets set to a string if the file has an associated reader that fails
         try:
-            data_list = super(Registry, self).load(path, format=format)
+            data_list = super().load(path, format=format)
             if data_list:
                 return data_list
             if format:
@@ -79,6 +84,7 @@ class Registry(ExtensionRegistry):
                     f"No data returned from '{path}' for format {format}")
             else:
                 logger.debug(f"No data returned from '{path}'")
+
         except Exception as e:
             logger.debug(traceback.print_exc())
             if not use_defaults:
@@ -99,7 +105,7 @@ class Registry(ExtensionRegistry):
             logger.debug(traceback.print_exc())
             raise
 
-    def load_using_generic_loaders(self, path):
+    def load_using_generic_loaders(self, path: str):
         """
         If the expected reader cannot load the file or no known loader exists,
         attempt to load the file using a few defaults readers
@@ -120,7 +126,7 @@ class Registry(ExtensionRegistry):
         raise NoKnownLoaderException(
             "Generic readers failed to load %s" % path)
 
-    def find_plugins(self, dir):
+    def find_plugins(self, dir: str):
         """
         Find readers in a given directory. This method
         can be used to inspect user plug-in directories to
@@ -191,12 +197,13 @@ class Registry(ExtensionRegistry):
 
         return readers_found
 
-    def associate_file_type(self, ext, module):
+    def associate_file_type(self, file_extension: str, module: ModuleType):
         """
         Look into a module to find whether it contains a
         Reader class. If so, APPEND it to readers and (potentially)
         to the list of writers for the given extension
-        :param ext: file extension [string]
+
+        :param file_extension: file extension [string]
         :param module: module object
         """
         reader_found = False
@@ -205,10 +212,9 @@ class Registry(ExtensionRegistry):
             try:
                 # Find supported extensions
                 loader = module.Reader()
-                if ext not in self.loaders:
-                    self.loaders[ext] = []
+
                 # Append the new reader to the list
-                self.loaders[ext].append(loader.read)
+                self.readers[file_extension].append(loader.read)
 
                 reader_found = True
 
@@ -217,17 +223,15 @@ class Registry(ExtensionRegistry):
                 if hasattr(loader, 'type_name'):
                     type_name = loader.type_name
 
-                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
-                                                ext.lower())
+                wcard = "%s files (*%s)|*%s" % (type_name, file_extension.lower(),
+                                                file_extension.lower())
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
 
                 # Check whether writing is supported
                 if hasattr(loader, 'write'):
-                    if ext not in self.writers:
-                        self.writers[ext] = []
                     # Append the new writer to the list
-                    self.writers[ext].append(loader.write)
+                    self.writers[file_extension].append(loader.write)
 
             except Exception as exc:
                 msg = "Loader: Error accessing"
@@ -235,44 +239,43 @@ class Registry(ExtensionRegistry):
                 logger.error(msg)
         return reader_found
 
-    def associate_file_reader(self, ext, loader):
+    def associate_file_reader(self, file_extension: str, reader: FileReader):
         """
         Append a reader object to readers
-        :param ext: file extension [string]
-        :param module: reader object
+        :param file_extension: file extension [string]
+        :param reader: reader object
         """
         reader_found = False
 
         try:
-            # Find supported extensions
-            if ext not in self.loaders:
-                self.loaders[ext] = []
-            # Append the new reader to the list
-            self.loaders[ext].append(loader.read)
+            self.readers[file_extension].append(reader.read)
 
             reader_found = True
 
             # Keep track of wildcards
-            if hasattr(loader, 'type_name'):
-                type_name = loader.type_name
+            if hasattr(reader, 'type_name'):
+                type_name = reader.type_name
 
-                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
-                                                ext.lower())
+                wcard = "%s files (*%s)|*%s" % (type_name, file_extension.lower(),
+                                                file_extension.lower())
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
 
-        except Exception as exc:
-            msg = "Loader: Error accessing Reader "
-            msg += "in %s\n  %s" % (loader.__name__, exc)
-            logger.error(msg)
+        except Exception as e:
+            message = f"Loader: Error accessing Reader in {reader.__name__}\n"
+            message += str(e)
+            logger.error(message)
+
         return reader_found
 
-    def _identify_plugin(self, module):
+    def _identify_plugin(self, module: ModuleType):
         """
         Look into a module to find whether it contains a
         Reader class. If so, add it to readers and (potentially)
         to the list of writers.
+
         :param module: module object
+        :returns: True if successful
         """
         reader_found = False
 
@@ -281,63 +284,61 @@ class Registry(ExtensionRegistry):
                 # Find supported extensions
                 loader = module.Reader()
                 for ext in loader.ext:
-                    if ext not in self.loaders:
-                        self.loaders[ext] = []
+                    if ext not in self.readers:
+                        self.readers[ext] = []
                     # When finding a reader at run time,
                     # treat this reader as the new default
-                    self.loaders[ext].insert(0, loader.read)
+                    self.readers[ext].insert(0, loader.read)
 
                     reader_found = True
 
                     # Keep track of wildcards
-                    type_name = module.__name__
+                    file_description = module.__name__
                     if hasattr(loader, 'type_name'):
-                        type_name = loader.type_name
-                    wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
-                                                    ext.lower())
-                    if wcard not in self.wildcards:
-                        self.wildcards.append(wcard)
+                        file_description = loader.type_name
+
+                    wildcard = "%s files (*%s)|*%s" % (file_description, ext.lower(), ext.lower())
+
+                    if wildcard not in self.wildcards:
+                        self.wildcards.append(wildcard)
 
                 # Check whether writing is supported
                 if hasattr(loader, 'write'):
                     for ext in loader.ext:
-                        if ext not in self.writers:
-                            self.writers[ext] = []
                         self.writers[ext].insert(0, loader.write)
 
             except Exception as exc:
                 msg = "Loader: Error accessing Reader"
                 msg += " in %s\n  %s" % (module.__name__, exc)
                 logger.error(msg)
+
         return reader_found
 
-    def lookup_writers(self, path):
+    def lookup_writers(self, path: str):
         """
         :return: the loader associated with the file type of path.
         :Raises ValueError: if file type is not known.
         """
+
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
+
         # Sort matching extensions by decreasing order of length
         extlist.sort(key=len)
+
         # Combine loaders for matching extensions into one big list
-        writers = []
-        for L in [self.writers[ext] for ext in extlist]:
-            writers.extend(L)
-        # Remove duplicates if they exist
-        if len(writers) != len(set(writers)):
-            result = []
-            for L in writers:
-                if L not in result:
-                    result.append(L)
-            writers = L
-        # Raise an error if there are no matching extensions
+
+        writers = [writer for ext in extlist for writer in self.writers[ext]]
+
+        # Remove duplicates
+        writers = unique_preserve_order(writers)
+
         if len(writers) == 0:
             raise ValueError("Unknown file type for " + path)
-        # All done
+
         return writers
 
-    def save(self, path, data, format=None):
+    def save(self, path: str, data, format: Optional[str]=None):
         """
         Call the writer for the file type of path.
         Raises ValueError if no writer is available.
@@ -348,24 +349,25 @@ class Registry(ExtensionRegistry):
             writers = self.lookup_writers(path)
         else:
             writers = self.writers[format]
-        for fn in writers:
+
+        for writing_function in writers:
             try:
-                return fn(path, data)
+                return writing_function(path, data)
             except Exception as exc:
                 msg = "Saving file {} using the {} writer failed.\n".format(
-                    path, type(fn).__name__)
+                    path, type(writing_function).__name__)
                 msg += str(exc)
                 logger.exception(msg)  # give other loaders a chance to succeed
 
 
-class Loader(object):
+class Loader:
     """
-    Utility class to use the Registry as a singleton.
+    Utility class to use Registry as a singleton.
     """
-    ## Registry instance
+
     __registry = Registry()
 
-    def associate_file_type(self, ext, module):
+    def associate_file_type(self, ext: str, module: ModuleType):
         """
         Look into a module to find whether it contains a
         Reader class. If so, append it to readers and (potentially)
@@ -375,15 +377,16 @@ class Loader(object):
         """
         return self.__registry.associate_file_type(ext, module)
 
-    def associate_file_reader(self, ext, loader):
+    def associate_file_reader(self, ext: str, reader: FileReader):
         """
         Append a reader object to readers
         :param ext: file extension [string]
         :param module: reader object
         """
-        return self.__registry.associate_file_reader(ext, loader)
+        return self.__registry.associate_file_reader(ext, reader)
 
-    def load(self, file, format=None):
+
+    def load(self, file: str, format: Optional[str]=None):
         """
         Load a file
         :param file: file name (path)

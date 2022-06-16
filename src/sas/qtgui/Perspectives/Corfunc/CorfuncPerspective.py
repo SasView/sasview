@@ -18,6 +18,7 @@ from typing import Optional, List, Tuple
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
@@ -32,7 +33,7 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .CorfuncUtils import WIDGETS
-
+from .saveextrapolated import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
 class MyMplCanvas(FigureCanvas):
@@ -225,9 +226,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item: Optional[QStandardItem] = None
+        self.data = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
+        self.extrapolation_curve = None
 
         self._canvas = MyMplCanvas(self.model)
         self.plotLayout.insertWidget(0, self._canvas)
@@ -265,6 +268,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdExtract.setEnabled(False)
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
+        self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
+        self.cmdSaveExtrapolation.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
@@ -344,7 +349,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._update_calculator()
         self.model.itemChanged.disconnect(self.model_changed)
         try:
-            params, extrapolation, _ = self._calculator.compute_extrapolation()
+            params, extrapolation, self.extrapolation_curve = self._calculator.compute_extrapolation()
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
@@ -370,6 +375,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._canvas.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
+        self.cmdSaveExtrapolation.setEnabled(True)
 
 
     def transform(self):
@@ -525,6 +531,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         model_item = data_items[0]
         data = GuiUtils.dataFromItem(model_item)
+        self.data = data
         self._model_item = model_item
         self._calculator.set_data(data)
         self.cmdCalculateBg.setEnabled(True)
@@ -597,6 +604,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
+
+    def on_save_extrapolation(self):
+        q = self.data.x
+        if self.extrapolation_curve is not None:
+            window = SaveExtrapolatedPopup(q, self.extrapolation_curve)
+            window.exec_()
+        else:
+            raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
 
     def serializeAll(self):
         """

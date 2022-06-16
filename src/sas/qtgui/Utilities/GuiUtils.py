@@ -2,7 +2,7 @@
 """
 Global defaults and various utility functions usable by the general GUI
 """
-
+import numbers
 import os
 import re
 import sys
@@ -412,6 +412,7 @@ def createModelItemWithPlot(update_data, name=""):
     Adds 'update_data' to that row.
     """
     py_update_data = update_data
+    py_update_data.name = name # name must match title due to how plots are referenced
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
@@ -1264,6 +1265,12 @@ def saveData(fp, data):
             # we have a pure function
             content = o.__dict__.copy()
             return add_type(content, type(o))
+
+        if isinstance(o, numbers.Integral):
+            return int(o)
+
+        if isinstance(o, numbers.Real):
+            return float(o)
 
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))

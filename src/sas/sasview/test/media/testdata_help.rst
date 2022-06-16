@@ -229,6 +229,9 @@ Coordinate Test Data
 A_Raw_Example-1
   - OMF format data file from a simulation of magnetic spheres.
 
+sphere_R=0_2025
+  - vtk format data file describing a homogeneously magnetised sphere.  
+
 diamond
   - PDB format data file describing the structure of diamond.
 
