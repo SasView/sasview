@@ -850,6 +850,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         fit_page = ObjectLibrary.getObject(tab)
         model = fit_page.kernel_module
+        
+        if model is None:
+            logging.warning("No model selected")
+            return
+
         tab_name = tab
         model_name = model.id
         moniker = model.name
