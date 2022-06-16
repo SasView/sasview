@@ -722,7 +722,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         for key in parameters:
             nice_key = " ".join([s.capitalize() for s in key.split("_")])
-            fancy_parameters[nice_key] = parameters[key]
+            if parameters[key].strip() == '':
+                fancy_parameters[nice_key] = '-'
+            else:
+                fancy_parameters[nice_key] = parameters[key]
 
         report.add_table(fancy_parameters)
 
