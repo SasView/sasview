@@ -204,7 +204,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .omf, .vtk and.sld datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load Magnetic sld data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only .txt, .omf, .vtk and .sld datafile formats are supported. &lt;/p&gt;&lt;p&gt;Load Magnetic sld data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Load</string>
