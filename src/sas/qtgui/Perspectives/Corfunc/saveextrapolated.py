@@ -125,17 +125,17 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         """
         filename = QFileDialog.getSaveFileName(
             caption="Save As",
-            filter="Tab separated values (*.tsv)",
+            filter="Comma separated values (*.csv)",
             parent=None)[0]
 
         if not filename:
             return
 
         if "." not in filename:
-            filename += ".tsv"
+            filename += ".csv"
 
         with open(filename, "w") as outfile:
-            outfile.write("Q\tI(q)\n")
+            outfile.write("Q, I(q)\n")
             for q_value, i_value in zip(q, intensity):
-                outfile.write("%.6g\t%.6g\n"%(q_value, i_value))
+                outfile.write("%.6g, %.6g\n"%(q_value, i_value))
 
