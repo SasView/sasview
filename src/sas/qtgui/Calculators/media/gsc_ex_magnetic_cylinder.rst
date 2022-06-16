@@ -7,7 +7,7 @@ Example 2: A Magnetic Cylinder
 
 In this example we will use an SLD file describing a single solid
 cylinder, with both nuclear and magnetic scattering length densities (SLDs).
-The mag. cylinder SLD file be found in the test folder for coordinate data.
+The mag. cylinder SLD file can be found in the test folder for coordinate data.
 We will then use the calculator to create scattering intensity patterns for
 both a non-magnetised and magnetised cylinder.
 
