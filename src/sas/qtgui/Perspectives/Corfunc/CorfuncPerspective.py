@@ -32,7 +32,7 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .CorfuncUtils import WIDGETS
+from .corefuncutil import WIDGETS
 from .saveextrapolated import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
