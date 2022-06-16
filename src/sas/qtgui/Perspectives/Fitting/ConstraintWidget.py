@@ -365,6 +365,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         help_location = tree_location + helpfile
 
         # OMG, really? Crawling up the object hierarchy...
+        #
+        # It's the top level that needs to do the show help.
+        # Perhaps better to address directly, but it does need to
+        # be that object. I don't like that the type is hidden. :LW
         self.parent.parent.showHelp(help_location)
 
     def onTabCellEdit(self, row, column):
@@ -850,7 +854,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         fit_page = ObjectLibrary.getObject(tab)
         model = fit_page.kernel_module
-        
+
         if model is None:
             logging.warning("No model selected")
             return
