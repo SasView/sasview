@@ -51,6 +51,15 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="decimals">
+    <number>6</number>
+   </property>
+   <property name="minimum">
+    <double>0.000001000000000</double>
+   </property>
+   <property name="maximum">
+    <double>100.000000000000000</double>
+   </property>
   </widget>
   <widget class="QDoubleSpinBox" name="spnHigh">
    <property name="geometry">
@@ -61,6 +70,18 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="decimals">
+    <number>6</number>
+   </property>
+   <property name="minimum">
+    <double>0.000001000000000</double>
+   </property>
+   <property name="maximum">
+    <double>100.000000000000000</double>
+   </property>
+   <property name="value">
+    <double>1.000000000000000</double>
+   </property>
   </widget>
   <widget class="QDoubleSpinBox" name="spnDelta">
    <property name="geometry">
@@ -70,6 +91,15 @@
      <width>91</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="decimals">
+    <number>6</number>
+   </property>
+   <property name="minimum">
+    <double>0.000001000000000</double>
+   </property>
+   <property name="maximum">
+    <double>100.000000000000000</double>
    </property>
   </widget>
   <widget class="QLabel" name="lblLow">
