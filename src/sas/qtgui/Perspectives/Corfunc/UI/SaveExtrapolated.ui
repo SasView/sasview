@@ -6,77 +6,78 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>301</width>
-    <height>302</height>
+    <width>246</width>
+    <height>214</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QRadioButton" name="originalQ">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>30</y>
-     <width>141</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Use input Q values</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="resampleQ">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>70</y>
-     <width>151</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Resample Q Values</string>
-   </property>
-  </widget>
   <widget class="QDoubleSpinBox" name="spnLow">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>110</y>
+     <x>90</x>
+     <y>20</y>
      <width>91</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="decimals">
+    <number>6</number>
+   </property>
+   <property name="minimum">
+    <double>0.000001000000000</double>
+   </property>
+   <property name="maximum">
+    <double>100.000000000000000</double>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="spnHigh">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>150</y>
+     <x>90</x>
+     <y>60</y>
      <width>91</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="decimals">
+    <number>6</number>
+   </property>
+   <property name="minimum">
+    <double>0.000001000000000</double>
+   </property>
+   <property name="maximum">
+    <double>100.000000000000000</double>
+   </property>
+   <property name="value">
+    <double>1.000000000000000</double>
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="spnDelta">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>190</y>
+     <x>90</x>
+     <y>100</y>
      <width>91</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="decimals">
+    <number>6</number>
+   </property>
+   <property name="minimum">
+    <double>0.000001000000000</double>
+   </property>
+   <property name="maximum">
+    <double>100.000000000000000</double>
    </property>
   </widget>
   <widget class="QLabel" name="lblLow">
    <property name="geometry">
     <rect>
-     <x>44</x>
-     <y>110</y>
+     <x>-6</x>
+     <y>20</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -91,8 +92,8 @@
   <widget class="QLabel" name="lblHigh">
    <property name="geometry">
     <rect>
-     <x>44</x>
-     <y>150</y>
+     <x>-6</x>
+     <y>60</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -107,8 +108,8 @@
   <widget class="QLabel" name="lblDelta">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>190</y>
+     <x>-10</x>
+     <y>100</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -123,8 +124,8 @@
   <widget class="QLabel" name="units1">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>110</y>
+     <x>190</x>
+     <y>20</y>
      <width>15</width>
      <height>22</height>
     </rect>
@@ -136,8 +137,8 @@
   <widget class="QLabel" name="units2">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>150</y>
+     <x>190</x>
+     <y>60</y>
      <width>15</width>
      <height>22</height>
     </rect>
@@ -149,8 +150,8 @@
   <widget class="QLabel" name="units3">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>190</y>
+     <x>190</x>
+     <y>100</y>
      <width>15</width>
      <height>22</height>
     </rect>
@@ -162,8 +163,8 @@
   <widget class="QPushButton" name="cmdOK">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>250</y>
+     <x>20</x>
+     <y>160</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -175,8 +176,8 @@
   <widget class="QPushButton" name="cmdCancel">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>250</y>
+     <x>130</x>
+     <y>160</y>
      <width>93</width>
      <height>28</height>
     </rect>
