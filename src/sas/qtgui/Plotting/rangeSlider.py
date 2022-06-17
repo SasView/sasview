@@ -80,7 +80,7 @@ class RangeSlider(QtWidgets.QSlider):
         self.update()
 
         if self.hasTracking():
-            self.lowValueChanged.emit(self._high)
+            self.highValueChanged.emit(self._high)
         
     def paintEvent(self, event):
         # based on http://qt.gitorious.org/qt/qt/blobs/master/src/gui/widgets/qslider.cpp

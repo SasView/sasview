@@ -12,11 +12,10 @@ import sys
 import logging
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
 
 from .geni import Iq, Iqxy
-
-logger = logging.getLogger(__name__)
 
 if sys.version_info[0] < 3:
     def decode(s):
@@ -25,17 +24,20 @@ else:
     def decode(s):
         return s.decode() if isinstance(s, bytes) else s
 
-MFACTOR_AM = 2.853E-12
-MFACTOR_MT = 2.3164E-9
+MFACTOR_AM = 2.90636E-12
+MFACTOR_MT = 2.3128E-9
 METER2ANG = 1.0E+10
-#Avogadro constant [1/mol]
+# Avogadro constant [1/mol]
 NA = 6.02214129e+23
+
+def _vec(v):
+    return np.ascontiguousarray(v, 'd') if v is not None else None
 
 def mag2sld(mag, v_unit=None):
     """
     Convert magnetization to magnatic SLD
     sldm = Dm * mag where Dm = gamma * classical elec. radius/(2*Bohr magneton)
-    Dm ~ 2.853E-12 [A^(-2)] ==> Shouldn't be 2.90636E-12 [A^(-2)]???
+    Dm ~ 2.90636E8 [(A m)^(-1)]= 2.90636E-12 [to Ang^(-2)]
     """
     if v_unit == "A/m":
         factor = MFACTOR_AM
@@ -74,8 +76,9 @@ class GenSAS(object):
         self.data_mx = None
         self.data_my = None
         self.data_mz = None
-        self.data_vol = None #[A^3]
+        self.data_vol = None # [A^3]
         self.is_avg = False
+        self.is_elements = False
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -87,6 +90,12 @@ class GenSAS(object):
         self.params['Up_frac_in'] = 1.0
         self.params['Up_frac_out'] = 1.0
         self.params['Up_theta'] = 0.0
+        self.params['Up_phi'] = 0.0
+        self.uvw_to_UVW=Rotation.from_rotvec([0,0,0])
+        self.xyz_to_UVW=Rotation.from_rotvec([0,0,0])
+        self.transformed_positions = None
+        self.transformed_magnetic_slds = None
+        self.transformed_angles = None
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
@@ -96,7 +105,8 @@ class GenSAS(object):
         self.details['total_volume'] = ['A^(3)', 0.0, np.inf]
         self.details['Up_frac_in'] = ['[u/(u+d)]', 0.0, 1.0]
         self.details['Up_frac_out'] = ['[u/(u+d)]', 0.0, 1.0]
-        self.details['Up_theta'] = ['[deg]', -np.inf, np.inf]
+        self.details['Up_theta'] = ['[deg]', -90, 90]
+        self.details['Up_phi'] = ['[deg]', -180, 180]
         # fixed parameters
         self.fixed = []
 
@@ -114,6 +124,53 @@ class GenSAS(object):
         Sets is_avg: [bool]
         """
         self.is_avg = bool(is_avg)
+    
+    def reset_transformations(self):
+        """Set previous transformations as invalid
+        """
+        self.transformed_positions = None
+        self.transformed_magnetic_slds = None
+        self.transformed_angles = None
+    
+    def transform_positions(self):
+        """Transform position data"""
+        if self.transformed_positions is not None:
+            return self.transformed_positions
+        position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
+        self.transformed_positions = np.transpose(self.xyz_to_UVW.apply(position_data))
+        return self.transformed_positions
+    
+    def transform_magnetic_slds(self):
+        if self.transformed_magnetic_slds is not None:
+            return self.transformed_magnetic_slds
+        if self.data_mx is None and self.data_my is None and self.data_mz is None:
+            return None, None, None
+        else:
+            if self.data_mx is not None:
+                data_len = len(self.data_mx)
+            elif self.data_mx is not None:
+                data_len = len(self.data_my)
+            else:
+                data_len = len(self.data_mz)
+            sld_mx, sld_my, sld_mz = [sld if sld is not None else np.zeros(data_len) for sld in (self.data_mx, self.data_my, self.data_mz)]
+            # apply transformation from sample coords to beamline coords
+            magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
+            self.transformed_magnetic_slds = np.transpose(self.xyz_to_UVW.apply(magnetic_data))
+            return self.transformed_magnetic_slds
+    
+    def transform_angles(self):
+        if self.transformed_angles is not None:
+            return self.transformed_angles
+        s_theta = np.radians(self.params['Up_theta'])
+        s_phi = np.radians(self.params['Up_phi'])
+        p_hat = np.array([np.sin(s_theta) * np.cos(s_phi), np.sin(s_theta) * np.sin(s_phi), np.cos(s_theta)])
+        p_hat = self.uvw_to_UVW.apply(p_hat)
+        # remove floating point errors in rotation giving |value| > 1 with max and min
+        s_theta = np.degrees(np.arccos(max( min( p_hat[2] , 1), -1)))
+        # do not require special values for atan2 as numpy uses C standard values for cases such as (0,0)
+        s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
+        self.transformed_angles = (s_theta, s_phi)
+        return self.transformed_angles
 
     def calculate_Iq(self, qx, qy=None):
         """
@@ -122,20 +179,31 @@ class GenSAS(object):
         :Param y: array of y-values
         :return: function value
         """
-        x, y, z = self.data_x, self.data_y, self.data_z
+        # transform position data from sample to beamline coords
+        x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
         vol = self.data_vol
         if qy is not None and len(qy) > 0:
             # 2-D calculation
             qx, qy = _vec(qx), _vec(qy)
-            mx, my, mz = self.data_mx, self.data_my, self.data_mz
+            # MagSLD can have sld_m = None, although in practice usually a zero array
+            # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
+            mx, my, mz = self.transform_magnetic_slds()
             in_spin = self.params['Up_frac_in']
             out_spin = self.params['Up_frac_out']
-            s_theta = self.params['Up_theta']
-            I_out = Iqxy(
-                qx, qy, x, y, z, sld, vol, mx, my, mz,
-                in_spin, out_spin, s_theta,
-                )
+            # transform angles from environment to beamline coords
+            s_theta, s_phi = self.transform_angles()
+
+            if self.is_elements:
+                I_out = Iqxy(
+                    qx, qy, x, y, z, sld, vol, mx, my, mz,
+                    in_spin, out_spin, s_theta, s_phi,
+                    self.data_elements, self.is_elements)
+            else:
+                I_out = Iqxy(
+                    qx, qy, x, y, z, sld, vol, mx, my, mz,
+                    in_spin, out_spin, s_theta, s_phi,
+                    )
         else:
             # 1-D calculation
             q = _vec(qx)
@@ -148,12 +216,26 @@ class GenSAS(object):
                   + self.params['background'])
         return result
 
+    def set_rotations(self, uvw_to_UVW=Rotation.from_rotvec([0,0,0]), xyz_to_UVW=Rotation.from_rotvec([0,0,0])):
+        """Set the rotations for the coordinate systems
+
+        The rotation matrices are given for the COMPONENTS of the vectors - that is xyz_to_UVW
+        transforms the components of a vector from the xyz to UVW frame. This is the same rotation that
+        transforms the basis vectors from UVW to xyz.
+        """
+        self.uvw_to_UVW = uvw_to_UVW
+        self.xyz_to_UVW = xyz_to_UVW
+        self.reset_transformations()
+
     # TODO: rename set_sld_data() since it does more than set sld
     def set_sld_data(self, sld_data=None):
         """
         Sets sld_data
         """
         self.sld_data = sld_data
+        self.is_elements = sld_data.is_elements
+        if self.is_elements:
+            self.data_elements = sld_data.elements
         self.data_pos_unit = sld_data.pos_unit
         self.data_x = _vec(sld_data.pos_x)
         self.data_y = _vec(sld_data.pos_y)
@@ -165,6 +247,7 @@ class GenSAS(object):
         self.data_vol = _vec(sld_data.vol_pix)
         self.data_total_volume = np.sum(sld_data.vol_pix)
         self.params['total_volume'] = self.data_total_volume
+        self.reset_transformations()
 
     def getProfile(self):
         """
@@ -179,6 +262,9 @@ class GenSAS(object):
         :param x: simple value
         :return: (I value)
         """
+        if self.is_elements:
+            msg = "The data must be a grid of pixels - not elements"
+            raise ValueError(msg)
         if isinstance(x, list):
             if len(x[1]) > 0:
                 raise ValueError("Not a 1D vector.")
@@ -216,8 +302,589 @@ class GenSAS(object):
             mesg += "a list [qx,qy] where qx,qy are arrays."
             raise RuntimeError(mesg)
 
-def _vec(v):
-    return np.ascontiguousarray(v, 'd') if v is not None else None
+
+    def file_verification(self, nuc_data, mag_data):
+        """Verifies that enabled files are compatible and can be combined
+
+        When the user wishes to combine two different files for nuclear (nuc_data) and magnetic
+        (mag_data) data they must have the same 3D data points in real-space. This function
+        decides whther verification of this is necessary and if so carries it out.
+        In the case that the two files have the same real-space data points in different
+        orders this function re-orders the stored data within the MagSLD objects to make
+        them align. The full verification is only carried out once for any pair of loaded
+        files.
+        """
+
+
+        if not (nuc_data is not None and mag_data is not None):
+            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality immediately
+            return True
+
+        # ensure both files are point or element type- not a mixture
+        if (nuc_data.is_elements and not mag_data.is_elements) or \
+           (not nuc_data.is_elements and mag_data.is_elements):
+            logging.error("ERROR: files must both be point-wise or element-wise")
+            return False
+            
+        # check each file has the same number of coords
+        if nuc_data.pos_x.size != mag_data.pos_x.size:
+            logging.error("ERROR: files have a different number of data points")
+            return False
+            
+        # check the coords match up 1-to-1
+        nuc_coords = np.array(np.column_stack((nuc_data.pos_x, nuc_data.pos_y, nuc_data.pos_z)))
+        mag_coords = np.array(np.column_stack((mag_data.pos_x, mag_data.pos_y, mag_data.pos_z)))
+        # TODO: should this have a floating point tolerance??
+        if np.array_equal(nuc_coords, mag_coords):
+            if not nuc_data.is_elements:
+                # arrays are already sorted in the same order, so files match
+                return True
+            else:
+                points_already_match = True
+        else:
+            # now check if coords are in wrong order or don't match
+            nuc_sort_order = np.lexsort((nuc_data.pos_z, nuc_data.pos_y, nuc_data.pos_x))
+            mag_sort_order = np.lexsort((mag_data.pos_z, mag_data.pos_y, mag_data.pos_x))
+            nuc_coords = nuc_coords[nuc_sort_order]
+            mag_coords = mag_coords[mag_sort_order]
+            # check if sorted data points are equal
+            if np.array_equal(nuc_coords, mag_coords):
+                # if data points are equal then resort both lists into the same order
+                # is this too time consuming for long lists? logging info?
+                # 1) coords
+                nuc_data.pos_x, nuc_data.pos_y, nuc_data.pos_z = np.transpose(nuc_coords)
+                mag_data.pos_x, mag_data.pos_y, mag_data.pos_z = np.transpose(mag_coords)
+                # 2) mag_data array params that must be in same order as coords
+                if not nuc_data.is_elements:
+                    params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
+                else:
+                    params = ["pix_symbol"]
+                for item in params:
+                    nuc_val = getattr(nuc_data, item)
+                    if nuc_val is not None:
+                        # data should already be a np array, we cast to an ndarray as a check
+                        # very fast if data is already an instance of ndarray as expected because function
+                        # returns the array as-is
+                        setattr(nuc_data, item, np.asanyarray(nuc_val)[nuc_sort_order])
+                    mag_val = getattr(mag_data, item)
+                    if mag_val is not None:
+                        setattr(mag_data, item, np.asanyarray(mag_val)[mag_sort_order])
+                # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
+                # absolute positions not references to pos_x, pos_y, pos_z).
+                if not nuc_data.is_elements:
+                    return True
+                else:
+
+                    points_already_match = False
+            else:
+                # if sorted lists not equal then data points aren't equal
+                logging.error("ERROR: files have different real space position data")
+                return False
+                
+        if nuc_data.are_elements_array != mag_data.are_elements_array:
+            # If files don't have the same value for this they do not match anyway.
+            logging.error("ERROR: files must contain the same elements")
+            return False
+        if nuc_data.are_elements_array: # already in np array - can check rapidly
+            if points_already_match:
+                if np.array_equal(nuc_data.elements, mag_data.elements): # straight match - immediately confirm
+                    return True
+                # convert each element into a list of vertices - do not bmag_data comparing each face separately
+                # while technically with a large number of points one could describe multiple different
+                # elements, this is not possible from .vtk element types - and would massively slow down verification.
+                # np.unique also sorts the vertices
+                nuc_elements_sort = np.unique(nuc_data.elements.reshape((nuc_data.elements.shape[0], -1)), axis=-1)
+                mag_elements_sort = np.unique(mag_data.elements.reshape((mag_data.elements.shape[0], -1)), axis=-1)
+            else:
+                # get reverse permutation
+                # when positions were changed each index was sent to a new position - this finds the 
+                # position each index was sent to by inverting the permuation
+                nuc_permutation = np.argsort(nuc_sort_order)
+                mag_permutation = np.argsort(mag_sort_order)
+                nuc_elements_sort = np.unique(nuc_data.elements.reshape((nuc_data.elements.shape[0], -1)), axis=-1)
+                mag_elements_sort = np.unique(mag_data.elements.reshape((mag_data.elements.shape[0], -1)), axis=-1)
+                # must resort after point positions changed
+                nuc_elements_sort = np.sort(nuc_permutation[nuc_elements_sort], axis=1)
+                mag_elements_sort = np.sort(mag_permutation[mag_elements_sort], axis=1)
+            # elements in each file should now be described by the same real space point indices
+            # we sort them into order and directly compare them
+            nuc_elements_sort_order = np.lexsort(np.transpose(nuc_elements_sort))
+            mag_elements_sort_order = np.lexsort(np.transpose(mag_elements_sort))
+            if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
+                logging.error("ERROR: files must contain the same elements")
+                return False
+                
+            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
+            nuc_data.elements = nuc_data.elements[nuc_elements_sort_order, ...]
+            mag_data.elements = mag_data.elements[mag_elements_sort_order, ...]
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
+            for item in params:
+                nuc_val = getattr(nuc_data, item)
+                if nuc_val is not None:
+                    # data should already be a np array, we cast to an ndarray as a check
+                    # very fast if data is already an instance of ndarray as expected becuase function
+                    # returns the array as-is
+                    setattr(nuc_data, item, np.asanyarray(nuc_val)[nuc_elements_sort_order])
+                mag_val = getattr(mag_data, item)
+                if mag_val is not None:
+                    setattr(mag_data, item, np.asanyarray(mag_val)[mag_elements_sort_order])
+            if not points_already_match:
+                # if the points were moved we must also update all indices
+                nuc_data.elements = nuc_permutation[nuc_data.elements]
+                mag_data.elements = mag_permutation[mag_data.elements]
+            return True
+            
+        else:
+            # the files have different cell types within themselves - the elements are not already in a np array
+            # as np does not support jagged arrays
+            nuc_elements = []
+            mag_elements = []
+            # get the unique vertices of each element - see the note above about how this is not technically
+            # a perfect validation.
+            if points_already_match:
+                for element in nuc_data.elements:
+                    nuc_elements.append(np.sort(list(set([vertex for face in element for vertex in face]))))
+                for element in mag_data.elements:
+                    mag_elements.append(np.sort(list(set([vertex for face in element for vertex in face]))))
+            else:
+                # ensure the real space point indices match if they were also sorted
+                nuc_permutation = np.argsort(nuc_sort_order)
+                mag_permutation = np.argsort(mag_sort_order)
+                for element in nuc_data.elements:
+                    nuc_elements.append(np.sort(list(set([nuc_permutation[vertex] for face in element for vertex in face]))))
+                for element in mag_data.elements:
+                    mag_elements.append(np.sort(list(set([mag_permutation[vertex] for face in element for vertex in face]))))
+            nuc_lengths = [len(i) for i in nuc_elements]
+            mag_lengths = [len(i) for i in mag_elements]
+            if max(nuc_lengths) != max(mag_lengths): # if files have different lengthed elements cannot match
+                logging.error("ERROR: files must contain the same elements")
+                return False
+                
+            # sort element vertices into a np array with '-1' filling up the empty slots
+            r = np.arange(max(nuc_lengths))
+            nuc_elements_sort = -np.ones((len(nuc_elements), max(nuc_lengths)))
+            for i in range(len(nuc_elements)):
+                nuc_elements_sort[i, :nuc_lengths[i]] = nuc_elements[i]
+            mag_elements_sort = -np.ones((len(mag_elements), max(mag_lengths)))
+            for i in range(len(mag_elements)):
+                mag_elements_sort[i, :mag_lengths[i]] = mag_elements[i]
+            # sort the elements and directly compare them against each mag_data
+            nuc_elements_sort_order = np.lexsort(np.transpose(nuc_elements_sort))
+            mag_elements_sort_order = np.lexsort(np.transpose(mag_elements_sort))
+            if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
+                logging.error("ERROR: files must contain the same elements")
+                return False
+                
+            # if the sorted elements did match we must reposition all the 'per cell' values so the files match
+            nuc_data.elements = [nuc_data.elements[i] for i in nuc_elements_sort_order]
+            mag_data.elements = [mag_data.elements[i] for i in mag_elements_sort_order]
+            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix"]
+            for item in params:
+                nuc_val = getattr(nuc_data, item)
+                if nuc_val is not None:
+                    # data should already be a np array, we cast to an ndarray as a check
+                    # very fast if data is already an instance of ndarray as expected becuase function
+                    # returns the array as-is
+                    setattr(nuc_data, item, np.asanyarray(nuc_val)[nuc_elements_sort_order])
+                mag_val = getattr(mag_data, item)
+                if mag_val is not None:
+                    setattr(mag_data, item, np.asanyarray(mag_val)[mag_elements_sort_order])
+            if not points_already_match:
+                nuc_data.elements = [[[nuc_permutation[v] for v in f] for f in e] for e in nuc_data.elements]
+                mag_data.elements = [[[mag_permutation[v] for v in f] for f in e] for e in mag_data.elements]
+            
+        return True
+
+
+
+class VTKReader:
+    """
+    Class to read and process .vtk files
+    """
+
+    type_name = "VTK"
+    ## Wildcards
+    type = ["vtk files (*.VTK, *.vtk)|*.vtk"]
+    ## List of allowed extensions
+    ext = ['.vtk', '.VTK']
+
+    def read(self, path):
+        """This function reads in a vtk file
+
+        :param path: The filepath to be loaded
+        :type path: string
+        :return: A MagSLD instance containing the loaded data or None if loading failed
+        :rtype: MagSLD or None
+        """
+        try:
+            #load in the file
+            # for standard see https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
+            input_f = open(path, 'rb')
+            buff = decode(input_f.read())
+            lines = buff.split('\n')
+            #remove blank lines - allowed in file standard - returns as an iterator
+            lines = filter(None, (line.rstrip(" \r") for line in lines))
+            input_f.close()
+            #first lines should be a file type of the form "# vtk DataFile Version x.x"
+            header = next(lines)
+            if len(header) < 23:
+                logging.error("not a vtk file")
+                return None
+            elif header[:23] != "# vtk DataFile Version ":
+                logging.error("not a vtk file")
+                return None
+            elif float(header[23:]) > 3:
+                logging.error("vtk file version > 3.0")
+                return None
+            #skip title
+            next(lines)
+            #check file is ascii not binary
+            if next(lines)[:5].upper() != "ASCII":
+                logging.error("cannot read binary vtk")
+                return None
+            # determine dataset format and call appropriate loader to return a MagSLD of suitable type
+            dataset_format = [item.strip() for item in next(lines).split()]
+            if dataset_format[0].upper() != "DATASET":
+                logging.error("vtk file must have geometry section to be used in calulator")
+                return None
+            if dataset_format[1].upper() == "UNSTRUCTURED_GRID":
+                return self.unstructured_grid_read(lines, path)
+            else:
+                logging.error("vtk dataset format " + dataset_format + " is not supported")
+                return None
+        except Exception as error:
+            logging.exception(error)
+            return None
+    
+    def unstructured_grid_read(self, lines, path):
+        """Processes .vtk files in ASCII unstructured_grid format
+
+        :param lines: an iterator with the (non-empty) lines of the file, starting one line
+                        after the DATASET marker
+        :type lines: iterator
+        :param path: The filepath to be loaded
+        :type path: string
+        :return: A MagSLD instance containing the loaded data or None if loading failed
+        :rtype: MagSLD or None
+        """
+        # get information on points
+        point_data = next(lines).split()
+        if point_data[0].upper() != "POINTS":
+            logging.error("Expected POINTS as next section in vtk file format unstructured grid")
+        num_points = int(point_data[1])
+        # ignore datatype  - all can be read as float in python
+        # cannot read in with np as data not guaranteed to be on a grid with new lines after each point - although this is standard
+        points = []
+        while len(points) < 3*num_points:
+            #casting to int and float can handle whitespace - shouldn't need to strip()
+            points += [float(item) for item in next(lines).split()]
+        points = np.array(points).reshape((num_points, 3))
+        pos_x, pos_y, pos_z = np.hsplit(points, 3)
+        # read in the element data
+        element_data = next(lines).split()
+        if element_data[0].upper() != "CELLS":
+            logging.error("Expected CELLS as next section in vtk file format unstructured grid")
+        num_elements = int(element_data[1])
+        len_elements = int(element_data[2])
+        # must load and store carfeully: filetype does not guarantee that elements are line by line
+        # or all of the same type, cannot immediately cast to np array as cannot support potential jagged arrays
+        elements_raw = []
+        while len(elements_raw) < len_elements:
+            elements_raw += [int(item) for item in next(lines).split()]
+        # convert element data from a list of integers into a list of lists of element vertices 
+        elements_sorted = []
+        elements_sizes = []
+        index = 0
+        while index < len(elements_raw):
+            element_size = elements_raw[index]
+            elements_sorted.append(elements_raw[index+1:(index+element_size+1)])
+            elements_sizes.append(element_size)
+            index+=element_size+1
+        #sanity check the file has the same number of elements as stated
+        if num_elements != len(elements_sorted):
+            logging.error("error while reading cells - specified number is inconsistent with data")
+            return None
+        #get information on the element types
+        element_type_data = next(lines).split()
+        if element_type_data[0].upper() != "CELL_TYPES":
+            logging.error("Expected CELL_TYPES as next section in vtk file format unstructured grid")
+        num_element_types = int(element_type_data[1])
+        # sanity check same number of element types as elements
+        if num_element_types != num_elements:
+            logging.error("error while reading cell types - specified number is inconsistent with cells")
+            return None
+        element_types = []
+        while len(element_types) < num_element_types:
+            element_types += [int(item) for item in next(lines).split()]
+        # rewrite elements as list of faces with vertices
+        # elements has form elements x faces x vertex_indices
+        elements = [self.get_faces(elements_sorted[i], element_types[i]) for i in range(num_elements)]
+        # get the volumes of each element
+        vols = np.array([self.get_vols(elements_sorted[i], element_types[i], points) for i in range(num_elements)])
+        # get the element attributes - nuclear/magnetic sld data
+        attribute_data = self.load_data_attributes(lines, num_points, num_elements)
+        if attribute_data is None:
+            return None
+        point_data, element_data = attribute_data
+        # remove None type elements
+        if None in elements:
+            i = 0
+            while i < len(elements):
+                if elements[i] is None:
+                    for data in element_data:
+                        del data[0][i]
+                    del elements[i]
+                    del vols[i]
+                else:
+                    i += 1
+        #convert point data to element data - for now a standard mean function
+        if len(point_data) > 0:
+            logging.info("Attributes provided per point - averaging to produce 'per cell' data")
+            if max(elements_sizes) != min(elements_sizes):
+                # If the number of vertices per cell is not constant then add 'dummy values'
+                # so that array is not jagged - even with additional points np can calulate
+                # much faster - so we need non-jagged arrays
+                max_size = max(elements_sizes)
+                points_adj = np.concatenate((points, [[0,0,0]]), axis=0) # add null point to make array non-jagged
+                for attr in point_data: # add null value for new vertices to point to
+                    attr[0] = np.concatenate((attr[0], [np.zeros(attr[2])]))
+                new_index = len(points)
+                cells_sorted_adj = np.array([i + [new_index]*(max_size-j) for i,j in zip(elements_sorted, elements_sizes)])
+            else:
+                points_adj = points # if aray already non-jagged no need to alter it
+                cells_sorted_adj = np.array(elements_sorted)
+            vertices = points_adj[cells_sorted_adj]
+            means = np.mean(vertices, axis=1)
+            dists = means[:, None, :]-vertices
+            weights = 1/(np.sum(dists*dists, axis=2)) # use inverse distance weighting with power factor 2
+            # If we added dummy values set their weights to 0 so they are not used in calulation
+            if max(elements_sizes) != min(elements_sizes):
+                weights[cells_sorted_adj == len(points_adj)-1] = 0
+            for attr in point_data:
+                vals = attr[0][cells_sorted_adj]
+                val_means = np.sum(vals*weights[..., None], axis=1)/np.sum(weights[..., None], axis=1)
+                element_data.append([val_means, attr[1], attr[2]])
+        # identify data read in as nuclear and magnetic data - for now uses sizes rather than names
+        # so the user doesn't have to get exactly the right names on the data
+        if len(element_data) == 1:
+            if element_data[0][2] == 1:
+                sld_n = element_data[0][0]
+                sld_mx = np.zeros_like(sld_n)
+                sld_my = np.zeros_like(sld_n)
+                sld_mz = np.zeros_like(sld_n)
+            elif element_data[0][2] == 3:
+                sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
+                nuc_data = np.zeros_like(sld_mx)
+            else:
+                logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
+                return None
+        elif len(element_data) == 2:
+            if element_data[0][2] == 1 and element_data[1][2] == 3:
+                sld_n = element_data[0][0]
+                sld_mx, sld_my, sld_mz = np.hsplit(element_data[1][0], 3)
+            elif element_data[0][2] == 3 and element_data[1][2] == 1:
+                sld_n = element_data[1][0]
+                sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
+            else:
+                logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear and magnetic SLDs")
+                return None
+        else:
+            logging.error("Data attributes cannot be interpreted as nuclear and/or magnetic SLDs")
+            return None
+        # need to flatten as hsplit leaves a length 1 axis
+        output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
+        output.filename = os.path.basename(path)
+        # check if elements can be written as np array - all elements have same number of faces - all faces have same number of vertices
+        are_elements_array = False
+        if all(element_types[0] == x for x in element_types) and not (element_types[0] == 13) and not (element_types[0] == 14):
+            elements = np.array(elements)
+            are_elements_array = True
+        output.set_elements(elements, are_elements_array)
+        output.set_pixel_symbols('pixel') # draw points as pixels
+        output.set_pixel_volumes(vols)
+        return output
+
+    def load_data_attributes(self, lines, num_points, num_elements):
+        """Extract the data attributes from the file
+        
+        In the vtk file format the data attributes (POINT_DATA and CELL_DATA) are the last part of
+        the file. This function processes that data and returns it.
+
+        :param lines: The lines from the file - with the next line being either POINT_DATA or CELL_DATA.
+        :type lines: iterator
+        :param num_points: The number of points in the loaded file.
+        :type num_points: int
+        :param num_elements: The number of elements in the loaded file.
+        :type num_elements: int
+        :return: Either the loaded data attributes of None if loading failed. The data is a 2-tuple of lists 
+                of attributes - each attribute being a list of length 3 containing:
+                the data as a list, the name of the attribute and the number of components of the attribute.
+                The first list in the tuple is data associated with points, and the second is data
+                associated with elements.
+        :rtype: 2-tuple
+        """
+        # get data attributes
+        data_type_info = next(lines).split()
+        #cell and point data can come in either order
+        if data_type_info[0].strip().upper() == "CELL_DATA":
+            first_set = [num_elements, "CELL_DATA", "cells"]
+            second_set = [num_points, "POINT_DATA", "points"]
+        elif data_type_info[0].strip().upper() == "POINT_DATA":
+            first_set = [num_points, "POINT_DATA", "points"]
+            second_set = [num_elements, "CELL_DATA", "cells"]
+        else:
+            logging.error("error while reading file line: " + data_type_info + ". Expected data attributes POINT_DATA or CELL_DATA")
+            return None
+        if int(data_type_info[1]) != first_set[0]:
+            logging.error("error while reading " + first_set[1] + " attributes - incompatible with number of " + first_set[2])
+            return None
+        first_data, nextLine = self.load_attribute(lines, first_set[0])
+        if first_data is None:
+            return None
+        if int(nextLine.split()[1]) != second_set[0]:
+            logging.error("error while reading " + second_set[1] + " attributes - incompatible with number of " + second_set[2])
+            return None
+        second_data, _ = self.load_attribute(lines, second_set[0]) # cell_data already read by prev. function so starts from correct position
+        if second_data is None:
+            return None
+        if data_type_info[0].strip().upper() == "CELL_DATA":
+            return (second_data, first_data)
+        else:
+            return (first_data, second_data)
+
+    def load_attribute(self, lines, size):
+        """Returns a single set of data - either point data or element data
+
+        :param lines: The lines of the file - with the next lines being the first after the descriptor
+                        POINT_DATA or CELL_DATA.
+        :type lines: iterator
+        :param size: The expected length of each attribute - either the number of points or number of elements.
+        :type size: int
+        :return: a tuple containg both the data loaded - and the next lines in the file - which is None
+                    if the file is ended.
+        :rtype: 2-tuple
+        """
+        # loop over lines - no need to worry about infinite loop as will stop at end of file if required
+        data = []
+        while True:
+            nextLine = next(lines, None)
+            # check if end of data attributes of this type
+            if nextLine is None:
+                return data, None
+            nextLineSplit = nextLine.split()
+            attribute = []
+            if nextLineSplit[0].strip().upper() == "CELL_DATA" or nextLineSplit[0].upper() == "POINT_DATA":
+                return data, nextLine
+            elif nextLineSplit[0].strip().upper() == "SCALARS":
+                dataType = "SCALAR"
+                dataName = nextLineSplit[1].strip()
+                if len(nextLineSplit) <= 3:
+                    components = 1
+                else:
+                    components = int(nextLineSplit[3]) # do not care about type - python can convert all to float
+                # check for lookup table
+                nextLine = next(lines)
+                if not nextLine.split()[0].strip().upper() == "LOOKUP_TABLE":
+                    attribute += [float(item) for item in nextLine.split()]
+            elif nextLineSplit[0].strip().upper() == "VECTORS":
+                dataType = "VECTOR"
+                dataName = nextLineSplit[1].strip()
+                components = 3
+            else:
+                logging.error("Data type " + nextLineSplit[0].strip() + " is not currently accepted")
+                return None, None
+            while len(attribute) < size*components:
+                #casting to int and float can handle whitespace - shouldn't need to strip()
+                attribute += [float(item) for item in next(lines).split()]
+            attribute = np.reshape(np.array(attribute), (size, components))
+            data.append([attribute, dataName, components])
+    
+    def get_faces(self, e, element_type):
+        """Returns the faces of the elements
+
+        This function takes in the vertices and element type of an element and returns
+        a list of faces - the orientation of the vertices in each face does not appear 
+        to be guaranteed in the vtk file format.
+
+        :param e: The vertices (as indices) of the element in the order as given in the .vtk file
+                    specification.
+        :type e: list of int
+        :param element_type: The element_type (as given in the file specification).
+        :type element_type: int
+        :return: A list of faces which is in turn a list of vertex indices, None if the element type is not supported
+        :rtype: list of list of int or None
+        """
+        # e = cell_elements - shortened for brevity in code
+        #returns points in faces
+        if element_type == 10: # tetrahedron
+            return [[e[0], e[2], e[1]], 
+                    [e[0], e[1], e[3]], 
+                    [e[0], e[3], e[2]], 
+                    [e[1], e[2], e[3]]]
+        elif element_type == 11 or element_type == 12: # voxel (rectangular cuboid) or hexahedron
+            return [[e[0], e[2], e[3], e[1]],
+                    [e[0], e[1], e[5], e[4]],
+                    [e[1], e[3], e[7], e[5]],
+                    [e[3], e[2], e[6], e[7]],
+                    [e[2], e[0], e[4], e[6]],
+                    [e[4], e[5], e[7], e[6]]]
+        elif element_type == 13: # wedge
+            return [[e[0], e[3], e[4], e[1]],
+                    [e[0]. e[2], e[5], e[3]],
+                    [e[1], e[4], e[5], e[2]],
+                    [e[0], e[1], e[2]],
+                    [e[3], e[5], e[4]]]
+        elif element_type == 14: # quadrilateral based pyramid
+            return [[e[0], e[3], e[2], e[1]],
+                    [e[0], e[1], e[4]],
+                    [e[3], e[0], e[4]],
+                    [e[2], e[3], e[4]],
+                    [e[1], e[2], e[4]]]
+        else:
+            logging.error("element type (CELL_TYPE=" + str(element_type) + ") is not supported - skipping element")
+            return None
+
+    def get_vols(self, e, element_type, v):
+        """Returns the volumes of the elements
+
+        This function takes in the vertices and element type of an element and returns
+        the real space volume of each element.
+
+        :param e: the vertices (as indexes) of the element in the order as given in the .vtk file
+                    specification.
+        :type e: list of int
+        :param element_type: The element_type (as given in the file specification).
+        :type element_type: int
+        :param v: A list of real space positions which are indexed by `e`.
+        :type v: list
+        :return: The volume of the element.
+        :rtype: float
+        """
+        if element_type == 10: # tetrahedron
+            return np.abs(np.dot(v[e[0]]-v[e[3]], np.cross(v[e[1]]-v[e[3]], v[e[2]]-v[e[3]])))/6
+        elif element_type == 11: # voxel
+            return np.abs(np.dot(v[e[0]]-v[e[2]], np.cross(v[e[0]]-v[e[1]], v[e[0]]-v[e[4]])))
+        elif element_type == 12: # hexahedron
+            vals = np.array([[e[2], e[4], e[7], e[1]],
+                             [e[0], e[1], e[2], e[4]],
+                             [e[1], e[4], e[7], e[5]],
+                             [e[1], e[2], e[3], e[7]],
+                             [e[2], e[4], e[6], e[7]]])
+            vert = v[vals]
+            return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
+        elif element_type == 13: # wedge
+            vals = np.array([[e[0], e[1], e[2], e[5]],
+                             [e[0], e[1], e[3], e[5]],
+                             [e[1], e[3], e[4], e[5]]])
+            vert = v[vals]
+            return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
+        elif element_type == 14: # quadrilateral based pyramid
+            vals = np.array([[e[0], e[1], e[2], e[4]],
+                             [e[0], e[3], e[2], e[4]]])
+            vert = v[vals]
+            return np.sum(np.abs(np.sum(vert[:,0]-vert[:,3] * np.cross(vert[:,1]-vert[:,3], vert[:,2]-vert[:,3]), axis=-1)))/6
+        else:
+            return None
 
 class OMF2SLD(object):
     """
@@ -270,7 +937,7 @@ class OMF2SLD(object):
             self.mz = np.zeros(length)
 
         self._check_data_length(length)
-        #self.remove_null_points(True, False)
+        # self.remove_null_points(True, False)
         mask = np.ones(len(self.sld_n), dtype=bool)
         if shape.lower() == 'ellipsoid':
             try:
@@ -292,12 +959,13 @@ class OMF2SLD(object):
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except Exception as exc:
-                logger.error(exc)
+                logging.error(exc)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
         self.output.set_pix_type('pixel')
         self.output.set_pixel_symbols('pixel')
+        self.output.filename = omfdata.filename
 
     def get_omfdata(self):
         """
@@ -317,6 +985,7 @@ class OMF2SLD(object):
         :Params length: data length
         """
         parts = (self.pos_x, self.pos_y, self.pos_z, self.mx, self.my, self.mz)
+
         if any(len(v) != length for v in parts):
             raise ValueError("Error: Inconsistent data length.")
 
@@ -340,11 +1009,7 @@ class OMF2SLD(object):
             self.pos_y -= (min(self.pos_y) + max(self.pos_y)) / 2.0
             self.pos_z -= (min(self.pos_z) + max(self.pos_z)) / 2.0
 
-    def get_magsld(self):
-        """
-        return MagSLD
-        """
-        return self.output
+
 
 
 class OMFReader(object):
@@ -366,9 +1031,9 @@ class OMFReader(object):
         :return: x, y, z, sld_n, sld_mx, sld_my, sld_mz
         """
         desc = ""
-        mx = np.zeros(0)
-        my = np.zeros(0)
-        mz = np.zeros(0)
+        mx = []
+        my = []
+        mz = []
         try:
             input_f = open(path, 'rb')
             buff = decode(input_f.read())
@@ -388,99 +1053,115 @@ class OMFReader(object):
                         _mx = mag2sld(_mx, valueunit)
                         _my = mag2sld(_my, valueunit)
                         _mz = mag2sld(_mz, valueunit)
-                        mx = np.append(mx, _mx)
-                        my = np.append(my, _my)
-                        mz = np.append(mz, _mz)
+                        mx.append(_mx)
+                        my.append(_my)
+                        mz.append(_mz)
                     except Exception as exc:
                         # Skip non-data lines
-                        logger.error(str(exc)+" when processing %r"%line)
-                #Reading Header; Segment count ignored
-                s_line = line.split(":", 1)
-                if s_line[0].lower().count("oommf") > 0:
-                    oommf = s_line[1].lstrip()
-                if s_line[0].lower().count("title") > 0:
-                    title = s_line[1].lstrip()
-                if s_line[0].lower().count("desc") > 0:
-                    desc += s_line[1].lstrip()
-                    desc += '\n'
-                if s_line[0].lower().count("meshtype") > 0:
-                    meshtype = s_line[1].lstrip()
-                if s_line[0].lower().count("meshunit") > 0:
-                    meshunit = s_line[1].lstrip()
-                    if meshunit.count("m") < 1:
-                        msg = "Error: \n"
-                        msg += "We accept only m as meshunit"
-                        raise ValueError(msg)
-                if s_line[0].lower().count("xbase") > 0:
-                    xbase = s_line[1].lstrip()
-                if s_line[0].lower().count("ybase") > 0:
-                    ybase = s_line[1].lstrip()
-                if s_line[0].lower().count("zbase") > 0:
-                    zbase = s_line[1].lstrip()
-                if s_line[0].lower().count("xstepsize") > 0:
-                    xstepsize = s_line[1].lstrip()
-                if s_line[0].lower().count("ystepsize") > 0:
-                    ystepsize = s_line[1].lstrip()
-                if s_line[0].lower().count("zstepsize") > 0:
-                    zstepsize = s_line[1].lstrip()
-                if s_line[0].lower().count("xnodes") > 0:
-                    xnodes = s_line[1].lstrip()
-                if s_line[0].lower().count("ynodes") > 0:
-                    ynodes = s_line[1].lstrip()
-                if s_line[0].lower().count("znodes") > 0:
-                    znodes = s_line[1].lstrip()
-                if s_line[0].lower().count("xmin") > 0:
-                    xmin = s_line[1].lstrip()
-                if s_line[0].lower().count("ymin") > 0:
-                    ymin = s_line[1].lstrip()
-                if s_line[0].lower().count("zmin") > 0:
-                    zmin = s_line[1].lstrip()
-                if s_line[0].lower().count("xmax") > 0:
-                    xmax = s_line[1].lstrip()
-                if s_line[0].lower().count("ymax") > 0:
-                    ymax = s_line[1].lstrip()
-                if s_line[0].lower().count("zmax") > 0:
-                    zmax = s_line[1].lstrip()
-                if s_line[0].lower().count("valueunit") > 0:
-                    valueunit = s_line[1].lstrip().rstrip()
-                if s_line[0].lower().count("valuemultiplier") > 0:
-                    valuemultiplier = s_line[1].lstrip()
-                if s_line[0].lower().count("valuerangeminmag") > 0:
-                    valuerangeminmag = s_line[1].lstrip()
-                if s_line[0].lower().count("valuerangemaxmag") > 0:
-                    valuerangemaxmag = s_line[1].lstrip()
-                if s_line[0].lower().count("end") > 0:
-                    output.filename = os.path.basename(path)
-                    output.oommf = oommf
-                    output.title = title
-                    output.desc = desc
-                    output.meshtype = meshtype
-                    output.xbase = float(xbase) * METER2ANG
-                    output.ybase = float(ybase) * METER2ANG
-                    output.zbase = float(zbase) * METER2ANG
-                    output.xstepsize = float(xstepsize) * METER2ANG
-                    output.ystepsize = float(ystepsize) * METER2ANG
-                    output.zstepsize = float(zstepsize) * METER2ANG
-                    output.xnodes = float(xnodes)
-                    output.ynodes = float(ynodes)
-                    output.znodes = float(znodes)
-                    output.xmin = float(xmin) * METER2ANG
-                    output.ymin = float(ymin) * METER2ANG
-                    output.zmin = float(zmin) * METER2ANG
-                    output.xmax = float(xmax) * METER2ANG
-                    output.ymax = float(ymax) * METER2ANG
-                    output.zmax = float(zmax) * METER2ANG
-                    output.valuemultiplier = valuemultiplier
-                    output.valuerangeminmag = mag2sld(float(valuerangeminmag), \
-                                                      valueunit)
-                    output.valuerangemaxmag = mag2sld(float(valuerangemaxmag), \
-                                                      valueunit)
+                        logging.error(str(exc)+" when processing %r"%line)
+                elif line:
+                # Reading Header; Segment count ignored
+                    s_line = line.split(":", 1)
+                    if s_line[0].lower().count("oommf") > 0:
+                        oommf = s_line[1].lstrip()
+                    if s_line[0].lower().count("title") > 0:
+                        title = s_line[1].lstrip()
+                    if s_line[0].lower().count("desc") > 0:
+                        desc += s_line[1].lstrip()
+                        desc += '\n'
+                    if s_line[0].lower().count("meshtype") > 0:
+                        meshtype = s_line[1].lstrip()
+                    if s_line[0].lower().count("meshunit") > 0:
+                        meshunit = s_line[1].lstrip()
+                        if meshunit.count("m") < 1:
+                            msg = "Error: \n"
+                            msg += "We accept only m as meshunit"
+                            logging.error(msg)
+                            return None
+                    if s_line[0].lower().count("xbase") > 0:
+                        xbase = s_line[1].lstrip()
+                    if s_line[0].lower().count("ybase") > 0:
+                        ybase = s_line[1].lstrip()
+                    if s_line[0].lower().count("zbase") > 0:
+                        zbase = s_line[1].lstrip()
+                    if s_line[0].lower().count("xstepsize") > 0:
+                        xstepsize = s_line[1].lstrip() 
+                    if s_line[0].lower().count("ystepsize") > 0:
+                        ystepsize = s_line[1].lstrip()   
+                    if s_line[0].lower().count("zstepsize") > 0:
+                        zstepsize = s_line[1].lstrip()
+                    if s_line[0].lower().count("xnodes") > 0:
+                        xnodes = s_line[1].lstrip()   
+                    #print(s_line[0].lower().count("ynodes"))
+                    if s_line[0].lower().count("ynodes") > 0:
+                        ynodes = s_line[1].lstrip()
+                        #print(ynodes)
+                    if s_line[0].lower().count("znodes") > 0:
+                        znodes = s_line[1].lstrip()  
+                    if s_line[0].lower().count("xmin") > 0:
+                        xmin = s_line[1].lstrip()
+                    if s_line[0].lower().count("ymin") > 0:
+                        ymin = s_line[1].lstrip()
+                    if s_line[0].lower().count("zmin") > 0:
+                        zmin = s_line[1].lstrip()
+                    if s_line[0].lower().count("xmax") > 0:
+                        xmax = s_line[1].lstrip()
+                    if s_line[0].lower().count("ymax") > 0:
+                        ymax = s_line[1].lstrip()
+                    if s_line[0].lower().count("zmax") > 0:
+                        zmax = s_line[1].lstrip()
+                    if s_line[0].lower().count("valueunit") > 0:
+                        valueunit = s_line[1].lstrip()
+                        if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
+                            msg = "Error: \n"
+                            msg += "We accept only mT or A/m as valueunit"
+                            logging.error(msg)    
+                            return None
+                    if s_line[0].lower().count("valuemultiplier") > 0:
+                        valuemultiplier = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangeminmag") > 0:
+                        valuerangeminmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangemaxmag") > 0:
+                        valuerangemaxmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("end") > 0:
+                        output.filename = os.path.basename(path)
+                        output.oommf = oommf
+                        output.title = title
+                        output.desc = desc
+                        output.meshtype = meshtype
+                        output.xbase = float(xbase) * METER2ANG
+                        output.ybase = float(ybase) * METER2ANG
+                        output.zbase = float(zbase) * METER2ANG
+                        output.xstepsize = float(xstepsize) * METER2ANG
+                        output.ystepsize = float(ystepsize) * METER2ANG
+                        output.zstepsize = float(zstepsize) * METER2ANG
+                        output.xnodes = float(xnodes)
+                        output.ynodes = float(ynodes)
+                        output.znodes = float(znodes)
+                        output.xmin = float(xmin) * METER2ANG
+                        output.ymin = float(ymin) * METER2ANG
+                        output.zmin = float(zmin) * METER2ANG
+                        output.xmax = float(xmax) * METER2ANG
+                        output.ymax = float(ymax) * METER2ANG
+                        output.zmax = float(zmax) * METER2ANG
+                        output.valuemultiplier = valuemultiplier
+                        output.valuerangeminmag \
+                            = mag2sld(float(valuerangeminmag), valueunit)
+                        output.valuerangemaxmag \
+                            = mag2sld(float(valuerangemaxmag), valueunit)
+            mx = np.reshape(mx, (len(mx),))
+            my = np.reshape(my, (len(my),))
+            mz = np.reshape(mz, (len(mz),))
             output.set_m(mx, my, mz)
+            omf2sld = OMF2SLD()
+            omf2sld.set_data(output)
+            output = omf2sld.get_output()
             return output
         except Exception:
             msg = "%s is not supported: \n" % path
             msg += "We accept only Text format OMF file."
-            raise RuntimeError(msg)
+            logging.warning(msg)
+            return None
 
 class PDBReader(object):
     """
@@ -541,25 +1222,26 @@ class PDBReader(object):
                         _pos_x = float(line[30:38].strip())
                         _pos_y = float(line[38:46].strip())
                         _pos_z = float(line[46:54].strip())
-                        pos_x = np.append(pos_x, _pos_x)
-                        pos_y = np.append(pos_y, _pos_y)
-                        pos_z = np.append(pos_z, _pos_z)
+                        pos_x.append(_pos_x)
+                        pos_y.append(_pos_y)
+                        pos_z.append(_pos_z)
                         try:
                             val = nsf.neutron_sld(atom_name)[0]
                             # sld in Ang^-2 unit
                             val *= 1.0e-6
-                            sld_n = np.append(sld_n, val)
+                            sld_n.append(val)
                             atom = formula(atom_name)
                             # cm to A units
                             vol = 1.0e+24 * atom.mass / atom.density / NA
-                            vol_pix = np.append(vol_pix, vol)
+                            vol_pix.append(vol)
                         except Exception:
-                            logger.error("Error: set the sld of %s to zero"% atom_name)
-                            sld_n = np.append(sld_n, 0.0)
-                        sld_mx = np.append(sld_mx, 0)
-                        sld_my = np.append(sld_my, 0)
-                        sld_mz = np.append(sld_mz, 0)
-                        pix_symbol = np.append(pix_symbol, atom_name)
+                            logging.warning("Warning: set the sld of %s to zero"% atom_name)
+                            sld_n.append(0.0)
+                        sld_mx.append(0)
+                        sld_my.append(0)
+                        sld_mz.append(0)
+                        pix_symbol.append(atom_name)
+
                     elif line[0:6] == 'CONECT':
                         toks = line.split()
                         num = int(toks[1]) - 1
@@ -572,7 +1254,7 @@ class PDBReader(object):
                             if int_val == 0:
                                 break
                             val_list.append(int_val)
-                        #need val_list ordered
+                        # need val_list ordered
                         for val in val_list:
                             index = val - 1
                             if (pos_x[index], pos_x[num]) in x_line and \
@@ -587,8 +1269,16 @@ class PDBReader(object):
                         y_lines.append(y_line)
                         z_lines.append(z_line)
                 except Exception as exc:
-                    logger.error(exc)
-
+                    logging.error(exc)
+            pos_x = np.reshape(pos_x, (len(pos_x),))
+            pos_y = np.reshape(pos_y, (len(pos_y),))
+            pos_z = np.reshape(pos_z, (len(pos_z),))    
+            sld_n = np.reshape(sld_n, (len(sld_n),)) 
+            sld_mx = np.reshape(sld_mx, (len(sld_mx),))    
+            sld_my = np.reshape(sld_my, (len(sld_my),)) 
+            sld_mz = np.reshape(sld_mz, (len(sld_mz),))  
+            vol_pix = np.reshape(vol_pix, (len(vol_pix),))   
+            pix_symbol = np.reshape(pix_symbol, (len(pix_symbol),))                                                             
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
             output.filename = os.path.basename(path)
@@ -599,7 +1289,8 @@ class PDBReader(object):
             output.sld_unit = '1/A^(2)'
             return output
         except Exception:
-            raise RuntimeError("%s is not a sld file" % path)
+            logging.error("%s is not a pdb file" % path)
+            return None
 
     def write(self, path, data):
         """
@@ -608,11 +1299,18 @@ class PDBReader(object):
         print("Not implemented... ")
 
 class SLDReader(object):
-    """
-    SLD reader for text files.
+    """SLD reader for text files.
 
-    7 columns: x, y, z, sld, mx, my, mz
-    8 columns: x, y, z, sld, mx, my, mz, volume
+    format:
+    1 line of header - may give any information
+    n lines of data points of the form:
+
+    4 columns: x        y       z       sld
+    6 columns: x        y       z       mx      my      mz
+    7 columns: x        y       z       sld     mx      my      mz
+    8 columns: x        y       z       sld     mx      my      mz      volume
+    
+    where all n lines have the same format.
     """
     ## File type
     type_name = "SLD ASCII"
@@ -635,9 +1333,19 @@ class SLDReader(object):
                               ndmin=1, unpack=True)
         except Exception:
             data = None
-        if data is None or data.shape[0] not in (7, 8):
-            raise RuntimeError("%r is not a sld file" % path)
-        x, y, z, sld, mx, my, mz = data[:7]
+        if data is None or data.shape[0] not in (4, 6, 7, 8):
+            logging.error("%r is not an sld file" % path)
+            return None
+        if data.shape[0] == 4:
+            x, y, z, sld = data[:4]
+            mx = np.zeros_like(sld)
+            my = np.zeros_like(sld)
+            mz = np.zeros_like(sld)
+        elif data.shape[0] == 6:
+            x, y, z, mx, my, mz = data[:6]
+            sld = np.zeros_like(mx)
+        else:
+            x, y, z, sld, mx, my, mz = data[:7]
         vol = data[7] if data.shape[0] > 7 else None
         output = MagSLD(x, y, z, sld, mx, my, mz, vol)
         output.filename = os.path.basename(path)
@@ -655,6 +1363,9 @@ class SLDReader(object):
             raise ValueError("Missing the file path.")
         if data is None:
             raise ValueError("Missing the data to save.")
+        if data.is_elements:
+            logging.error("cannot save finite element data as a .sld file")
+            return
         x, y, z = data.pos_x, data.pos_y, data.pos_z
         sld_n = data.sld_n if data.sld_n is not None else np.zeros_like(x)
         if data.sld_mx is None:
@@ -662,7 +1373,7 @@ class SLDReader(object):
         else:
             mx, my, mz = data.sld_mx, data.sld_my, data.sld_mz
         vol = data.vol_pix if data.vol_pix is not None else np.ones_like(x)
-        columns = np.vstack((x, y, z, sld_n, mx, my, mz, vol))
+        columns = np.column_stack((x, y, z, sld_n, mx, my, mz, vol))
         with open(path, 'w') as out:
             # First Line: Column names
             out.write("X  Y  Z  SLDN SLDMx  SLDMy  SLDMz VOLUMEpix\n")
@@ -773,9 +1484,12 @@ class MagSLD(object):
                  sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None):
         """
         Init for mag SLD
-        :params : All should be numpy 1D array
+        :params : All should be np 1D array
         """
         self.is_data = True
+        self.is_elements = False # is this a finite-element based mesh
+        self.are_elements_array = False # are all elements of the same type
+        self.elements = []
         self.filename = ''
         self.xstepsize = 6.0
         self.ystepsize = 6.0
@@ -799,9 +1513,11 @@ class MagSLD(object):
         self.sld_my = sld_my
         self.sld_mz = sld_mz
         self.vol_pix = vol_pix
+        self.data_length = len(pos_x)
         #self.sld_m = None
         #self.sld_phi = None
         #self.sld_theta = None
+        #self.sld_phi = None
         self.pix_symbol = None
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
@@ -827,27 +1543,28 @@ class MagSLD(object):
         """
         self.pix_type = pix_type
 
-    def set_sldn(self, sld_n):
+    def set_sldn(self, sld_n, non_zero_mag_only=True):
         """
         Sets neutron SLD.
 
         Warning: if *sld_n* is a scalar and attribute *is_data* is True, then
-        only pixels with non-zero magnetism will be set.
+        only pixels with non-zero magnetism will be set by default. Use
+        the argument non_zero_mag_only=False to change this
         """
         if isinstance(sld_n, float):
-            if self.is_data:
+            if self.is_data and non_zero_mag_only:
                 # For data, put the value to only the pixels w non-zero M
                 is_nonzero = (np.fabs(self.sld_mx) +
                               np.fabs(self.sld_my) +
                               np.fabs(self.sld_mz)).nonzero()
                 if len(is_nonzero[0]) > 0:
-                    self.sld_n = np.zeros_like(self.pos_x)
+                    self.sld_n = np.zeros(self.data_length)
                     self.sld_n[is_nonzero] = sld_n
                 else:
-                    self.sld_n = np.full_like(self.pos_x, sld_n)
+                    self.sld_n = np.full(self.data_length, sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n = np.full_like(self.pos_x, sld_n)
+                self.sld_n = np.full(self.data_length, sld_n)
         else:
             self.sld_n = sld_n
 
@@ -856,15 +1573,15 @@ class MagSLD(object):
         Sets mx, my, mz and abs(m).
         """ # Note: escaping
         if isinstance(sld_mx, float):
-            self.sld_mx = np.full_like(self.pos_x, sld_mx)
+            self.sld_mx = np.full(self.data_length, sld_mx)
         else:
             self.sld_mx = sld_mx
         if isinstance(sld_my, float):
-            self.sld_my = np.full_like(self.pos_x, sld_my)
+            self.sld_my = np.full(self.data_length, sld_my)
         else:
             self.sld_my = sld_my
         if isinstance(sld_mz, float):
-            self.sld_mz = np.full_like(self.pos_x, sld_mz)
+            self.sld_mz = np.full(self.data_length, sld_mz)
         else:
             self.sld_mz = sld_mz
 
@@ -882,7 +1599,7 @@ class MagSLD(object):
         if self.sld_n is None:
             return
         if symbol.__class__.__name__ == 'str':
-            self.pix_symbol = np.repeat(symbol, len(self.sld_n))
+            self.pix_symbol = np.repeat(symbol, len(self.pos_x))
         else:
             self.pix_symbol = symbol
 
@@ -896,10 +1613,32 @@ class MagSLD(object):
         if isinstance(vol, np.ndarray):
             self.vol_pix = vol
         elif vol.__class__.__name__.count('float') > 0:
-            self.vol_pix = np.repeat(vol, len(self.sld_n))
+            self.vol_pix = np.repeat(vol, self.data_length)
         else:
             # TODO: raise error rather than silently ignore
             self.vol_pix = None
+    
+    def set_elements(self, elements, are_elements_array):
+        """Set elements for a non-rectangular grid
+
+        This sets element data for the object allowing non rectangular grids to be used.
+        It sets a boolean flag in the class, stores the structure of the elements and
+        sets the pixel type to 'element', and hence nodes and stepsize to None. Once
+        this flag is enabled the sld data is expected to match up to elements as opposed
+        to points.
+
+        :param elements: The elements which describe the volume. This should be a list
+            (of elements) of a list (of faces) of a list (of vertex indices). It may be a
+            jagged array due to the freedom of the .vtk file format. Faces may not be
+            triangulised.
+        :type elements: list
+        """
+        self.is_elements = True
+        self.are_elements_array = are_elements_array
+        self.elements = elements
+        self.pix_type = "elements"
+        self.data_length = len(elements)
+        self.set_nodes()
 
     def get_sldn(self):
         """
@@ -951,7 +1690,7 @@ class MagSLD(object):
                     if zpos_pre != z_pos:
                         self.zstepsize = np.fabs(z_pos - zpos_pre)
                         break
-                #default pix volume
+                # default pix volume
                 self.vol_pix = np.ones(len(self.pos_x))
                 vol = self.xstepsize * self.ystepsize * self.zstepsize
                 self.set_pixel_volumes(vol)
@@ -994,10 +1733,9 @@ def test():
         raise ValueError("file(s) not found: %r"%(ofpath,))
     oreader = OMFReader()
     omfdata = oreader.read(ofpath)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
+
     model = GenSAS()
-    model.set_sld_data(omf2sld.output)
+    model.set_sld_data(omfdata.output)
     q = np.linspace(0, 0.1, 11)[1:]
     return model.runXY([q, q])
 
@@ -1025,8 +1763,7 @@ def demo_load():
     oreader = OMFReader()
     output = reader.read(tfpath)
     ooutput = oreader.read(ofpath)
-    foutput = OMF2SLD()
-    foutput.set_data(ooutput)
+
 
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
@@ -1063,10 +1800,9 @@ def demo_save():
         raise ValueError("file(s) not found: %r"%(ofpath,))
     oreader = OMFReader()
     omfdata = oreader.read(ofpath)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
+
     writer = SLDReader()
-    writer.write("out.txt", omf2sld.output)
+    writer.write("out.txt", omfdata.output)
 
 def sas_gen_c(self, qx, qy=None):
     """
@@ -1086,6 +1822,7 @@ def sas_gen_c(self, qx, qy=None):
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
+    s_phi = self.params['Up_phi']
     scale = self.params['scale']
     total_volume = self.params['total_volume']
     background = self.params['background']
@@ -1095,10 +1832,10 @@ def sas_gen_c(self, qx, qy=None):
         mx = my = mz = np.zeros_like(x)
     args = (
         (1 if self.is_avg else 0),
-        # WARNING: calc_msld in libfunc.c at line 174-175 swaps mz and my.
+        # WARNING: 
         # To compare new to old need to swap the inputs.  Also need to
         # reverse the sign.
-        x, y, z, sld, -mx, -mz, -my, vol, in_spin, out_spin, s_theta)
+        x, y, z, sld, mx, mz, my, vol, in_spin, out_spin, s_theta, s_phi)
     model = _sld2i.new_GenI(*args)
     I_out = np.empty_like(qx)
     if qy is not None and len(qy) > 0:
@@ -1128,6 +1865,7 @@ def realspace_Iq(self, qx, qy):
     in_spin = self.params['Up_frac_in']
     out_spin = self.params['Up_frac_out']
     s_theta = self.params['Up_theta']
+    s_phi = self.params['Up_phi']
     scale = self.params['scale']
     total_volume = self.params['total_volume']
     background = self.params['background']
@@ -1152,7 +1890,7 @@ def realspace_Iq(self, qx, qy):
         if is_magnetic:
             I_out = calc_Iq_magnetic(
                 qx, qy, rho, rho_m, points, volume,
-                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta,
+                up_frac_i=in_spin, up_frac_f=out_spin, up_theta=s_theta, up_phi=s_phi,
                 )
         else:
             I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
@@ -1317,9 +2055,8 @@ def demo_oommf():
     path = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
     reader = OMFReader()
     omfdata = reader.read(path)
-    omf2sld = OMF2SLD()
-    omf2sld.set_data(omfdata)
-    data = omf2sld.output
+
+    data = omfdata.output
     model = GenSAS()
     model.set_sld_data(data)
     model.params['background'] = 1e-7
@@ -1370,12 +2107,12 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         rho, rho_m, points = shape.sample_magnetic(sampling_density)
         rho, rho_m = rho*1e-6, rho_m*1e-6
         mx, my, mz = rho_m
-        up_i, up_f, up_angle = shape.spin
+        up_i, up_f, up_theta, up_phi = shape.spin
     else:
         rho, points = shape.sample(sampling_density)
         rho = rho*1e-6
         mx = my = mz = None
-        up_i, up_f, up_angle = 1.0, 1.0, 0.0
+        up_i, up_f, up_theta, up_phi = 0.5, 0.5, 90.0, 0.0
     points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
     #print("shape, pixel volume", shape.volume, shape.volume/len(points))
@@ -1390,7 +2127,8 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     model.params['background'] = 1e-2
     model.params['Up_frac_in'] = up_i
     model.params['Up_frac_out'] = up_f
-    model.params['Up_theta'] = up_angle
+    model.params['Up_theta'] = up_theta
+    model.params['Up_phi'] = up_phi
     if use_2d or shape.is_magnetic:
         q = np.linspace(-qmax, qmax, nq)
         qx, qy = np.meshgrid(q, q)
@@ -1402,6 +2140,10 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         theory = fx(qx)
     theory = model.params['scale']*theory + model.params['background']
     compare(model, qx, qy, plot_points=False, theory=theory)
+
+
+
+
 
 def demo():
     """
@@ -1421,7 +2163,7 @@ def demo():
         # Shape + qrange + magnetism (only for ellip).
         #shape='ellip', rab=125, rc=50, qmax=0.1,
         #shape='ellip', rab=25, rc=50, qmax=0.1,
-        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35,
+        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_theta=35, up_phi=35,
 
         # 1D or 2D curve (ignored for magnetism).
         #use_2d=False,
@@ -1450,7 +2192,7 @@ def _setup_realspace_path():
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))
         sys.path.insert(0, path)
-        logger.info("inserting %r into python path for realspace", path)
+        logging.info("inserting %r into python path for realspace", path)
 
 if __name__ == "__main__":
     _setup_realspace_path()

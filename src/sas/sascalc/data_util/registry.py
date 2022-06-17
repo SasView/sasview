@@ -4,12 +4,15 @@ File extension registry.
 This provides routines for opening files based on extension,
 and registers the built-in file extensions.
 """
-from __future__ import print_function
+
+from typing import Optional, List
+from collections import defaultdict
 
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
+from sas.sascalc.util import unique_preserve_order
 
 
-class ExtensionRegistry(object):
+class ExtensionRegistry:
     """
     Associate a file loader with an extension.
 
@@ -59,25 +62,23 @@ class ExtensionRegistry(object):
         registry.load('hello.cx',format='cx3') ->
             return cx3('hello.cx')
     """
-    def __init__(self, **kw):
-        self.loaders = {}
+    def __init__(self):
+        self.readers = defaultdict(list)
 
     def __setitem__(self, ext, loader):
-        if ext not in self.loaders:
-            self.loaders[ext] = []
-        self.loaders[ext].insert(0, loader)
+        self.readers[ext].insert(0, loader)
 
     def __getitem__(self, ext):
-        return self.loaders[ext]
+        return self.readers[ext]
 
-    def __contains__(self, ext):
-        return ext in self.loaders
+    def __contains__(self, ext: str):
+        return ext in self.readers
 
     def formats(self):
         """
         Return a sorted list of the registered formats.
         """
-        names = [a for a in self.loaders.keys() if not a.startswith('.')]
+        names = [a for a in self.readers.keys() if not a.startswith('.')]
         names.sort()
         return names
 
@@ -85,36 +86,32 @@ class ExtensionRegistry(object):
         """
         Return a sorted list of registered extensions.
         """
-        exts = [a for a in self.loaders.keys() if a.startswith('.')]
+        exts = [a for a in self.readers.keys() if a.startswith('.')]
         exts.sort()
         return exts
 
-    def lookup(self, path):
+    def lookup(self, path: str) -> List[str]:
         """
         Return the loader associated with the file type of path.
 
         :param path: Data file path
         :return: List of available readers for the file extension (maybe empty)
         """
+
         # Find matching lower-case extensions
         path_lower = path.lower()
-        extlist = [ext for ext in self.extensions() if path_lower.endswith(ext)]
-        # Sort matching extensions by decreasing order of length
-        extlist.sort(key=len)
-        # Combine loaders for matching extensions into one big list
-        loaders = []
-        for L in [self.loaders[ext] for ext in extlist]:
-            loaders.extend(L)
-        # Remove duplicates if they exist
-        if len(loaders) != len(set(loaders)):
-            result = []
-            for L in loaders:
-                if L not in result:
-                    result.append(L)
-            loaders = result
-        return loaders
+        extensions = [ext for ext in self.extensions() if path_lower.endswith(ext)]
 
-    def load(self, path, format=None):
+        # Sort matching extensions by decreasing order of length
+        extensions.sort(key=len)
+
+        # Combine loaders for matching extensions into one big list
+        loaders = [loader for ext in extensions for loader in self.readers[ext]]
+
+        # Remove duplicates when returning
+        return unique_preserve_order(loaders)
+
+    def load(self, path, format: Optional[str]=None):
         """
         Call the loader for the file type of path.
 
@@ -127,14 +124,14 @@ class ExtensionRegistry(object):
                 raise NoKnownLoaderException("No loaders match extension in %r"
                                              % path)
         else:
-            loaders = self.loaders.get(format.lower(), [])
+            loaders = self.readers.get(format.lower(), [])
             if not loaders:
                 raise NoKnownLoaderException("No loaders match format %r"
                                              % format)
         last_exc = None
-        for fn in loaders:
+        for load_function in loaders:
             try:
-                return fn(path)
+                return load_function(path)
             except Exception as e:
                 last_exc = e
                 pass  # give other loaders a chance to succeed

@@ -2,8 +2,8 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SasView"
-#define MyAppVersion "5.0.3"
-#define MyAppPublisher "(c) 2009 - 2020, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+#define MyAppVersion "5.0.5"
+#define MyAppPublisher "(c) 2009 - 2021, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
 
@@ -21,6 +21,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName=c:\{#MyAppName}-{#MyAppVersion}
 DefaultGroupName={#MyAppName}-{#MyAppVersion}
 DisableProgramGroupPage=yes
+DisableDirPage=no
 UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64

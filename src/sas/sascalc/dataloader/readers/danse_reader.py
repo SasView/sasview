@@ -19,7 +19,7 @@ import numpy as np
 
 from ..data_info import plottable_2D, DataInfo, Detector
 from ..manipulations import reader2D_converter
-from ..file_reader_base_class import FileReader
+from ..filereader import FileReader
 from ..loader_exceptions import FileContentsException, DataReaderException
 
 logger = logging.getLogger(__name__)

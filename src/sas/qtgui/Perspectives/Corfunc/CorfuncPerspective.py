@@ -13,6 +13,7 @@ import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
@@ -22,7 +23,9 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .CorfuncUtils import WIDGETS as W
+from .saveextrapolated import SaveExtrapolatedPopup
+from .corefuncutil import WIDGETS as W
+
 
 
 class MyMplCanvas(FigureCanvas):
@@ -209,9 +212,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item = None
+        self.data = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
+        self.extrapolation_curve = None
 
         self._canvas = MyMplCanvas(self.model)
         self.plotLayout.insertWidget(0, self._canvas)
@@ -249,6 +254,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdExtract.setEnabled(False)
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
+        self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
+        self.cmdSaveExtrapolation.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
@@ -296,8 +303,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         # Clear data plots
         self._canvas.data = None
         self._canvas.extrap = None
+        self._canvas.draw_q_space()
         self._realplot.data = None
         self._realplot.extrap = None
+        self._realplot.draw_real_space()
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
@@ -305,12 +314,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
-        # Disable buttons to return to base state
-        self.cmdExtrapolate.setEnabled(False)
-        self.cmdTransform.setEnabled(False)
-        self.cmdExtract.setEnabled(False)
-        self.cmdSave.setEnabled(False)
-        self.cmdCalculateBg.setEnabled(False)
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
@@ -332,7 +335,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._update_calculator()
         self.model.itemChanged.disconnect(self.model_changed)
         try:
-            params, extrapolation, _ = self._calculator.compute_extrapolation()
+            params, extrapolation, self.extrapolation_curve = self._calculator.compute_extrapolation()
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
@@ -358,6 +361,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
+        self.cmdSaveExtrapolation.setEnabled(True)
 
 
     def transform(self):
@@ -519,6 +523,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
+        self.data = data
         self._model_item = model_item
         self._calculator.set_data(data)
         self.cmdCalculateBg.setEnabled(True)
@@ -598,6 +603,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
     # pylint: enable=invalid-name
+
+    def on_save_extrapolation(self):
+        q = self.data.x
+        if self.extrapolation_curve is not None:
+            window = SaveExtrapolatedPopup(q, self.extrapolation_curve)
+            window.exec_()
+        else:
+            raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
 
     def serializeAll(self):
         """
@@ -700,9 +713,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.cmdCalculateBg.setEnabled(params.get('background', '0') != '0')
         self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
         self.cmdExtrapolate.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0.0')
-        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0.0')
+        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0')
+        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
         if params.get('guinier_a', '0.0') != '0.0':
             self.extrapolate()
-        if params.get('long_period', '0') != '0.0':
+        if params.get('long_period', '0') != '0':
             self.transform()

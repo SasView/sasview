@@ -26,7 +26,7 @@ dependencies:
   - glib=2.56.1=h000015b_0
   - gst-plugins-base=1.14.0=hbbd80ab_1
   - gstreamer=1.14.0=hb453b48_1
-  - h5py=2.7.1=py36h3585f63_0
+  - h5py=3.1=0
   - hdf5=1.10.1=h9caa474_1
   - icu=58.2=h9c2bf20_1
   - idna=2.6=py36h82fb2a8_1
@@ -82,7 +82,7 @@ dependencies:
   - qtconsole=4.3.1=py36h8f73b5b_0
   - readline=7.0=ha6073c6_4
   - requests=2.18.4=py36he2e5f8d_1
-  - scipy=1.1.0=py36hfc37229_0
+  - scipy=1.2.0
   - setuptools=39.1.0=py36_0
   - simplegeneric=0.8.1=py36_2
   - sip=4.19.8=py36hf484d3e_0

@@ -1,4 +1,4 @@
-name: Test
+name: Tests
 
 on:
   [push, pull_request]
@@ -8,13 +8,13 @@ defaults:
     shell: bash
 
 jobs:
-  test:
+  unit-test:
 
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
       fail-fast: false
 
     steps:
@@ -28,32 +28,15 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     ### Caching of pip downloads and local wheel builds
+    - name: Get pip cache dir
+      id: pip-cache
+      run: |
+        echo "::set-output name=dir::$(pip cache dir)"
 
     - name: Obtain pip cache (Linux)
       uses: actions/cache@v2
-      if: startsWith(runner.os, 'Linux')
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
-
-    - name: Obtain pip cache (macOS)
-      uses: actions/cache@v2
-      if: startsWith(runner.os, 'macOS')
-      with:
-        path: ~/Library/Caches/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
-
-    - name: Obtain pip cache (Windows)
-      uses: actions/cache@v2
-      if: startsWith(runner.os, 'Windows')
-      with:
-        path: ~\AppData\Local\pip\Cache
+        path: ${{ steps.pip-cache.outputs.dir }}
         key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/test.yml') }}
         restore-keys: |
           ${{ runner.os }}-pip-${{ matrix.python-version }}-
@@ -119,19 +102,6 @@ jobs:
         python setup.py clean
         python setup.py build
         python -m pip install .
-
-    - name: Build sasmodels and bumps docs (Linux only)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
-        make -C ../bumps/doc html || true
-        mkdir -p ~/.sasmodels/compiled_models
-        make -j4 -C ../sasmodels/doc html || true
-
-    - name: Build sasview docs (Linux only)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
-        cd docs/sphinx-docs/
-        xvfb-run -a --server-args="-screen 0 1024x768x24" python build_sphinx.py || true
 
     - name: Test with pytest
       env:

@@ -1,4 +1,6 @@
-Copyright (c) 2009-2020, SasView Developers
+Copyright (c) 2009-2022, SasView Developers
+
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

@@ -13,6 +13,9 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
+from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+
 from twisted.internet import reactor
 # General SAS imports
 from sas import get_local_config, get_custom_config
@@ -33,6 +36,7 @@ from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
+from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -100,7 +104,7 @@ class GuiManager(object):
         handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        logging.info(" --- SasView session started ---")
+        logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
 
@@ -196,7 +200,8 @@ class GuiManager(object):
             for name, perspective in self.loadedPerspectives.items():
                 try:
                     perspective.setClosable(True)
-                    self._workspace.workspace.removeSubWindow(self.subwindow)
+                    if self.subwindow in self._workspace.workspace.subWindowList():
+                        self._workspace.workspace.removeSubWindow(self.subwindow)
                     perspective.close()
                 except Exception as e:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
@@ -445,6 +450,7 @@ class GuiManager(object):
 
         # Exit if yes
         if reply == QMessageBox.Yes:
+
             # save the paths etc.
             self.saveCustomConfig()
             reactor.callFromThread(reactor.stop)
@@ -472,6 +478,18 @@ class GuiManager(object):
             self.processVersion(version_info)
         except ValueError as ex:
             logging.info("Failed to connect to www.sasview.org:", ex)
+
+    def log_installed_packages(self):
+        """
+        Log version number of locally installed python packages
+        """
+        PackageGatherer().log_installed_modules()
+
+    def log_imported_packages(self):
+        """
+        Log version number of python packages imported in this instance of SasView.
+        """
+        PackageGatherer().log_imported_packages()
 
     def processVersion(self, version_info):
         """
@@ -633,7 +651,7 @@ class GuiManager(object):
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-
+        
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 
@@ -667,6 +685,8 @@ class GuiManager(object):
         Menu Save Project
         """
         filename = self.filesWidget.saveProject()
+        if not filename:
+            return
 
         # datasets
         all_data = self.filesWidget.getSerializedData()

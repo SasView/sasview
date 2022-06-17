@@ -32,6 +32,10 @@ class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
         self.txtYmin.setText(str(y_range[0]))
         self.txtYmax.setText(str(y_range[1]))
 
+        self.rangeModified = False
+        self.defaultXRange = x_range
+        self.defaultYRange = y_range
+
     def xrange(self):
         """
         Return a tuple with line edit content of (xmin, xmax)

@@ -67,7 +67,7 @@ class Reader(XMLreader):
         Resets the class state to a base case when loading a new data file so previous
         data files do not appear a second time
         """
-        super(Reader, self).reset_state()
+        super().reset_state()
         self.data = []
         self.process = Process()
         self.transspectrum = TransmissionSpectrum()
@@ -110,7 +110,13 @@ class Reader(XMLreader):
                         bad_xml = INVALID_XML.format(basename + self.extension)
                         bad_xml += invalid_xml
                         self.current_datainfo.errors.append(bad_xml)
-                self.data_cleanup()
+                # Store datainfo locally to use for multiple SASdata entries - it is destroyed in data_cleanup()
+                datainfo = self.current_datainfo
+                # Combine all plottable_1D data sets in self.data with current_datainfo and put Data1D into self.output
+                for data in self.data:
+                    self.current_datainfo = datainfo
+                    self.current_dataset = data
+                    self.data_cleanup()
         except Exception as e:
             # Convert all other exceptions to FileContentsExceptions
             raise FileContentsException(str(e))
@@ -214,7 +220,8 @@ class Reader(XMLreader):
                     if isinstance(self.current_dataset, plottable_2D):
                         x_bins = attr.get("x_bins", "")
                         y_bins = attr.get("y_bins", "")
-                        if x_bins is not "" and y_bins is not "":
+                        # x_bins and y_bins can be strings, floats, or integers: Set shape if both non-zero
+                        if x_bins and y_bins:
                             self.current_dataset.shape = (x_bins, y_bins)
                         else:
                             self.current_dataset.shape = ()

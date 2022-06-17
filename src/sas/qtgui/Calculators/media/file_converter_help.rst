@@ -20,8 +20,7 @@ Supported input file formats (examples may be found in the /test/convertible_fil
 *   Single-column ASCII data, with lines that end without any delimiter,
     or with a comma or semi-colon delimiter
 *   2D `ISIS ASCII formatted
-    <http://www.isis.stfc.ac.uk/instruments/loq/software/
-    colette-ascii-file-format-descriptions9808.pdf>`_ data
+    <https://www.isis.stfc.ac.uk/Pages/colette-ascii-file-format-descriptions.pdf>`_ data
 *   `1D BSL/OTOKO format
     <http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/
     SAXS-Software/CCP13/BSL.html>`_ data
@@ -32,7 +31,7 @@ Supported input file formats (examples may be found in the /test/convertible_fil
 Supported output file formats:
 
 *   `CanSAS <http://www.cansas.org/formats/canSAS1d/1.1/doc/>`_
-*   `NXcanSAS <http://download.nexusformat.org/sphinx/classes/contributed_definitions/NXcanSAS.html>`_
+*   `NXcanSAS <http://cansas-org.github.io/NXcanSAS/classes/contributed_definitions/NXcanSAS.html>`_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

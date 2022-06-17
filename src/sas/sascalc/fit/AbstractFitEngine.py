@@ -394,7 +394,9 @@ class FitEngine:
         """
         #Dictionnary of fitArrange element (fit problems)
         self.fit_arrange_dict = {}
+        self.weight_increase = {}
         self.fitter_id = None
+
 
     def set_model(self, model, id, pars=[], constraints=[], data=None):
         """
@@ -502,6 +504,12 @@ class FitEngine:
         """
         if id in self.fit_arrange_dict:
             self.fit_arrange_dict[id].get_to_fit()
+
+    def set_weight_increase(self, fit_id, weight_increase):
+        self.weight_increase[fit_id] = weight_increase
+
+    def get_weight_increase(self, fit_id):
+        return self.weight_increase[fit_id]
 
 
 class FitArrange:

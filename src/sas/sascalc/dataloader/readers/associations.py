@@ -13,60 +13,74 @@ The readers are tried in order they appear when reading a file.
 #This work benefited from DANSE software developed under NSF award DMR-0520547.
 #copyright 2009, University of Tennessee
 #############################################################################
-import importlib
 import logging
+
+from sas.sascalc.dataloader.readers import abs_reader
+from sas.sascalc.dataloader.readers import anton_paar_saxs_reader
+from sas.sascalc.dataloader.readers import ascii_reader
+from sas.sascalc.dataloader.readers import cansas_reader
+from sas.sascalc.dataloader.readers import cansas_reader_HDF5
+from sas.sascalc.dataloader.readers import csv_reader
+from sas.sascalc.dataloader.readers import danse_reader
+from sas.sascalc.dataloader.readers import red2d_reader
+from sas.sascalc.dataloader.readers import sesans_reader
 
 logger = logging.getLogger(__name__)
 
 FILE_ASSOCIATIONS = {
-    ".xml": "cansas_reader",
-    ".ses": "sesans_reader",
-    ".h5": "cansas_reader_HDF5",
-    ".hdf": "cansas_reader_HDF5",
-    ".nxs": "cansas_reader_HDF5",
-    ".txt": "ascii_reader",
-    ".dat": "red2d_reader",
-    ".abs": "abs_reader",
-    ".cor": "abs_reader",
-    ".sans": "danse_reader",
-    ".pdh": "anton_paar_saxs_reader"
+    ".xml": cansas_reader,
+    ".ses": sesans_reader,
+    ".sesans": sesans_reader,
+    ".h5": cansas_reader_HDF5,
+    ".hdf": cansas_reader_HDF5,
+    ".hdf5": cansas_reader_HDF5,
+    ".nxs": cansas_reader_HDF5,
+    ".txt": ascii_reader,
+    ".csv": csv_reader,
+    ".dat": red2d_reader,
+    ".abs": abs_reader,
+    ".cor": abs_reader,
+    ".sans": danse_reader,
+    ".pdh": anton_paar_saxs_reader
 }
 
-GENERIC_ASSOCIATIONS = {
-    ".xml": "cansas_reader",
-    ".h5": "cansas_reader_HDF5",
-    ".txt": "ascii_reader",
-}
+GENERIC_READERS = [
+    ascii_reader,
+    cansas_reader,
+    cansas_reader_HDF5
+]
 
 
-def read_associations(loader, settings=FILE_ASSOCIATIONS):
+def read_associations(loader, settings=None):
+    # type: (Registry, {str: FileReader}) -> None
     """
-    Read the specified settings file to associate
-    default readers to file extension.
+    Use the specified settings dictionary to associate readers to file extension.
     :param loader: Loader object
-    :param settings: path to the json settings file [string]
+    :param settings: A dictionary in the format {str(file extension): data_loader_class} that is used to associate a
+    file extension to a data loader class
     """
+    # Default to a known list of extensions
+    if not settings:
+        settings = FILE_ASSOCIATIONS
     # For each FileType entry, get the associated reader and extension
-    path = 'sas.sascalc.dataloader.readers.'
     for ext, reader in settings.items():
-        if reader is not None and ext is not None:
-            # Associate the extension with a particular reader
-            try:
-                local_reader = importlib.import_module(path + reader)
-                loader.associate_file_type(ext.lower(), local_reader)
-            except Exception as exc:
-                msg = "read_associations: skipping association"
-                msg += " for %s\n  %s" % (ext.lower(), exc)
-                logger.error(msg)
+        # Associate the extension with a particular reader
+        if not loader.associate_file_type(ext.lower(), reader):
+            msg = f"read_associations: skipping association for {ext.lower()}"
+            logger.warning(msg)
 
 
-def get_generic_readers(settings=GENERIC_ASSOCIATIONS):
+def get_generic_readers(settings=None, use_generic_readers=True):
+    # type: ([FileReader], bool) -> []
     """
-    Find and load the default loaders used by the program
-    :param settings: path to the json settings file [string]
-    :return: list of default loaders every file can potentially try to use
+    Returns a list of default readers that the data loader system will use in an attempt to load a data file.
+    A list of loaders can be passed as an argument which will be appended to (if use_generic is True) or override the
+    list of generic readers.
+    :param settings: A list of modules to use as default readers. If None is passed, a default list will be used.
+    :param use_generic_readers: Boolean to say if the generic readers should be added to the list of readers returned.
+    :return: Final list of default loader modules the dataloader system will try if necessary
     """
-    path = 'sas.sascalc.dataloader.readers.'
-    defaults = [importlib.import_module(path + reader) for ext, reader in
-                settings.items() if reader is not None]
-    return defaults
+    default_readers = GENERIC_READERS.copy() if use_generic_readers else []
+    if isinstance(settings, (list, set, tuple)):
+        default_readers.extend(settings)
+    return default_readers

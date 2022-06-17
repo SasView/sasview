@@ -9,17 +9,18 @@ import os
 
 import numpy as np
 
-from ..file_reader_base_class import FileReader
+from ..filereader import FileReader
 from ..data_info import plottable_1D, DataInfo
 from ..loader_exceptions import FileContentsException
 
 # Check whether we have a converter available
 has_converter = True
+
 try:
     from sas.sascalc.data_util.nxsunit import Converter
+
 except ImportError:
     has_converter = False
-_ZERO = 1e-16
 
 class Reader(FileReader):
     """
