@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
-    <height>451</height>
+    <width>341</width>
+    <height>505</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -47,7 +47,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4" colspan="2">
+      <item row="0" column="4" colspan="3">
        <widget class="QComboBox" name="cbWeight"/>
       </item>
       <item row="1" column="0">
@@ -60,21 +60,21 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="cbColor"/>
       </item>
-      <item row="1" column="2" colspan="2">
+      <item row="1" column="2" colspan="3">
        <widget class="QPushButton" name="cmdCustom">
         <property name="text">
          <string>Custom..</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
+      <item row="1" column="5">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Size</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
+      <item row="1" column="6">
        <widget class="QSpinBox" name="cbSize">
         <property name="minimum">
          <number>1</number>
@@ -84,7 +84,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="4">
+      <item row="2" column="0" colspan="7">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="label">
@@ -97,6 +97,13 @@
          <widget class="QLineEdit" name="txtLegend"/>
         </item>
        </layout>
+      </item>
+      <item row="3" column="0" colspan="4">
+       <widget class="QCheckBox" name="chkTicks">
+        <property name="text">
+         <string>Apply style to X tick labels</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -124,7 +131,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4" colspan="2">
+      <item row="0" column="4" colspan="3">
        <widget class="QComboBox" name="cbWeight_y"/>
       </item>
       <item row="1" column="0">
@@ -137,21 +144,21 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="cbColor_y"/>
       </item>
-      <item row="1" column="2" colspan="2">
+      <item row="1" column="2" colspan="3">
        <widget class="QPushButton" name="cmdCustom_y">
         <property name="text">
          <string>Custom..</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
+      <item row="1" column="5">
        <widget class="QLabel" name="label_9">
         <property name="text">
          <string>Size</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
+      <item row="1" column="6">
        <widget class="QSpinBox" name="cbSize_y">
         <property name="minimum">
          <number>1</number>
@@ -161,7 +168,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="4">
+      <item row="2" column="0" colspan="7">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QLabel" name="label_10">
@@ -174,6 +181,13 @@
          <widget class="QLineEdit" name="txtLegend_y"/>
         </item>
        </layout>
+      </item>
+      <item row="3" column="0" colspan="4">
+       <widget class="QCheckBox" name="chkTicks_y">
+        <property name="text">
+         <string>Apply style to Y tick labels</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

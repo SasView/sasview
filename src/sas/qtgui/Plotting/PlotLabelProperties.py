@@ -170,6 +170,14 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
         ''' return current legend text for y-axis '''
         return str(self.txtLegend_y.text())
 
+    def apply_to_ticks_x(self):
+        ''' return status of the "Apply to ticks" checkbox for x-axis '''
+        return self.chkTicks.isChecked()
+
+    def apply_to_ticks_y(self):
+        ''' return status of the "Apply to ticks" checkbox for y-axis '''
+        return self.chkTicks_y.isChecked()
+
     def fx(self):
         ''' return font parameters for x-axis '''
         if self.custom_color:

@@ -825,16 +825,29 @@ class PlotterWidget(PlotterBase):
 
         labelWidget = PlotLabelProperties(self, x_props=font_x, y_props=font_y)
 
-        if labelWidget.exec_() == QtWidgets.QDialog.Accepted:
-            fx = labelWidget.fx()
-            fy = labelWidget.fy()
-            label_x = labelWidget.text_x()
-            label_y = labelWidget.text_y()
+        if labelWidget.exec_() != QtWidgets.QDialog.Accepted:
+            return
 
-            self.ax.set_xlabel(label_x, fontdict=fx)
-            self.ax.set_ylabel(label_y, fontdict=fy)
-            self.canvas.draw_idle()
-        pass  # debug hook
+        fx = labelWidget.fx()
+        fy = labelWidget.fy()
+        label_x = labelWidget.text_x()
+        label_y = labelWidget.text_y()
+        apply_x = labelWidget.apply_to_ticks_x()
+        apply_y = labelWidget.apply_to_ticks_y()
+
+        self.ax.set_xlabel(label_x, fontdict=fx)
+        self.ax.set_ylabel(label_y, fontdict=fy)
+        if apply_x:
+            # self.ax.tick_params(axis='x', labelsize=fx.size, labelcolor=fx.color)
+            from matplotlib.pyplot import gca
+            a = gca()
+            a.set_xticklabels(a.get_xticks(), fx)
+        if apply_y:
+            # self.ay.tick_params(axis='y', labelsize=fy.size, labelcolor=fy.color)
+            from matplotlib.pyplot import gca
+            a = gca()
+            a.set_yticklabels(a.get_yticks(), fy)
+        self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):
         """

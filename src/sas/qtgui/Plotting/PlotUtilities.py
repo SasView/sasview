@@ -54,8 +54,7 @@ COLORS_LETTER = OrderedDict([
 
 
 # MPL font weights list
-WEIGHTS = ['light', 'normal', 'regular', 'book', 'medium', 'roman',
-           'semibold', 'demibold', 'demi', 'bold', 'heavy']
+WEIGHTS = ['light', 'normal', 'bold']
 
 # MPL font family list
 FONTS = ['sans-serif', 'serif', 'cursive', 'fantasy', 'monospace']
