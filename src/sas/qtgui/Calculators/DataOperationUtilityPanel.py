@@ -160,6 +160,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         """ Prepare datasets to be added to DataExplorer and DataManager """
         name = self.txtOutputData.text()
         self.output.name = name
+        self.output.id = name + str(time.time())
         new_item = GuiUtils.createModelItemWithPlot(
             self.output,
             name=name)
@@ -410,7 +411,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # plot 2D data
             plotter2D = Plotter2DWidget(self, quickplot=True)
             plotter2D.scale = 'linear'
-
             plotter2D.ax.tick_params(axis='x', labelsize=8)
             plotter2D.ax.tick_params(axis='y', labelsize=8)
 
