@@ -21,7 +21,8 @@ import logging
 from sas.qtgui.Plotting.PlotterBase import Data1D, PlotterBase
 
 class pretty_units(span):
-    """ HTML tag for units, prettifies angstroms, inverse angstroms and inverse cm"""
+    """ HTML tag for units, prettifies angstroms, inverse angstroms and inverse cm
+    TODO: Should be replaced when there is a better way of handling units"""
     tagname = "span"
 
     def __init__(self, unit_string: str, *args, **kwargs):
@@ -64,6 +65,7 @@ class ReportBuilder:
         #
 
         self.html_doc = dominate.document(title=title)
+        self.plots = []
 
         with self.html_doc.head:
             meta(http_equiv="Content-Type", content="text/html; charset=utf-8")
@@ -127,6 +129,7 @@ class ReportBuilder:
                     fig.savefig(png_output, format="png", dpi=75)
 
                 self.add_image_from_bytes(png_output)
+                self.plots.append(fig)
 
         except PermissionError as ex:
             logging.error("Creating of report images failed: %s" % str(ex))
