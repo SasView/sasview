@@ -29,3 +29,4 @@ matplotlib==3.4.3; sys_platform == 'darwin'
 lxml
 pytools 
 cffi
+dominate
