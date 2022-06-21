@@ -22,6 +22,8 @@ from PyQt5.QtWidgets import QMessageBox
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
+from sas.qtgui.Plotting import PlotterBase
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.reportdata import ReportData
@@ -232,12 +234,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMin.setEnabled(False)
         self.extrapolation_curve = None
 
-        self._canvas = MyMplCanvas(self.model)
-        self.plotLayout.insertWidget(0, self._canvas)
-        self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._canvas, self))
-        self._realplot = MyMplCanvas(self.model) # TODO: This is not a good name, or structure either
-        self.plotLayout.insertWidget(2, self._realplot)
-        self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
+        self._q_space_plot = MyMplCanvas(self.model)
+        self.plotLayout.insertWidget(0, self._q_space_plot)
+        self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._q_space_plot, self))
+        self._real_space_plot = MyMplCanvas(self.model) # TODO: This is not a good name, or structure either
+        self.plotLayout.insertWidget(2, self._real_space_plot)
+        self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._real_space_plot, self))
 
         self.gridLayout_4.setColumnStretch(0, 1)
         self.gridLayout_4.setColumnStretch(1, 2)
@@ -315,12 +317,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if not data_list or self._model_item not in data_list:
             return
         # Clear data plots
-        self._canvas.data = None
-        self._canvas.extrap = None
-        self._canvas.draw_q_space()
-        self._realplot.data = None
-        self._realplot.extrap = None
-        self._realplot.draw_real_space()
+        self._q_space_plot.data = None
+        self._q_space_plot.extrap = None
+        self._q_space_plot.draw_q_space()
+        self._real_space_plot.data = None
+        self._real_space_plot.extrap = None
+        self._real_space_plot.draw_real_space()
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
@@ -334,7 +336,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if not self.mapper:
             return
         self.mapper.toFirst()
-        self._canvas.draw_q_space()
+        self._q_space_plot.draw_q_space()
 
     def _update_calculator(self):
         self._calculator.lowerq = float(self.model.item(WIDGETS.W_QMIN).text())
@@ -360,7 +362,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(""))
             self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(""))
             self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(""))
-            self._canvas.extrap = None
+            self._q_space_plot.extrap = None
             self.model_changed(None)
             return
         finally:
@@ -372,7 +374,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_PORODSIGMA,
                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
 
-        self._canvas.extrap = extrapolation
+        self._q_space_plot.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
         self.cmdSaveExtrapolation.setEnabled(True)
@@ -384,7 +386,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         method = "fourier"
 
-        extrap = self._canvas.extrap
+        extrap = self._q_space_plot.extrap
         background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
         def updatefn(msg):
@@ -401,16 +403,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
 
     def finish_transform(self, transforms):
-        self._realplot.data = transforms
+        self._real_space_plot.data = transforms
 
         self.update_real_space_plot(transforms)
 
-        self._realplot.draw_real_space()
+        self._real_space_plot.draw_real_space()
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
 
     def extract(self):
-        transforms = self._realplot.data
+        transforms = self._real_space_plot.data
 
         params = self._calculator.extract_parameters(transforms[0])
 
@@ -550,14 +552,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
         self.model.itemChanged.connect(self.model_changed)
 
-        self._canvas.data = data
-        self._canvas.extrap = None
+        self._q_space_plot.data = data
+        self._q_space_plot.extrap = None
         self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
-        self._realplot.data = None
-        self._realplot.draw_real_space()
+        self._real_space_plot.data = None
+        self._real_space_plot.draw_real_space()
         self.has_data = True
 
     def setClosable(self, value=True):
@@ -597,7 +599,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if "." not in f_name:
             f_name += ".crf"
 
-        data1, data3, data_idf = self._realplot.data
+        data1, data3, data_idf = self._real_space_plot.data
 
         with open(f_name, "w") as outfile:
             outfile.write("X 1D 3D IDF\n")
@@ -721,6 +723,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if params.get('long_period', '0') != '0':
             self.transform()
 
+    def get_figures(self):
+        """
+        Get plots for the report
+        """
+
+        return [self._real_space_plot.fig]
+
+    @property
+    def real_space_figure(self):
+        return self._real_space_plot.fig
+
+    @property
+    def q_space_figure(self):
+        return self._q_space_plot.fig
+
     @property
     def supports_reports(self) -> bool:
         return True
@@ -730,6 +747,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             return None
 
         report = ReportBuilder("Correlation Function")
+        report.add_data_details(self.data)
 
         # Format keys
         parameters = self.getState()
@@ -743,6 +761,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 fancy_parameters[nice_key] = parameters[key]
 
         report.add_table(fancy_parameters)
+        report.add_plot(self.q_space_figure, "Data and Extrapolation")
+        report.add_plot(self.real_space_figure, "Correlation Function")
 
         return ReportData(
             html=str(report.html_doc),

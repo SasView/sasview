@@ -107,7 +107,7 @@ class ReportPageLogic:
 
         return report
 
-    def buildPlotsForReport(self, images):
+    def buildPlotsForReport(self, images): # TODO: Unify with other report image to html conversion
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
         html = FEET_1 % self.data.name
 
@@ -177,7 +177,7 @@ class ReportPageLogic:
         graphs = []
         modelname = self.kernel_module.name
         if not modelname or self._index is None:
-            return None
+            return []
         plot_ids = [plot.id for plot in GuiUtils.plotsFromModel(modelname, self._index)]
 
         # Active plots
