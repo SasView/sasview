@@ -18,6 +18,8 @@ from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
+from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties
+from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
@@ -325,6 +327,8 @@ class PlotterWidget(PlotterBase):
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.contextMenu.addSeparator()
+        self.actionCustomizeLabel = self.contextMenu.addAction("Customize Labels")
+        self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
         self.contextMenu.addSeparator()
         self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
@@ -347,6 +351,7 @@ class PlotterWidget(PlotterBase):
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
         if self.show_legend:
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
+        self.actionCustomizeLabel.triggered.connect(self.onCusotmizeLabel)
 
     def addPlotsToContextMenu(self):
         """
@@ -796,6 +801,52 @@ class PlotterWidget(PlotterBase):
 
         visible = self.legend.get_visible()
         self.legend.set_visible(not visible)
+        self.canvas.draw_idle()
+
+    def onCusotmizeLabel(self):
+        """
+        Show label customization widget
+        """
+        xl = self.ax.xaxis.label
+        yl = self.ax.yaxis.label
+        font_x = PlotLabelPropertyHolder(
+            size=xl.get_fontsize(),
+            font=xl.get_family()[0],
+            color=xl.get_color(),
+            weight=xl.get_weight(),
+            text=xl.get_text())
+
+        font_y = PlotLabelPropertyHolder(
+            size=yl.get_fontsize(),
+            font=yl.get_family()[0],
+            color=yl.get_color(),
+            weight=yl.get_weight(),
+            text=yl.get_text())
+
+        labelWidget = PlotLabelProperties(self, x_props=font_x, y_props=font_y)
+
+        if labelWidget.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
+        fx = labelWidget.fx()
+        fy = labelWidget.fy()
+        label_x = labelWidget.text_x()
+        label_y = labelWidget.text_y()
+        apply_x = labelWidget.apply_to_ticks_x()
+        apply_y = labelWidget.apply_to_ticks_y()
+
+        self.ax.set_xlabel(label_x, fontdict=fx)
+        self.ax.set_ylabel(label_y, fontdict=fy)
+        if apply_x:
+            # self.ax.tick_params(axis='x', labelsize=fx.size, labelcolor=fx.color)
+            from matplotlib.pyplot import gca
+            a = gca()
+            a.set_xticklabels(a.get_xticks(), fx)
+        if apply_y:
+            # self.ay.tick_params(axis='y', labelsize=fy.size, labelcolor=fy.color)
+            from matplotlib.pyplot import gca
+            a = gca()
+            a.set_yticklabels(a.get_yticks(), fy)
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):

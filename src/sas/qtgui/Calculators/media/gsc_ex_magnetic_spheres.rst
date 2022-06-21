@@ -84,8 +84,9 @@ This code gives us the following scattering patterns:
 
 .. figure:: gsc_ex_magnetic_spheres_assets/analytical.png
 
-
-Next we need to generate the .vtk files describing the magnetised
+Test data (.vtk) with spheres in real space for 4 different ratio between magnetic 
+strength and nuclear SLD can be found in the test data folder for coordinate data.
+For completeness, we provide the script to generate the .vtk files describing the magnetised
 spheres. For this we will use netgen, and the following python script::
 
         from ngsolve import *

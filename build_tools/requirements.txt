@@ -1,0 +1,31 @@
+numpy 
+scipy==1.7.3 
+docutils 
+pytest<6 
+unittest-xml-reporting
+tinycc 
+h5py 
+sphinx
+pyparsing 
+html5lib 
+reportlab==3.6.6 
+pybind11 
+appdirs
+six 
+numba 
+mako 
+ipython 
+qtconsole 
+xhtml2pdf 
+pylint
+qt5reactor 
+periodictable 
+uncertainties 
+debugpy
+matplotlib==2.2.5; sys_platform == 'windows' or  sys_platform == 'linux'
+PyQt5; sys_platform == 'windows' or  sys_platform == 'linux'
+PyQt5==5.13; sys_platform == 'darwin'
+matplotlib==3.4.3; sys_platform == 'darwin'
+lxml
+pytools 
+cffi
