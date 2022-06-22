@@ -247,7 +247,6 @@ def main():
     x = np.arange(100)
     y = (x-50)**2
     plt.plot(x, y)
-
     rb.add_plot(plt.gcf(), image_type='png')
 
     print(rb.html_doc)

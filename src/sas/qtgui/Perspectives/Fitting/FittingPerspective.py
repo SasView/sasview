@@ -395,28 +395,28 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         return True
 
-    def setData(self, data_item=None, is_batch=False, tab_index=None):
+    def setData(self, data_items=None, is_batch=False, tab_index=None):
         """
         Assign new dataset to the fitting instance
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
         """
-        assert data_item is not None
+        assert data_items is not None
 
-        if not isinstance(data_item, list):
+        if not isinstance(data_items, list):
             msg = "Incorrect type passed to the Fitting Perspective"
             raise AttributeError(msg)
 
-        if not isinstance(data_item[0], QtGui.QStandardItem):
+        if not isinstance(data_items[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the Fitting Perspective"
             raise AttributeError(msg)
 
         if is_batch:
             # Just create a new fit tab. No empty batchFit tabs
-            self.addFit(data_item, is_batch=is_batch)
+            self.addFit(data_items, is_batch=is_batch)
             return
 
-        items = [data_item] if is_batch else data_item
+        items = [data_items] if is_batch else data_items
         for data in items:
             # Find the first unassigned tab.
             # If none, open a new tab.
