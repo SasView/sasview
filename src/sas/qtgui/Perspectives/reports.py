@@ -14,11 +14,18 @@ import dominate
 from dominate.tags import *
 from dominate.util import raw
 
+#import weasyprint
+
 import sas.sasview
 import sasmodels
 import logging
 
 from sas.qtgui.Plotting.PlotterBase import Data1D, PlotterBase
+from sas.qtgui.Utilities.reportdata import ReportData
+
+#
+# Utility classes
+#
 
 class pretty_units(span):
     """ HTML tag for units, prettifies angstroms, inverse angstroms and inverse cm
@@ -31,11 +38,11 @@ class pretty_units(span):
         clean_unit_string = unit_string.strip()
 
         if clean_unit_string == "A":
-            text = raw("&#8491;")
+            text = raw("&#8491;") # Overring A
             do_superscript_power = False
 
         elif clean_unit_string == "1/A" or clean_unit_string == "A^{-1}":
-            text = raw("&#8491;")
+            text = raw("&#8491;") # Overring A
             do_superscript_power = True
 
         elif clean_unit_string == "1/cm" or clean_unit_string == "cm^{-1}":
@@ -54,6 +61,9 @@ class pretty_units(span):
 
 
 
+#
+# Main report builder class
+#
 
 class ReportBuilder:
     """ Holds a (DOM) representation of a report, the details that need
@@ -115,12 +125,38 @@ class ReportBuilder:
                         with td():
                             pretty_units(data.y_unit)
 
-    def add_plot(self, fig: matplotlib.figure.Figure, figure_title: Optional[str]=None):
-        """ Add a plot to the report """
+    def add_plot(self, fig: matplotlib.figure.Figure, image_type="svg", figure_title: Optional[str]=None):
+        """ Add a plot to the report
+
+        :param fig: matplotlib.figure.Figure, Matplotlib figure object to add
+        :param image_type: str, type of embedded image - 'svg' or 'png', defaults to 'svg'
+        :param figure_title: Optional[str] - Optionally add an html header tag, defaults to None
+
+        :raises ValueError: if image_type is bad
+        """
 
         if figure_title is not None:
             h2(figure_title)
 
+        if image_type == "svg":
+            self._add_plot_svg(fig)
+        elif image_type == "png":
+            self._add_plot_png(fig)
+        else:
+            raise ValueError("image_type must be either 'svg' or 'png'")
+
+    def _add_plot_svg(self, fig: matplotlib.figure.Figure):
+        try:
+            with BytesIO() as svg_output:
+                fig.savefig(svg_output, format="svg")
+                self.add_image_from_bytes(svg_output, file_type='svg+xml')
+                self.plots.append(fig)
+
+        except PermissionError as ex:
+            logging.error("Creating of report images failed: %s" % str(ex))
+            return
+
+    def _add_plot_png(self, fig: matplotlib.figure.Figure):
         try:
             with BytesIO() as png_output:
                 if sys.platform == "darwin":
@@ -128,7 +164,7 @@ class ReportBuilder:
                 else:
                     fig.savefig(png_output, format="png", dpi=75)
 
-                self.add_image_from_bytes(png_output)
+                self.add_image_from_bytes(png_output, file_type='png')
                 self.plots.append(fig)
 
         except PermissionError as ex:
@@ -137,16 +173,20 @@ class ReportBuilder:
 
     def add_image_from_file(self, filename: str):
         """ Add image to report from a source file"""
+        extension = filename.split(".")[-1]
+
         with open(filename, 'rb') as fid:
             bytes = BytesIO(fid.read())
-            self.add_image_from_bytes(bytes)
+            self.add_image_from_bytes(bytes, extension)
 
-    def add_image_from_bytes(self, bytes: BytesIO):
+    def add_image_from_bytes(self, bytes: BytesIO, file_type='png'):
         """ Add an image from a BytesIO object"""
 
         data64 = base64.b64encode(bytes.getvalue())
         with self.html_doc.getElementById("figures"):
-            img(src="data:image/png;base64," + data64.decode("utf-8"))
+            img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
+                style="width:100%")
+
 
 
     def add_table(self, parameters: Dict[str, Any]):
@@ -158,11 +198,27 @@ class ReportBuilder:
                         th(key)
                         th(str(parameters[key])) # TODO decide on how to represent parameters
 
+    def _strip_html(self) -> str:
+        return ""
+
+    def report_data(self) -> ReportData:
+        return ReportData(
+            str(self.html_doc),
+            self._strip_html(),
+            self.plots)
+
+    def save_html(self, filename):
+        pass
+
+    def save_pdf(self, filename):
+        pass
 
 # Debugging tool
 def main():
     from sas.sascalc.dataloader.loader import Loader
     import os
+    import matplotlib.pyplot as plt
+    import numpy as np
     loader = Loader()
 
     fileanem = "100nmSpheresNodQ.txt"
@@ -175,7 +231,13 @@ def main():
 
     rb.add_data_details(data)
     rb.add_table({"A": 10, "B": 0.01, "C": 'stuff', "D": False})
-    rb.add_image_from_file(os.path.join(path_to_data, "../../../qtgui/images/angles.png"))
+    #rb.add_image_from_file(os.path.join(path_to_data, "../../../qtgui/images/angles.png"))
+
+    x = np.arange(100)
+    y = (x-50)**2
+    plt.plot(x, y)
+
+    rb.add_plot(plt.gcf())
 
     print(rb.html_doc)
 

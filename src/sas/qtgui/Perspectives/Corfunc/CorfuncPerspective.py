@@ -761,8 +761,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 fancy_parameters[nice_key] = parameters[key]
 
         report.add_table(fancy_parameters)
-        report.add_plot(self.q_space_figure, "Data and Extrapolation")
-        report.add_plot(self.real_space_figure, "Correlation Function")
+        report.add_plot(self.q_space_figure)
+        report.add_plot(self.real_space_figure)
 
         return ReportData(
             html=str(report.html_doc),
