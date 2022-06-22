@@ -30,4 +30,4 @@ lxml
 pytools 
 cffi
 dominate
-weasyprint
+html5lib

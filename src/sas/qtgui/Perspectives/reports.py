@@ -14,7 +14,7 @@ import dominate
 from dominate.tags import *
 from dominate.util import raw
 
-import weasyprint
+from xhtml2pdf import pisa
 
 import sas.sasview
 import sasmodels
@@ -139,6 +139,7 @@ class ReportBuilder:
             h2(figure_title)
 
         if image_type == "svg":
+            logging.warning("xhtml2pdf does not currently support svg export to pdf.")
             self._add_plot_svg(fig)
         elif image_type == "png":
             self._add_plot_png(fig)
@@ -208,10 +209,20 @@ class ReportBuilder:
             self.plots)
 
     def save_html(self, filename):
-        pass
+        with open(filename, 'w') as fid:
+            print(self.html_doc, file=fid)
 
     def save_pdf(self, filename):
-        pass
+        with open(filename, 'w+b') as fid:
+            try:
+                pisa.CreatePDF(str(self.html_doc),
+                                dest=fid,
+                                encoding='UTF-8')
+
+            except Exception as ex:
+                import traceback
+                logging.error("Error creating pdf: " + str(ex) + "\n" + traceback.format_exc())
+
 
 # Debugging tool
 def main():
@@ -237,13 +248,15 @@ def main():
     y = (x-50)**2
     plt.plot(x, y)
 
-    rb.add_plot(plt.gcf())
+    rb.add_plot(plt.gcf(), image_type='png')
 
     print(rb.html_doc)
 
+    rb.save_html("report_test.html")
+    rb.save_pdf("report_test.pdf")
+
     with open("report_test.html", 'w') as fid:
         print(rb.html_doc, file=fid)
-
 
 
 if __name__ == "__main__":
