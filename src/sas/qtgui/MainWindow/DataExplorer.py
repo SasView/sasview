@@ -568,7 +568,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Update the batch page list
                 batch_pages.append(batch_set)
                 # Assign parameters to the most recent (current) page.
-                self._perspective().setData(data_items=items, is_batch=True)
+                self._perspective().setData(data_item=items, is_batch=True)
                 self._perspective().updateFromParameters(page)
         pass
 
@@ -782,7 +782,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if self.chkSwap.isChecked():
                 self._perspective().swapData(selected_items[0])
             else:
-                self._perspective().setData(data_items=selected_items, is_batch=self.chkBatch.isChecked())
+                self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(msg)
@@ -803,9 +803,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Notify the GuiManager about the send request
         try:
             if tab_index is None:
-                self._perspective().setData(data_items=selected_items, is_batch=False)
+                self._perspective().setData(data_item=selected_items, is_batch=False)
             else:
-                self._perspective().setData(data_items=selected_items, is_batch=False, tab_index=tab_index)
+                self._perspective().setData(data_item=selected_items, is_batch=False, tab_index=tab_index)
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(msg)

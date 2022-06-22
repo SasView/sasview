@@ -515,7 +515,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         return False
 
-    def setData(self, data_items: List[QStandardItem], is_batch=False):
+    def setData(self, data_item: List[QStandardItem], is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
@@ -531,7 +531,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             if retval == QtWidgets.QMessageBox.Cancel:
                 return
 
-        model_item = data_items[0]
+        model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
         self.data = data
         self._model_item = model_item
