@@ -4,19 +4,16 @@ import unittest
 import logging
 from xhtml2pdf import pisa
 
-from unittest.mock import mock_open, patch
-
 from unittest.mock import MagicMock
 
 from PyQt5 import QtWidgets, QtPrintSupport
 from PyQt5.QtTest import QTest
 
 # set up import paths
-import path_prepare
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local
-from sas.qtgui.Utilities.ReportDialog import ReportDialog
+from qtgui.Utilities.Reports.ReportDialog import ReportDialog
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)

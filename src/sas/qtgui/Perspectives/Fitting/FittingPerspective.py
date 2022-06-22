@@ -1,5 +1,3 @@
-from distutils.command.config import config
-
 import numpy
 import copy
 
@@ -12,7 +10,6 @@ from PyQt5 import QtWidgets
 from bumps import options
 from bumps import fitters
 
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
@@ -23,7 +20,7 @@ from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.perspective import Perspective
 
-from sas.qtgui.Utilities.reportdata import ReportData
+from qtgui.Utilities.Reports.reportdata import ReportData
 
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """

@@ -12,22 +12,17 @@ from matplotlib.figure import Figure
 from numpy.linalg.linalg import LinAlgError
 import numpy as np
 
-from sas.qtgui.Perspectives.reports import ReportBuilder
-
 from typing import Optional, List, Tuple
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
-from sas.qtgui.Plotting import PlotterBase
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Utilities.reportdata import ReportData
-from sas.qtgui.Perspectives.reports import ReportBuilder
+from qtgui.Utilities.Reports.reportdata import ReportData
+from qtgui.Utilities.Reports import ReportBuilder
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module

@@ -1,6 +1,5 @@
 import sys
 import os
-import subprocess
 import logging
 import json
 import webbrowser
@@ -10,7 +9,7 @@ from typing import Optional
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale, QUrl
+from PyQt5.QtCore import Qt, QLocale
 
 import matplotlib as mpl
 mpl.use("Qt5Agg")
@@ -20,7 +19,7 @@ from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
 # General SAS imports
-from sas import get_local_config, get_custom_config
+from sas import get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
@@ -33,7 +32,7 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
-from sas.qtgui.Utilities.ReportDialog import ReportDialog
+from qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -62,7 +61,7 @@ from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer

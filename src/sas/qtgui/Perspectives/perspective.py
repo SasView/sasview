@@ -1,10 +1,10 @@
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 from typing import List, Optional, Union, Dict
 
 from PyQt5.QtGui import QStandardItem
 from PyQt5 import QtCore
 
-from sas.qtgui.Utilities.reportdata import ReportData
+from qtgui.Utilities.Reports.reportdata import ReportData
 
 
 class PerspectiveMeta(type(QtCore.QObject), ABCMeta):

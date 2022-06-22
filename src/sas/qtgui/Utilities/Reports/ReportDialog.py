@@ -12,8 +12,8 @@ from PyQt5 import QtPrintSupport
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
-from sas.qtgui.Utilities.UI.ReportDialogUI import Ui_ReportDialogUI
-from sas.qtgui.Utilities.reportdata import ReportData
+from sas.qtgui.Utilities.Reports.UI.ReportDialogUI import Ui_ReportDialogUI
+from qtgui.Utilities.Reports.reportdata import ReportData
 
 
 class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):

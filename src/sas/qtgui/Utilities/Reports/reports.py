@@ -8,11 +8,12 @@ import base64
 from io import BytesIO
 
 import matplotlib.figure
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 import dominate
 from dominate.tags import *
 from dominate.util import raw
+
+#import html2text
 
 from xhtml2pdf import pisa
 
@@ -20,8 +21,8 @@ import sas.sasview
 import sasmodels
 import logging
 
-from sas.qtgui.Plotting.PlotterBase import Data1D, PlotterBase
-from sas.qtgui.Utilities.reportdata import ReportData
+from sas.qtgui.Plotting.PlotterBase import Data1D
+from qtgui.Utilities.Reports.reportdata import ReportData
 
 #
 # Utility classes
@@ -118,14 +119,13 @@ class ReportBuilder:
                         with td():
                             pretty_units(data.x_unit)
 
-
                     with tr():
                         td("Q high")
                         td(getattr(data, "xmax", max(data.x))) # TODO: remove dynamically assigned field, xmax
                         with td():
                             pretty_units(data.y_unit)
 
-    def add_plot(self, fig: matplotlib.figure.Figure, image_type="svg", figure_title: Optional[str]=None):
+    def add_plot(self, fig: matplotlib.figure.Figure, image_type="png", figure_title: Optional[str]=None):
         """ Add a plot to the report
 
         :param fig: matplotlib.figure.Figure, Matplotlib figure object to add
@@ -233,7 +233,7 @@ def main():
     loader = Loader()
 
     fileanem = "100nmSpheresNodQ.txt"
-    path_to_data = "../../../sas/sasview/test/1d_data"
+    path_to_data = "../../../sasview/test/1d_data"
 
     filename = os.path.join(path_to_data, fileanem)
     data = loader.load(filename)[0]
@@ -254,7 +254,7 @@ def main():
     rb.save_html("report_test.html")
     rb.save_pdf("report_test.pdf")
 
-    with open("report_test.html", 'w') as fid:
+    with open("../../Perspectives/report_test.html", 'w') as fid:
         print(rb.html_doc, file=fid)
 
 
