@@ -14,7 +14,7 @@ import dominate
 from dominate.tags import *
 from dominate.util import raw
 
-#import weasyprint
+import weasyprint
 
 import sas.sasview
 import sasmodels

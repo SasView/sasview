@@ -30,3 +30,4 @@ lxml
 pytools 
 cffi
 dominate
+weasyprint
