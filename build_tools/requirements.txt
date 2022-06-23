@@ -31,3 +31,5 @@ pytools
 cffi
 dominate
 html5lib
+importlib-resources
+importlib_resources

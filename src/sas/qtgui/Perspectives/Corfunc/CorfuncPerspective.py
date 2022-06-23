@@ -22,7 +22,7 @@ from PyQt5 import QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from qtgui.Utilities.Reports.reportdata import ReportData
-from qtgui.Utilities.Reports import ReportBuilder
+from qtgui.Utilities.Reports import ReportBase
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module
@@ -741,7 +741,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if not self.has_data:
             return None
 
-        report = ReportBuilder("Correlation Function")
+        report = ReportBase("Correlation Function")
         report.add_data_details(self.data)
 
         # Format keys
@@ -755,11 +755,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             else:
                 fancy_parameters[nice_key] = parameters[key]
 
-        report.add_table(fancy_parameters)
+        report.add_table_dict(fancy_parameters, ("Parameter", "Value"))
         report.add_plot(self.q_space_figure)
         report.add_plot(self.real_space_figure)
 
         return ReportData(
-            html=str(report.html_doc),
-            text=str(report.html_doc),
+            html=str(report._html_doc),
+            text=str(report._html_doc),
             images=[])

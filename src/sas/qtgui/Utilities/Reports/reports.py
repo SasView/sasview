@@ -1,10 +1,14 @@
-from typing import Any, Dict, Optional
+from typing import List, Tuple, Iterable, Any, Dict, Optional
 
 import sys
 import os
 import datetime
-import base64
+try:
+    import importlib.resources as pkg_resources
+except:
+    import importlib_resources as pkg_resources
 
+import base64
 from io import BytesIO
 
 import matplotlib.figure
@@ -13,7 +17,7 @@ import dominate
 from dominate.tags import *
 from dominate.util import raw
 
-#import html2text
+import html2text
 
 from xhtml2pdf import pisa
 
@@ -66,64 +70,76 @@ class pretty_units(span):
 # Main report builder class
 #
 
-class ReportBuilder:
+class ReportBase:
     """ Holds a (DOM) representation of a report, the details that need
      to go into the report can be added to with reasonably simple calls"""
-    def __init__(self, title: str):
+    def __init__(self,
+                 title: str,
+                 style_link: Optional[str]=None,
+                 show_figure_section_title=True,
+                 show_param_section_title=True):
 
         #
         # Set up the html document and specify the general layout
         #
 
-        self.html_doc = dominate.document(title=title)
+        self._html_doc = dominate.document(title=title)
         self.plots = []
 
-        with self.html_doc.head:
+        with self._html_doc.head:
             meta(http_equiv="Content-Type", content="text/html; charset=utf-8")
             meta(name="Generator", content=f"SasView {sas.sasview.__version__}")
 
-        with self.html_doc.body:
-            with div(id="sasview"):
-                h1(title)
-                p(datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y"))
-                with div(id="version-info"):
-                    p(f"sasview {sas.sasview.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
+            if style_link is not None:
+                link(rel="stylesheet", href=style_link)
 
-            div(id="perspective")
-            with div(id="data"):
-                h2("Data")
+            else:
+                style_data = pkg_resources.read_text("sas.qtgui.Utilities.Reports", "report_style.css")
+                style(style_data)
 
-            with div(id="model"):
-                div(id="model-details")
-                div(id="model-parameters")
+        with self._html_doc.body:
+            with div(id="main"):
 
-            div(id="figures")
+                with div(id="sasview"):
+                    h1(title)
+                    p(datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y"))
+                    with div(id="version-info"):
+                        p(f"sasview {sas.sasview.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
+
+                div(id="perspective")
+                with div(id="data"):
+                    h2("Data")
+
+                with div(id="model"):
+
+                    if show_param_section_title:
+                        h2("Details")
+
+                    div(id="model-details")
+                    div(id="model-parameters")
+
+                with div(id="figures"):
+                    if show_figure_section_title:
+                        h2("Figures")
 
     def add_data_details(self, data: Data1D):
         """ Add details of input data to the report"""
-        with self.html_doc.getElementById("data"):
 
-            with div(cls="data-file"):
-                h3(f"File: {os.path.basename(data.filename)}")
+        n_points = len(getattr(data, 'x', []))
+        low_q = getattr(data, "xmin", min(data.x) if len(data.x) > 0 else None)
+        high_q = getattr(data, "xmax", max(data.x) if len(data.x) > 0 else None)
 
-                with table():
 
-                    with tr():
-                        td("Q Samples")
-                        td(str(len(getattr(data, 'x', []))))
-                        td()
+        table_data = [
+            ["File", os.path.basename(data.filename)],
+            ["n Samples", n_points],
+            ["Q min", span(low_q, pretty_units(data.x_unit))],
+            ["Q max", span(high_q, pretty_units(data.x_unit))]
+        ]
 
-                    with tr():
-                        td("Q low")
-                        td(getattr(data, "xmin", min(data.x))) # TODO: remove dynamically assigned field, xmin
-                        with td():
-                            pretty_units(data.x_unit)
+        self.add_table(table_data, target_tag="data", column_prefix="data-column")
 
-                    with tr():
-                        td("Q high")
-                        td(getattr(data, "xmax", max(data.x))) # TODO: remove dynamically assigned field, xmax
-                        with td():
-                            pretty_units(data.y_unit)
+
 
     def add_plot(self, fig: matplotlib.figure.Figure, image_type="png", figure_title: Optional[str]=None):
         """ Add a plot to the report
@@ -184,40 +200,62 @@ class ReportBuilder:
         """ Add an image from a BytesIO object"""
 
         data64 = base64.b64encode(bytes.getvalue())
-        with self.html_doc.getElementById("figures"):
+        with self._html_doc.getElementById("figures"):
             img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
                 style="width:100%")
 
+    def add_table_dict(self, d: Dict[str, Any], titles: Optional[Tuple[str, str]]=None):
 
+        self.add_table([[key, d[key]] for key in d], titles=titles)
 
-    def add_table(self, parameters: Dict[str, Any]):
+    def add_table(self,
+                  data: List[List[Any]],
+                  titles: Optional[Iterable[str]]=None,
+                  target_tag="model-parameters",
+                  column_prefix="column"):
+
         """ Add a table of parameters to the report"""
-        with self.html_doc.getElementById("model-parameters"):
+        with self._html_doc.getElementById(target_tag):
+
             with table():
-                for key in sorted(parameters.keys()):
+
+                if titles is not None:
                     with tr():
-                        th(key)
-                        th(str(parameters[key])) # TODO decide on how to represent parameters
+                        for title in titles:
+                            th(title)
 
-    def _strip_html(self) -> str:
-        return ""
+                for row in sorted(data, key=lambda x: x[0]):
+                    with tr():
+                        for i, value in enumerate(row):
+                            td(value, cls=f"{column_prefix}-{i}")
 
+    @property
+    def text(self) -> str:
+        """ Text version of the document (actually RST)"""
+        return html2text.html2text(self.html)
+
+    @property
+    def html(self) -> str:
+        """ A string containing the html of the document"""
+        return str(self._html_doc)
+
+    @property
     def report_data(self) -> ReportData:
         return ReportData(
-            str(self.html_doc),
-            self._strip_html(),
+            self.html,
+            self.text,
             self.plots)
 
     def save_html(self, filename):
         with open(filename, 'w') as fid:
-            print(self.html_doc, file=fid)
+            print(self._html_doc, file=fid)
 
     def save_pdf(self, filename):
         with open(filename, 'w+b') as fid:
             try:
-                pisa.CreatePDF(str(self.html_doc),
-                                dest=fid,
-                                encoding='UTF-8')
+                pisa.CreatePDF(str(self._html_doc),
+                               dest=fid,
+                               encoding='UTF-8')
 
             except Exception as ex:
                 import traceback
@@ -238,10 +276,11 @@ def main():
     filename = os.path.join(path_to_data, fileanem)
     data = loader.load(filename)[0]
 
-    rb = ReportBuilder("Test Report")
+    #rb = ReportBase("Test Report", "report_style.css")
+    rb = ReportBase("Test Report")
 
     rb.add_data_details(data)
-    rb.add_table({"A": 10, "B": 0.01, "C": 'stuff', "D": False})
+    rb.add_table_dict({"A": 10, "B": 0.01, "C": 'stuff', "D": False}, ("Parameter", "Value"))
     #rb.add_image_from_file(os.path.join(path_to_data, "../../../qtgui/images/angles.png"))
 
     x = np.arange(100)
@@ -249,13 +288,13 @@ def main():
     plt.plot(x, y)
     rb.add_plot(plt.gcf(), image_type='png')
 
-    print(rb.html_doc)
+    print(rb._html_doc)
 
     rb.save_html("report_test.html")
     rb.save_pdf("report_test.pdf")
 
-    with open("../../Perspectives/report_test.html", 'w') as fid:
-        print(rb.html_doc, file=fid)
+
+    print(rb.text)
 
 
 if __name__ == "__main__":
