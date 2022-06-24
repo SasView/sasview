@@ -128,7 +128,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         # html = re.sub(cleanr, replacement_name, self.report_data.html)
 
         if ext.lower() == ".txt":
-            #txt_ascii = GuiUtils.replaceHTMLwithASCII(self.report_data.text)
             self.write_string(self.report_data.text, filename)
 
         elif ext.lower() == ".html":
@@ -141,18 +140,18 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         else:
             logging.error(f"Unknown file extension: {ext.lower()}")
 
-    def getPictures(self, basename):
-        """
-        Returns list of saved MPL figures
-        """
-        # save figures
-        pictures = []
-        for num, image in enumerate(self.report_data.images):
-            pic_name = basename + '_img%s.png' % num
-            # save the image for use with pdf writer
-            image.savefig(pic_name)
-            pictures.append(pic_name)
-        return pictures
+    # def getPictures(self, basename):
+    #     """
+    #     Returns list of saved MPL figures
+    #     """
+    #     # save figures
+    #     pictures = []
+    #     for num, image in enumerate(self.report_data.images):
+    #         pic_name = basename + '_img%s.png' % num
+    #         # save the image for use with pdf writer
+    #         image.savefig(pic_name)
+    #         pictures.append(pic_name)
+    #     return pictures
 
 
     @staticmethod

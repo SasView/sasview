@@ -42,11 +42,15 @@ class ReportPageLogic:
         if self.kernel_module is None:
 
             text = "No model defined"
+            #
+            # return ReportData(
+            #     html = HEADER % text,
+            #     text = text,
+            #     images = [])
 
             return ReportData(
-                html = HEADER % text,
-                text = text,
-                images = [])
+                html=HEADER % text,
+                text=text)
 
         # Get plot image from plotpanel
         images = self.getImages()
@@ -61,9 +65,10 @@ class ReportPageLogic:
 
         report_html = report_header + report_parameters + imagesHTML
 
-        report_txt = html2text.html2text(report_html)
+        report_txt = html2text.html2text(GuiUtils.replaceHTMLwithASCII(report_html))
 
-        report_list = ReportData(html=report_html, text=report_txt, images=images)
+        # report_list = ReportData(html=report_html, text=report_txt, images=images)
+        report_list = ReportData(html=report_html, text=report_txt)
 
         return report_list
 

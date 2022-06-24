@@ -25,6 +25,7 @@ import sas.sasview
 import sasmodels
 import logging
 
+from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Plotting.PlotterBase import Data1D
 from qtgui.Utilities.Reports.reportdata import ReportData
 
@@ -242,7 +243,7 @@ class ReportBase:
     @property
     def text(self) -> str:
         """ Text version of the document (actually RST)"""
-        return html2text.html2text(self.html).encode("ascii", "ignore").decode()
+        return html2text.html2text(GuiUtils.replaceHTMLwithASCII(self.html)).encode("ascii", "ignore").decode()
 
     @property
     def html(self) -> str:
