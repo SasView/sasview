@@ -71,13 +71,23 @@ class pretty_units(span):
 #
 
 class ReportBase:
-    """ Holds a (DOM) representation of a report, the details that need
-     to go into the report can be added to with reasonably simple calls"""
     def __init__(self,
                  title: str,
                  style_link: Optional[str]=None,
                  show_figure_section_title=True,
                  show_param_section_title=True):
+
+        """ Holds a (DOM) representation of a report, the details that need
+         to go into the report can be added with reasonably simple calls, e.g. add_table, add_plot
+
+         :param title: Report title
+         :param style_link: If provided will set style in the html to the specified URL, rather than embedding contents
+                            from local report_style.css
+         :show_figure_section_title: Add h2 tag for figure section
+         :show_figure_section_title: Add h2 tag for parameters section
+
+
+         """
 
         #
         # Set up the html document and specify the general layout
@@ -268,27 +278,35 @@ class ReportBase:
 
 
 
-# Debugging tool
 def main():
+
+    """ This can be run locally without sasview to make it easy to adjust the report layout/styling,
+    it will generate a report with some arbitrary data"""
+
     from sas.sascalc.dataloader.loader import Loader
     import os
     import matplotlib.pyplot as plt
     import numpy as np
     loader = Loader()
 
-    fileanem = "100nmSpheresNodQ.txt"
-    path_to_data = "../../../sasview/test/1d_data"
 
-    filename = os.path.join(path_to_data, fileanem)
-    data = loader.load(filename)[0]
+    # Constructor:
 
     # Select this one to use a link, not embedding, for the css - quicker messing about with styling with
-    #rb = ReportBase("Test Report", "report_style.css")
+    # rb = ReportBase("Test Report", "report_style.css")
 
     # Use this to embed
     rb = ReportBase("Test Report")
 
+    # Arbitrary file used to add file info to the report
+    fileanem = "100nmSpheresNodQ.txt"
+    path_to_data = "../../../sasview/test/1d_data"
+    filename = os.path.join(path_to_data, fileanem)
+    data = loader.load(filename)[0]
+
     rb.add_data_details(data)
+
+    # Some made up parameters
     rb.add_table_dict({"A": 10, "B": 0.01, "C": 'stuff', "D": False}, ("Parameter", "Value"))
 
     # A test plot
@@ -302,8 +320,8 @@ def main():
     rb.save_pdf("report_test.pdf")
     rb.save_text("report_test.rst")
 
-    print(rb._html_doc) # The HTML
-    print(rb.text) # The text version
+    print(rb._html_doc) # Print the HTML version
+    print(rb.text) # Print the text version
 
 
 if __name__ == "__main__":

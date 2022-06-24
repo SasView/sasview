@@ -80,7 +80,7 @@ class ReportDialogTest(unittest.TestCase):
         self.setUp()
 
         # conversion failed
-        self.widget.HTML2PDF = MagicMock(return_value=1)
+        self.widget.save_pdf = MagicMock(return_value=1)
 
         # invoke the method
         self.widget.onSave()
@@ -92,8 +92,8 @@ class ReportDialogTest(unittest.TestCase):
             self.assertFalse(os.system.called)
 
         # conversion succeeded
-        temp_html2pdf = self.widget.HTML2PDF
-        self.widget.HTML2PDF = MagicMock(return_value=0)
+        temp_html2pdf = self.widget.save_pdf
+        self.widget.save_pdf = MagicMock(return_value=0)
 
         # invoke the method
         self.widget.onSave()
@@ -115,14 +115,14 @@ class ReportDialogTest(unittest.TestCase):
 
         # HTML save
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.html", "(*.html)"])
-        self.widget.onHTMLSave = MagicMock()
+        self.widget.write_string = MagicMock()
         # invoke the method
         self.widget.onSave()
 
         # Check that the file was saved
-        self.assertTrue(self.widget.onHTMLSave)
+        self.assertTrue(self.widget.write_string)
 
-        self.widget.HTML2PDF = temp_html2pdf
+        self.widget.save_pdf = temp_html2pdf
 
 
     def testGetPictures(self):
@@ -140,7 +140,7 @@ class ReportDialogTest(unittest.TestCase):
         QTest.qWait(100)
 
         data = self.widget.txtBrowser.toHtml()
-        return_value = self.widget.HTML2PDF(data, "b")
+        return_value = self.widget.save_pdf(data, "b")
 
         self.assertTrue(pisa.CreatePDF.called)
         self.assertEqual(return_value, 0)
@@ -151,7 +151,7 @@ class ReportDialogTest(unittest.TestCase):
         logging.error = MagicMock()
 
         #run the method
-        return_value = self.widget.HTML2PDF(data, "c")
+        return_value = self.widget.save_pdf(data, "c")
 
         self.assertTrue(logging.error.called)
         #logging.error.assert_called_with("Error creating pdf")
