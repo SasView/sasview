@@ -9,6 +9,7 @@ from typing import List
 import logging
 from io import BytesIO
 import urllib.parse
+import html2text
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from bumps import options
@@ -20,7 +21,6 @@ from qtgui.Utilities.Reports.reportdata import ReportData
 from sas.sasview import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION
 
-# TODO: Deal with HTML properly (see top answer at https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags )
 # TODO: Integrate with other reports
 class ReportPageLogic:
     """
@@ -34,12 +34,6 @@ class ReportPageLogic:
         self._index = index
         self.params = params
 
-    @staticmethod
-    def cleanhtml(raw_html):
-        """Remove html tags from a document"""
-        cleanr = re.compile('<.*?>')
-        cleantext = re.sub(cleanr, '', raw_html)
-        return cleantext
 
     def reportList(self) -> ReportData: # TODO: Rename to reference report object
         """
@@ -67,7 +61,7 @@ class ReportPageLogic:
 
         report_html = report_header + report_parameters + imagesHTML
 
-        report_txt = self.cleanhtml(report_html)
+        report_txt = html2text.html2text(report_html)
 
         report_list = ReportData(html=report_html, text=report_txt, images=images)
 
