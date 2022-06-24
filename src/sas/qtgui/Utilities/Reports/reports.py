@@ -258,15 +258,15 @@ class ReportBase:
             self.html,
             self.text)
 
-    def save_html(self, filename):
+    def save_html(self, filename: str):
         with open(filename, 'w') as fid:
             print(self._html_doc, file=fid)
 
-    def save_text(self, filename):
+    def save_text(self, filename: str):
         with open(filename, 'w') as fid:
             print(self.text, file=fid)
 
-    def save_pdf(self, filename):
+    def save_pdf(self, filename: str):
         with open(filename, 'w+b') as fid:
             try:
                 pisa.CreatePDF(str(self._html_doc),
