@@ -129,9 +129,11 @@ class ReportBase:
                     div(id="model-details")
                     div(id="model-parameters")
 
-                with div(id="figures"):
+                with div(id='figures-outer'):
                     if show_figure_section_title:
                         h2("Figures")
+
+                    div(id="figures")
 
     def add_data_details(self, data: Data1D):
         """ Add details of input data to the report"""
@@ -254,8 +256,7 @@ class ReportBase:
     def report_data(self) -> ReportData:
         return ReportData(
             self.html,
-            self.text,
-            self.plots)
+            self.text)
 
     def save_html(self, filename):
         with open(filename, 'w') as fid:

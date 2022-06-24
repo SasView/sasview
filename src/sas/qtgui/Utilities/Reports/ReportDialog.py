@@ -111,22 +111,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         if not extension:
             filename = '.'.join((filename, ext))
 
-        # Create files with charts
-        # pictures = []
-        # if self.report_data.images is not None:
-        #     pictures = self.getPictures(basename)
-
-        # # self.report_data.html contains all images at the end of the report, in base64 form;
-        # # replace them all with their saved on-disk filenames
-        # cleanr = re.compile('<img src.*$', re.DOTALL)
-        # replacement_name = ""
-        # html = self.report_data.html
-        # for picture in pictures:
-        #     replacement_name += '<img src="'+ picture + '"><p></p>'
-        # replacement_name += '\n'
-        # # <img src="data:image/png;.*>  => <img src=filename>
-        # html = re.sub(cleanr, replacement_name, self.report_data.html)
-
         if ext.lower() == ".txt":
             self.write_string(self.report_data.text, filename)
 
@@ -140,18 +124,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         else:
             logging.error(f"Unknown file extension: {ext.lower()}")
 
-    # def getPictures(self, basename):
-    #     """
-    #     Returns list of saved MPL figures
-    #     """
-    #     # save figures
-    #     pictures = []
-    #     for num, image in enumerate(self.report_data.images):
-    #         pic_name = basename + '_img%s.png' % num
-    #         # save the image for use with pdf writer
-    #         image.savefig(pic_name)
-    #         pictures.append(pic_name)
-    #     return pictures
 
 
     @staticmethod

@@ -759,6 +759,4 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         report.add_plot(self.q_space_figure)
         report.add_plot(self.real_space_figure)
 
-        return ReportData(
-            html=report.html,
-            text=report.text)
+        return report.report_data

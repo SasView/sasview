@@ -42,11 +42,6 @@ class ReportPageLogic:
         if self.kernel_module is None:
 
             text = "No model defined"
-            #
-            # return ReportData(
-            #     html = HEADER % text,
-            #     text = text,
-            #     images = [])
 
             return ReportData(
                 html=HEADER % text,
