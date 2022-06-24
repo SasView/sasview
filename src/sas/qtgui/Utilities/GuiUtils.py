@@ -1052,6 +1052,7 @@ def formatValue(value):
             value = str(formatNumber(value, True))
         return value
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithUTF8(html):
     """
     Replace some important HTML-encoded characters
@@ -1071,6 +1072,7 @@ def replaceHTMLwithUTF8(html):
 
     return html
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithASCII(html):
     """
     Replace some important HTML-encoded characters
