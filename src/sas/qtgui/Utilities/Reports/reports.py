@@ -232,7 +232,7 @@ class ReportBase:
     @property
     def text(self) -> str:
         """ Text version of the document (actually RST)"""
-        return html2text.html2text(self.html)
+        return html2text.html2text(self.html).encode("ascii", "ignore").decode()
 
     @property
     def html(self) -> str:
