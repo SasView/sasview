@@ -1058,27 +1058,37 @@ def replaceHTMLwithUTF8(html):
     with their UTF-8 equivalents
     """
     # Angstrom
-    html_out = html.replace("&#x212B;", "Å")
-    # infinity
-    html_out = html_out.replace("&#x221e;", "∞")
-    # +/-
-    html_out = html_out.replace("&#177;", "±")
+    html = html.replace("&#x212B;", "Å")  # Hex
+    html = html.replace("&#8491;", "Å")   # Dec
 
-    return html_out
+    # infinity
+    html = html.replace("&#x221e;", "∞") # Hex
+    html = html.replace("&#8734;", "∞")  # Dec
+
+    # +/-
+    html = html.replace("&#b1;", "±")   # Hex
+    html = html.replace("&#177;", "±")   # Dec
+
+    return html
 
 def replaceHTMLwithASCII(html):
     """
     Replace some important HTML-encoded characters
     with their ASCII equivalents
     """
-    # Angstrom
-    html_out = html.replace("&#x212B;", "Ang")
-    # infinity
-    html_out = html_out.replace("&#x221e;", "inf")
-    # +/-
-    html_out = html_out.replace("&#177;", "+/-")
 
-    return html_out
+    html = html.replace("&#x212B;", "Ang")  # Hex
+    html = html.replace("&#8491;", "Ang")  # Dec
+
+    # infinity
+    html = html.replace("&#x221e;", "inf")  # Hex
+    html = html.replace("&#8734;", "inf")  # Dec
+
+    # +/-
+    html = html.replace("&#xb1;", "+/-")  # Hex
+    html = html.replace("&#177;", "+/-")  # Dec
+
+    return html
 
 def convertUnitToUTF8(unit):
     """
