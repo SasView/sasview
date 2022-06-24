@@ -250,6 +250,10 @@ class ReportBase:
         with open(filename, 'w') as fid:
             print(self._html_doc, file=fid)
 
+    def save_text(self, filename):
+        with open(filename, 'w') as fid:
+            print(self.text, file=fid)
+
     def save_pdf(self, filename):
         with open(filename, 'w+b') as fid:
             try:
@@ -260,6 +264,8 @@ class ReportBase:
             except Exception as ex:
                 import traceback
                 logging.error("Error creating pdf: " + str(ex) + "\n" + traceback.format_exc())
+
+
 
 
 # Debugging tool
@@ -276,25 +282,28 @@ def main():
     filename = os.path.join(path_to_data, fileanem)
     data = loader.load(filename)[0]
 
+    # Select this one to use a link, not embedding, for the css - quicker messing about with styling with
     #rb = ReportBase("Test Report", "report_style.css")
+
+    # Use this to embed
     rb = ReportBase("Test Report")
 
     rb.add_data_details(data)
     rb.add_table_dict({"A": 10, "B": 0.01, "C": 'stuff', "D": False}, ("Parameter", "Value"))
-    #rb.add_image_from_file(os.path.join(path_to_data, "../../../qtgui/images/angles.png"))
 
+    # A test plot
     x = np.arange(100)
     y = (x-50)**2
     plt.plot(x, y)
     rb.add_plot(plt.gcf(), image_type='png')
 
-    print(rb._html_doc)
-
+    # Save in the different formats
     rb.save_html("report_test.html")
     rb.save_pdf("report_test.pdf")
+    rb.save_text("report_test.rst")
 
-
-    print(rb.text)
+    print(rb._html_doc) # The HTML
+    print(rb.text) # The text version
 
 
 if __name__ == "__main__":
