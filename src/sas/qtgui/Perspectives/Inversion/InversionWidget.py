@@ -8,12 +8,13 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
 from .InversionUtils import WIDGETS
-from .InversionWidget import InversionWidget
+from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
+
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 
@@ -35,42 +36,51 @@ DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 logger = logging.getLogger(__name__)
 
 
-class InversionWindow(QtWidgets.QTabWidget):
+class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
     """
 
     name = "Inversion"
-    ext = "pr"  # Extension used for saving analyses
+    ext = "pr"  # Extension used for saving analyse
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicSignal = QtCore.pyqtSignal(tuple)
     calculateSignal = QtCore.pyqtSignal(tuple)
 
-    def __init__(self, parent=None, data=None):
-        super(InversionWindow, self).__init__()
+    def __init__(self, parent=None, data=None, tab_id=1):
+        super(InversionWidget, self).__init__()
+
+        # Necessary globals
+        self.parent = parent
+
+        # Which tab is this widget displayed in?
+        self.tab_id = tab_id
+
+        # data index for the batch set
+        self.data_index = 0
+
+        self.setupUi(self)
 
         self.setWindowTitle("P(r) Inversion Perspective")
 
         self._manager = parent
-        # Needed for Batch fitting
-        self.parent = parent
+        #Needed for Batch fitting
         self._parent = parent
-        self.communicate = parent.communicator()
+        self.communicate = self.parent.communicate
         self.communicate.dataDeletedSignal.connect(self.removeData)
+        self.batchResults = {}
 
         self.logic = InversionLogic()
 
-        # List of active Pr Tabs
-        self.tabs = []
-
         # The window should not close
-        self._allowClose = False
+        self._allowClose = True
 
         # Visible data items
         # current QStandardItem showing on the panel
         self._data = None
+
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -82,9 +92,7 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.dataPlot = None
         # suggested nTerms
         self.nTermsSuggested = NUMBER_OF_TERMS
-
-        self.maxIndex = 1
-        self.tab_id = 1
+        self.maxIndex = 1 # Required for tabs (I think?)
 
         # Calculation threads used by all data items
         self.calcThread = None
@@ -95,8 +103,11 @@ class InversionWindow(QtWidgets.QTabWidget):
         # Mapping for all data items
         # Dictionary mapping data to all parameters
         self._dataList = {}
+        self._data = data
+
         if not isinstance(data, list):
             data_list = [data]
+
         if data is not None:
             for datum in data_list:
                 self.updateDataList(datum)
@@ -107,23 +118,24 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.mapper = QtWidgets.QDataWidgetMapper(self)
 
         # Batch fitting parameters
-        self.isBatch = False
+        self.isBatch = True
         self.batchResultsWindow = None
         self.batchResults = {}
+        self.batchComplete = []
 
-        # Max index for adding new, non-clashing tab names
-        self.maxIndex = 1
+        # Add validators
+        self.setupValidators()
+        # Link user interactions with methods
+        self.setupLinks()
+        # Set values
+        self.setupModel()
+        # Set up the Widget Map
+        self.setupMapper()
 
-        # The tabs need to be closeable
-        self.setTabsClosable(True)
-
-        # The tabs need to be movabe
-        self.setMovable(True)
-
-        self.communicate = self.parent.communicator()
-
-        # Initialize the first tab
-        self.addData(None)
+        #Hidding calculate all buton
+        self.calculateAllButton.setVisible(False)
+        # Set base window state
+        self.setupWindow()
 
     ######################################################################
     # Base Perspective Class Definitions
@@ -187,6 +199,160 @@ class InversionWindow(QtWidgets.QTabWidget):
             self.batchResultsWindow.close()
 
     ######################################################################
+    # Initialization routines
+
+    def setupLinks(self):
+        """Connect the use controls to their appropriate methods"""
+        self.dataList.currentIndexChanged.connect(self.displayChange)
+        self.calculateAllButton.clicked.connect(self.startThreadAll)
+        self.calculateThisButton.clicked.connect(self.startThread)
+        self.stopButton.clicked.connect(self.stopCalculation)
+        self.removeButton.clicked.connect(self.removeData)
+        self.helpButton.clicked.connect(self.help)
+        self.estimateBgd.toggled.connect(self.toggleBgd)
+        self.manualBgd.toggled.connect(self.toggleBgd)
+        self.regConstantSuggestionButton.clicked.connect(self.acceptAlpha)
+        self.noOfTermsSuggestionButton.clicked.connect(self.acceptNoTerms)
+        self.explorerButton.clicked.connect(self.openExplorerWindow)
+
+        self.backgroundInput.textChanged.connect(
+            lambda: self.set_background(self.backgroundInput.text()))
+        self.regularizationConstantInput.textChanged.connect(
+            lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
+        self.maxDistanceInput.textChanged.connect(
+            lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
+        self.maxQInput.editingFinished.connect(self.check_q_high)
+        self.minQInput.editingFinished.connect(self.check_q_low)
+        self.slitHeightInput.textChanged.connect(
+            lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
+        self.slitWidthInput.textChanged.connect(
+            lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
+
+        self.model.itemChanged.connect(self.model_changed)
+        self.estimateNTSignal.connect(self._estimateNTUpdate)
+        self.estimateDynamicNTSignal.connect(self._estimateDynamicNTUpdate)
+        self.estimateDynamicSignal.connect(self._estimateDynamicUpdate)
+        self.estimateSignal.connect(self._estimateUpdate)
+        self.calculateSignal.connect(self._calculateUpdate)
+
+        self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
+
+    def setupMapper(self):
+        # Set up the mapper.
+        self.mapper.setOrientation(QtCore.Qt.Vertical)
+        self.mapper.setModel(self.model)
+
+        # Filename
+        self.mapper.addMapping(self.dataList, WIDGETS.W_FILENAME)
+        # Background
+        self.mapper.addMapping(self.backgroundInput, WIDGETS.W_BACKGROUND_INPUT)
+        self.mapper.addMapping(self.estimateBgd, WIDGETS.W_ESTIMATE)
+        self.mapper.addMapping(self.manualBgd, WIDGETS.W_MANUAL_INPUT)
+
+        # Qmin/Qmax
+        self.mapper.addMapping(self.minQInput, WIDGETS.W_QMIN)
+        self.mapper.addMapping(self.maxQInput, WIDGETS.W_QMAX)
+
+        # Slit Parameter items
+        self.mapper.addMapping(self.slitWidthInput, WIDGETS.W_SLIT_WIDTH)
+        self.mapper.addMapping(self.slitHeightInput, WIDGETS.W_SLIT_HEIGHT)
+
+        # Parameter Items
+        self.mapper.addMapping(self.regularizationConstantInput, WIDGETS.W_REGULARIZATION)
+        self.mapper.addMapping(self.regConstantSuggestionButton, WIDGETS.W_REGULARIZATION_SUGGEST)
+        self.mapper.addMapping(self.explorerButton, WIDGETS.W_EXPLORE)
+        self.mapper.addMapping(self.maxDistanceInput, WIDGETS.W_MAX_DIST)
+        self.mapper.addMapping(self.noOfTermsInput, WIDGETS.W_NO_TERMS)
+        self.mapper.addMapping(self.noOfTermsSuggestionButton, WIDGETS.W_NO_TERMS_SUGGEST)
+
+        # Output
+        self.mapper.addMapping(self.rgValue, WIDGETS.W_RG)
+        self.mapper.addMapping(self.iQ0Value, WIDGETS.W_I_ZERO)
+        self.mapper.addMapping(self.backgroundValue, WIDGETS.W_BACKGROUND_OUTPUT)
+        self.mapper.addMapping(self.computationTimeValue, WIDGETS.W_COMP_TIME)
+        self.mapper.addMapping(self.chiDofValue, WIDGETS.W_CHI_SQUARED)
+        self.mapper.addMapping(self.oscillationValue, WIDGETS.W_OSCILLATION)
+        self.mapper.addMapping(self.posFractionValue, WIDGETS.W_POS_FRACTION)
+        self.mapper.addMapping(self.sigmaPosFractionValue, WIDGETS.W_SIGMA_POS_FRACTION)
+
+        # Main Buttons
+        self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
+        self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
+        self.mapper.addMapping(self.calculateThisButton, WIDGETS.W_CALCULATE_VISIBLE)
+        self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
+
+        self.mapper.toFirst()
+
+    def setupModel(self):
+        """
+        Update boxes with initial values
+        """
+        bgd_item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
+        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, bgd_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_QMIN, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_QMAX, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_SLIT_WIDTH, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_SLIT_HEIGHT, blank_item)
+        no_terms_item = QtGui.QStandardItem(str(NUMBER_OF_TERMS))
+        self.model.setItem(WIDGETS.W_NO_TERMS, no_terms_item)
+        reg_item = QtGui.QStandardItem(str(REGULARIZATION))
+        self.model.setItem(WIDGETS.W_REGULARIZATION, reg_item)
+        max_dist_item = QtGui.QStandardItem(str(MAX_DIST))
+        self.model.setItem(WIDGETS.W_MAX_DIST, max_dist_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_RG, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_I_ZERO, blank_item)
+        bgd_item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, bgd_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_COMP_TIME, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_CHI_SQUARED, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_OSCILLATION, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_POS_FRACTION, blank_item)
+        blank_item = QtGui.QStandardItem("")
+        self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, blank_item)
+
+    def setupWindow(self):
+        """Initialize base window state on init"""
+        self.enableButtons()
+        self.estimateBgd.setChecked(True)
+
+    def setupValidators(self):
+        """Apply validators to editable line edits"""
+        self.noOfTermsInput.setValidator(QtGui.QIntValidator())
+        self.regularizationConstantInput.setValidator(GuiUtils.DoubleValidator())
+        self.maxDistanceInput.setValidator(GuiUtils.DoubleValidator())
+        self.minQInput.setValidator(GuiUtils.DoubleValidator())
+        self.maxQInput.setValidator(GuiUtils.DoubleValidator())
+        self.slitHeightInput.setValidator(GuiUtils.DoubleValidator())
+        self.slitWidthInput.setValidator(GuiUtils.DoubleValidator())
+
+    ######################################################################
+    # Methods for updating GUI
+
+    def enableButtons(self):
+        """
+        Enable buttons when data is present, else disable them
+        """
+        self.calculateAllButton.setEnabled(len(self._dataList) > 1
+                                           and not self.isBatch
+                                           and not self.isCalculating)
+        self.calculateThisButton.setEnabled(self.logic.data_is_loaded
+                                            and not self.isBatch
+                                            and not self.isCalculating)
+        self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.stopButton.setVisible(self.isCalculating)
+        self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
 
     def populateDataComboBox(self, name, data_ref):
         """
@@ -194,8 +360,24 @@ class InversionWindow(QtWidgets.QTabWidget):
         :param name: data name
         :param data_ref: QStandardItem reference for data set to be added
         """
-        for i in self.tabs:
-            i.dataList.addItem(name, data_ref)
+        self.dataList.addItem(name, data_ref)
+
+    def acceptNoTerms(self):
+        """Send estimated no of terms to input"""
+        self.model.setItem(WIDGETS.W_NO_TERMS, QtGui.QStandardItem(
+            self.noOfTermsSuggestionButton.text()))
+
+    def acceptAlpha(self):
+        """Send estimated alpha to input"""
+        self.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem(
+            self.regConstantSuggestionButton.text()))
+
+    def displayChange(self, data_index=0):
+        """Switch to another item in the data list"""
+        if self.dataDeleted:
+            return
+        self.updateDataList(self._data)
+        self.setCurrentData(self.dataList.itemData(data_index))
 
     ######################################################################
     # GUI Interaction Events
@@ -209,6 +391,21 @@ class InversionWindow(QtWidgets.QTabWidget):
 
     def set_background(self, value):
         self._calculator.background = float(value)
+
+    def model_changed(self):
+        """Update the values when user makes changes"""
+        if not self.mapper:
+            msg = "Unable to update P{r}. The connection between the main GUI "
+            msg += "and P(r) was severed. Attempting to restart P(r)."
+            logger.warning(msg)
+            self.setClosable(True)
+            self.close()
+            InversionWidget.__init__(self.parent(), list(self._dataList.keys()))
+            exit(0)
+        if self.dmaxWindow is not None:
+            self.dmaxWindow.nfunc = self.getNFunc()
+            self.dmaxWindow.pr_state = self._calculator
+        self.mapper.toLast()
 
     def help(self):
         """
@@ -306,41 +503,6 @@ class InversionWindow(QtWidgets.QTabWidget):
     ######################################################################
     # Response Actions
 
-    def setData(self, data_item=None, is_batch=False):
-        """
-        Assign new data set(s) to the P(r) perspective
-        Obtain a QStandardItem object and parse it to get Data1D/2D
-        Pass it over to the calculator
-        """
-        assert data_item is not None
-
-        if not isinstance(data_item, list):
-            msg = "Incorrect type passed to the P(r) Perspective"
-            raise AttributeError(msg)
-
-        for data in data_item:
-            if data in self._dataList.keys():
-                # Don't add data if it's already in
-                continue
-            # Create initial internal mappings
-            self.logic.data = GuiUtils.dataFromItem(data)
-            if not isinstance(self.logic.data, Data1D):
-                msg = "P(r) perspective cannot be computed with 2D data."
-                logger.error(msg)
-                raise ValueError(msg)
-            # Estimate q range
-            qmin, qmax = self.logic.computeDataRange()
-            self._calculator.set_qmin(qmin)
-            self._calculator.set_qmax(qmax)
-            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
-                self.logic.add_errors()
-            self.updateDataList(data)
-            self.addData(name=self.logic.data.name, data=data, is_batch=is_batch, tab_index=None)
-
-        #Checking for 1D again to mitigate the case when 2D data is last on the data list
-        # if isinstance(self.logic.data, Data1D):
-        #     self.setCurrentData(data)
-
     def updateDataList(self, dataRef):
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
@@ -351,8 +513,8 @@ class InversionWindow(QtWidgets.QTabWidget):
             DICT_KEYS[2]: self.dataPlot
         }
         # Update batch results window when finished
-        self.batchResults[self.logic.data.name] = self._calculator
-        # if self.batchResultsWindow is not None: # enable when batch is fixed
+        self.batchResults[self.name] = self._calculator
+        # if self.batchResultsWindow is not None:
         #     self.showBatchOutput()
 
     def getState(self):
@@ -598,6 +760,25 @@ class InversionWindow(QtWidgets.QTabWidget):
             parent=self, output_data=self.batchResults)
         self.performEstimate()
 
+    def startNextBatchItem(self):
+        self.isBatch = False
+        for index in range(len(self._dataList)):
+            if index not in self.batchComplete:
+                self.dataList.setCurrentIndex(index)
+                self.isBatch = True
+                # Add the index before calculating in case calculation fails
+                self.batchComplete.append(index)
+                break
+        if self.isBatch:
+            self.performEstimate()
+        else:
+            # If no data sets left, end batch calculation
+            self.isCalculating = False
+            self.batchComplete = []
+            self.calculateAllButton.setText("Calculate All")
+            self.showBatchOutput()
+            self.enableButtons()
+
     def startThread(self):
         """
             Start a calculation thread
@@ -821,6 +1002,49 @@ class InversionWindow(QtWidgets.QTabWidget):
         ''' Send a signal to the main thread for model update'''
         self.calculateSignal.emit((out, cov, pr, elapsed))
 
+    def _calculateUpdate(self, output_tuple):
+        """
+        Method called with the results when the inversion is done
+
+        :param out: output coefficient for the base functions
+        :param cov: covariance matrix
+        :param pr: Invertor instance
+        :param elapsed: time spent computing
+        """
+        out, cov, pr, elapsed = output_tuple
+        # Save useful info
+        cov = np.ascontiguousarray(cov)
+        pr.cov = cov
+        pr.out = out
+        pr.elapsed = elapsed
+
+        # Save Pr invertor
+        self._calculator = pr
+
+        # Update P(r) and fit plots
+        self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
+        self.prPlot.show_yzero = True
+        self.prPlot.filename = self.logic.data.filename
+        self.dataPlot = self.logic.new1DPlot(out, self._calculator)
+        self.dataPlot.filename = self.logic.data.filename
+
+        self.dataPlot.show_q_range_sliders = True
+        self.dataPlot.slider_update_on_move = False
+        self.dataPlot.slider_perspective_name = "Inversion"
+        self.dataPlot.slider_low_q_input = ['minQInput']
+        self.dataPlot.slider_low_q_setter = ['check_q_low']
+        self.dataPlot.slider_high_q_input = ['maxQInput']
+        self.dataPlot.slider_high_q_setter = ['check_q_high']
+
+        # Udpate internals and GUI
+        self.updateDataList(self._data)
+        if self.isBatch:
+            self.batchComplete.append(self.dataList.currentIndex())
+            # self.startNextBatchItem()                             # Currently Broken
+        else:
+            self.isCalculating = False
+        self.updateGuiValues()
+
     def _threadError(self, error):
         """
             Call-back method for calculation errors
@@ -830,35 +1054,3 @@ class InversionWindow(QtWidgets.QTabWidget):
             self.startNextBatchItem()
         else:
             self.stopCalculation()
-
-    def addData(self, name=None, data=None, is_batch=False, tab_index=None):
-        """
-        Add a new tab for passed data
-        """
-        if tab_index is None:
-            tab_index = self.maxIndex
-        else:
-            self.maxIndex = tab_index
-
-        tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
-
-        if name is None:
-            name = "New Pr Tab"
-        else:
-            tab.name = name
-
-        if data is not None:
-            tab.populateDataComboBox(self.logic.data.name, data)
-            tab.is_batch_fitting = is_batch
-
-        # Add this tab to the object library so it can be retrieved by scripting/jupyter
-        self.tabs.append(tab)
-        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1 # ERROR: list index out of range
-        icon = QtGui.QIcon()
-        if is_batch:
-            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-
-        self.addTab(tab, icon, tab.name)
-
-        # Show the new tab
-        self.setCurrentWidget(tab)
