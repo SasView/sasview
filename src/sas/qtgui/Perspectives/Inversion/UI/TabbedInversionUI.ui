@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>PrInversion</class>
- <widget class="QDialog" name="PrInversion">
+ <widget class="QWidget" name="PrInversion">
   <property name="geometry">
    <rect>
     <x>0</x>
