@@ -1,60 +1,55 @@
 import logging
 import numpy as np
 
-
-from PySide6 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 # sas-global
-
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
 from .InversionUtils import WIDGETS
-from .UI.TabbedInversionUI import Ui_PrInversion
+from .InversionWidget import InversionWidget
 from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
-
 from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
-from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget, DICT_KEYS, NUMBER_OF_TERMS, REGULARIZATION
 
 
-from sasdata.dataloader import Data2D
+def is_float(value):
+    """Converts text input values to floats. Empty strings throw ValueError"""
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
+
+
+NUMBER_OF_TERMS = 10
+REGULARIZATION = 0.0001
+BACKGROUND_INPUT = 0.0
+MAX_DIST = 140.0
+DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 logger = logging.getLogger(__name__)
 
-class InversionWindow(QtWidgets.QTabWidget, Perspective):
+
+class InversionWindow(QtWidgets.QTabWidget):
     """
     The main window for the P(r) Inversion perspective.
-    This is the main window where the tabs for each of the widgets are shown
-
     """
 
-
     name = "Inversion"
+    ext = "pr"  # Extension used for saving analyses
+    estimateSignal = QtCore.pyqtSignal(tuple)
+    estimateNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
+    calculateSignal = QtCore.pyqtSignal(tuple)
 
-
-
-    ext = "pr"
-    tabsModifiedSignal = QtCore.Signal()
-    @property
-    def title(self):
-        return "P(r) Inversion"
-
-
-
-    @property
-    def title(self):
-        return "P(r) Inversion"
-
-    def __init__(self, parent=None):
-
+    def __init__(self, parent=None, data=None):
         super(InversionWindow, self).__init__()
-
 
         self.setWindowTitle("P(r) Inversion Perspective")
 
@@ -63,12 +58,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.parent = parent
         self._parent = parent
         self.communicate = parent.communicator()
-        self.tabCloseRequested.connect(self.tabCloses)
+        self.communicate.dataDeletedSignal.connect(self.removeData)
+
+        self.logic = InversionLogic()
 
         # List of active Pr Tabs
         self.tabs = []
-        self.setTabsClosable(True)
-
 
         # The window should not close
         self._allowClose = False
@@ -79,12 +74,14 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
-        self._calculator = None
-
+        self._calculator = Invertor()
+        # Default to background estimate
+        self._calculator.est_bck = True
         # plots of self._data
         self.prPlot = None
         self.dataPlot = None
         # suggested nTerms
+        self.nTermsSuggested = NUMBER_OF_TERMS
 
         self.maxIndex = 1
         self.tab_id = 1
@@ -98,6 +95,11 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Mapping for all data items
         # Dictionary mapping data to all parameters
         self._dataList = {}
+        if not isinstance(data, list):
+            data_list = [data]
+        if data is not None:
+            for datum in data_list:
+                self.updateDataList(datum)
 
         self.dataDeleted = False
 
@@ -115,99 +117,21 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # The tabs need to be closeable
         self.setTabsClosable(True)
 
-        # The tabs need to be movable
+        # The tabs need to be movabe
         self.setMovable(True)
+
+        self.communicate = self.parent.communicator()
 
         # Initialize the first tab
         self.addData(None)
 
     ######################################################################
-    # Batch Mode and Tab Functions
-
-    def resetTab(self, index):
-        """
-        Adds a new tab and removes the last tab
-        as a way of resetting the fit tabs
-        """
-        # If data on tab empty - do nothing
-        if index in self.tabs and not self.tabs[index].data:
-            return
-        # Remove the previous last tab
-        self.tabCloses(index)
-
-    def tabCloses(self, index):
-        """
-        Update local bookkeeping on tab close
-        """
-        # don't remove the last tab
-        if len(self.tabs) <= 1:
-            return
-        self.closeTabByIndex(index)
-
-    def closeTabByIndex(self, index):
-        """
-        Close/delete a tab with the given index.
-        No checks on validity of the index.
-        """
-        try:
-            self.removeTab(index)
-            del self.tabs[index]
-            self.tabsModifiedSignal.emit()
-        except IndexError:
-            # The tab might have already been deleted previously
-            pass
-
-    ######################################################################
-
-    def serializeAll(self):
-        """
-        Serialize the inversion state so data can be saved
-        Inversion is not batch-ready so this will only effect a single page
-        :return: {data-id: {self.name: {inversion-state}}}
-        """
-        return self.serializeCurrentPage()
-
-    def serializeCurrentPage(self, Index=None):
-        """
-        Serialize and return a dictionary of {data_id: inversion-state}
-        Return original dictionary if no data
-        """
-        if Index is None:
-            Index = self.currentIndex()
-        tab = self.tabs[Index]
-        state = {}
-        if tab.logic.data_is_loaded:
-            tab_data = tab.getPage()
-            data_id = tab_data.pop('data_id', '')
-            state[data_id] = {'pr_params': tab_data}
-        return state
-
-
-    def updateFromParameters(self, params: dict):
-        """ Update the perspective using a dictionary of parameters
-        e.g. those loaded via open project or open analysis menu items"""
-        raise NotImplementedError("Update from parameters not implemented yet.")
-
-
-    ######################################################################
     # Base Perspective Class Definitions
-
-
-    @property
-    def supports_reports(self):
-        return True
-        
-    @property
-    def supports_fitting(self):
-        return False
 
     def communicator(self):
         return self.communicate
 
     def allowBatch(self):
-        """
-        Tell the caller we accept batch mode
-        """
         return True
 
     def allowSwap(self):
@@ -264,6 +188,124 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     ######################################################################
 
+    def populateDataComboBox(self, name, data_ref):
+        """
+        Append a new name to the data combobox
+        :param name: data name
+        :param data_ref: QStandardItem reference for data set to be added
+        """
+        for i in self.tabs:
+            i.dataList.addItem(name, data_ref)
+
+    ######################################################################
+    # GUI Interaction Events
+
+    def updateCalculator(self):
+        """Update all p(r) params"""
+        self._calculator.set_x(self.logic.data.x)
+        self._calculator.set_y(self.logic.data.y)
+        self._calculator.set_err(self.logic.data.dy)
+        self.set_background(self.backgroundInput.text())
+
+    def set_background(self, value):
+        self._calculator.background = float(value)
+
+    def help(self):
+        """
+        Open the P(r) Inversion help browser
+        """
+        tree_location = "/user/qtgui/Perspectives/Inversion/pr_help.html"
+
+        # Actual file anchor will depend on the combo box index
+        # Note that we can be clusmy here, since bad current_fitter_id
+        # will just make the page displayed from the top
+        self._manager.showHelp(tree_location)
+
+    def toggleBgd(self):
+        """
+        Toggle the background between manual and estimated
+        """
+        self.model.blockSignals(True)
+        value = 1 if self.estimateBgd.isChecked() else 0
+        itemt = QtGui.QStandardItem(str(value == 1).lower())
+        self.model.setItem(WIDGETS.W_ESTIMATE, itemt)
+        itemt = QtGui.QStandardItem(str(value == 0).lower())
+        self.model.setItem(WIDGETS.W_MANUAL_INPUT, itemt)
+        self._calculator.set_est_bck(value)
+        self.backgroundInput.setEnabled(self._calculator.est_bck == 0)
+        self.model.blockSignals(False)
+
+    def openExplorerWindow(self):
+        """
+        Open the Explorer window to see correlations between params and results
+        """
+        from .DMaxExplorerWidget import DmaxWindow
+        self.dmaxWindow = DmaxWindow(pr_state=self._calculator,
+                                     nfunc=self.getNFunc(),
+                                     parent=self)
+        self.dmaxWindow.show()
+
+    def showBatchOutput(self):
+        """
+        Display the batch output in tabular form
+        :param output_data: Dictionary mapping name -> P(r) instance
+        """
+        if self.batchResultsWindow is None:
+            self.batchResultsWindow = BatchInversionOutputPanel(
+                parent=self, output_data=self.batchResults)
+        else:
+            self.batchResultsWindow.setupTable(self.batchResults)
+        self.batchResultsWindow.show()
+
+    def stopCalculation(self):
+        """ Stop all threads, return to the base state and update GUI """
+        self.stopCalcThread()
+        self.stopEstimationThread()
+        self.stopEstimateNTThread()
+        # Show any batch calculations that successfully completed
+        if self.isBatch and self.batchResultsWindow is not None:
+            self.showBatchOutput()
+        self.isBatch = False
+        self.isCalculating = False
+        self.updateGuiValues()
+
+    def check_q_low(self, q_value=None):
+        """ Validate the low q value """
+        if not q_value:
+            q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
+        q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
+        q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
+        if q_value > q_max:
+            # Value too high - coerce to max q
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_max)))
+        elif q_value < q_min:
+            # Value too low - coerce to min q
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_min)))
+        else:
+            # Valid Q - set model item
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            self._calculator.set_qmin(q_value)
+
+    def check_q_high(self, q_value=None):
+        """ Validate the value of high q sent by the slider """
+        if not q_value:
+            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
+        q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
+        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
+        if q_value > q_max:
+            # Value too high - coerce to max q
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))
+        elif q_value < q_min:
+            # Value too low - coerce to min q
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_min)))
+        else:
+            # Valid Q - set model item
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            self._calculator.set_qmax(q_value)
+
+    ######################################################################
+    # Response Actions
+
     def setData(self, data_item=None, is_batch=False):
         """
         Assign new data set(s) to the P(r) perspective
@@ -276,47 +318,166 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
-        if not isinstance(data_item[0], QtGui.QStandardItem):
+        for data in data_item:
+            if data in self._dataList.keys():
+                # Don't add data if it's already in
+                continue
+            # Create initial internal mappings
+            self.logic.data = GuiUtils.dataFromItem(data)
+            if not isinstance(self.logic.data, Data1D):
+                msg = "P(r) perspective cannot be computed with 2D data."
+                logger.error(msg)
+                raise ValueError(msg)
+            # Estimate q range
+            qmin, qmax = self.logic.computeDataRange()
+            self._calculator.set_qmin(qmin)
+            self._calculator.set_qmax(qmax)
+            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
+                self.logic.add_errors()
+            self.updateDataList(data)
+            self.addData(name=self.logic.data.name, data=data, is_batch=is_batch, tab_index=None)
+
+        #Checking for 1D again to mitigate the case when 2D data is last on the data list
+        # if isinstance(self.logic.data, Data1D):
+        #     self.setCurrentData(data)
+
+    def updateDataList(self, dataRef):
+        """Save the current data state of the window into self._data_list"""
+        if dataRef is None:
+            return
+        self._dataList[dataRef] = {
+            DICT_KEYS[0]: self._calculator,
+            DICT_KEYS[1]: self.prPlot,
+            DICT_KEYS[2]: self.dataPlot
+        }
+        # Update batch results window when finished
+        self.batchResults[self.logic.data.name] = self._calculator
+        # if self.batchResultsWindow is not None: # enable when batch is fixed
+        #     self.showBatchOutput()
+
+    def getState(self):
+        """
+        Collects all active params into a dictionary of {name: value}
+        :return: {name: value}
+        """
+        # If no measurement performed, calculate using base params
+        if self.chiDofValue.text() == '':
+            self._calculator.out, self._calculator.cov = self._calculator.invert()
+        return {
+            'alpha': self._calculator.alpha,
+            'background': self._calculator.background,
+            'chi2': self._calculator.chi2,
+            'cov': self._calculator.cov,
+            'd_max': self._calculator.d_max,
+            'elapsed': self._calculator.elapsed,
+            'err': self._calculator.err,
+            'est_bck': self._calculator.est_bck,
+            'iq0': self._calculator.iq0(self._calculator.out),
+            'nerr': self._calculator.nerr,
+            'nfunc': self.getNFunc(),
+            'npoints': self._calculator.npoints,
+            'ny': self._calculator.ny,
+            'out': self._calculator.out,
+            'oscillations': self._calculator.oscillations(self._calculator.out),
+            'pos_frac': self._calculator.get_positive(self._calculator.out),
+            'pos_err': self._calculator.get_pos_err(self._calculator.out,
+                                                    self._calculator.cov),
+            'q_max': self._calculator.q_max,
+            'q_min': self._calculator.q_min,
+            'rg': self._calculator.rg(self._calculator.out),
+            'slit_height': self._calculator.slit_height,
+            'slit_width': self._calculator.slit_width,
+            'suggested_alpha': self._calculator.suggested_alpha,
+            'x': self._calculator.x,
+            'y': self._calculator.y,
+        }
+
+    def getNFunc(self):
+        """Get the n_func value from the GUI object"""
+        try:
+            nfunc = int(self.noOfTermsInput.text())
+        except ValueError:
+            logger.error("Incorrect number of terms specified: %s"
+                          %self.noOfTermsInput.text())
+            self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
+            nfunc = NUMBER_OF_TERMS
+        return nfunc
+
+    def setCurrentData(self, data_ref):
+        """Get the data by reference and display as necessary"""
+        if data_ref is None:
+            return
+        if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
+        # Data references
+        self._data = data_ref
+        self.logic.data = GuiUtils.dataFromItem(data_ref)
+        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
+        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
+        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
+        self.performEstimate()
 
-        for data in data_item:
+    def updateDynamicGuiValues(self):
+        pr = self._calculator
+        alpha = self._calculator.suggested_alpha
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
+        self.noOfTermsSuggestionButton.setText(
+             "{:n}".format(self.nTermsSuggested))
 
-            logic_data = GuiUtils.dataFromItem(data)
+        self.enableButtons()
 
-            # Tab for 2D data
-            if isinstance(logic_data, Data2D) and not is_batch:
-                data.isSliced = False
-                tab = self.addData(data=data, is2D=True)
-                tab.tab2D.setEnabled(True)
-                tab.show2DPlot()
+    def updateGuiValues(self):
+        pr = self._calculator
+        out = self._calculator.out
+        cov = self._calculator.cov
+        elapsed = self._calculator.elapsed
+        alpha = self._calculator.suggested_alpha
+        self.check_q_high(pr.get_qmax())
+        self.check_q_low(pr.get_qmin())
+        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
+                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
+                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
+        self.model.setItem(WIDGETS.W_COMP_TIME,
+                           QtGui.QStandardItem("{:.4g}".format(elapsed)))
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:.2g}".format(alpha))
 
-            # Tab for 1D batch
-            if is_batch and not isinstance(logic_data, Data2D):
-                # initiate a single Tab for batch
-                self.addData(data=data_item, is_batch=is_batch)
-                return
-
-            # Tab for 1D
-            if isinstance(logic_data, Data1D):
-                tab = self.addData(data=data)
-                tab.setQ()
-
-                if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
-                    tab.logic.add_errors()
-
-            # let the user know that the 2D data cannot be batch processed
-            if isinstance(logic_data, Data2D) and is_batch:
-                msg = "2D data cannot be batch processed using the P(r) Perspective."
-                raise AttributeError(msg)
-
-        # replace the startup tab, so it looks like data has been added to it.
-        if self.tabs[0].tab_name == "New Tab":
-            self.closeTabByIndex(0)
-
-
-
-
+        if isinstance(pr.chi2, np.ndarray):
+            self.model.setItem(WIDGETS.W_CHI_SQUARED,
+                               QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
+        if out is not None:
+            self.model.setItem(WIDGETS.W_RG,
+                               QtGui.QStandardItem("{:.3g}".format(pr.rg(out))))
+            self.model.setItem(WIDGETS.W_I_ZERO,
+                               QtGui.QStandardItem(
+                                   "{:.3g}".format(pr.iq0(out))))
+            self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem(
+                "{:.3g}".format(pr.oscillations(out))))
+            self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem(
+                "{:.3g}".format(pr.get_positive(out))))
+            if cov is not None:
+                self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
+                                   QtGui.QStandardItem(
+                                       "{:.3g}".format(
+                                           pr.get_pos_err(out, cov))))
+        if self.prPlot is not None:
+            title = self.prPlot.name
+            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
+            GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
+            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
+        if self.dataPlot is not None:
+            title = self.dataPlot.name
+            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
+            self.dataPlot.symbol = "Line"
+            self.dataPlot.show_errors = False
+            GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
+            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
+        self.enableButtons()
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
@@ -334,13 +495,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             self.dataPlot.slider_low_q_setter = []
             self.dataPlot.slider_high_q_setter = []
         self._data = None
-        length = self.dataList.count()
+        length = len(self.dataList)
         for index in reversed(range(length)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
         # Last file removed
         self.dataDeleted = False
-        # if self._dataList.count() == 0:
         if len(self._dataList) == 0:
             self.prPlot = None
             self.dataPlot = None
@@ -352,7 +512,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 self.nTermsSuggested))
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(
                 REGULARIZATION))
-            # self.updateGuiValues()
+            self.updateGuiValues()
             self.setupModel()
         else:
             self.dataList.setCurrentIndex(0)
@@ -376,59 +536,329 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             state[data_id] = {'pr_params': tab_data}
         return state
 
- 
+    def getPage(self):
+        """
+        serializes full state of this fit page
+        """
+        # Get all parameters from page
+        param_dict = self.getState()
+        param_dict['data_name'] = str(self.logic.data.name)
+        param_dict['data_id'] = str(self.logic.data.id)
+        return param_dict
 
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = []
+        if self.logic.data_is_loaded:
+            tab_id.append(str(self.logic.data.id))
+        return tab_id
 
+    def updateFromParameters(self, params):
+        self._calculator.q_max = params['q_max']
+        self.check_q_high(self._calculator.get_qmax())
+        self._calculator.q_min = params['q_min']
+        self.check_q_low(self._calculator.get_qmin())
+        self._calculator.alpha = params['alpha']
+        self._calculator.suggested_alpha = params['suggested_alpha']
+        self._calculator.d_max = params['d_max']
+        self._calculator.nfunc = params['nfunc']
+        self.nTermsSuggested = self._calculator.nfunc
+        self.updateDynamicGuiValues()
+        self.acceptAlpha()
+        self.acceptNoTerms()
+        self._calculator.background = params['background']
+        self._calculator.chi2 = params['chi2']
+        self._calculator.cov = params['cov']
+        self._calculator.elapsed = params['elapsed']
+        self._calculator.err = params['err']
+        self._calculator.set_est_bck = bool(params['est_bck'])
+        self._calculator.nerr = params['nerr']
+        self._calculator.npoints = params['npoints']
+        self._calculator.ny = params['ny']
+        self._calculator.out = params['out']
+        self._calculator.slit_height = params['slit_height']
+        self._calculator.slit_width = params['slit_width']
+        self._calculator.x = params['x']
+        self._calculator.y = params['y']
+        self.updateGuiValues()
+        self.updateDynamicGuiValues()
 
-    def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
+    ######################################################################
+    # Thread Creators
 
+    def startThreadAll(self):
+        self.isCalculating = True
+        self.isBatch = True
+        self.batchComplete = []
+        self.calculateAllButton.setText("Calculating...")
+        self.enableButtons()
+        self.batchResultsWindow = BatchInversionOutputPanel(
+            parent=self, output_data=self.batchResults)
+        self.performEstimate()
+
+    def startThread(self):
+        """
+            Start a calculation thread
+        """
+        from .Thread import CalcPr
+
+        # Set data before running the calculations
+        self.isCalculating = True
+        self.enableButtons()
+        self.updateCalculator()
+        # Disable calculation buttons to prevent thread interference
+
+        # If the thread is already started, stop it
+        self.stopCalcThread()
+
+        pr = self._calculator.clone()
+        #Making sure that nfunc and alpha parameters are correctly initialized
+        pr.suggested_alpha = self._calculator.alpha
+        self.calcThread = CalcPr(pr, self.nTermsSuggested,
+                                 error_func=self._threadError,
+                                 completefn=self._calculateCompleted,
+                                 updatefn=None)
+        self.calcThread.queue()
+        self.calcThread.ready(2.5)
+
+    def stopCalcThread(self):
+        """ Stops a thread if it exists and is running """
+        if self.calcThread is not None and self.calcThread.isrunning():
+            self.calcThread.stop()
+
+    def performEstimateNT(self):
+        """
+        Perform parameter estimation
+        """
+        from .Thread import EstimateNT
+
+        self.updateCalculator()
+
+        # If a thread is already started, stop it
+        self.stopEstimateNTThread()
+
+        pr = self._calculator.clone()
+        # Skip the slit settings for the estimation
+        # It slows down the application and it doesn't change the estimates
+        pr.slit_height = 0.0
+        pr.slit_width = 0.0
+        nfunc = self.getNFunc()
+
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
+                                             error_func=self._threadError,
+                                             completefn=self._estimateNTCompleted,
+                                             updatefn=None)
+        self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
+
+    def performEstimateDynamicNT(self):
+        """
+        Perform parameter estimation
+        """
+        from .Thread import EstimateNT
+
+        self.updateCalculator()
+
+        # If a thread is already started, stop it
+        self.stopEstimateNTThread()
+
+        pr = self._calculator.clone()
+        # Skip the slit settings for the estimation
+        # It slows down the application and it doesn't change the estimates
+        pr.slit_height = 0.0
+        pr.slit_width = 0.0
+        nfunc = self.getNFunc()
+
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
+                                             error_func=self._threadError,
+                                             completefn=self._estimateDynamicNTCompleted,
+                                             updatefn=None)
+        self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
+
+    def stopEstimateNTThread(self):
+        if (self.estimationThreadNT is not None and
+                self.estimationThreadNT.isrunning()):
+            self.estimationThreadNT.stop()
+
+    def performEstimate(self):
+        """
+            Perform parameter estimation
+        """
+        from .Thread import EstimatePr
+
+        # If a thread is already started, stop it
+        self.stopEstimationThread()
+
+        self.estimationThread = EstimatePr(self._calculator.clone(),
+                                           self.getNFunc(),
+                                           error_func=self._threadError,
+                                           completefn=self._estimateCompleted,
+                                           updatefn=None)
+        self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
+
+    def performEstimateDynamic(self):
+        """
+            Perform parameter estimation
+        """
+        from .Thread import EstimatePr
+
+        # If a thread is already started, stop it
+        self.stopEstimationThread()
+
+        self.estimationThread = EstimatePr(self._calculator.clone(),
+                                           self.getNFunc(),
+                                           error_func=self._threadError,
+                                           completefn=self._estimateDynamicCompleted,
+                                           updatefn=None)
+        self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
+
+    def stopEstimationThread(self):
+        """ Stop the estimation thread if it exists and is running """
+        if (self.estimationThread is not None and
+                self.estimationThread.isrunning()):
+            self.estimationThread.stop()
+
+    ######################################################################
+    # Thread Complete
+
+    def _estimateCompleted(self, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateSignal.emit((alpha, message, elapsed))
+
+    def _estimateDynamicCompleted(self, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateDynamicSignal.emit((alpha, message, elapsed))
+
+    def _estimateUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param elapsed: computation time
+        """
+        alpha, message, elapsed = output_tuple
+        self._calculator.alpha = alpha
+        self._calculator.elapsed += self._calculator.elapsed
+        if message:
+            logger.info(message)
+        self.performEstimateNT()
+        self.performEstimateDynamicNT()
+
+    def _estimateDynamicUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param elapsed: computation time
+        """
+        alpha, message, elapsed = output_tuple
+        self._calculator.alpha = alpha
+        self._calculator.elapsed += self._calculator.elapsed
+        if message:
+            logger.info(message)
+        self.performEstimateDynamicNT()
+
+    def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateNTSignal.emit((nterms, alpha, message, elapsed))
+
+    def _estimateDynamicNTCompleted(self, nterms, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateDynamicNTSignal.emit((nterms, alpha, message, elapsed))
+
+    def _estimateNTUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param nterms: estimated number of terms
+        :param elapsed: computation time
+        """
+        nterms, alpha, message, elapsed = output_tuple
+        self._calculator.elapsed += elapsed
+        self._calculator.suggested_alpha = alpha
+        self.nTermsSuggested = nterms
+        # Save useful info
+        self.updateGuiValues()
+        if message:
+            logger.info(message)
+        if self.isBatch:
+            self.acceptAlpha()
+            self.acceptNoTerms()
+            self.startThread()
+
+    def _estimateDynamicNTUpdate(self, output_tuple):
+        """
+        Parameter estimation completed,
+        display the results to the user
+
+        :param alpha: estimated best alpha
+        :param nterms: estimated number of terms
+        :param elapsed: computation time
+        """
+        nterms, alpha, message, elapsed = output_tuple
+        self._calculator.elapsed += elapsed
+        self._calculator.suggested_alpha = alpha
+        self.nTermsSuggested = nterms
+        # Save useful info
+        self.updateDynamicGuiValues()
+        if message:
+            logger.info(message)
+        if self.isBatch:
+            self.acceptAlpha()
+            self.acceptNoTerms()
+            self.startThread()
+
+    def _calculateCompleted(self, out, cov, pr, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.calculateSignal.emit((out, cov, pr, elapsed))
+
+    def _threadError(self, error):
+        """
+            Call-back method for calculation errors
+        """
+        logger.error(error)
+        if self.isBatch:
+            self.startNextBatchItem()
+        else:
+            self.stopCalculation()
+
+    def addData(self, name=None, data=None, is_batch=False, tab_index=None):
         """
         Add a new tab for passed data
         """
-
         if tab_index is None:
             tab_index = self.maxIndex
         else:
             self.maxIndex = tab_index
 
-        # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
-        tab.setTabName("New Tab")
-        icon = QtGui.QIcon()
 
-        if data is not None and not is_batch:
-            tab.setTabName("New Tab")
-            tab.is2D = is2D
-            tab.logic.data = GuiUtils.dataFromItem(data)
-            tab.setTabName(tab.logic.data.name)
-            tab.populateDataComboBox(tab.logic.data.name, data)
-            tab.calculateAllButton.setVisible(False)
-            tab.showResultsButton.setVisible(False)
+        if name is None:
+            name = "New Pr Tab"
+        else:
+            tab.name = name
 
-        # Setting UP batch Mode
-        if is_batch:
-            tab = self.createBatchTab(batchDataList=data)
-            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-        self.addTab(tab, icon, tab.tab_name)
-        tab.enableButtons()
+        if data is not None:
+            tab.populateDataComboBox(self.logic.data.name, data)
+            tab.is_batch_fitting = is_batch
+
+        # Add this tab to the object library so it can be retrieved by scripting/jupyter
         self.tabs.append(tab)
+        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1 # ERROR: list index out of range
+        icon = QtGui.QIcon()
+        if is_batch:
+            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
+
+        self.addTab(tab, icon, tab.name)
 
         # Show the new tab
         self.setCurrentWidget(tab)
-        return tab
-
-    def createBatchTab(self, batchDataList):
-        """
-        setup for batch tab
-        essentially this makes sure a batch tab is set up so that multiple files can be computed
-        """
-        batchTab = InversionWidget(parent=self.parent, data=batchDataList)
-        batchTab.setTabName("Pr Batch")
-        batchTab.isBatch = True
-        batchTab.setPlotable(False)
-        for data in batchDataList:
-            batchTab.logic.data = GuiUtils.dataFromItem(data)
-            batchTab.populateDataComboBox(name=batchTab.logic.data.name, data_ref=data)
-            batchTab.updateDataList(data)
-        batchTab.setCurrentData(batchDataList[0])
-        return batchTab
