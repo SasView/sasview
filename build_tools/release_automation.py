@@ -65,6 +65,7 @@ sasview_data = {
         {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
         {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology'},
         {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
+        {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
         {'name': 'Murphy, Ryan', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-4080-7525'},
         {'name': 'Nielsen, Torben','affiliation': 'European Spallation Source ERIC'},
         {'name': "O'Driscoll, Lewis",'affiliation': 'STFC - Rutherford Appleton Laboratory'},
@@ -74,6 +75,7 @@ sasview_data = {
         {'name': 'Rozyczko, Piotr','affiliation': 'European Spallation Source ERIC', 'orcid' : '0000-0002-2359-1013' },
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'},
+        {'name': 'Wilkins, Lucas','affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology'}
         ],
     'grants': [{'id': '10.13039/501100000780::654000'}],
