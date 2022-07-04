@@ -1063,67 +1063,66 @@ class OMFReader(object):
                 # Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
-                        if len(s_line) < 2: s_line = line.split(" ",1)
-                        oommf = s_line[1].strip()                               
-
+                        oommf = s_line[1].lstrip()
                     if s_line[0].lower().count("title") > 0:
-                        title = s_line[1].strip()
+                        title = s_line[1].lstrip()
                     if s_line[0].lower().count("desc") > 0:
-                        desc += s_line[1].strip()
+                        desc += s_line[1].lstrip()
                         desc += '\n'
                     if s_line[0].lower().count("meshtype") > 0:
-                        meshtype = s_line[1].strip()
+                        meshtype = s_line[1].lstrip()
                     if s_line[0].lower().count("meshunit") > 0:
-                        meshunit = s_line[1].strip()
+                        meshunit = s_line[1].lstrip()
                         if meshunit.count("m") < 1:
                             msg = "Error: \n"
                             msg += "We accept only m as meshunit"
                             logging.error(msg)
                             return None
                     if s_line[0].lower().count("xbase") > 0:
-                        xbase = s_line[1].strip()
+                        xbase = s_line[1].lstrip()
                     if s_line[0].lower().count("ybase") > 0:
-                        ybase = s_line[1].strip()
+                        ybase = s_line[1].lstrip()
                     if s_line[0].lower().count("zbase") > 0:
-                        zbase = s_line[1].strip()
+                        zbase = s_line[1].lstrip()
                     if s_line[0].lower().count("xstepsize") > 0:
-                        xstepsize = s_line[1].strip() 
+                        xstepsize = s_line[1].lstrip() 
                     if s_line[0].lower().count("ystepsize") > 0:
-                        ystepsize = s_line[1].strip()   
+                        ystepsize = s_line[1].lstrip()   
                     if s_line[0].lower().count("zstepsize") > 0:
-                        zstepsize = s_line[1].strip()
+                        zstepsize = s_line[1].lstrip()
                     if s_line[0].lower().count("xnodes") > 0:
-                        xnodes = s_line[1].strip()   
+                        xnodes = s_line[1].lstrip()   
+                    #print(s_line[0].lower().count("ynodes"))
                     if s_line[0].lower().count("ynodes") > 0:
-                        ynodes = s_line[1].strip()
+                        ynodes = s_line[1].lstrip()
+                        #print(ynodes)
                     if s_line[0].lower().count("znodes") > 0:
-                        znodes = s_line[1].strip()  
+                        znodes = s_line[1].lstrip()  
                     if s_line[0].lower().count("xmin") > 0:
-                        xmin = s_line[1].strip()
+                        xmin = s_line[1].lstrip()
                     if s_line[0].lower().count("ymin") > 0:
-                        ymin = s_line[1].strip()
+                        ymin = s_line[1].lstrip()
                     if s_line[0].lower().count("zmin") > 0:
-                        zmin = s_line[1].strip()
+                        zmin = s_line[1].lstrip()
                     if s_line[0].lower().count("xmax") > 0:
-                        xmax = s_line[1].strip()
+                        xmax = s_line[1].lstrip()
                     if s_line[0].lower().count("ymax") > 0:
-                        ymax = s_line[1].strip()
+                        ymax = s_line[1].lstrip()
                     if s_line[0].lower().count("zmax") > 0:
-                        zmax = s_line[1].strip()
+                        zmax = s_line[1].lstrip()
                     if s_line[0].lower().count("valueunit") > 0:
-                        valueunit = s_line[1].strip()
+                        valueunit = s_line[1].lstrip()
                         if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
                             msg = "Error: \n"
                             msg += "We accept only mT or A/m as valueunit"
                             logging.error(msg)    
                             return None
-                        elif "mT" in valueunit or "A/m" in valueunit:    
-                            valueunit = valueunit.split(" ", 1)
-                            valueunit = valueunit[0].strip()
                     if s_line[0].lower().count("valuemultiplier") > 0:
-                        valuemultiplier = s_line[1].strip()
-                    else: 
-                        valuemultiplier = 1
+                        valuemultiplier = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangeminmag") > 0:
+                        valuerangeminmag = s_line[1].lstrip()
+                    if s_line[0].lower().count("valuerangemaxmag") > 0:
+                        valuerangemaxmag = s_line[1].lstrip()
                     if s_line[0].lower().count("end") > 0:
                         output.filename = os.path.basename(path)
                         output.oommf = oommf
@@ -1146,6 +1145,10 @@ class OMFReader(object):
                         output.ymax = float(ymax) * METER2ANG
                         output.zmax = float(zmax) * METER2ANG
                         output.valuemultiplier = valuemultiplier
+                        output.valuerangeminmag \
+                            = mag2sld(float(valuerangeminmag), valueunit)
+                        output.valuerangemaxmag \
+                            = mag2sld(float(valuerangemaxmag), valueunit)
             mx = np.reshape(mx, (len(mx),))
             my = np.reshape(my, (len(my),))
             mz = np.reshape(mz, (len(mz),))
@@ -1413,7 +1416,8 @@ class OMFData(object):
         self.my = None
         self.mz = None
         self.valuemultiplier = 1.
-
+        self.valuerangeminmag = 0
+        self.valuerangemaxmag = 0
 
     def __str__(self):
         """
@@ -1446,7 +1450,10 @@ class OMFData(object):
         _str += "zmax:            %s [%s]\n" % (str(self.zmax), self.meshunit)
         _str += "valueunit:       %s\n" % self.valueunit
         _str += "valuemultiplier: %s\n" % str(self.valuemultiplier)
-
+        _str += "ValueRangeMinMag:%s [%s]\n" % (str(self.valuerangeminmag),
+                                                self.valueunit)
+        _str += "ValueRangeMaxMag:%s [%s]\n" % (str(self.valuerangemaxmag),
+                                                self.valueunit)
         return _str
 
     def set_m(self, mx, my, mz):
@@ -1507,6 +1514,10 @@ class MagSLD(object):
         self.sld_mz = sld_mz
         self.vol_pix = vol_pix
         self.data_length = len(pos_x)
+        #self.sld_m = None
+        #self.sld_phi = None
+        #self.sld_theta = None
+        #self.sld_phi = None
         self.pix_symbol = None
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
@@ -1574,6 +1585,11 @@ class MagSLD(object):
         else:
             self.sld_mz = sld_mz
 
+        #sld_m = np.sqrt(sld_mx**2 + sld_my**2 + sld_mz**2)
+        #if isinstance(sld_m, float):
+        #    self.sld_m = np.full_like(self.pos_x, sld_m)
+        #else:
+        #    self.sld_m = sld_m
 
     def set_pixel_symbols(self, symbol='pixel'):
         """
