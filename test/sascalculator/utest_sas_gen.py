@@ -14,8 +14,6 @@ from scipy.spatial.transform import Rotation
 
 from sas.sascalc.calculator import sas_gen
 
-MFACTOR_AM = 2.90636E-12
-
 
 def find(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
@@ -68,33 +66,18 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(f.pos_y[0], -1.008)
         self.assertEqual(f.pos_z[0], 3.326)
 
-    def test_omfreader_V1(self):
+    def test_omfreader(self):
         """
         Test .omf file loaded
         """
-        f = self.omfloader.read(find("isolated_skyrmion_V1.omf"))
+        f = self.omfloader.read(find("A_Raw_Example-1.omf"))
 
-
-        self.assertEqual(f.sld_mx[0], MFACTOR_AM * 505613.032564973)
-        self.assertEqual(f.sld_my[0], - MFACTOR_AM * 505613.032564973)
-        self.assertEqual(f.sld_mz[0], MFACTOR_AM * 835889.300446479)
+        self.assertEqual(f.sld_mx[0], 0)
+        self.assertEqual(f.sld_my[0], 0)
+        self.assertEqual(f.sld_mz[0], 0)
         self.assertEqual(f.pos_x[0], 0.0)
         self.assertEqual(f.pos_y[0], 0.0)
         self.assertEqual(f.pos_z[0], 0.0)
-
-    def test_omfreader_V2(self):
-        """
-        Test .omf file loaded
-        """
-        f = self.omfloader.read(find("isolated_skyrmion_V2.omf"))
-
-
-        self.assertEqual(f.sld_mx[0], MFACTOR_AM * 505613.032564973)
-        self.assertEqual(f.sld_my[0], - MFACTOR_AM * 505613.032564973)
-        self.assertEqual(f.sld_mz[0], MFACTOR_AM * 835889.300446479)
-        self.assertEqual(f.pos_x[0], 0.0)
-        self.assertEqual(f.pos_y[0], 0.0)
-        self.assertEqual(f.pos_z[0], 0.0)        
     
     def test_rotations(self):
         pos_x = np.array([1, 0, 0])
