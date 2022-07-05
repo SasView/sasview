@@ -770,7 +770,7 @@ p, li { white-space: pre-wrap; }
      <item>
       <widget class="QPushButton" name="stopButton">
        <property name="text">
-        <string>Stop P(r)</string>
+        <string>Plot</string>
        </property>
       </widget>
      </item>

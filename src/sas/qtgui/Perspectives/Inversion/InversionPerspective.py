@@ -41,6 +41,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
 
     name = "Inversion"
+<<<<<<< HEAD
     ext = "pr"
 
     @property
@@ -53,6 +54,16 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     estimateDynamicNTSignal = QtCore.Signal(tuple)
     estimateDynamicSignal = QtCore.Signal(tuple)
     calculateSignal = QtCore.Signal(tuple)
+=======
+    ext = "pr"  # Extension used for saving analyses
+    tabsModifiedSignal = QtCore.pyqtSignal()
+
+    estimateSignal = QtCore.pyqtSignal(tuple)
+    estimateNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
+    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
+    calculateSignal = QtCore.pyqtSignal(tuple)
+>>>>>>> 2f0e64b07 (Added Batch Processing for Pr, However the interface is currently slow and efficient. also a way to display/export all the data in a table is still required)
 
     def __init__(self, parent=None, data=None):
 
@@ -61,9 +72,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
         super(InversionWindow, self).__init__()
 
+<<<<<<< HEAD
 
         self.setWindowTitle(self.title)
 
+=======
+        self.setWindowTitle("P(r) Inversion Perspective")
+>>>>>>> 2f0e64b07 (Added Batch Processing for Pr, However the interface is currently slow and efficient. also a way to display/export all the data in a table is still required)
         self._manager = parent
         # Needed for Batch fitting
         self.parent = parent
@@ -75,6 +90,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
         # List of active Pr Tabs
         self.tabs = []
+        self.setTabsClosable(True)
 
         # The window should not close
         self._allowClose = False
@@ -106,16 +122,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         # Mapping for all data items
         # Dictionary mapping data to all parameters
         self._dataList = {}
-        if not isinstance(data, list):
-            data_list = [data]
-        if data is not None:
-            for datum in data_list:
-                self.updateDataList(datum)
 
         self.dataDeleted = False
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
+        self.tabCloseRequested.connect(self.tabCloses)
 
         # Batch fitting parameters
         self.isBatch = False
@@ -163,6 +175,46 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         Allow outsiders close this widget
         """
         return self._allowClose
+
+    #####
+
+    def resetTab(self, index):
+        """
+        Adds a new tab and removes the last tab
+        as a way of resetting the fit tabs
+        """
+        # If data on tab empty - do nothing
+        if index in self.tabs and not self.tabs[index].data:
+            return
+        # Add a new, empy tab
+        #self.addData(None)
+        # Remove the previous last tab
+        self.tabCloses(index)
+
+    def tabCloses(self, index):
+        """
+        Update local bookkeeping on tab close
+        """
+        # don't remove the last tab
+        print(self.tabs)
+        if len(self.tabs) <= 1:
+            return
+        self.closeTabByIndex(index)
+
+    def closeTabByIndex(self, index):
+        """
+        Close/delete a tab with the given index.
+        No checks on validity of the index.
+        """
+        try:
+            self.removeTab(index)
+            del self.tabs[index]
+            self.tabsModifiedSignal.emit()
+        except IndexError:
+            print("[ DEBUG ] IndexError line 192")
+            # The tab might have already been deleted previously
+        pass
+        #######
 
     def isSerializable(self):
         """
@@ -330,10 +382,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
+        tab = self.addData(name="Pr Batch", data=None, is_batch=is_batch)
+
         for data in data_item:
-            if data in self._dataList.keys():
-                # Don't add data if it's already in
-                continue
+            # if data in self._dataList.keys():
+            #     # Don't add data if it's already in
+            #     continue
             # Create initial internal mappings
             self.logic.data = GuiUtils.dataFromItem(data)
             if not isinstance(self.logic.data, Data1D):
@@ -347,8 +401,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
                 self.logic.add_errors()
             self.updateDataList(data)
+<<<<<<< HEAD
+=======
+            tab.populateDataComboBox(name=self.logic.data.name, data_ref=data)
+            if not is_batch:
+                self.addData(name=self.logic.data.name, data=data, is_batch=is_batch, tab_index=None)
+>>>>>>> 2f0e64b07 (Added Batch Processing for Pr, However the interface is currently slow and efficient. also a way to display/export all the data in a table is still required)
 
-        #Checking for 1D again to mitigate the case when 2D data is last on the data list
+        # Checking for 1D again to mitigate the case when 2D data is last on the data list
         # if isinstance(self.logic.data, Data1D):
         #     self.setCurrentData(data)
 
@@ -372,8 +432,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         :return: {name: value}
         """
         # If no measurement performed, calculate using base params
-        if self.chiDofValue.text() == '':
-            self._calculator.out, self._calculator.cov = self._calculator.invert()
+        # if self.chiDofValue.text() == '':
+        #     self._calculator.out, self._calculator.cov = self._calculator.invert()
         return {
             'alpha': self._calculator.alpha,
             'background': self._calculator.background,
@@ -409,7 +469,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             nfunc = int(self.noOfTermsInput.text())
         except ValueError:
             logger.error("Incorrect number of terms specified: %s"
-                          %self.noOfTermsInput.text())
+                         % self.noOfTermsInput.text())
             self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
             nfunc = NUMBER_OF_TERMS
         return nfunc
@@ -433,10 +493,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         pr = self._calculator
         alpha = self._calculator.suggested_alpha
         self.model.setItem(WIDGETS.W_MAX_DIST,
-                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
         self.noOfTermsSuggestionButton.setText(
-             "{:n}".format(self.nTermsSuggested))
+            "{:n}".format(self.nTermsSuggested))
 
         self.enableButtons()
 
@@ -480,14 +540,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             title = self.prPlot.name
             self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
+            self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
         if self.dataPlot is not None:
             title = self.dataPlot.name
             self.dataPlot.plot_role = DataRole.ROLE_DEFAULT
             self.dataPlot.symbol = "Line"
             self.dataPlot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
+            self.communicate.plotRequestedSignal.emit([self._data, self.dataPlot], None)
         self.enableButtons()
 
     def removeData(self, data_list=None):
@@ -626,7 +686,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.stopCalcThread()
 
         pr = self._calculator.clone()
-        #Making sure that nfunc and alpha parameters are correctly initialized
+        # Making sure that nfunc and alpha parameters are correctly initialized
         pr.suggested_alpha = self._calculator.alpha
         self.calcThread = CalcPr(pr, self.nTermsSuggested,
                                  error_func=self._threadError,
@@ -851,26 +911,24 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             tab_index = self.maxIndex
         else:
             self.maxIndex = tab_index
-
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
 
         if name is None:
-            name = "New Pr Tab"
+            tab.name = "New Pr Tab"
         else:
             tab.name = name
 
-        if data is not None:
+        if data is not None and not is_batch:
             tab.populateDataComboBox(self.logic.data.name, data)
-            tab.is_batch_fitting = is_batch
 
-        # Add this tab to the object library so it can be retrieved by scripting/jupyter
-        self.tabs.append(tab)
-        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1 # ERROR: list index out of range
+        # self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1  # ERROR: list index out of range
         icon = QtGui.QIcon()
         if is_batch:
+            tab.name = "Pr Batch"
+            tab.is_batch_fitting = is_batch
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-
         self.addTab(tab, icon, tab.name)
 
         # Show the new tab
         self.setCurrentWidget(tab)
+        return tab

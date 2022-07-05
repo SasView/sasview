@@ -81,6 +81,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # current QStandardItem showing on the panel
         self._data = None
 
+        if data is not None:
+            self.data = data
+
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -104,13 +107,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Dictionary mapping data to all parameters
         self._dataList = {}
         self._data = data
-
-        if not isinstance(data, list):
-            data_list = [data]
-
-        if data is not None:
-            for datum in data_list:
-                self.updateDataList(datum)
 
         self.dataDeleted = False
 
@@ -514,8 +510,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         }
         # Update batch results window when finished
         self.batchResults[self.name] = self._calculator
-        # if self.batchResultsWindow is not None:
-        #     self.showBatchOutput()
+        if self.batchResultsWindow is not None:
+            self.showBatchOutput()
 
     def getState(self):
         """
