@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>543</height>
+    <width>446</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,89 +32,6 @@
    <string>P(r) Inversion</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_7">
-   <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_8">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
-     <item>
-      <widget class="QPushButton" name="calculateThisButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Calculate</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="calculateAllButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Calculate All</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="sliceButton">
-       <property name="text">
-        <string>Slice</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="stopButton">
-       <property name="text">
-        <string>Stop</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="showResultsButton">
-       <property name="text">
-        <string>Show Results</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Expanding</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="helpButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Help</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="PrTabWidget">
      <property name="sizePolicy">
@@ -137,6 +54,58 @@
        <string>Parameters</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="dataSourceGroupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>I(q) data source</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Data File Name:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="dataList">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="paramGroupBox">
          <property name="sizePolicy">
@@ -306,162 +275,16 @@ p, li { white-space: pre-wrap; }
          <zorder>label_14</zorder>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="2" column="0">
         <widget class="QGroupBox" name="outputsGroupBox">
          <property name="title">
           <string>Outputs</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="4">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5">
-           <widget class="QLineEdit" name="posFractionValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4">
-           <widget class="QLabel" name="label_29">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="label_27">
-            <property name="text">
-             <string>secs</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Å</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_15">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5">
-           <widget class="QLineEdit" name="oscillationValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>Background</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>Oscillations</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="5">
-           <widget class="QLineEdit" name="sigmaPosFractionValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QLineEdit" name="chiDofValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_25">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>Calc. Time</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_26">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -476,8 +299,42 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Å</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLineEdit" name="chiDofValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -488,13 +345,6 @@ p, li { white-space: pre-wrap; }
            <widget class="QLabel" name="label_16">
             <property name="text">
              <string>I(Q=0)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string/>
             </property>
            </widget>
           </item>
@@ -509,11 +359,98 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Oscillations</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QLineEdit" name="oscillationValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Background</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="backgroundValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QLineEdit" name="posFractionValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Calc. Time</string>
             </property>
            </widget>
           </item>
@@ -533,8 +470,22 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="backgroundValue">
+          <item row="3" column="2">
+           <widget class="QLabel" name="label_27">
+            <property name="text">
+             <string>secs</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5">
+           <widget class="QLineEdit" name="sigmaPosFractionValue">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -544,65 +495,10 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="dataSourceGroupBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string>I(q) data source</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Data File Name:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="dataList">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="removeButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Remove</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
          </layout>
         </widget>
@@ -620,6 +516,48 @@ p, li { white-space: pre-wrap; }
           <string>Options</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,1,0,2,2">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Background Level:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="backgroundInput">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>0.0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="estimateBgd">
+              <property name="text">
+               <string>Estimate</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="manualBgd">
+              <property name="text">
+               <string>Manual Input</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="1" column="0">
            <widget class="QGroupBox" name="qRangeGroupBox">
             <property name="title">
@@ -754,181 +692,97 @@ p, li { white-space: pre-wrap; }
             </layout>
            </widget>
           </item>
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,1,0,2,2">
-            <item>
-             <widget class="QLabel" name="label_5">
-              <property name="text">
-               <string>Background Level:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="backgroundInput">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>0.0</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="estimateBgd">
-              <property name="text">
-               <string>Estimate</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="manualBgd">
-              <property name="text">
-               <string>Manual Input</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="0">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab2D">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <attribute name="title">
-       <string>2D Data</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_10">
-       <item row="6" column="0">
-        <widget class="QGroupBox" name="Output2DBox">
-         <property name="title">
-          <string>2D Outputs</string>
+       <item row="1" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QWidget" name="widget" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QLabel" name="label_28">
-               <property name="text">
-                <string>Delta Phi</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="deltaPhiValue">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTableWidget" name="sliceList"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QGroupBox" name="twoDParamGroupBox">
-         <property name="title">
-          <string>2D Parameters</string>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>255</height>
+          </size>
          </property>
-         <layout class="QGridLayout" name="gridLayout_11">
-          <item row="6" column="2">
-           <widget class="QLineEdit" name="noOfQbinInput"/>
-          </item>
-          <item row="4" column="2">
-           <widget class="QLineEdit" name="noOfSlicesInput"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_31">
-            <property name="text">
-             <string>Start point</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_23">
-            <property name="text">
-             <string>Number of Qbin</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_30">
-            <property name="text">
-             <string>Number of slices</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="startPointInput"/>
-          </item>
-         </layout>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </widget>
     </widget>
    </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <item>
+      <widget class="QPushButton" name="calculateThisButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Calculate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="calculateAllButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Calculate All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="stopButton">
+       <property name="text">
+        <string>Plot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="helpButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>dataList</tabstop>
-  <tabstop>removeButton</tabstop>
-  <tabstop>noOfTermsInput</tabstop>
-  <tabstop>noOfTermsSuggestionButton</tabstop>
-  <tabstop>regularizationConstantInput</tabstop>
-  <tabstop>regConstantSuggestionButton</tabstop>
-  <tabstop>maxDistanceInput</tabstop>
-  <tabstop>explorerButton</tabstop>
-  <tabstop>rgValue</tabstop>
-  <tabstop>chiDofValue</tabstop>
-  <tabstop>iQ0Value</tabstop>
-  <tabstop>oscillationValue</tabstop>
-  <tabstop>backgroundValue</tabstop>
-  <tabstop>posFractionValue</tabstop>
-  <tabstop>computationTimeValue</tabstop>
-  <tabstop>sigmaPosFractionValue</tabstop>
-  <tabstop>calculateThisButton</tabstop>
-  <tabstop>calculateAllButton</tabstop>
-  <tabstop>stopButton</tabstop>
-  <tabstop>helpButton</tabstop>
-  <tabstop>PrTabWidget</tabstop>
-  <tabstop>backgroundInput</tabstop>
-  <tabstop>estimateBgd</tabstop>
-  <tabstop>manualBgd</tabstop>
-  <tabstop>minQInput</tabstop>
-  <tabstop>maxQInput</tabstop>
-  <tabstop>slitHeightInput</tabstop>
-  <tabstop>slitWidthInput</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
