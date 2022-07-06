@@ -95,7 +95,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.dataPlot = None
         # suggested nTerms
         self.nTermsSuggested = NUMBER_OF_TERMS
-        self.maxIndex = 1 # Required for tabs (I think?)
+        self.maxIndex = 1
 
         # Calculation threads used by all data items
         self.calcThread = None
@@ -114,7 +114,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.mapper = QtWidgets.QDataWidgetMapper(self)
 
         # Batch fitting parameters
-        self.isBatch = True
+        self.isBatch = False
         self.batchResultsWindow = None
         self.batchResults = {}
         self.batchComplete = []
@@ -127,11 +127,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.setupModel()
         # Set up the Widget Map
         self.setupMapper()
-
-        #Hidding calculate all buton
-        self.calculateAllButton.setVisible(False)
-        # Set base window state
-        self.setupWindow()
 
     ######################################################################
     # Base Perspective Class Definitions
@@ -344,6 +339,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
                                             and not self.isCalculating)
+        self.calculateAllButton.setVisible(self.isBatch)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)

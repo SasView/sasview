@@ -235,115 +235,6 @@ class InversionWindow(QtWidgets.QTabWidget):
         for i in self.tabs:
             i.dataList.addItem(name, data_ref)
 
-    ######################################################################
-    # GUI Interaction Events
-
-    def updateCalculator(self):
-        """Update all p(r) params"""
-        self._calculator.set_x(self.logic.data.x)
-        self._calculator.set_y(self.logic.data.y)
-        self._calculator.set_err(self.logic.data.dy)
-        self.set_background(self.backgroundInput.text())
-
-    def set_background(self, value):
-        self._calculator.background = float(value)
-
-    def help(self):
-        """
-        Open the P(r) Inversion help browser
-        """
-        tree_location = "/user/qtgui/Perspectives/Inversion/pr_help.html"
-
-        # Actual file anchor will depend on the combo box index
-        # Note that we can be clusmy here, since bad current_fitter_id
-        # will just make the page displayed from the top
-        self._manager.showHelp(tree_location)
-
-    def toggleBgd(self):
-        """
-        Toggle the background between manual and estimated
-        """
-        self.model.blockSignals(True)
-        value = 1 if self.estimateBgd.isChecked() else 0
-        itemt = QtGui.QStandardItem(str(value == 1).lower())
-        self.model.setItem(WIDGETS.W_ESTIMATE, itemt)
-        itemt = QtGui.QStandardItem(str(value == 0).lower())
-        self.model.setItem(WIDGETS.W_MANUAL_INPUT, itemt)
-        self._calculator.set_est_bck(value)
-        self.backgroundInput.setEnabled(self._calculator.est_bck == 0)
-        self.model.blockSignals(False)
-
-    def openExplorerWindow(self):
-        """
-        Open the Explorer window to see correlations between params and results
-        """
-        from .DMaxExplorerWidget import DmaxWindow
-        self.dmaxWindow = DmaxWindow(pr_state=self._calculator,
-                                     nfunc=self.getNFunc(),
-                                     parent=self)
-        self.dmaxWindow.show()
-
-    def showBatchOutput(self):
-        """
-        Display the batch output in tabular form
-        :param output_data: Dictionary mapping name -> P(r) instance
-        """
-        if self.batchResultsWindow is None:
-            self.batchResultsWindow = BatchInversionOutputPanel(
-                parent=self, output_data=self.batchResults)
-        else:
-            self.batchResultsWindow.setupTable(self.batchResults)
-        self.batchResultsWindow.show()
-
-    def stopCalculation(self):
-        """ Stop all threads, return to the base state and update GUI """
-        self.stopCalcThread()
-        self.stopEstimationThread()
-        self.stopEstimateNTThread()
-        # Show any batch calculations that successfully completed
-        if self.isBatch and self.batchResultsWindow is not None:
-            self.showBatchOutput()
-        self.isBatch = False
-        self.isCalculating = False
-        self.updateGuiValues()
-
-    def check_q_low(self, q_value=None):
-        """ Validate the low q value """
-        if not q_value:
-            q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
-        q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
-        q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
-        if q_value > q_max:
-            # Value too high - coerce to max q
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_max)))
-        elif q_value < q_min:
-            # Value too low - coerce to min q
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_min)))
-        else:
-            # Valid Q - set model item
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
-            self._calculator.set_qmin(q_value)
-
-    def check_q_high(self, q_value=None):
-        """ Validate the value of high q sent by the slider """
-        if not q_value:
-            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
-        q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
-        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
-        if q_value > q_max:
-            # Value too high - coerce to max q
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))
-        elif q_value < q_min:
-            # Value too low - coerce to min q
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_min)))
-        else:
-            # Valid Q - set model item
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
-            self._calculator.set_qmax(q_value)
-
-    ######################################################################
-    # Response Actions
-
     def setData(self, data_item=None, is_batch=False):
         """
         Assign new data set(s) to the P(r) perspective
@@ -356,7 +247,8 @@ class InversionWindow(QtWidgets.QTabWidget):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
-        tab = self.addData(name="Pr Batch", data=None, is_batch=is_batch)
+        if is_batch:
+            tab = self.addData(name="Pr Batch", data=None, is_batch=is_batch)
 
         for data in data_item:
             # if data in self._dataList.keys():
@@ -375,7 +267,8 @@ class InversionWindow(QtWidgets.QTabWidget):
             if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
                 self.logic.add_errors()
             self.updateDataList(data)
-            tab.populateDataComboBox(name=self.logic.data.name, data_ref=data)
+            if is_batch:
+                tab.populateDataComboBox(name=self.logic.data.name, data_ref=data)
             if not is_batch:
                 self.addData(name=self.logic.data.name, data=data, is_batch=is_batch, tab_index=None)
 
@@ -597,282 +490,6 @@ class InversionWindow(QtWidgets.QTabWidget):
             tab_id.append(str(self.logic.data.id))
         return tab_id
 
-    def updateFromParameters(self, params):
-        self._calculator.q_max = params['q_max']
-        self.check_q_high(self._calculator.get_qmax())
-        self._calculator.q_min = params['q_min']
-        self.check_q_low(self._calculator.get_qmin())
-        self._calculator.alpha = params['alpha']
-        self._calculator.suggested_alpha = params['suggested_alpha']
-        self._calculator.d_max = params['d_max']
-        self._calculator.nfunc = params['nfunc']
-        self.nTermsSuggested = self._calculator.nfunc
-        self.updateDynamicGuiValues()
-        self.acceptAlpha()
-        self.acceptNoTerms()
-        self._calculator.background = params['background']
-        self._calculator.chi2 = params['chi2']
-        self._calculator.cov = params['cov']
-        self._calculator.elapsed = params['elapsed']
-        self._calculator.err = params['err']
-        self._calculator.set_est_bck = bool(params['est_bck'])
-        self._calculator.nerr = params['nerr']
-        self._calculator.npoints = params['npoints']
-        self._calculator.ny = params['ny']
-        self._calculator.out = params['out']
-        self._calculator.slit_height = params['slit_height']
-        self._calculator.slit_width = params['slit_width']
-        self._calculator.x = params['x']
-        self._calculator.y = params['y']
-        self.updateGuiValues()
-        self.updateDynamicGuiValues()
-
-    ######################################################################
-    # Thread Creators
-
-    def startThreadAll(self):
-        self.isCalculating = True
-        self.isBatch = True
-        self.batchComplete = []
-        self.calculateAllButton.setText("Calculating...")
-        self.enableButtons()
-        self.batchResultsWindow = BatchInversionOutputPanel(
-            parent=self, output_data=self.batchResults)
-        self.performEstimate()
-
-    def startThread(self):
-        """
-            Start a calculation thread
-        """
-        from .Thread import CalcPr
-
-        # Set data before running the calculations
-        self.isCalculating = True
-        self.enableButtons()
-        self.updateCalculator()
-        # Disable calculation buttons to prevent thread interference
-
-        # If the thread is already started, stop it
-        self.stopCalcThread()
-
-        pr = self._calculator.clone()
-        # Making sure that nfunc and alpha parameters are correctly initialized
-        pr.suggested_alpha = self._calculator.alpha
-        self.calcThread = CalcPr(pr, self.nTermsSuggested,
-                                 error_func=self._threadError,
-                                 completefn=self._calculateCompleted,
-                                 updatefn=None)
-        self.calcThread.queue()
-        self.calcThread.ready(2.5)
-
-    def stopCalcThread(self):
-        """ Stops a thread if it exists and is running """
-        if self.calcThread is not None and self.calcThread.isrunning():
-            self.calcThread.stop()
-
-    def performEstimateNT(self):
-        """
-        Perform parameter estimation
-        """
-        from .Thread import EstimateNT
-
-        self.updateCalculator()
-
-        # If a thread is already started, stop it
-        self.stopEstimateNTThread()
-
-        pr = self._calculator.clone()
-        # Skip the slit settings for the estimation
-        # It slows down the application and it doesn't change the estimates
-        pr.slit_height = 0.0
-        pr.slit_width = 0.0
-        nfunc = self.getNFunc()
-
-        self.estimationThreadNT = EstimateNT(pr, nfunc,
-                                             error_func=self._threadError,
-                                             completefn=self._estimateNTCompleted,
-                                             updatefn=None)
-        self.estimationThreadNT.queue()
-        self.estimationThreadNT.ready(2.5)
-
-    def performEstimateDynamicNT(self):
-        """
-        Perform parameter estimation
-        """
-        from .Thread import EstimateNT
-
-        self.updateCalculator()
-
-        # If a thread is already started, stop it
-        self.stopEstimateNTThread()
-
-        pr = self._calculator.clone()
-        # Skip the slit settings for the estimation
-        # It slows down the application and it doesn't change the estimates
-        pr.slit_height = 0.0
-        pr.slit_width = 0.0
-        nfunc = self.getNFunc()
-
-        self.estimationThreadNT = EstimateNT(pr, nfunc,
-                                             error_func=self._threadError,
-                                             completefn=self._estimateDynamicNTCompleted,
-                                             updatefn=None)
-        self.estimationThreadNT.queue()
-        self.estimationThreadNT.ready(2.5)
-
-    def stopEstimateNTThread(self):
-        if (self.estimationThreadNT is not None and
-                self.estimationThreadNT.isrunning()):
-            self.estimationThreadNT.stop()
-
-    def performEstimate(self):
-        """
-            Perform parameter estimation
-        """
-        from .Thread import EstimatePr
-
-        # If a thread is already started, stop it
-        self.stopEstimationThread()
-
-        self.estimationThread = EstimatePr(self._calculator.clone(),
-                                           self.getNFunc(),
-                                           error_func=self._threadError,
-                                           completefn=self._estimateCompleted,
-                                           updatefn=None)
-        self.estimationThread.queue()
-        self.estimationThread.ready(2.5)
-
-    def performEstimateDynamic(self):
-        """
-            Perform parameter estimation
-        """
-        from .Thread import EstimatePr
-
-        # If a thread is already started, stop it
-        self.stopEstimationThread()
-
-        self.estimationThread = EstimatePr(self._calculator.clone(),
-                                           self.getNFunc(),
-                                           error_func=self._threadError,
-                                           completefn=self._estimateDynamicCompleted,
-                                           updatefn=None)
-        self.estimationThread.queue()
-        self.estimationThread.ready(2.5)
-
-    def stopEstimationThread(self):
-        """ Stop the estimation thread if it exists and is running """
-        if (self.estimationThread is not None and
-                self.estimationThread.isrunning()):
-            self.estimationThread.stop()
-
-    ######################################################################
-    # Thread Complete
-
-    def _estimateCompleted(self, alpha, message, elapsed):
-        ''' Send a signal to the main thread for model update'''
-        self.estimateSignal.emit((alpha, message, elapsed))
-
-    def _estimateDynamicCompleted(self, alpha, message, elapsed):
-        ''' Send a signal to the main thread for model update'''
-        self.estimateDynamicSignal.emit((alpha, message, elapsed))
-
-    def _estimateUpdate(self, output_tuple):
-        """
-        Parameter estimation completed,
-        display the results to the user
-
-        :param alpha: estimated best alpha
-        :param elapsed: computation time
-        """
-        alpha, message, elapsed = output_tuple
-        self._calculator.alpha = alpha
-        self._calculator.elapsed += self._calculator.elapsed
-        if message:
-            logger.info(message)
-        self.performEstimateNT()
-        self.performEstimateDynamicNT()
-
-    def _estimateDynamicUpdate(self, output_tuple):
-        """
-        Parameter estimation completed,
-        display the results to the user
-
-        :param alpha: estimated best alpha
-        :param elapsed: computation time
-        """
-        alpha, message, elapsed = output_tuple
-        self._calculator.alpha = alpha
-        self._calculator.elapsed += self._calculator.elapsed
-        if message:
-            logger.info(message)
-        self.performEstimateDynamicNT()
-
-    def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
-        ''' Send a signal to the main thread for model update'''
-        self.estimateNTSignal.emit((nterms, alpha, message, elapsed))
-
-    def _estimateDynamicNTCompleted(self, nterms, alpha, message, elapsed):
-        ''' Send a signal to the main thread for model update'''
-        self.estimateDynamicNTSignal.emit((nterms, alpha, message, elapsed))
-
-    def _estimateNTUpdate(self, output_tuple):
-        """
-        Parameter estimation completed,
-        display the results to the user
-
-        :param alpha: estimated best alpha
-        :param nterms: estimated number of terms
-        :param elapsed: computation time
-        """
-        nterms, alpha, message, elapsed = output_tuple
-        self._calculator.elapsed += elapsed
-        self._calculator.suggested_alpha = alpha
-        self.nTermsSuggested = nterms
-        # Save useful info
-        self.updateGuiValues()
-        if message:
-            logger.info(message)
-        if self.isBatch:
-            self.acceptAlpha()
-            self.acceptNoTerms()
-            self.startThread()
-
-    def _estimateDynamicNTUpdate(self, output_tuple):
-        """
-        Parameter estimation completed,
-        display the results to the user
-
-        :param alpha: estimated best alpha
-        :param nterms: estimated number of terms
-        :param elapsed: computation time
-        """
-        nterms, alpha, message, elapsed = output_tuple
-        self._calculator.elapsed += elapsed
-        self._calculator.suggested_alpha = alpha
-        self.nTermsSuggested = nterms
-        # Save useful info
-        self.updateDynamicGuiValues()
-        if message:
-            logger.info(message)
-        if self.isBatch:
-            self.acceptAlpha()
-            self.acceptNoTerms()
-            self.startThread()
-
-    def _calculateCompleted(self, out, cov, pr, elapsed):
-        ''' Send a signal to the main thread for model update'''
-        self.calculateSignal.emit((out, cov, pr, elapsed))
-
-    def _threadError(self, error):
-        """
-            Call-back method for calculation errors
-        """
-        logger.error(error)
-        if self.isBatch:
-            self.startNextBatchItem()
-        else:
-            self.stopCalculation()
-
     def addData(self, name=None, data=None, is_batch=False, tab_index=None):
         """
         Add a new tab for passed data
@@ -881,12 +498,19 @@ class InversionWindow(QtWidgets.QTabWidget):
             tab_index = self.maxIndex
         else:
             self.maxIndex = tab_index
+
+        # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
 
+        # set name to "New Pr Tab" if no name is set to the data set
         if name is None:
             tab.name = "New Pr Tab"
         else:
             tab.name = name
+
+        # if the length of the name is over 23 shorten it and add ellipsis
+        if len(tab.name) >= 23:
+            tab.name = tab.name[:20] + "..."
 
         if data is not None and not is_batch:
             tab.populateDataComboBox(self.logic.data.name, data)
