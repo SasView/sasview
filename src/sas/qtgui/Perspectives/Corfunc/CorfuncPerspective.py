@@ -21,8 +21,8 @@ from PyQt5 import QtGui, QtWidgets
 # pylint: disable=import-error, no-name-in-module
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from qtgui.Utilities.Reports.reportdata import ReportData
-from qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports import ReportBase
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module

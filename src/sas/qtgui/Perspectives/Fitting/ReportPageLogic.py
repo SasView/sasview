@@ -16,7 +16,7 @@ from bumps import options
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 from sas.sasview import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION

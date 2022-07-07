@@ -4,7 +4,7 @@ from typing import List, Optional, Union, Dict
 from PyQt5.QtGui import QStandardItem
 from PyQt5 import QtCore
 
-from qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 
 class PerspectiveMeta(type(QtCore.QObject), ABCMeta):

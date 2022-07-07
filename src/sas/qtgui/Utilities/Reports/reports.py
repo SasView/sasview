@@ -27,7 +27,7 @@ import logging
 
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Plotting.PlotterBase import Data1D
-from qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 #
 # Utility classes

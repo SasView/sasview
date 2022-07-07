@@ -20,7 +20,7 @@ from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.perspective import Perspective
 
-from qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
