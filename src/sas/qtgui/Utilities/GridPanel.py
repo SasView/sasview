@@ -57,10 +57,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
-        if output_data is not None:
-            # Set a table tooltip describing the model
-            model_name = output_data[0][0].model.id
-            self.tabWidget.setTabToolTip(0, model_name)
+        # if output_data is not None:
+        #     # Set a table tooltip describing the model
+        #     model_name = output_data[0][0].model.id
+        #     self.tabWidget.setTabToolTip(0, model_name)
 
     def closeEvent(self, event):
         """
@@ -440,9 +440,9 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         Class for stateless grid-like printout of P(r) parameters for any number
         of data sets
     """
-    def __init__(self, parent = None, output_data=None):
+    def __init__(self, parent=None, output_data=None):
 
-        super(BatchInversionOutputPanel, self).__init__(parent._parent, output_data)
+        super(BatchInversionOutputPanel, self).__init__(parent.parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
 
@@ -470,11 +470,11 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         for i_row, (filename, pr) in enumerate(data.items()):
             out = pr.out
             cov = pr.cov
+            self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
+                "{}".format(filename)))
             if out is None:
                 logging.warning("P(r) for {} did not converge.".format(filename))
                 continue
-            self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
-                "{}".format(filename)))
             self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.rg(out))))
             self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
