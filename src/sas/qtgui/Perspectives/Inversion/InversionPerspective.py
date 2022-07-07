@@ -183,7 +183,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         Update local bookkeeping on tab close
         """
         # don't remove the last tab
-        print(self.tabs)
         if len(self.tabs) <= 1:
             return
         self.closeTabByIndex(index)
@@ -297,8 +296,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         }
         # Update batch results window when finished
         self.batchResults[self.logic.data.name] = self._calculator
+        print(self._calculator)
+        #
         # if self.batchResultsWindow is not None: # enable when batch is fixed
-        #     self.showBatchOutput()
+        #       self.showBatchOutput()
 
     def getState(self):
         """
@@ -532,7 +533,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             tab.name = "Pr Batch"
             tab.is_batch_fitting = is_batch
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
+            tab.calculateAllButton.setVisible(True)
+            tab.calculateAllButton.setEnabled(True)
+            tab.startNextBatchItem()
         self.addTab(tab, icon, tab.name)
+        self.tabs.append(tab)
 
         # Show the new tab
         self.setCurrentWidget(tab)
