@@ -527,16 +527,16 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         if data is not None and not is_batch:
             tab.populateDataComboBox(self.logic.data.name, data)
 
-        # self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1  # ERROR: list index out of range
         icon = QtGui.QIcon()
         if is_batch:
             tab.name = "Pr Batch"
-            tab.is_batch_fitting = is_batch
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
             tab.calculateAllButton.setVisible(True)
-            tab.calculateAllButton.setEnabled(True)
-            tab.startNextBatchItem()
+            tab.setPlotable(False)
+        else:
+            tab.calculateAllButton.setVisible(False)
         self.addTab(tab, icon, tab.name)
+        tab.enableButtons()
         self.tabs.append(tab)
 
         # Show the new tab
