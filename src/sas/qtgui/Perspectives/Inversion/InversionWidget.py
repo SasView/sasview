@@ -53,6 +53,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         super(InversionWidget, self).__init__()
 
         # Necessary globals
+
         self.parent = parent
 
         # Which tab is this widget displayed in?
@@ -74,7 +75,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.logic = InversionLogic()
 
-        # The window should not close
+        # Allow Tabs to close
         self._allowClose = True
 
         # Visible data items
@@ -117,8 +118,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.batchResults = {}
         self.batchComplete = []
         self.isBatch = False
-        self.batchResultsWindow = BatchInversionOutputPanel(
-            parent=self, output_data=None)
+        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
+        self._allowPlots = True
 
         # Add validators
         self.setupValidators()
@@ -150,6 +151,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         assert isinstance(value, bool)
         self._allowClose = value
+
+    def setPlotable(self, value=True):
+        """
+        Let Plots to be displayable - needed so batch mode is not clutter with plots
+        """
+        assert isinstance(value, bool)
+        self._allowPlots = value
 
     def isClosable(self):
         """
@@ -187,8 +195,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dmaxWindow.close()
 
     def closeBatchResults(self):
-        if self.batchResultsWindow is not None:
-            self.batchResultsWindow.close()
+        self.batchResultsWindow.close()
 
     ######################################################################
     # Initialization routines
@@ -334,14 +341,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        self.calculateAllButton.setEnabled(True)
-        # len(self._dataList) > 1
-        #                                and not self.isBatch
-        #                                and not self.isCalculating)
+        self.calculateAllButton.setEnabled(not self.isCalculating)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
                                             and not self.isCalculating)
-        self.calculateAllButton.setVisible(True)  # self.isBatch
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
@@ -370,7 +373,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Switch to another item in the data list"""
         if self.dataDeleted:
             return
-        # self.updateDataList(self._data)
+        self.updateDataList(self._data)
         self.setCurrentData(self.dataList.itemData(data_index))
 
     ######################################################################
@@ -441,11 +444,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
         """
-        if self.batchResultsWindow is None:
-            self.batchResultsWindow = BatchInversionOutputPanel(
-                parent=self, output_data=None)
-        else:
-            self.batchResultsWindow.setupTable(self.batchResults)
+        if not self.isBatch:
+            return
+        self.batchResultsWindow.close()
+        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
         self.batchResultsWindow.show()
 
     def stopCalculation(self):
@@ -454,8 +456,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopEstimationThread()
         self.stopEstimateNTThread()
         # Show any batch calculations that successfully completed
-        # if self.isBatch and self.batchResultsWindow is not None:
-        #     self.showBatchOutput()
+        self.showBatchOutput()
         self.isBatch = False
         self.isCalculating = False
         self.updateGuiValues()
@@ -507,10 +508,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             DICT_KEYS[2]: self.dataPlot
         }
         # Update batch results window when finished
-        print("HERE: ", self.name)
+        print("DONE: ", self.name)
         self.batchResults[self.name] = self._calculator
-        if self.batchResultsWindow is not None:
-            self.showBatchOutput()
 
     def getState(self):
         """
@@ -751,15 +750,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
         self.enableButtons()
-
-        self.batchResultsWindow = BatchInversionOutputPanel(
-            parent=self, output_data=self.batchResults)
         self.performEstimate()
-        self.batchResultsWindow.show()
 
     def startNextBatchItem(self):
         self.isBatch = False
-        for index in range(len(self._dataList)):
+        print("startNextBatchItem: ", self.dataList.count())
+        for index in range(self.dataList.count()):
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
                 self.isBatch = True
@@ -774,7 +770,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.isCalculating = False
             self.batchComplete = []
             self.calculateAllButton.setText("Calculate All")
-            # self.showBatchOutput()
             self.enableButtons()
 
     def startThread(self):
@@ -1020,19 +1015,21 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator = pr
 
         # Update P(r) and fit plots
-        self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
-        self.prPlot.show_yzero = True
-        self.prPlot.filename = self.logic.data.filename
-        self.dataPlot = self.logic.new1DPlot(out, self._calculator)
-        self.dataPlot.filename = self.logic.data.filename
+        # do not show/update plot if batch (Clutters and slows down interface)
+        if self._allowPlots:
+            self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
+            self.prPlot.show_yzero = True
+            self.prPlot.filename = self.logic.data.filename
+            self.dataPlot = self.logic.new1DPlot(out, self._calculator)
+            self.dataPlot.filename = self.logic.data.filename
 
-        self.dataPlot.show_q_range_sliders = True
-        self.dataPlot.slider_update_on_move = False
-        self.dataPlot.slider_perspective_name = "Inversion"
-        self.dataPlot.slider_low_q_input = ['minQInput']
-        self.dataPlot.slider_low_q_setter = ['check_q_low']
-        self.dataPlot.slider_high_q_input = ['maxQInput']
-        self.dataPlot.slider_high_q_setter = ['check_q_high']
+            self.dataPlot.show_q_range_sliders = True
+            self.dataPlot.slider_update_on_move = False
+            self.dataPlot.slider_perspective_name = "Inversion"
+            self.dataPlot.slider_low_q_input = ['minQInput']
+            self.dataPlot.slider_low_q_setter = ['check_q_low']
+            self.dataPlot.slider_high_q_input = ['maxQInput']
+            self.dataPlot.slider_high_q_setter = ['check_q_high']
 
         # Udpate internals and GUI
         self.name = self.logic.data.filename
@@ -1040,6 +1037,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
+            self.showBatchOutput()
         else:
             self.isCalculating = False
         self.updateGuiValues()
