@@ -106,7 +106,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Mapping for all data items
         # Dictionary mapping data to all parameters
-        self._dataList = {}
+        self._dataList = dict()
         self._data = data
 
         self.dataDeleted = False
@@ -207,6 +207,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateThisButton.clicked.connect(self.startThread)
         self.stopButton.clicked.connect(self.stopCalculation)
         self.removeButton.clicked.connect(self.removeData)
+        self.showResultsButton.clicked.connect(self.showBatchOutput)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
         self.manualBgd.toggled.connect(self.toggleBgd)
@@ -278,6 +279,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
         self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
         self.mapper.addMapping(self.calculateThisButton, WIDGETS.W_CALCULATE_VISIBLE)
+        self.mapper.addMapping(self.showResultsButton, WIDGETS.W_CALCULATE_VISIBLE)
         self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
 
         self.mapper.toFirst()
@@ -343,6 +345,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         self.calculateAllButton.setEnabled(not self.isCalculating)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
+                                            and not self.isBatch
+                                            and not self.isCalculating)
+        self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
                                             and not self.isCalculating)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
@@ -444,9 +449,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
         """
-        if not self.isBatch:
+        # check if all the data is calculated and saved in batchResults
+        if len(self.batchResults) != len(self.dataList):
+            logger.error("Recalculate all data.")
             return
-        self.batchResultsWindow.close()
+        # creates and shows a new table when ever ran
         self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
         self.batchResultsWindow.show()
 
@@ -456,7 +463,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopEstimationThread()
         self.stopEstimateNTThread()
         # Show any batch calculations that successfully completed
-        self.showBatchOutput()
         self.isBatch = False
         self.isCalculating = False
         self.updateGuiValues()
@@ -508,7 +514,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             DICT_KEYS[2]: self.dataPlot
         }
         # Update batch results window when finished
-        print("DONE: ", self.name)
         self.batchResults[self.name] = self._calculator
 
     def getState(self):
@@ -569,7 +574,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Data references
         self._data = data_ref
         self.logic.data = GuiUtils.dataFromItem(data_ref)
-        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
+        self._calculator = self._dataList.get(DICT_KEYS[0])
         self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
         self.performEstimate()
@@ -582,7 +587,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
         self.noOfTermsSuggestionButton.setText(
             "{:n}".format(self.nTermsSuggested))
-
         self.enableButtons()
 
     def updateGuiValues(self):
@@ -741,6 +745,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.updateGuiValues()
         self.updateDynamicGuiValues()
 
+
     ######################################################################
     # Thread Creators
 
@@ -754,14 +759,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def startNextBatchItem(self):
         self.isBatch = False
-        print("startNextBatchItem: ", self.dataList.count())
         for index in range(self.dataList.count()):
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
                 self.isBatch = True
                 # Add the index before calculating in case calculation fails
                 self.batchComplete.append(index)
-                print("Calculating: ", self.logic.data.filename)
                 break
         if self.isBatch:
             self.performEstimate()
@@ -801,6 +804,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """ Stops a thread if it exists and is running """
         if self.calcThread is not None and self.calcThread.isrunning():
             self.calcThread.stop()
+
 
     def performEstimateNT(self):
         """
@@ -1037,7 +1041,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
-            self.showBatchOutput()
         else:
             self.isCalculating = False
         self.updateGuiValues()
