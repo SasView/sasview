@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import sys
 import os
+import traceback
 from os.path import exists, expanduser, dirname, realpath, join as joinpath
 import logging
 import shutil
@@ -91,6 +92,7 @@ def setup_custom_config(app_dir, user_dir):
             # the app dir
             shutil.copyfile(os.path.join(app_dir, "custom_config.py"), path)
         except Exception:
+            logger.error(traceback.format_exc())
             logger.error("Could not copy default custom config.")
 
     #Adding SAS_OPENCL if it doesn't exist in the config file
