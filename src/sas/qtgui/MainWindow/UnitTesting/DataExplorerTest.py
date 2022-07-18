@@ -604,7 +604,7 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 1)
 
         self.assertTrue(self.form.cbgraph.isEnabled())
         self.assertTrue(self.form.cmdAppend.isEnabled())
@@ -682,14 +682,14 @@ class DataExplorerTest(unittest.TestCase):
 
         QApplication.processEvents()
         # See that we have two plots
-        self.assertEqual(len(PlotHelper.currentPlots()), 2)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 2)
 
         # Add data to plot #1
         self.form.cbgraph.setCurrentIndex(1)
         self.form.appendPlot()
 
         # See that we still have two plots
-        self.assertEqual(len(PlotHelper.currentPlots()), 2)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 2)
 
     def testUpdateGraphCombo(self):
         """
@@ -1111,7 +1111,7 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 1)
         self.assertEqual(len(self.form.plot_widgets), 1)
         # could have leftovers from previous tests
         #self.assertEqual(list(self.form.plot_widgets.keys()), ['Graph3'])
@@ -1124,7 +1124,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.closePlotsForItem(model_item)
 
         # See that no plot remained
-        self.assertEqual(len(PlotHelper.currentPlots()), 0)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 0)
         self.assertEqual(len(self.form.plot_widgets), 0)
 
     def testPlotsFromMultipleData1D(self):

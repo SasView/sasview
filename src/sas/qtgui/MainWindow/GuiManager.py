@@ -1,14 +1,15 @@
 import sys
 import os
-import subprocess
 import logging
 import json
 import webbrowser
 import traceback
 
+from typing import Optional
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale, QUrl
+from PyQt5.QtCore import Qt, QLocale
 
 import matplotlib as mpl
 mpl.use("Qt5Agg")
@@ -18,7 +19,7 @@ from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
 # General SAS imports
-from sas import get_local_config, get_custom_config
+from sas import get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
@@ -31,7 +32,7 @@ from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
-from sas.qtgui.Utilities.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -48,12 +49,19 @@ from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringC
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 
+
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
+from sas.qtgui.Perspectives.perspective import Perspective
+
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
+from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
+from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
+
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
@@ -62,7 +70,7 @@ from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 logger = logging.getLogger(__name__)
 
 
-class GuiManager(object):
+class GuiManager:
     """
     Main SasView window functionality
     """
@@ -93,7 +101,7 @@ class GuiManager(object):
         self.addTriggers()
 
         # Currently displayed perspective
-        self._current_perspective = None
+        self._current_perspective: Optional[Perspective] = None
         self.loadedPerspectives = {}
 
         # Populate the main window with stuff
@@ -259,7 +267,7 @@ class GuiManager(object):
         Set focus on the selected plot
         """
         # loop over all visible plots and find the requested plot
-        for plot in PlotHelper.currentPlots():
+        for plot in PlotHelper.currentPlotIds():
             # take last plot
             if PlotHelper.plotById(plot).data[-1].name == plot_name:
                 # set focus on the plot
@@ -341,32 +349,82 @@ class GuiManager(object):
         """
         return self._workspace.workspace
 
-    def perspectiveChanged(self, perspective_name):
+    def perspectiveChanged(self, new_perspective_name: str):
         """
         Respond to change of the perspective signal
         """
-        # Remove the previous perspective from the window
-        self.clearPerspectiveMenubarOptions(self._current_perspective)
-        if self._current_perspective:
+
+        assert new_perspective_name in self.loadedPerspectives # supplied name should always be in loaded perspectives
+
+        # Uncheck all menu items
+        for menuItem in self._workspace.menuAnalysis.actions():
+            menuItem.setChecked(False)
+
+        if self._current_perspective is not None:
+
+            # Remove the fitting menu for now, will be replaced later if we move back to a perspective that supports it
+            # I do not like that this requires the menu action to exist to be correct
+            if self._current_perspective.supports_fitting_menu:
+                self._workspace.menubar.removeAction(self._workspace.menuFitting.menuAction())
+
             # Remove perspective and store in Perspective dictionary
-            self.loadedPerspectives[
-                self._current_perspective.name] = self._current_perspective
+            self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
+
             self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._workspace.workspace.removeSubWindow(self.subwindow)
-        # Get new perspective
-        self._current_perspective = self.loadedPerspectives[str(perspective_name)]
 
-        self.setupPerspectiveMenubarOptions(self._current_perspective)
+        # Get new perspective - note that _current_perspective is of type Optional[Perspective],
+        # but new_perspective is of type Perspective, thus call to Perspective members are safe
+        new_perspective = self.loadedPerspectives[new_perspective_name]
 
-        self.subwindow = self._workspace.workspace.addSubWindow(
-            self._current_perspective)
+        self._workspace.actionReport.setEnabled(new_perspective.supports_reports)
+        self._workspace.actionOpen_Analysis.setEnabled(False)
+        self._workspace.actionSave_Analysis.setEnabled(False)
+
+        if new_perspective.isSerializable():
+            self._workspace.actionOpen_Analysis.setEnabled(True)
+            self._workspace.actionSave_Analysis.setEnabled(True)
+
+        if new_perspective.supports_fitting_menu:
+            # Put the fitting menu back in
+            # This is a bit involved but it is needed to preserve the menu ordering
+            self._workspace.menubar.removeAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.removeAction(self._workspace.menuHelp.menuAction())
+
+            self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
+
+            self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+
+        #
+        # Selection on perspective choice menu
+        #
+        if isinstance(new_perspective, FittingWindow):
+            self.checkAnalysisOption(self._workspace.actionFitting)
+
+        elif isinstance(new_perspective, InvariantWindow):
+            self.checkAnalysisOption(self._workspace.actionInvariant)
+
+        elif isinstance(new_perspective, InversionWindow):
+            self.checkAnalysisOption(self._workspace.actionInversion)
+
+        elif isinstance(new_perspective, CorfuncWindow):
+            self.checkAnalysisOption(self._workspace.actionCorfunc)
+
+
+        #
+        # Set up the window
+        #
+        self.subwindow = self._workspace.workspace.addSubWindow(new_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
-        perspective_size = self._current_perspective.sizeHint()
+        perspective_size = new_perspective.sizeHint()
         perspective_width = perspective_size.width()
-        self._current_perspective.resize(perspective_width, workspace_height-10)
+        new_perspective.resize(perspective_width, workspace_height-10)
 
+        # Set the current perspective to new one and show
+        self._current_perspective = new_perspective
         self._current_perspective.show()
 
     def updatePerspective(self, data):
@@ -773,16 +831,16 @@ class GuiManager(object):
         """
         Show the Fit Report dialog.
         """
-        report_list = None
-        if getattr(self._current_perspective, "currentTab"):
-            try:
-                report_list = self._current_perspective.currentTab.getReport()
-            except Exception as ex:
-                logging.error("Report generation failed with: " + str(ex))
+        if self._current_perspective is not None:
+            report_data = self._current_perspective.getReport()
 
-        if report_list is not None:
-            self.report_dialog = ReportDialog(parent=self, report_list=report_list)
-            self.report_dialog.show()
+            if report_data is None:
+                logging.info("Report data is empty, dialog not shown")
+            else:
+                self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
+                self.report_dialog.show()
+
+
 
     def actionReset(self):
         """
@@ -1237,44 +1295,6 @@ class GuiManager(object):
         self.uncheckAllMenuItems(self._workspace.menuAnalysis)
         analysisMenuOption.setChecked(True)
 
-    def clearPerspectiveMenubarOptions(self, perspective):
-        """
-        When closing a perspective, clears the menu bar
-        """
-        for menuItem in self._workspace.menuAnalysis.actions():
-            menuItem.setChecked(False)
-
-        if isinstance(self._current_perspective, Perspectives.PERSPECTIVES["Fitting"]):
-            self._workspace.menubar.removeAction(self._workspace.menuFitting.menuAction())
-
-    def setupPerspectiveMenubarOptions(self, perspective):
-        """
-        When setting a perspective, sets up the menu bar
-        """
-        self._workspace.actionReport.setEnabled(False)
-        self._workspace.actionOpen_Analysis.setEnabled(False)
-        self._workspace.actionSave_Analysis.setEnabled(False)
-        if hasattr(perspective, 'isSerializable') and perspective.isSerializable():
-            self._workspace.actionOpen_Analysis.setEnabled(True)
-            self._workspace.actionSave_Analysis.setEnabled(True)
-
-        if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
-            self.checkAnalysisOption(self._workspace.actionFitting)
-            # Put the fitting menu back in
-            # This is a bit involved but it is needed to preserve the menu ordering
-            self._workspace.menubar.removeAction(self._workspace.menuWindow.menuAction())
-            self._workspace.menubar.removeAction(self._workspace.menuHelp.menuAction())
-            self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
-            self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
-            self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
-            self._workspace.actionReport.setEnabled(True)
-
-        elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
-            self.checkAnalysisOption(self._workspace.actionInvariant)
-        elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
-            self.checkAnalysisOption(self._workspace.actionInversion)
-        elif isinstance(perspective, Perspectives.PERSPECTIVES["Corfunc"]):
-            self.checkAnalysisOption(self._workspace.actionCorfunc)
 
     def saveCustomConfig(self):
         """

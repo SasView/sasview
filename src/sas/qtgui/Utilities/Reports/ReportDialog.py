@@ -4,6 +4,7 @@ import re
 import logging
 import traceback
 from xhtml2pdf import pisa
+from typing import Optional
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5 import QtPrintSupport
@@ -11,30 +12,29 @@ from PyQt5 import QtPrintSupport
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
-from sas.qtgui.Utilities.UI.ReportDialogUI import Ui_ReportDialogUI
+from sas.qtgui.Utilities.Reports.UI.ReportDialogUI import Ui_ReportDialogUI
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 
 class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, parent=None, report_list=None):
+    def __init__(self, report_data: ReportData, parent: Optional[QtCore.QObject]=None):
 
-        super(ReportDialog, self).__init__(parent._parent)
+        super().__init__(parent)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
-        assert isinstance(report_list, list)
-        assert len(report_list) == 3
+        self.report_data = report_data
 
-        self.data_html, self.data_txt, self.data_images = report_list
         #self.save_location = None
         #if 'ReportDialog_directory' in ObjectLibrary.listObjects():
         self.save_location = ObjectLibrary.getObject('ReportDialog_directory')
 
         # Fill in the table from input data
-        self.setupDialog(self.data_html)
+        self.setupDialog(self.report_data.html)
 
         # Command buttons
         self.cmdPrint.clicked.connect(self.onPrint)
@@ -80,7 +80,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         else:
             location = self.save_location
         # Use a sensible filename default
-        default_name = os.path.join(location, 'fit_report.pdf')
+        default_name = os.path.join(location, 'report.pdf')
 
         kwargs = {
             'parent'   : self,
@@ -111,76 +111,31 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         if not extension:
             filename = '.'.join((filename, ext))
 
-        # Create files with charts
-        pictures = []
-        if self.data_images is not None:
-            pictures = self.getPictures(basename)
-
-        # self.data_html contains all images at the end of the report, in base64 form;
-        # replace them all with their saved on-disk filenames
-        cleanr = re.compile('<img src.*$', re.DOTALL)
-        replacement_name = ""
-        html = self.data_html
-        for picture in pictures:
-            replacement_name += '<img src="'+ picture + '"><p></p>'
-        replacement_name += '\n'
-        # <img src="data:image/png;.*>  => <img src=filename>
-        html = re.sub(cleanr, replacement_name, self.data_html)
-
         if ext.lower() == ".txt":
-            txt_ascii = GuiUtils.replaceHTMLwithASCII(self.data_txt)
-            self.onTXTSave(txt_ascii, filename)
-        if ext.lower() == ".html":
-            self.onHTMLSave(html, filename)
-        if ext.lower() == ".pdf":
-            html_utf = GuiUtils.replaceHTMLwithUTF8(html)
-            pdf_success = self.HTML2PDF(html_utf, filename)
-            # delete images used to create the pdf
-            for pic_name in pictures:
-                os.remove(pic_name)
-            #open pdf viewer
-            if pdf_success == 0:
-                try:
-                    if os.name == 'nt':  # Windows
-                        os.startfile(filename)
-                    elif sys.platform == "darwin":  # Mac
-                        os.system("open %s" % filename)
-                except Exception as ex:
-                    # cannot open pdf.
-                    # We don't know what happened in os.* , so broad Exception is required
-                    logging.error(str(ex))
+            self.write_string(self.report_data.text, filename)
 
-    def getPictures(self, basename):
-        """
-        Returns list of saved MPL figures
-        """
-        # save figures
-        pictures = []
-        for num, image in enumerate(self.data_images):
-            pic_name = basename + '_img%s.png' % num
-            # save the image for use with pdf writer
-            image.savefig(pic_name)
-            pictures.append(pic_name)
-        return pictures
+        elif ext.lower() == ".html":
+            self.write_string(self.report_data.html, filename)
+
+        elif ext.lower() == ".pdf":
+            html_utf = GuiUtils.replaceHTMLwithUTF8(self.report_data.html)
+            self.save_pdf(html_utf, filename)
+
+        else:
+            logging.error(f"Unknown file extension: {ext.lower()}")
+
+
 
     @staticmethod
-    def onTXTSave(data, filename):
+    def write_string(string, filename):
         """
-        Simple txt file serialization
+        Write string to file
         """
         with open(filename, 'w') as f:
-            f.write(data)
+            f.write(string)
 
     @staticmethod
-    def onHTMLSave(html, filename):
-        """
-        HTML file write
-        """
-        with open(filename, 'w') as f:
-            f.write(html)
-
-    @staticmethod
-    def HTML2PDF(data, filename):
+    def save_pdf(data, filename):
         """
         Create a PDF file from html source string.
         Returns True is the file creation was successful.
@@ -195,6 +150,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
                                             dest=resultFile,
                                             encoding='UTF-8')
                 return pisaStatus.err
+
         except Exception as ex:
             # logging.error("Error creating pdf: " + str(ex))
             logging.error("Error creating pdf: " + traceback.format_exc())

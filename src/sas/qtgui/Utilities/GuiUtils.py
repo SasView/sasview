@@ -1052,33 +1052,45 @@ def formatValue(value):
             value = str(formatNumber(value, True))
         return value
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithUTF8(html):
     """
     Replace some important HTML-encoded characters
     with their UTF-8 equivalents
     """
     # Angstrom
-    html_out = html.replace("&#x212B;", "Å")
+    html = html.replace("&#x212B;", "Å")  # Hex
+    html = html.replace("&#8491;", "Å")   # Dec
+
     # infinity
-    html_out = html_out.replace("&#x221e;", "∞")
+    html = html.replace("&#x221e;", "∞") # Hex
+    html = html.replace("&#8734;", "∞")  # Dec
+
     # +/-
-    html_out = html_out.replace("&#177;", "±")
+    html = html.replace("&#b1;", "±")   # Hex
+    html = html.replace("&#177;", "±")   # Dec
 
-    return html_out
+    return html
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithASCII(html):
     """
     Replace some important HTML-encoded characters
     with their ASCII equivalents
     """
-    # Angstrom
-    html_out = html.replace("&#x212B;", "Ang")
-    # infinity
-    html_out = html_out.replace("&#x221e;", "inf")
-    # +/-
-    html_out = html_out.replace("&#177;", "+/-")
 
-    return html_out
+    html = html.replace("&#x212B;", "Ang")  # Hex
+    html = html.replace("&#8491;", "Ang")  # Dec
+
+    # infinity
+    html = html.replace("&#x221e;", "inf")  # Hex
+    html = html.replace("&#8734;", "inf")  # Dec
+
+    # +/-
+    html = html.replace("&#xb1;", "+/-")  # Hex
+    html = html.replace("&#177;", "+/-")  # Dec
+
+    return html
 
 def convertUnitToUTF8(unit):
     """

@@ -32,7 +32,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # the two scrollbars will help managing the workspace.
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.screen_width =  screen_resolution.width()
+        self.screen_width = screen_resolution.width()
         self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
 
@@ -47,6 +47,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         except Exception as ex:
             import logging
             logging.error("Application failed with: "+str(ex))
+            raise ex
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
@@ -120,6 +121,3 @@ def run_sasview():
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
-
-if __name__ == "__main__":
-    run_sasview()

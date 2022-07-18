@@ -183,8 +183,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Enables/disables "Assign Plot" elements
         """
-        self.cbgraph.setEnabled(len(PlotHelper.currentPlots()) > 0)
-        self.cmdAppend.setEnabled(len(PlotHelper.currentPlots()) > 0)
+        self.cbgraph.setEnabled(len(PlotHelper.currentPlotIds()) > 0)
+        self.cmdAppend.setEnabled(len(PlotHelper.currentPlotIds()) > 0)
 
     def initPerspectives(self):
         """
@@ -956,7 +956,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         deleted graphs
         """
         graph2, delete = graphs
-        graph_list = PlotHelper.currentPlots()
+        graph_list = PlotHelper.currentPlotIds()
         self.updateGraphCombo(graph_list)
 
         if not self.active_plots:
@@ -983,11 +983,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Notify the gui manager about the new perspective chosen.
         """
+
+        # Notify via communicator
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
-        self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
-        # Deactivate and uncheck the swap data option if the current perspective does not allow it
-        self.chkSwap.setEnabled(self.parent.perspective().allowSwap())
-        if not self.parent.perspective().allowSwap():
+
+        # Set checkboxes
+        current_perspective = self.parent.perspective()
+
+        allow_batch = False if current_perspective is None else current_perspective.allowBatch()
+        allow_swap = False if current_perspective is None else current_perspective.allowSwap()
+
+        self.chkBatch.setEnabled(allow_batch)
+        self.chkSwap.setEnabled(allow_swap)
+
+        # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
+        if not allow_swap:
             self.chkSwap.setCheckState(False)
 
     def itemFromDisplayName(self, name):
@@ -1213,7 +1223,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # old plot data
         plot_id = str(self.cbgraph.currentText())
         try:
-            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s" % (plot_id)
+            assert plot_id in PlotHelper.currentPlotIds(), "No such plot: %s" % (plot_id)
         except:
             return
 
@@ -1828,7 +1838,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Close all currently displayed plots
         """
 
-        for plot_id in PlotHelper.currentPlots():
+        for plot_id in PlotHelper.currentPlotIds():
             try:
                 plotter = PlotHelper.plotById(plot_id)
                 plotter.close()
@@ -1841,7 +1851,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Minimize all currently displayed plots
         """
-        for plot_id in PlotHelper.currentPlots():
+        for plot_id in PlotHelper.currentPlotIds():
             plotter = PlotHelper.plotById(plot_id)
             plotter.showMinimized()
 
@@ -1853,7 +1863,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # {} -> 'Graph1' : HashableStandardItem()
         current_plot_items = {}
-        for plot_name in PlotHelper.currentPlots():
+        for plot_name in PlotHelper.currentPlotIds():
             current_plot_items[plot_name] = PlotHelper.plotById(plot_name).item
 
         # item and its hashable children
@@ -1883,15 +1893,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         pass  # debugger anchor
 
-    def onAnalysisUpdate(self, new_perspective=""):
+    def onAnalysisUpdate(self, new_perspective_name: str):
         """
         Update the perspective combo index based on passed string
         """
-        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        assert new_perspective_name in Perspectives.PERSPECTIVES.keys()
+
         self.cbFitting.blockSignals(True)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        index = self.cbFitting.findText(new_perspective_name)
+        self.cbFitting.setCurrentIndex(index)
         self.cbFitting.blockSignals(False)
-        pass
+
 
     def loadComplete(self, output):
         """
