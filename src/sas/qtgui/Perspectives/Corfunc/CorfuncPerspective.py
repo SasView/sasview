@@ -14,6 +14,8 @@ import numpy as np
 
 from typing import Optional, List, Tuple
 
+import logging
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 
@@ -249,6 +251,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Set up the mapper
         self.setup_mapper()
 
+    def set_background_warning(self, show_warning: bool = True):
+        if show_warning:
+            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+        else:
+            self.txtBackground.setStyleSheet("")
+
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
@@ -275,6 +283,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.itemChanged.connect(self.model_changed)
 
         self.trigger.connect(self.finish_transform)
+        self.txtBackground.textChanged.connect(self.on_background_text_changed)
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -609,6 +618,25 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             window.exec_()
         else:
             raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
+
+    def on_background_text_changed(self, data):
+        """ Background value number changed"""
+        # If data has a "bad" value we want to indicate this
+        # The only good values can be interpreted as non-negative floats
+
+        is_bad = True
+
+        try:
+            value = float(data)
+            if value >= 0:
+                is_bad = False
+
+        except ValueError:
+            pass
+
+        self.set_background_warning(is_bad)
+
+
 
     def serializeAll(self):
         """
