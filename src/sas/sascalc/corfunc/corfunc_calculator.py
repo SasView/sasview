@@ -151,7 +151,7 @@ class CorfuncCalculator:
         if len(maxs) == 0:
             return None
 
-        GammaMin = y[mins[0]]  # The value at the first minimum
+        gamma_min = y[mins[0]]  # The value at the first minimum
 
         ddy = (y[:-2]+y[2:]-2*y[1:-1])/(x[2:]-x[:-2])**2  # 2nd derivative of y
         dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
@@ -178,7 +178,7 @@ class CorfuncCalculator:
         b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
 
         long_period = x[maxs[0]]
-        long_block_thickness = (GammaMin-b)/m  # Hard block thickness
+        long_block_thickness = (gamma_min - b) / m  # Hard block thickness
         soft_block_thickess = x[maxs[0]] - long_block_thickness
 
         # Find the data points where the graph is linear to within 1%
@@ -189,17 +189,22 @@ class CorfuncCalculator:
         dtr = x[mask[0]]  # Beginning of Linear Section
         d0 = x[mask[-1]]  # End of Linear Section
 
-        GammaMax = y[mask[-1]]
-        A = np.abs(GammaMin/GammaMax)  # Normalized depth of minimum
+        local_crystallinity = long_block_thickness / long_period
+
+        gamma_max = y[mask[-1]]
+
+        polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
+        polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
 
         params = {
             'max': long_period,
             'dtr': dtr,
             'Lc': long_block_thickness,
             'd0': d0,
-            'A': A,
-            'fill': long_block_thickness/x[maxs[0]],
-            'soft': soft_block_thickess
+            'A': polydispersity_ryan,
+            'fill': local_crystallinity,
+            'soft': soft_block_thickess,
+            'polydispersity_stribeck': polydispersity_stribeck
         }
 
         return params
