@@ -177,24 +177,29 @@ class CorfuncCalculator:
         m = np.mean(dy[lower:upper])  # Linear slope
         b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
 
-        Lc = (GammaMin-b)/m  # Hard block thickness
+        long_period = x[maxs[0]]
+        long_block_thickness = (GammaMin-b)/m  # Hard block thickness
+        soft_block_thickess = x[maxs[0]] - long_block_thickness
 
         # Find the data points where the graph is linear to within 1%
         mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
         if len(mask) == 0:  # Return garbage for bad fits
-            return { 'max': self._round_sig_figs(x[maxs[0]], 6) }
+            return None
+
         dtr = x[mask[0]]  # Beginning of Linear Section
         d0 = x[mask[-1]]  # End of Linear Section
+
         GammaMax = y[mask[-1]]
         A = np.abs(GammaMin/GammaMax)  # Normalized depth of minimum
 
         params = {
-            'max': x[maxs[0]],
+            'max': long_period,
             'dtr': dtr,
-            'Lc': Lc,
+            'Lc': long_block_thickness,
             'd0': d0,
             'A': A,
-            'fill': Lc/x[maxs[0]]
+            'fill': long_block_thickness/x[maxs[0]],
+            'soft': soft_block_thickess
         }
 
         return params
