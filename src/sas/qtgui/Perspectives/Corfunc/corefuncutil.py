@@ -12,7 +12,7 @@ WIDGETS = enum( 'W_QMIN',
                 'W_CORETHICK',
                 'W_INTTHICK',
                 'W_HARDBLOCK',
-                'W_SOFTBLOCK'
+                'W_SOFTBLOCK',
                 'W_CRYSTAL',
                 'W_POLY',
                 'W_PERIOD',
