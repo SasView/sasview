@@ -669,7 +669,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete selected rows from the model
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the checked data sets and all the dependents." +\
+        delete_msg = "This operation will remove the checked data from the data explorer." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
@@ -712,7 +712,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete selected rows from the theory model
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the checked data sets and all the dependents." +\
+        delete_msg = "This operation remove the checked data sets and their dependents from the data explorer." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
@@ -1778,8 +1778,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete the current item
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the selected data sets " +\
-                     "and all the dependents." +\
+        delete_msg = "This operation will remove the selected data sets " +\
+                     "and all the dependents from the data explorer." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
