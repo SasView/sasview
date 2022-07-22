@@ -22,10 +22,8 @@ qt5reactor
 periodictable 
 uncertainties 
 debugpy
-matplotlib==2.2.5; sys_platform == 'windows' or  sys_platform == 'linux'
-PyQt5; sys_platform == 'windows' or  sys_platform == 'linux'
-PyQt5==5.13; sys_platform == 'darwin'
-matplotlib==3.4.3; sys_platform == 'darwin'
+matplotlib==2.2.5
+PyQt5
 lxml
 pytools 
 cffi
@@ -33,3 +31,6 @@ dominate
 html5lib
 importlib-resources
 importlib_resources
+bumps
+html2text
+pyqt5-tools
