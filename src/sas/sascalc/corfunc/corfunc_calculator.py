@@ -178,18 +178,18 @@ class CorfuncCalculator:
         b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
 
         long_period = x[maxs[0]]
-        long_block_thickness = (gamma_min - b) / m  # Hard block thickness
-        soft_block_thickess = x[maxs[0]] - long_block_thickness
+        hard_block_thickness = (gamma_min - b) / m  # Hard block thickness
+        soft_block_thickess = long_period - hard_block_thickness
 
         # Find the data points where the graph is linear to within 1%
         mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
         if len(mask) == 0:  # Return garbage for bad fits
             return None
 
-        dtr = x[mask[0]]  # Beginning of Linear Section
-        d0 = x[mask[-1]]  # End of Linear Section
+        interface_thickness = x[mask[0]]  # Beginning of Linear Section
+        core_thickness = x[mask[-1]]  # End of Linear Section
 
-        local_crystallinity = long_block_thickness / long_period
+        local_crystallinity = hard_block_thickness / long_period
 
         gamma_max = y[mask[-1]]
 
@@ -198,9 +198,9 @@ class CorfuncCalculator:
 
         params = {
             'max': long_period,
-            'dtr': dtr,
-            'Lc': long_block_thickness,
-            'd0': d0,
+            'dtr': interface_thickness,
+            'Lc': hard_block_thickness,
+            'd0': core_thickness,
             'A': polydispersity_ryan,
             'fill': local_crystallinity,
             'soft': soft_block_thickess,
