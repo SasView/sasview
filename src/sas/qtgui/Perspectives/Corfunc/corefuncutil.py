@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_QMIN',
@@ -14,7 +15,16 @@ WIDGETS = enum( 'W_QMIN',
                 'W_HARDBLOCK',
                 'W_SOFTBLOCK',
                 'W_CRYSTAL',
-                'W_POLY',
+                'W_POLY_RYAN',
+                'W_POLY_STRIBECK',
                 'W_PERIOD',
                 'W_FILENAME',
                 )
+
+@dataclass
+class ExtractedParameters:
+    long_period: float
+    long_block_thickness: float
+    polydispersity_ryan: float
+    polydispersity_stribeck: float
+    local_crystallinity: float
