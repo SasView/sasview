@@ -24,7 +24,10 @@ WIDGETS = enum( 'W_QMIN',
 @dataclass
 class ExtractedParameters:
     long_period: float
-    long_block_thickness: float
+    interface_thickness: float
+    hard_block_thickness: float
+    soft_block_thickness: float
+    core_thickness: float
     polydispersity_ryan: float
     polydispersity_stribeck: float
     local_crystallinity: float

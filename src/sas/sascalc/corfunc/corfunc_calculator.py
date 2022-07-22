@@ -13,6 +13,8 @@ from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
+from sas.qtgui.Perspectives.Corfunc.corefuncutil import ExtractedParameters
+
 from typing import Optional, Tuple
 
 class CorfuncCalculator:
@@ -135,7 +137,7 @@ class CorfuncCalculator:
         if self._transform_thread.isrunning():
             self._transform_thread.stop()
 
-    def extract_parameters(self, transformed_data):
+    def extract_parameters(self, transformed_data) -> Optional[ExtractedParameters]:
         """
         Extract the interesting measurements from a correlation function
 
@@ -179,7 +181,7 @@ class CorfuncCalculator:
 
         long_period = x[maxs[0]]
         hard_block_thickness = (gamma_min - b) / m  # Hard block thickness
-        soft_block_thickess = long_period - hard_block_thickness
+        soft_block_thickness = long_period - hard_block_thickness
 
         # Find the data points where the graph is linear to within 1%
         mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
@@ -196,18 +198,15 @@ class CorfuncCalculator:
         polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
         polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
 
-        params = {
-            'max': long_period,
-            'dtr': interface_thickness,
-            'Lc': hard_block_thickness,
-            'd0': core_thickness,
-            'A': polydispersity_ryan,
-            'fill': local_crystallinity,
-            'soft': soft_block_thickess,
-            'polydispersity_stribeck': polydispersity_stribeck
-        }
-
-        return params
+        return ExtractedParameters(
+                    long_period,
+                    interface_thickness,
+                    hard_block_thickness,
+                    soft_block_thickness,
+                    core_thickness,
+                    polydispersity_ryan,
+                    polydispersity_stribeck,
+                    local_crystallinity)
 
 
     def _porod(self, q, K, sigma, bg):
