@@ -22,7 +22,7 @@ qt5reactor
 periodictable 
 uncertainties 
 debugpy
-matplotlib==2.2.5
+matplotlib==3.4.3
 PyQt5
 lxml
 pytools 
