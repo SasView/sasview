@@ -13,9 +13,19 @@ from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
-from sas.qtgui.Perspectives.Corfunc.corefuncutil import ExtractedParameters
-
+from dataclasses import dataclass
 from typing import Optional, Tuple
+
+@dataclass
+class ExtractedParameters:
+    long_period: float
+    interface_thickness: float
+    hard_block_thickness: float
+    soft_block_thickness: float
+    core_thickness: float
+    polydispersity_ryan: float
+    polydispersity_stribeck: float
+    local_crystallinity: float
 
 class CorfuncCalculator:
 
