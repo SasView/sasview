@@ -1,22 +1,24 @@
 import logging
 import numpy as np
 
+
 from PySide6 import QtGui, QtCore, QtWidgets
 
 # sas-global
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
-from .InversionUtils import WIDGETS
 from .InversionWidget import InversionWidget
-from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
+
 from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
+
 
 def str_to_float(string: str):
     """Converts text input values to float.
@@ -56,10 +58,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     calculateSignal = QtCore.Signal(tuple)
 
 
-    def __init__(self, parent=None, data=None):
 
-        #super().__init__()
-        #self.setupUi(self)
+    def __init__(self, parent=None):
 
         super(InversionWindow, self).__init__()
 
@@ -71,10 +71,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.parent = parent
         self._parent = parent
         self.communicate = parent.communicator()
-        self.communicate.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
 
-        self.logic = InversionLogic()
+        # self.logic = InversionLogic()
 
         # List of active Pr Tabs
         self.tabs = []
@@ -89,9 +88,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
-        self._calculator = Invertor()
-        # Default to background estimate
-        self._calculator.est_bck = True
+        self._calculator = None
+
         # plots of self._data
         self.prPlot = None
         self.dataPlot = None
@@ -135,6 +133,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
     ######################################################################
     # Batch Mode and Tab Functions
+
+    def calculate(self):
+        # Default to background estimate
+        self._calculator.est_bck = True
 
     def resetTab(self, index):
         """
@@ -206,25 +208,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         """
         return True
 
-    def closeEvent(self, event):
-        """
-        Overwrite QDialog close method to allow for custom widget close
-        """
-        # Close report widgets before closing/minimizing main widget
-        self.closeDMax()
-        self.closeBatchResults()
-        if self._allowClose:
-            # reset the closability flag
-            self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
-            event.accept()
-        else:
-            event.ignore()
-            # Maybe we should just minimize
-            self.setWindowState(QtCore.Qt.WindowMinimized)
-
     def closeDMax(self):
         if self.dmaxWindow is not None:
             self.dmaxWindow.close()
@@ -234,15 +217,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             self.batchResultsWindow.close()
 
     ######################################################################
-
-
-    def populateDataComboBox(self, name, data_ref):
-        """
-        Append a new name to the data combobox
-        :param name: data name
-        :param data_ref: QStandardItem reference for data set to be added
-        """
-        self.dataList.addItem(name, data_ref)
 
     def setData(self, data_item=None, is_batch=False):
         """
@@ -256,40 +230,46 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
-        if is_batch:
-            # initiate a single Tab for batch
-            tab = self.addData(name="Pr Batch", data=None, is_batch=is_batch)
+        if not isinstance(data_item[0], QtGui.QStandardItem):
+            msg = "Incorrect type passed to the P(r) Perspective"
+            raise AttributeError(msg)
 
+        #
         for data in data_item:
-            self.logic.data = GuiUtils.dataFromItem(data)
-            if not isinstance(self.logic.data, Data1D):
-                # Code for 2D data
-                msg = "P(r) perspective cannot be computed with 2D data."
-                logger.error(msg)
-                raise ValueError(msg)
-            # Estimate q range
-            qmin, qmax = self.logic.computeDataRange()
-            self._calculator.set_qmin(qmin)
-            self._calculator.set_qmax(qmax)
-            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
-                self.logic.add_errors()
-            self.updateDataList(data)
+
+            logic_data = GuiUtils.dataFromItem(data)
+
+            if isinstance(logic_data, Data2D):
+                print("2D single")
+                tab = self.addData(data=data)
+                tab.twoDParamGroupBox.setEnabled(True)
+                qmin, qmax = tab.logic.computeDataRange()
+                tab.calculator.set_qmin(qmin)
+                tab.calculator.set_qmax(qmax)
+                tab.show2Dplot()
+
+            if is_batch and not isinstance(logic_data, Data2D):
+                print("Is Batch")
+                # initiate a single Tab for batch
+                self.addData(data=data_item, is_batch=is_batch)
+                return
+
+            if isinstance(logic_data, Data1D):
+                print("1D single")
+                tab = self.addData(data=data)
+                qmin, qmax = tab.logic.computeDataRange()
+                tab.calculator.set_qmin(qmin)
+                tab.calculator.set_qmax(qmax)
+                if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
+                    tab.logic.add_errors()
+
+                ###############
 
         # Checking for 1D again to mitigate the case when 2D data is last on the data list
         # if isinstance(self.logic.data, Data1D):
         #     self.setCurrentData(data)
 
-    def updateDataList(self, dataRef): # TODO Typing, name, underscore prefix
-        """Save the current data state of the window into self._data_list"""
-        if dataRef is None:
-            return
-        self._dataList[dataRef] = {
-            DICT_KEYS[0]: self._calculator,
-            DICT_KEYS[1]: self.prPlot,
-            DICT_KEYS[2]: self.dataPlot
-        }
-        # Update batch results window when finished
-        self.batchResults[self.logic.data.name] = self._calculator
+
 
 
     def removeData(self, data_list=None):
@@ -369,7 +349,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             tab_id.append(str(self.logic.data.id))
         return tab_id
 
-    def addData(self, name=None, data=None, is_batch=False, tab_index=None):
+
+    def addData(self, data=None, is_batch=False, tab_index=None):
         """
         Add a new tab for passed data
         """
@@ -381,31 +362,31 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
         # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
+        tab.set_tab_name("New Tab")
 
-        # set name to "New Pr Tab" if no name is set to the data set
-        if name is None:
-            tab.TabName = "New Pr Tab"
-        else:
-            tab.TabName = name
-
-        # if the length of the name is over 23 shorten it and add ellipsis
-        if len(tab.TabName) >= 23:
-            tab.TabName = tab.TabName[:20] + "..."
         if data is not None and not is_batch:
-            tab.populateDataComboBox(self.logic.data.name, data)
+            tab.logic.data = GuiUtils.dataFromItem(data)
+            tab.set_tab_name(tab.logic.data.name)
+            tab.populateDataComboBox(tab.logic.data.name, data)
 
         # Setting UP batch Mode
         icon = QtGui.QIcon()
         if is_batch:
-            tab.TabName = "Pr Batch"
+            tab.isBatch = True
+            tab.set_tab_name("Pr Batch")
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
             tab.calculateAllButton.setVisible(True)
             tab.calculateThisButton.setVisible(False)
             tab.setPlotable(False)
+            tab._allowPlots = False
+
+            for i in data:
+                tab.logic.data = GuiUtils.dataFromItem(i)
+                tab.populateDataComboBox(name=tab.logic.data.name, data_ref=i)
         else:
             tab.calculateAllButton.setVisible(False)
             tab.showResultsButton.setVisible(False)
-        self.addTab(tab, icon, tab.TabName)
+        self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
 
