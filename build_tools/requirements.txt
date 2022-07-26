@@ -30,7 +30,5 @@ cffi
 dominate
 html5lib
 importlib-resources
-importlib_resources
 bumps
 html2text
-pyqt5-tools
