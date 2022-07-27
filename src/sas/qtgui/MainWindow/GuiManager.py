@@ -354,7 +354,11 @@ class GuiManager:
         Respond to change of the perspective signal
         """
 
-        assert new_perspective_name in self.loadedPerspectives # supplied name should always be in loaded perspectives
+        if new_perspective_name not in self.loadedPerspectives:
+            keylist = ', '.join(self.loadedPerspectives.keys())
+            raise KeyError(
+                f"Perspective {new_perspective_name} is not in the dictionary "
+                f"- options are: {keylist} - probably one failed to load")
 
         # Uncheck all menu items
         for menuItem in self._workspace.menuAnalysis.actions():

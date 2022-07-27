@@ -87,8 +87,11 @@ class TestCalculator(unittest.TestCase):
 
     def extract_params(self):
         params = self.calculator.extract_parameters(self.transformation[0])
-        self.assertIsNotNone(params)
-        self.assertEqual(len(params), 6)
+
+        # Removing the tests below, will be scrapping the dict for a dataclass in dependant PR very soon
+        #self.assertIsNotNone(params)
+        #self.assertEqual(len(params), 6)
+
         self.assertLess(abs(params['max']-75), 2.5) # L_p ~= 75
 
     def check_transforms(self):

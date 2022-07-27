@@ -303,6 +303,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(str(0)))
@@ -415,6 +416,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
         self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params['soft'])))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
         self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
@@ -465,6 +467,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper.addMapping(self.txtAvgCoreThick, WIDGETS.W_CORETHICK)
         self.mapper.addMapping(self.txtAvgIntThick, WIDGETS.W_INTTHICK)
         self.mapper.addMapping(self.txtAvgHardBlock, WIDGETS.W_HARDBLOCK)
+        self.mapper.addMapping(self.txtAvgSoftBlock, WIDGETS.W_SOFTBLOCK)
         self.mapper.addMapping(self.txtPolydisp, WIDGETS.W_POLY)
         self.mapper.addMapping(self.txtLongPeriod, WIDGETS.W_PERIOD)
         self.mapper.addMapping(self.txtLocalCrystal, WIDGETS.W_CRYSTAL)
@@ -542,6 +545,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
@@ -657,6 +661,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             'avg_core_thick': self.txtAvgCoreThick.text(),
             'avg_inter_thick': self.txtAvgIntThick.text(),
             'avg_hard_block_thick': self.txtAvgHardBlock.text(),
+            'avg_soft_block_thick': self.txtAvgSoftBlock.text(),
             'local_crystalinity': self.txtLocalCrystal.text(),
             'polydispersity': self.txtPolydisp.text(),
             'long_period': self.txtLongPeriod.text(),
@@ -692,6 +697,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             params.get('avg_inter_thick', '0')))
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(
             params.get('avg_hard_block_thick', '0')))
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(
+            params.get('avg_soft_block_thick', '0')))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(
             params.get('local_crystalinity', '0')))
         self.model.setItem(
