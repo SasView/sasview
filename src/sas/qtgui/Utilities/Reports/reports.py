@@ -3,10 +3,8 @@ from typing import List, Tuple, Iterable, Any, Dict, Optional
 import sys
 import os
 import datetime
-try:
-    import importlib.resources as pkg_resources
-except:
-    import importlib_resources as pkg_resources
+
+import importlib.resources as pkg_resources
 
 import base64
 from io import BytesIO
