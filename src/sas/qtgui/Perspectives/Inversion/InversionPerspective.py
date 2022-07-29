@@ -44,6 +44,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
     name = "Inversion"
 
+
     ext = "pr"
     tabsModifiedSignal = QtCore.Signal()
     @property
@@ -56,6 +57,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     estimateDynamicNTSignal = QtCore.Signal(tuple)
     estimateDynamicSignal = QtCore.Signal(tuple)
     calculateSignal = QtCore.Signal(tuple)
+
 
 
 
@@ -246,7 +248,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                 qmin, qmax = tab.logic.computeDataRange()
                 tab.calculator.set_qmin(qmin)
                 tab.calculator.set_qmax(qmax)
-                tab.show2Dplot()
+                tab.show2DPlot()
 
             if is_batch and not isinstance(logic_data, Data2D):
                 print("Is Batch")
