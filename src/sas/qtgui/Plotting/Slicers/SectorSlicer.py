@@ -8,6 +8,7 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 MIN_PHI = 0.05
 
+
 class SectorInteractor(BaseInteractor, SlicerModel):
     """
     SectorInteractor plots a data1D average of a sector area defined in a
@@ -26,6 +27,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         ..TODO: the 2 subclasses here are the same as used by the BoxSum. These
             should probably be abstracted out.
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -34,15 +36,15 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-
+        self.sector = None
         # Connect the plot to event
         self.connect = self.base.connect
 
         # Compute qmax limit to reset the graph
         x = numpy.power(max(self.data.xmax,
-                         numpy.fabs(self.data.xmin)), 2)
+                            numpy.fabs(self.data.xmin)), 2)
         y = numpy.power(max(self.data.ymax,
-                         numpy.fabs(self.data.ymin)), 2)
+                            numpy.fabs(self.data.ymin)), 2)
         self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
         self.nbins = 100
@@ -186,10 +188,10 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        # GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+        #
+        # self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        # self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
         if self.update_model:
             self.setModelFromParams()
@@ -290,6 +292,54 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
+    def getSlice(self, nbins=None):
+        data = self.data
+        # If we have no data, just return
+        if data is None:
+            return
+        # Averaging
+        from sas.sascalc.dataloader.manipulations import SectorQ
+        radius = self.qmax
+        phimin = -self.left_line.phi + self.main_line.theta
+        phimax = self.left_line.phi + self.main_line.theta
+        if nbins is None:
+            nbins = 20
+        sect = SectorQ(r_min=0.0, r_max=radius,
+                       phi_min=phimin + numpy.pi,
+                       phi_max=phimax + numpy.pi, nbins=nbins)
+
+        sector = sect(self.data)
+        # Create 1D data resulting from average
+
+        if hasattr(sector, "dxl"):
+            dxl = sector.dxl
+        else:
+            dxl = None
+        if hasattr(sector, "dxw"):
+            dxw = sector.dxw
+        else:
+            dxw = None
+        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
+        new_plot.dxl = dxl
+        new_plot.dxw = dxw
+        new_plot.name = "SectorQ" + "(" + self.data.name + ")"
+        new_plot.title = "SectorQ" + "(" + self.data.name + ")"
+        new_plot.source = self.data.source
+        new_plot.interactive = True
+        new_plot.detector = self.data.detector
+        # If the data file does not tell us what the axes are, just assume them.
+        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")
+        if hasattr(data, "scale") and data.scale == 'linear' and \
+                self.data.name.count("Residuals") > 0:
+            new_plot.ytransform = 'y'
+            new_plot.yaxis("\\rm{Residuals} ", "/")
+
+        new_plot.group_id = "2daverage" + self.data.name
+        new_plot.id = "SectorQ" + self.data.name
+        new_plot.is_data = True
+        return new_plot
+
 
 class SideInteractor(BaseInteractor):
     """
@@ -302,10 +352,12 @@ class SideInteractor(BaseInteractor):
     :param theta2: the angle between the middle line and x- axis
 
     """
+
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
                  phi=numpy.pi / 4, theta2=numpy.pi / 3):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialize the class
+        self.sector = None
         self.markers = []
         self.axes = axes
         self.color = color
@@ -379,9 +431,9 @@ class SideInteractor(BaseInteractor):
             self.phi = phi
         if delta is None:
             delta = 0
-        if  right:
+        if right:
             self.phi = -1 * numpy.fabs(self.phi)
-            #delta=-delta
+            # delta=-delta
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
@@ -427,6 +479,7 @@ class SideInteractor(BaseInteractor):
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
         if not self.left_moving:
+
             if  self.theta2 - self.theta <= 0 and self.theta2 > 0:
                 self.restore(ev)
                 return
@@ -449,6 +502,7 @@ class SideInteractor(BaseInteractor):
         else:
             if  self.theta < 0 and (self.theta + numpy.pi * 2 - self.theta2) <= 0:
                 self.restore(ev)
+
                 return
             elif self.theta2 < 0 and (self.theta - self.theta2) <= 0:
                 self.restore(ev)
@@ -493,6 +547,7 @@ class LineInteractor(BaseInteractor):
     :param half_length: Defaults to False. If True, the line is drawn from the
                         origin rather than across the whole graph.
     """
+
     def __init__(self, base, axes, color='black',
                  zorder=5, r=1.0, theta=numpy.pi / 4, half_length=False):
         BaseInteractor.__init__(self, base, axes, color=color)

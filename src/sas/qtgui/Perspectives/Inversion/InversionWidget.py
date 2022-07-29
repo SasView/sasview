@@ -13,12 +13,14 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
-from ...Plotting.Plotter2D import Plotter2D, Plotter2DWidget
+from ...Plotting.Plotter import Plotter, PlotterWidget
+from ...Plotting.Plotter2D import Plotter2D
 from ...Plotting.Slicers.SectorSlicer import SectorInteractor
+
 
 def is_float(value):
     """Converts text input values to floats. Empty strings throw ValueError"""
@@ -55,10 +57,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Necessary globals
 
+        # 2D Data globals
+        self.nbins = None
+        self.axes = None
+        self.fig = None
+        self.plot_widget = None
+        self.phi = None
+        self.deltaPhi = None
+        self.active_plots = {}
+        self.plot2D = Plotter2D(self, quickplot=True)
+        self.plot1D = Plotter(quickplot=True)
         self.plotList = None
-        self.DeltaPhi = None
-        self.Phi = None
-        self.parent = parent
 
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
@@ -73,12 +82,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self._manager = parent
         # Needed for Batch fitting
+        self.parent = parent
         self._parent = parent
         self.communicate = self.parent.communicate
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.batchResults = {}
 
         self.logic = InversionLogic()
+        self.logic2D = self.logic
 
         # Allow Tabs to close
         self._allowClose = True
@@ -124,7 +135,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.batchComplete = []
         self.isBatch = False
         self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
-        self.plot2D = None
         self._allowPlots = True
 
         # Add validators
@@ -143,6 +153,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         return self.communicate
 
     def allowBatch(self):
+        """
+        Allows Pr Interface to accept multiple datasets for batch processing
+        """
         return True
 
     def allowSwap(self):
@@ -754,13 +767,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
-
-        # left click ont eh plot then eddit slicer parimeters and set the vals
-        print(self.startPointInput.text())  # this is Phi the start angle
-        print(self.noOfSlicesInput.text())  # this is Delta_Phi the angle of opening as an angle
-
-        # keep nbins as default and show plot
-
         self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
@@ -771,14 +777,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def startNextBatchItem(self):
         self.isBatch = False
         for index in range(self.dataList.count()):
+            print("Calculating item {}".format(index))
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
                 self.isBatch = True
                 # Add the index before calculating in case calculation fails
                 self.batchComplete.append(index)
                 break
-        if self.isBatch:
-            self.performEstimate()
+        # if self.isBatch:
+        #     self.performEstimate()
         else:
             # If no data sets left, end batch calculation
             self.isCalculating = False
@@ -791,12 +798,18 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             Start a calculation thread
         """
         from .Thread import CalcPr
-
-        # Set data before running the calculations
         self.isCalculating = True
+
+        slice = self.plot2D.slicer.getSlice()
+        self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
+        self.calculator = Invertor()
+        self.setSlicerParms()
+        self.show1DPlot()
+        self.plot2D.update()
+
+        # Disable calculation buttons to prevent thread interference
         self.enableButtons()
         self.updateCalculator()
-        # Disable calculation buttons to prevent thread interference
 
         # If the thread is already started, stop it
         self.stopCalcThread()
@@ -1073,32 +1086,48 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if name is not None:
             self.tab_name = name
         else:
-             self.tab_name = "Untitled Pr Tab"
+            self.tab_name = "Untitled Pr Tab"
 
         if self.isBatch:
-                self.tab_name = "Pr Batch"
+            self.tab_name = "Pr Batch"
 
         # if the length of the name is over 23 shorten it and add ellipsis
         if len(self.tab_name) >= 23:
             self.tab_name = self.tab_name[:20] + "..."
 
-    def show2Dplot(self):
-        self.plotList = []
-
-        self.Phi = self.startPointInput.text()
-        self.DeltaPhi = self.noOfSlicesInput.text()
-        self.plot2D = Plotter2D(self, quickplot=True)
-        self.plot2D.data = self.logic.data
-        self.plot2D.plot()
-        self.plot2D.show()
+    def show2DPlot(self):
+        self.plot2D.plot(data=self.logic.data, marker='-')
+        self.plot_widget = QtWidgets.QWidget()
+        self.plot_widget.setWindowTitle("2D Plot - " + self.logic.data.name)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.plot2D)
+        self.plot_widget.setLayout(layout)
         self.plot2D._item = self.plot2D
-        # self.plot2D.setSlicer(slicer=SectorInteractor, reset=False)
+        self.plot2D.setSlicer(SectorInteractor)
+        self.plot_widget.show()
+        self.setSlicerParms()
+
+    def show1DPlot(self):
+        selectedSlice = self.plot2D.slicer.getSlice()
+        selectedSlice.title += ' @slic={}; start={}'.format(self.phi, self.deltaPhi)
+        self.plot1D.plot(selectedSlice)
+        # self.logic.data = slice.data
+        self.plot1D.show()
+        self.plot2D.update()
+
+    def setSlicerParms(self):
+        try:
+            self.phi = float(self.startPointInput.text())
+            self.deltaPhi = float(self.noOfSlicesInput.text())
+        except:
+            self.phi = 60
+            self.deltaPhi = 15
+            self.nbins = 20
+        params = self.plot2D.slicer.getParams()
+        params["Phi [deg]"] = self.phi
+        params["Delta_Phi [deg]"] = self.deltaPhi
+        self.plot2D.slicer.setParams(params)
 
 
-        # for plot in plots:
-        #     for item in self.active_plots.keys():
-        #         data = self.active_plots[item].data[-1]
-        #         if not isinstance(data, Data1D):
-        #             continue
-        #         if plot not in data.name:
-        #             continue
+def debug(checkpoint):
+    print(" - - - - - - - - [ DEBUG :: Checkpoint {} ] - - - - - - - - ".format(checkpoint))
