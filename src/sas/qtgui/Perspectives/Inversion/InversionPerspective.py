@@ -42,6 +42,7 @@ class InversionWindow(QtWidgets.QTabWidget):
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicSignal = QtCore.pyqtSignal(tuple)
     calculateSignal = QtCore.pyqtSignal(tuple)
+    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
 
     def __init__(self, parent=None):
         super(InversionWindow, self).__init__()
@@ -226,7 +227,7 @@ class InversionWindow(QtWidgets.QTabWidget):
                 qmin, qmax = tab.logic.computeDataRange()
                 tab.calculator.set_qmin(qmin)
                 tab.calculator.set_qmax(qmax)
-                tab.show2Dplot()
+                tab.show2DPlot()
 
             if is_batch and not isinstance(logic_data, Data2D):
                 print("Is Batch")
