@@ -283,7 +283,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.itemChanged.connect(self.model_changed)
 
         self.trigger.connect(self.finish_transform)
-        self.txtBackground.textEdited.connect(self.on_background_text_changed)
+        self.txtBackground.textChanged.connect(self.on_background_text_changed)
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -629,8 +629,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         try:
             value = float(data)
             if self.data is not None:
-                if value >= -np.min(self.data.y):
+                min = np.min(self.data.y)
+                if value <= min:
                     is_bad = False
+                else:
+                    logging.warning(f"Background value results in negative intensities ({value} > {min})")
             else:
                 is_bad = False
 
