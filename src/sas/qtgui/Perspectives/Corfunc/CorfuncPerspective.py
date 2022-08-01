@@ -283,7 +283,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.itemChanged.connect(self.model_changed)
 
         self.trigger.connect(self.finish_transform)
-        self.txtBackground.textChanged.connect(self.on_background_text_changed)
+        self.txtBackground.textEdited.connect(self.on_background_text_changed)
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -628,7 +628,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         try:
             value = float(data)
-            if value >= 0:
+            if self.data is not None:
+                if value >= -np.min(self.data.y):
+                    is_bad = False
+            else:
                 is_bad = False
 
         except ValueError:
