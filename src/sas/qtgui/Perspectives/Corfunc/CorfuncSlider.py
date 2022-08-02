@@ -6,10 +6,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFontMetrics
 
+
 class CorfuncSlider(QtWidgets.QWidget):
-
-
-
     def __init__(self,
                  log_q_min: float,
                  log_q_point_1: float,
@@ -39,48 +37,105 @@ class CorfuncSlider(QtWidgets.QWidget):
         self._point_2 = log_q_point_2
         self._point_3 = log_q_point_3
 
-        # Parameters
+        # Display Parameters
         self.vertical_size = 70
         self.guinier_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
         self.porod_color = QtGui.QColor('green')
         self.text_color = QtGui.QColor('black')
-        self.line_drag_color = QtGui.QColor('light grey')
+        self.line_drag_color = QtGui.QColor('grey')
+        self.hover_colour = QtGui.QColor('white')
+
+        # - define hover colours by mixing with a grey
+        mix_color = QtGui.QColor('light grey')
+        mix_fraction = 0.7
+        self.guinier_hover_color = mix_colours(self.guinier_color, mix_color, mix_fraction)
+        self.data_hover_color = mix_colours(self.data_color, mix_color, mix_fraction)
+        self.porod_hover_color = mix_colours(self.porod_color, mix_color, mix_fraction)
 
         # Mouse control
+        self._hovering = False
+        self._hover_id: Optional[int] = None
+
         self._drag_id: Optional[int] = None
         self._movement_line_position: Optional[int] = None
 
-        # Size properties
+        # Qt things
+        # self.setAttribute(Qt.WA_Hover)
+        self.setMouseTracking(True)
         self.setSizePolicy(
             QtWidgets.QSizePolicy.MinimumExpanding,
             QtWidgets.QSizePolicy.Fixed
         )
-        
 
+    def enterEvent(self, a0: QtCore.QEvent) -> None:
+        self._hovering = True
+        self.update()
+
+    def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        self._hovering = False
+        self.update()
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
         mouse_x = event.x()
-        distances = [abs(mouse_x - line_x) for line_x in self.line_paint_positions]
-        self._drag_id = np.argmin(distances)
+
+        self._drag_id = self._nearest_line(mouse_x)
         self._movement_line_position = mouse_x
+        self._hovering = False
 
         self.update()
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
-        if self._drag_id is not None:
-            self._movement_line_position = event.x()
+        mouse_x = event.x()
 
-            self.update()
+        if self._hovering:
+            self._hover_id = self._nearest_line(mouse_x)
+
+        if self._drag_id is not None:
+            if self._validate_new_position(self._drag_id, mouse_x):
+                self._movement_line_position = mouse_x
+
+
+        self.update()
 
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
-        if self._drag_id is not None:
-            self.set_boundary(self._drag_id, self.inverse_transform(event.x()))
+        if self._drag_id is not None and self._movement_line_position is not None:
+            self.set_boundary(self._drag_id, self.inverse_transform(self._movement_line_position))
 
         self._drag_id = None
         self._movement_line_position = None
 
+        x, y = event.x(), event.y()
+
+        self._hovering = self._mouse_inside(x, y)
+        if self._hovering:
+            self._hover_id = self._nearest_line(x)
+        else:
+            self._hover_id = None
+
         self.update()
+
+    def _mouse_inside(self, x, y):
+        """ Is the mouse inside the window"""
+        return (0 < x < self.width()) and (0 < y < self.height())
+
+    def _validate_new_position(self, line_id: int, new_position: float):
+        """ Checks whether a new position for a line is valid"""
+        l1, l2, l3 = self.line_paint_positions
+
+        if line_id == 0:
+            return 0 < new_position < l2
+        elif line_id == 1:
+            return l1 < new_position < l3
+        elif line_id == 2:
+            return l2 < new_position < self.width()
+        else:
+            raise ValueError("line_id must be 0, 1 or 2")
+
+    def _nearest_line(self, x) -> int:
+        """ Get id of the nearest line"""
+        distances = [abs(x - line_x) for line_x in self.line_paint_positions]
+        return int(np.argmin(distances))
 
     def set_scale(self, log_q_min: float, log_q_max: float):
         """ Set the range of q values this slider should represent"""
@@ -110,6 +165,10 @@ class CorfuncSlider(QtWidgets.QWidget):
 
         self.update()
 
+    @property
+    def _dragging(self):
+        """ Are we dragging? """
+        return self._drag_id is not None
 
     @property
     def data_width(self):
@@ -133,7 +192,7 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def guinier_label_position(self):
         """ Position to put the text for the guinier region"""
-        return 2
+        return 5
 
     @property
     def data_label_centre(self):
@@ -155,11 +214,9 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def line_paint_positions(self):
         """ x coordinate of the painted lines"""
-        return [self.transform(self._point_1),
+        return (self.transform(self._point_1),
                 self.transform(self._point_2),
-                self.transform(self._point_3)]
-
-
+                self.transform(self._point_3))
 
     def paintEvent(self, e):
         painter = QtGui.QPainter(self)
@@ -185,23 +242,33 @@ class CorfuncSlider(QtWidgets.QWidget):
         #
         brush.setStyle(Qt.SolidPattern)
 
+        if self._hovering or self._dragging:
+            guinier_color = self.guinier_hover_color
+            data_color = self.data_hover_color
+            porod_color = self.porod_hover_color
+        else:
+            guinier_color = self.guinier_color
+            data_color = self.data_color
+            porod_color = self.porod_color
+
+
         grad = QtGui.QLinearGradient(0, 0, widths[0], 0)
-        grad.setColorAt(0.0, self.guinier_color)
-        grad.setColorAt(1.0, self.data_color)
+        grad.setColorAt(0.0, guinier_color)
+        grad.setColorAt(1.0, data_color)
         rect = QtCore.QRect(positions[0], 0, widths[0], self.vertical_size)
         painter.fillRect(rect, grad)
 
-        brush.setColor(self.data_color)
+        brush.setColor(data_color)
         rect = QtCore.QRect(positions[1], 0, widths[1], self.vertical_size)
         painter.fillRect(rect, brush)
 
         grad = QtGui.QLinearGradient(positions[2], 0, positions[3], 0)
-        grad.setColorAt(0.0, self.data_color)
-        grad.setColorAt(1.0, self.porod_color)
+        grad.setColorAt(0.0, data_color)
+        grad.setColorAt(1.0, porod_color)
         rect = QtCore.QRect(positions[2], 0, widths[2], self.vertical_size)
         painter.fillRect(rect, grad)
 
-        brush.setColor(self.porod_color)
+        brush.setColor(porod_color)
         rect = QtCore.QRect(positions[3], 0, widths[3], self.vertical_size)
         painter.fillRect(rect, brush)
 
@@ -211,9 +278,9 @@ class CorfuncSlider(QtWidgets.QWidget):
 
         for i, x in enumerate(positions[1:-1]):
 
-            # Grey line if its being moved
-            if i == self._drag_id:
-                pen = QtGui.QPen(self.line_drag_color, 5)
+            # different color if it's the one that will be moved
+            if self._hovering and i == self._hover_id:
+                pen = QtGui.QPen(self.hover_colour, 5)
             else:
                 pen = QtGui.QPen(self.text_color, 5)
 
@@ -221,7 +288,7 @@ class CorfuncSlider(QtWidgets.QWidget):
             painter.drawLine(x, 0, x, self.vertical_size)
 
         if self._movement_line_position is not None:
-            pen = QtGui.QPen(self.text_color, 5)
+            pen = QtGui.QPen(self.line_drag_color, 5)
             painter.setPen(pen)
             painter.drawLine(self._movement_line_position, 0, self._movement_line_position, self.vertical_size)
 
@@ -263,12 +330,22 @@ class CorfuncSlider(QtWidgets.QWidget):
     def sizeHint(self):
         return QtCore.QSize(800, self.vertical_size)
 
+
+def mix_colours(a: QtGui.QColor, b: QtGui.QColor, k: float) -> QtGui.QColor:
+    return QtGui.QColor(
+        k * a.red() + (1-k) * b.red(),
+        k * a.green() + (1-k) * b.green(),
+        k * a.blue() + (1-k) * b.blue(),
+        k * a.alpha() + (1-k) * b.alpha())
+
+
 def main():
     """ Show a demo of the slider """
     app = QtWidgets.QApplication([])
     slider = CorfuncSlider(0, 0.25, 0.50, 0.75, 1)
     slider.show()
     app.exec_()
+
 
 if __name__ == "__main__":
     main()
