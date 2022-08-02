@@ -18,7 +18,7 @@ from PyQt5 import QtGui, QtWidgets
 # sas-global
 # pylint: disable=import-error, no-name-in-module
 
-from sas.qtgui.Perspectives.Corfunc.Slider import CorfuncSlider
+from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 
@@ -31,8 +31,8 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .Util import WIDGETS
-from .SaveExtrapolated import SaveExtrapolatedPopup
+from .util import WIDGETS
+from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):

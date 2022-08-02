@@ -7,7 +7,7 @@ from matplotlib.figure import Figure
 
 from PyQt5 import QtGui
 
-from .Util import WIDGETS
+from .util import WIDGETS
 
 
 class RealSpaceCanvas(FigureCanvas):
