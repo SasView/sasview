@@ -8,7 +8,6 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 MIN_PHI = 0.05
 
-
 class SectorInteractor(BaseInteractor, SlicerModel):
     """
     SectorInteractor plots a data1D average of a sector area defined in a
@@ -27,7 +26,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         ..TODO: the 2 subclasses here are the same as used by the BoxSum. These
             should probably be abstracted out.
     """
-
     def __init__(self, base, axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -36,15 +34,16 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        self.sector = None
+        self.data = self.base.data[0]
+
         # Connect the plot to event
         self.connect = self.base.connect
 
         # Compute qmax limit to reset the graph
         x = numpy.power(max(self.data.xmax,
-                            numpy.fabs(self.data.xmin)), 2)
+                         numpy.fabs(self.data.xmin)), 2)
         y = numpy.power(max(self.data.ymax,
-                            numpy.fabs(self.data.ymin)), 2)
+                         numpy.fabs(self.data.ymin)), 2)
         self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
         self.nbins = 100
@@ -189,7 +188,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if self._item.parent() is not None:
             item = self._item.parent()
         # GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-        #
+
         # self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
         # self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
@@ -293,6 +292,9 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.base.draw()
 
     def getSlice(self, nbins=None):
+        """
+        Add Description Ruben
+        """
         data = self.data
         # If we have no data, just return
         if data is None:
@@ -340,7 +342,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.is_data = True
         return new_plot
 
-
 class SideInteractor(BaseInteractor):
     """
     Draws a line though 0,0 on a data2D plot with reference to a center line.
@@ -352,12 +353,10 @@ class SideInteractor(BaseInteractor):
     :param theta2: the angle between the middle line and x- axis
 
     """
-
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
                  phi=numpy.pi / 4, theta2=numpy.pi / 3):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialize the class
-        self.sector = None
         self.markers = []
         self.axes = axes
         self.color = color
@@ -431,9 +430,9 @@ class SideInteractor(BaseInteractor):
             self.phi = phi
         if delta is None:
             delta = 0
-        if right:
+        if  right:
             self.phi = -1 * numpy.fabs(self.phi)
-            # delta=-delta
+            #delta=-delta
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
@@ -480,6 +479,7 @@ class SideInteractor(BaseInteractor):
         self.has_move = True
         if not self.left_moving:
 
+
             if  self.theta2 - self.theta <= 0 and self.theta2 > 0:
                 self.restore(ev)
                 return
@@ -508,12 +508,16 @@ class SideInteractor(BaseInteractor):
                 self.restore(ev)
                 return
             elif  self.theta > 0 and self.theta - self.theta2 <= 0:
+
                 self.restore(ev)
+
                 return
             elif self.theta - self.theta2 >= numpy.pi / 2 or  \
                 ((self.theta + numpy.pi * 2 - self.theta2) >= numpy.pi / 2 and \
                  self.theta < 0 and self.theta2 > 0):
+
                 self.restore(ev)
+
                 return
 
         self.phi = numpy.fabs(self.theta2 - self.theta)
@@ -547,7 +551,6 @@ class LineInteractor(BaseInteractor):
     :param half_length: Defaults to False. If True, the line is drawn from the
                         origin rather than across the whole graph.
     """
-
     def __init__(self, base, axes, color='black',
                  zorder=5, r=1.0, theta=numpy.pi / 4, half_length=False):
         BaseInteractor.__init__(self, base, axes, color=color)
