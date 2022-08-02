@@ -57,17 +57,20 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Necessary globals
 
-        # 2D Data globals
-        self.nbins = None
-        self.axes = None
-        self.fig = None
-        self.plot_widget = None
-        self.phi = None
-        self.deltaPhi = None
+        # 2D Data globals #####################
+        self.slices = list()        # List to store the slices from 2D data
+
+        self.phi = None             # Start Point
+        self.deltaPhi = None        # Number of slicer
+        self.qbins = None           # Number of points on plot
+
         self.active_plots = {}
+        self.plot_widget = None
         self.plot2D = Plotter2D(self, quickplot=True)
         self.plot1D = Plotter(quickplot=True)
         self.plotList = None
+
+        ########################################
 
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
@@ -804,7 +807,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
         self.calculator = Invertor()
         self.setSlicerParms()
-        self.show1DPlot()
+        x = self.muiltiSlicer()
+        for i in x:
+            self.plot1D.plot(i)
+            self.plot1D.show()
         self.plot2D.update()
 
         # Disable calculation buttons to prevent thread interference
@@ -1117,16 +1123,39 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def setSlicerParms(self):
         try:
-            self.phi = float(self.startPointInput.text())
-            self.deltaPhi = float(self.noOfSlicesInput.text())
+            self.phi = float(self.noOfSlicesInput.text())
+            self.deltaPhi = float(self.startPointInput.text())
+            self.qbins = float(self.noOfQbin.text())
         except:
             self.phi = 60
             self.deltaPhi = 15
-            self.nbins = 20
+            self.qbins = 20
         params = self.plot2D.slicer.getParams()
         params["Phi [deg]"] = self.phi
         params["Delta_Phi [deg]"] = self.deltaPhi
+        params["nbins"] = self.qbins
         self.plot2D.slicer.setParams(params)
+
+    def muiltiSlicer(self):
+        listOfSlices = list()
+        step = 2 * self.deltaPhi
+        print("step: ", step)
+        noOfSteps = int(180 / step)
+        print("no of steps: ", noOfSteps)
+        for i in range(noOfSteps):
+            self.phi = self.phi + step
+            print(self.phi)
+            params = self.plot2D.slicer.getParams()
+            params["Phi [deg]"] = self.phi
+            params["Delta_Phi [deg]"] = self.deltaPhi
+            params["nbins"] = self.qbins
+            self.plot2D.slicer.setParams(params)
+            slicePlot = self.plot2D.slicer.getSlice()
+            slicePlot.title += ' @slic={}; start={}'.format(self.phi, self.deltaPhi)
+            listOfSlices.append(slicePlot)
+            self.plot2D.update()
+
+        return listOfSlices
 
 
 def debug(checkpoint):
