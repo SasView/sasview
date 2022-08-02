@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from .corefuncutil import WIDGETS
+from .Util import WIDGETS
 
 
 class RealSpaceCanvas(FigureCanvas):
@@ -21,7 +21,7 @@ class RealSpaceCanvas(FigureCanvas):
         self.data: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
 
 
-    def draw_real_space(self):
+    def draw_data(self):
         """
         This function draws the real space data onto the plot
 

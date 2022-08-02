@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from .corefuncutil import WIDGETS
+from .Util import WIDGETS
 
 
 class QSpaceCanvas(FigureCanvas):
@@ -21,7 +21,7 @@ class QSpaceCanvas(FigureCanvas):
         self.data: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
         self.extrap = None
 
-    def draw_q_space(self):
+    def draw_data(self):
         """Draw the Q space data in the plot window
 
         This draws the q space data in self.data, as well

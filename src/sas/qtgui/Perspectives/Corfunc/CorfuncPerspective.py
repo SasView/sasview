@@ -18,7 +18,7 @@ from PyQt5 import QtGui, QtWidgets
 # sas-global
 # pylint: disable=import-error, no-name-in-module
 
-from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
+from sas.qtgui.Perspectives.Corfunc.Slider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 
@@ -31,8 +31,8 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .corefuncutil import WIDGETS
-from .saveextrapolated import SaveExtrapolatedPopup
+from .Util import WIDGETS
+from .SaveExtrapolated import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
@@ -161,10 +161,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Clear data plots
         self._q_space_plot.data = None
         self._q_space_plot.extrap = None
-        self._q_space_plot.draw_q_space()
+        self._q_space_plot.draw_data()
         self._real_space_plot.data = None
         self._real_space_plot.extrap = None
-        self._real_space_plot.draw_real_space()
+        self._real_space_plot.draw_data()
         self.slider.setEnabled(False)
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
@@ -179,7 +179,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if not self.mapper:
             return
         self.mapper.toFirst()
-        self._q_space_plot.draw_q_space()
+        self._q_space_plot.draw_data()
         #TODO: Update slider
 
     def _update_calculator(self):
@@ -251,7 +251,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.update_real_space_plot(transforms)
 
-        self._real_space_plot.draw_real_space()
+        self._real_space_plot.draw_data()
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
 
@@ -406,7 +406,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
         self._real_space_plot.data = None
-        self._real_space_plot.draw_real_space()
+        self._real_space_plot.draw_data()
+        self.slider.set_interpolation_parameters()
         self.has_data = True
 
     def setClosable(self, value=True):
