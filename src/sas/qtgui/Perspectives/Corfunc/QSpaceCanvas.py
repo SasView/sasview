@@ -5,13 +5,15 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+from PyQt5 import QtGui
+
 from .Util import WIDGETS
 
 
 class QSpaceCanvas(FigureCanvas):
     """ Canvas for displaying input data and extrapolation parameters"""
 
-    def __init__(self, model, width=5, height=4, dpi=100):
+    def __init__(self, model: QtGui.QStandardItemModel, width=5, height=4, dpi=100):
         self.model = model
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)

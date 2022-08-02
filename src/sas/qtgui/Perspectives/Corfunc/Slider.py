@@ -50,8 +50,8 @@ class CorfuncSlider(QtWidgets.QWidget):
         self.hover_colour = QtGui.QColor('white')
         self.disabled_line_color = QtGui.QColor('light grey')
         self.disabled_line_color.setAlpha(0)
-        self.disabled_text_color = QtGui.QColor('light grey')
-        self.disabled_non_data_color = QtGui.QColor('grey')
+        self.disabled_text_color = QtGui.QColor('grey')
+        self.disabled_non_data_color = QtGui.QColor('light grey')
 
         # - define hover colours by mixing with a grey
         mix_color = QtGui.QColor('light grey')
