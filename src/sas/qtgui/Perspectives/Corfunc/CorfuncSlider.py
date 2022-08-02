@@ -41,7 +41,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
 
         # Display Parameters
-        self.vertical_size = 70
+        self.vertical_size = 60
         self.guinier_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
         self.porod_color = QtGui.QColor('green')
@@ -206,7 +206,7 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def guinier_label_position(self) -> float:
         """ Position to put the text for the guinier region"""
-        return 5
+        return 15
 
     @property
     def data_label_centre(self) -> float:
