@@ -58,6 +58,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Necessary globals
 
         # 2D Data globals #####################
+        self.startPoint = None
+        self.noOfSlices = None
         self.slices = list()        # List to store the slices from 2D data
 
         self.phi = None             # Start Point
@@ -803,13 +805,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         from .Thread import CalcPr
         self.isCalculating = True
 
-        slice = self.plot2D.slicer.getSlice()
+        slicedData = self.muiltiSlicer()
+        slice = slicedData[0]
         self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
         self.calculator = Invertor()
         self.setSlicerParms()
-        x = self.muiltiSlicer()
-        for i in x:
-            self.plot1D.plot(i)
+
+        for slice in slicedData:
+            self.plot1D.plot(slice)
+            # self.removeData()
             self.plot1D.show()
         self.plot2D.update()
 
@@ -1111,25 +1115,36 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.plot2D._item = self.plot2D
         self.plot2D.setSlicer(SectorInteractor)
         self.plot_widget.show()
-        self.setSlicerParms()
+        self.updateSlicerParams()
 
     def show1DPlot(self):
         selectedSlice = self.plot2D.slicer.getSlice()
         selectedSlice.title += ' @slic={}; start={}'.format(self.phi, self.deltaPhi)
         self.plot1D.plot(selectedSlice)
-        # self.logic.data = slice.data
         self.plot1D.show()
         self.plot2D.update()
 
-    def setSlicerParms(self):
+    def updateSlicerParams(self):
         try:
-            self.phi = float(self.noOfSlicesInput.text())
-            self.deltaPhi = float(self.startPointInput.text())
+            self.startPoint = float(self.startPointInput.text())
+        except ValueError:
+            self.startPoint = 60
+
+        try:
+            self.noOfSlices = int(self.noOfSlicesInput.text())
+        except ValueError:
+            self.noOfSlices = 6
+
+        try:
             self.qbins = float(self.noOfQbin.text())
-        except:
-            self.phi = 60
-            self.deltaPhi = 15
+        except ValueError:
             self.qbins = 20
+
+        self.phi = self.startPoint
+        self.deltaPhi = (180 / self.noOfSlices)
+        self.setSlicerParms()
+
+    def setSlicerParms(self):
         params = self.plot2D.slicer.getParams()
         params["Phi [deg]"] = self.phi
         params["Delta_Phi [deg]"] = self.deltaPhi
@@ -1138,22 +1153,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def muiltiSlicer(self):
         listOfSlices = list()
-        step = 2 * self.deltaPhi
-        print("step: ", step)
-        noOfSteps = int(180 / step)
-        print("no of steps: ", noOfSteps)
-        for i in range(noOfSteps):
-            self.phi = self.phi + step
-            print(self.phi)
-            params = self.plot2D.slicer.getParams()
+        self.plot1D.clean()
+        params = self.plot2D.slicer.getParams()
+        self.setSlicerParms()
+
+        for i in range(self.noOfSlices):
             params["Phi [deg]"] = self.phi
-            params["Delta_Phi [deg]"] = self.deltaPhi
-            params["nbins"] = self.qbins
             self.plot2D.slicer.setParams(params)
             slicePlot = self.plot2D.slicer.getSlice()
-            slicePlot.title += ' @slic={}; start={}'.format(self.phi, self.deltaPhi)
+            slicePlot.title += ' @Phi={}'.format(self.phi)
             listOfSlices.append(slicePlot)
-            self.plot2D.update()
+            self.phi += (self.deltaPhi * 2)
 
         return listOfSlices
 
