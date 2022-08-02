@@ -19,7 +19,8 @@ from PyQt5 import QtGui, QtWidgets
 # pylint: disable=import-error, no-name-in-module
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
-from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
+from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
@@ -73,11 +74,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.slider = CorfuncSlider()
         self.plotLayout.insertWidget(2, self.slider)
 
-        self._q_space_plot = CorfuncCanvas(self.model)
+        self._q_space_plot = QSpaceCanvas(self.model)
         self.plotLayout.insertWidget(1, self._q_space_plot)
         self.plotLayout.insertWidget(2, NavigationToolbar2QT(self._q_space_plot, self))
 
-        self._real_space_plot = CorfuncCanvas(self.model)
+        self._real_space_plot = RealSpaceCanvas(self.model)
         self.plotLayout.insertWidget(3, self._real_space_plot)
         self.plotLayout.insertWidget(4, NavigationToolbar2QT(self._real_space_plot, self))
 
