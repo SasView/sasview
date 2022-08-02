@@ -1,5 +1,7 @@
-from typing import NamedTuple
+from dataclasses import dataclass
 
-class ReportData(NamedTuple):
+@dataclass
+class ReportData:
     html: str = "<html><body>No Data</body></html>"
     text: str = "No data"
+
