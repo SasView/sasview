@@ -1,43 +1,50 @@
 from typing import Optional, Tuple
 
+import math
 import numpy as np
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFontMetrics
 
+from sas.qtgui.Perspectives.Corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 class CorfuncSlider(QtWidgets.QWidget):
+
+    valueEdited = pyqtSignal(ExtrapolationParameters, name='valueEdited')
+    valueEditing = pyqtSignal(ExtrapolationInteractionState, name='valueEditing')
+
     def __init__(self,
-                 log_q_min: float = 0.00,
-                 log_q_point_1: float = 0.25,
-                 log_q_point_2: float = 0.50,
-                 log_q_point_3: float = 0.75,
-                 log_q_max: float = 1.00,
+                 q_min: float = 1,
+                 q_point_1: float = 2,
+                 q_point_2: float = 4,
+                 q_point_3: float = 8,
+                 q_max: float = 16,
                  enabled: bool = False,
                  *args, **kwargs):
 
+
         super().__init__(*args, **kwargs)
 
-        if log_q_min >= log_q_point_1:
+        if q_min >= q_point_1:
             raise ValueError("min_q should be smaller than q_point_1")
 
-        if log_q_point_1 > log_q_point_2:
+        if q_point_1 > q_point_2:
             raise ValueError("q_point_1 should be smaller or equal to q_point_2")
 
-        if log_q_point_2 > log_q_point_3:
+        if q_point_2 > q_point_3:
             raise ValueError("q_point_2 should be smaller or equal to q_point_3")
 
-        if log_q_point_3 > log_q_max:
+        if q_point_3 > q_max:
             raise ValueError("q_point_3 should be smaller or equal to max_q")
 
         self.setEnabled(enabled)
 
-        self._min = log_q_min
-        self._point_1 = log_q_point_1
-        self._point_2 = log_q_point_2
-        self._point_3 = log_q_point_3
-        self._max = log_q_max
+        self._min = q_min
+        self._point_1 = q_point_1
+        self._point_2 = q_point_2
+        self._point_3 = q_point_3
+        self._max = q_max
 
 
         # Display Parameters
@@ -46,7 +53,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         self.data_color = QtGui.QColor('white')
         self.porod_color = QtGui.QColor('green')
         self.text_color = QtGui.QColor('black')
-        self.line_drag_color = QtGui.QColor('grey')
+        self.line_drag_color = mix_colours(QtGui.QColor('white'), QtGui.QColor('black'), 0.4)
         self.hover_colour = QtGui.QColor('white')
         self.disabled_line_color = QtGui.QColor('light grey')
         self.disabled_line_color.setAlpha(0)
@@ -54,7 +61,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         self.disabled_non_data_color = QtGui.QColor('light grey')
 
         # - define hover colours by mixing with a grey
-        mix_color = QtGui.QColor('light grey')
+        mix_color = QtGui.QColor('grey')
         mix_fraction = 0.7
         self.guinier_hover_color = mix_colours(self.guinier_color, mix_color, mix_fraction)
         self.data_hover_color = mix_colours(self.data_color, mix_color, mix_fraction)
@@ -108,6 +115,8 @@ class CorfuncSlider(QtWidgets.QWidget):
                 if self._validate_new_position(self._drag_id, mouse_x):
                     self._movement_line_position = mouse_x
 
+                self.valueEditing.emit(self.interaction_state)
+
 
         self.update()
 
@@ -127,6 +136,7 @@ class CorfuncSlider(QtWidgets.QWidget):
             else:
                 self._hover_id = None
 
+            self.valueEdited.emit(self.extrapolation_parameters)
         self.update()
 
     def _mouse_inside(self, x, y):
@@ -151,13 +161,6 @@ class CorfuncSlider(QtWidgets.QWidget):
         distances = [abs(x - line_x) for line_x in self.line_paint_positions]
         return int(np.argmin(distances))
 
-    def set_scale(self, log_q_min: float, log_q_max: float):
-        """ Set the range of q values this slider should represent"""
-        self._min = log_q_min
-        self._max = log_q_max
-
-        self.update()
-
     def set_boundaries(self, q_point_1: float, q_point_2: float, q_point_3: float):
         """ Set the boundaries between the sections"""
         self._point_1 = q_point_1
@@ -180,6 +183,25 @@ class CorfuncSlider(QtWidgets.QWidget):
         self.update()
 
     @property
+    def extrapolation_parameters(self):
+        return ExtrapolationParameters(self._min, self._point_1, self._point_2, self._point_3, self._max)
+
+    @extrapolation_parameters.setter
+    def extrapolation_parameters(self, params: ExtrapolationParameters):
+        self._min, self._point_1, self._point_2, self._point_3, self._max = params
+        print(params)
+        self.update()
+
+    @property
+    def interaction_state(self) -> ExtrapolationInteractionState:
+        """ The current state of the slider, including temporary data about how it is being moved"""
+        return ExtrapolationInteractionState(
+            self.extrapolation_parameters,
+            self._drag_id,
+            None if self._movement_line_position is None else self.inverse_transform(self._movement_line_position)
+        )
+
+    @property
     def _dragging(self) -> bool:
         """ Are we dragging? """
         return self._drag_id is not None
@@ -187,21 +209,27 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def data_width(self) -> float:
         """ Length of range spanned by the data"""
-        return self._max - self._min
+        return math.log(self._max/self._min)
 
     @property
     def scale(self) -> float:
         """ Scale factor from input to draw scale e.g. A^-1 -> px"""
         return self.width() / self.data_width
 
-    def transform(self, value: float) -> float:
+    def transform(self, q_value: float) -> float:
         """Convert a value from input to draw coordinates"""
-        return self.scale * (value - self._min)
 
+        if q_value == 0:
+            return 0
 
-    def inverse_transform(self, value: float) -> float:
+        if self._min == 0:
+            return self.width()
+
+        return self.scale * (math.log(q_value) - math.log(self._min))
+
+    def inverse_transform(self, px_value: float) -> float:
         """Convert a value from draw coordinates to input value"""
-        return (value / self.scale) + self._min
+        return self._min*math.exp((px_value/self.scale))
 
     @property
     def guinier_label_position(self) -> float:
@@ -211,19 +239,18 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def data_label_centre(self) -> float:
         """ Centre of the interpolation region"""
-        return self.transform(0.5 * (self._point_1 + self._point_2))
+        return 0.5 * (self.transform(self._point_1) + self.transform(self._point_2))
 
     @property
     def transition_label_centre(self) -> float:
         """ Centre of the data-porod transition"""
-
-        return self.transform(0.5 * (self._point_2 + self._point_3))
+        return 0.5 * (self.transform(self._point_2) + self.transform(self._point_3))
 
     @property
     def porod_label_centre(self) -> float:
         """ Centre of the Porod region"""
 
-        return self.transform(0.5 * (self._point_3 + self._max))
+        return 0.5 * (self.transform(self._point_3) + self.transform(self._max))
 
     @property
     def line_paint_positions(self) -> Tuple[float, float, float]:
@@ -365,7 +392,7 @@ def mix_colours(a: QtGui.QColor, b: QtGui.QColor, k: float) -> QtGui.QColor:
 def main():
     """ Show a demo of the slider """
     app = QtWidgets.QApplication([])
-    slider = CorfuncSlider(0, 0.25, 0.50, 0.75, 1, enabled=True)
+    slider = CorfuncSlider(enabled=True)
     slider.show()
     app.exec_()
 

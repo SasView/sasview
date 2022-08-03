@@ -1,20 +1,21 @@
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Optional, Tuple, TYPE_CHECKING
 
 import numpy as np
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from PyQt5 import QtGui
-
-from .util import WIDGETS
+if TYPE_CHECKING:
+    from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 
 
 class RealSpaceCanvas(FigureCanvas):
     """ Canvas for displaying real space representation"""
 
-    def __init__(self, model: QtGui.QStandardItemModel, width=5, height=4, dpi=100):
-        self.model = model
+    def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
+        self.parent = parent
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
 

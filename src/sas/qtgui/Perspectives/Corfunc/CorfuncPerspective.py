@@ -1,14 +1,12 @@
-"""
-This module provides the intelligence behind the gui interface for Corfunc.
-"""
-# pylint: disable=E1101
+
+import numpy as np
 
 # global
 from PyQt5.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 from numpy.linalg.linalg import LinAlgError
-import numpy as np
+import math
 
 from typing import Optional, List
 
@@ -21,6 +19,7 @@ from PyQt5 import QtGui, QtWidgets
 from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
@@ -31,9 +30,10 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .util import WIDGETS
+from .util import WIDGETS, safe_float
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
+
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
@@ -74,11 +74,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.slider = CorfuncSlider()
         self.plotLayout.insertWidget(2, self.slider)
 
-        self._q_space_plot = QSpaceCanvas(self.model)
+        self._q_space_plot = QSpaceCanvas(self)
         self.plotLayout.insertWidget(1, self._q_space_plot)
         self.plotLayout.insertWidget(2, NavigationToolbar2QT(self._q_space_plot, self))
 
-        self._real_space_plot = RealSpaceCanvas(self.model)
+        self._real_space_plot = RealSpaceCanvas(self)
         self.plotLayout.insertWidget(3, self._real_space_plot)
         self.plotLayout.insertWidget(4, NavigationToolbar2QT(self._real_space_plot, self))
 
@@ -105,20 +105,32 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """Connect the buttons to their appropriate slots."""
         self.cmdExtrapolate.clicked.connect(self.extrapolate)
         self.cmdExtrapolate.setEnabled(False)
+
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+
         self.cmdExtract.clicked.connect(self.extract)
         self.cmdExtract.setEnabled(False)
+
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
+
         self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
         self.cmdSaveExtrapolation.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
+
         self.cmdHelp.clicked.connect(self.showHelp)
 
         self.model.itemChanged.connect(self.model_changed)
+
+        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
+        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
+        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+
+        self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
+        self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
         self.trigger.connect(self.finish_transform)
 
@@ -180,13 +192,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             return
         self.mapper.toFirst()
         self._q_space_plot.draw_data()
-        #TODO: Update slider
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
 
     def _update_calculator(self):
-        self._calculator.lowerq = float(self.model.item(WIDGETS.W_QMIN).text())
-        qmax1 = float(self.model.item(WIDGETS.W_QMAX).text())
-        qmax2 = float(self.model.item(WIDGETS.W_QCUTOFF).text())
-        self._calculator.upperq = (qmax1, qmax2)
+        self._calculator.extrapolation_parameters = self.extrapolation_parmameters
+
         self._calculator.background = \
             float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
@@ -347,19 +357,29 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         treeLocation = "/user/qtgui/Perspectives/Corfunc/corfunc_help.html"
         self.parent.showHelp(treeLocation)
 
-    @staticmethod
-    def allowBatch():
+    def allowBatch(self):
         """
         We cannot perform corfunc analysis in batch at this time.
         """
         return False
 
-    @staticmethod
-    def allowSwap():
+    def allowSwap(self):
         """
         We cannot swap data with corfunc analysis at this time.
         """
         return False
+
+    @property
+    def extrapolation_parmameters(self) -> Optional[ExtrapolationParameters]:
+        if self.data is not None:
+            return ExtrapolationParameters(
+                min(self.data.x),
+                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
+                max(self.data.x))
+        else:
+            return None
 
     def setData(self, data_item: List[QStandardItem], is_batch=False):
         """
@@ -407,8 +427,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
         self._real_space_plot.data = None
         self._real_space_plot.draw_data()
-        self.slider.set_interpolation_parameters()
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self.slider.setEnabled(True)
         self.has_data = True
+
 
     def setClosable(self, value=True):
         """
@@ -433,6 +455,28 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             event.ignore()
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
+
+    def on_extrapolation_text_changed_1(self, text):
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters._replace(point_1=safe_float(text))
+
+    def on_extrapolation_text_changed_2(self, text):
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters._replace(point_2=safe_float(text))
+
+    def on_extrapolation_text_changed_3(self, text):
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters._replace(point_3=safe_float(text))
+
+
+    def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
+        format_string = "%.8g"
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem(format_string%state.point_1))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem(format_string%state.point_2))
+        self.model.setItem(WIDGETS.W_QCUTOFF,
+                           QtGui.QStandardItem(format_string%state.point_3))
+
+    def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
+        pass
 
     def on_save(self):
         """
