@@ -16,5 +16,5 @@ class ExtrapolationInteractionState(NamedTuple):
     Contains extrapolation parameters along with the representation of the hover state.
     """
     extrapolation_parameters: ExtrapolationParameters
-    working_line_id: Optional[int]
-    dragging_line_position: Optional[float]
+    working_line_id: Optional[int] = None
+    dragging_line_position: Optional[float] = None

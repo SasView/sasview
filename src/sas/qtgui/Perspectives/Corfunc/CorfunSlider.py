@@ -15,36 +15,23 @@ class CorfuncSlider(QtWidgets.QWidget):
     valueEditing = pyqtSignal(ExtrapolationInteractionState, name='valueEditing')
 
     def __init__(self,
-                 q_min: float = 1,
-                 q_point_1: float = 2,
-                 q_point_2: float = 4,
-                 q_point_3: float = 8,
-                 q_max: float = 16,
+                 parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16),
                  enabled: bool = False,
                  *args, **kwargs):
 
-
         super().__init__(*args, **kwargs)
-
-        if q_min >= q_point_1:
-            raise ValueError("min_q should be smaller than q_point_1")
-
-        if q_point_1 > q_point_2:
-            raise ValueError("q_point_1 should be smaller or equal to q_point_2")
-
-        if q_point_2 > q_point_3:
-            raise ValueError("q_point_2 should be smaller or equal to q_point_3")
-
-        if q_point_3 > q_max:
-            raise ValueError("q_point_3 should be smaller or equal to max_q")
 
         self.setEnabled(enabled)
 
-        self._min = q_min
-        self._point_1 = q_point_1
-        self._point_2 = q_point_2
-        self._point_3 = q_point_3
-        self._max = q_max
+        parameter_problems = self.find_parameter_problems(parameters)
+        if parameter_problems is not None:
+            raise ValueError(parameter_problems)
+
+        self._min = parameters.data_q_min
+        self._point_1 = parameters.point_1
+        self._point_2 = parameters.point_2
+        self._point_3 = parameters.point_3
+        self._max = parameters.data_q_max
 
 
         # Display Parameters
@@ -81,6 +68,24 @@ class CorfuncSlider(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.MinimumExpanding,
             QtWidgets.QSizePolicy.Fixed
         )
+
+    @staticmethod
+    def find_parameter_problems(params: ExtrapolationParameters) -> Optional[str]:
+
+        if params.data_q_min >= params.point_1:
+            return "min_q should be smaller than q_point_1"
+
+        if params.point_1 > params.point_2:
+            return "q_point_1 should be smaller or equal to q_point_2"
+
+        if params.point_2 > params.point_3:
+            return "q_point_2 should be smaller or equal to q_point_3"
+
+        if params.point_3 > params.data_q_max:
+            return "q_point_3 should be smaller or equal to max_q"
+
+        return None
+
 
     def enterEvent(self, a0: QtCore.QEvent) -> None:
         if self.isEnabled():
@@ -154,7 +159,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         elif line_id == 2:
             return l2 < new_position < self.width()
         else:
-            raise ValueError("line_id must be 0, 1 or 2")
+            raise IndexError("line_id must be 0, 1 or 2")
 
     def _nearest_line(self, x: float) -> int:
         """ Get id of the nearest line"""
@@ -188,8 +193,9 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @extrapolation_parameters.setter
     def extrapolation_parameters(self, params: ExtrapolationParameters):
-        self._min, self._point_1, self._point_2, self._point_3, self._max = params
-        print(params)
+        if self.find_parameter_problems(params) is None:
+            self._min, self._point_1, self._point_2, self._point_3, self._max = params
+
         self.update()
 
     @property

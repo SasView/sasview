@@ -190,8 +190,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if not self.mapper:
             return
         self.mapper.toFirst()
-        self._q_space_plot.draw_data()
         self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self._q_space_plot.draw_data()
 
     def _update_calculator(self):
         self._calculator.extrapolation_parameters = self.extrapolation_parmameters
@@ -456,13 +456,19 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def on_extrapolation_text_changed_1(self, text):
-        self.slider.extrapolation_parameters = self.extrapolation_parmameters._replace(point_1=safe_float(text))
+        params = self.extrapolation_parmameters._replace(point_1=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
 
     def on_extrapolation_text_changed_2(self, text):
-        self.slider.extrapolation_parameters = self.extrapolation_parmameters._replace(point_2=safe_float(text))
+        params = self.extrapolation_parmameters._replace(point_2=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
 
     def on_extrapolation_text_changed_3(self, text):
-        self.slider.extrapolation_parameters = self.extrapolation_parmameters._replace(point_3=safe_float(text))
+        params = self.extrapolation_parmameters._replace(point_3=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
 
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
@@ -475,7 +481,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                            QtGui.QStandardItem(format_string%state.point_3))
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
-        pass
+        self._q_space_plot.update_lines(state)
 
     def on_save(self):
         """
