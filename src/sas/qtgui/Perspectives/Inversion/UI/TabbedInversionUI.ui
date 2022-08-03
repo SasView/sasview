@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
-    <height>538</height>
+    <width>536</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -60,6 +60,13 @@
        </property>
        <property name="text">
         <string>Calculate All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="sliceButton">
+       <property name="text">
+        <string>Slice</string>
        </property>
       </widget>
      </item>
@@ -123,7 +130,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -769,48 +776,117 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
           <item row="3" column="0">
-           <widget class="QGroupBox" name="twoDParamGroupBox">
-            <property name="enabled">
-             <bool>false</bool>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-            <property name="title">
-             <string>2D Parameters</string>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout">
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab2D">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <attribute name="title">
+       <string>2D Data</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_10">
+       <item row="8" column="0">
+        <widget class="QGroupBox" name="Output2DBox">
+         <property name="title">
+          <string>2D Outputs</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QWidget" name="widget" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QLabel" name="label_31">
+              <widget class="QLabel" name="label_28">
                <property name="text">
-                <string>Start point</string>
+                <string>Delta Phi</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="startPointInput"/>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_30">
-               <property name="text">
-                <string>Number of slices</string>
+              <widget class="QLineEdit" name="deltaPhiValue">
+               <property name="readOnly">
+                <bool>true</bool>
                </property>
               </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="noOfSlicesInput"/>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_23">
-               <property name="text">
-                <string>Number of Qbin</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="noOfQbin"/>
              </item>
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QTableWidget" name="sliceList"/>
+          </item>
          </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="fileName2d">
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QGroupBox" name="twoDParamGroupBox">
+         <property name="title">
+          <string>2D Parameters</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="6" column="2">
+           <widget class="QLineEdit" name="noOfQbinInput"/>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLineEdit" name="noOfSlicesInput"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_31">
+            <property name="text">
+             <string>Start point</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_23">
+            <property name="text">
+             <string>Number of Qbin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_30">
+            <property name="text">
+             <string>Number of slices</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="startPointInput"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_32">
+         <property name="text">
+          <string>2D Data File Name: </string>
+         </property>
         </widget>
        </item>
       </layout>
