@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import qtpy
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
@@ -34,6 +35,10 @@ NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0001
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
+
+START_POINT = 60
+NO_OF_SLICES = 6
+NO_OF_QBIN = 20
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 logger = logging.getLogger(__name__)
@@ -58,13 +63,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Necessary globals
 
         # 2D Data globals #####################
+        self.isSlicing = None
         self.startPoint = None
         self.noOfSlices = None
-        self.slices = list()        # List to store the slices from 2D data
+        self.slices = list()  # List to store the slices from 2D data
 
-        self.phi = None             # Start Point
-        self.deltaPhi = None        # Number of slicer
-        self.qbins = None           # Number of points on plot
+        self.phi = None  # Start Point
+        self.deltaPhi = None  # Number of slicer
+        self.qbins = None  # Number of points on plot
 
         self.active_plots = {}
         self.plot_widget = None
@@ -232,6 +238,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopButton.clicked.connect(self.stopCalculation)
         self.removeButton.clicked.connect(self.removeData)
         self.showResultsButton.clicked.connect(self.showBatchOutput)
+        self.sliceButton.clicked.connect(self.slice)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
         self.manualBgd.toggled.connect(self.toggleBgd)
@@ -370,10 +377,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateAllButton.setEnabled(not self.isCalculating)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
-                                            and not self.isCalculating)
+                                            and not self.isCalculating
+                                            and not isinstance(self.logic.data, Data2D))
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
                                           and not self.isCalculating)
+        self.sliceButton.setEnabled(not self.isSlicing)
+        self.sliceButton.setVisible(self.logic.data_is_loaded and isinstance(self.logic.data, Data2D))
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
@@ -805,18 +815,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         from .Thread import CalcPr
         self.isCalculating = True
 
-        slicedData = self.muiltiSlicer()
-        slice = slicedData[0]
-        self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
-        self.calculator = Invertor()
-        self.setSlicerParms()
-
-        for slice in slicedData:
-            self.plot1D.plot(slice)
-            # self.removeData()
-            self.plot1D.show()
-        self.plot2D.update()
-
         # Disable calculation buttons to prevent thread interference
         self.enableButtons()
         self.updateCalculator()
@@ -1091,6 +1089,47 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     #####################
     # comment the following code
 
+    def slice(self):
+        self.sliceButton.setText("Slicing...")
+        self.isSlicing = True
+        self.enableButtons()
+
+        slicedData = self.muiltiSlicer()
+
+        # slice = slicedData[0]
+        # self._data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
+        # self.calculator = Invertor()
+        # self.updateSlicerParams()
+
+        self.sliceList.setHorizontalHeaderLabels(["title", "phi"])
+        self.sliceList.setColumnCount(2)
+        self.sliceList.setRowCount(self.noOfSlices)
+
+        for row, slice in enumerate(slicedData):
+            self.plot1D.plot(slice)
+            # self.removeData()
+            self.plot1D.show()
+            plotButton = QtWidgets.QPushButton(str(slice.phi))
+            self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))
+            self.sliceList.setCellWidget(row, 1, plotButton)
+
+            # c = InversionWidget(data=None, parent=self.parent)
+            # c.logic.data = GuiUtils.dataFromItem(self.data)
+            #
+            # Fix the Data to Batch part of this code
+            #
+            # self.populateDataComboBox(name=slice.title, data_ref=c)
+
+        self.calculateAllButton.setVisible(True)
+        self.dataList.removeItem(0)
+
+        self.plot2D.update()
+        self.sliceList.resizeColumnsToContents()
+        self.sliceList.resizeRowsToContents()
+        self.sliceButton.setText("Slice")
+        self.sliceList.show()
+        self.enableButtons()
+
     def set_tab_name(self, name=None):
         # set name to "New Pr Tab" if no name is set to the data set
         if name is not None:
@@ -1116,6 +1155,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.plot2D.setSlicer(SectorInteractor)
         self.plot_widget.show()
         self.updateSlicerParams()
+        self.enableButtons()
 
     def show1DPlot(self):
         selectedSlice = self.plot2D.slicer.getSlice()
@@ -1128,20 +1168,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         try:
             self.startPoint = float(self.startPointInput.text())
         except ValueError:
-            self.startPoint = 60
+            self.startPoint = START_POINT
+            self.startPointInput.setText(str(START_POINT))
 
         try:
             self.noOfSlices = int(self.noOfSlicesInput.text())
         except ValueError:
-            self.noOfSlices = 6
+            self.noOfSlices = NO_OF_SLICES
+            self.noOfSlicesInput.setText(str(NO_OF_SLICES))
 
         try:
-            self.qbins = float(self.noOfQbin.text())
+            self.qbins = float(self.noOfQbinInput.text())
         except ValueError:
-            self.qbins = 20
+            self.qbins = NO_OF_QBIN
+            self.noOfQbinInput.setText(str(NO_OF_QBIN))
 
         self.phi = self.startPoint
         self.deltaPhi = (180 / self.noOfSlices)
+        print(self.deltaPhi)
         self.setSlicerParms()
 
     def setSlicerParms(self):
@@ -1149,21 +1193,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         params["Phi [deg]"] = self.phi
         params["Delta_Phi [deg]"] = self.deltaPhi
         params["nbins"] = self.qbins
+
+        self.deltaPhiValue.setText(str(self.deltaPhi))
         self.plot2D.slicer.setParams(params)
 
     def muiltiSlicer(self):
         listOfSlices = list()
         self.plot1D.clean()
         params = self.plot2D.slicer.getParams()
-        self.setSlicerParms()
+        self.updateSlicerParams()
 
         for i in range(self.noOfSlices):
             params["Phi [deg]"] = self.phi
             self.plot2D.slicer.setParams(params)
             slicePlot = self.plot2D.slicer.getSlice()
             slicePlot.title += ' @Phi={}'.format(self.phi)
+            slicePlot.phi = self.phi
             listOfSlices.append(slicePlot)
-            self.phi += (self.deltaPhi * 2)
+            self.phi += (self.deltaPhi)
 
         return listOfSlices
 
