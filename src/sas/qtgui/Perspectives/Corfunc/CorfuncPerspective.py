@@ -127,11 +127,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
         self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
         self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.set_text_enable(False)
 
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
         self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
         self.trigger.connect(self.finish_transform)
+
+    def set_text_enable(self, state: bool):
+        self.txtLowerQMax.setEnabled(state)
+        self.txtUpperQMin.setEnabled(state)
+        self.txtUpperQMax.setEnabled(state)
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -184,6 +190,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
+        self.set_text_enable(False)
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
@@ -428,6 +435,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._real_space_plot.draw_data()
         self.slider.extrapolation_parameters = self.extrapolation_parmameters
         self.slider.setEnabled(True)
+        self.set_text_enable(True)
         self.has_data = True
 
 
@@ -502,7 +510,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         box_1_style = ""
         box_2_style = ""
         box_3_style = ""
-        red = "QLineEdit { background-color: rgb(255,0,0); text-color: rgb(255,255,255) }"
+        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
 
         if params.point_1 <= params.data_q_min:
             box_1_style = red
