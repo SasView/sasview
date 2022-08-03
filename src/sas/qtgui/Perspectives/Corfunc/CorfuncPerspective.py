@@ -515,6 +515,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             box_2_style = red
             box_3_style = red
 
+        # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
+        if params.point_3 <= params.point_1:
+            box_1_style = red
+            box_3_style = red
+
         self.txtLowerQMax.setStyleSheet(box_1_style)
         self.txtUpperQMin.setStyleSheet(box_2_style)
         self.txtUpperQMax.setStyleSheet(box_3_style)
