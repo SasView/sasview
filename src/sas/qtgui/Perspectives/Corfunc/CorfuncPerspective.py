@@ -6,7 +6,6 @@ from PyQt5.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 from numpy.linalg.linalg import LinAlgError
-import math
 
 from typing import Optional, List
 
@@ -19,7 +18,7 @@ from PyQt5 import QtGui, QtWidgets
 from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
-from sas.qtgui.Perspectives.Corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData

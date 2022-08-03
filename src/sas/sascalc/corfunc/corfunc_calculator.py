@@ -1,15 +1,13 @@
 """
 This module implements corfunc
 """
-import warnings
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
-from scipy.fftpack import dct
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
 
-from sas.qtgui.Perspectives.Corfunc.extrapolation_data import ExtrapolationParameters
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
 
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
