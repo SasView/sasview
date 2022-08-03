@@ -456,22 +456,71 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def on_extrapolation_text_changed_1(self, text):
+        """ Text in LowerQMax changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
         params = self.extrapolation_parmameters._replace(point_1=safe_float(text))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
 
     def on_extrapolation_text_changed_2(self, text):
+        """ Text in UpperQMin changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
         params = self.extrapolation_parmameters._replace(point_2=safe_float(text))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
 
     def on_extrapolation_text_changed_3(self, text):
+        """ Text in UpperQMax changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
         params = self.extrapolation_parmameters._replace(point_3=safe_float(text))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
 
+    def notify_extrapolation_text_box_validity(self, params):
+        """ Set the colour of the text boxes to red if they have bad parameter definitions"""
+        box_1_style = ""
+        box_2_style = ""
+        box_3_style = ""
+        red = "QLineEdit { background-color: rgb(255,0,0); text-color: rgb(255,255,255) }"
+
+        if params.point_1 <= params.data_q_min:
+            box_1_style = red
+
+        if params.point_2 <= params.point_1:
+            box_1_style = red
+            box_2_style = red
+
+        if params.point_3 <= params.point_2:
+            box_2_style = red
+            box_3_style = red
+
+        self.txtLowerQMax.setStyleSheet(box_1_style)
+        self.txtUpperQMin.setStyleSheet(box_2_style)
+        self.txtUpperQMax.setStyleSheet(box_3_style)
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
+        """ Slider state changed"""
         format_string = "%.8g"
         self.model.setItem(WIDGETS.W_QMIN,
                            QtGui.QStandardItem(format_string%state.point_1))
@@ -481,6 +530,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                            QtGui.QStandardItem(format_string%state.point_3))
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
+        """ Slider is being moved about"""
         self._q_space_plot.update_lines(state)
 
     def on_save(self):
