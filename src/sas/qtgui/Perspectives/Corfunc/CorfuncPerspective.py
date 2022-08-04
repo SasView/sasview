@@ -672,7 +672,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             'avg_soft_block_thick': self.txtAvgSoftBlock.text(),
             'local_crystalinity': self.txtLocalCrystal.text(),
             'polydispersity': self.txtPolyRyan.text(),
-            'polydispersity_stribeck': self.txtPolyStribeck(),
+            'polydispersity_stribeck': self.txtPolyStribeck.text(),
             'long_period': self.txtLongPeriod.text(),
             'lower_q_max': self.txtLowerQMax.text(),
             'upper_q_min': self.txtUpperQMin.text(),
