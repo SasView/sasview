@@ -37,7 +37,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
 
         # Display Parameters
-        self.vertical_size = 30
+        self.vertical_size = 20
         self.guinier_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
         self.porod_color = QtGui.QColor('green')

@@ -75,18 +75,18 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
 
         self.slider = CorfuncSlider()
-        self.plotLayout.insertWidget(2, self.slider)
+        self.sliderLayout.insertWidget(1, self.slider)
 
         self._q_space_plot = QSpaceCanvas(self)
-        self.plotLayout.insertWidget(1, self._q_space_plot)
-        self.plotLayout.insertWidget(2, NavigationToolbar2QT(self._q_space_plot, self))
+        self.qSpaceLayout.insertWidget(0, self._q_space_plot)
+        self.qSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._q_space_plot, self))
 
         self._real_space_plot = RealSpaceCanvas(self)
-        self.plotLayout.insertWidget(3, self._real_space_plot)
-        self.plotLayout.insertWidget(4, NavigationToolbar2QT(self._real_space_plot, self))
+        self.realSpaceLayout.insertWidget(0, self._real_space_plot)
+        self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
 
-        self.gridLayout_4.setColumnStretch(0, 1)
-        self.gridLayout_4.setColumnStretch(1, 2)
+        # self.gridLayout_4.setColumnStretch(0, 1)
+        # self.gridLayout_4.setColumnStretch(1, 2)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -251,6 +251,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdTransform.setEnabled(True)
         self.cmdSaveExtrapolation.setEnabled(True)
 
+        self.tabWidget.setCurrentIndex(0)
+
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
@@ -274,6 +276,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                                            completefn, updatefn)
 
 
+
+
     def finish_transform(self, transforms):
         self._real_space_plot.data = transforms
 
@@ -282,6 +286,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._real_space_plot.draw_data()
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
+        self.tabWidget.setCurrentIndex(1)
 
     def extract(self):
         transforms = self._real_space_plot.data
