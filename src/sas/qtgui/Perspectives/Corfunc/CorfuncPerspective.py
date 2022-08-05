@@ -305,7 +305,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(str(0)))
-        self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(str(0)))
 
     def removeData(self, data_list=None):
@@ -412,16 +413,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         params = self._calculator.extract_parameters(transforms[0])
 
-        self.model.itemChanged.disconnect(self.model_changed)
-        self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
-        self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
-        self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
-        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params['soft'])))
-        self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
-        self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-        self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        self.model.itemChanged.connect(self.model_changed)
-        self.model_changed(None)
+        if params is not None:
+
+            self.model.itemChanged.disconnect(self.model_changed)
+
+            self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params.core_thickness)))
+            self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params.interface_thickness)))
+            self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params.hard_block_thickness)))
+            self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params.soft_block_thickness)))
+            self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params.local_crystallinity)))
+            self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_ryan)))
+            self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_stribeck)))
+            self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params.long_period)))
+
+            self.model.itemChanged.connect(self.model_changed)
+            self.model_changed(None)
 
 
     def update_real_space_plot(self, datas):
@@ -468,7 +474,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper.addMapping(self.txtAvgIntThick, WIDGETS.W_INTTHICK)
         self.mapper.addMapping(self.txtAvgHardBlock, WIDGETS.W_HARDBLOCK)
         self.mapper.addMapping(self.txtAvgSoftBlock, WIDGETS.W_SOFTBLOCK)
-        self.mapper.addMapping(self.txtPolydisp, WIDGETS.W_POLY)
+        self.mapper.addMapping(self.txtPolyRyan, WIDGETS.W_POLY_RYAN)
+        self.mapper.addMapping(self.txtPolyStribeck, WIDGETS.W_POLY_STRIBECK)
         self.mapper.addMapping(self.txtLongPeriod, WIDGETS.W_PERIOD)
         self.mapper.addMapping(self.txtLocalCrystal, WIDGETS.W_CRYSTAL)
 
@@ -547,7 +554,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(""))
-        self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
         self.model.itemChanged.connect(self.model_changed)
 
@@ -663,7 +671,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             'avg_hard_block_thick': self.txtAvgHardBlock.text(),
             'avg_soft_block_thick': self.txtAvgSoftBlock.text(),
             'local_crystalinity': self.txtLocalCrystal.text(),
-            'polydispersity': self.txtPolydisp.text(),
+            'polydispersity': self.txtPolyRyan.text(),
+            'polydispersity_stribeck': self.txtPolyStribeck.text(),
             'long_period': self.txtLongPeriod.text(),
             'lower_q_max': self.txtLowerQMax.text(),
             'upper_q_min': self.txtUpperQMin.text(),
@@ -702,7 +711,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(
             params.get('local_crystalinity', '0')))
         self.model.setItem(
-            WIDGETS.W_POLY, QtGui.QStandardItem(params.get('polydispersity', '0')))
+            WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(params.get('polydispersity', '0')))
+        self.model.setItem(
+            WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(params.get('polydispersity_stribeck', '0')))
         self.model.setItem(
             WIDGETS.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
         self.model.setItem(
