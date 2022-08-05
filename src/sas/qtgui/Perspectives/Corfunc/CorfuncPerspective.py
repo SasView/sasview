@@ -1,18 +1,15 @@
-"""
-This module provides the intelligence behind the gui interface for Corfunc.
-"""
-# pylint: disable=E1101
+
+import numpy as np
+import math
 
 # global
 from PyQt5.QtGui import QStandardItem
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
-    as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from matplotlib.figure import Figure
-from numpy.linalg.linalg import LinAlgError
-import numpy as np
 
-from typing import Optional, List, Tuple
+from numpy.linalg.linalg import LinAlgError
+
+
+from typing import Optional, List
 
 import logging
 
@@ -21,6 +18,11 @@ from PyQt5 import QtGui, QtWidgets
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
+
+from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
+from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
@@ -31,169 +33,9 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .corefuncutil import WIDGETS
-from .saveextrapolated import SaveExtrapolatedPopup
+from .util import WIDGETS, safe_float
+from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
-
-class MyMplCanvas(FigureCanvas):
-    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-
-    def __init__(self, model, width=5, height=4, dpi=100):
-        self.model = model
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, self.fig)
-
-        self.data: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
-        self.extrap = None
-        self.dragging = None
-        self.draggable = False
-        self.leftdown = False
-        self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
-        self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
-        self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
-
-    def on_legend(self, qx, qy):
-        """
-        Checks if mouse coursor is on legend box
-        :return:
-        """
-        on_legend_box = False
-        bbox = self.legend.get_window_extent()
-        if qx > bbox.xmin and qx < bbox.xmax and qy > bbox.ymin  and qy < bbox.ymax:
-            on_legend_box = True
-        return  on_legend_box
-
-    def on_mouse_down(self, event):
-        if not self.draggable:
-            return
-        if event.button == 1:
-            self.leftdown = True
-        if self.on_legend(event.x, event.y):
-            return
-
-        qmin = float(self.model.item(WIDGETS.W_QMIN).text())
-        qmax1 = float(self.model.item(WIDGETS.W_QMAX).text())
-        qmax2 = float(self.model.item(WIDGETS.W_QCUTOFF).text())
-
-        q = event.xdata
-
-        if (np.abs(q-qmin) < np.abs(q-qmax1) and
-            np.abs(q-qmin) < np.abs(q-qmax2)):
-            self.dragging = "qmin"
-        elif (np.abs(q-qmax2) < np.abs(q-qmax1)):
-            self.dragging = "qmax2"
-        else:
-            self.dragging = "qmax1"
-
-    def on_mouse_up(self, event):
-        if not self.dragging:
-            return None
-        if event.button == 1:
-            self.leftdown = False
-        if self.on_legend(event.x, event.y):
-            return
-
-        if self.dragging == "qmin":
-            item = WIDGETS.W_QMIN
-        elif self.dragging == "qmax1":
-            item = WIDGETS.W_QMAX
-        else:
-            item = WIDGETS.W_QCUTOFF
-
-        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
-
-        self.dragging = None
-
-    def on_motion(self, event):
-        if not self.leftdown:
-            return
-        if not self.draggable:
-            return
-        if self.dragging is None:
-            return
-
-        if self.dragging == "qmin":
-            item = WIDGETS.W_QMIN
-        elif self.dragging == "qmax1":
-            item = WIDGETS.W_QMAX
-        else:
-            item = WIDGETS.W_QCUTOFF
-
-        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
-
-
-    def draw_q_space(self):
-        """Draw the Q space data in the plot window
-
-        This draws the q space data in self.data, as well
-        as the bounds set by self.qmin, self.qmax1, and self.qmax2.
-        It will also plot the extrpolation in self.extrap, if it exists."""
-
-        self.draggable = True
-
-        self.fig.clf()
-
-        self.axes = self.fig.add_subplot(111)
-        self.axes.set_xscale("log")
-        self.axes.set_yscale("log")
-        self.axes.set_xlabel("Q [$\AA^{-1}$]")
-        self.axes.set_ylabel("I(Q) [cm$^{-1}$]")
-        self.axes.set_title("Scattering data")
-        self.fig.tight_layout()
-
-        qmin = float(self.model.item(WIDGETS.W_QMIN).text())
-        qmax1 = float(self.model.item(WIDGETS.W_QMAX).text())
-        qmax2 = float(self.model.item(WIDGETS.W_QCUTOFF).text())
-
-        if self.data:
-            # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
-            self.axes.errorbar(self.data.x, self.data.y, yerr=self.data.dy, label="Experimental Data")
-            self.axes.axvline(qmin)
-            self.axes.axvline(qmax1)
-            self.axes.axvline(qmax2)
-            self.axes.set_xlim(min(self.data.x) / 2,
-                               max(self.data.x) * 1.5 - 0.5 * min(self.data.x))
-            self.axes.set_ylim(min(self.data.y) / 2,
-                               max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
-
-        if self.extrap:
-            self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
-
-        if self.data or self.extrap:
-            self.legend = self.axes.legend()
-
-        self.draw()
-
-    def draw_real_space(self):
-        """
-        This function draws the real space data onto the plot
-
-        The 1d correlation function in self.data, the 3d correlation function
-        in self.data3, and the interface distribution function in self.data_idf
-        are all draw in on the plot in linear cooredinates."""
-
-        self.draggable = False
-
-        self.fig.clf()
-
-        self.axes = self.fig.add_subplot(111)
-        self.axes.set_xscale("linear")
-        self.axes.set_yscale("linear")
-        self.axes.set_xlabel("Z [$\AA$]")
-        self.axes.set_ylabel("Correlation")
-        self.axes.set_title("Real Space Correlations")
-        self.fig.tight_layout()
-
-        if self.data:
-            data1, data3, data_idf = self.data
-            self.axes.plot(data1.x, data1.y, label="1D Correlation")
-            self.axes.plot(data3.x, data3.y, label="3D Correlation")
-            self.axes.set_xlim(0, max(data1.x) / 4)
-            self.legend = self.axes.legend()
-
-        self.draw()
 
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
@@ -231,12 +73,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMin.setEnabled(False)
         self.extrapolation_curve = None
 
-        self._q_space_plot = MyMplCanvas(self.model)
-        self.plotLayout.insertWidget(0, self._q_space_plot)
-        self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._q_space_plot, self))
-        self._real_space_plot = MyMplCanvas(self.model) # TODO: This is not a good name, or structure either
-        self.plotLayout.insertWidget(2, self._real_space_plot)
-        self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._real_space_plot, self))
+
+        self.slider = CorfuncSlider()
+        self.plotLayout.insertWidget(2, self.slider)
+
+        self._q_space_plot = QSpaceCanvas(self)
+        self.plotLayout.insertWidget(1, self._q_space_plot)
+        self.plotLayout.insertWidget(2, NavigationToolbar2QT(self._q_space_plot, self))
+
+        self._real_space_plot = RealSpaceCanvas(self)
+        self.plotLayout.insertWidget(3, self._real_space_plot)
+        self.plotLayout.insertWidget(4, NavigationToolbar2QT(self._real_space_plot, self))
 
         self.gridLayout_4.setColumnStretch(0, 1)
         self.gridLayout_4.setColumnStretch(1, 2)
@@ -267,23 +114,41 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """Connect the buttons to their appropriate slots."""
         self.cmdExtrapolate.clicked.connect(self.extrapolate)
         self.cmdExtrapolate.setEnabled(False)
+
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+
         self.cmdExtract.clicked.connect(self.extract)
         self.cmdExtract.setEnabled(False)
+
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
+
         self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
         self.cmdSaveExtrapolation.setEnabled(False)
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
+
         self.cmdHelp.clicked.connect(self.showHelp)
 
         self.model.itemChanged.connect(self.model_changed)
 
+        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
+        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
+        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.set_text_enable(False)
+
+        self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
+        self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
+
         self.trigger.connect(self.finish_transform)
         self.txtBackground.textChanged.connect(self.on_background_text_changed)
+
+    def set_text_enable(self, state: bool):
+        self.txtLowerQMax.setEnabled(state)
+        self.txtUpperQMin.setEnabled(state)
+        self.txtUpperQMax.setEnabled(state)
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -325,10 +190,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Clear data plots
         self._q_space_plot.data = None
         self._q_space_plot.extrap = None
-        self._q_space_plot.draw_q_space()
+        self._q_space_plot.draw_data()
         self._real_space_plot.data = None
         self._real_space_plot.extrap = None
-        self._real_space_plot.draw_real_space()
+        self._real_space_plot.draw_data()
+        self.slider.setEnabled(False)
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
@@ -336,19 +202,19 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
+        self.set_text_enable(False)
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
         if not self.mapper:
             return
         self.mapper.toFirst()
-        self._q_space_plot.draw_q_space()
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self._q_space_plot.draw_data()
 
     def _update_calculator(self):
-        self._calculator.lowerq = float(self.model.item(WIDGETS.W_QMIN).text())
-        qmax1 = float(self.model.item(WIDGETS.W_QMAX).text())
-        qmax2 = float(self.model.item(WIDGETS.W_QCUTOFF).text())
-        self._calculator.upperq = (qmax1, qmax2)
+        self._calculator.extrapolation_parameters = self.extrapolation_parmameters
+
         self._calculator.background = \
             float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
@@ -413,7 +279,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.update_real_space_plot(transforms)
 
-        self._real_space_plot.draw_real_space()
+        self._real_space_plot.draw_data()
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
 
@@ -515,19 +381,29 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         treeLocation = "/user/qtgui/Perspectives/Corfunc/corfunc_help.html"
         self.parent.showHelp(treeLocation)
 
-    @staticmethod
-    def allowBatch():
+    def allowBatch(self):
         """
         We cannot perform corfunc analysis in batch at this time.
         """
         return False
 
-    @staticmethod
-    def allowSwap():
+    def allowSwap(self):
         """
         We cannot swap data with corfunc analysis at this time.
         """
         return False
+
+    @property
+    def extrapolation_parmameters(self) -> Optional[ExtrapolationParameters]:
+        if self.data is not None:
+            return ExtrapolationParameters(
+                min(self.data.x),
+                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
+                max(self.data.x))
+        else:
+            return None
 
     def setData(self, data_item: List[QStandardItem], is_batch=False):
         """
@@ -554,6 +430,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdExtrapolate.setEnabled(True)
 
         self.model.itemChanged.disconnect(self.model_changed)
+
         self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(""))
@@ -566,17 +443,40 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
-        self.model.itemChanged.connect(self.model_changed)
 
         self._q_space_plot.data = data
         self._q_space_plot.extrap = None
+
+        # Put the slider in sensible places
+        log_data_min = math.log(min(self.data.x))
+        log_data_max = math.log(max(self.data.x))
+
+        def fractional_position(f):
+            return math.exp(f*log_data_max + (1-f)*log_data_min)
+
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
+        self.model.setItem(WIDGETS.W_QCUTOFF,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
+
+
+        # Reconnect model
+        self.model.itemChanged.connect(self.model_changed)
+
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self.slider.setEnabled(True)
+
         self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
         self._real_space_plot.data = None
-        self._real_space_plot.draw_real_space()
+        self._real_space_plot.draw_data()
+        self.set_text_enable(True)
         self.has_data = True
+
 
     def setClosable(self, value=True):
         """
@@ -601,6 +501,89 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             event.ignore()
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
+
+    def on_extrapolation_text_changed_1(self, text):
+        """ Text in LowerQMax changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
+        params = self.extrapolation_parmameters._replace(point_1=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
+
+    def on_extrapolation_text_changed_2(self, text):
+        """ Text in UpperQMin changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
+        params = self.extrapolation_parmameters._replace(point_2=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
+
+    def on_extrapolation_text_changed_3(self, text):
+        """ Text in UpperQMax changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
+        params = self.extrapolation_parmameters._replace(point_3=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
+
+    def notify_extrapolation_text_box_validity(self, params):
+        """ Set the colour of the text boxes to red if they have bad parameter definitions"""
+        box_1_style = ""
+        box_2_style = ""
+        box_3_style = ""
+        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
+
+        if params.point_1 <= params.data_q_min:
+            box_1_style = red
+
+        if params.point_2 <= params.point_1:
+            box_1_style = red
+            box_2_style = red
+
+        if params.point_3 <= params.point_2:
+            box_2_style = red
+            box_3_style = red
+
+        # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
+        if params.point_3 <= params.point_1:
+            box_1_style = red
+            box_3_style = red
+
+        self.txtLowerQMax.setStyleSheet(box_1_style)
+        self.txtUpperQMin.setStyleSheet(box_2_style)
+        self.txtUpperQMax.setStyleSheet(box_3_style)
+
+    def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
+        """ Slider state changed"""
+        format_string = "%.8g"
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem(format_string%state.point_1))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem(format_string%state.point_2))
+        self.model.setItem(WIDGETS.W_QCUTOFF,
+                           QtGui.QStandardItem(format_string%state.point_3))
+
+    def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
+        """ Slider is being moved about"""
+        self._q_space_plot.update_lines(state)
 
     def on_save(self):
         """

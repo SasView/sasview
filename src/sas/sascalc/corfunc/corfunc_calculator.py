@@ -1,13 +1,14 @@
 """
 This module implements corfunc
 """
-import warnings
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
-from scipy.fftpack import dct
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
+
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
+
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
@@ -26,6 +27,8 @@ class ExtractedParameters:
     polydispersity_ryan: float
     polydispersity_stribeck: float
     local_crystallinity: float
+
+
 
 class CorfuncCalculator:
 
@@ -50,6 +53,24 @@ class CorfuncCalculator:
         self.upperq = upperq
         self.background = self.compute_background()
         self._transform_thread = None
+
+    @property
+    def extrapolation_parameters(self) -> Optional[ExtrapolationParameters]:
+        if self._data is None or self.lowerq is None or self.upperq is None:
+            return None
+        else:
+            return ExtrapolationParameters(
+                min(self._data.x),
+                self.lowerq,
+                self.upperq[0],
+                self.upperq[1],
+                max(self._data.x))
+
+    @extrapolation_parameters.setter
+    def extrapolation_parameters(self, extrap: ExtrapolationParameters):
+        self.lowerq = extrap.point_1
+        self.upperq = (extrap.point_2, extrap.point_3)
+
 
     def set_data(self, data: Optional[Data1D], scale: float=1):
         """
