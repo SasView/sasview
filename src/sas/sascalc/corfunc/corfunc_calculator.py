@@ -14,7 +14,19 @@ from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
+from dataclasses import dataclass
 from typing import Optional, Tuple
+
+@dataclass
+class ExtractedParameters:
+    long_period: float
+    interface_thickness: float
+    hard_block_thickness: float
+    soft_block_thickness: float
+    core_thickness: float
+    polydispersity_ryan: float
+    polydispersity_stribeck: float
+    local_crystallinity: float
 
 
 
@@ -156,7 +168,7 @@ class CorfuncCalculator:
         if self._transform_thread.isrunning():
             self._transform_thread.stop()
 
-    def extract_parameters(self, transformed_data):
+    def extract_parameters(self, transformed_data) -> Optional[ExtractedParameters]:
         """
         Extract the interesting measurements from a correlation function
 
@@ -172,7 +184,7 @@ class CorfuncCalculator:
         if len(maxs) == 0:
             return None
 
-        GammaMin = y[mins[0]]  # The value at the first minimum
+        gamma_min = y[mins[0]]  # The value at the first minimum
 
         ddy = (y[:-2]+y[2:]-2*y[1:-1])/(x[2:]-x[:-2])**2  # 2nd derivative of y
         dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
@@ -199,31 +211,33 @@ class CorfuncCalculator:
         b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
 
         long_period = x[maxs[0]]
-        long_block_thickness = (GammaMin-b)/m  # Hard block thickness
-        soft_block_thickess = x[maxs[0]] - long_block_thickness
+        hard_block_thickness = (gamma_min - b) / m  # Hard block thickness
+        soft_block_thickness = long_period - hard_block_thickness
 
         # Find the data points where the graph is linear to within 1%
         mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
         if len(mask) == 0:  # Return garbage for bad fits
             return None
 
-        dtr = x[mask[0]]  # Beginning of Linear Section
-        d0 = x[mask[-1]]  # End of Linear Section
+        interface_thickness = x[mask[0]]  # Beginning of Linear Section
+        core_thickness = x[mask[-1]]  # End of Linear Section
 
-        GammaMax = y[mask[-1]]
-        A = np.abs(GammaMin/GammaMax)  # Normalized depth of minimum
+        local_crystallinity = hard_block_thickness / long_period
 
-        params = {
-            'max': long_period,
-            'dtr': dtr,
-            'Lc': long_block_thickness,
-            'd0': d0,
-            'A': A,
-            'fill': long_block_thickness/x[maxs[0]],
-            'soft': soft_block_thickess
-        }
+        gamma_max = y[mask[-1]]
 
-        return params
+        polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
+        polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
+
+        return ExtractedParameters(
+                    long_period,
+                    interface_thickness,
+                    hard_block_thickness,
+                    soft_block_thickness,
+                    core_thickness,
+                    polydispersity_ryan,
+                    polydispersity_stribeck,
+                    local_crystallinity)
 
 
     def _porod(self, q, K, sigma, bg):

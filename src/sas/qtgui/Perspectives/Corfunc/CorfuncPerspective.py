@@ -11,6 +11,8 @@ from numpy.linalg.linalg import LinAlgError
 
 from typing import Optional, List
 
+import logging
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 
@@ -96,6 +98,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Set up the mapper
         self.setup_mapper()
 
+    def set_background_warning(self, show_warning: bool = True):
+        if show_warning:
+            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+        else:
+            self.txtBackground.setStyleSheet("")
+
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
@@ -135,6 +143,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
         self.trigger.connect(self.finish_transform)
+        self.txtBackground.textChanged.connect(self.on_background_text_changed)
 
     def set_text_enable(self, state: bool):
         self.txtLowerQMax.setEnabled(state)
@@ -170,7 +179,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(str(0)))
-        self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(str(0)))
 
     def removeData(self, data_list=None):
@@ -278,16 +288,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         params = self._calculator.extract_parameters(transforms[0])
 
-        self.model.itemChanged.disconnect(self.model_changed)
-        self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
-        self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
-        self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
-        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params['soft'])))
-        self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
-        self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-        self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        self.model.itemChanged.connect(self.model_changed)
-        self.model_changed(None)
+        if params is not None:
+
+            self.model.itemChanged.disconnect(self.model_changed)
+
+            self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params.core_thickness)))
+            self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params.interface_thickness)))
+            self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params.hard_block_thickness)))
+            self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params.soft_block_thickness)))
+            self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params.local_crystallinity)))
+            self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_ryan)))
+            self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_stribeck)))
+            self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params.long_period)))
+
+            self.model.itemChanged.connect(self.model_changed)
+            self.model_changed(None)
 
 
     def update_real_space_plot(self, datas):
@@ -334,7 +349,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper.addMapping(self.txtAvgIntThick, WIDGETS.W_INTTHICK)
         self.mapper.addMapping(self.txtAvgHardBlock, WIDGETS.W_HARDBLOCK)
         self.mapper.addMapping(self.txtAvgSoftBlock, WIDGETS.W_SOFTBLOCK)
-        self.mapper.addMapping(self.txtPolydisp, WIDGETS.W_POLY)
+        self.mapper.addMapping(self.txtPolyRyan, WIDGETS.W_POLY_RYAN)
+        self.mapper.addMapping(self.txtPolyStribeck, WIDGETS.W_POLY_STRIBECK)
         self.mapper.addMapping(self.txtLongPeriod, WIDGETS.W_PERIOD)
         self.mapper.addMapping(self.txtLocalCrystal, WIDGETS.W_CRYSTAL)
 
@@ -424,7 +440,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(""))
-        self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
 
         self._q_space_plot.data = data
@@ -597,6 +614,31 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         else:
             raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
 
+    def on_background_text_changed(self, data):
+        """ Background value number changed"""
+        # If data has a "bad" value we want to indicate this
+        # The only good values can be interpreted as non-negative floats
+
+        is_bad = True
+
+        try:
+            value = float(data)
+            if self.data is not None:
+                min = np.min(self.data.y)
+                if value <= min:
+                    is_bad = False
+                else:
+                    logging.warning(f"Background value results in negative intensities ({value} > {min})")
+            else:
+                is_bad = False
+
+        except ValueError:
+            pass
+
+        self.set_background_warning(is_bad)
+
+
+
     def serializeAll(self):
         """
         Serialize the corfunc state so data can be saved
@@ -646,7 +688,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             'avg_hard_block_thick': self.txtAvgHardBlock.text(),
             'avg_soft_block_thick': self.txtAvgSoftBlock.text(),
             'local_crystalinity': self.txtLocalCrystal.text(),
-            'polydispersity': self.txtPolydisp.text(),
+            'polydispersity': self.txtPolyRyan.text(),
+            'polydispersity_stribeck': self.txtPolyStribeck.text(),
             'long_period': self.txtLongPeriod.text(),
             'lower_q_max': self.txtLowerQMax.text(),
             'upper_q_min': self.txtUpperQMin.text(),
@@ -685,7 +728,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(
             params.get('local_crystalinity', '0')))
         self.model.setItem(
-            WIDGETS.W_POLY, QtGui.QStandardItem(params.get('polydispersity', '0')))
+            WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(params.get('polydispersity', '0')))
+        self.model.setItem(
+            WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(params.get('polydispersity_stribeck', '0')))
         self.model.setItem(
             WIDGETS.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
         self.model.setItem(
