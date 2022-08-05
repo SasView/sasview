@@ -1,11 +1,13 @@
 
 import numpy as np
+import math
 
 # global
 from PyQt5.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 from numpy.linalg.linalg import LinAlgError
+
 
 from typing import Optional, List
 
@@ -412,6 +414,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdExtrapolate.setEnabled(True)
 
         self.model.itemChanged.disconnect(self.model_changed)
+
         self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(""))
@@ -423,18 +426,37 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_POLY, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
-        self.model.itemChanged.connect(self.model_changed)
 
         self._q_space_plot.data = data
         self._q_space_plot.extrap = None
+
+        # Put the slider in sensible places
+        log_data_min = math.log(min(self.data.x))
+        log_data_max = math.log(max(self.data.x))
+
+        def fractional_position(f):
+            return math.exp(f*log_data_max + (1-f)*log_data_min)
+
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
+        self.model.setItem(WIDGETS.W_QCUTOFF,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
+
+
+        # Reconnect model
+        self.model.itemChanged.connect(self.model_changed)
+
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self.slider.setEnabled(True)
+
         self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
         self._real_space_plot.data = None
         self._real_space_plot.draw_data()
-        self.slider.extrapolation_parameters = self.extrapolation_parmameters
-        self.slider.setEnabled(True)
         self.set_text_enable(True)
         self.has_data = True
 
