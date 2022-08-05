@@ -10,6 +10,8 @@ from PyQt5.QtGui import QFontMetrics
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 class CorfuncSlider(QtWidgets.QWidget):
+    """ Slider that allows the selection of the different Q-ranges involved in interpolation,
+    and that provides some visual cues to how it works."""
 
     valueEdited = pyqtSignal(ExtrapolationParameters, name='valueEdited')
     valueEditing = pyqtSignal(ExtrapolationInteractionState, name='valueEditing')
@@ -35,7 +37,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
 
         # Display Parameters
-        self.vertical_size = 60
+        self.vertical_size = 30
         self.guinier_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
         self.porod_color = QtGui.QColor('green')
@@ -71,7 +73,11 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @staticmethod
     def find_parameter_problems(params: ExtrapolationParameters) -> Optional[str]:
+        """ Check an extratpolation prarameters object for consistency
 
+        :param params: An extrapolation parameters object describing a desired state
+        :returns: A description of the problem if it exists, otherwise None
+        """
         if params.data_q_min >= params.point_1:
             return "min_q should be smaller than q_point_1"
 
