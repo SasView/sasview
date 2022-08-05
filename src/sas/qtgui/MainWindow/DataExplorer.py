@@ -785,7 +785,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
-            logging.error(msg)
+            logging.error(ex, exc_info=True)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
