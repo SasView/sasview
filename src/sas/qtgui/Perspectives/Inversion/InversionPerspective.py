@@ -222,10 +222,11 @@ class InversionWindow(QtWidgets.QTabWidget):
 
             if isinstance(logic_data, Data2D) and not is_batch:
                 tab = self.addData(data=data)
+                tab.is2D = True
                 tab.tab2D.setEnabled(True)
                 qmin, qmax = tab.logic.computeDataRange()
-                tab.calculator.set_qmin(qmin)
-                tab.calculator.set_qmax(qmax)
+                tab._calculator.set_qmin(qmin)
+                tab._calculator.set_qmax(qmax)
                 tab.show2DPlot()
 
             if is_batch and not isinstance(logic_data, Data2D):
@@ -236,8 +237,8 @@ class InversionWindow(QtWidgets.QTabWidget):
             if isinstance(logic_data, Data1D):
                 tab = self.addData(data=data)
                 qmin, qmax = tab.logic.computeDataRange()
-                tab.calculator.set_qmin(qmin)
-                tab.calculator.set_qmax(qmax)
+                tab._calculator.set_qmin(qmin)
+                tab._calculator.set_qmax(qmax)
                 if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
                     tab.logic.add_errors()
 
