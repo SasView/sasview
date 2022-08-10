@@ -138,14 +138,6 @@ package_dir["sas.sascalc.invariant"] = os.path.join(
 packages.extend(["sas.sascalc.invariant"])
 
 
-# sas.sascalc.dataloader
-package_dir["sas.sascalc.dataloader"] = os.path.join(
-    "src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = ['schema/*.xsd']
-packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
-                 "sas.sascalc.dataloader.readers.schema"])
-
-
 # sas.sascalc.calculator
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
