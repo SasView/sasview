@@ -148,12 +148,6 @@ packages.append("sas.sascalc.calculator")
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
 packages.append("sas.sascalc.pr")
 
-
-# sas.sascalc.file_converter
-package_dir["sas.sascalc.file_converter"] = os.path.join(
-    "src", "sas", "sascalc", "file_converter")
-packages.append("sas.sascalc.file_converter")
-
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
     "src", "sas", "sascalc", "corfunc")
