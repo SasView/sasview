@@ -1,5 +1,5 @@
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D
 from scipy.fftpack import dct
 from scipy.integrate import trapz, cumtrapz
 import numpy as np
