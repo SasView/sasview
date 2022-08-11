@@ -449,7 +449,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         Create tablewidget items and show them, based on params
         """
         # headers
-        param_list = ['Filename','Number Of Terms','Reg. Const','Max Distance', 'Rg [Å]', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
+        param_list = ['Filename','Number Of Terms','Reg. Const','Max Distance',
+                      'Rg [Å]', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
                       'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]']
 
@@ -473,12 +474,12 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             if out is None:
                 logging.warning("P(r) for {} did not converge.".format(filename))
                 continue
-            # self.tblParams.setItem(i_row,1, QtWidgets.QTableWidgetItem(
-            #     "{:.3g}".format(self.)))
-            # self.tblParams.setItem(i_row,2, QtWidgets.QTableWidgetItem(
-            #     "{:.3g}".format(pr.rg(out))))
-            # self.tblParams.setItem(i_row,3, QtWidgets.QTableWidgetItem(
-            #     "{:.3g}".format(pr.rg(out))))
+            self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.nfunc)))
+            self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.alpha)))
+            self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.d_max)))
             self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.rg(out))))
             self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(

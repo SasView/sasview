@@ -380,13 +380,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             tab.set_tab_name("Pr Batch")
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
             tab.calculateAllButton.setVisible(True)
-            tab.calculateThisButton.setVisible(False)
+            tab.calculateThisButton.setVisible(True)
             tab.setPlotable(False)
             tab._allowPlots = False
 
             for i in data:
                 tab.logic.data = GuiUtils.dataFromItem(i)
                 tab.populateDataComboBox(name=tab.logic.data.name, data_ref=i)
+                tab.updateDataList(i)
+            tab.setCurrentData(data[0])
         else:
             tab.calculateAllButton.setVisible(False)
             tab.showResultsButton.setVisible(False)
