@@ -267,6 +267,7 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              'Plotting/UI/*',
                              'Utilities/UI/*',
                              'Utilities/Reports/UI/*',
+                             'Utilities/Reports/*.css'
                              'UI/*',
                              'UI/res/*',
                              ]
