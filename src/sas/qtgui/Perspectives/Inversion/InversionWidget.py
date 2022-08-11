@@ -487,15 +487,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
         """
-        for i in range(self.dataList.count()):
-            self.setCurrentData(self.dataList.itemData(i))
-            # self.batchResults[self.logic.data.name] = self._dataList[self.dataList.itemData(i)].get(DICT_KEYS[0])
-            print(self._dataList[self.dataList.itemData(i)].get(DICT_KEYS[0]))
+        # for i in range(self.dataList.count()):
+        #     self.setCurrentData(self.dataList.itemData(i))
+        #     self.batchResults[self.logic.data.name] = self._dataList[self.dataList.itemData(i)].get(DICT_KEYS[0])
+        #     print(self._dataList[self.dataList.itemData(i)].get(DICT_KEYS[0]))
+
 
         self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
-        if self.batchResultsWindow is not None:
-            self.batchResultsWindow.close()
-            self.batchResultsWindow.setupTable(self.batchResults)
+        self.batchResultsWindow.setupTable(self.batchResults)
         self.batchResultsWindow.show()
 
     def stopCalculation(self):
@@ -1124,9 +1123,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # self.slices.append(slice.data)
             self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
             self._calculator = Invertor()
-            print("Calculating Pr of Phi {}".format(slice.phi))
+            self._calculator.out = slice.phi
             self.batchResults[slice.phi] = self._calculator
-
+            print("Calculating Pr of Phi {}".format(slice.phi))
         self.calculateAllButton.setVisible(True)
         self.dataList.removeItem(0)
 
@@ -1135,9 +1134,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.sliceList.resizeRowsToContents()
         self.sliceButton.setText("Slice")
         self.sliceList.show()
+        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
+        self.batchResultsWindow.setupTable(self.batchResults)
+        self.batchResultsWindow.show()
         self.enableButtons()
         self.calculateThisButton.setEnabled(True)
-        self.showRshowResultsButton.setVisible(True)
+        self.showResultsButton.setVisible(True)
 
     def set_tab_name(self, name=None):
         # set name to "New Pr Tab" if no name is set to the data set
