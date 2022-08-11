@@ -191,14 +191,14 @@ packages.append("sas.qtgui.UnitTesting")
 package_dir["sas.qtgui.Utilities"] = os.path.join(
     "src", "sas", "qtgui", "Utilities")
 packages.append("sas.qtgui.Utilities")
-package_dir["sas.qtgui.UtilitiesUI"] = os.path.join(
-    "src", "sas", "qtgui", "Utilities","UI")
+package_dir["sas.qtgui.Utilities.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "UI")
 packages.append("sas.qtgui.Utilities.UI")
 
 package_dir["sas.qtgui.Utilities.Reports"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "Reports")
 packages.append("sas.qtgui.Utilities.Reports")
-package_dir["sas.qtgui.Utilities.UI"] = os.path.join(
+package_dir["sas.qtgui.Utilities.Reports.UI"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "Reports", "UI")
 packages.append("sas.qtgui.Utilities.Reports.UI")
 
