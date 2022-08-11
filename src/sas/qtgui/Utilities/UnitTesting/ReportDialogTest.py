@@ -13,7 +13,7 @@ from PyQt5.QtTest import QTest
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local
-from qtgui.Utilities.Reports.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
