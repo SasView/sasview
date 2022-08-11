@@ -485,7 +485,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.rg(out))))
             self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.chi2[0])))
+                "{:.3g}".format(pr.chi2)))
             self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.iq0(out))))
             self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
@@ -494,8 +494,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 "{:.3g}".format(pr.background)))
             self.tblParams.setItem(i_row, 9, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.get_positive(out))))
-            self.tblParams.setItem(i_row, 10, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.get_pos_err(out, cov))))
+            # self.tblParams.setItem(i_row, 10, QtWidgets.QTableWidgetItem(
+            #     "{:.3g}".format(pr.get_pos_err(out, cov))))
             self.tblParams.setItem(i_row, 11, QtWidgets.QTableWidgetItem(
                 "{:.2g}".format(pr.elapsed)))
 
