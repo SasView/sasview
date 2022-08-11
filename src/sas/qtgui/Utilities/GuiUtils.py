@@ -30,9 +30,9 @@ from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plottables import Plottable
-from sas.sascalc.dataloader.data_info import Sample, Source, Vector
-from sas.sascalc.dataloader.data_info import Detector, Process, TransmissionSpectrum
-from sas.sascalc.dataloader.data_info import Aperture, Collimation
+from sasdata.dataloader.data_info import Sample, Source, Vector
+from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
+from sasdata.dataloader.data_info import Aperture, Collimation
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
@@ -44,8 +44,8 @@ from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
-from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+from sasdata.dataloader.loader import Loader
+from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 
 from sas.qtgui.Utilities import CustomDir
 
@@ -783,11 +783,11 @@ def onTXTSave(data, path):
     reader = None
     append_format = len(path.split(".")) == 1
     if isinstance(data, Data1D):
-        from sas.sascalc.dataloader.readers.ascii_reader import Reader as ASCIIReader
+        from sasdata.dataloader.readers.ascii_reader import Reader as ASCIIReader
         path += ".txt" if append_format else ""
         reader = ASCIIReader()
     elif isinstance(data, Data2D):
-        from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DReader
+        from sasdata.dataloader.readers.red2d_reader import Reader as Red2DReader
         path += ".dat" if append_format else ""
         reader = Red2DReader()
     if reader:
@@ -1442,7 +1442,7 @@ def readProjectFromSVS(filepath):
     """
     Read old SVS file and convert to the project dictionary
     """
-    from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+    from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
     from sas.sascalc.fit.pagestate import Reader
 
     loader = Loader()
