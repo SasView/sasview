@@ -97,7 +97,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         if data is None:
             return
 
-        from sas.sascalc.dataloader.manipulations import Ring
+        from sasdata.data_util.manipulations import Ring
         rmin = min(numpy.fabs(self.inner_circle.get_radius()),
                    numpy.fabs(self.outer_circle.get_radius()))
         rmax = max(numpy.fabs(self.inner_circle.get_radius()),

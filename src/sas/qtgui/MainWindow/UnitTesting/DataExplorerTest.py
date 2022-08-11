@@ -16,7 +16,7 @@ import path_prepare
 
 # Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
