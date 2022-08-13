@@ -161,6 +161,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Set up the Widget Map
         self.setupMapper()
         self.setupWindow()
+
     ######################################################################
     # Base Perspective Class Definitions
 
@@ -416,8 +417,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Switch to another item in the data list"""
         if self.dataDeleted:
             return
-        self.updateDataList(self._data)
+        if data_index == 0:
+            return
+        self.prPlot = None
+        self.dataPlot = None
+        self.dataList.itemData(data_index)
         self.setCurrentData(self.dataList.itemData(data_index))
+        self.updateDataList(self._data)
+
 
     ######################################################################
     # GUI Interaction Events
@@ -486,12 +493,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
-        """
-        # for i in range(self.dataList.count()):
-        #     self.setCurrentData(self.dataList.itemData(i))
-        #     self.batchResults[self.logic.data.name] = self._dataList[self.dataList.itemData(i)].get(DICT_KEYS[0])
-        #     print(self._dataList[self.dataList.itemData(i)].get(DICT_KEYS[0]))
-
+         """
+        # if self.slices is not None:
+        #
+        #
+        #     for index in range(self.dataList.count()):
+        #         self.setCurrentData(self.dataList.itemData(index))
+        #         self.batchResults[self.logic.data.name] = self._dataList[self.dataList.itemData(index)].get(DICT_KEYS[0])
+        #         print(self._dataList[self.dataList.itemData(index)].get(DICT_KEYS[0]))
+        # except:
+        #     pass
+        # for slice in self.slices:
+        #     print(slice.phi)
+        #     self._data = slice
+        #     self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
+        #     self._calculator = Invertor()
+        #     self.performEstimate()
+        #     self.batchResults[str(slice.phi)] = self._calculator
+        #     self.updateDataList(self._data)
 
         self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
         self.batchResultsWindow.setupTable(self.batchResults)
@@ -550,11 +569,16 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
             return
+        qmin, qmax = self.logic.computeDataRange()
+        self._calculator.set_qmin(qmin)
+        self._calculator.set_qmax(qmax)
+
         self._dataList[dataRef] = {
             DICT_KEYS[0]: self._calculator,
             DICT_KEYS[1]: self.prPlot,
             DICT_KEYS[2]: self.dataPlot
         }
+        self.batchResults[str(self.phi)] = self._calculator
 
     def getState(self):
         """
@@ -607,9 +631,19 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Get the data by reference and display as necessary"""
         if data_ref is None:
             return
+
+        if self.is2D:
+            self._data = self.data
+            self.logic.data = Data1D(x=data_ref.x, y=data_ref.y, dx=data_ref.dx, dy=data_ref.dy)
+            self._calculator = Invertor()
+            self.phi = data_ref.phi
+            self.performEstimate()
+            return
+
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
+        self.dataList.setCurrentIndex(self.data_index)
         # Data references
         self._data = data_ref
         self.logic.data = GuiUtils.dataFromItem(data_ref)
@@ -622,10 +656,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr = self._calculator
         alpha = self._calculator.suggested_alpha
         self.model.setItem(WIDGETS.W_MAX_DIST,
-                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
         self.noOfTermsSuggestionButton.setText(
-             "{:n}".format(self.nTermsSuggested))
+            "{:n}".format(self.nTermsSuggested))
 
         self.enableButtons()
 
@@ -665,18 +699,18 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                    QtGui.QStandardItem(
                                        "{:.3g}".format(
                                            pr.get_pos_err(out, cov))))
-        if self.prPlot is not None:
+        if False: #self.prPlot is not None or
             title = self.prPlot.name
             self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
-        if self.dataPlot is not None:
+            self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
+        if False: # self.dataPlot is not None or
             title = self.dataPlot.name
             self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
             self.dataPlot.symbol = "Line"
             self.dataPlot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
+            self.communicate.plotRequestedSignal.emit([self._data, self.dataPlot], None)
         self.enableButtons()
 
     def removeData(self, data_list=None):
@@ -798,7 +832,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def startNextBatchItem(self):
         self.isBatch = False
-        print(self.dataList.count())
         for index in range(self.dataList.count()):
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
@@ -841,7 +874,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                  updatefn=None)
         self.calcThread.queue()
         self.calcThread.ready(2.5)
-
 
     def stopCalcThread(self):
         """ Stops a thread if it exists and is running """
@@ -889,8 +921,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # It slows down the application and it doesn't change the estimates
         pr.slit_height = 0.0
         pr.slit_width = 0.0
-        nfunc = 10 # change this to get the no of terms onky once using "nfunc = self.getNFunc()" gets messy with batch as it uses the vaues of the brevous calculation
-
+        nfunc = 10  # change this to get the no of terms onky once using "nfunc = self.getNFunc()" gets messy with batch as it uses the vaues of the brevous calculation
 
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
@@ -1113,30 +1144,22 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         for row, slice in enumerate(slicedData):
             self.plot1D.plot(slice)
-            # self.removeData()
             self.plot1D.show()
             plotButton = QtWidgets.QPushButton(str(slice.phi))
             self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))
             self.sliceList.setCellWidget(row, 1, plotButton)
-            # self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
-            # self.calculator = Invertor()
-            # self.slices.append(slice.data)
-            self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
-            self._calculator = Invertor()
-            self._calculator.out = slice.phi
-            self.batchResults[slice.phi] = self._calculator
+            self.populateDataComboBox(name=str(slice.phi), data_ref=slice)
+            self.slices.append(slice)
+
             print("Calculating Pr of Phi {}".format(slice.phi))
         self.calculateAllButton.setVisible(True)
-        self.dataList.removeItem(0)
+        # self.dataList.removeItem(0)
 
         self.plot2D.update()
         self.sliceList.resizeColumnsToContents()
         self.sliceList.resizeRowsToContents()
         self.sliceButton.setText("Slice")
         self.sliceList.show()
-        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
-        self.batchResultsWindow.setupTable(self.batchResults)
-        self.batchResultsWindow.show()
         self.enableButtons()
         self.calculateThisButton.setEnabled(True)
         self.showResultsButton.setVisible(True)

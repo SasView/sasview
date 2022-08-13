@@ -241,13 +241,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
             logic_data = GuiUtils.dataFromItem(data)
 
+
             if isinstance(logic_data, Data2D) and not is_batch:
                 tab = self.addData(data=data)
                 tab.is2D = True
                 tab.tab2D.setEnabled(True)
-                qmin, qmax = tab.logic.computeDataRange()
-                tab._calculator.set_qmin(qmin)
-                tab._calculator.set_qmax(qmax)
                 tab.show2DPlot()
 
             if is_batch and not isinstance(logic_data, Data2D):
@@ -385,7 +383,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             tab._allowPlots = False
 
             for i in data:
-                tab.logic.data = GuiUtils.dataFromItem(i)
+                tab.logic.data = GuiUtils.dataFromItem(i) # Fix this for batch
                 tab.populateDataComboBox(name=tab.logic.data.name, data_ref=i)
                 tab.updateDataList(i)
             tab.setCurrentData(data[0])
