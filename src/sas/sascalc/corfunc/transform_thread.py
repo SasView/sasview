@@ -5,10 +5,12 @@ from scipy.integrate import trapz, cumtrapz
 import numpy as np
 from time import sleep
 
+from sas.qtgui.Perspectives.Corfunc.util import TransformedData
+
 class FourierThread(CalcThread):
-    def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
-        completefn=None):
-        CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
+    def __init__(self, raw_data, extrapolated_data, bg, update_callback=None,
+                 complete_callback=None):
+        CalcThread.__init__(self, update_callback=update_callback, complete_callback=complete_callback)
         self.data = raw_data
         self.background = bg
         self.extrapolation = extrapolated_data
@@ -78,14 +80,14 @@ class FourierThread(CalcThread):
         transform3 = Data1D(xs, gamma3)
         idf = Data1D(xs, idf)
 
-        transforms = (transform1, transform3, idf)
+        transformed_data = (transform1, transform3, idf)
 
-        self.complete(transforms=transforms)
+        self.complete(transformed_data=transformed_data)
 
 class HilbertThread(CalcThread):
-    def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
-        completefn=None):
-        CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
+    def __init__(self, raw_data, extrapolated_data, bg, update_callback=None,
+                 complete_callback=None):
+        CalcThread.__init__(self, update_callback=update_callback, complete_callback=complete_callback)
         self.data = raw_data
         self.background = bg
         self.extrapolation = extrapolated_data

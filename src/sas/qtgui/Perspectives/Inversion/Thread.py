@@ -8,11 +8,11 @@ class CalcPr(CalcThread):
     Compute P(r)
     """
 
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
+    def __init__(self, pr, nfunc=5, error_func=None, complete_callback=None,
+                 update_callback=None, yieldtime=0.01, worktime=0.01):
         """
         """
-        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
+        CalcThread.__init__(self, complete_callback, update_callback, yieldtime, worktime)
         self.pr = pr
         self.nfunc = nfunc
         self.error_func = error_func
@@ -40,9 +40,9 @@ class EstimatePr(CalcThread):
     Estimate P(r)
     """
 
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
-        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
+    def __init__(self, pr, nfunc=5, error_func=None, complete_callback=None,
+                 update_callback=None, yieldtime=0.01, worktime=0.01):
+        CalcThread.__init__(self, complete_callback, update_callback, yieldtime, worktime)
         self.pr = pr
         self.nfunc = nfunc
         self.error_func = error_func
@@ -67,9 +67,9 @@ class EstimatePr(CalcThread):
 class EstimateNT(CalcThread):
     """
     """
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
-                 updatefn=None, yieldtime=0.01, worktime=0.01):
-        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
+    def __init__(self, pr, nfunc=5, error_func=None, complete_callback=None,
+                 update_callback=None, yieldtime=0.01, worktime=0.01):
+        CalcThread.__init__(self, complete_callback, update_callback, yieldtime, worktime)
         self.pr = pr
         self.nfunc = nfunc
         self.error_func = error_func

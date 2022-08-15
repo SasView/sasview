@@ -7,7 +7,12 @@ from typing import Optional, Union, List, Iterable, TYPE_CHECKING
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+# TODO: Make not crazy
+from sas.qtgui.Plotting.PlotterData import Data1D as Data1DVersion1
+from sas.sascalc.dataloader.data_info import Data1D as Data1DVersion2
+from sasmodels.data import Data1D as Data1DVersion3
+Data1D = (Data1DVersion1, Data1DVersion2, Data1DVersion3)
+Data1DType = Union[Data1DVersion1, Data1DVersion2, Data1DVersion3]
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
@@ -46,14 +51,13 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
         return self._data
 
     @data.setter
-    def data(self, target_data: Optional[Union[Data1D, Iterable[Data1D]]]):
+    def data(self, target_data: Optional[Union[Data1DType, Iterable[Data1DType]]]):
         # I'm not 100% sure this is good practice, but it will make things cleaner in the short term
         if target_data is None:
             self._data = None
         elif isinstance(target_data, Data1D):
             self._data = [target_data]
         else:
-            print(type(target_data))
             self._data = list(target_data)
 
         self.draw_data()

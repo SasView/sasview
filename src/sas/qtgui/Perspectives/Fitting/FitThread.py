@@ -28,16 +28,16 @@ class FitThread(CalcThread):
                  batch_outputs,
                  batch_inputs=None,
                  pars=None,
-                 completefn=None,
-                 updatefn=None,
+                 complete_callback=None,
+                 update_callback=None,
                  yieldtime=0.03,
                  worktime=0.03,
                  reset_flag=False):
         CalcThread.__init__(self,
-                 completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+                            complete_callback,
+                            update_callback,
+                            yieldtime,
+                            worktime)
         self.handler = handler
         self.fitter = fn
         self.pars = pars
@@ -45,7 +45,7 @@ class FitThread(CalcThread):
         self.batch_outputs = batch_outputs
         self.page_id = page_id
         self.starttime = time.time()
-        self.updatefn = updatefn
+        self.updatefn = update_callback
         #Relative error desired in the sum of squares.
         self.reset_flag = reset_flag
 

@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from numpy.linalg.linalg import LinAlgError
 
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import logging
 
@@ -28,6 +28,7 @@ from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, Extr
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module
@@ -68,7 +69,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item: Optional[QStandardItem] = None
-        self.data = None
+        self.data: Optional[Data1D] = None
+        self.extrap: Optional[Data1D] = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
@@ -254,6 +256,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_PORODSIGMA,
                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
 
+        self.extrap = extrapolation
         self._q_space_plot.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
@@ -275,9 +278,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             """Report progress of transformation."""
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-        def completefn(transforms: TransformedData):
+        def completefn(transformed_data: Tuple[Data1D, Data1D, Data1D]):
             """Extract the values from the transforms and plot"""
-            self.trigger.emit(transforms)
+            self.trigger.emit(TransformedData(*transformed_data)) # TODO: Make this return more structured data earlier
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, background,

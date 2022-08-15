@@ -9,15 +9,15 @@ class GenReader(CalcThread):
     Load a sld data given a filename
     """
     def __init__(self, path, loader,
-                 completefn=None,
-                 updatefn=None,
+                 complete_callback=None,
+                 update_callback=None,
                  yieldtime=0.01,
                  worktime=0.01
                  ):
-        CalcThread.__init__(self, completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+        CalcThread.__init__(self, complete_callback,
+                            update_callback,
+                            yieldtime,
+                            worktime)
         self.path = path
         #Instantiate a loader 
         self.loader = loader

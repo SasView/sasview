@@ -3,24 +3,16 @@
 ## \file
 #  \brief Abstract class for defining calculation threads.
 #
-from __future__ import print_function
+
+from typing import Optional, Callable
 
 import sys
 import logging
 import traceback
-from time import sleep
+from time import sleep,  perf_counter
 
-try:
-    import _thread as thread
-except ImportError: # CRUFT: python 2 support
-    import thread
-try:
-    from time import perf_counter as clock
-except ImportError: # CRUFT: python < 3.3
-    if sys.platform.count("darwin") > 0:
-        from time import time as clock
-    else:
-        from time import clock
+import _thread as thread
+
 
 logger = logging.getLogger(__name__)
 
@@ -119,22 +111,25 @@ class CalcThread:
             ...
     """
 
-    def __init__(self, completefn=None, updatefn=None,
-                 yieldtime=0.01, worktime=0.01,
-                 exception_handler=None):
-        """Prepare the calculator"""
-        self.yieldtime     = yieldtime
-        self.worktime      = worktime
-        self.completefn    = completefn
-        self.updatefn      = updatefn
+    def __init__(self,
+                 complete_callback: Optional[Callable]=None, # TODO: Specify types properly when they are supported
+                 update_callback: Optional[Callable]=None,
+                 exception_handler: Optional[Callable]=None,
+                 yieldtime=0.01,
+                 worktime=0.01):
+
+        self.yieldtime = yieldtime
+        self.worktime = worktime
+        self.completefn = complete_callback
+        self.updatefn = update_callback
         self.exception_handler = exception_handler
         self._interrupting = False
-        self._running      = False
-        self._queue        = []
-        self._lock         = thread.allocate_lock()
-        self._delay        = 1e6
+        self._running = False
+        self._queue = []
+        self._lock = thread.allocate_lock()
+        self._delay = 1e6
 
-    def queue(self,*args,**kwargs):
+    def queue(self, *args, **kwargs):
         """Add a work unit to the end of the queue.  See the compute()
         method for details of the arguments to the work unit."""
         self._lock.acquire()
@@ -142,7 +137,7 @@ class CalcThread:
         # Cannot do start_new_thread call within the lock
         self._lock.release()
         if not self._running:
-            self._time_for_update = clock() + 1e6
+            self._time_for_update = perf_counter() + 1e6
             thread.start_new_thread(self._run, ())
 
     def requeue(self, *args, **kwargs):
@@ -184,7 +179,7 @@ class CalcThread:
         long calculations."""
         self._delay = delay
         self._lock.acquire()
-        self._time_for_update = clock() + delay
+        self._time_for_update = perf_counter() + delay
         # print "setting _time_for_update to ",self._time_for_update
         self._lock.release()
 
@@ -195,22 +190,25 @@ class CalcThread:
 
         # Only called from within the running thread so no need to lock
         if self._running and self.yieldtime > 0 \
-            and clock() > self._time_for_nap:
+            and perf_counter() > self._time_for_nap:
             sleep(self.yieldtime)
-            self._time_for_nap = clock() + self.worktime
+            self._time_for_nap = perf_counter() + self.worktime
+
         if self._interrupting:
             raise KeyboardInterrupt
 
     def update(self, **kwargs):
         """Update GUI with the lastest results from the current work unit."""
-        if self.updatefn is not None and clock() > self._time_for_update:
+        if self.updatefn is not None and perf_counter() > self._time_for_update:
             self._lock.acquire()
-            self._time_for_update = clock() + self._delay
+            self._time_for_update = perf_counter() + self._delay
             self._lock.release()
             self._time_for_update += 1e6  # No more updates
 
             self.updatefn(**kwargs)
+
             sleep(self.yieldtime)
+
             if self._interrupting:
                 raise KeyboardInterrupt
         else:
@@ -239,13 +237,15 @@ class CalcThread:
         # (the original exception will be lost).  If there is no exception
         # handler, just log the exception in compute that we are responding to.
         if self.exception_handler:
+
             try:
                 self.exception_handler(*sys.exc_info())
                 return
+
             except Exception as exc:
-                pass
+                logger.error(exc, exc_info=True)
+
         logger.error(traceback.format_exc())
-        #print 'CalcThread exception',
 
     def _run(self):
         """Internal function to manage the thread."""
@@ -255,22 +255,28 @@ class CalcThread:
         # difficult to avoid.  Rather than polling, I will exit the
         # thread when the queue is empty and start a new thread when
         # there is more work to be done.
-        while 1:
+        while True:
             self._lock.acquire()
-            self._time_for_nap = clock() + self.worktime
+            self._time_for_nap = perf_counter() + self.worktime
             self._running = True
-            if self._queue == []:
+
+            if len(self._queue) == 0:
                 break
+
             self._interrupting = False
             args, kwargs = self._queue[0]
             self._queue = self._queue[1:]
             self._lock.release()
+
             try:
                 self.compute(*args, **kwargs)
-            except KeyboardInterrupt:
-                pass
-            except:
+
+            except KeyboardInterrupt as exc:
+                logger.error(exc, exc_info=True)
+
+            except Exception:
                 self.exception()
+
         self._running = False
 
 
@@ -294,14 +300,14 @@ class CalcCommandline:
     """
     def __init__(self, n=20000):
         print(thread.get_ident())
-        self.starttime = clock()
+        self.starttime = perf_counter()
         self.done = False
-        self.work = CalcDemo(completefn=self.complete,
-                             updatefn=self.update, yieldtime=0.001)
-        self.work2 = CalcDemo(completefn=self.complete,
-                             updatefn=self.update)
-        self.work3 = CalcDemo(completefn=self.complete,
-                             updatefn=self.update)
+        self.work = CalcDemo(complete_callback=self.complete,
+                             update_callback=self.update, yieldtime=0.001)
+        self.work2 = CalcDemo(complete_callback=self.complete,
+                              update_callback=self.update)
+        self.work3 = CalcDemo(complete_callback=self.complete,
+                              update_callback=self.update)
         self.work.queue(n)
         self.work2.queue(n)
         self.work3.queue(n)
@@ -311,15 +317,15 @@ class CalcCommandline:
         while not self.done:
             sleep(1)
             print("Main thread %d at %.2f" % (thread.get_ident(),
-                                              clock() - self.starttime))
+                                              perf_counter() - self.starttime))
 
     def update(self, i=0):
         print("Update i=%d from thread %d at %.2f" % (i, thread.get_ident(),
-                                                      clock() - self.starttime))
+                                                      perf_counter() - self.starttime))
         self.work.ready(2.5)
 
     def complete(self, total=0.0):
         print("Complete total=%g from thread %d at %.2f" % (total,
-                                                    thread.get_ident(),
-                                                    clock() - self.starttime))
+                                                            thread.get_ident(),
+                                                            perf_counter() - self.starttime))
         self.done = True
