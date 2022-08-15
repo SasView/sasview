@@ -612,7 +612,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         data1, data3, data_idf = self._real_space_plot.data
 
         with open(f_name, "w") as outfile:
-            outfile.write("X 1D 3D IDF\n")
+            outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
                        np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T,
                        delimiter=",")
