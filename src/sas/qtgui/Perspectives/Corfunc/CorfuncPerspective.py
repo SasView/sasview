@@ -85,8 +85,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.realSpaceLayout.insertWidget(0, self._real_space_plot)
         self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
 
-        # self.gridLayout_4.setColumnStretch(0, 1)
-        # self.gridLayout_4.setColumnStretch(1, 2)
+        self.mainLayout.setStretch(0, 0)
+        self.mainLayout.setStretch(1, 1)
+        self.controlFrame.setFixedWidth(583)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
