@@ -1,28 +1,21 @@
 from __future__ import annotations
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
-import numpy as np
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 
+from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationInteractionState
 
-class QSpaceCanvas(FigureCanvas):
+
+class QSpaceCanvas(CorfuncCanvas):
     """ Canvas for displaying input data and extrapolation parameters"""
 
     def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
-        self.parent = parent
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
+        super().__init__(parent, width, height, dpi)
 
-        FigureCanvas.__init__(self, self.fig)
-
-        self.data: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
         self.extrap = None
 
         # Vertical lines
@@ -77,7 +70,7 @@ class QSpaceCanvas(FigureCanvas):
         self.axes.set_title("Scattering data")
         self.fig.tight_layout()
 
-        if self.data:
+        if self.data is not None:
 
             extrapolation_params = self.parent.extrapolation_parmameters
 
@@ -93,10 +86,10 @@ class QSpaceCanvas(FigureCanvas):
                                max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
 
 
-        if self.extrap:
+        if self.extrap is not None:
             self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
 
-        if self.data or self.extrap:
+        if self.data is not None or self.extrap is not None:
             self.legend = self.axes.legend()
 
         self.draw()
