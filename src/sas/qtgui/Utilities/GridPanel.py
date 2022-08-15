@@ -452,7 +452,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         param_list = ['Filename','Number Of Terms','Reg. Const','Max Distance',
                       'Rg [Å]', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
                       'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
-                      'Calc. Time [sec]']
+                      'Calc. Time [sec]', 'Q Min', 'Q Max']
 
         if data is None:
             return
@@ -532,7 +532,20 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
             if msg != '':
                 GuiUtils.logger.warning(msg)
-
+            try:
+                    self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
+                    "{:.2g}".format(pr.get_qmin())))
+            except:
+                msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
+            if msg != '':
+                GuiUtils.logger.warning(msg)
+            try:
+                    self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
+                    "{:.2g}".format(pr.get_qmax())))
+            except:
+                msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
+            if msg != '':
+                GuiUtils.logger.warning(msg)
         self.tblParams.resizeColumnsToContents()
 
     @classmethod

@@ -417,14 +417,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Switch to another item in the data list"""
         if self.dataDeleted:
             return
-        if data_index == 0:
-            return
-        self.prPlot = None
-        self.dataPlot = None
+        print("Change display to: ", data_index)
+
+        self.data_index = data_index
         self.dataList.itemData(data_index)
+
+        if self.is2D:
+            self.prPlot = None
+            self.dataPlot = None
+            SliceLogicData = self.dataList.itemData(data_index)
+            self.logic.data = Data1D(x=SliceLogicData.x, y=SliceLogicData.y, dx=SliceLogicData.dx, dy=SliceLogicData.dy)
+            self._calculator = Invertor()
+            self.phi = SliceLogicData.phi
+            self.performEstimate()
+        else:
+            self.dataList.setCurrentIndex(self.data_index)
+            self.dataList.itemData(data_index)
         self.setCurrentData(self.dataList.itemData(data_index))
         self.updateDataList(self._data)
-
 
     ######################################################################
     # GUI Interaction Events
@@ -494,24 +504,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
          """
-        # if self.slices is not None:
-        #
-        #
-        #     for index in range(self.dataList.count()):
-        #         self.setCurrentData(self.dataList.itemData(index))
-        #         self.batchResults[self.logic.data.name] = self._dataList[self.dataList.itemData(index)].get(DICT_KEYS[0])
-        #         print(self._dataList[self.dataList.itemData(index)].get(DICT_KEYS[0]))
-        # except:
-        #     pass
-        # for slice in self.slices:
-        #     print(slice.phi)
-        #     self._data = slice
-        #     self.logic.data = Data1D(x=slice.x, y=slice.y, dx=slice.dx, dy=slice.dy)
-        #     self._calculator = Invertor()
-        #     self.performEstimate()
-        #     self.batchResults[str(slice.phi)] = self._calculator
-        #     self.updateDataList(self._data)
-
         self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
         self.batchResultsWindow.setupTable(self.batchResults)
         self.batchResultsWindow.show()
@@ -578,7 +570,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             DICT_KEYS[1]: self.prPlot,
             DICT_KEYS[2]: self.dataPlot
         }
-        self.batchResults[str(self.phi)] = self._calculator
+        if self.is2D:
+            self.logic.data.name = self.phi
+        self.batchResults[self.logic.data.name] = self._calculator
 
     def getState(self):
         """
@@ -631,19 +625,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Get the data by reference and display as necessary"""
         if data_ref is None:
             return
-
-        if self.is2D:
-            self._data = self.data
-            self.logic.data = Data1D(x=data_ref.x, y=data_ref.y, dx=data_ref.dx, dy=data_ref.dy)
-            self._calculator = Invertor()
-            self.phi = data_ref.phi
-            self.performEstimate()
-            return
-
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
-        self.dataList.setCurrentIndex(self.data_index)
         # Data references
         self._data = data_ref
         self.logic.data = GuiUtils.dataFromItem(data_ref)
@@ -1250,4 +1234,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
 
 def debug(checkpoint):
+    print(dir(InversionWidget))
     print(" - - - - - - - - [ DEBUG :: Checkpoint {} ] - - - - - - - - ".format(checkpoint))
+debug(1)
