@@ -82,7 +82,14 @@ class QSpaceCanvas(FigureCanvas):
             extrapolation_params = self.parent.extrapolation_parmameters
 
             # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
-            self.axes.errorbar(self.data.x, self.data.y, yerr=self.data.dy, label="Experimental Data")
+            self.axes.errorbar(self.data.x,
+                               self.data.y,
+                               yerr=self.data.dy,
+                               label="Experimental Data",
+                               marker='o',
+                               linestyle='',
+                               markersize=3,
+                               capsize=2)
             self.line1 = self.axes.axvline(extrapolation_params.point_1, color='k')
             self.line2 = self.axes.axvline(extrapolation_params.point_2, color='k')
             self.line3 = self.axes.axvline(extrapolation_params.point_3, color='k')
