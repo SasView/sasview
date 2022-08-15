@@ -389,7 +389,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                           and not self.isCalculating)
         self.sliceButton.setVisible(not isinstance(self._data, Data2D))
         self.sliceButton.setEnabled(not self.isSlicing)
-        self.sliceButton.setVisible(self.logic.data_is_loaded and not self.is2D)
+        self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
@@ -686,12 +686,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                    QtGui.QStandardItem(
                                        "{:.3g}".format(
                                            pr.get_pos_err(out, cov))))
-        if False: #self.prPlot is not None or
+        if self.prPlot is not None:
             title = self.prPlot.name
             self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
             self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
-        if False: # self.dataPlot is not None or
+        if self.dataPlot is not None:
             title = self.dataPlot.name
             self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
             self.dataPlot.symbol = "Line"
