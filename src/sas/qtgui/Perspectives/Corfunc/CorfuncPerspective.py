@@ -50,7 +50,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """ Window title """
         return "Corfunc Perspective"
 
-    trigger = QtCore.pyqtSignal(tuple)
+    trigger = QtCore.pyqtSignal(TransformedData)
 
 # pylint: disable=unused-argument
     def __init__(self, parent=None):
@@ -268,14 +268,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         method = "fourier"
 
-        extrap = self._q_space_plot.extrap
+        extrap = self.extrap
         background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
         def updatefn(msg):
             """Report progress of transformation."""
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-        def completefn(transforms):
+        def completefn(transforms: TransformedData):
             """Extract the values from the transforms and plot"""
             self.trigger.emit(transforms)
 
@@ -497,7 +497,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.set_text_enable(True)
         self.has_data = True
-        
+
         self.tabWidget.setCurrentIndex(0)
 
 

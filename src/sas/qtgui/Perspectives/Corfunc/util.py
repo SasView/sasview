@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from sasmodels.data import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_QMIN',

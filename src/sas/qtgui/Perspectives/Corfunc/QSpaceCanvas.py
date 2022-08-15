@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationInteractionState
 
 
@@ -16,7 +17,7 @@ class QSpaceCanvas(CorfuncCanvas):
     def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
         super().__init__(parent, width, height, dpi)
 
-        self.extrap = None
+        self.extrap: Optional[Data1D] = None
 
         # Vertical lines
         self.line1: Optional[Line2D] = None
@@ -75,16 +76,15 @@ class QSpaceCanvas(CorfuncCanvas):
             extrapolation_params = self.parent.extrapolation_parmameters
 
             # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
-            self.axes.errorbar(self.data.x, self.data.y, yerr=self.data.dy, label="Experimental Data")
+            self.axes.errorbar(self.data[0].x, self.data[0].y, yerr=self.data[0].dy, label="Experimental Data")
             self.line1 = self.axes.axvline(extrapolation_params.point_1, color='k')
             self.line2 = self.axes.axvline(extrapolation_params.point_2, color='k')
             self.line3 = self.axes.axvline(extrapolation_params.point_3, color='k')
             self.ghost_line = self.axes.axvline(0.1, color='k', alpha=0)
             self.axes.set_xlim(extrapolation_params.data_q_min / 2,
                                extrapolation_params.data_q_max* 1.5 - 0.5 * extrapolation_params.data_q_min)
-            self.axes.set_ylim(min(self.data.y) / 2,
-                               max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
-
+            self.axes.set_ylim(min(self.data[0].y) / 2,
+                               max(self.data[0].y) * 1.5 - 0.5 * min(self.data[0].y))
 
         if self.extrap is not None:
             self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")

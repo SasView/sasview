@@ -4,12 +4,10 @@ from abc import ABC, ABCMeta, abstractmethod
 
 from typing import Optional, Union, List, Iterable, TYPE_CHECKING
 
-import numpy as np
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from sasmodels.data import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
@@ -20,6 +18,7 @@ class CorfuncCanvasMeta(type(FigureCanvas), ABCMeta):
 
     This is needed to enable the mixin of CorfuncCanvas
     """
+
 
 class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
     """ Base class for the canvases in corfunc"""
@@ -54,6 +53,7 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
         elif isinstance(target_data, Data1D):
             self._data = [target_data]
         else:
+            print(type(target_data))
             self._data = list(target_data)
 
         self.draw_data()
