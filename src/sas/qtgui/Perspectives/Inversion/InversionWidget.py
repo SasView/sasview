@@ -387,8 +387,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
                                           and not self.isCalculating)
+        self.sliceButton.setVisible(not isinstance(self._data, Data2D))
         self.sliceButton.setEnabled(not self.isSlicing)
-        self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
+        self.sliceButton.setVisible(self.logic.data_is_loaded and not self.is2D)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
@@ -426,8 +427,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.prPlot = None
             self.dataPlot = None
             SliceLogicData = self.dataList.itemData(data_index)
+            print("Switching to ", SliceLogicData.phi)
             self.logic.data = Data1D(x=SliceLogicData.x, y=SliceLogicData.y, dx=SliceLogicData.dx, dy=SliceLogicData.dy)
             self._calculator = Invertor()
+            self.logic.data.name = SliceLogicData.phi
             self.phi = SliceLogicData.phi
             self.performEstimate()
         else:
@@ -1095,7 +1098,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Udpate internals and GUI
         self.updateDataList(self._data)
-        if self.isBatch:
+        if self.isBatch or self.is2D:
             self.startNextBatchItem()
         else:
             self.isCalculating = False
@@ -1145,7 +1148,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.sliceButton.setText("Slice")
         self.sliceList.show()
         self.enableButtons()
-        self.calculateThisButton.setEnabled(True)
         self.showResultsButton.setVisible(True)
 
     def set_tab_name(self, name=None):
