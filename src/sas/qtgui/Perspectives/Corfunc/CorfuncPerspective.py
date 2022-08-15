@@ -497,6 +497,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.set_text_enable(True)
         self.has_data = True
+        
+        self.tabWidget.setCurrentIndex(0)
 
 
     def setClosable(self, value=True):
