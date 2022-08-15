@@ -10,21 +10,6 @@ from .InversionWidget import InversionWidget
 # pr inversion calculation elements
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
-
-def is_float(value):
-    """Converts text input values to floats. Empty strings throw ValueError"""
-    try:
-        return float(value)
-    except ValueError:
-        return 0.0
-
-
-NUMBER_OF_TERMS = 10
-REGULARIZATION = 0.0001
-BACKGROUND_INPUT = 0.0
-MAX_DIST = 140.0
-DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
-
 logger = logging.getLogger(__name__)
 
 
@@ -76,7 +61,6 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.prPlot = None
         self.dataPlot = None
         # suggested nTerms
-        self.nTermsSuggested = NUMBER_OF_TERMS
 
         self.maxIndex = 1
         self.tab_id = 1
@@ -244,6 +228,8 @@ class InversionWindow(QtWidgets.QTabWidget):
                 msg = "2D data cannot be batch processed in P(r) Perspective yet"
                 raise AttributeError(msg)
 
+        if self.tabs[0].tab_name == "New Tab":
+            self.closeTabByIndex(0)
                 ###############
         # Checking for 1D again to mitigate the case when 2D data is last on the data list
         # if isinstance(self.logic.data, Data1D):
@@ -287,6 +273,7 @@ class InversionWindow(QtWidgets.QTabWidget):
         else:
             tab.calculateAllButton.setVisible(False)
             tab.showResultsButton.setVisible(False)
+
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
@@ -294,3 +281,4 @@ class InversionWindow(QtWidgets.QTabWidget):
         # Show the new tab
         self.setCurrentWidget(tab)
         return tab
+
