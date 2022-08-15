@@ -35,7 +35,7 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
 
     def clear(self):
         """ Remove data from plots"""
-        self.data = None
+        self._data = None
 
     @abstractmethod
     def draw_data(self):
@@ -50,10 +50,10 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
     def data(self, target_data: Optional[Union[Data1D, Iterable[Data1D]]]):
         # I'm not 100% sure this is good practice, but it will make things cleaner in the short term
         if target_data is None:
-            self.data = None
+            self._data = None
         elif isinstance(target_data, Data1D):
-            self.data = [target_data]
+            self._data = [target_data]
         else:
-            self.data = list(target_data)
+            self._data = list(target_data)
 
         self.draw_data()

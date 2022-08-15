@@ -491,8 +491,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdTransform.setEnabled(False)
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
+
         self._real_space_plot.data = None
         self._idf_plot.data = None
+
         self.set_text_enable(True)
         self.has_data = True
 
