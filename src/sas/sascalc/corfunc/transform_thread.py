@@ -3,9 +3,6 @@ from sas.sascalc.dataloader.data_info import Data1D
 from scipy.fftpack import dct
 from scipy.integrate import trapz, cumtrapz
 import numpy as np
-from time import sleep
-
-from sas.qtgui.Perspectives.Corfunc.util import TransformedData
 
 class FourierThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, update_callback=None,

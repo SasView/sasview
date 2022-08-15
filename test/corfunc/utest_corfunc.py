@@ -110,7 +110,7 @@ class TestCalculator(unittest.TestCase):
             try:
                 test()
             except Exception as e:
-                raise
+                raise e
                 self.fail("{} failed ({}: {})".format(test, type(e), e))
 
 
