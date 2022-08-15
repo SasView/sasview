@@ -38,6 +38,9 @@ class CorfuncSlider(QtWidgets.QWidget):
 
         # Display Parameters
         self.vertical_size = 20
+        self.left_pad = 60
+        self.right_pad = 60
+        self.line_width = 3
         self.guinier_color = QtGui.QColor('orange')
         self.data_color = QtGui.QColor('white')
         self.porod_color = QtGui.QColor('green')
@@ -123,9 +126,7 @@ class CorfuncSlider(QtWidgets.QWidget):
                 self._hover_id = self._nearest_line(mouse_x)
 
             if self._drag_id is not None:
-                if self._validate_new_position(self._drag_id, mouse_x):
-                    self._movement_line_position = mouse_x
-
+                self._movement_line_position = self._sanitise_new_position(self._drag_id, mouse_x)
                 self.valueEditing.emit(self.interaction_state)
 
 
@@ -154,16 +155,34 @@ class CorfuncSlider(QtWidgets.QWidget):
         """ Is the mouse inside the window"""
         return (0 < x < self.width()) and (0 < y < self.height())
 
-    def _validate_new_position(self, line_id: int, new_position: float):
-        """ Checks whether a new position for a line is valid"""
-        l1, l2, l3 = self.line_paint_positions
+    def _sanitise_new_position(self, line_id: int, new_position: int, delta=1) -> int:
+        """ Returns a revised position for a line position that prevents the bounds being exceeded """
+        l1, l2, l3 = (int(x) for x in self.line_paint_positions)
 
         if line_id == 0:
-            return 0 < new_position < l2
+            if self.left_pad > new_position:
+                return self.left_pad
+            elif new_position > l2:
+                return l2 - delta
+            else:
+                return new_position
+
         elif line_id == 1:
-            return l1 < new_position < l3
+            if l1 > new_position:
+                return l1 + delta
+            elif new_position > l3:
+                return l3 - delta
+            else:
+                return new_position
+
         elif line_id == 2:
-            return l2 < new_position < self.width()
+            if l2 > new_position:
+                return l2 + delta
+            elif new_position > self.width() - self.right_pad:
+                return self.width() - self.right_pad
+            else:
+                return new_position
+
         else:
             raise IndexError("line_id must be 0, 1 or 2")
 
@@ -224,9 +243,14 @@ class CorfuncSlider(QtWidgets.QWidget):
         return math.log(self._max/self._min)
 
     @property
+    def input_width(self) -> float:
+        """ Width of the part of the widget representing input data"""
+        return self.width() - (self.left_pad + self.right_pad)
+
+    @property
     def scale(self) -> float:
         """ Scale factor from input to draw scale e.g. A^-1 -> px"""
-        return self.width() / self.data_width
+        return self.input_width / self.data_width
 
     def transform(self, q_value: float) -> float:
         """Convert a value from input to draw coordinates"""
@@ -235,18 +259,18 @@ class CorfuncSlider(QtWidgets.QWidget):
             return 0
 
         if self._min == 0:
-            return self.width()
+            return self.input_width + self.left_pad
 
-        return self.scale * (math.log(q_value) - math.log(self._min))
+        return self.left_pad + self.scale * (math.log(q_value) - math.log(self._min))
 
     def inverse_transform(self, px_value: float) -> float:
         """Convert a value from draw coordinates to input value"""
-        return self._min*math.exp((px_value/self.scale))
+        return self._min*math.exp(((px_value - self.left_pad)/self.scale))
 
     @property
     def guinier_label_position(self) -> float:
         """ Position to put the text for the guinier region"""
-        return 15
+        return 0.5*self.left_pad
 
     @property
     def data_label_centre(self) -> float:
@@ -262,7 +286,7 @@ class CorfuncSlider(QtWidgets.QWidget):
     def porod_label_centre(self) -> float:
         """ Centre of the Porod region"""
 
-        return 0.5 * (self.transform(self._point_3) + self.transform(self._max))
+        return 0.5 * (self.transform(self._point_3) + self.width())
 
     @property
     def line_paint_positions(self) -> Tuple[float, float, float]:
@@ -279,7 +303,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         rect = QtCore.QRect(0, 0, painter.device().width(), self.vertical_size)
         painter.fillRect(rect, brush)
 
-        positions = [0,
+        positions = [self.transform(self._min),
                      self.transform(self._point_1),
                      self.transform(self._point_2),
                      self.transform(self._point_3),
@@ -308,7 +332,12 @@ class CorfuncSlider(QtWidgets.QWidget):
             data_color = self.data_color
             porod_color = self.disabled_non_data_color
 
-        grad = QtGui.QLinearGradient(0, 0, widths[0], 0)
+
+        brush.setColor(guinier_color)
+        rect = QtCore.QRect(0, 0, self.left_pad, self.vertical_size)
+        painter.fillRect(rect, brush)
+
+        grad = QtGui.QLinearGradient(positions[0], 0, positions[1], 0)
         grad.setColorAt(0.0, guinier_color)
         grad.setColorAt(1.0, data_color)
         rect = QtCore.QRect(positions[0], 0, widths[0], self.vertical_size)
@@ -325,36 +354,59 @@ class CorfuncSlider(QtWidgets.QWidget):
         painter.fillRect(rect, grad)
 
         brush.setColor(porod_color)
-        rect = QtCore.QRect(positions[3], 0, widths[3], self.vertical_size)
+        rect = QtCore.QRect(positions[3], 0, widths[3] + self.right_pad, self.vertical_size)
         painter.fillRect(rect, brush)
 
         #
         # Dividing lines
         #
+
+        # Data range lines
+        if self.isEnabled():
+            pen = QtGui.QPen(mix_colours(self.hover_colour, guinier_color, 0.5), self.line_width)
+        else:
+            pen = QtGui.QPen(self.disabled_line_color, self.line_width)
+
+        painter.setPen(pen)
+        painter.drawLine(self.left_pad, 0, self.left_pad, self.vertical_size)
+
+
+        if self.isEnabled():
+            pen = QtGui.QPen(mix_colours(self.hover_colour, porod_color, 0.5), self.line_width)
+        else:
+            pen = QtGui.QPen(self.disabled_line_color, self.line_width)
+
+        painter.setPen(pen)
+        painter.drawLine(self.width() - self.right_pad, 0, self.width()-self.right_pad, self.vertical_size)
+
+        # Main lines
         for i, x in enumerate(positions[1:-1]):
             if self.isEnabled():
                 # different color if it's the one that will be moved
                 if self._hovering and i == self._hover_id:
-                    pen = QtGui.QPen(self.hover_colour, 5)
+                    pen = QtGui.QPen(self.hover_colour, self.line_width)
                 else:
-                    pen = QtGui.QPen(self.text_color, 5)
+                    pen = QtGui.QPen(self.text_color, self.line_width)
             else:
-                pen = QtGui.QPen(self.disabled_line_color, 5)
+                pen = QtGui.QPen(self.disabled_line_color, self.line_width)
 
             painter.setPen(pen)
             painter.drawLine(x, 0, x, self.vertical_size)
 
+        # Moving line
         if self._movement_line_position is not None:
-            pen = QtGui.QPen(self.line_drag_color, 5)
+            pen = QtGui.QPen(self.line_drag_color, self.line_width)
             painter.setPen(pen)
             painter.drawLine(self._movement_line_position, 0, self._movement_line_position, self.vertical_size)
+
+
 
         #
         # Labels
         #
 
 
-        self._paint_label(self.guinier_label_position, "Guinier", False)
+        self._paint_label(self.guinier_label_position, "Guinier")
         self._paint_label(self.data_label_centre, "Data")
         # self._paint_label(self.transition_label_centre, "Transition") # Looks better without this
         self._paint_label(self.porod_label_centre, "Porod")

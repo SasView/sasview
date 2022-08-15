@@ -73,10 +73,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMin.setEnabled(False)
         self.extrapolation_curve = None
 
-
+        # Add slider widget
         self.slider = CorfuncSlider()
         self.sliderLayout.insertWidget(1, self.slider)
 
+        # Plots
         self._q_space_plot = QSpaceCanvas(self)
         self.qSpaceLayout.insertWidget(0, self._q_space_plot)
         self.qSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._q_space_plot, self))
@@ -85,6 +86,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.realSpaceLayout.insertWidget(0, self._real_space_plot)
         self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
 
+        # Things to make the corfunc panel behave
         self.mainLayout.setStretch(0, 0)
         self.mainLayout.setStretch(1, 1)
         self.controlFrame.setFixedWidth(583)
@@ -566,6 +568,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         if params.point_3 <= params.point_2:
             box_2_style = red
+            box_3_style = red
+
+        if params.data_q_max <= params.point_3:
             box_3_style = red
 
         # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
