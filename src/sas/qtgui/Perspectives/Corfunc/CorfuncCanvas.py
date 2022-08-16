@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 from typing import Optional, Union, List, Iterable, TYPE_CHECKING
 
