@@ -328,28 +328,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.model_changed(None)
 
 
-    # def update_real_space_plot(self, datas):
-    #     """take the datas tuple and create a plot in DE"""
-    #
-    #     assert isinstance(datas, tuple)
-    #     plot_id = id(self)
-    #     titles = [f"1D Correlation [{self._path}]", f"3D Correlation [{self._path}]"]
-    #     for i, plot in enumerate(datas):
-    #         plot_to_add = self.parent.createGuiData(plot)
-    #         # set plot properties
-    #         title = plot_to_add.title
-    #         plot_to_add.scale = 'linear'
-    #         plot_to_add.symbol = 'Line'
-    #         plot_to_add._xaxis = "x"
-    #         plot_to_add._xunit = "A"
-    #         plot_to_add._yaxis = "\Gamma"
-    #         if i < len(titles):
-    #             title = titles[i]
-    #             plot_to_add.name = titles[i]
-    #         GuiUtils.updateModelItemWithPlot(self._model_item, plot_to_add, title)
-    #         #self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
-
-
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
         self.mapper = QtWidgets.QDataWidgetMapper(self)
