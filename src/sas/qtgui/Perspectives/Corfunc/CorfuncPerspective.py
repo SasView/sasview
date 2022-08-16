@@ -602,19 +602,20 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         f_name = QtWidgets.QFileDialog.getSaveFileName(
             caption="Save As",
-            filter="Corfunc Text Output (*.crf)",
+            filter="Comma Separated Values (*.csv)",
             parent=None)[0]
         if not f_name:
             return
         if "." not in f_name:
-            f_name += ".crf"
+            f_name += ".csv"
 
         data1, data3, data_idf = self._real_space_plot.data
 
         with open(f_name, "w") as outfile:
-            outfile.write("X 1D 3D IDF\n")
+            outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
-                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
+                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T,
+                       delimiter=",")
     # pylint: enable=invalid-name
 
     def on_save_extrapolation(self):
