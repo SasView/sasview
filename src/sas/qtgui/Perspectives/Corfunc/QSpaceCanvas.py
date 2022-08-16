@@ -75,9 +75,9 @@ class QSpaceCanvas(CorfuncCanvas):
 
             extrapolation_params = self.parent.extrapolation_parmameters
 
-            self.axes.errorbar(self.data.x,
-                               self.data.y,
-                               yerr=self.data.dy,
+            self.axes.errorbar(self.data[0].x,
+                               self.data[0].y,
+                               yerr=self.data[0].dy,
                                label="Experimental Data",
                                marker='o',
                                linestyle='',
