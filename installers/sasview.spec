@@ -12,10 +12,10 @@ PYTHON_LOC = sys.exec_prefix
 datas = [
     ('../src/sas/sasview/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
-    ('../src/sas/sasview/test', 'test'),
+    ('../src/sas/sasview/test', 'test'), # TODO: probably need to update this
     ('../src/sas/sasview/custom_config.py', '.'),
     ('../src/sas/sasview/local_config.py', '.'),
-    ('../src/sas/sasview/wxcruft.py', '.'),
+#    ('../src/sas/sasview/wxcruft.py', '.'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
     ('../src/sas/logger_config.py', '.'),
     ('../src/sas/logging.ini', '.'),
