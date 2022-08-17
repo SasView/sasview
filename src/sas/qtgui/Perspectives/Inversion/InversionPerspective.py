@@ -824,8 +824,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         pr.suggested_alpha = self._calculator.alpha
         self.calcThread = CalcPr(pr, self.nTermsSuggested,
                                  error_func=self._threadError,
-                                 complete_callback=self._calculateCompleted,
-                                 update_callback=None)
+                                 completefn=self._calculateCompleted,
+                                 updatefn=None)
         self.calcThread.queue()
         self.calcThread.ready(2.5)
 
@@ -854,8 +854,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
-                                             complete_callback=self._estimateNTCompleted,
-                                             update_callback=None)
+                                             completefn=self._estimateNTCompleted,
+                                             updatefn=None)
         self.estimationThreadNT.queue()
         self.estimationThreadNT.ready(2.5)
 
@@ -879,8 +879,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
-                                             complete_callback=self._estimateDynamicNTCompleted,
-                                             update_callback=None)
+                                             completefn=self._estimateDynamicNTCompleted,
+                                             updatefn=None)
         self.estimationThreadNT.queue()
         self.estimationThreadNT.ready(2.5)
 
@@ -901,8 +901,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
                                            error_func=self._threadError,
-                                           complete_callback=self._estimateCompleted,
-                                           update_callback=None)
+                                           completefn=self._estimateCompleted,
+                                           updatefn=None)
         self.estimationThread.queue()
         self.estimationThread.ready(2.5)
 
@@ -918,8 +918,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
                                            error_func=self._threadError,
-                                           complete_callback=self._estimateDynamicCompleted,
-                                           update_callback=None)
+                                           completefn=self._estimateDynamicCompleted,
+                                           updatefn=None)
         self.estimationThread.queue()
         self.estimationThread.ready(2.5)
 

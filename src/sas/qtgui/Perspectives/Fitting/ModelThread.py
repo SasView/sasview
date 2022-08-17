@@ -21,15 +21,15 @@ class Calc2D(CalcThread):
                  weight=None,
                  fid=None,
                  toggle_mode_on=False,
-                 complete_callback=None,
-                 update_callback=None,
+                 completefn=None,
+                 updatefn=None,
                  update_chisqr=True,
                  source='model',
                  yieldtime=0.04,
                  worktime=0.04,
                  exception_handler=None,
                  ):
-        CalcThread.__init__(self, complete_callback, update_callback, yieldtime, worktime,
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
                             exception_handler=exception_handler)
         self.qmin = qmin
         self.qmax = qmax
@@ -127,17 +127,17 @@ class Calc1D(CalcThread):
                  smearer=None,
                  toggle_mode_on=False,
                  state=None,
-                 complete_callback=None,
+                 completefn=None,
                  update_chisqr=True,
                  source='model',
-                 update_callback=None,
+                 updatefn=None,
                  yieldtime=0.01,
                  worktime=0.01,
                  exception_handler=None,
                  ):
         """
         """
-        CalcThread.__init__(self, complete_callback, update_callback, yieldtime, worktime,
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
                             exception_handler=exception_handler)
         self.fid = fid
         self.data = data

@@ -5,9 +5,9 @@ from scipy.integrate import trapz, cumtrapz
 import numpy as np
 
 class FourierThread(CalcThread):
-    def __init__(self, raw_data, extrapolated_data, bg, update_callback=None,
-                 complete_callback=None):
-        CalcThread.__init__(self, update_callback=update_callback, complete_callback=complete_callback)
+    def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
+                 completefn=None):
+        CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
         self.data = raw_data
         self.background = bg
         self.extrapolation = extrapolated_data
@@ -82,9 +82,9 @@ class FourierThread(CalcThread):
         self.complete(transformed_data=transformed_data)
 
 class HilbertThread(CalcThread):
-    def __init__(self, raw_data, extrapolated_data, bg, update_callback=None,
-                 complete_callback=None):
-        CalcThread.__init__(self, update_callback=update_callback, complete_callback=complete_callback)
+    def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
+                 completefn=None):
+        CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
         self.data = raw_data
         self.background = bg
         self.extrapolation = extrapolated_data

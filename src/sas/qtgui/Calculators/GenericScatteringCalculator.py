@@ -660,8 +660,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     "Loading File {}".format(os.path.basename(
                         str(self.datafile))))
                 self.reader = GenReader(path=str(self.datafile), loader=loader,
-                                        complete_callback=lambda data=None: self.complete_loading_ex(data=data, load_nuc=load_nuc),
-                                        update_callback=self.load_update)
+                                        completefn=lambda data=None: self.complete_loading_ex(data=data, load_nuc=load_nuc),
+                                        updatefn=self.load_update)
                 self.reader.queue()
         except (RuntimeError, IOError):
             log_msg = "Generic SAS Calculator: %s" % sys.exc_info()[1]

@@ -112,16 +112,16 @@ class CalcThread:
     """
 
     def __init__(self,
-                 complete_callback: Optional[Callable]=None, # TODO: Specify types properly when they are supported
-                 update_callback: Optional[Callable]=None,
+                 completefn: Optional[Callable]=None,  # TODO: Specify types properly when they are supported
+                 updatefn: Optional[Callable]=None,
                  exception_handler: Optional[Callable]=None,
                  yieldtime=0.01,
                  worktime=0.01):
 
         self.yieldtime = yieldtime
         self.worktime = worktime
-        self.completefn = complete_callback
-        self.updatefn = update_callback
+        self.completefn = completefn
+        self.updatefn = updatefn
         self.exception_handler = exception_handler
         self._interrupting = False
         self._running = False

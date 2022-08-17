@@ -1692,8 +1692,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                   batch_inputs=batch_inputs,
                                   batch_outputs=batch_outputs,
                                   page_id=[[self.page_id]],
-                                  update_callback=updater,
-                                  complete_callback=completefn,
+                                  updatefn=updater,
+                                  completefn=completefn,
                                   reset_flag=self.is_chain_fitting)
 
         if LocalConfig.USING_TWISTED:

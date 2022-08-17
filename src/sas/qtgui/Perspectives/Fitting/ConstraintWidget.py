@@ -369,8 +369,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                                   batch_inputs=batch_inputs,
                                   batch_outputs=batch_outputs,
                                   page_id=page_ids,
-                                  update_callback=updater,
-                                  complete_callback=completefn,
+                                  updatefn=updater,
+                                  completefn=completefn,
                                   reset_flag=self.is_chain_fitting)
 
         if LocalConfig.USING_TWISTED:
