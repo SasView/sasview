@@ -27,7 +27,6 @@ class IDFCanvas(CorfuncCanvas):
         if self.data is not None and len(self.data) > 0:
             self.axes.plot(self.data[0].x, self.data[0].y)
             self.axes.set_xlim(0, max(self.data[0].x) / 4)
-            self.legend = self.axes.legend()
-
+            
         self.draw()
 
