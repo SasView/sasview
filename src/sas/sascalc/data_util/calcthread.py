@@ -114,9 +114,9 @@ class CalcThread:
     def __init__(self,
                  completefn: Optional[Callable]=None,  # TODO: Specify types properly when they are supported
                  updatefn: Optional[Callable]=None,
-                 exception_handler: Optional[Callable]=None,
                  yieldtime=0.01,
-                 worktime=0.01):
+                 worktime=0.01,
+                 exception_handler: Optional[Callable]=None):
 
         self.yieldtime = yieldtime
         self.worktime = worktime
