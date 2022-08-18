@@ -605,6 +605,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if "." not in f_name:
             f_name += ".csv"
 
+
         with open(f_name, "w") as outfile:
             outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
