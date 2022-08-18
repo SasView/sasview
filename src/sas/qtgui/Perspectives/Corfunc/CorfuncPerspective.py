@@ -94,9 +94,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.idfLayout.insertWidget(1, NavigationToolbar2QT(self._idf_plot, self))
 
         # Things to make the corfunc panel behave
-        self.mainLayout.setStretch(0, 0)
-        self.mainLayout.setStretch(1, 1)
-        self.controlFrame.setFixedWidth(583)
+        self.horizontalLayout_3.setStretch(0, 0)
+        self.horizontalLayout_3.setStretch(1, 1)
+        self.scrollArea.setFixedWidth(600)
+        self.adjustSize()
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
