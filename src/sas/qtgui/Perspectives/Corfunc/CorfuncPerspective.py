@@ -73,20 +73,23 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMin.setEnabled(False)
         self.extrapolation_curve = None
 
-
+        # Add slider widget
         self.slider = CorfuncSlider()
-        self.plotLayout.insertWidget(2, self.slider)
+        self.sliderLayout.insertWidget(1, self.slider)
 
+        # Plots
         self._q_space_plot = QSpaceCanvas(self)
-        self.plotLayout.insertWidget(1, self._q_space_plot)
-        self.plotLayout.insertWidget(2, NavigationToolbar2QT(self._q_space_plot, self))
+        self.qSpaceLayout.insertWidget(0, self._q_space_plot)
+        self.qSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._q_space_plot, self))
 
         self._real_space_plot = RealSpaceCanvas(self)
-        self.plotLayout.insertWidget(3, self._real_space_plot)
-        self.plotLayout.insertWidget(4, NavigationToolbar2QT(self._real_space_plot, self))
+        self.realSpaceLayout.insertWidget(0, self._real_space_plot)
+        self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
 
-        self.gridLayout_4.setColumnStretch(0, 1)
-        self.gridLayout_4.setColumnStretch(1, 2)
+        # Things to make the corfunc panel behave
+        self.mainLayout.setStretch(0, 0)
+        self.mainLayout.setStretch(1, 1)
+        self.controlFrame.setFixedWidth(583)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -251,6 +254,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdTransform.setEnabled(True)
         self.cmdSaveExtrapolation.setEnabled(True)
 
+        self.tabWidget.setCurrentIndex(0)
+
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
@@ -274,6 +279,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                                            completefn, updatefn)
 
 
+
+
     def finish_transform(self, transforms):
         self._real_space_plot.data = transforms
 
@@ -282,6 +289,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._real_space_plot.draw_data()
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
+        self.tabWidget.setCurrentIndex(1)
 
     def extract(self):
         transforms = self._real_space_plot.data
@@ -562,6 +570,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             box_2_style = red
             box_3_style = red
 
+        if params.data_q_max <= params.point_3:
+            box_3_style = red
+
         # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
         if params.point_3 <= params.point_1:
             box_1_style = red
@@ -591,19 +602,20 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         f_name = QtWidgets.QFileDialog.getSaveFileName(
             caption="Save As",
-            filter="Corfunc Text Output (*.crf)",
+            filter="Comma Separated Values (*.csv)",
             parent=None)[0]
         if not f_name:
             return
         if "." not in f_name:
-            f_name += ".crf"
+            f_name += ".csv"
 
         data1, data3, data_idf = self._real_space_plot.data
 
         with open(f_name, "w") as outfile:
-            outfile.write("X 1D 3D IDF\n")
+            outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
-                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
+                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T,
+                       delimiter=",")
     # pylint: enable=invalid-name
 
     def on_save_extrapolation(self):
