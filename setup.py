@@ -51,7 +51,7 @@ if os.path.isdir(sas_dir):
     #f_path = os.path.join(sas_dir, "categories.json")
     #if os.path.isfile(f_path):
     #    os.remove(f_path)
-    f_path = os.path.join(sas_dir, 'config_system', "custom_config.py")
+    f_path = os.path.join(sas_dir, 'sasview', "custom_config.py")
     if os.path.isfile(f_path):
         os.remove(f_path)
     #f_path = os.path.join(sas_dir, 'plugin_models')
