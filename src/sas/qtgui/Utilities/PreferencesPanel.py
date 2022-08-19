@@ -1,7 +1,7 @@
 import logging
 
-from PyQt5.QtWidgets import QComboBox, QDialog, QPushButton
-from typing import Optional, Any, List
+from PyQt5.QtWidgets import QComboBox, QDialog, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
+from typing import Optional, Any, List, Union, Callable
 
 from sas import get_custom_config
 from sas.qtgui.Utilities.UI.PreferencesUI import Ui_preferencesUI
@@ -63,10 +63,6 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
         self.buttonBox.clicked.connect(self.onClick)
 
-        ######################################################
-        # Setup each widget separately below here
-        ######################################################
-
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
         row = self.listWidget.currentRow()
@@ -97,9 +93,79 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             self.parent.guiManager.writeCustomConfig(get_custom_config())
         super(PreferencesPanel, self).close()
 
+    def addWidget(self, widget: QWidget):
+        self.stackedWidget.addWidget(widget)
+        self.listWidget.addItem(widget.name)
+        if widget.resetDefaults is not None and callable(widget.resetDefaults):
+            self.restoreDefaultMethods.append(widget.resetDefaults)
+
     def help(self):
         """Open the help window associated with the preferences window"""
         # TODO: Write the help file and then link to it here
         pass
 
-# TODO: Create API to easily add preferences to the panel
+
+class PreferencesWidget(QWidget):
+    """A helper class that bundles all values needed to add a new widget to the preferences panel
+    """
+    # Name that will be added to the PreferencesPanel listWidget
+    name = None  # type: str
+
+    def __init__(self, name: str, default_method: Optional[Callable] = None):
+        super(PreferencesWidget, self).__init__()
+        self.name = name
+        self.resetDefaults = default_method
+        self.horizontalLayout = QHBoxLayout()
+        self.setLayout(self.horizontalLayout)
+        self.adjustSize()
+
+    def _createLayoutAndTitle(self, title: str):
+        """A private class method that creates a vertical layout to hold the title and interactive item.
+        :param title: The title of the interactive item to be added to the preferences panel.
+        :return: A QVBoxLayout instance with a title box already added
+        """
+        layout = QVBoxLayout(self.horizontalLayout)
+        label = QLabel(title + ": ", layout)
+        layout.addWidget(label)
+        return layout
+
+    def addComboBox(self, title: str, params: List[Union[str, int, float]], callback: Callable):
+        """Add a title and combo box within the widget.
+        :param title: The title of the combo box to be added to the preferences panel.
+        :param params: A list of options to be added to the combo box.
+        :param callback: A callback method called when the combobox value is changed.
+        """
+        layout = self._createLayoutAndTitle(title)
+        box = QComboBox(layout)
+        for value in params:
+            box.addItem(str(value))
+        box.currentIndexChanged.connect(callback)
+        layout.addWidget(box)
+        self.horizontalLayout.addWidget(layout)
+
+    def addTextInput(self, title: str, callback: Callable, default_text: Optional[str] = ""):
+        """Add a title and text box within the widget.
+        :param title: The title of the text box to be added to the preferences panel.
+        :param callback: A callback method called when the combobox value is changed.
+        :param default_text: An optional value to be put within the text box as a default. Defaults to an empty string.
+        """
+        layout = self._createLayoutAndTitle(title)
+        text_box = QLineEdit(layout)
+        if default_text:
+            text_box.setText(default_text)
+        text_box.textChanged.connect(callback)
+        layout.addWidget(text_box)
+        self.horizontalLayout.addWidget(layout)
+
+    def addCheckBox(self, title: str, callback: Callable, checked: Optional[bool] = False):
+        """Add a title and check box within the widget.
+        :param title: The title of the check box to be added to the preferences panel.
+        :param callback: A callback method called when the combobox value is changed.
+        :param checked: An optional boolean value to specify if the check box is checked. Defaults to unchecked.
+        """
+        layout = self._createLayoutAndTitle(title)
+        check_box = QCheckBox(layout)
+        check_box.setChecked(checked)
+        check_box.toggled.connect(callback)
+        layout.addWidget(check_box)
+        self.horizontalLayout.addWidget(layout)

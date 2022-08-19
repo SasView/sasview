@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from PyQt5.QtWidgets import QWidget
-
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.PreferencesPanel import *
 
@@ -62,11 +60,10 @@ class PreferencesPanelTest(unittest.TestCase):
 
     def testPreferencesExtensibility(self):
         """Test ability to add and remove items from the listWidget and stackedWidget"""
-        # Create fake QWidget, add to stacked widget, and add item to list widget
-        new_widget = QWidget()
+        # Create fake PreferencesWidget, add to stacked widget, and add item to list widget
+        new_widget = PreferencesWidget("Fake Widget")
         starting_size = self.pref_panel.stackedWidget.count()
-        self.pref_panel.stackedWidget.addWidget(new_widget)
-        self.pref_panel.listWidget.addItem("Fake Widget")
+        self.pref_panel.addWidget(new_widget)
         # Ensure stacked widget and list widget have the same number of elements
         self.assertEqual(self.pref_panel.stackedWidget.count(), self.pref_panel.listWidget.count())
         self.assertEqual(starting_size + 1, self.pref_panel.stackedWidget.count())
