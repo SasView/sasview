@@ -12,7 +12,8 @@ PYTHON_LOC = sys.exec_prefix
 datas = [
     ('../src/sas/sasview/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
-    ('../src/sas/example_data', 'example_data'), 
+    ('../src/sas/example_data', 'example_data'),
+    ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports/report_style.css')
     ('../src/sas/sasview/custom_config.py', '.'),
     ('../src/sas/sasview/local_config.py', '.'),
 #    ('../src/sas/sasview/wxcruft.py', '.'),
