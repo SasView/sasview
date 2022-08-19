@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from collections import defaultdict
+from typing import Any, Tuple
 
 import copy
 import logging
@@ -20,12 +21,11 @@ from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
+from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.sascalc.fit.pagestate import PageState
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -65,11 +65,10 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
 from sasmodels.sasview_model import SasviewModel
 if not hasattr(SasviewModel, 'get_weights'):
-    def get_weights(self, name):
+    def get_weights(self: Any, name: str) -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
         """
-        # type: (str) -> Tuple(np.ndarray, np.ndarray)
         _, x, w = self._get_weights(self._model_info.parameters[name])
         return x, w
 
@@ -1664,7 +1663,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         batch_inputs = {}
         batch_outputs = {}
         #---------------------------------
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             handler = None
             updater = None
         else:
@@ -1696,7 +1695,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                             completefn=completefn,
                             reset_flag=self.is_chain_fitting)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # start the trhrhread with twisted
             calc_thread = threads.deferToThread(self.calc_fit.compute)
             calc_thread.addCallback(completefn)
@@ -2900,7 +2899,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                exception_handler=self.calcException,
                                                source=None)
         if use_threads:
-            if LocalConfig.USING_TWISTED:
+            if config.USING_TWISTED:
                 # start the thread with twisted
                 thread = threads.deferToThread(calc_thread.compute)
                 thread.addCallback(completefn)

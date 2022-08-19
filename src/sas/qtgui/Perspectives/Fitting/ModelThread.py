@@ -7,7 +7,7 @@ import numpy
 import math
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
+from sas import config
 
 class Calc2D(CalcThread):
     """
@@ -108,7 +108,7 @@ class Calc2D(CalcThread):
             weight = self.weight, update_chisqr = self.update_chisqr,
             source = self.source)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             return res
         else:
             self.completefn(res)
@@ -263,7 +263,7 @@ class Calc1D(CalcThread):
             unsmeared_data = unsmeared_data, unsmeared_error = unsmeared_error,
             intermediate_results = intermediate_results)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             return res
         else:
             self.completefn(res)

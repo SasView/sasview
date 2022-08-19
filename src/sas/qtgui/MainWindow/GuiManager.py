@@ -19,11 +19,9 @@ from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
 # General SAS imports
-from sas import get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -178,7 +176,7 @@ class GuiManager:
         self.results_frame.setVisible(False)
         self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
-        self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
+        self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
         self._workspace.actionHide_Toolbar.setText("Show Toolbar")
 
         # Add calculators - floating for usability
@@ -531,7 +529,7 @@ class GuiManager:
         a call-back method when the current version number has been obtained.
         """
         version_info = {"version": "0.0.0"}
-        c = ConnectionProxy(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
+        c = ConnectionProxy(config.__update_URL__, config.UPDATE_TIMEOUT)
         response = c.connect()
         if response is None:
             return
@@ -572,16 +570,16 @@ class GuiManager:
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif version.__gt__(LocalConfig.__version__):
+            elif version.__gt__(config.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
                 else:
-                    webbrowser.open(LocalConfig.__download_page__)
+                    webbrowser.open(config.__download_page__)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                msg += " of %s" % str(LocalConfig.__appname__)
+                msg += " of %s" % str(config.__appname__)
                 self.communicate.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
@@ -1214,7 +1212,7 @@ class GuiManager:
         """
         Open the marketplace link in default browser
         """
-        url = LocalConfig.MARKETPLACE_URL
+        url = config.MARKETPLACE_URL
         webbrowser.open_new(url)
 
     def actionAbout(self):

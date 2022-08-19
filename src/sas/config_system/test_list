@@ -4,3 +4,7 @@ AboutBox
 GuiManger save state
 DensityCalculatorTest
 AboutBoxTest
+WelcomePanel
+ModelThread.Calc2D
+FittingWidget
+FittingWidgetTest

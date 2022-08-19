@@ -427,7 +427,7 @@ class FittingWidgetTest(unittest.TestCase):
         Check that the fitting 1D data object is ready
         """
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # Mock the thread creation
             threads.deferToThread = MagicMock()
             # Model for theory
