@@ -2,14 +2,11 @@ import functools
 from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.UI import images_rc
-from sas.qtgui.UI import main_resources_rc
 
 from .UI.AcknowledgementsUI import Ui_Acknowledgements
 
 class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
+
     def __init__(self, parent=None):
         super(Acknowledgements, self).__init__(parent)
         self.setupUi(self)
@@ -17,8 +14,6 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.addText()
-
-        #self.addActions()
 
     def addText(self):
         """
@@ -33,11 +28,3 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
         self.textBrowser.setText(acknowledgement_text_1)
         acknowledgement_text_2 = 'M. Doucet et al. SasView Version ' + str(version) + ', ' + str(doi)
         self.textBrowser_2.setText(acknowledgement_text_2)
-
-
-    # def addActions(self):
-    #     """
-    #     Add actions to the logo push buttons
-    #     """
-    #
-    #     self.cmdOK.clicked.connect(self.close)

@@ -20,7 +20,6 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-import sas.qtgui.Utilities.LocalConfig
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D

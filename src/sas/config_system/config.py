@@ -16,6 +16,7 @@ from sas.config_system.config_meta import ConfigBase, ConfigMeta
 import sas.sasview
 import os
 import time
+import logging
 
 
 class Config(ConfigBase, metaclass=ConfigMeta):
@@ -97,13 +98,17 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self._ess_url = "https://europeanspallationsource.se/"
         self._ill_url = "https://www.ill.eu/"
         self._ansto_url = "https://www.ansto.gov.au/"
+        self._bam_url = "http://www.bam.de/"
         self._tudelft_url = "https://www.tudelft.nl/en/faculty-of-applied-sciences/business/facilities/reactor-institute-delft"
+        self._delft_url = "http://www.tudelft.nl/en/tnw/business/facilities/reactor-instituut-delft/"
         self._dls_url = "https://www.diamond.ac.uk/"
         self._danse_url = "https://www.its.caltech.edu/~matsci/btf/DANSE_web_page.html"
         self._inst_url = "https://www.utk.edu"
+        self._diamond_url = "http://www.diamond.ac.uk"
         self._corner_image = os.path.join(self.icon_path, "angles_flat.png")
         self._welcome_image = os.path.join(self.icon_path, "SVwelcome.png")
-        self._copyright = "(c) 2009 - 2022, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+        # self._copyright = "(c) 2009 - 2022, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+        self._copyright = "Copyright (c) 2009-2022 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO"
         self.marketplace_url = "http://marketplace.sasview.org/"
 
         # edit the list of file state your plugin can read
@@ -177,6 +182,17 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Logging options
         self.FILTER_DEBUG_LOGS = True
+
+        # Default threading model
+        self.USING_TWISTED = False
+
+        # Time out for updating sasview
+        self.UPDATE_TIMEOUT = 2
+
+        # Logging levels to disable, if any
+        self.DISABLE_LOGGING = logging.NOTSET
+
+        # Location of the marketplace
 
         #
         # Lock the class down

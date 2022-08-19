@@ -20,6 +20,10 @@ class ConfigBase:
     def _lock(self):
         self._locked = True
 
+    def save(self):
+        #TODO: Implement save functionality to yaml (and load, with schema)
+        raise NotImplementedError()
+
     def __setattr__(self, key, value):
         if hasattr(self, "_locked") and self._locked:
             if key not in self.__dict__:

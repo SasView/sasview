@@ -3,7 +3,7 @@ import sys
 from sas.config_system import configuration as config
 
 __all__ = ['get_app_dir', 'get_user_dir',
-           'get_local_config', 'get_custom_config']
+           'get_local_config', 'get_custom_config', 'config']
 
 _APP_DIR = None
 def get_app_dir():

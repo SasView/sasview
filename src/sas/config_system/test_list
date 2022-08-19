@@ -1,0 +1,6 @@
+Places where config has been replaced
+
+AboutBox
+GuiManger save state
+DensityCalculatorTest
+AboutBoxTest

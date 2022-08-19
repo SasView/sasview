@@ -67,6 +67,8 @@ from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
+from sas import config
+
 logger = logging.getLogger(__name__)
 
 
@@ -599,13 +601,8 @@ class GuiManager:
         """ Show the Welcome panel, when required """
         # Assure the welcome screen is requested
         show_welcome_widget = True
-        custom_config = get_custom_config()
-        if hasattr(custom_config, "WELCOME_PANEL_SHOW"):
-            if isinstance(custom_config.WELCOME_PANEL_SHOW, bool):
-                show_welcome_widget = custom_config.WELCOME_PANEL_SHOW
-            else:
-                logging.warning("WELCOME_PANEL_SHOW has invalid value in custom_config.py")
-        if show_welcome_widget:
+
+        if config.WELCOME_PANEL_SHOW:
             self.actionWelcome()
 
     def addCallbacks(self):
@@ -1305,6 +1302,10 @@ class GuiManager:
         """
         Save the config_system file based on current session values
         """
+
+        config.save()
+        return
+
         # Load the current file
         config_content = GuiUtils.custom_config
 
