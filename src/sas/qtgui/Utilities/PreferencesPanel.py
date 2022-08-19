@@ -129,7 +129,7 @@ class PreferencesWidget(QWidget):
         layout.addWidget(label)
         return layout
 
-    def addComboBox(self, title: str, params: List[Union[str, int, float]], callback: Callable):
+    def addComboBox(self, title: str, params: List[Union[str, int, float]], callback: Callable, default: Optional[str]):
         """Add a title and combo box within the widget.
         :param title: The title of the combo box to be added to the preferences panel.
         :param params: A list of options to be added to the combo box.
@@ -137,8 +137,7 @@ class PreferencesWidget(QWidget):
         """
         layout = self._createLayoutAndTitle(title)
         box = QComboBox(layout)
-        for value in params:
-            box.addItem(str(value))
+        cb_replace_all_items_with_new(box, params, default)
         box.currentIndexChanged.connect(callback)
         layout.addWidget(box)
         self.horizontalLayout.addWidget(layout)
