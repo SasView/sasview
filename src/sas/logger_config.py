@@ -74,7 +74,7 @@ class SetupLogger(object):
 
     def _find_config_file(self, filename="logging.ini"):
         '''
-        The config file is in:
+        The config_system file is in:
         Debug ./sasview/
         Packaging: sas/sasview/
         Packaging / production does not work well with absolute paths

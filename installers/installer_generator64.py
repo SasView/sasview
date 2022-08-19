@@ -1,5 +1,5 @@
 """
-This module generates .iss file according to the local config of
+This module generates .iss file according to the local config_system of
 the current application. Please make sure a file named "local_config.py"
 exists in the current directory. Edit local_config.py according to your needs.
 """

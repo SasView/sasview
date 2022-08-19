@@ -41,7 +41,7 @@ extensions = ['sphinx.ext.autodoc',
 
 mathjax_path = (
     'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?'
-    'config=TeX-MML-AM_CHTML')
+    'config_system=TeX-MML-AM_CHTML')
 
 # For katex uncomment the following
 """

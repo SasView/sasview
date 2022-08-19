@@ -1,7 +1,7 @@
 """ Configuration class - stores configuration information for SasView
 
 The Config class cannot be subclassed or dynamically modified,
-this prevents the config from having fields that are unspecified in
+this prevents the config_system from having fields that are unspecified in
 the base class, and makes it so that all usages of fields can be
 automatically tracked. This allows the configs to be much more
 easily maintained.
@@ -11,7 +11,7 @@ because, as they currently work, the behaviour would make creating
 different configs difficult.
 """
 
-from config_meta import ConfigBase, ConfigMeta
+from sas.config_system.config_meta import ConfigBase, ConfigMeta
 
 import sas.sasview
 import os
@@ -158,6 +158,25 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # OpenCL option
         self.SAS_OPENCL = None
+
+        self.DATAPANEL_WIDTH = -1
+        self.CLEANUP_PLOT = False
+        self.FIXED_PANEL = True
+        self.PLOPANEL_WIDTH = -1
+        self.DATALOADER_SHOW = True
+        self.GUIFRAME_HEIGHT = -1
+        self.GUIFRAME_WIDTH = -1
+        self.CONTROL_WIDTH = -1
+        self.CONTROL_HEIGHT = -1
+        self.DEFAULT_OPEN_FOLDER = None
+        self.WELCOME_PANEL_SHOW = False
+        self.TOOLBAR_SHOW = True
+        self.DEFAULT_PERSPECTIVE = "Fitting"
+        self.SAS_OPENCL = "None"
+        self.MARKETPLACE_URL = "http://marketplace.sasview.org/"
+
+        # Logging options
+        self.FILTER_DEBUG_LOGS = True
 
         #
         # Lock the class down

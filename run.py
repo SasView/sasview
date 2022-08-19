@@ -111,7 +111,7 @@ def prepare():
 
     # initialize OpenCL setting
     import sas
-    SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
+    SAS_OPENCL = sas.config.SAS_OPENCL
     if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
         os.environ["SAS_OPENCL"] = SAS_OPENCL
 

@@ -1,5 +1,5 @@
 """
-This module generates .iss file according to the local config of
+This module generates .iss file according to the local config_system of
 the current application. Please make sure a file named "local_config.py"
 exists in the current directory. Edit local_config.py according to your needs.
 """
@@ -11,7 +11,7 @@ import string
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(root, 'sasview-install', 'Lib', 'site-packages'))
-from sas.sasview import local_config
+from sas import config as local_config
 
 #REG_PROGRAM = """{app}\MYPROG.EXE"" ""%1"""
 APPLICATION = str(local_config.__appname__ )+ '.exe'
