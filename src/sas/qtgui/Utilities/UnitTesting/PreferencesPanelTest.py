@@ -31,6 +31,11 @@ class PreferencesPanelTest(unittest.TestCase):
                             item = '"' + item + '"'
                         out_f.write("%s = %s\n" % (key, str(item)))
 
+            @staticmethod
+            def showHelp(location):
+                """Simulate a help window"""
+                return location == "/user/qtgui/MainWindow/preferences_help.html"
+
         self.dummy_parent = QWidget()
         self.dummy_parent.guiManager = DummyClass()
         self.pref_panel = PreferencesPanel(self.dummy_parent)
@@ -70,3 +75,7 @@ class PreferencesPanelTest(unittest.TestCase):
         # Select last item in list widget and check the stacked widget moves too
         self.pref_panel.listWidget.setCurrentRow(self.pref_panel.listWidget.count() - 1)
         self.assertEqual(self.pref_panel.stackedWidget.currentIndex(), self.pref_panel.listWidget.currentRow())
+
+    def testHelp(self):
+        help_button = self.pref_panel.buttonBox.buttons()[0]
+        self.pref_panel.onClick(help_button)
