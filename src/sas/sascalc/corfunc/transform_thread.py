@@ -3,11 +3,10 @@ from sas.sascalc.dataloader.data_info import Data1D
 from scipy.fftpack import dct
 from scipy.integrate import trapz, cumtrapz
 import numpy as np
-from time import sleep
 
 class FourierThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
-        completefn=None):
+                 completefn=None):
         CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
         self.data = raw_data
         self.background = bg
@@ -78,13 +77,13 @@ class FourierThread(CalcThread):
         transform3 = Data1D(xs, gamma3)
         idf = Data1D(xs, idf)
 
-        transforms = (transform1, transform3, idf)
+        transformed_data = (transform1, transform3, idf)
 
-        self.complete(transforms=transforms)
+        self.complete(transformed_data=transformed_data)
 
 class HilbertThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
-        completefn=None):
+                 completefn=None):
         CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
         self.data = raw_data
         self.background = bg

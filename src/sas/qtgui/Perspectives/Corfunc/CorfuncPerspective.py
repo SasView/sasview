@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from numpy.linalg.linalg import LinAlgError
 
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import logging
 
@@ -22,18 +22,20 @@ from PyQt5 import QtGui, QtWidgets
 from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .util import WIDGETS, safe_float
+from .util import WIDGETS, safe_float, TransformedData
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
@@ -49,7 +51,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """ Window title """
         return "Corfunc Perspective"
 
-    trigger = QtCore.pyqtSignal(tuple)
+    trigger = QtCore.pyqtSignal(TransformedData)
 
 # pylint: disable=unused-argument
     def __init__(self, parent=None):
@@ -67,7 +69,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._calculator = CorfuncCalculator()
         self._allow_close = False
         self._model_item: Optional[QStandardItem] = None
-        self.data = None
+        self.data: Optional[Data1D] = None
+        self.extrap: Optional[Data1D] = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
@@ -86,10 +89,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.realSpaceLayout.insertWidget(0, self._real_space_plot)
         self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
 
+        self._idf_plot = IDFCanvas(self)
+        self.idfLayout.insertWidget(0, self._idf_plot)
+        self.idfLayout.insertWidget(1, NavigationToolbar2QT(self._idf_plot, self))
+
         # Things to make the corfunc panel behave
-        self.mainLayout.setStretch(0, 0)
-        self.mainLayout.setStretch(1, 1)
-        self.controlFrame.setFixedWidth(583)
+        self.horizontalLayout_3.setStretch(0, 0)
+        self.horizontalLayout_3.setStretch(1, 1)
+        self.scrollArea.setFixedWidth(600)
+        self.adjustSize()
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -193,10 +201,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Clear data plots
         self._q_space_plot.data = None
         self._q_space_plot.extrap = None
-        self._q_space_plot.draw_data()
+
         self._real_space_plot.data = None
-        self._real_space_plot.extrap = None
-        self._real_space_plot.draw_data()
+        self._idf_plot.data = None
+
         self.slider.setEnabled(False)
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
@@ -249,6 +257,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_PORODSIGMA,
                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
 
+        self.extrap = extrapolation
         self._q_space_plot.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
@@ -263,16 +272,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         method = "fourier"
 
-        extrap = self._q_space_plot.extrap
+        extrap = self.extrap
         background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
         def updatefn(msg):
             """Report progress of transformation."""
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-        def completefn(transforms):
+        def completefn(transformed_data: Tuple[Data1D, Data1D, Data1D]):
             """Extract the values from the transforms and plot"""
-            self.trigger.emit(transforms)
+            self.trigger.emit(TransformedData(*transformed_data)) # TODO: Make this return more structured data earlier
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, background,
@@ -281,20 +290,27 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
 
 
-    def finish_transform(self, transforms):
-        self._real_space_plot.data = transforms
+    def finish_transform(self, data: TransformedData):
 
-        self.update_real_space_plot(transforms)
+        self.transformed_data = data
 
-        self._real_space_plot.draw_data()
+        self._real_space_plot.data = data.gamma_1, data.gamma_3
+
+        # self.update_real_space_plot(transforms)
+
+        self._idf_plot.data = data.idf
+
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
+
         self.tabWidget.setCurrentIndex(1)
 
     def extract(self):
-        transforms = self._real_space_plot.data
 
-        params = self._calculator.extract_parameters(transforms[0])
+        if self.transformed_data is None:
+            return
+
+        params = self._calculator.extract_parameters(self.transformed_data[0])
 
         if params is not None:
 
@@ -312,29 +328,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.model.itemChanged.connect(self.model_changed)
             self.model_changed(None)
 
-
-    def update_real_space_plot(self, datas):
-        """take the datas tuple and create a plot in DE"""
-
-        assert isinstance(datas, tuple)
-        plot_id = id(self)
-        titles = [f"1D Correlation [{self._path}]", f"3D Correlation [{self._path}]",
-                  'Interface Distribution Function']
-        for i, plot in enumerate(datas):
-            plot_to_add = self.parent.createGuiData(plot)
-            # set plot properties
-            title = plot_to_add.title
-            plot_to_add.scale = 'linear'
-            plot_to_add.symbol = 'Line'
-            plot_to_add._xaxis = "x"
-            plot_to_add._xunit = "A"
-            plot_to_add._yaxis = "\Gamma"
-            if i < len(titles):
-                title = titles[i]
-                plot_to_add.name = titles[i]
-            GuiUtils.updateModelItemWithPlot(self._model_item, plot_to_add, title)
-            #self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
-        pass
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
@@ -480,10 +473,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdTransform.setEnabled(False)
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
+
         self._real_space_plot.data = None
-        self._real_space_plot.draw_data()
+        self._idf_plot.data = None
+
         self.set_text_enable(True)
         self.has_data = True
+
+        self.tabWidget.setCurrentIndex(0)
 
 
     def setClosable(self, value=True):
@@ -609,12 +606,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if "." not in f_name:
             f_name += ".csv"
 
-        data1, data3, data_idf = self._real_space_plot.data
 
         with open(f_name, "w") as outfile:
             outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
-                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T,
+                       np.vstack([(
+                           self.transformed_data.gamma_1.x,
+                           self.transformed_data.gamma_1.y,
+                           self.transformed_data.gamma_3.y,
+                           self.transformed_data.idf.y)]).T,
                        delimiter=",")
     # pylint: enable=invalid-name
 
@@ -765,13 +765,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if params.get('long_period', '0') != '0':
             self.transform()
 
-    def get_figures(self):
-        """
-        Get plots for the report
-        """
-
-        return [self._real_space_plot.fig]
-
     @property
     def real_space_figure(self):
         return self._real_space_plot.fig
@@ -779,6 +772,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     @property
     def q_space_figure(self):
         return self._q_space_plot.fig
+
+    @property
+    def idf_figure(self):
+        return self._idf_plot.fig
 
     @property
     def supports_reports(self) -> bool:
@@ -805,5 +802,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         report.add_table_dict(fancy_parameters, ("Parameter", "Value"))
         report.add_plot(self.q_space_figure)
         report.add_plot(self.real_space_figure)
+        report.add_plot(self.idf_figure)
 
         return report.report_data

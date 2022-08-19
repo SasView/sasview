@@ -148,11 +148,11 @@ class CorfuncCalculator:
 
         if trans_type == 'fourier':
             self._transform_thread = FourierThread(self._data, extrapolation,
-            background, completefn=completefn,
-            updatefn=updatefn)
+                                                   background, completefn=completefn,
+                                                   updatefn=updatefn)
         elif trans_type == 'hilbert':
             self._transform_thread = HilbertThread(self._data, extrapolation,
-            background, completefn=completefn, updatefn=updatefn)
+                                                   background, completefn=completefn, updatefn=updatefn)
         else:
             err = ("Incorrect transform type supplied, must be 'fourier'",
                 " or 'hilbert'")

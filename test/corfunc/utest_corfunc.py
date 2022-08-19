@@ -82,8 +82,8 @@ class TestCalculator(unittest.TestCase):
         self.assertAlmostEqual(transform1.y[0], 1)
         self.assertAlmostEqual(transform1.y[-1], 0, 5)
 
-    def transform_callback(self, transforms):
-        self.transformation = transforms
+    def transform_callback(self, transformed_data):
+        self.transformation = transformed_data
 
     def extract_params(self):
         params = self.calculator.extract_parameters(self.transformation[0])
@@ -110,7 +110,7 @@ class TestCalculator(unittest.TestCase):
             try:
                 test()
             except Exception as e:
-                raise
+                raise e
                 self.fail("{} failed ({}: {})".format(test, type(e), e))
 
 
