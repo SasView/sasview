@@ -479,17 +479,17 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 continue
             try:
                 self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.nfunc)))
+                    "{:.3g}".format(pr.noOfTerms)))
             except:
                 msg += "Unable to load nfunc for {} in row {}.\n".format(filename, i_row)
             try:
                 self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.alpha)))
+                    "{:.3g}".format(pr.regConst)))
             except:
                 msg += "Unable to load alpha for {} in row {}.\n".format(filename, i_row)
             try:
                 self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.d_max)))
+                    "{:.3g}".format(pr.maxDist)))
             except:
                 msg += "Unable to load Dmax for {} in row {}.\n".format(filename, i_row)
             try:
