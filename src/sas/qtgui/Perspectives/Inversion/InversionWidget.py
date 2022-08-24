@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import qtpy
+import traceback
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
@@ -18,7 +19,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
-from ...Plotting.Plotter import Plotter, PlotterWidget
+from ...Plotting.Plotter import Plotter
 from ...Plotting.Plotter2D import Plotter2D
 from ...Plotting.Slicers.SectorSlicer import SectorInteractor
 
@@ -39,7 +40,7 @@ MAX_DIST = 140.0
 START_POINT = 60
 NO_OF_SLICES = 6
 NO_OF_QBIN = 20
-DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
+DICT_KEYS = ["Parameters", "Calculator", "PrPlot", "DataPlot"]
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if data is not None:
             self.data = data
             if isinstance(data, list):
-                self._data = data[0]
+                self._data = data
+
+        self._parameters = Parameters()
 
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
@@ -265,13 +268,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.slitWidthInput.textChanged.connect(
             lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
 
-        self.model.itemChanged.connect(self.model_changed)
+        # self.model.itemChanged.connect(self.model_changed) // disabled because it causes dataList to be set to prevous item. further debuging required.
         self.estimateNTSignal.connect(self._estimateNTUpdate)
         self.estimateDynamicNTSignal.connect(self._estimateDynamicNTUpdate)
         self.estimateDynamicSignal.connect(self._estimateDynamicUpdate)
         self.estimateSignal.connect(self._estimateUpdate)
         self.calculateSignal.connect(self._calculateUpdate)
-
         self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
 
     def setupMapper(self):
@@ -418,26 +420,38 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Switch to another item in the data list"""
         if self.dataDeleted:
             return
-        print("Change display to: ", data_index)
+        if isinstance(self._data, list):
+            return
 
-        self.data_index = data_index
-        self.dataList.itemData(data_index)
-
+            # only take in 1D slices of 2dData files
         if self.is2D:
             self.prPlot = None
             self.dataPlot = None
             SliceLogicData = self.dataList.itemData(data_index)
-            print("Switching to ", SliceLogicData.phi)
-            self.logic.data = Data1D(x=SliceLogicData.x, y=SliceLogicData.y, dx=SliceLogicData.dx, dy=SliceLogicData.dy)
+            self.logic.data = Data1D(x=SliceLogicData.x,
+                                         y=SliceLogicData.y,
+                                         dx=SliceLogicData.dx,
+                                         dy=SliceLogicData.dy)
+            self._parameters = Parameters()
             self._calculator = Invertor()
             self.logic.data.name = SliceLogicData.phi
             self.phi = SliceLogicData.phi
             self.performEstimate()
+            return
         else:
-            self.dataList.setCurrentIndex(self.data_index)
-            self.dataList.itemData(data_index)
-        self.setCurrentData(self.dataList.itemData(data_index))
-        self.updateDataList(self._data)
+            self.updateDataList(self._data)
+
+            qmin, qmax = self.logic.computeDataRange()
+            self._calculator.set_qmin(qmin)
+            self._calculator.set_qmax(qmax)
+
+            self.setCurrentData(self.dataList.itemData(data_index))
+
+            print('###------{}------###\nNO of Terms: {}\nRegConst: {}\nMax Distance: {}'.format(self.logic.data.name,
+                                                                                                 self.noOfTermsInput.text(),
+                                                                                                 self.regularizationConstantInput.text(),
+                                                                                                 self.maxDistanceInput.text()))
+
 
     ######################################################################
     # GUI Interaction Events
@@ -564,14 +578,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
             return
-        qmin, qmax = self.logic.computeDataRange()
-        self._calculator.set_qmin(qmin)
-        self._calculator.set_qmax(qmax)
+
+        self._calculator.noOfTerms = int(self.noOfTermsInput.text())
+        self._calculator.regConst = float(self.regularizationConstantInput.text())
+        self._calculator.maxDist = float(self.maxDistanceInput.text())
+        self._calculator.background = float(self.backgroundInput.text())
 
         self._dataList[dataRef] = {
-            DICT_KEYS[0]: self._calculator,
-            DICT_KEYS[1]: self.prPlot,
-            DICT_KEYS[2]: self.dataPlot
+            DICT_KEYS[0]: self._parameters,
+            DICT_KEYS[1]: self._calculator,
+            DICT_KEYS[2]: self.prPlot,
+            DICT_KEYS[3]: self.dataPlot
         }
         if self.is2D:
             self.logic.data.name = self.phi
@@ -631,17 +648,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
+
         # Data references
         self._data = data_ref
         self.logic.data = GuiUtils.dataFromItem(data_ref)
-        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
-        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
-        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
+        self._parameters = self._dataList[data_ref].get(DICT_KEYS[0])
+        self._calculator = self._dataList[data_ref].get(DICT_KEYS[1])
+        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[2])
+        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[3])
         self.performEstimate()
+
+        self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).noOfTerms))
+        self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).regConst))
+        self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).maxDist))
+        self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).background))
 
     def updateDynamicGuiValues(self):
         pr = self._calculator
-        alpha = self._calculator.suggested_alpha
+        alpha = self._calculator.alpha
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
@@ -777,6 +801,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         return tab_id
 
     def updateFromParameters(self, params):
+        self._parameters.noOfTerms = params['no_of_terms']
+        self._parameters.regConst = params['reg_const']
+        self._parameters.maxDist = params['max_dist']
+        self._parameters.background = params['background']
         self._calculator.q_max = params['q_max']
         self.check_q_high(self._calculator.get_qmax())
         self._calculator.q_min = params['q_min']
@@ -810,6 +838,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
+        # if batch calculating 2D slices ignore first item as its a 2D file
+        if self.is2D:
+            self.dataList.setCurrentIndex(1)
+            self.batchComplete.append(1)
         self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
@@ -842,7 +874,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             Start a calculation thread
         """
         from .Thread import CalcPr
-
         # Set data before running the calculations
         self.isCalculating = True
         self.enableButtons()
@@ -915,7 +946,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                              completefn=self._estimateDynamicNTCompleted,
                                              updatefn=None)
         self.estimationThreadNT.queue()
-        self.estimationThreadNT.ready(2.5)
 
     def stopEstimateNTThread(self):
         if (self.estimationThreadNT is not None and
@@ -937,7 +967,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                            completefn=self._estimateCompleted,
                                            updatefn=None)
         self.estimationThread.queue()
-        self.estimationThread.ready(2.5)
 
     def performEstimateDynamic(self):
         """
@@ -954,7 +983,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                            completefn=self._estimateDynamicCompleted,
                                            updatefn=None)
         self.estimationThread.queue()
-        self.estimationThread.ready(2.5)
 
     def stopEstimationThread(self):
         """ Stop the estimation thread if it exists and is running """
@@ -1102,6 +1130,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.startNextBatchItem()
         else:
             self.isCalculating = False
+
         self.updateGuiValues()
 
     def _threadError(self, error):
@@ -1231,11 +1260,28 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             slicePlot.phi = self.phi
             listOfSlices.append(slicePlot)
             self.phi += (self.deltaPhi)
-
         return listOfSlices
+
+class Parameters():
+
+    """
+    Add all the calculation interfaces here
+    qmin, qmax, bg, ....
+    add seters and getters
+
+    """
+    def __init__(self):
+        self.noOfTerms = NUMBER_OF_TERMS
+        self.regConst = REGULARIZATION
+        self.maxDist = MAX_DIST
+        self.background = BACKGROUND_INPUT
+
+
 
 
 def debug(checkpoint):
     print(dir(InversionWidget))
     print(" - - - - - - - - [ DEBUG :: Checkpoint {} ] - - - - - - - - ".format(checkpoint))
+
+
 debug(1)
