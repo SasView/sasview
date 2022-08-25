@@ -1,7 +1,5 @@
 import logging
 import numpy as np
-import qtpy
-import traceback
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
@@ -385,6 +383,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateAllButton.setEnabled(not self.isCalculating)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
+                                            and not self.is2D
                                             and not self.isCalculating)
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
@@ -428,15 +427,31 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.prPlot = None
             self.dataPlot = None
             SliceLogicData = self.dataList.itemData(data_index)
+            try:
+                self.phi = SliceLogicData.phi
+            except:
+                return
+            print("is :", self.phi)
             self.logic.data = Data1D(x=SliceLogicData.x,
-                                         y=SliceLogicData.y,
-                                         dx=SliceLogicData.dx,
-                                         dy=SliceLogicData.dy)
-            self._parameters = Parameters()
+                                     y=SliceLogicData.y,
+                                     dx=SliceLogicData.dx,
+                                     dy=SliceLogicData.dy)
+            self.logic.data.name = SliceLogicData.title
+            # self.updateDataList(SliceLogicData)
+
+            qmin, qmax = self.logic.computeDataRange()
+            self._calculator.set_qmin(qmin)
+            self._calculator.set_qmax(qmax)
+
+            self._parameters = self._dataList[SliceLogicData].get(DICT_KEYS[0])
+            self._calculator = self._dataList[SliceLogicData].get(DICT_KEYS[1])
+            self.prPlot = self._dataList[SliceLogicData].get(DICT_KEYS[2])
+            self.dataPlot = self._dataList[SliceLogicData].get(DICT_KEYS[3])
+
+            # self._parameters = Parameters()
             self._calculator = Invertor()
             self.logic.data.name = SliceLogicData.phi
             self.phi = SliceLogicData.phi
-            self.performEstimate()
             return
         else:
             self.updateDataList(self._data)
@@ -444,14 +459,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
             self._calculator.set_qmax(qmax)
-
             self.setCurrentData(self.dataList.itemData(data_index))
-
-            print('###------{}------###\nNO of Terms: {}\nRegConst: {}\nMax Distance: {}'.format(self.logic.data.name,
-                                                                                                 self.noOfTermsInput.text(),
-                                                                                                 self.regularizationConstantInput.text(),
-                                                                                                 self.maxDistanceInput.text()))
-
 
     ######################################################################
     # GUI Interaction Events
@@ -521,8 +529,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
          """
-        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
-        self.batchResultsWindow.setupTable(self.batchResults)
+        if self.batchResultsWindow is not None:
+            self.batchResultsWindow.newTableTab(tab_name="TEst", data=self.batchResults)
+        else:
+            self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
         self.batchResultsWindow.show()
 
     def stopCalculation(self):
@@ -579,10 +589,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if dataRef is None:
             return
 
-        self._calculator.noOfTerms = int(self.noOfTermsInput.text())
+        self._calculator.noOfTerms = int(self.getNFunc())
         self._calculator.regConst = float(self.regularizationConstantInput.text())
         self._calculator.maxDist = float(self.maxDistanceInput.text())
-        self._calculator.background = float(self.backgroundInput.text())
+        # self._calculator.background = float(self.backgroundInput.text())
 
         self._dataList[dataRef] = {
             DICT_KEYS[0]: self._parameters,
@@ -590,8 +600,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             DICT_KEYS[2]: self.prPlot,
             DICT_KEYS[3]: self.dataPlot
         }
-        if self.is2D:
-            self.logic.data.name = self.phi
         self.batchResults[self.logic.data.name] = self._calculator
 
     def getState(self):
@@ -661,7 +669,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).noOfTerms))
         self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).regConst))
         self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).maxDist))
-        self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).background))
+        # self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).background))
 
     def updateDynamicGuiValues(self):
         pr = self._calculator
@@ -853,10 +861,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = False
         for index in range(self.dataList.count()):
             if index not in self.batchComplete:
-                self.dataList.setCurrentIndex(index)
-                self.isBatch = True
                 # Add the index before calculating in case calculation fails
                 self.batchComplete.append(index)
+                self.dataList.setCurrentIndex(index)
+                self.isBatch = True
+
                 break
         if self.isBatch:
             self.performEstimate()
@@ -878,6 +887,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isCalculating = True
         self.enableButtons()
         self.updateCalculator()
+
+        print(self.logic.data.name)
         # Disable calculation buttons to prevent thread interference
 
         # If the thread is already started, stop it
@@ -1208,7 +1219,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def show1DPlot(self):
         selectedSlice = self.plot2D.slicer.getSlice()
-        selectedSlice.title += ' @slic={}; start={}'.format(self.phi, self.deltaPhi)
         self.plot1D.plot(selectedSlice)
         self.plot1D.show()
         self.plot2D.update()
@@ -1256,27 +1266,26 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             params["Phi [deg]"] = self.phi
             self.plot2D.slicer.setParams(params)
             slicePlot = self.plot2D.slicer.getSlice()
-            slicePlot.title += ' @Phi={}'.format(self.phi)
+            slicePlot.title += ' φ {}'.format(self.phi)
             slicePlot.phi = self.phi
             listOfSlices.append(slicePlot)
             self.phi += (self.deltaPhi)
         return listOfSlices
 
-class Parameters():
 
+class Parameters:
     """
     Add all the calculation interfaces here
     qmin, qmax, bg, ....
     add seters and getters
 
     """
+
     def __init__(self):
         self.noOfTerms = NUMBER_OF_TERMS
         self.regConst = REGULARIZATION
         self.maxDist = MAX_DIST
-        self.background = BACKGROUND_INPUT
-
-
+        # self.background = BACKGROUND_INPUT
 
 
 def debug(checkpoint):
