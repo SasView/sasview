@@ -18,7 +18,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
     windowClosedSignal = QtCore.Signal()
-    def __init__(self, parent=None, output_data=None):
+    def __init__(self, parent = None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
         self.setupUi(self)
@@ -54,6 +54,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Command buttons
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdPlot.clicked.connect(self.onPlot)
+        self.saveButton.clicked.connect(self.actionSaveFile)
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
@@ -83,7 +84,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Open file load dialog and load a .csv file
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a file with results", "", "CSV files (*.csv)", None)[0]
+            self, "Choose a file with results", "", "CSV files (*.csv)", None,
+            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
         if not datafile:
             logging.info("No data file chosen.")
@@ -113,7 +115,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Find out which items got selected and in which row
         # Select for fitting
 
-        self.actionPlotResults = QtGui.QAction(self)
+        self.actionPlotResults = QtWidgets.QAction(self)
         self.actionPlotResults.setObjectName("actionPlot")
         self.actionPlotResults.setText(QtCore.QCoreApplication.translate("self", "Plot selected fits."))
 
@@ -178,13 +180,15 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
         self.data_dict[page_name] = results
-    
-    def onHelp(self):
+
+    @classmethod
+    def onHelp(cls):
         """
         Open a local url in the default browser
         """
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        self.parent.showHelp(url)
+        GuiUtils.showHelp(url)
+
 
     def onPlot(self):
         """
@@ -254,7 +258,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         time_str = time.strftime("%b %d %H %M of %Y", t)
         default_name = "Batch_Fitting_"+time_str+".csv"
 
-        wildcard = "CSV files (*.csv)"
+        wildcard = "CSV files (*.csv);;"
         caption =  'Save As'
         directory =  default_name
         filter =  wildcard
@@ -440,7 +444,6 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         super(BatchInversionOutputPanel, self).__init__(parent.parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
-        self.parent = parent
 
     def setupTable(self, widget=None,  data=None):
         """
@@ -546,12 +549,27 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 GuiUtils.logger.warning(msg)
         self.tblParams.resizeColumnsToContents()
 
-    def onHelp(self):
+    def newTableTab(self, tab_name=None, data=None):
+        # creating a BatchInversionOutputPanel object and taking out the .tblParams is not the cleanest.
+        # this can be changed when setupTable is made more flexible
+        self.tab_number += 1
+        if tab_name is not None:
+            tab_name = "Batch Result " + str(self.tab_number)
+        tableItem = BatchInversionOutputPanel(parent=self, output_data=data).tblParams
+        self.tables.append(tableItem)
+        self.tabWidget.addTab(tableItem, tab_name)
+
+    @classmethod
+    def onHelp(cls):
         """
         Open a local url in the default browser
         """
+        location = GuiUtils.HELP_DIRECTORY_LOCATION
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        self.parent.showHelp(url)
+        try:
+            webbrowser.open('file://' + os.path.realpath(location + url))
+        except webbrowser.Error as ex:
+            logging.warning("Cannot display help. %s" % ex)
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""
