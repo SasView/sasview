@@ -54,6 +54,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Command buttons
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdPlot.clicked.connect(self.onPlot)
+        self.saveButton.clicked.connect(self.actionSaveFile)
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
@@ -547,6 +548,16 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             if msg != '':
                 GuiUtils.logger.warning(msg)
         self.tblParams.resizeColumnsToContents()
+
+    def newTableTab(self, tab_name=None, data=None):
+        # creating a BatchInversionOutputPanel object and taking out the .tblParams is not the cleanest.
+        # this can be changed when setupTable is made more flexible
+        self.tab_number += 1
+        if tab_name is not None:
+            tab_name = "Batch Result " + str(self.tab_number)
+        tableItem = BatchInversionOutputPanel(parent=self, output_data=data).tblParams
+        self.tables.append(tableItem)
+        self.tabWidget.addTab(tableItem, tab_name)
 
     @classmethod
     def onHelp(cls):
