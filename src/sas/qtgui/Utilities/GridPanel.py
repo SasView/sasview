@@ -51,6 +51,9 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.tblParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblParams.customContextMenuRequested.connect(self.showContextMenu)
 
+        self.tabWidget.tabCloseRequested.connect(self.closeTab)
+
+
         # Command buttons
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdPlot.clicked.connect(self.onPlot)
@@ -204,9 +207,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                name = data['Data'][row]
+                name = data['Filename'][row]
                 # emit a signal so the plots are being shown
                 self.communicate.plotFromNameSignal.emit(name)
+
             except (IndexError, AttributeError):
                 # data messed up.
                 return
@@ -435,6 +439,11 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             tmpfile.write('\n')
             index += 1
 
+    def closeTab(self, currentIndex):
+        self.tables.pop(currentIndex)
+        self.tabWidget.removeTab(currentIndex)
+
+
 
 class BatchInversionOutputPanel(BatchOutputPanel):
     """
@@ -533,15 +542,11 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                     "{:.2g}".format(pr.elapsed)))
             except:
                 msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
-            if msg != '':
-                GuiUtils.logger.warning(msg)
             try:
                     self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
                     "{:.2g}".format(pr.get_qmin())))
             except:
                 msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
-            if msg != '':
-                GuiUtils.logger.warning(msg)
             try:
                     self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
                     "{:.2g}".format(pr.get_qmax())))
@@ -549,6 +554,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
             if msg != '':
                 GuiUtils.logger.warning(msg)
+                msg = ''
         self.tblParams.resizeColumnsToContents()
 
     def newTableTab(self, tab_name=None, data=None):
@@ -558,6 +564,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         if tab_name is not None:
             tab_name = "Batch Result " + str(self.tab_number)
         tableItem = BatchInversionOutputPanel(parent=self, output_data=data).tblParams
+
         self.tables.append(tableItem)
         self.tabWidget.addTab(tableItem, tab_name)
 
