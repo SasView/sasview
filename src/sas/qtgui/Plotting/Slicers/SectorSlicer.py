@@ -276,7 +276,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
 
     def getSlice(self, nbins=None):
         """
-        Add Description Ruben
         """
         data = self.data
         # If we have no data, just return
