@@ -64,7 +64,7 @@ sasview_data = {
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
         {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
-        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2380-4090'},
         {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
         {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
         {'name': 'Murphy, Ryan', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-4080-7525'},
