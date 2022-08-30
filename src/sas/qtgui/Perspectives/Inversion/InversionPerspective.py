@@ -229,6 +229,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
 
             if isinstance(logic_data, Data2D) and not is_batch:
+                data.isSliced = False
                 tab = self.addData(data=data)
                 tab.is2D = True
                 tab.tab2D.setEnabled(True)

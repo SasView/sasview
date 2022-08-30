@@ -38,7 +38,7 @@ MAX_DIST = 140.0
 START_POINT = 60
 NO_OF_SLICES = 6
 NO_OF_QBIN = 20
-DICT_KEYS = ["Parameters", "Calculator", "PrPlot", "DataPlot"]
+DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.startPoint = None
         self.noOfSlices = None
         self.slices = {}  # List to store the slices from 2D data
+        self.isSliced = False
 
         self.phi = None  # Start Point
         self.deltaPhi = None  # Number of slicer
@@ -115,8 +116,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             if isinstance(data, list):
                 self._data = data
 
-        self._parameters = Parameters()
-
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -131,9 +130,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.maxIndex = 1
 
         # Calculation threads used by all data items
-        self.calcThread = {}
-        self.estimationThread = {}
-        self.estimationThreadNT = {}
+        self.calcThread = None
+        self.estimationThread = None
+        self.estimationThreadNT = None
         self.isCalculating = False
 
         # Mapping for all data items
@@ -382,7 +381,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         self.calculateAllButton.setEnabled(not self.isCalculating)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
-                                            and not self.isBatch
+                                            # and not self.isBatch
                                             # and not self.is2D
                                             and not self.isCalculating)
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
@@ -424,40 +423,40 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         print(data_index ,"Passed")
             # only take in 1D slices of 2dData files
         if self.is2D:
-            debug(1)
 
-            self.prPlot = None
-            self.dataPlot = None
-            debug(2)
-
-            SliceLogicData = self.dataList.itemData(data_index)
-            self._data = SliceLogicData
-            debug(3)
-            self.updateDataList(self._data)
-            qmin, qmax = self.logic.computeDataRange()
-            self._calculator.set_qmin(qmin)
-            self._calculator.set_qmax(qmax)
-            debug(4)
             self.saveParameters()
-            debug(5)
+            self._dataList[self._data] = {
+                DICT_KEYS[0]: self._calculator,
+                DICT_KEYS[1]: self.prPlot,
+                DICT_KEYS[2]: self.dataPlot
+            }
+            self.batchResults = self._calculator
 
-            self.logic.data = GuiUtils.dataFromItem(SliceLogicData)
-            self.phi = self.logic.data.phi
+            newData = self.dataList.itemData(data_index)
 
-            debug(6)
-            self.logic.data.name = self.logic.data.title
-            # self.updateDataList(SliceLogicData)
-            # self._data = self.slices[self.phi]
-            debug(7)
-            self.setParameters()
-            self._parameters = self._dataList[self._data].get(DICT_KEYS[0])
-            self._calculator = self._dataList[self._data].get(DICT_KEYS[1])
-            self.prPlot = self._dataList[self._data].get(DICT_KEYS[2])
-            self.dataPlot = self._dataList[self._data].get(DICT_KEYS[3])
-            debug(8)
-            self.startThread()  # WHy this??
-            debug(9)
-            return
+            self._data = newData
+            self.logic.data = GuiUtils.dataFromItem(newData)
+
+            self.updateCalculator()  # sets Background
+            try:
+                self.setCurrentData(self._data)
+                self._calculator = self._dataList[newData].get(DICT_KEYS[0])
+                self.prPlot = self._dataList[newData].get(DICT_KEYS[1])
+                self.dataPlot = self._dataList[newData].get(DICT_KEYS[2])
+            except:
+                pass
+
+            self.startThread()
+            # qmin, qmax = self.logic.computeDataRange()
+            # self._calculator.set_qmin(qmin)
+            # self._calculator.set_qmax(qmax)
+            # self.saveParameters()
+            # self.logic.data = GuiUtils.dataFromItem(self._data)
+            # self.phi = self.logic.data.phi
+            # self.logic.data.name = self.logic.data.title
+            #
+            # self._calculator = self._dataList[self._data].get(DICT_KEYS[1])
+            # self.startThread()
         else:
             self.updateDataList(self._data)
             qmin, qmax = self.logic.computeDataRange()
@@ -598,15 +597,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.saveParameters()
         self._dataList[dataRef] = {
-            DICT_KEYS[0]: self._parameters,
-            DICT_KEYS[1]: self._calculator,
-            DICT_KEYS[2]: self.prPlot,
-            DICT_KEYS[3]: self.dataPlot
+            DICT_KEYS[0]: self._calculator,
+            DICT_KEYS[1]: self.prPlot,
+            DICT_KEYS[2]: self.dataPlot
         }
         self.batchResults[self.logic.data.name] = self._calculator
 
 
     def saveParameters(self):
+        # remove the need for the extra noOfTerms regConst and maxDist
         self._calculator.noOfTerms = int(self.getNFunc())
         self._calculator.regConst = float(self.regularizationConstantInput.text())
         self._calculator.maxDist = float(self.maxDistanceInput.text())
@@ -619,23 +618,21 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_slit_width(is_float(self.slitWidthInput.text()))
 
     def setParameters(self):
-        self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).noOfTerms))
-        self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).regConst))
-        self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).maxDist))
-        self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).background))
-        self.minQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).q_min))
-        self.maxQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).q_max))
-        self.slitHeightInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).slit_height))
-        self.slitWidthInput.setText(str(self._dataList[self._data].get(DICT_KEYS[1]).slit_width))
+        self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).noOfTerms))
+        self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).regConst))
+        self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).maxDist))
+        self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).background))
+        self.minQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_min))
+        self.maxQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_max))
+        self.slitHeightInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_height))
+        self.slitWidthInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_width))
+
+    def resetCalcPrams(self):
+        self._calculator.nfunc = self._calculator.nfunc
+        self._calculator.set_alpha(self._calculator.regConst)
+        self._calculator.set_dmax(self._calculator.d_max)
 
         self.updateCalculator() # sets Background
-
-        self._calculator.set_alpha(is_float(self.regularizationConstantInput.text()))
-        self._calculator.set_dmax(is_float(self.maxDistanceInput.text()))
-        self.check_q_high(self._calculator.get_qmax())
-        self.check_q_low(self._calculator.get_qmin())
-        self._calculator.set_slit_height(is_float(self.slitHeightInput.text()))
-        self._calculator.set_slit_width(is_float(self.slitWidthInput.text()))
 
     def getState(self):
         """
@@ -696,10 +693,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._data = data_ref
         self.setParameters()
         self.logic.data = GuiUtils.dataFromItem(data_ref)
-        self._parameters = self._dataList[data_ref].get(DICT_KEYS[0])
-        self._calculator = self._dataList[data_ref].get(DICT_KEYS[1])
-        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[2])
-        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[3])
+        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
+        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
+        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
         self.startThread()
 
     def updateDynamicGuiValues(self):
@@ -840,10 +836,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         return tab_id
 
     def updateFromParameters(self, params):
-        self._parameters.noOfTerms = params['no_of_terms']
-        self._parameters.regConst = params['reg_const']
-        self._parameters.maxDist = params['max_dist']
-        self._parameters.background = params['background']
         self._calculator.q_max = params['q_max']
         self.check_q_high(self._calculator.get_qmax())
         self._calculator.q_min = params['q_min']
@@ -854,8 +846,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.nfunc = params['nfunc']
         self.nTermsSuggested = self._calculator.nfunc
         self.updateDynamicGuiValues()
-        self.acceptAlpha()
-        self.acceptNoTerms()
+        # self.acceptAlpha()
+        # self.acceptNoTerms()
         self._calculator.background = params['background']
         self._calculator.chi2 = params['chi2']
         self._calculator.cov = params['cov']
@@ -878,27 +870,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def startThreadAll(self):
         # if batch calculating 2D slices ignore first item as its a 2D file
-        if self.is2D:
-            self.dataList.setCurrentIndex(1)
+
         self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
         self.enableButtons()
-        self.performEstimate()
         self.startThread()
 
     def startNextBatchItem(self):
         self.isBatch = False
         for index in range(len(self._dataList)):
             if index not in self.batchComplete:
-                # Add the index before calculating in case calculation fails
-                self.batchComplete.append(index)
                 self.dataList.setCurrentIndex(index)
+                self.batchComplete.append(index)
                 self.isBatch = True
                 break
-        if self.isBatch:
-            self.performEstimate()
+        if self.isBatch or self.is2D:
+            self.startThread()
         else:
             # If no data sets left, end batch calculation
             self.isCalculating = False
@@ -920,28 +909,31 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # If the thread is already started, stop it
         self.stopCalcThread()
-        print(self.logic.data.name)
-        print(self._calculator.noOfTerms)
-        print(self._calculator.regConst)
-        print(self._calculator.maxDist)
-        print(self._calculator.background)
+        print("-----------------------")
+        print("File: ", self.logic.data.name)
+        print("NoT In: ", self._calculator.noOfTerms)
+        print("REGC In: ", self._calculator.regConst)
+        print("Max Dist in: ", self._calculator.maxDist)
+        print("Nfuc end: ", self._calculator.nfunc)
+        print("Alpha end: ", self._calculator.alpha)
+        print("D_max end: ", self._calculator.d_max)
+        print("bg: ", self._calculator.background)
 
         pr = self._calculator.clone()
         # Making sure that nfunc and alpha parameters are correctly initialized
         pr.suggested_alpha = self._calculator.alpha
-        self.calcThread[self.logic.data.name] = CalcPr(pr, self.nTermsSuggested,
+        self.resetCalcPrams()
+        self.calcThread = CalcPr(pr, self.nTermsSuggested,
                                                        error_func=self._threadError,
                                                        completefn=self._calculateCompleted,
                                                        updatefn=None)
-        self.calcThread[self.logic.data.name].queue()
-        self.calcThread[self.logic.data.name].ready(2.5)
+        self.calcThread.queue()
+        self.calcThread.ready(2.5)
 
     def stopCalcThread(self):
         """ Stops a thread if it exists and is running """
-        if self.logic.data.name not in self.calcThread:
-            return
-        if self.calcThread[self.logic.data.name] is not None and self.calcThread[self.logic.data.name].isrunning():
-            self.calcThread[self.logic.data.name].stop()
+        if self.calcThread is not None and self.calcThread.isrunning():
+            self.calcThread.stop()
 
     def performEstimateNT(self):
         """
@@ -960,13 +952,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr.slit_height = 0.0
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
+        # self.resetCalcPrams()
 
-        self.estimationThreadNT[self.logic.data.name] = EstimateNT(pr, nfunc,
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
                                              completefn=self._estimateNTCompleted,
                                              updatefn=None)
-        self.estimationThreadNT[self.logic.data.name].queue()
-        self.estimationThreadNT[self.logic.data.name].ready(2.5)
+        self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
 
     def performEstimateDynamicNT(self):
         """
@@ -984,20 +977,19 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # It slows down the application and it doesn't change the estimates
         pr.slit_height = 0.0
         pr.slit_width = 0.0
-        nfunc = 10  # change this to get the no of terms onky once using "nfunc = self.getNFunc()" gets messy with batch as it uses the vaues of the brevous calculation
+        nfunc = self.getNFunc()
+        # self.resetCalcPrams()
 
-        self.estimationThreadNT[self.logic.data.name] = EstimateNT(pr, nfunc,
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
                                              completefn=self._estimateDynamicNTCompleted,
                                              updatefn=None)
-        self.estimationThreadNT[self.logic.data.name].queue()
+        self.estimationThreadNT.queue()
 
     def stopEstimateNTThread(self):
-        if self.logic.data.name not in self.estimationThreadNT:
-            return
-        if (self.estimationThreadNT[self.logic.data.name] is not None and
-                self.estimationThreadNT[self.logic.data.name].isrunning()):
-            self.estimationThreadNT[self.logic.data.name].stop()
+        if (self.estimationThreadNT is not None and
+                self.estimationThreadNT.isrunning()):
+            self.estimationThreadNT.stop()
 
     def performEstimate(self):
         """
@@ -1007,13 +999,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # If a thread is already started, stop it
         self.stopEstimationThread()
+        # self.resetCalcPrams()
 
-        self.estimationThread[self.logic.data.name] = EstimatePr(self._calculator.clone(),
+        self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
                                            error_func=self._threadError,
                                            completefn=self._estimateCompleted,
                                            updatefn=None)
-        self.estimationThread[self.logic.data.name].queue()
+        self.estimationThread.queue()
 
     def performEstimateDynamic(self):
         """
@@ -1023,21 +1016,20 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # If a thread is already started, stop it
         self.stopEstimationThread()
+        # self.resetCalcPrams()
 
-        self.estimationThread[self.logic.data.name] = EstimatePr(self._calculator.clone(),
+        self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
                                            error_func=self._threadError,
                                            completefn=self._estimateDynamicCompleted,
                                            updatefn=None)
-        self.estimationThread[self.logic.data.name].queue()
+        self.estimationThread.queue()
 
     def stopEstimationThread(self):
         """ Stop the estimation thread if it exists and is running """
-        if self.logic.data.name not in self.estimationThread:
-            return
-        if (self.estimationThread[self.logic.data.name] is not None and
-                self.estimationThread[self.logic.data.name].isrunning()):
-            self.estimationThread[self.logic.data.name].stop()
+        if (self.estimationThread is not None and
+                self.estimationThread.isrunning()):
+            self.estimationThread.stop()
 
     ######################################################################
     # Thread Complete
@@ -1107,8 +1099,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if message:
             logger.info(message)
         if self.isBatch:
-            self.acceptAlpha()
-            self.acceptNoTerms()
+            # self.acceptAlpha()
+            # self.acceptNoTerms()
             self.startThread()
 
     def _estimateDynamicNTUpdate(self, output_tuple):
@@ -1129,8 +1121,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if message:
             logger.info(message)
         if self.isBatch:
-            self.acceptAlpha()
-            self.acceptNoTerms()
+            # self.acceptAlpha()
+            # self.acceptNoTerms()
             self.startThread()
 
     def _calculateCompleted(self, out, cov, pr, elapsed):
@@ -1174,7 +1166,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_high_q_setter = ['check_q_high']
 
         # Udpate internals and GUI
-        if not self.isBatch or not self.is2D:
+        if not self.isBatch:
             self.updateDataList(self._data)
         if self.isBatch or self.is2D:
             self.startNextBatchItem()
@@ -1199,6 +1191,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.enableButtons()
 
         slicedData = self.muiltiSlicer()
+        self.isSliced = True
 
         self.sliceList.setHorizontalHeaderLabels(["title", "phi"])
         self.sliceList.setColumnCount(2)
@@ -1307,21 +1300,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             listOfSlices.append(slicePlot)
             self.phi += (self.deltaPhi)
         return listOfSlices
-
-
-class Parameters:
-    """
-    Add all the calculation interfaces here
-    qmin, qmax, bg, ....
-    add seters and getters
-
-    """
-
-    def __init__(self):
-        self.noOfTerms = NUMBER_OF_TERMS
-        self.regConst = REGULARIZATION
-        self.maxDist = MAX_DIST
-        self.background = BACKGROUND_INPUT
 
 class InversionWidget2D(InversionWidget):
     """
