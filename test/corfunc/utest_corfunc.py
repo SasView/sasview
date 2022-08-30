@@ -10,7 +10,7 @@ import time
 import numpy as np
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D
 
 
 def find(filename):

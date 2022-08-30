@@ -13,7 +13,7 @@ from PyQt5 import QtWidgets
 from twisted.internet import threads
 
 # SASCALC
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 
 # QTGUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils

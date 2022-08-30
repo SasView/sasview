@@ -20,8 +20,7 @@ from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.GenericReader import GenReader
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Source
+from sasdata.dataloader.data_info import Detector, Source
 from sas.sascalc.calculator import sas_gen
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D

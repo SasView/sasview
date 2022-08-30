@@ -56,8 +56,18 @@ jobs:
 
     - name: Fetch sources for sibling projects
       run: |
+        git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
         git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+
+    - name: Build and install sasdata
+      run: |
+        cd ../sasdata
+        rm -rf build
+        rm -rf dist
+        python setup.py clean
+        python setup.py build
+        python -m pip install .
 
     - name: Build and install sasmodels
       run: |

@@ -284,7 +284,7 @@ def main():
     """ This can be run locally without sasview to make it easy to adjust the report layout/styling,
     it will generate a report with some arbitrary data"""
 
-    from sas.sascalc.dataloader.loader import Loader
+    from sasdata.dataloader.loader import Loader
     import os
     import matplotlib.pyplot as plt
     import numpy as np

@@ -9,7 +9,7 @@ from numpy.linalg import lstsq
 
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
 
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin

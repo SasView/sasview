@@ -9,16 +9,16 @@ import numpy as np
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from sas.sascalc.file_converter.ascii2d_loader import ASCII2DLoader
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
+from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
+from sasdata.dataloader.data_info import Data1D
 
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Sample
-from sas.sascalc.dataloader.data_info import Source
-from sas.sascalc.dataloader.data_info import Vector
+from sasdata.dataloader.data_info import Detector
+from sasdata.dataloader.data_info import Sample
+from sasdata.dataloader.data_info import Source
+from sasdata.dataloader.data_info import Vector
 
-import sas.sascalc.file_converter.FileConverterUtilities as Utilities
+import sasdata.file_converter.FileConverterUtilities as Utilities
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.FrameSelect import FrameSelect
