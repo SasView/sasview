@@ -1,6 +1,7 @@
 # Setup and find Custom config dir
 from __future__ import print_function
 
+import glob
 import sys
 import os
 import traceback
@@ -90,7 +91,7 @@ def setup_custom_config(app_dir, user_dir):
         try:
             # if the custom config file does not exist, copy the default from
             # the app dir
-            shutil.copyfile(os.path.join(app_dir, "custom_config.py"), path)
+            shutil.copyfile(glob.glob(os.path.join(app_dir, "custom_config.py"))[0], path)
         except Exception:
             logger.error(traceback.format_exc())
             logger.error("Could not copy default custom config.")
