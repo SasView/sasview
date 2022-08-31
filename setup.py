@@ -289,6 +289,9 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              ]
 packages.append("sas.qtgui")
 
+package_data["sas.config_system"] = ["*"]
+packages.append("sas.config_system")
+
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml', 'h5py',
