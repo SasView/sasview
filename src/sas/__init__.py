@@ -88,7 +88,7 @@ def make_custom_config_path():
 _CUSTOM_CONFIG = None
 def get_custom_config():
     """
-    Setup the custom config_system dir and cat file
+    Setup the custom config dir and cat file
     """
     global _CUSTOM_CONFIG
     if not _CUSTOM_CONFIG:
@@ -100,7 +100,7 @@ def get_custom_config():
 _LOCAL_CONFIG = None
 def get_local_config():
     """
-    Loads the local config_system file.
+    Loads the local config file.
     """
     global _LOCAL_CONFIG
     if not _LOCAL_CONFIG:

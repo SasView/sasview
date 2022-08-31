@@ -1,7 +1,7 @@
 """ Configuration class - stores configuration information for SasView
 
 The Config class cannot be subclassed or dynamically modified,
-this prevents the config_system from having fields that are unspecified in
+this prevents the config from having fields that are unspecified in
 the base class, and makes it so that all usages of fields can be
 automatically tracked. This allows the configs to be much more
 easily maintained.

@@ -81,10 +81,10 @@ except:
 def builder_inited(app):
     jaxpath = app.config.mathjax_path
     if not jaxpath:
-        raise ExtensionError('mathjax_path config_system value must be set for the '
+        raise ExtensionError('mathjax_path config value must be set for the '
                              'mathjax extension to work')
 
-    # app.config_system.mathjax_path can be a string or a list of strings
+    # app.config.mathjax_path can be a string or a list of strings
     if isinstance(jaxpath, basestring):
         app.add_javascript(jaxpath)
     else:
@@ -105,8 +105,7 @@ def setup(app):
     # http://docs.mathjax.org/en/latest/start.html#secure-access-to-the-cdn
     app.add_config_value('mathjax_path',
                          'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?'
-                         'config_system=TeX-MML-AM_CHTML',
-                         #'config_system=TeX-AMS-MML_HTMLorMML',
+                         'config=TeX-MML-AM_CHTML',
                          False)
     app.add_config_value('mathjax_css', None, 'html')
     app.add_config_value('mathjax_use_katex', False, 'html')

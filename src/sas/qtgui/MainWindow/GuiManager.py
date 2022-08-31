@@ -1298,7 +1298,7 @@ class GuiManager:
 
     def saveCustomConfig(self):
         """
-        Save the config_system file based on current session values
+        Save the config file based on current session values
         """
 
         config.save()
@@ -1315,7 +1315,7 @@ class GuiManager:
 
     def customSavePaths(self, config_content):
         """
-        Update the config_system module with current session paths
+        Update the config module with current session paths
         Returns True if update was done, False, otherwise
         """
         changed = False
@@ -1330,7 +1330,7 @@ class GuiManager:
 
     def customSaveOpenCL(self, config_content):
         """
-        Update the config_system module with current session OpenCL choice
+        Update the config module with current session OpenCL choice
         Returns True if update was done, False, otherwise
         """
         changed = False

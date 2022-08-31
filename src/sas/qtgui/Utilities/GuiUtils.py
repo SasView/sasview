@@ -89,7 +89,7 @@ def get_app_dir():
 
     # Finally, try the directory of the sasview module
     # TODO: gui_manager will have to know about sasview until we
-    # clean all these module variables and put them into a config_system class
+    # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
     # logging.info(sys.executable)
     # logging.info(str(sys.argv))
@@ -130,7 +130,7 @@ def _find_local_config(confg_file, path):
 # Get APP folder
 PATH_APP = get_app_dir()
 DATAPATH = PATH_APP
-# Read in the local config_system, which can either be with the main
+# Read in the local config, which can either be with the main
 # application or in the installation directory
 config = _find_local_config('local_config', PATH_APP)
 
@@ -145,9 +145,9 @@ if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
     if custom_config is None:
         msgConfig = "Custom_config file was not imported"
-logging.info("Custom config_system path: %s", custom_config)
+logging.info("Custom config path: %s", custom_config)
 
-#read some constants from config_system
+#read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
 APPLICATION_NAME = config.__appname__
 SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
@@ -196,7 +196,7 @@ except AttributeError:
     DEFAULT_OPEN_FOLDER = PATH_APP
     SAS_OPENCL = config.SAS_OPENCL
 
-#DEFAULT_STYLE = config_system.DEFAULT_STYLE
+#DEFAULT_STYLE = config.DEFAULT_STYLE
 
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
 OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU

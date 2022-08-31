@@ -1,4 +1,4 @@
-# Setup and find Custom config_system dir
+# Setup and find Custom config dir
 from __future__ import print_function
 
 import sys
@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 def make_custom_config_path(user_dir):
     """
-    The location of the cusstom config_system file.
+    The location of the cusstom config file.
 
-    Returns ~/.sasview/config_system/custom_config.py
+    Returns ~/.sasview/config/custom_config.py
     """
-    dirname = os.path.join(user_dir, 'config_system')
+    dirname = os.path.join(user_dir, 'config')
     # If the directory doesn't exist, create it
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -29,19 +29,19 @@ def setup_custom_config(app_dir, user_dir):
     path = make_custom_config_path(user_dir)
     if not os.path.isfile(path):
         try:
-            # if the custom config_system file does not exist, copy the default from
+            # if the custom config file does not exist, copy the default from
             # the app dir
             shutil.copyfile(os.path.join(app_dir, "custom_config.py"), path)
         except Exception:
-            logger.error("Could not copy default custom config_system.")
+            logger.error("Could not copy default custom config.")
 
-    #Adding SAS_OPENCL if it doesn't exist in the config_system file
+    #Adding SAS_OPENCL if it doesn't exist in the config file
     # - to support backcompability
     if not "SAS_OPENCL" in open(path).read():
         try:
             open(path, "a+").write("SAS_OPENCL = \"None\"\n")
         except Exception:
-            logger.error("Could not update custom config_system with SAS_OPENCL.")
+            logger.error("Could not update custom config with SAS_OPENCL.")
 
     custom_config = load_custom_config(path)
     return custom_config

@@ -2,7 +2,7 @@
 class ConfigLocked(Exception):
     def __init__(self):
         super().__init__(self,
-                         "The Config class cannot be subclassed or added to dynamically, see config_system.py for details")
+                         "The Config class cannot be subclassed or added to dynamically, see config.py for details")
 
 
 class ConfigMeta(type):

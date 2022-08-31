@@ -29,7 +29,7 @@ class CategoryInstaller:
     @staticmethod
     def _get_home_dir():
         """
-        returns the users sasview config_system dir
+        returns the users sasview config dir
         """
         return os.path.join(os.path.expanduser("~"), ".sasview")
 
