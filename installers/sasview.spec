@@ -15,7 +15,7 @@ datas = [
     ('../src/sas/example_data', 'example_data'),
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/sasview/custom_config.py', '.'),
-    ('../src/sas/sasview/local_config.py', '.'),
+#    ('../src/sas/sasview/local_config.py', '.'),
 #    ('../src/sas/sasview/wxcruft.py', '.'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
     ('../src/sas/logger_config.py', '.'),

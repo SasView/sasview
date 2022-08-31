@@ -141,15 +141,16 @@ DATAPATH = PATH_APP
 # else:
 #     pass
 
-
-
-c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-custom_config = _find_local_config('custom_config', c_conf_dir)
-if custom_config is None:
-    custom_config = _find_local_config('custom_config', os.getcwd())
-    if custom_config is None:
-        msgConfig = "Custom_config file was not imported"
-logging.info("Custom config path: %s", custom_config)
+#
+#
+# c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
+# custom_config = _find_local_config('custom_config', c_conf_dir)
+# if custom_config is None:
+#     custom_config = _find_local_config('custom_config', os.getcwd())
+#     if custom_config is None:
+#         msgConfig = "Custom_config file was not imported"
+custom_config = config
+# logging.info("Custom config path: %s", custom_config)
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
