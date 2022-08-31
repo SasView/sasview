@@ -70,24 +70,18 @@ logger = logging.getLogger(__name__)
 
 def get_app_dir():
     """
-        The application directory is the one where the default custom_config.py
-        file resides.
-
-        :returns: app_path - the path to the applicatin directory
+        :returns: app_path - the path to the application directory
     """
     # First, try the directory of the executable we are running
     app_path = sys.path[0]
     if os.path.isfile(app_path):
-        app_path = os.path.dirname(app_path)
-    if os.path.isfile(os.path.join(app_path, "custom_config.py")):
-        app_path = os.path.abspath(app_path)
-        #logging.info("Using application path: %s", app_path)
-        return app_path
+        return os.path.dirname(app_path)
 
-    # Next, try the current working directory
-    if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        #logging.info("Using application path: %s", os.getcwd())
-        return os.path.abspath(os.getcwd())
+    #
+    # # Next, try the current working directory
+    # if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
+    #     #logging.info("Using application path: %s", os.getcwd())
+    #     return os.path.abspath(os.getcwd())
 
     # Finally, try the directory of the sasview module
     # TODO: gui_manager will have to know about sasview until we

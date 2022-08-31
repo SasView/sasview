@@ -8,7 +8,7 @@ import os.path
 
 import pkg_resources
 
-from sas import get_custom_config
+from sas import config
 
 '''
 Module that manages the global logging
@@ -46,17 +46,7 @@ class SetupLogger(object):
 
     def _disable_debug_from_config(self):
         '''disable DEBUG logs as per user configuration (DEBUG logs disabled by default)'''
-        disable_debug = True
-        custom_config = get_custom_config()
-
-        if hasattr(custom_config, "FILTER_DEBUG_LOGS"):
-            if type(custom_config.FILTER_DEBUG_LOGS) is bool:
-                disable_debug = custom_config.FILTER_DEBUG_LOGS
-            else:
-                logging.warning("FILTER_DEBUG_LOGS has invalid value in custom_config.py")
-
-        if disable_debug:
-            # logging.info("Note: DEBUG logs are disabled.")
+        if config.FILTER_DEBUG_LOGS:
             logging.disable(logging.DEBUG)
 
     def _read_config_file(self):

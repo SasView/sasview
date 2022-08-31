@@ -87,23 +87,25 @@ def make_custom_config_path():
 
 _CUSTOM_CONFIG = None
 def get_custom_config():
-    """
-    Setup the custom config dir and cat file
-    """
-    global _CUSTOM_CONFIG
-    if not _CUSTOM_CONFIG:
-        from ._config import setup_custom_config
-        _CUSTOM_CONFIG = setup_custom_config(get_app_dir(), get_user_dir())
-    return _CUSTOM_CONFIG
+    raise RuntimeError("Tried to call get_custom_config - this is now forbidden")
+    # """
+    # Setup the custom config dir and cat file
+    # """
+    # global _CUSTOM_CONFIG
+    # if not _CUSTOM_CONFIG:
+    #     from ._config import setup_custom_config
+    #     _CUSTOM_CONFIG = setup_custom_config(get_app_dir(), get_user_dir())
+    # return _CUSTOM_CONFIG
 
 
 _LOCAL_CONFIG = None
 def get_local_config():
-    """
-    Loads the local config file.
-    """
-    global _LOCAL_CONFIG
-    if not _LOCAL_CONFIG:
-        from ._config import load_local_config
-        _LOCAL_CONFIG = load_local_config(get_app_dir())
-    return _LOCAL_CONFIG
+    raise RuntimeError("Tried to call get_local_config - this is now forbidden")
+    # """
+    # Loads the local config file.
+    # """
+    # global _LOCAL_CONFIG
+    # if not _LOCAL_CONFIG:
+    #     from ._config import load_local_config
+    #     _LOCAL_CONFIG = load_local_config(get_app_dir())
+    # return _LOCAL_CONFIG
