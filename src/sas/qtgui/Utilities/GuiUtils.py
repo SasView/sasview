@@ -45,6 +45,7 @@ from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
 from sas.sascalc.dataloader.loader import Loader
+from sas import config
 from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 
 from sas.qtgui.Utilities import CustomDir
@@ -132,12 +133,14 @@ PATH_APP = get_app_dir()
 DATAPATH = PATH_APP
 # Read in the local config, which can either be with the main
 # application or in the installation directory
-config = _find_local_config('local_config', PATH_APP)
+# config = _find_local_config('local_config', PATH_APP)
+#
+# if config is None:
+#     config = _find_local_config('local_config', os.getcwd())
+# else:
+#     pass
 
-if config is None:
-    config = _find_local_config('local_config', os.getcwd())
-else:
-    pass
+
 
 c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
 custom_config = _find_local_config('custom_config', c_conf_dir)
