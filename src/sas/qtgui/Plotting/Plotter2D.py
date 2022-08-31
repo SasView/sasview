@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets
 
 from mpl_toolkits.mplot3d import Axes3D
 
-from sas.sascalc.dataloader.manipulations import CircularAverage
+from sasdata.data_util.manipulations import CircularAverage
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D

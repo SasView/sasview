@@ -1,19 +1,34 @@
 """
 This module implements corfunc
 """
-import warnings
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
-from scipy.fftpack import dct
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
-from sas.sascalc.dataloader.data_info import Data1D
+
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
+
+from sasdata.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
+from dataclasses import dataclass
 from typing import Optional, Tuple
+
+@dataclass
+class ExtractedParameters:
+    long_period: float
+    interface_thickness: float
+    hard_block_thickness: float
+    soft_block_thickness: float
+    core_thickness: float
+    polydispersity_ryan: float
+    polydispersity_stribeck: float
+    local_crystallinity: float
+
+
 
 class CorfuncCalculator:
 
@@ -38,6 +53,24 @@ class CorfuncCalculator:
         self.upperq = upperq
         self.background = self.compute_background()
         self._transform_thread = None
+
+    @property
+    def extrapolation_parameters(self) -> Optional[ExtrapolationParameters]:
+        if self._data is None or self.lowerq is None or self.upperq is None:
+            return None
+        else:
+            return ExtrapolationParameters(
+                min(self._data.x),
+                self.lowerq,
+                self.upperq[0],
+                self.upperq[1],
+                max(self._data.x))
+
+    @extrapolation_parameters.setter
+    def extrapolation_parameters(self, extrap: ExtrapolationParameters):
+        self.lowerq = extrap.point_1
+        self.upperq = (extrap.point_2, extrap.point_3)
+
 
     def set_data(self, data: Optional[Data1D], scale: float=1):
         """
@@ -115,11 +148,11 @@ class CorfuncCalculator:
 
         if trans_type == 'fourier':
             self._transform_thread = FourierThread(self._data, extrapolation,
-            background, completefn=completefn,
-            updatefn=updatefn)
+                                                   background, completefn=completefn,
+                                                   updatefn=updatefn)
         elif trans_type == 'hilbert':
             self._transform_thread = HilbertThread(self._data, extrapolation,
-            background, completefn=completefn, updatefn=updatefn)
+                                                   background, completefn=completefn, updatefn=updatefn)
         else:
             err = ("Incorrect transform type supplied, must be 'fourier'",
                 " or 'hilbert'")
@@ -135,7 +168,7 @@ class CorfuncCalculator:
         if self._transform_thread.isrunning():
             self._transform_thread.stop()
 
-    def extract_parameters(self, transformed_data):
+    def extract_parameters(self, transformed_data) -> Optional[ExtractedParameters]:
         """
         Extract the interesting measurements from a correlation function
 
@@ -151,7 +184,7 @@ class CorfuncCalculator:
         if len(maxs) == 0:
             return None
 
-        GammaMin = y[mins[0]]  # The value at the first minimum
+        gamma_min = y[mins[0]]  # The value at the first minimum
 
         ddy = (y[:-2]+y[2:]-2*y[1:-1])/(x[2:]-x[:-2])**2  # 2nd derivative of y
         dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
@@ -177,27 +210,34 @@ class CorfuncCalculator:
         m = np.mean(dy[lower:upper])  # Linear slope
         b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
 
-        Lc = (GammaMin-b)/m  # Hard block thickness
+        long_period = x[maxs[0]]
+        hard_block_thickness = (gamma_min - b) / m  # Hard block thickness
+        soft_block_thickness = long_period - hard_block_thickness
 
         # Find the data points where the graph is linear to within 1%
         mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
         if len(mask) == 0:  # Return garbage for bad fits
-            return { 'max': self._round_sig_figs(x[maxs[0]], 6) }
-        dtr = x[mask[0]]  # Beginning of Linear Section
-        d0 = x[mask[-1]]  # End of Linear Section
-        GammaMax = y[mask[-1]]
-        A = np.abs(GammaMin/GammaMax)  # Normalized depth of minimum
+            return None
 
-        params = {
-            'max': x[maxs[0]],
-            'dtr': dtr,
-            'Lc': Lc,
-            'd0': d0,
-            'A': A,
-            'fill': Lc/x[maxs[0]]
-        }
+        interface_thickness = x[mask[0]]  # Beginning of Linear Section
+        core_thickness = x[mask[-1]]  # End of Linear Section
 
-        return params
+        local_crystallinity = hard_block_thickness / long_period
+
+        gamma_max = y[mask[-1]]
+
+        polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
+        polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
+
+        return ExtractedParameters(
+                    long_period,
+                    interface_thickness,
+                    hard_block_thickness,
+                    soft_block_thickness,
+                    core_thickness,
+                    polydispersity_ryan,
+                    polydispersity_stribeck,
+                    local_crystallinity)
 
 
     def _porod(self, q, K, sigma, bg):

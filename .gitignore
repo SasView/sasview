@@ -63,6 +63,9 @@ default_categories.json
 **/logs
 tests.log
 
+# Test reports
+/src/sas/qtgui/Utilities/Reports/report_test*
+
 # Installer files
 /sasview-install
 /installers/build

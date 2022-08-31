@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 import sas.qtgui.path_prepare
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)

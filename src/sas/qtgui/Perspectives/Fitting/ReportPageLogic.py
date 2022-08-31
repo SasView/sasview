@@ -3,21 +3,26 @@ import base64
 import datetime
 import re
 import sys
-import tempfile
+
+from typing import List
 
 import logging
 from io import BytesIO
 import urllib.parse
+import html2text
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from bumps import options
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
+
 from sas.sasview import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION
 
-
-class ReportPageLogic(object):
+# TODO: Integrate with other reports
+class ReportPageLogic:
     """
     Logic for the Report Page functionality. Refactored from FittingWidget.
     """
@@ -29,22 +34,18 @@ class ReportPageLogic(object):
         self._index = index
         self.params = params
 
-    @staticmethod
-    def cleanhtml(raw_html):
-        """Remove html tags from a document"""
-        cleanr = re.compile('<.*?>')
-        cleantext = re.sub(cleanr, '', raw_html)
-        return cleantext
 
-    def reportList(self):
+    def reportList(self) -> ReportData: # TODO: Rename to reference report object
         """
         Return the HTML version of the full report
         """
         if self.kernel_module is None:
-            report_txt = "No model defined"
-            report_html = HEADER % report_txt
-            images = []
-            return [report_html, report_txt, images]
+
+            text = "No model defined"
+
+            return ReportData(
+                html=HEADER % text,
+                text=text)
 
         # Get plot image from plotpanel
         images = self.getImages()
@@ -59,9 +60,10 @@ class ReportPageLogic(object):
 
         report_html = report_header + report_parameters + imagesHTML
 
-        report_txt = self.cleanhtml(report_html)
+        report_txt = html2text.html2text(GuiUtils.replaceHTMLwithASCII(report_html))
 
-        report_list = [report_html, report_txt, images]
+        # report_list = ReportData(html=report_html, text=report_txt, images=images)
+        report_list = ReportData(html=report_html, text=report_txt)
 
         return report_list
 
@@ -98,7 +100,7 @@ class ReportPageLogic(object):
 
         return report
 
-    def buildPlotsForReport(self, images):
+    def buildPlotsForReport(self, images): # TODO: Unify with other report image to html conversion
         """ Convert Matplotlib figure 'fig' into a <img> tag for HTML use using base64 encoding. """
         html = FEET_1 % self.data.name
 
@@ -161,19 +163,19 @@ class ReportPageLogic(object):
 
         return report
 
-    def getImages(self):
+    def getImages(self) -> List[PlotterBase]:
         """
         Create MPL figures for the current fit
         """
         graphs = []
         modelname = self.kernel_module.name
         if not modelname or self._index is None:
-            return None
+            return []
         plot_ids = [plot.id for plot in GuiUtils.plotsFromModel(modelname, self._index)]
 
         # Active plots
         import sas.qtgui.Plotting.PlotHelper as PlotHelper
-        shown_plot_names = PlotHelper.currentPlots()
+        shown_plot_names = PlotHelper.currentPlotIds()
 
         # current_plots = list of graph names of currently shown plots
         # which are related to this dataset
@@ -188,6 +190,7 @@ class ReportPageLogic(object):
 
 
 # Simple html report template
+# TODO Remove microsoft based stuff - probably implicit in the refactoring to come
 HEADER = "<html>\n"
 HEADER += "<head>\n"
 HEADER += "<meta http-equiv=Content-Type content='text/html; "

@@ -74,7 +74,9 @@ jobs:
         python -m pip install numpy scipy==1.7.3 docutils "pytest<6" sphinx unittest-xml-reporting
         python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab==3.6.6 pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
-        python -m pip install qt5reactor periodictable uncertainties debugpy
+        python -m pip install qt5reactor periodictable uncertainties debugpy dominate importlib_resources 
+        python -m pip install html2text
+
 
     - name: Install PyQt (Windows + Linux)
       if: ${{ matrix.os != 'macos-latest' }}
@@ -104,11 +106,21 @@ jobs:
       run: |
         python -m pip install pyinstaller
 
-    ### TODO: Bumps and sasmodels branches needs to be setup manually until we find better mechanism
+    ### TODO: Bumps, sasdata and sasmodels branches needs to be setup manually until we find better mechanism
     - name: Fetch sources for sibling projects
       run: |
+        git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
         git clone --depth=1 --branch=v1.0.6 https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=1 --branch=v0.9.0 https://github.com/bumps/bumps.git ../bumps
+
+    - name: Build and install sasdata
+      run: |
+        cd ../sasdata
+        rm -rf build
+        rm -rf dist
+        python setup.py clean
+        python setup.py build
+        python -m pip install .
 
     - name: Build and install sasmodels
       run: |

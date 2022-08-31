@@ -17,8 +17,8 @@ from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
-from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+from sasdata.dataloader.loader import Loader
+from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 

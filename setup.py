@@ -138,14 +138,6 @@ package_dir["sas.sascalc.invariant"] = os.path.join(
 packages.extend(["sas.sascalc.invariant"])
 
 
-# sas.sascalc.dataloader
-package_dir["sas.sascalc.dataloader"] = os.path.join(
-    "src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = ['schema/*.xsd']
-packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
-                 "sas.sascalc.dataloader.readers.schema"])
-
-
 # sas.sascalc.calculator
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
@@ -155,12 +147,6 @@ packages.append("sas.sascalc.calculator")
 # sas.sascalc.pr
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
 packages.append("sas.sascalc.pr")
-
-
-# sas.sascalc.file_converter
-package_dir["sas.sascalc.file_converter"] = os.path.join(
-    "src", "sas", "sascalc", "file_converter")
-packages.append("sas.sascalc.file_converter")
 
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
@@ -191,9 +177,16 @@ packages.append("sas.qtgui.UnitTesting")
 package_dir["sas.qtgui.Utilities"] = os.path.join(
     "src", "sas", "qtgui", "Utilities")
 packages.append("sas.qtgui.Utilities")
-package_dir["sas.qtgui.UtilitiesUI"] = os.path.join(
-    "src", "sas", "qtgui", "Utilities","UI")
+package_dir["sas.qtgui.Utilities.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "UI")
 packages.append("sas.qtgui.Utilities.UI")
+
+package_dir["sas.qtgui.Utilities.Reports"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "Reports")
+packages.append("sas.qtgui.Utilities.Reports")
+package_dir["sas.qtgui.Utilities.Reports.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "Reports", "UI")
+packages.append("sas.qtgui.Utilities.Reports.UI")
 
 package_dir["sas.qtgui.Calculators"] = os.path.join(
     "src", "sas", "qtgui", "Calculators")
@@ -251,18 +244,20 @@ packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
 # SasView
 package_data['sas'] = ['logging.ini']
 package_data['sas.sasview'] = ['images/*',
+                               'media/*']
+
+package_data["sas.example_data"] = [
+                               '*.txt',
+                               '1d_data/*',
+                               '2d_data/*',
+                               'convertible_files/*',
+                               'coordinate_data/*',
+                               'image_data/*',
                                'media/*',
-                               'test/*.txt',
-                               'test/1d_data/*',
-                               'test/2d_data/*',
-                               'test/convertible_files/*',
-                               'test/coordinate_data/*',
-                               'test/image_data/*',
-                               'test/media/*',
-                               'test/other_files/*',
-                               'test/save_states/*',
-                               'test/sesans_data/*',
-                               'test/upcoming_formats/*',
+                               'other_files/*',
+                               'save_states/*',
+                               'sesans_data/*',
+                               'upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
 package_data['sas.qtgui'] = ['Calculators/UI/*',
@@ -273,6 +268,8 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              'Perspectives/Inversion/UI/*',
                              'Plotting/UI/*',
                              'Utilities/UI/*',
+                             'Utilities/Reports/UI/*',
+                             'Utilities/Reports/*.css',
                              'UI/*',
                              'UI/res/*',
                              ]

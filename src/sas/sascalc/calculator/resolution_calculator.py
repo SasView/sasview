@@ -1087,7 +1087,7 @@ class ResolutionCalculator(object):
 
         # try to set it as a Data2D otherwise pass (not required for now)
         try:
-            from sas.sascalc.dataloader.data_info import Data2D
+            from sasdata.dataloader.data_info import Data2D
             output = Data2D()
             inten = np.zeros_like(qx_value)
             output.data = inten
