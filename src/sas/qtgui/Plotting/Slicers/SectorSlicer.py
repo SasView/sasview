@@ -128,7 +128,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if data is None:
             return
         # Averaging
-        from sas.sascalc.dataloader.manipulations import SectorQ
+        from sasdata.data_util.manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta

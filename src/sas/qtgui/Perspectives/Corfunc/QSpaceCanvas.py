@@ -1,29 +1,23 @@
 from __future__ import annotations
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
-import numpy as np
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 
+from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationInteractionState
 
-class QSpaceCanvas(FigureCanvas):
+
+class QSpaceCanvas(CorfuncCanvas):
     """ Canvas for displaying input data and extrapolation parameters"""
 
     def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
-        self.parent = parent
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
+        super().__init__(parent, width, height, dpi)
 
-        FigureCanvas.__init__(self, self.fig)
-
-        self.data: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
-        self.extrap = None
+        self.extrap: Optional[Data1D] = None
 
         # Vertical lines
         self.line1: Optional[Line2D] = None
@@ -77,33 +71,32 @@ class QSpaceCanvas(FigureCanvas):
         self.axes.set_title("Scattering data")
         self.fig.tight_layout()
 
-        if self.data:
+        if self.data is not None:
 
             extrapolation_params = self.parent.extrapolation_parmameters
 
-            # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
-            self.axes.errorbar(self.data.x,
-                               self.data.y,
-                               yerr=self.data.dy,
+            self.axes.errorbar(self.data[0].x,
+                               self.data[0].y,
+                               yerr=self.data[0].dy,
                                label="Experimental Data",
                                marker='o',
                                linestyle='',
                                markersize=3,
                                capsize=2)
+                               
             self.line1 = self.axes.axvline(extrapolation_params.point_1, color='k')
             self.line2 = self.axes.axvline(extrapolation_params.point_2, color='k')
             self.line3 = self.axes.axvline(extrapolation_params.point_3, color='k')
             self.ghost_line = self.axes.axvline(0.1, color='k', alpha=0)
             self.axes.set_xlim(extrapolation_params.data_q_min / 2,
                                extrapolation_params.data_q_max* 1.5 - 0.5 * extrapolation_params.data_q_min)
-            self.axes.set_ylim(min(self.data.y) / 2,
-                               max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
+            self.axes.set_ylim(min(self.data[0].y) / 2,
+                               max(self.data[0].y) * 1.5 - 0.5 * min(self.data[0].y))
 
-
-        if self.extrap:
+        if self.extrap is not None:
             self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
 
-        if self.data or self.extrap:
+        if self.data is not None or self.extrap is not None:
             self.legend = self.axes.legend()
 
         self.draw()

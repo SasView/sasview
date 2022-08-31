@@ -366,13 +366,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # new fit thread object
         self.calc_fit = FitThread(handler=handler,
-                             fn=sim_fitter_list,
-                             batch_inputs=batch_inputs,
-                             batch_outputs=batch_outputs,
-                             page_id=page_ids,
-                             updatefn=updater,
-                             completefn=completefn,
-                             reset_flag=self.is_chain_fitting)
+                                  fn=sim_fitter_list,
+                                  batch_inputs=batch_inputs,
+                                  batch_outputs=batch_outputs,
+                                  page_id=page_ids,
+                                  updatefn=updater,
+                                  completefn=completefn,
+                                  reset_flag=self.is_chain_fitting)
 
         if config.USING_TWISTED:
             # start the trhrhread with twisted

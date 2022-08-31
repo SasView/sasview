@@ -212,8 +212,9 @@ class ReportBase:
 
         data64 = base64.b64encode(bytes.getvalue())
         with self._html_doc.getElementById("figures"):
-            img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
-                style="width:100%")
+            with p():
+                img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
+                    style="width:100%")
 
     def add_table_dict(self, d: Dict[str, Any], titles: Optional[Tuple[str, str]]=None):
 
@@ -283,7 +284,7 @@ def main():
     """ This can be run locally without sasview to make it easy to adjust the report layout/styling,
     it will generate a report with some arbitrary data"""
 
-    from sas.sascalc.dataloader.loader import Loader
+    from sasdata.dataloader.loader import Loader
     import os
     import matplotlib.pyplot as plt
     import numpy as np

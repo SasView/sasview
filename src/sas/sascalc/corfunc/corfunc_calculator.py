@@ -9,7 +9,7 @@ from numpy.linalg import lstsq
 
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
 
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
@@ -148,11 +148,11 @@ class CorfuncCalculator:
 
         if trans_type == 'fourier':
             self._transform_thread = FourierThread(self._data, extrapolation,
-            background, completefn=completefn,
-            updatefn=updatefn)
+                                                   background, completefn=completefn,
+                                                   updatefn=updatefn)
         elif trans_type == 'hilbert':
             self._transform_thread = HilbertThread(self._data, extrapolation,
-            background, completefn=completefn, updatefn=updatefn)
+                                                   background, completefn=completefn, updatefn=updatefn)
         else:
             err = ("Incorrect transform type supplied, must be 'fourier'",
                 " or 'hilbert'")

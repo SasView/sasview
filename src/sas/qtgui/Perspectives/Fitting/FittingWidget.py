@@ -1687,13 +1687,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         completefn = self.batchFittingCompleted if self.is_batch_fitting else self.fittingCompleted
 
         self.calc_fit = FitThread(handler=handler,
-                            fn=fitters,
-                            batch_inputs=batch_inputs,
-                            batch_outputs=batch_outputs,
-                            page_id=[[self.page_id]],
-                            updatefn=updater,
-                            completefn=completefn,
-                            reset_flag=self.is_chain_fitting)
+                                  fn=fitters,
+                                  batch_inputs=batch_inputs,
+                                  batch_outputs=batch_outputs,
+                                  page_id=[[self.page_id]],
+                                  updatefn=updater,
+                                  completefn=completefn,
+                                  reset_flag=self.is_chain_fitting)
 
         if config.USING_TWISTED:
             # start the trhrhread with twisted

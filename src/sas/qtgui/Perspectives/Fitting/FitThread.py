@@ -34,10 +34,10 @@ class FitThread(CalcThread):
                  worktime=0.03,
                  reset_flag=False):
         CalcThread.__init__(self,
-                 completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+                            completefn,
+                            updatefn,
+                            yieldtime,
+                            worktime)
         self.handler = handler
         self.fitter = fn
         self.pars = pars
