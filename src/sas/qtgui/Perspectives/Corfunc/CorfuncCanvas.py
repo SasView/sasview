@@ -7,7 +7,7 @@ from typing import Optional, Union, List, Iterable, TYPE_CHECKING
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D
 
 
 if TYPE_CHECKING:

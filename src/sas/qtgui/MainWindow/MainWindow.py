@@ -75,11 +75,11 @@ def run_sasview():
     SetupLogger(__name__).config_development()
 
     # initialize sasmodels settings
-    from sas import get_custom_config, get_user_dir
+    from sas import config, get_user_dir
     if "SAS_DLL_PATH" not in os.environ:
         os.environ["SAS_DLL_PATH"] = os.path.join(
             get_user_dir(), "compiled_models")
-    SAS_OPENCL = get_custom_config().SAS_OPENCL
+    SAS_OPENCL = config.SAS_OPENCL
     if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
         os.environ["SAS_OPENCL"] = SAS_OPENCL
 
