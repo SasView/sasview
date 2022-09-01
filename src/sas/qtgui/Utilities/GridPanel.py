@@ -150,7 +150,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         if name is not None:
             tab_name = name
         else:
-            tab_name = "Tab " + str(self.tab_number)
+            tab_name = "Batch Result " + str(self.tab_number)
         # each table needs separate slots.
         tab_widget.customContextMenuRequested.connect(self.showContextMenu)
         self.tables.append(tab_widget)
@@ -559,7 +559,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         # creating a BatchInversionOutputPanel object and taking out the .tblParams is not the cleanest.
         # this can be changed when setupTable is made more flexible
         self.tab_number += 1
-        if tab_name is not None:
+        if tab_name is None:
             tab_name = "Batch Result " + str(self.tab_number)
         tableItem = BatchInversionOutputPanel(parent=self, output_data=data).tblParams
 

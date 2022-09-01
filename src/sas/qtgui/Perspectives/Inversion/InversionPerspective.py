@@ -369,7 +369,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             tab.calculateAllButton.setVisible(True)
             tab.calculateThisButton.setVisible(True)
             tab.setPlotable(False)
-            tab._allowPlots = False
 
             for i in data:
                 tab.logic.data = GuiUtils.dataFromItem(i) # Fix this for batch
