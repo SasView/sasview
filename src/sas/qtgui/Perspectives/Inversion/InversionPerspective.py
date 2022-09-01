@@ -25,8 +25,11 @@ from sas.qtgui.Perspectives.perspective import Perspective
 logger = logging.getLogger(__name__)
 
 
+class InversionWindow(QtWidgets.QTabWidget):
 
-class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
+    """
+    The main window for the P(r) Inversion perspective.
+    """
 
 
     name = "Inversion"
@@ -61,8 +64,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self._parent = parent
         self.communicate = parent.communicator()
         self.tabCloseRequested.connect(self.tabCloses)
-
-        # self.logic = InversionLogic()
 
         # List of active Pr Tabs
         self.tabs = []
@@ -230,8 +231,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
 
             if isinstance(logic_data, Data2D) and not is_batch:
                 data.isSliced = False
-                tab = self.addData(data=data)
-                tab.is2D = True
+                tab = self.addData(data=data, is2D=True)
                 tab.tab2D.setEnabled(True)
                 tab.show2DPlot()
 
@@ -321,27 +321,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             state[data_id] = {'pr_params': tab_data}
         return state
 
-    def getPage(self):
-        """
-        serializes full state of this fit page
-        """
-        # Get all parameters from page
-        param_dict = self.getState()
-        param_dict['data_name'] = str(self.logic.data.name)
-        param_dict['data_id'] = str(self.logic.data.id)
-        return param_dict
-
-    def currentTabDataId(self):
-        """
-        Returns the data ID of the current tab
-        """
-        tab_id = []
-        if self.logic.data_is_loaded:
-            tab_id.append(str(self.logic.data.id))
-        return tab_id
+ 
 
 
-    def addData(self, data=None, is_batch=False, tab_index=None):
+
+    def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
+
         """
         Add a new tab for passed data
         """
@@ -354,6 +339,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.set_tab_name("New Tab")
+        tab.is2D = is2D
 
         if data is not None and not is_batch:
             tab.logic.data = GuiUtils.dataFromItem(data)

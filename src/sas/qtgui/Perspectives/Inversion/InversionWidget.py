@@ -428,14 +428,21 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             return
 
         if self.is2D:
+            self._allowPlots = False
             self._data = self.dataList.itemData(data_index)
             self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(data_index))
+
+            if not isinstance(self._data, Data1D): # Only allow 1D slices of 2D data NOT the full 2D data
+                return
 
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
             self._calculator.set_qmax(qmax)
-            self.startThread()
-
+            try:
+                self.startThread()
+            except TypeError:
+                logging.warning("2D data as a whole cannot be Processed using Pr.")
+                return
             self._calculator = self._dataList[self._data].get(DICT_KEYS[0])
             self.prPlot = self._dataList[self._data].get(DICT_KEYS[1])
             self.dataPlot = self._dataList[self._data].get(DICT_KEYS[2])
@@ -443,11 +450,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # self.setCurrentData(self.dataList.itemData(data_index))
         else:
             self.updateDataList(self._data)
-            qmin, qmax = self.logic.computeDataRange()
-            self._calculator.set_qmin(qmin)
-            self._calculator.set_qmax(qmax)
+            self.setQ()
             self.setCurrentData(self.dataList.itemData(data_index))
         self.enableButtons()
+
+    def setQ(self):
+        qmin, qmax = self.logic.computeDataRange()
+        self._calculator.set_qmin(qmin)
+        self._calculator.set_qmax(qmax)
 
     ######################################################################
     # GUI Interaction Events
@@ -595,9 +605,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def saveParameters(self):
         # remove the need for the extra noOfTerms regConst and maxDist
         self._calculator.noOfTerms = int(self.getNFunc())
-        self._calculator.regConst = float(self.regularizationConstantInput.text())
-        self._calculator.maxDist = float(self.maxDistanceInput.text())
-        self._calculator.background = float(self.backgroundInput.text())
+        self._calculator.regConst = is_float(self.regularizationConstantInput.text())
+        self._calculator.maxDist = is_float(self.maxDistanceInput.text())
+        self._calculator.background = is_float(self.backgroundInput.text())
         self._calculator.set_slit_height(is_float(self.slitHeightInput.text()))
         self._calculator.set_slit_width(is_float(self.slitWidthInput.text()))
 
@@ -680,9 +690,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._data = data_ref
         self.setParameters()
         self.logic.data = GuiUtils.dataFromItem(data_ref)
+        self.resetCalcPrams()
         self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
         self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
+        self.startThread()
+        self.updateGuiValues()
 
     def updateDynamicGuiValues(self):
         pr = self._calculator
@@ -855,6 +868,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
+        if self.is2D:
+            self.batchComplete.append(0)
+            self.dataList.setCurrentIndex(1)
+            return
         self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
@@ -1181,10 +1198,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_low_q_setter = ['check_q_low']
             self.dataPlot.slider_high_q_input = ['maxQInput']
             self.dataPlot.slider_high_q_setter = ['check_q_high']
-        # Udpate internals and GUI
+
+            # Udpate internals and GUI
         self.updateDataList(self._data)
         if self.isBatch:
-            self.resetCalcPrams()
+            self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
         else:
             self.isCalculating = False
@@ -1213,11 +1231,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.sliceList.setRowCount(self.noOfSlices)
 
         for row, slice in enumerate(slicedData):
+            from functools import partial
             self.plot1D.plot(slice)
             self.plot1D.show()
             plotButton = QtWidgets.QPushButton(str(slice.phi))
-            self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))
             self.sliceList.setCellWidget(row, 1, plotButton)
+            plotButton.clicked.connect(partial(self.show1DPlot,slice))
+            self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))
             newData = GuiUtils.createModelItemWithPlot(update_data=slice, name=str(slice.title))
             self.populateDataComboBox(name=str(slice.title), data_ref=newData)
             self.updateDataList(newData)
@@ -1260,11 +1280,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.updateSlicerParams()
         self.enableButtons()
 
-    def show1DPlot(self):
-        selectedSlice = self.plot2D.slicer.getSlice()
-        self.plot1D.plot(selectedSlice)
+    def show1DPlot(self, data):
+        self.plot1D.clean()
+        self.plot1D.plot(data)
         self.plot1D.show()
-        self.plot2D.update()
 
     def updateSlicerParams(self):
         try:
