@@ -79,7 +79,7 @@
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Batch Result 1</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <property name="leftMargin">
