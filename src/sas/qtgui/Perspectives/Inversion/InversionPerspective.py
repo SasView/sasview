@@ -12,8 +12,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 logger = logging.getLogger(__name__)
 
-
 class InversionWindow(QtWidgets.QTabWidget):
+
     """
     The main window for the P(r) Inversion perspective.
     """
@@ -39,8 +39,6 @@ class InversionWindow(QtWidgets.QTabWidget):
         self._parent = parent
         self.communicate = parent.communicator()
         self.tabCloseRequested.connect(self.tabCloses)
-
-        # self.logic = InversionLogic()
 
         # List of active Pr Tabs
         self.tabs = []
@@ -207,8 +205,7 @@ class InversionWindow(QtWidgets.QTabWidget):
 
             if isinstance(logic_data, Data2D) and not is_batch:
                 data.isSliced = False
-                tab = self.addData(data=data)
-                tab.is2D = True
+                tab = self.addData(data=data, is2D=True)
                 tab.tab2D.setEnabled(True)
                 tab.show2DPlot()
 
@@ -236,7 +233,7 @@ class InversionWindow(QtWidgets.QTabWidget):
         # if isinstance(self.logic.data, Data1D):
         #     self.setCurrentData(data)
 
-    def addData(self, data=None, is_batch=False, tab_index=None):
+    def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
         """
         Add a new tab for passed data
         """
@@ -249,6 +246,7 @@ class InversionWindow(QtWidgets.QTabWidget):
         # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.set_tab_name("New Tab")
+        tab.is2D = is2D
 
         if data is not None and not is_batch:
             tab.logic.data = GuiUtils.dataFromItem(data)
