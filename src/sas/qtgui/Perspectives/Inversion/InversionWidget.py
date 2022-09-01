@@ -240,7 +240,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Connect the use controls to their appropriate methods"""
         self.dataList.currentIndexChanged.connect(self.displayChange)
         self.calculateAllButton.clicked.connect(self.startThreadAll)
-        self.calculateThisButton.clicked.connect(self.startThread)
+        self.calculateThisButton.clicked.connect(self.calc)
         self.stopButton.clicked.connect(self.stopCalculation)
         self.removeButton.clicked.connect(self.removeData)
         self.showResultsButton.clicked.connect(self.showBatchOutput)
@@ -445,8 +445,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                 self.dataPlot = self._dataList[newData].get(DICT_KEYS[2])
             except:
                 pass
-
-            self.startThread()
             # qmin, qmax = self.logic.computeDataRange()
             # self._calculator.set_qmin(qmin)
             # self._calculator.set_qmax(qmax)
@@ -462,8 +460,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
             self._calculator.set_qmax(qmax)
-            # if not isinstance(self._data, Data1D):
-            #     return
             self.setCurrentData(self.dataList.itemData(data_index))
         self.enableButtons()
 
@@ -535,10 +531,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping name -> P(r) instance
          """
-        if self.batchResultsWindow is not None:
-            self.batchResultsWindow.newTableTab(tab_name="TEst", data=self.batchResults)
-        else:
-            self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
+        self.batchResultsWindow = BatchInversionOutputPanel(parent=self, output_data=self.batchResults)
         self.batchResultsWindow.show()
 
     def stopCalculation(self):
@@ -594,13 +587,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
             return
-
         self.saveParameters()
         self._dataList[dataRef] = {
             DICT_KEYS[0]: self._calculator,
             DICT_KEYS[1]: self.prPlot,
             DICT_KEYS[2]: self.dataPlot
         }
+
+    def saveToBatchResults(self):
         self.batchResults[self.logic.data.name] = self._calculator
 
 
@@ -696,11 +690,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
         self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
-        self.startThread()
+        self.calc()
+        self.updateGuiValues()
 
     def updateDynamicGuiValues(self):
         pr = self._calculator
-        alpha = self._calculator.alpha
+        alpha = self._calculator.suggested_alpha
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
@@ -869,25 +864,29 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
-        # if batch calculating 2D slices ignore first item as its a 2D file
-
         self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
         self.enableButtons()
-        self.startThread()
+        self.batchResultsWindow = BatchInversionOutputPanel(
+            parent=self, output_data=self.batchResults)
+        self.calc()
 
     def startNextBatchItem(self):
+        """
+        """
         self.isBatch = False
         for index in range(len(self._dataList)):
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
+                self.saveToBatchResults()
                 self.batchComplete.append(index)
                 self.isBatch = True
                 break
         if self.isBatch or self.is2D:
-            self.startThread()
+            self.performEstimate()
+            self.calc()
         else:
             # If no data sets left, end batch calculation
             self.isCalculating = False
@@ -896,9 +895,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.showBatchOutput()
             self.enableButtons()
 
-    def startThread(self):
+    def calc(self):
         """
-            Start a calculation thread
+            Revised Calculations function that c
         """
         from .Thread import CalcPr
         # Set data before running the calculations
@@ -919,14 +918,39 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         print("D_max end: ", self._calculator.d_max)
         print("bg: ", self._calculator.background)
 
+        # self.resetCalcPrams()
         pr = self._calculator.clone()
-        # Making sure that nfunc and alpha parameters are correctly initialized
+
+        self.calcThread = CalcPr(pr,
+                                             self.getNFunc(),
+                                             error_func=self._threadError,
+                                             completefn=self._calculateCompleted,
+                                             updatefn=None)
+        self.calcThread.queue()
+        self.calcThread.ready(2.5)
+
+    def startThread(self):
+        """
+            Start a calculation thread
+        """
+        from .Thread import CalcPr
+
+        # Set data before running the calculations
+        self.isCalculating = True
+        self.enableButtons()
+        self.updateCalculator()
+        # Disable calculation buttons to prevent thread interference
+
+        # If the thread is already started, stop it
+        self.stopCalcThread()
+
+        pr = self._calculator.clone()
+        #Making sure that nfunc and alpha parameters are correctly initialized
         pr.suggested_alpha = self._calculator.alpha
-        self.resetCalcPrams()
-        self.calcThread = CalcPr(pr, self.nTermsSuggested,
-                                                       error_func=self._threadError,
-                                                       completefn=self._calculateCompleted,
-                                                       updatefn=None)
+        self.calcThread = CalcPr(pr, self.getNFunc(),
+                                 error_func=self._threadError,
+                                 completefn=self._calculateCompleted,
+                                 updatefn=None)
         self.calcThread.queue()
         self.calcThread.ready(2.5)
 
@@ -952,7 +976,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr.slit_height = 0.0
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
-        # self.resetCalcPrams()
 
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
@@ -978,13 +1001,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr.slit_height = 0.0
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
-        # self.resetCalcPrams()
 
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
                                              completefn=self._estimateDynamicNTCompleted,
                                              updatefn=None)
         self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
 
     def stopEstimateNTThread(self):
         if (self.estimationThreadNT is not None and
@@ -999,7 +1022,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # If a thread is already started, stop it
         self.stopEstimationThread()
-        # self.resetCalcPrams()
 
         self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
@@ -1007,6 +1029,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                            completefn=self._estimateCompleted,
                                            updatefn=None)
         self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
 
     def performEstimateDynamic(self):
         """
@@ -1016,7 +1039,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # If a thread is already started, stop it
         self.stopEstimationThread()
-        # self.resetCalcPrams()
 
         self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
@@ -1024,6 +1046,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                            completefn=self._estimateDynamicCompleted,
                                            updatefn=None)
         self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
 
     def stopEstimationThread(self):
         """ Stop the estimation thread if it exists and is running """
@@ -1099,8 +1122,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if message:
             logger.info(message)
         if self.isBatch:
-            # self.acceptAlpha()
-            # self.acceptNoTerms()
+            self.acceptAlpha()
+            self.acceptNoTerms()
             self.startThread()
 
     def _estimateDynamicNTUpdate(self, output_tuple):
@@ -1121,8 +1144,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if message:
             logger.info(message)
         if self.isBatch:
-            # self.acceptAlpha()
-            # self.acceptNoTerms()
+            self.acceptAlpha()
+            self.acceptNoTerms()
+            self.acceptNoTerms()
             self.startThread()
 
     def _calculateCompleted(self, out, cov, pr, elapsed):
@@ -1166,13 +1190,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_high_q_setter = ['check_q_high']
 
         # Udpate internals and GUI
-        if not self.isBatch:
-            self.updateDataList(self._data)
+        self.updateDataList(self._data)
         if self.isBatch or self.is2D:
+            self.resetCalcPrams()
             self.startNextBatchItem()
         else:
             self.isCalculating = False
-
         self.updateGuiValues()
 
     def _threadError(self, error):
