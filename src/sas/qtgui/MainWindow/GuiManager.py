@@ -1304,6 +1304,8 @@ class GuiManager:
         config.save()
         return
 
+        # TODO: Remove the rest of this function
+
         # Load the current file
         config_content = GuiUtils.custom_config
 

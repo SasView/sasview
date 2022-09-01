@@ -197,7 +197,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         #
         # Lock the class down
         #
-        self._lock()
+        self.finalise()
 
     def printEVT(self, message):
         if self.__EVT_DEBUG__:
