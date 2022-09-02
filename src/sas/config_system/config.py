@@ -25,8 +25,8 @@ If you're looking to change a field in the config file, you should read this
 Configs
 =======
 
-In general, configs are a nightmare from the perspective of code maintainability.
-There are three main reasons for this
+Configs are a nightmare from the perspective of code maintainability. There are
+three main reasons for this
   1) They have a tendency to accumulate junk because people don't realise that a
      config item is no longer needed
   2) It's hard to trace the usages and types because values are loaded at runtime

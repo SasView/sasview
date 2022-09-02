@@ -8,7 +8,6 @@ import json
 
 import sas
 
-from sas import config
 from sas.config_system.config import Config
 
 from sas.config_system.config_meta import MalformedFile
@@ -25,6 +24,8 @@ class TestConfig(unittest.TestCase):
 
     def a_test_dict(self) -> dict:
         """ A dictionary with field names from the config, but with different values"""
+
+        config = Config()
 
         # config variables (exclude the ones used by the base class)
         all_variables = vars(config).copy()
@@ -68,6 +69,7 @@ class TestConfig(unittest.TestCase):
     def test_valid_update(self):
         """ Test setting variables with known valid options"""
 
+        config = Config()
         test_dict = self.a_test_dict()
 
         config.update(test_dict)
@@ -80,6 +82,8 @@ class TestConfig(unittest.TestCase):
 
     def test_invalid_update_bad_name(self):
         """ Check that an error is logged when there is a bad name in the config"""
+
+        config = Config()
 
         # Create a variable that isn't in the config
         test_dict = self.a_test_dict()
@@ -101,6 +105,7 @@ class TestConfig(unittest.TestCase):
         For this test to be useful it requires config to have at least one default entry with a schematisable type
         """
 
+        config = Config()
         test_dict = self.a_test_dict()
         for key in test_dict:
 
@@ -193,6 +198,8 @@ class TestConfig(unittest.TestCase):
 
 
     def test_bad_config_version(self):
+
+        config = Config()
         file = StringIO()
 
         json.dump({
@@ -209,6 +216,9 @@ class TestConfig(unittest.TestCase):
             self.assertTrue(cm.output[0].startswith("WARNING:sas.config_system:"))
 
     def test_bad_config_file_structure(self):
+
+        config = Config()
+        
         bad_structures = [
             {
                 "sasview_version": sas.__version__,
