@@ -336,7 +336,7 @@ class Pinvertor(object):
 
         iq_val = calc.iq(pars, self.d_max, q)
         if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
+            return iq_val[0]
         return iq_val
 
     def get_iq_smeared(self, pars, q):
@@ -358,7 +358,7 @@ class Pinvertor(object):
         iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height, self.slit_width, npts)
         #If q was a scalar
         if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
+            return iq_val[0]
         return iq_val
 
     def pr(self, pars, r):
@@ -377,7 +377,7 @@ class Pinvertor(object):
         pr_val = calc.pr(pars, self.d_max, r)
         if len(pr_val) == 1:
             #scalar
-            return np.asscalar(pr_val)
+            return pr_val[0]
         return pr_val
 
     def get_pr_err(self, pars, pars_err, r):
@@ -429,7 +429,7 @@ class Pinvertor(object):
 
         if ortho_val.shape[0] == 1:
             #If the q input was scalar.
-            return np.asscalar(ortho_val)
+            return ortho_val[0]
         return ortho_val
 
     def oscillations(self, pars):
