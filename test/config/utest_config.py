@@ -1,13 +1,25 @@
 
+""" Unit tests for Config system. """
+
 import unittest
+
+from io import StringIO
+import json
+
+import sas
+
 from sas import config
+from sas.config_system.config import Config
+
+from sas.config_system.config_meta import MalformedFile
+
 from sas.config_system.schema_elements import \
     pairwise_schema_union, create_schema_element, \
     SchemaBool, SchemaInt, SchemaFloat, SchemaStr, \
     SchemaList, SchemaNonSpecified, \
     CoercionError
 
-""" Unit tests for Config system. """
+
 
 class TestConfig(unittest.TestCase):
 
@@ -16,9 +28,8 @@ class TestConfig(unittest.TestCase):
 
         # config variables (exclude the ones used by the base class)
         all_variables = vars(config).copy()
-        del all_variables["_locked"]
-        del all_variables["_schema"]
-        del all_variables["_deleted_attributes"]
+        for skipped in config._meta_attributes:
+            del all_variables[skipped]
 
 
         # New values
@@ -117,10 +128,122 @@ class TestConfig(unittest.TestCase):
                             self.assertTrue(cm.output[0].startswith("ERROR:sas.config_system:"))
 
 
+    def test_save_basics(self):
+        file = StringIO()
+
+        # Check saving with no changes, should be empty and
+        config = Config()
+        config.save(file)
+
+        file.seek(0)
+
+        observed = json.load(file)
+
+        empty_file = {
+            "sasview_version": sas.__version__,
+             "config_data": {}
+        }
+
+        self.assertEqual(observed, empty_file)
 
 
-    def test_load_and_save(self):
-        pass
+
+    def test_save_changes(self):
+        """ Check that save saves a change that has been made"""
+
+        test_dict = self.a_test_dict()
+        for key in test_dict:
+            file = StringIO()
+            config = Config()
+            config.update({key: test_dict[key]})
+            config.save(file)
+            file.seek(0)
+
+            observed = json.load(file)
+
+            expected = {
+                "sasview_version": sas.__version__,
+                "config_data": {key: test_dict[key]}
+            }
+
+            self.assertEqual(observed, expected)
+
+    def test_only_save_actual_changes(self):
+        """ Check that if a field is set back to its default, it isn't saved in the config"""
+
+        # (1) make a single change
+        # (2) change back to the default value
+        # (3) Check
+
+        empty_file = {
+            "sasview_version": sas.__version__,
+             "config_data": {}
+        }
+
+        backup = Config()
+
+        test_dict = self.a_test_dict()
+        for key in test_dict:
+            file = StringIO()
+            config = Config()
+
+            config.update({key: test_dict[key]})
+            config.update({key: getattr(backup, key)})
+            config.save(file)
+
+            file.seek(0)
+            observed = json.load(file)
+
+            self.assertEqual(observed, empty_file)
+
+
+    def test_bad_config_version(self):
+        file = StringIO()
+
+        json.dump({
+            "sasview_version": "1.2.3",
+             "config_data": {}},
+            file)
+
+        file.seek(0)
+
+        with self.assertLogs('sas.config_system', level="WARN") as cm:
+            # Try the bad value
+            config.load(file)
+
+            self.assertTrue(cm.output[0].startswith("WARNING:sas.config_system:"))
+
+    def test_bad_config_file_structure(self):
+        bad_structures = [
+            {
+                "sasview_version": sas.__version__,
+                "quanfig_data": {}
+            },
+            {
+                "sasview_version": "bad version",
+                "config_data": {}
+            },
+            {
+                "sassy_verberry": sas.__version__,
+                "config_data": {}
+            },
+            {
+                "sasview_version": sas.__version__,
+                "config_data": []
+            },
+            {}
+        ]
+
+        for structure in bad_structures:
+            file = StringIO()
+
+            json.dump(structure,file)
+
+            file.seek(0)
+
+            with self.assertRaises(MalformedFile):
+                config.load(file)
+
 
     def test_schema_union(self):
         """ Check the typing behaviour of the schema system"""

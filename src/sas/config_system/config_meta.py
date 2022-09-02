@@ -1,11 +1,17 @@
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Set
 import json
 import logging
 from sas.config_system.schema_elements import create_schema_element, CoercionError, SchemaElement
-
-
+from copy import deepcopy
+import sas
 
 logger = logging.getLogger("sas.config_system")
+
+
+class MalformedFile(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 
 class ConfigLocked(Exception):
     def __init__(self, message):
@@ -26,17 +32,21 @@ class ConfigBase:
     def __init__(self):
 
         # Note on editing the following variables:
-        #   they are referenced as strings in functions below
-        #   remember that the strings will have to be updated
+        #   they are referenced as strings via _meta_attributes
+        #   you need to keep this up to date (probably shouldn't be
+        #   changing it anyway)
         self._locked = False
         self._schema: Dict[str, SchemaElement] = {}
+        self._defaults: Dict[str, SchemaElement] = {}
         self._deleted_attributes: List[str] = []
+        self._meta_attributes = ["_locked", "_schema", "_defaults", "_deleted_attributes", "_meta_attributes"]
 
     def finalise(self):
         """ Call this at the end of the config to make this class 'final'
             and to set up the config file schema"""
 
-        self._schema = self.generate_schema()
+        self._schema = self._generate_schema()
+        self._defaults = self._state_copy()
         self._locked = True
 
     def update(self, data: Dict[str, Any]):
@@ -61,41 +71,92 @@ class ConfigBase:
             else:
                 logger.error(f"Unknown config key: '{key}', skipping")
 
+    def save(self, file):
+        """ Save config file
 
-    def generate_schema(self):
+        Only changed variables will be included in the saved file
+        """
+        data = {}
+        for key in self._defaults:
+            old_value = self._defaults[key]
+            new_value = getattr(self, key)
+            if new_value != old_value:
+                data[key] = new_value
+
+        output_data = {
+            "sasview_version": sas.__version__,
+            "config_data": data}
+
+        json.dump(output_data, file)
+
+    def load(self, file):
+        """ Load config file """
+        data = json.load(file)
+
+        if "sasview_version" not in data:
+            raise MalformedFile("Malformed config file - no 'sasview_version' key")
+
+        try:
+            parts = [int(s) for s in data["sasview_version"].split(".")]
+            if len(parts) != 3:
+                raise Exception
+
+        except Exception:
+            raise MalformedFile("Malformed version in config file, should be a string of the form 'X.Y.Z'")
+
+        if "config_data" not in data:
+            raise MalformedFile("Malformed config file - no 'config_data' key")
+
+        if not isinstance(data["config_data"], dict):
+            raise MalformedFile("Malformed config file - expected 'config_data' to be a dictionary")
+
+
+        # Check major version
+        file_version = data["sasview_version"]
+        file_major_version = file_version.split(".")[0]
+        sasview_major_version = sas.__version__.split(".")[0]
+
+        if int(file_major_version) != int(sasview_major_version):
+            logger.warning(f"Attempting to used outdated config file (config is"
+                           f" for {file_version}, this SasView version is {sas.__version__})")
+
+        self.update(data["config_data"])
+
+    def _state_copy(self) -> Dict[str, Any]:
+        """ Get a copy of all the data in the config"""
+        state: Dict[str, Any] = {}
+        variables = vars(self)
+        for variable_name in variables:
+            if variable_name in self._meta_attributes:
+                continue
+
+            state[variable_name] = deepcopy(variables[variable_name])
+
+        return state
+
+    def _generate_schema(self) -> Dict[str, SchemaElement]:
         """ Auto-generate schema for the current config class and validate config class
 
         Note: there is an assumption here that the class of the value in the default
         config file is
         """
 
-        schema = {}
+        schema: Dict[str, SchemaElement] = {}
         variables = vars(self)
         for variable_name in variables:
-            if variable_name in ["_locked", "_schema", "_deleted_attributes"]:
+            if variable_name in self._meta_attributes:
                 continue
 
             schema[variable_name] = create_schema_element(variable_name, variables[variable_name])
 
         return schema
 
-    def load(self, file_object: StringIO):
-
-        # TODO: Add check for major version change
-
-        {}
-
-        pass
-
-    def save(self, file_object: StringIO):
-        """ Save the configuration to a file"""
-        #TODO: Implement save functionality to yaml (and load, with schema)
-        raise NotImplementedError()
-
     def __setattr__(self, key, value):
         if hasattr(self, "_locked") and self._locked:
             if key not in self.__dict__:
                 raise ConfigLocked("New attribute attempt")
+
+
 
         super().__setattr__(key, value)
 

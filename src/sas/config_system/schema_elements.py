@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, List
 import logging
 
+
 """ Type representation for config elements
 
 Unfortunately, json schemas are not flexible enough to make this unnecessary"""
@@ -112,7 +113,8 @@ class SchemaList(SchemaElement):
             raise CoercionError(f"Cannot coerce {value} ({type(value)}) to list")
 
         if not isinstance(value, list):
-            logging.warning(f"Corercing variable of type {type(value)} to list ({value})")
+            logger = logging.getLogger(self.__class__.__name__)
+            logger.warning(f"Corercing variable of type {type(value)} to list ({value})")
 
         return [self.child_type.coerce(x) for x in value]
 
@@ -126,7 +128,7 @@ class SchemaList(SchemaElement):
         return f"SchemaList({repr(self.child_type)})"
 
 
-def create_schema_element(name: str, value, recursion_depth: int=10):
+def create_schema_element(name: str, value, recursion_depth: int=10) -> SchemaElement:
     """ Get an appropriate schema element for a specified config datum"""
 
     # Limits the depth of list config items
@@ -134,7 +136,8 @@ def create_schema_element(name: str, value, recursion_depth: int=10):
         raise SchemaError(f"Config element '{name}' is too nested, or is self-referential")
 
     if value is None:
-        logging.warning(f"Non-specified type for variable '{name}'")
+        logger = logging.getLogger("create_schema_element")
+        logger.warning(f"Non-specified type for variable '{name}'")
         return SchemaNonSpecified()
 
     # List case
@@ -142,7 +145,8 @@ def create_schema_element(name: str, value, recursion_depth: int=10):
 
         # Empty list
         if len(value) == 0:
-            logging.warning(f"Non-specified list type for variable '{name}'")
+            logger = logging.getLogger("create_schema_element")
+            logger.warning(f"Non-specified list type for variable '{name}'")
             return SchemaList(SchemaNonSpecified())
 
         elif len(value) == 1:

@@ -1,4 +1,4 @@
-from version import __version__
+from sas.version import __version__
 
 import os
 import sys
