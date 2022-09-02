@@ -6,8 +6,8 @@ import sys
 import math
 import numpy as np
 
-from sas.sascalc.dataloader.data_info import Data1D
-from sas.sascalc.dataloader.data_info import Data2D
+from sasdata.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data2D
 _SMALLVALUE = 1.0e-10
 
 class FitHandler(object):

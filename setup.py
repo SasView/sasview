@@ -138,14 +138,6 @@ package_dir["sas.sascalc.invariant"] = os.path.join(
 packages.extend(["sas.sascalc.invariant"])
 
 
-# sas.sascalc.dataloader
-package_dir["sas.sascalc.dataloader"] = os.path.join(
-    "src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = ['schema/*.xsd']
-packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
-                 "sas.sascalc.dataloader.readers.schema"])
-
-
 # sas.sascalc.calculator
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
@@ -155,12 +147,6 @@ packages.append("sas.sascalc.calculator")
 # sas.sascalc.pr
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
 packages.append("sas.sascalc.pr")
-
-
-# sas.sascalc.file_converter
-package_dir["sas.sascalc.file_converter"] = os.path.join(
-    "src", "sas", "sascalc", "file_converter")
-packages.append("sas.sascalc.file_converter")
 
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
@@ -283,7 +269,7 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              'Plotting/UI/*',
                              'Utilities/UI/*',
                              'Utilities/Reports/UI/*',
-                             'Utilities/Reports/*.css'
+                             'Utilities/Reports/*.css',
                              'UI/*',
                              'UI/res/*',
                              ]
