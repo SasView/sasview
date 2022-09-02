@@ -1300,20 +1300,10 @@ class GuiManager:
         """
         Save the config file based on current session values
         """
-
-        config.save()
-        return
-
-        # TODO: Remove the rest of this function
-
-        # Load the current file
-        config_content = GuiUtils.custom_config
-
-        changed = self.customSavePaths(config_content)
-        changed = changed or self.customSaveOpenCL(config_content)
-
-        if changed:
-            self.writeCustomConfig(config_content)
+        # TODO: Decide what to do with config locations
+        logger.warning("Config paths have not yet been set up")
+        with open("config.json", 'w') as file:
+            config.save(file)
 
     def customSavePaths(self, config_content):
         """
