@@ -31,39 +31,34 @@ class TestConfig(unittest.TestCase):
         for skipped in config._meta_attributes:
             del all_variables[skipped]
 
-
-        # New values
-        bool_value = True
-        int_value = 42
-        float_value = 2.7669
-        string_value_suffix = 7
+        string_value_suffix = 42
 
         target_values = {}
 
         for key in all_variables:
 
             if isinstance(all_variables[key], bool):
-                target_values[key] = bool_value
-                bool_value = not bool_value
+                target_values[key] = not all_variables[key]
 
 
             elif isinstance(all_variables[key], int):
-                target_values[key] = int_value
-                int_value += 1
+                target_values[key] = all_variables[key] + 42
 
             elif isinstance(all_variables[key], float):
-                target_values[key] = int_value
-                float_value += 3.149999
+                target_values[key] = all_variables[key] + 3.149999
 
             elif isinstance(all_variables[key], str):
-                target_values[key] = f"A string ending in the number {string_value_suffix}"
+                target_values[key] = all_variables[key] + f" with string making it end in the number {string_value_suffix}"
                 string_value_suffix += 1
 
+            elif all_variables[key] == []:
+                target_values[key] = ["something else"]
+
             elif isinstance(all_variables[key], list):
-                target_values[key] = all_variables[key] * 2 # Finding a more specific test is too complicated
+                target_values[key] = all_variables[key] * 2
 
             elif all_variables[key] is None:
-                target_values[key] = None
+                target_values[key] = "something"
 
             else:
                 raise TypeError(f"Config entry '{key}' is not bool, int, float, str ({all_variables[key]})")
