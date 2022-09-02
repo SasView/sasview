@@ -2,12 +2,12 @@
 import unittest
 from sas import config
 from sas.config_system.schema_elements import \
-    pairwise_schema_union, \
+    pairwise_schema_union, create_schema_element, \
     SchemaBool, SchemaInt, SchemaFloat, SchemaStr, \
-    SchemaList, SchemaNonSpecified
+    SchemaList, SchemaNonSpecified, \
+    CoercionError
 
 """ Unit tests for Config system. """
-
 
 class TestConfig(unittest.TestCase):
 
@@ -18,7 +18,7 @@ class TestConfig(unittest.TestCase):
         all_variables = vars(config).copy()
         del all_variables["_locked"]
         del all_variables["_schema"]
-        del all_variables["_modified_values"]
+        del all_variables["_deleted_attributes"]
 
 
         # New values
@@ -71,19 +71,59 @@ class TestConfig(unittest.TestCase):
             self.assertEqual(var, test_dict[key])
             self.assertEqual(type(var), type(test_dict[key]))
 
-    def test_config_variable_change_tracker(self):
-        pass
 
     def test_invalid_update_bad_name(self):
-        pass
+        """ Check that an error is logged when there is a bad name in the config"""
+
+        # Create a variable that isn't in the config
+        test_dict = self.a_test_dict()
+
+        name = "x"
+        while name in test_dict:
+            name += "x"
+
+        # try and set it
+        with self.assertLogs('sas.config_system', level="ERROR") as cm:
+            config.update({name: None})
+            self.assertTrue(cm.output[0].startswith("ERROR:sas.config_system:"))
 
     def test_invalid_update_bad_type(self):
-        pass
+
+        """Check that bad types give an error, this tries a bunch of incompatable types with each of the
+        existing entries in config
+
+        For this test to be useful it requires config to have at least one default entry with a schematisable type
+        """
+
+        test_dict = self.a_test_dict()
+        for key in test_dict:
+
+            # find types that should be incompatable
+            for test_value in [False, 0, 1.0, "string", [1,2,3], [[["deep"]]]]:
+                test_value_schema = create_schema_element("value not important", test_value)
+
+                try:
+                    config._schema[key].coerce(test_value)
+
+                except CoercionError:
+
+                    # Only test the ones that fail, i.e. cannot be coerced
+                    if pairwise_schema_union(test_value_schema, config._schema[key]) is None:
+                        with self.assertLogs('sas.config_system', level="ERROR") as cm:
+
+                            # Try the bad value
+                            config.update({key: test_value})
+
+                            self.assertTrue(cm.output[0].startswith("ERROR:sas.config_system:"))
+
+
+
 
     def test_load_and_save(self):
         pass
 
     def test_schema_union(self):
+        """ Check the typing behaviour of the schema system"""
 
         anything = SchemaNonSpecified()
 
@@ -166,10 +206,6 @@ class TestConfig(unittest.TestCase):
         self.assertIsNone(pairwise_schema_union(float_list, int_list2))
         self.assertIsNone(pairwise_schema_union(int_list2, float_list))
         self.assertIsNone(pairwise_schema_union(int_list, float_list2))
-
-
-    def test_schema_extraction(self):
-        pass
 
 
 if __name__ == '__main__':

@@ -1,7 +1,11 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import json
 import logging
-from sas.config_system.schema_elements import create_schema_element, CoercionError
+from sas.config_system.schema_elements import create_schema_element, CoercionError, SchemaElement
+
+
+
+logger = logging.getLogger("sas.config_system")
 
 class ConfigLocked(Exception):
     def __init__(self, message):
@@ -25,11 +29,12 @@ class ConfigBase:
         #   they are referenced as strings in functions below
         #   remember that the strings will have to be updated
         self._locked = False
-        self._schema = {}
-        self._modified_values = set()
+        self._schema: Dict[str, SchemaElement] = {}
+        self._deleted_attributes: List[str] = []
 
     def finalise(self):
-        """ Call this to make this class 'final' """
+        """ Call this at the end of the config to make this class 'final'
+            and to set up the config file schema"""
 
         self._schema = self.generate_schema()
         self._locked = True
@@ -39,16 +44,22 @@ class ConfigBase:
 
         for key in data:
 
-            if key not in self._schema:
-                logging.error(f"Unknown config key: '{key}', skipping")
+            # Skip over any deleted attributes
+            if key in self._deleted_attributes:
+                continue
 
-            else:
+            # Check the variable is in the schema
+            if key in self._schema:
+
                 try:
                     coerced = self._schema[key].coerce(data[key])
                     setattr(self, key, coerced)
 
                 except CoercionError as e:
-                    logging.error(f"Cannot set set variable '{key}', improper type ({e.message})")
+                    logger.error(f"Cannot set set variable '{key}', improper type ({e.message})")
+
+            else:
+                logger.error(f"Unknown config key: '{key}', skipping")
 
 
     def generate_schema(self):
@@ -61,17 +72,22 @@ class ConfigBase:
         schema = {}
         variables = vars(self)
         for variable_name in variables:
-            if variable_name in ["_locked", "_schema", "_modified_values"]:
+            if variable_name in ["_locked", "_schema", "_deleted_attributes"]:
                 continue
 
             schema[variable_name] = create_schema_element(variable_name, variables[variable_name])
 
         return schema
 
-    def load(self, filename: str):
+    def load(self, file_object: StringIO):
+
+        # TODO: Add check for major version change
+
+        {}
+
         pass
 
-    def save(self, filename: Optional[str]=None):
+    def save(self, file_object: StringIO):
         """ Save the configuration to a file"""
         #TODO: Implement save functionality to yaml (and load, with schema)
         raise NotImplementedError()
@@ -80,10 +96,6 @@ class ConfigBase:
         if hasattr(self, "_locked") and self._locked:
             if key not in self.__dict__:
                 raise ConfigLocked("New attribute attempt")
-
-
-        # if not self._locked:
-        #     self._modified_values.add(key)
 
         super().__setattr__(key, value)
 

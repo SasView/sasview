@@ -1,3 +1,5 @@
+from version import __version__
+
 import os
 import sys
 from sas.config_system import configuration as config
