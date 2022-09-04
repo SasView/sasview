@@ -223,8 +223,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         assert(isinstance(table, QtWidgets.QTableWidget))
         params = {}
         for column in range(table.columnCount()):
-            value = [table.item(row, column).data(0) for row in range(table.rowCount())]
+            value = list()
             key = table.horizontalHeaderItem(column).data(0)
+            for row in range(table.rowCount()):
+                try:
+                    value.append(table.item(row, column).data(0))
+                except:
+                    value.append(" ")
             params[key] = value
         return params
 
@@ -564,9 +569,10 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         if tab_name is None:
             tab_name = "Batch Result " + str(self.tab_number)
         tableItem = BatchInversionOutputPanel(parent=self, output_data=data).tblParams
-
+        tableItem.customContextMenuRequested.connect(self.showContextMenu)
         self.tables.append(tableItem)
         self.tabWidget.addTab(tableItem, tab_name)
+        self.tabWidget.setCurrentIndex(self.tab_number-1)
 
     @classmethod
     def onHelp(cls):
