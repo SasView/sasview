@@ -29,12 +29,13 @@ def is_float(value):
     except ValueError:
         return 0.0
 
-
+# Default Values for inputs
 NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0001
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 
+# Default Values for 2D slicing
 START_POINT = 60
 NO_OF_SLICES = 6
 NO_OF_QBIN = 20
@@ -59,16 +60,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def __init__(self, parent=None, data=None, tab_id=1):
         super(InversionWidget, self).__init__()
 
-        # Necessary globals
-
         # 2D Data globals #####################
-        self.is2D = False
+
+        self.is2D = False           # used to determine weather its a 2D tab
         self.batchData = list()
         self.calculatedData = None
         self.isSlicing = None
         self.startPoint = None
         self.noOfSlices = None
-        self.slices = {}  # List to store the slices from 2D data
+        self.slices = {}                # List to store the slices from 2D data
         self.isSliced = False
 
         self.phi = None  # Start Point
@@ -379,15 +379,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        self.calculateAllButton.setEnabled(not self.isCalculating)
+        self.calculateAllButton.setEnabled(not self.isCalculating
+                                           and self.logic.data_is_loaded)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
-                                            # and not self.isBatch
-                                            # and not self.is2D
+                                            and not isinstance(self.logic.data, Data2D)
                                             and not self.isCalculating)
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
                                           and not self.isCalculating)
-        self.sliceButton.setVisible(not isinstance(self._data, Data2D))
+        self.sliceButton.setVisible(not isinstance(self.logic.data, Data2D))
         self.sliceButton.setEnabled(not self.isSlicing)
         self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
@@ -423,31 +423,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         print(data_index ,"Passed")
             # only take in 1D slices of 2dData files
 
-        if isinstance(self._data, Data2D):
-            logger.error("2D Data")
-            return
-
         if self.is2D:
-            self._allowPlots = False
+            # self._allowPlots = False
             self._data = self.dataList.itemData(data_index)
             self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(data_index))
 
-            if not isinstance(self._data, Data1D): # Only allow 1D slices of 2D data NOT the full 2D data
+            if not isinstance(self.logic.data, Data1D): # Only allow 1D slices of 2D data NOT the full 2D data
+                self.enableButtons()
                 return
-
-            qmin, qmax = self.logic.computeDataRange()
-            self._calculator.set_qmin(qmin)
-            self._calculator.set_qmax(qmax)
-            try:
-                self.startThread()
-            except TypeError:
-                logging.warning("2D data as a whole cannot be Processed using Pr.")
-                return
-            self._calculator = self._dataList[self._data].get(DICT_KEYS[0])
-            self.prPlot = self._dataList[self._data].get(DICT_KEYS[1])
-            self.dataPlot = self._dataList[self._data].get(DICT_KEYS[2])
-            self.updateGuiValues()
-            # self.setCurrentData(self.dataList.itemData(data_index))
         else:
             self.updateDataList(self._data)
             self.setQ()
@@ -868,8 +851,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
-        if self.is2D:
-            self.batchComplete.append(0)
+        if not isinstance(self.logic.data, Data1D):
             self.dataList.setCurrentIndex(1)
             return
         self.isCalculating = True
@@ -1242,6 +1224,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.populateDataComboBox(name=str(slice.title), data_ref=newData)
             self.updateDataList(newData)
             print("Calculating Pr of Phi {}".format(slice.title))
+            
         self.calculateAllButton.setVisible(True)
         # self.dataList.removeItem(0)
 
@@ -1284,6 +1267,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.plot1D.clean()
         self.plot1D.plot(data)
         self.plot1D.show()
+        params = self.plot2D.slicer.getParams()
+        params["Phi [deg]"] = data.phi
+        self.plot2D.slicer.setParams(params)
 
     def updateSlicerParams(self):
         try:
