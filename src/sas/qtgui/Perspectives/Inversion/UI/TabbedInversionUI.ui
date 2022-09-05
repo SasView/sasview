@@ -801,7 +801,7 @@ p, li { white-space: pre-wrap; }
        <string>2D Data</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_10">
-       <item row="8" column="0">
+       <item row="6" column="0">
         <widget class="QGroupBox" name="Output2DBox">
          <property name="title">
           <string>2D Outputs</string>
@@ -833,17 +833,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLineEdit" name="fileName2d">
-         <property name="mouseTracking">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0">
+       <item row="5" column="0">
         <widget class="QGroupBox" name="twoDParamGroupBox">
          <property name="title">
           <string>2D Parameters</string>
@@ -880,13 +870,6 @@ p, li { white-space: pre-wrap; }
            <widget class="QLineEdit" name="startPointInput"/>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_32">
-         <property name="text">
-          <string>2D Data File Name: </string>
-         </property>
         </widget>
        </item>
       </layout>
