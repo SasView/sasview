@@ -481,7 +481,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             self.tblParams.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(param))
 
         # first - Chi2 and data filename
-        msg = ''
+        failedCells = False
+
         for i_row, (filename, pr) in enumerate(data.items()):
             out = pr.out
             cov = pr.cov
@@ -493,71 +494,70 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             try:
                 self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.noOfTerms)))
-            except:
-                msg += "Unable to load nfunc for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                 self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.regConst)))
-            except:
-                msg += "Unable to load alpha for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                 self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.maxDist)))
-            except:
-                msg += "Unable to load Dmax for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.rg(out))))
-            except:
-                msg += "Unable to load rg for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
-                    self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.chi2[0])))
-            except:
-                msg += "Unable to load chi2 for {} in row {}.\n".format(filename, i_row)
+                self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.chi2[0])))
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.iq0(out))))
-            except:
-                msg += "Unable to load iq for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.oscillations(out))))
-            except:
-                msg += "Unable to load oscillations for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.background)))
-            except:
-                msg += "Unable to load background for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 9, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.get_positive(out))))
-            except:
-                msg += "Unable to load positives for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 10, QtWidgets.QTableWidgetItem(
                     "{:.3g}".format(pr.get_pos_err(out, cov))))
-            except:
-                msg += "Unable to load pos error for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 11, QtWidgets.QTableWidgetItem(
                     "{:.2g}".format(pr.elapsed)))
-            except:
-                msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
                     "{:.2g}".format(pr.get_qmin())))
-            except:
-                msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
+            except TypeError:
+                failedCells = True
             try:
                     self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
                     "{:.2g}".format(pr.get_qmax())))
-            except:
-                msg += "Unable to load elapsed for {} in row {}.\n".format(filename, i_row)
-            if msg != '':
-                GuiUtils.logger.warning(msg)
-                msg = ''
+            except TypeError:
+                failedCells = True
+        if failedCells:
+            GuiUtils.logger.warning("Some of the cells failed to receive outputs.")
         self.tblParams.resizeColumnsToContents()
 
     def newTableTab(self, tab_name=None, data=None):

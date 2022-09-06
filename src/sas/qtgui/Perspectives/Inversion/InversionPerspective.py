@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 
 class InversionWindow(QtWidgets.QTabWidget):
-
     """
     The main window for the P(r) Inversion perspective.
     """
@@ -161,6 +160,31 @@ class InversionWindow(QtWidgets.QTabWidget):
             pass
 
     ######################################################################
+
+    def serializeAll(self):
+        """
+        Serialize the inversion state so data can be saved
+        Inversion is not batch-ready so this will only effect a single page
+        :return: {data-id: {self.name: {inversion-state}}}
+        """
+        return self.serializeCurrentPage()
+
+    def serializeCurrentPage(self, Index=None):
+        """
+        Serialize and return a dictionary of {data_id: inversion-state}
+        Return original dictionary if no data
+        """
+        if Index is None:
+            Index = self.currentIndex()
+        tab = self.tabs[Index]
+        state = {}
+        if tab.logic.data_is_loaded:
+            tab_data = tab.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'pr_params': tab_data}
+        return state
+
+    ######################################################################
     # Base Perspective Class Definitions
 
     def communicator(self):
@@ -228,7 +252,6 @@ class InversionWindow(QtWidgets.QTabWidget):
 
             logic_data = GuiUtils.dataFromItem(data)
 
-
             if isinstance(logic_data, Data2D) and not is_batch:
                 data.isSliced = False
                 tab = self.addData(data=data, is2D=True)
@@ -254,7 +277,8 @@ class InversionWindow(QtWidgets.QTabWidget):
 
         if self.tabs[0].tab_name == "New Tab":
             self.closeTabByIndex(0)
-                ###############
+
+            ###############
 
         # Checking for 1D again to mitigate the case when 2D data is last on the data list
         # if isinstance(self.logic.data, Data1D):
@@ -338,33 +362,22 @@ class InversionWindow(QtWidgets.QTabWidget):
 
         # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
-        tab.set_tab_name("New Tab")
-        tab.is2D = is2D
+        tab.setTabName("New Tab")
+        icon = QtGui.QIcon()
 
         if data is not None and not is_batch:
+            tab.setTabName("New Tab")
+            tab.is2D = is2D
             tab.logic.data = GuiUtils.dataFromItem(data)
-            tab.set_tab_name(tab.logic.data.name)
+            tab.setTabName(tab.logic.data.name)
             tab.populateDataComboBox(tab.logic.data.name, data)
-
-        # Setting UP batch Mode
-        icon = QtGui.QIcon()
-        if is_batch:
-            tab.isBatch = True
-            tab.set_tab_name("Pr Batch")
-            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-            tab.calculateAllButton.setVisible(True)
-            tab.calculateThisButton.setVisible(True)
-            tab.setPlotable(False)
-
-            for i in data:
-                tab.logic.data = GuiUtils.dataFromItem(i) # Fix this for batch
-                tab.populateDataComboBox(name=tab.logic.data.name, data_ref=i)
-                tab.updateDataList(i)
-            tab.setCurrentData(data[0])
-        else:
             tab.calculateAllButton.setVisible(False)
             tab.showResultsButton.setVisible(False)
 
+        # Setting UP batch Mode
+        if is_batch:
+            tab = self.createBatchTab(batchDataList=data)
+            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
@@ -373,3 +386,17 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.setCurrentWidget(tab)
         return tab
 
+    def createBatchTab(self, batchDataList):
+        batchTab = InversionWidget(parent=self.parent, data=batchDataList)
+        batchTab.setTabName("Pr Batch")
+        batchTab.isBatch = True
+
+        batchTab.calculateAllButton.setVisible(True)
+        batchTab.calculateThisButton.setVisible(True)
+        batchTab.setPlotable(False)
+        for data in batchDataList:
+            batchTab.logic.data = GuiUtils.dataFromItem(data)  # Fix this for batch
+            batchTab.populateDataComboBox(name=batchTab.logic.data.name, data_ref=data)
+            batchTab.updateDataList(data)
+        batchTab.setCurrentData(batchDataList[0])
+        return batchTab
