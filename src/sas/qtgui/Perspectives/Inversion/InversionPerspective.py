@@ -16,18 +16,13 @@ logger = logging.getLogger(__name__)
 class InversionWindow(QtWidgets.QTabWidget):
     """
     The main window for the P(r) Inversion perspective.
+    This is the main window where the tabs for each of the widgets are shown
+
     """
 
     name = "Inversion"
     ext = "pr"  # Extension used for saving analyses
     tabsModifiedSignal = QtCore.pyqtSignal()
-
-    estimateSignal = QtCore.pyqtSignal(tuple)
-    estimateNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
-    calculateSignal = QtCore.pyqtSignal(tuple)
-    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
 
     def __init__(self, parent=None):
         super(InversionWindow, self).__init__()
@@ -223,39 +218,38 @@ class InversionWindow(QtWidgets.QTabWidget):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
-        #
         for data in data_item:
             logic_data = GuiUtils.dataFromItem(data)
 
+            # Tab for 2D data
             if isinstance(logic_data, Data2D) and not is_batch:
                 data.isSliced = False
                 tab = self.addData(data=data, is2D=True)
                 tab.tab2D.setEnabled(True)
                 tab.show2DPlot()
 
+            # Tab for 1D batch
             if is_batch and not isinstance(logic_data, Data2D):
                 # initiate a single Tab for batch
                 self.addData(data=data_item, is_batch=is_batch)
                 return
 
+            # Tab for 1D
             if isinstance(logic_data, Data1D):
                 tab = self.addData(data=data)
-                qmin, qmax = tab.logic.computeDataRange()
-                tab._calculator.set_qmin(qmin)
-                tab._calculator.set_qmax(qmax)
+                tab.setQ()
+
                 if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
                     tab.logic.add_errors()
 
+            # let the user know that the 2D data cannot be batch processed
             if isinstance(logic_data, Data2D) and is_batch:
-                msg = "2D data cannot be batch processed in P(r) Perspective yet"
+                msg = "2D data cannot be batch processed using the P(r) Perspective."
                 raise AttributeError(msg)
 
+        # replace the startup tab, so it looks like data has been added to it.
         if self.tabs[0].tab_name == "New Tab":
             self.closeTabByIndex(0)
-            ###############
-        # Checking for 1D again to mitigate the case when 2D data is last on the data list
-        # if isinstance(self.logic.data, Data1D):
-        #     self.setCurrentData(data)
 
     def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
         """
@@ -294,15 +288,16 @@ class InversionWindow(QtWidgets.QTabWidget):
         return tab
 
     def createBatchTab(self, batchDataList):
+        """
+        setup for batch tab
+        essentially this makes sure a batch tab is set up so that multiple files can be computed
+        """
         batchTab = InversionWidget(parent=self.parent, data=batchDataList)
         batchTab.setTabName("Pr Batch")
         batchTab.isBatch = True
-
-        batchTab.calculateAllButton.setVisible(True)
-        batchTab.calculateThisButton.setVisible(True)
         batchTab.setPlotable(False)
         for data in batchDataList:
-            batchTab.logic.data = GuiUtils.dataFromItem(data)  # Fix this for batch
+            batchTab.logic.data = GuiUtils.dataFromItem(data)
             batchTab.populateDataComboBox(name=batchTab.logic.data.name, data_ref=data)
             batchTab.updateDataList(data)
         batchTab.setCurrentData(batchDataList[0])
