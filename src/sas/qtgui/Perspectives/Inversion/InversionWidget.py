@@ -79,8 +79,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # 2D Data Plot
 
         self.plot_widget = None
-        self.plot2D = Plotter2D(self, quickplot=True)
-        self.plot1D = Plotter(quickplot=True)
+
         self.plotList = None
 
         ########################################
@@ -105,6 +104,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.batchResults = {}
 
+        self.plot2D = Plotter2D(quickplot=True)
+        self.plot1D = Plotter(quickplot=True)
         self.logic = InversionLogic()
 
         # Allow Tabs to close
@@ -1240,21 +1241,19 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def show2DPlot(self):
         """
-        Show 2D plot representing the raaw 2D data
+        Show 2D plot representing the raw 2D data
         """
         self.plot2D.plot(data=self.logic.data, marker='-')
-        self.plot_widget = QtWidgets.QWidget()
-        self.plot_widget.setWindowTitle("2D Plot - " + self.logic.data.name)
-        layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.plot2D)
-        self.plot_widget.setLayout(layout)
         self.plot2D._item = self.plot2D
         self.plot2D.setSlicer(SectorInteractor)
-        self.plot_widget.show()
+        self.plot2D.show()
         self.updateSlicerParams()
         self.enableButtons()
 
     def show1DPlot(self, data):
+        """
+        show a 1D plot of all of the slices
+        """
         self.plot1D.clean()
         self.plot1D.plot(data)
         self.plot1D.show()
@@ -1319,6 +1318,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
 class InversionWidget2D(InversionWidget):
     """
+    TO DO In the future:
     Separate InversionWidget and InversionWidget2D
     so that this class is similar to InversionWidget
     with a few 2D attributes abd methods.
