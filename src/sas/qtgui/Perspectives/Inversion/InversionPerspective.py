@@ -63,6 +63,12 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.tabs = []
         self.setTabsClosable(True)
 
+
+        self.supports_reports = True
+        self.supports_fitting_menu= False
+
+
+
         # The window should not close
         self._allowClose = False
 

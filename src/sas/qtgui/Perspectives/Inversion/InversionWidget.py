@@ -428,10 +428,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Switch to another item in the data list"""
         if isinstance(self._data, list):
             return
-        self.updateDataList(self._data)
-        self.setQ()
-        self.setCurrentData(self.dataList.itemData(data_index))
-        self.enableButtons()
+        try:
+            self.updateDataList(self._data)
+            self.setQ()
+            self.setCurrentData(self.dataList.itemData(data_index))
+            self.enableButtons()
+        except KeyError:
+            # Data might be removed
+            return
 
     def setQ(self):
         """calculate qmin and qmax values and update calculator accordingly"""
@@ -450,7 +454,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.set_background(self.backgroundInput.text())
 
     def set_background(self, value):
-        """set background"""
+        """sets background"""
         self._calculator.background = float(value)
 
     def model_changed(self):
