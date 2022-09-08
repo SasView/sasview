@@ -2,6 +2,8 @@ import logging
 import numpy as np
 
 from PyQt5 import QtGui, QtCore, QtWidgets
+
+# sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
