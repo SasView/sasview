@@ -157,26 +157,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self._do_aboutbox = True
         self._do_acknowledge = True
         self._do_tutorial = True
-        self._acknowledgement_preamble = \
-            '''To ensure the long term support and development of this software please''' + \
-            ''' remember to:'''
-        self._acknowledgement_preamble_bullet1 = \
-            '''Acknowledge its use in your publications as :'''
-        self._acknowledgement_preamble_bullet2 = \
-            '''Reference SasView as:'''
-        self._acknowledgement_preamble_bullet3 = \
-            '''Reference the model you used if appropriate (see documentation for refs)'''
-        self._acknowledgement_preamble_bullet4 = \
-            '''Send us your reference for our records: developers@sasview.org'''
-        self._acknowledgement_publications = \
-            '''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
-        self._acknowledgement_citation = \
-            '''M. Doucet et al. SasView Version 5.0'''
-
-        self._acknowledgement = \
-            '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
-            '''
-
+        
         self._homepage = "https://www.sasview.org"
         self._download = self.__download_page__
         self._authors = []
