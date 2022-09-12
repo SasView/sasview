@@ -157,7 +157,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self._do_aboutbox = True
         self._do_acknowledge = True
         self._do_tutorial = True
-        
+
         self._homepage = "https://www.sasview.org"
         self._download = self.__download_page__
         self._authors = []
