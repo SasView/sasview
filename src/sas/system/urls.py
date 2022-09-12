@@ -17,6 +17,10 @@ class URL:
         self._inst_url = "https://www.utk.edu"
         self._diamond_url = "http://www.diamond.ac.uk"
 
+        self._homepage = "https://www.sasview.org"
+        self.__download_page__ = 'https://github.com/SasView/sasview/releases'
+
+        self._license = "help@sasview.org" # TODO: Rename
 
 url = URL()
 
