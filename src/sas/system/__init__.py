@@ -1,3 +1,4 @@
-from urls import url
-from legal import legal
-__all__ = ["url", "legal"]
+from .urls import web
+from .legal import legal
+
+__all__ = ["web", "legal"]

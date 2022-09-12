@@ -505,7 +505,7 @@ class DataExplorerTest(unittest.TestCase):
         qApp.processEvents()
 
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.url()))
+        self.assertIn(partial_url, str(self.form._helpView.web()))
         # Close the browser
         self.form._helpView.close()
 
@@ -513,7 +513,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(button2, Qt.LeftButton)
         qApp.processEvents()
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.url()))
+        self.assertIn(partial_url, str(self.form._helpView.web()))
 
     def testLoadFile(self):
         """

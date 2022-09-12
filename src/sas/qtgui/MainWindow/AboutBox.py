@@ -6,7 +6,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
 
-from sas.system import url, legal
+from sas.system import web, legal
 from sas import config
 
 from .UI.AboutUI import Ui_AboutUI
@@ -46,17 +46,17 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
                     {legal._copyright}
                 </p>
                 <p>
-                    <a href="{url._homepage}">{url._homepage}</a>
+                    <a href="{web.homepage_url}">{web.homepage_url}</a>
                 </p>
                 <br/>
                 <p>
                     Comments? Bugs? Requests?
                     <br/>
-                    <a href="mailto:{url._license}">Send us a ticket</a>
+                    <a href="mailto:{web._license}">Send us a ticket</a>
                 </p>
                 <br/>
                 <p>
-                    <a href="{url.__download_page__}">Get the latest version</a>
+                    <a href="{web.download_url}">Get the latest version</a>
                 </p>
                 <br/>
             </body>
@@ -73,26 +73,26 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         Add actions to the logo push buttons
         """
         self.cmdLinkUT.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._inst_url))
+            GuiUtils.openLink, web.inst_url))
         self.cmdLinkUMD.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._umd_url))
+            GuiUtils.openLink, web.umd_url))
         self.cmdLinkNIST.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._nist_url))
+            GuiUtils.openLink, web.nist_url))
         self.cmdLinkSNS.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._sns_url))
+            GuiUtils.openLink, web.sns_url))
         self.cmdLinkISIS.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._isis_url))
+            GuiUtils.openLink, web.isis_url))
         self.cmdLinkESS.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._ess_url))
+            GuiUtils.openLink, web.ess_url))
         self.cmdLinkILL.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._ill_url))
+            GuiUtils.openLink, web.ill_url))
         self.cmdLinkANSTO.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._ansto_url))
+            GuiUtils.openLink, web.ansto_url))
         self.cmdLinkBAM.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._bam_url))
+            GuiUtils.openLink, web.bam_url))
         self.cmdLinkDELFT.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._delft_url))
+            GuiUtils.openLink, web.delft_url))
         self.cmdLinkDIAMOND.clicked.connect(functools.partial(
-            GuiUtils.openLink, url._diamond_url))
+            GuiUtils.openLink, web.diamond_url))
 
         self.cmdOK.clicked.connect(self.close)

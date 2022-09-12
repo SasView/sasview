@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
 from sas import config
-from sas.system import url
+from sas.system import web
 
 # Local
 from sas.qtgui.MainWindow.AboutBox import AboutBox
@@ -57,8 +57,8 @@ class AboutBoxTest(unittest.TestCase):
         # License
         self.assertIn(str(config._copyright), about.text())
         # URLs
-        self.assertIn(str(url._homepage), about.text())
-        self.assertIn(str(config.__download_page__), about.text())
+        self.assertIn(str(web.homepage_url), about.text())
+        self.assertIn(str(config.download_url), about.text())
         self.assertIn(str(config._license), about.text())
 
         # Are links enabled?
@@ -70,18 +70,18 @@ class AboutBoxTest(unittest.TestCase):
         """
         webbrowser.open = MagicMock()
         all_hosts = [
-                config._nist_url,
-                config._umd_url,
-                config._sns_url,
-                config._nsf_url,
-                config._isis_url,
-                config._ess_url,
-                config._ill_url,
-                config._ansto_url,
-                config._inst_url,
-                config._delft_url,
-                config._bam_url,
-                config._diamond_url]
+                config.nist_url,
+                config.umd_url,
+                config.sns_url,
+                config.nsf_url,
+                config.isis_url,
+                config.ess_url,
+                config.ill_url,
+                config.ansto_url,
+                config.inst_url,
+                config.delft_url,
+                config.bam_url,
+                config.diamond_url]
 
         # Press the buttons
         buttonList = self.widget.findChildren(QtWidgets.QPushButton)
