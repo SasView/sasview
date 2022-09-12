@@ -4,8 +4,7 @@ import os
 import sys
 from sas.config_system import configuration as config
 
-__all__ = ['get_app_dir', 'get_user_dir',
-           'get_local_config', 'get_custom_config', 'config']
+__all__ = ['get_app_dir', 'get_user_dir', 'config']
 
 _APP_DIR = None
 def get_app_dir():
@@ -82,32 +81,3 @@ def get_user_dir():
     if not _USER_DIR:
         _USER_DIR = make_user_dir()
     return _USER_DIR
-
-def make_custom_config_path():
-    from ._config import make_custom_config_path as _make_path
-    return _make_path(get_user_dir())
-
-_CUSTOM_CONFIG = None
-def get_custom_config():
-    raise RuntimeError("Tried to call get_custom_config - this is now forbidden")
-    # """
-    # Setup the custom config dir and cat file
-    # """
-    # global _CUSTOM_CONFIG
-    # if not _CUSTOM_CONFIG:
-    #     from ._config import setup_custom_config
-    #     _CUSTOM_CONFIG = setup_custom_config(get_app_dir(), get_user_dir())
-    # return _CUSTOM_CONFIG
-
-
-_LOCAL_CONFIG = None
-def get_local_config():
-    raise RuntimeError("Tried to call get_local_config - this is now forbidden")
-    # """
-    # Loads the local config file.
-    # """
-    # global _LOCAL_CONFIG
-    # if not _LOCAL_CONFIG:
-    #     from ._config import load_local_config
-    #     _LOCAL_CONFIG = load_local_config(get_app_dir())
-    # return _LOCAL_CONFIG

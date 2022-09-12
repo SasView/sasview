@@ -1335,19 +1335,3 @@ class GuiManager:
             changed = True
         return changed
 
-    def writeCustomConfig(self, config):
-        """
-        Write custom configuration
-        """
-        from sas import make_custom_config_path
-        path = make_custom_config_path()
-        # Just clobber the file - we already have its content read in
-        with open(path, 'w') as out_f:
-            out_f.write("#Application appearance custom configuration\n")
-            for key, item in config.__dict__.items():
-                if key[:2] == "__":
-                    continue
-                if isinstance(item, str):
-                    item = '"' + item + '"'
-                out_f.write("%s = %s\n" % (key, str(item)))
-        pass # debugger anchor
