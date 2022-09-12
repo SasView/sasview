@@ -255,20 +255,5 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         #
         self.finalise()
 
-    def printEVT(self, message):
-        if self.__EVT_DEBUG__:
-            """
-            :TODO - Need method doc string
-            """
-            print("%g:  %s" % (time.clock(), message))
-
-            if self.__EVT_DEBUG_2_FILE__:
-                out = open(self.__EVT_DEBUG_FILENAME__, 'a')
-                out.write("%10g:  %s\n" % (time.clock(), message))
-                out.close()
-
-
-
-
 
 
