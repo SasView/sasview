@@ -157,9 +157,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self._do_aboutbox = True
         self._do_acknowledge = True
         self._do_tutorial = True
-
-        self._homepage = "https://www.sasview.org"
-        self._download = self.__download_page__
+        
         self._authors = []
         self._paper = "http://sourceforge.net/p/sasview/tickets/"
         self._license = "mailto:help@sasview.org"
@@ -187,7 +185,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self._welcome_image = os.path.join(self.icon_path, "SVwelcome.png")
         # self._copyright = "(c) 2009 - 2022, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
         self._copyright = "Copyright (c) 2009-2022 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO"
-        self.marketplace_url = "http://marketplace.sasview.org/"
 
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
