@@ -633,8 +633,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # add the main index
             if not value: continue
             new_data = value[0]
-            from sas.sascalc.dataloader.data_info import Data1D as old_data1d
-            from sas.sascalc.dataloader.data_info import Data2D as old_data2d
+            from sasdata.dataloader.data_info import Data1D as old_data1d
+            from sasdata.dataloader.data_info import Data2D as old_data2d
             if isinstance(new_data, (old_data1d, old_data2d)):
                 new_data = self.manager.create_gui_data(value[0], new_data.name)
             if hasattr(value[0], 'id'):
