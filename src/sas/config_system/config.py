@@ -157,29 +157,12 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self._do_aboutbox = True
         self._do_acknowledge = True
         self._do_tutorial = True
-        
-        self._authors = []
-        self._paper = "http://sourceforge.net/p/sasview/tickets/"
-        self._license = "mailto:help@sasview.org"
 
         self.icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
         # logging.info("icon path: %s" % icon_path)
         self.media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
         self.test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
-        self._nist_logo = os.path.join(self.icon_path, "nist_logo.png")
-        self._umd_logo = os.path.join(self.icon_path, "umd_logo.png")
-        self._sns_logo = os.path.join(self.icon_path, "sns_logo.png")
-        self._ornl_logo = os.path.join(self.icon_path, "ornl_logo.png")
-        self._isis_logo = os.path.join(self.icon_path, "isis_logo.png")
-        self._ess_logo = os.path.join(self.icon_path, "ess_logo.png")
-        self._ill_logo = os.path.join(self.icon_path, "ill_logo.png")
-        self._ansto_logo = os.path.join(self.icon_path, "ansto_logo.png")
-        self._tudelft_logo = os.path.join(self.icon_path, "tudelft_logo.png")
-        self._dls_logo = os.path.join(self.icon_path, "dls_logo.png")
-        self._nsf_logo = os.path.join(self.icon_path, "nsf_logo.png")
-        self._danse_logo = os.path.join(self.icon_path, "danse_logo.png")
-        self._inst_logo = os.path.join(self.icon_path, "utlogo.gif")
 
         self._corner_image = os.path.join(self.icon_path, "angles_flat.png")
         self._welcome_image = os.path.join(self.icon_path, "SVwelcome.png")
