@@ -133,7 +133,7 @@ class TestConfig(unittest.TestCase):
 
         # Check saving with no changes, should be empty and
         config = Config()
-        config.save(file)
+        config.save_to_file_object(file)
 
         file.seek(0)
 
@@ -156,7 +156,7 @@ class TestConfig(unittest.TestCase):
             file = StringIO()
             config = Config()
             config.update({key: test_dict[key]})
-            config.save(file)
+            config.save_to_file_object(file)
             file.seek(0)
 
             observed = json.load(file)
@@ -189,7 +189,7 @@ class TestConfig(unittest.TestCase):
 
             config.update({key: test_dict[key]})
             config.update({key: getattr(backup, key)})
-            config.save(file)
+            config.save_to_file_object(file)
 
             file.seek(0)
             observed = json.load(file)
@@ -211,7 +211,7 @@ class TestConfig(unittest.TestCase):
 
         with self.assertLogs('sas.config_system', level="WARN") as cm:
             # Try the bad value
-            config.load(file)
+            config.load_from_file_object(file)
 
             self.assertTrue(cm.output[0].startswith("WARNING:sas.config_system:"))
 

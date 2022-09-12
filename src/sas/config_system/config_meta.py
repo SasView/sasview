@@ -1,9 +1,11 @@
-from typing import Optional, Dict, Any, List, Set
-import json
+from typing import Dict, Any, List
+import os
 import logging
-from sas.config_system.schema_elements import create_schema_element, CoercionError, SchemaElement
+import json
 from copy import deepcopy
+
 import sas
+from sas.config_system.schema_elements import create_schema_element, CoercionError, SchemaElement
 
 logger = logging.getLogger("sas.config_system")
 
@@ -39,7 +41,9 @@ class ConfigBase:
         self._schema: Dict[str, SchemaElement] = {}
         self._defaults: Dict[str, SchemaElement] = {}
         self._deleted_attributes: List[str] = []
-        self._meta_attributes = ["_locked", "_schema", "_defaults", "_deleted_attributes", "_meta_attributes"]
+        self._write_disabled = False
+        self._meta_attributes = ["_locked", "_schema", "_defaults",
+                                 "_deleted_attributes", "_meta_attributes", "_write_disabled"]
 
     def finalise(self):
         """ Call this at the end of the config to make this class 'final'
@@ -71,7 +75,15 @@ class ConfigBase:
             else:
                 logger.error(f"Unknown config key: '{key}', skipping")
 
-    def save(self, file):
+    def save(self):
+        if self._write_disabled:
+            logger.error("Write disabled, this is probably because it will overwrite an outdated config.")
+            return
+
+        with open("config.json", 'w') as file:
+            self.save_to_file_object(file)
+
+    def save_to_file_object(self, file):
         """ Save config file
 
         Only changed variables will be included in the saved file
@@ -89,7 +101,13 @@ class ConfigBase:
 
         json.dump(output_data, file)
 
-    def load(self, file):
+    def load(self):
+        filename = "config.json"
+        if os.path.exists(filename):
+            with open("config.json", 'r') as file:
+                self.load_from_file_object(file)
+
+    def load_from_file_object(self, file):
         """ Load config file """
         data = json.load(file)
 
@@ -119,6 +137,7 @@ class ConfigBase:
         if int(file_major_version) != int(sasview_major_version):
             logger.warning(f"Attempting to used outdated config file (config is"
                            f" for {file_version}, this SasView version is {sas.__version__})")
+            self._write_disabled = True
 
         self.update(data["config_data"])
 

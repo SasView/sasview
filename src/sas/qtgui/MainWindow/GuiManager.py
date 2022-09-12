@@ -1300,10 +1300,7 @@ class GuiManager:
         """
         Save the config file based on current session values
         """
-        # TODO: Decide what to do with config locations
-        logger.warning("Config paths have not yet been set up")
-        with open("config.json", 'w') as file:
-            config.save(file)
+        config.save()
 
     def customSavePaths(self, config_content):
         """

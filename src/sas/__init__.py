@@ -6,6 +6,10 @@ from sas.config_system import configuration as config
 
 __all__ = ['get_app_dir', 'get_user_dir', 'config']
 
+# Load the config file
+config.load()
+
+
 _APP_DIR = None
 def get_app_dir():
     """
