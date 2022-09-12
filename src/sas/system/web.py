@@ -15,6 +15,7 @@ class WebLinks:
 
         self.homepage_url = "https://www.sasview.org"
         self.download_url = 'https://github.com/SasView/sasview/releases'
+        self.marketplace_url = "http://marketplace.sasview.org/"
         self.update_url = 'https://www.sasview.org/latestversion.json'
 
         self._license = "help@sasview.org" # TODO: Rename

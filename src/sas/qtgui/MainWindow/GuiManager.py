@@ -1213,8 +1213,7 @@ class GuiManager:
         """
         Open the marketplace link in default browser
         """
-        url = config.MARKETPLACE_URL
-        webbrowser.open_new(url)
+        webbrowser.open_new(web.marketplace_url)
 
     def actionAbout(self):
         """

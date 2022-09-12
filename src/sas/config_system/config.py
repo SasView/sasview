@@ -232,7 +232,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.TOOLBAR_SHOW = True
         self.DEFAULT_PERSPECTIVE = "Fitting"
         self.SAS_OPENCL = "None"
-        self.MARKETPLACE_URL = "http://marketplace.sasview.org/"
 
         # Logging options
         self.FILTER_DEBUG_LOGS = True
@@ -245,7 +244,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
 
         #
-        # Lock the class down
+        # Lock the class down, this is necessary both for
+        # securing the class, and for setting up reading/writing files
         #
         self.finalise()
 
