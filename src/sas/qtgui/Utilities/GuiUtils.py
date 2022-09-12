@@ -146,6 +146,9 @@ if open_folder is not None and os.path.isdir(open_folder):
 else:
     DEFAULT_OPEN_FOLDER = PATH_APP
 
+if config.DEFAULT_OPEN_FOLDER != "":
+    config.DEFAULT_OPEN_FOLDER = PATH_APP
+
 
 #DEFAULT_STYLE = config.DEFAULT_STYLE
 

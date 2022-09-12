@@ -175,6 +175,12 @@ class Config(ConfigBase, metaclass=ConfigMeta):
             'P(r) files (*.prv)|*.prv',
             'Corfunc files (*.crf)|*.crf']
 
+        self.ANALYSIS_TYPES = [
+            'Fitting files (*.fitv)',
+            'Invariant files (*.inv)',
+            'P(r) files (*.prv)',
+            'Corfunc files (*.crf)']
+
         self.PLOPANEL_WIDTH = 415
         self.PLOPANEL_HEIGTH = 370
         self.DATAPANEL_WIDTH = 235
