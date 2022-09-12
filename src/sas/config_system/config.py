@@ -93,7 +93,14 @@ exercised - when changing the config, don't just think about the
 problem at hand, but about the future maintainability of SasView in
 general.
 
-Deleting from Config class:
+Adding to the Config class:
+Before adding a variable, think about whether it might more properly
+belong somewhere else, perhaps in the web or legal classes in the
+system package.
+Remember that config variables are accessed across the whole of sasview
+and that names need to be suitably descriptive.
+
+Deleting from the Config class:
 Currently (02/09/2022) the consequences of providing an entry in a
 config file that is not properly reflected in the Config class is a
 error. To ease backward compatibility, it is possible to disable
