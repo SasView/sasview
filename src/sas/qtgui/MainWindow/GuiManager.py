@@ -1317,6 +1317,7 @@ class GuiManager:
             changed = True
         return changed
 
+
     def customSaveOpenCL(self, config_content):
         """
         Update the config module with current session OpenCL choice

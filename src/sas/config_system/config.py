@@ -158,11 +158,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.__EVT_DEBUG_2_FILE__ = False
         self.__EVT_DEBUG_FILENAME__ = "debug.log"
 
-        # About box info
-        self._do_aboutbox = True
-        self._do_acknowledge = True
-        self._do_tutorial = True
-
         self.icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
         # logging.info("icon path: %s" % icon_path)
         self.media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
