@@ -188,8 +188,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.DATAPANEL_HEIGHT = 700
         self.SPLASH_SCREEN_PATH = os.path.join(self.icon_path, "SVwelcome_mini.png")
         self.TUTORIAL_PATH = os.path.join(self.media_path, "Tutorial.pdf")
-        # DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
-        #                    |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
+
         self.DEFAULT_STYLE = 64
 
         self.SPLASH_SCREEN_WIDTH = 512

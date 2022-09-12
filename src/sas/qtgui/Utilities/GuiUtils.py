@@ -135,16 +135,6 @@ DATAPATH = PATH_APP
 # else:
 #     pass
 
-#
-#
-# c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-# custom_config = _find_local_config('custom_config', c_conf_dir)
-# if custom_config is None:
-#     custom_config = _find_local_config('custom_config', os.getcwd())
-#     if custom_config is None:
-#         msgConfig = "Custom_config file was not imported"
-custom_config = config
-# logging.info("Custom config path: %s", custom_config)
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -154,46 +144,33 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
+
 if not WELCOME_PANEL_ON:
     WELCOME_PANEL_SHOW = False
 else:
     WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    SAS_OPENCL = custom_config.SAS_OPENCL
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder is not None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-    else:
-        DEFAULT_OPEN_FOLDER = PATH_APP
-except AttributeError:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
+
+DATALOADER_SHOW = config.DATALOADER_SHOW
+TOOLBAR_SHOW = config.TOOLBAR_SHOW
+FIXED_PANEL = config.FIXED_PANEL
+if WELCOME_PANEL_ON:
+    WELCOME_PANEL_SHOW = config.WELCOME_PANEL_SHOW
+PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
+DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
+GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
+GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
+CONTROL_WIDTH = config.CONTROL_WIDTH
+CONTROL_HEIGHT = config.CONTROL_HEIGHT
+DEFAULT_PERSPECTIVE = config.DEFAULT_PERSPECTIVE
+CLEANUP_PLOT = config.CLEANUP_PLOT
+SAS_OPENCL = config.SAS_OPENCL
+# custom open_path
+open_folder = config.DEFAULT_OPEN_FOLDER
+if open_folder is not None and os.path.isdir(open_folder):
+    DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
+else:
     DEFAULT_OPEN_FOLDER = PATH_APP
-    SAS_OPENCL = config.SAS_OPENCL
+
 
 #DEFAULT_STYLE = config.DEFAULT_STYLE
 
