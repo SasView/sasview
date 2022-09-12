@@ -140,8 +140,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.__appname__ = "SasView"
         self.__version__ = sas.sasview.__version__
         self.__build__ = sas.sasview.__build__
-        self.__download_page__ = 'https://github.com/SasView/sasview/releases'
-        self.__update_URL__ = 'https://www.sasview.org/latestversion.json'
 
         # Debug message flag
         self.__EVT_DEBUG__ = False
@@ -166,8 +164,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         self._corner_image = os.path.join(self.icon_path, "angles_flat.png")
         self._welcome_image = os.path.join(self.icon_path, "SVwelcome.png")
-        # self._copyright = "(c) 2009 - 2022, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
-        self._copyright = "Copyright (c) 2009-2022 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM and ANSTO"
 
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
@@ -247,10 +243,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
-        # Logging levels to disable, if any
-        self.DISABLE_LOGGING = logging.NOTSET
-
-        # Location of the marketplace
 
         #
         # Lock the class down

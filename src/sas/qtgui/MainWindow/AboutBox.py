@@ -43,7 +43,7 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
                     Build{config.__build__}
                 </p>
                 <p>
-                    {legal._copyright}
+                    {legal.copyright}
                 </p>
                 <p>
                     <a href="{web.homepage_url}">{web.homepage_url}</a>

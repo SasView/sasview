@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
 from sas import config
-from sas.system import web
+from sas.system import web, legal
 
 # Local
 from sas.qtgui.MainWindow.AboutBox import AboutBox
@@ -55,7 +55,7 @@ class AboutBoxTest(unittest.TestCase):
         # build version
         self.assertIn(str(config.__build__), about.text())
         # License
-        self.assertIn(str(config._copyright), about.text())
+        self.assertIn(str(legal.copyright), about.text())
         # URLs
         self.assertIn(str(web.homepage_url), about.text())
         self.assertIn(str(config.download_url), about.text())

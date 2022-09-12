@@ -17,7 +17,7 @@ class WelcomePanel(QtWidgets.QDialog, Ui_WelcomePanelUI):
         version = sas.sasview.__version__ # TODO: Make consistent with other version references
         build = sas.sasview.__build__ # TODO: Make consistent with other build references
 
-        ver = "\nSasView %s\nBuild: %s\n%s" % (version, build, legal._copyright)
+        ver = "\nSasView %s\nBuild: %s\n%s" % (version, build, legal.copyright)
 
         self.lblVersion.setText(ver)
 

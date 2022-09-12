@@ -66,6 +66,7 @@ from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 from sas import config
+from sas.system import web
 
 logger = logging.getLogger(__name__)
 
@@ -529,7 +530,7 @@ class GuiManager:
         a call-back method when the current version number has been obtained.
         """
         version_info = {"version": "0.0.0"}
-        c = ConnectionProxy(config.__update_URL__, config.UPDATE_TIMEOUT)
+        c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
         response = c.connect()
         if response is None:
             return
