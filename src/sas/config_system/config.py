@@ -163,20 +163,18 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
         self.test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
-
-        self._corner_image = os.path.join(self.icon_path, "angles_flat.png")
-        self._welcome_image = os.path.join(self.icon_path, "SVwelcome.png")
-
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
         self.APPLICATION_STATE_EXTENSION = '.svs'
         self.GUIFRAME_WIDTH = 1150
         self.GUIFRAME_HEIGHT = 840
         self.PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv', '.crf']
-        self.PLUGINS_WLIST = ['Fitting files (*.fitv)|*.fitv',
-                         'Invariant files (*.inv)|*.inv',
-                         'P(r) files (*.prv)|*.prv',
-                         'Corfunc files (*.crf)|*.crf']
+        self.PLUGINS_WLIST = [
+            'Fitting files (*.fitv)|*.fitv',
+            'Invariant files (*.inv)|*.inv',
+            'P(r) files (*.prv)|*.prv',
+            'Corfunc files (*.crf)|*.crf']
+
         self.PLOPANEL_WIDTH = 415
         self.PLOPANEL_HEIGTH = 370
         self.DATAPANEL_WIDTH = 235
@@ -184,7 +182,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.SPLASH_SCREEN_PATH = os.path.join(self.icon_path, "SVwelcome_mini.png")
         self.TUTORIAL_PATH = os.path.join(self.media_path, "Tutorial.pdf")
 
-        self.DEFAULT_STYLE = 64
 
         self.SPLASH_SCREEN_WIDTH = 512
         self.SPLASH_SCREEN_HEIGHT = 366
