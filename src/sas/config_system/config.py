@@ -158,11 +158,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.__EVT_DEBUG_2_FILE__ = False
         self.__EVT_DEBUG_FILENAME__ = "debug.log"
 
-        self.icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
-        # logging.info("icon path: %s" % icon_path)
-        self.media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
-        self.test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
-
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
         self.APPLICATION_STATE_EXTENSION = '.svs'
@@ -183,9 +178,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.PLOPANEL_HEIGTH = 370
         self.DATAPANEL_WIDTH = 235
         self.DATAPANEL_HEIGHT = 700
-        self.SPLASH_SCREEN_PATH = os.path.join(self.icon_path, "SVwelcome_mini.png")
-        self.TUTORIAL_PATH = os.path.join(self.media_path, "Tutorial.pdf")
-
 
         self.SHOW_WELCOME_PANEL = False
         # OPEN and SAVE project menu
