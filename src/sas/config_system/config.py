@@ -166,8 +166,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
         self.APPLICATION_STATE_EXTENSION = '.svs'
-        self.GUIFRAME_WIDTH = 1150
-        self.GUIFRAME_HEIGHT = 840
         self.PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv', '.crf']
         self.PLUGINS_WLIST = [
             'Fitting files (*.fitv)|*.fitv',
@@ -200,13 +198,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         self.FIXED_PANEL = True
         self.DATALOADER_SHOW = True
-        # Show or hide toolbar at the start up
-        self.TOOLBAR_SHOW = True
-        # set a default perspective
-        self.DEFAULT_PERSPECTIVE = 'None'
 
-        # Time out for updating sasview
-        self.UPDATE_TIMEOUT = 2
 
         # OpenCL option
         self.SAS_OPENCL = None
@@ -216,8 +208,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.FIXED_PANEL = True
         self.PLOPANEL_WIDTH = -1
         self.DATALOADER_SHOW = True
-        self.GUIFRAME_HEIGHT = -1
-        self.GUIFRAME_WIDTH = -1
         self.CONTROL_WIDTH = -1
         self.CONTROL_HEIGHT = -1
         self.DEFAULT_OPEN_FOLDER = ""
