@@ -13,7 +13,6 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
@@ -71,7 +70,7 @@ def run_sasview():
     app = QApplication([])
 
     #Initialize logger
-    from sas.logger_config import SetupLogger
+    from sas.system.log import SetupLogger
     SetupLogger(__name__).config_development()
 
     # initialize sasmodels settings

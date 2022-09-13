@@ -62,7 +62,7 @@ class SetupLogger(object):
         for name, _ in logging.Logger.manager.loggerDict.items():
             logging.getLogger(name).setLevel(logging.DEBUG)
 
-    def _find_config_file(self, filename="logging.ini"):
+    def _find_config_file(self, filename="log.ini"):
         '''
         The config file is in:
         Debug ./sasview/
@@ -73,8 +73,8 @@ class SetupLogger(object):
         places_to_look_for_conf_file = [
             os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
             filename,
-            os.path.join("sas", "sasview", filename),
-            os.path.join(os.getcwd(), "sas", "sasview", filename),
+            os.path.join("sas", "system", filename),
+            os.path.join(os.getcwd(), "sas", "system", filename),
             os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), filename) #For OSX app
         ]
 

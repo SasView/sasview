@@ -174,11 +174,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
             'P(r) files (*.prv)',
             'Corfunc files (*.crf)']
 
-        self.PLOPANEL_WIDTH = 415
-        self.PLOPANEL_HEIGTH = 370
-        self.DATAPANEL_WIDTH = 235
-        self.DATAPANEL_HEIGHT = 700
-
         self.SHOW_WELCOME_PANEL = False
         # OPEN and SAVE project menu
         self.OPEN_SAVE_PROJECT_MENU = True
@@ -188,23 +183,14 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.EDIT_MENU = True
 
 
-        self.FIXED_PANEL = True
-        self.DATALOADER_SHOW = True
-
 
         # OpenCL option
         self.SAS_OPENCL = None
 
-        self.DATAPANEL_WIDTH = -1
-        self.CLEANUP_PLOT = False
-        self.FIXED_PANEL = True
-        self.PLOPANEL_WIDTH = -1
-        self.DATALOADER_SHOW = True
-        self.CONTROL_WIDTH = -1
-        self.CONTROL_HEIGHT = -1
         self.DEFAULT_OPEN_FOLDER = ""
         self.TOOLBAR_SHOW = True
         self.DEFAULT_PERSPECTIVE = "Fitting"
+        # self.DEFAULT_PERSPECTIVE = "Corfunc"
 
         # Logging options
         self.FILTER_DEBUG_LOGS = True

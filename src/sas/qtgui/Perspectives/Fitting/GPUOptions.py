@@ -108,6 +108,9 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         else:
             self.sas_open_cl = None
 
+        logger.info(self.sas_open_cl)
+        print(self.sas_open_cl)
+
     def set_sas_open_cl(self):
         """
         Set SAS_OPENCL value when tests run or OK button clicked

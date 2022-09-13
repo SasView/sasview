@@ -1301,35 +1301,3 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
-
-    def customSavePaths(self, config_content):
-        """
-        Update the config module with current session paths
-        Returns True if update was done, False, otherwise
-        """
-        changed = False
-        # Find load path
-        open_path = GuiUtils.DEFAULT_OPEN_FOLDER
-        defined_path = self.filesWidget.default_load_location
-        if open_path != defined_path:
-            # Replace the load path
-            config_content.DEFAULT_OPEN_FOLDER = defined_path
-            changed = True
-        return changed
-
-
-    def customSaveOpenCL(self, config_content):
-        """
-        Update the config module with current session OpenCL choice
-        Returns True if update was done, False, otherwise
-        """
-        changed = False
-        # Find load path
-        file_value = GuiUtils.SAS_OPENCL
-        session_value = os.environ.get("SAS_OPENCL", "")
-        if file_value != session_value:
-            # Replace the load path
-            config_content.SAS_OPENCL = session_value
-            changed = True
-        return changed
-
