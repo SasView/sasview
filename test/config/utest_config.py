@@ -247,7 +247,7 @@ class TestConfig(unittest.TestCase):
             file.seek(0)
 
             with self.assertRaises(MalformedFile):
-                config.load(file)
+                config.load_from_file_object(file)
 
 
     def test_schema_union(self):
