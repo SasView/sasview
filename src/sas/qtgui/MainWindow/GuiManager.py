@@ -601,7 +601,7 @@ class GuiManager:
         # Assure the welcome screen is requested
         show_welcome_widget = True
 
-        if config.WELCOME_PANEL_SHOW:
+        if config.SHOW_WELCOME_PANEL:
             self.actionWelcome()
 
     def addCallbacks(self):

@@ -189,12 +189,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.TUTORIAL_PATH = os.path.join(self.media_path, "Tutorial.pdf")
 
 
-        self.SPLASH_SCREEN_WIDTH = 512
-        self.SPLASH_SCREEN_HEIGHT = 366
-        self.SS_MAX_DISPLAY_TIME = 2000
-        self.WELCOME_PANEL_ON = True
-        self.WELCOME_PANEL_SHOW = False
-        self.CLEANUP_PLOT = False
+        self.SHOW_WELCOME_PANEL = False
         # OPEN and SAVE project menu
         self.OPEN_SAVE_PROJECT_MENU = True
         # VIEW MENU
@@ -202,15 +197,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # EDIT MENU
         self.EDIT_MENU = True
 
-        self.SetupIconFile_win = os.path.join(self.icon_path, "ball.ico")
-        self.SetupIconFile_mac = os.path.join(self.icon_path, "ball.icns")
-        self.DefaultGroupName = "."
-        self.OutputBaseFilename = "setupSasView"
 
         self.FIXED_PANEL = True
         self.DATALOADER_SHOW = True
-        self.CLEANUP_PLOT = False
-        self.WELCOME_PANEL_SHOW = False
         # Show or hide toolbar at the start up
         self.TOOLBAR_SHOW = True
         # set a default perspective
@@ -231,11 +220,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.GUIFRAME_WIDTH = -1
         self.CONTROL_WIDTH = -1
         self.CONTROL_HEIGHT = -1
-        self.DEFAULT_OPEN_FOLDER = None
-        self.WELCOME_PANEL_SHOW = False
+        self.DEFAULT_OPEN_FOLDER = ""
         self.TOOLBAR_SHOW = True
         self.DEFAULT_PERSPECTIVE = "Fitting"
-        self.SAS_OPENCL = "None"
 
         # Logging options
         self.FILTER_DEBUG_LOGS = True
