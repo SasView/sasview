@@ -130,12 +130,7 @@ because, as they currently work, the behaviour would make creating
 different configs difficult.
 """
 
-from sas.config_system.config_meta import ConfigBase, ConfigMeta
-
-import sas.sasview
-import os
-import time
-import logging
+from sas.system.config.config_meta import ConfigBase, ConfigMeta
 
 
 class Config(ConfigBase, metaclass=ConfigMeta):

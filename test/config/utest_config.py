@@ -8,11 +8,11 @@ import json
 
 import sas
 
-from sas.config_system.config import Config
+from sas.system.config import Config
 
-from sas.config_system.config_meta import MalformedFile
+from sas.system.config.config_meta import MalformedFile
 
-from sas.config_system.schema_elements import \
+from sas.system.config import \
     pairwise_schema_union, create_schema_element, \
     SchemaBool, SchemaInt, SchemaFloat, SchemaStr, \
     SchemaList, SchemaNonSpecified, \
@@ -93,9 +93,9 @@ class TestConfig(unittest.TestCase):
             name += "x"
 
         # try and set it
-        with self.assertLogs('sas.config_system', level="ERROR") as cm:
+        with self.assertLogs('sas.config', level="ERROR") as cm:
             config.update({name: None})
-            self.assertTrue(cm.output[0].startswith("ERROR:sas.config_system:"))
+            self.assertTrue(cm.output[0].startswith("ERROR:sas.config:"))
 
     def test_invalid_update_bad_type(self):
 
@@ -120,12 +120,12 @@ class TestConfig(unittest.TestCase):
 
                     # Only test the ones that fail, i.e. cannot be coerced
                     if pairwise_schema_union(test_value_schema, config._schema[key]) is None:
-                        with self.assertLogs('sas.config_system', level="ERROR") as cm:
+                        with self.assertLogs('sas.config', level="ERROR") as cm:
 
                             # Try the bad value
                             config.update({key: test_value})
 
-                            self.assertTrue(cm.output[0].startswith("ERROR:sas.config_system:"))
+                            self.assertTrue(cm.output[0].startswith("ERROR:sas.config:"))
 
 
     def test_save_basics(self):
@@ -209,11 +209,11 @@ class TestConfig(unittest.TestCase):
 
         file.seek(0)
 
-        with self.assertLogs('sas.config_system', level="WARN") as cm:
+        with self.assertLogs('sas.config', level="WARN") as cm:
             # Try the bad value
             config.load_from_file_object(file)
 
-            self.assertTrue(cm.output[0].startswith("WARNING:sas.config_system:"))
+            self.assertTrue(cm.output[0].startswith("WARNING:sas.config:"))
 
     def test_bad_config_file_structure(self):
 

@@ -5,9 +5,9 @@ import json
 from copy import deepcopy
 
 import sas
-from sas.config_system.schema_elements import create_schema_element, CoercionError, SchemaElement
+from sas.system.config.schema_elements import create_schema_element, CoercionError, SchemaElement
 
-logger = logging.getLogger("sas.config_system")
+logger = logging.getLogger("sas.config")
 
 
 class MalformedFile(Exception):

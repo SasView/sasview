@@ -1,8 +1,5 @@
-from sas.config_system.config import Config
+from sas.system.config.config import Config
 
-import sys
-import os
-import os
 
 def get_config() -> Config:
     return Config()
