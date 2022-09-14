@@ -144,7 +144,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         super().__init__()
 
         # Flag for automated testing
-        self.__TEST__ = False
+        # self.__TEST__ = False
 
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
