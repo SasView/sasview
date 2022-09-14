@@ -18,6 +18,9 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
+from sas.system import env
+from sas import config
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -64,10 +67,10 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         # Get list of openCL options and add to GUI
         cl_tuple = _get_clinfo()
-        self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
+        self.sas_open_cl = config.sas_opencl
 
         # Keys are the names in the form "platform: device". Corresponding values are the combined indices, e.g.
-        # "0:1", for setting the SAS_OPENCL env.
+        # "0:1", for setting the SAS_OPENCL env. TODO This appears not to be the case
         self.cl_options = {}
 
         for title, descr in cl_tuple:
@@ -76,8 +79,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             check_box.setObjectName(_fromUtf8(descr))
             check_box.setText(_translate("GPUOptions", descr, None))
             self.optionsLayout.addWidget(check_box)
-            if (title == self.sas_open_cl) or (
-                            title == "None" and not self.clicked):
+            if (title == self.sas_open_cl) or (title == "None" and not self.clicked):
                 check_box.click()
                 self.clicked = True
             self.cl_options[descr] = title
@@ -106,23 +108,15 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         if hasattr(checked, "text"):
             self.sas_open_cl = self.cl_options[str(checked.text())]
         else:
-            self.sas_open_cl = None
-
-        logger.info(self.sas_open_cl)
-        print(self.sas_open_cl)
+            self.sas_open_cl = -1
 
     def set_sas_open_cl(self):
         """
         Set SAS_OPENCL value when tests run or OK button clicked
         """
-        no_opencl_msg = False
-        if self.sas_open_cl:
-            os.environ["SAS_OPENCL"] = self.sas_open_cl
-            if self.sas_open_cl.lower() == "none":
-                no_opencl_msg = True
-        else:
-            if "SAS_OPENCL" in os.environ:
-                del os.environ["SAS_OPENCL"]
+        no_opencl_msg = self.sas_open_cl == -1
+        env.sas_opencl = self.sas_open_cl
+
         # CRUFT: next version of reset_environment() will return env
         sasmodels.sasview_model.reset_environment()
         return no_opencl_msg

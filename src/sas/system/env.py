@@ -39,4 +39,9 @@ class Envrironment:
         Set the value of the environment variable SAS_OPENCL
         """
 
-        os.environ["SAS_OPENCL"] = str(value)
+        if value == -1:
+            del os.environ["SAS_OPENCL"]
+        else:
+            os.environ["SAS_OPENCL"] = str(value)
+
+env = Envrironment()
