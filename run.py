@@ -86,14 +86,6 @@ def prepare():
     # sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
 
-    # If the SAS_OPENCL environment setting is set, set the config from it
-    # if it isn't set, set it from the config
-    from sas import config
-    from sas.system import env
-    if "SAS_OPENCL" in os.environ:
-        config.SAS_OPENCL = env.sas_opencl
-    else:
-        env.sas_opencl = config.SAS_OPENCL
 
 
 if __name__ == "__main__":

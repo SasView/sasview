@@ -172,8 +172,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
 
 
-        # OpenCL option
-        self.SAS_OPENCL = None
+        # OpenCL option - should be a string, either, "none", a number, or pair of form "A:B"
+        self.SAS_OPENCL = "none"
 
         self.DEFAULT_OPEN_FOLDER = ""
         self.TOOLBAR_SHOW = True
