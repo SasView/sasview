@@ -1,10 +1,10 @@
+from sas.sasview import __version__
 
 import os
 import sys
 from sas.config_system import configuration as config
 
 __all__ = ['get_app_dir', 'get_user_dir', 'config']
-__version__ = "5.0.5"
 
 # Load the config file
 config.load()

@@ -40,7 +40,7 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
             <head/>
             <body>
                 <p>
-                    Build{config.__build__}
+                    Build{sas.sasview.__build__}
                 </p>
                 <p>
                     {legal.copyright}

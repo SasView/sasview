@@ -69,7 +69,7 @@ class PackageGatherer:
         :returns: A dictionary with the package names as the key, with their respective version numbers as the value.
         :rtype: dict
         """
-        package_versions_dict = {'python': sys.version, 'SasView': sas.sasview.__version__}
+        package_versions_dict = {'python': sys.version, 'SasView': sas.__version__}
         err_version_dict = {}
         no_version_list = []
         # Generate a list of standard modules by looking at the local python library

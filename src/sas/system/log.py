@@ -90,5 +90,5 @@ class SetupLogger(object):
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return
-        print("ERROR: Logging.ini not found...")
+        print(f"'{filename}' not found.", file=sys.stderr)
         self.config_file = None

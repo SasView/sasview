@@ -65,6 +65,7 @@ from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
+import sas
 from sas import config
 from sas.system import web
 
@@ -571,7 +572,7 @@ class GuiManager:
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif version.__gt__(config.__version__):
+            elif version.__gt__(sas.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
@@ -580,7 +581,6 @@ class GuiManager:
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                msg += " of %s" % str(config.__appname__)
                 self.communicate.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"

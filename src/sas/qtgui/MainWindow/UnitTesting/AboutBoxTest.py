@@ -7,6 +7,7 @@ from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
+import sas.sasview
 from sas import config
 from sas.system import web, legal
 
@@ -44,7 +45,7 @@ class AboutBoxTest(unittest.TestCase):
         """
         version = self.widget.lblVersion
         self.assertIsInstance(version, QtWidgets.QLabel)
-        self.assertEqual(str(version.text()), str(config.__version__))
+        self.assertEqual(str(version.text()), str(sas.__version__))
 
     def testAbout(self):
         """
@@ -53,7 +54,7 @@ class AboutBoxTest(unittest.TestCase):
         about = self.widget.lblAbout
         self.assertIsInstance(about, QtWidgets.QLabel)
         # build version
-        self.assertIn(str(config.__build__), about.text())
+        self.assertIn(str(sas.sasview.__build__), about.text())
         # License
         self.assertIn(str(legal.copyright), about.text())
         # URLs

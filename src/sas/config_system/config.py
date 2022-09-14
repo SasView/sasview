@@ -143,20 +143,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
     def __init__(self):
         super().__init__()
 
-        # Version of the application
-        self.__appname__ = "SasView"
-        self.__version__ = sas.sasview.__version__
-        self.__build__ = sas.sasview.__build__
-
-        # Debug message flag
-        self.__EVT_DEBUG__ = False
-
         # Flag for automated testing
         self.__TEST__ = False
-
-        # Debug message should be written to a file?
-        self.__EVT_DEBUG_2_FILE__ = False
-        self.__EVT_DEBUG_FILENAME__ = "debug.log"
 
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
