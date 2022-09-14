@@ -2,7 +2,7 @@ from sas.sasview import __version__
 
 import os
 import sys
-from sas.system.config import configuration as config
+from sas.system import config
 
 __all__ = ['get_app_dir', 'get_user_dir', 'config']
 

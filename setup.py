@@ -260,7 +260,8 @@ package_data["sas.example_data"] = [
                                ]
 packages.append("sas.sasview")
 
-package_data["sas.system"] = ["*"]
+package_data["sas.system"] = ["*",
+                              "config/*"]
 packages.append("sas.system")
 
 package_data['sas.qtgui'] = ['Calculators/UI/*',
@@ -278,8 +279,6 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              ]
 packages.append("sas.qtgui")
 
-package_data["sas.config"] = ["*"]
-packages.append("sas.config")
 
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',

@@ -193,3 +193,4 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
 
 
+config = Config()
