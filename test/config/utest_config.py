@@ -8,11 +8,11 @@ import json
 
 import sas
 
-from sas.system.config import Config
+from sas.system.config.config import Config
 
 from sas.system.config.config_meta import MalformedFile
 
-from sas.system.config import \
+from sas.system.config.schema_elements import \
     pairwise_schema_union, create_schema_element, \
     SchemaBool, SchemaInt, SchemaFloat, SchemaStr, \
     SchemaList, SchemaNonSpecified, \
