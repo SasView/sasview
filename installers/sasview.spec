@@ -19,8 +19,8 @@ datas = [
 #    ('../src/sas/sasview/local_config.py', '.'),
 #    ('../src/sas/sasview/wxcruft.py', '.'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
-    ('../src/sas/logger_config.py', '.'),
-    ('../src/sas/logging.ini', '.'),
+#    ('../src/sas/logger_config.py', '.'),
+    ('../src/sas/system/log.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build/html','doc')
 ]
