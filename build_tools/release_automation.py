@@ -135,29 +135,34 @@ def generate_zenodo(sasview_data, zenodo_api_key):
                                                             "and attach to Zenodo release record.\n- Publish Zenodo record")
     return newDOI
 
-def update_sasview_init(version, doi):
+version_template = \
+"""
+from distutils.version import StrictVersion
+
+__version__ = "%s"
+__release_date__ = "%i"
+
+StrictVersion(__version__)
+"""
+
+zenodo_template = '__DOI__ = "%s"'
+
+def update_sasview_metadata(version, doi):
+    """
+    Update version and zenodo DOI
     """
 
-    :return:
-    """
+    system_directory = "sasview/src/sas/system"
+    version_filename = os.path.join(system_directory, "version.py")
+    zenodo_filename = os.path.join(system_directory, "zenodo.py")
 
-    init_file = os.path.join('sasview','src', 'sas', 'sasview', '__init__.py')
-    output_lines = []
     year = datetime.datetime.now().year
-    with open(init_file, 'r') as f:
-        for line in f.readlines():
-            if line[:11] in '__version__':
-               output_lines.append('__version__ = \"'+version+'\"\n')
-            elif line[:7] in '__DOI__' :
-                output_lines.append('__DOI__ = \"Zenodo, ' + str(doi) + '\"\n')
-            elif line[:16] in '__release_date__':
-                output_lines.append('__release_date__ = \"' + str(year) + '\"\n')
-            else:
-                output_lines.append(line)
 
-    with open(init_file, 'w') as f:
-        f.writelines(output_lines)
+    with open(version_filename, 'w') as file:
+        file.write(version_template % (version, year))
 
+    with open(zenodo_filename, 'w') as file:
+        file.write(zenodo_template % doi)
 
 def update_sasmodels_init(version):
     """
@@ -241,7 +246,7 @@ if __name__ == "__main__":
         zenodo_api_key = args.zenodo
         new_doi = generate_zenodo(sasview_data, zenodo_api_key)
 
-    update_sasview_init(sasview_version, new_doi)
+    update_sasview_metadata(sasview_version, new_doi)
     update_sasmodels_init(sasmodels_version)
 
     year = datetime.datetime.now().year
