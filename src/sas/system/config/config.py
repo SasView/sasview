@@ -138,8 +138,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
     def __init__(self):
         super().__init__()
 
-        # Flag for automated testing
-        # self.__TEST__ = False
 
         # edit the list of file state your plugin can read
         self.APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
@@ -158,12 +156,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
             'Corfunc files (*.crf)']
 
         self.SHOW_WELCOME_PANEL = False
-        # OPEN and SAVE project menu
-        self.OPEN_SAVE_PROJECT_MENU = True
-        # VIEW MENU
-        self.VIEW_MENU = True
-        # EDIT MENU
-        self.EDIT_MENU = True
 
 
 

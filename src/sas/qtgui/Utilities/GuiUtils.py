@@ -48,9 +48,6 @@ import sas
 from sas import config
 
 from sasdata.dataloader.loader import Loader
-from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
-
-from sas.qtgui.Utilities import CustomDir
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
         HELP_DIRECTORY_LOCATION = "doc"
@@ -82,51 +79,10 @@ def get_sensible_default_open_directory():
     return os.path.dirname(sas.__file__)
 
 
-
-# Get APP folder
-PATH_APP = get_sensible_default_open_directory()
-
-# Read in the local config, which can either be with the main
-# application or in the installation directory
-# config = _find_local_config('local_config', PATH_APP)
-#
-# if config is None:
-#     config = _find_local_config('local_config', os.getcwd())
-# else:
-#     pass
-
-
-#read some constants from config
-
-SAS_OPENCL = config.SAS_OPENCL
 # custom open_path
-open_folder = config.DEFAULT_OPEN_FOLDER
-if open_folder is not None and os.path.isdir(open_folder):
-    DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-else:
-    DEFAULT_OPEN_FOLDER = PATH_APP
+if config.DEFAULT_OPEN_FOLDER == "" or not os.path.isdir(config.DEFAULT_OPEN_FOLDER):
+    config.DEFAULT_OPEN_FOLDER = get_sensible_default_open_directory()
 
-if config.DEFAULT_OPEN_FOLDER != "":
-    config.DEFAULT_OPEN_FOLDER = PATH_APP
-
-
-PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
-VIEW_MENU = config.VIEW_MENU
-EDIT_MENU = config.EDIT_MENU
-extension_list = []
-if config.APPLICATION_STATE_EXTENSION is not None:
-    extension_list.append(config.APPLICATION_STATE_EXTENSION)
-EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
-try:
-    PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
-except AttributeError:
-    PLUGINS_WLIST = ''
-APPLICATION_WLIST = config.APPLICATION_WLIST
-IS_WIN = True
-IS_LINUX = False
-CLOSE_SHOW = True
-TIME_FACTOR = 2
-NOT_SO_GRAPH_LIST = ["BoxSum"]
 
 
 class Communicate(QtCore.QObject):

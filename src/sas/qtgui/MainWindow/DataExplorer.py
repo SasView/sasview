@@ -1312,7 +1312,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            if extension.lower() in GuiUtils.EXTENSIONS:
+            extension_list = config.PLUGIN_STATE_EXTENSIONS
+            if config.APPLICATION_STATE_EXTENSION is not None:
+                extension_list.append(config.APPLICATION_STATE_EXTENSION)
+
+            if extension.lower() in extension_list:
                 any_error = True
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
