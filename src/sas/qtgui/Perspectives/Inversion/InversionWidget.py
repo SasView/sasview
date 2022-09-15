@@ -18,7 +18,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from ...Plotting.Plotter import Plotter
-from ...Plotting.Plotter2D import Plotter2D
+from ...Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from ...Plotting.Slicers.SectorSlicer import SectorInteractor
 
 
@@ -28,6 +28,7 @@ def is_float(value):
         return float(value)
     except ValueError:
         return 0.0
+
 
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
@@ -58,23 +59,26 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     estimateDynamicSignal = QtCore.pyqtSignal(tuple)
     calculateSignal = QtCore.pyqtSignal(tuple)
 
+    plotUpdateSignal = QtCore.pyqtSignal(list)
+    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+
     def __init__(self, parent=None, data=None, tab_id=1):
         super(InversionWidget, self).__init__()
 
         # 2D Data globals #####################
 
-        self.is2D = False               # used to determine weather its a 2D tab
-        self.isSlicing = False          # used to determine weather 2D data is being sliced
-        self.startPoint = None          # start point for where to start slicing
-        self.noOfSlices = None          # number of slices
-        self.slices = {}                # List to store the slices from 2D data
+        self.is2D = False  # used to determine weather its a 2D tab
+        self.isSlicing = False  # used to determine weather 2D data is being sliced
+        self.startPoint = None  # start point for where to start slicing
+        self.noOfSlices = None  # number of slices
+        self.slices = {}  # List to store the slices from 2D data
         self.isSliced = False
 
         # Slice values
 
-        self.phi = None                 # Phi Value of slice
-        self.deltaPhi = None            # Number of slicer
-        self.qbins = None               # Number of points on plot
+        self.phi = None  # Phi Value of slice
+        self.deltaPhi = None  # Number of slicer
+        self.qbins = None  # Number of points on plot
 
         # 2D Data Plot
 
@@ -104,12 +108,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.batchResults = {}
 
-        self.plot2D = Plotter2D(quickplot=True)
-        self.plot1D = Plotter(quickplot=True)
         self.logic = InversionLogic()
-
-        # Allow Tabs to close
-        self._allowClose = True
 
         # current QStandardItem showing on the panel
         self._data = None
@@ -131,6 +130,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # plots of self._data
         self.prPlot = None
         self.dataPlot = None
+        self.plot2D = None
+        self.plot1D = Plotter(quickplot=True)
 
         # suggested nTerms
         self.nTermsSuggested = NUMBER_OF_TERMS
@@ -189,13 +190,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         return False
 
-    def setClosable(self, value=True):
-        """
-        Allow outsiders close this widget
-        """
-        assert isinstance(value, bool)
-        self._allowClose = value
-
     def setPlotable(self, value=True):
         """
         Let Plots to be displayable - needed so batch mode is not clutter with plots
@@ -203,36 +197,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         assert isinstance(value, bool)
         self._allowPlots = value
 
-    def isClosable(self):
-        """
-        Allow outsiders close this widget
-        """
-        return self._allowClose
-
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
         """
         return True
-
-    def closeEvent(self, event):
-        """
-        Overwrite QDialog close method to allow for custom widget close
-        """
-        # Close report widgets before closing/minimizing main widget
-        self.closeDMax()
-        self.closeBatchResults()
-        if self._allowClose:
-            # reset the closability flag
-            self.setClosable(value=False)
-            # Tell the MdiArea to close the container if it is visible
-            if self.parentWidget():
-                self.parentWidget().close()
-            event.accept()
-        else:
-            event.ignore()
-            # Maybe we should just minimize
-            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeDMax(self):
         if self.dmaxWindow is not None:
@@ -281,6 +250,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.estimateSignal.connect(self._estimateUpdate)
         self.calculateSignal.connect(self._calculateUpdate)
         self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
+        self.plotUpdateSignal.connect(lambda: print('Plot'))
 
     def setupMapper(self):
         # Set up the mapper.
@@ -528,7 +498,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopCalcThread()
         self.stopEstimationThread()
         self.stopEstimateNTThread()
-
         # Show any batch calculations that successfully completed
         if self.isBatch and self.batchResultsWindow is not None:
             self.showBatchOutput()
@@ -618,7 +587,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_alpha(self._calculator.regConst)
         self._calculator.set_dmax(self._calculator.d_max)
 
-        self.updateCalculator() # sets Background
+        self.updateCalculator()  # sets Background
 
     def getState(self):
         """
@@ -917,7 +886,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopCalcThread()
 
         pr = self._calculator.clone()
-        #Making sure that nfunc and alpha parameters are correctly initialized
+        # Making sure that nfunc and alpha parameters are correctly initialized
         pr.suggested_alpha = self._calculator.alpha
         self.calcThread = CalcPr(pr, self.getNFunc(),
                                  error_func=self._threadError,
@@ -1068,6 +1037,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             logger.info(message)
         self.performEstimateDynamicNT()
 
+    def _plotUpdate(self):
+        print("Plotting update")
+
     def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
         ''' Send a signal to the main thread for model update'''
         self.estimateNTSignal.emit((nterms, alpha, message, elapsed))
@@ -1206,12 +1178,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             from functools import partial
             self.plot1D.plot(slice)
             self.plot1D.show()
-            self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))             # sets the title
-            self.sliceList.setItem(row, 1, QtWidgets.QTableWidgetItem(str(slice.phi)))          # sets the phi
-            self.sliceList.setItem(row, 2, QtWidgets.QTableWidgetItem(str(slice.startPoint)))   # sets the start Point
-            self.sliceList.setItem(row, 3, QtWidgets.QTableWidgetItem(str(slice.noOfSlices)))   # sets the number of slices
-            self.sliceList.setItem(row, 4, QtWidgets.QTableWidgetItem(str(slice.Qbin)))         # set Number of points on plot
-            self.sliceList.setItem(row, 5, QtWidgets.QTableWidgetItem(str(slice.deltaPhi)))     # set Delta phi
+            self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))  # sets the title
+            self.sliceList.setItem(row, 1, QtWidgets.QTableWidgetItem(str(slice.phi)))  # sets the phi
+            self.sliceList.setItem(row, 2, QtWidgets.QTableWidgetItem(str(slice.startPoint)))  # sets the start Point
+            self.sliceList.setItem(row, 3,
+                                   QtWidgets.QTableWidgetItem(str(slice.noOfSlices)))  # sets the number of slices
+            self.sliceList.setItem(row, 4, QtWidgets.QTableWidgetItem(str(slice.Qbin)))  # set Number of points on plot
+            self.sliceList.setItem(row, 5, QtWidgets.QTableWidgetItem(str(slice.deltaPhi)))  # set Delta phi
             plotButton = QtWidgets.QPushButton(str(slice.phi))
             self.sliceList.setCellWidget(row, 6, plotButton)
             plotButton.clicked.connect(partial(self.show1DPlot, slice))
@@ -1247,11 +1220,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         Show 2D plot representing the raw 2D data
         """
-        self.plot2D.plot(data=self.logic.data, marker='-')
-        self.plot2D._item = self.plot2D
-        self.plot2D.setSlicer(SectorInteractor)
+        # data = GuiUtils.dataFromItem(s)
+
+        self.plot2D = Plotter2D(self, quickplot=True)
+        self.plot2D.data = self.logic.data
+        self.plot2D.plot()
+        self.plot2D.item = self.tabMain
+        self.plot2D.onSectorView()
+
         self.plot2D.show()
-        self.updateSlicerParams()
         self.enableButtons()
 
     def show1DPlot(self, data):
@@ -1320,6 +1297,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.phi += self.deltaPhi
         return listOfSlices
 
+
 class InversionWidget2D(InversionWidget):
     """
     TO DO In the future:
@@ -1328,6 +1306,7 @@ class InversionWidget2D(InversionWidget):
     with a few 2D attributes abd methods.
     """
     pass
+
 
 def debug(checkpoint):
     print(" - - - - - - - - [ DEBUG :: Checkpoint {} ] - - - - - - - - ".format(checkpoint))
