@@ -141,6 +141,7 @@ from distutils.version import StrictVersion
 
 __version__ = "%s"
 __release_date__ = "%i"
+__build__ = "GIT_COMMIT"
 
 StrictVersion(__version__)
 """
