@@ -42,7 +42,7 @@ import sasdata.dataloader.data_info as DataInfo
 # used for import/export
 from sasdata.dataloader.data_info import Sample, Source, Vector
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 
 class DataManager(object):

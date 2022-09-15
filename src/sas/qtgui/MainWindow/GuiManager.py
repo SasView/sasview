@@ -12,10 +12,12 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale
 
 import matplotlib as mpl
+
+import sas.system.version
+
 mpl.use("Qt5Agg")
 
-from sas.sasview import __version__ as SASVIEW_VERSION
-from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
 # General SAS imports
@@ -572,7 +574,7 @@ class GuiManager:
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif version.__gt__(sas.__version__):
+            elif version.__gt__(sas.system.version.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])

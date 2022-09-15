@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from ...system.version import __version__ as SASVIEW_VERSION
 from sas import config
 from sas.system import env
 
@@ -77,7 +77,7 @@ def run_sasview():
     SetupLogger(__name__).config_development()
 
     # initialize sasmodels settings
-    from sas import get_user_dir
+    from sas.system.user import get_user_dir
     if "SAS_DLL_PATH" not in os.environ:
         os.environ["SAS_DLL_PATH"] = os.path.join(
             get_user_dir(), "compiled_models")

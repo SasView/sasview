@@ -5,6 +5,7 @@ import json
 from copy import deepcopy
 
 import sas
+import sas.system.version
 from sas.system.config.schema_elements import create_schema_element, CoercionError, SchemaElement
 
 logger = logging.getLogger("sas.config")
@@ -96,7 +97,7 @@ class ConfigBase:
                 data[key] = new_value
 
         output_data = {
-            "sasview_version": sas.__version__,
+            "sasview_version": sas.system.version.__version__,
             "config_data": data}
 
         json.dump(output_data, file)
@@ -132,11 +133,11 @@ class ConfigBase:
         # Check major version
         file_version = data["sasview_version"]
         file_major_version = file_version.split(".")[0]
-        sasview_major_version = sas.__version__.split(".")[0]
+        sasview_major_version = sas.system.version.__version__.split(".")[0]
 
         if int(file_major_version) != int(sasview_major_version):
             logger.warning(f"Attempting to used outdated config file (config is"
-                           f" for {file_version}, this SasView version is {sas.__version__})")
+                           f" for {file_version}, this SasView version is {sas.system.version.__version__})")
             self._write_disabled = True
 
         self.update(data["config_data"])

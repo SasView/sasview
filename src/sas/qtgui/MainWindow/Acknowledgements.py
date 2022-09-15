@@ -2,6 +2,8 @@ import functools
 from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
+import sas.system.version
+import sas.system.zenodo
 
 from .UI.AcknowledgementsUI import Ui_Acknowledgements
 
@@ -19,8 +21,8 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
         """
         Modify the labels so the text corresponds to the current version
         """
-        version = sas.sasview.__version__
-        doi = sas.sasview.__DOI__
+        version = sas.system.version.__version__
+        doi = sas.system.zenodo.__DOI__
         acknowledgement_text_1 = "This work benefited from the use of the SasView application, originally developed " \
                                  "under NSF Award DMR - 0520547. SasView also contains code developed with funding" \
                                  " from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000."

@@ -27,7 +27,7 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 if not QApplication.instance():
     app = QApplication(sys.argv)

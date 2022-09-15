@@ -20,6 +20,8 @@ import os
 from os.path import abspath, dirname, realpath, join as joinpath
 from contextlib import contextmanager
 
+import sas.system.user
+
 PLUGIN_MODEL_DIR = 'plugin_models'
 
 def addpath(path):
@@ -52,7 +54,7 @@ def setup_sasmodels():
     """
     # Set SAS_MODELPATH so sasmodels can find our custom models
     import sas
-    plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
+    plugin_dir = os.path.join(sas.system.user.get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir
 
 def prepare():

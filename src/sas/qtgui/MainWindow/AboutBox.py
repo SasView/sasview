@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.system.version
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
 
@@ -28,7 +29,7 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         """
         Modify the labels so the text corresponds to the current version
         """
-        version = sas.sasview.__version__
+        version = sas.system.version.__version__
 
         self.lblVersion.setText(str(version))
         lbl_font = self.font()
@@ -39,9 +40,6 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         <html>
             <head/>
             <body>
-                <p>
-                    Build{sas.sasview.__build__}
-                </p>
                 <p>
                     {legal.copyright}
                 </p>

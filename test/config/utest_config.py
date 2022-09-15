@@ -7,6 +7,7 @@ from io import StringIO
 import json
 
 import sas
+import sas.system.version
 
 from sas.system.config.config import Config
 
@@ -140,7 +141,7 @@ class TestConfig(unittest.TestCase):
         observed = json.load(file)
 
         empty_file = {
-            "sasview_version": sas.__version__,
+            "sasview_version": sas.system.version.__version__,
              "config_data": {}
         }
 
@@ -162,7 +163,7 @@ class TestConfig(unittest.TestCase):
             observed = json.load(file)
 
             expected = {
-                "sasview_version": sas.__version__,
+                "sasview_version": sas.system.version.__version__,
                 "config_data": {key: test_dict[key]}
             }
 
@@ -176,7 +177,7 @@ class TestConfig(unittest.TestCase):
         # (3) Check
 
         empty_file = {
-            "sasview_version": sas.__version__,
+            "sasview_version": sas.system.version.__version__,
              "config_data": {}
         }
 
@@ -221,7 +222,7 @@ class TestConfig(unittest.TestCase):
         
         bad_structures = [
             {
-                "sasview_version": sas.__version__,
+                "sasview_version": sas.system.version.__version__,
                 "quanfig_data": {}
             },
             {
@@ -229,11 +230,11 @@ class TestConfig(unittest.TestCase):
                 "config_data": {}
             },
             {
-                "sassy_verberry": sas.__version__,
+                "sassy_verberry": sas.system.version.__version__,
                 "config_data": {}
             },
             {
-                "sasview_version": sas.__version__,
+                "sasview_version": sas.system.version.__version__,
                 "config_data": []
             },
             {}

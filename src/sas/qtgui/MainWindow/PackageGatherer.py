@@ -4,6 +4,7 @@ import pkg_resources
 import pathlib
 
 import sas
+import sas.system.version
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class PackageGatherer:
         :returns: A dictionary with the package names as the key, with their respective version numbers as the value.
         :rtype: dict
         """
-        package_versions_dict = {'python': sys.version, 'SasView': sas.__version__}
+        package_versions_dict = {'python': sys.version, 'SasView': sas.system.version.__version__}
         err_version_dict = {}
         no_version_list = []
         # Generate a list of standard modules by looking at the local python library
@@ -146,7 +147,7 @@ class PackageGatherer:
             if hasattr(package, '__version__'):
                 # Module has __version__ attribute
                 try:
-                    package_versions_dict[package_name] = package.__version__
+                    package_versions_dict[package_name] = sas.system.version.__version__
                     continue
                 except Exception as e:
                     # Unable to access module
