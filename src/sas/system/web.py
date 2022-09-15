@@ -1,6 +1,6 @@
 class WebLinks:
     def __init__(self):
-        self.nist_url = "https://www.nist.gov/"
+        self.nist_url = "https://www.nist.gov/ncnr"
         self.umd_url = "https://www.umd.edu/"
         self.sns_url = "https://neutrons.ornl.gov/"
         self.nsf_url = "https://www.nsf.gov"
@@ -14,7 +14,7 @@ class WebLinks:
         self.diamond_url = "http://www.diamond.ac.uk"
 
         self.homepage_url = "https://www.sasview.org"
-        self.download_url = 'https://github.com/SasView/sasview/releases'
+        self.download_url = 'https://github.com/SasView/sasview/releases/latest'
         self.marketplace_url = "http://marketplace.sasview.org/"
         self.update_url = 'https://www.sasview.org/latestversion.json'
 
