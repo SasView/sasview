@@ -14,13 +14,14 @@ from distutils.core import Command
 from setuptools import setup
 
 # Manage version number ######################################
-with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
+version_file = os.path.join("src", "sas", "system", "version.py")
+with open(version_file) as fid:
     for line in fid:
         if line.startswith('__version__'):
             VERSION = line.split('"')[1]
             break
     else:
-        raise ValueError("Could not find version in src/sas/sasview/__init__.py")
+        raise ValueError(f"Could not find version in {version_file}")
 ##############################################################
 
 package_dir = {}
