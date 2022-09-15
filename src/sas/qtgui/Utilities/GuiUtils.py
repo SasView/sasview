@@ -44,6 +44,7 @@ from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
+import sas
 from sas import config
 
 from sasdata.dataloader.loader import Loader
@@ -68,7 +69,7 @@ theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 logger = logging.getLogger(__name__)
 
 
-def get_app_dir():
+def get_sensible_default_open_directory():
     """
         :returns: app_path - the path to the application directory
     """
@@ -77,55 +78,14 @@ def get_app_dir():
     if os.path.isfile(app_path):
         return os.path.dirname(app_path)
 
-    #
-    # # Next, try the current working directory
-    # if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-    #     #logging.info("Using application path: %s", os.getcwd())
-    #     return os.path.abspath(os.getcwd())
+    # if this fails, use try the directory of the sasview module
+    return os.path.dirname(sas.__file__)
 
-    # Finally, try the directory of the sasview module
-    # TODO: gui_manager will have to know about sasview until we
-    # clean all these module variables and put them into a config class
-    # that can be passed by sasview.py.
-    # logging.info(sys.executable)
-    # logging.info(str(sys.argv))
-    from sas import sasview as sasview
-    app_path = os.path.dirname(sasview.__file__)
-    # logging.info("Using application path: %s", app_path)
-    return app_path
-
-def get_user_directory():
-    """
-        Returns the user's home directory
-    """
-    userdir = os.path.join(os.path.expanduser("~"), ".sasview")
-    if not os.path.isdir(userdir):
-        os.makedirs(userdir)
-    return userdir
-
-def _find_local_config(confg_file, path):
-    """
-        Find configuration file for the current application
-    """
-    config_module = None
-    fObj = None
-    try:
-        fObj, path_config, descr = imp.find_module(confg_file, [path])
-        config_module = imp.load_module(confg_file, fObj, path_config, descr)
-    except ImportError:
-        pass
-    except ValueError:
-        print("Value error")
-        pass
-    finally:
-        if fObj is not None:
-            fObj.close()
-    return config_module
 
 
 # Get APP folder
-PATH_APP = get_app_dir()
-DATAPATH = PATH_APP
+PATH_APP = get_sensible_default_open_directory()
+
 # Read in the local config, which can either be with the main
 # application or in the installation directory
 # config = _find_local_config('local_config', PATH_APP)
@@ -150,10 +110,7 @@ if config.DEFAULT_OPEN_FOLDER != "":
     config.DEFAULT_OPEN_FOLDER = PATH_APP
 
 
-#DEFAULT_STYLE = config.DEFAULT_STYLE
-
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
-OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
 VIEW_MENU = config.VIEW_MENU
 EDIT_MENU = config.EDIT_MENU
 extension_list = []
