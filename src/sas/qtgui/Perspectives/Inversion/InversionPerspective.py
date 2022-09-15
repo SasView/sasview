@@ -67,8 +67,6 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.supports_reports = True
         self.supports_fitting_menu= False
 
-
-
         # The window should not close
         self._allowClose = False
 
@@ -122,10 +120,6 @@ class InversionWindow(QtWidgets.QTabWidget):
 
     ######################################################################
     # Batch Mode and Tab Functions
-
-    def calculate(self):
-        # Default to background estimate
-        self._calculator.est_bck = True
 
     def resetTab(self, index):
         """
@@ -221,6 +215,25 @@ class InversionWindow(QtWidgets.QTabWidget):
         Tell the caller that this perspective writes its state
         """
         return True
+
+    def closeEvent(self, event):
+        """
+        Overwrite QDialog close method to allow for custom widget close
+        """
+        # Close report widgets before closing/minimizing main widget
+        self.closeDMax()
+        self.closeBatchResults()
+        if self._allowClose:
+            # reset the closability flag
+            self.setClosable(value=False)
+            # Tell the MdiArea to close the container if it is visible
+            if self.parentWidget():
+                self.parentWidget().close()
+            event.accept()
+        else:
+            event.ignore()
+            # Maybe we should just minimize
+            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeDMax(self):
         if self.dmaxWindow is not None:
