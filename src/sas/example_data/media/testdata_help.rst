@@ -229,8 +229,13 @@ Coordinate Test Data
 A_Raw_Example-1
   - OMF format data file from a simulation of magnetic spheres.
 
-sphere_R=0_2025
-  - vtk format data file describing a homogeneously magnetised sphere.  
+five_tetrahedra_cube
+  - VTK format file describing a cube formed of five finite elements.
+
+sphere_R= x with x = 0_0025, 0_2025, 4 and 2500
+  - VTK format data files describing a homogeneously magnetised sphere. The ratio R 
+    between nuclear and magnetic SLD is varied from mostly magnetic to only nuclear
+    structural scattering.
 
 diamond
   - PDB format data file describing the structure of diamond.
@@ -240,6 +245,10 @@ dna
 
 sld_file
   - Example SLD format data file.
+
+mag_cylinder
+  - SLD file that describes a single cylinder of radius 2nm and length of 4nm.
+    The cylinder has equal nuclear and magnetic SLD, magnetised along the length.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
