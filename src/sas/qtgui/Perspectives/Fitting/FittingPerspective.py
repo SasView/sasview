@@ -591,5 +591,13 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         return True
 
     @property
+    def supports_copy_excel(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_latex(self) -> bool:
+        return True
+
+    @property
     def supports_paste(self) -> bool:
         return True

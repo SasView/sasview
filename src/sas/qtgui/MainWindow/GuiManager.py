@@ -385,8 +385,8 @@ class GuiManager:
 
         # Copy paste options
         self._workspace.actionCopy.setEnabled(new_perspective.supports_copy)
-        self._workspace.actionLatex.setEnabled(new_perspective.supports_copy)
-        self._workspace.actionExcel.setEnabled(new_perspective.supports_copy)
+        self._workspace.actionLatex.setEnabled(new_perspective.supports_copy_latex)
+        self._workspace.actionExcel.setEnabled(new_perspective.supports_copy_excel)
         self._workspace.actionPaste.setEnabled(new_perspective.supports_paste)
 
         # Serialisation/saving things
@@ -829,16 +829,16 @@ class GuiManager:
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyFitParamsSignal.emit("")
-        #self._workspace.actionPaste.setEnabled(True)
-        pass
+        if self._current_perspective is not None:
+            self._current_perspective.on_copy()
 
     def actionPaste(self):
         """
         Send a signal to the fitting perspective so parameters
         from the clipboard can be used to modify the fit state
         """
-        self.communicate.pasteFitParamsSignal.emit()
+        if self._current_perspective is not None:
+            self._current_perspective.on_paste()
 
     def actionReport(self):
         """
@@ -868,20 +868,23 @@ class GuiManager:
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyExcelFitParamsSignal.emit("Excel")
+        if self._current_perspective is not None:
+            self._current_perspective.on_excel_copy()
 
     def actionLatex(self):
         """
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyLatexFitParamsSignal.emit("Latex")
+        if self._current_perspective is not None:
+            self._current_perspective.on_latex_copy()
 
     def actionSaveParamsAs(self):
         """
         Menu Save Params
         """
-        self.communicate.SaveFitParamsSignal.emit("Save")
+        if self._current_perspective is not None:
+            self._current_perspective.save_parameters()
 
     #============ VIEW =================
     def actionShow_Grid_Window(self):
