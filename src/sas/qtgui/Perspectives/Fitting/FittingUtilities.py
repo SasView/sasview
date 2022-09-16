@@ -859,11 +859,11 @@ def formatParameters(parameters: list, entry_sep=',', line_sep=':'):
     Prepare the parameter string in the standard SasView layout
     """
 
-    parameter_strings = []
+    parameter_strings = ["sasview_parameter_values"]
     for parameter in parameters:
         parameters.append(entry_sep.join([str(component) for component in parameter]))
 
-    return "sasview_parameter_values:" + line_sep.join(parameter_strings)
+    return line_sep.join(parameter_strings)
 
 def formatParametersExcel(parameters: list):
     """
