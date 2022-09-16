@@ -117,7 +117,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
         pass # TODO: refactor to closable property
 
     def isClosable(self) -> bool:
-        """ Flag that determines whether this perspecive can be closed"""
+        """ Flag that determines whether this perspective can be closed"""
         return False # TODO: refactor to closable property
 
     #
@@ -126,7 +126,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
 
     @property
     def supports_reports(self) -> bool:
-        """ Does this perspecive have a report functionality (currently used by menus and toolbar)"""
+        """ Does this perspective have a report functionality (currently used by menus and toolbar)"""
         return False
 
     @property
