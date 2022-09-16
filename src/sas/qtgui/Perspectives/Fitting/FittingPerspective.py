@@ -586,3 +586,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def supports_fitting_menu(self) -> bool:
         return True
 
+    @property
+    def supports_copy(self) -> bool:
+        return True
+
+    @property
+    def supports_paste(self) -> bool:
+        return True

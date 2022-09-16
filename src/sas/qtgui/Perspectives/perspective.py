@@ -131,3 +131,11 @@ class Perspective(object, metaclass=PerspectiveMeta):
     def supports_fitting_menu(self) -> bool:
         return False
 
+    # Copy and paste functionality
+    @property
+    def supports_copy(self) -> bool:
+        return False
+
+    @property
+    def supports_paste(self) -> bool:
+        return False

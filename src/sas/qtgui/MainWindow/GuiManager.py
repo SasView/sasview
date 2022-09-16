@@ -382,7 +382,21 @@ class GuiManager:
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
         new_perspective = self.loadedPerspectives[new_perspective_name]
 
+        # Report options
         self._workspace.actionReport.setEnabled(new_perspective.supports_reports)
+
+        # Copy paste options
+
+
+
+
+
+
+
+
+
+
+        # Serialisation/saving things
         self._workspace.actionOpen_Analysis.setEnabled(False)
         self._workspace.actionSave_Analysis.setEnabled(False)
 
@@ -415,6 +429,7 @@ class GuiManager:
 
         elif isinstance(new_perspective, CorfuncWindow):
             self.checkAnalysisOption(self._workspace.actionCorfunc)
+
 
 
         #
