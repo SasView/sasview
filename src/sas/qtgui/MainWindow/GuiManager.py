@@ -5,7 +5,7 @@ import json
 import webbrowser
 import traceback
 
-from typing import Optional
+from typing import Optional, Dict
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -102,7 +102,7 @@ class GuiManager:
 
         # Currently displayed perspective
         self._current_perspective: Optional[Perspective] = None
-        self.loadedPerspectives = {}
+        self.loadedPerspectives: Dict[str, Perspective] = {}
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -277,7 +277,6 @@ class GuiManager:
                 PlotHelper.plotById(plot).showNormal()
                 PlotHelper.plotById(plot).setFocus()
                 return
-        pass
 
     def removePlotItemsInWindowsMenu(self, plot):
         """
@@ -293,7 +292,6 @@ class GuiManager:
                 action.triggered.disconnect()
                 self._workspace.menuWindow.removeAction(action)
                 return
-        pass
 
     def updateLogContextMenus(self, visible=False):
         """
@@ -386,13 +384,10 @@ class GuiManager:
         self._workspace.actionReport.setEnabled(new_perspective.supports_reports)
 
         # Copy paste options
-
-
-
-
-
-
-
+        self._workspace.actionCopy.setEnabled(new_perspective.supports_copy)
+        self._workspace.actionLatex.setEnabled(new_perspective.supports_copy)
+        self._workspace.actionExcel.setEnabled(new_perspective.supports_copy)
+        self._workspace.actionPaste.setEnabled(new_perspective.supports_paste)
 
 
 
