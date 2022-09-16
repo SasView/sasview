@@ -73,12 +73,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
-        self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
-        self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
-        self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
-        self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
-        self.communicate.SaveFitParamsSignal.connect(self.onParamSave)
-
         # Perspective window not allowed to close by default
         self._allow_close = False
 
@@ -119,17 +113,25 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         self._allow_close = value
 
-    def onParamCopy(self):
-        self.currentTab.onCopyToClipboard("")
+    def copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.copy()
 
-    def onParamPaste(self):
-        self.currentTab.onParameterPaste()
+    def paste(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.paste()
 
-    def onExcelCopy(self):
-        self.currentTab.onCopyToClipboard("Excel")
+    def excel_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.copy_excel()
 
-    def onLatexCopy(self):
-        self.currentTab.onCopyToClipboard("Latex")
+    def latex_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.copy_latex()
+
+    def save_parameters(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.save_parameters()
 
     def serializeAll(self):
         return self.serializeAllFitpage()
@@ -218,9 +220,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
                                                constraint_param[1]))
-
-    def onParamSave(self):
-        self.currentTab.onCopyToClipboard("Save")
 
     def closeEvent(self, event):
         """

@@ -3864,7 +3864,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Gather current fitting parameters as dict
         """
-        param_list = self.getFitParameters()
+
         param_list = self.getFitPage()
         param_list += self.getFitModel()
 
@@ -3878,60 +3878,70 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 line_dict[content[0]] = content[1:]
         return line_dict
 
-    def onCopyToClipboard(self, format=None):
-        """
-        Copy current fitting parameters into the clipboard
-        using requested formatting:
-        plain, excel, latex
-        """
+    def copy(self):
+        self.set_clipboard(self.full_copy_data())
+
+    def paste(self):
+        pass
+
+    def copy_excel(self):
+        self.set_clipboard(self.excel_copy_data())
+
+    def copy_latex(self):
+        self.set_clipboard(self.latex_copy_data())
+
+    def full_copy_data(self):
+        """ Data destined for the clipboard when copy clicked"""
+        param_list = self.getFitPage()
+        param_list += self.getFitModel()
+        return FittingUtilities.formatParameters(param_list)
+
+    def excel_copy_data(self):
+        """ Excel format data destined for the clipboard"""
         param_list = self.getFitParameters()
-        if format=="":
-            param_list = self.getFitPage()
-            param_list += self.getFitModel()
-            formatted_output = FittingUtilities.formatParameters(param_list)
-        elif format == "Excel":
-            formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
-        elif format == "Latex":
-            formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
-        elif format == "Save":
-            Text_output = FittingUtilities.formatParameters(param_list, False)
-            Excel_output = FittingUtilities.formatParametersExcel(param_list[1:])
-            Latex_output = FittingUtilities.formatParametersLatex(param_list[1:])
+        return FittingUtilities.formatParametersExcel(param_list[1:])
+
+    def latex_copy_data(self):
+        """ Latex format data destined for the clipboard"""
+        param_list = self.getFitParameters()
+        return FittingUtilities.formatParametersLatex(param_list[1:])
+
+    def save_parameters(self):
+        """ Save parameters to a file"""
+        param_list = self.getFitParameters()
+
+        save_dialog = QtWidgets.QFileDialog()
+        save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        kwargs = {
+            'parent': self,
+            'caption': 'Save Project',
+            'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
+            'options': QtWidgets.QFileDialog.DontUseNativeDialog
+        }
+        file_path = save_dialog.getSaveFileName(**kwargs)
+        filename = file_path[0]
+
+        if not filename:
+            return
+        if file_path[1] == 'Text (*.txt)':
+            save_data = FittingUtilities.formatParameters(param_list, line_sep="\n")
+            filename = '.'.join((filename, 'txt'))
+        elif file_path[1] == 'Excel (*.xls)':
+            save_data = FittingUtilities.formatParametersExcel(param_list[1:])
+            filename = '.'.join((filename, 'xls'))
+        elif file_path[1] == 'Latex (*.log)':
+            save_data = FittingUtilities.formatParametersLatex(param_list[1:])
+            filename = '.'.join((filename, 'log'))
         else:
-            raise AttributeError("Bad parameter output format specifier.")
+            raise ValueError(f"Unknown File Format {file_path[1]}")
 
-        # Dump formatted_output to the clipboard
+        with open(filename, 'w') as file:
+            file.write(save_data)
 
-
-        if format == "Save":
-            save_dialog = QtWidgets.QFileDialog()
-            save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-            kwargs = {
-                'parent': self,
-                'caption': 'Save Project',
-                'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
-                'options': QtWidgets.QFileDialog.DontUseNativeDialog
-            }
-            file_path = save_dialog.getSaveFileName(**kwargs)
-            filename = file_path[0]
-            if not filename:
-                return
-            if file_path[1] == 'Text (*.txt)':
-                Type_output = Text_output
-                filename = '.'.join((filename, 'txt'))
-            elif file_path[1] == 'Excel (*.xls)':
-                Type_output = Excel_output
-                filename = '.'.join((filename, 'xls'))
-            elif file_path[1] == 'Latex (*.log)':
-                Type_output = Latex_output
-                filename = '.'.join((filename, 'log'))
-
-            file_open = open(filename, 'w')
-            with file_open:
-                file_open.write(Type_output)
-        else:
-            cb = QtWidgets.QApplication.clipboard()
-            cb.setText(formatted_output)
+    def set_clipboard(self, data: str):
+        """ Set the data in the clipboard """
+        cb = QtWidgets.QApplication.clipboard()
+        cb.setText(data)
 
 
     def getFitModel(self):
