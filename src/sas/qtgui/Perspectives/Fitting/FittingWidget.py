@@ -3882,7 +3882,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.set_clipboard(self.full_copy_data())
 
     def paste(self):
-        pass
+        """
+        Use the clipboard to update fit state
+        """
+        # Check if the clipboard contains right stuff
+        cb = QtWidgets.QApplication.clipboard()
+        cb_text = cb.text()
+
+        lines = cb_text.split(':')
+        if lines[0] != 'sasview_parameter_values':
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            msgbox.exec_()
+            return
+
+        # put the text into dictionary
+        line_dict = {}
+        for line in lines[1:]:
+            content = line.split(',')
+            if len(content) > 1 and content[0] != "tab_name":
+                line_dict[content[0]] = content[1:]
+
+        self.updatePageWithParameters(line_dict)
 
     def copy_excel(self):
         self.set_clipboard(self.excel_copy_data())
@@ -4123,33 +4147,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_list.append(['multiplicity', str(self.kernel_module.multiplicity)])
 
         return param_list
-
-    def onParameterPaste(self):
-        """
-        Use the clipboard to update fit state
-        """
-        # Check if the clipboard contains right stuff
-        cb = QtWidgets.QApplication.clipboard()
-        cb_text = cb.text()
-
-        lines = cb_text.split(':')
-        if lines[0] != 'sasview_parameter_values':
-            msg = "Clipboard content is incompatible with the Fit Page."
-            msgbox = QtWidgets.QMessageBox(self)
-            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
-            msgbox.setText(msg)
-            msgbox.setWindowTitle("Clipboard")
-            retval = msgbox.exec_()
-            return
-
-        # put the text into dictionary
-        line_dict = {}
-        for line in lines[1:]:
-            content = line.split(',')
-            if len(content) > 1 and content[0] != "tab_name":
-                line_dict[content[0]] = content[1:]
-
-        self.updatePageWithParameters(line_dict)
 
     def createPageForParameters(self, line_dict):
         """
