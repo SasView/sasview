@@ -861,7 +861,7 @@ def formatParameters(parameters: list, entry_sep=',', line_sep=':'):
 
     parameter_strings = ["sasview_parameter_values"]
     for parameter in parameters:
-        parameters.append(entry_sep.join([str(component) for component in parameter]))
+        parameter_strings.append(entry_sep.join([str(component) for component in parameter]))
 
     return line_sep.join(parameter_strings)
 

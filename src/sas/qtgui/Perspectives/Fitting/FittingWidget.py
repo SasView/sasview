@@ -3879,7 +3879,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         return line_dict
 
     def copy(self):
-        self.set_clipboard(self.full_copy_data())
+        copy_data = self.full_copy_data()
+        self.set_clipboard(copy_data)
 
     def paste(self):
         """
