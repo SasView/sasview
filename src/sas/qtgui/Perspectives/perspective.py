@@ -76,13 +76,13 @@ class Perspective(object, metaclass=PerspectiveMeta):
 
     def isSerializable(self) -> bool:
         """ Can this perspective be serialised - default is no"""
-        return False # TODO: Refactor to serializable property
+        return False
 
     def serialiseAll(self) -> dict:
         raise NotImplementedError(f"{self.name} perspective is not serializable")
 
     @abstractmethod
-    def updateFromParameters(self, params: dict): # TODO: Pythonic name
+    def updateFromParameters(self, params: dict):
         """ Update the perspective using a dictionary of parameters
         e.g. those loaded via open project or open analysis menu items"""
         pass
@@ -117,6 +117,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
         pass # TODO: refactor to closable property
 
     def isClosable(self) -> bool:
+        """ Flag that determines whether this perspective can be closed"""
         return False # TODO: refactor to closable property
 
     #
@@ -125,9 +126,11 @@ class Perspective(object, metaclass=PerspectiveMeta):
 
     @property
     def supports_reports(self) -> bool:
+        """ Does this perspective have a report functionality (currently used by menus and toolbar)"""
         return False
 
     @property
     def supports_fitting_menu(self) -> bool:
+        """ Should the fitting menu be shown when using this perspective (unless its Fitting, probably not)"""
         return False
 
