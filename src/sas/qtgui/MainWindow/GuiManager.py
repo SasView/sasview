@@ -389,8 +389,6 @@ class GuiManager:
         self._workspace.actionExcel.setEnabled(new_perspective.supports_copy)
         self._workspace.actionPaste.setEnabled(new_perspective.supports_paste)
 
-
-
         # Serialisation/saving things
         self._workspace.actionOpen_Analysis.setEnabled(False)
         self._workspace.actionSave_Analysis.setEnabled(False)

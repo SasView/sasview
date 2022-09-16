@@ -134,8 +134,13 @@ class Perspective(object, metaclass=PerspectiveMeta):
     # Copy and paste functionality
     @property
     def supports_copy(self) -> bool:
+        """ Does this perspective support copy functionality? """
         return False
 
     @property
     def supports_paste(self) -> bool:
         return False
+
+    def on_copy(self):
+        pass
+
