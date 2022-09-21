@@ -466,7 +466,8 @@ class GuiManager:
         """
         Update progress bar with the required value (0-100)
         """
-        assert -1 <= value <= 100
+        if value < -1 or value > 100:
+            return
         if value == -1:
             self.progress.setVisible(False)
             return
