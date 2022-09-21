@@ -67,8 +67,8 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             rect = textRect.topLeft()
             x = rect.x()
             y = rect.y()
-            x += 3.0 # magic value for rendering nice display in the table
-            y += 2.0 # magic value for rendering nice display in the table
+            x += 3 # magic value for rendering nice display in the table
+            y += 2 # magic value for rendering nice display in the table
             rect.setX(x)
             rect.setY(y)
             painter.translate(rect)
