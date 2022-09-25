@@ -124,5 +124,4 @@ jobs:
       env:
         PYOPENCL_COMPILER_OUTPUT: 1
       run: |
-        cd src/sas/qtgui
-        xvfb-run -a --server-args="-screen 0 1024x768x24" python GUITests.py || true
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python -m pytest -rsx -v src/sas/qtgui/
