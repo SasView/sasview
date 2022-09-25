@@ -1,7 +1,8 @@
 numpy 
 scipy==1.7.3 
 docutils 
-pytest<6 
+pytest
+pytest_qt
 unittest-xml-reporting
 tinycc 
 h5py 
