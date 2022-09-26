@@ -9,7 +9,8 @@ class WebLinks:
         self.ill_url = "https://www.ill.eu/"
         self.ansto_url = "https://www.ansto.gov.au/"
         self.bam_url = "http://www.bam.de/"
-        self.delft_url = "http://www.tudelft.nl/en/tnw/business/facilities/reactor-instituut-delft/"
+        self.delft_url = \
+            "https://www.tudelft.nl/en/faculty-of-applied-sciences/business/facilities/reactor-institute-delft"
         self.inst_url = "https://www.utk.edu"
         self.diamond_url = "http://www.diamond.ac.uk"
 
