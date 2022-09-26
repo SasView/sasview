@@ -5,7 +5,7 @@ import json
 import webbrowser
 import traceback
 
-from typing import Optional
+from typing import Optional, Dict
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -102,7 +102,7 @@ class GuiManager:
 
         # Currently displayed perspective
         self._current_perspective: Optional[Perspective] = None
-        self.loadedPerspectives = {}
+        self.loadedPerspectives: Dict[str, Perspective] = {}
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -277,7 +277,6 @@ class GuiManager:
                 PlotHelper.plotById(plot).showNormal()
                 PlotHelper.plotById(plot).setFocus()
                 return
-        pass
 
     def removePlotItemsInWindowsMenu(self, plot):
         """
@@ -293,7 +292,6 @@ class GuiManager:
                 action.triggered.disconnect()
                 self._workspace.menuWindow.removeAction(action)
                 return
-        pass
 
     def updateLogContextMenus(self, visible=False):
         """
@@ -382,7 +380,16 @@ class GuiManager:
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
         new_perspective = self.loadedPerspectives[new_perspective_name]
 
+        # Report options
         self._workspace.actionReport.setEnabled(new_perspective.supports_reports)
+
+        # Copy paste options
+        self._workspace.actionCopy.setEnabled(new_perspective.supports_copy)
+        self._workspace.actionLatex.setEnabled(new_perspective.supports_copy_latex)
+        self._workspace.actionExcel.setEnabled(new_perspective.supports_copy_excel)
+        self._workspace.actionPaste.setEnabled(new_perspective.supports_paste)
+
+        # Serialisation/saving things
         self._workspace.actionOpen_Analysis.setEnabled(False)
         self._workspace.actionSave_Analysis.setEnabled(False)
 
@@ -415,6 +422,7 @@ class GuiManager:
 
         elif isinstance(new_perspective, CorfuncWindow):
             self.checkAnalysisOption(self._workspace.actionCorfunc)
+
 
 
         #
@@ -818,19 +826,17 @@ class GuiManager:
 
     def actionCopy(self):
         """
-        Send a signal to the fitting perspective so parameters
-        can be saved to the clipboard
+        Response to copy menu / button trigger
         """
-        self.communicate.copyFitParamsSignal.emit("")
-        #self._workspace.actionPaste.setEnabled(True)
-        pass
+        if self._current_perspective is not None:
+            self._current_perspective.clipboard_copy()
 
     def actionPaste(self):
         """
-        Send a signal to the fitting perspective so parameters
-        from the clipboard can be used to modify the fit state
+        Response to paste menu / button trigger
         """
-        self.communicate.pasteFitParamsSignal.emit()
+        if self._current_perspective is not None:
+            self._current_perspective.clipboard_paste()
 
     def actionReport(self):
         """
@@ -860,20 +866,23 @@ class GuiManager:
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyExcelFitParamsSignal.emit("Excel")
+        if self._current_perspective is not None:
+            self._current_perspective.excel_clipboard_copy()
 
     def actionLatex(self):
         """
         Send a signal to the fitting perspective so parameters
         can be saved to the clipboard
         """
-        self.communicate.copyLatexFitParamsSignal.emit("Latex")
+        if self._current_perspective is not None:
+            self._current_perspective.latex_clipboard_copy()
 
     def actionSaveParamsAs(self):
         """
         Menu Save Params
         """
-        self.communicate.SaveFitParamsSignal.emit("Save")
+        if self._current_perspective is not None:
+            self._current_perspective.save_parameters()
 
     #============ VIEW =================
     def actionShow_Grid_Window(self):

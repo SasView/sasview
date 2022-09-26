@@ -854,31 +854,21 @@ def getOrientationParam(kernel_module=None):
 
     return param
 
-def formatParameters(parameters, Check=True):
+def formatParameters(parameters: list, entry_sep=',', line_sep=':'):
     """
     Prepare the parameter string in the standard SasView layout
     """
-    assert parameters is not None
-    assert isinstance(parameters, list)
-    output_string = "sasview_parameter_values:"
+
+    parameter_strings = ["sasview_parameter_values"]
     for parameter in parameters:
-        # recast tuples into strings
-        parameter = [str(p) for p in parameter]
-        output_string += ",".join([p for p in parameter if p is not None])
-        output_string += ":"
+        parameter_strings.append(entry_sep.join([str(component) for component in parameter]))
 
-    if Check == False:
-        new_string = output_string.replace(':', '\n')
-        return new_string
-    else:
-        return output_string
+    return line_sep.join(parameter_strings)
 
-def formatParametersExcel(parameters):
+def formatParametersExcel(parameters: list):
     """
     Prepare the parameter string in the Excel format (tab delimited)
     """
-    assert parameters is not None
-    assert isinstance(parameters, list)
     crlf = chr(13) + chr(10)
     tab = chr(9)
 
@@ -906,12 +896,11 @@ def formatParametersExcel(parameters):
     output_string = names + crlf + values + crlf + check
     return output_string
 
-def formatParametersLatex(parameters):
+def formatParametersLatex(parameters: list):
     """
     Prepare the parameter string in latex
     """
-    assert parameters is not None
-    assert isinstance(parameters, list)
+
     output_string = r'\begin{table}'
     output_string += r'\begin{tabular}[h]'
 

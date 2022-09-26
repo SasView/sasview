@@ -23,7 +23,7 @@ except ImportError:
     fitters.FIT_DEFAULT = 'lm'
     def get_fitter():
         fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-        return fitopts.fitclass, fitopts.options.copy()
+        return fitopts.fitclass, fitopts.options.clipboard_copy()
 
 
 from bumps.mapper import SerialMapper, MPMapper

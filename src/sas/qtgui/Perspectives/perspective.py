@@ -99,8 +99,13 @@ class Perspective(object, metaclass=PerspectiveMeta):
 
 
     #
-    # Other shared functionality
+    # Reports
     #
+
+    @property
+    def supports_reports(self) -> bool:
+        """ Does this perspective have a report functionality (currently used by menus and toolbar)"""
+        return False
 
     def getReport(self) -> Optional[ReportData]: # TODO: Refactor to just report, or report_html
         """ A string containing the HTML to be shown in the report"""
@@ -125,12 +130,62 @@ class Perspective(object, metaclass=PerspectiveMeta):
     #
 
     @property
-    def supports_reports(self) -> bool:
-        """ Does this perspective have a report functionality (currently used by menus and toolbar)"""
-        return False
-
-    @property
     def supports_fitting_menu(self) -> bool:
         """ Should the fitting menu be shown when using this perspective (unless its Fitting, probably not)"""
         return False
+
+    #
+    # Copy and paste functionality
+    #
+
+    @property
+    def supports_copy(self) -> bool:
+        """ Does this perspective support copy functionality? """
+        return False
+
+    @property
+    def supports_copy_excel(self) -> bool:
+        """ Does this perspective support copy functionality? """
+        return False
+
+    @property
+    def supports_copy_latex(self) -> bool:
+        """ Does this perspective support copy functionality? """
+        return False
+
+    @property
+    def supports_paste(self) -> bool:
+        """ Does this perspective allow pasting?"""
+        return False
+
+    def clipboard_copy(self):
+        """ Called by copy menu item"""
+        pass
+
+    def clipboard_paste(self):
+        """ Called by paste menu item"""
+        pass
+
+    def excel_clipboard_copy(self):
+        """ Called by copy excel menu item"""
+        pass
+
+    def latex_clipboard_copy(self):
+        """ Called by copy latex menu item"""
+        pass
+
+    #
+    # Loading and saving of parameters
+    #
+
+    @property
+    def supports_save_parameters(self) -> bool:
+        """ Can this perspective save its parameters to a file"""
+        return False
+
+    def save_parameters(self):
+        """ Save parameters to a file"""
+        pass
+
+
 
