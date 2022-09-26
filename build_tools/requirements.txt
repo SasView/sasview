@@ -32,3 +32,4 @@ html5lib
 importlib-resources
 bumps
 html2text
+jsonschema

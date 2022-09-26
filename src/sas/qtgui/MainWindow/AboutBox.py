@@ -2,10 +2,13 @@ import functools
 from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.system.version
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
+
+from sas.system import web, legal
+from sas import config
 
 from .UI.AboutUI import Ui_AboutUI
 
@@ -26,20 +29,38 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         """
         Modify the labels so the text corresponds to the current version
         """
-        version = sas.sasview.__version__
+        version = sas.system.version.__version__
 
         self.lblVersion.setText(str(version))
         lbl_font = self.font()
         lbl_font.setPointSize(24)
         self.lblVersion.setFont(lbl_font)
-        about_text = r'<html><head/><body><p>'
-        about_text += '<p>Build ' + str(LocalConfig.__build__) +'</p>'
-        about_text += '<p>' + LocalConfig._copyright + '</p>'
-        about_text += r'<p><a href=http://www.sasview.org>http://www.sasview.org</a></p><br/>'
-        about_text += '<p>Comments? Bugs? Requests?<br/>'
-        about_text += r'<a href=mailto:help@sasview.org>Send us a ticket</a></p><br/>'
-        about_text += r'<a href=' + str(LocalConfig.__download_page__)\
-                   + 'Get the latest version</a></p><br/>'
+
+        about_text = f"""
+        <html>
+            <head/>
+            <body>
+                <p>
+                    {legal.copyright}
+                </p>
+                <p>
+                    <a href="{web.homepage_url}">{web.homepage_url}</a>
+                </p>
+                <br/>
+                <p>
+                    Comments? Bugs? Requests?
+                    <br/>
+                    <a href="mailto:{web._license}">Send us a ticket</a>
+                </p>
+                <br/>
+                <p>
+                    <a href="{web.download_url}">Get the latest version</a>
+                </p>
+                <br/>
+            </body>
+        </html>
+        """
+
         self.lblAbout.setText(about_text)
 
         # Enable link clicking on the label
@@ -50,26 +71,26 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         Add actions to the logo push buttons
         """
         self.cmdLinkUT.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._inst_url))
+            GuiUtils.openLink, web.inst_url))
         self.cmdLinkUMD.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._umd_url))
+            GuiUtils.openLink, web.umd_url))
         self.cmdLinkNIST.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._nist_url))
+            GuiUtils.openLink, web.nist_url))
         self.cmdLinkSNS.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._sns_url))
+            GuiUtils.openLink, web.sns_url))
         self.cmdLinkISIS.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._isis_url))
+            GuiUtils.openLink, web.isis_url))
         self.cmdLinkESS.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._ess_url))
+            GuiUtils.openLink, web.ess_url))
         self.cmdLinkILL.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._ill_url))
+            GuiUtils.openLink, web.ill_url))
         self.cmdLinkANSTO.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._ansto_url))
+            GuiUtils.openLink, web.ansto_url))
         self.cmdLinkBAM.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._bam_url))
+            GuiUtils.openLink, web.bam_url))
         self.cmdLinkDELFT.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._delft_url))
+            GuiUtils.openLink, web.delft_url))
         self.cmdLinkDIAMOND.clicked.connect(functools.partial(
-            GuiUtils.openLink, LocalConfig._diamond_url))
+            GuiUtils.openLink, web.diamond_url))
 
         self.cmdOK.clicked.connect(self.close)

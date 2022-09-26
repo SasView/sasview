@@ -23,7 +23,7 @@ import sasdata.file_converter.FileConverterUtilities as Utilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.FrameSelect import FrameSelect
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from ...system.version import __version__ as SASVIEW_VERSION
 
 from .UI.FileConverterUI import Ui_FileConverterUI
 

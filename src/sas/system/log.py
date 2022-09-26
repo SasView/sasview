@@ -8,7 +8,7 @@ import os.path
 
 import pkg_resources
 
-from sas import get_custom_config
+from sas import config
 
 '''
 Module that manages the global logging
@@ -46,17 +46,7 @@ class SetupLogger(object):
 
     def _disable_debug_from_config(self):
         '''disable DEBUG logs as per user configuration (DEBUG logs disabled by default)'''
-        disable_debug = True
-        custom_config = get_custom_config()
-
-        if hasattr(custom_config, "FILTER_DEBUG_LOGS"):
-            if type(custom_config.FILTER_DEBUG_LOGS) is bool:
-                disable_debug = custom_config.FILTER_DEBUG_LOGS
-            else:
-                logging.warning("FILTER_DEBUG_LOGS has invalid value in custom_config.py")
-
-        if disable_debug:
-            # logging.info("Note: DEBUG logs are disabled.")
+        if config.FILTER_DEBUG_LOGS:
             logging.disable(logging.DEBUG)
 
     def _read_config_file(self):
@@ -72,7 +62,7 @@ class SetupLogger(object):
         for name, _ in logging.Logger.manager.loggerDict.items():
             logging.getLogger(name).setLevel(logging.DEBUG)
 
-    def _find_config_file(self, filename="logging.ini"):
+    def _find_config_file(self, filename="log.ini"):
         '''
         The config file is in:
         Debug ./sasview/
@@ -83,8 +73,8 @@ class SetupLogger(object):
         places_to_look_for_conf_file = [
             os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
             filename,
-            os.path.join("sas", "sasview", filename),
-            os.path.join(os.getcwd(), "sas", "sasview", filename),
+            os.path.join("sas", "system", filename),
+            os.path.join(os.getcwd(), "sas", "system", filename),
             os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), filename) #For OSX app
         ]
 
@@ -100,5 +90,5 @@ class SetupLogger(object):
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return
-        print("ERROR: Logging.ini not found...")
+        print(f"'{filename}' not found.", file=sys.stderr)
         self.config_file = None

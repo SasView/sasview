@@ -14,12 +14,8 @@ datas = [
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
-    ('../src/sas/sasview/custom_config.py', '.'),
-    ('../src/sas/sasview/local_config.py', '.'),
-#    ('../src/sas/sasview/wxcruft.py', '.'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
-    ('../src/sas/logger_config.py', '.'),
-    ('../src/sas/logging.ini', '.'),
+    ('../src/sas/system/log.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build/html','doc')
 ]

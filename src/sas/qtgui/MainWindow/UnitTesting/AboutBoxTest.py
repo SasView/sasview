@@ -7,12 +7,13 @@ from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
-# set up import paths
-import path_prepare
+import sas.sasview
+import sas.system.version
+from sas import config
+from sas.system import web, legal
 
 # Local
 from sas.qtgui.MainWindow.AboutBox import AboutBox
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -45,7 +46,7 @@ class AboutBoxTest(unittest.TestCase):
         """
         version = self.widget.lblVersion
         self.assertIsInstance(version, QtWidgets.QLabel)
-        self.assertEqual(str(version.text()), str(LocalConfig.__version__))
+        self.assertEqual(str(version.text()), str(sas.system.version.__version__))
 
     def testAbout(self):
         """
@@ -53,14 +54,12 @@ class AboutBoxTest(unittest.TestCase):
         """
         about = self.widget.lblAbout
         self.assertIsInstance(about, QtWidgets.QLabel)
-        # build version
-        self.assertIn(str(LocalConfig.__build__), about.text())
         # License
-        self.assertIn(str(LocalConfig._copyright), about.text())
+        self.assertIn(str(legal.copyright), about.text())
         # URLs
-        self.assertIn(str(LocalConfig._homepage), about.text())
-        self.assertIn(str(LocalConfig.__download_page__), about.text())
-        self.assertIn(str(LocalConfig._license), about.text())
+        self.assertIn(str(web.homepage_url), about.text())
+        self.assertIn(str(config.download_url), about.text())
+        self.assertIn(str(config._license), about.text())
 
         # Are links enabled?
         self.assertTrue(about.openExternalLinks())
@@ -71,18 +70,18 @@ class AboutBoxTest(unittest.TestCase):
         """
         webbrowser.open = MagicMock()
         all_hosts = [
-                LocalConfig._nist_url,
-                LocalConfig._umd_url,
-                LocalConfig._sns_url,
-                LocalConfig._nsf_url,
-                LocalConfig._isis_url,
-                LocalConfig._ess_url,
-                LocalConfig._ill_url,
-                LocalConfig._ansto_url,
-                LocalConfig._inst_url,
-                LocalConfig._delft_url,
-                LocalConfig._bam_url,
-                LocalConfig._diamond_url]
+                config.nist_url,
+                config.umd_url,
+                config.sns_url,
+                config.nsf_url,
+                config.isis_url,
+                config.ess_url,
+                config.ill_url,
+                config.ansto_url,
+                config.inst_url,
+                config.delft_url,
+                config.bam_url,
+                config.diamond_url]
 
         # Press the buttons
         buttonList = self.widget.findChildren(QtWidgets.QPushButton)

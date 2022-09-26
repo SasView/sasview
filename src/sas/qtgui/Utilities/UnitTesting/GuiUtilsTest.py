@@ -46,12 +46,6 @@ class GuiUtilsTest(unittest.TestCase):
         """
         pass
 
-    def testGetUserDirectory(self):
-        """
-        Simple test of user directory getter
-        """
-        home_dir = os.path.expanduser("~")
-        self.assertIn(home_dir, get_user_directory())
 
     def testCommunicate(self):
         """
