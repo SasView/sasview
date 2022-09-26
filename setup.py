@@ -10,6 +10,7 @@ import subprocess
 import shutil
 import sys
 from distutils.core import Command
+from typing import List
 
 from setuptools import setup
 
@@ -27,7 +28,6 @@ with open(version_file) as fid:
 package_dir = {}
 package_data = {}
 packages = []
-ext_modules = []
 
 # Remove all files that should be updated by this setup
 # We do this here because application updates these files from .sasview
@@ -119,6 +119,47 @@ build_qt = any(c in sys.argv for c in build_commands)
 
 if build_qt:
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
+
+
+# Stopgap until this setup.py is more standard
+# Recursively add all the directories, add those with py files in them, or their subdirectories
+def add_all_directories(path: str, name_components: List[str], exclusions: List[str]):
+
+    if any([exclusion in path for exclusion in exclusions]):
+        return False
+
+    contains_python = any([filename.endswith(".py") for filename in os.listdir(path)])
+
+    for filename in os.listdir(path):
+        if "." in filename:
+            continue
+
+        if filename.startswith("_"):
+            continue
+
+        sub_path = os.path.join(path, filename)
+
+        if not os.path.isdir(sub_path):
+            continue
+
+        add_all_directories(sub_path, name_components + [filename], exclusions)
+
+    if contains_python:
+        package_name = ".".join(name_components)
+        package_dir[package_name] = path
+        packages.append(package_name)
+
+    return contains_python
+
+add_all_directories("src", [], exclusions=["UnitTesting"])
+
+for key in package_dir:
+    print(key, package_dir[key])
+
+print(packages)
+
+package_dir = {}
+packages = []
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
@@ -285,6 +326,13 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              ]
 packages.append("sas.qtgui")
 
+for key in package_dir:
+    print(key, package_dir[key])
+
+print(packages)
+
+from setuptools import find_packages
+print(find_packages("src"))
 
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
@@ -308,10 +356,10 @@ setup(
     license="PSF",
     keywords="small-angle x-ray and neutron scattering analysis",
     download_url="https://github.com/SasView/sasview.git",
-    package_dir=package_dir,
-    packages=packages,
+    package_dir={"sas": "src/sas"},
+    packages=find_packages("src"),
     package_data=package_data,
-    ext_modules=ext_modules,
+    ext_modules=[],
     install_requires=required,
     zip_safe=False,
     entry_points={
