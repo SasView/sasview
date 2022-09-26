@@ -158,19 +158,19 @@ class Perspective(object, metaclass=PerspectiveMeta):
         """ Does this perspective allow pasting?"""
         return False
 
-    def copy(self):
+    def clipboard_copy(self):
         """ Called by copy menu item"""
         pass
 
-    def paste(self):
+    def clipboard_paste(self):
         """ Called by paste menu item"""
         pass
 
-    def excel_copy(self):
+    def excel_clipboard_copy(self):
         """ Called by copy excel menu item"""
         pass
 
-    def latex_copy(self):
+    def latex_clipboard_copy(self):
         """ Called by copy latex menu item"""
         pass
 

@@ -3878,11 +3878,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 line_dict[content[0]] = content[1:]
         return line_dict
 
-    def copy(self):
+    def clipboard_copy(self):
         copy_data = self.full_copy_data()
         self.set_clipboard(copy_data)
 
-    def paste(self):
+    def clipboard_paste(self):
         """
         Use the clipboard to update fit state
         """
@@ -3909,10 +3909,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.updatePageWithParameters(line_dict)
 
-    def copy_excel(self):
+    def clipboard_copy_excel(self):
         self.set_clipboard(self.excel_copy_data())
 
-    def copy_latex(self):
+    def clipboard_copy_latex(self):
         self.set_clipboard(self.latex_copy_data())
 
     def full_copy_data(self):

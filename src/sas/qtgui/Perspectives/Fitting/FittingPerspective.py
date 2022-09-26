@@ -113,21 +113,21 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         self._allow_close = value
 
-    def copy(self):
+    def clipboard_copy(self):
         if self.currentFittingWidget is not None:
-            self.currentFittingWidget.copy()
+            self.currentFittingWidget.clipboard_copy()
 
-    def paste(self):
+    def clipboard_paste(self):
         if self.currentFittingWidget is not None:
-            self.currentFittingWidget.paste()
+            self.currentFittingWidget.clipboard_paste()
 
-    def excel_copy(self):
+    def excel_clipboard_copy(self):
         if self.currentFittingWidget is not None:
-            self.currentFittingWidget.copy_excel()
+            self.currentFittingWidget.clipboard_copy_excel()
 
-    def latex_copy(self):
+    def latex_clipboard_copy(self):
         if self.currentFittingWidget is not None:
-            self.currentFittingWidget.copy_latex()
+            self.currentFittingWidget.clipboard_copy_latex()
 
     def save_parameters(self):
         if self.currentFittingWidget is not None:

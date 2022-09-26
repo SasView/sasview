@@ -830,7 +830,7 @@ class GuiManager:
         can be saved to the clipboard
         """
         if self._current_perspective is not None:
-            self._current_perspective.copy()
+            self._current_perspective.clipboard_copy()
 
     def actionPaste(self):
         """
@@ -838,7 +838,7 @@ class GuiManager:
         from the clipboard can be used to modify the fit state
         """
         if self._current_perspective is not None:
-            self._current_perspective.paste()
+            self._current_perspective.clipboard_paste()
 
     def actionReport(self):
         """
@@ -869,7 +869,7 @@ class GuiManager:
         can be saved to the clipboard
         """
         if self._current_perspective is not None:
-            self._current_perspective.excel_copy()
+            self._current_perspective.excel_clipboard_copy()
 
     def actionLatex(self):
         """
@@ -877,7 +877,7 @@ class GuiManager:
         can be saved to the clipboard
         """
         if self._current_perspective is not None:
-            self._current_perspective.latex_copy()
+            self._current_perspective.latex_clipboard_copy()
 
     def actionSaveParamsAs(self):
         """
