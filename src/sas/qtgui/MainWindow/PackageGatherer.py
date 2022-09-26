@@ -147,7 +147,7 @@ class PackageGatherer:
             if hasattr(package, '__version__'):
                 # Module has __version__ attribute
                 try:
-                    package_versions_dict[package_name] = sas.system.version.__version__
+                    package_versions_dict[package_name] = package.__version__
                     continue
                 except Exception as e:
                     # Unable to access module
