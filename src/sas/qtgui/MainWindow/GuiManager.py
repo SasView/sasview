@@ -826,16 +826,14 @@ class GuiManager:
 
     def actionCopy(self):
         """
-        Send a signal to the fitting perspective so parameters
-        can be saved to the clipboard
+        Response to copy menu / button trigger
         """
         if self._current_perspective is not None:
             self._current_perspective.clipboard_copy()
 
     def actionPaste(self):
         """
-        Send a signal to the fitting perspective so parameters
-        from the clipboard can be used to modify the fit state
+        Response to paste menu / button trigger
         """
         if self._current_perspective is not None:
             self._current_perspective.clipboard_paste()
