@@ -51,7 +51,7 @@ def setup_sasmodels():
     Prepare sasmodels for running within sasview.
     """
     # Set SAS_MODELPATH so sasmodels can find our custom models
-    
+
     from sas.system.user import get_user_dir
     plugin_dir = os.path.join(get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir

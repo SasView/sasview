@@ -137,13 +137,9 @@ def generate_zenodo(sasview_data, zenodo_api_key):
 
 version_template = \
 """
-from distutils.version import StrictVersion
-
 __version__ = "%s"
 __release_date__ = "%i"
 __build__ = "GIT_COMMIT"
-
-StrictVersion(__version__)
 """
 
 zenodo_template = '__DOI__ = "%s"'
