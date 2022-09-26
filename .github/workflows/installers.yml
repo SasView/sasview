@@ -1,5 +1,8 @@
 name: Installer
 
+env:
+  SETUPTOOLS_USE_DISTUTILS: stdlib
+
 #Build all branches except release
 on:
   push:
