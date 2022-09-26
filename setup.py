@@ -230,6 +230,11 @@ package_dir["sas.qtgui.Perspectives.Corfunc.UI"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives", "Corfunc", "UI")
 packages.extend(["sas.qtgui.Perspectives.Corfunc", "sas.qtgui.Perspectives.Corfunc.UI"])
 
+
+package_dir["sas.qtgui.images"] = os.path.join(
+    "src", "sas", "qtgui", "images")
+packages.append("sas.qtgui.images")
+
 ## Plotting
 package_dir["sas.qtgui.Plotting"] = os.path.join(
     "src", "sas", "qtgui", "Plotting")
