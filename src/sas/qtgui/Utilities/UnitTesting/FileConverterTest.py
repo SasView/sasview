@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
-import sas.sascalc.file_converter.FileConverterUtilities as Utilities
+import sasdata.file_converter.FileConverterUtilities as Utilities
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)

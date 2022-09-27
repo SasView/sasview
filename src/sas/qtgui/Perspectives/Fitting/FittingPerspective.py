@@ -1,7 +1,7 @@
-from distutils.command.config import config
-
 import numpy
 import copy
+
+from typing import Optional
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -10,7 +10,6 @@ from PyQt5 import QtWidgets
 from bumps import options
 from bumps import fitters
 
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
@@ -19,19 +18,28 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
+from sas.qtgui.Perspectives.perspective import Perspective
 
-class FittingWindow(QtWidgets.QTabWidget):
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
+
+class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
     """
     tabsModifiedSignal = QtCore.pyqtSignal()
     fittingStartedSignal = QtCore.pyqtSignal(list)
     fittingStoppedSignal = QtCore.pyqtSignal(list)
 
-    name = "Fitting" # For displaying in the combo box in DataExplorer
-    ext = "fitv"  # Extension used for saving analyses
+    name = "Fitting"
+    ext = "fitv"
+
+    @property
+    def title(self):
+        """ Window title"""
+        return "Fitting Perspective"
+
     def __init__(self, parent=None, data=None):
 
-        super(FittingWindow, self).__init__()
+        super().__init__()
 
         self.parent = parent
         self._data = data
@@ -65,19 +73,13 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
-        self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
-        self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
-        self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
-        self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
-        self.communicate.SaveFitParamsSignal.connect(self.onParamSave)
-
         # Perspective window not allowed to close by default
         self._allow_close = False
 
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
         self.fit_options_widget = FittingOptions(self, config=self.fit_options)
-        self.fit_options.selected_id = fitters.LevenbergMarquardtFit.id
+        self.fit_options.selected_id = fitters.MPFit.id
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
@@ -93,6 +95,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.setCornerWidget(self.plusButton)
         self.plusButton.setToolTip("Add a new Fit Page")
         self.plusButton.clicked.connect(lambda: self.addFit(None))
+
 
     def updateWindowTitle(self):
         """
@@ -110,17 +113,25 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         self._allow_close = value
 
-    def onParamCopy(self):
-        self.currentTab.onCopyToClipboard("")
+    def clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy()
 
-    def onParamPaste(self):
-        self.currentTab.onParameterPaste()
+    def clipboard_paste(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_paste()
 
-    def onExcelCopy(self):
-        self.currentTab.onCopyToClipboard("Excel")
+    def excel_clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy_excel()
 
-    def onLatexCopy(self):
-        self.currentTab.onCopyToClipboard("Latex")
+    def latex_clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy_latex()
+
+    def save_parameters(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.save_parameters()
 
     def serializeAll(self):
         return self.serializeAllFitpage()
@@ -209,9 +220,6 @@ class FittingWindow(QtWidgets.QTabWidget):
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
                                                constraint_param[1]))
-
-    def onParamSave(self):
-        self.currentTab.onCopyToClipboard("Save")
 
     def closeEvent(self, event):
         """
@@ -498,11 +506,19 @@ class FittingWindow(QtWidgets.QTabWidget):
         return state
 
     @property
-    def currentTab(self):
+    def currentTab(self): # TODO: More pythonic name
         """
         Returns the tab widget currently shown
         """
         return self.currentWidget()
+
+    @property
+    def currentFittingWidget(self) -> Optional[FittingWidget]:
+        current_tab = self.currentTab
+        if isinstance(current_tab, FittingWidget):
+            return current_tab
+        else:
+            return None
 
     def getFitTabs(self):
         """
@@ -555,3 +571,32 @@ class FittingWindow(QtWidgets.QTabWidget):
             if tab.modelName() == name:
                 return tab
         return None
+
+    @property
+    def supports_reports(self) -> bool:
+        return True
+
+    def getReport(self) -> Optional[ReportData]:
+        """ Get the report from the current tab"""
+        fitting_widget = self.currentFittingWidget
+        return None if fitting_widget is None else fitting_widget.getReport()
+
+    @property
+    def supports_fitting_menu(self) -> bool:
+        return True
+
+    @property
+    def supports_copy(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_excel(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_latex(self) -> bool:
+        return True
+
+    @property
+    def supports_paste(self) -> bool:
+        return True

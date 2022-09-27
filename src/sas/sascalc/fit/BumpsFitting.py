@@ -14,7 +14,7 @@ from bumps import fitters
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
-    FIT_CONFIG.selected_id = fitters.LevenbergMarquardtFit.id
+    FIT_CONFIG.selected_id = fitters.MPFit.id
     def get_fitter():
         return FIT_CONFIG.selected_fitter, FIT_CONFIG.selected_values
 except ImportError:
@@ -23,7 +23,7 @@ except ImportError:
     fitters.FIT_DEFAULT = 'lm'
     def get_fitter():
         fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-        return fitopts.fitclass, fitopts.options.copy()
+        return fitopts.fitclass, fitopts.options.clipboard_copy()
 
 
 from bumps.mapper import SerialMapper, MPMapper
@@ -260,16 +260,16 @@ class BumpsFit(FitEngine):
             q=None, handler=None, curr_thread=None,
             ftol=1.49012e-8, reset_flag=False):
         # Build collection of bumps fitness calculators
-        models = [SasFitness(model=M.get_model(),
-                             data=M.get_data(),
-                             constraints=M.constraints,
-                             fitted=M.pars,
-                             initial_values=M.vals if reset_flag else None)
-                  for M in self.fit_arrange_dict.values()
-                  if M.get_to_fit()]
+        models = []
+        weights = []
+        for tab_id, dataset in self.fit_arrange_dict.items():
+            if dataset.get_to_fit():
+                models.append(SasFitness(model=dataset.get_model(), data=dataset.get_data(), constraints=dataset.constraints,
+                                         fitted=dataset.pars, initial_values=dataset.vals if reset_flag else None))
+                weights.append(self.get_weight_increase(tab_id))
         if len(models) == 0:
             raise RuntimeError("Nothing to fit")
-        problem = FitProblem(models)
+        problem = FitProblem(models, weights=weights)
 
         # TODO: need better handling of parameter expressions and bounds constraints
         # so that they are applied during polydispersity calculations.  This

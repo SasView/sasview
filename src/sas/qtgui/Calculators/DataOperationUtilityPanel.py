@@ -160,6 +160,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         """ Prepare datasets to be added to DataExplorer and DataManager """
         name = self.txtOutputData.text()
         self.output.name = name
+        self.output.id = name + str(time.time())
         new_item = GuiUtils.createModelItemWithPlot(
             self.output,
             name=name)
@@ -298,13 +299,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
-                logging.warning('Cannot compute data of different dimensions')
+                logging.error('Cannot compute data of different dimensions')
                 return False
 
             elif self.data1.__class__.__name__ == 'Data1D'\
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-                logging.warning('Cannot compute 1D data of different lengths')
+                logging.error('Cannot compute 1D data of different lengths')
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 return False
@@ -319,7 +320,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                          ):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
-                logging.warning('Cannot compute 2D data of different lengths')
+                logging.error('Cannot compute 2D data of different lengths')
                 return False
 
             else:
@@ -372,7 +373,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return copy.deepcopy(data_complete)
 
         else:
-            logging.warning('Error with data format')
+            logging.error('Error with data format')
             return
 
     # ########
@@ -410,7 +411,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # plot 2D data
             plotter2D = Plotter2DWidget(self, quickplot=True)
             plotter2D.scale = 'linear'
-
             plotter2D.ax.tick_params(axis='x', labelsize=8)
             plotter2D.ax.tick_params(axis='y', labelsize=8)
 

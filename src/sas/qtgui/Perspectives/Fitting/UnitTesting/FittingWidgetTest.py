@@ -221,7 +221,7 @@ class FittingWidgetTest(unittest.TestCase):
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
         self.assertEqual(mag_index.data(), "up_frac_f")
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        self.assertEqual(mag_index.data(), "up_angle")
+        self.assertEqual(mag_index.data(), "up_theta")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
         self.assertEqual(mag_index.data(), "up_phi")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)
@@ -1772,6 +1772,49 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(constraint.active, False)
         # Check that the uncheckConstraint method was called
         constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
+
+    def testQRangeReset(self):
+        ''' Test onRangeReset w/ and w/o data loaded '''
+        self.assertEqual(self.widget.options_widget.qmin,
+                         self.widget.options_widget.QMIN_DEFAULT)
+        self.assertEqual(self.widget.options_widget.qmax,
+                         self.widget.options_widget.QMAX_DEFAULT)
+        self.assertEqual(self.widget.options_widget.npts,
+                         self.widget.options_widget.NPTS_DEFAULT)
+        self.assertEqual(self.widget.options_widget.npts,
+                         self.widget.options_widget.npts_fit)
+        # Set values to non-defaults and check they updated
+        self.widget.options_widget.updateMinQ(0.01)
+        self.widget.options_widget.updateMaxQ(0.02)
+        self.assertEqual(float(self.widget.options_widget.qmin), 0.01)
+        self.assertEqual(float(self.widget.options_widget.qmax), 0.02)
+        # Click the reset range button and check the values went back to defaults
+        self.widget.options_widget.cmdReset.click()
+        self.assertEqual(self.widget.options_widget.qmin,
+                         self.widget.options_widget.QMIN_DEFAULT)
+        self.assertEqual(self.widget.options_widget.qmax,
+                         self.widget.options_widget.QMAX_DEFAULT)
+        self.assertEqual(self.widget.options_widget.npts,
+                         self.widget.options_widget.NPTS_DEFAULT)
+        # Load data into tab and check new limits
+        data = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        item = QtGui.QStandardItem("test")
+        widget_with_data = FittingWidget(dummy_manager(), data=item, tab_id=3)
+        self.assertEqual(widget_with_data.options_widget.qmin, min(data.x))
+        self.assertEqual(widget_with_data.options_widget.qmax, max(data.x))
+        self.assertEqual(widget_with_data.options_widget.npts, len(data.x))
+        # Set values to non-defaults and check they updated
+        self.widget.options_widget.updateMinQ(0.01)
+        self.widget.options_widget.updateMaxQ(0.02)
+        self.assertEqual(float(self.widget.options_widget.qmin), 0.01)
+        self.assertEqual(float(self.widget.options_widget.qmax), 0.02)
+        # Click the reset range button and check the values went back to data values
+        self.widget.options_widget.cmdReset.click()
+        self.assertEqual(widget_with_data.options_widget.qmin, min(data.x))
+        self.assertEqual(widget_with_data.options_widget.qmax, max(data.x))
+        self.assertEqual(widget_with_data.options_widget.npts, len(data.x))
+
 
 if __name__ == "__main__":
     unittest.main()

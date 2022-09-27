@@ -37,10 +37,10 @@ from sas.qtgui.Plotting.Plottables import View
 
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.MainWindow.DataState import DataState
-import sas.sascalc.dataloader.data_info as DataInfo
+import sasdata.dataloader.data_info as DataInfo
 
 # used for import/export
-from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sasdata.dataloader.data_info import Sample, Source, Vector
 
 from sas.sasview import __version__ as SASVIEW_VERSION
 

@@ -2,8 +2,11 @@ name: Create release
 
 on:
   push:
-    tags:
-      - v* 
+    branches:
+      - release*
+  pull_request:
+    branches:
+      - release*
       
 defaults:
   run:
@@ -11,6 +14,8 @@ defaults:
 
 jobs:
   installer:
+
+    timeout-minutes: 40
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -55,31 +60,41 @@ jobs:
 
     ### Installation of build-dependencies
 
+    - name: Install lxml and MPL (Linux + Win)
+      if: ${{ matrix.os != 'macos-latest' }}
+      run: |
+        python -m pip install matplotlib==2.2.5
+        python -m pip install lxml
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
 
-        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting
-        python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab pybind11 appdirs
+        python -m pip install numpy scipy==1.7.3 docutils "pytest<6" sphinx unittest-xml-reporting
+        python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab==3.6.6 pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
-        python -m pip install qt5reactor periodictable PyQt5 uncertainties debugpy
+        python -m pip install qt5reactor periodictable uncertainties debugpy dominate importlib_resources 
+        python -m pip install html2text
 
-    - name: Install lxml (Linux + Win)
+
+    - name: Install PyQt (Windows + Linux)
       if: ${{ matrix.os != 'macos-latest' }}
       run: |
-        python -m pip install lxml
+        python -m pip install PyQt5
 
-    - name: Install lxml (OSX)
+    - name: Install lxml, matplotlib and PyQt (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        python -m pip install PyQt5==5.13
+        python -m pip install matplotlib==3.4.3
         python -m pip install --no-binary lxml lxml
-
     - name: Install pyopencl (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         python -m pip install pytools mako cffi
         choco install opencl-intel-cpu-runtime
+        choco install innosetup
         python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
 
     - name: Install pyopencl (Linux + macOS)
@@ -91,10 +106,21 @@ jobs:
       run: |
         python -m pip install pyinstaller
 
+    ### TODO: Bumps, sasdata and sasmodels branches needs to be setup manually until we find better mechanism
     - name: Fetch sources for sibling projects
       run: |
-        git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-        git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+        git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
+        git clone --depth=1 --branch=v1.0.6 https://github.com/SasView/sasmodels.git ../sasmodels
+        git clone --depth=1 --branch=v0.9.0 https://github.com/bumps/bumps.git ../bumps
+
+    - name: Build and install sasdata
+      run: |
+        cd ../sasdata
+        rm -rf build
+        rm -rf dist
+        python setup.py clean
+        python setup.py build
+        python -m pip install .
 
     - name: Build and install sasmodels
       run: |
@@ -183,21 +209,6 @@ jobs:
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
         codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
-    - name: Notarize Release Build (OSX)
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: devbotsxyz/xcode-notarize@v1
-      with:
-          product-path: "installers/dist/SasView5.dmg"
-          primary-bundle-id: "org.sasview.SasView5"
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-
-    - name: Staple Release Build (OSX)
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: devbotsxyz/xcode-staple@v1
-      with:
-          product-path: "installers/dist/SasView5.dmg"
-
     - name: Publish installer package (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: actions/upload-artifact@v2
@@ -205,3 +216,40 @@ jobs:
         name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
+          
+#     - name: Notarize Release Build (OSX)
+#       if: ${{ matrix.os == 'macos-latest' }}
+#       uses: devbotsxyz/xcode-notarize@v1
+#       with:
+#           product-path: "installers/dist/SasView5.dmg"
+#           primary-bundle-id: "org.sasview.SasView5"
+#           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+#           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+
+#     - name: Staple Release Build (OSX)
+#       if: ${{ matrix.os == 'macos-latest' }}
+#       uses: devbotsxyz/xcode-staple@v1
+#       with:
+#           product-path: "installers/dist/SasView5.dmg"
+
+    - name: Declare env variables on push only
+      if: github.event_name == 'push'
+      shell: bash
+      run: echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Declare env variables on pull_request only
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
+
+    - name: Upload installer to GitHub releases
+      uses: ncipollo/release-action@v1
+      with:
+          draft: true
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
+          name: ${{ env.BRANCH_NAME }}
+          tag: ${{ env.BRANCH_NAME }}

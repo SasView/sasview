@@ -2,7 +2,7 @@
 """
 Global defaults and various utility functions usable by the general GUI
 """
-
+import numbers
 import os
 import re
 import sys
@@ -30,9 +30,9 @@ from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plottables import Plottable
-from sas.sascalc.dataloader.data_info import Sample, Source, Vector
-from sas.sascalc.dataloader.data_info import Detector, Process, TransmissionSpectrum
-from sas.sascalc.dataloader.data_info import Aperture, Collimation
+from sasdata.dataloader.data_info import Sample, Source, Vector
+from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
+from sasdata.dataloader.data_info import Aperture, Collimation
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
@@ -44,8 +44,8 @@ from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
-from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+from sasdata.dataloader.loader import Loader
+from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 
 from sas.qtgui.Utilities import CustomDir
 
@@ -412,6 +412,7 @@ def createModelItemWithPlot(update_data, name=""):
     Adds 'update_data' to that row.
     """
     py_update_data = update_data
+    py_update_data.name = name # name must match title due to how plots are referenced
 
     checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
@@ -782,11 +783,11 @@ def onTXTSave(data, path):
     reader = None
     append_format = len(path.split(".")) == 1
     if isinstance(data, Data1D):
-        from sas.sascalc.dataloader.readers.ascii_reader import Reader as ASCIIReader
+        from sasdata.dataloader.readers.ascii_reader import Reader as ASCIIReader
         path += ".txt" if append_format else ""
         reader = ASCIIReader()
     elif isinstance(data, Data2D):
-        from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DReader
+        from sasdata.dataloader.readers.red2d_reader import Reader as Red2DReader
         path += ".dat" if append_format else ""
         reader = Red2DReader()
     if reader:
@@ -1051,33 +1052,45 @@ def formatValue(value):
             value = str(formatNumber(value, True))
         return value
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithUTF8(html):
     """
     Replace some important HTML-encoded characters
     with their UTF-8 equivalents
     """
     # Angstrom
-    html_out = html.replace("&#x212B;", "Å")
+    html = html.replace("&#x212B;", "Å")  # Hex
+    html = html.replace("&#8491;", "Å")   # Dec
+
     # infinity
-    html_out = html_out.replace("&#x221e;", "∞")
+    html = html.replace("&#x221e;", "∞") # Hex
+    html = html.replace("&#8734;", "∞")  # Dec
+
     # +/-
-    html_out = html_out.replace("&#177;", "±")
+    html = html.replace("&#b1;", "±")   # Hex
+    html = html.replace("&#177;", "±")   # Dec
 
-    return html_out
+    return html
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithASCII(html):
     """
     Replace some important HTML-encoded characters
     with their ASCII equivalents
     """
-    # Angstrom
-    html_out = html.replace("&#x212B;", "Ang")
-    # infinity
-    html_out = html_out.replace("&#x221e;", "inf")
-    # +/-
-    html_out = html_out.replace("&#177;", "+/-")
 
-    return html_out
+    html = html.replace("&#x212B;", "Ang")  # Hex
+    html = html.replace("&#8491;", "Ang")  # Dec
+
+    # infinity
+    html = html.replace("&#x221e;", "inf")  # Hex
+    html = html.replace("&#8734;", "inf")  # Dec
+
+    # +/-
+    html = html.replace("&#xb1;", "+/-")  # Hex
+    html = html.replace("&#177;", "+/-")  # Dec
+
+    return html
 
 def convertUnitToUTF8(unit):
     """
@@ -1265,6 +1278,12 @@ def saveData(fp, data):
             content = o.__dict__.copy()
             return add_type(content, type(o))
 
+        if isinstance(o, numbers.Integral):
+            return int(o)
+
+        if isinstance(o, numbers.Real):
+            return float(o)
+
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
         return None
@@ -1423,7 +1442,7 @@ def readProjectFromSVS(filepath):
     """
     Read old SVS file and convert to the project dictionary
     """
-    from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+    from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
     from sas.sascalc.fit.pagestate import Reader
 
     loader = Loader()

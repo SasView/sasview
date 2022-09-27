@@ -20,8 +20,7 @@ from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.GenericReader import GenReader
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Source
+from sasdata.dataloader.data_info import Detector, Source
 from sas.sascalc.calculator import sas_gen
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
@@ -60,16 +59,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.omf_reader = sas_gen.OMFReader()
         self.sld_reader = sas_gen.SLDReader()
         self.pdb_reader = sas_gen.PDBReader()
+        self.vtk_reader = sas_gen.VTKReader()
         self.reader = None
         # sld data for nuclear and magnetic cases
         self.nuc_sld_data = None
         self.mag_sld_data = None
-        # verification information to avoid recalculating
-        # verification carried out whenever files are selected/deselected
-        # verification reset whenever a new files loaded
-        self.verification_occurred = False # has verification happened on these files
-        self.verified = False # was the verification successsful
-        # verification error label
+        self.verified = False
         # prevent layout shifting when widget hidden
         # TODO: Is there a way to lcoate this policy in the ui file?
         sizePolicy = self.lblVerifyError.sizePolicy()
@@ -155,6 +150,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxNucData.setEnabled(False)
         self.checkboxMagData.setEnabled(False)
         self.change_data_type()
+        # verify that the new enabled files are compatible
+        
+        self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
+        self.toggle_error_functionality()
 
         # validators
         # scale, volume and background must be positive
@@ -456,19 +455,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
-    def toggle_error_functionality(self, verificationMsg=None):
+    def toggle_error_functionality(self):
         """Disables/Enables some functionality if the state of the GUI means calculation cannot proceed
 
         This function is called during any process whenever there is a risk that the state
         of the GUI will make the data invalid for plotting, drawing or saving. If that is the 
         case then this functionality is disabled. This function is currently called when two
         files are being verified for compatibility, and when textboxes enter 'intermediate' states.
-        It also optionally changes the validation error message for the user.
-
-        :param msg: The error message due to file verification which should be displayed
-            to the user on the GUI. Defaults to `None` in which case the error message is
-            not changed.
-        :type msg: str or None
         """
         verificationEnable = self.verified or not (self.is_mag and self.is_nuc)
         lineEditsEnable = len(self.invalidLineEdits) == 0
@@ -477,87 +470,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdDrawpoints.setEnabled(verificationEnable and lineEditsEnable)
         self.cmdSave.setEnabled(verificationEnable and lineEditsEnable)
         self.cmdCompute.setEnabled(verificationEnable and lineEditsEnable)
-        # alter the error message if a new message is provided
-        # verification is only carried out once so if msg=None do not set the msg to ""
-        # but simply don't alter it - this means the message is preserved and re-verification
-        # s not called when the files have not been changed
-        if verificationMsg is not None:
-            self.lblVerifyError.setText('<font color="#FF0000">' + verificationMsg + '</font>')
-        # display the message
-        self.lblVerifyError.setVisible(not verificationEnable)
 
-    def verify_files_match(self):
-        """Verifies that enabled files are compatible and can be combined
 
-        When the user wishes to combine two different files for nuclear and magnetic
-        data they must have the same 3D data points in real-space. This function
-        decides whther verification of this is necessary and if so carries it out.
-        In the case that the two files have the same real-space data points in different
-        orders this function re-orders the stored data within the MagSLD objects to make
-        them align. The full verification is only carried out once for any pair of loaded
-        files.
-        """
-        if not (self.is_mag and self.is_nuc):
-            # no conflicts if only 1/0 file(s) loaded - therefore restore functionality immediately
-            self.toggle_error_functionality()
-            return
-        # check if files already verified
-        if self.verification_occurred:
-            self.toggle_error_functionality()
-            return
-        # check each file has the same number of coords
-        if self.nuc_sld_data.pos_x.size != self.mag_sld_data.pos_x.size:
-            self.verification_occurred = True
-            self.verified = False
-            self.toggle_error_functionality("ERROR: files have a different number of data points")
-            return
-        # check the coords match up 1-to-1
-        nuc_coords = numpy.array(numpy.column_stack((self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z)))
-        mag_coords = numpy.array(numpy.column_stack((self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z)))
-        # TODO: should this have a floating point tolerance??
-        if numpy.array_equal(nuc_coords, mag_coords):
-            # arrays are already sorted in the same order, so files match
-            self.verification_occurred = True
-            self.verified = True
-            self.toggle_error_functionality()
-            return
-        # now check if coords are in wrong order or don't match
-        nuc_sort_order = numpy.lexsort((self.nuc_sld_data.pos_z, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_x))
-        mag_sort_order = numpy.lexsort((self.mag_sld_data.pos_z, self.mag_sld_data.pos_y, self.mag_sld_data.pos_x))
-        nuc_coords = nuc_coords[nuc_sort_order]
-        mag_coords = mag_coords[mag_sort_order]
-        # check if sorted data points are equal
-        if numpy.array_equal(nuc_coords, mag_coords):
-            # if data points are equal then resort both lists into the same order
-            # is this too time consuming for long lists? logging info?
-            # 1) coords
-            self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z = numpy.transpose(nuc_coords)
-            self.mag_sld_data.pos_x, self.mag_sld_data.pos_y, self.mag_sld_data.pos_z = numpy.transpose(mag_coords)
-            # 2) other array params that must be in same order as coords
-            params = ["sld_n", "sld_mx", "sld_my", "sld_mz", "vol_pix", "pix_symbol"]
-            for item in params:
-                nuc_val = getattr(self.nuc_sld_data, item)
-                if nuc_val is not None:
-                    # data should already be a numpy array, we cast to an ndarray as a check
-                    # very fast if data is already an instance of ndarray as expected becuase function
-                    # returns the array as-is
-                    setattr(self.nuc_sld_data, item, numpy.asanyarray(nuc_val)[nuc_sort_order])
-                mag_val = getattr(self.mag_sld_data, item)
-                if mag_val is not None:
-                    setattr(self.mag_sld_data, item, numpy.asanyarray(mag_val)[mag_sort_order])
-            # Do NOT need to edit CONECT data (line_x, line_y, line_z as these lines are given by
-            # absolute positions not references to pos_x, pos_y, pos_z).
-            self.verification_occurred = True
-            self.verified = True
-            self.toggle_error_functionality()
-            return
-        else:
-            # if sorted lists not equal then data points aren't equal
-            self.verification_occurred = True
-            self.verified = False
-            self.toggle_error_functionality("ERROR: files have different real space position data")
-            return
-        
+
 
     def change_data_type(self):
         """Adjusts the GUI for the enabled nuclear/magnetic data files
@@ -607,19 +522,28 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtXstepsize.setEnabled(both_disabled)
         self.txtYstepsize.setEnabled(both_disabled)
         self.txtZstepsize.setEnabled(both_disabled)
-        # Only allow 1D averaging if no magnetic data
-        self.cbOptionsCalc.setVisible(not self.is_mag)
-        if (not self.is_mag):
+        # update the gui with new values - sets the average values from enabled files
+        self.update_gui()
+        self.check_for_magnetic_controls()
+
+
+    
+    def update_cbOptionsCalc_visibility(self):
+        # Only allow 1D averaging if no magnetic data and not elements
+        allow = not self.is_mag
+        if self.is_nuc and allow:
+            allow = not self.nuc_sld_data.is_elements
+        self.cbOptionsCalc.setVisible(allow)
+        if (allow):
             # A helper function to set up the averaging system
             self.change_is_avg()
         else:
             # If magnetic data present then no averaging is allowed
             self.is_avg = False
-        # update the gui with new values - sets the average values from enabled files
-        self.update_gui()
-        self.check_for_magnetic_controls()
-        # verify that the new enabled files are compatible
-        self.verify_files_match()
+            self.txtMx.setEnabled(not self.is_mag)
+            self.txtMy.setEnabled(not self.is_mag)
+            self.txtMz.setEnabled(not self.is_mag)
+
         
     def change_is_avg(self):
         """Adjusts the GUI for whether 1D averaging is enabled
@@ -683,17 +607,26 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
+
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB);;"
+                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;"
                                             "SLD files (*.SLD *.sld);;"
                                             "PDB files (*.pdb *.PDB);;"
-                                            "All files (*.*)")[0]
+                                            "VTK files (*.vtk *.VTK);;"
+                                            "All files (*.*)",
+                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
+                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
+                                            )[0]
             else:
                 self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld);;"
+                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;"
                                             "OMF files (*.OMF *.omf);;"
                                             "SLD files (*.SLD *.sld);;"
-                                            "All files (*.*)")[0]
+                                            "VTK files (*.vtk *.VTK);;"
+                                            "All files (*.*)",
+                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
+                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
+                                            )[0]
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -705,11 +638,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     loader = self.omf_reader
                 elif self.ext in self.sld_reader.ext:
                     loader = self.sld_reader
+                elif self.ext in self.vtk_reader.ext:
+                    loader = self.vtk_reader
                 elif self.ext in self.pdb_reader.ext and load_nuc:
                     # only load pdb files for nuclear data
                     loader = self.pdb_reader
                 else:
-                    logging.error("The selected file does not have a suitable file extension")
+                    logging.warning("The selected file does not have a suitable file extension")
                     return
 
                 if self.reader is not None and self.reader.isrunning():
@@ -789,12 +724,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             else:
                 self.txtMagData.setText(os.path.basename(str(self.datafile)))
             if self.ext in self.omf_reader.ext:
-                gen = sas_gen.OMF2SLD()
-                gen.set_data(data)
                 # only magnetic data can be read from omf files
-                self.mag_sld_data = gen.get_magsld()
+                self.mag_sld_data = data 
                 self.check_units()
-            elif self.ext in self.sld_reader.ext:
+            elif self.ext in self.sld_reader.ext or self.ext in self.vtk_reader.ext:
                 if load_nuc:
                     self.nuc_sld_data = data
                 else:
@@ -806,7 +739,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         except IOError:
             log_msg = "Loading Error: " \
                       "This file format is not supported for GenSAS."
-            logging.info(log_msg)
+            logging.warning(log_msg)
             raise
         except ValueError:
             log_msg = "Could not find any data"
@@ -822,15 +755,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxMagData.setChecked(True)
         self.update_gui()
         # reset verification now we have loaded new files
-        self.verification_occurred = False
-        self.verified = False
-        self.verify_files_match()
+        self.verify = False
+        self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
+        self.toggle_error_functionality()
 
     def check_units(self):
         """
         Check if the units from the OMF file correspond to the default ones
         displayed on the interface.
-        If not, modify the GUI with the correct unit
+        If not, modify the GUI with the correct units
         """
         # TODO: adopt the convention of font and symbol for the updated values
         if sas_gen.OMFData().valueunit != 'A^(-2)':
@@ -853,10 +786,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         and then updates all values in the gui with either model paramters or paramaters from the
         loaded data.
         """
+        self.update_cbOptionsCalc_visibility()
         if self.is_nuc:
-            self.model.params['total_volume'] = len(self.nuc_sld_data.sld_n)*self.nuc_sld_data.vol_pix[0]
+            if self.nuc_sld_data.is_elements:
+                self.model.params['total_volume'] = numpy.sum(self.nuc_sld_data.vol_pix)
+            else:
+                self.model.params['total_volume'] = len(self.nuc_sld_data.sld_n)*self.nuc_sld_data.vol_pix[0]
         elif self.is_mag:
-            self.model.params['total_volume'] = len(self.mag_sld_data.sld_n)*self.mag_sld_data.vol_pix[0]
+            if self.mag_sld_data.is_elements:
+                self.model.params['total_volume'] = numpy.sum(self.mag_sld_data.vol_pix)
+            else:
+                self.model.params['total_volume'] = len(self.mag_sld_data.sld_n)*self.mag_sld_data.vol_pix[0]
         else:
             # use same calculation of total volume as when converting OMF to SLD
             self.model.params['total_volume'] = (float(self.txtXstepsize.text()) * float(self.txtYstepsize.text())
@@ -874,9 +814,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # update the number of pixels with values from the loaded data or GUI if no datafiles enabled
         if self.is_nuc:
-            self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
+            if self.nuc_sld_data.is_elements:
+                self.txtNoPixels.setText(str(len(self.nuc_sld_data.elements)))
+            else:
+                self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
         elif self.is_mag:
-            self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
+            if self.mag_sld_data.is_elements:
+                self.txtNoPixels.setText(str(len(self.mag_sld_data.elements)))
+            else:
+                self.txtNoPixels.setText(str(len(self.mag_sld_data.sld_mx)))
         elif not(self.txtXnodes.hasAcceptableInput() and self.txtYnodes.hasAcceptableInput() and self.txtZnodes.hasAcceptableInput()):
             self.txtNoPixels.setText("NaN")
         else:
@@ -1022,7 +968,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtSampleRoll.setText("0.0")
             self.reset_camera()
             # re-enable any options disabled by failed verification
-            self.verification_occurred = False
+
             self.verified = False
             self.toggle_error_functionality()
             # reset option for calculation
@@ -1052,6 +998,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.mag_sld_data = None
             # update the gui for the no files loaded case
             self.change_data_type()
+            # verify that the new enabled files are compatible
+            
+            self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
+            self.toggle_error_functionality()
 
 
         finally:
@@ -1063,7 +1013,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Copied from previous version
         Create 2D data by default
 
-        :warning: This data is never plotted.
+        .. warning:: This data is never plotted.
         """
         self.qmax_x = float(self.txtQxMax.text())
         self.npts_x = int(self.txtNoQBins.text())
@@ -1117,7 +1067,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Copied from previous version
 
-        :deprecated:
+        .. warning:: deprecated
         """
         sld_n_default = 6.97e-06  # what is this number??
         omfdata = sas_gen.OMFData()
@@ -1134,7 +1084,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Copied from previous version
         Create 1D data by default
 
-        :warning: This data is never plotted.
+        .. warning:: This data is never plotted.
 
         residuals.x = data_copy.x[index]
         residuals.dy = numpy.ones(len(residuals.y))
@@ -1194,11 +1144,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sld_data.pos_x = self.nuc_sld_data.pos_x
             sld_data.pos_y = self.nuc_sld_data.pos_y
             sld_data.pos_z = self.nuc_sld_data.pos_z
+            sld_data.data_length = len(self.nuc_sld_data.pos_x)
         elif self.is_mag:
             sld_data.vol_pix = self.mag_sld_data.vol_pix
             sld_data.pos_x = self.mag_sld_data.pos_x
             sld_data.pos_y = self.mag_sld_data.pos_y
             sld_data.pos_z = self.mag_sld_data.pos_z
+            sld_data.data_length = len(self.mag_sld_data.pos_x)
+
+        if self.is_nuc:
+            if self.nuc_sld_data.is_elements:
+                sld_data.set_elements(self.nuc_sld_data.elements, self.nuc_sld_data.are_elements_array)
+        elif self.is_mag:
+            if self.mag_sld_data.is_elements:
+                sld_data.set_elements(self.mag_sld_data.elements, self.mag_sld_data.are_elements_array)
 
         # set the sld data from the required model file/GUI textbox
         if (self.is_nuc):
@@ -1238,7 +1197,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         elif self.is_mag:
             sld_data.pix_type = self.mag_sld_data.pix_type
             sld_data.pix_symbol = self.mag_sld_data.pix_symbol
-
         return sld_data
 
     def create_rotation_matrices(self):
@@ -1289,6 +1247,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+            # TODO: implement fourier transform for meshes with multiple element or face types
+            # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
+            # increase the calculation time.
+            if sld_data.is_elements:
+                if not sld_data.are_elements_array:
+                    logging.warning("SasView does not currently support computation of meshes with multiple element or face types")
+                    return
             self.model.set_sld_data(sld_data)
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
             # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
@@ -1537,11 +1502,15 @@ class Plotter3DWidget(PlotterBase):
         sld_mx = data.sld_mx
         sld_my = data.sld_my
         sld_mz = data.sld_mz
-        pix_symbol = data.pix_symbol
         sld_tot = numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
-                  numpy.fabs(sld_mz) + numpy.fabs(data.sld_n)
-        is_nonzero = sld_tot > 0.0
-        is_zero = sld_tot == 0.0
+                numpy.fabs(sld_mz) + numpy.fabs(data.sld_n)
+        if data.is_elements: # Do not assign values to points if values are element-wise
+            is_nonzero = numpy.ones_like(pos_x, dtype=bool)
+            is_zero = numpy.zeros_like(pos_x, dtype=bool)
+        else:
+            is_nonzero = sld_tot > 0.0
+            is_zero = sld_tot == 0.0
+        pix_symbol = data.pix_symbol
 
         if data.pix_type == 'atom':
             marker = 'o'
@@ -1610,9 +1579,16 @@ class Plotter3DWidget(PlotterBase):
                 max_my = max(numpy.fabs(sld_my))
                 max_mz = max(numpy.fabs(sld_mz))
                 max_m = max(max_mx, max_my, max_mz)
-                max_step = max(data.xstepsize, data.ystepsize, data.zstepsize)
-                if max_step <= 0:
-                    max_step = 5
+                if data.xstepsize is None or data.ystepsize is None or data.zstepsize is None:
+                    if data.is_elements:
+                        vol_per_element = numpy.sum(data.vol_pix)/len(data.elements)
+                    else:
+                        vol_per_element = numpy.sum(data.vol_pix)/len(data.pos_x)
+                    max_step = numpy.cbrt(vol_per_element)
+                else:
+                    max_step = max(data.xstepsize, data.ystepsize, data.zstepsize)
+                    if max_step <= 0:
+                        max_step = 5
                 try:
                     if max_m != 0:
                         unit_x2 = sld_mx / max_m
@@ -1622,6 +1598,18 @@ class Plotter3DWidget(PlotterBase):
                         color_x = numpy.fabs(unit_x2 * 0.8)
                         color_y = numpy.fabs(unit_y2 * 0.8)
                         color_z = numpy.fabs(unit_z2 * 0.8)
+                        if data.is_elements: # convert positions to match elements
+                            # TODO: pos_x does not exist within the function - have to relocate from data, sld_mx etc. do carry through, why?
+                            if data.are_elements_array:
+                                vertices = numpy.unique(data.elements.reshape((data.elements.shape[0], -1)), axis=-1)
+                                pos_x = numpy.mean(data.pos_x[vertices], axis=-1)
+                                pos_y = numpy.mean(data.pos_y[vertices], axis=-1)
+                                pos_z = numpy.mean(data.pos_z[vertices], axis=-1)
+                            else:
+                                vertices = [list(set([vertex for face in element for vertex in face])) for element in data.elements]
+                                pos_x = numpy.array([numpy.mean([data.pos_x[vertex] for vertex in element]) for element in vertices])
+                                pos_y = numpy.array([numpy.mean([data.pos_y[vertex] for vertex in element]) for element in vertices])
+                                pos_z = numpy.array([numpy.mean([data.pos_z[vertex] for vertex in element]) for element in vertices])
                         x2 = pos_x + unit_x2 * max_step
                         y2 = pos_y + unit_y2 * max_step
                         z2 = pos_z + unit_z2 * max_step

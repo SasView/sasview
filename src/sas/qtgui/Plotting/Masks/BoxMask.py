@@ -138,7 +138,7 @@ class BoxMask(BaseInteractor):
         Get the limits of the boxsum and compute the sum of the pixel
         contained in that region and the error on that sum
         """
-        from sas.sascalc.dataloader.manipulations import Boxcut
+        from sasdata.data_util.manipulations import Boxcut
         # # Data 2D for which the pixel will be summed
         data = self.data
         mask = data.mask

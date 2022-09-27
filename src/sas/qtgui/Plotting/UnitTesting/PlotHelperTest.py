@@ -38,13 +38,13 @@ class PlotHelperTest(unittest.TestCase):
 
         # Other properties
         #self.assertEqual(PlotHelper.currentPlots(), [plot_id, plot_id_2])
-        self.assertTrue(set(PlotHelper.currentPlots()).issubset([plot_id, plot_id_2]))
+        self.assertTrue(set(PlotHelper.currentPlotIds()).issubset([plot_id, plot_id_2]))
         self.assertEqual(PlotHelper.plotById(plot_id), plot)
         self.assertEqual(PlotHelper.plotById(plot_id_2), plot2)
 
         # Delete a graph
         PlotHelper.deletePlot(plot_id)
-        self.assertEqual(PlotHelper.currentPlots(), [plot_id_2])
+        self.assertEqual(PlotHelper.currentPlotIds(), [plot_id_2])
 
         # Add another graph to see the counter
         plot3 = "Just another plot. Move along."

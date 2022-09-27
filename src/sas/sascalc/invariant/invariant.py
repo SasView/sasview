@@ -20,7 +20,7 @@ from __future__ import division
 import math
 import numpy as np
 
-from sas.sascalc.dataloader.data_info import Data1D as LoaderData1D
+from sasdata.dataloader.data_info import Data1D as LoaderData1D
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5

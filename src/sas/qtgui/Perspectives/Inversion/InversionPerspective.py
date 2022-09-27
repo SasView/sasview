@@ -16,12 +16,13 @@ from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
+from sas.qtgui.Perspectives.perspective import Perspective
 
-
-def is_float(value):
-    """Converts text input values to floats. Empty strings throw ValueError"""
+def str_to_float(string: str):
+    """Converts text input values to float.
+    Failure to parse string returns zero"""
     try:
-        return float(value)
+        return float(string)
     except ValueError:
         return 0.0
 
@@ -35,13 +36,19 @@ DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 logger = logging.getLogger(__name__)
 
 
-class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
+class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     """
     The main window for the P(r) Inversion perspective.
     """
 
     name = "Inversion"
-    ext = "pr"  # Extension used for saving analyses
+    ext = "pr"
+
+    @property
+    def title(self) -> str:
+        """ Window title"""
+        return "P(r) Inversion Perspective"
+
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
@@ -49,10 +56,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     calculateSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None):
-        super(InversionWindow, self).__init__()
+        super().__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("P(r) Inversion Perspective")
+        self.setWindowTitle(self.title)
 
         self._manager = parent
         #Needed for Batch fitting
@@ -201,15 +208,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.backgroundInput.textChanged.connect(
             lambda: self.set_background(self.backgroundInput.text()))
         self.regularizationConstantInput.textChanged.connect(
-            lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
+            lambda: self._calculator.set_alpha(str_to_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
-            lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
+            lambda: self._calculator.set_dmax(str_to_float(self.maxDistanceInput.text())))
         self.maxQInput.editingFinished.connect(self.check_q_high)
         self.minQInput.editingFinished.connect(self.check_q_low)
         self.slitHeightInput.textChanged.connect(
-            lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
+            lambda: self._calculator.set_slit_height(str_to_float(self.slitHeightInput.text())))
         self.slitWidthInput.textChanged.connect(
-            lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
+            lambda: self._calculator.set_slit_width(str_to_float(self.slitWidthInput.text())))
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
@@ -521,7 +528,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if isinstance(self.logic.data, Data1D):
             self.setCurrentData(data)
 
-    def updateDataList(self, dataRef):
+    def updateDataList(self, dataRef): # TODO Typing, name, underscore prefix
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
             return
