@@ -9,7 +9,7 @@ from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
 # Local
-from sas.qtgui.Calculators.DensityPanel import DensityPanel
+from sas.qtgui.Calculators.DensityPanel import DensityPanel, MODEL
 from sas.qtgui.Calculators.DensityPanel import toMolarMass
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 
@@ -56,6 +56,42 @@ class DensityCalculatorTest:
         assert widget.model.columnCount() == 1
         assert widget.model.rowCount() == 4
         assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
+
+
+    def testModelMolecularFormula(self, widget, qtbot):
+        ''' Default compound calculations '''
+        qtbot.addWidget(widget)
+        widget.show()
+
+        widget.ui.editMolecularFormula.clear()
+        qtbot.keyClicks(widget.ui.editMolecularFormula, "C6H12")
+
+        assert widget.ui.editMolecularFormula.text() == "C6H12"
+        assert widget.model.item(MODEL.MOLECULAR_FORMULA).text() == "C6H12"
+
+
+    def testModelVolume(self, widget, qtbot):
+        ''' Default compound calculations '''
+        qtbot.addWidget(widget)
+        widget.show()
+
+        widget.ui.editMolarVolume.clear()
+        qtbot.keyClicks(widget.ui.editMolarVolume, "42.0")
+
+        assert widget.ui.editMolarVolume.text() == "42.0"
+        assert widget.model.item(MODEL.MOLAR_VOLUME).text() == "42.0"
+
+
+    def testModelMassDensity(self, widget, qtbot):
+        ''' Default compound calculations '''
+        qtbot.addWidget(widget)
+        widget.show()
+
+        qtbot.keyClicks(widget.ui.editMassDensity, "19.9")
+
+        assert widget.ui.editMassDensity.text() == "19.9"
+        assert widget.model.item(MODEL.MASS_DENSITY).text() == "19.9"
+
 
     def testSimpleEntry(self, widget, qtbot):
         ''' Default compound calculations '''
