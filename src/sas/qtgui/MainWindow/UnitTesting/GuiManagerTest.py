@@ -10,9 +10,6 @@ from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
-# set up import paths
-import path_prepare
-
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.AboutBox import AboutBox

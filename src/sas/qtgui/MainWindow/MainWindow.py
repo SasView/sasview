@@ -4,9 +4,8 @@ import logging
 import os
 import sys
 
-from ...system.version import __version__ as SASVIEW_VERSION
 from sas import config
-from sas.system import env
+from sas.system import env, version
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
@@ -26,8 +25,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.setupUi(self)
 
         # Add the version number to window title
-        self.setWindowTitle(f"SasView {SASVIEW_VERSION}")
-
+        self.setWindowTitle(f"SasView {version.__version__}")
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
         # some perspectives are fixed size.
