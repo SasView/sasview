@@ -19,7 +19,7 @@ class WebLinks:
         self.marketplace_url = "http://marketplace.sasview.org/"
         self.update_url = 'https://www.sasview.org/latestversion.json'
 
-        self._license = "help@sasview.org" # TODO: Rename
+        self.help_email = "help@sasview.org"
 
 web = WebLinks()
 

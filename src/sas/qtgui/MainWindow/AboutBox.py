@@ -50,7 +50,7 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
                 <p>
                     Comments? Bugs? Requests?
                     <br/>
-                    <a href="mailto:{web._license}">Send us a ticket</a>
+                    <a href="mailto:{web.help_email}">Send us a ticket</a>
                 </p>
                 <br/>
                 <p>

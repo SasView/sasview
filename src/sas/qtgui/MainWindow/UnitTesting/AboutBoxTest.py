@@ -59,7 +59,7 @@ class AboutBoxTest(unittest.TestCase):
         # URLs
         self.assertIn(str(web.homepage_url), about.text())
         self.assertIn(str(config.download_url), about.text())
-        self.assertIn(str(config._license), about.text())
+        self.assertIn(str(config.help_email), about.text())
 
         # Are links enabled?
         self.assertTrue(about.openExternalLinks())
