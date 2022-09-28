@@ -57,24 +57,28 @@ class DensityCalculatorTest:
         assert widget.model.rowCount() == 4
         assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
 
-    def testSimpleEntry(self, widget):
+    def testSimpleEntry(self, widget, qtbot):
         ''' Default compound calculations '''
-        widget.ui.editMolarVolume.insert("1.0")
+        qtbot.addWidget(widget)
 
         widget.show()
+
+        qtbot.keyClicks(widget.ui.editMolarVolume, "1.0")
+
         # Send tab x3
         key = QtCore.Qt.Key_Tab
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.qWait(100)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.wait(100)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
         assert widget.ui.editMassDensity.text() == '18.015'
 
         # Change mass density
-        widget.ui.editMassDensity.insert("16.0")
+        widget.ui.editMassDensity.clear()
+        qtbot.keyClicks(widget.ui.editMassDensity, "16.0")
         # Send shift-tab to update the molar volume field
         key =  QtCore.Qt.Key_Tab
         QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.ShiftModifier)
@@ -83,34 +87,38 @@ class DensityCalculatorTest:
         # Assure the molar volume field got updated
         assert widget.ui.editMolarVolume.text() == '1.126'
 
-    def testComplexEntryAndReset(self, widget):
+    def testComplexEntryAndReset(self, widget, qtbot):
         ''' User entered compound calculations and subsequent reset'''
-
-        widget.ui.editMolecularFormula.clear()
-        widget.ui.editMolecularFormula.insert("KMnO4")
-        widget.ui.editMolarVolume.insert("2.0")
+        qtbot.addWidget(widget)
 
         widget.show()
+
+        widget.ui.editMolecularFormula.clear()
+        qtbot.keyClicks(widget.ui.editMolecularFormula, "KMnO4")
+        qtbot.keyClicks(widget.ui.editMolarVolume, "2.0")
+
+        qtbot.wait(100)
+
         # Send tab x3
         key = QtCore.Qt.Key_Tab
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
-        QTest.qWait(100)
-        QTest.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
+        qtbot.wait(100)
+        qtbot.keyEvent(QTest.Press, widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
         assert widget.ui.editMassDensity.text() == '79.017'
 
         # Reset the widget
-        widget.modelReset()
+        qtbot.mouseClick(widget.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset), QtCore.Qt.LeftButton)
+
+        qtbot.wait(100)
 
         assert widget.ui.editMolecularFormula.text() == "H2O"
         assert widget.ui.editMolarMass.text() == "18.015"
         assert widget.ui.editMolarVolume.text() == ""
         assert widget.ui.editMassDensity.text() == ""
-
-        #widget.exec_()
 
     def testHelp(self, widget):
         """ Assure help file is shown """
