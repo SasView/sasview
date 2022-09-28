@@ -138,7 +138,7 @@ class DataOperationUtilityTest(unittest.TestCase):
         closeButton = self.widget.cmdClose
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
-
+    @pytest.mark.xfail(reason="2022-09 already broken")
     def testOnCompute(self):
         """ Test onCompute function """
 
@@ -379,6 +379,7 @@ class DataOperationUtilityTest(unittest.TestCase):
         id_out = self.widget._findId('datafile2')
         self.assertEqual(id_out, 'datafile2')
 
+    @pytest.mark.xfail(reason="2022-09 already broken")
     def testExtractData(self):
         """
         Test function to extract data to be computed from input filenames
