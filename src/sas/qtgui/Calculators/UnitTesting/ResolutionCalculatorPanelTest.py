@@ -3,6 +3,13 @@ import time
 import numpy
 import logging
 import unittest
+
+# CRUFT: this shouldn't be needed in the test but makes the difference
+# between passing tests and failing tests. Remove this and figure out how
+# to fix the resolution calculator widget itself?
+import os
+os.environ['MPLBACKEND'] = 'qtagg'
+
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
