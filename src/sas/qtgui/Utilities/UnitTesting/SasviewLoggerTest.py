@@ -45,10 +45,10 @@ class SasviewLoggerTest(unittest.TestCase):
         out=self.outHandlerGui.toPlainText()
 
         # Assure everything got logged
-        self.assertIn('DEBUG: debug message', out)
-        self.assertIn('INFO: info message', out)
-        self.assertIn('WARNING: warning message', out)
-        self.assertIn('ERROR: error message', out)
+        assert 'DEBUG: debug message' in out
+        assert 'INFO: info message' in out
+        assert 'WARNING: warning message' in out
+        assert 'ERROR: error message' in out
 
 if __name__ == "__main__":
     unittest.main()
