@@ -6,7 +6,7 @@ from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 
 # set up import paths
-import path_prepare
+import sas.qtgui.path_prepare
 
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.Utilities.GuiUtils import *
@@ -49,10 +49,10 @@ class DroppableDataLoadWidgetTest(unittest.TestCase):
                                                QtCore.Qt.NoModifier)
 
         # Call the drag handler with good event
-        self.assertTrue(self.form.dragIsOK(good_drag_event))
+        assert self.form.dragIsOK(good_drag_event)
 
         # Call the drag handler with bad event
-        self.assertFalse(self.form.dragIsOK(bad_drag_event))
+        assert not self.form.dragIsOK(bad_drag_event)
 
     def testDropEvent(self):
         """
@@ -68,7 +68,7 @@ class DroppableDataLoadWidgetTest(unittest.TestCase):
 
         self.form.dropEvent(drop_event)
         QApplication.processEvents()
-        self.assertEqual(spy_file_read.count(), 1)
+        assert spy_file_read.count() == 1
         #self.assertIn(self.testfile, str(spy_file_read.signal(index=0)))
 
 
