@@ -1,6 +1,9 @@
 import sys
 import unittest
 import webbrowser
+
+import pytest
+
 from bumps import options
 
 from PyQt5 import QtGui, QtWidgets
@@ -8,9 +11,9 @@ from PyQt5 import QtGui, QtWidgets
 from unittest.mock import MagicMock
 
 # set up import paths
-import path_prepare
+import sas.qtgui.path_prepare
 
-from UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
@@ -39,8 +42,8 @@ class FittingOptionsTest(unittest.TestCase):
         self.assertIsInstance(self.widget.cbAlgorithm, QtWidgets.QComboBox)
         self.assertEqual(self.widget.cbAlgorithm.count(), 6)
         self.assertEqual(self.widget.cbAlgorithm.itemText(0), 'Nelder-Mead Simplex')
-        self.assertEqual(self.widget.cbAlgorithm.itemText(4), 'Levenberg-Marquardt')
-        self.assertEqual(self.widget.cbAlgorithm.currentIndex(), 4)
+        self.assertEqual(self.widget.cbAlgorithm.itemText(4), 'Levenberg-Marquardt (scipy.leastsq)')
+        self.assertEqual(self.widget.cbAlgorithm.currentIndex(), 5)
 
     def testAssignValidators(self):
         """
@@ -113,6 +116,7 @@ class FittingOptionsTest(unittest.TestCase):
         self.assertEqual(options.FIT_CONFIG.values['dream']['init'], 'cov')
 
     # test disabled until pyQt5 works well
+    @pytest.mark.skip(reason="2022-09 already broken - causes test suite hang")
     def testOnHelp(self):
         ''' Test help display'''
         webbrowser.open = MagicMock()
