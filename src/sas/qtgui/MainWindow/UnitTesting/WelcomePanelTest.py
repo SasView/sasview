@@ -4,7 +4,7 @@ import unittest
 from PyQt5 import QtGui, QtWidgets
 
 # set up import paths
-import path_prepare
+import sas.qtgui.path_prepare
 
 # Local
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -36,7 +36,8 @@ class WelcomePanelTest(unittest.TestCase):
 
         self.assertIn("SasView", version.text())
         self.assertIn("Build:", version.text())
-        self.assertIn("UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and BAM", version.text())
+        for inst in "UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM, ANSTO".split(", "):
+            self.assertIn(inst, version.text())
        
 if __name__ == "__main__":
     unittest.main()
