@@ -54,27 +54,27 @@ class CorfuncTest(unittest.TestCase):
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "Corfunc Perspective")
-        self.assertEqual(self.widget.model.columnCount(), 1)
-        self.assertEqual(self.widget.model.rowCount(), 16)
-        self.assertEqual(self.widget.txtLowerQMin.text(), '0.0')
-        self.assertFalse(self.widget.txtLowerQMin.isEnabled())
-        self.assertEqual(self.widget.txtFilename.text(), '')
-        self.assertEqual(self.widget.txtLowerQMax.text(), '0.01')
-        self.assertEqual(self.widget.txtUpperQMin.text(), '0.20')
-        self.assertEqual(self.widget.txtUpperQMax.text(), '0.22')
-        self.assertEqual(self.widget.txtBackground.text(), '0')
-        self.assertEqual(self.widget.txtGuinierA.text(), '0.0')
-        self.assertEqual(self.widget.txtGuinierB.text(), '0.0')
-        self.assertEqual(self.widget.txtPorodK.text(), '0.0')
-        self.assertEqual(self.widget.txtPorodSigma.text(), '0.0')
-        self.assertEqual(self.widget.txtAvgCoreThick.text(), '0')
-        self.assertEqual(self.widget.txtAvgIntThick.text(), '0')
-        self.assertEqual(self.widget.txtAvgHardBlock.text(), '0')
-        self.assertEqual(self.widget.txtPolydisp.text(), '0')
-        self.assertEqual(self.widget.txtLongPeriod.text(), '0')
-        self.assertEqual(self.widget.txtLocalCrystal.text(), '0')
+        assert isinstance(self.widget, QtWidgets.QWidget)
+        assert self.widget.windowTitle() == "Corfunc Perspective"
+        assert self.widget.model.columnCount() == 1
+        assert self.widget.model.rowCount() == 16
+        assert self.widget.txtLowerQMin.text() == '0.0'
+        assert not self.widget.txtLowerQMin.isEnabled()
+        assert self.widget.txtFilename.text() == ''
+        assert self.widget.txtLowerQMax.text() == '0.01'
+        assert self.widget.txtUpperQMin.text() == '0.20'
+        assert self.widget.txtUpperQMax.text() == '0.22'
+        assert self.widget.txtBackground.text() == '0'
+        assert self.widget.txtGuinierA.text() == '0.0'
+        assert self.widget.txtGuinierB.text() == '0.0'
+        assert self.widget.txtPorodK.text() == '0.0'
+        assert self.widget.txtPorodSigma.text() == '0.0'
+        assert self.widget.txtAvgCoreThick.text() == '0'
+        assert self.widget.txtAvgIntThick.text() == '0'
+        assert self.widget.txtAvgHardBlock.text() == '0'
+        assert self.widget.txtPolydisp.text() == '0'
+        assert self.widget.txtLongPeriod.text() == '0'
+        assert self.widget.txtLocalCrystal.text() == '0'
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testOnCalculate(self):
@@ -82,7 +82,7 @@ class CorfuncTest(unittest.TestCase):
         self.widget.calculate_background = MagicMock()
         self.widget.cmdCalculateBg.setEnabled(True)
         QTest.mouseClick(self.widget.cmdCalculateBg, QtCore.Qt.LeftButton)
-        self.assertTrue(self.widget.calculate_background.called_once())
+        assert self.widget.calculate_background.called_once()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testProcess(self):
@@ -92,13 +92,13 @@ class CorfuncTest(unittest.TestCase):
         try:
             os.stat(filename)
         except OSError:
-            self.assertTrue(False, "ISIS_98929.txt does not exist")
+            assert False, "ISIS_98929.txt does not exist"
         f = Loader().load(filename)
         QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename, ''))
 
         #self.assertEqual(self.widget.txtFilename.text(), filename)
 
-        self.assertEqual(float(self.widget.txtBackground.text()), 0.0)
+        assert float(self.widget.txtBackground.text()) == 0.0
 
         self.widget.txtLowerQMin.setText("0.01")
         self.widget.txtLowerQMax.setText("0.20")
@@ -141,8 +141,8 @@ class CorfuncTest(unittest.TestCase):
     def testSerialization(self):
         """ Serialization routines """
         self.widget.setData([self.fakeData])
-        self.assertTrue(hasattr(self.widget, 'isSerializable'))
-        self.assertTrue(self.widget.isSerializable())
+        assert hasattr(self.widget, 'isSerializable')
+        assert self.widget.isSerializable()
         self.checkFakeDataState()
         data = GuiUtils.dataFromItem(self.widget._model_item)
         data_id = str(data.id)
@@ -154,12 +154,12 @@ class CorfuncTest(unittest.TestCase):
         params_dict = state_all.get(data_id)
         params = params_dict.get('corfunc_params')
         # Tests
-        self.assertEqual(len(state_all), len(state_one))
-        self.assertEqual(len(state_all), 1)
+        assert len(state_all) == len(state_one)
+        assert len(state_all) == 1
         # getPage should include an extra param 'data_id' removed by serialize
-        self.assertNotEqual(len(params), len(page))
-        self.assertEqual(len(params), 15)
-        self.assertEqual(len(page), 16)
+        assert len(params) != len(page)
+        assert len(params) == 15
+        assert len(page) == 16
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testRemoveData(self):
@@ -184,23 +184,23 @@ class CorfuncTest(unittest.TestCase):
         self.testDefaults()
 
     def checkFakeDataState(self):
-        self.assertEqual(self.widget.txtFilename.text(), 'data')
-        self.assertEqual(self.widget.txtLowerQMin.text(), '0.0')
-        self.assertFalse(self.widget.txtLowerQMin.isEnabled())
-        self.assertEqual(self.widget.txtLowerQMax.text(), '0.01')
-        self.assertEqual(self.widget.txtUpperQMin.text(), '0.20')
-        self.assertEqual(self.widget.txtUpperQMax.text(), '0.22')
-        self.assertEqual(self.widget.txtBackground.text(), '0')
-        self.assertEqual(self.widget.txtGuinierA.text(), '')
-        self.assertEqual(self.widget.txtGuinierB.text(), '')
-        self.assertEqual(self.widget.txtPorodK.text(), '')
-        self.assertEqual(self.widget.txtPorodSigma.text(), '')
-        self.assertEqual(self.widget.txtAvgCoreThick.text(), '')
-        self.assertEqual(self.widget.txtAvgIntThick.text(), '')
-        self.assertEqual(self.widget.txtAvgHardBlock.text(), '')
-        self.assertEqual(self.widget.txtPolydisp.text(), '')
-        self.assertEqual(self.widget.txtLongPeriod.text(), '')
-        self.assertEqual(self.widget.txtLocalCrystal.text(), '')
+        assert self.widget.txtFilename.text() == 'data'
+        assert self.widget.txtLowerQMin.text() == '0.0'
+        assert not self.widget.txtLowerQMin.isEnabled()
+        assert self.widget.txtLowerQMax.text() == '0.01'
+        assert self.widget.txtUpperQMin.text() == '0.20'
+        assert self.widget.txtUpperQMax.text() == '0.22'
+        assert self.widget.txtBackground.text() == '0'
+        assert self.widget.txtGuinierA.text() == ''
+        assert self.widget.txtGuinierB.text() == ''
+        assert self.widget.txtPorodK.text() == ''
+        assert self.widget.txtPorodSigma.text() == ''
+        assert self.widget.txtAvgCoreThick.text() == ''
+        assert self.widget.txtAvgIntThick.text() == ''
+        assert self.widget.txtAvgHardBlock.text() == ''
+        assert self.widget.txtPolydisp.text() == ''
+        assert self.widget.txtLongPeriod.text() == ''
+        assert self.widget.txtLocalCrystal.text() == ''
 
 
 if __name__ == "__main__":
