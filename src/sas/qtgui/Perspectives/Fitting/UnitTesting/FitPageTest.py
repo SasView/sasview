@@ -20,17 +20,17 @@ class FitPageTest(unittest.TestCase):
         """
         Test all the global constants defined in the file.
         """
-        self.assertIsInstance(self.page.fit_options, dict)
-        self.assertIsInstance(self.page.smearing_options, dict)
-        self.assertEqual(self.page.current_category, "")
-        self.assertEqual(self.page.current_model, "")
-        self.assertEqual(self.page.current_factor, "")
-        self.assertEqual(self.page.page_id, 0)
-        self.assertFalse(self.page.data_is_loaded)
-        self.assertEqual(self.page.name, "")
-        self.assertIsNone(self.page.data)
-        self.assertIsNone(self.page.kernel_module)
-        self.assertEqual(self.page.parameters_to_fit, [])
+        assert isinstance(self.page.fit_options, dict)
+        assert isinstance(self.page.smearing_options, dict)
+        assert self.page.current_category == ""
+        assert self.page.current_model == ""
+        assert self.page.current_factor == ""
+        assert self.page.page_id == 0
+        assert not self.page.data_is_loaded
+        assert self.page.name == ""
+        assert self.page.data is None
+        assert self.page.kernel_module is None
+        assert self.page.parameters_to_fit == []
 
     def testSave(self):
         """
