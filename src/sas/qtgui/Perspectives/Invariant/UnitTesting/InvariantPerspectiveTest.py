@@ -110,7 +110,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
         # name for displaying in the DataExplorer combo box
         self.assertEqual(self.widget.name, "Invariant")
         self.assertEqual(self.widget.windowTitle(), "Invariant Perspective")
-        self.assertEqual(self.widget.title(), self.widget.windowTitle())
+        self.assertEqual(self.widget.title, self.widget.windowTitle())
 
         self.assertIsNone(self.widget._data)
         self.assertEqual(self.widget._path, '')
