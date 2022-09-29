@@ -1,43 +1,36 @@
 import sys
-import unittest
+
+import pytest
 
 from PyQt5 import QtGui, QtWidgets
-
-# set up import paths
-import sas.qtgui.path_prepare
 
 # Local
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class WelcomePanelTest(unittest.TestCase):
+class WelcomePanelTest:
     '''Test the WelcomePanel'''
-    def setUp(self):
-        '''Create the WelcomePanel'''
 
-        self.widget = WelcomePanel(None)
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the WelcomePanel'''
+        w = WelcomePanel(None)
 
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.widget.close()
-        self.widget = None
+        yield w
 
-    def testDefaults(self):
+        w.close()
+
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        assert isinstance(self.widget, QtWidgets.QDialog)
-        assert self.widget.windowTitle() == "Welcome"
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert widget.windowTitle() == "Welcome"
         
-    def testVersion(self):
+    def testVersion(self, widget):
         '''Test the version string'''
-        version = self.widget.lblVersion
+        version = widget.lblVersion
         assert isinstance(version, QtWidgets.QLabel)
 
         assert "SasView" in version.text()
         assert "Build:" in version.text()
         for inst in "UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM, ANSTO".split(", "):
             assert inst in version.text()
-       
-if __name__ == "__main__":
-    unittest.main()
