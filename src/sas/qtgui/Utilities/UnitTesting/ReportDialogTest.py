@@ -1,6 +1,5 @@
 import os
 import sys
-import unittest
 import logging
 from xhtml2pdf import pisa
 
@@ -17,13 +16,13 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class ReportDialogTest(unittest.TestCase):
+class ReportDialogTest:
     '''Test the report dialog'''
-    def setUp(self):
-        '''Create the dialog'''
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the dialog'''
+
         class dummy_manager(QtWidgets.QWidget):
             _parent = QtWidgets.QWidget()
             def communicator(self):
@@ -38,31 +37,29 @@ class ReportDialogTest(unittest.TestCase):
 
         #self.test_list = [test_html, test_txt, test_images]
         self.test_report = dummy_report()
-        self.widget = ReportDialog(parent=dummy_manager(), report_data=self.test_report)
+        w = ReportDialog(parent=dummy_manager(), report_data=self.test_report)
 
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.widget = None
+        yield w
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
-    def testDefaults(self):
+    def testDefaults(self, widget):
         '''Look at the default state of the widget'''
-        assert self.test_report.html in self.widget.txtBrowser.toHtml()
-        assert self.widget.txtBrowser.isReadOnly()
+        assert self.test_report.html in widget.txtBrowser.toHtml()
+        assert widget.txtBrowser.isReadOnly()
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
-    def testOnPrint(self):
+    def testOnPrint(self, widget):
         ''' Printing the report '''
-        document = self.widget.txtBrowser.document()
+        document = widget.txtBrowser.document()
         document.print = MagicMock()
-        self.setUp()
+
         # test rejected dialog
         QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
 
         # invoke the method
-        self.widget.onPrint()
+        widget.onPrint()
 
         # Assure printing was not done
         assert not document.print.called
@@ -74,25 +71,24 @@ class ReportDialogTest(unittest.TestCase):
         # default printer
 
         # invoke the method
-        #self.widget.onPrint()
+        #widget.onPrint()
 
         # Assure printing was done
         #self.assertTrue(document.print.called)
 
 
-    def testOnSave(self):
+    def testOnSave(self, widget):
         ''' Saving the report to a file '''
         # PDF save
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.pdf", "(*.pdf)"])
         os.startfile = MagicMock()
         os.system = MagicMock()
-        self.setUp()
 
         # conversion failed
-        self.widget.save_pdf = MagicMock(return_value=1)
+        widget.save_pdf = MagicMock(return_value=1)
 
         # invoke the method
-        self.widget.onSave()
+        widget.onSave()
 
         # Check that the file wasn't saved
         if os.name == 'nt':  # Windows
@@ -101,11 +97,11 @@ class ReportDialogTest(unittest.TestCase):
             assert not os.system.called
 
         # conversion succeeded
-        temp_html2pdf = self.widget.save_pdf
-        self.widget.save_pdf = MagicMock(return_value=0)
+        temp_html2pdf = widget.save_pdf
+        widget.save_pdf = MagicMock(return_value=0)
 
         # invoke the method
-        self.widget.onSave()
+        widget.onSave()
 
         # Check that the file was saved
         if os.name == 'nt':  # Windows
@@ -115,43 +111,42 @@ class ReportDialogTest(unittest.TestCase):
 
         # TXT save
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.txt", "(*.txt)"])
-        self.widget.onTXTSave = MagicMock()
+        widget.onTXTSave = MagicMock()
         # invoke the method
-        self.widget.onSave()
+        widget.onSave()
 
         # Check that the file was saved
-        assert self.widget.onTXTSave
+        assert widget.onTXTSave
 
         # HTML save
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.html", "(*.html)"])
-        self.widget.write_string = MagicMock()
+        widget.write_string = MagicMock()
         # invoke the method
-        self.widget.onSave()
+        widget.onSave()
 
         # Check that the file was saved
-        assert self.widget.write_string
+        assert widget.write_string
 
-        self.widget.save_pdf = temp_html2pdf
+        widget.save_pdf = temp_html2pdf
 
 
-    def testGetPictures(self):
+    def testGetPictures(self, widget):
         ''' Saving MPL charts and returning filenames '''
         pass
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
-    def testHTML2PDF(self):
+    def testHTML2PDF(self, widget):
         ''' html to pdf conversion '''
         class pisa_dummy(object):
             err = 0
         pisa.CreatePDF = MagicMock(return_value=pisa_dummy())
         open = MagicMock(return_value="y")
-        self.setUp()
 
         QTest.qWait(100)
 
-        data = self.widget.txtBrowser.toHtml()
-        return_value = self.widget.save_pdf(data, "b")
+        data = widget.txtBrowser.toHtml()
+        return_value = widget.save_pdf(data, "b")
 
         assert pisa.CreatePDF.called
         assert return_value == 0
@@ -162,8 +157,7 @@ class ReportDialogTest(unittest.TestCase):
         logging.error = MagicMock()
 
         #run the method
-        return_value = self.widget.save_pdf(data, "c")
+        return_value = widget.save_pdf(data, "c")
 
         assert logging.error.called
         #logging.error.assert_called_with("Error creating pdf")
-
