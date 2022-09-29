@@ -48,8 +48,8 @@ class ReportDialogTest(unittest.TestCase):
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
     def testDefaults(self):
         '''Look at the default state of the widget'''
-        self.assertIn(self.test_report.html, self.widget.txtBrowser.toHtml())
-        self.assertTrue(self.widget.txtBrowser.isReadOnly())
+        assert self.test_report.html in self.widget.txtBrowser.toHtml()
+        assert self.widget.txtBrowser.isReadOnly()
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
@@ -65,7 +65,7 @@ class ReportDialogTest(unittest.TestCase):
         self.widget.onPrint()
 
         # Assure printing was not done
-        self.assertFalse(document.print.called)
+        assert not document.print.called
 
         # test accepted dialog
         QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
@@ -96,9 +96,9 @@ class ReportDialogTest(unittest.TestCase):
 
         # Check that the file wasn't saved
         if os.name == 'nt':  # Windows
-            self.assertFalse(os.startfile.called)
+            assert not os.startfile.called
         elif sys.platform == "darwin":  # Mac
-            self.assertFalse(os.system.called)
+            assert not os.system.called
 
         # conversion succeeded
         temp_html2pdf = self.widget.save_pdf
@@ -109,9 +109,9 @@ class ReportDialogTest(unittest.TestCase):
 
         # Check that the file was saved
         if os.name == 'nt':  # Windows
-            self.assertTrue(os.startfile.called)
+            assert os.startfile.called
         elif sys.platform == "darwin":  # Mac
-            self.assertTrue(os.system.called)
+            assert os.system.called
 
         # TXT save
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.txt", "(*.txt)"])
@@ -120,7 +120,7 @@ class ReportDialogTest(unittest.TestCase):
         self.widget.onSave()
 
         # Check that the file was saved
-        self.assertTrue(self.widget.onTXTSave)
+        assert self.widget.onTXTSave
 
         # HTML save
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.html", "(*.html)"])
@@ -129,7 +129,7 @@ class ReportDialogTest(unittest.TestCase):
         self.widget.onSave()
 
         # Check that the file was saved
-        self.assertTrue(self.widget.write_string)
+        assert self.widget.write_string
 
         self.widget.save_pdf = temp_html2pdf
 
@@ -153,8 +153,8 @@ class ReportDialogTest(unittest.TestCase):
         data = self.widget.txtBrowser.toHtml()
         return_value = self.widget.save_pdf(data, "b")
 
-        self.assertTrue(pisa.CreatePDF.called)
-        self.assertEqual(return_value, 0)
+        assert pisa.CreatePDF.called
+        assert return_value == 0
 
         # Try to raise somewhere
         pisa.CreatePDF.side_effect = Exception("Failed")
@@ -164,6 +164,6 @@ class ReportDialogTest(unittest.TestCase):
         #run the method
         return_value = self.widget.save_pdf(data, "c")
 
-        self.assertTrue(logging.error.called)
+        assert logging.error.called
         #logging.error.assert_called_with("Error creating pdf")
 
