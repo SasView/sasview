@@ -1,5 +1,5 @@
 import sys
-import unittest
+
 import pytest
 
 from PyQt5 import QtGui, QtWidgets
@@ -8,43 +8,37 @@ from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
-# set up import paths
-import sas.qtgui.path_prepare
-
 # Local
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class MainWindowTest(unittest.TestCase):
+class MainWindowTest:
     """Test the Main Window GUI"""
-    def setUp(self):
-        """Create the GUI"""
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the GUI'''
         screen_resolution = QtCore.QRect(0, 0, 640, 480)
-        self.widget = MainSasViewWindow(screen_resolution, None)
+        w = MainSasViewWindow(screen_resolution, None)
 
-    def tearDown(self):
-        """Destroy the GUI"""
-        self.widget = None
+        yield w
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         """Test the GUI in its default state"""
-        assert isinstance(self.widget, QtWidgets.QMainWindow)
-        assert isinstance(self.widget.centralWidget(), QtWidgets.QMdiArea)
-        assert self.widget.workspace.horizontalScrollBarPolicy() == \
+        assert isinstance(widget, QtWidgets.QMainWindow)
+        assert isinstance(widget.centralWidget(), QtWidgets.QMdiArea)
+        assert widget.workspace.horizontalScrollBarPolicy() == \
                         QtCore.Qt.ScrollBarAsNeeded
-        assert self.widget.workspace.verticalScrollBarPolicy() == \
+        assert widget.workspace.verticalScrollBarPolicy() == \
                         QtCore.Qt.ScrollBarAsNeeded
 
-    def testSplashScreen(self):
+    def testSplashScreen(self, qapp):
         """ Test the splash screen """
         splash = SplashScreen()
         assert isinstance(splash, QtWidgets.QSplashScreen)
 
-    def testWidgets(self):
+    def testWidgets(self, qapp):
         """ Test enablement/disablement of widgets """
         # Open the main window
         screen_resolution = QtCore.QRect(0, 0, 640, 480)
@@ -59,10 +53,8 @@ class MainWindowTest(unittest.TestCase):
         # Assure it is visible and a part of the MdiArea
         assert len(tmp_main.workspace.subWindowList()) == 3
 
-        tmp_main.close()
-
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testPerspectiveChanges(self):
+    def testPerspectiveChanges(self, widget):
         """
         Test all information is retained on perspective change
         """
@@ -74,7 +66,7 @@ class MainWindowTest(unittest.TestCase):
         # Base definitions
         FIT = 'Fitting'
         PR = 'Inversion'
-        gui = self.widget.guiManager
+        gui = widget.guiManager
         filesWidget = gui.filesWidget
         currentPers = filesWidget.cbFitting
         sendDataButton = filesWidget.cmdSendTo
@@ -101,7 +93,7 @@ class MainWindowTest(unittest.TestCase):
         currentPers.setCurrentIndex(currentPers.findText(PR))
         check_after_load(PR)
 
-    def testExit(self):
+    def testExit(self, qapp):
         """
         Test that the custom exit method is called on shutdown
         """
@@ -116,7 +108,3 @@ class MainWindowTest(unittest.TestCase):
 
         # See that the MessageBox method got called
         assert QtWidgets.QMessageBox.question.called
-
-
-if __name__ == "__main__":
-    unittest.main()
