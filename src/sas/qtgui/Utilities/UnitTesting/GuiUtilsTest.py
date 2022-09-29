@@ -71,7 +71,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Assure all signals are defined.
         for signal in list_of_signals:
-            self.assertIn(signal, dir(com))
+            assert signal in dir(com)
 
     def testupdateModelItem(self):
         """
@@ -85,12 +85,12 @@ class GuiUtilsTest(unittest.TestCase):
         updateModelItem(test_item, test_list, name)
 
         # Make sure test_item got all data added
-        self.assertEqual(test_item.child(0).text(), name)
+        assert test_item.child(0).text() == name
         list_from_item = test_item.child(0).data()
-        self.assertIsInstance(list_from_item, list)
-        self.assertEqual(list_from_item[0], test_list[0])
-        self.assertEqual(list_from_item[1], test_list[1])
-        self.assertEqual(list_from_item[2], test_list[2])
+        assert isinstance(list_from_item, list)
+        assert list_from_item[0] == test_list[0]
+        assert list_from_item[1] == test_list[1]
+        assert list_from_item[2] == test_list[2]
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testupdateModelItemWithPlot(self):
@@ -114,13 +114,13 @@ class GuiUtilsTest(unittest.TestCase):
         updateModelItemWithPlot(test_item, update_data, name)
 
         # Make sure test_item got all data added
-        self.assertEqual(test_item.child(0).text(), name)
-        self.assertTrue(test_item.child(0).isCheckable())
+        assert test_item.child(0).text() == name
+        assert test_item.child(0).isCheckable()
         data_from_item = test_item.child(0).child(0).data()
-        self.assertIsInstance(data_from_item, Data1D)
-        self.assertSequenceEqual(list(data_from_item.x), [1.0, 2.0, 3.0])
-        self.assertSequenceEqual(list(data_from_item.y), [10.0, 11.0, 12.0])
-        self.assertEqual(test_item.rowCount(), 1)
+        assert isinstance(data_from_item, Data1D)
+        assert list(data_from_item.x) == [1.0, 2.0, 3.0]
+        assert list(data_from_item.y) == [10.0, 11.0, 12.0]
+        assert test_item.rowCount() == 1
 
         # add another dataset (different from the first one)
         update_data1 = Data1D(x=[1.1, 2.1, 3.1], y=[10.1, 11.1, 12.1])
@@ -130,7 +130,7 @@ class GuiUtilsTest(unittest.TestCase):
         # update the item and check number of rows
         updateModelItemWithPlot(test_item, update_data1, name1)
 
-        self.assertEqual(test_item.rowCount(), 2)
+        assert test_item.rowCount() == 2
 
         # add another dataset (with the same name as the first one)
         # check that number of rows was not changed but data have been updated
@@ -139,11 +139,11 @@ class GuiUtilsTest(unittest.TestCase):
         update_data2.name = 'data0'
         name2 = "Black Sabbath2"
         updateModelItemWithPlot(test_item, update_data2, name2)
-        self.assertEqual(test_item.rowCount(), 2)
+        assert test_item.rowCount() == 2
 
         data_from_item = test_item.child(0).child(0).data()
-        self.assertSequenceEqual(list(data_from_item.x), [4.0, 5.0, 6.0])
-        self.assertSequenceEqual(list(data_from_item.y), [13.0, 14.0, 15.0])
+        assert list(data_from_item.x) == [4.0, 5.0, 6.0]
+        assert list(data_from_item.y) == [13.0, 14.0, 15.0]
 
 
     def testPlotsFromCheckedItems(self):
@@ -191,12 +191,12 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Make sure only the checked data is present
         # FRIDAY IN
-        self.assertIn(test_list0, plot_list[0])
+        assert test_list0 in plot_list[0]
         # SATURDAY IN
-        self.assertIn(test_list1, plot_list[1])
+        assert test_list1 in plot_list[1]
         # MONDAY NOT IN
-        self.assertNotIn(test_list2, plot_list[0])
-        self.assertNotIn(test_list2, plot_list[1])
+        assert test_list2 not in plot_list[0]
+        assert test_list2 not in plot_list[1]
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testInfoFromData(self):
@@ -215,14 +215,14 @@ class GuiUtilsTest(unittest.TestCase):
         item = infoFromData(new_data)
 
         # Test the item and its children
-        self.assertIsInstance(item, QtGui.QStandardItem)
-        self.assertEqual(item.rowCount(), 5)
-        self.assertEqual(item.text(), "Info")
-        self.assertIn(p_file,   item.child(0).text())
-        self.assertIn("Run",    item.child(1).text())
-        self.assertIn("Data1D", item.child(2).text())
-        self.assertIn(p_file,   item.child(3).text())
-        self.assertIn("Process",item.child(4).text())
+        assert isinstance(item, QtGui.QStandardItem)
+        assert item.rowCount() == 5
+        assert item.text() == "Info"
+        assert p_file in item.child(0).text()
+        assert "Run" in item.child(1).text()
+        assert "Data1D" in item.child(2).text()
+        assert p_file in item.child(3).text()
+        assert "Process" in item.child(4).text()
 
     def testOpenLink(self):
         """
@@ -240,19 +240,19 @@ class GuiUtilsTest(unittest.TestCase):
         openLink(good_url1)
         openLink(good_url2)
         openLink(good_url3)
-        self.assertEqual(webbrowser.open.call_count, 3)
+        assert webbrowser.open.call_count == 3
 
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             openLink(bad_url1)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             openLink(bad_url2)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             openLink(bad_url3)
 
     def testRetrieveData1d(self):
         """
         """
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             retrieveData1d("BOOP")
 
         #data = Data1D()
@@ -263,15 +263,15 @@ class GuiUtilsTest(unittest.TestCase):
 
         text = retrieveData1d(data)
 
-        self.assertIn("Temperature:", text)
-        self.assertIn("Beam_size:", text)
-        self.assertIn("X_min = 1.0:  X_max = 3.0", text)
-        self.assertIn("3.0 \t12.0 \t0.0 \t0.0", text)
+        assert "Temperature:" in text
+        assert "Beam_size:" in text
+        assert "X_min = 1.0:  X_max = 3.0" in text
+        assert "3.0 \t12.0 \t0.0 \t0.0" in text
 
     def testRetrieveData2d(self):
         """
         """
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             retrieveData2d("BOOP")
         data = Data2D(image=[1.0, 2.0, 3.0],
                       err_image=[0.01, 0.02, 0.03],
@@ -280,10 +280,10 @@ class GuiUtilsTest(unittest.TestCase):
 
         text = retrieveData2d(data)
 
-        self.assertIn("Type:         Data2D", text)
-        self.assertIn("I_min = 1.0", text)
-        self.assertIn("I_max = 3.0", text)
-        self.assertIn("2 \t0.3 \t0.3 \t3.0 \t0.03 \t0.0 \t0.0", text)
+        assert "Type:         Data2D" in text
+        assert "I_min = 1.0" in text
+        assert "I_max = 3.0" in text
+        assert "2 \t0.3 \t0.3 \t3.0 \t0.03 \t0.0 \t0.0" in text
 
     def testOnTXTSave(self):
         """
@@ -299,14 +299,14 @@ class GuiUtilsTest(unittest.TestCase):
         # Broken data
         data = Data1D(x=[1.0, 2.0, 3.0], y=[])
         # Expect a raise
-        with self.assertRaises(IndexError):
+        with pytest.raises(IndexError):
             onTXTSave(data, path)
 
         # Good data - no dX/dY
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
         onTXTSave(data, path)
 
-        self.assertTrue(os.path.isfile(save_path))
+        assert os.path.isfile(save_path)
         with open(save_path,'r') as out:
             data_read = out.read()
             expected = \
@@ -315,7 +315,7 @@ class GuiUtilsTest(unittest.TestCase):
             "2.000000000000000e+00 1.100000000000000e+01\n" +\
             "3.000000000000000e+00 1.200000000000000e+01\n"
 
-            self.assertEqual(expected, data_read)
+            assert expected == data_read
 
         if os.path.isfile(save_path):
             os.remove(save_path)
@@ -327,10 +327,10 @@ class GuiUtilsTest(unittest.TestCase):
         onTXTSave(data, path)
         with open(save_path,'r') as out:
             data_read = out.read()
-            self.assertIn("<X> <Y> <dY> <dX>\n", data_read)
-            self.assertIn("1.000000000000000e+00 1.000000000000000e+01 1.000000000000000e-01 1.000000000000000e-01\n", data_read)
-            self.assertIn("2.000000000000000e+00 1.100000000000000e+01 2.000000000000000e-01 2.000000000000000e-01\n", data_read)
-            self.assertIn("3.000000000000000e+00 1.200000000000000e+01 3.000000000000000e-01 3.000000000000000e-01\n", data_read)
+            assert "<X> <Y> <dY> <dX>\n" in data_read
+            assert "1.000000000000000e+00 1.000000000000000e+01 1.000000000000000e-01 1.000000000000000e-01\n" in data_read
+            assert "2.000000000000000e+00 1.100000000000000e+01 2.000000000000000e-01 2.000000000000000e-01\n" in data_read
+            assert "3.000000000000000e+00 1.200000000000000e+01 3.000000000000000e-01 3.000000000000000e-01\n" in data_read
 
         if os.path.isfile(save_path):
             os.remove(save_path)
@@ -420,16 +420,15 @@ class GuiUtilsTest(unittest.TestCase):
         if catch_logs:
             with self.assertLogs(logger.name) as cm:
                 saveMethod(data)
-                self.assertEqual(len(cm.output), 1)
-                self.assertEqual(
-                    cm.output[0],
+                assert len(cm.output) == 1
+                assert cm.output[0] == \
                     (f"WARNING:sas.qtgui.Utilities.GuiUtils:Unknown file type specified when saving {name}."
-                     + f" Saving in {file_format} format."))
+                     + f" Saving in {file_format} format.")
         else:
             saveMethod(data)
-        self.assertTrue(os.path.isfile(name_full))
+        assert os.path.isfile(name_full)
         os.remove(name_full)
-        self.assertFalse(os.path.isfile(name_full))
+        assert not os.path.isfile(name_full)
 
     def testXYTransform(self):
         """ Assure the unit/legend transformation is correct"""
@@ -437,171 +436,171 @@ class GuiUtilsTest(unittest.TestCase):
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="y")
-        self.assertEqual(xLabel, "()")
-        self.assertEqual(xscale, "linear")
-        self.assertEqual(yscale, "linear")
+        assert xLabel == "()"
+        assert xscale == "linear"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x^(2)", yLabel="1/y")
-        self.assertEqual(xLabel, "^{2}(()^{2})")
-        self.assertEqual(yLabel, "1/(()^{-1})")
-        self.assertEqual(xscale, "linear")
-        self.assertEqual(yscale, "linear")
+        assert xLabel == "^{2}(()^{2})"
+        assert yLabel == "1/(()^{-1})"
+        assert xscale == "linear"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x^(4)", yLabel="ln(y)")
-        self.assertEqual(xLabel, "^{4}(()^{4})")
-        self.assertEqual(yLabel, "\\ln{()}()")
-        self.assertEqual(xscale, "linear")
-        self.assertEqual(yscale, "linear")
+        assert xLabel == "^{4}(()^{4})"
+        assert yLabel == "\\ln{()}()"
+        assert xscale == "linear"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="ln(x)", yLabel="y^(2)")
-        self.assertEqual(xLabel, "\\ln{()}()")
-        self.assertEqual(yLabel, "^{2}(()^{2})")
-        self.assertEqual(xscale, "linear")
-        self.assertEqual(yscale, "linear")
+        assert xLabel == "\\ln{()}()"
+        assert yLabel == "^{2}(()^{2})"
+        assert xscale == "linear"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="log10(x)", yLabel="y*x^(2)")
-        self.assertEqual(xLabel, "()")
-        self.assertEqual(yLabel, " \\ \\ ^{2}(()^{2})")
-        self.assertEqual(xscale, "log")
-        self.assertEqual(yscale, "linear")
+        assert xLabel == "()"
+        assert yLabel == " \\ \\ ^{2}(()^{2})"
+        assert xscale == "log"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="log10(x^(4))", yLabel="y*x^(4)")
-        self.assertEqual(xLabel, "^{4}(()^{4})")
-        self.assertEqual(yLabel, " \\ \\ ^{4}(()^{16})")
-        self.assertEqual(xscale, "log")
-        self.assertEqual(yscale, "linear")
+        assert xLabel == "^{4}(()^{4})"
+        assert yLabel == " \\ \\ ^{4}(()^{16})"
+        assert xscale == "log"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="1/sqrt(y)")
-        self.assertEqual(yLabel, "1/\\sqrt{}(()^{-0.5})")
-        self.assertEqual(yscale, "linear")
+        assert yLabel == "1/\\sqrt{}(()^{-0.5})"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y)")
-        self.assertEqual(yLabel, "()")
-        self.assertEqual(yscale, "log")
+        assert yLabel == "()"
+        assert yscale == "log"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x)")
-        self.assertEqual(yLabel, "\\ln{( \\ \\ )}()")
-        self.assertEqual(yscale, "linear")
+        assert yLabel == "\\ln{( \\ \\ )}()"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x^(2))")
-        self.assertEqual(yLabel, "\\ln ( \\ \\ ^{2})(()^{2})")
-        self.assertEqual(yscale, "linear")
+        assert yLabel == "\\ln ( \\ \\ ^{2})(()^{2})"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x^(4))")
-        self.assertEqual(yLabel, "\\ln ( \\ \\ ^{4})(()^{4})")
-        self.assertEqual(yscale, "linear")
+        assert yLabel == "\\ln ( \\ \\ ^{4})(()^{4})"
+        assert yscale == "linear"
 
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y*x^(4))")
-        self.assertEqual(yLabel, " \\ \\ ^{4}(()^{4})")
-        self.assertEqual(yscale, "log")
+        assert yLabel == " \\ \\ ^{4}(()^{4})"
+        assert yscale == "log"
 
     def testReplaceHTMLwithUTF8(self):
         ''' test single character replacement '''
         s = None
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             result = replaceHTMLwithUTF8(s)
 
         s = ""
-        self.assertEqual(replaceHTMLwithUTF8(s), s)
+        assert replaceHTMLwithUTF8(s) == s
 
         s = "aaaa"
-        self.assertEqual(replaceHTMLwithUTF8(s), s)
+        assert replaceHTMLwithUTF8(s) == s
 
         s = "&#x212B; &#x221e;      &#177;"
-        self.assertEqual(replaceHTMLwithUTF8(s), "Å ∞      ±")
+        assert replaceHTMLwithUTF8(s) == "Å ∞      ±"
 
     def testReplaceHTMLwithASCII(self):
         ''' test single character replacement'''
         s = None
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             result = replaceHTMLwithASCII(s)
 
         s = ""
-        self.assertEqual(replaceHTMLwithASCII(s), s)
+        assert replaceHTMLwithASCII(s) == s
 
         s = "aaaa"
-        self.assertEqual(replaceHTMLwithASCII(s), s)
+        assert replaceHTMLwithASCII(s) == s
 
         s = "&#x212B; &#x221e;      &#177;"
-        self.assertEqual(replaceHTMLwithASCII(s), "Ang inf      +/-")
+        assert replaceHTMLwithASCII(s) == "Ang inf      +/-"
 
     def testConvertUnitToUTF8(self):
         ''' test unit string replacement'''
         s = None
-        self.assertIsNone(convertUnitToUTF8(s))
+        assert convertUnitToUTF8(s) is None
 
         s = ""
-        self.assertEqual(convertUnitToUTF8(s), s)
+        assert convertUnitToUTF8(s) == s
 
         s = "aaaa"
-        self.assertEqual(convertUnitToUTF8(s), s)
+        assert convertUnitToUTF8(s) == s
 
         s = "1/A"
-        self.assertEqual(convertUnitToUTF8(s), "Å<sup>-1</sup>")
+        assert convertUnitToUTF8(s) == "Å<sup>-1</sup>"
 
         s = "Ang"
-        self.assertEqual(convertUnitToUTF8(s), "Å")
+        assert convertUnitToUTF8(s) == "Å"
 
         s = "1e-6/Ang^2"
-        self.assertEqual(convertUnitToUTF8(s), "10<sup>-6</sup>/Å<sup>2</sup>")
+        assert convertUnitToUTF8(s) == "10<sup>-6</sup>/Å<sup>2</sup>"
 
         s = "inf"
-        self.assertEqual(convertUnitToUTF8(s), "∞")
+        assert convertUnitToUTF8(s) == "∞"
 
         s = "1/cm"
-        self.assertEqual(convertUnitToUTF8(s), "cm<sup>-1</sup>")
+        assert convertUnitToUTF8(s) == "cm<sup>-1</sup>"
 
     def testConvertUnitToHTML(self):
         ''' test unit string replacement'''
         s = None
-        self.assertIsNone(convertUnitToHTML(s))
+        assert convertUnitToHTML(s) is None
 
         s = ""
-        self.assertEqual(convertUnitToHTML(s), s)
+        assert convertUnitToHTML(s) == s
 
         s = "aaaa"
-        self.assertEqual(convertUnitToHTML(s), s)
+        assert convertUnitToHTML(s) == s
 
         s = "1/A"
-        self.assertEqual(convertUnitToHTML(s), "&#x212B;<sup>-1</sup>")
+        assert convertUnitToHTML(s) == "&#x212B;<sup>-1</sup>"
 
         s = "Ang"
-        self.assertEqual(convertUnitToHTML(s), "&#x212B;")
+        assert convertUnitToHTML(s) == "&#x212B;"
 
         s = "1e-6/Ang^2"
-        self.assertEqual(convertUnitToHTML(s), "10<sup>-6</sup>/&#x212B;<sup>2</sup>")
+        assert convertUnitToHTML(s) == "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
 
         s = "inf"
-        self.assertEqual(convertUnitToHTML(s), "&#x221e;")
+        assert convertUnitToHTML(s) == "&#x221e;"
         s = "-inf"
 
-        self.assertEqual(convertUnitToHTML(s), "-&#x221e;")
+        assert convertUnitToHTML(s) == "-&#x221e;"
 
         s = "1/cm"
-        self.assertEqual(convertUnitToHTML(s), "cm<sup>-1</sup>")
+        assert convertUnitToHTML(s) == "cm<sup>-1</sup>"
 
     def testParseName(self):
         '''test parse out a string from the beinning of a string'''
         # good input
         value = "_test"
-        self.assertEqual(parseName(value, '_'), 'test')
+        assert parseName(value, '_') == 'test'
         value = "____test____"
-        self.assertEqual(parseName(value, '_'), '___test____')
-        self.assertEqual(parseName(value, '___'), '_test____')
-        self.assertEqual(parseName(value, 'test'), '____test____')
+        assert parseName(value, '_') == '___test____'
+        assert parseName(value, '___') == '_test____'
+        assert parseName(value, 'test') == '____test____'
         # bad input
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             parseName(value, None)
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             parseName(None, '_')
         value = []
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             parseName(value, '_')
         value = 1.44
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             parseName(value, 'p')
         value = 100
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             parseName(value, 'p')
 
     @pytest.mark.xfail(reason="2022-09 already broken")
@@ -609,22 +608,22 @@ class GuiUtilsTest(unittest.TestCase):
         '''test homemade string-> double converter'''
         #good values
         value = "1"
-        self.assertEqual(toDouble(value), 1.0)
+        assert toDouble(value) == 1.0
         value = "1.2"
         # has to be AlmostEqual due to numerical rounding
-        self.assertAlmostEqual(toDouble(value), 1.2, 6)
+        assert round(abs(toDouble(value)-1.2), 6) == 0
         value = "2,1"
-        self.assertAlmostEqual(toDouble(value), 2.1, 6)
+        assert round(abs(toDouble(value)-2.1), 6) == 0
 
         # bad values
         value = None
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             toDouble(value)
         value = "MyDouble"
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             toDouble(value)
         value = [1,2.2]
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             toDouble(value)
 
 
@@ -642,28 +641,28 @@ class DoubleValidatorTest(unittest.TestCase):
         """Test a valid float """
         QtCore.QLocale.setDefault(QtCore.QLocale('en_US'))
         float_good = "170"
-        self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        assert self.validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
         float_good = "170.11"
         ## investigate: a double returns Invalid here!
         ##self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
         float_good = "17e2"
-        self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        assert self.validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
 
     def testValidateBad(self):
         """Test a bad float """
         float_bad = None
-        self.assertEqual(self.validator.validate(float_bad, 1)[0], QtGui.QValidator.Intermediate)
+        assert self.validator.validate(float_bad, 1)[0] == QtGui.QValidator.Intermediate
         float_bad = [1]
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
            self.validator.validate(float_bad, 1)
         float_bad = "1,3"
-        self.assertEqual(self.validator.validate(float_bad, 1)[0], QtGui.QValidator.Invalid)
+        assert self.validator.validate(float_bad, 1)[0] == QtGui.QValidator.Invalid
 
     def notestFixup(self):
         """Fixup of a float"""
         float_to_fixup = "1,3"
         self.validator.fixup(float_to_fixup)
-        self.assertEqual(float_to_fixup, "13")
+        assert float_to_fixup == "13"
 
 
 class FormulaValidatorTest(unittest.TestCase):
@@ -679,20 +678,20 @@ class FormulaValidatorTest(unittest.TestCase):
     def testValidateGood(self):
         """Test a valid Formula """
         formula_good = "H24O12C4C6N2Pu"
-        self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
+        assert self.validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
 
         formula_good = "(H2O)0.5(D2O)0.5"
-        self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
+        assert self.validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testValidateBad(self):
         """Test an invalid Formula """
         formula_bad = "H24 %%%O12C4C6N2Pu"
-        self.assertRaises(self.validator.validate(formula_bad, 1)[0])
-        self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
+        pytest.raises(self.validator.validate(formula_bad, 1)[0])
+        assert self.validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
 
         formula_bad = [1]
-        self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
+        assert self.validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
 
 class HashableStandardItemTest(unittest.TestCase):
     """ Test the reimplementation of QStandardItem """
@@ -706,18 +705,18 @@ class HashableStandardItemTest(unittest.TestCase):
 
     def testHash(self):
         '''assure the item returns hash'''
-        self.assertEqual(self.item.__hash__(), 0)
+        assert self.item.__hash__() == 0
 
     def testIndexing(self):
         '''test that we can use HashableSI as an index'''
         dictionary = {}
         dictionary[self.item] = "wow!"
-        self.assertEqual(dictionary[self.item], "wow!")
+        assert dictionary[self.item] == "wow!"
 
     def testClone(self):
         '''let's see if we can clone the item'''
         item_clone = self.item.clone()
-        self.assertEqual(item_clone.__hash__(), 0)
+        assert item_clone.__hash__() == 0
 
     def testGetConstraints(self):
         '''test the method that reads constraints from a project and returns
@@ -737,13 +736,13 @@ class HashableStandardItemTest(unittest.TestCase):
         # get the constraint_dict
         constraint_dict = getConstraints(fit_project)
         # we have two constraints on different fit pages
-        self.assertEqual(len(constraint_dict), 2)
+        assert len(constraint_dict) == 2
         # we have one constraint per fit page
-        self.assertEqual(len(constraint_dict['M1']), 1)
-        self.assertEqual(len(constraint_dict['M2']), 1)
+        assert len(constraint_dict['M1']) == 1
+        assert len(constraint_dict['M2']) == 1
         # check the constraints in the constraint_dict
-        self.assertEqual(constraint_dict['M1'][0], constraint1)
-        self.assertEqual(constraint_dict['M2'][0], constraint2)
+        assert constraint_dict['M1'][0] == constraint1
+        assert constraint_dict['M2'][0] == constraint2
 
 if __name__ == "__main__":
     unittest.main()
