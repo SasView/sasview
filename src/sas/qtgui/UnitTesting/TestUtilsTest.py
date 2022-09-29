@@ -1,5 +1,4 @@
 import sys
-import unittest
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -11,13 +10,10 @@ from unittest.mock import MagicMock
 from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.UnitTesting.TestUtils import *
 
-if not QApplication.instance():
-    app = QApplication(sys.argv)
-
-class TestUtilsTest(unittest.TestCase):
+class TestUtilsTest:
     '''Test TestUtils'''
 
-    def testQtSignalSpy(self):
+    def testQtSignalSpy(self, qapp):
         '''Create the Spy the correct way'''
         test_string = 'my precious'
 
@@ -37,6 +33,3 @@ class TestUtilsTest(unittest.TestCase):
 
         # Was the signal caught by the signal spy?
         assert spy.count() == 1
-
-if __name__ == "__main__":
-    unittest.main()
