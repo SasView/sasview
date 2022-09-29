@@ -220,7 +220,8 @@ class GuiManager:
         self.loadedPerspectives = {}
         self._current_perspective = None
 
-    def addCategories(self):
+    @staticmethod
+    def addCategories():
         """
         Make sure categories.json exists and if not compile it and install in ~/.sasview
         """

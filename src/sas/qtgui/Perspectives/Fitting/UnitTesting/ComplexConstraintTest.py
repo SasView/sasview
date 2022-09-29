@@ -14,6 +14,8 @@ from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
+from sas.qtgui.MainWindow.GuiManager import GuiManager
+
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
@@ -27,6 +29,9 @@ class ComplexConstraintTest:
             communicate = GuiUtils.Communicate()
 
         '''Create ComplexConstraint dialog'''
+        # need to ensure that categories exist first
+        GuiManager.addCategories()
+
         # mockup tabs
         tab1 = FittingWidget(dummy_manager())
         tab2 = FittingWidget(dummy_manager())

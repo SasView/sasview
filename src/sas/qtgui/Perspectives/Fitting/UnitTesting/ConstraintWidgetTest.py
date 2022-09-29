@@ -13,6 +13,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Plotting.PlotterData import Data1D
 
+from sas.qtgui.MainWindow.GuiManager import GuiManager
+
 # Local
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
@@ -54,6 +56,9 @@ class ConstraintWidgetTest:
 
             def getConstraintTab(self):
                 return self.constraint_tab
+
+        # need to ensure that categories exist first
+        GuiManager.addCategories()
 
         '''Create the perspective'''
         perspective = FittingWindow(dummy_manager())
