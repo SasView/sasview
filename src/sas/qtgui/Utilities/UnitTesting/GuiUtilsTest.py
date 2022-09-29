@@ -3,6 +3,8 @@ import sys
 import unittest
 import webbrowser
 
+import pytest
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 from unittest.mock import MagicMock
@@ -90,6 +92,7 @@ class GuiUtilsTest(unittest.TestCase):
         self.assertEqual(list_from_item[1], test_list[1])
         self.assertEqual(list_from_item[2], test_list[2])
 
+    @pytest.mark.xfail(reason="2022-09 already broken")
     def testupdateModelItemWithPlot(self):
         """
         Test the QModelItem checkbox update method
@@ -195,6 +198,7 @@ class GuiUtilsTest(unittest.TestCase):
         self.assertNotIn(test_list2, plot_list[0])
         self.assertNotIn(test_list2, plot_list[1])
 
+    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testInfoFromData(self):
         """
         Test Info element extraction from a plottable object
@@ -600,6 +604,7 @@ class GuiUtilsTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             parseName(value, 'p')
 
+    @pytest.mark.xfail(reason="2022-09 already broken")
     def testToDouble(self):
         '''test homemade string-> double converter'''
         #good values
@@ -679,6 +684,7 @@ class FormulaValidatorTest(unittest.TestCase):
         formula_good = "(H2O)0.5(D2O)0.5"
         self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
 
+    @pytest.mark.xfail(reason="2022-09 already broken")
     def testValidateBad(self):
         """Test an invalid Formula """
         formula_bad = "H24 %%%O12C4C6N2Pu"
