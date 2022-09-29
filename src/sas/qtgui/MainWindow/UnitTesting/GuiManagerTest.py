@@ -49,17 +49,17 @@ class GuiManagerTest(unittest.TestCase):
         """
         Test the object in its default state
         """
-        self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
-        self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
-        self.assertIsInstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
-        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), QtCore.Qt.LeftDockWidgetArea)
+        assert isinstance(self.manager.filesWidget, DataExplorerWindow)
+        assert isinstance(self.manager.dockedFilesWidget, QDockWidget)
+        assert isinstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
+        assert self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget) == QtCore.Qt.LeftDockWidgetArea
 
-        self.assertIsInstance(self.manager.logDockWidget, QDockWidget)
-        self.assertIsInstance(self.manager.logDockWidget.widget(), QTextBrowser)
-        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.logDockWidget), QtCore.Qt.BottomDockWidgetArea)
+        assert isinstance(self.manager.logDockWidget, QDockWidget)
+        assert isinstance(self.manager.logDockWidget.widget(), QTextBrowser)
+        assert self.manager._workspace.dockWidgetArea(self.manager.logDockWidget) == QtCore.Qt.BottomDockWidgetArea
 
-        self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
-        self.assertIsInstance(self.manager.aboutWidget, AboutBox)
+        assert isinstance(self.manager.ackWidget, Acknowledgements)
+        assert isinstance(self.manager.aboutWidget, AboutBox)
         #self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
 
     def skip_testLogging(self):
@@ -67,25 +67,25 @@ class GuiManagerTest(unittest.TestCase):
         Test logging of stdout, stderr and log messages
         """
         # See if the log window is empty
-        self.assertEqual(self.manager.logDockWidget.widget().toPlainText(), "")
+        assert self.manager.logDockWidget.widget().toPlainText() == ""
 
         # Now, send some message to stdout.
         # We are in the MainWindow scope, so simple 'print' will work
         message = "from stdout"
         print(message)
-        self.assertIn(message, self.manager.logDockWidget.widget().toPlainText())
+        assert message in self.manager.logDockWidget.widget().toPlainText()
 
         # Send some message to stderr
         message = "from stderr"
         sys.stderr.write(message)
-        self.assertIn(message, self.manager.logDockWidget.widget().toPlainText())
+        assert message in self.manager.logDockWidget.widget().toPlainText()
 
         # And finally, send a log message
         import logging
         message = "from logging"
         message_logged = "ERROR: " + message
         logging.error(message)
-        self.assertIn(message_logged, self.manager.logDockWidget.widget().toPlainText())
+        assert message_logged in self.manager.logDockWidget.widget().toPlainText()
 
     def testConsole(self):
         """
@@ -95,9 +95,9 @@ class GuiManagerTest(unittest.TestCase):
         self.manager.actionPython_Shell_Editor()
 
         # Test the widegt properties
-        self.assertIsInstance(self.manager.ipDockWidget, QDockWidget)
-        self.assertIsInstance(self.manager.ipDockWidget.widget(), IPythonWidget)
-        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.ipDockWidget), QtCore.Qt.RightDockWidgetArea)
+        assert isinstance(self.manager.ipDockWidget, QDockWidget)
+        assert isinstance(self.manager.ipDockWidget.widget(), IPythonWidget)
+        assert self.manager._workspace.dockWidgetArea(self.manager.ipDockWidget) == QtCore.Qt.RightDockWidgetArea
 
     def testUpdatePerspective(self):
         """
@@ -166,9 +166,9 @@ class GuiManagerTest(unittest.TestCase):
 
         self.manager.processVersion(version_info)
 
-        self.assertEqual(spy_status_update.count(), 1)
+        assert spy_status_update.count() == 1
         message = 'Could not connect to the application server. Please try again later.'
-        self.assertIn(message, str(spy_status_update.signal(index=0)))
+        assert message in str(spy_status_update.signal(index=0))
 
         # 2. version < config.__version__
         version_info = {'version' : '0.0.1'}
@@ -176,9 +176,9 @@ class GuiManagerTest(unittest.TestCase):
 
         self.manager.processVersion(version_info)
 
-        self.assertEqual(spy_status_update.count(), 1)
+        assert spy_status_update.count() == 1
         message = 'You have the latest version of SasView'
-        self.assertIn(message, str(spy_status_update.signal(index=0)))
+        assert message in str(spy_status_update.signal(index=0))
 
         # 3. version > LocalConfig.__version__
         version_info = {'version' : '999.0.0'}
@@ -187,9 +187,9 @@ class GuiManagerTest(unittest.TestCase):
 
         self.manager.processVersion(version_info)
 
-        self.assertEqual(spy_status_update.count(), 1)
+        assert spy_status_update.count() == 1
         message = 'Version 999.0.0 is available!'
-        self.assertIn(message, str(spy_status_update.signal(index=0)))
+        assert message in str(spy_status_update.signal(index=0))
 
         webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases")
 
@@ -203,11 +203,11 @@ class GuiManagerTest(unittest.TestCase):
         # Retrieve and compare arguments of the mocked call
         message = "guiframe: could not get latest application version number"
         args, _ = logging.error.call_args
-        self.assertIn(message, args[0])
+        assert message in args[0]
 
         # Check the signal message
         message = 'Could not connect to the application server.'
-        self.assertIn(message, str(spy_status_update.signal(index=0)))
+        assert message in str(spy_status_update.signal(index=0))
 
     def testActions(self):
         """
@@ -226,7 +226,7 @@ class GuiManagerTest(unittest.TestCase):
         self.manager.actionLoadData()
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QFileDialog.getOpenFileNames.called)
+        assert QFileDialog.getOpenFileNames.called
 
     def testActionLoadDataFolder(self):
         """
@@ -239,7 +239,7 @@ class GuiManagerTest(unittest.TestCase):
         self.manager.actionLoad_Data_Folder()
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QFileDialog.getExistingDirectory.called)
+        assert QFileDialog.getExistingDirectory.called
 
     #### VIEW ####
     def testActionHideToolbar(self):
@@ -250,22 +250,22 @@ class GuiManagerTest(unittest.TestCase):
         self.manager._workspace.show()
 
         # Check the initial state
-        self.assertFalse(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        assert not self.manager._workspace.toolBar.isVisible()
+        assert 'Show Toolbar' == self.manager._workspace.actionHide_Toolbar.text()
 
         # Invoke action
         self.manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        assert self.manager._workspace.toolBar.isVisible()
+        assert 'Hide Toolbar' == self.manager._workspace.actionHide_Toolbar.text()
 
         # Revert
         self.manager.actionHide_Toolbar()
 
         # Assure the original values are back
-        self.assertFalse(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        assert not self.manager._workspace.toolBar.isVisible()
+        assert 'Show Toolbar' == self.manager._workspace.actionHide_Toolbar.text()
 
 
     #### HELP ####
@@ -293,13 +293,13 @@ class GuiManagerTest(unittest.TestCase):
         tested_location = self.manager._tutorialLocation
 
         # Assure the filename is correct
-        self.assertIn("Tutorial.pdf", tested_location)
+        assert "Tutorial.pdf" in tested_location
 
         # Invoke the action
         self.manager.actionTutorial()
 
         # Check if popen() got called
-        self.assertTrue(subprocess.Popen.called)
+        assert subprocess.Popen.called
 
         #Check the popen() call arguments
         subprocess.Popen.assert_called_with([tested_location], shell=True)
@@ -311,8 +311,8 @@ class GuiManagerTest(unittest.TestCase):
         self.manager.actionAcknowledge()
 
         # Check if the window is actually opened.
-        self.assertTrue(self.manager.ackWidget.isVisible())
-        self.assertIn("developers@sasview.org", self.manager.ackWidget.label_3.text())
+        assert self.manager.ackWidget.isVisible()
+        assert "developers@sasview.org" in self.manager.ackWidget.label_3.text()
 
     def testActionCheck_for_update(self):
         """
@@ -323,7 +323,7 @@ class GuiManagerTest(unittest.TestCase):
 
         self.manager.actionCheck_for_update()
 
-        self.assertTrue(self.manager.checkUpdate.called)
+        assert self.manager.checkUpdate.called
              
        
 if __name__ == "__main__":
