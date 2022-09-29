@@ -32,17 +32,17 @@ class MainWindowTest(unittest.TestCase):
 
     def testDefaults(self):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget, QtWidgets.QMainWindow)
-        self.assertIsInstance(self.widget.centralWidget(), QtWidgets.QMdiArea)
-        self.assertTrue(self.widget.workspace.horizontalScrollBarPolicy() ==
-                        QtCore.Qt.ScrollBarAsNeeded)
-        self.assertTrue(self.widget.workspace.verticalScrollBarPolicy() ==
-                        QtCore.Qt.ScrollBarAsNeeded)
+        assert isinstance(self.widget, QtWidgets.QMainWindow)
+        assert isinstance(self.widget.centralWidget(), QtWidgets.QMdiArea)
+        assert self.widget.workspace.horizontalScrollBarPolicy() == \
+                        QtCore.Qt.ScrollBarAsNeeded
+        assert self.widget.workspace.verticalScrollBarPolicy() == \
+                        QtCore.Qt.ScrollBarAsNeeded
 
     def testSplashScreen(self):
         """ Test the splash screen """
         splash = SplashScreen()
-        self.assertIsInstance(splash, QtWidgets.QSplashScreen)
+        assert isinstance(splash, QtWidgets.QSplashScreen)
 
     def testWidgets(self):
         """ Test enablement/disablement of widgets """
@@ -51,14 +51,13 @@ class MainWindowTest(unittest.TestCase):
         tmp_main = MainSasViewWindow(screen_resolution, None)
         tmp_main.showMaximized()
         # See that only one subwindow is up
-        self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
+        assert len(tmp_main.workspace.subWindowList()) == 3
         # and that the subwindow is the fitting perspective
-        self.assertIsInstance(tmp_main.workspace.subWindowList()[0].widget(),
-                              FittingPerspective.FittingWindow)
+        assert isinstance(tmp_main.workspace.subWindowList()[0].widget(), FittingPerspective.FittingWindow)
         # Show the message widget
         tmp_main.guiManager.showWelcomeMessage()
         # Assure it is visible and a part of the MdiArea
-        self.assertEqual(len(tmp_main.workspace.subWindowList()), 3)
+        assert len(tmp_main.workspace.subWindowList()) == 3
 
         tmp_main.close()
 
@@ -68,10 +67,9 @@ class MainWindowTest(unittest.TestCase):
         Test all information is retained on perspective change
         """
         def check_after_load(name):
-            self.assertEqual(name, gui.perspective().name)
-            self.assertEqual(1, len(gui.perspective().currentTabDataId()))
-            self.assertTrue(
-                (gui.perspective().currentTabDataId()[0]) in dataIDList)
+            assert name == gui.perspective().name
+            assert 1 == len(gui.perspective().currentTabDataId())
+            assert (gui.perspective().currentTabDataId()[0]) in dataIDList
 
         # Base definitions
         FIT = 'Fitting'
@@ -81,8 +79,8 @@ class MainWindowTest(unittest.TestCase):
         currentPers = filesWidget.cbFitting
         sendDataButton = filesWidget.cmdSendTo
         # Verify defaults
-        self.assertTrue(hasattr(gui, 'loadedPerspectives'))
-        self.assertEqual(4, len(gui.loadedPerspectives))
+        assert hasattr(gui, 'loadedPerspectives')
+        assert 4 == len(gui.loadedPerspectives)
         # Load data
         file = ["cyl_400_20.txt"]
         filesWidget.readData(file)
@@ -117,7 +115,7 @@ class MainWindowTest(unittest.TestCase):
         tmp_main.close()
 
         # See that the MessageBox method got called
-        self.assertTrue(QtWidgets.QMessageBox.question.called)
+        assert QtWidgets.QMessageBox.question.called
 
 
 if __name__ == "__main__":
