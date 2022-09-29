@@ -26,18 +26,18 @@ class WelcomePanelTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Welcome")
+        assert isinstance(self.widget, QtWidgets.QDialog)
+        assert self.widget.windowTitle() == "Welcome"
         
     def testVersion(self):
         '''Test the version string'''
         version = self.widget.lblVersion
-        self.assertIsInstance(version, QtWidgets.QLabel)
+        assert isinstance(version, QtWidgets.QLabel)
 
-        self.assertIn("SasView", version.text())
-        self.assertIn("Build:", version.text())
+        assert "SasView" in version.text()
+        assert "Build:" in version.text()
         for inst in "UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, TUD, BAM, ANSTO".split(", "):
-            self.assertIn(inst, version.text())
+            assert inst in version.text()
        
 if __name__ == "__main__":
     unittest.main()
