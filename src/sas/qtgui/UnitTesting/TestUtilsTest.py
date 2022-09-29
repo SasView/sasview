@@ -23,7 +23,7 @@ class TestUtilsTest(unittest.TestCase):
 
         def signalReceived(signal):
             # Test the signal callback
-            self.assertEqual(signal, test_string)
+            assert signal == test_string
 
         communicator = Communicate()
         communicator.statusBarUpdateSignal.connect(signalReceived)
@@ -36,7 +36,7 @@ class TestUtilsTest(unittest.TestCase):
         communicator.statusBarUpdateSignal.emit(test_string)
 
         # Was the signal caught by the signal spy?
-        self.assertEqual(spy.count(), 1)
+        assert spy.count() == 1
 
 if __name__ == "__main__":
     unittest.main()
