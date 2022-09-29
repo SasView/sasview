@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import sys
-import unittest
 import webbrowser
 
 import pytest
@@ -8,9 +6,6 @@ import pytest
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 from unittest.mock import MagicMock
-
-# set up import paths
-import sas.qtgui.path_prepare
 
 # SV imports
 from sasdata.dataloader.loader import Loader
@@ -21,18 +16,9 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Tested module
 from sas.qtgui.Utilities.GuiUtils import *
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class GuiUtilsTest(unittest.TestCase):
+class GuiUtilsTest:
     '''Test the GUI Utilities methods'''
-    def setUp(self):
-        '''Empty'''
-        pass
-
-    def tearDown(self):
-        '''Empty'''
-        pass
 
     def testDefaults(self):
         """
@@ -49,7 +35,7 @@ class GuiUtilsTest(unittest.TestCase):
         pass
 
 
-    def testCommunicate(self):
+    def testCommunicate(self, qapp):
         """
         Test the container class with signal definitions
         """
@@ -73,7 +59,7 @@ class GuiUtilsTest(unittest.TestCase):
         for signal in list_of_signals:
             assert signal in dir(com)
 
-    def testupdateModelItem(self):
+    def testupdateModelItem(self, qapp):
         """
         Test the generic QModelItem update method
         """
@@ -93,7 +79,7 @@ class GuiUtilsTest(unittest.TestCase):
         assert list_from_item[2] == test_list[2]
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testupdateModelItemWithPlot(self):
+    def testupdateModelItemWithPlot(self, qapp):
         """
         Test the QModelItem checkbox update method
         """
@@ -146,7 +132,7 @@ class GuiUtilsTest(unittest.TestCase):
         assert list(data_from_item.y) == [13.0, 14.0, 15.0]
 
 
-    def testPlotsFromCheckedItems(self):
+    def testPlotsFromCheckedItems(self, qapp):
         """
         Test addition of a plottable to the model
         """
@@ -199,7 +185,7 @@ class GuiUtilsTest(unittest.TestCase):
         assert test_list2 not in plot_list[1]
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testInfoFromData(self):
+    def testInfoFromData(self, qapp):
         """
         Test Info element extraction from a plottable object
         """
@@ -335,7 +321,7 @@ class GuiUtilsTest(unittest.TestCase):
         if os.path.isfile(save_path):
             os.remove(save_path)
 
-    def testSaveAnyData(self):
+    def testSaveAnyData(self, qapp, caplog):
         """
         Test the generic GUIUtils.saveAnyData method
         """
@@ -347,7 +333,7 @@ class GuiUtilsTest(unittest.TestCase):
         file_name_save = "test123_out.txt"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.txt"
-        self.genericFileSaveTest(data, file_name, file_name_save, "ASCII", True)
+        self.genericFileSaveTest(data, file_name, file_name_save, "ASCII", caplog=caplog)
 
         data = Data2D(image=[1.0, 2.0, 3.0],
                       err_image=[0.01, 0.02, 0.03],
@@ -359,9 +345,9 @@ class GuiUtilsTest(unittest.TestCase):
         file_name_save = "test123_out.dat"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.dat"
-        self.genericFileSaveTest(data, file_name, file_name_save, "IGOR", True)
+        self.genericFileSaveTest(data, file_name, file_name_save, "IGOR", caplog=caplog)
 
-    def testSaveData1D(self):
+    def testSaveData1D(self, qapp, caplog):
         """
         Test the 1D file save method
         """
@@ -384,9 +370,9 @@ class GuiUtilsTest(unittest.TestCase):
         file_name = "test123_out.mp3"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
-        self.genericFileSaveTest(data, file_name, file_name, "ASCII", True, "1D")
+        self.genericFileSaveTest(data, file_name, file_name, "ASCII", "1D", caplog=caplog)
 
-    def testSaveData2D(self):
+    def testSaveData2D(self, qapp, caplog):
         """
         Test the 1D file save method
         """
@@ -405,9 +391,9 @@ class GuiUtilsTest(unittest.TestCase):
         file_name = "test123_out.mp3"
         QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
-        self.genericFileSaveTest(data, file_name, file_name, "IGOR", True, "2D")
+        self.genericFileSaveTest(data, file_name, file_name, "IGOR", "2D", caplog=caplog)
 
-    def genericFileSaveTest(self, data, name, name_full="", file_format="ASCII", catch_logs=False, level=None):
+    def genericFileSaveTest(self, data, name, name_full="", file_format="ASCII", level=None, caplog=False):
         if level == '1D':
             saveMethod = saveData1D
         elif level == "2D":
@@ -417,20 +403,19 @@ class GuiUtilsTest(unittest.TestCase):
 
         name_full = name if name_full == "" else name_full
 
-        if catch_logs:
-            with self.assertLogs(logger.name) as cm:
+        if caplog:
+            with caplog.at_level(logging.WARNING):
                 saveMethod(data)
-                assert len(cm.output) == 1
-                assert cm.output[0] == \
-                    (f"WARNING:sas.qtgui.Utilities.GuiUtils:Unknown file type specified when saving {name}."
-                     + f" Saving in {file_format} format.")
+                #assert len(cm.output) == 1
+                assert (f"Unknown file type specified when saving {name}."
+                        + f" Saving in {file_format} format.") in caplog.text
         else:
             saveMethod(data)
         assert os.path.isfile(name_full)
         os.remove(name_full)
         assert not os.path.isfile(name_full)
 
-    def testXYTransform(self):
+    def testXYTransform(self, qapp):
         """ Assure the unit/legend transformation is correct"""
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
@@ -627,95 +612,89 @@ class GuiUtilsTest(unittest.TestCase):
             toDouble(value)
 
 
-class DoubleValidatorTest(unittest.TestCase):
+class DoubleValidatorTest:
     """ Test the validator for floats """
-    def setUp(self):
-        '''Create the validator'''
-        self.validator = DoubleValidator()
+    @pytest.fixture(autouse=True)
+    def validator(self, qapp):
+        '''Create/Destroy the validator'''
+        v = DoubleValidator()
+        yield v
 
-    def tearDown(self):
-        '''Destroy the validator'''
-        self.validator = None
-
-    def testValidateGood(self):
+    def testValidateGood(self, validator):
         """Test a valid float """
         QtCore.QLocale.setDefault(QtCore.QLocale('en_US'))
         float_good = "170"
-        assert self.validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
+        assert validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
         float_good = "170.11"
         ## investigate: a double returns Invalid here!
         ##self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
         float_good = "17e2"
-        assert self.validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
+        assert validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
 
-    def testValidateBad(self):
+    def testValidateBad(self, validator):
         """Test a bad float """
         float_bad = None
-        assert self.validator.validate(float_bad, 1)[0] == QtGui.QValidator.Intermediate
+        assert validator.validate(float_bad, 1)[0] == QtGui.QValidator.Intermediate
         float_bad = [1]
         with pytest.raises(TypeError):
-           self.validator.validate(float_bad, 1)
+           validator.validate(float_bad, 1)
         float_bad = "1,3"
-        assert self.validator.validate(float_bad, 1)[0] == QtGui.QValidator.Invalid
+        assert validator.validate(float_bad, 1)[0] == QtGui.QValidator.Invalid
 
-    def notestFixup(self):
+    def notestFixup(self, validator):
         """Fixup of a float"""
         float_to_fixup = "1,3"
-        self.validator.fixup(float_to_fixup)
+        validator.fixup(float_to_fixup)
         assert float_to_fixup == "13"
 
 
-class FormulaValidatorTest(unittest.TestCase):
+class FormulaValidatorTest:
     """ Test the formula validator """
-    def setUp(self):
-        '''Create the validator'''
-        self.validator = FormulaValidator()
+    @pytest.fixture(autouse=True)
+    def validator(self, qapp):
+        '''Create/Destroy the validator'''
+        v = FormulaValidator()
+        yield v
 
-    def tearDown(self):
-        '''Destroy the validator'''
-        self.validator = None
-
-    def testValidateGood(self):
+    def testValidateGood(self, validator):
         """Test a valid Formula """
         formula_good = "H24O12C4C6N2Pu"
-        assert self.validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
+        assert validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
 
         formula_good = "(H2O)0.5(D2O)0.5"
-        assert self.validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
+        assert validator.validate(formula_good, 1)[0] == QtGui.QValidator.Acceptable
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testValidateBad(self):
+    def testValidateBad(self, validator):
         """Test an invalid Formula """
         formula_bad = "H24 %%%O12C4C6N2Pu"
-        pytest.raises(self.validator.validate(formula_bad, 1)[0])
-        assert self.validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
+        pytest.raises(validator.validate(formula_bad, 1)[0])
+        assert validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
 
         formula_bad = [1]
         assert self.validator.validate(formula_bad, 1)[0] == QtGui.QValidator.Intermediate
 
-class HashableStandardItemTest(unittest.TestCase):
+class HashableStandardItemTest:
     """ Test the reimplementation of QStandardItem """
-    def setUp(self):
-        '''Create the validator'''
-        self.item = HashableStandardItem()
+    @pytest.fixture(autouse=True)
+    def item(self, qapp):
+        '''Create/Destroy the HashableStandardItem'''
+        i = HashableStandardItem()
+        yield i
 
-    def tearDown(self):
-        '''Destroy the validator'''
-        self.item = None
-
-    def testHash(self):
+    def testHash(self, item):
         '''assure the item returns hash'''
-        assert self.item.__hash__() == 0
+        assert item.__hash__() == 0
 
-    def testIndexing(self):
+    def testIndexing(self, item):
         '''test that we can use HashableSI as an index'''
         dictionary = {}
-        dictionary[self.item] = "wow!"
-        assert dictionary[self.item] == "wow!"
+        dictionary[item] = "wow!"
+        assert dictionary[item] == "wow!"
 
-    def testClone(self):
+    def testClone(self, item):
         '''let's see if we can clone the item'''
-        item_clone = self.item.clone()
+        item_clone = item.clone()
         assert item_clone.__hash__() == 0
 
     def testGetConstraints(self):
@@ -743,7 +722,3 @@ class HashableStandardItemTest(unittest.TestCase):
         # check the constraints in the constraint_dict
         assert constraint_dict['M1'][0] == constraint1
         assert constraint_dict['M2'][0] == constraint2
-
-if __name__ == "__main__":
-    unittest.main()
-
