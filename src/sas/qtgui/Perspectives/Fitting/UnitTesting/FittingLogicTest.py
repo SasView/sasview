@@ -1,38 +1,37 @@
 import sys
-import unittest
+
+import pytest
 
 import numpy
 from unittest.mock import MagicMock
 
-# set up import paths
-import sas.qtgui.path_prepare
-
 # Local
-from sas.qtgui.Utilities.GuiUtils import *
-from sas.qtgui.Perspectives.Fitting.FittingWidget import *
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingLogic
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 
-class FittingLogicTest(unittest.TestCase):
+class FittingLogicTest:
     """Test the fitting logic class"""
 
-    def setUp(self):
-        """Create the component"""
+    @pytest.fixture(autouse=True)
+    def logic(self, qapp):
+        '''Create/Destroy the component'''
         data = Data1D(x=[1,2,3],y=[3,4,5])
-        self.logic = FittingLogic(data=data)
+        l = FittingLogic(data=data)
+        yield l
 
-    def testDefaults(self):
+    def testDefaults(self, logic):
         """Test the component in its default state"""
-        assert isinstance(self.logic.data, Data1D)
-        assert self.logic.data_is_loaded
-        assert self.logic.data == self.logic._data
+        assert isinstance(logic.data, Data1D)
+        assert logic.data_is_loaded
+        assert logic.data == logic._data
 
-    def testComputeDataRange(self):
+    def testComputeDataRange(self, logic):
         """
         Tests the data range calculator on Data1D/Data2D
         """
         # Using the default data
-        qmin, qmax, npts = self.logic.computeDataRange()
+        qmin, qmax, npts = logic.computeDataRange()
 
         assert qmin == 1
         assert qmax == 3
@@ -40,58 +39,58 @@ class FittingLogicTest(unittest.TestCase):
 
         # data with more points
         data = Data1D(x=[-10, 2, 10, 20],y=[-3, 4, 10, 50])
-        self.logic.data=data
-        qmin, qmax, npts = self.logic.computeDataRange()
+        logic.data=data
+        qmin, qmax, npts = logic.computeDataRange()
 
         assert qmin == -10
         assert qmax == 20
         assert npts == 4
 
-    def testCreateDefault1dData(self):
+    def testCreateDefault1dData(self, logic):
         """
         Tests the default 1D set
         """
         interval = numpy.linspace(start=1, stop=10, num=10, endpoint=True)
-        self.logic.createDefault1dData(interval=interval)
+        logic.createDefault1dData(interval=interval)
 
-        assert self.logic.data.id == ('0 data')
-        assert self.logic.data.group_id == ('0 Model1D')
-        assert not self.logic.data.is_data
-        assert self.logic.data._xaxis == ('\\rm{Q}')
-        assert self.logic.data._xunit == ('A^{-1}')
-        assert self.logic.data._yaxis == ('\\rm{Intensity}')
-        assert self.logic.data._yunit == ('cm^{-1}')
+        assert logic.data.id == ('0 data')
+        assert logic.data.group_id == ('0 Model1D')
+        assert not logic.data.is_data
+        assert logic.data._xaxis == ('\\rm{Q}')
+        assert logic.data._xunit == ('A^{-1}')
+        assert logic.data._yaxis == ('\\rm{Intensity}')
+        assert logic.data._yunit == ('cm^{-1}')
 
-    def testCreateDefault2dData(self):
+    def testCreateDefault2dData(self, logic):
         """
         Tests the default 2D set
         """
-        self.logic.createDefault2dData(qmax=0.35, qstep=50, tab_id=8)
+        logic.createDefault2dData(qmax=0.35, qstep=50, tab_id=8)
 
-        assert self.logic.data.id == ('8 data')
-        assert self.logic.data.group_id == ('8 Model2D')
-        assert not self.logic.data.is_data
-        assert self.logic.data._xaxis == ('\\rm{Q_{x}}')
-        assert self.logic.data._xunit == ('A^{-1}')
-        assert self.logic.data._yaxis == ('\\rm{Q_{y}}')
-        assert self.logic.data._yunit == ('A^{-1}')
+        assert logic.data.id == ('8 data')
+        assert logic.data.group_id == ('8 Model2D')
+        assert not logic.data.is_data
+        assert logic.data._xaxis == ('\\rm{Q_{x}}')
+        assert logic.data._xunit == ('A^{-1}')
+        assert logic.data._yaxis == ('\\rm{Q_{y}}')
+        assert logic.data._yunit == ('A^{-1}')
 
-        assert self.logic.data.xmin == -0.35
-        assert self.logic.data.xmax == 0.35
+        assert logic.data.xmin == -0.35
+        assert logic.data.xmax == 0.35
 
-        assert self.logic.data.ymin == -0.35
-        assert self.logic.data.ymax == 0.35
+        assert logic.data.ymin == -0.35
+        assert logic.data.ymax == 0.35
 
-        assert self.logic.data.data.sum() == 2500.0 # 50x50 array of 1's
-        assert self.logic.data.err_data.sum(axis=0) == 2500.0
-        assert round(abs(self.logic.data.qx_data.sum(axis=0)-0.0), 7) == 0
-        assert round(abs(self.logic.data.qy_data.sum()-0.0), 7) == 0
-        assert round(abs(self.logic.data.q_data.sum()-683.106490), 6) == 0
-        assert numpy.all(self.logic.data.mask)
-        assert round(abs(self.logic.data.x_bins.sum()-0.0), 7) == 0
-        assert round(abs(self.logic.data.y_bins.sum()-0.0), 7) == 0
+        assert logic.data.data.sum() == 2500.0 # 50x50 array of 1's
+        assert logic.data.err_data.sum(axis=0) == 2500.0
+        assert round(abs(logic.data.qx_data.sum(axis=0)-0.0), 7) == 0
+        assert round(abs(logic.data.qy_data.sum()-0.0), 7) == 0
+        assert round(abs(logic.data.q_data.sum()-683.106490), 6) == 0
+        assert numpy.all(logic.data.mask)
+        assert round(abs(logic.data.x_bins.sum()-0.0), 7) == 0
+        assert round(abs(logic.data.y_bins.sum()-0.0), 7) == 0
 
-    def testNew1DPlot(self):
+    def testNew1DPlot(self, logic):
         """
         Test how the extra shells are presented
         """
@@ -109,7 +108,7 @@ class FittingLogicTest(unittest.TestCase):
         #                None, None, None,
         #                None, None)
 
-        new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
+        new_plot = logic.new1DPlot(return_data=return_data, tab_id=0)
 
         assert isinstance(new_plot, Data1D)
         assert not new_plot.is_data
@@ -117,7 +116,7 @@ class FittingLogicTest(unittest.TestCase):
         assert new_plot.title == "boop [boop]"
         assert new_plot.name == "boop [boop]"
 
-    def testNew2DPlot(self):
+    def testNew2DPlot(self, logic):
         """
         Test the additional rows added by modifying the shells combobox
         """
@@ -139,9 +138,9 @@ class FittingLogicTest(unittest.TestCase):
         data.ymax = numpy.amax(q_0)
         data.xmin = numpy.amin(x_0)
         data.xmax = numpy.amax(x_0)
-        self.logic.data = data
+        logic.data = data
 
-        qmin, qmax, npts = self.logic.computeDataRange()
+        qmin, qmax, npts = logic.computeDataRange()
 
         # Condensed return data (new2DPlot only uses these fields)
         return_data = dict(image = x_0,
@@ -152,14 +151,9 @@ class FittingLogicTest(unittest.TestCase):
         #                 True, 0.0, 1, 0, qmin, qmax,
         #                 0.1, False, None)
 
-        new_plot = self.logic.new2DPlot(return_data=return_data)
+        new_plot = logic.new2DPlot(return_data=return_data)
 
         assert isinstance(new_plot, Data2D)
         assert not new_plot.is_data
         assert new_plot.title == "Analytical model 2D "
         assert new_plot.name == "boop [boop]"
-
-
-
-if __name__ == "__main__":
-    unittest.main()
