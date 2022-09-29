@@ -1,6 +1,8 @@
 import sys
 import logging
-import unittest
+
+import pytest
+
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
@@ -17,16 +19,16 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
 
-class InvariantPerspectiveTest(unittest.TestCase):
+class InvariantPerspectiveTest:
     """Test the Invariant Perspective Window"""
-    def setUp(self):
-        """Create the Invariant Perspective Window"""
+
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the Invariant Perspective Window'''
 
         class MainWindow(object):
             def __init__(self):
@@ -49,7 +51,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
                 # Pass data back - testing module - production createGuiData returns a QStandardItem
                 return data_to_plot
 
-        self.widget = InvariantWindow(dummy_manager())
+        w = InvariantWindow(dummy_manager())
         # Real data taken from src/sas/sasview/test/id_data/AOT_Microemulsion-Core_Contrast.xml
         # Using hard-coded data to limit sascalc imports in gui tests
         self.data = Data1D(
@@ -95,304 +97,304 @@ class InvariantPerspectiveTest(unittest.TestCase):
         GuiUtils.dataFromItem = MagicMock(return_value=self.data)
         self.fakeData = QtGui.QStandardItem("test")
 
-    def tearDown(self):
-        """Destroy the DataOperationUtility"""
-        self.widget.setClosable(True)
-        self.widget.close()
-        self.widget = None
+        yield w
 
-    def testDefaults(self):
+        """Destroy the DataOperationUtility"""
+        w.setClosable(True)
+        w.close()
+
+    def testDefaults(self, widget):
         """Test the GUI in its default state"""
 
-        assert isinstance(self.widget, QtWidgets.QDialog)
-        assert isinstance(self.widget.model, QtGui.QStandardItemModel)
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert isinstance(widget.model, QtGui.QStandardItemModel)
 
         # name for displaying in the DataExplorer combo box
-        assert self.widget.name == "Invariant"
-        assert self.widget.windowTitle() == "Invariant Perspective"
-        assert self.widget.title == self.widget.windowTitle()
+        assert widget.name == "Invariant"
+        assert widget.windowTitle() == "Invariant Perspective"
+        assert widget.title == widget.windowTitle()
 
-        assert self.widget._data is None
-        assert self.widget._path == ''
+        assert widget._data is None
+        assert widget._path == ''
 
-        self.checkControlDefaults()
+        self.checkControlDefaults(widget)
 
         # content of line edits
-        assert self.widget.txtName.text() == ''
-        assert self.widget.txtTotalQMin.text() == '0.0'
-        assert self.widget.txtTotalQMax.text() == '0.0'
-        assert self.widget.txtBackgd.text() == '0.0'
-        assert self.widget.txtScale.text() == '1.0'
-        assert self.widget.txtContrast.text() == '8e-06'
-        assert self.widget.txtExtrapolQMin.text() == '1e-05'
-        assert self.widget.txtExtrapolQMax.text() == '10'
-        assert self.widget.txtPowerLowQ.text() == '4'
-        assert self.widget.txtPowerHighQ.text() == '4'
+        assert widget.txtName.text() == ''
+        assert widget.txtTotalQMin.text() == '0.0'
+        assert widget.txtTotalQMax.text() == '0.0'
+        assert widget.txtBackgd.text() == '0.0'
+        assert widget.txtScale.text() == '1.0'
+        assert widget.txtContrast.text() == '8e-06'
+        assert widget.txtExtrapolQMin.text() == '1e-05'
+        assert widget.txtExtrapolQMax.text() == '10'
+        assert widget.txtPowerLowQ.text() == '4'
+        assert widget.txtPowerHighQ.text() == '4'
 
         # number of tabs
-        assert self.widget.tabWidget.count() == 2
+        assert widget.tabWidget.count() == 2
         # default tab
-        assert self.widget.tabWidget.currentIndex() == 0
+        assert widget.tabWidget.currentIndex() == 0
         # tab's title
-        assert self.widget.tabWidget.tabText(0) == 'Invariant'
-        assert self.widget.tabWidget.tabText(1) == 'Options'
+        assert widget.tabWidget.tabText(0) == 'Invariant'
+        assert widget.tabWidget.tabText(1) == 'Options'
 
         # Tooltips
-        assert self.widget.cmdStatus.toolTip() == \
+        assert widget.cmdStatus.toolTip() == \
                          "Get more details of computation such as fraction from extrapolation"
-        assert self.widget.txtInvariantTot.toolTip() == "Total invariant [Q*], including extrapolated regions."
-        assert self.widget.txtExtrapolQMin.toolTip() == "The minimum extrapolated q value."
-        assert self.widget.txtPowerHighQ.toolTip() == "Exponent to apply to the Power_law function."
-        assert self.widget.txtNptsHighQ.toolTip() == \
+        assert widget.txtInvariantTot.toolTip() == "Total invariant [Q*], including extrapolated regions."
+        assert widget.txtExtrapolQMin.toolTip() == "The minimum extrapolated q value."
+        assert widget.txtPowerHighQ.toolTip() == "Exponent to apply to the Power_law function."
+        assert widget.txtNptsHighQ.toolTip() == \
                          "Number of Q points to consider\n while extrapolating the high-Q region"
-        assert self.widget.chkHighQ.toolTip() == "Check to extrapolate data at high-Q"
-        assert self.widget.txtNptsLowQ.toolTip() == \
+        assert widget.chkHighQ.toolTip() == "Check to extrapolate data at high-Q"
+        assert widget.txtNptsLowQ.toolTip() == \
                          "Number of Q points to consider\nwhile extrapolating the low-Q region"
-        assert self.widget.chkLowQ.toolTip() == "Check to extrapolate data at low-Q"
-        assert self.widget.cmdCalculate.toolTip() == "Compute invariant"
-        assert self.widget.txtPowerLowQ.toolTip() == "Exponent to apply to the Power_law function."
+        assert widget.chkLowQ.toolTip() == "Check to extrapolate data at low-Q"
+        assert widget.cmdCalculate.toolTip() == "Compute invariant"
+        assert widget.txtPowerLowQ.toolTip() == "Exponent to apply to the Power_law function."
 
         # Validators
-        assert isinstance(self.widget.txtNptsLowQ.validator(), QtGui.QIntValidator)
-        assert isinstance(self.widget.txtNptsHighQ.validator(), QtGui.QIntValidator)
-        assert isinstance(self.widget.txtExtrapolQMin.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtExtrapolQMax.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtPowerLowQ.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtPowerHighQ.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtBackgd.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtContrast.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtScale.validator(), GuiUtils.DoubleValidator)
-        assert isinstance(self.widget.txtPorodCst.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtNptsLowQ.validator(), QtGui.QIntValidator)
+        assert isinstance(widget.txtNptsHighQ.validator(), QtGui.QIntValidator)
+        assert isinstance(widget.txtExtrapolQMin.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtExtrapolQMax.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtPowerLowQ.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtPowerHighQ.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtBackgd.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtContrast.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtScale.validator(), GuiUtils.DoubleValidator)
+        assert isinstance(widget.txtPorodCst.validator(), GuiUtils.DoubleValidator)
 
-    def checkControlDefaults(self):
+    def checkControlDefaults(self, widget):
         # All values in this list should assert to False
         false_list = [
-            self.widget._allow_close, self.widget.allowBatch(),
+            widget._allow_close, widget.allowBatch(),
             # disabled buttons
-            self.widget.cmdStatus.isEnabled(), self.widget.cmdCalculate.isEnabled(),
+            widget.cmdStatus.isEnabled(), widget.cmdCalculate.isEnabled(),
             # read only text boxes
-            self.widget.txtBackgd.isReadOnly(), self.widget.txtScale.isReadOnly(), self.widget.txtContrast.isReadOnly(),
-            self.widget.txtPorodCst.isReadOnly(), self.widget.txtNptsLowQ.isReadOnly(),
-            self.widget.txtNptsHighQ.isReadOnly(), self.widget.txtName.isEnabled(),
-            self.widget.txtExtrapolQMin.isReadOnly(), self.widget.txtExtrapolQMax.isReadOnly(),
+            widget.txtBackgd.isReadOnly(), widget.txtScale.isReadOnly(), widget.txtContrast.isReadOnly(),
+            widget.txtPorodCst.isReadOnly(), widget.txtNptsLowQ.isReadOnly(),
+            widget.txtNptsHighQ.isReadOnly(), widget.txtName.isEnabled(),
+            widget.txtExtrapolQMin.isReadOnly(), widget.txtExtrapolQMax.isReadOnly(),
             # unchecked check boxes
-            self.widget.chkLowQ.isChecked(), self.widget.chkHighQ.isChecked(),
+            widget.chkLowQ.isChecked(), widget.chkHighQ.isChecked(),
             # radio buttons exclusivity
-            self.widget.rbGuinier.autoExclusive(), self.widget.rbPowerLawLowQ.autoExclusive()
+            widget.rbGuinier.autoExclusive(), widget.rbPowerLawLowQ.autoExclusive()
             ]
         # All values in this list should assert to True
         true_list = [
             # Enable buttons
-            self.widget.txtExtrapolQMax.isEnabled(), self.widget.txtExtrapolQMin.isEnabled(),
+            widget.txtExtrapolQMax.isEnabled(), widget.txtExtrapolQMin.isEnabled(),
             # enabled text boxes
-            self.widget.txtVolFract.isReadOnly(), self.widget.txtVolFractErr.isReadOnly(),
-            self.widget.txtSpecSurf.isReadOnly(), self.widget.txtSpecSurfErr.isReadOnly(),
-            self.widget.txtInvariantTot.isReadOnly(), self.widget.txtInvariantTotErr.isReadOnly(),
+            widget.txtVolFract.isReadOnly(), widget.txtVolFractErr.isReadOnly(),
+            widget.txtSpecSurf.isReadOnly(), widget.txtSpecSurfErr.isReadOnly(),
+            widget.txtInvariantTot.isReadOnly(), widget.txtInvariantTotErr.isReadOnly(),
             # radio buttons exclusivity
-            self.widget.rbFixLowQ.autoExclusive(), self.widget.rbFitLowQ.autoExclusive(),
-            self.widget.rbFixHighQ.autoExclusive(), self.widget.rbFitHighQ.autoExclusive()
+            widget.rbFixLowQ.autoExclusive(), widget.rbFitLowQ.autoExclusive(),
+            widget.rbFixHighQ.autoExclusive(), widget.rbFitHighQ.autoExclusive()
             ]
         assert all(v is False for v in false_list)
         assert all(v is True for v in true_list)
 
-    def testOnCalculate(self):
+    def testOnCalculate(self, widget):
         """ Test onCompute function """
-        self.widget.calculateInvariant = MagicMock()
-        self.widget.cmdCalculate.setEnabled(True)
-        QTest.mouseClick(self.widget.cmdCalculate, Qt.LeftButton)
-        assert self.widget.calculateInvariant.called_once()
+        widget.calculateInvariant = MagicMock()
+        widget.cmdCalculate.setEnabled(True)
+        QTest.mouseClick(widget.cmdCalculate, Qt.LeftButton)
+        assert widget.calculateInvariant.called_once()
 
-    def testCalculateInvariant(self):
+    def testCalculateInvariant(self, widget):
         """ """
         threads.deferToThread = MagicMock()
-        self.widget.calculateInvariant()
+        widget.calculateInvariant()
         assert threads.deferToThread.called
         assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'calculateThread'
 
-        assert self.widget.cmdCalculate.text() == 'Calculating...'
-        assert not self.widget.cmdCalculate.isEnabled()
+        assert widget.cmdCalculate.text() == 'Calculating...'
+        assert not widget.cmdCalculate.isEnabled()
 
-    def testUpdateFromModel(self):
+    def testUpdateFromModel(self, widget):
         """
         update the globals based on the data in the model
         """
-        self.widget.updateFromModel()
-        assert self.widget._background == float(self.widget.model.item(WIDGETS.W_BACKGROUND).text())
-        assert self.widget._contrast == float(self.widget.model.item(WIDGETS.W_CONTRAST).text())
-        assert self.widget._scale == float(self.widget.model.item(WIDGETS.W_SCALE).text())
-        assert self.widget._low_extrapolate == \
-                         (str(self.widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == 'true')
-        assert self.widget._low_points == float(self.widget.model.item(WIDGETS.W_NPTS_LOWQ).text())
-        assert self.widget._low_guinier == (str(self.widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()) == 'true')
-        assert self.widget._low_fit == (str(self.widget.model.item(WIDGETS.W_LOWQ_FIT).text()) == 'true')
-        assert self.widget._low_power_value == float(self.widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text())
-        assert self.widget._high_extrapolate == \
-                         (str(self.widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == 'true')
-        assert self.widget._high_points == float(self.widget.model.item(WIDGETS.W_NPTS_HIGHQ).text())
-        assert self.widget._high_fit == (str(self.widget.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true')
-        assert self.widget._high_power_value == \
-                         float(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
+        widget.updateFromModel()
+        assert widget._background == float(widget.model.item(WIDGETS.W_BACKGROUND).text())
+        assert widget._contrast == float(widget.model.item(WIDGETS.W_CONTRAST).text())
+        assert widget._scale == float(widget.model.item(WIDGETS.W_SCALE).text())
+        assert widget._low_extrapolate == \
+                         (str(widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == 'true')
+        assert widget._low_points == float(widget.model.item(WIDGETS.W_NPTS_LOWQ).text())
+        assert widget._low_guinier == (str(widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()) == 'true')
+        assert widget._low_fit == (str(widget.model.item(WIDGETS.W_LOWQ_FIT).text()) == 'true')
+        assert widget._low_power_value == float(widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text())
+        assert widget._high_extrapolate == \
+                         (str(widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()) == 'true')
+        assert widget._high_points == float(widget.model.item(WIDGETS.W_NPTS_HIGHQ).text())
+        assert widget._high_fit == (str(widget.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true')
+        assert widget._high_power_value == \
+                         float(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
 
-    def testCheckLength(self):
+    def testCheckLength(self, widget):
         """
         Test validator for number of points for extrapolation
          Error if it is larger than the distribution length
         """
         logging.warning = MagicMock()
-        self.widget.txtNptsLowQ.setEnabled(True)
+        widget.txtNptsLowQ.setEnabled(True)
 
-        self.widget.setData([self.fakeData])
+        widget.setData([self.fakeData])
         # Set number of points to 1 larger than the data
-        self.widget.txtNptsLowQ.setText(str(len(self.data.x) + 1))
+        widget.txtNptsLowQ.setText(str(len(self.data.x) + 1))
 
         BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
         # Ensure a warning is issued in the GUI that the number of points is too large
-        assert BG_COLOR_ERR in self.widget.txtNptsLowQ.styleSheet()
+        assert BG_COLOR_ERR in widget.txtNptsLowQ.styleSheet()
         assert logging.warning.called_once_with()
-        assert not self.widget.cmdCalculate.isEnabled()
+        assert not widget.cmdCalculate.isEnabled()
 
-    def testExtrapolationQRange(self):
+    def testExtrapolationQRange(self, widget):
         """
         Test changing the extrapolated Q-range
         """
         # Set values to invalid points and be sure the calculation cannot be run
-        self.widget.txtNptsLowQ.setText('4')
-        self.widget.txtNptsHighQ.setText('4')
-        self.widget.txtExtrapolQMin.setText('0.8')
-        self.widget.txtExtrapolQMax.setText('0.2')
-        self.widget.setData([self.fakeData])
-        assert not self.widget.cmdCalculate.isEnabled()
+        widget.txtNptsLowQ.setText('4')
+        widget.txtNptsHighQ.setText('4')
+        widget.txtExtrapolQMin.setText('0.8')
+        widget.txtExtrapolQMax.setText('0.2')
+        widget.setData([self.fakeData])
+        assert not widget.cmdCalculate.isEnabled()
         # Set Qmin to a valid value, but leave Qmax invalid - should not be able to calculate
-        self.widget.txtExtrapolQMin.setText('0.001')
-        assert not self.widget.cmdCalculate.isEnabled()
+        widget.txtExtrapolQMin.setText('0.001')
+        assert not widget.cmdCalculate.isEnabled()
         # Set Qmax to a valid value - calculation should now be possible
-        self.widget.txtExtrapolQMax.setText('100.0')
-        assert self.widget.cmdCalculate.isEnabled()
+        widget.txtExtrapolQMax.setText('100.0')
+        assert widget.cmdCalculate.isEnabled()
 
-    def testUpdateFromGui(self):
+    def testUpdateFromGui(self, widget):
         """ """
-        self.widget.txtBackgd.setText('0.22')
-        assert str(self.widget.model.item(WIDGETS.W_BACKGROUND).text()) == '0.22'
+        widget.txtBackgd.setText('0.22')
+        assert str(widget.model.item(WIDGETS.W_BACKGROUND).text()) == '0.22'
 
-    def testLowGuinierAndPowerToggle(self):
+    def testLowGuinierAndPowerToggle(self, widget):
         """ """
         # enable all tested radiobuttons
-        self.widget.rbGuinier.setEnabled(True)
-        self.widget.rbPowerLawLowQ.setEnabled(True)
-        self.widget.txtNptsLowQ.setEnabled(True)
+        widget.rbGuinier.setEnabled(True)
+        widget.rbPowerLawLowQ.setEnabled(True)
+        widget.txtNptsLowQ.setEnabled(True)
         # record initial status
-        status_ini = self.widget.rbGuinier.isChecked()
+        status_ini = widget.rbGuinier.isChecked()
         # mouse click to run function
-        QTest.mouseClick(self.widget.rbGuinier, Qt.LeftButton)
+        QTest.mouseClick(widget.rbGuinier, Qt.LeftButton)
         # check that status changed
-        assert self.widget.rbGuinier.isChecked() != status_ini
-        status_fin = self.widget.rbGuinier.isChecked()
-        assert self.widget.rbPowerLawLowQ.isChecked() == (not status_fin)
-        assert self.widget.txtPowerLowQ.isEnabled() == \
-                         all([not status_fin, not self.widget._low_fit])
+        assert widget.rbGuinier.isChecked() != status_ini
+        status_fin = widget.rbGuinier.isChecked()
+        assert widget.rbPowerLawLowQ.isChecked() == (not status_fin)
+        assert widget.txtPowerLowQ.isEnabled() == \
+                         all([not status_fin, not widget._low_fit])
 
-    def testHighQToggle(self):
+    def testHighQToggle(self, widget):
         """ Test enabling / disabling for check box High Q extrapolation """
-        self.widget.chkHighQ.setChecked(True)
-        assert self.widget.chkHighQ.isChecked()
+        widget.chkHighQ.setChecked(True)
+        assert widget.chkHighQ.isChecked()
         # Check base state when high Q fit toggled
-        assert self.widget.rbFitHighQ.isChecked()
-        assert not self.widget.rbFixHighQ.isChecked()
-        assert self.widget.rbFitHighQ.isEnabled()
-        assert self.widget.rbFixHighQ.isEnabled()
-        assert self.widget.txtNptsHighQ.isEnabled()
-        assert not self.widget.txtPowerHighQ.isEnabled()
+        assert widget.rbFitHighQ.isChecked()
+        assert not widget.rbFixHighQ.isChecked()
+        assert widget.rbFitHighQ.isEnabled()
+        assert widget.rbFixHighQ.isEnabled()
+        assert widget.txtNptsHighQ.isEnabled()
+        assert not widget.txtPowerHighQ.isEnabled()
         # Toggle between fit and fix
-        self.widget.rbFixHighQ.setChecked(True)
-        assert not self.widget.rbFitHighQ.isChecked()
-        assert self.widget.rbFixHighQ.isChecked()
-        assert self.widget.txtPowerHighQ.isEnabled()
+        widget.rbFixHighQ.setChecked(True)
+        assert not widget.rbFitHighQ.isChecked()
+        assert widget.rbFixHighQ.isChecked()
+        assert widget.txtPowerHighQ.isEnabled()
         # Change value and be sure model updates
-        self.widget.txtPowerHighQ.setText("11")
-        assert self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text() == '11'
+        widget.txtPowerHighQ.setText("11")
+        assert widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text() == '11'
         # Check Qmax of plot
-        self.widget.txtExtrapolQMax.setText('100')
-        assert self.widget.txtExtrapolQMax.text() == '100'
+        widget.txtExtrapolQMax.setText('100')
+        assert widget.txtExtrapolQMax.text() == '100'
         # Run the calculation
-        self.widget.setData([self.fakeData])
-        self.widget.calculateThread('high')
+        widget.setData([self.fakeData])
+        widget.calculateThread('high')
         # Ensure the extrapolation plot is generated
-        assert self.widget.high_extrapolation_plot is not None
+        assert widget.high_extrapolation_plot is not None
         # Ensure Qmax for the plot is equal to Qmax entered into the extrapolation limits
-        assert round(abs(max(self.widget.high_extrapolation_plot.x)-100.0), 7) == 0
+        assert round(abs(max(widget.high_extrapolation_plot.x)-100.0), 7) == 0
         # Ensure radio buttons unchanged
-        assert not self.widget.rbFitHighQ.isChecked()
-        assert self.widget.rbFixHighQ.isChecked()
-        assert self.widget.txtPowerHighQ.text() == '11'
+        assert not widget.rbFitHighQ.isChecked()
+        assert widget.rbFixHighQ.isChecked()
+        assert widget.txtPowerHighQ.text() == '11'
 
-    def testLowQToggle(self):
+    def testLowQToggle(self, widget):
         """ Test enabling / disabling for check box Low Q extrapolation """
-        self.widget.chkLowQ.setChecked(True)
-        status_chkLowQ = self.widget.chkLowQ.isChecked()
+        widget.chkLowQ.setChecked(True)
+        status_chkLowQ = widget.chkLowQ.isChecked()
         assert status_chkLowQ
         # Check base state
-        assert self.widget.rbGuinier.isEnabled()
-        assert self.widget.rbPowerLawLowQ.isEnabled()
-        assert self.widget.txtNptsLowQ.isEnabled()
-        assert self.widget.rbFitLowQ.isEnabled()
-        assert self.widget.rbFixLowQ.isEnabled()
-        assert self.widget.rbGuinier.isChecked()
-        assert self.widget.rbFitLowQ.isChecked()
+        assert widget.rbGuinier.isEnabled()
+        assert widget.rbPowerLawLowQ.isEnabled()
+        assert widget.txtNptsLowQ.isEnabled()
+        assert widget.rbFitLowQ.isEnabled()
+        assert widget.rbFixLowQ.isEnabled()
+        assert widget.rbGuinier.isChecked()
+        assert widget.rbFitLowQ.isChecked()
         # Click the Power Law radio button
-        self.widget.rbPowerLawLowQ.setChecked(True)
-        assert not self.widget.rbGuinier.isChecked()
-        assert self.widget.rbFitLowQ.isChecked()
-        assert not self.widget.txtPowerLowQ.isEnabled()
+        widget.rbPowerLawLowQ.setChecked(True)
+        assert not widget.rbGuinier.isChecked()
+        assert widget.rbFitLowQ.isChecked()
+        assert not widget.txtPowerLowQ.isEnabled()
         # Return to the Guinier
-        self.widget.rbGuinier.setChecked(True)
-        assert self.widget.txtNptsLowQ.isEnabled() == \
-                         all([status_chkLowQ, self.widget._low_guinier, self.widget._low_fit])
+        widget.rbGuinier.setChecked(True)
+        assert widget.txtNptsLowQ.isEnabled() == \
+                         all([status_chkLowQ, widget._low_guinier, widget._low_fit])
 
-        self.widget.calculateInvariant()
+        widget.calculateInvariant()
         # Ensure radio buttons unchanged
-        assert self.widget.rbGuinier.isChecked()
-        assert self.widget.rbFitLowQ.isChecked()
+        assert widget.rbGuinier.isChecked()
+        assert widget.rbFitLowQ.isChecked()
 
-    def testSetupModel(self):
+    def testSetupModel(self, widget):
         """ Test default settings of model"""
 
-        assert self.widget.model.item(WIDGETS.W_NAME).text() == self.widget._path
-        assert self.widget.model.item(WIDGETS.W_QMIN).text() == '0.0'
-        assert self.widget.model.item(WIDGETS.W_QMAX).text() == '0.0'
-        assert self.widget.model.item(WIDGETS.W_BACKGROUND).text() == str(self.widget._background)
-        assert self.widget.model.item(WIDGETS.W_CONTRAST).text() == str(self.widget._contrast)
-        assert self.widget.model.item(WIDGETS.W_SCALE).text() == str(self.widget._scale)
-        assert str(self.widget.model.item(WIDGETS.W_POROD_CST).text()) in ['', str(self.widget._porod)]
+        assert widget.model.item(WIDGETS.W_NAME).text() == widget._path
+        assert widget.model.item(WIDGETS.W_QMIN).text() == '0.0'
+        assert widget.model.item(WIDGETS.W_QMAX).text() == '0.0'
+        assert widget.model.item(WIDGETS.W_BACKGROUND).text() == str(widget._background)
+        assert widget.model.item(WIDGETS.W_CONTRAST).text() == str(widget._contrast)
+        assert widget.model.item(WIDGETS.W_SCALE).text() == str(widget._scale)
+        assert str(widget.model.item(WIDGETS.W_POROD_CST).text()) in ['', str(widget._porod)]
 
-        assert str(self.widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()).lower() == 'false'
-        assert str(self.widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()).lower() == 'false'
-        assert str(self.widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()).lower() == 'true'
-        assert str(self.widget.model.item(WIDGETS.W_LOWQ_FIT).text()).lower() == 'true'
-        assert str(self.widget.model.item(WIDGETS.W_HIGHQ_FIT).text()).lower() == 'true'
+        assert str(widget.model.item(WIDGETS.W_ENABLE_HIGHQ).text()).lower() == 'false'
+        assert str(widget.model.item(WIDGETS.W_ENABLE_LOWQ).text()).lower() == 'false'
+        assert str(widget.model.item(WIDGETS.W_LOWQ_GUINIER).text()).lower() == 'true'
+        assert str(widget.model.item(WIDGETS.W_LOWQ_FIT).text()).lower() == 'true'
+        assert str(widget.model.item(WIDGETS.W_HIGHQ_FIT).text()).lower() == 'true'
 
-        assert str(self.widget.model.item(WIDGETS.W_NPTS_LOWQ).text()) == str(10)
-        assert self.widget.model.item(WIDGETS.W_NPTS_HIGHQ).text() == str(10)
-        assert str(self.widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text()) == '4'
-        assert str(self.widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()) == '4'
+        assert str(widget.model.item(WIDGETS.W_NPTS_LOWQ).text()) == str(10)
+        assert widget.model.item(WIDGETS.W_NPTS_HIGHQ).text() == str(10)
+        assert str(widget.model.item(WIDGETS.W_LOWQ_POWER_VALUE).text()) == '4'
+        assert str(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text()) == '4'
 
-    def testSetupMapper(self):
+    def testSetupMapper(self, widget):
         """ """
-        assert isinstance(self.widget.mapper, QtWidgets.QDataWidgetMapper)
-        assert self.widget.mapper.orientation() == 2
-        assert self.widget.mapper.model() == self.widget.model
+        assert isinstance(widget.mapper, QtWidgets.QDataWidgetMapper)
+        assert widget.mapper.orientation() == 2
+        assert widget.mapper.model() == widget.model
 
-    def testSerialization(self):
+    def testSerialization(self, widget):
         """ Serialization routines """
-        assert hasattr(self.widget, 'isSerializable')
-        assert self.widget.isSerializable()
-        self.widget.setData([self.fakeData])
-        self.checkFakeDataState()
-        data_return = GuiUtils.dataFromItem(self.widget._model_item)
+        assert hasattr(widget, 'isSerializable')
+        assert widget.isSerializable()
+        widget.setData([self.fakeData])
+        self.checkFakeDataState(widget)
+        data_return = GuiUtils.dataFromItem(widget._model_item)
         data_id = str(data_return.id)
         # Test three separate serialization routines
-        state_all = self.widget.serializeAll()
-        state_one = self.widget.serializeCurrentPage()
-        page = self.widget.getPage()
+        state_all = widget.serializeAll()
+        state_one = widget.serializeCurrentPage()
+        page = widget.getPage()
         # Pull out params from state
         params = state_all[data_id]['invar_params']
         # Tests
@@ -403,71 +405,67 @@ class InvariantPerspectiveTest(unittest.TestCase):
         assert len(params) == 24
         assert len(page) == 25
 
-    def testLoadParams(self):
-        self.widget.setData([self.fakeData])
-        self.checkFakeDataState()
-        pageState = self.widget.getPage()
-        self.widget.updateFromParameters(pageState)
-        self.checkFakeDataState()
-        self.widget.removeData([self.fakeData])
-        self.checkControlDefaults()
+    def testLoadParams(self, widget):
+        widget.setData([self.fakeData])
+        self.checkFakeDataState(widget)
+        pageState = widget.getPage()
+        widget.updateFromParameters(pageState)
+        self.checkFakeDataState(widget)
+        widget.removeData([self.fakeData])
+        self.checkControlDefaults(widget)
 
-    def testRemoveData(self):
-        self.widget.setData([self.fakeData])
-        self.checkFakeDataState()
+    def testRemoveData(self, widget):
+        widget.setData([self.fakeData])
+        self.checkFakeDataState(widget)
         # Removing something not already in the perspective should do nothing
-        self.widget.removeData([])
-        self.checkFakeDataState()
+        widget.removeData([])
+        self.checkFakeDataState(widget)
         # Be sure the defaults hold true after data removal
-        self.widget.removeData([self.fakeData])
-        self.checkControlDefaults()
+        widget.removeData([self.fakeData])
+        self.checkControlDefaults(widget)
 
-    def checkFakeDataState(self):
+    def checkFakeDataState(self, widget):
         """ Ensure the state is constant every time the fake data set loaded """
-        assert self.widget._data is not None
+        assert widget._data is not None
 
         # push buttons enabled
-        assert not self.widget.cmdStatus.isEnabled()
-        assert not self.widget.cmdCalculate.isEnabled()
+        assert not widget.cmdStatus.isEnabled()
+        assert not widget.cmdCalculate.isEnabled()
 
         # disabled, read only line edits
-        assert not self.widget.txtName.isEnabled()
-        assert self.widget.txtVolFract.isReadOnly()
-        assert self.widget.txtVolFractErr.isReadOnly()
+        assert not widget.txtName.isEnabled()
+        assert widget.txtVolFract.isReadOnly()
+        assert widget.txtVolFractErr.isReadOnly()
 
-        assert self.widget.txtSpecSurf.isReadOnly()
-        assert self.widget.txtSpecSurfErr.isReadOnly()
+        assert widget.txtSpecSurf.isReadOnly()
+        assert widget.txtSpecSurfErr.isReadOnly()
 
-        assert self.widget.txtInvariantTot.isReadOnly()
-        assert self.widget.txtInvariantTotErr.isReadOnly()
+        assert widget.txtInvariantTot.isReadOnly()
+        assert widget.txtInvariantTotErr.isReadOnly()
 
-        assert not self.widget.txtBackgd.isReadOnly()
-        assert not self.widget.txtScale.isReadOnly()
-        assert not self.widget.txtContrast.isReadOnly()
-        assert not self.widget.txtPorodCst.isReadOnly()
+        assert not widget.txtBackgd.isReadOnly()
+        assert not widget.txtScale.isReadOnly()
+        assert not widget.txtContrast.isReadOnly()
+        assert not widget.txtPorodCst.isReadOnly()
 
-        assert self.widget.txtExtrapolQMin.isEnabled()
-        assert self.widget.txtExtrapolQMax.isEnabled()
+        assert widget.txtExtrapolQMin.isEnabled()
+        assert widget.txtExtrapolQMax.isEnabled()
 
-        assert not self.widget.txtNptsLowQ.isReadOnly()
-        assert not self.widget.txtNptsHighQ.isReadOnly()
+        assert not widget.txtNptsLowQ.isReadOnly()
+        assert not widget.txtNptsHighQ.isReadOnly()
 
         # content of line edits
-        assert self.widget.txtName.text() == 'data'
-        assert self.widget.txtTotalQMin.text() == '0.009'
-        assert self.widget.txtTotalQMax.text() == '0.281'
-        assert self.widget.txtBackgd.text() == '0.0'
-        assert self.widget.txtScale.text() == '1.0'
-        assert self.widget.txtContrast.text() == '8e-06'
-        assert self.widget.txtExtrapolQMin.text() == '1e-05'
-        assert self.widget.txtExtrapolQMax.text() == '10'
-        assert self.widget.txtPowerLowQ.text() == '4'
-        assert self.widget.txtPowerHighQ.text() == '4'
+        assert widget.txtName.text() == 'data'
+        assert widget.txtTotalQMin.text() == '0.009'
+        assert widget.txtTotalQMax.text() == '0.281'
+        assert widget.txtBackgd.text() == '0.0'
+        assert widget.txtScale.text() == '1.0'
+        assert widget.txtContrast.text() == '8e-06'
+        assert widget.txtExtrapolQMin.text() == '1e-05'
+        assert widget.txtExtrapolQMax.text() == '10'
+        assert widget.txtPowerLowQ.text() == '4'
+        assert widget.txtPowerHighQ.text() == '4'
 
         # unchecked checkboxes
-        assert not self.widget.chkLowQ.isChecked()
-        assert not self.widget.chkHighQ.isChecked()
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert not widget.chkLowQ.isChecked()
+        assert not widget.chkHighQ.isChecked()
