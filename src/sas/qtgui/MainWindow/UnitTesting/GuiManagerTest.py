@@ -1,6 +1,5 @@
 import sys
 import subprocess
-import unittest
 import webbrowser
 import logging
 
@@ -22,13 +21,13 @@ from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
-if not QApplication.instance():
-    app = QApplication(sys.argv)
 
-class GuiManagerTest(unittest.TestCase):
+class GuiManagerTest:
     '''Test the Main Window functionality'''
-    def setUp(self):
-        '''Create the tested object'''
+
+    @pytest.fixture(autouse=True)
+    def manager(self, qapp):
+        '''Create/Destroy the GUI Manager'''
         class MainWindow(MainSasViewWindow):
             # Main window of the application
             def __init__(self, reactor, parent=None):
@@ -39,86 +38,84 @@ class GuiManagerTest(unittest.TestCase):
                 self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
 
-        self.manager = GuiManager(MainWindow(None))
+        m = GuiManager(MainWindow(None))
 
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.manager = None
+        yield m
 
-    def testDefaults(self):
+    def testDefaults(self, manager):
         """
         Test the object in its default state
         """
-        assert isinstance(self.manager.filesWidget, DataExplorerWindow)
-        assert isinstance(self.manager.dockedFilesWidget, QDockWidget)
-        assert isinstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
-        assert self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget) == QtCore.Qt.LeftDockWidgetArea
+        assert isinstance(manager.filesWidget, DataExplorerWindow)
+        assert isinstance(manager.dockedFilesWidget, QDockWidget)
+        assert isinstance(manager.dockedFilesWidget.widget(), DataExplorerWindow)
+        assert manager._workspace.dockWidgetArea(manager.dockedFilesWidget) == QtCore.Qt.LeftDockWidgetArea
 
-        assert isinstance(self.manager.logDockWidget, QDockWidget)
-        assert isinstance(self.manager.logDockWidget.widget(), QTextBrowser)
-        assert self.manager._workspace.dockWidgetArea(self.manager.logDockWidget) == QtCore.Qt.BottomDockWidgetArea
+        assert isinstance(manager.logDockWidget, QDockWidget)
+        assert isinstance(manager.logDockWidget.widget(), QTextBrowser)
+        assert manager._workspace.dockWidgetArea(manager.logDockWidget) == QtCore.Qt.BottomDockWidgetArea
 
-        assert isinstance(self.manager.ackWidget, Acknowledgements)
-        assert isinstance(self.manager.aboutWidget, AboutBox)
-        #self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
+        assert isinstance(manager.ackWidget, Acknowledgements)
+        assert isinstance(manager.aboutWidget, AboutBox)
+        #self.assertIsInstance(manager.welcomePanel, WelcomePanel)
 
-    def skip_testLogging(self):
+    def skip_testLogging(self, manager):
         """
         Test logging of stdout, stderr and log messages
         """
         # See if the log window is empty
-        assert self.manager.logDockWidget.widget().toPlainText() == ""
+        assert manager.logDockWidget.widget().toPlainText() == ""
 
         # Now, send some message to stdout.
         # We are in the MainWindow scope, so simple 'print' will work
         message = "from stdout"
         print(message)
-        assert message in self.manager.logDockWidget.widget().toPlainText()
+        assert message in manager.logDockWidget.widget().toPlainText()
 
         # Send some message to stderr
         message = "from stderr"
         sys.stderr.write(message)
-        assert message in self.manager.logDockWidget.widget().toPlainText()
+        assert message in manager.logDockWidget.widget().toPlainText()
 
         # And finally, send a log message
         import logging
         message = "from logging"
         message_logged = "ERROR: " + message
         logging.error(message)
-        assert message_logged in self.manager.logDockWidget.widget().toPlainText()
+        assert message_logged in manager.logDockWidget.widget().toPlainText()
 
-    def testConsole(self):
+    def testConsole(self, manager):
         """
         Test the docked QtConsole
         """
         # Invoke the console action
-        self.manager.actionPython_Shell_Editor()
+        manager.actionPython_Shell_Editor()
 
         # Test the widegt properties
-        assert isinstance(self.manager.ipDockWidget, QDockWidget)
-        assert isinstance(self.manager.ipDockWidget.widget(), IPythonWidget)
-        assert self.manager._workspace.dockWidgetArea(self.manager.ipDockWidget) == QtCore.Qt.RightDockWidgetArea
+        assert isinstance(manager.ipDockWidget, QDockWidget)
+        assert isinstance(manager.ipDockWidget.widget(), IPythonWidget)
+        assert manager._workspace.dockWidgetArea(manager.ipDockWidget) == QtCore.Qt.RightDockWidgetArea
 
-    def testUpdatePerspective(self):
+    def testUpdatePerspective(self, manager):
         """
         """
         pass
 
-    def testUpdateStatusBar(self):
+    def testUpdateStatusBar(self, manager):
         """
         """
         pass
 
-    def testSetData(self):
+    def testSetData(self, manager):
         """
         """
         pass
 
-    def testQuitApplication(self):
+    def testQuitApplication(self, manager):
         """
         Test that the custom exit method is called on shutdown
         """
-        self.manager._workspace.show()
+        manager._workspace.show()
 
         # Must mask sys.exit, otherwise the whole testing process stops.
         sys.exit = MagicMock()
@@ -127,7 +124,7 @@ class GuiManagerTest(unittest.TestCase):
         QMessageBox.question = MagicMock(return_value=QMessageBox.No)
 
         # Open, then close the manager
-        self.manager.quitApplication()
+        manager.quitApplication()
 
         # See that the MessageBox method got called
         #self.assertTrue(QMessageBox.question.called)
@@ -136,35 +133,35 @@ class GuiManagerTest(unittest.TestCase):
         QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
 
         # Open, then close the manager
-        self.manager.quitApplication()
+        manager.quitApplication()
 
         # See that the MessageBox method got called
         #self.assertTrue(QMessageBox.question.called)
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testCheckUpdate(self):
+    def testCheckUpdate(self, manager):
         """
         Tests the SasView website version polling
         """
-        self.manager.processVersion = MagicMock()
+        manager.processVersion = MagicMock()
         version = {'version'     : '5.0.2',
                    'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
                    'download_url': 'https://github.com/SasView/sasview/releases/tag/v5.0.2'}
-        self.manager.checkUpdate()
+        manager.checkUpdate()
 
-        self.manager.processVersion.assert_called_with(version)
+        manager.processVersion.assert_called_with(version)
 
         pass
 
-    def testProcessVersion(self):
+    def testProcessVersion(self, manager):
         """
         Tests the version checker logic
         """
         # 1. version = 0.0.0
         version_info = {'version' : '0.0.0'}
-        spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
-        self.manager.processVersion(version_info)
+        manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
         message = 'Could not connect to the application server. Please try again later.'
@@ -172,9 +169,9 @@ class GuiManagerTest(unittest.TestCase):
 
         # 2. version < config.__version__
         version_info = {'version' : '0.0.1'}
-        spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
-        self.manager.processVersion(version_info)
+        manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
         message = 'You have the latest version of SasView'
@@ -182,10 +179,10 @@ class GuiManagerTest(unittest.TestCase):
 
         # 3. version > LocalConfig.__version__
         version_info = {'version' : '999.0.0'}
-        spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
         webbrowser.open = MagicMock()
 
-        self.manager.processVersion(version_info)
+        manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
         message = 'Version 999.0.0 is available!'
@@ -196,9 +193,9 @@ class GuiManagerTest(unittest.TestCase):
         # 4. couldn't load version
         version_info = {}
         logging.error = MagicMock()
-        spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
+        spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
-        self.manager.processVersion(version_info)
+        manager.processVersion(version_info)
 
         # Retrieve and compare arguments of the mocked call
         message = "guiframe: could not get latest application version number"
@@ -209,13 +206,13 @@ class GuiManagerTest(unittest.TestCase):
         message = 'Could not connect to the application server.'
         assert message in str(spy_status_update.signal(index=0))
 
-    def testActions(self):
+    def testActions(self, manager):
         """
         """
         pass
 
     #### FILE ####
-    def testActionLoadData(self):
+    def testActionLoadData(self, manager):
         """
         Menu File/Load Data File(s)
         """
@@ -223,12 +220,12 @@ class GuiManagerTest(unittest.TestCase):
         QFileDialog.getOpenFileNames = MagicMock(return_value=('',''))
 
         # invoke the action
-        self.manager.actionLoadData()
+        manager.actionLoadData()
 
         # Test the getOpenFileName() dialog called once
         assert QFileDialog.getOpenFileNames.called
 
-    def testActionLoadDataFolder(self):
+    def testActionLoadDataFolder(self, manager):
         """
         Menu File/Load Data Folder
         """
@@ -236,67 +233,67 @@ class GuiManagerTest(unittest.TestCase):
         QFileDialog.getExistingDirectory = MagicMock(return_value=('',''))
 
         # invoke the action
-        self.manager.actionLoad_Data_Folder()
+        manager.actionLoad_Data_Folder()
 
         # Test the getOpenFileName() dialog called once
         assert QFileDialog.getExistingDirectory.called
 
     #### VIEW ####
-    def testActionHideToolbar(self):
+    def testActionHideToolbar(self, manager):
         """
         Menu View/Hide Toolbar
         """
         # Need to display the main window to initialize the toolbar.
-        self.manager._workspace.show()
+        manager._workspace.show()
 
         # Check the initial state
-        assert not self.manager._workspace.toolBar.isVisible()
-        assert 'Show Toolbar' == self.manager._workspace.actionHide_Toolbar.text()
+        assert not manager._workspace.toolBar.isVisible()
+        assert 'Show Toolbar' == manager._workspace.actionHide_Toolbar.text()
 
         # Invoke action
-        self.manager.actionHide_Toolbar()
+        manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
-        assert self.manager._workspace.toolBar.isVisible()
-        assert 'Hide Toolbar' == self.manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.toolBar.isVisible()
+        assert 'Hide Toolbar' == manager._workspace.actionHide_Toolbar.text()
 
         # Revert
-        self.manager.actionHide_Toolbar()
+        manager.actionHide_Toolbar()
 
         # Assure the original values are back
-        assert not self.manager._workspace.toolBar.isVisible()
-        assert 'Show Toolbar' == self.manager._workspace.actionHide_Toolbar.text()
+        assert not manager._workspace.toolBar.isVisible()
+        assert 'Show Toolbar' == manager._workspace.actionHide_Toolbar.text()
 
 
     #### HELP ####
     # test when PyQt5 works with html
-    def testActionDocumentation(self):
+    def testActionDocumentation(self, manager):
         """
         Menu Help/Documentation
         """
         webbrowser.open = MagicMock()
 
         # Invoke the action
-        self.manager.actionDocumentation()
+        manager.actionDocumentation()
 
         # see that webbrowser open was attempted
         webbrowser.open.assert_called_once()
 
 
-    def skip_testActionTutorial(self):
+    def skip_testActionTutorial(self, manager):
         """
         Menu Help/Tutorial
         """
         # Mock subprocess.Popen
         subprocess.Popen = MagicMock()
 
-        tested_location = self.manager._tutorialLocation
+        tested_location = manager._tutorialLocation
 
         # Assure the filename is correct
         assert "Tutorial.pdf" in tested_location
 
         # Invoke the action
-        self.manager.actionTutorial()
+        manager.actionTutorial()
 
         # Check if popen() got called
         assert subprocess.Popen.called
@@ -304,28 +301,23 @@ class GuiManagerTest(unittest.TestCase):
         #Check the popen() call arguments
         subprocess.Popen.assert_called_with([tested_location], shell=True)
 
-    def testActionAcknowledge(self):
+    def testActionAcknowledge(self, manager):
         """
         Menu Help/Acknowledge
         """
-        self.manager.actionAcknowledge()
+        manager.actionAcknowledge()
 
         # Check if the window is actually opened.
-        assert self.manager.ackWidget.isVisible()
-        assert "developers@sasview.org" in self.manager.ackWidget.label_3.text()
+        assert manager.ackWidget.isVisible()
+        assert "developers@sasview.org" in manager.ackWidget.label_3.text()
 
-    def testActionCheck_for_update(self):
+    def testActionCheck_for_update(self, manager):
         """
         Menu Help/Check for update
         """
         # Just make sure checkUpdate is called.
-        self.manager.checkUpdate = MagicMock()
+        manager.checkUpdate = MagicMock()
 
-        self.manager.actionCheck_for_update()
+        manager.actionCheck_for_update()
 
-        assert self.manager.checkUpdate.called
-             
-       
-if __name__ == "__main__":
-    unittest.main()
-
+        assert manager.checkUpdate.called
