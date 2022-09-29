@@ -76,50 +76,50 @@ class ConstraintWidgetTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QWidget)
+        assert isinstance(self.widget, QtWidgets.QWidget)
         # Default title
-        self.assertEqual(self.widget.windowTitle(), "Constrained and Simultaneous Fit")
+        assert self.widget.windowTitle() == "Constrained and Simultaneous Fit"
         # Dicts
-        self.assertIsInstance(self.widget.available_constraints, dict)
-        self.assertIsInstance(self.widget.available_tabs, dict)
+        assert isinstance(self.widget.available_constraints, dict)
+        assert isinstance(self.widget.available_tabs, dict)
         # TableWidgets
-        self.assertEqual(self.widget.tblTabList.columnCount(), 4)
-        self.assertEqual(self.widget.tblConstraints.columnCount(), 1)
+        assert self.widget.tblTabList.columnCount() == 4
+        assert self.widget.tblConstraints.columnCount() == 1
         # Data accept 
-        self.assertFalse(self.widget.acceptsData())
+        assert not self.widget.acceptsData()
         # By default, the constraint table is disabled
-        self.assertFalse(self.widget.tblConstraints.isEnabled())
+        assert not self.widget.tblConstraints.isEnabled()
 
     def testOnFitTypeChange(self):
         ''' test the single/batch fit switch '''
         self.widget.initializeFitList = MagicMock()
         # Assure current type is Single
-        self.assertEqual(self.widget.currentType, "FitPage")
+        assert self.widget.currentType == "FitPage"
         # click on "batch"
         QTest.mouseClick(self.widget.btnBatch, QtCore.Qt.LeftButton)
         QtWidgets.QApplication.processEvents()
         # See what the current type is now
-        self.assertEqual(self.widget.currentType, "BatchPage")
+        assert self.widget.currentType == "BatchPage"
         # See if the list is getting initialized
-        self.assertTrue(self.widget.initializeFitList.called)
+        assert self.widget.initializeFitList.called
         # Go back to single fit
         QTest.mouseClick(self.widget.btnSingle, QtCore.Qt.LeftButton)
         QtWidgets.QApplication.processEvents()
         # See what the current type is now
-        self.assertEqual(self.widget.currentType, "FitPage")
+        assert self.widget.currentType == "FitPage"
 
     def testGetTabsForFit(self):
         ''' Test the fitting tab list '''
-        self.assertEqual(self.widget.getTabsForFit(), [])
+        assert self.widget.getTabsForFit() == []
         # add one tab
         self.widget.tabs_for_fitting = {"foo": True}
-        self.assertEqual(self.widget.getTabsForFit(), ['foo'])
+        assert self.widget.getTabsForFit() == ['foo']
         # add two tabs
         self.widget.tabs_for_fitting = {"foo": True, "bar": True}
-        self.assertEqual(self.widget.getTabsForFit(), ['foo', 'bar'])
+        assert self.widget.getTabsForFit() == ['foo', 'bar']
         # disable one tab
         self.widget.tabs_for_fitting = {"foo": False, "bar": True}
-        self.assertEqual(self.widget.getTabsForFit(), ['bar'])
+        assert self.widget.getTabsForFit() == ['bar']
 
     def testIsTabImportable(self):
         ''' tab checks for consistency '''
@@ -128,14 +128,14 @@ class ConstraintWidgetTest(unittest.TestCase):
         test_tab.kernel_module = None
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
-        self.assertFalse(self.widget.isTabImportable(None))
-        self.assertFalse(self.widget.isTabImportable("BatchTab1"))
+        assert not self.widget.isTabImportable(None)
+        assert not self.widget.isTabImportable("BatchTab1")
         self.widget.currentType = "Batch"
-        self.assertFalse(self.widget.isTabImportable("BatchTab"))
+        assert not self.widget.isTabImportable("BatchTab")
         self.widget.currentType = "test"
-        self.assertFalse(self.widget.isTabImportable("test_tab"))
+        assert not self.widget.isTabImportable("test_tab")
         test_tab.data_is_loaded = True
-        self.assertTrue(self.widget.isTabImportable("test_tab"))
+        assert self.widget.isTabImportable("test_tab")
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testOnTabCellEdit(self):
@@ -149,12 +149,12 @@ class ConstraintWidgetTest(unittest.TestCase):
 
         # disable the tab
         self.widget.tblTabList.item(0, 0).setCheckState(0)
-        self.assertEqual(self.widget.tabs_for_fitting["test_tab"], False)
-        self.assertFalse(self.widget.cmdFit.isEnabled())
+        assert self.widget.tabs_for_fitting["test_tab"] == False
+        assert not self.widget.cmdFit.isEnabled()
         # enable the tab
         self.widget.tblTabList.item(0, 0).setCheckState(2)
-        self.assertEqual(self.widget.tabs_for_fitting["test_tab"], True)
-        self.assertTrue(self.widget.cmdFit.isEnabled())
+        assert self.widget.tabs_for_fitting["test_tab"] == True
+        assert self.widget.cmdFit.isEnabled()
 
     def testUpdateFitLine(self):
         ''' See if the fit table row can be updated '''
@@ -167,9 +167,9 @@ class ConstraintWidgetTest(unittest.TestCase):
 
         # Add a tab without an constraint
         self.widget.updateFitLine("test_tab")
-        self.assertEqual(self.widget.tblTabList.rowCount(), 1)
+        assert self.widget.tblTabList.rowCount() == 1
         # Constraint tab should be empty
-        self.assertEqual(self.widget.tblConstraints.rowCount(), 0)
+        assert self.widget.tblConstraints.rowCount() == 0
 
         # Add a second tab with an active constraint
         test_tab.getComplexConstraintsForModel = MagicMock(
@@ -180,23 +180,23 @@ class ConstraintWidgetTest(unittest.TestCase):
             return_value=[self.constraint1])
         self.widget.updateFitLine("test_tab")
         # We should have 2 tabs in the model tab
-        self.assertEqual(self.widget.tblTabList.rowCount(), 2)
+        assert self.widget.tblTabList.rowCount() == 2
         # One constraint in the constraint tab
-        self.assertEqual(self.widget.tblConstraints.rowCount(), 1)
+        assert self.widget.tblConstraints.rowCount() == 1
         # Constraint should be active
-        self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 2)
+        assert self.widget.tblConstraints.item(0, 0).checkState() == 2
         # Check the text
-        self.assertEqual(self.widget.tblConstraints.item(0, 0).text(),
-                         test_tab.kernel_module.name +
-                         ":scale = " +
-                         self.constraint1.func)
+        assert self.widget.tblConstraints.item(0, 0).text() == \
+                         test_tab.kernel_module.name + \
+                         ":scale = " + \
+                         self.constraint1.func
         # Add a tab with a non active constraint
         test_tab.getComplexConstraintsForModel = MagicMock(return_value=[])
         self.widget.updateFitLine("test_tab")
         # There should be two constraints now
-        self.assertEqual(self.widget.tblConstraints.rowCount(), 2)
+        assert self.widget.tblConstraints.rowCount() == 2
         # Added constraint should not be checked since it isn't active
-        self.assertEqual(self.widget.tblConstraints.item(1, 0).checkState(), 0)
+        assert self.widget.tblConstraints.item(1, 0).checkState() == 0
 
     def testUpdateFitList(self):
         ''' see if the fit table can be updated '''
@@ -209,11 +209,11 @@ class ConstraintWidgetTest(unittest.TestCase):
         # Fit button should be disabled if no tabs are present
         ObjectLibrary.listObjects =MagicMock(return_value=False)
         self.widget.initializeFitList()
-        self.assertEqual(self.widget.available_tabs, {})
-        self.assertEqual(self.widget.available_constraints, {})
-        self.assertEqual(self.widget.tblConstraints.rowCount(), 0)
-        self.assertEqual(self.widget.tblTabList.rowCount(), 0)
-        self.assertFalse(self.widget.cmdFit.isEnabled())
+        assert self.widget.available_tabs == {}
+        assert self.widget.available_constraints == {}
+        assert self.widget.tblConstraints.rowCount() == 0
+        assert self.widget.tblTabList.rowCount() == 0
+        assert not self.widget.cmdFit.isEnabled()
 
         # Add a tab
         self.widget.isTabImportable = MagicMock(return_value=True)
@@ -223,7 +223,7 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.initializeFitList()
         self.widget.updateFitLine.assert_called_once()
         self.widget.updateSignalsFromTab.assert_called_once()
-        self.assertTrue(self.widget.cmdFit.isEnabled())
+        assert self.widget.cmdFit.isEnabled()
 
         # Check if the tab list gets ordered
         self.widget.isTabImportable = MagicMock(return_value=True)
@@ -267,15 +267,15 @@ class ConstraintWidgetTest(unittest.TestCase):
         # result is None
         result = None
         self.widget.fitComplete(result)
-        self.assertEqual(spy[0][0], 'Fitting failed.')
+        assert spy[0][0] == 'Fitting failed.'
         # Result has failed
         result = MagicMock(return_value= "foo")
         results = [[[result]], 1.5]
         result.success = False
         result.mesg = ["foo", None]
         self.widget.fitComplete(results)
-        self.assertEqual(spy[1][0], 'Fitting failed with the following '
-                                    'message: foo')
+        assert spy[1][0] == 'Fitting failed with the following ' \
+                                    'message: foo'
 
         # test a successful fit
         result.success = True
@@ -286,11 +286,11 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.tabs_for_fitting = {"test_tab": test_tab}
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
         self.widget.fitComplete(results)
-        self.assertEqual(test_tab.fitComplete.call_args[0][0][1], 1.5)
-        self.assertEqual(test_tab.fitComplete.call_args[0][0][0],
-                         [[result]])
-        self.assertEqual(spy[2][0], 'Fitting completed successfully in: 1.5 '
-                                    's.\n')
+        assert test_tab.fitComplete.call_args[0][0][1] == 1.5
+        assert test_tab.fitComplete.call_args[0][0][0] == \
+                         [[result]]
+        assert spy[2][0] == 'Fitting completed successfully in: 1.5 ' \
+                                    's.\n'
 
     def testBatchFitComplete(self):
         ''' test the handling of batch fit results'''
@@ -302,22 +302,22 @@ class ConstraintWidgetTest(unittest.TestCase):
         # result is None
         result = None
         self.widget.batchComplete(result)
-        self.assertEqual(spy[0][0], 'Fitting failed.')
+        assert spy[0][0] == 'Fitting failed.'
         # Result has failed
         result = MagicMock(return_value= "foo")
         results = [[[result]], 1.5]
         result.success = False
         result.mesg = ["foo", None]
         self.widget.batchComplete(results)
-        self.assertEqual(spy[1][0], 'Fitting failed with the following '
-                                    'message: foo')
+        assert spy[1][0] == 'Fitting failed with the following ' \
+                                    'message: foo'
 
         # test a successful fit
         result.success = True
         self.widget.batchComplete(results)
-        self.assertEqual(spy[2][0], 'Fitting completed successfully in: 1.5 '
-                                    's.\n')
-        self.assertEqual(spy_data[0][0], [[result], 'ConstSimulPage'])
+        assert spy[2][0] == 'Fitting completed successfully in: 1.5 ' \
+                                    's.\n'
+        assert spy_data[0][0] == [[result], 'ConstSimulPage']
 
     def testUncheckConstraints(self):
         '''Tests the unchecking of constraints'''
@@ -343,13 +343,13 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.widget.initializeFitList = MagicMock()
 
         # Constraint should be checked
-        self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 2)
+        assert self.widget.tblConstraints.item(0, 0).checkState() == 2
 
         self.widget.uncheckConstraint('M1:scale')
         # Should be unchecked in tblConstraint
-        self.assertEqual(self.widget.tblConstraints.item(0, 0).checkState(), 0)
+        assert self.widget.tblConstraints.item(0, 0).checkState() == 0
         # Constraint should be deactivated
-        self.assertEqual(self.constraint1.active, False)
+        assert self.constraint1.active == False
 
     def testOnConstraintChange(self):
         ''' test edition of the constraint list '''
@@ -419,34 +419,34 @@ class ConstraintWidgetTest(unittest.TestCase):
         constraint = Constraint(param="radius", func="bar",
                                 value_ex="M1.radius")
         target = test_tab.addConstraintToRow.call_args[1]
-        self.assertEqual(target["constraint"].value_ex, constraint.value_ex)
-        self.assertEqual(target["constraint"].func, constraint.func)
-        self.assertEqual(target["constraint"].param, constraint.param)
-        self.assertEqual(target["row"], 0)
+        assert target["constraint"].value_ex == constraint.value_ex
+        assert target["constraint"].func == constraint.func
+        assert target["constraint"].param == constraint.param
+        assert target["row"] == 0
         target = test_tab.deleteConstraintOnParameter.call_args[0]
-        self.assertEqual(target[0], "scale")
+        assert target[0] == "scale"
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
 
         self.widget.initializeFitList.reset_mock()
         # Check the checkbox
         self.widget.tblConstraints.item(0, 0).setText("M1:scale = M1.sld")
-        self.assertEqual(test_tab.modifyViewOnRow.call_args[0][0], 0)
+        assert test_tab.modifyViewOnRow.call_args[0][0] == 0
         font = QtGui.QFont()
         font.setItalic(True)
-        self.assertEqual(test_tab.modifyViewOnRow.call_args[1]["font"],
-                         font)
+        assert test_tab.modifyViewOnRow.call_args[1]["font"] == \
+                         font
         brush = QtGui.QBrush(QtGui.QColor('blue'))
-        self.assertEqual(test_tab.modifyViewOnRow.call_args[1]["brush"],
-                         brush)
+        assert test_tab.modifyViewOnRow.call_args[1]["brush"] == \
+                         brush
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
 
         self.widget.initializeFitList.reset_mock()
         # Uncheck the checkbox
         self.widget.tblConstraints.item(0, 0).setCheckState(0)
-        self.assertEqual(test_tab.modifyViewOnRow.call_args[0][0], 0)
-        self.assertTrue(not test_tab.modifyViewOnRow.call_args[1])
-        self.assertEqual(self.constraint1.active, False)
+        assert test_tab.modifyViewOnRow.call_args[0][0] == 0
+        assert not test_tab.modifyViewOnRow.call_args[1]
+        assert self.constraint1.active == False
         # Check the reloading of the view
         self.widget.initializeFitList.assert_called_once()
