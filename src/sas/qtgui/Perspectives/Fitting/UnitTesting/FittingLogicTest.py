@@ -23,9 +23,9 @@ class FittingLogicTest(unittest.TestCase):
 
     def testDefaults(self):
         """Test the component in its default state"""
-        self.assertIsInstance(self.logic.data, Data1D)
-        self.assertTrue(self.logic.data_is_loaded)
-        self.assertEqual(self.logic.data, self.logic._data)
+        assert isinstance(self.logic.data, Data1D)
+        assert self.logic.data_is_loaded
+        assert self.logic.data == self.logic._data
 
     def testComputeDataRange(self):
         """
@@ -34,18 +34,18 @@ class FittingLogicTest(unittest.TestCase):
         # Using the default data
         qmin, qmax, npts = self.logic.computeDataRange()
 
-        self.assertEqual(qmin, 1)
-        self.assertEqual(qmax, 3)
-        self.assertEqual(npts, 3)
+        assert qmin == 1
+        assert qmax == 3
+        assert npts == 3
 
         # data with more points
         data = Data1D(x=[-10, 2, 10, 20],y=[-3, 4, 10, 50])
         self.logic.data=data
         qmin, qmax, npts = self.logic.computeDataRange()
 
-        self.assertEqual(qmin, -10)
-        self.assertEqual(qmax, 20)
-        self.assertEqual(npts, 4)
+        assert qmin == -10
+        assert qmax == 20
+        assert npts == 4
 
     def testCreateDefault1dData(self):
         """
@@ -54,13 +54,13 @@ class FittingLogicTest(unittest.TestCase):
         interval = numpy.linspace(start=1, stop=10, num=10, endpoint=True)
         self.logic.createDefault1dData(interval=interval)
 
-        self.assertEqual(self.logic.data.id, ('0 data'))
-        self.assertEqual(self.logic.data.group_id, ('0 Model1D'))
-        self.assertFalse(self.logic.data.is_data)
-        self.assertEqual(self.logic.data._xaxis, ('\\rm{Q}'))
-        self.assertEqual(self.logic.data._xunit, ('A^{-1}'))
-        self.assertEqual(self.logic.data._yaxis, ('\\rm{Intensity}'))
-        self.assertEqual(self.logic.data._yunit, ('cm^{-1}'))
+        assert self.logic.data.id == ('0 data')
+        assert self.logic.data.group_id == ('0 Model1D')
+        assert not self.logic.data.is_data
+        assert self.logic.data._xaxis == ('\\rm{Q}')
+        assert self.logic.data._xunit == ('A^{-1}')
+        assert self.logic.data._yaxis == ('\\rm{Intensity}')
+        assert self.logic.data._yunit == ('cm^{-1}')
 
     def testCreateDefault2dData(self):
         """
@@ -68,28 +68,28 @@ class FittingLogicTest(unittest.TestCase):
         """
         self.logic.createDefault2dData(qmax=0.35, qstep=50, tab_id=8)
 
-        self.assertEqual(self.logic.data.id, ('8 data'))
-        self.assertEqual(self.logic.data.group_id, ('8 Model2D'))
-        self.assertFalse(self.logic.data.is_data)
-        self.assertEqual(self.logic.data._xaxis, ('\\rm{Q_{x}}'))
-        self.assertEqual(self.logic.data._xunit, ('A^{-1}'))
-        self.assertEqual(self.logic.data._yaxis, ('\\rm{Q_{y}}'))
-        self.assertEqual(self.logic.data._yunit, ('A^{-1}'))
+        assert self.logic.data.id == ('8 data')
+        assert self.logic.data.group_id == ('8 Model2D')
+        assert not self.logic.data.is_data
+        assert self.logic.data._xaxis == ('\\rm{Q_{x}}')
+        assert self.logic.data._xunit == ('A^{-1}')
+        assert self.logic.data._yaxis == ('\\rm{Q_{y}}')
+        assert self.logic.data._yunit == ('A^{-1}')
 
-        self.assertEqual(self.logic.data.xmin, -0.35)
-        self.assertEqual(self.logic.data.xmax, 0.35)
+        assert self.logic.data.xmin == -0.35
+        assert self.logic.data.xmax == 0.35
 
-        self.assertEqual(self.logic.data.ymin, -0.35)
-        self.assertEqual(self.logic.data.ymax, 0.35)
+        assert self.logic.data.ymin == -0.35
+        assert self.logic.data.ymax == 0.35
 
-        self.assertEqual(self.logic.data.data.sum(), 2500.0) # 50x50 array of 1's
-        self.assertEqual(self.logic.data.err_data.sum(axis=0), 2500.0)
-        self.assertAlmostEqual(self.logic.data.qx_data.sum(axis=0), 0.0)
-        self.assertAlmostEqual(self.logic.data.qy_data.sum(), 0.0)
-        self.assertAlmostEqual(self.logic.data.q_data.sum(), 683.106490, 6)
-        self.assertTrue(numpy.all(self.logic.data.mask))
-        self.assertAlmostEqual(self.logic.data.x_bins.sum(), 0.0)
-        self.assertAlmostEqual(self.logic.data.y_bins.sum(), 0.0)
+        assert self.logic.data.data.sum() == 2500.0 # 50x50 array of 1's
+        assert self.logic.data.err_data.sum(axis=0) == 2500.0
+        assert round(abs(self.logic.data.qx_data.sum(axis=0)-0.0), 7) == 0
+        assert round(abs(self.logic.data.qy_data.sum()-0.0), 7) == 0
+        assert round(abs(self.logic.data.q_data.sum()-683.106490), 6) == 0
+        assert numpy.all(self.logic.data.mask)
+        assert round(abs(self.logic.data.x_bins.sum()-0.0), 7) == 0
+        assert round(abs(self.logic.data.y_bins.sum()-0.0), 7) == 0
 
     def testNew1DPlot(self):
         """
@@ -111,11 +111,11 @@ class FittingLogicTest(unittest.TestCase):
 
         new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
 
-        self.assertIsInstance(new_plot, Data1D)
-        self.assertFalse(new_plot.is_data)
-        self.assertEqual(new_plot.dy.size, 3)
-        self.assertEqual(new_plot.title, "boop [boop]")
-        self.assertEqual(new_plot.name, "boop [boop]")
+        assert isinstance(new_plot, Data1D)
+        assert not new_plot.is_data
+        assert new_plot.dy.size == 3
+        assert new_plot.title == "boop [boop]"
+        assert new_plot.name == "boop [boop]"
 
     def testNew2DPlot(self):
         """
@@ -154,10 +154,10 @@ class FittingLogicTest(unittest.TestCase):
 
         new_plot = self.logic.new2DPlot(return_data=return_data)
 
-        self.assertIsInstance(new_plot, Data2D)
-        self.assertFalse(new_plot.is_data)
-        self.assertEqual(new_plot.title, "Analytical model 2D ")
-        self.assertEqual(new_plot.name, "boop [boop]")
+        assert isinstance(new_plot, Data2D)
+        assert not new_plot.is_data
+        assert new_plot.title == "Analytical model 2D "
+        assert new_plot.name == "boop [boop]"
 
 
 
