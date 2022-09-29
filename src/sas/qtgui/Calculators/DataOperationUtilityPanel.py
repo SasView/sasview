@@ -154,6 +154,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
         self.cbData2.addItem(self.output.name)
+        if self.filenames is None:
+            self.filenames = {}
         self.filenames[self.output.name] = self.output
 
     def onPrepareOutputData(self):
@@ -367,10 +369,10 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
         data_complete = self.filenames[key_id]
-        dimension = data_complete.__class__.__name__
+        dimension = data_complete.data.__class__.__name__
 
         if dimension in ('Data1D', 'Data2D'):
-            return copy.deepcopy(data_complete)
+            return copy.deepcopy(data_complete.data)
 
         else:
             logging.error('Error with data format')
