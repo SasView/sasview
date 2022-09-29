@@ -1,5 +1,4 @@
 import sys
-import unittest
 
 import pytest
 
@@ -20,15 +19,9 @@ from sasmodels.sasview_model import load_standard_models
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.FittingUtilities import checkConstraints
 
-class FittingUtilitiesTest(unittest.TestCase):
-    '''Test the Fitting Utilities functions'''
-    def setUp(self):
-        '''Empty'''
-        pass
 
-    def tearDown(self):
-        '''Empty'''
-        pass
+class FittingUtilitiesTest:
+    '''Test the Fitting Utilities functions'''
 
     def testReplaceShellName(self):
         """
@@ -303,6 +296,3 @@ class FittingUtilitiesTest(unittest.TestCase):
         constraints = [("M1.foo", "M1.background")]
         errors = checkConstraints(symtab, constraints)
         assert isinstance(errors, str)
-
-if __name__ == "__main__":
-    unittest.main()
