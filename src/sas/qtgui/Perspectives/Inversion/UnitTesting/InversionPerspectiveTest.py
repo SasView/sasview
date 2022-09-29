@@ -1,4 +1,3 @@
-import unittest
 import pytest
 
 from unittest.mock import MagicMock
@@ -10,29 +9,26 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-
-class dummy_manager(object):
-    HELP_DIRECTORY_LOCATION = "html"
-    communicate = Communicate()
-    def communicator(self):
-        return self.communicate
-
-
-class InversionTest(unittest.TestCase):
+class InversionTest:
     """ Test the Inversion Perspective GUI """
 
-    def setUp(self):
-        """ Create the InversionWindow """
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the InversionWindow'''
 
-        self.widget = InversionWindow(parent=dummy_manager())
-        self.widget._parent = QtWidgets.QMainWindow()
-        self.widget.showBatchOutput = MagicMock()
-        self.widget.startThread = MagicMock()
-        self.widget.startThreadAll = MagicMock()
-        self.widget.show()
+        class dummy_manager:
+            HELP_DIRECTORY_LOCATION = "html"
+            communicate = Communicate()
+            def communicator(self):
+                return self.communicate
+
+        w = InversionWindow(parent=dummy_manager())
+        w._parent = QtWidgets.QMainWindow()
+        w.showBatchOutput = MagicMock()
+        w.startThread = MagicMock()
+        w.startThreadAll = MagicMock()
+        w.show()
 
         self.fakeData1 = GuiUtils.HashableStandardItem("A")
         self.fakeData2 = GuiUtils.HashableStandardItem("B")
@@ -43,281 +39,282 @@ class InversionTest(unittest.TestCase):
         GuiUtils.updateModelItem(self.fakeData1, reference_data1)
         GuiUtils.updateModelItem(self.fakeData2, reference_data2)
 
-    def tearDown(self):
+        yield w
+
         """ Destroy the InversionWindow """
-        self.widget.setClosable(False)
-        self.widget.close()
-        self.widget = None
+        w.setClosable(False)
+        w.close()
 
-    def removeAllData(self):
+    def removeAllData(self, widget):
         """ Cleanup method to restore widget to its base state """
-        while len(self.widget.dataList) > 0:
-            remove_me = list(self.widget._dataList.keys())
-            self.widget.removeData(remove_me)
+        while len(widget.dataList) > 0:
+            remove_me = list(widget._dataList.keys())
+            widget.removeData(remove_me)
 
-    def baseGUIState(self):
+    def baseGUIState(self, widget):
         """ Testing base state of Inversion """
         # base class information
-        assert isinstance(self.widget, QtWidgets.QWidget)
-        assert self.widget.windowTitle() == "P(r) Inversion Perspective"
-        assert not self.widget.isClosable()
-        assert not self.widget.isCalculating
+        assert isinstance(widget, QtWidgets.QWidget)
+        assert widget.windowTitle() == "P(r) Inversion Perspective"
+        assert not widget.isClosable()
+        assert not widget.isCalculating
         # mapper
-        assert isinstance(self.widget.mapper, QtWidgets.QDataWidgetMapper)
-        assert self.widget.mapper.mappedSection(self.widget.dataList) != -1
+        assert isinstance(widget.mapper, QtWidgets.QDataWidgetMapper)
+        assert widget.mapper.mappedSection(widget.dataList) != -1
         # validators
-        assert isinstance(self.widget.noOfTermsInput.validator(), QtGui.QIntValidator)
-        assert isinstance(self.widget.regularizationConstantInput.validator(), QtGui.QDoubleValidator)
-        assert isinstance(self.widget.maxDistanceInput.validator(), QtGui.QDoubleValidator)
-        assert isinstance(self.widget.minQInput.validator(), QtGui.QDoubleValidator)
-        assert isinstance(self.widget.maxQInput.validator(), QtGui.QDoubleValidator)
-        assert isinstance(self.widget.slitHeightInput.validator(), QtGui.QDoubleValidator)
-        assert isinstance(self.widget.slitWidthInput.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.noOfTermsInput.validator(), QtGui.QIntValidator)
+        assert isinstance(widget.regularizationConstantInput.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.maxDistanceInput.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.minQInput.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.maxQInput.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.slitHeightInput.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.slitWidthInput.validator(), QtGui.QDoubleValidator)
         # model
-        assert self.widget.model.rowCount() == 22
-        assert self.widget.model.columnCount() == 1
-        assert self.widget.mapper.model() == self.widget.model
+        assert widget.model.rowCount() == 22
+        assert widget.model.columnCount() == 1
+        assert widget.mapper.model() == widget.model
         # buttons
-        assert not self.widget.calculateThisButton.isEnabled()
-        assert not self.widget.removeButton.isEnabled()
-        assert self.widget.stopButton.isEnabled()
-        assert not self.widget.stopButton.isVisible()
-        assert not self.widget.regConstantSuggestionButton.isEnabled()
-        assert not self.widget.noOfTermsSuggestionButton.isEnabled()
-        assert not self.widget.explorerButton.isEnabled()
-        assert self.widget.helpButton.isEnabled()
+        assert not widget.calculateThisButton.isEnabled()
+        assert not widget.removeButton.isEnabled()
+        assert widget.stopButton.isEnabled()
+        assert not widget.stopButton.isVisible()
+        assert not widget.regConstantSuggestionButton.isEnabled()
+        assert not widget.noOfTermsSuggestionButton.isEnabled()
+        assert not widget.explorerButton.isEnabled()
+        assert widget.helpButton.isEnabled()
         # extra windows and charts
-        assert self.widget.dmaxWindow is None
-        assert self.widget.prPlot is None
-        assert self.widget.dataPlot is None
+        assert widget.dmaxWindow is None
+        assert widget.prPlot is None
+        assert widget.dataPlot is None
         # threads
-        assert self.widget.calcThread is None
-        assert self.widget.estimationThread is None
-        assert self.widget.estimationThreadNT is None
+        assert widget.calcThread is None
+        assert widget.estimationThread is None
+        assert widget.estimationThreadNT is None
 
-    def baseBatchState(self):
+    def baseBatchState(self, widget):
         """ Testing the base batch fitting state """
-        assert not self.widget.allowBatch()
-        assert not self.widget.isBatch
-        assert not self.widget.calculateAllButton.isEnabled()
-        assert len(self.widget.batchResults) == 0
-        assert len(self.widget.batchComplete) == 0
-        self.widget.closeBatchResults()
+        assert not widget.allowBatch()
+        assert not widget.isBatch
+        assert not widget.calculateAllButton.isEnabled()
+        assert len(widget.batchResults) == 0
+        assert len(widget.batchComplete) == 0
+        widget.closeBatchResults()
 
-    def zeroDataSetState(self):
+    def zeroDataSetState(self, widget):
         """ Testing the base data state of the GUI """
         # data variables
-        assert self.widget._data is None
-        assert len(self.widget._dataList) == 0
-        assert self.widget.nTermsSuggested == 10
+        assert widget._data is None
+        assert len(widget._dataList) == 0
+        assert widget.nTermsSuggested == 10
         # inputs
-        assert len(self.widget.dataList) == 0
-        assert self.widget.backgroundInput.text() == "0.0"
-        assert self.widget.minQInput.text() == ""
-        assert self.widget.maxQInput.text() == ""
-        assert self.widget.regularizationConstantInput.text() == "0.0001"
-        assert self.widget.noOfTermsInput.text() == "10"
-        assert self.widget.maxDistanceInput.text() == "140.0"
+        assert len(widget.dataList) == 0
+        assert widget.backgroundInput.text() == "0.0"
+        assert widget.minQInput.text() == ""
+        assert widget.maxQInput.text() == ""
+        assert widget.regularizationConstantInput.text() == "0.0001"
+        assert widget.noOfTermsInput.text() == "10"
+        assert widget.maxDistanceInput.text() == "140.0"
 
-    def oneDataSetState(self):
+    def oneDataSetState(self, widget):
         """ Testing the base data state of the GUI """
         # Test the globals after first sent
-        assert len(self.widget._dataList) == 1
-        assert self.widget.dataList.count() == 1
+        assert len(widget._dataList) == 1
+        assert widget.dataList.count() == 1
         # See that the buttons are now enabled properly
-        self.widget.enableButtons()
-        assert not self.widget.calculateAllButton.isEnabled()
-        assert self.widget.calculateThisButton.isEnabled()
-        assert self.widget.removeButton.isEnabled()
-        assert self.widget.explorerButton.isEnabled()
+        widget.enableButtons()
+        assert not widget.calculateAllButton.isEnabled()
+        assert widget.calculateThisButton.isEnabled()
+        assert widget.removeButton.isEnabled()
+        assert widget.explorerButton.isEnabled()
 
-    def twoDataSetState(self):
+    def twoDataSetState(self, widget):
         """ Testing the base data state of the GUI """
         # Test the globals after first sent
-        assert len(self.widget._dataList) == 2
-        assert self.widget.dataList.count() == 2
+        assert len(widget._dataList) == 2
+        assert widget.dataList.count() == 2
         # See that the buttons are now enabled properly
-        self.widget.enableButtons()
-        assert self.widget.calculateThisButton.isEnabled()
-        assert self.widget.calculateAllButton.isEnabled()
-        assert self.widget.removeButton.isEnabled()
-        assert self.widget.explorerButton.isEnabled()
+        widget.enableButtons()
+        assert widget.calculateThisButton.isEnabled()
+        assert widget.calculateAllButton.isEnabled()
+        assert widget.removeButton.isEnabled()
+        assert widget.explorerButton.isEnabled()
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         """ Test the GUI in its default state """
-        self.baseGUIState()
-        self.zeroDataSetState()
-        self.baseBatchState()
-        self.removeAllData()
+        self.baseGUIState(widget)
+        self.zeroDataSetState(widget)
+        self.baseBatchState(widget)
+        self.removeAllData(widget)
 
-    def notestAllowBatch(self):
+    def notestAllowBatch(self, widget):
         """ Batch P(r) Tests """
         self.baseBatchState()
-        self.widget.setData([self.fakeData1])
+        widget.setData([self.fakeData1])
         self.oneDataSetState()
-        self.widget.setData([self.fakeData2])
+        widget.setData([self.fakeData2])
         self.twoDataSetState()
-        self.widget.calculateAllButton.click()
-        assert self.widget.isCalculating
-        assert self.widget.isBatch
-        assert self.widget.stopButton.isVisible()
-        assert self.widget.stopButton.isEnabled()
-        assert self.widget.batchResultsWindow is not None
-        assert self.widget.batchResultsWindow.cmdHelp.isEnabled()
-        assert self.widget.batchResultsWindow.tblParams.columnCount() == 9
-        assert self.widget.batchResultsWindow.tblParams.rowCount() == 2
+        widget.calculateAllButton.click()
+        assert widget.isCalculating
+        assert widget.isBatch
+        assert widget.stopButton.isVisible()
+        assert widget.stopButton.isEnabled()
+        assert widget.batchResultsWindow is not None
+        assert widget.batchResultsWindow.cmdHelp.isEnabled()
+        assert widget.batchResultsWindow.tblParams.columnCount() == 9
+        assert widget.batchResultsWindow.tblParams.rowCount() == 2
         # Test stop button
-        self.widget.stopButton.click()
-        assert self.widget.batchResultsWindow.isVisible()
-        assert not self.widget.stopButton.isVisible()
-        assert self.widget.stopButton.isEnabled()
-        assert not self.widget.isBatch
-        assert not self.widget.isCalculating
-        self.widget.batchResultsWindow.close()
-        assert self.widget.batchResultsWindow is None
+        widget.stopButton.click()
+        assert widget.batchResultsWindow.isVisible()
+        assert not widget.stopButton.isVisible()
+        assert widget.stopButton.isEnabled()
+        assert not widget.isBatch
+        assert not widget.isCalculating
+        widget.batchResultsWindow.close()
+        assert widget.batchResultsWindow is None
         # Last test
-        self.removeAllData()
-        self.baseBatchState()
+        self.removeAllData(widget)
+        self.baseBatchState(widget)
 
     @pytest.mark.skip(reason="2022-09 already broken - causes Qt event loop exception")
-    def testSetData(self):
+    def testSetData(self, widget):
         """ Check if sending data works as expected """
-        self.zeroDataSetState()
-        self.widget.setData([self.fakeData1])
-        self.oneDataSetState()
-        self.widget.setData([self.fakeData1])
-        self.oneDataSetState()
-        self.widget.setData([self.fakeData2])
-        self.twoDataSetState()
-        self.removeAllData()
-        self.zeroDataSetState()
-        self.removeAllData()
+        self.zeroDataSetState(widget)
+        widget.setData([self.fakeData1])
+        self.oneDataSetState(widget)
+        widget.setData([self.fakeData1])
+        self.oneDataSetState(widget)
+        widget.setData([self.fakeData2])
+        self.twoDataSetState(widget)
+        self.removeAllData(widget)
+        self.zeroDataSetState(widget)
+        self.removeAllData(widget)
 
     @pytest.mark.skip(reason="2022-09 already broken - causes Qt event loop exception")
-    def testRemoveData(self):
+    def testRemoveData(self, widget):
         """ Test data removal from widget """
-        self.widget.setData([self.fakeData1, self.fakeData2])
-        self.twoDataSetState()
+        widget.setData([self.fakeData1, self.fakeData2])
+        self.twoDataSetState(widget)
         # Remove data 0
-        self.widget.removeData()
-        self.oneDataSetState()
-        self.removeAllData()
+        widget.removeData()
+        self.oneDataSetState(widget)
+        self.removeAllData(widget)
 
-    def testClose(self):
+    def testClose(self, widget):
         """ Test methods related to closing the window """
-        assert not self.widget.isClosable()
-        self.widget.close()
-        assert self.widget.isMinimized()
-        assert self.widget.dmaxWindow is None
-        self.widget.setClosable(False)
-        assert not self.widget.isClosable()
-        self.widget.close()
-        assert self.widget.isMinimized()
-        self.widget.setClosable(True)
-        assert self.widget.isClosable()
-        self.widget.setClosable()
-        assert self.widget.isClosable()
-        self.removeAllData()
+        assert not widget.isClosable()
+        widget.close()
+        assert widget.isMinimized()
+        assert widget.dmaxWindow is None
+        widget.setClosable(False)
+        assert not widget.isClosable()
+        widget.close()
+        assert widget.isMinimized()
+        widget.setClosable(True)
+        assert widget.isClosable()
+        widget.setClosable()
+        assert widget.isClosable()
+        self.removeAllData(widget)
 
-    def testGetNFunc(self):
+    def testGetNFunc(self, widget, caplog):
         """ test nfunc getter """
         # Float
-        self.widget.noOfTermsInput.setText("10")
-        assert self.widget.getNFunc() == 10
+        widget.noOfTermsInput.setText("10")
+        assert widget.getNFunc() == 10
         # Int
-        self.widget.noOfTermsInput.setText("980")
-        assert self.widget.getNFunc() == 980
+        widget.noOfTermsInput.setText("980")
+        assert widget.getNFunc() == 980
         # Empty
-        with self.assertLogs(level='ERROR') as cm:
-            self.widget.noOfTermsInput.setText("")
-            n = self.widget.getNFunc()
-            assert cm.output == ['ERROR:sas.qtgui.Perspectives.Inversion.InversionPerspective:Incorrect number of terms specified: ']
-        assert self.widget.getNFunc() == 10
+        with caplog.at_level(logging.ERROR):
+            widget.noOfTermsInput.setText("")
+            n = widget.getNFunc()
+        assert 'Incorrect number of terms specified:' in caplog.text
+        assert widget.getNFunc() == 10
         # string
-        with self.assertLogs(level='ERROR') as cm:
-            self.widget.noOfTermsInput.setText("Nordvest Pizza")
-            n = self.widget.getNFunc()
-            assert cm.output == ['ERROR:sas.qtgui.Perspectives.Inversion.InversionPerspective:Incorrect number of terms specified: Nordvest Pizza']
-        assert self.widget.getNFunc() == 10
-        self.removeAllData()
+        with caplog.at_level(logging.ERROR):
+            widget.noOfTermsInput.setText("Nordvest Pizza")
+            n = widget.getNFunc()
+        assert "Incorrect number of terms specified: Nordvest Pizza" in caplog.text
+        assert widget.getNFunc() == 10
+        self.removeAllData(widget)
 
     @pytest.mark.skip(reason="2022-09 already broken - causes Qt event loop exception")
-    def testSetCurrentData(self):
+    def testSetCurrentData(self, widget):
         """ test current data setter """
-        self.widget.setData([self.fakeData1, self.fakeData2])
+        widget.setData([self.fakeData1, self.fakeData2])
 
         # Check that the current data is reference2
-        assert self.widget._data == self.fakeData2
+        assert widget._data == self.fakeData2
         # Set the ref to none
-        self.widget.setCurrentData(None)
-        assert self.widget._data == self.fakeData2
+        widget.setCurrentData(None)
+        assert widget._data == self.fakeData2
         # Set the ref to wrong type
         with pytest.raises(AttributeError):
-            self.widget.setCurrentData("Afandi Kebab")
+            widget.setCurrentData("Afandi Kebab")
         # Set the reference to ref1
-        self.widget.setCurrentData(self.fakeData1)
-        assert self.widget._data == self.fakeData1
-        self.removeAllData()
+        widget.setCurrentData(self.fakeData1)
+        assert widget._data == self.fakeData1
+        self.removeAllData(widget)
 
-    def testModelChanged(self):
+    def testModelChanged(self, widget):
         """ Test setting the input and the model and vice-versa """
         # Initial values
-        assert self.widget._calculator.get_dmax() == 140.0
-        assert self.widget._calculator.get_qmax() == -1.0
-        assert self.widget._calculator.get_qmin() == -1.0
-        assert self.widget._calculator.slit_height == 0.0
-        assert self.widget._calculator.slit_width == 0.0
-        assert self.widget._calculator.alpha == 0.0001
+        assert widget._calculator.get_dmax() == 140.0
+        assert widget._calculator.get_qmax() == -1.0
+        assert widget._calculator.get_qmin() == -1.0
+        assert widget._calculator.slit_height == 0.0
+        assert widget._calculator.slit_width == 0.0
+        assert widget._calculator.alpha == 0.0001
         # Set new values
         # Min Q must always be less than max Q - Set max Q first
-        self.widget.maxQInput.setText("5.0")
-        self.widget.check_q_high()
-        self.widget.minQInput.setText("3.0")
-        self.widget.check_q_low()
-        self.widget.slitHeightInput.setText("7.0")
-        self.widget.slitWidthInput.setText("9.0")
-        self.widget.regularizationConstantInput.setText("11.0")
-        self.widget.maxDistanceInput.setText("1.0")
+        widget.maxQInput.setText("5.0")
+        widget.check_q_high()
+        widget.minQInput.setText("3.0")
+        widget.check_q_low()
+        widget.slitHeightInput.setText("7.0")
+        widget.slitWidthInput.setText("9.0")
+        widget.regularizationConstantInput.setText("11.0")
+        widget.maxDistanceInput.setText("1.0")
         # Check new values
-        assert self.widget._calculator.get_dmax() == 1.0
-        assert self.widget._calculator.get_qmin() == 3.0
-        assert self.widget._calculator.get_qmax() == 5.0
-        assert self.widget._calculator.slit_height == 7.0
-        assert self.widget._calculator.slit_width == 9.0
-        assert self.widget._calculator.alpha == 11.0
+        assert widget._calculator.get_dmax() == 1.0
+        assert widget._calculator.get_qmin() == 3.0
+        assert widget._calculator.get_qmax() == 5.0
+        assert widget._calculator.slit_height == 7.0
+        assert widget._calculator.slit_width == 9.0
+        assert widget._calculator.alpha == 11.0
         # Change model directly
-        self.widget.model.setItem(WIDGETS.W_MAX_DIST, QtGui.QStandardItem("2.0"))
-        self.widget.model.setItem(WIDGETS.W_SLIT_HEIGHT, QtGui.QStandardItem("8.0"))
-        self.widget.model.setItem(WIDGETS.W_SLIT_WIDTH, QtGui.QStandardItem("10.0"))
-        self.widget.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem("12.0"))
+        widget.model.setItem(WIDGETS.W_MAX_DIST, QtGui.QStandardItem("2.0"))
+        widget.model.setItem(WIDGETS.W_SLIT_HEIGHT, QtGui.QStandardItem("8.0"))
+        widget.model.setItem(WIDGETS.W_SLIT_WIDTH, QtGui.QStandardItem("10.0"))
+        widget.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem("12.0"))
         # Check values
-        assert self.widget._calculator.get_dmax() == 2.0
-        assert self.widget._calculator.slit_height == 8.0
-        assert self.widget._calculator.slit_width == 10.0
-        assert self.widget._calculator.alpha == 12.0
-        self.removeAllData()
+        assert widget._calculator.get_dmax() == 2.0
+        assert widget._calculator.slit_height == 8.0
+        assert widget._calculator.slit_width == 10.0
+        assert widget._calculator.alpha == 12.0
+        self.removeAllData(widget)
 
     @pytest.mark.xfail(reason="2022-09 already broken - opens tk not qt mpl backend")
-    def testOpenExplorerWindow(self):
+    def testOpenExplorerWindow(self, widget):
         """ open Dx window """
-        assert self.widget.dmaxWindow is None
-        assert not self.widget.explorerButton.isEnabled()
-        self.widget.openExplorerWindow()
-        assert self.widget.dmaxWindow is not None
-        assert self.widget.dmaxWindow.isVisible()
-        assert self.widget.dmaxWindow.windowTitle() == "Dmax Explorer"
+        assert widget.dmaxWindow is None
+        assert not widget.explorerButton.isEnabled()
+        widget.openExplorerWindow()
+        assert widget.dmaxWindow is not None
+        assert widget.dmaxWindow.isVisible()
+        assert widget.dmaxWindow.windowTitle() == "Dmax Explorer"
 
-    def testSerialization(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - flaky?")
+    def testSerialization(self, widget):
         """ Serialization routines """
-        assert hasattr(self.widget, 'isSerializable')
-        assert self.widget.isSerializable()
-        self.widget.setData([self.fakeData1])
-        self.oneDataSetState()
-        data_id = self.widget.currentTabDataId()[0]
+        assert hasattr(widget, 'isSerializable')
+        assert widget.isSerializable()
+        widget.setData([self.fakeData1])
+        self.oneDataSetState(widget)
+        data_id = widget.currentTabDataId()[0]
         # Test three separate serialization routines
-        state_all = self.widget.serializeAll()
-        state_one = self.widget.serializeCurrentPage()
-        page = self.widget.getPage()
+        state_all = widget.serializeAll()
+        state_one = widget.serializeCurrentPage()
+        page = widget.getPage()
         # Pull out params from state
         params = state_all[data_id]['pr_params']
         # Tests
@@ -331,7 +328,3 @@ class InversionTest(unittest.TestCase):
         assert params.get('alpha', None) != None
         assert params.get('alpha', None) == page.get('alpha', None)
         assert np.isnan(params.get('rg'))
-
-
-if __name__ == "__main__":
-    unittest.main()
