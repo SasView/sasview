@@ -1,6 +1,7 @@
 import sys
-import unittest
 import platform
+
+import pytest
 
 import os
 os.environ["MPLBACKEND"] = "qtagg"
@@ -11,9 +12,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
-####### TEMP
-import sas.qtgui.path_prepare
-#######
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
@@ -23,16 +21,13 @@ from sas.qtgui.Plotting.PlotProperties import PlotProperties
 # Tested module
 import sas.qtgui.Plotting.Plotter as Plotter
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-
-class PlotterTest(unittest.TestCase):
+class PlotterTest:
     '''Test the Plotter 1D class'''
-    def setUp(self):
-        '''create'''
-
-        self.plotter = Plotter.Plotter(None, quickplot=True)
+    @pytest.fixture(autouse=True)
+    def plotter(self, qapp):
+        '''Create/Destroy the Plotter1D'''
+        p = Plotter.Plotter(None, quickplot=True)
         self.data = Data1D(x=[1.0, 2.0, 3.0],
                            y=[10.0, 11.0, 12.0],
                            dx=[0.1, 0.2, 0.3],
@@ -42,45 +37,43 @@ class PlotterTest(unittest.TestCase):
         self.data.id = 1
         self.isWindows = platform.system=="Windows"
 
-    def tearDown(self):
-        '''destroy'''
-        self.plotter = None
+        yield p
 
-    def testDataProperty(self):
+    def testDataProperty(self, plotter):
         """ Adding data """
-        self.plotter.data = self.data
+        plotter.data = self.data
 
-        assert self.plotter.data[0] == self.data
-        assert self.plotter._title == self.data.name
-        assert self.plotter.xLabel == ""
-        assert self.plotter.yLabel == ""
+        assert plotter.data[0] == self.data
+        assert plotter._title == self.data.name
+        assert plotter.xLabel == ""
+        assert plotter.yLabel == ""
 
-    def testPlotWithErrors(self):
+    def testPlotWithErrors(self, plotter):
         """ Look at the plotting with error bars"""
-        self.plotter.data = self.data
-        self.plotter.show()
+        plotter.data = self.data
+        plotter.show()
         FigureCanvas.draw_idle = MagicMock()
 
-        self.plotter.plot(hide_error=False)
+        plotter.plot(hide_error=False)
 
-        assert self.plotter.ax.get_xscale() == 'linear'
+        assert plotter.ax.get_xscale() == 'linear'
         assert FigureCanvas.draw_idle.called
 
-        self.plotter.figure.clf()
+        plotter.figure.clf()
 
-    def testPlotWithoutErrors(self):
+    def testPlotWithoutErrors(self, plotter):
         """ Look at the plotting without error bars"""
-        self.plotter.data = self.data
-        self.plotter.show()
+        plotter.data = self.data
+        plotter.show()
         FigureCanvas.draw_idle = MagicMock()
 
-        self.plotter.plot(hide_error=True)
+        plotter.plot(hide_error=True)
 
-        assert self.plotter.ax.get_yscale() == 'linear'
+        assert plotter.ax.get_yscale() == 'linear'
         assert FigureCanvas.draw_idle.called
-        self.plotter.figure.clf()
+        plotter.figure.clf()
 
-    def testPlotWithSesans(self):
+    def testPlotWithSesans(self, plotter):
         """ Ensure that Sesans data is plotted in linear cooredinates"""
         data = Data1D(x=[1.0, 2.0, 3.0],
                       y=[-10.0, -11.0, -12.0],
@@ -91,21 +84,21 @@ class PlotterTest(unittest.TestCase):
         data.isSesans = True
         data.id = 2
 
-        self.plotter.data = data
-        self.plotter.show()
+        plotter.data = data
+        plotter.show()
         FigureCanvas.draw_idle = MagicMock()
 
-        self.plotter.plot(hide_error=True)
+        plotter.plot(hide_error=True)
 
-        assert self.plotter.ax.get_xscale() == 'linear'
-        assert self.plotter.ax.get_yscale() == 'linear'
-        #self.assertEqual(self.plotter.data[0].ytransform, "y")
+        assert plotter.ax.get_xscale() == 'linear'
+        assert plotter.ax.get_yscale() == 'linear'
+        #self.assertEqual(plotter.data[0].ytransform, "y")
         assert FigureCanvas.draw_idle.called
 
-    def testCreateContextMenuQuick(self):
+    def testCreateContextMenuQuick(self, plotter):
         """ Test the right click menu """
-        self.plotter.createContextMenuQuick()
-        actions = self.plotter.contextMenu.actions()
+        plotter.createContextMenuQuick()
+        actions = plotter.contextMenu.actions()
         assert len(actions) == 8
 
         # Trigger Print Image and make sure the method is called
@@ -119,15 +112,15 @@ class PlotterTest(unittest.TestCase):
 
         # Trigger Toggle Grid and make sure the method is called
         assert actions[4].text() == "Toggle Grid On/Off"
-        self.plotter.ax.grid = MagicMock()
+        plotter.ax.grid = MagicMock()
         actions[4].trigger()
-        assert self.plotter.ax.grid.called
+        assert plotter.ax.grid.called
 
         # Trigger Change Scale and make sure the method is called
         assert actions[6].text() == "Change Scale"
-        self.plotter.properties.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        plotter.properties.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
         actions[6].trigger()
-        assert self.plotter.properties.exec_.called
+        assert plotter.properties.exec_.called
 
         # Spy on cliboard's dataChanged() signal
         if not self.isWindows:
@@ -141,141 +134,141 @@ class PlotterTest(unittest.TestCase):
         # Make sure clipboard got updated.
         assert self.clipboard_called
 
-    def testXyTransform(self):
+    def testXyTransform(self, plotter):
         """ Tests the XY transformation and new chart update """
-        self.plotter.plot(self.data)
+        plotter.plot(self.data)
 
         # Transform the points
-        self.plotter.xyTransform(xLabel="x", yLabel="log10(y)")
+        plotter.xyTransform(xLabel="x", yLabel="log10(y)")
 
         # Assure new plot has correct labels
-        assert self.plotter.ax.get_xlabel() == "$()$"
-        assert self.plotter.ax.get_ylabel() == "$()$"
+        assert plotter.ax.get_xlabel() == "$()$"
+        assert plotter.ax.get_ylabel() == "$()$"
         # ... and scale
-        assert self.plotter.xscale == "linear"
-        assert self.plotter.yscale == "log"
+        assert plotter.xscale == "linear"
+        assert plotter.yscale == "log"
         # See that just one plot is present
-        assert len(self.plotter.plot_dict) == 1
-        assert len(self.plotter.ax.collections) == 1
-        self.plotter.figure.clf()
+        assert len(plotter.plot_dict) == 1
+        assert len(plotter.ax.collections) == 1
+        plotter.figure.clf()
 
-    def testAddText(self):
+    def testAddText(self, plotter):
         """ Checks the functionality of adding text to graph """
 
-        self.plotter.plot(self.data)
-        self.plotter.x_click = 100.0
-        self.plotter.y_click = 100.0
+        plotter.plot(self.data)
+        plotter.x_click = 100.0
+        plotter.y_click = 100.0
         # modify the text edit control
         test_text = "Smoke in cabin"
         test_font = QtGui.QFont("Arial", 16, QtGui.QFont.Bold)
         test_color = "#00FF00"
-        self.plotter.addText.textEdit.setText(test_text)
+        plotter.addText.textEdit.setText(test_text)
 
         # Return the requested font parameters
-        self.plotter.addText.font = MagicMock(return_value = test_font)
-        self.plotter.addText.color = MagicMock(return_value = test_color)
+        plotter.addText.font = MagicMock(return_value = test_font)
+        plotter.addText.color = MagicMock(return_value = test_color)
         # Return OK from the dialog
-        self.plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
+        plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         # Add text to graph
-        self.plotter.onAddText()
-        self.plotter.show()
+        plotter.onAddText()
+        plotter.show()
         # Check if the text was added properly
-        assert len(self.plotter.textList) == 1
-        assert self.plotter.textList[0].get_text() == test_text
-        assert self.plotter.textList[0].get_color() == test_color
-        assert self.plotter.textList[0].get_fontproperties().get_family()[0] == 'Arial'
-        assert self.plotter.textList[0].get_fontproperties().get_size() == 16
-        self.plotter.figure.clf()
+        assert len(plotter.textList) == 1
+        assert plotter.textList[0].get_text() == test_text
+        assert plotter.textList[0].get_color() == test_color
+        assert plotter.textList[0].get_fontproperties().get_family()[0] == 'Arial'
+        assert plotter.textList[0].get_fontproperties().get_size() == 16
+        plotter.figure.clf()
 
-    def testOnRemoveText(self):
+    def testOnRemoveText(self, plotter):
         """ Cheks if annotations can be removed from the graph """
 
         # Add some text
-        self.plotter.plot(self.data)
+        plotter.plot(self.data)
         test_text = "Safety instructions"
-        self.plotter.addText.textEdit.setText(test_text)
+        plotter.addText.textEdit.setText(test_text)
         # Return OK from the dialog
-        self.plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
+        plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         # Add text to graph
-        self.plotter.x_click = 1.0
-        self.plotter.y_click = 5.0
-        self.plotter.onAddText()
-        self.plotter.show()
+        plotter.x_click = 1.0
+        plotter.y_click = 5.0
+        plotter.onAddText()
+        plotter.show()
         # Check if the text was added properly
-        assert len(self.plotter.textList) == 1
+        assert len(plotter.textList) == 1
 
         # Now, remove the text
-        self.plotter.onRemoveText()
+        plotter.onRemoveText()
 
         # And assure no text is displayed
-        assert self.plotter.textList == []
+        assert plotter.textList == []
 
         # Attempt removal on empty and check
-        self.plotter.onRemoveText()
-        assert self.plotter.textList == []
-        self.plotter.figure.clf()
+        plotter.onRemoveText()
+        assert plotter.textList == []
+        plotter.figure.clf()
 
-    def testOnSetGraphRange(self):
+    def testOnSetGraphRange(self, plotter):
         """ Cheks if the graph can be resized for range """
         new_x = (1,2)
         new_y = (10,11)
-        self.plotter.plot(self.data)
-        self.plotter.show()
-        self.plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
-        self.plotter.setRange.xrange = MagicMock(return_value = new_x)
-        self.plotter.setRange.yrange = MagicMock(return_value = new_y)
+        plotter.plot(self.data)
+        plotter.show()
+        plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
+        plotter.setRange.xrange = MagicMock(return_value = new_x)
+        plotter.setRange.yrange = MagicMock(return_value = new_y)
 
         # Call the tested method
-        self.plotter.onSetGraphRange()
+        plotter.onSetGraphRange()
         # See that ranges changed accordingly
-        assert self.plotter.ax.get_xlim() == new_x
-        assert self.plotter.ax.get_ylim() == new_y
-        self.plotter.figure.clf()
+        assert plotter.ax.get_xlim() == new_x
+        assert plotter.ax.get_ylim() == new_y
+        plotter.figure.clf()
 
-    def testOnResetGraphRange(self):
+    def testOnResetGraphRange(self, plotter):
         """ Cheks if the graph can be reset after resizing for range """
         # New values
         new_x = (1,2)
         new_y = (10,11)
         # define the plot
-        self.plotter.plot(self.data)
-        self.plotter.show()
+        plotter.plot(self.data)
+        plotter.show()
 
         # mock setRange methods
-        self.plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
-        self.plotter.setRange.xrange = MagicMock(return_value = new_x)
-        self.plotter.setRange.yrange = MagicMock(return_value = new_y)
+        plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
+        plotter.setRange.xrange = MagicMock(return_value = new_x)
+        plotter.setRange.yrange = MagicMock(return_value = new_y)
 
         # Change the axes range
-        self.plotter.onSetGraphRange()
+        plotter.onSetGraphRange()
 
         # Now, reset the range back
-        self.plotter.onResetGraphRange()
+        plotter.onResetGraphRange()
 
         # See that ranges are changed
-        assert self.plotter.ax.get_xlim() != new_x
-        assert self.plotter.ax.get_ylim() != new_y
-        self.plotter.figure.clf()
+        assert plotter.ax.get_xlim() != new_x
+        assert plotter.ax.get_ylim() != new_y
+        plotter.figure.clf()
 
-    def testOnLinearFit(self):
+    def testOnLinearFit(self, plotter):
         """ Checks the response to LinearFit call """
-        self.plotter.plot(self.data)
-        self.plotter.show()
+        plotter.plot(self.data)
+        plotter.show()
         QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
 
         # Just this one plot
-        assert len(list(self.plotter.plot_dict.keys())) == 1
-        self.plotter.onLinearFit('Test name')
+        assert len(list(plotter.plot_dict.keys())) == 1
+        plotter.onLinearFit('Test name')
 
         # Check that exec_ got called
         assert QtWidgets.QDialog.exec_.called
-        self.plotter.figure.clf()
+        plotter.figure.clf()
 
-    def testOnRemovePlot(self):
+    def testOnRemovePlot(self, plotter):
         """ Assure plots get removed when requested """
         # Add two plots
-        self.plotter.show()
-        self.plotter.plot(self.data)
+        plotter.show()
+        plotter.plot(self.data)
         data2 = Data1D(x=[1.0, 2.0, 3.0],
                        y=[11.0, 12.0, 13.0],
                        dx=[0.1, 0.2, 0.3],
@@ -283,34 +276,34 @@ class PlotterTest(unittest.TestCase):
         data2.title="Test data 2"
         data2.name="Test name 2"
         data2.id = 2
-        self.plotter.plot(data2)
+        plotter.plot(data2)
 
         # Assure the plotter window is visible
-        #self.assertTrue(self.plotter.isVisible())
+        #self.assertTrue(plotter.isVisible())
 
         # Assure we have two sets
-        assert len(list(self.plotter.plot_dict.keys())) == 2
+        assert len(list(plotter.plot_dict.keys())) == 2
 
         # Delete one set
-        self.plotter.onRemovePlot('Test name 2')
+        plotter.onRemovePlot('Test name 2')
         # Assure we have two sets
-        assert len(list(self.plotter.plot_dict.keys())) == 1
+        assert len(list(plotter.plot_dict.keys())) == 1
 
-        self.plotter.manager = MagicMock()
+        plotter.manager = MagicMock()
 
         # Delete the remaining set
-        self.plotter.onRemovePlot('Test name')
+        plotter.onRemovePlot('Test name')
         # Assure we have no plots
-        assert len(list(self.plotter.plot_dict.keys())) == 0
+        assert len(list(plotter.plot_dict.keys())) == 0
         # Assure the plotter window is closed
-        assert not self.plotter.isVisible()
-        self.plotter.figure.clf()
+        assert not plotter.isVisible()
+        plotter.figure.clf()
 
-    def testRemovePlot(self):
+    def testRemovePlot(self, plotter):
         """ Test plot removal """
         # Add two plots
-        self.plotter.show()
-        self.plotter.plot(self.data)
+        plotter.show()
+        plotter.plot(self.data)
         data2 = Data1D(x=[1.0, 2.0, 3.0],
                        y=[11.0, 12.0, 13.0],
                        dx=[0.1, 0.2, 0.3],
@@ -323,25 +316,25 @@ class PlotterTest(unittest.TestCase):
         data2._yaxis = "YAXIS"
         data2._yunit = "cake"
         data2.hide_error = True
-        self.plotter.plot(data2)
+        plotter.plot(data2)
 
         # delete plot 1
-        self.plotter.removePlot(1)
+        plotter.removePlot(1)
 
         # See that the labels didn't change
-        xl = self.plotter.ax.xaxis.label.get_text()
-        yl = self.plotter.ax.yaxis.label.get_text()
+        xl = plotter.ax.xaxis.label.get_text()
+        yl = plotter.ax.yaxis.label.get_text()
         assert xl == "$XAXIS(furlong*fortnight^{-1})$"
         assert yl == "$YAXIS(cake)$"
         # The hide_error flag should also remain
-        assert self.plotter.plot_dict['Test name 2'].hide_error
-        self.plotter.figure.clf()
+        assert plotter.plot_dict['Test name 2'].hide_error
+        plotter.figure.clf()
 
-    def testOnToggleHideError(self):
+    def testOnToggleHideError(self, plotter):
         """ Test the error bar toggle on plots """
         # Add two plots
-        self.plotter.show()
-        self.plotter.plot(self.data)
+        plotter.show()
+        plotter.plot(self.data)
         data2 = Data1D(x=[1.0, 2.0, 3.0],
                        y=[11.0, 12.0, 13.0],
                        dx=[0.1, 0.2, 0.3],
@@ -355,44 +348,44 @@ class PlotterTest(unittest.TestCase):
         data2._yunit = "cake"
         error_status = True
         data2.hide_error = error_status
-        self.plotter.plot(data2)
+        plotter.plot(data2)
 
         # Reverse the toggle
-        self.plotter.onToggleHideError('Test name 2')
+        plotter.onToggleHideError('Test name 2')
         # See that the labels didn't change
-        xl = self.plotter.ax.xaxis.label.get_text()
-        yl = self.plotter.ax.yaxis.label.get_text()
+        xl = plotter.ax.xaxis.label.get_text()
+        yl = plotter.ax.yaxis.label.get_text()
         assert xl == "$XAXIS(furlong*fortnight^{-1})$"
         assert yl == "$YAXIS(cake)$"
         # The hide_error flag should toggle
-        assert self.plotter.plot_dict['Test name 2'].hide_error == (not error_status)
-        self.plotter.figure.clf()
+        assert plotter.plot_dict['Test name 2'].hide_error == (not error_status)
+        plotter.figure.clf()
 
-    def testOnFitDisplay(self):
+    def testOnFitDisplay(self, plotter):
         """ Test the fit line display on the chart """
-        assert isinstance(self.plotter.fit_result, Data1D)
-        assert self.plotter.fit_result.symbol == 17
-        assert self.plotter.fit_result.name == "Fit"
+        assert isinstance(plotter.fit_result, Data1D)
+        assert plotter.fit_result.symbol == 17
+        assert plotter.fit_result.name == "Fit"
 
         # fudge some init data
         fit_data = [[0.0,0.0], [5.0,5.0]]
         # Call the method
-        self.plotter.plot = MagicMock()
-        self.plotter.onFitDisplay(fit_data)
-        assert self.plotter.plot.called
+        plotter.plot = MagicMock()
+        plotter.onFitDisplay(fit_data)
+        assert plotter.plot.called
         # Look at arguments passed to .plot()
-        self.plotter.plot.assert_called_with(data=self.plotter.fit_result,
+        plotter.plot.assert_called_with(data=plotter.fit_result,
                                              hide_error=True, marker='-')
-        self.plotter.figure.clf()
+        plotter.figure.clf()
 
-    def testReplacePlot(self):
+    def testReplacePlot(self, plotter):
         """ Test the plot refresh functionality """
         # Add original data
-        self.plotter.show()
-        self.plotter.plot(self.data)
+        plotter.show()
+        plotter.plot(self.data)
         # See the default labels
-        xl = self.plotter.ax.xaxis.label.get_text()
-        yl = self.plotter.ax.yaxis.label.get_text()
+        xl = plotter.ax.xaxis.label.get_text()
+        yl = plotter.ax.yaxis.label.get_text()
         assert xl == "$()$"
         assert yl == "$()$"
 
@@ -415,18 +408,18 @@ class PlotterTest(unittest.TestCase):
         data2.markersize = 11
 
         # Replace data in plot
-        self.plotter.replacePlot("Test name", data2)
+        plotter.replacePlot("Test name", data2)
 
         # See that the labels changed
-        xl = self.plotter.ax.xaxis.label.get_text()
-        yl = self.plotter.ax.yaxis.label.get_text()
+        xl = plotter.ax.xaxis.label.get_text()
+        yl = plotter.ax.yaxis.label.get_text()
         assert xl == "$XAXIS(furlong*fortnight^{-1})$"
         assert yl == "$YAXIS(cake)$"
         # The hide_error flag should be as set
-        assert self.plotter.plot_dict['Test name 2'].hide_error == error_status
-        self.plotter.figure.clf()
+        assert plotter.plot_dict['Test name 2'].hide_error == error_status
+        plotter.figure.clf()
 
-    def notestOnModifyPlot(self):
+    def notestOnModifyPlot(self, plotter):
         """ Test the functionality for changing plot properties """
         # Prepare new data
         data2 = Data1D(x=[1.0, 2.0, 3.0],
@@ -440,17 +433,17 @@ class PlotterTest(unittest.TestCase):
         data2.symbol = 1
         data2.markersize = 11
 
-        self.plotter.plot(data2)
+        plotter.plot(data2)
 
         with patch('sas.qtgui.Plotting.PlotProperties.PlotProperties') as mock:
             instance = mock.return_value
             QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
             instance.symbol.return_value = 7
 
-            self.plotter.onModifyPlot(2)
-        self.plotter.figure.clf()
+            plotter.onModifyPlot(2)
+        plotter.figure.clf()
 
-    def testOnToggleLegend(self):
+    def testOnToggleLegend(self, plotter):
         """
         Make sure Legend can be switched on/off
         """
@@ -466,32 +459,29 @@ class PlotterTest(unittest.TestCase):
         data2.symbol = 1
         data2.markersize = 11
 
-        self.plotter.plot(data2)
+        plotter.plot(data2)
 
-        assert self.plotter.showLegend
+        assert plotter.showLegend
         # assure we see the legend
-        assert self.plotter.legend.get_visible()
+        assert plotter.legend.get_visible()
 
         # toggle legend
-        self.plotter.onToggleLegend()
+        plotter.onToggleLegend()
 
         # now we don't see the legend
-        assert not self.plotter.legend.get_visible()
+        assert not plotter.legend.get_visible()
 
         # toggle again
-        self.plotter.onToggleLegend()
+        plotter.onToggleLegend()
 
         # see the legend again
-        assert self.plotter.legend.get_visible()
+        assert plotter.legend.get_visible()
 
         # switch the visibility of the legend
-        self.plotter.showLegend = False
+        plotter.showLegend = False
 
         # see that the legend setting is not done
-        self.plotter.legend.set_visible = MagicMock()
+        plotter.legend.set_visible = MagicMock()
 
-        self.plotter.onToggleLegend()
-        self.plotter.legend.set_visible.assert_not_called()
-
-if __name__ == "__main__":
-    unittest.main()
+        plotter.onToggleLegend()
+        plotter.legend.set_visible.assert_not_called()
