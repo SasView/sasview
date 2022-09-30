@@ -1,5 +1,4 @@
 import sys
-import unittest
 from collections import OrderedDict
 
 from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
@@ -7,15 +6,7 @@ from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 # Tested module
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-class PlotUtilitiesTest(unittest.TestCase):
-    '''Test the Plot Utilities functions'''
-    def setUp(self):
-        '''Empty'''
-        pass
-
-    def tearDown(self):
-        '''Empty'''
-        pass
+class PlotUtilitiesTest:
 
     def testDefaults(self):
         """ default method variables values """
@@ -41,6 +32,3 @@ class PlotUtilitiesTest(unittest.TestCase):
     def testGgetValidColor(self):
         """ test that the method returns a color understood by MPL """
         WarningTestNotImplemented()
-
-if __name__ == "__main__":
-    unittest.main()
