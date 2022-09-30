@@ -26,15 +26,15 @@ class WindowTitleTest(unittest.TestCase):
     def testDefaults(self):
         '''Test the GUI in its default state'''
         self.widget.show()
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Modify Window Title")
+        assert isinstance(self.widget, QtWidgets.QDialog)
+        assert self.widget.windowTitle() == "Modify Window Title"
         
     def testTitle(self):
         '''Modify the title'''
         self.widget.show()
         QtWidgets.qApp.processEvents()
         # make sure we have the pre-set title
-        self.assertEqual(self.widget.txtTitle.text(), "some title")
+        assert self.widget.txtTitle.text() == "some title"
         # Clear the control and set it to something else
         self.widget.txtTitle.clear()
         self.widget.txtTitle.setText("5 elephants")
@@ -42,7 +42,7 @@ class WindowTitleTest(unittest.TestCase):
         # Retrieve value
         new_title = self.widget.title()
         # Check
-        self.assertEqual(new_title, "5 elephants")
+        assert new_title == "5 elephants"
        
 if __name__ == "__main__":
     unittest.main()
