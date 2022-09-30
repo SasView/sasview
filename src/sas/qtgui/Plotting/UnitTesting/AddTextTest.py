@@ -29,9 +29,9 @@ class AddTextTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertIsInstance(self.widget._font, QtGui.QFont)
-        self.assertEqual(self.widget._color, "black")
+        assert isinstance(self.widget, QtWidgets.QDialog)
+        assert isinstance(self.widget._font, QtGui.QFont)
+        assert self.widget._color == "black"
         
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testOnFontChange(self):
@@ -41,7 +41,7 @@ class AddTextTest(unittest.TestCase):
         # Call the method
         self.widget.onFontChange(None)
         # Check that the text field got the new font info
-        self.assertEqual(self.widget.textEdit.currentFont(), font_1)
+        assert self.widget.textEdit.currentFont() == font_1
 
         # See that rejecting the dialog doesn't modify the font
         font_2 = QtGui.QFont("Arial", 9)
@@ -49,7 +49,7 @@ class AddTextTest(unittest.TestCase):
         # Call the method
         self.widget.onFontChange(None)
         # Check that the text field retained the previous font info
-        self.assertEqual(self.widget.textEdit.currentFont(), font_1)
+        assert self.widget.textEdit.currentFont() == font_1
 
     def testOnColorChange(self):
         ''' Test the QColorDialog output'''
@@ -58,9 +58,9 @@ class AddTextTest(unittest.TestCase):
         # Call the method
         self.widget.onColorChange(None)
         # Check that the text field got the new color info for text
-        self.assertEqual(self.widget.textEdit.palette().color(QtGui.QPalette.Text), new_color)
+        assert self.widget.textEdit.palette().color(QtGui.QPalette.Text) == new_color
         # ... and the hex value of this color is correct
-        self.assertEqual(self.widget.color(), "#ff0000")
+        assert self.widget.color() == "#ff0000"
         
 if __name__ == "__main__":
     unittest.main()
