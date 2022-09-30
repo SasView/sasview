@@ -26,36 +26,36 @@ class ScalePropertiesTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Scale Properties")
-        self.assertEqual(self.widget.cbX.count(), 6)
-        self.assertEqual(self.widget.cbY.count(), 12)
-        self.assertEqual(self.widget.cbView.count(), 7)
+        assert isinstance(self.widget, QtWidgets.QDialog)
+        assert self.widget.windowTitle() == "Scale Properties"
+        assert self.widget.cbX.count() == 6
+        assert self.widget.cbY.count() == 12
+        assert self.widget.cbView.count() == 7
         
     def testGetValues(self):
         '''Test the values returned'''
-        self.assertEqual(self.widget.getValues(), ("x", "y"))
+        assert self.widget.getValues() == ("x", "y")
         self.widget.cbX.setCurrentIndex(2)
         self.widget.cbY.setCurrentIndex(4)
-        self.assertEqual(self.widget.getValues(), ("x^(4)", "y*x^(2)"))
+        assert self.widget.getValues() == ("x^(4)", "y*x^(2)")
 
     def testSettingView(self):
         '''Test various settings of view'''
         self.widget.cbView.setCurrentIndex(1)
-        self.assertEqual(self.widget.getValues(), ("x", "y"))
+        assert self.widget.getValues() == ("x", "y")
         self.widget.cbView.setCurrentIndex(6)
-        self.assertEqual(self.widget.getValues(), ("x", "y*x^(2)"))
+        assert self.widget.getValues() == ("x", "y*x^(2)")
 
         # Assure the View combobox resets on the x index changes
-        self.assertNotEqual(self.widget.cbView.currentIndex(), 0)
+        assert self.widget.cbView.currentIndex() != 0
         self.widget.cbX.setCurrentIndex(2)
-        self.assertEqual(self.widget.cbView.currentIndex(), 0)
+        assert self.widget.cbView.currentIndex() == 0
 
         # Same for Y
         self.widget.cbView.setCurrentIndex(6)
-        self.assertNotEqual(self.widget.cbView.currentIndex(), 0)
+        assert self.widget.cbView.currentIndex() != 0
         self.widget.cbY.setCurrentIndex(2)
-        self.assertEqual(self.widget.cbView.currentIndex(), 0)
+        assert self.widget.cbView.currentIndex() == 0
       
 if __name__ == "__main__":
     unittest.main()
