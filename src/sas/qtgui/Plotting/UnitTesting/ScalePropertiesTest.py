@@ -1,61 +1,51 @@
 import sys
-import unittest
+
+import pytest
 
 from PyQt5 import QtGui, QtWidgets
-
-# set up import paths
-import sas.qtgui.path_prepare
 
 # Local
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class ScalePropertiesTest(unittest.TestCase):
+class ScalePropertiesTest:
     '''Test the ScaleProperties'''
-    def setUp(self):
-        '''Create the ScaleProperties'''
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the AboutBox'''
+        w = ScaleProperties(None)
+        yield w
+        w.close()
 
-        self.widget = ScaleProperties(None)
-
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.widget.close()
-        self.widget = None
-
-    def testDefaults(self):
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        assert isinstance(self.widget, QtWidgets.QDialog)
-        assert self.widget.windowTitle() == "Scale Properties"
-        assert self.widget.cbX.count() == 6
-        assert self.widget.cbY.count() == 12
-        assert self.widget.cbView.count() == 7
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert widget.windowTitle() == "Scale Properties"
+        assert widget.cbX.count() == 6
+        assert widget.cbY.count() == 12
+        assert widget.cbView.count() == 7
         
-    def testGetValues(self):
+    def testGetValues(self, widget):
         '''Test the values returned'''
-        assert self.widget.getValues() == ("x", "y")
-        self.widget.cbX.setCurrentIndex(2)
-        self.widget.cbY.setCurrentIndex(4)
-        assert self.widget.getValues() == ("x^(4)", "y*x^(2)")
+        assert widget.getValues() == ("x", "y")
+        widget.cbX.setCurrentIndex(2)
+        widget.cbY.setCurrentIndex(4)
+        assert widget.getValues() == ("x^(4)", "y*x^(2)")
 
-    def testSettingView(self):
+    def testSettingView(self, widget):
         '''Test various settings of view'''
-        self.widget.cbView.setCurrentIndex(1)
-        assert self.widget.getValues() == ("x", "y")
-        self.widget.cbView.setCurrentIndex(6)
-        assert self.widget.getValues() == ("x", "y*x^(2)")
+        widget.cbView.setCurrentIndex(1)
+        assert widget.getValues() == ("x", "y")
+        widget.cbView.setCurrentIndex(6)
+        assert widget.getValues() == ("x", "y*x^(2)")
 
         # Assure the View combobox resets on the x index changes
-        assert self.widget.cbView.currentIndex() != 0
-        self.widget.cbX.setCurrentIndex(2)
-        assert self.widget.cbView.currentIndex() == 0
+        assert widget.cbView.currentIndex() != 0
+        widget.cbX.setCurrentIndex(2)
+        assert widget.cbView.currentIndex() == 0
 
         # Same for Y
-        self.widget.cbView.setCurrentIndex(6)
-        assert self.widget.cbView.currentIndex() != 0
-        self.widget.cbY.setCurrentIndex(2)
-        assert self.widget.cbView.currentIndex() == 0
-      
-if __name__ == "__main__":
-    unittest.main()
+        widget.cbView.setCurrentIndex(6)
+        assert widget.cbView.currentIndex() != 0
+        widget.cbY.setCurrentIndex(2)
+        assert widget.cbView.currentIndex() == 0
