@@ -6,9 +6,6 @@ from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtWidgets
 
-# set up import paths
-import sas.qtgui.path_prepare
-
 # Local
 from sas.qtgui.Plotting.AddText import AddText
 

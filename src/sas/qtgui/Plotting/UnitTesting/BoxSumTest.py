@@ -6,7 +6,7 @@ from PyQt5 import QtGui,QtWidgets
 from PyQt5 import QtCore
 
 # set up import paths
-import path_prepare
+import sas.qtgui.path_prepare
 
 # Local
 from sas.qtgui.Plotting.BoxSum import BoxSum
@@ -32,15 +32,15 @@ class BoxSumTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(0), QtWidgets.QLineEdit)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(1), QtWidgets.QLineEdit)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(2), QtWidgets.QLineEdit)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(3), QtWidgets.QLineEdit)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(4), QtWidgets.QLabel)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(5), QtWidgets.QLabel)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(6), QtWidgets.QLabel)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(7), QtWidgets.QLabel)
-        self.assertIsInstance(self.widget.mapper.mappedWidgetAt(8), QtWidgets.QLabel)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(0), QtWidgets.QLineEdit)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(1), QtWidgets.QLineEdit)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(2), QtWidgets.QLineEdit)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(3), QtWidgets.QLineEdit)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(4), QtWidgets.QLabel)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(5), QtWidgets.QLabel)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(6), QtWidgets.QLabel)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(7), QtWidgets.QLabel)
+        assert isinstance(self.widget.mapper.mappedWidgetAt(8), QtWidgets.QLabel)
         
         
 if __name__ == "__main__":
