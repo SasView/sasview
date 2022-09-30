@@ -3,6 +3,9 @@ import unittest
 import webbrowser
 from unittest.mock import MagicMock
 
+import os
+os.environ["MPLBACKEND"] = "qtagg"
+
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtTest
@@ -64,25 +67,25 @@ class SlicerParametersTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget.proxy, QtCore.QIdentityProxyModel)
-        self.assertIsInstance(self.widget.lstParams.itemDelegate(), QtWidgets.QStyledItemDelegate)
-        self.assertTrue(self.widget.lstParams.model().columnReadOnly(0))
-        self.assertFalse(self.widget.lstParams.model().columnReadOnly(1))
+        assert isinstance(self.widget.proxy, QtCore.QIdentityProxyModel)
+        assert isinstance(self.widget.lstParams.itemDelegate(), QtWidgets.QStyledItemDelegate)
+        assert self.widget.lstParams.model().columnReadOnly(0)
+        assert not self.widget.lstParams.model().columnReadOnly(1)
 
         # Test the proxy model
-        self.assertEqual(self.widget.lstParams.model(), self.widget.proxy)
-        self.assertEqual(self.widget.proxy.columnCount(), 0)
-        self.assertEqual(self.widget.proxy.rowCount(), 0)
+        assert self.widget.lstParams.model() == self.widget.proxy
+        assert self.widget.proxy.columnCount() == 0
+        assert self.widget.proxy.rowCount() == 0
 
         # Slicer choice
-        self.assertTrue(self.widget.cbSlicer.count(), 5)
-        self.assertTrue(self.widget.cbSlicer.itemText(0), 'None')
+        assert self.widget.cbSlicer.count(), 5
+        assert self.widget.cbSlicer.itemText(0), 'None'
 
         # Batch slicing options tab
-        self.assertFalse(self.widget.cbSave1DPlots.isChecked())
-        self.assertFalse(self.widget.txtLocation.isEnabled())
-        self.assertTrue(self.widget.cbSlicer.count(), 3)
-        self.assertTrue(self.widget.cbSlicer.itemText(0), 'No fitting')
+        assert not self.widget.cbSave1DPlots.isChecked()
+        assert not self.widget.txtLocation.isEnabled()
+        assert self.widget.cbSlicer.count(), 3
+        assert self.widget.cbSlicer.itemText(0), 'No fitting'
 
     def testLstParams(self):
         ''' test lstParams with content '''
@@ -100,15 +103,15 @@ class SlicerParametersTest(unittest.TestCase):
         widget = SlicerParameters(model=model, parent=plotter,
                                   active_plots=active_plots,
                                   communicator=dummy_manager().communicate)
-        self.assertEqual(widget.proxy.columnCount(), 2)
-        self.assertEqual(widget.proxy.rowCount(), 2)
-        self.assertEqual(widget.model.item(0, 0).text(), 't1')
-        self.assertEqual(widget.model.item(0, 1).text(), 't2')
+        assert widget.proxy.columnCount() == 2
+        assert widget.proxy.rowCount() == 2
+        assert widget.model.item(0, 0).text() == 't1'
+        assert widget.model.item(0, 1).text() == 't2'
         # Check the flags in the proxy model
         flags = widget.proxy.flags(widget.proxy.index(0, 0))
-        self.assertFalse(flags & QtCore.Qt.ItemIsEditable)
-        self.assertTrue(flags & QtCore.Qt.ItemIsSelectable)
-        self.assertTrue(flags & QtCore.Qt.ItemIsEnabled)
+        assert not flags & QtCore.Qt.ItemIsEditable
+        assert flags & QtCore.Qt.ItemIsSelectable
+        assert flags & QtCore.Qt.ItemIsEnabled
 
     def testClose(self):
         ''' Assure that clicking on Close triggers right behaviour'''
@@ -120,7 +123,7 @@ class SlicerParametersTest(unittest.TestCase):
         QtTest.QTest.mouseClick(self.widget.cmdClose, QtCore.Qt.LeftButton)
 
         # Check the signal
-        self.assertEqual(spy_close.count(), 1)
+        assert spy_close.count() == 1
         self.widget.close()
 
     def testOnHelp(self):
@@ -134,10 +137,10 @@ class SlicerParametersTest(unittest.TestCase):
         self.widget.onHelp()
 
         # Check if show() got called
-        self.assertTrue(webbrowser.open.called)
+        assert webbrowser.open.called
 
         # Assure the filename is correct
-        self.assertIn("graph_help.html", webbrowser.open.call_args[0][0])
+        assert "graph_help.html" in webbrowser.open.call_args[0][0]
 
         self.widget.close()
 
@@ -154,44 +157,44 @@ class SlicerParametersTest(unittest.TestCase):
         self.widget.setModel(model=new_model)
 
         # Test if the widget got it
-        self.assertEqual(self.widget.model.columnCount(), 2)
-        self.assertEqual(self.widget.model.rowCount(), 2)
-        self.assertEqual(self.widget.model.item(0, 0).text(), 's1')
-        self.assertEqual(self.widget.model.item(1, 0).text(), 's2')
+        assert self.widget.model.columnCount() == 2
+        assert self.widget.model.rowCount() == 2
+        assert self.widget.model.item(0, 0).text() == 's1'
+        assert self.widget.model.item(1, 0).text() == 's2'
 
     def testPlotSave(self):
         ''' defaults for the Auto Save options '''
-        self.assertFalse(self.widget.cbSave1DPlots.isChecked())
-        self.assertFalse(self.widget.txtLocation.isEnabled())
-        self.assertFalse(self.widget.txtExtension.isEnabled())
-        self.assertFalse(self.widget.cbFitOptions.isEnabled())
-        self.assertFalse(self.widget.cbSaveExt.isEnabled())
+        assert not self.widget.cbSave1DPlots.isChecked()
+        assert not self.widget.txtLocation.isEnabled()
+        assert not self.widget.txtExtension.isEnabled()
+        assert not self.widget.cbFitOptions.isEnabled()
+        assert not self.widget.cbSaveExt.isEnabled()
 
         # Select auto save
         self.widget.cbSave1DPlots.setChecked(True)
-        self.assertTrue(self.widget.txtLocation.isEnabled())
-        self.assertTrue(self.widget.txtExtension.isEnabled())
-        self.assertTrue(self.widget.cbFitOptions.isEnabled())
-        self.assertTrue(self.widget.cbSaveExt.isEnabled())
+        assert self.widget.txtLocation.isEnabled()
+        assert self.widget.txtExtension.isEnabled()
+        assert self.widget.cbFitOptions.isEnabled()
+        assert self.widget.cbSaveExt.isEnabled()
 
     def testPlotList(self):
         ''' check if the plot list shows correct content '''
-        self.assertEqual(self.widget.lstPlots.count(), 1)
-        self.assertEqual(self.widget.lstPlots.item(0).text(), "test_plot")
-        self.assertFalse(self.widget.lstPlots.item(0).checkState())
+        assert self.widget.lstPlots.count() == 1
+        assert self.widget.lstPlots.item(0).text() == "test_plot"
+        assert not self.widget.lstPlots.item(0).checkState()
 
     def testOnSlicerChange(self):
         ''' change the slicer '''
         self.widget.onApply = MagicMock()
-        self.assertEqual(self.widget.lstParams.model().rowCount(), 0)
-        self.assertEqual(self.widget.lstParams.model().columnCount(), 0)
-        self.assertEqual(self.widget.lstParams.model().index(0, 0).data(), None)
+        assert self.widget.lstParams.model().rowCount() == 0
+        assert self.widget.lstParams.model().columnCount() == 0
+        assert self.widget.lstParams.model().index(0, 0).data() == None
 
     def testOnApply(self):
         self.widget.lstPlots.item(0).setCheckState(True)
         self.widget.applyPlotter = MagicMock()
         self.widget.save1DPlotsForPlot = MagicMock()
-        self.assertFalse(self.widget.isSave)
+        assert not self.widget.isSave
         # Apply without 1D data saved
         self.widget.onApply()
         self.widget.applyPlotter.assert_called_once()
@@ -199,9 +202,9 @@ class SlicerParametersTest(unittest.TestCase):
 
         # Apply with 1D data saved
         self.widget.cbSave1DPlots.setCheckState(True)
-        self.assertTrue(self.widget.isSave)
+        assert self.widget.isSave
         self.widget.onApply()
-        self.assertIsNotNone(self.widget.model)
+        assert self.widget.model is not None
         self.widget.applyPlotter.assert_called()
         self.widget.save1DPlotsForPlot.assert_called_once()
 
