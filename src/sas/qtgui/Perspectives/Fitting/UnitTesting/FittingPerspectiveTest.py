@@ -37,7 +37,7 @@ class FittingPerspectiveTest:
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QWidget)
         assert "Fit panel" in widget.windowTitle()
-        assert widget.optimizer == "Levenberg-Marquardt"
+        assert widget.optimizer == "MPFit"
         assert len(widget.tabs) == 1
         assert widget.maxIndex == 2
         assert widget.getTabName() == "FitPage2"
