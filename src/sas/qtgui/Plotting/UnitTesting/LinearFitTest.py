@@ -41,14 +41,14 @@ class LinearFitTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Linear Fit")
-        self.assertEqual(self.widget.txtA.text(), "1")
-        self.assertEqual(self.widget.txtB.text(), "1")
-        self.assertEqual(self.widget.txtAerr.text(), "0")
-        self.assertEqual(self.widget.txtBerr.text(), "0")
+        assert isinstance(self.widget, QtWidgets.QDialog)
+        assert self.widget.windowTitle() == "Linear Fit"
+        assert self.widget.txtA.text() == "1"
+        assert self.widget.txtB.text() == "1"
+        assert self.widget.txtAerr.text() == "0"
+        assert self.widget.txtBerr.text() == "0"
 
-        self.assertEqual(self.widget.lblRange.text(), "Fit range of log10(x^2)")
+        assert self.widget.lblRange.text() == "Fit range of log10(x^2)"
 
     def testFit(self):
         '''Test the fitting wrapper '''
@@ -66,23 +66,23 @@ class LinearFitTest(unittest.TestCase):
         self.widget.fit(None)
 
         # Expected one spy instance
-        self.assertEqual(spy_update.count(), 1)
+        assert spy_update.count() == 1
 
         return_values = spy_update.called()[0]['args'][0]
         # Compare
         self.assertCountEqual(return_values[0], [1.0, 3.0])
-        self.assertAlmostEqual(return_values[1][0], 10.004054329, 6)
-        self.assertAlmostEqual(return_values[1][1], 12.030439848, 6)
+        assert round(abs(return_values[1][0]-10.004054329), 6) == 0
+        assert round(abs(return_values[1][1]-12.030439848), 6) == 0
 
         # Set the log scale
         self.widget.x_is_log = True
         self.widget.fit(None)
-        self.assertEqual(spy_update.count(), 2)
+        assert spy_update.count() == 2
         return_values = spy_update.called()[1]['args'][0]
         # Compare
         self.assertCountEqual(return_values[0], [1.0, 3.0])
-        self.assertAlmostEqual(return_values[1][0], 9.987732937, 6)
-        self.assertAlmostEqual(return_values[1][1], 11.84365082, 6)
+        assert round(abs(return_values[1][0]-9.987732937), 6) == 0
+        assert round(abs(return_values[1][1]-11.84365082), 6) == 0
 
     def testOrigData(self):
         ''' Assure the un-logged data is returned'''
@@ -94,12 +94,12 @@ class LinearFitTest(unittest.TestCase):
         x, y, dy = self.widget.origData()
 
         self.assertCountEqual(x, orig_x)
-        self.assertEqual(y[0], orig_y[0])
-        self.assertAlmostEqual(y[1], orig_y[1], 8)
-        self.assertAlmostEqual(y[2], orig_y[2], 8)
-        self.assertEqual(dy[0], orig_dy[0])
-        self.assertAlmostEqual(dy[1], orig_dy[1], 8)
-        self.assertAlmostEqual(dy[2], orig_dy[2], 8)
+        assert y[0] == orig_y[0]
+        assert round(abs(y[1]-orig_y[1]), 8) == 0
+        assert round(abs(y[2]-orig_y[2]), 8) == 0
+        assert dy[0] == orig_dy[0]
+        assert round(abs(dy[1]-orig_dy[1]), 8) == 0
+        assert round(abs(dy[2]-orig_dy[2]), 8) == 0
 
         # x, y
         self.widget.x_is_log = False
@@ -124,39 +124,39 @@ class LinearFitTest(unittest.TestCase):
         x, y, dy = self.widget.origData()
 
         self.assertCountEqual(x, orig_x)
-        self.assertEqual(y[0], orig_y[0])
-        self.assertAlmostEqual(y[1], orig_y[1], 8)
-        self.assertAlmostEqual(y[2], orig_y[2], 8)
-        self.assertEqual(dy[0], orig_dy[0])
-        self.assertAlmostEqual(dy[1], orig_dy[1], 8)
-        self.assertAlmostEqual(dy[2], orig_dy[2], 8)
+        assert y[0] == orig_y[0]
+        assert round(abs(y[1]-orig_y[1]), 8) == 0
+        assert round(abs(y[2]-orig_y[2]), 8) == 0
+        assert dy[0] == orig_dy[0]
+        assert round(abs(dy[1]-orig_dy[1]), 8) == 0
+        assert round(abs(dy[2]-orig_dy[2]), 8) == 0
 
     def testCheckFitValues(self):
         '''Assure fit values are correct'''
         # Good values
-        self.assertTrue(self.widget.checkFitValues(self.widget.txtFitRangeMin))
+        assert self.widget.checkFitValues(self.widget.txtFitRangeMin)
         # Colors platform dependent
         #self.assertEqual(self.widget.txtFitRangeMin.palette().color(10).name(), "#f0f0f0")
         # Bad values
         self.widget.x_is_log = True
         self.widget.txtFitRangeMin.setText("-1.0")
-        self.assertFalse(self.widget.checkFitValues(self.widget.txtFitRangeMin))
+        assert not self.widget.checkFitValues(self.widget.txtFitRangeMin)
        
 
     def testFloatInvTransform(self):
         '''Test the helper method for providing conversion function'''
         self.widget.xLabel="x"
-        self.assertEqual(self.widget.floatInvTransform(5.0), 5.0)
+        assert self.widget.floatInvTransform(5.0) == 5.0
         self.widget.xLabel="x^(2)"
-        self.assertEqual(self.widget.floatInvTransform(25.0), 5.0)
+        assert self.widget.floatInvTransform(25.0) == 5.0
         self.widget.xLabel="x^(4)"
-        self.assertEqual(self.widget.floatInvTransform(81.0), 3.0)
+        assert self.widget.floatInvTransform(81.0) == 3.0
         self.widget.xLabel="log10(x)"
-        self.assertEqual(self.widget.floatInvTransform(2.0), 100.0)
+        assert self.widget.floatInvTransform(2.0) == 100.0
         self.widget.xLabel="ln(x)"
-        self.assertEqual(self.widget.floatInvTransform(1.0), numpy.exp(1))
+        assert self.widget.floatInvTransform(1.0) == numpy.exp(1)
         self.widget.xLabel="log10(x^(4))"
-        self.assertEqual(self.widget.floatInvTransform(4.0), 10.0)
+        assert self.widget.floatInvTransform(4.0) == 10.0
       
 if __name__ == "__main__":
     unittest.main()
