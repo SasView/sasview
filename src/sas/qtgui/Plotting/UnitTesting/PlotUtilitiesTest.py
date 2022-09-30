@@ -2,7 +2,7 @@ import sys
 import unittest
 from collections import OrderedDict
 
-from UnitTesting.TestUtils import WarningTestNotImplemented
+from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 
 # Tested module
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
@@ -19,8 +19,8 @@ class PlotUtilitiesTest(unittest.TestCase):
 
     def testDefaults(self):
         """ default method variables values """
-        self.assertIsInstance(PlotUtilities.SHAPES, OrderedDict)
-        self.assertIsInstance(PlotUtilities.COLORS, OrderedDict)
+        assert isinstance(PlotUtilities.SHAPES, OrderedDict)
+        assert isinstance(PlotUtilities.COLORS, OrderedDict)
 
     def testBuildMatrix(self):
         """ build matrix for 2d plot from a vector """
