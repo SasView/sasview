@@ -1,5 +1,4 @@
 import sys
-import unittest
 import numpy
 
 import pytest
@@ -11,9 +10,6 @@ from PyQt5 import QtGui, QtWidgets
 from unittest.mock import MagicMock
 import matplotlib as mpl
 
-# set up import paths
-import sas.qtgui.path_prepare
-
 from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
 from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
@@ -22,16 +18,16 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 # Local
 from sas.qtgui.Plotting.ColorMap import ColorMap
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class ColorMapTest(unittest.TestCase):
+class ColorMapTest:
     '''Test the ColorMap'''
-    def setUp(self):
-        '''Create the ColorMap'''
-        self.plotter = Plotter2D.Plotter2D(None, quickplot=True)
 
-        self.data = Data2D(image=[0.1]*4,
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the ColorMap'''
+        plotter = Plotter2D.Plotter2D(None, quickplot=True)
+
+        data = Data2D(image=[0.1]*4,
                            qx_data=[1.0, 2.0, 3.0, 4.0],
                            qy_data=[10.0, 11.0, 12.0, 13.0],
                            dqx_data=[0.1, 0.2, 0.3, 0.4],
@@ -49,174 +45,170 @@ class ColorMapTest(unittest.TestCase):
         # saves all values. Lack of xmin/xmax etc means that the following
         # instantiation of the ColorMap class fails.
 
-        self.data.title="Test data"
-        self.data.id = 1
-        self.widget = ColorMap(parent=self.plotter, data=self.data)
+        data.title="Test data"
+        data.id = 1
+        w = ColorMap(parent=plotter, data=data)
 
-    def tearDown(self):
+        yield w
+
         '''Destroy the GUI'''
-        self.widget.close()
-        self.widget = None
+        w.close()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testDefaults(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        assert isinstance(self.widget, QtWidgets.QDialog)
+        assert isinstance(widget, QtWidgets.QDialog)
 
-        assert self.widget._cmap_orig == "jet"
-        assert len(self.widget.all_maps) == 150
-        assert len(self.widget.maps) == 75
-        assert len(self.widget.rmaps) == 75
+        assert widget._cmap_orig == "jet"
+        assert len(widget.all_maps) == 150
+        assert len(widget.maps) == 75
+        assert len(widget.rmaps) == 75
 
-        assert self.widget.lblWidth.text() == "0"
-        assert self.widget.lblHeight.text() == "0"
-        assert self.widget.lblQmax.text() == "18"
-        assert self.widget.lblStopRadius.text() == "-1"
-        assert not self.widget.chkReverse.isChecked()
-        assert self.widget.cbColorMap.count() == 75
-        assert self.widget.cbColorMap.currentIndex() == 60
+        assert widget.lblWidth.text() == "0"
+        assert widget.lblHeight.text() == "0"
+        assert widget.lblQmax.text() == "18"
+        assert widget.lblStopRadius.text() == "-1"
+        assert not widget.chkReverse.isChecked()
+        assert widget.cbColorMap.count() == 75
+        assert widget.cbColorMap.currentIndex() == 60
 
         # validators
-        assert isinstance(self.widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
-        assert isinstance(self.widget.txtMaxAmplitude.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget.txtMaxAmplitude.validator(), QtGui.QDoubleValidator)
 
         # Ranges
-        assert self.widget.txtMinAmplitude.text() == "0"
-        assert self.widget.txtMaxAmplitude.text() == "100"
-        assert isinstance(self.widget.slider, QtWidgets.QSlider)
+        assert widget.txtMinAmplitude.text() == "0"
+        assert widget.txtMaxAmplitude.text() == "100"
+        assert isinstance(widget.slider, QtWidgets.QSlider)
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnReset(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testOnReset(self, widget):
         '''Check the dialog reset function'''
         # Set some controls to non-default state
-        self.widget.cbColorMap.setCurrentIndex(20)
-        self.widget.chkReverse.setChecked(True)
-        self.widget.txtMinAmplitude.setText("20.0")
+        widget.cbColorMap.setCurrentIndex(20)
+        widget.chkReverse.setChecked(True)
+        widget.txtMinAmplitude.setText("20.0")
 
         # Reset the widget state
-        self.widget.onReset()
+        widget.onReset()
 
         # Assure things went back to default
-        assert self.widget.cbColorMap.currentIndex() == 20
-        assert not self.widget.chkReverse.isChecked()
-        assert self.widget.txtMinAmplitude.text() == "0"
+        assert widget.cbColorMap.currentIndex() == 20
+        assert not widget.chkReverse.isChecked()
+        assert widget.txtMinAmplitude.text() == "0"
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnApply(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testOnApply(self, widget):
         '''Check the dialog apply function'''
         # Set some controls to non-default state
-        self.widget.show()
-        self.widget.cbColorMap.setCurrentIndex(20) # PuRd_r
-        self.widget.chkReverse.setChecked(True)
-        self.widget.txtMinAmplitude.setText("20.0")
+        widget.show()
+        widget.cbColorMap.setCurrentIndex(20) # PuRd_r
+        widget.chkReverse.setChecked(True)
+        widget.txtMinAmplitude.setText("20.0")
 
-        spy_apply = QtSignalSpy(self.widget, self.widget.apply_signal)
+        spy_apply = QtSignalSpy(widget, widget.apply_signal)
         # Reset the widget state
-        self.widget.onApply()
+        widget.onApply()
 
         # Assure the widget is still up and the signal was sent.
-        assert self.widget.isVisible()
+        assert widget.isVisible()
         assert spy_apply.count() == 1
         assert 'PuRd_r' in spy_apply.called()[0]['args'][1]
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testInitMapCombobox(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testInitMapCombobox(self, widget):
         '''Test the combo box initializer'''
         # Set a color map from the direct list
-        self.widget._cmap = "gnuplot"
-        self.widget.initMapCombobox()
+        widget._cmap = "gnuplot"
+        widget.initMapCombobox()
 
         # Check the combobox
-        assert self.widget.cbColorMap.currentIndex() == 55
-        assert not self.widget.chkReverse.isChecked()
+        assert widget.cbColorMap.currentIndex() == 55
+        assert not widget.chkReverse.isChecked()
 
         # Set a reversed value
-        self.widget._cmap = "hot_r"
-        self.widget.initMapCombobox()
+        widget._cmap = "hot_r"
+        widget.initMapCombobox()
         # Check the combobox
-        assert self.widget.cbColorMap.currentIndex() == 56
-        assert self.widget.chkReverse.isChecked()
+        assert widget.cbColorMap.currentIndex() == 56
+        assert widget.chkReverse.isChecked()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testInitRangeSlider(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testInitRangeSlider(self, widget):
         '''Test the range slider initializer'''
         # Set a color map from the direct list
-        self.widget._cmap = "gnuplot"
-        self.widget.initRangeSlider()
+        widget._cmap = "gnuplot"
+        widget.initRangeSlider()
 
         # Check the values
-        assert self.widget.slider.minimum() == 0
-        assert self.widget.slider.maximum() == 100
-        assert self.widget.slider.orientation() == 1
+        assert widget.slider.minimum() == 0
+        assert widget.slider.maximum() == 100
+        assert widget.slider.orientation() == 1
 
         # Emit new low value
-        self.widget.slider.lowValueChanged.emit(5)
+        widget.slider.lowValueChanged.emit(5)
         # Assure the widget received changes
-        assert self.widget.txtMinAmplitude.text() == "5"
+        assert widget.txtMinAmplitude.text() == "5"
 
         # Emit new high value
-        self.widget.slider.highValueChanged.emit(45)
+        widget.slider.highValueChanged.emit(45)
         # Assure the widget received changes
-        assert self.widget.txtMaxAmplitude.text() == "45"
+        assert widget.txtMaxAmplitude.text() == "45"
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnMapIndexChange(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testOnMapIndexChange(self, widget):
         '''Test the response to the combo box index change'''
 
-        self.widget.canvas.draw = MagicMock()
+        widget.canvas.draw = MagicMock()
         mpl.colorbar.ColorbarBase = MagicMock()
 
         # simulate index change
-        self.widget.cbColorMap.setCurrentIndex(1)
+        widget.cbColorMap.setCurrentIndex(1)
 
         # Check that draw() got called
-        assert self.widget.canvas.draw.called
+        assert widget.canvas.draw.called
         assert mpl.colorbar.ColorbarBase.called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnColorMapReversed(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testOnColorMapReversed(self, widget):
         '''Test reversing the color map functionality'''
         # Check the defaults
-        assert self.widget._cmap == "jet"
-        self.widget.cbColorMap.addItems = MagicMock()
+        assert widget._cmap == "jet"
+        widget.cbColorMap.addItems = MagicMock()
 
         # Reverse the choice
-        self.widget.onColorMapReversed(True)
+        widget.onColorMapReversed(True)
 
         # check the behaviour
-        assert self.widget._cmap == "jet_r"
-        assert self.widget.cbColorMap.addItems.called
+        assert widget._cmap == "jet_r"
+        assert widget.cbColorMap.addItems.called
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnAmplitudeChange(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - causes segfault")
+    def testOnAmplitudeChange(self, widget):
         '''Check the callback method for responding to changes in textboxes'''
-        self.widget.canvas.draw = MagicMock()
+        widget.canvas.draw = MagicMock()
         mpl.colors.Normalize = MagicMock()
         mpl.colorbar.ColorbarBase = MagicMock()
 
-        self.widget.vmin = 0.0
-        self.widget.vmax = 100.0
+        widget.vmin = 0.0
+        widget.vmax = 100.0
 
         # good values in fields
-        self.widget.txtMinAmplitude.setText("1.0")
-        self.widget.txtMaxAmplitude.setText("10.0")
+        widget.txtMinAmplitude.setText("1.0")
+        widget.txtMaxAmplitude.setText("10.0")
 
-        self.widget.onAmplitudeChange()
+        widget.onAmplitudeChange()
 
         # Check the arguments to Normalize
         mpl.colors.Normalize.assert_called_with(vmin=1.0, vmax=10.0)
-        assert self.widget.canvas.draw.called
+        assert widget.canvas.draw.called
 
         # Bad values in fields
-        self.widget.txtMinAmplitude.setText("cake")
-        self.widget.txtMaxAmplitude.setText("more cake")
+        widget.txtMinAmplitude.setText("cake")
+        widget.txtMaxAmplitude.setText("more cake")
 
-        self.widget.onAmplitudeChange()
+        widget.onAmplitudeChange()
 
         # Check the arguments to Normalize - should be defaults
         mpl.colors.Normalize.assert_called_with(vmin=0.0, vmax=100.0)
-        assert self.widget.canvas.draw.called
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert widget.canvas.draw.called
