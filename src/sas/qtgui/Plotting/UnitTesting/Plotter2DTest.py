@@ -66,10 +66,10 @@ class Plotter2DTest(unittest.TestCase):
         """ Adding data """
         self.plotter.data = self.data
 
-        self.assertEqual(self.plotter.data0, self.data)
-        self.assertEqual(self.plotter._title, self.data.title)
-        self.assertEqual(self.plotter.xLabel, "$\\rm{Q_{x}}(A^{-1})$")
-        self.assertEqual(self.plotter.yLabel, "$\\rm{Q_{y}}(A^{-1})$")
+        assert self.plotter.data0 == self.data
+        assert self.plotter._title == self.data.title
+        assert self.plotter.xLabel == "$\\rm{Q_{x}}(A^{-1})$"
+        assert self.plotter.yLabel == "$\\rm{Q_{y}}(A^{-1})$"
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testPlot(self):
@@ -80,7 +80,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.plotter.plot()
 
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        assert FigureCanvas.draw_idle.called
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
@@ -90,13 +90,13 @@ class Plotter2DTest(unittest.TestCase):
 
         # Default, log scale
         depth = self.plotter.calculateDepth()
-        self.assertEqual(depth, (0.1, 1.e20))
+        assert depth == (0.1, 1.e20)
 
         # Change the scale to linear
         self.plotter.scale = 'linear'
         depth = self.plotter.calculateDepth()
-        self.assertEqual(depth[0], -32.)
-        self.assertAlmostEqual(depth[1], 1.30103, 5)
+        assert depth[0] == -32.
+        assert round(abs(depth[1]-1.30103), 5) == 0
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnColorMap(self):
@@ -111,11 +111,11 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.onColorMap()
 
         # Check that exec_ got called
-        self.assertTrue(QtWidgets.QDialog.exec_.called)
+        assert QtWidgets.QDialog.exec_.called
 
-        self.assertEqual(self.plotter.cmap, "jet")
-        self.assertAlmostEqual(self.plotter.vmin, 0.1, 6)
-        self.assertAlmostEqual(self.plotter.vmax, 1e+20, 6)
+        assert self.plotter.cmap == "jet"
+        assert round(abs(self.plotter.vmin-0.1), 6) == 0
+        assert round(abs(self.plotter.vmax-1e+20), 6) == 0
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
@@ -127,7 +127,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.plotter.onToggleScale(None)
 
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        assert FigureCanvas.draw_idle.called
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
@@ -147,9 +147,9 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.onBoxSum()
 
         # Test various properties
-        self.assertIsInstance(self.plotter.slicer.model(), QtGui.QStandardItemModel)
-        self.assertTrue(self.plotter.boxwidget.isVisible())
-        self.assertIsInstance(self.plotter.boxwidget.model, QtGui.QStandardItemModel)
+        assert isinstance(self.plotter.slicer.model(), QtGui.QStandardItemModel)
+        assert self.plotter.boxwidget.isVisible()
+        assert isinstance(self.plotter.boxwidget.model, QtGui.QStandardItemModel)
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken")
@@ -158,28 +158,28 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.data = self.data
         self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 7)
+        assert len(actions) == 7
 
         # Trigger Print Image and make sure the method is called
-        self.assertEqual(actions[1].text(), "Print Image")
+        assert actions[1].text() == "Print Image"
         QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        self.assertTrue(QtPrintSupport.QPrintDialog.exec_.called)
+        assert QtPrintSupport.QPrintDialog.exec_.called
 
         # Trigger Copy to Clipboard and make sure the method is called
-        self.assertEqual(actions[2].text(), "Copy to Clipboard")
+        assert actions[2].text() == "Copy to Clipboard"
 
         # Trigger Toggle Grid and make sure the method is called
-        self.assertEqual(actions[4].text(), "Toggle Grid On/Off")
+        assert actions[4].text() == "Toggle Grid On/Off"
         self.plotter.ax.grid = MagicMock()
         actions[4].trigger()
-        self.assertTrue(self.plotter.ax.grid.called)
+        assert self.plotter.ax.grid.called
 
         # Trigger Change Scale and make sure the method is called
-        self.assertEqual(actions[6].text(), "Toggle Linear/Log Scale")
+        assert actions[6].text() == "Toggle Linear/Log Scale"
         FigureCanvas.draw_idle = MagicMock()
         actions[6].trigger()
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        assert FigureCanvas.draw_idle.called
 
         # Spy on cliboard's dataChanged() signal
         if not self.isWindows:
@@ -191,7 +191,7 @@ class Plotter2DTest(unittest.TestCase):
         actions[2].trigger()
         QtWidgets.qApp.processEvents()
         # Make sure clipboard got updated.
-        self.assertTrue(self.clipboard_called)
+        assert self.clipboard_called
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
@@ -211,8 +211,8 @@ class Plotter2DTest(unittest.TestCase):
                               cmap=None, zmin=None,
                               zmax=None)
 
-        self.assertFalse(FigureCanvas.draw_idle.called)
-        self.assertFalse(FigureCanvas.draw.called)
+        assert not FigureCanvas.draw_idle.called
+        assert not FigureCanvas.draw.called
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
@@ -233,8 +233,8 @@ class Plotter2DTest(unittest.TestCase):
                               ymin=self.data.ymin, ymax=self.data.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
-        self.assertTrue(Axes3D.plot_surface.called)
-        self.assertTrue(FigureCanvas.draw.called)
+        assert Axes3D.plot_surface.called
+        assert FigureCanvas.draw.called
         self.plotter.figure.clf()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
@@ -254,7 +254,7 @@ class Plotter2DTest(unittest.TestCase):
                               ymin=self.data.ymin, ymax=self.data.ymax,
                               cmap=None, zmin=None,
                               zmax=None)
-        self.assertTrue(FigureCanvas.draw_idle.called)
+        assert FigureCanvas.draw_idle.called
         self.plotter.figure.clf()
 
 
