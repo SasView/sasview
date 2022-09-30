@@ -1,6 +1,7 @@
 import sys
-import unittest
 import webbrowser
+
+import pytest
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
@@ -15,44 +16,40 @@ from sas.system import web, legal
 # Local
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
-
-class AboutBoxTest(unittest.TestCase):
+class AboutBoxTest:
     '''Test the AboutBox'''
-    def setUp(self):
-        '''Create the AboutBox'''
-        self.widget = AboutBox(None)
 
-    def tearDown(self):
-        '''Destroy the AboutBox'''
-        self.widget.close()
-        self.widget = None
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the AboutBox'''
+        w = AboutBox(None)
+        yield w
+        w.close()
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        assert isinstance(self.widget, QtWidgets.QWidget)
-        assert self.widget.windowTitle() == "About"
-        assert self.widget.cmdOK.text() == "OK"
+        assert isinstance(widget, QtWidgets.QWidget)
+        assert widget.windowTitle() == "About"
+        assert widget.cmdOK.text() == "OK"
 
-        assert "SasView" in self.widget.label_2.text()
+        assert "SasView" in widget.label_2.text()
         # Link buttons pixmaps don't contain image filenames, so can't check this.
-        # self.assertEqual(self.widget.cmdLinkUT.icon().name(), "utlogo.gif")
+        # self.assertEqual(widget.cmdLinkUT.icon().name(), "utlogo.gif")
 
 
-    def testVersion(self):
+    def testVersion(self, widget):
         """
         Assure the version number is as expected
         """
-        version = self.widget.lblVersion
+        version = widget.lblVersion
         assert isinstance(version, QtWidgets.QLabel)
         assert str(version.text()) == str(sas.system.version.__version__)
 
-    def testAbout(self):
+    def testAbout(self, widget):
         """
         Assure the about label is filled properly
         """
-        about = self.widget.lblAbout
+        about = widget.lblAbout
         assert isinstance(about, QtWidgets.QLabel)
         # License
         assert str(legal.copyright) in about.text()
@@ -64,7 +61,7 @@ class AboutBoxTest(unittest.TestCase):
         # Are links enabled?
         assert about.openExternalLinks()
 
-    def testAddActions(self):
+    def testAddActions(self, widget):
         """
         Assure link buttons are set up correctly
         """
@@ -84,7 +81,7 @@ class AboutBoxTest(unittest.TestCase):
                 config.diamond_url]
 
         # Press the buttons
-        buttonList = self.widget.findChildren(QtWidgets.QPushButton)
+        buttonList = widget.findChildren(QtWidgets.QPushButton)
         for button in buttonList:
             QTest.mouseClick(button, QtCore.Qt.LeftButton)
             #open_link = webbrowser.open.call_args
@@ -95,12 +92,9 @@ class AboutBoxTest(unittest.TestCase):
         # The above test also greedily catches the OK button,
         # so let's test it separately.
         # Show the widget
-        self.widget.show()
-        assert self.widget.isVisible()
+        widget.show()
+        assert widget.isVisible()
         # Click on the OK button
-        QTest.mouseClick(self.widget.cmdOK, QtCore.Qt.LeftButton)
+        QTest.mouseClick(widget.cmdOK, QtCore.Qt.LeftButton)
         # assure the widget is no longer seen
-        assert not self.widget.isVisible()
-
-if __name__ == "__main__":
-    unittest.main()
+        assert not widget.isVisible()
