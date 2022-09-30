@@ -1,17 +1,7 @@
-import unittest
-
 # Tested module
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-class PlotHelperTest(unittest.TestCase):
-    '''Test the Plot helper functions'''
-    def setUp(self):
-        '''Empty'''
-        pass
-
-    def tearDown(self):
-        '''Empty'''
-        pass
+class PlotHelperTest:
 
     def testDefaults(self):
         """ default method variables values """
@@ -50,6 +40,3 @@ class PlotHelperTest(unittest.TestCase):
         plot3 = "Just another plot. Move along."
         PlotHelper.addPlot(plot3)
         #self.assertEqual(PlotHelper.idOfPlot(plot3), plot_id_2 + 1)
-
-if __name__ == "__main__":
-    unittest.main()
