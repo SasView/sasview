@@ -1,5 +1,8 @@
 import sys
 import unittest
+
+import pytest
+
 from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtWidgets
@@ -35,14 +38,14 @@ class SlicerModelTest(unittest.TestCase):
     def testBaseClass(self):
         '''Assure that SlicerModel contains pure virtuals'''
         model = SlicerModel()
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             model.setParams()
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             model.setModelFromParams()
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.model.model(), QtGui.QStandardItemModel)
+        assert isinstance(self.model.model(), QtGui.QStandardItemModel)
 
     def testSetModelFromParams(self):
         '''Test the model update'''
@@ -55,23 +58,23 @@ class SlicerModelTest(unittest.TestCase):
         self.model.setModelFromParams()
 
         # Check the new model.
-        self.assertEqual(self.model.model().rowCount(), 3)
-        self.assertEqual(self.model.model().columnCount(), 2)
+        assert self.model.model().rowCount() == 3
+        assert self.model.model().columnCount() == 2
 
     def testSetParamsFromModel(self):
         ''' Test the parameters update'''
         # First - the default model
         self.model.setModelFromParams()
-        self.assertEqual(self.model.model().rowCount(), 2)
-        self.assertEqual(self.model.model().columnCount(), 2)
+        assert self.model.model().rowCount() == 2
+        assert self.model.model().columnCount() == 2
 
         # Add a row
         item1 = QtGui.QStandardItem("c")
         item2 = QtGui.QStandardItem(3)
         self.model.model().appendRow([item1, item2])
         # Check the new model. The update should be automatic
-        self.assertEqual(self.model.model().rowCount(), 3)
-        self.assertEqual(self.model.model().columnCount(), 2)
+        assert self.model.model().rowCount() == 3
+        assert self.model.model().columnCount() == 2
 
 
 if __name__ == "__main__":
