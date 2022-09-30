@@ -31,11 +31,11 @@ class AboutBoxTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "About")
-        self.assertEqual(self.widget.cmdOK.text(), "OK")
+        assert isinstance(self.widget, QtWidgets.QWidget)
+        assert self.widget.windowTitle() == "About"
+        assert self.widget.cmdOK.text() == "OK"
 
-        self.assertIn("SasView", self.widget.label_2.text())
+        assert "SasView" in self.widget.label_2.text()
         # Link buttons pixmaps don't contain image filenames, so can't check this.
         # self.assertEqual(self.widget.cmdLinkUT.icon().name(), "utlogo.gif")
 
@@ -45,24 +45,24 @@ class AboutBoxTest(unittest.TestCase):
         Assure the version number is as expected
         """
         version = self.widget.lblVersion
-        self.assertIsInstance(version, QtWidgets.QLabel)
-        self.assertEqual(str(version.text()), str(sas.system.version.__version__))
+        assert isinstance(version, QtWidgets.QLabel)
+        assert str(version.text()) == str(sas.system.version.__version__)
 
     def testAbout(self):
         """
         Assure the about label is filled properly
         """
         about = self.widget.lblAbout
-        self.assertIsInstance(about, QtWidgets.QLabel)
+        assert isinstance(about, QtWidgets.QLabel)
         # License
-        self.assertIn(str(legal.copyright), about.text())
+        assert str(legal.copyright) in about.text()
         # URLs
-        self.assertIn(str(web.homepage_url), about.text())
-        self.assertIn(str(config.download_url), about.text())
-        self.assertIn(str(config.help_email), about.text())
+        assert str(web.homepage_url) in about.text()
+        assert str(config.download_url) in about.text()
+        assert str(config.help_email) in about.text()
 
         # Are links enabled?
-        self.assertTrue(about.openExternalLinks())
+        assert about.openExternalLinks()
 
     def testAddActions(self):
         """
@@ -90,17 +90,17 @@ class AboutBoxTest(unittest.TestCase):
             #open_link = webbrowser.open.call_args
             args, _ = webbrowser.open.call_args
             # args[0] contains the actual argument sent to open()
-            self.assertIn(args[0], all_hosts)
+            assert args[0] in all_hosts
 
         # The above test also greedily catches the OK button,
         # so let's test it separately.
         # Show the widget
         self.widget.show()
-        self.assertTrue(self.widget.isVisible())
+        assert self.widget.isVisible()
         # Click on the OK button
         QTest.mouseClick(self.widget.cmdOK, QtCore.Qt.LeftButton)
         # assure the widget is no longer seen
-        self.assertFalse(self.widget.isVisible())
+        assert not self.widget.isVisible()
 
 if __name__ == "__main__":
     unittest.main()
