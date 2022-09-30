@@ -89,49 +89,49 @@ class DataExplorerTest(unittest.TestCase):
     def testDefaults(self):
         '''Test the GUI in its default state'''
         # Tab widget
-        self.assertIsInstance(self.form, QTabWidget)
-        self.assertEqual(self.form.count(), 2)
+        assert isinstance(self.form, QTabWidget)
+        assert self.form.count() == 2
 
         # Buttons - data tab
-        self.assertEqual(self.form.cmdLoad.text(), "Load data")
-        self.assertEqual(self.form.cmdDeleteData.text(), "Delete Data")
-        self.assertEqual(self.form.cmdDeleteTheory.text(), "Delete")
-        self.assertEqual(self.form.cmdFreeze.text(), "Freeze Theory")
-        self.assertEqual(self.form.cmdSendTo.text(), "Send data to")
-        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(32, 32))
-        self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
-        self.assertEqual(self.form.chkBatch.text(), "Batch mode")
-        self.assertFalse(self.form.chkBatch.isChecked())
-        self.assertEqual(self.form.chkSwap.text(), "Swap data")
-        self.assertFalse(self.form.chkSwap.isChecked())
+        assert self.form.cmdLoad.text() == "Load data"
+        assert self.form.cmdDeleteData.text() == "Delete Data"
+        assert self.form.cmdDeleteTheory.text() == "Delete"
+        assert self.form.cmdFreeze.text() == "Freeze Theory"
+        assert self.form.cmdSendTo.text() == "Send data to"
+        assert self.form.cmdSendTo.iconSize() == QSize(32, 32)
+        assert isinstance(self.form.cmdSendTo.icon(), QIcon)
+        assert self.form.chkBatch.text() == "Batch mode"
+        assert not self.form.chkBatch.isChecked()
+        assert self.form.chkSwap.text() == "Swap data"
+        assert not self.form.chkSwap.isChecked()
 
         # Buttons - theory tab
 
         # Combo boxes
-        self.assertEqual(self.form.cbSelect.count(), 6)
-        self.assertEqual(self.form.cbSelect.currentIndex(), 0)
+        assert self.form.cbSelect.count() == 6
+        assert self.form.cbSelect.currentIndex() == 0
 
         # Models - data
-        self.assertIsInstance(self.form.model, QStandardItemModel)
-        self.assertEqual(self.form.treeView.model().rowCount(), 0)
-        self.assertEqual(self.form.treeView.model().columnCount(), 0)
-        self.assertEqual(self.form.model.rowCount(), 0)
-        self.assertEqual(self.form.model.columnCount(), 0)
-        self.assertIsInstance(self.form.data_proxy, QSortFilterProxyModel)
-        self.assertEqual(self.form.data_proxy.sourceModel(), self.form.model)
-        self.assertEqual("[^()]", str(self.form.data_proxy.filterRegExp().pattern()))
-        self.assertIsInstance(self.form.treeView, QTreeView)
+        assert isinstance(self.form.model, QStandardItemModel)
+        assert self.form.treeView.model().rowCount() == 0
+        assert self.form.treeView.model().columnCount() == 0
+        assert self.form.model.rowCount() == 0
+        assert self.form.model.columnCount() == 0
+        assert isinstance(self.form.data_proxy, QSortFilterProxyModel)
+        assert self.form.data_proxy.sourceModel() == self.form.model
+        assert "[^()]" == str(self.form.data_proxy.filterRegExp().pattern())
+        assert isinstance(self.form.treeView, QTreeView)
 
         # Models - theory
-        self.assertIsInstance(self.form.theory_model, QStandardItemModel)
-        self.assertEqual(self.form.freezeView.model().rowCount(), 0)
-        self.assertEqual(self.form.freezeView.model().columnCount(), 0)
-        self.assertEqual(self.form.theory_model.rowCount(), 0)
-        self.assertEqual(self.form.theory_model.columnCount(), 0)
-        self.assertIsInstance(self.form.theory_proxy, QSortFilterProxyModel)
-        self.assertEqual(self.form.theory_proxy.sourceModel(), self.form.theory_model)
-        self.assertEqual("[^()]", str(self.form.theory_proxy.filterRegExp().pattern()))
-        self.assertIsInstance(self.form.freezeView, QTreeView)
+        assert isinstance(self.form.theory_model, QStandardItemModel)
+        assert self.form.freezeView.model().rowCount() == 0
+        assert self.form.freezeView.model().columnCount() == 0
+        assert self.form.theory_model.rowCount() == 0
+        assert self.form.theory_model.columnCount() == 0
+        assert isinstance(self.form.theory_proxy, QSortFilterProxyModel)
+        assert self.form.theory_proxy.sourceModel() == self.form.theory_model
+        assert "[^()]" == str(self.form.theory_proxy.filterRegExp().pattern())
+        assert isinstance(self.form.freezeView, QTreeView)
 
     def testWidgets(self):
         """
@@ -153,11 +153,11 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(loadButton, Qt.LeftButton)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QFileDialog.getOpenFileNames.called)
+        assert QFileDialog.getOpenFileNames.called
         QFileDialog.getOpenFileNames.assert_called_once()
 
         # Make sure the signal has not been emitted
-        self.assertEqual(spy_file_read.count(), 0)
+        assert spy_file_read.count() == 0
 
         # Now, return a single file
         QFileDialog.getOpenFileNames = MagicMock(return_value=(filename,''))
@@ -167,7 +167,7 @@ class DataExplorerTest(unittest.TestCase):
         qApp.processEvents()
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QFileDialog.getOpenFileNames.called)
+        assert QFileDialog.getOpenFileNames.called
         QFileDialog.getOpenFileNames.assert_called_once()
 
         # Expected one spy instance
@@ -188,11 +188,11 @@ class DataExplorerTest(unittest.TestCase):
         self.form.readData(filename)
 
         # 0, 0, 33, 66, -1 -> 5 signals reaching progressBar
-        self.assertEqual(spy_progress_bar_update.count(), 5)
+        assert spy_progress_bar_update.count() == 5
 
         expected_list = [0, 0, 33, 66, -1]
         spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in range(5)]
-        self.assertEqual(expected_list, spied_list)
+        assert expected_list == spied_list
         
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDeleteButton(self):
@@ -209,24 +209,24 @@ class DataExplorerTest(unittest.TestCase):
         self.form.readData(filename)
 
         # Assure the model contains three items
-        self.assertEqual(self.form.model.rowCount(), 3)
+        assert self.form.model.rowCount() == 3
 
         # Assure the checkboxes are on
         item1 = self.form.model.item(0)
         item2 = self.form.model.item(1)
         item3 = self.form.model.item(2)
-        self.assertTrue(item1.checkState() == Qt.Checked)
-        self.assertTrue(item2.checkState() == Qt.Checked)
-        self.assertTrue(item3.checkState() == Qt.Checked)
+        assert item1.checkState() == Qt.Checked
+        assert item2.checkState() == Qt.Checked
+        assert item3.checkState() == Qt.Checked
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QMessageBox.question.called)
+        assert QMessageBox.question.called
 
         # Assure the model still contains the items
-        self.assertEqual(self.form.model.rowCount(), 3)
+        assert self.form.model.rowCount() == 3
 
         # Now, mock the confirmation dialog with return=Yes
         QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
@@ -235,10 +235,10 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QMessageBox.question.called)
+        assert QMessageBox.question.called
 
         # Assure the model contains no items
-        self.assertEqual(self.form.model.rowCount(), 0)
+        assert self.form.model.rowCount() == 0
 
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
@@ -265,20 +265,20 @@ class DataExplorerTest(unittest.TestCase):
         self.form.theory_model.appendRow(item2)
 
         # Assure the model contains two items
-        self.assertEqual(self.form.theory_model.rowCount(), 2)
+        assert self.form.theory_model.rowCount() == 2
 
         # Assure the checkboxes are on
-        self.assertTrue(item1.checkState() == Qt.Checked)
-        self.assertTrue(item2.checkState() == Qt.Unchecked)
+        assert item1.checkState() == Qt.Checked
+        assert item2.checkState() == Qt.Unchecked
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QMessageBox.question.called)
+        assert QMessageBox.question.called
 
         # Assure the model still contains the items
-        self.assertEqual(self.form.theory_model.rowCount(), 2)
+        assert self.form.theory_model.rowCount() == 2
 
         # Now, mock the confirmation dialog with return=Yes
         QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
@@ -287,10 +287,10 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QMessageBox.question.called)
+        assert QMessageBox.question.called
 
         # Assure the model contains 1 item
-        self.assertEqual(self.form.theory_model.rowCount(), 1)
+        assert self.form.theory_model.rowCount() == 1
 
         # Set the remaining item to checked
         self.form.theory_model.item(0).setCheckState(Qt.Checked)
@@ -299,7 +299,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Assure the model contains no items
-        self.assertEqual(self.form.theory_model.rowCount(), 0)
+        assert self.form.theory_model.rowCount() == 0
 
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
@@ -317,7 +317,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
 
         # The set_data method not called
-        self.assertFalse(mocked_perspective.setData.called)
+        assert not mocked_perspective.setData.called
 
         # Populate the model
         filename = ["cyl_400_20.txt"]
@@ -337,8 +337,8 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # Test the set_data method called
-        self.assertTrue(mocked_perspective.setData.called)
-        self.assertFalse(mocked_perspective.swapData.called)
+        assert mocked_perspective.setData.called
+        assert not mocked_perspective.swapData.called
 
         # Now select the swap data checkbox
         self.form.chkSwap.setChecked(True)
@@ -349,8 +349,8 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # Now the swap data method should be called
-        self.assertTrue(mocked_perspective.setData.called_once)
-        self.assertTrue(mocked_perspective.swapData.called)
+        assert mocked_perspective.setData.called_once
+        assert mocked_perspective.swapData.called
 
         # Test the exception block
         QMessageBox.exec_ = MagicMock()
@@ -400,42 +400,42 @@ class DataExplorerTest(unittest.TestCase):
         item1D = self.form.model.item(0)
         item2D = self.form.model.item(1)
 
-        self.assertTrue(item1D.checkState() == Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
+        assert item1D.checkState() == Qt.Unchecked
+        assert item2D.checkState() == Qt.Unchecked
 
         # Select all data
         self.form.cbSelect.activated.emit(0)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == Qt.Checked)
-        self.assertTrue(item2D.checkState() == Qt.Checked)        
+        assert item1D.checkState() == Qt.Checked
+        assert item2D.checkState() == Qt.Checked
 
         # select 1d data
         self.form.cbSelect.activated.emit(2)
         # Test the current selection
-        self.assertTrue(item1D.checkState() == Qt.Checked)
-        self.assertTrue(item2D.checkState() == Qt.Checked)
+        assert item1D.checkState() == Qt.Checked
+        assert item2D.checkState() == Qt.Checked
 
         # unselect 1d data
         self.form.cbSelect.activated.emit(3)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == Qt.Checked)
+        assert item1D.checkState() == Qt.Unchecked
+        assert item2D.checkState() == Qt.Checked
 
         # select 2d data
         self.form.cbSelect.activated.emit(4)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == Qt.Checked)        
+        assert item1D.checkState() == Qt.Unchecked
+        assert item2D.checkState() == Qt.Checked
 
         # unselect 2d data
         self.form.cbSelect.activated.emit(5)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
+        assert item1D.checkState() == Qt.Unchecked
+        assert item2D.checkState() == Qt.Unchecked
 
     def testFreezeTheory(self):
         """
@@ -466,10 +466,10 @@ class DataExplorerTest(unittest.TestCase):
         new_item = self.form.recursivelyCloneItem(item1)
 
         # assure the trees look identical
-        self.assertEqual(item1.rowCount(), new_item.rowCount())
-        self.assertEqual(item1.child(0).rowCount(), new_item.child(0).rowCount())
-        self.assertEqual(item1.child(1).rowCount(), new_item.child(1).rowCount())
-        self.assertEqual(item1.child(0).child(0).rowCount(), new_item.child(0).child(0).rowCount())
+        assert item1.rowCount() == new_item.rowCount()
+        assert item1.child(0).rowCount() == new_item.child(0).rowCount()
+        assert item1.child(1).rowCount() == new_item.child(1).rowCount()
+        assert item1.child(0).child(0).rowCount() == new_item.child(0).child(0).rowCount()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testReadData(self):
@@ -487,18 +487,18 @@ class DataExplorerTest(unittest.TestCase):
         self.form.readData(filename)
 
         # Expected two status bar updates
-        self.assertEqual(spy_status_update.count(), 2)
-        self.assertIn(filename[0], str(spy_status_update.called()[0]['args'][0]))
+        assert spy_status_update.count() == 2
+        assert filename[0] in str(spy_status_update.called()[0]['args'][0])
 
 
         # Check that the model contains the item
-        self.assertEqual(self.form.model.rowCount(), 1)
-        self.assertEqual(self.form.model.columnCount(), 1)
+        assert self.form.model.rowCount() == 1
+        assert self.form.model.columnCount() == 1
 
         # The 0th item header should be the name of the file
         model_item = self.form.model.index(0,0)
         model_name = self.form.model.data(model_item)
-        self.assertEqual(model_name, filename[0])
+        assert model_name == filename[0]
 
     def skip_testDisplayHelp(self): # Skip due to help path change
         """
@@ -513,7 +513,7 @@ class DataExplorerTest(unittest.TestCase):
         qApp.processEvents()
 
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.web()))
+        assert partial_url in str(self.form._helpView.web())
         # Close the browser
         self.form._helpView.close()
 
@@ -521,7 +521,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(button2, Qt.LeftButton)
         qApp.processEvents()
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.web()))
+        assert partial_url in str(self.form._helpView.web())
 
     def testLoadFile(self):
         """
@@ -543,7 +543,7 @@ class DataExplorerTest(unittest.TestCase):
         default_list = defaults.split(';;')
 
         for def_format in default_list:
-            self.assertIn(def_format, w_list)
+            assert def_format in w_list
        
     def testLoadComplete(self):
         """
@@ -563,19 +563,19 @@ class DataExplorerTest(unittest.TestCase):
         self.form.loadComplete(output_data)
 
         # "Loading data complete" no longer sent in LoadFile but in callback
-        self.assertIn("Loading Data Complete", str(spy_status_update.called()[0]['args'][0]))
+        assert "Loading Data Complete" in str(spy_status_update.called()[0]['args'][0])
 
         # Expect one Data Received signal
-        self.assertEqual(spy_data_received.count(), 1)
+        assert spy_data_received.count() == 1
 
         # Assure returned dictionary has correct data
         # We don't know the data ID, so need to iterate over dict
         data_dict = spy_data_received.called()[0]['args'][0]
         for data_key, data_value in data_dict.items():
-            self.assertIsInstance(data_value, Data1D)
+            assert isinstance(data_value, Data1D)
 
         # Assure add_data on data_manager was called (last call)
-        self.assertTrue(self.form.manager.add_data.called)
+        assert self.form.manager.add_data.called
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     @patch('sas.qtgui.Utilities.GuiUtils.plotsFromCheckedItems')
@@ -589,16 +589,16 @@ class DataExplorerTest(unittest.TestCase):
         self.form.enableGraphCombo(None)
 
         # Make sure the controls are disabled
-        self.assertFalse(self.form.cbgraph.isEnabled())
-        self.assertFalse(self.form.cmdAppend.isEnabled())
+        assert not self.form.cbgraph.isEnabled()
+        assert not self.form.cmdAppend.isEnabled()
 
         # get Data1D
         p_file="cyl_400_20.txt"
         output_object = loader.load(p_file)
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
         _, test_data = new_data[0]
-        self.assertTrue(f'Data file generated by SasView v{SASVIEW_VERSION}' in
-                        test_data.notes)
+        assert f'Data file generated by SasView v{SASVIEW_VERSION}' in \
+                        test_data.notes
 
         # Mask retrieval of the data
         test_patch.return_value = new_data
@@ -613,10 +613,10 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlotIds()), 1)
+        assert len(PlotHelper.currentPlotIds()) == 1
 
-        self.assertTrue(self.form.cbgraph.isEnabled())
-        self.assertTrue(self.form.cmdAppend.isEnabled())
+        assert self.form.cbgraph.isEnabled()
+        assert self.form.cmdAppend.isEnabled()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     @patch('sas.qtgui.Utilities.GuiUtils.plotsFromCheckedItems')
@@ -630,8 +630,8 @@ class DataExplorerTest(unittest.TestCase):
         self.form.enableGraphCombo(None)
 
         # Make sure the controls are disabled
-        self.assertFalse(self.form.cbgraph.isEnabled())
-        self.assertFalse(self.form.cmdAppend.isEnabled())
+        assert not self.form.cbgraph.isEnabled()
+        assert not self.form.cmdAppend.isEnabled()
 
         # get Data2D
         p_file="P123_D2O_10_percent.dat"
@@ -667,8 +667,8 @@ class DataExplorerTest(unittest.TestCase):
         self.form.enableGraphCombo(None)
 
         # Make sure the controls are disabled
-        self.assertFalse(self.form.cbgraph.isEnabled())
-        self.assertFalse(self.form.cmdAppend.isEnabled())
+        assert not self.form.cbgraph.isEnabled()
+        assert not self.form.cmdAppend.isEnabled()
 
         # get Data1D
         p_file="cyl_400_20.txt"
@@ -693,14 +693,14 @@ class DataExplorerTest(unittest.TestCase):
 
         QApplication.processEvents()
         # See that we have two plots
-        self.assertEqual(len(PlotHelper.currentPlotIds()), 2)
+        assert len(PlotHelper.currentPlotIds()) == 2
 
         # Add data to plot #1
         self.form.cbgraph.setCurrentIndex(1)
         self.form.appendPlot()
 
         # See that we still have two plots
-        self.assertEqual(len(PlotHelper.currentPlotIds()), 2)
+        assert len(PlotHelper.currentPlotIds()) == 2
 
     def testUpdateGraphCombo(self):
         """
@@ -711,12 +711,12 @@ class DataExplorerTest(unittest.TestCase):
         graph_list=["1","2","3"]
         self.form.updateGraphCombo(graph_list)
 
-        self.assertEqual(self.form.cbgraph.count(), 3)
-        self.assertEqual(self.form.cbgraph.currentText(), '1')
+        assert self.form.cbgraph.count() == 3
+        assert self.form.cbgraph.currentText() == '1'
 
         graph_list=[]
         self.form.updateGraphCombo(graph_list)
-        self.assertEqual(self.form.cbgraph.count(), 0)
+        assert self.form.cbgraph.count() == 0
 
     def testUpdateModelFromPerspective(self):
         """
@@ -733,7 +733,7 @@ class DataExplorerTest(unittest.TestCase):
         # self.form.model.reset.assert_called_once()
 
         # See that the bad item causes raise
-        with self.assertRaises(Exception):
+        with pytest.raises(Exception):
             self.form.updateModelFromPerspective(bad_item)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
@@ -772,20 +772,20 @@ class DataExplorerTest(unittest.TestCase):
         """
         Helper method for the Name Change Tests Below - Check the base state of the window
         """
-        self.assertTrue(hasattr(self.form, "nameChangeBox"))
-        self.assertTrue(self.form.nameChangeBox.isModal())
-        self.assertEqual(self.form.nameChangeBox.windowTitle(), "Display Name Change")
-        self.assertFalse(self.form.nameChangeBox.isVisible())
-        self.assertIsNone(self.form.nameChangeBox.data)
-        self.assertIsNone(self.form.nameChangeBox.model_item)
-        self.assertFalse(self.form.nameChangeBox.txtCurrentName.isEnabled())
-        self.assertFalse(self.form.nameChangeBox.txtDataName.isEnabled())
-        self.assertFalse(self.form.nameChangeBox.txtFileName.isEnabled())
-        self.assertFalse(self.form.nameChangeBox.txtNewCategory.isEnabled())
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), "")
-        self.assertEqual(self.form.nameChangeBox.txtDataName.text(), "")
-        self.assertEqual(self.form.nameChangeBox.txtFileName.text(), "")
-        self.assertEqual(self.form.nameChangeBox.txtNewCategory.text(), "")
+        assert hasattr(self.form, "nameChangeBox")
+        assert self.form.nameChangeBox.isModal()
+        assert self.form.nameChangeBox.windowTitle() == "Display Name Change"
+        assert not self.form.nameChangeBox.isVisible()
+        assert self.form.nameChangeBox.data is None
+        assert self.form.nameChangeBox.model_item is None
+        assert not self.form.nameChangeBox.txtCurrentName.isEnabled()
+        assert not self.form.nameChangeBox.txtDataName.isEnabled()
+        assert not self.form.nameChangeBox.txtFileName.isEnabled()
+        assert not self.form.nameChangeBox.txtNewCategory.isEnabled()
+        assert self.form.nameChangeBox.txtCurrentName.text() == ""
+        assert self.form.nameChangeBox.txtDataName.text() == ""
+        assert self.form.nameChangeBox.txtFileName.text() == ""
+        assert self.form.nameChangeBox.txtNewCategory.text() == ""
 
     def testNameDictionary(self):
         """
@@ -796,32 +796,32 @@ class DataExplorerTest(unittest.TestCase):
         names_numbered = ["test [1]", "test [2]"]
         names_edge_cases = ["test [1] [2]", "test [2] [1]"]
         # Ensure items not of type() == str return empty string
-        self.assertEqual("", self.form.manager.rename(names_with_brackets))
-        self.assertEqual("", self.form.manager.rename(self))
-        self.assertNotIn("", self.form.manager.data_name_dict)
+        assert "" == self.form.manager.rename(names_with_brackets)
+        assert "" == self.form.manager.rename(self)
+        assert "" not in self.form.manager.data_name_dict
         # Test names with brackets
         for i, name in enumerate(names_with_brackets):
             # Send to rename method which populates data_name_dict
             names_to_delete.append(self.form.manager.rename(name))
             # Ensure each name is unique
-            self.assertEqual(i + 1, len(self.form.manager.data_name_dict))
-            self.assertEqual(1, len(self.form.manager.data_name_dict[name]))
+            assert i + 1 == len(self.form.manager.data_name_dict)
+            assert 1 == len(self.form.manager.data_name_dict[name])
         for i, name in enumerate(names_with_brackets):
             names_to_delete.append(self.form.manager.rename(name))
-            self.assertEqual(4, len(self.form.manager.data_name_dict))
-            self.assertEqual(2, len(self.form.manager.data_name_dict[name]))
-            self.assertEqual(self.form.manager.data_name_dict[name], [0,1])
+            assert 4 == len(self.form.manager.data_name_dict)
+            assert 2 == len(self.form.manager.data_name_dict[name])
+            assert self.form.manager.data_name_dict[name] == [0,1]
         for i, name in enumerate(names_numbered):
             return_name = self.form.manager.rename(name)
             names_to_delete.append(return_name)
-            self.assertEqual(return_name, f"test [{i+2}]")
-            self.assertEqual(4, len(self.form.manager.data_name_dict))
-            self.assertNotIn(name, self.form.manager.data_name_dict)
-        self.assertEqual([0,1,2,3], self.form.manager.data_name_dict['test'])
+            assert return_name == f"test [{i+2}]"
+            assert 4 == len(self.form.manager.data_name_dict)
+            assert name not in self.form.manager.data_name_dict
+        assert [0,1,2,3] == self.form.manager.data_name_dict['test']
         for i, name in enumerate(names_edge_cases):
             names_to_delete.append(self.form.manager.rename(name))
-            self.assertEqual(5 + i, len(self.form.manager.data_name_dict))
-            self.assertIn(name, self.form.manager.data_name_dict)
+            assert 5 + i == len(self.form.manager.data_name_dict)
+            assert name in self.form.manager.data_name_dict
         # Names will be truncated when matching numbers
         # Shuffle the list to be sure deletion order doesn't matter
         random.shuffle(names_to_delete)
@@ -830,9 +830,9 @@ class DataExplorerTest(unittest.TestCase):
             self.form.manager.remove_item_from_data_name_dict(name)
             for value in self.form.manager.data_name_dict.values():
                 items_left += len(value)
-            self.assertLess(items_left, len(names_to_delete))
+            assert items_left < len(names_to_delete)
         # Data name dictionary should be empty at this point
-        self.assertEqual(0, len(self.form.manager.data_name_dict))
+        assert 0 == len(self.form.manager.data_name_dict)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNameChange(self):
@@ -858,62 +858,62 @@ class DataExplorerTest(unittest.TestCase):
         self.form.changeName()
 
         # Test window state after adding data
-        self.assertTrue(self.form.nameChangeBox.isVisible())
-        self.assertIsNotNone(self.form.nameChangeBox.data)
-        self.assertIsNotNone(self.form.nameChangeBox.model_item)
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
-        self.assertEqual(self.form.nameChangeBox.txtDataName.text(), TEST_STRING_1)
-        self.assertEqual(self.form.nameChangeBox.txtFileName.text(), FILE_NAME)
-        self.assertTrue(self.form.nameChangeBox.rbExisting.isChecked())
-        self.assertFalse(self.form.nameChangeBox.rbDataName.isChecked())
-        self.assertFalse(self.form.nameChangeBox.rbFileName.isChecked())
-        self.assertFalse(self.form.nameChangeBox.rbNew.isChecked())
+        assert self.form.nameChangeBox.isVisible()
+        assert self.form.nameChangeBox.data is not None
+        assert self.form.nameChangeBox.model_item is not None
+        assert self.form.nameChangeBox.txtCurrentName.text() == FILE_NAME
+        assert self.form.nameChangeBox.txtDataName.text() == TEST_STRING_1
+        assert self.form.nameChangeBox.txtFileName.text() == FILE_NAME
+        assert self.form.nameChangeBox.rbExisting.isChecked()
+        assert not self.form.nameChangeBox.rbDataName.isChecked()
+        assert not self.form.nameChangeBox.rbFileName.isChecked()
+        assert not self.form.nameChangeBox.rbNew.isChecked()
 
         # Take the existing name
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        assert self.form.nameChangeBox.txtCurrentName.text() == FILE_NAME
 
         # Take the title
         self.form.nameChangeBox.rbDataName.setChecked(True)
-        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        assert not self.form.nameChangeBox.rbExisting.isChecked()
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_1)
+        assert self.form.nameChangeBox.txtCurrentName.text() == TEST_STRING_1
 
         # Take the file name again
         self.form.nameChangeBox.rbFileName.setChecked(True)
-        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        assert not self.form.nameChangeBox.rbExisting.isChecked()
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        assert self.form.nameChangeBox.txtCurrentName.text() == FILE_NAME
 
         # Take the user-defined name, which is empty - should retain existing value
         self.form.nameChangeBox.rbNew.setChecked(True)
-        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        assert not self.form.nameChangeBox.rbExisting.isChecked()
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
+        assert self.form.nameChangeBox.txtCurrentName.text() == FILE_NAME
 
         # Take a different user-defined name
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_2)
-        self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
+        assert not self.form.nameChangeBox.rbExisting.isChecked()
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        assert self.form.nameChangeBox.txtCurrentName.text() == TEST_STRING_2
 
         # Test cancel button
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.form.nameChangeBox.txtNewCategory.setText(TEST_STRING_1)
         self.form.nameChangeBox.cmdCancel.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        assert self.form.nameChangeBox.txtCurrentName.text() == TEST_STRING_2
         self.form.nameChangeBox.cmdOK.click()
 
         # Test delete data
         self.form.nameChangeBox.removeData(None)  # Nothing should happen
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), TEST_STRING_2)
+        assert self.form.nameChangeBox.txtCurrentName.text() == TEST_STRING_2
         self.form.nameChangeBox.removeData([self.form.nameChangeBox.model_item])  # Should return to base state
         self.baseNameStateCheck()
 
@@ -935,12 +935,12 @@ class DataExplorerTest(unittest.TestCase):
         self.form.showDataInfo()
 
         # Test the properties
-        self.assertTrue(self.form.txt_widget.isReadOnly())
-        self.assertEqual(self.form.txt_widget.windowTitle(), "Data Info: cyl_400_20.txt")
-        self.assertIn("Waveln_max", self.form.txt_widget.toPlainText())
+        assert self.form.txt_widget.isReadOnly()
+        assert self.form.txt_widget.windowTitle() == "Data Info: cyl_400_20.txt"
+        assert "Waveln_max" in self.form.txt_widget.toPlainText()
 
         # Slider moved all the way up
-        self.assertEqual(self.form.txt_widget.verticalScrollBar().sliderPosition(), 0)
+        assert self.form.txt_widget.verticalScrollBar().sliderPosition() == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testSaveDataAs(self):
@@ -1008,7 +1008,7 @@ class DataExplorerTest(unittest.TestCase):
         Plotter.show = MagicMock() # for masking the display
 
         self.form.quickDataPlot()
-        self.assertTrue(Plotter.show.called)
+        assert Plotter.show.called
 
     def notestQuickData3DPlot(self):
         """
@@ -1027,7 +1027,7 @@ class DataExplorerTest(unittest.TestCase):
 
         self.form.quickData3DPlot()
 
-        self.assertTrue(Plotter2D.show.called)
+        assert Plotter2D.show.called
 
     def testShowEditMask(self):
         """
@@ -1049,12 +1049,12 @@ class DataExplorerTest(unittest.TestCase):
         # Populate the model
         filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
         self.form.readData(filename)
-        self.assertEqual(len(self.form.manager.data_name_dict), 1)
-        self.assertEqual(len(self.form.manager.data_name_dict["cyl_400_20.txt"]), 3)
-        self.assertEqual(max(self.form.manager.data_name_dict["cyl_400_20.txt"]), 2)
+        assert len(self.form.manager.data_name_dict) == 1
+        assert len(self.form.manager.data_name_dict["cyl_400_20.txt"]) == 3
+        assert max(self.form.manager.data_name_dict["cyl_400_20.txt"]) == 2
 
         # Assure the model contains three items
-        self.assertEqual(self.form.model.rowCount(), 3)
+        assert self.form.model.rowCount() == 3
 
         # Add an item to first file item
         item1 = QtGui.QStandardItem("test")
@@ -1063,7 +1063,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Check the new item is in
 
-        self.assertTrue(self.form.model.item(0).hasChildren())
+        assert self.form.model.item(0).hasChildren()
 
         #select_item = self.form.model.item(0).child(3)
         select_item = self.form.model.item(0)
@@ -1079,10 +1079,10 @@ class DataExplorerTest(unittest.TestCase):
         self.form.deleteSelectedItem()
 
         # Test the warning dialog called once
-        self.assertTrue(QMessageBox.question.called)
+        assert QMessageBox.question.called
 
         # Assure the model still contains the items
-        self.assertEqual(self.form.model.rowCount(), 3)
+        assert self.form.model.rowCount() == 3
 
         # Now, mock the confirmation dialog with return=Yes
         QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
@@ -1093,10 +1093,10 @@ class DataExplorerTest(unittest.TestCase):
         self.form.deleteSelectedItem()
 
         # Test the warning dialog called once
-        self.assertTrue(QMessageBox.question.called)
+        assert QMessageBox.question.called
 
         # Assure the model contains no items
-        self.assertEqual(self.form.model.rowCount(), 3)
+        assert self.form.model.rowCount() == 3
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testClosePlotsForItem(self):
@@ -1112,8 +1112,8 @@ class DataExplorerTest(unittest.TestCase):
         self.form.enableGraphCombo(None)
 
         # Make sure the controls are disabled
-        self.assertFalse(self.form.cbgraph.isEnabled())
-        self.assertFalse(self.form.cmdAppend.isEnabled())
+        assert not self.form.cbgraph.isEnabled()
+        assert not self.form.cmdAppend.isEnabled()
 
         # Populate the model
         filename = ["cyl_400_20.txt"]
@@ -1129,11 +1129,11 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlotIds()), 1)
-        self.assertEqual(len(self.form.plot_widgets), 1)
+        assert len(PlotHelper.currentPlotIds()) == 1
+        assert len(self.form.plot_widgets) == 1
         # could have leftovers from previous tests
         #self.assertEqual(list(self.form.plot_widgets.keys()), ['Graph3'])
-        self.assertEqual(len(self.form.plot_widgets.keys()), 1)
+        assert len(self.form.plot_widgets.keys()) == 1
 
         # data index
         model_item = self.form.model.item(0,0)
@@ -1142,8 +1142,8 @@ class DataExplorerTest(unittest.TestCase):
         self.form.closePlotsForItem(model_item)
 
         # See that no plot remained
-        self.assertEqual(len(PlotHelper.currentPlotIds()), 0)
-        self.assertEqual(len(self.form.plot_widgets), 0)
+        assert len(PlotHelper.currentPlotIds()) == 0
+        assert len(self.form.plot_widgets) == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testPlotsFromMultipleData1D(self):
@@ -1178,11 +1178,11 @@ class DataExplorerTest(unittest.TestCase):
 
         # redoing plots from the same tab
         # data -> must be shown
-        self.assertFalse(self.form.isPlotShown(data1))
+        assert not self.form.isPlotShown(data1)
 
         # model and residuals are already shown
-        self.assertTrue(self.form.isPlotShown(data2))
-        self.assertTrue(self.form.isPlotShown(data3))
+        assert self.form.isPlotShown(data2)
+        assert self.form.isPlotShown(data3)
 
         # Try from different fit page
         plot4 = Plotter(parent=self.form)
@@ -1191,7 +1191,7 @@ class DataExplorerTest(unittest.TestCase):
         data4.plot_role = Data1D.ROLE_DEFAULT
         plot4.data = data1
         # same data but must show, since different model
-        self.assertFalse(self.form.isPlotShown(data4))
+        assert not self.form.isPlotShown(data4)
 
     def testPlotsFromMultipleData2D(self):
         """
@@ -1225,11 +1225,11 @@ class DataExplorerTest(unittest.TestCase):
 
         # redoing plots from the same tab
         # data -> Already there, don't show
-        self.assertTrue(self.form.isPlotShown(data1))
+        assert self.form.isPlotShown(data1)
 
         # model and residuals are already shown
-        self.assertTrue(self.form.isPlotShown(data2))
-        self.assertTrue(self.form.isPlotShown(data3))
+        assert self.form.isPlotShown(data2)
+        assert self.form.isPlotShown(data3)
 
         # Try from different fit page
         plot4 = Plotter(parent=self.form)
@@ -1237,7 +1237,7 @@ class DataExplorerTest(unittest.TestCase):
         data4.name = 'M1 [p1]'
         plot4.data = data1
         # same data but must show, since different model
-        self.assertFalse(self.form.isPlotShown(data4))
+        assert not self.form.isPlotShown(data4)
 
 if __name__ == "__main__":
     unittest.main()
