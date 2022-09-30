@@ -15,6 +15,7 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
+from sas.qtgui.Plotting.PlotterBase import PlotHelper
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.GuiManager import GuiManager
@@ -449,6 +450,7 @@ class Plotter3DTest:
 
         yield p
 
+        PlotHelper.clear()
 
     @pytest.fixture(autouse=True)
     def data(self):
