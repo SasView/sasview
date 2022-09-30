@@ -2,13 +2,16 @@ import sys
 import unittest
 import numpy
 
+import os
+os.environ["MPLBACKEND"] = "qtagg"
+
 from PyQt5 import QtGui, QtWidgets
 from unittest.mock import MagicMock
 
-from UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # set up import paths
-import path_prepare
+import sas.qtgui.path_prepare
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Plotting.Plotter as Plotter
