@@ -1334,7 +1334,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 output_objects = self.loader.load(p_file)
 
                 for item in output_objects:
-                    # cast sascalc.dataloader.data_info.Data1D into
+                    # cast sasdata.dataloader.data_info.Data1D into
                     # sasgui.guiframe.dataFitting.Data1D
                     # TODO : Fix it
                     new_data = self.manager.create_gui_data(item, p_file)

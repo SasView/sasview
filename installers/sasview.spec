@@ -50,16 +50,6 @@ import periodictable
 add_data(periodictable.data_files())
 
 hiddenimports = [
-    'sas.sascalc.dataloader.readers.abs_reader',
-    'sas.sascalc.dataloader.readers.anton_paar_saxs_reader',
-    'sas.sascalc.dataloader.readers.ascii_reader',
-    'sas.sascalc.dataloader.readers.cansas_reader_HDF5',
-    'sas.sascalc.dataloader.readers.cansas_reader',
-    'sas.sascalc.dataloader.readers.danse_reader',
-    'sas.sascalc.dataloader.readers.red2d_reader',
-    'sas.sascalc.dataloader.readers.sesans_reader',
-    'sas.sascalc.dataloader.readers.tiff_reader',
-    'sas.sascalc.dataloader.readers.xml_reader',
     #'PyQt5',
     #'periodictable.core',
     #'sasmodels.core',
