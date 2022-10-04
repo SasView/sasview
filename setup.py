@@ -243,8 +243,7 @@ packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
 
 # SasView
 package_data['sas'] = ['logging.ini']
-package_data['sas.sasview'] = ['images/*',
-                               'media/*']
+package_data['sas.sasview'] = ['media/*']
 
 package_data["sas.example_data"] = [
                                '*.txt',
@@ -260,7 +259,8 @@ package_data["sas.example_data"] = [
                                'upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
-package_data['sas.qtgui'] = ['Calculators/UI/*',
+package_data['sas.qtgui'] = ['images/*',
+                             'Calculators/UI/*',
                              'MainWindow/UI/*',
                              'Perspectives/Corfunc/UI/*',
                              'Perspectives/Fitting/UI/*',
