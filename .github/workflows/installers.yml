@@ -138,6 +138,12 @@ jobs:
         python setup.py build
         python -m pip install .
 
+    ### Document the build environment
+
+    - name: Python package version list
+      run: |
+        python -m pip freeze
+
     ### Actual building/testing of sasview
 
     - name: Build sasview
