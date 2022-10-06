@@ -15,7 +15,7 @@ datas = [
     ('../src/sas/example_data', 'example_data'),
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
-    ('../src/sas/system/log.ini', '.'),
+    ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build/html','doc')
 ]
