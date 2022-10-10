@@ -46,12 +46,16 @@ class ConfigBase:
         self._bad_entries: Dict[str, Any] = {}
         self._meta_attributes = ["_locked", "_schema", "_defaults",
                                  "_deleted_attributes", "_meta_attributes",
-                                 "_bad_keys"]
+                                 "_bad_entries"]
 
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
         version_parts = sas.system.version.__version__.split(".")
-        return os.path.join(user.get_user_dir(create_if_nonexistent), f"config-{version_parts[0]}.json")
+        user_dir = user.get_user_dir(create_if_nonexistent)
+        if user_dir is None:
+            return None
+        else:
+            return os.path.join(user_dir, f"config-{version_parts[0]}.json")
 
     def finalise(self):
         """ Call this at the end of the config to make this class 'final'
@@ -111,6 +115,10 @@ class ConfigBase:
 
     def load(self):
         filename = self.config_filename(False)
+
+        if filename is None:
+            return
+
         if os.path.exists(filename):
             with open(filename, 'r') as file:
                 self.load_from_file_object(file)

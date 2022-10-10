@@ -177,7 +177,7 @@ def create_schema_element(name: str, value, recursion_depth: int=10) -> SchemaEl
         return SchemaStr()
 
     else:
-        raise SchemaError(f"Config element is not a bool, int, float, str, or a homogeneous list thereof ({value})")
+        raise SchemaError(f"Config element is not a bool, int, float, str, or a homogeneous list thereof ({name}={value})")
 
 
 def schema_union(elements: List[SchemaElement]):
