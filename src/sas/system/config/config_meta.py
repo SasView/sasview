@@ -52,10 +52,7 @@ class ConfigBase:
         """Filename for saving config items"""
         version_parts = sas.system.version.__version__.split(".")
         user_dir = user.get_user_dir(create_if_nonexistent)
-        if user_dir is None:
-            return None
-        else:
-            return os.path.join(user_dir, f"config-{version_parts[0]}.json")
+        return os.path.join(user_dir, f"config-{version_parts[0]}.json")
 
     def finalise(self):
         """ Call this at the end of the config to make this class 'final'
@@ -116,12 +113,12 @@ class ConfigBase:
     def load(self):
         filename = self.config_filename(False)
 
-        if filename is None:
-            return
-
         if os.path.exists(filename):
             with open(filename, 'r') as file:
                 self.load_from_file_object(file)
+
+        else:
+            logger.warning(f"No config file found - one will be created when sasview exits")
 
     def load_from_file_object(self, file):
         """ Load config file """

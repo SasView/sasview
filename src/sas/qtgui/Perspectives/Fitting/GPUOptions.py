@@ -82,6 +82,9 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             radio_button.setObjectName(_fromUtf8(descr))
             radio_button.setText(_translate("GPUOptions", descr, None))
             self.optionsLayout.addWidget(radio_button)
+
+            print(title, config.SAS_OPENCL)
+
             if title.lower() == config.SAS_OPENCL.lower():
 
                 radio_button.setChecked(True)

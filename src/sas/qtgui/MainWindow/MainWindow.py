@@ -83,7 +83,8 @@ def run_sasview():
     # Set open cl config from environment variable, if it is set
     if "SAS_OPENCL" in os.environ:
         logging.getLogger(__name__).info("Getting OpenCL settings from environment variables")
-        config.SAS_OPENCL = env.sas_opencl
+        if env.SAS_OPENCL != "none":
+            config.SAS_OPENCL = env.sas_opencl
     else:
         logging.getLogger(__name__).info("Getting OpenCL settings from config")
         env.sas_opencl = config.SAS_OPENCL
