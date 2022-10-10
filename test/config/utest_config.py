@@ -82,7 +82,7 @@ class TestConfig(unittest.TestCase):
 
 
     def test_invalid_update_bad_name(self):
-        """ Check that an error is logged when there is a bad name in the config"""
+        """ Check that a warning is logged when there is a bad name in the config"""
 
         config = Config()
 
@@ -94,9 +94,9 @@ class TestConfig(unittest.TestCase):
             name += "x"
 
         # try and set it
-        with self.assertLogs('sas.config', level="ERROR") as cm:
+        with self.assertLogs('sas.config', level="WARNING") as cm:
             config.update({name: None})
-            self.assertTrue(cm.output[0].startswith("ERROR:sas.config:"))
+            self.assertTrue(cm.output[0].startswith("WARNING:sas.config:"))
 
     def test_invalid_update_bad_type(self):
 
