@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Set
 import os
 import logging
 import json
@@ -6,6 +6,7 @@ from copy import deepcopy
 
 import sas
 import sas.system.version
+from sas.system import user
 from sas.system.config.schema_elements import create_schema_element, CoercionError, SchemaElement
 
 logger = logging.getLogger("sas.config")
@@ -42,9 +43,15 @@ class ConfigBase:
         self._schema: Dict[str, SchemaElement] = {}
         self._defaults: Dict[str, SchemaElement] = {}
         self._deleted_attributes: List[str] = []
-        self._write_disabled = False
+        self._bad_entries: Dict[str, Any] = {}
         self._meta_attributes = ["_locked", "_schema", "_defaults",
-                                 "_deleted_attributes", "_meta_attributes", "_write_disabled"]
+                                 "_deleted_attributes", "_meta_attributes",
+                                 "_bad_keys"]
+
+    def config_filename(self, create_if_nonexistent=False):
+        """Filename for saving config items"""
+        version_parts = sas.system.version.__version__.split(".")
+        return os.path.join(user.get_user_dir(create_if_nonexistent), f"config-{version_parts[0]}.json")
 
     def finalise(self):
         """ Call this at the end of the config to make this class 'final'
@@ -61,6 +68,7 @@ class ConfigBase:
 
             # Skip over any deleted attributes
             if key in self._deleted_attributes:
+                self._bad_entries[key] = data[key]
                 continue
 
             # Check the variable is in the schema
@@ -74,20 +82,17 @@ class ConfigBase:
                     logger.error(f"Cannot set set variable '{key}', improper type ({e.message})")
 
             else:
-                logger.error(f"Unknown config key: '{key}', skipping")
+                logger.warning(f"Unknown config key: '{key}', skipping")
+                self._bad_entries[key] = data[key]
 
     def save(self):
-        if self._write_disabled:
-            logger.error("Write disabled, this is probably because it will overwrite an outdated config.")
-            return
-
-        with open("config.json", 'w') as file:
+        with open(self.config_filename(True), 'w') as file:
             self.save_to_file_object(file)
 
     def save_to_file_object(self, file):
         """ Save config file
 
-        Only changed variables will be included in the saved file
+        Only changed and unknown variables will be included in the saved file
         """
         data = {}
         for key in self._defaults:
@@ -96,16 +101,18 @@ class ConfigBase:
             if new_value != old_value:
                 data[key] = new_value
 
+        data.update(self._bad_entries)
+
         output_data = {
             "sasview_version": sas.system.version.__version__,
             "config_data": data}
 
-        json.dump(output_data, file)
+        json.dump(output_data, file, indent=2)
 
     def load(self):
-        filename = "config.json"
+        filename = self.config_filename(False)
         if os.path.exists(filename):
-            with open("config.json", 'r') as file:
+            with open(filename, 'r') as file:
                 self.load_from_file_object(file)
 
     def load_from_file_object(self, file):
@@ -138,7 +145,6 @@ class ConfigBase:
         if int(file_major_version) != int(sasview_major_version):
             logger.warning(f"Attempting to used outdated config file (config is"
                            f" for {file_version}, this SasView version is {sas.system.version.__version__})")
-            self._write_disabled = True
 
         self.update(data["config_data"])
 
@@ -175,8 +181,6 @@ class ConfigBase:
         if hasattr(self, "_locked") and self._locked:
             if key not in self.__dict__:
                 raise ConfigLocked("New attribute attempt")
-
-
 
         super().__setattr__(key, value)
 

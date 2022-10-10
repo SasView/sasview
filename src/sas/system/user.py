@@ -12,13 +12,14 @@ def make_user_dir():
     return path
 
 
-def get_user_dir():
+def get_user_dir(create_if_nonexistent=True):
     """
     The directory where the per-user configuration is stored.
 
     Returns ~/.sasview, creating it if it does not already exist.
     """
     global _USER_DIR
-    if not _USER_DIR:
+    if create_if_nonexistent and not _USER_DIR:
         _USER_DIR = make_user_dir()
     return _USER_DIR
+

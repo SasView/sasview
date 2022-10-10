@@ -8,8 +8,6 @@ import os.path
 
 import pkg_resources
 
-from sas import config
-
 '''
 Module that manages the global logging
 '''
