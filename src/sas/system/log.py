@@ -38,14 +38,8 @@ class SetupLogger(object):
         logger = logging.getLogger(self.name)
         self._update_all_logs_to_debug(logger)
         logging.captureWarnings(True)
-        self._disable_debug_from_config()
         logging.getLogger('matplotlib').setLevel(logging.WARN)
         return logger
-
-    def _disable_debug_from_config(self):
-        '''disable DEBUG logs as per user configuration (DEBUG logs disabled by default)'''
-        if config.FILTER_DEBUG_LOGS:
-            logging.disable(logging.DEBUG)
 
     def _read_config_file(self):
         if self.config_file is not None:
