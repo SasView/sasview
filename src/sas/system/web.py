@@ -8,7 +8,7 @@ class WebLinks:
         self.ess_url = "https://europeanspallationsource.se/"
         self.ill_url = "https://www.ill.eu/"
         self.ansto_url = "https://www.ansto.gov.au/"
-        self.bam_url = "http://www.bam.de/"
+        self.bam_url = "https://www.bam.de/"
         self.delft_url = \
             "https://www.tudelft.nl/en/faculty-of-applied-sciences/business/facilities/reactor-institute-delft"
         self.inst_url = "https://www.utk.edu"
@@ -16,7 +16,7 @@ class WebLinks:
 
         self.homepage_url = "https://www.sasview.org"
         self.download_url = 'https://github.com/SasView/sasview/releases/latest'
-        self.marketplace_url = "http://marketplace.sasview.org/"
+        self.marketplace_url = "https://marketplace.sasview.org/"
         self.update_url = 'https://www.sasview.org/latestversion.json'
 
         self.help_email = "help@sasview.org"
