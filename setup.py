@@ -9,9 +9,8 @@ import os
 import subprocess
 import shutil
 import sys
-from distutils.core import Command
 
-from setuptools import setup
+from setuptools import setup, Command
 
 # Manage version number ######################################
 version_file = os.path.join("src", "sas", "system", "version.py")

@@ -47,6 +47,7 @@ add_data(periodictable.data_files())
 
 hiddenimports = [
     'pyopencl',
+    'setuptools._distutils',
     'reportlab',
     'reportlab.graphics',
     'reportlab.graphics.barcode.common',
