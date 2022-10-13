@@ -264,11 +264,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.view_elev = 45
         self.mouse_down = False
         sampleWindow = FigureCanvas(Figure())
-        axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
+        sampleWindow.figure.add_axes(axes_sample)
         envWindow = FigureCanvas(Figure())
-        axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
+        envWindow.figure.add_axes(axes_env)
         beamWindow = FigureCanvas(Figure())
-        axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
+        beamWindow.figure.add_axes(axes_beam)
         self.coord_windows = [sampleWindow, envWindow, beamWindow]
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
@@ -1518,7 +1521,8 @@ class Plotter3DWidget(PlotterBase):
 
         self.figure.clear()
         self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
-        ax = Axes3D(self.figure)
+        ax = Axes3D(self.figure, auto_add_to_figure=False)
+        self.figure.add_axes(ax)
         ax.set_xlabel(r'x ($\A{}$)'.format(data.pos_unit))
         ax.set_ylabel(r'z ($\A{}$)'.format(data.pos_unit))
         ax.set_zlabel(r'y ($\A{}$)'.format(data.pos_unit))
