@@ -1,23 +1,28 @@
 
-from sas.qtgui.Utilities.UI.OrientationViewerUI import Ui_OrientationViewer
+from sas.qtgui.Utilities.UI.OrientationViewerUIBackup import Ui_OrientationViewer
 
 from PyQt5 import QtWidgets
 
-class OrientationViewer(QtWidgets.QMainWindow, Ui_OrientationViewer):
+class OrientationViewer(QtWidgets.QWidget, Ui_OrientationViewer):
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
 
         self.parent = parent
-        self.setupUi(self)
+        self.setupUi(parent)
 
 
 def main():
     """ Show a demo of the slider """
     app = QtWidgets.QApplication([])
-    viewer = OrientationViewer()
+    app.setStyleSheet("* {font-size: 11pt;}")
 
-    viewer.show()
+    mainWindow = QtWidgets.QMainWindow()
+    viewer = OrientationViewer(mainWindow)
+
+    mainWindow.setCentralWidget(viewer)
+
+    mainWindow.show()
     app.exec_()
 
 
