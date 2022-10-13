@@ -6,7 +6,6 @@ import pytest
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.Calculators.DensityPanel import DensityPanel, MODEL
@@ -156,10 +155,10 @@ class DensityCalculatorTest:
         assert widget.ui.editMolarVolume.text() == ""
         assert widget.ui.editMassDensity.text() == ""
 
-    def testHelp(self, widget):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         widget.manager = QtWidgets.QWidget()
-        widget.manager.showHelp = MagicMock()
+        mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.displayHelp()
         assert widget.manager.showHelp.called_once()
         args = widget.manager.showHelp.call_args

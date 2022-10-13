@@ -72,7 +72,7 @@ class QRangeSlidersTest:
 
     def testFittingSliders(self, slidersetup):
         '''Test the QRangeSlider class within the context of the Fitting perspective'''
-        # Ensure fitting prespective is active and send data to it
+        # Ensure fitting perspective is active and send data to it
         self.current_perspective = 'Fitting'
         self.manager.perspectiveChanged(self.current_perspective)
         fitting = self.manager.perspective()

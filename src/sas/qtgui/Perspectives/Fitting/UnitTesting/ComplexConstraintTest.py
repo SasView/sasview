@@ -4,8 +4,6 @@ import webbrowser
 
 import pytest
 
-from unittest.mock import MagicMock, patch
-
 from PyQt5 import QtGui, QtWidgets, QtCore, QtTest
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
@@ -22,7 +20,7 @@ from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 
 class ComplexConstraintTest:
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the ComplexConstraint'''
         class dummy_manager(object):
             HELP_DIRECTORY_LOCATION = "html"
@@ -37,10 +35,10 @@ class ComplexConstraintTest:
         tab2 = FittingWidget(dummy_manager())
         tab3 = FittingWidget(dummy_manager())
         # mock the constraint error mechanism
-        FittingUtilities.checkConstraints = MagicMock(return_value=None)
-        tab1.parent.perspective = MagicMock()
-        tab2.parent.perspective = MagicMock()
-        tab3.parent.perspective = MagicMock()
+        mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
+        mocker.patch.object(tab1.parent, 'perspective', create=True)
+        mocker.patch.object(tab2.parent, 'perspective', create=True)
+        mocker.patch.object(tab3.parent, 'perspective', create=True)
 
         # set some models on tabs
         category_index = tab1.cbCategory.findText("Shape Independent")
@@ -123,17 +121,17 @@ class ComplexConstraintTest:
         tooltip += "M1:scale = sqrt(M2.scale) + 5"
         assert widget.txtConstraint.toolTip() == tooltip
 
-    def notestValidateFormula(self, widget):
+    def notestValidateFormula(self, widget, mocker):
         ''' assure enablement and color for valid formula '''
         # Invalid string
-        widget.validateConstraint = MagicMock(return_value=False)
+        mocker.patch.object(widget, 'validateConstraint', return_value=False)
         widget.validateFormula()
         style_sheet = "QLineEdit {background-color: red;}"
         assert not widget.cmdOK.isEnabled()
         assert widget.txtConstraint.styleSheet() == style_sheet
 
         # Valid string
-        widget.validateConstraint = MagicMock(return_value=True)
+        mocker.patch.object(widget, 'validateConstraint', return_value=True)
         widget.validateFormula()
         style_sheet = "QLineEdit {background-color: white;}"
         assert widget.cmdOK.isEnabled()
@@ -186,11 +184,11 @@ class ComplexConstraintTest:
         assert c[1].func == 'M1.bjerrum_length'
         #assert c[1].operator == '>='
 
-    def notestOnHelp(self, widget):
+    def notestOnHelp(self, widget, mocker):
         """
         Test the default help renderer
         """
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
 
         # invoke the tested method
         widget.onHelp()
@@ -211,14 +209,13 @@ class ComplexConstraintTest:
         assert spy.count() == 2
 
 
-    def testOnApply(self, widget):
+    def testOnApply(self, widget, mocker):
         """
         Test the application of constraints
         """
         index = widget.cbModel2.findText("M2")
         widget.cbModel2.setCurrentIndex(index)
-        cstab = MagicMock(spec=ConstraintWidget, constraint_accepted=True)
-        widget.parent = cstab
+        mocker.patch.object(widget, 'parent', spec=ConstraintWidget, constraint_accepted=True)
         spy = QtSignalSpy(widget,
                             widget.constraintReadySignal)
         QtTest.QTest.mouseClick(widget.cmdOK, QtCore.Qt.LeftButton)
@@ -227,7 +224,7 @@ class ComplexConstraintTest:
         assert isinstance(spy.signal(0)[0][1], Constraint)
 
         # Test the `All` option in the combobox
-        widget.applyAcrossTabs = MagicMock()
+        mocker.patch.object(widget, 'applyAcrossTabs')
         index = widget.cbModel1.findText("All")
         widget.cbModel1.setCurrentIndex(index)
         widget.onApply()

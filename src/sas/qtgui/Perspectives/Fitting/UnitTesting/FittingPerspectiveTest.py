@@ -7,7 +7,6 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import QtTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
 
 # Local
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -66,7 +65,7 @@ class FittingPerspectiveTest:
         assert len(widget.tabs) == 2
         assert widget.getCSTabName() == "Const. & Simul. Fit"
 
-    def testResetTab(self, widget):
+    def testResetTab(self, widget, mocker):
         ''' Remove data from last tab'''
         assert len(widget.tabs) == 1
         assert widget.getTabName() == "FitPage2"
@@ -82,7 +81,7 @@ class FittingPerspectiveTest:
 
         # Now, add data
         data = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
         item = QtGui.QStandardItem("test")
         widget.setData([item])
         # Assert data is on widget
@@ -115,7 +114,7 @@ class FittingPerspectiveTest:
         assert widget.allowBatch()
 
     #@pytest.mark.skip()
-    def testSetData(self, widget,qtbot):
+    def testSetData(self, widget, qtbot, mocker):
         ''' Assure that setting data is correct'''
         with pytest.raises(AssertionError):
             widget.setData(None)
@@ -125,7 +124,7 @@ class FittingPerspectiveTest:
 
         # Mock the datafromitem() call from FittingWidget
         data = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
 
         item = QtGui.QStandardItem("test")
         widget.setData([item])
@@ -145,12 +144,12 @@ class FittingPerspectiveTest:
         # Check for 4 tabs
         assert len(widget.tabs) == 4
 
-    def testSwapData(self, widget):
+    def testSwapData(self, widget, mocker):
         '''Assure that data swapping is correct'''
 
         # Mock the datafromitem() call from FittingWidget
         data1 = Data1D(x=[3,4], y=[3,4])
-        GuiUtils.dataFromItem = MagicMock(return_value=data1)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data1)
 
         # Add a new tab
         item = QtGui.QStandardItem("test")
@@ -158,7 +157,7 @@ class FittingPerspectiveTest:
 
         # Create a new dataset and mock the datafromitemcall()
         data2 = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data2)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data2)
 
         # Swap the data
         widget.swapData(item)
@@ -191,14 +190,14 @@ class FittingPerspectiveTest:
         with pytest.raises(TypeError):
             widget.swapData(item)
 
-    def testSetBatchData(self, widget):
+    def testSetBatchData(self, widget, mocker):
         ''' Assure that setting batch data is correct'''
 
         # Mock the datafromitem() call from FittingWidget
         data1 = Data1D(x=[1,2], y=[1,2])
         data2 = Data1D(x=[1,2], y=[1,2])
         data_batch = [data1, data2]
-        GuiUtils.dataFromItem = MagicMock(return_value=data1)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data1)
 
         item = QtGui.QStandardItem("test")
         widget.setData([item, item], is_batch=True)
@@ -225,21 +224,20 @@ class FittingPerspectiveTest:
         assert isinstance(tabs, list)
         assert len(tabs) == 2
 
-    def testGetActiveConstraintList(self, widget):
+    def testGetActiveConstraintList(self, widget, mocker):
         '''test the active constraint getter'''
         # Add an empty tab
         widget.addFit(None)
         # mock the getConstraintsForModel method of the FittingWidget tab of
         # the first tab
         tab = widget.tabs[0]
-        tab.getConstraintsForModel = MagicMock(return_value=[("scale",
-                                                               "M2.scale +2")])
+        mocker.patch.object(tab, 'getConstraintsForModel',
+                            return_value=[("scale", "M2.scale +2")])
         # mock the getConstraintsForModel method of the FittingWidget tab of
         # the second tab
         tab = widget.tabs[1]
-        tab.getConstraintsForModel = MagicMock(return_value=[("scale",
-                                                               "M2.background "
-                                                               "+2")])
+        mocker.patch.object(tab, 'getConstraintsForModel',
+                            return_value=[("scale", "M2.background +2")])
         constraints = widget.getActiveConstraintList()
 
         # we should have 2 constraints
@@ -247,16 +245,16 @@ class FittingPerspectiveTest:
         assert constraints == [("M1.scale", "M2.scale +2"),
                                        ('M2.scale', 'M2.background +2')]
 
-    def testGetSymbolDictForConstraints(self, widget):
+    def testGetSymbolDictForConstraints(self, widget, mocker):
         '''test the symbol dict getter'''
         # Add an empty tab
         widget.addFit(None)
         # mock the getSymbolDict method of the first tab
         tab = widget.tabs[0]
-        tab.getSymbolDict = MagicMock(return_value={"M1.scale": 1})
+        mocker.patch.object(tab, 'getSymbolDict', return_value={"M1.scale": 1})
         # mock the getSymbolDict method of the second tab
         tab = widget.tabs[1]
-        tab.getSymbolDict = MagicMock(return_value={"M2.scale": 1})
+        mocker.patch.object(tab, 'getSymbolDict', return_value={"M2.scale": 1})
 
         symbols = widget.getSymbolDictForConstraints()
         # we should have 2 symbols
@@ -280,12 +278,12 @@ class FittingPerspectiveTest:
         constraint_tab = widget.getConstraintTab()
         assert constraint_tab == widget.tabs[1]
 
-    def testSerialization(self, widget):
+    def testSerialization(self, widget, mocker):
         ''' Serialize fit pages and check data '''
         assert hasattr(widget, 'isSerializable')
         assert widget.isSerializable()
         data = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
         item = QtGui.QStandardItem("test")
         widget.setData([item])
         tab = widget.tabs[0]
@@ -312,7 +310,7 @@ class FittingPerspectiveTest:
         assert len(params) == 28
         assert page.get('data_id', None) == None
 
-    def testUpdateFromConstraints(self, widget):
+    def testUpdateFromConstraints(self, widget, mocker):
         '''tests the method that parses the loaded project dict and retuens a dict with constrains across all fit pages'''
         # create a constraint dict with one constraint for fit pages 1 and 2
         constraint_dict = {'M1': [['scale', 'scale', 'M1.scale', True,
@@ -324,11 +322,11 @@ class FittingPerspectiveTest:
         tab1 = widget.tabs[0]
         tab2 = widget.tabs[1]
         # mock the getRowFromName methods from both tabs
-        tab1.getRowFromName = MagicMock(return_value=0)
-        tab2.getRowFromName = MagicMock(return_value=1)
+        mocker.patch.object(tab1, 'getRowFromName', return_value=0)
+        mocker.patch.object(tab2, 'getRowFromName', return_value=1)
         # mock the addConstraintToRow method of both tabs
-        tab1.addConstraintToRow = MagicMock()
-        tab2.addConstraintToRow = MagicMock()
+        mocker.patch.object(tab1, 'addConstraintToRow')
+        mocker.patch.object(tab2, 'addConstraintToRow')
         # add the constraints
         widget.updateFromConstraints(constraint_dict)
         # check that getRowFromName was called correctly on both tabs

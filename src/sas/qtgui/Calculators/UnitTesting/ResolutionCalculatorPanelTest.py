@@ -8,14 +8,13 @@ import pytest
 # CRUFT: this shouldn't be needed in the test but makes the difference
 # between passing tests and failing tests. Remove this and figure out how
 # to fix the resolution calculator widget itself?
-import os
-os.environ['MPLBACKEND'] = 'qtagg'
+import matplotlib as mpl
+mpl.use("Qt5Agg")
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from unittest.mock import MagicMock
 
 from twisted.internet import threads
 
@@ -228,20 +227,20 @@ class ResolutionCalculatorPanelTest:
         assert widget.lblSpectrum.isVisible()
         assert widget.cbCustomSpectrum.isVisible()
 
-    def testOnSelectCustomSpectrum(self, widget):
+    def testOnSelectCustomSpectrum(self, widget, mocker):
         """ Test Custom Spectrum: load file if 'Add New' """
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=("",""))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=("",""))
         widget.cbCustomSpectrum.setCurrentIndex(1)
 
         # Test the getOpenFileName() dialog called once
         assert QtWidgets.QFileDialog.getOpenFileName.called
         QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
-    def testHelp(self, widget):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         # this should not rise
         widget.manager = QtWidgets.QWidget()
-        widget.manager.showHelp = MagicMock()
+        mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
         assert widget.manager.showHelp.called_once()
         args = widget.manager.showHelp.call_args
@@ -266,9 +265,9 @@ class ResolutionCalculatorPanelTest:
         closeButton = widget.cmdClose
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
-    def testOnCompute(self, widget):
+    def testOnCompute(self, widget, mocker):
         """ """
-        threads.deferToThread = MagicMock()
+        mocker.patch.object(threads, 'deferToThread')
         widget.onCompute()
 
         # thread called

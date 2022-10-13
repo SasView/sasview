@@ -7,8 +7,6 @@ from bumps import options
 
 from PyQt5 import QtGui, QtWidgets
 
-from unittest.mock import MagicMock
-
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
@@ -109,9 +107,9 @@ class FittingOptionsTest:
 
     # test disabled until pyQt5 works well
     @pytest.mark.skip(reason="2022-09 already broken - causes test suite hang")
-    def testOnHelp(self, widget):
+    def testOnHelp(self, widget, mocker):
         ''' Test help display'''
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
 
         # Invoke the action on default tab
         widget.onHelp()

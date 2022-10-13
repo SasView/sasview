@@ -100,9 +100,9 @@ class GenericScatteringCalculatorTest:
         assert not widget.cmdDraw.isEnabled()
         assert not widget.cmdDrawpoints.isEnabled()
 
-    def testHelpButton(self, widget):
+    def testHelpButton(self, widget, mocker):
         """ Assure help file is shown """
-        widget.manager.showHelp = MagicMock()
+        mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
         assert widget.manager.showHelp.called_once()
         args = widget.manager.showHelp.call_args
@@ -170,12 +170,12 @@ class GenericScatteringCalculatorTest:
             QtGui.QValidator.Acceptable
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testLoadedSLDData(self, widget):
+    def testLoadedSLDData(self, widget, mocker):
         """
         Load sld data and check modifications of GUI
         """
         filename = os.path.join("UnitTesting", "sld_file.sld")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
 
         # check modification of text in Load button
@@ -235,13 +235,13 @@ class GenericScatteringCalculatorTest:
         # assert widget.trigger_plot_3d
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testLoadedPDBButton(self, widget):
+    def testLoadedPDBButton(self, widget, mocker):
         """
         Load pdb data and check modifications of GUI
         """
         filename = os.path.join("UnitTesting", "diamdsml.pdb")
 
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
 
         # check modification of text in Load button
@@ -301,13 +301,13 @@ class GenericScatteringCalculatorTest:
 
     # TODO
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testLoadedOMFButton(self, widget):
+    def testLoadedOMFButton(self, widget, mocker):
         """
         Load omf data and check modifications of GUI
         """
         filename = os.path.join("UnitTesting", "A_Raw_Example-1.omf")
 
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
         assert widget.cmdLoad.text() == 'Loading...'
         time.sleep(2)
@@ -369,14 +369,14 @@ class GenericScatteringCalculatorTest:
 
     # TODO check plots
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testCompute(self, widget):
+    def testCompute(self, widget, mocker):
         """
         Test compute button
         """
         # load data
         filename = os.path.join("UnitTesting", "diamdsml.pdb")
 
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
         time.sleep(1)
         QTest.mouseClick(widget.cmdCompute, Qt.LeftButton)
@@ -390,13 +390,13 @@ class GenericScatteringCalculatorTest:
 
     # TODO
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testDrawButton(self, widget):
+    def testDrawButton(self, widget, mocker):
         """
         Test Draw buttons for 3D plots with and without arrows
         """
         assert not widget.cmdDraw.isEnabled()
         filename = os.path.join("UnitTesting", "diamdsml.pdb")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename,''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename,''])
         widget.loadFile()
         assert widget.cmdLoad.text() == 'Loading...'
         time.sleep(1)
@@ -412,20 +412,20 @@ class GenericScatteringCalculatorTest:
         closeButton = widget.cmdClose
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
-    def testSaveFile(self, widget):
+    def testSaveFile(self, widget, mocker):
         """
         Test Save feature to .sld file
         """
         filename = os.path.join("UnitTesting", "sld_file.sld")
 
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.loadFile()
 
         time.sleep(0.1)
         QtWidgets.qApp.processEvents()
 
         filename1 = "test"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=[filename1, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=[filename1, ''])
 
         #QTest.mouseClick(widget.cmdSave, Qt.LeftButton)
         widget.onSaveFile()
@@ -476,16 +476,16 @@ class Plotter3DTest:
         assert plotter.graph_title, 'test'
         assert not plotter.data.has_conect
 
-    def testShowNoPlot(self, plotter):
-        FigureCanvas.draw_idle = MagicMock()
-        FigureCanvas.draw = MagicMock()
+    def testShowNoPlot(self, plotter, mocker):
+        mocker.patch.object(FigureCanvas, 'draw_idle')
+        mocker.patch.object(FigureCanvas, 'draw')
         plotter.showPlot(data=None)
         assert not FigureCanvas.draw_idle.called
         assert not FigureCanvas.draw.called
 
-    def testShow3DPlot(self, plotter, data):
-        FigureCanvas.draw = MagicMock()
-        Axes3D.plot = MagicMock()
+    def testShow3DPlot(self, plotter, data, mocker):
+        mocker.patch.object(FigureCanvas, 'draw')
+        mocker.patch.object(Axes3D, 'plot')
 
         plotter.data = data
         plotter.showPlot(data=data)

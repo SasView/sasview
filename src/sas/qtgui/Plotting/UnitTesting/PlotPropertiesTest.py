@@ -2,8 +2,6 @@ import sys
 
 import pytest
 
-from unittest.mock import MagicMock
-
 from PyQt5 import QtGui, QtWidgets
 
 # Local
@@ -50,10 +48,10 @@ class PlotPropertiesTest:
         assert widget.cbColor.currentText() == "Custom"
         assert widget.cbColor.count() == 8
         
-    def testOnColorChange(self, widget):
+    def testOnColorChange(self, widget, mocker):
         '''Test the response to color change event'''
         # Accept the new color
-        QtWidgets.QColorDialog.getColor = MagicMock(return_value=QtGui.QColor(255, 0, 255))
+        mocker.patch.object(QtWidgets.QColorDialog, 'getColor', return_value=QtGui.QColor(255, 0, 255))
 
         widget.onColorChange()
 
@@ -69,7 +67,7 @@ class PlotPropertiesTest:
 
         # Cancel the dialog now
         bad_color = QtGui.QColor() # constructs an invalid color
-        QtWidgets.QColorDialog.getColor = MagicMock(return_value=bad_color)
+        mocker.patch.object(QtWidgets.QColorDialog, 'getColor', return_value=bad_color)
         widget.onColorChange()
 
         assert widget.color() == 1

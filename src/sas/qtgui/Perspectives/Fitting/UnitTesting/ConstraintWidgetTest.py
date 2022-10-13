@@ -1,9 +1,8 @@
 import sys
 import numpy as np
+from unittest.mock import MagicMock
 
 import pytest
-
-from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtTest import QTest, QSignalSpy
@@ -26,7 +25,7 @@ class ConstraintWidgetTest:
     '''Test the ConstraintWidget dialog'''
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the ConstraintWidget'''
 
         '''Create ConstraintWidget dialog'''
@@ -62,7 +61,7 @@ class ConstraintWidgetTest:
 
         '''Create the perspective'''
         perspective = FittingWindow(dummy_manager())
-        ConstraintWidget.updateSignalsFromTab = MagicMock()
+        mocker.patch.object(ConstraintWidget, 'updateSignalsFromTab')
 
         w = ConstraintWidget(parent=perspective)
 
@@ -79,7 +78,7 @@ class ConstraintWidgetTest:
         self.constraint2 = None
         w.close()
 
-    def testDefaults(self, widget):
+    def testDefaults(self, widget, mocker):
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QWidget)
         # Default title
@@ -95,9 +94,9 @@ class ConstraintWidgetTest:
         # By default, the constraint table is disabled
         assert not widget.tblConstraints.isEnabled()
 
-    def testOnFitTypeChange(self, widget):
+    def testOnFitTypeChange(self, widget, mocker):
         ''' test the single/batch fit switch '''
-        widget.initializeFitList = MagicMock()
+        mocker.patch.object(widget, 'initializeFitList')
         # Assure current type is Single
         assert widget.currentType == "FitPage"
         # click on "batch"
@@ -126,12 +125,12 @@ class ConstraintWidgetTest:
         widget.tabs_for_fitting = {"foo": False, "bar": True}
         assert widget.getTabsForFit() == ['bar']
 
-    def testIsTabImportable(self, widget):
+    def testIsTabImportable(self, widget, mocker):
         ''' tab checks for consistency '''
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         test_tab.kernel_module = None
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         assert not widget.isTabImportable(None)
         assert not widget.isTabImportable("BatchTab1")
@@ -143,13 +142,13 @@ class ConstraintWidgetTest:
         assert widget.isTabImportable("test_tab")
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testOnTabCellEdit(self, widget):
+    def testOnTabCellEdit(self, widget, mocker):
         ''' test what happens on monicker edit '''
         # Mock a tab
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(test_tab, 'kernel_module')
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
         widget.updateFitLine("test_tab")
 
         # disable the tab
@@ -161,14 +160,14 @@ class ConstraintWidgetTest:
         assert widget.tabs_for_fitting["test_tab"] == True
         assert widget.cmdFit.isEnabled()
 
-    def testUpdateFitLine(self, widget):
+    def testUpdateFitLine(self, widget, mocker):
         ''' See if the fit table row can be updated '''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
+        mocker.patch.object(test_tab, 'kernel_module', create=True)
         test_tab.kernel_module.name = "M1"
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         # Add a tab without an constraint
         widget.updateFitLine("test_tab")
@@ -196,20 +195,20 @@ class ConstraintWidgetTest:
                          ":scale = " + \
                          self.constraint1.func
         # Add a tab with a non active constraint
-        test_tab.getComplexConstraintsForModel = MagicMock(return_value=[])
+        mocker.patch.object(test_tab, 'getComplexConstraintsForModel', return_value=[])
         widget.updateFitLine("test_tab")
         # There should be two constraints now
         assert widget.tblConstraints.rowCount() == 2
         # Added constraint should not be checked since it isn't active
         assert widget.tblConstraints.item(1, 0).checkState() == 0
 
-    def testUpdateFitList(self, widget):
+    def testUpdateFitList(self, widget, mocker):
         ''' see if the fit table can be updated '''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(test_tab, 'kernel_module', create=True)
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         # Fit button should be disabled if no tabs are present
         ObjectLibrary.listObjects =MagicMock(return_value=False)
@@ -221,36 +220,36 @@ class ConstraintWidgetTest:
         assert not widget.cmdFit.isEnabled()
 
         # Add a tab
-        widget.isTabImportable = MagicMock(return_value=True)
-        ObjectLibrary.listObjects = MagicMock(return_value=[test_tab])
-        widget.updateFitLine = MagicMock()
-        widget.updateSignalsFromTab = MagicMock()
+        mocker.patch.object(widget, 'isTabImportable', return_value=True)
+        mocker.patch.object(ObjectLibrary, 'listObjects', return_value=[test_tab])
+        mocker.patch.object(widget, 'updateFitLine')
+        mocker.patch.object(widget, 'updateSignalsFromTab')
         widget.initializeFitList()
         widget.updateFitLine.assert_called_once()
         widget.updateSignalsFromTab.assert_called_once()
         assert widget.cmdFit.isEnabled()
 
         # Check if the tab list gets ordered
-        widget.isTabImportable = MagicMock(return_value=True)
-        ObjectLibrary.listObjects = MagicMock(return_value=[test_tab])
-        widget.updateFitLine = MagicMock()
-        widget.updateSignalsFromTab = MagicMock()
+        mocker.patch.object(widget, 'isTabImportable', return_value=True)
+        mocker.patch.object(ObjectLibrary, 'listObjects', return_value=[test_tab])
+        mocker.patch.object(widget, 'updateFitLine')
+        mocker.patch.object(widget, 'updateSignalsFromTab')
         widget._row_order = [test_tab]
-        widget.orderedSublist = MagicMock()
+        mocker.patch.object(widget, 'orderedSublist')
         widget.initializeFitList()
         widget.orderedSublist.assert_called_with([test_tab], [test_tab])
 
 
-    def testOnAcceptConstraint(self, widget):
+    def testOnAcceptConstraint(self, widget, mocker):
         ''' test if a constraint can be added '''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
-        test_tab.addConstraintToRow = MagicMock()
-        test_tab.getRowFromName = MagicMock(return_value=1)
-        test_tab.changeCheckboxStatus = MagicMock()
+        mocker.patch.object(test_tab, 'addConstraintToRow')
+        mocker.patch.object(test_tab, 'getRowFromName', return_value=1)
+        mocker.patch.object(test_tab, 'changeCheckboxStatus')
 
         # mock the getObjectByName method
-        widget.getObjectByName = MagicMock(return_value=test_tab)
+        mocker.patch.object(widget, 'getObjectByName', return_value=test_tab)
 
         # add a constraint
         constraint_tuple = ('M1', self.constraint1)
@@ -264,9 +263,9 @@ class ConstraintWidgetTest:
         test_tab.addConstraintToRow.assert_called_with(self.constraint1, 1)
         test_tab.changeCheckboxStatus.assert_called_with(1, True)
 
-    def testFitComplete(self, widget):
+    def testFitComplete(self, widget, mocker):
         ''' test the handling of fit results'''
-        widget.getTabsForFit = MagicMock(return_value=[[None], [None]])
+        mocker.patch.object(widget, 'getTabsForFit', return_value=[[None], [None]])
         spy = QSignalSpy(widget.parent.communicate.statusBarUpdateSignal)
         # test handling of fit error
         # result is None
@@ -286,10 +285,10 @@ class ConstraintWidgetTest:
         result.success = True
         test_tab = MagicMock()
         test_tab.kernel_module.name = 'M1'
-        test_tab.fitComplete = MagicMock()
+        mocker.patch.object(test_tab, 'fitComplete')
         result.model.name = 'M1'
         widget.tabs_for_fitting = {"test_tab": test_tab}
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
         widget.fitComplete(results)
         assert test_tab.fitComplete.call_args[0][0][1] == 1.5
         assert test_tab.fitComplete.call_args[0][0][0] == \
@@ -297,9 +296,9 @@ class ConstraintWidgetTest:
         assert spy[2][0] == 'Fitting completed successfully in: 1.5 ' \
                                     's.\n'
 
-    def testBatchFitComplete(self, widget):
+    def testBatchFitComplete(self, widget, mocker):
         ''' test the handling of batch fit results'''
-        widget.getTabsForFit = MagicMock(return_value=[[None], [None]])
+        mocker.patch.object(widget, 'getTabsForFit', return_value=[[None], [None]])
         spy = QSignalSpy(widget.parent.communicate.statusBarUpdateSignal)
         spy_data = QSignalSpy(
             widget.parent.communicate.sendDataToGridSignal)
@@ -324,14 +323,14 @@ class ConstraintWidgetTest:
                                     's.\n'
         assert spy_data[0][0] == [[result], 'ConstSimulPage']
 
-    def testUncheckConstraints(self, widget):
+    def testUncheckConstraints(self, widget, mocker):
         '''Tests the unchecking of constraints'''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
+        mocker.patch.object(test_tab, 'kernel_module', create=True)
         test_tab.kernel_module.name = "M1"
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         # Add a tab with an active constraint
         test_tab.getComplexConstraintsForModel = MagicMock(
@@ -340,12 +339,12 @@ class ConstraintWidgetTest:
             return_value=[('scale', self.constraint1.func)])
         test_tab.getConstraintObjectsForModel = MagicMock(
             return_value=[self.constraint1])
-        test_tab.getConstraintForRow = MagicMock(return_value=self.constraint1)
+        mocker.patch.object(test_tab, 'getConstraintForRow', return_value=self.constraint1)
         widget.updateFitLine("test_tab")
-        widget.parent.getTabByName = MagicMock(return_value=test_tab)
+        mocker.patch.object(widget.parent, 'getTabByName', return_value=test_tab)
         perspective = widget.parent.parent.perspective()
         perspective.symbol_dict = {"M1.scale": 1, "M1.radius": 1}
-        widget.initializeFitList = MagicMock()
+        mocker.patch.object(widget, 'initializeFitList')
 
         # Constraint should be checked
         assert widget.tblConstraints.item(0, 0).checkState() == 2
@@ -356,15 +355,15 @@ class ConstraintWidgetTest:
         # Constraint should be deactivated
         assert self.constraint1.active == False
 
-    def testOnConstraintChange(self, widget):
+    def testOnConstraintChange(self, widget, mocker):
         ''' test edition of the constraint list '''
         # mock a tab
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
-        test_tab.kernel_module = MagicMock()
+        mocker.patch.object(test_tab, 'kernel_module', create=True)
         test_tab.kernel_module.name = "M1"
-        test_tab.getRowFromName = MagicMock(return_value=0)
-        ObjectLibrary.getObject = MagicMock(return_value=test_tab)
+        mocker.patch.object(test_tab, 'getRowFromName', return_value=0)
+        mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         # Add a constraint to the tab
         test_tab.getComplexConstraintsForModel = MagicMock(
@@ -376,8 +375,8 @@ class ConstraintWidgetTest:
 
         widget.updateFitLine("test_tab")
 
-        widget.initializeFitList = MagicMock()
-        QtWidgets.QMessageBox.critical = MagicMock()
+        mocker.patch.object(widget, 'initializeFitList')
+        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
 
         # Change the constraint to one with no equal sign
         widget.tblConstraints.item(0, 0).setText("foo")

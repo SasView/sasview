@@ -9,7 +9,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
@@ -111,17 +110,17 @@ class GuiManagerTest:
         """
         pass
 
-    def testQuitApplication(self, manager):
+    def testQuitApplication(self, manager, mocker):
         """
         Test that the custom exit method is called on shutdown
         """
         manager._workspace.show()
 
         # Must mask sys.exit, otherwise the whole testing process stops.
-        sys.exit = MagicMock()
+        mocker.patch.object(sys, 'exit')
 
         # Say No to the close dialog
-        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Open, then close the manager
         manager.quitApplication()
@@ -130,7 +129,7 @@ class GuiManagerTest:
         #self.assertTrue(QMessageBox.question.called)
 
         # Say Yes to the close dialog
-        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
 
         # Open, then close the manager
         manager.quitApplication()
@@ -139,11 +138,11 @@ class GuiManagerTest:
         #self.assertTrue(QMessageBox.question.called)
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testCheckUpdate(self, manager):
+    def testCheckUpdate(self, manager, mocker):
         """
         Tests the SasView website version polling
         """
-        manager.processVersion = MagicMock()
+        mocker.patch.object(manager, 'processVersion')
         version = {'version'     : '5.0.2',
                    'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
                    'download_url': 'https://github.com/SasView/sasview/releases/tag/v5.0.2'}
@@ -153,7 +152,7 @@ class GuiManagerTest:
 
         pass
 
-    def testProcessVersion(self, manager):
+    def testProcessVersion(self, manager, mocker):
         """
         Tests the version checker logic
         """
@@ -180,7 +179,7 @@ class GuiManagerTest:
         # 3. version > LocalConfig.__version__
         version_info = {'version' : '999.0.0'}
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
 
         manager.processVersion(version_info)
 
@@ -192,7 +191,7 @@ class GuiManagerTest:
 
         # 4. couldn't load version
         version_info = {}
-        logging.error = MagicMock()
+        mocker.patch.object(logging, 'error')
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
@@ -212,12 +211,12 @@ class GuiManagerTest:
         pass
 
     #### FILE ####
-    def testActionLoadData(self, manager):
+    def testActionLoadData(self, manager, mocker):
         """
         Menu File/Load Data File(s)
         """
         # Mock the system file open method
-        QFileDialog.getOpenFileNames = MagicMock(return_value=('',''))
+        mocker.patch.object(QFileDialog, 'getOpenFileNames', return_value=('',''))
 
         # invoke the action
         manager.actionLoadData()
@@ -225,12 +224,12 @@ class GuiManagerTest:
         # Test the getOpenFileName() dialog called once
         assert QFileDialog.getOpenFileNames.called
 
-    def testActionLoadDataFolder(self, manager):
+    def testActionLoadDataFolder(self, manager, mocker):
         """
         Menu File/Load Data Folder
         """
         # Mock the system file open method
-        QFileDialog.getExistingDirectory = MagicMock(return_value=('',''))
+        mocker.patch.object(QFileDialog, 'getExistingDirectory', return_value=('',''))
 
         # invoke the action
         manager.actionLoad_Data_Folder()
@@ -267,11 +266,11 @@ class GuiManagerTest:
 
     #### HELP ####
     # test when PyQt5 works with html
-    def testActionDocumentation(self, manager):
+    def testActionDocumentation(self, manager, mocker):
         """
         Menu Help/Documentation
         """
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
 
         # Invoke the action
         manager.actionDocumentation()
@@ -280,12 +279,12 @@ class GuiManagerTest:
         webbrowser.open.assert_called_once()
 
 
-    def skip_testActionTutorial(self, manager):
+    def skip_testActionTutorial(self, manager, mocker):
         """
         Menu Help/Tutorial
         """
         # Mock subprocess.Popen
-        subprocess.Popen = MagicMock()
+        mocker.patch.object(subprocess, 'Popen')
 
         tested_location = manager._tutorialLocation
 
@@ -311,12 +310,12 @@ class GuiManagerTest:
         assert manager.ackWidget.isVisible()
         assert "developers@sasview.org" in manager.ackWidget.label_3.text()
 
-    def testActionCheck_for_update(self, manager):
+    def testActionCheck_for_update(self, manager, mocker):
         """
         Menu Help/Check for update
         """
         # Just make sure checkUpdate is called.
-        manager.checkUpdate = MagicMock()
+        mocker.patch.object(manager, 'checkUpdate')
 
         manager.actionCheck_for_update()
 

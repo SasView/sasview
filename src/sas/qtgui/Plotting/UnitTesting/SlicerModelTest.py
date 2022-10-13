@@ -2,8 +2,6 @@ import sys
 
 import pytest
 
-from unittest.mock import MagicMock
-
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 

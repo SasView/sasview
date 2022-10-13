@@ -6,7 +6,6 @@ import pytest
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
 
 import sas.sasview
 import sas.system.version
@@ -61,11 +60,11 @@ class AboutBoxTest:
         # Are links enabled?
         assert about.openExternalLinks()
 
-    def testAddActions(self, widget):
+    def testAddActions(self, widget, mocker):
         """
         Assure link buttons are set up correctly
         """
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
         all_hosts = [
                 config.nist_url,
                 config.umd_url,

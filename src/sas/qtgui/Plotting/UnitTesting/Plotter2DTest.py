@@ -4,13 +4,12 @@ import platform
 
 import pytest
 
-import os
-os.environ["MPLBACKEND"] = "qtagg"
+import matplotlib as mpl
+mpl.use("Qt5Agg")
 
 from PyQt5 import QtGui, QtWidgets, QtPrintSupport
 from PyQt5 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from unittest.mock import MagicMock
 from mpl_toolkits.mplot3d import Axes3D
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -57,7 +56,7 @@ class Plotter2DTest:
         '''destroy'''
         p.figure.clf()
 
-    #@pytest.mark.skip(reason="2022-09 already broken - causes segfault")
+    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testDataProperty(self, plotter):
         """ Adding data """
         plotter.data = self.data
@@ -67,18 +66,18 @@ class Plotter2DTest:
         assert plotter.xLabel == "$\\rm{Q_{x}}(A^{-1})$"
         assert plotter.yLabel == "$\\rm{Q_{y}}(A^{-1})$"
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
-    def testPlot(self, plotter):
+    @pytest.mark.skip(reason="2022-09 already broken")
+    def testPlot(self, plotter, mocker):
         """ Look at the plotting """
         plotter.data = self.data
         plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.plot()
 
         assert FigureCanvas.draw_idle.called
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
+    @pytest.mark.skip(reason="2022-09 already broken")
     def testCalculateDepth(self, plotter):
         ''' Test the depth calculator '''
         plotter.data = self.data
@@ -94,13 +93,13 @@ class Plotter2DTest:
         assert round(abs(depth[1]-1.30103), 5) == 0
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnColorMap(self, plotter):
+    def testOnColorMap(self, plotter, mocker):
         ''' Respond to the color map event '''
         plotter.data = self.data
         plotter.plot()
         plotter.show()
 
-        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
 
         # Just this one plot
         plotter.onColorMap()
@@ -113,18 +112,18 @@ class Plotter2DTest:
         assert round(abs(plotter.vmax-1e+20), 6) == 0
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnToggleScale(self, plotter):
+    def testOnToggleScale(self, plotter, mocker):
         """ Respond to the event by replotting """
         plotter.data = self.data
         plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.onToggleScale(None)
 
         assert FigureCanvas.draw_idle.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnBoxSum(self, plotter):
+    def testOnBoxSum(self, plotter, mocker):
         """ Test the box sum display and functionality """
 
         # hacky way to make things work in manipulations._sum
@@ -134,7 +133,7 @@ class Plotter2DTest:
         plotter.show()
 
         # Mock the main window
-        plotter.manager.parent = MagicMock()
+        mocker.patch.object(plotter.manager, 'parent', create=True)
 
         # Call the main tested method
         plotter.onBoxSum()
@@ -145,7 +144,7 @@ class Plotter2DTest:
         assert isinstance(plotter.boxwidget.model, QtGui.QStandardItemModel)
 
     @pytest.mark.skip(reason="2022-09 already broken")
-    def testContextMenuQuickPlot(self, plotter):
+    def testContextMenuQuickPlot(self, plotter, mocker):
         """ Test the right click menu """
         plotter.data = self.data
         plotter.createContextMenuQuick()
@@ -154,7 +153,7 @@ class Plotter2DTest:
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
         assert QtPrintSupport.QPrintDialog.exec_.called
 
@@ -163,13 +162,13 @@ class Plotter2DTest:
 
         # Trigger Toggle Grid and make sure the method is called
         assert actions[4].text() == "Toggle Grid On/Off"
-        plotter.ax.grid = MagicMock()
+        mocker.patch.object(plotter.ax, 'grid')
         actions[4].trigger()
         assert plotter.ax.grid.called
 
         # Trigger Change Scale and make sure the method is called
         assert actions[6].text() == "Toggle Linear/Log Scale"
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
         actions[6].trigger()
         assert FigureCanvas.draw_idle.called
 
@@ -186,11 +185,11 @@ class Plotter2DTest:
         assert self.clipboard_called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testShowNoPlot(self, plotter):
+    def testShowNoPlot(self, plotter, mocker):
         """ Test the plot rendering and generation """
 
-        FigureCanvas.draw_idle = MagicMock()
-        FigureCanvas.draw = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
+        mocker.patch.object(FigureCanvas, 'draw')
 
         # Test early return on no data
         plotter.showPlot(data=None,
@@ -206,12 +205,12 @@ class Plotter2DTest:
         assert not FigureCanvas.draw.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testShow3DPlot(self, plotter):
+    def testShow3DPlot(self, plotter, mocker):
         """ Test the 3Dplot rendering and generation """
         # Test 3D printout
-        FigureCanvas.draw = MagicMock()
-        Axes3D.plot_surface = MagicMock()
-        plotter.figure.colorbar = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw')
+        mocker.patch.object(Axes3D, 'plot_surface')
+        mocker.patch.object(plotter.figure, 'colorbar')
 
         plotter.dimension = 3
         plotter.data = self.data
@@ -227,11 +226,11 @@ class Plotter2DTest:
         assert FigureCanvas.draw.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testShow2DPlot(self, plotter):
+    def testShow2DPlot(self, plotter, mocker):
         """ Test the 2Dplot rendering and generation """
         # Test 2D printout
-        FigureCanvas.draw_idle = MagicMock()
-        plotter.figure.colorbar = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
+        mocker.patch.object(plotter.figure, 'colorbar')
 
         plotter.dimension = 2
         plotter.data = self.data

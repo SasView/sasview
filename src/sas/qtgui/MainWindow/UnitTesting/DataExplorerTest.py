@@ -8,8 +8,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import *
-from unittest.mock import MagicMock
-from unittest.mock import patch
 from mpl_toolkits.mplot3d import Axes3D
 
 # Local
@@ -131,7 +129,7 @@ class DataExplorerTest:
         """
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testLoadButton(self, form):
+    def testLoadButton(self, form, mocker):
         loadButton = form.cmdLoad
 
         filename = "cyl_400_20.txt"
@@ -139,7 +137,7 @@ class DataExplorerTest:
         spy_file_read = QtSignalSpy(form, form.communicator.fileReadSignal)
 
         # Return no files.
-        QFileDialog.getOpenFileNames = MagicMock(return_value=('',''))
+        mocker.patch.object(QFileDialog, 'getOpenFileNames', return_value=('',''))
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
@@ -152,7 +150,7 @@ class DataExplorerTest:
         assert spy_file_read.count() == 0
 
         # Now, return a single file
-        QFileDialog.getOpenFileNames = MagicMock(return_value=(filename,''))
+        mocker.patch.object(QFileDialog, 'getOpenFileNames', return_value=(filename,''))
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
@@ -187,14 +185,14 @@ class DataExplorerTest:
         assert expected_list == spied_list
         
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testDeleteButton(self, form):
+    def testDeleteButton(self, form, mocker):
         """
         Functionality of the delete button
         """
         deleteButton = form.cmdDeleteData
 
         # Mock the confirmation dialog with return=No
-        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
         filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
@@ -221,7 +219,7 @@ class DataExplorerTest:
         assert form.model.rowCount() == 3
 
         # Now, mock the confirmation dialog with return=Yes
-        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
@@ -235,14 +233,14 @@ class DataExplorerTest:
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
-    def testDeleteTheory(self, form):
+    def testDeleteTheory(self, form, mocker):
         """
         Test that clicking "Delete" in theories tab removes selected indices
         """
         deleteButton = form.cmdDeleteTheory
 
         # Mock the confirmation dialog with return=No
-        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
         item1 = HashableStandardItem(True)
@@ -273,7 +271,7 @@ class DataExplorerTest:
         assert form.theory_model.rowCount() == 2
 
         # Now, mock the confirmation dialog with return=Yes
-        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
@@ -297,13 +295,13 @@ class DataExplorerTest:
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testSendToButton(self, form):
+    def testSendToButton(self, form, mocker):
         """
         Test that clicking the Send To button sends checked data to a perspective
         """
         # Send empty data
         mocked_perspective = form._perspective()
-        mocked_perspective.setData = MagicMock()
+        mocker.patch.object(mocked_perspective, 'setData')
 
         # Click on the Send To  button
         QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
@@ -318,7 +316,7 @@ class DataExplorerTest:
         QApplication.processEvents()
 
         # setData is the method we want to see called
-        mocked_perspective.swapData = MagicMock()
+        mocker.patch.object(mocked_perspective, 'swapData')
 
         # Assure the checkbox is on
         form.cbSelect.setCurrentIndex(0)
@@ -345,9 +343,9 @@ class DataExplorerTest:
         assert mocked_perspective.swapData.called
 
         # Test the exception block
-        QMessageBox.exec_ = MagicMock()
-        QMessageBox.setText = MagicMock()
-        mocked_perspective.swapData = MagicMock(side_effect = Exception("foo"))
+        mocker.patch.object(QMessageBox, 'exec_')
+        mocker.patch.object(QMessageBox, 'setText')
+        mocker.patch.object(mocked_perspective, 'swapData', side_effect = Exception("foo"))
 
         # Click on the button to so the mocked swapData method raises an exception
         QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
@@ -362,9 +360,9 @@ class DataExplorerTest:
         form.readData(filename)
 
         # Mock the warning message and the swapData method
-        QMessageBox.exec_ = MagicMock()
-        QMessageBox.setText = MagicMock()
-        mocked_perspective.swapData = MagicMock()
+        mocker.patch.object(QMessageBox, 'exec_')
+        mocker.patch.object(QMessageBox, 'setText')
+        mocker.patch.object(mocked_perspective, 'swapData')
 
         # Click on the button to swap both datasets to the perspective
         QTest.mouseClick(form.cmdSendTo, Qt.LeftButton)
@@ -464,12 +462,12 @@ class DataExplorerTest:
         assert item1.child(0).child(0).rowCount() == new_item.child(0).child(0).rowCount()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testReadData(self, form):
+    def testReadData(self, form, mocker):
         """
         Test the low level readData() method
         """
         filename = ["cyl_400_20.txt"]
-        form.manager.add_data = MagicMock()
+        mocker.patch.object(form.manager, 'add_data')
 
         # Initialize signal spy instances
         spy_status_update = QtSignalSpy(form, form.communicator.statusBarUpdateSignal)
@@ -537,7 +535,7 @@ class DataExplorerTest:
         for def_format in default_list:
             assert def_format in w_list
        
-    def testLoadComplete(self, form):
+    def testLoadComplete(self, form, mocker):
         """
         Test the callback method updating the data object
         """
@@ -545,7 +543,7 @@ class DataExplorerTest:
         data_dict = {"a1":Data1D()}
         output_data = (data_dict, message)
 
-        form.manager.add_data = MagicMock()
+        mocker.patch.object(form.manager, 'add_data')
 
         # Initialize signal spy instances
         spy_status_update = QtSignalSpy(form, form.communicator.statusBarUpdateSignal)
@@ -570,8 +568,7 @@ class DataExplorerTest:
         assert form.manager.add_data.called
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    @patch('sas.qtgui.Utilities.GuiUtils.plotsFromCheckedItems')
-    def testNewPlot1D(self, test_patch):
+    def testNewPlot1D(self, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -593,10 +590,10 @@ class DataExplorerTest:
                         test_data.notes
 
         # Mask retrieval of the data
-        test_patch.return_value = new_data
+        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
-        form.parent.workspace = MagicMock()
+        mocker.patch.object(form.parent, 'workspace')
 
         # Call the plotting method
         form.newPlot()
@@ -611,8 +608,7 @@ class DataExplorerTest:
         assert form.cmdAppend.isEnabled()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    @patch('sas.qtgui.Utilities.GuiUtils.plotsFromCheckedItems')
-    def testNewPlot2D(self, test_patch):
+    def testNewPlot2D(self, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -631,10 +627,10 @@ class DataExplorerTest:
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask retrieval of the data
-        test_patch.return_value = new_data
+        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
-        form.parent.workspace = MagicMock()
+        mocker.patch.object(form.parent, 'workspace')
 
         # Call the plotting method
         #form.newPlot()
@@ -647,8 +643,7 @@ class DataExplorerTest:
         #self.assertTrue(form.cmdAppend.isEnabled())
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    @patch('sas.qtgui.Utilities.GuiUtils.plotsFromCheckedItems')
-    def testAppendPlot(self, test_patch):
+    def testAppendPlot(self, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -669,13 +664,13 @@ class DataExplorerTest:
         new_data = [(output_item, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask plotting
-        form.parent.workspace = MagicMock()
+        mocker.patch.object(form.parent, 'workspace')
 
         # Mask the plot show call
-        Plotter.show = MagicMock()
+        mocker.patch.object(Plotter, 'show')
 
         # Mask retrieval of the data
-        test_patch.return_value = new_data
+        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Call the plotting method
         form.newPlot()
@@ -710,14 +705,14 @@ class DataExplorerTest:
         form.updateGraphCombo(graph_list)
         assert form.cbgraph.count() == 0
 
-    def testUpdateModelFromPerspective(self, form):
+    def testUpdateModelFromPerspective(self, form, mocker):
         """
         Assure the model update is correct
         """
         good_item = QStandardItem()
         bad_item = "I'm so bad"
 
-        form.model.reset = MagicMock()
+        mocker.patch.object(form.model, 'reset', create=True)
 
         form.updateModelFromPerspective(good_item)
 
@@ -729,7 +724,7 @@ class DataExplorerTest:
             form.updateModelFromPerspective(bad_item)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testContextMenu(self, form):
+    def testContextMenu(self, form, mocker):
         """
         See if the context menu is present
         """
@@ -746,7 +741,7 @@ class DataExplorerTest:
         # Find out the center pointof the treeView row
         rect = form.treeView.visualRect(index).center()
 
-        form.context_menu.exec_ = MagicMock()
+        mocker.patch.object(form.context_menu, 'exec_')
 
         # Move the mouse pointer to the first row
         QTest.mouseMove(form.treeView.viewport(), pos=rect)
@@ -935,7 +930,7 @@ class DataExplorerTest:
         assert form.txt_widget.verticalScrollBar().sliderPosition() == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testSaveDataAs(self, form):
+    def testSaveDataAs(self, form, mocker):
         """
         Test the Save As context menu action
         """
@@ -948,7 +943,7 @@ class DataExplorerTest:
         # select the data
         form.treeView.selectAll()
 
-        QFileDialog.getSaveFileName = MagicMock(return_value=("cyl_400_20_out", "(*.txt)"))
+        mocker.patch.object(QFileDialog, 'getSaveFileName', return_value=("cyl_400_20_out", "(*.txt)"))
 
         # Call the tested method
         form.saveDataAs()
@@ -972,7 +967,7 @@ class DataExplorerTest:
         selmodel.setCurrentIndex(index, QItemSelectionModel.NoUpdate)
         selmodel.select(index, QItemSelectionModel.Select|QItemSelectionModel.Rows)
 
-        QFileDialog.getSaveFileName = MagicMock(return_value="test.xyz")
+        mocker.patch.object(QFileDialog, 'getSaveFileName', return_value="test.xyz")
 
         # Call the tested method
         form.saveDataAs()
@@ -997,7 +992,7 @@ class DataExplorerTest:
         # select the data
         form.treeView.selectAll()
 
-        Plotter.show = MagicMock() # for masking the display
+        mocker.patch.object(Plotter, 'show') # for masking the display
 
         form.quickDataPlot()
         assert Plotter.show.called
@@ -1015,7 +1010,7 @@ class DataExplorerTest:
         # select the data
         form.treeView.selectAll()
 
-        Plotter2D.show = MagicMock() # for masking the display
+        mocker.patch.object(Plotter2D, 'show') # for masking the display
 
         form.quickData3DPlot()
 
@@ -1036,7 +1031,7 @@ class DataExplorerTest:
         """
 
         # Mock the confirmation dialog with return=No
-        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         # Populate the model
         filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
@@ -1077,7 +1072,7 @@ class DataExplorerTest:
         assert form.model.rowCount() == 3
 
         # Now, mock the confirmation dialog with return=Yes
-        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
 
         # Select the newly created item
         form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
@@ -1096,7 +1091,7 @@ class DataExplorerTest:
         Delete selected item from data explorer should also delete corresponding plots
         """
         # Mock the confirmation dialog with return=No
-        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
 
         loader = Loader()
         manager = DataManager()
@@ -1112,7 +1107,7 @@ class DataExplorerTest:
         form.readData(filename)
 
         # Mask plotting
-        form.parent.workspace = MagicMock()
+        mocker.patch.object(form.parent, 'workspace')
 
         # Call the plotting method
         form.newPlot()

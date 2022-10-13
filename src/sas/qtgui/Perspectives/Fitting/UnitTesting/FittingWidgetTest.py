@@ -128,10 +128,10 @@ class FittingWidgetTest:
     """Test the fitting widget GUI"""
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the GUI'''
         w = FittingWidgetMod(dummy_manager())
-        FittingUtilities.checkConstraints = MagicMock(return_value=None)
+        mocker.patch.object(FittingUtilities, 'checkConstraints', return_value=None)
         yield w
         """Destroy the GUI"""
         w.close()
@@ -166,12 +166,12 @@ class FittingWidgetTest:
         #Test what is current text in the combobox
         assert fittingWindow.cbCategory.currentText() == CATEGORY_DEFAULT
 
-    def testWidgetWithData(self, widget):
+    def testWidgetWithData(self, widget, mocker):
         """
         Test the instantiation of the widget with initial data
         """
         data = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
         item = QtGui.QStandardItem("test")
 
         widget_with_data = FittingWidgetMod(dummy_manager(), data=item, tab_id=3)
@@ -293,7 +293,7 @@ class FittingWidgetTest:
         assert not widget.cbModel.isEnabled()
         assert widget.cbStructureFactor.isEnabled()
 
-    def testSelectModel(self, widget):
+    def testSelectModel(self, widget, mocker):
         """
         Assure proper behaviour on changing model
         """
@@ -313,9 +313,9 @@ class FittingWidgetTest:
         # spy = QtSignalSpy(widget._model_model, widget._model_model.itemChanged)
 
         # mock the tested methods
-        widget.SASModelToQModel = MagicMock()
-        widget.createDefaultDataset = MagicMock()
-        widget.calculateQGridForModel = MagicMock()
+        mocker.patch.object(widget, 'SASModelToQModel')
+        mocker.patch.object(widget, 'createDefaultDataset')
+        mocker.patch.object(widget, 'calculateQGridForModel')
         # 
         # Now change the model
         widget.cbModel.setCurrentIndex(4)
@@ -421,14 +421,14 @@ class FittingWidgetTest:
         # Check the argument type
         assert isinstance(spy.called()[0]['args'][0], QtGui.QStandardItem)
 
-    def testCalculateQGridForModel(self, widget):
+    def testCalculateQGridForModel(self, widget, mocker):
         """
         Check that the fitting 1D data object is ready
         """
 
         if config.USING_TWISTED:
             # Mock the thread creation
-            threads.deferToThread = MagicMock()
+            mocker.patch.object(threads, 'deferToThread')
             # Model for theory
             widget.SASModelToQModel("cylinder")
             # Call the tested method
@@ -438,7 +438,7 @@ class FittingWidgetTest:
             assert threads.deferToThread.called
             assert threads.deferToThread.call_args_list[0][0][0].__name__ == "compute"
         else:
-            Calc2D.queue = MagicMock()
+            mocker.patch.object(Calc2D, 'queue')
             # Model for theory
             widget.SASModelToQModel("cylinder")
             # Call the tested method
@@ -596,7 +596,7 @@ class FittingWidgetTest:
         # no efect
         assert widget.poly_params['radius_bell.nsigmas'] == 222
 
-    def testOnPolyComboIndexChange(self, widget):
+    def testOnPolyComboIndexChange(self, widget, mocker):
         """
         Test the slot method for polydisp. combo box index change
         """
@@ -629,14 +629,14 @@ class FittingWidgetTest:
         assert widget.poly_params['radius_bell.nsigmas'] == 8
 
         # mock up file load
-        widget.loadPolydispArray = MagicMock()
+        mocker.patch.object(widget, 'loadPolydispArray')
         # Change to 'array'
         widget.onPolyComboIndexChange('array', 0)
         # See the mock fire
         assert widget.loadPolydispArray.called
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testLoadPolydispArray(self, widget):
+    def testLoadPolydispArray(self, widget, mocker):
         """
         Test opening of the load file dialog for 'array' polydisp. function
         """
@@ -645,7 +645,7 @@ class FittingWidgetTest:
         filename = os.path.join("UnitTesting", "testdata_noexist.txt")
         with pytest.raises(OSError):
             os.stat(filename)
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename,''))
         widget.show()
         # Change the category index so we have a model with polydisp
         category_index = widget.cbCategory.findText("Cylinder")
@@ -666,7 +666,7 @@ class FittingWidgetTest:
             os.stat(filename)
         except OSError:
             assert False, "testdata.txt does not exist"
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename,''))
 
         widget.onPolyComboIndexChange('array', 0)
         # check values - disabled control, present weights
@@ -827,7 +827,7 @@ class FittingWidgetTest:
         # Make sure the signal has been emitted == new plot
         assert spy.count() == 1
 
-    def testOnEmptyFit(self, widget):
+    def testOnEmptyFit(self, widget, mocker):
         """
         Test a 1D/2D fit with no parameters
         """
@@ -844,14 +844,14 @@ class FittingWidgetTest:
         # Test no fitting params
         widget.main_params_to_fit = []
 
-        logging.error = MagicMock()
+        mocker.patch.object(logging, 'error')
 
         widget.onFit()
         assert logging.error.called_with('no fitting parameters')
         widget.close()
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testOnEmptyFit2(self, widget):
+    def testOnEmptyFit2(self, widget, mocker):
         test_data = Data2D(image=[1.0, 2.0, 3.0],
                            err_image=[0.01, 0.02, 0.03],
                            qx_data=[0.1, 0.2, 0.3],
@@ -873,7 +873,7 @@ class FittingWidgetTest:
         # Test no fitting params
         widget.main_params_to_fit = []
 
-        logging.error = MagicMock()
+        mocker.patch.object(logging, 'error')
 
         widget.onFit()
         assert logging.error.called_once()
@@ -901,20 +901,20 @@ class FittingWidgetTest:
         # Spying on status update signal
         update_spy = QtSignalSpy(widget, widget.communicate.statusBarUpdateSignal)
 
-        with threads.deferToThread as MagicMock:
-            widget.onFit()
-            # thread called
-            assert threads.deferToThread.called
-            # thread method is 'compute'
-            assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'compute'
+        mocker.patch.object(threads, 'deferToThread')
+        widget.onFit()
+        # thread called
+        assert threads.deferToThread.called
+        # thread method is 'compute'
+        assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'compute'
 
-            # the fit button changed caption and got disabled
-            # could fail if machine fast enough to finish
-            #self.assertEqual(widget.cmdFit.text(), 'Stop fit')
-            #self.assertFalse(widget.cmdFit.isEnabled())
+        # the fit button changed caption and got disabled
+        # could fail if machine fast enough to finish
+        #self.assertEqual(widget.cmdFit.text(), 'Stop fit')
+        #self.assertFalse(widget.cmdFit.isEnabled())
 
-            # Signal pushed up
-            assert update_spy.count() == 1
+        # Signal pushed up
+        assert update_spy.count() == 1
 
         widget.close()
 
@@ -960,13 +960,13 @@ class FittingWidgetTest:
             # Signal pushed up
             assert update_spy.count() == 1
 
-    def testOnHelp(self, widget):
+    def testOnHelp(self, widget, mocker):
         """
         Test various help pages shown in this widget
         """
         #Mock the webbrowser.open method
-        widget.parent.showHelp = MagicMock()
-        #webbrowser.open = MagicMock()
+        mocker.patch.object(widget.parent, 'showHelp', create=True)
+        mocker.patch.object(webbrowser, 'open')
 
         # Invoke the action on default tab
         widget.onHelp()
@@ -1240,7 +1240,7 @@ class FittingWidgetTest:
             menu = widget.modelContextMenu([i for i in range(9001)])
         assert len(menu.actions()) == 4
 
-    def testShowModelContextMenu(self, widget):
+    def testShowModelContextMenu(self, widget, mocker):
         # select model: cylinder / cylinder
         category_index = widget.cbCategory.findText("Cylinder")
         widget.cbCategory.setCurrentIndex(category_index)
@@ -1249,8 +1249,8 @@ class FittingWidgetTest:
         widget.cbModel.setCurrentIndex(model_index)
 
         # No selection
-        logging.error = MagicMock()
-        widget.showModelDescription = MagicMock()
+        mocker.patch.object(logging, 'error')
+        mocker.patch.object(widget, 'showModelDescription')
         # Show the menu
         widget.showModelContextMenu(QtCore.QPoint(10,20))
 
@@ -1265,8 +1265,8 @@ class FittingWidgetTest:
         selection_model.select(index1, selection_model.Select | selection_model.Rows)
         selection_model.select(index2, selection_model.Select | selection_model.Rows)
 
-        QtWidgets.QMenu.exec_ = MagicMock()
-        logging.error = MagicMock()
+        mocker.patch.object(QtWidgets.QMenu, 'exec_')
+        mocker.patch.object(logging, 'error')
         # Show the menu
         widget.showModelContextMenu(QtCore.QPoint(10,20))
 
@@ -1274,7 +1274,7 @@ class FittingWidgetTest:
         assert not logging.error.called
         assert QtWidgets.QMenu.exec_.called
 
-    def testShowMultiConstraint(self, widget):
+    def testShowMultiConstraint(self, widget, mocker):
         """
         Test the widget update on new multi constraint
         """
@@ -1305,13 +1305,13 @@ class FittingWidgetTest:
         selection_model.select(index2, selection_model.Select | selection_model.Rows)
 
         # return non-OK from dialog
-        QtWidgets.QDialog.exec_ = MagicMock()
+        mocker.patch.object(QtWidgets.QDialog, 'exec_')
         widget.showMultiConstraint()
         # Check the dialog called
         assert QtWidgets.QDialog.exec_.called
 
         # return OK from dialog
-        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         spy = QtSignalSpy(widget, widget.constraintAddedSignal)
 
         widget.showMultiConstraint()
@@ -1360,7 +1360,7 @@ class FittingWidgetTest:
         # make sure the parameters are different than before
         assert not (widget.getParamNames() == cylinder_params)
 
-    def testAddConstraintToRow(self, widget):
+    def testAddConstraintToRow(self, widget, mocker):
         """
         Test the constraint row add operation
         """
@@ -1378,7 +1378,7 @@ class FittingWidgetTest:
         spy = QtSignalSpy(widget, widget.constraintAddedSignal)
 
         # Mock the modelName method
-        widget.modelName = MagicMock(return_value='M1')
+        mocker.patch.object(widget, 'modelName', return_value='M1')
 
         # Mock a constraint tab
         constraint_tab = MagicMock()
@@ -1420,10 +1420,10 @@ class FittingWidgetTest:
 
         # Now try to add an constraint when the checking function returns an
         # error message
-        FittingUtilities.checkConstraints = MagicMock(return_value="foo")
+        mocker.patch.object(FittingUtilities, 'checkConstraints', return_value="foo")
 
         # Mock the QMessagebox Warning
-        QtWidgets.QMessageBox.critical = MagicMock()
+        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
 
         # Call the method tested
         widget.addConstraintToRow(constraint=const, row=row)
@@ -1721,13 +1721,13 @@ class FittingWidgetTest:
         assert int(widget._model_model.item(row, 1).text()) == 333
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testOnParameterPaste(self, widget):
+    def testOnParameterPaste(self, widget, mocker):
         """
         Test response of the widget to clipboard content
         paste request
         """
-        widget.updatePageWithParameters = MagicMock()
-        QtWidgets.QMessageBox.exec_ = MagicMock()
+        mocker.patch.object(widget, 'updatePageWithParameters')
+        mocker.patch.object(QtWidgets.QMessageBox, 'exec_')
         cb = QtWidgets.QApplication.clipboard()
 
         # test bad clipboard
@@ -1741,7 +1741,7 @@ class FittingWidgetTest:
         widget.onParameterPaste()
         widget.updatePageWithParameters.assert_called_once()
 
-    def testGetConstraintsForFitting(self, widget):
+    def testGetConstraintsForFitting(self, widget, mocker):
         """
         Test the deactivation of constraints when trying to fit a single page
         with constraints relying on other pages
@@ -1750,15 +1750,15 @@ class FittingWidgetTest:
         widget.getComplexConstraintsForModel = MagicMock(return_value=[
             ('scale', 'M2.background')])
         # mock isConstraintMultimodel so that our constraint is multi-model
-        widget.isConstraintMultimodel = MagicMock(return_value=True)
+        mocker.patch.object(widget, 'isConstraintMultimodel', return_value=True)
         # Mock a constraint tab
         constraint_tab = MagicMock()
         widget.parent.perspective().constraint_tab = constraint_tab
         # instanciate a constraint
         constraint = Constraint(parent=None, param="scale", value=7.0)
-        widget.getConstraintForRow = MagicMock(return_value=constraint)
+        mocker.patch.object(widget, 'getConstraintForRow', return_value=constraint)
         # mock the messagebox
-        QtWidgets.QMessageBox.exec_ = MagicMock()
+        mocker.patch.object(QtWidgets.QMessageBox, 'exec_')
 
         # select a model
         category_index = widget.cbCategory.findText("Cylinder")
@@ -1776,7 +1776,7 @@ class FittingWidgetTest:
         # Check that the uncheckConstraint method was called
         constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 
-    def testQRangeReset(self, widget):
+    def testQRangeReset(self, widget, mocker):
         ''' Test onRangeReset w/ and w/o data loaded '''
         assert widget.options_widget.qmin == \
                          widget.options_widget.QMIN_DEFAULT
@@ -1801,7 +1801,7 @@ class FittingWidgetTest:
                          widget.options_widget.NPTS_DEFAULT
         # Load data into tab and check new limits
         data = Data1D(x=[1,2], y=[1,2])
-        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
         item = QtGui.QStandardItem("test")
         widget_with_data = FittingWidget(dummy_manager(), data=item, tab_id=3)
         assert widget_with_data.options_widget.qmin == min(data.x)

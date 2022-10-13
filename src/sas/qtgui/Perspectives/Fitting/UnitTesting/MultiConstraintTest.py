@@ -5,8 +5,6 @@ import pytest
 
 import numpy as np
 
-from unittest.mock import MagicMock
-
 from PyQt5 import QtGui, QtWidgets
 
 # Local
@@ -50,17 +48,17 @@ class MultiConstraintTest:
         tooltip += "%s = sqrt(%s) + 5"%(self.p1, self.p2)
         assert widget.txtConstraint.toolTip() == tooltip
 
-    def testValidateFormula(self, widget):
+    def testValidateFormula(self, widget, mocker):
         ''' assure enablement and color for valid formula '''
         # Invalid string
-        widget.validateConstraint = MagicMock(return_value=False)
+        mocker.patch.object(widget, 'validateConstraint', return_value=False)
         widget.validateFormula()
         style_sheet = "QLineEdit {background-color: red;}"
         assert not widget.cmdOK.isEnabled()
         assert widget.txtConstraint.styleSheet() == style_sheet
 
         # Valid string
-        widget.validateConstraint = MagicMock(return_value=True)
+        mocker.patch.object(widget, 'validateConstraint', return_value=True)
         widget.validateFormula()
         style_sheet = "QLineEdit {background-color: white;}"
         assert widget.cmdOK.isEnabled()
@@ -96,11 +94,11 @@ class MultiConstraintTest:
         # log10(    p2    ) +  p2
         assert widget.validateConstraint("log10(    p2    ) +  p2  ")
 
-    def testOnHelp(self, widget):
+    def testOnHelp(self, widget, mocker):
         """
         Test the default help renderer
         """
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
 
         # invoke the tested method
         widget.onHelp()

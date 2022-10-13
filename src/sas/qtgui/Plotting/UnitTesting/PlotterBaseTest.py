@@ -1,11 +1,10 @@
 import sys
 import platform
-from unittest.mock import MagicMock
 
 import pytest
 
-import os
-os.environ["MPLBACKEND"] = "qtagg"
+import matplotlib as mpl
+mpl.use("Qt5Agg")
 
 from PyQt5 import QtGui, QtWidgets, QtPrintSupport
 import matplotlib.pyplot as plt
@@ -63,9 +62,9 @@ class PlotterBaseTest:
         with pytest.raises(NotImplementedError):
             plotter.createContextMenu()
 
-    def testClean(self, plotter):
+    def testClean(self, plotter, mocker):
         ''' test the graph cleanup '''
-        plotter.figure.delaxes = MagicMock()
+        mocker.patch.object(plotter.figure, 'delaxes')
         plotter.clean()
         assert plotter.figure.delaxes.called
 
@@ -74,47 +73,47 @@ class PlotterBaseTest:
         with pytest.raises(NotImplementedError):
             plotter.plot()
 
-    def notestOnCloseEvent(self, plotter):
+    def notestOnCloseEvent(self, plotter, mocker):
         ''' test the plotter close behaviour '''
-        PlotHelper.deletePlot = MagicMock()
+        mocker.patch.object(PlotHelper, 'deletePlot')
         plotter.closeEvent(None)
         assert PlotHelper.deletePlot.called
 
-    def notestOnImagePrint(self, plotter):
+    def notestOnImagePrint(self, plotter, mocker):
         ''' test the workspace print '''
-        QtGui.QPainter.end = MagicMock()
-        QtWidgets.QLabel.render = MagicMock()
+        mocker.patch.object(QtGui.QPainter, 'end')
+        mocker.patch.object(QtWidgets.QLabel, 'render')
 
         # First, let's cancel printing
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         plotter.onImagePrint()
         assert not QtGui.QPainter.end.called
         assert not QtWidgets.QLabel.render.called
 
         # Let's print now
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         plotter.onImagePrint()
         assert QtGui.QPainter.end.called
         assert QtWidgets.QLabel.render.called
 
-    def testOnClipboardCopy(self, plotter):
+    def testOnClipboardCopy(self, plotter, mocker):
         ''' test the workspace screen copy '''
-        QtGui.QClipboard.setPixmap = MagicMock()
+        mocker.patch.object(QtGui.QClipboard, 'setPixmap')
         plotter.onClipboardCopy()
         assert QtGui.QClipboard.setPixmap.called
 
-    def testOnGridToggle(self, plotter):
+    def testOnGridToggle(self, plotter, mocker):
         ''' test toggling the grid lines '''
         # Check the toggle
         orig_toggle = plotter.grid_on
         
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
         plotter.onGridToggle()
 
         assert FigureCanvas.draw_idle.called
         assert plotter.grid_on != orig_toggle
 
-    def testDefaultContextMenu(self, plotter):
+    def testDefaultContextMenu(self, plotter, mocker):
         """ Test the right click default menu """
 
         plotter.defaultContextMenu()
@@ -124,7 +123,7 @@ class PlotterBaseTest:
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
         assert QtPrintSupport.QPrintDialog.exec_.called
 
@@ -155,16 +154,16 @@ class PlotterBaseTest:
         #self.assertTrue(isShow)
 
 
-    def testOnWindowsTitle(self, plotter):
+    def testOnWindowsTitle(self, plotter, mocker):
         """ Test changing the plot title"""
         # Mock the modal dialog's response
-        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         plotter.show()
         # Assure the original title is none
         assert plotter.windowTitle() == ""
-        plotter.manager.communicator = MagicMock()
+        mocker.patch.object(plotter.manager, 'communicator')
 
-        WindowTitle.title = MagicMock(return_value="I am a new title")
+        mocker.patch.object(WindowTitle, 'title', return_value="I am a new title")
         # Change the title
         plotter.onWindowsTitle()
 

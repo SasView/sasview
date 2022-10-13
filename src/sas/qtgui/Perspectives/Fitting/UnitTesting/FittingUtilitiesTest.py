@@ -2,8 +2,6 @@ import sys
 
 import pytest
 
-from unittest.mock import MagicMock
-
 from PyQt5 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D

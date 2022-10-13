@@ -3,11 +3,10 @@ import numpy
 
 import pytest
 
-import os
-os.environ["MPLBACKEND"] = "qtagg"
+import matplotlib as mpl
+mpl.use("Qt5Agg")
 
 from PyQt5 import QtGui, QtWidgets
-from unittest.mock import MagicMock
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 

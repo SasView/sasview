@@ -6,8 +6,6 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-from unittest.mock import MagicMock
-
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
 class KiessigCalculatorTest:
@@ -24,16 +22,16 @@ class KiessigCalculatorTest:
         w = None
 
 
-    def testDefaults(self, widget):
+    def testDefaults(self, widget, mocker):
         """Test the GUI in its default state"""
         assert isinstance(widget, QtWidgets.QWidget)
         assert widget.windowTitle() == "Kiessig Thickness Calculator"
         assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
 
-    def testHelp(self, widget):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         widget.manager = QtWidgets.QWidget()
-        widget.manager.showHelp = MagicMock()
+        mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
         assert widget.manager.showHelp.called_once()
         args = widget.manager.showHelp.call_args

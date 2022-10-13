@@ -6,7 +6,6 @@ import pytest
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from unittest.mock import MagicMock
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sasdata.dataloader.loader import Loader
@@ -30,22 +29,22 @@ class SlitSizeCalculatorTest:
         assert widget.windowTitle() == "Slit Size Calculator"
         assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
 
-    def testHelp(self, widget):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         widget._parent = QtWidgets.QWidget()
-        widget._parent.showHelp = MagicMock()
+        mocker.patch.object(widget._parent, 'showHelp', create=True)
         widget.onHelp()
         assert widget._parent.showHelp.called_once()
         args = widget._parent.showHelp.call_args
         assert 'slit_calculator_help.html' in args[0][0]
 
-    def testBrowseButton(self, widget):
+    def testBrowseButton(self, widget, mocker):
         browseButton = widget.browseButton
 
         filename = "beam_profile.DAT"
 
         # Return no files.
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=('',''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=('',''))
 
         # Click on the Browse button
         QTest.mouseClick(browseButton, Qt.LeftButton)
@@ -55,7 +54,7 @@ class SlitSizeCalculatorTest:
         QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
         # Now, return a single file
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename,''))
 
         # Click on the Load button
         QTest.mouseClick(browseButton, Qt.LeftButton)
@@ -79,14 +78,14 @@ class SlitSizeCalculatorTest:
         assert round(abs(float(widget.slit_length_out.text())-5.5858/2), 3) == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testWrongInput(self, widget):
+    def testWrongInput(self, widget, mocker):
         """ Test on wrong input data """
 
         filename = "Dec07031.ASC"
         loader = Loader()
         data = loader.load(filename)[0]
 
-        logging.error = MagicMock()
+        mocker.patch.object(logging, 'error')
 
         widget.calculateSlitSize(data)
 

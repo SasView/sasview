@@ -1,16 +1,15 @@
 import sys
 import platform
+from unittest.mock import patch
 
 import pytest
 
-import os
-os.environ["MPLBACKEND"] = "qtagg"
+import matplotlib as mpl
+mpl.use("Qt5Agg")
 
 from PyQt5 import QtGui, QtWidgets, QtPrintSupport
 from PyQt5 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from unittest.mock import MagicMock
-from unittest.mock import patch
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -27,6 +26,7 @@ class PlotterTest:
     @pytest.fixture(autouse=True)
     def plotter(self, qapp):
         '''Create/Destroy the Plotter1D'''
+
         p = Plotter.Plotter(None, quickplot=True)
         self.data = Data1D(x=[1.0, 2.0, 3.0],
                            y=[10.0, 11.0, 12.0],
@@ -48,11 +48,11 @@ class PlotterTest:
         assert plotter.xLabel == ""
         assert plotter.yLabel == ""
 
-    def testPlotWithErrors(self, plotter):
+    def testPlotWithErrors(self, plotter, mocker):
         """ Look at the plotting with error bars"""
         plotter.data = self.data
         plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.plot(hide_error=False)
 
@@ -61,11 +61,11 @@ class PlotterTest:
 
         plotter.figure.clf()
 
-    def testPlotWithoutErrors(self, plotter):
+    def testPlotWithoutErrors(self, plotter, mocker):
         """ Look at the plotting without error bars"""
         plotter.data = self.data
         plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.plot(hide_error=True)
 
@@ -73,7 +73,7 @@ class PlotterTest:
         assert FigureCanvas.draw_idle.called
         plotter.figure.clf()
 
-    def testPlotWithSesans(self, plotter):
+    def testPlotWithSesans(self, plotter, mocker):
         """ Ensure that Sesans data is plotted in linear cooredinates"""
         data = Data1D(x=[1.0, 2.0, 3.0],
                       y=[-10.0, -11.0, -12.0],
@@ -86,7 +86,7 @@ class PlotterTest:
 
         plotter.data = data
         plotter.show()
-        FigureCanvas.draw_idle = MagicMock()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
 
         plotter.plot(hide_error=True)
 
@@ -95,7 +95,7 @@ class PlotterTest:
         #self.assertEqual(plotter.data[0].ytransform, "y")
         assert FigureCanvas.draw_idle.called
 
-    def testCreateContextMenuQuick(self, plotter):
+    def testCreateContextMenuQuick(self, plotter, mocker):
         """ Test the right click menu """
         plotter.createContextMenuQuick()
         actions = plotter.contextMenu.actions()
@@ -103,7 +103,7 @@ class PlotterTest:
 
         # Trigger Print Image and make sure the method is called
         assert actions[1].text() == "Print Image"
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
         assert QtPrintSupport.QPrintDialog.exec_.called
 
@@ -112,13 +112,13 @@ class PlotterTest:
 
         # Trigger Toggle Grid and make sure the method is called
         assert actions[4].text() == "Toggle Grid On/Off"
-        plotter.ax.grid = MagicMock()
+        mocker.patch.object(plotter.ax, 'grid')
         actions[4].trigger()
         assert plotter.ax.grid.called
 
         # Trigger Change Scale and make sure the method is called
         assert actions[6].text() == "Change Scale"
-        plotter.properties.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        mocker.patch.object(plotter.properties, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[6].trigger()
         assert plotter.properties.exec_.called
 
@@ -152,7 +152,7 @@ class PlotterTest:
         assert len(plotter.ax.collections) == 1
         plotter.figure.clf()
 
-    def testAddText(self, plotter):
+    def testAddText(self, plotter, mocker):
         """ Checks the functionality of adding text to graph """
 
         plotter.plot(self.data)
@@ -165,10 +165,10 @@ class PlotterTest:
         plotter.addText.textEdit.setText(test_text)
 
         # Return the requested font parameters
-        plotter.addText.font = MagicMock(return_value = test_font)
-        plotter.addText.color = MagicMock(return_value = test_color)
+        mocker.patch.object(plotter.addText, 'font', return_value=test_font)
+        mocker.patch.object(plotter.addText, 'color', return_value=test_color)
         # Return OK from the dialog
-        plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
+        mocker.patch.object(plotter.addText, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         # Add text to graph
         plotter.onAddText()
         plotter.show()
@@ -180,7 +180,7 @@ class PlotterTest:
         assert plotter.textList[0].get_fontproperties().get_size() == 16
         plotter.figure.clf()
 
-    def testOnRemoveText(self, plotter):
+    def testOnRemoveText(self, plotter, mocker):
         """ Cheks if annotations can be removed from the graph """
 
         # Add some text
@@ -188,7 +188,7 @@ class PlotterTest:
         test_text = "Safety instructions"
         plotter.addText.textEdit.setText(test_text)
         # Return OK from the dialog
-        plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
+        mocker.patch.object(plotter.addText, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         # Add text to graph
         plotter.x_click = 1.0
         plotter.y_click = 5.0
@@ -208,15 +208,15 @@ class PlotterTest:
         assert plotter.textList == []
         plotter.figure.clf()
 
-    def testOnSetGraphRange(self, plotter):
+    def testOnSetGraphRange(self, plotter, mocker):
         """ Cheks if the graph can be resized for range """
         new_x = (1,2)
         new_y = (10,11)
         plotter.plot(self.data)
         plotter.show()
-        plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
-        plotter.setRange.xrange = MagicMock(return_value = new_x)
-        plotter.setRange.yrange = MagicMock(return_value = new_y)
+        mocker.patch.object(plotter.setRange, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(plotter.setRange, 'xrange', return_value=new_x)
+        mocker.patch.object(plotter.setRange, 'yrange', return_value=new_y)
 
         # Call the tested method
         plotter.onSetGraphRange()
@@ -225,7 +225,7 @@ class PlotterTest:
         assert plotter.ax.get_ylim() == new_y
         plotter.figure.clf()
 
-    def testOnResetGraphRange(self, plotter):
+    def testOnResetGraphRange(self, plotter, mocker):
         """ Cheks if the graph can be reset after resizing for range """
         # New values
         new_x = (1,2)
@@ -235,9 +235,9 @@ class PlotterTest:
         plotter.show()
 
         # mock setRange methods
-        plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
-        plotter.setRange.xrange = MagicMock(return_value = new_x)
-        plotter.setRange.yrange = MagicMock(return_value = new_y)
+        mocker.patch.object(plotter.setRange, 'exec_', returnvalue=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(plotter.setRange, 'xrange', returnvalue=new_x)
+        mocker.patch.object(plotter.setRange, 'yrange', returnvalue=new_y)
 
         # Change the axes range
         plotter.onSetGraphRange()
@@ -250,11 +250,11 @@ class PlotterTest:
         assert plotter.ax.get_ylim() != new_y
         plotter.figure.clf()
 
-    def testOnLinearFit(self, plotter):
+    def testOnLinearFit(self, plotter, mocker):
         """ Checks the response to LinearFit call """
         plotter.plot(self.data)
         plotter.show()
-        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
 
         # Just this one plot
         assert len(list(plotter.plot_dict.keys())) == 1
@@ -264,7 +264,7 @@ class PlotterTest:
         assert QtWidgets.QDialog.exec_.called
         plotter.figure.clf()
 
-    def testOnRemovePlot(self, plotter):
+    def testOnRemovePlot(self, plotter, mocker):
         """ Assure plots get removed when requested """
         # Add two plots
         plotter.show()
@@ -289,7 +289,7 @@ class PlotterTest:
         # Assure we have two sets
         assert len(list(plotter.plot_dict.keys())) == 1
 
-        plotter.manager = MagicMock()
+        mocker.patch.object(plotter, 'manager')
 
         # Delete the remaining set
         plotter.onRemovePlot('Test name')
@@ -361,7 +361,7 @@ class PlotterTest:
         assert plotter.plot_dict['Test name 2'].hide_error == (not error_status)
         plotter.figure.clf()
 
-    def testOnFitDisplay(self, plotter):
+    def testOnFitDisplay(self, plotter, mocker):
         """ Test the fit line display on the chart """
         assert isinstance(plotter.fit_result, Data1D)
         assert plotter.fit_result.symbol == 17
@@ -370,7 +370,7 @@ class PlotterTest:
         # fudge some init data
         fit_data = [[0.0,0.0], [5.0,5.0]]
         # Call the method
-        plotter.plot = MagicMock()
+        mocker.patch.object(plotter, 'plot')
         plotter.onFitDisplay(fit_data)
         assert plotter.plot.called
         # Look at arguments passed to .plot()
@@ -419,7 +419,7 @@ class PlotterTest:
         assert plotter.plot_dict['Test name 2'].hide_error == error_status
         plotter.figure.clf()
 
-    def notestOnModifyPlot(self, plotter):
+    def notestOnModifyPlot(self, plotter, mocker):
         """ Test the functionality for changing plot properties """
         # Prepare new data
         data2 = Data1D(x=[1.0, 2.0, 3.0],
@@ -437,13 +437,13 @@ class PlotterTest:
 
         with patch('sas.qtgui.Plotting.PlotProperties.PlotProperties') as mock:
             instance = mock.return_value
-            QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
-            instance.symbol.return_value = 7
+            mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+            instance.symbol.returnvalue=7
 
             plotter.onModifyPlot(2)
         plotter.figure.clf()
 
-    def testOnToggleLegend(self, plotter):
+    def testOnToggleLegend(self, plotter, mocker):
         """
         Make sure Legend can be switched on/off
         """
@@ -481,7 +481,7 @@ class PlotterTest:
         plotter.showLegend = False
 
         # see that the legend setting is not done
-        plotter.legend.set_visible = MagicMock()
+        mocker.patch.object(plotter.legend, 'set_visible')
 
         plotter.onToggleLegend()
         plotter.legend.set_visible.assert_not_called()

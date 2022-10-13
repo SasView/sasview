@@ -10,7 +10,6 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 from twisted.internet import threads
@@ -40,7 +39,7 @@ class DataOperationUtilityTest:
         w = None
 
 
-    def testDefaults(self, widget):
+    def testDefaults(self, widget, mocker):
         """Test the GUI in its default state"""
 
         assert isinstance(widget, QtWidgets.QDialog)
@@ -112,14 +111,14 @@ class DataOperationUtilityTest:
         assert not widget.data2OK
         assert not widget.data1OK
 
-        widget.newPlot = MagicMock()
+        mocker.patch.object(widget, 'newPlot')
         assert widget.newPlot.called_once()
         assert widget.newPlot.called_once()
         assert widget.newPlot.called_once()
 
-    def testHelp(self, widget):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        widget.manager.showHelp = MagicMock()
+        mocker.patch.object(widget.manager, 'showHelp', create=True)
         widget.onHelp()
         assert widget.manager.showHelp.called_once()
         args = widget.manager.showHelp.call_args
@@ -138,7 +137,7 @@ class DataOperationUtilityTest:
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testOnCompute(self, widget):
+    def testOnCompute(self, widget, mocker):
         """ Test onCompute function """
 
         # define the data
@@ -147,10 +146,10 @@ class DataOperationUtilityTest:
         widget.data2 = 1
 
         # mock update of plot
-        widget.updatePlot = MagicMock()
+        mocker.patch.object(widget, 'updatePlot')
 
         # enable onCompute to run (check on data type)
-        widget.onCheckChosenData = MagicMock(return_value=True)
+        mocker.patch.object(widget, 'onCheckChosenData', return_value=True)
 
         # run onCompute
         widget.onCompute()
@@ -162,11 +161,11 @@ class DataOperationUtilityTest:
         assert widget.output.y.tolist() == [12.0, 13.0, 14.0]
         assert widget.updatePlot.called_once()
 
-        widget.onPrepareOutputData = MagicMock()
+        mocker.patch.object(widget, 'onPrepareOutputData')
 
         assert widget.onPrepareOutputData.called_once()
 
-    def testOnSelectData1(self, widget):
+    def testOnSelectData1(self, widget, mocker):
         """ Test ComboBox for Data1 """
         # Case 1: no data loaded
         widget.onSelectData1()
@@ -175,9 +174,8 @@ class DataOperationUtilityTest:
         assert not widget.cmdCompute.isEnabled()
 
         # Case 2: data1 is a datafile
-        widget.filenames = MagicMock(
-            return_value={'datafile1': 'details'})
-        widget.updatePlot = MagicMock()
+        mocker.patch.object(widget, 'filenames', return_value={'datafile1': 'details'})
+        mocker.patch.object(widget, 'updatePlot')
 
         widget.cbData1.addItems(['Select Data', 'datafile1'])
         widget.cbData1.setCurrentIndex(widget.cbData1.count()-1)
@@ -185,9 +183,9 @@ class DataOperationUtilityTest:
         # Compute button disabled if data2OK == False
         assert widget.cmdCompute.isEnabled() == widget.data2OK
 
-    def testOnSelectData2(self, widget):
+    def testOnSelectData2(self, widget, mocker):
         """ Test ComboBox for Data2 """
-        widget.updatePlot = MagicMock()
+        mocker.patch.object(widget, 'updatePlot', )
         # Case 1: no data loaded
         widget.onSelectData2()
         assert widget.data2 is None
@@ -215,8 +213,7 @@ class DataOperationUtilityTest:
         assert widget.updatePlot.called_once()
 
         # Case 4: when Data2 is a file
-        widget.filenames = MagicMock(
-            return_value={'datafile2': 'details'})
+        mocker.patch.object(widget, 'filenames', return_value={'datafile2': 'details'})
         widget.cbData2.addItems(['Select Data', 'Number', 'datafile2'])
         widget.cbData2.setCurrentIndex(widget.cbData2.count() - 1)
         assert widget.updatePlot.called_once()

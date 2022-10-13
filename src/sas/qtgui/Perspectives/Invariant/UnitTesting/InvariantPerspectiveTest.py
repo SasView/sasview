@@ -27,7 +27,7 @@ class InvariantPerspectiveTest:
     """Test the Invariant Perspective Window"""
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the Invariant Perspective Window'''
 
         class MainWindow(object):
@@ -94,7 +94,7 @@ class InvariantPerspectiveTest:
                 0.169998, 0.182096, 0.19544, 0.208226, 0.20631, 0.211599, 0.261127, 0.248377, 0.268117, 0.248487,
                 0.30063, 0.311092, 0.307792, 0.346191, 0.433197, 0.425931, 0.432325, 0.415476, 0.458327, 0.501942,
                 0.526654, 0.671965, 0.605943, 0.772724])
-        GuiUtils.dataFromItem = MagicMock(return_value=self.data)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=self.data)
         self.fakeData = QtGui.QStandardItem("test")
 
         yield w
@@ -197,16 +197,16 @@ class InvariantPerspectiveTest:
         assert all(v is False for v in false_list)
         assert all(v is True for v in true_list)
 
-    def testOnCalculate(self, widget):
+    def testOnCalculate(self, widget, mocker):
         """ Test onCompute function """
-        widget.calculateInvariant = MagicMock()
+        mocker.patch.object(widget, 'calculateInvariant')
         widget.cmdCalculate.setEnabled(True)
         QTest.mouseClick(widget.cmdCalculate, Qt.LeftButton)
         assert widget.calculateInvariant.called_once()
 
-    def testCalculateInvariant(self, widget):
+    def testCalculateInvariant(self, widget, mocker):
         """ """
-        threads.deferToThread = MagicMock()
+        mocker.patch.object(threads, 'deferToThread')
         widget.calculateInvariant()
         assert threads.deferToThread.called
         assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'calculateThread'
@@ -235,12 +235,12 @@ class InvariantPerspectiveTest:
         assert widget._high_power_value == \
                          float(widget.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
 
-    def testCheckLength(self, widget):
+    def testCheckLength(self, widget, mocker):
         """
         Test validator for number of points for extrapolation
          Error if it is larger than the distribution length
         """
-        logging.warning = MagicMock()
+        mocker.patch.object(logging, 'warning')
         widget.txtNptsLowQ.setEnabled(True)
 
         widget.setData([self.fakeData])

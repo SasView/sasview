@@ -3,7 +3,6 @@ import sys
 import pytest
 
 import numpy
-from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingLogic

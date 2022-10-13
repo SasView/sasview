@@ -6,7 +6,6 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtGui import *
 from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
@@ -93,13 +92,13 @@ class MainWindowTest:
         currentPers.setCurrentIndex(currentPers.findText(PR))
         check_after_load(PR)
 
-    def testExit(self, qapp):
+    def testExit(self, qapp, mocker):
         """
         Test that the custom exit method is called on shutdown
         """
         # Must mask sys.exit, otherwise the whole testing process stops.
-        sys.exit = MagicMock()
-        QtWidgets.QMessageBox.question = MagicMock(return_value=QtWidgets.QMessageBox.Yes)
+        mocker.patch.object(sys, 'exit')
+        mocker.patch.object(QtWidgets.QMessageBox, 'question', return_value=QtWidgets.QMessageBox.Yes)
 
         # Open, then close the main window
         screen_resolution = QtCore.QRect(0, 0, 640, 480)

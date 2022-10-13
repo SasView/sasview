@@ -3,8 +3,6 @@ import sys
 
 import pytest
 
-from unittest.mock import MagicMock
-
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
@@ -20,7 +18,7 @@ class CorfuncTest:
     '''Test the Corfunc Interface'''
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the CorfuncWindow'''
         class MainWindow(object):
             def __init__(self, widget):
@@ -39,7 +37,7 @@ class CorfuncTest:
         w = CorfuncWindow(dummy_manager())
         reference_data1 = Data1D(x=[0.1, 0.2, 0.3, 0.4, 0.5], y=[1000, 1000, 100, 10, 1], dy=[0.0, 0.0, 0.0, 0.0, 0.0])
         reference_data1.filename = "Test A"
-        GuiUtils.dataFromItem = MagicMock(return_value=reference_data1)
+        mocker.patch.object(GuiUtils, 'dataFromItem', return_value=reference_data1)
         self.fakeData = QtGui.QStandardItem("test")
 
         yield w
@@ -72,9 +70,9 @@ class CorfuncTest:
         assert widget.txtLocalCrystal.text() == '0'
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testOnCalculate(self, widget):
+    def testOnCalculate(self, widget, mocker):
         """ Test onCompute function """
-        widget.calculate_background = MagicMock()
+        mocker.patch.object(widget, 'calculate_background')
         widget.cmdCalculateBg.setEnabled(True)
         QTest.mouseClick(widget.cmdCalculateBg, QtCore.Qt.LeftButton)
         assert widget.calculate_background.called_once()
@@ -89,7 +87,7 @@ class CorfuncTest:
         except OSError:
             assert False, "ISIS_98929.txt does not exist"
         f = Loader().load(filename)
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename, ''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename, ''))
 
         #self.assertEqual(widget.txtFilename.text(), filename)
 

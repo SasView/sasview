@@ -1,7 +1,5 @@
 import pytest
 
-from unittest.mock import MagicMock
-
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
@@ -14,7 +12,7 @@ class InversionTest:
     """ Test the Inversion Perspective GUI """
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the InversionWindow'''
 
         class dummy_manager:
@@ -25,9 +23,9 @@ class InversionTest:
 
         w = InversionWindow(parent=dummy_manager())
         w._parent = QtWidgets.QMainWindow()
-        w.showBatchOutput = MagicMock()
-        w.startThread = MagicMock()
-        w.startThreadAll = MagicMock()
+        mocker.patch.object(w, 'showBatchOutput')
+        mocker.patch.object(w, 'startThread')
+        mocker.patch.object(w, 'startThreadAll')
         w.show()
 
         self.fakeData1 = GuiUtils.HashableStandardItem("A")
