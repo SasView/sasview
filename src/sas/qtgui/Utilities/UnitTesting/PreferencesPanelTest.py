@@ -15,22 +15,6 @@ class PreferencesPanelTest(unittest.TestCase):
             def __init__(self):
                 self.path = None
 
-            def writeCustomConfig(self, config):
-                """
-                Write custom configuration
-                """
-                path = './custom_config.py'
-                # Just clobber the file - we already have its content read in
-                with open(path, 'w') as out_f:
-                    self.path = os.path.abspath(path)
-                    out_f.write("#Application appearance custom configuration\n")
-                    for key, item in config.__dict__.items():
-                        if key[:2] == "__":
-                            continue
-                        if isinstance(item, str):
-                            item = '"' + item + '"'
-                        out_f.write("%s = %s\n" % (key, str(item)))
-
             @staticmethod
             def showHelp(location):
                 """Simulate a help window"""

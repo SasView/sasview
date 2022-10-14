@@ -3,7 +3,7 @@ import logging
 from PyQt5.QtWidgets import QComboBox, QDialog, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
 from typing import Optional, Any, List, Union, Callable
 
-from sas import get_custom_config
+from sas.system.config.config import config
 from sas.qtgui.Utilities.UI.PreferencesUI import Ui_preferencesUI
 
 logger = logging.getLogger(__name__)
@@ -14,8 +14,7 @@ def set_config_value(attr: str, value: Any):
     :param attr: The configuration attribute that will be set
     :param value: The value the attribute will be set to. This could be a str, int, bool, a class instance, or any other
     """
-    custom_config = get_custom_config()
-    setattr(custom_config, attr, value)
+    setattr(config, attr, value)
 
 
 def get_config_value(attr: str, default: Optional[Any] = None) -> Any:
@@ -23,8 +22,7 @@ def get_config_value(attr: str, default: Optional[Any] = None) -> Any:
     :param attr: The configuration attribute that will be returned
     :param default: The assumed value, if the attribute cannot be found
     """
-    custom_config = get_custom_config()
-    return getattr(custom_config, attr, default) if hasattr(custom_config, attr) else default
+    return getattr(config, attr, default) if hasattr(config, attr) else default
 
 
 def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_item: Optional[str] = None):
@@ -89,8 +87,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def close(self):
         """Save the configuration values when the preferences window is closed"""
-        if hasattr(self.parent, 'guiManager'):
-            self.parent.guiManager.writeCustomConfig(get_custom_config())
+        config.save()
         super(PreferencesPanel, self).close()
 
     def addWidget(self, widget: QWidget):
