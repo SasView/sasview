@@ -96,7 +96,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
                 else:
                     # filenames without titles by removing time.time()
-                    new_title = re.sub('\d{10}\.\d{2}', '', str(key_id))
+                    new_title = re.sub(r'\d{10}\.\d{2}', '', str(key_id))
                     self.list_data_items.append(new_title)
                     list_datafiles.append(new_title)
 
