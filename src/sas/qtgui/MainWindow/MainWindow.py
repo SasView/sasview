@@ -91,7 +91,7 @@ def run_sasview():
     splash = SplashScreen()
     splash.show()
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app.setStyleSheet("* {font-size: 11pt}")
+    app.setStyleSheet("* {font-size: 9pt}")
     # Main application style.
     #app.setStyle('Fusion')
 
