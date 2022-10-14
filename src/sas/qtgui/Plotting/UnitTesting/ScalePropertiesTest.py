@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 # Local
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
@@ -12,7 +12,7 @@ class ScalePropertiesTest:
     '''Test the ScaleProperties'''
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
-        '''Create/Destroy the AboutBox'''
+        '''Create/Destroy the ScaleProperties'''
         w = ScaleProperties(None)
         yield w
         w.close()
