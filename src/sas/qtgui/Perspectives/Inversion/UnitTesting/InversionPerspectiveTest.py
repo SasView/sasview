@@ -1,5 +1,8 @@
 import pytest
 
+import matplotlib as mpl
+mpl.use("Qt5Agg")
+
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
@@ -291,7 +294,7 @@ class InversionTest:
         assert widget._calculator.alpha == 12.0
         self.removeAllData(widget)
 
-    @pytest.mark.xfail(reason="2022-09 already broken - opens tk not qt mpl backend")
+    @pytest.mark.skip(reason="2022-09 already broken - generates numba crash")
     def testOpenExplorerWindow(self, widget):
         """ open Dx window """
         assert widget.dmaxWindow is None
@@ -301,7 +304,7 @@ class InversionTest:
         assert widget.dmaxWindow.isVisible()
         assert widget.dmaxWindow.windowTitle() == "Dmax Explorer"
 
-    @pytest.mark.xfail(reason="2022-09 already broken - flaky?")
+    @pytest.mark.skip(reason="2022-09 already broken - generates numba crash")
     def testSerialization(self, widget):
         """ Serialization routines """
         assert hasattr(widget, 'isSerializable')
