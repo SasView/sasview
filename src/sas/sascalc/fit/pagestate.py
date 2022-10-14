@@ -28,7 +28,7 @@ from lxml import etree
 from sasmodels import convert
 import sasmodels.weights
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 import sasdata.dataloader
 from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader

@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from collections import defaultdict
+from typing import Any, Tuple
 
 import copy
 import logging
@@ -20,12 +21,11 @@ from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
+from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.sascalc.fit.pagestate import PageState
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -65,11 +65,10 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
 from sasmodels.sasview_model import SasviewModel
 if not hasattr(SasviewModel, 'get_weights'):
-    def get_weights(self, name):
+    def get_weights(self: Any, name: str) -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
         """
-        # type: (str) -> Tuple(np.ndarray, np.ndarray)
         _, x, w = self._get_weights(self._model_info.parameters[name])
         return x, w
 
@@ -1664,7 +1663,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         batch_inputs = {}
         batch_outputs = {}
         #---------------------------------
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             handler = None
             updater = None
         else:
@@ -1696,7 +1695,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                   completefn=completefn,
                                   reset_flag=self.is_chain_fitting)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # start the trhrhread with twisted
             calc_thread = threads.deferToThread(self.calc_fit.compute)
             calc_thread.addCallback(completefn)
@@ -2900,7 +2899,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                exception_handler=self.calcException,
                                                source=None)
         if use_threads:
-            if LocalConfig.USING_TWISTED:
+            if config.USING_TWISTED:
                 # start the thread with twisted
                 thread = threads.deferToThread(calc_thread.compute)
                 thread.addCallback(completefn)
@@ -3864,7 +3863,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Gather current fitting parameters as dict
         """
-        param_list = self.getFitParameters()
+
         param_list = self.getFitPage()
         param_list += self.getFitModel()
 
@@ -3878,60 +3877,95 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 line_dict[content[0]] = content[1:]
         return line_dict
 
-    def onCopyToClipboard(self, format=None):
+    def clipboard_copy(self):
+        copy_data = self.full_copy_data()
+        self.set_clipboard(copy_data)
+
+    def clipboard_paste(self):
         """
-        Copy current fitting parameters into the clipboard
-        using requested formatting:
-        plain, excel, latex
+        Use the clipboard to update fit state
         """
+        # Check if the clipboard contains right stuff
+        cb = QtWidgets.QApplication.clipboard()
+        cb_text = cb.text()
+
+        lines = cb_text.split(':')
+        if lines[0] != 'sasview_parameter_values':
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            msgbox.exec_()
+            return
+
+        # put the text into dictionary
+        line_dict = {}
+        for line in lines[1:]:
+            content = line.split(',')
+            if len(content) > 1 and content[0] != "tab_name":
+                line_dict[content[0]] = content[1:]
+
+        self.updatePageWithParameters(line_dict)
+
+    def clipboard_copy_excel(self):
+        self.set_clipboard(self.excel_copy_data())
+
+    def clipboard_copy_latex(self):
+        self.set_clipboard(self.latex_copy_data())
+
+    def full_copy_data(self):
+        """ Data destined for the clipboard when copy clicked"""
+        param_list = self.getFitPage()
+        param_list += self.getFitModel()
+        return FittingUtilities.formatParameters(param_list)
+
+    def excel_copy_data(self):
+        """ Excel format data destined for the clipboard"""
         param_list = self.getFitParameters()
-        if format=="":
-            param_list = self.getFitPage()
-            param_list += self.getFitModel()
-            formatted_output = FittingUtilities.formatParameters(param_list)
-        elif format == "Excel":
-            formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
-        elif format == "Latex":
-            formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
-        elif format == "Save":
-            Text_output = FittingUtilities.formatParameters(param_list, False)
-            Excel_output = FittingUtilities.formatParametersExcel(param_list[1:])
-            Latex_output = FittingUtilities.formatParametersLatex(param_list[1:])
+        return FittingUtilities.formatParametersExcel(param_list[1:])
+
+    def latex_copy_data(self):
+        """ Latex format data destined for the clipboard"""
+        param_list = self.getFitParameters()
+        return FittingUtilities.formatParametersLatex(param_list[1:])
+
+    def save_parameters(self):
+        """ Save parameters to a file"""
+        param_list = self.getFitParameters()
+
+        save_dialog = QtWidgets.QFileDialog()
+        save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        kwargs = {
+            'parent': self,
+            'caption': 'Save Project',
+            'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
+            'options': QtWidgets.QFileDialog.DontUseNativeDialog
+        }
+        file_path = save_dialog.getSaveFileName(**kwargs)
+        filename = file_path[0]
+
+        if not filename:
+            return
+        if file_path[1] == 'Text (*.txt)':
+            save_data = FittingUtilities.formatParameters(param_list, line_sep="\n")
+            filename = '.'.join((filename, 'txt'))
+        elif file_path[1] == 'Excel (*.xls)':
+            save_data = FittingUtilities.formatParametersExcel(param_list[1:])
+            filename = '.'.join((filename, 'xls'))
+        elif file_path[1] == 'Latex (*.log)':
+            save_data = FittingUtilities.formatParametersLatex(param_list[1:])
+            filename = '.'.join((filename, 'log'))
         else:
-            raise AttributeError("Bad parameter output format specifier.")
+            raise ValueError(f"Unknown File Format {file_path[1]}")
 
-        # Dump formatted_output to the clipboard
+        with open(filename, 'w') as file:
+            file.write(save_data)
 
-
-        if format == "Save":
-            save_dialog = QtWidgets.QFileDialog()
-            save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-            kwargs = {
-                'parent': self,
-                'caption': 'Save Project',
-                'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
-                'options': QtWidgets.QFileDialog.DontUseNativeDialog
-            }
-            file_path = save_dialog.getSaveFileName(**kwargs)
-            filename = file_path[0]
-            if not filename:
-                return
-            if file_path[1] == 'Text (*.txt)':
-                Type_output = Text_output
-                filename = '.'.join((filename, 'txt'))
-            elif file_path[1] == 'Excel (*.xls)':
-                Type_output = Excel_output
-                filename = '.'.join((filename, 'xls'))
-            elif file_path[1] == 'Latex (*.log)':
-                Type_output = Latex_output
-                filename = '.'.join((filename, 'log'))
-
-            file_open = open(filename, 'w')
-            with file_open:
-                file_open.write(Type_output)
-        else:
-            cb = QtWidgets.QApplication.clipboard()
-            cb.setText(formatted_output)
+    def set_clipboard(self, data: str):
+        """ Set the data in the clipboard """
+        cb = QtWidgets.QApplication.clipboard()
+        cb.setText(data)
 
 
     def getFitModel(self):
@@ -4113,33 +4147,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_list.append(['multiplicity', str(self.kernel_module.multiplicity)])
 
         return param_list
-
-    def onParameterPaste(self):
-        """
-        Use the clipboard to update fit state
-        """
-        # Check if the clipboard contains right stuff
-        cb = QtWidgets.QApplication.clipboard()
-        cb_text = cb.text()
-
-        lines = cb_text.split(':')
-        if lines[0] != 'sasview_parameter_values':
-            msg = "Clipboard content is incompatible with the Fit Page."
-            msgbox = QtWidgets.QMessageBox(self)
-            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
-            msgbox.setText(msg)
-            msgbox.setWindowTitle("Clipboard")
-            retval = msgbox.exec_()
-            return
-
-        # put the text into dictionary
-        line_dict = {}
-        for line in lines[1:]:
-            content = line.split(',')
-            if len(content) > 1 and content[0] != "tab_name":
-                line_dict[content[0]] = content[1:]
-
-        self.updatePageWithParameters(line_dict)
 
     def createPageForParameters(self, line_dict):
         """

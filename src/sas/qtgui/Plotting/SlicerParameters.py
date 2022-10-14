@@ -21,6 +21,7 @@ from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
+from sas import config
 
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
@@ -44,7 +45,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
-        self.save_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.save_location = config.DEFAULT_OPEN_FOLDER
         self.communicator = communicator
 
         # Initially, Apply is disabled

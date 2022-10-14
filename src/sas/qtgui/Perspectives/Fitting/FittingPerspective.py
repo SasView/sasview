@@ -73,12 +73,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
-        self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
-        self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
-        self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
-        self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
-        self.communicate.SaveFitParamsSignal.connect(self.onParamSave)
-
         # Perspective window not allowed to close by default
         self._allow_close = False
 
@@ -119,17 +113,25 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         self._allow_close = value
 
-    def onParamCopy(self):
-        self.currentTab.onCopyToClipboard("")
+    def clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy()
 
-    def onParamPaste(self):
-        self.currentTab.onParameterPaste()
+    def clipboard_paste(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_paste()
 
-    def onExcelCopy(self):
-        self.currentTab.onCopyToClipboard("Excel")
+    def excel_clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy_excel()
 
-    def onLatexCopy(self):
-        self.currentTab.onCopyToClipboard("Latex")
+    def latex_clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy_latex()
+
+    def save_parameters(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.save_parameters()
 
     def serializeAll(self):
         return self.serializeAllFitpage()
@@ -218,9 +220,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
                                                constraint_param[1]))
-
-    def onParamSave(self):
-        self.currentTab.onCopyToClipboard("Save")
 
     def closeEvent(self, event):
         """
@@ -586,3 +585,18 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def supports_fitting_menu(self) -> bool:
         return True
 
+    @property
+    def supports_copy(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_excel(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_latex(self) -> bool:
+        return True
+
+    @property
+    def supports_paste(self) -> bool:
+        return True
