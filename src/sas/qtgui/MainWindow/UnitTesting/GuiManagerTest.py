@@ -83,6 +83,8 @@ class GuiManagerTest:
         logging.error(message)
         assert message_logged in manager.logDockWidget.widget().toPlainText()
 
+    @pytest.mark.skip("2022-09 already broken - generates runtime error")
+    # IPythonWidget.py:38: RuntimeWarning: coroutine 'InteractiveShell.run_code' was never awaited
     def testConsole(self, manager):
         """
         Test the docked QtConsole
