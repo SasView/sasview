@@ -5,7 +5,6 @@ import re
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
@@ -19,6 +18,8 @@ from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+
+from sas import config
 
 logger = logging.getLogger(__name__)
 
@@ -348,7 +349,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Create the fitting thread, based on the fitter
         completefn = self.onBatchFitComplete if self.currentType=='BatchPage' else self.onFitComplete
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             handler = None
             updater = None
         else:
@@ -373,7 +374,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                                   completefn=completefn,
                                   reset_flag=self.is_chain_fitting)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # start the trhrhread with twisted
             self.calc_fit = threads.deferToThread(self.calc_fit.compute)
             self.calc_fit.addCallback(completefn)

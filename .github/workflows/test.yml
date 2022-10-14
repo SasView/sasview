@@ -107,7 +107,7 @@ jobs:
       run: |
         # SET SASVIEW GITHASH
         githash=$( git rev-parse HEAD )
-        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
+        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/system/version.py
         # BUILD SASVIEW
         python setup.py clean
         python setup.py build
