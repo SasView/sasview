@@ -5,7 +5,6 @@ import pytest
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
-from unittest.mock import MagicMock
 
 # SV imports
 from sasdata.dataloader.loader import Loader
@@ -210,7 +209,7 @@ class GuiUtilsTest:
         assert p_file in item.child(3).text()
         assert "Process" in item.child(4).text()
 
-    def testOpenLink(self):
+    def testOpenLink(self, mocker):
         """
         Opening a link in the external browser
         """
@@ -222,7 +221,7 @@ class GuiUtilsTest:
         bad_url2 = QtGui.QStandardItem()
         bad_url3 = r"poop;//**I.am.a.!bad@url"
 
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
         openLink(good_url1)
         openLink(good_url2)
         openLink(good_url3)
@@ -321,7 +320,7 @@ class GuiUtilsTest:
         if os.path.isfile(save_path):
             os.remove(save_path)
 
-    def testSaveAnyData(self, qapp, caplog):
+    def testSaveAnyData(self, qapp, caplog, mocker):
         """
         Test the generic GUIUtils.saveAnyData method
         """
@@ -331,7 +330,7 @@ class GuiUtilsTest:
         # Test the .txt format
         file_name = "test123_out"
         file_name_save = "test123_out.txt"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.txt"
         self.genericFileSaveTest(data, file_name, file_name_save, "ASCII", caplog=caplog)
 
@@ -343,11 +342,11 @@ class GuiUtilsTest:
         # Test the .txt format
         file_name = "test123_out"
         file_name_save = "test123_out.dat"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.dat"
         self.genericFileSaveTest(data, file_name, file_name_save, "IGOR", caplog=caplog)
 
-    def testSaveData1D(self, qapp, caplog):
+    def testSaveData1D(self, qapp, caplog, mocker):
         """
         Test the 1D file save method
         """
@@ -356,23 +355,23 @@ class GuiUtilsTest:
 
         # Test the .txt format
         file_name = "test123_out.txt"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.txt"
         self.genericFileSaveTest(data, file_name)
 
         # Test the .xml format
         file_name = "test123_out.xml"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.xml"
         self.genericFileSaveTest(data, file_name)
 
         # Test the wrong format
         file_name = "test123_out.mp3"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.mp3"
         self.genericFileSaveTest(data, file_name, file_name, "ASCII", "1D", caplog=caplog)
 
-    def testSaveData2D(self, qapp, caplog):
+    def testSaveData2D(self, qapp, caplog, mocker):
         """
         Test the 1D file save method
         """
@@ -383,13 +382,13 @@ class GuiUtilsTest:
 
         # Test the .txt format
         file_name = "test123_out.dat"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.dat"
         self.genericFileSaveTest(data, file_name)
 
         # Test the wrong format
         file_name = "test123_out.mp3"
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=(file_name,''))
         data.filename = "test123.mp3"
         self.genericFileSaveTest(data, file_name, file_name, "IGOR", "2D", caplog=caplog)
 

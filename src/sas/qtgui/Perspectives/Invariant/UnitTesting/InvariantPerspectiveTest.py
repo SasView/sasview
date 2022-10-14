@@ -7,8 +7,6 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from unittest.mock import MagicMock
-from unittest.mock import create_autospec
 
 from twisted.internet import threads
 

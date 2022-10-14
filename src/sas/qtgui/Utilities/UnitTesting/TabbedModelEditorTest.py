@@ -4,8 +4,6 @@ import logging
 
 import pytest
 
-from unittest.mock import MagicMock
-
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -22,7 +20,7 @@ from sas.qtgui.Utilities.ModelEditor import ModelEditor
 
 class TabbedModelEditorTest:
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the editor'''
         class dummy_manager:
             _parent = QWidget()
@@ -32,11 +30,11 @@ class TabbedModelEditorTest:
 
         yield w
 
-        QMessageBox.exec = MagicMock(return_value=QMessageBox.Discard)
+        mocker.patch.object(QMessageBox, 'exec', return_value=QMessageBox.Discard)
         w.close()
 
     @pytest.fixture(autouse=True)
-    def widget_edit(self, qapp):
+    def widget_edit(self, qapp, mocker):
         '''Create/Destroy the editor'''
         class dummy_manager:
             _parent = QWidget()
@@ -46,7 +44,7 @@ class TabbedModelEditorTest:
 
         yield w
 
-        QMessageBox.exec = MagicMock(return_value=QMessageBox.Discard)
+        mocker.patch.object(QMessageBox, 'exec', return_value=QMessageBox.Discard)
         w.close()
         widget_edit = TabbedModelEditor(parent=dummy_manager, edit_only=True)
 
@@ -85,10 +83,10 @@ class TabbedModelEditorTest:
         widget.setPluginActive(True)
         assert widget.plugin_widget.isEnabled()
 
-    def notestCloseEvent(self, widget):
+    def notestCloseEvent(self, widget, mocker):
         """Test the close event wrt. saving info"""
         event = QObject()
-        event.accept = MagicMock()
+        mocker.patch.object(event, 'accept')
 
         # 1. no changes to document - straightforward exit
         widget.is_modified = False
@@ -97,23 +95,23 @@ class TabbedModelEditorTest:
 
         # 2. document changed, cancelled
         widget.is_modified = True
-        QMessageBox.exec = MagicMock(return_value=QMessageBox.Cancel)
+        mocker.patch.object(QMessageBox, 'exec', return_value=QMessageBox.Cancel)
         widget.closeEvent(event)
         assert QMessageBox.exec.called_once()
         # no additional calls to event accept
         assert event.accept.called_once()
 
         # 3. document changed, save
-        QMessageBox.exec = MagicMock(return_value=QMessageBox.Save)
+        mocker.patch.object(QMessageBox, 'exec', return_value=QMessageBox.Save)
         widget.filename = "random string #8"
-        widget.updateFromEditor = MagicMock()
+        mocker.patch.object(widget, 'updateFromEditor')
         widget.closeEvent(event)
         assert QMessageBox.exec.called_once()
         # no additional calls to event accept
         assert event.accept.called_once()
         assert widget.updateFromEditor.called_once()
 
-    def testOnApply(self, widget):
+    def testOnApply(self, widget, mocker):
         """Test the Apply/Save event"""
         # name the plugin
         widget.plugin_widget.txtName.setText("Uncharacteristically eloquent filename")
@@ -123,13 +121,13 @@ class TabbedModelEditorTest:
         assert widget.is_modified
 
         # default tab
-        widget.updateFromPlugin = MagicMock()
+        mocker.patch.object(widget, 'updateFromPlugin')
         widget.onApply()
         assert widget.updateFromPlugin.called_once()
 
         # switch tabs
         widget.tabWidget.setCurrentIndex(1)
-        widget.updateFromEditor = MagicMock()
+        mocker.patch.object(widget, 'updateFromEditor')
         widget.onApply()
         assert widget.updateFromEditor.called_once()
 
@@ -195,7 +193,7 @@ class TabbedModelEditorTest:
         assert title == widget.windowTitle()
 
     @pytest.mark.xfail(reason="2022-09 already broken")
-    def testUpdateFromEditor(self, widget):
+    def testUpdateFromEditor(self, widget, mocker):
         """
         Test the behaviour on editor window being updated
         """
@@ -206,11 +204,11 @@ class TabbedModelEditorTest:
 
         # change the filename
         widget.filename="testfile.py"
-        widget.writeFile = MagicMock()
+        mocker.patch.object(widget, 'writeFile')
         boring_text = "so bored with unit tests"
-        widget.editor_widget.txtEditor.toPlainText = MagicMock(return_value=boring_text)
-        widget.writeFile = MagicMock()
-        widget.plugin_widget.is_python = MagicMock()
+        mocker.patch.object(widget.editor_widget.txtEditor, 'toPlainText', return_value=boring_text)
+        mocker.patch.object(widget, 'writeFile')
+        mocker.patch.object(widget.plugin_widget, 'is_python')
         #invoke the method
         widget.updateFromEditor()
 
@@ -218,7 +216,7 @@ class TabbedModelEditorTest:
         assert widget.writeFile.called_once()
         assert widget.writeFile.called_with('testfile.py', boring_text)
 
-    def testCanWriteModel(self, widget):
+    def testCanWriteModel(self, widget, mocker):
         """
         Test if the model can be written to a file, given initial conditions
         """
@@ -236,8 +234,8 @@ class TabbedModelEditorTest:
             widget.canWriteModel(full_path=test_path)
 
         # 1. Overwrite box unchecked, file exists
-        os.path.isfile = MagicMock(return_value=True)
-        QMessageBox.critical = MagicMock()
+        mocker.patch.object(os.path, 'isfile', return_value=True)
+        mocker.patch.object(QMessageBox, 'critical')
 
         ret = widget.canWriteModel(model=test_model, full_path=test_path)
         assert not ret
@@ -246,10 +244,10 @@ class TabbedModelEditorTest:
         assert 'Plugin with specified name already exists' in QMessageBox.critical.call_args[0][2]
 
         # 2. Overwrite box checked, file exists, empty model
-        os.path.isfile = MagicMock(return_value=True)
+        mocker.patch.object(os.path, 'isfile', return_value=True)
         test_model['overwrite']=True
         test_model['text'] = ""
-        QMessageBox.critical = MagicMock()
+        mocker.patch.object(QMessageBox, 'critical')
 
         ret = widget.canWriteModel(model=test_model, full_path=test_path)
         assert not ret
@@ -258,10 +256,10 @@ class TabbedModelEditorTest:
         assert 'Error: Function is not defined' in QMessageBox.critical.call_args[0][2]
 
         # 3. Overwrite box unchecked, file doesn't exists, model with no 'return'
-        os.path.isfile = MagicMock(return_value=False)
+        mocker.patch.object(os.path, 'isfile', return_value=False)
         test_model['overwrite']=False
         test_model['text'] = "I am a simple model"
-        QMessageBox.critical = MagicMock()
+        mocker.patch.object(QMessageBox, 'critical')
 
         ret = widget.canWriteModel(model=test_model, full_path=test_path)
         assert not ret
@@ -270,7 +268,7 @@ class TabbedModelEditorTest:
         assert 'Error: The func(x) must' in QMessageBox.critical.call_args[0][2]
 
         # 4. Overwrite box unchecked, file doesnt exist, good model
-        os.path.isfile = MagicMock(return_value=False)
+        mocker.patch.object(os.path, 'isfile', return_value=False)
         test_model['text'] = "return"
         ret = widget.canWriteModel(model=test_model, full_path=test_path)
         assert ret

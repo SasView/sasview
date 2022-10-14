@@ -5,8 +5,6 @@ from lxml import etree
 
 import pytest
 
-from unittest.mock import MagicMock, patch
-
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
@@ -50,21 +48,21 @@ class FileConverterTest:
         assert widget.metadata == {}
 
 
-    def testOnHelp(self, widget):
+    def testOnHelp(self, widget, mocker):
         """ Test the default help renderer """
 
-        widget.parent.showHelp = MagicMock()
+        mocker.patch.object(widget.parent, 'showHelp', create=True)
         widget.onHelp()
         assert widget.parent.showHelp.called_once()
      
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testOnIFileOpen(self, widget):
+    def testOnIFileOpen(self, widget, mocker):
         """
         Testing intensity file read in.
         :return:
         """
         filename = os.path.join("UnitTesting", "FIT2D_I.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.onIFileOpen()
 
         # check updated values in ui, read from loaded file
@@ -76,13 +74,13 @@ class FileConverterTest:
         assert round(abs(iqdata[0][0]-224.08691), 5) == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testOnQFileOpen(self, widget):
+    def testOnQFileOpen(self, widget, mocker):
         """
         Testing intensity file read in.
         :return:
         """
         filename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
         widget.onQFileOpen()
 
         # check updated values in ui, read from loaded file
@@ -94,16 +92,16 @@ class FileConverterTest:
         assert round(abs(qdata[0]-0.13073), 5) == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testOnConvert(self, widget):
+    def testOnConvert(self, widget, mocker):
         """
 
         :return:
         """
         ifilename = os.path.join("UnitTesting", "FIT2D_I.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[ifilename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[ifilename, ''])
         widget.onIFileOpen()
         qfilename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[qfilename, ''])
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[qfilename, ''])
         widget.onQFileOpen()
 
         assert not widget.isBSL

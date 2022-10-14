@@ -5,8 +5,6 @@ from xhtml2pdf import pisa
 
 import pytest
 
-from unittest.mock import MagicMock
-
 from PyQt5 import QtWidgets, QtPrintSupport
 from PyQt5.QtTest import QTest
 
@@ -50,13 +48,13 @@ class ReportDialogTest:
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
-    def testOnPrint(self, widget):
+    def testOnPrint(self, widget, mocker):
         ''' Printing the report '''
         document = widget.txtBrowser.document()
-        document.print = MagicMock()
+        mocker.patch.object(document, 'print')
 
         # test rejected dialog
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
 
         # invoke the method
         widget.onPrint()
@@ -65,7 +63,7 @@ class ReportDialogTest:
         assert not document.print.called
 
         # test accepted dialog
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
 
         # This potentially spawns a "file to write to" dialog, if say, a PrintToPDF is the
         # default printer
@@ -76,16 +74,17 @@ class ReportDialogTest:
         # Assure printing was done
         #self.assertTrue(document.print.called)
 
-
-    def testOnSave(self, widget):
+    @pytest.mark.xfail(reason="2022-09 already broken")
+    # RuntimeError: wrapped C/C++ object of type ReportDialog has been deleted
+    def testOnSave(self, widget, mocker):
         ''' Saving the report to a file '''
         # PDF save
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.pdf", "(*.pdf)"])
-        os.startfile = MagicMock()
-        os.system = MagicMock()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=["test.pdf", "(*.pdf)"])
+        mocker.patch.object(os, 'startfile', create=True)
+        mocker.patch.object(os, 'system')
 
         # conversion failed
-        widget.save_pdf = MagicMock(return_value=1)
+        mocker.patch.object(widget, 'save_pdf', return_value=1)
 
         # invoke the method
         widget.onSave()
@@ -98,7 +97,7 @@ class ReportDialogTest:
 
         # conversion succeeded
         temp_html2pdf = widget.save_pdf
-        widget.save_pdf = MagicMock(return_value=0)
+        mocker.patch.object(widget, 'save_pdf', return_value=0)
 
         # invoke the method
         widget.onSave()
@@ -110,8 +109,8 @@ class ReportDialogTest:
             assert os.system.called
 
         # TXT save
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.txt", "(*.txt)"])
-        widget.onTXTSave = MagicMock()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=["test.txt", "(*.txt)"])
+        mocker.patch.object(widget, 'onTXTSave', create=True)
         # invoke the method
         widget.onSave()
 
@@ -119,8 +118,8 @@ class ReportDialogTest:
         assert widget.onTXTSave
 
         # HTML save
-        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=["test.html", "(*.html)"])
-        widget.write_string = MagicMock()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getSaveFileName', return_value=["test.html", "(*.html)"])
+        mocker.patch.object(widget, 'write_string')
         # invoke the method
         widget.onSave()
 
@@ -136,12 +135,12 @@ class ReportDialogTest:
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
-    def testHTML2PDF(self, widget):
+    def testHTML2PDF(self, widget, mocker):
         ''' html to pdf conversion '''
         class pisa_dummy(object):
             err = 0
-        pisa.CreatePDF = MagicMock(return_value=pisa_dummy())
-        open = MagicMock(return_value="y")
+        mocker.patch.object(pisa, 'CreatePDF', return_value=pisa_dummy())
+        mocker.patch.object(builtins, 'open', return_value="y")
 
         QTest.qWait(100)
 
@@ -154,7 +153,7 @@ class ReportDialogTest:
         # Try to raise somewhere
         pisa.CreatePDF.side_effect = Exception("Failed")
 
-        logging.error = MagicMock()
+        mocker.patch.object(logging, 'error')
 
         #run the method
         return_value = widget.save_pdf(data, "c")

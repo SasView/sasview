@@ -5,7 +5,6 @@ import pytest
 
 import webbrowser
 import tempfile
-from unittest.mock import MagicMock
 
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -21,7 +20,7 @@ class AddMultEditorTest:
     """ Test the simple AddMultEditor dialog """
 
     @pytest.fixture(autouse=True)
-    def widget(self, qapp):
+    def widget(self, qapp, mocker):
         '''Create/Destroy the AddMultEditor'''
         class dummy_manager(object):
             HELP_DIRECTORY_LOCATION = "html"
@@ -29,7 +28,7 @@ class AddMultEditorTest:
             _parent = QtWidgets.QDialog()
 
         # mock models from plugin folder
-        AddMultEditor.readModels = MagicMock(
+        mocker.patch.object(AddMultEditor, 'readModels',
             return_value=[
                 'cylinder', 'rpa',
                 'core_shell_cylinder', 'sphere'
@@ -131,11 +130,11 @@ class AddMultEditorTest:
                                                  0)[0]
         assert state == QtGui.QValidator.Acceptable
 
-    def testOnApply(self, widget):
+    def testOnApply(self, widget, mocker):
         """ Test onApply """
 
         widget.txtName.setText("new_model")
-        widget.updateModels = MagicMock()
+        mocker.patch.object(widget, 'updateModels')
 
         # make sure the flag is set correctly
         widget.is_modified = True
@@ -145,7 +144,7 @@ class AddMultEditorTest:
         widget.plugin_filename = \
             os.path.join(widget.plugin_dir, 'new_model.py')
 
-        widget.write_new_mode_to_file = MagicMock()
+        mocker.patch.object(widget, 'write_new_mode_to_file', create=True)
 
         # invoke the tested method
         widget.onApply()
@@ -234,10 +233,10 @@ class AddMultEditorTest:
         assert widget.cbOperator.currentText() in \
                       widget.lblEquation.text()
 
-    def testOnHelp(self, widget):
+    def testOnHelp(self, widget, mocker):
         """ Test the default help renderer """
 
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open', create=True)
 
         # invoke the tested method
         widget.onHelp()
@@ -245,7 +244,7 @@ class AddMultEditorTest:
         # see that webbrowser open was attempted
         webbrowser.open.assert_called()
 
-    def testOnNameCheck(self, widget):
+    def testOnNameCheck(self, widget, mocker):
         """ Test onNameCheck """
 
         # Enter plugin name already present in list of existing models
@@ -256,7 +255,7 @@ class AddMultEditorTest:
         # and good_name set to False, 'Apply' button disabled
 
         # mock QMessageBox
-        QtWidgets.QMessageBox.critical = MagicMock()
+        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
 
         widget.chkOverwrite.setChecked(False)
         widget.txtName.editingFinished.emit()
@@ -277,7 +276,7 @@ class AddMultEditorTest:
         # and good_name set to True, Apply button enabled, output name created
 
         # mock QMessageBox
-        QtWidgets.QMessageBox.critical = MagicMock()
+        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
         # create dummy plugin_dir for output file
         widget.plugin_dir = tempfile.gettempdir()
 
@@ -302,12 +301,12 @@ class AddMultEditorTest:
         assert widget.buttonBox.button(
             QtWidgets.QDialogButtonBox.Apply).isEnabled()
 
-    def testOnUpdateModels(self, widget):
+    def testOnUpdateModels(self, widget, mocker):
         """ Test onUpdateModels """
 
         ini_count_models = widget.cbModel1.count()
 
-        AddMultEditor.readModels = MagicMock(
+        mocker.patch.object(AddMultEditor, 'readModels',
             return_value=[
                 'cylinder', 'rpa',
                 'core_shell_cylinder', 'sphere',
