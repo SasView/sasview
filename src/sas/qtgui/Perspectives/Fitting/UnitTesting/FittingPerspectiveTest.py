@@ -14,6 +14,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+from sas.qtgui.MainWindow.GuiManager import GuiManager
 
 
 class FittingPerspectiveTest:
@@ -28,6 +29,9 @@ class FittingPerspectiveTest:
             communicate = GuiUtils.Communicate()
 
         '''Create the perspective'''
+        # need to ensure that categories exist first
+        GuiManager.addCategories()
+
         w = FittingWindow(dummy_manager())
         yield w
         w.close()
