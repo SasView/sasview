@@ -588,7 +588,7 @@ class GuiManager:
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
                 else:
-                    webbrowser.open(config.download_url)
+                    webbrowser.open(web.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"

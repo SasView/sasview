@@ -189,7 +189,7 @@ class GuiManagerTest:
         message = 'Version 999.0.0 is available!'
         assert message in str(spy_status_update.signal(index=0))
 
-        webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases")
+        webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases/latest")
 
         # 4. couldn't load version
         version_info = {}
