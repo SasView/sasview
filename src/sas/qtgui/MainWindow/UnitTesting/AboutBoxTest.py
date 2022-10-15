@@ -54,8 +54,8 @@ class AboutBoxTest:
         assert str(legal.copyright) in about.text()
         # URLs
         assert str(web.homepage_url) in about.text()
-        assert str(config.download_url) in about.text()
-        assert str(config.help_email) in about.text()
+        assert str(web.download_url) in about.text()
+        assert str(web.help_email) in about.text()
 
         # Are links enabled?
         assert about.openExternalLinks()
@@ -66,18 +66,18 @@ class AboutBoxTest:
         """
         mocker.patch.object(webbrowser, 'open')
         all_hosts = [
-                config.nist_url,
-                config.umd_url,
-                config.sns_url,
-                config.nsf_url,
-                config.isis_url,
-                config.ess_url,
-                config.ill_url,
-                config.ansto_url,
-                config.inst_url,
-                config.delft_url,
-                config.bam_url,
-                config.diamond_url]
+                web.nist_url,
+                web.umd_url,
+                web.sns_url,
+                web.nsf_url,
+                web.isis_url,
+                web.ess_url,
+                web.ill_url,
+                web.ansto_url,
+                web.inst_url,
+                web.delft_url,
+                web.bam_url,
+                web.diamond_url]
 
         # Press the buttons
         buttonList = widget.findChildren(QtWidgets.QPushButton)
