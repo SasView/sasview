@@ -35,7 +35,7 @@ class FittingOptionsTest:
         assert widget.cbAlgorithm.count() == 6
         assert widget.cbAlgorithm.itemText(0) == 'Nelder-Mead Simplex'
         assert widget.cbAlgorithm.itemText(4).startswith('Levenberg-Marquardt')
-        assert widget.cbAlgorithm.currentIndex() == 4
+        assert widget.cbAlgorithm.currentIndex() == 5
 
     def testAssignValidators(self, widget):
         """
