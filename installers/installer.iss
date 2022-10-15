@@ -46,8 +46,8 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\sasview\plugin_models\*";	DestDir: "{%USERPROFILE}\.sasview\plugin_models";	Flags: recursesubdirs createallsubdirs
-Source: "dist\sasview\custom_config.py";	DestDir: "{%USERPROFILE}\.sasview\config";	Flags: recursesubdirs createallsubdirs
+Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
+Source: "dist\sasview\custom_config.py"; DestDir: "{%USERPROFILE}\.sasview\config"
 
 [Icons]
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
