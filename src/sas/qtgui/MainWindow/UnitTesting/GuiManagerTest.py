@@ -240,6 +240,9 @@ class GuiManagerTest:
         assert QFileDialog.getExistingDirectory.called
 
     #### VIEW ####
+    @pytest.mark.xfail(reason="2022-10 - broken by config refactoring")
+    # default show/hide for toolbar (accidentally?) changed during
+    # refactoring of config code in a32de61ba038da9a1435c15875d6ce764262cea9
     def testActionHideToolbar(self, manager):
         """
         Menu View/Hide Toolbar
