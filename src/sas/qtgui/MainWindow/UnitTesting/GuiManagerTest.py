@@ -175,7 +175,7 @@ class GuiManagerTest:
         manager.processVersion(version_info)
 
         assert spy_status_update.count() == 1
-        message = 'You have the latest version of SasView'
+        message = 'You have the latest version'
         assert message in str(spy_status_update.signal(index=0))
 
         # 3. version > LocalConfig.__version__
