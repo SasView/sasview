@@ -23,6 +23,7 @@ import copy
 import logging
 import json
 import time
+import re
 from io import BytesIO
 import numpy as np
 
@@ -36,12 +37,12 @@ from sas.qtgui.Plotting.Plottables import View
 
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.MainWindow.DataState import DataState
-import sas.sascalc.dataloader.data_info as DataInfo
+import sasdata.dataloader.data_info as DataInfo
 
 # used for import/export
-from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sasdata.dataloader.data_info import Sample, Source, Vector
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 
 class DataManager(object):
@@ -141,20 +142,21 @@ class DataManager(object):
             name = GuiUtils.parseName(name=name, expression="_")
         except TypeError:
             # bad name sent to rename
-            return None
+            return ""
 
-        max_char = name.find("[")
-        if max_char < 0:
-            max_char = len(name)
-        name = name[0:max_char]
+        # Explicitly match [0-9]+ at the end of the name
+        result = re.split("[[0-9]+]$", name)
+        base_name = result[0].strip()
 
-        if name not in self.data_name_dict:
-            self.data_name_dict[name] = 0
+        # data_name_dict: {'baseName': [0, 1, .. n]}
+        # Match 'test' and 'test [1]' to {'test': [0,1, .. n]}
+        if base_name not in self.data_name_dict:
+            self.data_name_dict[name] = [0]
         else:
-            self.data_name_dict[name] += 1
-            name = name + " [" + str(self.data_name_dict[name]) + "]"
+            number = max(self.data_name_dict[base_name]) + 1
+            self.data_name_dict[base_name].append(number)
+            name = f"{base_name} [{number}]"
         return name
-
 
     def add_data(self, data_list):
         """
@@ -263,14 +265,37 @@ class DataManager(object):
         for d_id in data_id:
             if d_id in list(self.stored_data.keys()):
                 data_state = self.stored_data[d_id]
-                if data_state.data.name in self.data_name_dict:
-                    del self.data_name_dict[data_state.data.name]
+                self.remove_item_from_data_name_dict(data_state.data.name)
                 del self.stored_data[d_id]
 
         self.delete_theory(data_id, theory_id)
         if delete_all:
             self.stored_data = {}
             self.data_name_dict = {}
+
+    def remove_item_from_data_name_dict(self, name):
+        """
+        Remove 'name' or 'name [n]' from data_name_dict
+        """
+        # Split on whitespace - split 'name [n]' into list of len() == 2
+        data_name_split = re.split("[[0-9]+]$", name)
+        base_name = data_name_split[0].strip()
+        if name in self.data_name_dict:
+            self.data_name_dict[name].remove(0)
+            # Remove empty lists from dictionary
+            if not self.data_name_dict[name]:
+                del self.data_name_dict[name]
+            return True
+        elif base_name in self.data_name_dict:
+            number_match = name[len(data_name_split[0]) - 1:].strip()
+            number = int(number_match[1:-1]) if len(data_name_split) > 1 else 0
+            if number in self.data_name_dict[base_name]:
+                self.data_name_dict[base_name].remove(number)
+            # Remove empty lists from dictionary
+            if not self.data_name_dict[base_name]:
+                del self.data_name_dict[base_name]
+            return True
+        return False
 
     def delete_theory(self, data_id, theory_id):
         """
@@ -290,7 +315,8 @@ class DataManager(object):
         """
         for id in id_list:
             if id in self.stored_data:
-                del self.stored_data[id]
+                if self.remove_item_from_data_name_dict(self.stored_data[id].name):
+                    del self.stored_data[id]
 
     def get_by_name(self, name_list=None):
         """
@@ -308,18 +334,15 @@ class DataManager(object):
         save data and path
         """
         for selected_name in name_list:
-            for id, data_state in self.stored_data.items():
+            stored_data = copy.deepcopy(self.stored_data)
+            for id, data_state in stored_data.items():
                 if data_state.data.name == selected_name:
-                    del self.stored_data[id]
+                    if self.remove_item_from_data_name_dict(selected_name):
+                        del self.stored_data[id]
 
     def update_stored_data(self, name_list=None):
         """ update stored data after deleting files in Data Explorer """
-        for selected_name in name_list:
-            # Take the copy of current, possibly shorter stored_data dict
-            stored_data = copy.deepcopy(self.stored_data)
-            for idx in list(stored_data.keys()):
-                if str(selected_name) in str(idx):
-                    del self.stored_data[idx]
+        self.delete_by_name(name_list)
 
     def get_data_state(self, data_id):
         """

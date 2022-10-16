@@ -17,10 +17,11 @@ from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
-from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+from sasdata.dataloader.loader import Loader
+from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
+from sas import config
 
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
@@ -44,7 +45,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
-        self.save_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.save_location = config.DEFAULT_OPEN_FOLDER
         self.communicator = communicator
 
         # Initially, Apply is disabled
@@ -340,7 +341,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         items_for_fit = []
         for plot in plots:
             for item in self.active_plots.keys():
-                data = self.active_plots[item].data[0]
+                data = self.active_plots[item].data[-1]
                 if not isinstance(data, Data1D):
                     continue
                 if plot not in data.name:

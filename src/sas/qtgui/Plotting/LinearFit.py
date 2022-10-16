@@ -3,6 +3,8 @@ Adds a linear fit plot to the chart
 """
 import re
 import numpy
+from numbers import Number
+from typing import Optional
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -12,11 +14,13 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.LineModel import LineModel
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
+
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
     updatePlot = QtCore.pyqtSignal(tuple)
@@ -26,7 +30,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
                  fit_range=(0.0, 0.0),
                  xlabel="",
                  ylabel=""):
-        super(LinearFit, self).__init__()
+        super(LinearFit, self).__init__(parent)
 
         self.setupUi(self)
         # disable the context help icon
@@ -39,6 +43,9 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.parent = parent
 
         self.max_range = max_range
+        # Set fit minimum to 0.0 if below zero
+        if fit_range[0] < 0.0:
+            fit_range = (0.0, fit_range[1])
         self.fit_range = fit_range
         self.xLabel = xlabel
         self.yLabel = ylabel
@@ -48,14 +55,14 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.bg_on = False
 
         # Scale dependent content
-        self.guiner_box.setVisible(False)
+        self.guinier_box.setVisible(False)
         if (self.yLabel == "ln(y)" or self.yLabel == "ln(y*x)") and \
                 (self.xLabel == "x^(2)"):
             if self.yLabel == "ln(y*x)":
                 self.label_12.setText('<html><head/><body><p>Rod diameter [Å]</p></body></html>')
                 self.rg_yx = True
             self.rg_on = True
-            self.guiner_box.setVisible(True)
+            self.guinier_box.setVisible(True)
 
         if (self.xLabel == "x^(4)") and (self.yLabel == "y*x^(4)"):
             self.bg_on = True
@@ -97,6 +104,9 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
 
+        self.q_sliders = None
+        self.drawSliders()
+
         self.setFixedSize(self.minimumSizeHint())
 
         # connect Fit button
@@ -110,7 +120,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.lblRange.setText(label)
 
     def range(self):
-        return (float(self.txtFitRangeMin.text()), float(self.txtFitRangeMax.text()))
+        return (float(self.txtFitRangeMin.text()) if float(self.txtFitRangeMin.text()) > 0 else 0.0,
+                float(self.txtFitRangeMax.text()))
 
     def fit(self, event):
         """
@@ -201,11 +212,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText(formatNumber(self.ErrBvalue))
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
-        # Possibly Guiner analysis
+        # Possibly Guinier analysis
         i0 = numpy.exp(cstB)
-        self.txtGuiner_1.setText(formatNumber(i0))
+        self.txtGuinier_1.setText(formatNumber(i0))
         err = numpy.abs(numpy.exp(cstB) * errB)
-        self.txtGuiner1_Err.setText(formatNumber(err))
+        self.txtGuinier1_Err.setText(formatNumber(err))
 
         if self.rg_yx:
             rg = numpy.sqrt(-2 * float(cstA))
@@ -224,18 +235,20 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             else:
                 err = ''
 
-        self.txtGuiner_2.setText(value)
-        self.txtGuiner2_Err.setText(err)
+        self.txtGuinier_2.setText(value)
+        self.txtGuinier2_Err.setText(err)
 
         value = formatNumber(rg * self.floatInvTransform(self.xminFit))
-        self.txtGuiner_3.setText(value)
+        self.txtGuinier_4.setText(value)
         value = formatNumber(rg * self.floatInvTransform(self.xmaxFit))
-        self.txtGuiner_4.setText(value)
+        self.txtGuinier_3.setText(value)
 
         tempx = numpy.array(tempx)
         tempy = numpy.array(tempy)
 
+        self.clearSliders()
         self.updatePlot.emit((tempx, tempy))
+        self.drawSliders()
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit
@@ -310,4 +323,29 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
         return x
 
+    def drawSliders(self):
+        """Show new Q-range sliders"""
+        self.data.show_q_range_sliders = True
+        self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
+        self.q_sliders.line_min.input = self.txtFitRangeMin
+        self.q_sliders.line_max.input = self.txtFitRangeMax
+        # Ensure values are updated on redraw of plots
+        self.q_sliders.line_min.inputChanged()
+        self.q_sliders.line_max.inputChanged()
 
+    def clearSliders(self):
+        """Clear existing sliders"""
+        if self.q_sliders:
+            self.q_sliders.clear()
+        self.data.show_q_range_sliders = False
+        self.q_sliders = None
+
+    def closeEvent(self, ev):
+        self.clearSliders()
+        self.parent.update()
+
+    def accept(self, ev):
+        self.close()
+
+    def reject(self, ev):
+        self.close()

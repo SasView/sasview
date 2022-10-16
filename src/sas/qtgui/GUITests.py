@@ -57,6 +57,7 @@ from Plotting.UnitTesting import SlicerParametersTest
 from Plotting.UnitTesting import PlotterBaseTest
 from Plotting.UnitTesting import PlotterTest
 from Plotting.UnitTesting import Plotter2DTest
+from Plotting.UnitTesting import QRangeSliderTests
 
 # Calculators
 from Calculators.UnitTesting import KiessigCalculatorTest
@@ -121,6 +122,7 @@ def plottingSuite():
         unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
         unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,           'test'),
         unittest.makeSuite(PlotterTest.PlotterTest,                   'test'),
+        unittest.makeSuite(QRangeSliderTests.QRangeSlidersTest,       'test'),
         )
     return unittest.TestSuite(suites)
 

@@ -645,6 +645,7 @@ def plotPolydispersities(model):
 def binary_encode(i, digits):
     return [i >> d & 1 for d in range(digits)]
 
+
 def getWeight(data, is2d, flag=None):
     """
     Received flag and compute error on data.
@@ -672,7 +673,96 @@ def getWeight(data, is2d, flag=None):
         weight = numpy.sqrt(numpy.abs(data))
     elif flag == 3:
         weight = numpy.abs(data)
+
     return weight
+
+
+def getRelativeError(data, is2d, flag=None):
+    """
+    Return dy/y.
+    """
+    weight = None
+    if data is None:
+        return []
+    if is2d:
+        if not hasattr(data, 'err_data'):
+            return numpy.ones_like(data.y)
+        dy_data = data.err_data
+        data = data.data
+    else:
+        if not hasattr(data, 'dy'):
+            return numpy.ones_like(data.y)
+        dy_data = data.dy
+        data = data.y
+
+    if flag == 0:
+        weight = numpy.ones_like(data)
+    elif flag == 1:
+        weight = dy_data / data
+    elif flag == 2:
+        weight = 1.0 / numpy.sqrt(numpy.abs(data))
+    elif flag == 3:
+        weight = 1.0 / numpy.abs(data)
+
+    return weight
+
+
+def calcWeightIncrease(weights, ratios, flag=False):
+    """ Calculate the weights to be passed to bumps in order to ensure
+        that each data set contributes to the total residual with a
+        relative weight roughly proportional to the ratios defined by
+        the user when the "Modify weighting" option is employed.
+
+        The influence of each data set in the global fit is approximately
+        proportional to the number of points and to (1/sigma^2), or
+        probably better to (1/relative_error^2) = (intensity/sigma)^2.
+
+        Therefore in order to try to give equal weights to each data set
+        in the global fitting, we can compute the total relative weight
+        of each data set as the sum (y_i/dy_i**2) over all the points in
+        the data set and then renormalize them using:
+
+        user_weight[dataset] * sqrt(min(relative_weights) /  relative_weights[dataset])
+
+        If all user weights are one (the default), this will decrease the weight
+        of the data sets initially contributing more to the global fit, while
+        keeping the weight of the initially smaller contributor equal to one.
+
+        These weights are stored for each data set (FitPage) in a dictionary that
+        will be then used by bumps to modify the weights of each set.
+
+        Warning: As bumps uses the data set weights to multiply the residuals
+        calculated as (y-f(x))/sigma, it would probably make sense to include
+        the value of user_weight[dataset] in the square root, but as in any
+        case this is just a qualitative way of increasing/decreasing the weight
+        of some datasets and there is not a real mathematical justification
+        behind, this provides a more intuitive behaviour for the user, who will
+        see that the final weights of the data sets vary proportionally to changes
+        in the input user weights.
+
+    :param weights: Dictionary of data for the statistical weight, typical the y axis error
+    :type weights: dict of numpy.ndarray
+    :param ratios: Desired relative statistical weight ratio between the different datasets.
+    :type ratios: dict
+    :param flag: Boolean indicating if the weight of the datasets should be modified or not,
+                 which depends on the "Modify weighting" box in the Simultaneous Fit tab
+                 being checked or not
+    :type flag: bool
+    :return: Weight multiplier for each dataset
+    :rtype: dict
+    """
+
+    # If "Modify weighting" option not checked
+    if not flag:
+        return {k: 1.0 for k in weights}
+
+    # Calc statistical weight for each dataset and maximum
+    stat_weights = {k: numpy.sum(v**-2) for k, v in weights.items()}
+    min_weight = min(stat_weights.values())
+    weight_increase = {k: float(ratios[k]) * numpy.sqrt(min_weight / v) for k, v in stat_weights.items()}
+
+    return weight_increase
+
 
 def updateKernelWithResults(kernel, results):
     """
@@ -764,31 +854,21 @@ def getOrientationParam(kernel_module=None):
 
     return param
 
-def formatParameters(parameters, Check=True):
+def formatParameters(parameters: list, entry_sep=',', line_sep=':'):
     """
     Prepare the parameter string in the standard SasView layout
     """
-    assert parameters is not None
-    assert isinstance(parameters, list)
-    output_string = "sasview_parameter_values:"
+
+    parameter_strings = ["sasview_parameter_values"]
     for parameter in parameters:
-        # recast tuples into strings
-        parameter = [str(p) for p in parameter]
-        output_string += ",".join([p for p in parameter if p is not None])
-        output_string += ":"
+        parameter_strings.append(entry_sep.join([str(component) for component in parameter]))
 
-    if Check == False:
-        new_string = output_string.replace(':', '\n')
-        return new_string
-    else:
-        return output_string
+    return line_sep.join(parameter_strings)
 
-def formatParametersExcel(parameters):
+def formatParametersExcel(parameters: list):
     """
     Prepare the parameter string in the Excel format (tab delimited)
     """
-    assert parameters is not None
-    assert isinstance(parameters, list)
     crlf = chr(13) + chr(10)
     tab = chr(9)
 
@@ -816,12 +896,11 @@ def formatParametersExcel(parameters):
     output_string = names + crlf + values + crlf + check
     return output_string
 
-def formatParametersLatex(parameters):
+def formatParametersLatex(parameters: list):
     """
     Prepare the parameter string in latex
     """
-    assert parameters is not None
-    assert isinstance(parameters, list)
+
     output_string = r'\begin{table}'
     output_string += r'\begin{tabular}[h]'
 

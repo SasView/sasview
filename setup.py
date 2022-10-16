@@ -9,18 +9,18 @@ import os
 import subprocess
 import shutil
 import sys
-from distutils.core import Command
 
-from setuptools import setup
+from setuptools import setup, Command
 
 # Manage version number ######################################
-with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
+version_file = os.path.join("src", "sas", "system", "version.py")
+with open(version_file) as fid:
     for line in fid:
         if line.startswith('__version__'):
             VERSION = line.split('"')[1]
             break
     else:
-        raise ValueError("Could not find version in src/sas/sasview/__init__.py")
+        raise ValueError(f"Could not find version in {version_file}")
 ##############################################################
 
 package_dir = {}
@@ -42,24 +42,24 @@ ext_modules = []
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SASVIEW_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 
-# TODO: build step should not be messing with existing installation!!
-sas_dir = os.path.join(os.path.expanduser("~"), '.sasview')
-if os.path.isdir(sas_dir):
-    f_path = os.path.join(sas_dir, "sasview.log")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
-    #f_path = os.path.join(sas_dir, "categories.json")
-    #if os.path.isfile(f_path):
-    #    os.remove(f_path)
-    f_path = os.path.join(sas_dir, 'config', "custom_config.py")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
-    #f_path = os.path.join(sas_dir, 'plugin_models')
-    # if os.path.isdir(f_path):
-    #     for f in os.listdir(f_path):
-    #         if f in plugin_model_list:
-    #             file_path =  os.path.join(f_path, f)
-    #             os.remove(file_path)
+# # TODO: build step should not be messing with existing installation!!
+# sas_dir = os.path.join(os.path.expanduser("~"), '.sasview')
+# if os.path.isdir(sas_dir):
+#     f_path = os.path.join(sas_dir, "sasview.log")
+#     if os.path.isfile(f_path):
+#         os.remove(f_path)
+#     #f_path = os.path.join(sas_dir, "categories.json")
+#     #if os.path.isfile(f_path):
+#     #    os.remove(f_path)
+#     f_path = os.path.join(sas_dir, 'sasview', "custom_config.py")
+#     if os.path.isfile(f_path):
+#         os.remove(f_path)
+#     #f_path = os.path.join(sas_dir, 'plugin_models')
+#     # if os.path.isdir(f_path):
+#     #     for f in os.listdir(f_path):
+#     #         if f in plugin_model_list:
+#     #             file_path =  os.path.join(f_path, f)
+#     #             os.remove(file_path)
 
 
 # Optionally clean before build.
@@ -138,14 +138,6 @@ package_dir["sas.sascalc.invariant"] = os.path.join(
 packages.extend(["sas.sascalc.invariant"])
 
 
-# sas.sascalc.dataloader
-package_dir["sas.sascalc.dataloader"] = os.path.join(
-    "src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = ['schema/*.xsd']
-packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
-                 "sas.sascalc.dataloader.readers.schema"])
-
-
 # sas.sascalc.calculator
 package_dir["sas.sascalc.calculator"] = os.path.join(
     "src", "sas", "sascalc", "calculator")
@@ -155,12 +147,6 @@ packages.append("sas.sascalc.calculator")
 # sas.sascalc.pr
 package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
 packages.append("sas.sascalc.pr")
-
-
-# sas.sascalc.file_converter
-package_dir["sas.sascalc.file_converter"] = os.path.join(
-    "src", "sas", "sascalc", "file_converter")
-packages.append("sas.sascalc.file_converter")
 
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
@@ -191,9 +177,16 @@ packages.append("sas.qtgui.UnitTesting")
 package_dir["sas.qtgui.Utilities"] = os.path.join(
     "src", "sas", "qtgui", "Utilities")
 packages.append("sas.qtgui.Utilities")
-package_dir["sas.qtgui.UtilitiesUI"] = os.path.join(
-    "src", "sas", "qtgui", "Utilities","UI")
+package_dir["sas.qtgui.Utilities.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "UI")
 packages.append("sas.qtgui.Utilities.UI")
+
+package_dir["sas.qtgui.Utilities.Reports"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "Reports")
+packages.append("sas.qtgui.Utilities.Reports")
+package_dir["sas.qtgui.Utilities.Reports.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "Reports", "UI")
+packages.append("sas.qtgui.Utilities.Reports.UI")
 
 package_dir["sas.qtgui.Calculators"] = os.path.join(
     "src", "sas", "qtgui", "Calculators")
@@ -236,6 +229,11 @@ package_dir["sas.qtgui.Perspectives.Corfunc.UI"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives", "Corfunc", "UI")
 packages.extend(["sas.qtgui.Perspectives.Corfunc", "sas.qtgui.Perspectives.Corfunc.UI"])
 
+
+package_dir["sas.qtgui.images"] = os.path.join(
+    "src", "sas", "qtgui", "images")
+packages.append("sas.qtgui.images")
+
 ## Plotting
 package_dir["sas.qtgui.Plotting"] = os.path.join(
     "src", "sas", "qtgui", "Plotting")
@@ -249,23 +247,29 @@ packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
                  "sas.qtgui.Plotting.Slicers", "sas.qtgui.Plotting.Masks"])
 
 # SasView
-package_data['sas'] = ['logging.ini']
-package_data['sas.sasview'] = ['images/*',
+package_data['sas.sasview'] = ['media/*']
+
+package_data["sas.example_data"] = [
+                               '*.txt',
+                               '1d_data/*',
+                               '2d_data/*',
+                               'convertible_files/*',
+                               'coordinate_data/*',
+                               'image_data/*',
                                'media/*',
-                               'test/*.txt',
-                               'test/1d_data/*',
-                               'test/2d_data/*',
-                               'test/convertible_files/*',
-                               'test/coordinate_data/*',
-                               'test/image_data/*',
-                               'test/media/*',
-                               'test/other_files/*',
-                               'test/save_states/*',
-                               'test/sesans_data/*',
-                               'test/upcoming_formats/*',
+                               'other_files/*',
+                               'save_states/*',
+                               'sesans_data/*',
+                               'upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
-package_data['sas.qtgui'] = ['Calculators/UI/*',
+
+package_data["sas.system"] = ["*",
+                              "config/*"]
+packages.append("sas.system")
+
+package_data['sas.qtgui'] = ['images/*',
+                             'Calculators/UI/*',
                              'MainWindow/UI/*',
                              'Perspectives/Corfunc/UI/*',
                              'Perspectives/Fitting/UI/*',
@@ -273,10 +277,13 @@ package_data['sas.qtgui'] = ['Calculators/UI/*',
                              'Perspectives/Inversion/UI/*',
                              'Plotting/UI/*',
                              'Utilities/UI/*',
+                             'Utilities/Reports/UI/*',
+                             'Utilities/Reports/*.css',
                              'UI/*',
                              'UI/res/*',
                              ]
 packages.append("sas.qtgui")
+
 
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',

@@ -2,15 +2,33 @@
 import os
 import sys
 
+def run(main, name, *args):
+    saved_argv = sys.argv
+    sys.argv = [name, *args]
+    try:
+        main()
+    except SystemExit as exc:
+        if exc.code != 0:
+            raise RuntimeError(f"\"{name} {' '.join(args)}\" exited with {exc.code}")
+        return exc.code
+    finally:
+        sys.argv = saved_argv
+        pass
+    return 0
+
 def pyrrc(in_file, out_file):
-    """ Run the pyrcc4 script"""
-    execute = 'pyrcc5 %s -o %s' % (in_file, out_file)
-    os.system(execute)
+    """
+    Run the qt resource compiler
+    """
+    from PyQt5.pyrcc_main import main
+    run(main, "pyrcc", in_file, "-o", out_file)
 
 def pyuic(in_file, out_file):
-    """ Run the pyuic5 script"""
-    execute = 'pyuic5 -o %s %s' % (out_file, in_file)
-    os.system(execute)
+    """
+    Run the qt UI compiler
+    """
+    from PyQt5.uic.pyuic import main
+    run(main, "pyuic", "-o", out_file, in_file)
 
 def file_in_newer(file_in, file_out):
     """

@@ -42,6 +42,24 @@ COLORS = OrderedDict([
         ('Custom', 'x'),
 ])
 
+COLORS_LETTER = OrderedDict([
+        ('b', '#1f77b4'),
+        ('g', '#2ca02c'),
+        ('r', '#d62728'),
+        ('c', '#17becf'),
+        ('m', '#e377c2'),
+        ('y', '#bcbd22'),
+        ('k', '#000000'),
+])
+
+
+# MPL font weights list
+WEIGHTS = ['light', 'normal', 'bold']
+
+# MPL font family list
+FONTS = ['sans-serif', 'serif', 'cursive', 'fantasy', 'monospace']
+
+
 def build_matrix(data, qx_data, qy_data):
     """
     Build a matrix for 2d plot from a vector

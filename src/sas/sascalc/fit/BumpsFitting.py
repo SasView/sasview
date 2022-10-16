@@ -1,17 +1,20 @@
 """
 BumpsFitting module runs the bumps optimizer.
 """
+import logging
 import os
 from datetime import timedelta, datetime
 import traceback
+import uncertainties
 
 import numpy as np
 
+import bumps
 from bumps import fitters
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
-    FIT_CONFIG.selected_id = fitters.LevenbergMarquardtFit.id
+    FIT_CONFIG.selected_id = fitters.MPFit.id
     def get_fitter():
         return FIT_CONFIG.selected_fitter, FIT_CONFIG.selected_values
 except ImportError:
@@ -20,7 +23,7 @@ except ImportError:
     fitters.FIT_DEFAULT = 'lm'
     def get_fitter():
         fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-        return fitopts.fitclass, fitopts.options.copy()
+        return fitopts.fitclass, fitopts.options.clipboard_copy()
 
 
 from bumps.mapper import SerialMapper, MPMapper
@@ -257,16 +260,16 @@ class BumpsFit(FitEngine):
             q=None, handler=None, curr_thread=None,
             ftol=1.49012e-8, reset_flag=False):
         # Build collection of bumps fitness calculators
-        models = [SasFitness(model=M.get_model(),
-                             data=M.get_data(),
-                             constraints=M.constraints,
-                             fitted=M.pars,
-                             initial_values=M.vals if reset_flag else None)
-                  for M in self.fit_arrange_dict.values()
-                  if M.get_to_fit()]
+        models = []
+        weights = []
+        for tab_id, dataset in self.fit_arrange_dict.items():
+            if dataset.get_to_fit():
+                models.append(SasFitness(model=dataset.get_model(), data=dataset.get_data(), constraints=dataset.constraints,
+                                         fitted=dataset.pars, initial_values=dataset.vals if reset_flag else None))
+                weights.append(self.get_weight_increase(tab_id))
         if len(models) == 0:
             raise RuntimeError("Nothing to fit")
-        problem = FitProblem(models)
+        problem = FitProblem(models, weights=weights)
 
         # TODO: need better handling of parameter expressions and bounds constraints
         # so that they are applied during polydispersity calculations.  This
@@ -282,37 +285,120 @@ class BumpsFit(FitEngine):
 
         # TODO: shouldn't reference internal parameters of fit problem
         varying = problem._parameters
+
+        values, errs, cov = result['value'], result['stderr'], result[
+            'covariance']
+        assert values is not None and errs is not None
+
+        # Propagate uncertainty through the parameter expressions
+        # We are going to abuse bumps a little here and stuff uncertainty
+        # objects into the parameter values, then update all the
+        # derived parameters with uncertainty propagation. We need to
+        # avoid triggering a model recalc since the uncertainty objects
+        # will not be working with sasmodels
+
+        if len(varying) < 2:
+            # Use the standard error as the error in the parameter
+            for param, val, err in zip(varying, values, errs):
+                # Convert all varying parameters to uncertainties objects
+                param.value = uncertainties.ufloat(val, err)
+        else:
+            try:
+                uncertainties.correlated_values(values, cov)
+            except:
+                # No convergance 
+                for param, val, err in zip(varying, values, errs):
+                    # Convert all varying parameters to uncertainties objects
+                    param.value = uncertainties.ufloat(val, err)
+            else:
+                # Use the covariance matrix to calculate error in the parameter
+                fitted = uncertainties.correlated_values(values, cov)
+                for param, val in zip(varying, fitted):
+                    param.value = val
+
+        # Propagate correlated uncertainty through constraints.
+        problem.setp_hook()
+
         # collect the results
         all_results = []
-        for M in problem.models:
-            fitness = M.fitness
-            fitted_index = [varying.index(p) for p in fitness.fitted_pars]
-            param_list = fitness.fitted_par_names + fitness.computed_par_names
-            R = FResult(model=fitness.model, data=fitness.data,
-                        param_list=param_list)
-            R.theory = fitness.theory()
-            R.residuals = fitness.residuals()
-            R.index = fitness.data.idx
-            R.fitter_id = self.fitter_id
+
+        for fitting_module in problem.models:
+            fitness = fitting_module.fitness
+            pars = fitness.fitted_pars + fitness.computed_pars
+            par_names = fitness.fitted_par_names + fitness.computed_par_names
+
+            fitting_result = FResult(model=fitness.model, data=fitness.data, param_list=par_names)
+            fitting_result.theory = fitness.theory()
+            fitting_result.residuals = fitness.residuals()
+            fitting_result.index = fitness.data.idx
+            fitting_result.fitter_id = self.fitter_id
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-            R.success = result['success']
-            if R.success:
-                if result['stderr'] is None:
-                    R.stderr = np.NaN*np.ones(len(param_list))
-                else:
-                    R.stderr = np.hstack((result['stderr'][fitted_index],
-                                          np.NaN*np.ones(len(fitness.computed_pars))))
-                R.pvec = np.hstack((result['value'][fitted_index],
-                                    [p.value for p in fitness.computed_pars]))
-                R.fitness = np.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
-            else:
-                R.stderr = np.NaN*np.ones(len(param_list))
-                R.pvec = np.asarray([p.value for p in fitness.fitted_pars+fitness.computed_pars])
-                R.fitness = np.NaN
-            R.convergence = result['convergence']
+            fitting_result.success = result['success']
+            fitting_result.convergence = result['convergence']
             if result['uncertainty'] is not None:
-                R.uncertainty_state = result['uncertainty']
-            all_results.append(R)
+                fitting_result.uncertainty_state = result['uncertainty']
+
+            if fitting_result.success:
+                pvec = list()
+                stderr = list()
+                for p in pars:
+                    # If p is already defined as an uncertainties object it is not constrained based on another
+                    # parameter
+                    if isinstance(p.value, uncertainties.core.Variable) or \
+                            isinstance(p.value, uncertainties.core.AffineScalarFunc):
+                        # value.n returns value p
+                        pvec.append(p.value.n)
+                        # value.n returns error in p
+                        stderr.append(p.value.s)
+                    # p constrained based on another parameter
+                    else:
+                        # Details of p
+                        param_model, param_name = p.name.split(".")[0], p.name.split(".")[1]
+                        # Constraints applied on p, list comprehension most efficient method, will always return a
+                        # list with 1 entry
+                        constraints = [model.constraints for model in models if model.name == param_model][0]
+                        # Parameters p is constrained on.
+                        reference_params = [v for v in varying if str(v.name) in str(constraints[param_name])]
+                        err_exp = str(constraints[param_name])
+                        # Convert string entries into variable names within the code.
+                        for i, index in enumerate(reference_params):
+                            err_exp = err_exp.replace(reference_params[index].name, f"reference_params[{index}].value")
+                        try:
+                            # Evaluate a string containing constraints as if it where a line of code
+                            pvec.append(eval(err_exp).n)
+                            stderr.append(eval(err_exp).s)
+                        except NameError as e:
+                            pvec.append(p.value)
+                            stderr.append(0)
+                            # Get model causing error
+                            name_error = e.args[0].split()[1].strip("'")
+                            # Safety net if following code does not work
+                            error_param = name_error
+                            # Get parameter causing error
+                            constraints_sections = constraints[param_name].split(".")
+                            for i in range(len(constraints_sections)):
+                                if name_error in constraints_sections[i]:
+                                    error_param = f"{name_error}.{constraints_sections[i+1]}"
+                            logging.error(f"Constraints ordered incorrectly. Attempting to constrain {p}, based on "
+                                          f"{error_param}, however {error_param} is not defined itself. This is "
+                                          f"because {error_param} is also constrained.\n"
+                                          f"The fitting will continue, but {name_error} will be incorrect.")
+                            logging.error(e)
+                        except Exception as e:
+                            logging.error(e)
+                            pvec.append(p.value)
+                            stderr.append(0)
+
+                fitting_result.pvec = (np.array(pvec))
+                fitting_result.stderr = (np.array(stderr))
+                DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
+                fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
+            else:
+                fitting_result.pvec = np.asarray([p.value for p in pars])
+                fitting_result.stderr = np.NaN * np.ones(len(pars))
+                fitting_result.fitness = np.NaN
+
+            all_results.append(fitting_result)
         all_results[0].mesg = result['errors']
 
         if q is not None:
@@ -367,10 +453,13 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
+        cov = (fitdriver.cov() if not hasattr(fitdriver.fitter, 'state') else
+               np.cov(fitdriver.fitter.state.draw().points.T))
     except Exception as exc:
         errors.append(str(exc))
         errors.append(traceback.format_exc())
         stderr = None
+        cov = None
     return {
         'value': best if success else None,
         'stderr': stderr,
@@ -378,4 +467,5 @@ def run_bumps(problem, handler, curr_thread):
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
         'errors': '\n'.join(errors),
+        'covariance': cov,
         }

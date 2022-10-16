@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib import rcParams
 
+from packaging import version
+
 DEFAULT_CMAP = mpl.cm.jet
 from sas.qtgui.Plotting.PlotterData import Data1D
 
@@ -22,6 +24,8 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 
 class PlotterBase(QtWidgets.QWidget):
+    #TODO: Describe what this class is
+
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterBase, self).__init__(parent)
 
@@ -153,8 +157,8 @@ class PlotterBase(QtWidgets.QWidget):
         self._item = item
 
     @property
-    def xLabel(self, xlabel=""):
-        """ x-label setter """
+    def xLabel(self):
+        """ x-label getter """
         return self.x_label
 
     @xLabel.setter
@@ -163,8 +167,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.x_label = r'$%s$'% xlabel if xlabel else ""
 
     @property
-    def yLabel(self, ylabel=""):
-        """ y-label setter """
+    def yLabel(self):
+        """ y-label getter """
         return self.y_label
 
     @yLabel.setter
@@ -180,7 +184,10 @@ class PlotterBase(QtWidgets.QWidget):
     @yscale.setter
     def yscale(self, scale='linear'):
         """ Y-axis scale setter """
-        self.ax.set_yscale(scale, nonposy='clip')
+        if version.parse(mpl.__version__) < version.parse("3.3"):
+            self.ax.set_yscale(scale, nonposy='clip') if scale != 'linear' else self.ax.set_yscale(scale)
+        else:
+            self.ax.set_yscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_yscale(scale)
         self._yscale = scale
 
     @property
@@ -192,7 +199,10 @@ class PlotterBase(QtWidgets.QWidget):
     def xscale(self, scale='linear'):
         """ X-axis scale setter """
         self.ax.cla()
-        self.ax.set_xscale(scale)
+        if version.parse(mpl.__version__) < version.parse("3.3"):
+            self.ax.set_xscale(scale, nonposx='clip') if scale != 'linear' else self.ax.set_xscale(scale)
+        else:
+            self.ax.set_xscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_xscale(scale)
         self._xscale = scale
 
     @property
@@ -315,6 +325,7 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Overwrite the close event adding helper notification
         """
+        self.clearQRangeSliders()
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
 
@@ -322,6 +333,13 @@ class PlotterBase(QtWidgets.QWidget):
         self.manager.communicator.activeGraphsSignal.emit([self, True])
 
         event.accept()
+
+    def clearQRangeSliders(self):
+        # Destroy the Q-range sliders in 1D plots
+        if hasattr(self, 'sliders') and isinstance(self.sliders, dict):
+            for slider in self.sliders.values():
+                slider.clear()
+            self.sliders = {}
 
     def onImageSave(self):
         """

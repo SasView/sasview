@@ -1,19 +1,35 @@
-# List of dependencies meant for pip.
-# Commented items are generally easier to install separately.
+numpy 
+scipy==1.7.3 
+docutils 
+pytest<6 
+unittest-xml-reporting
+tinycc 
+h5py 
+sphinx
+pyparsing 
+html5lib 
+reportlab==3.6.6 
+pybind11 
+appdirs
+six 
+numba 
+mako 
+ipython 
+qtconsole 
+xhtml2pdf 
 pylint
-unittest-xml-reporting==1.10.0
-pyparsing==1.5.5
-html5lib==0.95
-reportlab==2.5
-lxml==2.3
-#PIL==1.1.7
-periodictable==1.5.0
-bumps==0.7.5.9
-numpy>=1.7.1
-scipy>=0.18.0
-# wx==2.8.12.1
-# matplotlib==1.1.0
-xhtml2pdf==0.0.6
-sphinx==1.2.1
-h5py==2.5
-pyopencl==2015.1
+qt5reactor 
+periodictable 
+uncertainties 
+debugpy
+matplotlib~=3.5.2
+PyQt5
+lxml
+pytools 
+cffi
+dominate
+html5lib
+importlib-resources
+bumps
+html2text
+jsonschema

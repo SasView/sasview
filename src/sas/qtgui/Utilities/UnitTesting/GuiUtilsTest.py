@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 import sas.qtgui.path_prepare
 
 # SV imports
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -46,12 +46,6 @@ class GuiUtilsTest(unittest.TestCase):
         """
         pass
 
-    def testGetUserDirectory(self):
-        """
-        Simple test of user directory getter
-        """
-        home_dir = os.path.expanduser("~")
-        self.assertIn(home_dir, get_user_directory())
 
     def testCommunicate(self):
         """

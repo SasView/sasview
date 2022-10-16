@@ -6,15 +6,19 @@ import copy
 import matplotlib as mpl
 import numpy as np
 from matplotlib.font_manager import FontProperties
+from packaging import version
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
+from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
+from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties
+from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
@@ -45,8 +49,20 @@ class PlotterWidget(PlotterBase):
 
         # Data container for the linear fit
         self.fit_result = Data1D(x=[], y=[], dy=None)
-        self.fit_result.symbol = 13
+        self.fit_result.symbol = 17
         self.fit_result.name = "Fit"
+
+        # Range setter - used to store active SetGraphRange instance
+        # Initialize to None so graph range is only stored once data is present.
+        self.setRange = None
+
+        # Connections used to prevent conflict between built in mpl toolbar actions and SasView context menu actions.
+        # Toolbar actions only needed in 1D plots. 2D plots have no such conflicts.
+        self.toolbar._actions['home'].triggered.connect(self._home)
+        self.toolbar._actions['back'].triggered.connect(self._back)
+        self.toolbar._actions['forward'].triggered.connect(self._forward)
+        self.toolbar._actions['pan'].triggered.connect(self._pan)
+        self.toolbar._actions['zoom'].triggered.connect(self._zoom)
 
         parent.geometry()
 
@@ -153,12 +169,12 @@ class PlotterWidget(PlotterBase):
         markersize = data.markersize
 
         # Include scaling (log vs. linear)
-        ax.set_xscale(self.xscale, nonposx='clip')
-        ax.set_yscale(self.yscale, nonposy='clip')
-
-        # define the ranges
-        self.setRange = SetGraphRange(parent=self,
-            x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
+        if version.parse(mpl.__version__) < version.parse("3.3"):
+            ax.set_xscale(self.xscale, nonposx='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
+            ax.set_yscale(self.yscale, nonposy='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
+        else:
+            ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
+            ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
 
         # Draw non-standard markers
         l_width = markersize * 0.4
@@ -220,9 +236,35 @@ class PlotterWidget(PlotterBase):
         if self.xLabel and not is_fit:
             ax.set_xlabel(self.xLabel)
 
+        # define the ranges
+        if isinstance(self.setRange, SetGraphRange) and self.setRange.rangeModified:
+            # Assume the range has changed and retain the current and default ranges for future use
+            modified = self.setRange.rangeModified
+            default_x_range = self.setRange.defaultXRange
+            default_y_range = self.setRange.defaultYRange
+            x_range = self.setRange.xrange()
+            y_range = self.setRange.yrange()
+        else:
+            # Use default ranges given by matplotlib
+            x_range = default_x_range = self.ax.get_xlim()
+            y_range = default_y_range = self.ax.get_ylim()
+            modified = False
+        self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
+        self.setRange.rangeModified = modified
+        self.setRange.defaultXRange = default_x_range
+        self.setRange.defaultYRange = default_y_range
+        # Go to expected range
+        self.ax.set_xbound(x_range[0], x_range[1])
+        self.ax.set_ybound(y_range[0], y_range[1])
+
         # Add q-range sliders
         if data.show_q_range_sliders:
+            # Grab existing slider if it exists
+            existing_slider = self.sliders.pop(data.name, None)
             sliders = QRangeSlider(self, self.ax, data=data)
+            # New sliders should be visible but existing sliders that were turned off should remain off
+            if existing_slider is not None and not existing_slider.is_visible:
+                sliders.toggle()
             self.sliders[data.name] = sliders
 
         # refresh canvas
@@ -245,6 +287,8 @@ class PlotterWidget(PlotterBase):
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.contextMenu.addSeparator()
+        self.actionCustomizeLabel = self.contextMenu.addAction("Customize Labels")
+        self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
         self.contextMenu.addSeparator()
         self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
@@ -267,6 +311,7 @@ class PlotterWidget(PlotterBase):
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
         if self.show_legend:
             self.actionToggleLegend.triggered.connect(self.onToggleLegend)
+        self.actionCustomizeLabel.triggered.connect(self.onCusotmizeLabel)
 
     def addPlotsToContextMenu(self):
         """
@@ -296,6 +341,11 @@ class PlotterWidget(PlotterBase):
             self.actionRemovePlot = plot_menu.addAction("Remove")
             self.actionRemovePlot.triggered.connect(
                                 functools.partial(self.onRemovePlot, id))
+
+            if plot.show_q_range_sliders:
+                self.actionToggleSlider = plot_menu.addAction("Toggle Q-Range Slider Visibility")
+                self.actionToggleSlider.triggered.connect(
+                                    functools.partial(self.toggleSlider, id))
 
             if not plot.is_data:
                 self.actionFreeze = plot_menu.addAction('&Freeze')
@@ -407,30 +457,97 @@ class PlotterWidget(PlotterBase):
 
         self.canvas.draw_idle()
 
+    def _zoom_pan_handler(self, event):
+        if not self.setRange:
+            self.setRange = SetGraphRange(parent=self)
+        x_range = self.ax.get_xlim()
+        y_range = self.ax.get_ylim()
+        self.setRange.txtXmin.setText(str(x_range[0]))
+        self.setRange.txtXmax.setText(str(x_range[1]))
+        self.setRange.txtYmin.setText(str(y_range[0]))
+        self.setRange.txtYmax.setText(str(y_range[1]))
+        self._setGraphRange()
+
+    def _zoom_handler(self, event):
+        """
+        Explicitly call toolbar method to ensure range is changed. In MPL 2.2, local events take precedence over the
+        toolbar events, so the range isn't zoomed until after _zoom_pan_handler is run.
+        """
+        self.toolbar.release_zoom(event)
+        self._zoom_pan_handler(event)
+
+    def _pan_handler(self, event):
+        """
+        Explicitly call toolbar method to ensure range is changed. In MPL 2.2, local events take precedence over the
+        toolbar events, so the range isn't panned until after _zoom_pan_handler is run.
+        """
+        self.toolbar.release_pan(event)
+        self._zoom_pan_handler(event)
+
+    def _home(self, event):
+        """
+        Catch home button click events
+        """
+        self.onResetGraphRange()
+
+    def _back(self, event):
+        """
+        Catch back button click events
+        """
+        self.toolbar.back()
+        self._zoom_pan_handler(event)
+
+    def _forward(self, event):
+        """
+        Catch forward button click events
+        """
+        self.toolbar.forward()
+        self._zoom_pan_handler(event)
+
+    def _pan(self, event):
+        """
+        Catch pan button click events
+        """
+        self.canvas.mpl_connect('button_release_event', self._pan_handler)
+
+    def _zoom(self, event):
+        """
+        Catch zoom button click events
+        """
+        self.canvas.mpl_connect('button_release_event', self._zoom_handler)
+
     def onSetGraphRange(self):
         """
         Show a dialog allowing setting the chart ranges
         """
         # min and max of data
         if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
-            x_range = self.setRange.xrange()
-            y_range = self.setRange.yrange()
-            if x_range is not None and y_range is not None:
-                self.ax.set_xlim(x_range)
-                self.ax.set_ylim(y_range)
-                self.canvas.draw_idle()
+            self._setGraphRange()
+
+    def _setGraphRange(self):
+        x_range = self.setRange.xrange()
+        y_range = self.setRange.yrange()
+        if x_range is not None and y_range is not None:
+            self.setRange.rangeModified = (self.setRange.defaultXRange != x_range
+                                           or self.setRange.defaultYRange != y_range)
+            self.ax.set_xlim(x_range)
+            self.ax.set_ylim(y_range)
+            self.canvas.draw_idle()
 
     def onResetGraphRange(self):
         """
         Resets the chart X and Y ranges to their original values
         """
-        for d in self.data:
-            x_range = (d.x.min(), d.x.max())
-            y_range = (d.y.min(), d.y.max())
-        if x_range is not None and y_range is not None:
-            self.ax.set_xlim(x_range)
-            self.ax.set_ylim(y_range)
-            self.canvas.draw_idle()
+        # Clear graph and plot everything again
+        mpl.pyplot.cla()
+        self.ax.cla()
+        self.setRange = None
+        for ids in self.plot_dict:
+            # Color, marker, etc. are stored in each data set and will be used to restore visual changes on replot
+            self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
+
+        # Redraw
+        self.canvas.draw_idle()
 
     def onLinearFit(self, id):
         """
@@ -451,7 +568,7 @@ class PlotterWidget(PlotterBase):
         if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
-    def replacePlot(self, id, new_plot):
+    def replacePlot(self, id, new_plot, retain_dimensions=True):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
         This effectlvely refreshes the chart with changes to one of its plots
@@ -466,9 +583,14 @@ class PlotterWidget(PlotterBase):
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
-
         self.removePlot(id)
         self.plot(data=new_plot)
+        # Apply user-defined plot range
+        if retain_dimensions or self.setRange.rangeModified:
+            x_bounds = self.setRange.xrange()
+            y_bounds = self.setRange.yrange()
+            self.ax.set_xbound(x_bounds[0], x_bounds[1])
+            self.ax.set_ybound(y_bounds[0], y_bounds[1])
 
     def onRemovePlot(self, id):
         """
@@ -497,6 +619,9 @@ class PlotterWidget(PlotterBase):
         mpl.pyplot.cla()
         self.ax.cla()
 
+        # Recreate Artist bindings after plot clear
+        self.connect = BindArtist(self.figure)
+
         for ids in self.plot_dict:
             if ids != id:
                 self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
@@ -505,6 +630,11 @@ class PlotterWidget(PlotterBase):
         self.ax.set_xlabel(xl)
         self.ax.set_ylabel(yl)
         self.canvas.draw_idle()
+
+    def toggleSlider(self, id):
+        if id in self.sliders.keys():
+            slider = self.sliders.get(id)
+            slider.toggle()
 
     def onFreeze(self, id):
         """
@@ -607,9 +737,6 @@ class PlotterWidget(PlotterBase):
         self.fit_result.dx = None
         self.fit_result.dy = None
 
-        #Remove another Fit, if exists
-        self.removePlot("Fit")
-
         self.fit_result.reset_view()
         #self.offset_graph()
 
@@ -618,8 +745,12 @@ class PlotterWidget(PlotterBase):
         self.fit_result.title = 'Fit'
         self.fit_result.name = 'Fit'
 
-        # Plot the line
-        self.plot(data=self.fit_result, marker='-', hide_error=True)
+        if self.fit_result.name in self.plot_dict.keys():
+            # Replace an existing Fit and ensure the plot range is not reset
+            self.replacePlot("Fit", new_plot=self.fit_result)
+        else:
+            # Otherwise, Plot a new line
+            self.plot(data=self.fit_result, marker='-', hide_error=True)
 
     def onToggleLegend(self):
         """
@@ -630,6 +761,52 @@ class PlotterWidget(PlotterBase):
 
         visible = self.legend.get_visible()
         self.legend.set_visible(not visible)
+        self.canvas.draw_idle()
+
+    def onCusotmizeLabel(self):
+        """
+        Show label customization widget
+        """
+        xl = self.ax.xaxis.label
+        yl = self.ax.yaxis.label
+        font_x = PlotLabelPropertyHolder(
+            size=xl.get_fontsize(),
+            font=xl.get_family()[0],
+            color=xl.get_color(),
+            weight=xl.get_weight(),
+            text=xl.get_text())
+
+        font_y = PlotLabelPropertyHolder(
+            size=yl.get_fontsize(),
+            font=yl.get_family()[0],
+            color=yl.get_color(),
+            weight=yl.get_weight(),
+            text=yl.get_text())
+
+        labelWidget = PlotLabelProperties(self, x_props=font_x, y_props=font_y)
+
+        if labelWidget.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
+        fx = labelWidget.fx()
+        fy = labelWidget.fy()
+        label_x = labelWidget.text_x()
+        label_y = labelWidget.text_y()
+        apply_x = labelWidget.apply_to_ticks_x()
+        apply_y = labelWidget.apply_to_ticks_y()
+
+        self.ax.set_xlabel(label_x, fontdict=fx)
+        self.ax.set_ylabel(label_y, fontdict=fy)
+        if apply_x:
+            # self.ax.tick_params(axis='x', labelsize=fx.size, labelcolor=fx.color)
+            from matplotlib.pyplot import gca
+            a = gca()
+            a.set_xticklabels(a.get_xticks(), fx)
+        if apply_y:
+            # self.ay.tick_params(axis='y', labelsize=fy.size, labelcolor=fy.color)
+            from matplotlib.pyplot import gca
+            a = gca()
+            a.set_yticklabels(a.get_yticks(), fy)
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):

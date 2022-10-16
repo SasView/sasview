@@ -17,8 +17,6 @@ from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.SldPanel import neutronSldAlgorithm, xraySldAlgorithm
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 
-import sas.qtgui.Utilities.LocalConfig
-
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
 

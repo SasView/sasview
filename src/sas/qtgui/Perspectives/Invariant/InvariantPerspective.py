@@ -15,6 +15,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
+from ..perspective import Perspective
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS
@@ -23,8 +24,6 @@ from .InvariantUtils import WIDGETS
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
 Q_MAXIMUM = 10
-# the ratio of maximum q value/(qmax of data) to plot the theory data
-Q_MAXIMUM_PLOT = 3
 # Default number of points of interpolation: high and low range
 NPOINTS_Q_INTERP = 10
 # Default power law for interpolation
@@ -35,17 +34,25 @@ BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
-class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
+class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
-    name = "Invariant"  # For displaying in the combo box in DataExplorer
-    ext = 'inv'  # File extension used for saving analyses
+
+
+    name = "Invariant"
+    ext = 'inv'
+
+    @property
+    def title(self):
+        """ Perspective name """
+        return "Invariant Perspective"
+
 
     def __init__(self, parent=None):
-        super(InvariantWindow, self).__init__()
+        super().__init__()
         self.setupUi(self)
 
-        self.setWindowTitle(self.title())
+        self.setWindowTitle(self.title)
 
         # initial input params
         self._background = 0.0
@@ -140,31 +147,33 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.mapper.toFirst()
 
-    def get_low_q_extrapolation_upper_limit(self):
+    def get_low_q_extrapolation_upper_limit(self): # TODO: No usages
         q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
         return q_value
 
-    def set_low_q_extrapolation_upper_limit(self, value):
+    def set_low_q_extrapolation_upper_limit(self, value): # TODO: No usages
         n_pts = (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(n_pts))
         self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
+        self.txtNptsLowQ.setText(str(n_pts))
 
-    def get_high_q_extrapolation_lower_limit(self):
+    def get_high_q_extrapolation_lower_limit(self): # TODO: No usgaes
         q_value = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text()) - 1]
         return q_value
 
-    def set_high_q_extrapolation_lower_limit(self, value):
-        n_pts = (np.abs(self._data.x - value)).argmin() + 1
+    def set_high_q_extrapolation_lower_limit(self, value): # TODO: No usages
+        n_pts = len(self._data.x) - (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(int(n_pts)))
         self.model.setItem(WIDGETS.W_NPTS_HIGHQ, item)
+        self.txtNptsHighQ.setText(str(n_pts))
 
     def enabling(self):
         """ """
         self.cmdStatus.setEnabled(True)
 
-    def setClosable(self, value=True):
+    def setClosable(self, value: bool=True):
         """ Allow outsiders close this widget """
-        assert isinstance(value, bool)
+        assert isinstance(value, bool) # TODO: Remove
 
         self._allow_close = value
 
@@ -211,7 +220,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true'
         self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
 
-    def calculateInvariant(self):
+    def calculateInvariant(self): # TODO: pythonic name
         """ Use twisted to thread the calculations away """
         # Find out if extrapolation needs to be used.
         extrapolation = None
@@ -233,8 +242,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         d.addCallback(self.deferredPlot)
         d.addErrback(self.calculationFailed)
 
-    def calculationFailed(self, reason):
-        print("calculation failed: ", reason)
+    def calculationFailed(self, reason): # TODO: rename to on_calculation_failed
+        print("calculation failed: ", reason) # TODO: Print to log
         self.allow_calculation()
 
     def deferredPlot(self, model):
@@ -249,7 +258,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
 
-    def plotResult(self, model):
+    def plotResult(self, model): # TODO: Pythonic name, typing
         """ Plot result of calculation """
 
         self.model = model
@@ -260,13 +269,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.high_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.show_errors = False
-            # TODO: Fix the link between npts and q and then enable the q-range sliders
-            #self.high_extrapolation_plot.show_q_range_sliders = True
-            #self.high_extrapolation_plot.slider_update_on_move = False
-            #self.high_extrapolation_plot.slider_low_q_input = self.txtNptsHighQ
-            #self.high_extrapolation_plot.slider_low_q_setter = self.set_high_q_extrapolation_lower_limit
-            #self.high_extrapolation_plot.slider_low_q_getter = self.get_high_q_extrapolation_lower_limit
-            #self.high_extrapolation_plot.slider_high_q_input = self.txtExtrapolQMax
+            self.high_extrapolation_plot.show_q_range_sliders = True
+            self.high_extrapolation_plot.slider_update_on_move = False
+            self.high_extrapolation_plot.slider_perspective_name = self.name
+            self.high_extrapolation_plot.slider_low_q_input = ['txtNptsHighQ']
+            self.high_extrapolation_plot.slider_low_q_setter = ['set_high_q_extrapolation_lower_limit']
+            self.high_extrapolation_plot.slider_low_q_getter = ['get_high_q_extrapolation_lower_limit']
+            self.high_extrapolation_plot.slider_high_q_input = ['txtExtrapolQMax']
             GuiUtils.updateModelItemWithPlot(self._model_item, self.high_extrapolation_plot,
                                              self.high_extrapolation_plot.title)
             plots.append(self.high_extrapolation_plot)
@@ -274,13 +283,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.low_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.show_errors = False
-            # TODO: Fix the link between npts and q and then enable the q-range sliders
-            #self.low_extrapolation_plot.show_q_range_sliders = True
-            #self.low_extrapolation_plot.slider_update_on_move = False
-            #self.low_extrapolation_plot.slider_high_q_input = self.txtNptsLowQ
-            #self.low_extrapolation_plot.slider_high_q_setter = self.set_low_q_extrapolation_upper_limit
-            #self.low_extrapolation_plot.slider_high_q_getter = self.get_low_q_extrapolation_upper_limit
-            #self.low_extrapolation_plot.slider_low_q_input = self.txtExtrapolQMin
+            self.low_extrapolation_plot.show_q_range_sliders = True
+            self.low_extrapolation_plot.slider_update_on_move = False
+            self.low_extrapolation_plot.slider_perspective_name = self.name
+            self.low_extrapolation_plot.slider_high_q_input = ['txtNptsLowQ']
+            self.low_extrapolation_plot.slider_high_q_setter = ['set_low_q_extrapolation_upper_limit']
+            self.low_extrapolation_plot.slider_high_q_getter = ['get_low_q_extrapolation_upper_limit']
+            self.low_extrapolation_plot.slider_low_q_input = ['txtExtrapolQMin']
             GuiUtils.updateModelItemWithPlot(self._model_item, self.low_extrapolation_plot,
                                              self.low_extrapolation_plot.title)
             plots.append(self.low_extrapolation_plot)
@@ -290,14 +299,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Update the details dialog in case it is open
         self.updateDetailsWidget(model)
 
-    def updateDetailsWidget(self, model):
+    def updateDetailsWidget(self, model): # TODO: pythonic name, type model
         """
         On demand update of the details widget
         """
         if self.detailsDialog.isVisible():
             self.onStatus()
 
-    def calculateThread(self, extrapolation):
+    def calculateThread(self, extrapolation): # Pythonic name, typing
         """
         Perform Invariant calculations.
         """
@@ -455,9 +464,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         if high_calculation_pass:
             # for presentation in InvariantDetails
-            qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
             qmax_input = float(self.txtExtrapolQMax.text())
-            qmax_plot = qmax_input if qmax_plot > qmax_input else qmax_plot
+            qmax_plot = qmax_input
 
             power_high = self._calculator.get_extrapolation_power(range='high')
             high_out_data = self._calculator.get_extra_data_high(q_end=qmax_plot, npts=500)
@@ -496,21 +504,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         return self.model
 
-    def updateModelFromThread(self, widget, value):
+    def updateModelFromThread(self, widget, value): # TODO: Name, and typing
         """
         Update the model in the main thread
         """
         try:
-            value = float('%.3g' % value)
+            value = float('%.3g' % value) # TODO: Replace with round
         except TypeError:
             pass
         item = QtGui.QStandardItem(str(value))
         self.model.setItem(widget, item)
         self.mapper.toLast()
-
-    def title(self):
-        """ Perspective name """
-        return "Invariant Perspective"
 
     def onStatus(self):
         """
@@ -571,12 +575,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         self.txtNptsHighQ.textChanged.connect(self.checkLength)
 
+        self.txtExtrapolQMin.editingFinished.connect(self.checkQMinRange)
         self.txtExtrapolQMin.textChanged.connect(self.checkQMinRange)
 
+        self.txtExtrapolQMax.editingFinished.connect(self.checkQMaxRange)
         self.txtExtrapolQMax.textChanged.connect(self.checkQMaxRange)
 
+        self.txtNptsLowQ.editingFinished.connect(self.checkQRange)
         self.txtNptsLowQ.textChanged.connect(self.checkQRange)
 
+        self.txtNptsHighQ.editingFinished.connect(self.checkQRange)
         self.txtNptsHighQ.textChanged.connect(self.checkQRange)
 
     def stateChanged(self):
@@ -639,12 +647,22 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
                                        self._path, name,
                                        self.sender().checkState())
 
-    def checkQMaxRange(self):
+    def checkQMaxRange(self, value=None):
+        if not value:
+            value = float(self.txtExtrapolQMax.text()) if self.txtExtrapolQMax.text() else ''
+        if value == '':
+            self.model.setItem(WIDGETS.W_EX_QMAX, QtGui.QStandardItem(value))
+            return
         item = QtGui.QStandardItem(self.txtExtrapolQMax.text())
         self.model.setItem(WIDGETS.W_EX_QMAX, item)
         self.checkQRange()
 
-    def checkQMinRange(self):
+    def checkQMinRange(self, value=None):
+        if not value:
+            value = float(self.txtExtrapolQMin.text()) if self.txtExtrapolQMin.text() else ''
+        if value == '':
+            self.model.setItem(WIDGETS.W_EX_QMIN, QtGui.QStandardItem(value))
+            return
         item = QtGui.QStandardItem(self.txtExtrapolQMin.text())
         self.model.setItem(WIDGETS.W_EX_QMIN, item)
         self.checkQRange()
@@ -1013,7 +1031,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             state[data_id] = {'invar_params': tab_data}
         return state
 
-    def getPage(self):
+    def getPage(self) -> dict: # TODO: Better name, serializePage, pageData
         """
         Serializes full state of this invariant page
         Called by Save Analysis
@@ -1026,7 +1044,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             param_dict['data_id'] = str(self._data.id)
         return param_dict
 
-    def getState(self):
+    def getState(self): # TODO: Better name, serializeState, stateData
         """
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}

@@ -13,7 +13,7 @@ from sas.qtgui.UI import main_resources_rc
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from .UI.SlitSizeCalculator import Ui_SlitSizeCalculator
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 

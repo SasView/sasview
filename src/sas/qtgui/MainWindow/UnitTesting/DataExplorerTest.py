@@ -1,6 +1,7 @@
 import sys
 import time
 import unittest
+import random
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -15,7 +16,7 @@ import path_prepare
 
 # Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
@@ -26,7 +27,7 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 if not QApplication.instance():
     app = QApplication(sys.argv)
@@ -246,12 +247,12 @@ class DataExplorerTest(unittest.TestCase):
         QMessageBox.question = MagicMock(return_value=QMessageBox.No)
 
         # Populate the model
-        item1 = QStandardItem(True)
+        item1 = HashableStandardItem(True)
         item1.setCheckable(True)
         item1.setCheckState(Qt.Checked)
         item1.setText("item 1")
         self.form.theory_model.appendRow(item1)
-        item2 = QStandardItem(True)
+        item2 = HashableStandardItem(True)
         item2.setCheckable(True)
         item2.setCheckState(Qt.Unchecked)
         item2.setText("item 2")
@@ -504,7 +505,7 @@ class DataExplorerTest(unittest.TestCase):
         qApp.processEvents()
 
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.url()))
+        self.assertIn(partial_url, str(self.form._helpView.web()))
         # Close the browser
         self.form._helpView.close()
 
@@ -512,7 +513,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(button2, Qt.LeftButton)
         qApp.processEvents()
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.url()))
+        self.assertIn(partial_url, str(self.form._helpView.web()))
 
     def testLoadFile(self):
         """
@@ -603,7 +604,7 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 1)
 
         self.assertTrue(self.form.cbgraph.isEnabled())
         self.assertTrue(self.form.cmdAppend.isEnabled())
@@ -681,14 +682,14 @@ class DataExplorerTest(unittest.TestCase):
 
         QApplication.processEvents()
         # See that we have two plots
-        self.assertEqual(len(PlotHelper.currentPlots()), 2)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 2)
 
         # Add data to plot #1
         self.form.cbgraph.setCurrentIndex(1)
         self.form.appendPlot()
 
         # See that we still have two plots
-        self.assertEqual(len(PlotHelper.currentPlots()), 2)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 2)
 
     def testUpdateGraphCombo(self):
         """
@@ -774,13 +775,59 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(self.form.nameChangeBox.txtFileName.text(), "")
         self.assertEqual(self.form.nameChangeBox.txtNewCategory.text(), "")
 
+    def testNameDictionary(self):
+        """
+        Testing the name dictionary self.form.manager.data_name_dict to catch edge cases
+        """
+        names_to_delete = []
+        names_with_brackets = ["test", "test [brackets]", "test [brackets", "test brackets]"]
+        names_numbered = ["test [1]", "test [2]"]
+        names_edge_cases = ["test [1] [2]", "test [2] [1]"]
+        # Ensure items not of type() == str return empty string
+        self.assertEqual("", self.form.manager.rename(names_with_brackets))
+        self.assertEqual("", self.form.manager.rename(self))
+        self.assertNotIn("", self.form.manager.data_name_dict)
+        # Test names with brackets
+        for i, name in enumerate(names_with_brackets):
+            # Send to rename method which populates data_name_dict
+            names_to_delete.append(self.form.manager.rename(name))
+            # Ensure each name is unique
+            self.assertEqual(i + 1, len(self.form.manager.data_name_dict))
+            self.assertEqual(1, len(self.form.manager.data_name_dict[name]))
+        for i, name in enumerate(names_with_brackets):
+            names_to_delete.append(self.form.manager.rename(name))
+            self.assertEqual(4, len(self.form.manager.data_name_dict))
+            self.assertEqual(2, len(self.form.manager.data_name_dict[name]))
+            self.assertEqual(self.form.manager.data_name_dict[name], [0,1])
+        for i, name in enumerate(names_numbered):
+            return_name = self.form.manager.rename(name)
+            names_to_delete.append(return_name)
+            self.assertEqual(return_name, f"test [{i+2}]")
+            self.assertEqual(4, len(self.form.manager.data_name_dict))
+            self.assertNotIn(name, self.form.manager.data_name_dict)
+        self.assertEqual([0,1,2,3], self.form.manager.data_name_dict['test'])
+        for i, name in enumerate(names_edge_cases):
+            names_to_delete.append(self.form.manager.rename(name))
+            self.assertEqual(5 + i, len(self.form.manager.data_name_dict))
+            self.assertIn(name, self.form.manager.data_name_dict)
+        # Names will be truncated when matching numbers
+        # Shuffle the list to be sure deletion order doesn't matter
+        random.shuffle(names_to_delete)
+        for i, name in enumerate(names_to_delete):
+            items_left = 0
+            self.form.manager.remove_item_from_data_name_dict(name)
+            for value in self.form.manager.data_name_dict.values():
+                items_left += len(value)
+            self.assertLess(items_left, len(names_to_delete))
+        # Data name dictionary should be empty at this point
+        self.assertEqual(0, len(self.form.manager.data_name_dict))
+
     def testNameChange(self):
         """
         Test the display name change routines
         """
         # Define Constants
         FILE_NAME = "cyl_400_20.txt"
-        FILE_NAME_APPENDED = FILE_NAME + " [1]"
         TEST_STRING_1 = "test value change"
         TEST_STRING_2 = "TEST VALUE CHANGE"
         # Test base state of the name change window
@@ -826,14 +873,14 @@ class DataExplorerTest(unittest.TestCase):
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME_APPENDED)
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
 
         # Take the user-defined name, which is empty - should retain existing value
         self.form.nameChangeBox.rbNew.setChecked(True)
         self.assertFalse(self.form.nameChangeBox.rbExisting.isChecked())
         self.form.nameChangeBox.cmdOK.click()
         self.form.changeName()
-        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME_APPENDED)
+        self.assertEqual(self.form.nameChangeBox.txtCurrentName.text(), FILE_NAME)
 
         # Take a different user-defined name
         self.form.nameChangeBox.rbNew.setChecked(True)
@@ -985,6 +1032,9 @@ class DataExplorerTest(unittest.TestCase):
         # Populate the model
         filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
         self.form.readData(filename)
+        self.assertEqual(len(self.form.manager.data_name_dict), 1)
+        self.assertEqual(len(self.form.manager.data_name_dict["cyl_400_20.txt"]), 3)
+        self.assertEqual(max(self.form.manager.data_name_dict["cyl_400_20.txt"]), 2)
 
         # Assure the model contains three items
         self.assertEqual(self.form.model.rowCount(), 3)
@@ -1061,7 +1111,7 @@ class DataExplorerTest(unittest.TestCase):
         QApplication.processEvents()
 
         # The plot was registered
-        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 1)
         self.assertEqual(len(self.form.plot_widgets), 1)
         # could have leftovers from previous tests
         #self.assertEqual(list(self.form.plot_widgets.keys()), ['Graph3'])
@@ -1074,7 +1124,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.closePlotsForItem(model_item)
 
         # See that no plot remained
-        self.assertEqual(len(PlotHelper.currentPlots()), 0)
+        self.assertEqual(len(PlotHelper.currentPlotIds()), 0)
         self.assertEqual(len(self.form.plot_widgets), 0)
 
     def testPlotsFromMultipleData1D(self):

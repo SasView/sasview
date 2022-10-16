@@ -3,11 +3,11 @@ import numpy as np
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Source
+from sasdata.dataloader.data_info import Detector
+from sasdata.dataloader.data_info import Source
 
 
-class FittingLogic(object):
+class FittingLogic:
     """
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.

@@ -2,6 +2,9 @@ import sys
 import unittest
 import time
 import logging
+import os
+import inspect
+import glob
 
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -17,13 +20,15 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-import sas.qtgui.Utilities.LocalConfig
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+
+from sasmodels.sasview_model import load_custom_model
+from sas.sascalc.fit.models import ModelManagerBase, ModelManager
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -54,12 +59,81 @@ class dummy_perspective(object):
     def getConstraintTab(self):
         return self.constraint_tab
 
+def find_plugin_models_mod():
+    """
+    Modification to sas.sascalc.fit.models.find_plugin_models().
+    Instead of searching for user's plugin directory, the path is set at:
+    'sas/qtgui/Perspectives/Fitting/plugin_models'
+    Modified to test handling of plugin models.
+    """
+    plugins_dir = [
+        os.path.abspath(path) for path in glob.glob("**/plugin_models",recursive=True)
+        if os.path.normpath("qtgui/Perspectives/Fitting/plugin_models") in os.path.abspath(path)
+    ][0]
+
+    plugins = {}
+    for filename in os.listdir(plugins_dir):
+        name, ext = os.path.splitext(filename)
+        if ext == '.py' and not name == '__init__':
+            path = os.path.abspath(os.path.join(plugins_dir, filename))
+            model = load_custom_model(path)
+            plugins[model.name] = model
+
+    return plugins
+
+class ModelManagerBaseMod(ModelManagerBase):
+    """
+    Inherits from ModelManagerBase class and is the base class for the ModelManagerMod.
+    Modified to test handling of plugin models.
+    """
+    def _is_plugin_dir_changed(self):
+        """
+        Originally checked if the plugin directory has changed, returning True if so.
+        Now returns False in all cases to test handling of plugin models.
+        """
+        is_modified = False
+        return is_modified
+
+    def plugins_reset(self):
+        """
+        Returns a dictionary of the models, but will now utilize the find_plugin_models_mod function.
+        """
+        self.plugin_models = find_plugin_models_mod()
+        self.model_dictionary.clear()
+        self.model_dictionary.update(self.standard_models)
+        self.model_dictionary.update(self.plugin_models)
+        return self.get_model_list()
+
+class ModelManagerMod(ModelManager):
+    """
+    Inherits from ModelManager class which manages the list of available models.
+    Modified to test handling of plugin models.
+    """
+    base = None
+
+    def __init__(self):
+        if ModelManagerMod.base is None:
+            ModelManagerMod.base = ModelManagerBaseMod()
+
+class FittingWidgetMod(FittingWidget):
+    """
+    Inherits from FittingWidget class which is the main widget for selecting form and structure factor models.
+    Modified to test handling of plugin models.
+    """
+    def customModels(cls):
+        """
+        Reads in file names from the modified plugin directory to test handling of plugin models.
+        """
+        manager = ModelManagerMod()
+        manager.update()
+        return manager.base.plugin_models
+
 class FittingWidgetTest(unittest.TestCase):
     """Test the fitting widget GUI"""
 
     def setUp(self):
         """Create the GUI"""
-        self.widget = FittingWidget(dummy_manager())
+        self.widget = FittingWidgetMod(dummy_manager())
         FittingUtilities.checkConstraints = MagicMock(return_value=None)
 
     def tearDown(self):
@@ -104,7 +178,7 @@ class FittingWidgetTest(unittest.TestCase):
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         item = QtGui.QStandardItem("test")
 
-        widget_with_data = FittingWidget(dummy_manager(), data=item, tab_id=3)
+        widget_with_data = FittingWidgetMod(dummy_manager(), data=item, tab_id=3)
 
         self.assertEqual(widget_with_data.data, data)
         self.assertTrue(widget_with_data.data_is_loaded)
@@ -146,18 +220,20 @@ class FittingWidgetTest(unittest.TestCase):
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
         self.assertEqual(mag_index.data(), "up_frac_f")
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        self.assertEqual(mag_index.data(), "up_angle")
+        self.assertEqual(mag_index.data(), "up_theta")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
-        self.assertEqual(mag_index.data(), "sld_M0")
+        self.assertEqual(mag_index.data(), "up_phi")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)
-        self.assertEqual(mag_index.data(), "sld_mtheta")
+        self.assertEqual(mag_index.data(), "sld_M0")
         mag_index = fittingWindow.lstMagnetic.model().index(5,0)
-        self.assertEqual(mag_index.data(), "sld_mphi")
+        self.assertEqual(mag_index.data(), "sld_mtheta")
         mag_index = fittingWindow.lstMagnetic.model().index(6,0)
-        self.assertEqual(mag_index.data(), "sld_solvent_M0")
+        self.assertEqual(mag_index.data(), "sld_mphi")
         mag_index = fittingWindow.lstMagnetic.model().index(7,0)
-        self.assertEqual(mag_index.data(), "sld_solvent_mtheta")
+        self.assertEqual(mag_index.data(), "sld_solvent_M0")
         mag_index = fittingWindow.lstMagnetic.model().index(8,0)
+        self.assertEqual(mag_index.data(), "sld_solvent_mtheta")
+        mag_index = fittingWindow.lstMagnetic.model().index(9,0)
         self.assertEqual(mag_index.data(), "sld_solvent_mphi")
 
         # test the delegate a bit
@@ -166,7 +242,7 @@ class FittingWidgetTest(unittest.TestCase):
 
     def testSelectStructureFactor(self):
         """
-        Test if structure factors have been loaded properly
+        Test if structure factors have been loaded properly, including plugins also classified as a structure factor.
         """
         fittingWindow =  self.widget
 
@@ -175,6 +251,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertNotEqual(fittingWindow.cbStructureFactor.findText("hayter_msa"),-1)
         self.assertNotEqual(fittingWindow.cbStructureFactor.findText("squarewell"),-1)
         self.assertNotEqual(fittingWindow.cbStructureFactor.findText("hardsphere"),-1)
+        self.assertNotEqual(fittingWindow.cbStructureFactor.findText("plugin_structure_template"),-1)
+        self.assertEqual(fittingWindow.cbStructureFactor.findText("plugin_template"),-1)
 
         #Test what is current text in the combobox
         self.assertTrue(fittingWindow.cbCategory.currentText(), "None")
@@ -349,7 +427,7 @@ class FittingWidgetTest(unittest.TestCase):
         Check that the fitting 1D data object is ready
         """
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # Mock the thread creation
             threads.deferToThread = MagicMock()
             # Model for theory
@@ -1624,7 +1702,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # see if radius is the same as set
-        self.assertTrue(self.widget._model_model.item(5, 1).text() == "333.0")
+        row = self.widget.getRowFromName("radius")
+        self.assertEqual(self.widget._model_model.item(row, 1).text(), "333")
 
         # Now, change not just model but a category as well
         # cylinder / cylinder
@@ -1635,7 +1714,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(model_index)
 
         # see if radius is still the same
-        self.assertTrue(int(self.widget._model_model.item(5, 1).text()) == 333)
+        row = self.widget.getRowFromName("radius")
+        self.assertEqual(int(self.widget._model_model.item(row, 1).text()), 333)
 
     def testOnParameterPaste(self):
         """
@@ -1691,6 +1771,49 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(constraint.active, False)
         # Check that the uncheckConstraint method was called
         constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
+
+    def testQRangeReset(self):
+        ''' Test onRangeReset w/ and w/o data loaded '''
+        self.assertEqual(self.widget.options_widget.qmin,
+                         self.widget.options_widget.QMIN_DEFAULT)
+        self.assertEqual(self.widget.options_widget.qmax,
+                         self.widget.options_widget.QMAX_DEFAULT)
+        self.assertEqual(self.widget.options_widget.npts,
+                         self.widget.options_widget.NPTS_DEFAULT)
+        self.assertEqual(self.widget.options_widget.npts,
+                         self.widget.options_widget.npts_fit)
+        # Set values to non-defaults and check they updated
+        self.widget.options_widget.updateMinQ(0.01)
+        self.widget.options_widget.updateMaxQ(0.02)
+        self.assertEqual(float(self.widget.options_widget.qmin), 0.01)
+        self.assertEqual(float(self.widget.options_widget.qmax), 0.02)
+        # Click the reset range button and check the values went back to defaults
+        self.widget.options_widget.cmdReset.click()
+        self.assertEqual(self.widget.options_widget.qmin,
+                         self.widget.options_widget.QMIN_DEFAULT)
+        self.assertEqual(self.widget.options_widget.qmax,
+                         self.widget.options_widget.QMAX_DEFAULT)
+        self.assertEqual(self.widget.options_widget.npts,
+                         self.widget.options_widget.NPTS_DEFAULT)
+        # Load data into tab and check new limits
+        data = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        item = QtGui.QStandardItem("test")
+        widget_with_data = FittingWidget(dummy_manager(), data=item, tab_id=3)
+        self.assertEqual(widget_with_data.options_widget.qmin, min(data.x))
+        self.assertEqual(widget_with_data.options_widget.qmax, max(data.x))
+        self.assertEqual(widget_with_data.options_widget.npts, len(data.x))
+        # Set values to non-defaults and check they updated
+        self.widget.options_widget.updateMinQ(0.01)
+        self.widget.options_widget.updateMaxQ(0.02)
+        self.assertEqual(float(self.widget.options_widget.qmin), 0.01)
+        self.assertEqual(float(self.widget.options_widget.qmax), 0.02)
+        # Click the reset range button and check the values went back to data values
+        self.widget.options_widget.cmdReset.click()
+        self.assertEqual(widget_with_data.options_widget.qmin, min(data.x))
+        self.assertEqual(widget_with_data.options_widget.qmax, max(data.x))
+        self.assertEqual(widget_with_data.options_widget.npts, len(data.x))
+
 
 if __name__ == "__main__":
     unittest.main()
