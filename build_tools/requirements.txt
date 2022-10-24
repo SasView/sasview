@@ -3,6 +3,7 @@ scipy==1.7.3
 docutils 
 pytest
 pytest_qt
+pyteset-mock
 unittest-xml-reporting
 tinycc 
 h5py 
