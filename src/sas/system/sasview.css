@@ -1,0 +1,6 @@
+* {font-size: 10pt;}
+
+QLineEdit {background-color: white; color: black;}
+QLineEdit:focus {background-color: #98dbcc; color: #333333}
+
+.warning {background-color: red;}

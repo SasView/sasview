@@ -5,7 +5,7 @@ import os
 import sys
 
 from sas import config
-from sas.system import env, version
+from sas.system import env, version, style
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
@@ -98,7 +98,7 @@ def run_sasview():
     splash.show()
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     # Main application style.
-    #app.setStyle('Fusion')
+    app.setStyleSheet(style.style_sheet())
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     if 'twisted.internet.reactor' in sys.modules:
