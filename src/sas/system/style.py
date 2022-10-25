@@ -5,12 +5,34 @@ import sys
 from sas.system import user, config
 
 
+
 class StyleSheet:
     """
     Class to create and load the per-user style sheet.
 
     Stores the file in ~/.sasview/sasview.css, if it does not already exist, otherwise overwrites it
     """
+    _default_sheet = """
+        /* Global Properties */
+        * {font-size: 9pt; font-family: Helvetica, Arial, Verdana, sans-serif}
+    
+        /* HTML Elements */
+        h1 {font-size: 240%;}
+    
+        /* Qt Elements */
+        QLineEdit {background-color: white; color: black;}
+        QLineEdit:focus {background-color: #98dbcc; color: #333333}
+        QLineEdit[urgent=true] {background-color: red;}
+        QTableWidgetItem[italic=true] {font-style: italic}
+    
+        QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
+    
+        QToolTip {font-size: 80%;}
+    
+        /* Class-specific Properties */
+        .monospace {font-family: 'monospace, monospace'}
+        """
+
     def __init__(self):
         self.style_sheet = None
         self.save()
@@ -24,7 +46,6 @@ class StyleSheet:
         """
         Save the existing style in the user directory
         """
-        self._find_style_sheet()
         sheet = self.read()
         self._style_sheet_filename()
         with open(self.style_sheet, 'w') as file:
@@ -55,12 +76,15 @@ class StyleSheet:
             if os.path.exists(filepath):
                 self.style_sheet = filepath
                 return
-        print(f"'{filename}' not found.", file=sys.stderr)
         self.style_sheet = None
 
     def read(self):
-        with open(self.style_sheet) as f:
-            style = f.read()
+        self._find_style_sheet()
+        if self.style_sheet is not None:
+            with open(self.style_sheet) as f:
+                style = f.read()
+        else:
+            style = self._default_sheet
         return style
 
 
