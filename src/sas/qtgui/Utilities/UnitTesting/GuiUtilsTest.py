@@ -595,9 +595,9 @@ class GuiUtilsTest:
         assert toDouble(value) == 1.0
         value = "1.2"
         # has to be AlmostEqual due to numerical rounding
-        assert round(abs(toDouble(value)-1.2), 6) == 0
+        assert toDouble(value) == pytest.approx(1.2, abs=1e-6)
         value = "2,1"
-        assert round(abs(toDouble(value)-2.1), 6) == 0
+        assert toDouble(value) == pytest.approx(2.1, abs=1e-6)
 
         # bad values
         value = None
