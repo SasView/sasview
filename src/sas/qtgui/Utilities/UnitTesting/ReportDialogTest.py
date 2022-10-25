@@ -72,7 +72,7 @@ class ReportDialogTest:
         #widget.onPrint()
 
         # Assure printing was done
-        #self.assertTrue(document.print.called)
+        #assert document.print.called
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # RuntimeError: wrapped C/C++ object of type ReportDialog has been deleted
