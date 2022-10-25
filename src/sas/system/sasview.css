@@ -9,8 +9,9 @@ QLineEdit {background-color: white; color: black;}
 QLineEdit:focus {background-color: #98dbcc; color: #333333}
 QLineEdit[urgent=true] {background-color: red;}
 
+QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
+
 QToolTip {font-size: 80%;}
 
 /* Class-specific Properties */
-.angstrom {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
 .monospace {font-family: 'monospace, monospace'}
