@@ -89,7 +89,7 @@ class CorfuncTest:
         f = Loader().load(filename)
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename, ''))
 
-        #self.assertEqual(widget.txtFilename.text(), filename)
+        #assert widget.txtFilename.text() == filename
 
         assert float(widget.txtBackground.text()) == 0.0
 
@@ -101,13 +101,13 @@ class CorfuncTest:
 
 
         #TODO: All the asserts when Calculate is clicked and file properly loaded
-        #self.assertTrue(float(widget.txtBackground.text()) > 0.2)
+        #assert float(widget.txtBackground.text()) > 0.2
 
         #widget.extrapolateBtn.click()
-        #self.assertTrue(float(widget.txtGuinierA.text()) > 1)
-        #self.assertTrue(float(widget.txtGuinierB.text()) < -10000)
-        #self.assertTrue(float(widget.txtPorodK.text()) > 10)
-        #self.assertTrue(float(widget.txtPorodSigma.text()) > 10)
+        #assert float(widget.txtGuinierA.text()) > 1
+        #assert float(widget.txtGuinierB.text()) < -10000
+        #assert float(widget.txtPorodK.text()) > 10
+        #assert float(widget.txtPorodSigma.text()) > 10
 
         #################################################
         # The testing framework does not seem to handle
@@ -120,15 +120,12 @@ class CorfuncTest:
         # while float(widget.longPeriod.text()) == 0.0:
         #     print("Waiting")
         #     sleep(1)
-        # self.assertTrue(float(widget.longPeriod.text()) > 10)
-        # self.assertTrue(float(widget.polydisp.text()) > 0)
-        # self.assertTrue(float(widget.localCrystal.text()) > 0)
-        # self.assertTrue(float(widget.longPeriod.text()) >
-        #                 float(widget.avgHardBlock.text()) > 0)
-        # self.assertTrue(float(widget.longPeriod.text()) >
-        #                 float(widget.avgIntThick.text()) > 0)
-        # self.assertTrue(float(widget.longPeriod.text()) >
-        #                 float(widget.avgCoreThick.text()) > 0)
+        # assert float(widget.longPeriod.text()) > 10
+        # assert float(widget.polydisp.text()) > 0
+        # assert float(widget.localCrystal.text()) > 0
+        # assert float(widget.longPeriod.text()) > float(widget.avgHardBlock.text()) > 0
+        # assert float(widget.longPeriod.text()) > float(widget.avgIntThick.text()) > 0
+        # assert float(widget.longPeriod.text()) > float(widget.avgCoreThick.text()) > 0
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testSerialization(self, widget):
