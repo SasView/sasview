@@ -319,7 +319,7 @@ class InvariantPerspectiveTest:
         # Ensure the extrapolation plot is generated
         assert widget.high_extrapolation_plot is not None
         # Ensure Qmax for the plot is equal to Qmax entered into the extrapolation limits
-        assert round(abs(max(widget.high_extrapolation_plot.x)-100.0), 7) == 0
+        assert max(widget.high_extrapolation_plot.x) == pytest.approx(100.0, abs=1e-7)
         # Ensure radio buttons unchanged
         assert not widget.rbFitHighQ.isChecked()
         assert widget.rbFixHighQ.isChecked()
