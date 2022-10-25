@@ -65,6 +65,8 @@ class PlotterWidget(PlotterBase):
         self.toolbar._actions['pan'].triggered.connect(self._pan)
         self.toolbar._actions['zoom'].triggered.connect(self._zoom)
 
+        self.legendVisible = True
+
         parent.geometry()
 
     @property
@@ -238,7 +240,8 @@ class PlotterWidget(PlotterBase):
 
             self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
             self.legend.set_picker(True)
-
+            self.legend.set_visible(self.legendVisible)
+            
         # Current labels for axes
         if self.yLabel and not is_fit:
             ax.set_ylabel(self.yLabel)
@@ -278,6 +281,7 @@ class PlotterWidget(PlotterBase):
 
         # refresh canvas
         self.canvas.draw_idle()
+
 
     def createContextMenu(self):
         """
@@ -768,8 +772,9 @@ class PlotterWidget(PlotterBase):
         if not self.showLegend:
             return
 
-        visible = self.legend.get_visible()
-        self.legend.set_visible(not visible)
+        #visible = self.legend.get_visible()
+        self.legendVisible = not self.legendVisible
+        self.legend.set_visible(self.legendVisible)
         self.canvas.draw_idle()
 
     def onCusotmizeLabel(self):
