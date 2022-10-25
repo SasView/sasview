@@ -206,7 +206,7 @@ class FittingUtilitiesTest:
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should be zero
-        assert round(abs(chi-0.0), 8) == 0
+        assert chi == pytest.approx(0.0, abs=1e-8)
 
         # 2. far data
         current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0])
@@ -214,13 +214,13 @@ class FittingUtilitiesTest:
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should not be zero
-        assert round(abs(chi-31250.0), 8) == 0
+        assert chi == pytest.approx(31250.0, rel=1e-8)
 
         # 3. Wrong data
         current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0, 200.0])
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
         # Should remain unchanged
-        assert round(abs(chi-31250.0), 8) == 0
+        assert chi == pytest.approx(31250.0, rel=1e-8)
 
     def testCalculate2DChi2(self):
         """
@@ -241,7 +241,7 @@ class FittingUtilitiesTest:
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should be zero
-        assert round(abs(chi-0.0), 8) == 0
+        assert chi == pytest.approx(0.0, abs=1e-8)
 
         # 2. far data
         current_data = Data2D(image=[100.0, 200.0, 300.0],
@@ -252,7 +252,7 @@ class FittingUtilitiesTest:
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should not be zero
-        assert round(abs(chi-9607.88), 2) == 0
+        assert chi == pytest.approx(9607.88, abs=1e-2)
 
         # 3. Wrong data
         current_data = Data2D(image=[1.0, 2.0, 3.0],
