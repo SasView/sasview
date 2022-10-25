@@ -25,9 +25,9 @@ class SldAlgorithmTest:
                                 mass_density,
                                 wavelength)
         #assert isinstance(results, SldResult)
-        assert round(abs(results.neutron_length-0.175463), 5) == 0
-        assert round(abs(results.neutron_inc_xs-5.365857), 5) == 0
-        assert round(abs(results.neutron_abs_xs-0.074224), 5) == 0
+        assert results.neutron_length == pytest.approx(0.175463, abs=1e-5)
+        assert results.neutron_inc_xs == pytest.approx(5.365857, abs=1e-5)
+        assert results.neutron_abs_xs == pytest.approx(0.074224, abs=1e-5)
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testSldAlgorithm2(self):
@@ -39,11 +39,11 @@ class SldAlgorithmTest:
                                 mass_density,
                                 wavelength)
         #assert isinstance(results, SldResult)
-        assert round(abs(results.neutron_length-0.059402), 5) == 0
-        assert round(abs(results.neutron_inc_xs-0.145427), 5) == 0
-        assert round(abs(results.neutron_abs_xs-15.512215), 5) == 0
-        assert round(abs(results.neutron_sld_real-1.3352833e-05), 5) == 0
-        assert round(abs(results.neutron_sld_imag-1.1645807e-10), 5) == 0
+        assert results.neutron_length == pytest.approx(0.059402, abs=1e-5)
+        assert results.neutron_inc_xs == pytest.approx(0.145427, abs=1e-5)
+        assert results.neutron_abs_xs == pytest.approx(15.512215, abs=1e-5)
+        assert results.neutron_sld_real == pytest.approx(1.3352833e-05, abs=1e-5)
+        assert results.neutron_sld_imag == pytest.approx(1.1645807e-10, abs=1e-5)
 
 class SLDCalculatorTest:
     '''Test the SLDCalculator'''
