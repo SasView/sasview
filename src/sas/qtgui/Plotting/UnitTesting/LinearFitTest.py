@@ -137,7 +137,7 @@ class LinearFitTest:
         # Good values
         assert widget.checkFitValues(widget.txtFitRangeMin)
         # Colors platform dependent
-        #self.assertEqual(widget.txtFitRangeMin.palette().color(10).name(), "#f0f0f0")
+        #assert widget.txtFitRangeMin.palette().color(10).name() == "#f0f0f0"
         # Bad values
         widget.x_is_log = True
         widget.txtFitRangeMin.setText("-1.0")
