@@ -241,7 +241,7 @@ class GuiUtilsTest:
             retrieveData1d("BOOP")
 
         #data = Data1D()
-        #with self.assertRaises(ValueError):
+        #with pytest.raises(ValueError):
         #    retrieveData1d(data)
 
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
@@ -626,7 +626,7 @@ class DoubleValidatorTest:
         assert validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
         float_good = "170.11"
         ## investigate: a double returns Invalid here!
-        ##self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        ##assert self.validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
         float_good = "17e2"
         assert validator.validate(float_good, 1)[0] == QtGui.QValidator.Acceptable
 
