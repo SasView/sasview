@@ -9,7 +9,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-
 class ResultPanel(QtWidgets.QTabWidget):
     """
     FitPanel class contains fields allowing to fit  models and  data

@@ -15,8 +15,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
 
-from .geni import Iq, Iqxy
-
 if sys.version_info[0] < 3:
     def decode(s):
         return s
@@ -179,6 +177,7 @@ class GenSAS(object):
         :Param y: array of y-values
         :return: function value
         """
+        from .geni import Iq, Iqxy
         # transform position data from sample to beamline coords
         x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
