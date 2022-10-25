@@ -268,16 +268,16 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logging.warning(msg)
-                self.txtNumber.setProperty('class', 'warning')
+                GuiUtils.updateProperty(self.txtNumber, 'urgent', 'true')
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
                 logging.warning(msg)
-                self.txtNumber.setProperty('class', 'warning')
+                GuiUtils.updateProperty(self.txtNumber, 'urgent', 'true')
 
             else:
-                self.txtNumber.setProperty('class', None)
+                GuiUtils.updateProperty(self.txtNumber, 'urgent', 'false')
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
@@ -288,13 +288,14 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
         else:
             if self.cbData2.currentText() == 'Number':
-                self.cbData1.setProperty('class', None)
-                self.cbData2.setProperty('class', None)
+
+                GuiUtils.updateProperty(self.cbData1, 'urgent', 'false')
+                GuiUtils.updateProperty(self.cbData2, 'urgent', 'false')
                 return True
 
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
-                self.cbData1.setProperty('class', 'warning')
-                self.cbData2.setProperty('class', 'warning')
+                GuiUtils.updateProperty(self.cbData1, 'urgent', 'true')
+                GuiUtils.updateProperty(self.cbData2, 'urgent', 'true')
                 print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logging.error('Cannot compute data of different dimensions')
                 return False
@@ -303,8 +304,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
                 logging.error('Cannot compute 1D data of different lengths')
-                self.cbData1.setProperty('class', 'warning')
-                self.cbData2.setProperty('class', 'warning')
+                GuiUtils.updateProperty(self.cbData1, 'urgent', 'true')
+                GuiUtils.updateProperty(self.cbData2, 'urgent', 'true')
                 return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
@@ -315,14 +316,14 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                     or not all(i == j for i, j in
                                 zip(self.data1.qy_data, self.data2.qy_data))
                          ):
-                self.cbData1.setProperty('class', 'warning')
-                self.cbData2.setProperty('class', 'warning')
+                GuiUtils.updateProperty(self.cbData1, 'urgent', 'true')
+                GuiUtils.updateProperty(self.cbData2, 'urgent', 'true')
                 logging.error('Cannot compute 2D data of different lengths')
                 return False
 
             else:
-                self.cbData1.setProperty('class', None)
-                self.cbData2.setProperty('class', None)
+                GuiUtils.updateProperty(self.cbData1, 'urgent', 'false')
+                GuiUtils.updateProperty(self.cbData2, 'urgent', 'false')
                 return True
 
     def onCheckOutputName(self):
@@ -330,17 +331,17 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         name_to_check = str(self.txtOutputData.text())
 
         if name_to_check is None or name_to_check == '':
-            self.txtOutputData.setProperty('class', 'warning')
+            GuiUtils.updateProperty(self.txtOutputData, 'urgent', 'true')
             logging.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
-            self.txtOutputData.setProperty('class', 'warning')
+            GuiUtils.updateProperty(self.txtOutputData, 'urgent', 'true')
             logging.warning('The Output data name already exists')
             return False
 
         else:
-            self.txtOutputData.setProperty('class', None)
+            GuiUtils.updateProperty(self.txtOutputData, 'urgent', 'false')
             return True
 
     # ########
