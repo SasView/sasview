@@ -41,7 +41,6 @@ class StyleSheet:
         self._style_sheet_filename()
         places_to_look_for_conf_file = [
             self.style_sheet,
-            filename,
         ]
 
         # To avoid the exception in OSx
@@ -66,3 +65,23 @@ class StyleSheet:
 
 
 style_sheet = StyleSheet()
+
+
+default_sheet = """
+/* Global Properties */
+* {font-size: 9pt; font-family: "Lucinda Grande", "Lucinda Sans Unicode", Helvetica, Arial, Verdana, sans-serif}
+
+/* HTML Elements */
+h1 {font-size: 240%;}
+
+/* Qt Elements */
+QLineEdit {background-color: white; color: black;}
+QLineEdit:focus {background-color: #98dbcc; color: #333333}
+QLineEdit[urgent=true] {background-color: red;}
+
+QToolTip {font-size: 80%;}
+
+/* Class-specific Properties */
+.angstrom {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
+.monospace {font-family: 'monospace, monospace'}
+"""

@@ -241,16 +241,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
 
         # New font to display angstrom symbol
-        self.lblUnitSolventSLD.setProperty('class', 'angstrom')
-        self.lblUnitVolume.setProperty('class', 'angstrom')
-        self.lbl5.setProperty('class', 'angstrom')
-        self.lblUnitMx.setProperty('class', 'angstrom')
-        self.lblUnitMy.setProperty('class', 'angstrom')
-        self.lblUnitMz.setProperty('class', 'angstrom')
-        self.lblUnitNucl.setProperty('class', 'angstrom')
-        self.lblUnitx.setProperty('class', 'angstrom')
-        self.lblUnity.setProperty('class', 'angstrom')
-        self.lblUnitz.setProperty('class', 'angstrom')
+        GuiUtils.updateProperty(self.lblUnitSolventSLD, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitVolume, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lbl5, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitMx, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitMy, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitMz, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitNucl, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitx, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnity, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitz, 'angstrom', 'true')
 
     def setup_display(self):
         """
