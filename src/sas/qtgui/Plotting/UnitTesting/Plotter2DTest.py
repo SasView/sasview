@@ -90,7 +90,7 @@ class Plotter2DTest:
         plotter.scale = 'linear'
         depth = plotter.calculateDepth()
         assert depth[0] == -32.
-        assert round(abs(depth[1]-1.30103), 5) == 0
+        assert depth[1] == pytest.approx(1.30103, abs=1e-5)
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnColorMap(self, plotter, mocker):
@@ -108,8 +108,8 @@ class Plotter2DTest:
         assert QtWidgets.QDialog.exec_.called
 
         assert plotter.cmap == "jet"
-        assert round(abs(plotter.vmin-0.1), 6) == 0
-        assert round(abs(plotter.vmax-1e+20), 6) == 0
+        assert plotter.vmin == pytest.approx(0.1, abs=1e-6)
+        assert plotter.vmax == pytest.approx(1e+20, abs=1e-6)
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnToggleScale(self, plotter, mocker):
