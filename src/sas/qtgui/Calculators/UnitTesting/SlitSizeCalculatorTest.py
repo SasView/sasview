@@ -64,8 +64,8 @@ class SlitSizeCalculatorTest:
         assert QtWidgets.QFileDialog.getOpenFileName.called
         QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
-
-    def notestCalculateSlitSize(self, widget):
+    @pytest.mark.skip(reason="2022-09 already broken - already skipped")
+    def testCalculateSlitSize(self, widget):
         """ Test slit size calculated value """
 
         filename = "beam_profile.DAT"
@@ -75,7 +75,7 @@ class SlitSizeCalculatorTest:
         widget.calculateSlitSize(data)
         # The value "5.5858" was obtained by manual calculation.
         # It turns out our slit length is FWHM/2
-        assert round(abs(float(widget.slit_length_out.text())-5.5858/2), 3) == 0
+        assert float(widget.slit_length_out.text()) == pytest.approx(5.5858/2, abs=1e-3)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testWrongInput(self, widget, mocker):
