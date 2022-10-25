@@ -57,8 +57,8 @@ class TabbedModelEditorTest:
         assert widget_edit.edit_only
 
         # Add model
-        #self.assertFalse(widget.cmdLoad.isVisible())
-        #self.assertTrue(widget_edit.cmdLoad.isVisible())
+        #assert widget.cmdLoad.isVisible()
+        #assert widget_edit.cmdLoad.isVisible()
         assert isinstance(widget.plugin_widget, PluginDefinition)
         assert isinstance(widget.editor_widget, ModelEditor)
         # tabs
