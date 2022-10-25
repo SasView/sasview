@@ -178,7 +178,7 @@ class FittingWidgetTest:
 
         assert widget_with_data.data == data
         assert widget_with_data.data_is_loaded
-        # self.assertTrue(widget_with_data.cmdFit.isEnabled())
+        # assert widget_with_data.cmdFit.isEnabled()
         assert not widget_with_data.acceptsData()
 
     def testSelectPolydispersity(self, widget):
@@ -354,7 +354,7 @@ class FittingWidgetTest:
 
         # We have this many rows in the model
         rowcount = widget._model_model.rowCount()
-        #self.assertEqual(widget._model_model.rowCount(), 8)
+        #assert widget._model_model.rowCount() == 8
 
         # Change structure factor to something more exciting
         structure_index = widget.cbStructureFactor.findText('squarewell')
@@ -910,8 +910,8 @@ class FittingWidgetTest:
 
         # the fit button changed caption and got disabled
         # could fail if machine fast enough to finish
-        #self.assertEqual(widget.cmdFit.text(), 'Stop fit')
-        #self.assertFalse(widget.cmdFit.isEnabled())
+        #assert widget.cmdFit.text() == 'Stop fit'
+        #assert not widget.cmdFit.isEnabled()
 
         # Signal pushed up
         assert update_spy.count() == 1
@@ -954,8 +954,8 @@ class FittingWidgetTest:
             assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'compute'
 
             # the fit button changed caption and got disabled
-            #self.assertEqual(widget.cmdFit.text(), 'Stop fit')
-            #self.assertFalse(widget.cmdFit.isEnabled())
+            #assert widget.cmdFit.text() == 'Stop fit'
+            #assert not widget.cmdFit.isEnabled()
 
             # Signal pushed up
             assert update_spy.count() == 1
@@ -1187,8 +1187,8 @@ class FittingWidgetTest:
         assert widget._model_model.columnCount() == 5
 
         # Test the header
-        #self.assertEqual(widget.lstParams.horizontalHeader().count(), 5)
-        #self.assertFalse(widget.lstParams.horizontalHeader().stretchLastSection())
+        #assert widget.lstParams.horizontalHeader().count() == 5
+        #assert not widget.lstParams.horizontalHeader().stretchLastSection()
 
         assert len(widget._model_model.header_tooltips) == 5
         header_tooltips = ['Select parameter for fitting',
@@ -1632,7 +1632,7 @@ class FittingWidgetTest:
         widget.addSimpleConstraint()
 
         # simple constraints
-        # self.assertEqual(widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
+        # assert widget.getConstraintsForModel(), [('background', '0.001') == ('radius', '20')]
         cons = widget.getConstraintForRow(row1)
         assert cons.param == param1
         assert cons.value == default_value1
@@ -1652,7 +1652,7 @@ class FittingWidgetTest:
         # add complex constraint
         const = Constraint(parent=None, param=param, func=func)
         widget.addConstraintToRow(constraint=const, row=row)
-        #self.assertEqual(widget.getConstraintsForModel(),[('scale', '5*sld'), ('background', '0.001'), ('radius', None)])
+        #assert widget.getConstraintsForModel() == [('scale', '5*sld'), ('background', '0.001'), ('radius', None)]
         cons = widget.getConstraintForRow(row2)
         assert cons.param == param2
         assert cons.value == default_value2
