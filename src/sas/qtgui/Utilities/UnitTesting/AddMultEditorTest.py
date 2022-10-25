@@ -86,10 +86,11 @@ class AddMultEditorTest:
         assert widget.plugin_filename is None
 
         # default content of displayed equation (to create the new model)
-        #self.assertEqual(widget.lblEquation.text(),
+        #assert widget.lblEquation.text() == (
                          #"<html><head/><body><p>Plugin_model = "
                          #"scale_factor * (model_1 + model_2) + background"
-                         #"</p></body></html>")
+                         #"</p></body></html>"
+        #)
 
         # Tooltips
         assert widget.cbOperator.toolTip() == \
