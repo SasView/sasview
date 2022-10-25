@@ -82,12 +82,12 @@ class FittingLogicTest:
 
         assert logic.data.data.sum() == 2500.0 # 50x50 array of 1's
         assert logic.data.err_data.sum(axis=0) == 2500.0
-        assert round(abs(logic.data.qx_data.sum(axis=0)-0.0), 7) == 0
-        assert round(abs(logic.data.qy_data.sum()-0.0), 7) == 0
-        assert round(abs(logic.data.q_data.sum()-683.106490), 6) == 0
+        assert logic.data.qx_data.sum(axis=0) == pytest.approx(0.0, abs=1e-7)
+        assert logic.data.qy_data.sum() == pytest.approx(0.0, abs=1e-7)
+        assert logic.data.q_data.sum() == pytest.approx(683.106490, abs=1e-6)
         assert numpy.all(logic.data.mask)
-        assert round(abs(logic.data.x_bins.sum()-0.0), 7) == 0
-        assert round(abs(logic.data.y_bins.sum()-0.0), 7) == 0
+        assert logic.data.x_bins.sum() == pytest.approx(0.0, abs=1e-7)
+        assert logic.data.y_bins.sum() == pytest.approx(0.0, abs=1e-7)
 
     def testNew1DPlot(self, logic):
         """
