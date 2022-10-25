@@ -208,11 +208,11 @@ class GenericScatteringCalculatorTest:
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
         assert not widget.txtMx.isEnabled()
-        assert round(abs(float(widget.txtMx.text())-8.0795e-07), 4) == 0
+        assert float(widget.txtMx.text()) == pytest.approx(8.0795e-07, rel=1e-4)
         assert not widget.txtMy.isEnabled()
-        assert round(abs(float(widget.txtMy.text())-8.0795e-07), 4) == 0
+        assert float(widget.txtMy.text()) == pytest.approx(8.0795e-07, rel=1e-4)
         assert not widget.txtMz.isEnabled()
-        assert round(abs(float(widget.txtMz.text())-3.1739e-07), 4) == 0
+        assert float(widget.txtMz.text()) == pytest.approx(3.1739e-07, rel=1e-4)
         assert widget.txtNucl.isEnabled()
         assert widget.txtNucl.text() == '0'
 
@@ -253,7 +253,7 @@ class GenericScatteringCalculatorTest:
         # check updated values in ui, read from loaded file
         # TODO to be changed
         assert widget.txtData.text() == 'diamdsml.pdb'
-        assert round(abs(float(widget.txtTotalVolume.text())-170.95058), 5) == 0
+        assert float(widget.txtTotalVolume.text()) == pytest.approx(170.95058, abs=1e-5)
         assert widget.txtNoPixels.text() == '18'
 
         # check disabled TextEdits according to data format
@@ -281,7 +281,7 @@ class GenericScatteringCalculatorTest:
         assert not widget.txtMz.isEnabled()
         assert widget.txtMz.text() == '0'
         assert not widget.txtNucl.isEnabled()
-        assert round(abs(float(widget.txtNucl.text())-7.0003e-06), 4) == 0
+        assert float(widget.txtNucl.text()) == pytest.approx(7.0003e-06, rel=1e-4)
 
         assert not widget.txtXnodes.isEnabled()
         assert widget.txtXnodes.text() == 'NaN'
@@ -334,11 +334,11 @@ class GenericScatteringCalculatorTest:
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
         assert not widget.txtMx.isEnabled()
-        assert round(abs(float(widget.txtMx.text())-7.855e-09), 4) == 0
+        assert float(widget.txtMx.text()) == pytest.approx(7.855e-09, rel=1e-4)
         assert not widget.txtMy.isEnabled()
-        assert round(abs(float(widget.txtMy.text())-4.517e-08), 4) == 0
+        assert float(widget.txtMy.text()) == pytest.approx(4.517e-08, rel=1e-4)
         assert not widget.txtMz.isEnabled()
-        assert round(abs(float(widget.txtMz.text())-9.9511e-10), 4) == 0
+        assert float(widget.txtMz.text()) == pytest.approx(9.9511e-10, rel=1e-4)
         assert widget.txtNucl.isEnabled()
         assert widget.txtNucl.text() == '0'
 
