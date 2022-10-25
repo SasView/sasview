@@ -1,6 +1,9 @@
 
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QSizePolicy
 import pyqtgraph.opengl as gl
+
+from sas.qtgui.Utilities.OrientationViewerController import OrientationViewierController
 
 
 class OrientationViewer(QtWidgets.QWidget):
@@ -8,20 +11,22 @@ class OrientationViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__()
 
-        self.resize(600, 700)
-
         self.graph = gl.GLViewWidget()
+        self.graph.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+
+        self.controller = OrientationViewierController()
         layout = QtWidgets.QVBoxLayout()
 
-        # Add widgets to the layout
         layout.addWidget(self.graph)
-        layout.addWidget(QtWidgets.QPushButton("Top"))
-        layout.addWidget(QtWidgets.QPushButton("Center"))
-        layout.addWidget(QtWidgets.QPushButton("Bottom"))
-        # Set the layout on the application's window
+        layout.addWidget(self.controller)
         self.setLayout(layout)
 
-        ## create three grids, add each to the view
+
+
+
+
+
+
         xgrid = gl.GLGridItem()
         ygrid = gl.GLGridItem()
         zgrid = gl.GLGridItem()
@@ -50,6 +55,8 @@ def main():
     mainWindow.setCentralWidget(viewer)
 
     mainWindow.show()
+
+    mainWindow.resize(700, 700)
     app.exec_()
 
 
