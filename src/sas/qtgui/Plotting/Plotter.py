@@ -86,6 +86,8 @@ class PlotterWidget(PlotterBase):
         self.toolbar._actions['pan'].triggered.connect(self._pan)
         self.toolbar._actions['zoom'].triggered.connect(self._zoom)
 
+        self.legendVisible = True
+
         parent.geometry()
 
     @property
@@ -248,7 +250,7 @@ class PlotterWidget(PlotterBase):
         self.plot_lines[data.name] = line
 
         # Now add the legend with some customizations.
-        if self.showLegend:
+        if self.showLegend and self.legendVisible:
             width=_legendResize(self.canvas.size().width(), self.parent)
             if width is not None:
                 self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
@@ -301,7 +303,7 @@ class PlotterWidget(PlotterBase):
         """
         Resize the legend window/font on canvas resize
         """
-        if not self.showLegend:
+        if not self.showLegend or not self.legendVisible:
             return
         width = _legendResize(event.width, self.parent)
         # resize the legend to follow the canvas width.
@@ -794,8 +796,9 @@ class PlotterWidget(PlotterBase):
         if not self.showLegend:
             return
 
-        visible = self.legend.get_visible()
-        self.legend.set_visible(not visible)
+        #visible = self.legend.get_visible()
+        self.legendVisible = not self.legendVisible
+        self.legend.set_visible(self.legendVisible)
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):
