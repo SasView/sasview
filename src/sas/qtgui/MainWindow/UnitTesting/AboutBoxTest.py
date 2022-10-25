@@ -33,7 +33,7 @@ class AboutBoxTest:
 
         assert "SasView" in widget.label_2.text()
         # Link buttons pixmaps don't contain image filenames, so can't check this.
-        # self.assertEqual(widget.cmdLinkUT.icon().name(), "utlogo.gif")
+        # assert widget.cmdLinkUT.icon().name() == "utlogo.gif"
 
 
     def testVersion(self, widget):
