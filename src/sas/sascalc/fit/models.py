@@ -17,7 +17,7 @@ from six import reraise
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
-from sas import get_user_dir
+from sas.system.user import get_user_dir
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used

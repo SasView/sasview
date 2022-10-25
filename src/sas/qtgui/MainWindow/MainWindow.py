@@ -1,9 +1,11 @@
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
+import logging
 import os
 import sys
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas import config
+from sas.system import env, version
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
@@ -13,7 +15,6 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
@@ -24,8 +25,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.setupUi(self)
 
         # Add the version number to window title
-        self.setWindowTitle(f"SasView {SASVIEW_VERSION}")
-
+        self.setWindowTitle(f"SasView {version.__version__}")
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
         # some perspectives are fixed size.
@@ -71,17 +71,23 @@ def run_sasview():
     app = QApplication([])
 
     #Initialize logger
-    from sas.logger_config import SetupLogger
+    from sas.system.log import SetupLogger
     SetupLogger(__name__).config_development()
 
     # initialize sasmodels settings
-    from sas import get_custom_config, get_user_dir
+    from sas.system.user import get_user_dir
     if "SAS_DLL_PATH" not in os.environ:
         os.environ["SAS_DLL_PATH"] = os.path.join(
             get_user_dir(), "compiled_models")
-    SAS_OPENCL = get_custom_config().SAS_OPENCL
-    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
-        os.environ["SAS_OPENCL"] = SAS_OPENCL
+
+    # Set open cl config from environment variable, if it is set
+
+    if env.sas_opencl is not None:
+        logging.getLogger(__name__).info("Getting OpenCL settings from environment variables")
+        config.SAS_OPENCL = env.sas_opencl
+    else:
+        logging.getLogger(__name__).info("Getting OpenCL settings from config")
+        env.sas_opencl = config.SAS_OPENCL
 
     # Make the event loop interruptable quickly
     import signal

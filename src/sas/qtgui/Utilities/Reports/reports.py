@@ -20,6 +20,7 @@ import html2text
 from xhtml2pdf import pisa
 
 import sas.sasview
+import sas.system.version
 import sasmodels
 import logging
 
@@ -97,7 +98,7 @@ class ReportBase:
 
         with self._html_doc.head:
             meta(http_equiv="Content-Type", content="text/html; charset=utf-8")
-            meta(name="Generator", content=f"SasView {sas.sasview.__version__}")
+            meta(name="Generator", content=f"SasView {sas.system.version.__version__}")
 
             if style_link is not None:
                 link(rel="stylesheet", href=style_link)
@@ -113,7 +114,7 @@ class ReportBase:
                     h1(title)
                     p(datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y"))
                     with div(id="version-info"):
-                        p(f"sasview {sas.sasview.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
+                        p(f"sasview {sas.system.version.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
 
                 div(id="perspective")
                 with div(id="data"):

@@ -10,9 +10,6 @@ from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
-# set up import paths
-import path_prepare
-
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.AboutBox import AboutBox
@@ -170,7 +167,7 @@ class GuiManagerTest(unittest.TestCase):
         message = 'Could not connect to the application server. Please try again later.'
         self.assertIn(message, str(spy_status_update.signal(index=0)))
 
-        # 2. version < LocalConfig.__version__
+        # 2. version < config.__version__
         version_info = {'version' : '0.0.1'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
 

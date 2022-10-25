@@ -12,18 +12,18 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale
 
 import matplotlib as mpl
+
+import sas.system.version
+
 mpl.use("Qt5Agg")
 
-from sas.sasview import __version__ as SASVIEW_VERSION
-from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
 # General SAS imports
-from sas import get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -66,6 +66,10 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+
+import sas
+from sas import config
+from sas.system import web
 
 logger = logging.getLogger(__name__)
 
@@ -176,9 +180,8 @@ class GuiManager:
         self.results_frame.setVisible(False)
         self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
-        self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
-        self._workspace.actionHide_Toolbar.setText("Show Toolbar")
-
+        self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
+        
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
@@ -537,7 +540,7 @@ class GuiManager:
         a call-back method when the current version number has been obtained.
         """
         version_info = {"version": "0.0.0"}
-        c = ConnectionProxy(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
+        c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
         response = c.connect()
         if response is None:
             return
@@ -578,16 +581,15 @@ class GuiManager:
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif version.__gt__(LocalConfig.__version__):
+            elif version.__gt__(sas.system.version.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
                 else:
-                    webbrowser.open(LocalConfig.__download_page__)
+                    webbrowser.open(config.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                msg += " of %s" % str(LocalConfig.__appname__)
                 self.communicate.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
@@ -607,13 +609,8 @@ class GuiManager:
         """ Show the Welcome panel, when required """
         # Assure the welcome screen is requested
         show_welcome_widget = True
-        custom_config = get_custom_config()
-        if hasattr(custom_config, "WELCOME_PANEL_SHOW"):
-            if isinstance(custom_config.WELCOME_PANEL_SHOW, bool):
-                show_welcome_widget = custom_config.WELCOME_PANEL_SHOW
-            else:
-                logging.warning("WELCOME_PANEL_SHOW has invalid value in custom_config.py")
-        if show_welcome_widget:
+
+        if config.SHOW_WELCOME_PANEL:
             self.actionWelcome()
 
     def addCallbacks(self):
@@ -1226,8 +1223,7 @@ class GuiManager:
         """
         Open the marketplace link in default browser
         """
-        url = LocalConfig.MARKETPLACE_URL
-        webbrowser.open_new(url)
+        webbrowser.open_new(web.marketplace_url)
 
     def actionAbout(self):
         """
@@ -1314,58 +1310,4 @@ class GuiManager:
         """
         Save the config file based on current session values
         """
-        # Load the current file
-        config_content = GuiUtils.custom_config
-
-        changed = self.customSavePaths(config_content)
-        changed = changed or self.customSaveOpenCL(config_content)
-
-        if changed:
-            self.writeCustomConfig(config_content)
-
-    def customSavePaths(self, config_content):
-        """
-        Update the config module with current session paths
-        Returns True if update was done, False, otherwise
-        """
-        changed = False
-        # Find load path
-        open_path = GuiUtils.DEFAULT_OPEN_FOLDER
-        defined_path = self.filesWidget.default_load_location
-        if open_path != defined_path:
-            # Replace the load path
-            config_content.DEFAULT_OPEN_FOLDER = defined_path
-            changed = True
-        return changed
-
-    def customSaveOpenCL(self, config_content):
-        """
-        Update the config module with current session OpenCL choice
-        Returns True if update was done, False, otherwise
-        """
-        changed = False
-        # Find load path
-        file_value = GuiUtils.SAS_OPENCL
-        session_value = os.environ.get("SAS_OPENCL", "")
-        if file_value != session_value:
-            # Replace the load path
-            config_content.SAS_OPENCL = session_value
-            changed = True
-        return changed
-
-    def writeCustomConfig(self, config):
-        """
-        Write custom configuration
-        """
-        from sas import make_custom_config_path
-        path = make_custom_config_path()
-        # Just clobber the file - we already have its content read in
-        with open(path, 'w') as out_f:
-            out_f.write("#Application appearance custom configuration\n")
-            for key, item in config.__dict__.items():
-                if key[:2] == "__":
-                    continue
-                if isinstance(item, str):
-                    item = '"' + item + '"'
-                out_f.write("%s = %s\n" % (key, str(item)))
-        pass # debugger anchor
+        config.save()

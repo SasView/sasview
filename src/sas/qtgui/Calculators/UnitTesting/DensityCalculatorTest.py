@@ -16,7 +16,6 @@ from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.DensityPanel import toMolarMass
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 
-import sas.qtgui.Utilities.LocalConfig
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)

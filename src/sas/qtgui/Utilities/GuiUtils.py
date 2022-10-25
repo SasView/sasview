@@ -44,10 +44,10 @@ from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
-from sasdata.dataloader.loader import Loader
-from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
+import sas
+from sas import config
 
-from sas.qtgui.Utilities import CustomDir
+from sasdata.dataloader.loader import Loader
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
         HELP_DIRECTORY_LOCATION = "doc"
@@ -66,156 +66,23 @@ theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 logger = logging.getLogger(__name__)
 
 
-def get_app_dir():
+def get_sensible_default_open_directory():
     """
-        The application directory is the one where the default custom_config.py
-        file resides.
-
-        :returns: app_path - the path to the applicatin directory
+        :returns: app_path - the path to the application directory
     """
     # First, try the directory of the executable we are running
     app_path = sys.path[0]
     if os.path.isfile(app_path):
-        app_path = os.path.dirname(app_path)
-    if os.path.isfile(os.path.join(app_path, "custom_config.py")):
-        app_path = os.path.abspath(app_path)
-        #logging.info("Using application path: %s", app_path)
-        return app_path
+        return os.path.dirname(app_path)
 
-    # Next, try the current working directory
-    if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        #logging.info("Using application path: %s", os.getcwd())
-        return os.path.abspath(os.getcwd())
-
-    # Finally, try the directory of the sasview module
-    # TODO: gui_manager will have to know about sasview until we
-    # clean all these module variables and put them into a config class
-    # that can be passed by sasview.py.
-    # logging.info(sys.executable)
-    # logging.info(str(sys.argv))
-    from sas import sasview as sasview
-    app_path = os.path.dirname(sasview.__file__)
-    # logging.info("Using application path: %s", app_path)
-    return app_path
-
-def get_user_directory():
-    """
-        Returns the user's home directory
-    """
-    userdir = os.path.join(os.path.expanduser("~"), ".sasview")
-    if not os.path.isdir(userdir):
-        os.makedirs(userdir)
-    return userdir
-
-def _find_local_config(confg_file, path):
-    """
-        Find configuration file for the current application
-    """
-    config_module = None
-    fObj = None
-    try:
-        fObj, path_config, descr = imp.find_module(confg_file, [path])
-        config_module = imp.load_module(confg_file, fObj, path_config, descr)
-    except ImportError:
-        pass
-    except ValueError:
-        print("Value error")
-        pass
-    finally:
-        if fObj is not None:
-            fObj.close()
-    return config_module
+    # if this fails, use try the directory of the sasview module
+    return os.path.dirname(sas.__file__)
 
 
-# Get APP folder
-PATH_APP = get_app_dir()
-DATAPATH = PATH_APP
-# Read in the local config, which can either be with the main
-# application or in the installation directory
-config = _find_local_config('local_config', PATH_APP)
+# custom open_path
+if config.DEFAULT_OPEN_FOLDER == "" or not os.path.isdir(config.DEFAULT_OPEN_FOLDER):
+    config.DEFAULT_OPEN_FOLDER = get_sensible_default_open_directory()
 
-if config is None:
-    config = _find_local_config('local_config', os.getcwd())
-else:
-    pass
-
-c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-custom_config = _find_local_config('custom_config', c_conf_dir)
-if custom_config is None:
-    custom_config = _find_local_config('custom_config', os.getcwd())
-    if custom_config is None:
-        msgConfig = "Custom_config file was not imported"
-logging.info("Custom config path: %s", custom_config)
-
-#read some constants from config
-APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
-APPLICATION_NAME = config.__appname__
-SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
-WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
-SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
-SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
-SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-if not WELCOME_PANEL_ON:
-    WELCOME_PANEL_SHOW = False
-else:
-    WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    SAS_OPENCL = custom_config.SAS_OPENCL
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder is not None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-    else:
-        DEFAULT_OPEN_FOLDER = PATH_APP
-except AttributeError:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = PATH_APP
-    SAS_OPENCL = config.SAS_OPENCL
-
-#DEFAULT_STYLE = config.DEFAULT_STYLE
-
-PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
-OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
-VIEW_MENU = config.VIEW_MENU
-EDIT_MENU = config.EDIT_MENU
-extension_list = []
-if APPLICATION_STATE_EXTENSION is not None:
-    extension_list.append(APPLICATION_STATE_EXTENSION)
-EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
-try:
-    PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
-except AttributeError:
-    PLUGINS_WLIST = ''
-APPLICATION_WLIST = config.APPLICATION_WLIST
-IS_WIN = True
-IS_LINUX = False
-CLOSE_SHOW = True
-TIME_FACTOR = 2
-NOT_SO_GRAPH_LIST = ["BoxSum"]
 
 
 class Communicate(QtCore.QObject):

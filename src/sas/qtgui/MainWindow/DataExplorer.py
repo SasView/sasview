@@ -30,10 +30,7 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
 
 import sas.qtgui.Perspectives as Perspectives
-
-DEFAULT_PERSPECTIVE = "Fitting"
-ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'Invariant (*.inv)',
-                  'Corfunc (*.crf)', 'All Files (*.*)']
+from sas import config
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +54,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Read in default locations
         self.default_save_location = None
-        self.default_load_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.default_load_location = config.DEFAULT_OPEN_FOLDER
         self.default_project_location = None
 
         self.manager = manager if manager is not None else DataManager()
@@ -196,7 +193,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.addItems(available_perspectives)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
 
     def _perspective(self):
         """
@@ -290,7 +287,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Open Analysis" menu item chosen.
         """
-        file_filter = ';;'.join(ANALYSIS_TYPES)
+        file_filter = ';;'.join(config.ANALYSIS_TYPES + ['All Files (*.*)'])
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Analysis',
@@ -506,7 +503,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     logging.error("Project load failed with " + str(ex))
                     return
         cs_keys = []
-        visible_perspective = DEFAULT_PERSPECTIVE
+        visible_perspective = config.DEFAULT_PERSPECTIVE
         for key, value in all_data.items():
             if key == 'is_batch':
                 self.chkBatch.setChecked(value == 'True')
@@ -527,7 +524,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.updatePerspectiveWithProperties(key, value)
         # Set to fitting perspective and load in Batch and C&S Pages
         self.cbFitting.setCurrentIndex(
-            self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+            self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
         # Get the constraint dict and apply it
@@ -581,7 +578,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             items = self.updateModelFromData(data_dict)
 
         if 'fit_params' in value:
-            self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
             params = value['fit_params']
             # Make the perspective read the rest of the read data
             if not isinstance(params, list):
@@ -1315,7 +1312,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            if extension.lower() in GuiUtils.EXTENSIONS:
+            extension_list = config.PLUGIN_STATE_EXTENSIONS
+            if config.APPLICATION_STATE_EXTENSION is not None:
+                extension_list.append(config.APPLICATION_STATE_EXTENSION)
+
+            if extension.lower() in extension_list:
                 any_error = True
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)

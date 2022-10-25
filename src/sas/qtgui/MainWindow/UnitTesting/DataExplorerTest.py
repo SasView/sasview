@@ -27,7 +27,7 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 if not QApplication.instance():
     app = QApplication(sys.argv)
@@ -505,7 +505,7 @@ class DataExplorerTest(unittest.TestCase):
         qApp.processEvents()
 
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.url()))
+        self.assertIn(partial_url, str(self.form._helpView.web()))
         # Close the browser
         self.form._helpView.close()
 
@@ -513,7 +513,7 @@ class DataExplorerTest(unittest.TestCase):
         QTest.mouseClick(button2, Qt.LeftButton)
         qApp.processEvents()
         # Check the browser
-        self.assertIn(partial_url, str(self.form._helpView.url()))
+        self.assertIn(partial_url, str(self.form._helpView.web()))
 
     def testLoadFile(self):
         """
