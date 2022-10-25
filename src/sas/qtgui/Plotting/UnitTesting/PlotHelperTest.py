@@ -18,7 +18,7 @@ class PlotHelperTest:
         #assert isinstance(PlotHelper._plots, dict)
         assert len(PlotHelper._plots) == 0
         # could have leftovers from previous tests
-        #self.assertEqual(PlotHelper._plot_id, 0)
+        #assert PlotHelper._plot_id == 0
 
     def testFunctions(self):
         """ Adding a plot """
@@ -37,7 +37,7 @@ class PlotHelperTest:
         assert id2 - id1 == 1
 
         # Other properties
-        #self.assertEqual(PlotHelper.currentPlots(), [plot_id, plot_id_2])
+        #assert PlotHelper.currentPlots() == [plot_id, plot_id_2]
         assert set(PlotHelper.currentPlotIds()).issubset([plot_id, plot_id_2])
         assert PlotHelper.plotById(plot_id) == plot
         assert PlotHelper.plotById(plot_id_2) == plot2
@@ -49,4 +49,4 @@ class PlotHelperTest:
         # Add another graph to see the counter
         plot3 = PlotProxy("Just another plot. Move along.")
         PlotHelper.addPlot(plot3)
-        #self.assertEqual(PlotHelper.idOfPlot(plot3), plot_id_2 + 1)
+        #assert PlotHelper.idOfPlot(plot3) == plot_id_2 + 1
