@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide2 import QtGui, QtCore, QtWidgets
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -49,11 +49,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         """ Window title"""
         return "P(r) Inversion Perspective"
 
-    estimateSignal = QtCore.pyqtSignal(tuple)
-    estimateNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
-    calculateSignal = QtCore.pyqtSignal(tuple)
+    estimateSignal = QtCore.Signal(tuple)
+    estimateNTSignal = QtCore.Signal(tuple)
+    estimateDynamicNTSignal = QtCore.Signal(tuple)
+    estimateDynamicSignal = QtCore.Signal(tuple)
+    calculateSignal = QtCore.Signal(tuple)
 
     def __init__(self, parent=None, data=None):
         super().__init__()

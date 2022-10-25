@@ -4,8 +4,8 @@ import numpy as np
 
 from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtTest import QTest, QSignalSpy
+from PySide2 import QtGui, QtCore, QtWidgets
+from PySide2.QtTest import QTest, QSignalSpy
 
 # set up import paths
 import path_prepare

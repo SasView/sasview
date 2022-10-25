@@ -6,8 +6,8 @@ from xhtml2pdf import pisa
 
 from unittest.mock import MagicMock
 
-from PyQt5 import QtWidgets, QtPrintSupport
-from PyQt5.QtTest import QTest
+from PySide2 import QtWidgets, QtPrintSupport
+from PySide2.QtTest import QTest
 
 # set up import paths
 

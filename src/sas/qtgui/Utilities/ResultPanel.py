@@ -5,9 +5,9 @@ FitPanel class contains fields allowing to fit  models and  data
 import sys
 import datetime
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from bumps.dream.stats import var_stats, format_vars
 
@@ -22,7 +22,7 @@ class ResultPanel(QtWidgets.QTabWidget):
     """
     ## Internal name for the AUI manager
     window_name = "Result panel"
-    windowClosedSignal = QtCore.pyqtSignal()
+    windowClosedSignal = QtCore.Signal()
 
     def __init__(self, parent, manager=None, *args, **kwargs):
         """

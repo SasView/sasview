@@ -7,9 +7,9 @@ import traceback
 
 from typing import Optional, Dict
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale
+from PySide2.QtWidgets import *
+from PySide2.QtGui import *
+from PySide2.QtCore import Qt, QLocale
 
 import matplotlib as mpl
 

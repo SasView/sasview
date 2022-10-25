@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # global
-from PyQt5.QtGui import QStandardItem
+from PySide2.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 from numpy.linalg.linalg import LinAlgError
@@ -13,8 +13,8 @@ from typing import Optional, List, Tuple
 
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui, QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui, QtWidgets
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
@@ -51,7 +51,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """ Window title """
         return "Corfunc Perspective"
 
-    trigger = QtCore.pyqtSignal(TransformedData)
+    trigger = QtCore.Signal(TransformedData)
 
 # pylint: disable=unused-argument
     def __init__(self, parent=None):

@@ -6,25 +6,25 @@ import os
 
 import numpy as np
 
-try:
-    if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
-        from numba import njit, prange
-        # Suppress numba debug info
-        import logging
-        numba_logger = logging.getLogger('numba')
-        numba_logger.setLevel(logging.WARNING)
-        USE_NUMBA = True
-    else:
-        raise ImportError("fail")
-except ImportError:
-    USE_NUMBA = False
-    # if no numba then njit does nothing
-    def njit(*args, **kw):
-        # Check for bare @njit, in which case we just return the function.
-        if len(args) == 1 and callable(args[0]) and not kw:
-            return args[0]
-        # Otherwise we have @njit(...), so return the identity decorator.
-        return lambda fn: fn
+# try:
+#     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
+#         from numba import njit, prange
+#         # Suppress numba debug info
+#         import logging
+#         numba_logger = logging.getLogger('numba')
+#         numba_logger.setLevel(logging.WARNING)
+#         USE_NUMBA = True
+#     else:
+#         raise ImportError("fail")
+# except ImportError:
+USE_NUMBA = False
+# if no numba then njit does nothing
+def njit(*args, **kw):
+    # Check for bare @njit, in which case we just return the function.
+    if len(args) == 1 and callable(args[0]) and not kw:
+        return args[0]
+    # Otherwise we have @njit(...), so return the identity decorator.
+    return lambda fn: fn
 
 def Iq(q, x, y, z, sld, vol, is_avg=False):
     """

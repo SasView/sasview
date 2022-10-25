@@ -1,9 +1,9 @@
 import sys
 import unittest
 
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide2.QtWidgets import QApplication
+from PySide2.QtTest import QTest
+from PySide2 import QtCore
 
 # set up import paths
 import path_prepare

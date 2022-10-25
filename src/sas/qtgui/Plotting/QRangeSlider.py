@@ -1,8 +1,8 @@
 """Double slider interactor for setting the Q range for a fit or function"""
 import numpy as np
 from typing import Union
-from PyQt5.QtCore import QEvent
-from PyQt5.QtWidgets import QLineEdit, QTextEdit
+from PySide2.QtCore import QEvent
+from PySide2.QtWidgets import QLineEdit, QTextEdit
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor

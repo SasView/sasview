@@ -2,8 +2,8 @@ import sys
 import unittest
 import platform
 
-from PyQt5 import QtGui, QtWidgets, QtPrintSupport
-from PyQt5 import QtCore
+from PySide2 import QtGui, QtWidgets, QtPrintSupport
+from PySide2 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from unittest.mock import MagicMock
 from unittest.mock import patch

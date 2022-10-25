@@ -4,7 +4,7 @@ import time
 import logging
 import webbrowser
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets, QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -17,7 +17,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
-    windowClosedSignal = QtCore.pyqtSignal()
+    windowClosedSignal = QtCore.Signal()
     def __init__(self, parent = None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)

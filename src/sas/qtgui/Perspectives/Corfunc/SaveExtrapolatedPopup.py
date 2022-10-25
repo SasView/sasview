@@ -1,7 +1,7 @@
 import numpy as np
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
+from PySide2 import QtCore
+from PySide2.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 
 from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
@@ -18,7 +18,7 @@ class UserInputInvalid(Exception):
 class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
     """ Dialogue window for saving extrapolated data"""
 
-    #trigger = QtCore.pyqtSignal(tuple)
+    #trigger = QtCore.Signal(tuple)
 
     # pylint: disable=unused-argument
     def __init__(self, input_qs: np.ndarray, interpolation_function: Callable[[np.ndarray], np.ndarray], parent=None):

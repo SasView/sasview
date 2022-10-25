@@ -3,7 +3,7 @@ import unittest
 import platform
 from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtWidgets, QtPrintSupport
+from PySide2 import QtGui, QtWidgets, QtPrintSupport
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar

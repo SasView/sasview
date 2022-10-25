@@ -20,9 +20,9 @@
 # *                                                                         *
 # ***************************************************************************/
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 class RangeSlider(QtWidgets.QSlider):
     """ A slider for ranges.
@@ -37,8 +37,8 @@ class RangeSlider(QtWidgets.QSlider):
         In addition, two new signals are emitted to catch the movement of 
         each handle, lowValueChanged(int) and highValueChanged(int).
     """
-    highValueChanged = QtCore.pyqtSignal(int)
-    lowValueChanged = QtCore.pyqtSignal(int)
+    highValueChanged = QtCore.Signal(int)
+    lowValueChanged = QtCore.Signal(int)
     def __init__(self, *args):
         super(RangeSlider, self).__init__(*args)
 

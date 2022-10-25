@@ -1,8 +1,8 @@
 import numpy
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets, QtPrintSupport
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets, QtPrintSupport
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar

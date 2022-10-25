@@ -1,8 +1,8 @@
 # global
 import os
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 # UI
 from sas.qtgui.UI import main_resources_rc

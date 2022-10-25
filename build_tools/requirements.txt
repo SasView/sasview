@@ -1,5 +1,6 @@
 numpy 
 scipy==1.7.3 
+pyside2
 docutils 
 pytest<6 
 unittest-xml-reporting
@@ -23,7 +24,6 @@ periodictable
 uncertainties 
 debugpy
 matplotlib~=3.5.2
-PyQt5
 lxml
 pytools 
 cffi

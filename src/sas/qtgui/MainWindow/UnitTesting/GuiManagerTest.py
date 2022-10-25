@@ -4,10 +4,10 @@ import unittest
 import webbrowser
 import logging
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from PySide2.QtTest import QTest
+from PySide2 import QtCore
 from unittest.mock import MagicMock
 
 # Local
@@ -266,7 +266,7 @@ class GuiManagerTest(unittest.TestCase):
 
 
     #### HELP ####
-    # test when PyQt5 works with html
+    # test when PySide2 works with html
     def testActionDocumentation(self):
         """
         Menu Help/Documentation

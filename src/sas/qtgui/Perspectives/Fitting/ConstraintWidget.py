@@ -6,7 +6,7 @@ from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide2 import QtGui, QtCore, QtWidgets
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
@@ -107,9 +107,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
     """
-    fitCompleteSignal = QtCore.pyqtSignal(tuple)
-    batchCompleteSignal = QtCore.pyqtSignal(tuple)
-    fitFailedSignal = QtCore.pyqtSignal(tuple)
+    fitCompleteSignal = QtCore.Signal(tuple)
+    batchCompleteSignal = QtCore.Signal(tuple)
+    fitFailedSignal = QtCore.Signal(tuple)
 
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()

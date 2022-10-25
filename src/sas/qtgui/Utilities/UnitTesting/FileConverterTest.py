@@ -6,7 +6,7 @@ from lxml import etree
 
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtWidgets
+from PySide2 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget

@@ -3,8 +3,8 @@ import logging
 import copy
 import numpy as np
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui, QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui, QtWidgets
 
 from twisted.internet import threads
 from twisted.internet import reactor

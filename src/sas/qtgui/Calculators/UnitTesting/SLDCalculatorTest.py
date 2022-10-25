@@ -2,9 +2,9 @@ import sys
 import unittest
 import webbrowser
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide2 import QtGui, QtWidgets
+from PySide2.QtTest import QTest
+from PySide2 import QtCore
 from unittest.mock import MagicMock
 
 ####### TEMP

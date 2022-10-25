@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from PyQt5 import QtCore, QtWidgets
+from PySide2 import QtCore, QtWidgets
 
 # set up import paths
 import sas.qtgui.path_prepare

@@ -3,9 +3,9 @@ import unittest
 import webbrowser
 from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtCore
-from PyQt5 import QtTest
+from PySide2 import QtGui, QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtTest
 
 # set up import paths
 import sas.qtgui.path_prepare

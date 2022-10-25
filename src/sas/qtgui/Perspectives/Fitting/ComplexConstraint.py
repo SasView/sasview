@@ -7,9 +7,9 @@ import os
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 import webbrowser
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
@@ -23,7 +23,7 @@ ALLOWED_OPERATORS = ['=']
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
-    constraintReadySignal = QtCore.pyqtSignal(tuple)
+    constraintReadySignal = QtCore.Signal(tuple)
     def __init__(self, parent=None, tabs=None):
         super(ComplexConstraint, self).__init__(parent)
 

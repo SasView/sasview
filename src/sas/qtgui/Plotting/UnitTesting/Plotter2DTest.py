@@ -3,8 +3,8 @@ import unittest
 import numpy
 import platform
 
-from PyQt5 import QtGui, QtWidgets, QtPrintSupport
-from PyQt5 import QtCore
+from PySide2 import QtGui, QtWidgets, QtPrintSupport
+from PySide2 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from unittest.mock import MagicMock
 from mpl_toolkits.mplot3d import Axes3D

@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import List, Optional, Union, Dict
 
-from PyQt5.QtGui import QStandardItem
-from PyQt5 import QtCore
+from PySide2.QtGui import QStandardItem
+from PySide2 import QtCore
 
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 

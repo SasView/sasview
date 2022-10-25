@@ -2,8 +2,8 @@ import copy
 import numpy
 import functools
 
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from mpl_toolkits.mplot3d import Axes3D
 

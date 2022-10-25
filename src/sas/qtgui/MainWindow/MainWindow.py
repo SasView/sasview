@@ -1,5 +1,3 @@
-# UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
-# ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
 import logging
 import os
 import sys
@@ -7,12 +5,12 @@ import sys
 from sas import config
 from sas.system import env, version
 
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QMdiArea
-from PyQt5.QtWidgets import QSplashScreen
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QMdiArea
+from PySide2.QtWidgets import QSplashScreen
+from PySide2.QtWidgets import QApplication
+from PySide2.QtGui import QPixmap
+from PySide2.QtCore import Qt
 
 # Local UI
 from .UI.MainWindowUI import Ui_SasView
@@ -43,11 +41,12 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # Create the gui manager
         from .GuiManager import GuiManager
         try:
-            self.guiManager = GuiManager(self)
+           self.guiManager = GuiManager(self)
         except Exception as ex:
-            import logging
-            logging.error("Application failed with: "+str(ex))
-            raise ex
+           import logging
+
+           logging.error("Application failed with: "+str(ex))
+           raise ex
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
@@ -70,7 +69,7 @@ def SplashScreen():
 def run_sasview():
     app = QApplication([])
 
-    #Initialize logger
+    # Initialize logger
     from sas.system.log import SetupLogger
     SetupLogger(__name__).config_development()
 

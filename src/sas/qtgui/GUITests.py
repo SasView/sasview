@@ -1,8 +1,8 @@
 import os
 import unittest
 import sys
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 """
 Unit tests for the QT GUI

@@ -3,7 +3,7 @@ import unittest
 import webbrowser
 from bumps import options
 
-from PyQt5 import QtGui, QtWidgets
+from PySide2 import QtGui, QtWidgets
 
 from unittest.mock import MagicMock
 
@@ -112,7 +112,7 @@ class FittingOptionsTest(unittest.TestCase):
         self.assertEqual(options.FIT_CONFIG.values['dream']['steps'], 50.0)
         self.assertEqual(options.FIT_CONFIG.values['dream']['init'], 'cov')
 
-    # test disabled until pyQt5 works well
+    # test disabled until PySide2 works well
     def testOnHelp(self):
         ''' Test help display'''
         webbrowser.open = MagicMock()

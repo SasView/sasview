@@ -3,10 +3,10 @@ import time
 import numpy
 import logging
 import unittest
-from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtCore
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import Qt
+from PySide2 import QtGui, QtWidgets
+from PySide2 import QtCore
+from PySide2.QtTest import QTest
+from PySide2.QtCore import Qt
 from unittest.mock import MagicMock
 
 from twisted.internet import threads

@@ -1,9 +1,9 @@
 """
 Allows users to change the range of the current graph
 """
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 import sas.qtgui.path_prepare
 
 import matplotlib as mpl
@@ -21,7 +21,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
-    apply_signal = QtCore.pyqtSignal(tuple, str)
+    apply_signal = QtCore.Signal(tuple, str)
     def __init__(self, parent=None, cmap=None, vmin=0.0, vmax=100.0, data=None):
         super(ColorMap, self).__init__()
 

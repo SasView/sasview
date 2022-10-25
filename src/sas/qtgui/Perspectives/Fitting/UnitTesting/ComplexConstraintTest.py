@@ -5,7 +5,7 @@ import webbrowser
 
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtGui, QtWidgets, QtCore, QtTest
+from PySide2 import QtGui, QtWidgets, QtCore, QtTest
 
 # set up import paths
 import path_prepare

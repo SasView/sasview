@@ -2,10 +2,10 @@ import sys
 import time
 import numpy
 import unittest
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtTest import QTest
+from PySide2 import QtGui, QtWidgets
+from PySide2.QtTest import QTest
 
-from PyQt5.QtCore import Qt
+from PySide2.QtCore import Qt
 from unittest.mock import MagicMock
 from unittest.mock import patch
 

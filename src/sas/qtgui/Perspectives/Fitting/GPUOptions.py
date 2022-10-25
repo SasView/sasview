@@ -14,7 +14,7 @@ import sasmodels.kernelcl
 from sasmodels.generate import F32, F64
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide2 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
@@ -43,8 +43,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     """
 
     cl_options = None
-    testingDoneSignal = QtCore.pyqtSignal(str)
-    testingFailedSignal = QtCore.pyqtSignal(str)
+    testingDoneSignal = QtCore.Signal(str)
+    testingFailedSignal = QtCore.Signal(str)
 
     def __init__(self, parent=None):
         super(GPUOptions, self).__init__(parent)

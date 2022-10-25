@@ -1,7 +1,7 @@
 
-from PyQt5.QtCore import Qt, QRect, QSize
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
-from PyQt5.QtGui import QColor, QPainter, QTextFormat
+from PySide2.QtCore import Qt, QRect, QSize
+from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
+from PySide2.QtGui import QColor, QPainter, QTextFormat
 
 
 class QLineNumberArea(QWidget):
@@ -91,7 +91,7 @@ class QCodeEditor(QPlainTextEdit):
 
 if __name__ == '__main__':
     import sys
-    from PyQt5.QtWidgets import QApplication
+    from PySide2.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     codeEditor = QCodeEditor()

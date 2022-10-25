@@ -1,6 +1,6 @@
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
 from sas.qtgui.Utilities import GuiUtils
@@ -18,7 +18,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     This is a simple series of widgets allowing for specifying
     model form and parameters.
     """
-    modelModified = QtCore.pyqtSignal()
+    modelModified = QtCore.Signal()
     def __init__(self, parent=None):
         super(PluginDefinition, self).__init__(parent)
         self.setupUi(self)

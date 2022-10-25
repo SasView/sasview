@@ -3,9 +3,9 @@ import copy
 
 from typing import Optional
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from bumps import options
 from bumps import fitters
@@ -25,9 +25,9 @@ from sas.qtgui.Utilities.Reports.reportdata import ReportData
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
     """
-    tabsModifiedSignal = QtCore.pyqtSignal()
-    fittingStartedSignal = QtCore.pyqtSignal(list)
-    fittingStoppedSignal = QtCore.pyqtSignal(list)
+    tabsModifiedSignal = QtCore.Signal()
+    fittingStartedSignal = QtCore.Signal(list)
+    fittingStoppedSignal = QtCore.Signal(list)
 
     name = "Fitting"
     ext = "fitv"

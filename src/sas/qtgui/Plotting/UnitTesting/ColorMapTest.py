@@ -2,7 +2,7 @@ import sys
 import unittest
 import numpy
 
-from PyQt5 import QtGui, QtWidgets
+from PySide2 import QtGui, QtWidgets
 from unittest.mock import MagicMock
 import matplotlib as mpl
 

@@ -2,7 +2,7 @@ import sys
 import unittest
 from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtCore
+from PySide2 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D

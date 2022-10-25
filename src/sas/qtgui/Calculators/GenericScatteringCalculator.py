@@ -8,9 +8,9 @@ import timeit
 
 from scipy.spatial.transform import Rotation
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -38,9 +38,9 @@ _Q1D_MIN = 0.001
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
-    trigger_plot_3d = QtCore.pyqtSignal()
-    calculationFinishedSignal = QtCore.pyqtSignal()
-    loadingFinishedSignal = QtCore.pyqtSignal(list, bool)
+    trigger_plot_3d = QtCore.Signal()
+    calculationFinishedSignal = QtCore.Signal()
+    loadingFinishedSignal = QtCore.Signal(list, bool)
 
     # class constants for textbox background colours
     TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
@@ -366,18 +366,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.gui_text_changed(target)
         elif target in self.coord_windows:
             if event.type() == QtCore.QEvent.MouseButtonPress:
-                mEvent = QtGui.QMouseEvent(event)
-                self.mouse_x = mEvent.x()
-                self.mouse_y = mEvent.y()
+                self.mouse_x = event.x()
+                self.mouse_y = event.y()
                 self.mouse_down = True
             elif event.type() == QtCore.QEvent.MouseButtonRelease:
                 self.mouse_down = False
             elif event.type() == QtCore.QEvent.MouseMove and self.mouse_down:
-                mEvent = QtGui.QMouseEvent(event)
-                self.view_azim = (self.view_azim - mEvent.x() + self.mouse_x) % 360
-                self.view_elev = min(max(self.view_elev + mEvent.y() - self.mouse_y, -90), 90)
-                self.mouse_x = mEvent.x()
-                self.mouse_y = mEvent.y()
+                self.view_azim = (self.view_azim - event.x() + self.mouse_x) % 360
+                self.view_elev = min(max(self.view_elev + event.y() - self.mouse_y, -90), 90)
+                self.mouse_x = event.x()
+                self.mouse_y = event.y()
                 for axes in self.coord_axes:
                     axes.view_init(elev=self.view_elev, azim=self.view_azim)
                     axes.figure.canvas.draw()

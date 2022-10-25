@@ -1,6 +1,6 @@
 import os
 
-from PyQt5 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtCore
 
 from sas.qtgui.Utilities import GuiUtils
 

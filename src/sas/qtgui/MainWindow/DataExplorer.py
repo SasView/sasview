@@ -6,9 +6,9 @@ import time
 import logging
 import copy
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from twisted.internet import threads
 
@@ -642,7 +642,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
-            new_item.setCheckState(is_checked)
+            new_item.setChecked(is_checked)
             items.append(new_item)
             model = self.theory_model
             if new_data.is_data:
@@ -995,7 +995,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
         if not allow_swap:
-            self.chkSwap.setCheckState(False)
+            self.chkSwap.setChecked(False)
 
     def itemFromDisplayName(self, name):
         """

@@ -20,9 +20,9 @@ import numpy as np
 warnings.simplefilter("ignore")
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from periodictable import formula as Formula
 from sas.qtgui.Plotting import DataTransform
@@ -90,99 +90,99 @@ class Communicate(QtCore.QObject):
     Utility class for tracking of the Qt signals
     """
     # File got successfully read
-    fileReadSignal = QtCore.pyqtSignal(list)
+    fileReadSignal = QtCore.Signal(list)
 
     # Open File returns "list" of paths
-    fileDataReceivedSignal = QtCore.pyqtSignal(dict)
+    fileDataReceivedSignal = QtCore.Signal(dict)
 
     # Update Main window status bar with "str"
     # Old "StatusEvent"
-    statusBarUpdateSignal = QtCore.pyqtSignal(str)
+    statusBarUpdateSignal = QtCore.Signal(str)
 
     # Send data to the current perspective
-    updatePerspectiveWithDataSignal = QtCore.pyqtSignal(list)
+    updatePerspectiveWithDataSignal = QtCore.Signal(list)
 
     # New data in current perspective
-    updateModelFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+    updateModelFromPerspectiveSignal = QtCore.Signal(QtGui.QStandardItem)
 
     # New theory data in current perspective
-    updateTheoryFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+    updateTheoryFromPerspectiveSignal = QtCore.Signal(QtGui.QStandardItem)
 
     # Request to delete plots (in the theory view) related to a given model ID
-    deleteIntermediateTheoryPlotsSignal = QtCore.pyqtSignal(str)
+    deleteIntermediateTheoryPlotsSignal = QtCore.Signal(str)
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.pyqtSignal(list, int)
+    plotRequestedSignal = QtCore.Signal(list, int)
 
     # Plot from file names
-    plotFromNameSignal = QtCore.pyqtSignal(str)
+    plotFromNameSignal = QtCore.Signal(str)
 
     # Plot update requested from a perspective
-    plotUpdateSignal = QtCore.pyqtSignal(list)
+    plotUpdateSignal = QtCore.Signal(list)
 
     # Progress bar update value
-    progressBarUpdateSignal = QtCore.pyqtSignal(int)
+    progressBarUpdateSignal = QtCore.Signal(int)
 
     # Workspace charts added/removed
-    activeGraphsSignal = QtCore.pyqtSignal(list)
+    activeGraphsSignal = QtCore.Signal(list)
 
     # Current workspace chart's name changed
-    activeGraphName = QtCore.pyqtSignal(tuple)
+    activeGraphName = QtCore.Signal(tuple)
 
     # Current perspective changed
-    perspectiveChangedSignal = QtCore.pyqtSignal(str)
+    perspectiveChangedSignal = QtCore.Signal(str)
 
     # File/dataset got deleted
-    dataDeletedSignal = QtCore.pyqtSignal(list)
+    dataDeletedSignal = QtCore.Signal(list)
 
     # Send data to Data Operation Utility panel
-    sendDataToPanelSignal = QtCore.pyqtSignal(dict)
+    sendDataToPanelSignal = QtCore.Signal(dict)
 
     # Send result of Data Operation Utility panel to Data Explorer
-    updateModelFromDataOperationPanelSignal = QtCore.pyqtSignal(QtGui.QStandardItem, dict)
+    updateModelFromDataOperationPanelSignal = QtCore.Signal(QtGui.QStandardItem, dict)
 
     # Notify about a new custom plugin being written/deleted/modified
-    customModelDirectoryChanged = QtCore.pyqtSignal()
+    customModelDirectoryChanged = QtCore.Signal()
 
     # Notify the gui manager about new data to be added to the grid view
-    sendDataToGridSignal = QtCore.pyqtSignal(list)
+    sendDataToGridSignal = QtCore.Signal(list)
 
     # Mask Editor requested
-    maskEditorSignal = QtCore.pyqtSignal(Data2D)
+    maskEditorSignal = QtCore.Signal(Data2D)
 
     #second Mask Editor for external
-    extMaskEditorSignal = QtCore.pyqtSignal()
+    extMaskEditorSignal = QtCore.Signal()
 
     # Fitting parameter copy to clipboard
-    copyFitParamsSignal = QtCore.pyqtSignal(str)
+    copyFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Excel
-    copyExcelFitParamsSignal = QtCore.pyqtSignal(str)
+    copyExcelFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Latex
-    copyLatexFitParamsSignal = QtCore.pyqtSignal(str)
+    copyLatexFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Latex
-    SaveFitParamsSignal = QtCore.pyqtSignal(str)
+    SaveFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter paste from clipboard
-    pasteFitParamsSignal = QtCore.pyqtSignal()
+    pasteFitParamsSignal = QtCore.Signal()
 
     # Notify about new categories/models from category manager
-    updateModelCategoriesSignal = QtCore.pyqtSignal()
+    updateModelCategoriesSignal = QtCore.Signal()
 
     # Tell the data explorer to switch tabs
-    changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
+    changeDataExplorerTabSignal = QtCore.Signal(int)
 
     # Plot fitting results (FittingWidget->GuiManager)
-    resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+    resultPlotUpdateSignal = QtCore.Signal(list)
 
     # show the plot as a regular in-workspace object
-    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+    forcePlotDisplaySignal = QtCore.Signal(list)
 
     # Update the masked ranges in fitting
-    updateMaskedDataSignal = QtCore.pyqtSignal()
+    updateMaskedDataSignal = QtCore.Signal()
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """

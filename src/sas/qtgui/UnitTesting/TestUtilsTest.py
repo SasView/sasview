@@ -1,10 +1,10 @@
 import sys
 import unittest
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from PySide2.QtTest import QTest
+from PySide2.QtCore import *
 from unittest.mock import MagicMock
 
 # Local

@@ -3,9 +3,9 @@ from typing import Optional, Tuple
 import math
 import numpy as np
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QFontMetrics
+from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import Qt, Signal
+from PySide2.QtGui import QFontMetrics
 
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
@@ -13,8 +13,8 @@ class CorfuncSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,
     and that provides some visual cues to how it works."""
 
-    valueEdited = pyqtSignal(ExtrapolationParameters, name='valueEdited')
-    valueEditing = pyqtSignal(ExtrapolationInteractionState, name='valueEditing')
+    valueEdited = Signal(ExtrapolationParameters, name='valueEdited')
+    valueEditing = Signal(ExtrapolationInteractionState, name='valueEditing')
 
     def __init__(self,
                  parameters: ExtrapolationParameters = ExtrapolationParameters(1,2,4,8,16),

@@ -6,9 +6,9 @@ Widget for simple add / multiply editor.
 from numpy import *
 import numpy as np
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 import webbrowser
 
 import os

@@ -1,5 +1,5 @@
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtWidgets
 
 from sas.qtgui.Plotting.PlotUtilities import COLORS, COLORS_LETTER, WEIGHTS, FONTS
 from sas.qtgui.Plotting.UI.PlotLabelPropertiesUI import Ui_PlotLabelPropertiesUI

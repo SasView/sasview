@@ -11,9 +11,9 @@ from twisted.internet import threads
 import numpy as np
 import webbrowser
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from sasmodels import generate
 from sasmodels import modelinfo
@@ -102,13 +102,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    constraintAddedSignal = QtCore.pyqtSignal(list)
-    newModelSignal = QtCore.pyqtSignal()
-    fittingFinishedSignal = QtCore.pyqtSignal(tuple)
-    batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
-    Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
-    Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
-    keyPressedSignal = QtCore.pyqtSignal(QtCore.QEvent)
+    constraintAddedSignal = QtCore.Signal(list)
+    newModelSignal = QtCore.Signal()
+    fittingFinishedSignal = QtCore.Signal(tuple)
+    batchFittingFinishedSignal = QtCore.Signal(tuple)
+    Calc1DFinishedSignal = QtCore.Signal(dict)
+    Calc2DFinishedSignal = QtCore.Signal(dict)
+    keyPressedSignal = QtCore.Signal(QtCore.QEvent)
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
@@ -558,11 +558,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
         self.chkPolydispersity.setEnabled(True)
-        self.chkPolydispersity.setCheckState(False)
+        self.chkPolydispersity.setChecked(False)
         self.chk2DView.setEnabled(True)
-        self.chk2DView.setCheckState(False)
+        self.chk2DView.setChecked(False)
         self.chkMagnetism.setEnabled(False)
-        self.chkMagnetism.setCheckState(False)
+        self.chkMagnetism.setChecked(False)
         self.chkChainFit.setEnabled(False)
         self.chkChainFit.setVisible(False)
         # Tabs
@@ -3680,9 +3680,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Main tab info
         self.logic.data.name = fp.name
         self.data_is_loaded = fp.data_is_loaded
-        self.chkPolydispersity.setCheckState(fp.is_polydisperse)
-        self.chkMagnetism.setCheckState(fp.is_magnetic)
-        self.chk2DView.setCheckState(fp.is2D)
+        self.chkPolydispersity.setChecked(fp.is_polydisperse)
+        self.chkMagnetism.setChecked(fp.is_magnetic)
+        self.chk2DView.setChecked(fp.is2D)
 
         # Update the comboboxes
         self.cbCategory.setCurrentIndex(self.cbCategory.findText(fp.current_category))

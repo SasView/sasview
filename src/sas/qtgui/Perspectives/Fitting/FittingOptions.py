@@ -4,9 +4,9 @@ import os
 import types
 import webbrowser
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
@@ -37,7 +37,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
 
         >>> settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
     """
-    fit_option_changed = QtCore.pyqtSignal(str)
+    fit_option_changed = QtCore.Signal(str)
 
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
