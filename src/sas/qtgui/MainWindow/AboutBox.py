@@ -32,9 +32,6 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         version = sas.system.version.__version__
 
         self.lblVersion.setText(str(version))
-        lbl_font = self.font()
-        lbl_font.setPointSize(24)
-        self.lblVersion.setFont(lbl_font)
 
         about_text = f"""
         <html>
