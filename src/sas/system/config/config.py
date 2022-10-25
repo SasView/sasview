@@ -176,6 +176,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        # Default style sheet name
+        self.STYLE_SHEET = 'sasview.css'
 
         #
         # Lock the class down, this is necessary both for

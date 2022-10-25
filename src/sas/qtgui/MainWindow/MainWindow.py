@@ -98,7 +98,7 @@ def run_sasview():
     splash.show()
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     # Main application style.
-    app.setStyleSheet(style.style_sheet())
+    app.setStyleSheet(style.style_sheet.read())
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     if 'twisted.internet.reactor' in sys.modules:

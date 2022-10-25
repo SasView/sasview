@@ -2,51 +2,46 @@ import os
 import pkg_resources
 import sys
 
-from sas.system import user
-
-DEFAULT_STYLE_SHEET_NAME = 'sasview.css'
+from sas.system import user, config
 
 
 class StyleSheet:
     """
-    The directory where the per-user style sheet is stored.
+    Class to create and load the per-user style sheet.
 
-    Returns ~/.sasview/sasview.css, creating it if it does not already exist.
+    Stores the file in ~/.sasview/sasview.css, if it does not already exist, otherwise overwrites it
     """
     def __init__(self):
         self.style_sheet = None
-        self._find_style_sheet()
         self.save()
 
-    def style_sheet_filename(self):
+    def _style_sheet_filename(self):
         """Filename for saving config items"""
         user_dir = user.get_user_dir()
-        self.style_sheet = os.path.join(user_dir, DEFAULT_STYLE_SHEET_NAME)
+        self.style_sheet = os.path.join(user_dir, config.STYLE_SHEET)
 
     def save(self):
+        """
+        Save the existing style in the user directory
+        """
         self._find_style_sheet()
-        sheet = self()
-        self.style_sheet_filename()
+        sheet = self.read()
+        self._style_sheet_filename()
         with open(self.style_sheet, 'w') as file:
             file.write(sheet)
 
-    def _find_style_sheet(self, filename=DEFAULT_STYLE_SHEET_NAME):
-        '''
+    def _find_style_sheet(self, filename=None):
+        """
         The style sheet is in:
         User directory ~/.sasview/
         Debug .
-        Packaging: sas/sasview/
-        Packaging / production does not work well with absolute paths
-        thus the multiple paths below
-        '''
-        self.style_sheet_filename()
+        """
+        if filename is None:
+            filename = config.STYLE_SHEET
+        self._style_sheet_filename()
         places_to_look_for_conf_file = [
             self.style_sheet,
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
             filename,
-            os.path.join("sas", "system", filename),
-            os.path.join(os.getcwd(), "sas", "system", filename),
-            os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), filename)  #For OSX app
         ]
 
         # To avoid the exception in OSx
@@ -64,7 +59,7 @@ class StyleSheet:
         print(f"'{filename}' not found.", file=sys.stderr)
         self.style_sheet = None
 
-    def __call__(self, *args, **kwargs):
+    def read(self):
         with open(self.style_sheet) as f:
             style = f.read()
         return style
