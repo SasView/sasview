@@ -70,8 +70,7 @@ class LinearFitTest:
         return_values = spy_update.called()[0]['args'][0]
         # Compare
         assert sorted(return_values[0]) == [1.0, 3.0]
-        assert round(abs(return_values[1][0]-10.004054329), 6) == 0
-        assert round(abs(return_values[1][1]-12.030439848), 6) == 0
+        assert return_values[1] == pytest.approx([10.004054329, 12.030439848], abs=1e-6)
 
         # Set the log scale
         widget.x_is_log = True
@@ -80,10 +79,9 @@ class LinearFitTest:
         return_values = spy_update.called()[1]['args'][0]
         # Compare
         assert sorted(return_values[0]) == [1.0, 3.0]
-        assert round(abs(return_values[1][0]-9.987732937), 6) == 0
-        assert round(abs(return_values[1][1]-11.84365082), 6) == 0
+        assert return_values[1] == pytest.approx([9.987732937, 11.84365082], abs=1e-6)
 
-    @pytest.mark.skip("2022-09 already broken - generates runtime error")
+    #@pytest.mark.skip("2022-09 already broken - generates runtime error")
     # LinearFit.py:255: RuntimeWarning: divide by zero encountered in log10 xmin_check = numpy.log10(self.xminFit)
     def testOrigData(self, widget):
         ''' Assure the un-logged data is returned'''
@@ -96,11 +94,9 @@ class LinearFitTest:
 
         assert sorted(x) == sorted(orig_x)
         assert y[0] == orig_y[0]
-        assert round(abs(y[1]-orig_y[1]), 8) == 0
-        assert round(abs(y[2]-orig_y[2]), 8) == 0
+        assert y[1:3] == pytest.approx(orig_y[1:3], abs=1e-8)
         assert dy[0] == orig_dy[0]
-        assert round(abs(dy[1]-orig_dy[1]), 8) == 0
-        assert round(abs(dy[2]-orig_dy[2]), 8) == 0
+        assert dy[1:3] == pytest.approx(orig_dy[1:3], abs=1e-8)
 
         # x, y
         widget.x_is_log = False
@@ -126,11 +122,9 @@ class LinearFitTest:
 
         assert sorted(x) == sorted(orig_x)
         assert y[0] == orig_y[0]
-        assert round(abs(y[1]-orig_y[1]), 8) == 0
-        assert round(abs(y[2]-orig_y[2]), 8) == 0
+        assert y[1:3] == pytest.approx(orig_y[1:3], abs=1e-8)
         assert dy[0] == orig_dy[0]
-        assert round(abs(dy[1]-orig_dy[1]), 8) == 0
-        assert round(abs(dy[2]-orig_dy[2]), 8) == 0
+        assert dy[1:3] == pytest.approx(orig_dy[1:3], abs=1e-8)
 
     def testCheckFitValues(self, widget):
         '''Assure fit values are correct'''
