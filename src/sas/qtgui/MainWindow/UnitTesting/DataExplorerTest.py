@@ -161,8 +161,8 @@ class DataExplorerTest:
         QFileDialog.getOpenFileNames.assert_called_once()
 
         # Expected one spy instance
-        #self.assertEqual(spy_file_read.count(), 1)
-        #self.assertIn(filename, str(spy_file_read.called()[0]['args'][0]))
+        #assert spy_file_read.count() == 1
+        #assert filename in str(spy_file_read.called()[0]['args'][0])
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testLoadFiles(self, form):
@@ -637,10 +637,10 @@ class DataExplorerTest:
         #QApplication.processEvents()
 
         # The plot was registered
-        #self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        #assert len(PlotHelper.currentPlots() == 1
 
-        #self.assertTrue(form.cbgraph.isEnabled())
-        #self.assertTrue(form.cmdAppend.isEnabled())
+        #assert form.cbgraph.isEnabled()
+        #assert form.cmdAppend.isEnabled()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testAppendPlot(self, mocker):
@@ -1119,7 +1119,7 @@ class DataExplorerTest:
         assert len(PlotHelper.currentPlotIds()) == 1
         assert len(form.plot_widgets) == 1
         # could have leftovers from previous tests
-        #self.assertEqual(list(form.plot_widgets.keys()), ['Graph3'])
+        #assert list(form.plot_widgets.keys()) == ['Graph3']
         assert len(form.plot_widgets.keys()) == 1
 
         # data index
