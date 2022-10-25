@@ -133,7 +133,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-        if hasattr(data, "scale") and data.scale == 'linear' and \
+        if hasattr(data, "scale") and data.cuboid_scaling == 'linear' and \
                 self.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")

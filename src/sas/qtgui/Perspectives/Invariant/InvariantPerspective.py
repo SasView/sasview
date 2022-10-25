@@ -330,7 +330,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Update calculator with background, scale, and data values
         self._calculator.background = self._background
-        self._calculator.scale = self._scale
+        self._calculator.cuboid_scaling = self._scale
         self._calculator.set_data(temp_data)
 
         # Low Q extrapolation calculations

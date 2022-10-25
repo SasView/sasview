@@ -29,14 +29,23 @@
    </item>
    <item row="0" column="1">
     <widget class="QSlider" name="thetaSlider">
+     <property name="minimum">
+      <number>-90</number>
+     </property>
      <property name="maximum">
-      <number>360</number>
+      <number>90</number>
      </property>
      <property name="pageStep">
       <number>15</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickPosition">
+      <enum>QSlider::TicksBelow</enum>
+     </property>
+     <property name="tickInterval">
+      <number>15</number>
      </property>
     </widget>
    </item>
@@ -56,27 +65,45 @@
    </item>
    <item row="1" column="1">
     <widget class="QSlider" name="phiSlider">
+     <property name="minimum">
+      <number>-90</number>
+     </property>
      <property name="maximum">
-      <number>360</number>
+      <number>90</number>
      </property>
      <property name="pageStep">
       <number>15</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickPosition">
+      <enum>QSlider::TicksBelow</enum>
+     </property>
+     <property name="tickInterval">
+      <number>15</number>
      </property>
     </widget>
    </item>
    <item row="2" column="1">
     <widget class="QSlider" name="psiSlider">
+     <property name="minimum">
+      <number>-90</number>
+     </property>
      <property name="maximum">
-      <number>360</number>
+      <number>90</number>
      </property>
      <property name="pageStep">
       <number>15</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickPosition">
+      <enum>QSlider::TicksBelow</enum>
+     </property>
+     <property name="tickInterval">
+      <number>15</number>
      </property>
     </widget>
    </item>

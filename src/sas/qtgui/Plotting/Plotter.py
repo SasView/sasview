@@ -108,7 +108,7 @@ class PlotterWidget(PlotterBase):
         else:
             self.yLabel = "%s"%(value._yaxis)
 
-        if value.scale == 'linear' or value.isSesans:
+        if value.cuboid_scaling == 'linear' or value.isSesans:
             self.xscale = 'linear'
             self.yscale = 'linear'
         self.title(title=value.name)
