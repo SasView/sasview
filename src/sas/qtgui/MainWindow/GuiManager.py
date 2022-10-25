@@ -135,23 +135,6 @@ class GuiManager:
         """
         Populate the main window with widgets
         """
-        # Preload all perspectives
-        self.loadAllPerspectives()
-
-        # Add FileDialog widget as docked
-        self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
-        ObjectLibrary.addObject('DataExplorer', self.filesWidget)
-
-        self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
-        self.dockedFilesWidget.setFloating(False)
-        self.dockedFilesWidget.setWidget(self.filesWidget)
-
-        # Modify menu items on widget visibility change
-        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
-
-        self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
-        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
-
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
@@ -161,6 +144,21 @@ class GuiManager:
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
+
+        # Preload all perspectives
+        self.loadAllPerspectives()
+        # Add FileDialog widget as docked
+        self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
+        ObjectLibrary.addObject('DataExplorer', self.filesWidget)
+
+        self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget.setFloating(False)
+        self.dockedFilesWidget.setWidget(self.filesWidget)
+        # Modify menu items on widget visibility change
+        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
+
+        self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
@@ -181,7 +179,7 @@ class GuiManager:
         self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
         self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
-        
+
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
