@@ -5,6 +5,7 @@ import functools
 import copy
 import matplotlib as mpl
 import numpy as np
+import textwrap
 from matplotlib.font_manager import FontProperties
 from packaging import version
 
@@ -227,7 +228,15 @@ class PlotterWidget(PlotterBase):
 
         # Now add the legend with some customizations.
         if self.showLegend:
-            self.legend = ax.legend(loc='best', shadow=True, mode='expand')
+            max_legend_width = 30
+            handles, labels = ax.get_legend_handles_labels()
+            newhandles = []
+            newlabels = []
+            for h,l in zip(handles,labels):
+                    newlabels.append(textwrap.fill(l,max_legend_width))
+                    newhandles.append(h)
+
+            self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
             self.legend.set_picker(True)
 
         # Current labels for axes
