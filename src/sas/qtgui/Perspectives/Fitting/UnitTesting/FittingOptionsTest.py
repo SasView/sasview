@@ -63,7 +63,7 @@ class FittingOptionsTest:
         widget.onAlgorithmChange(3)
         widget.steps_de.setText("")
         # This should disable the OK button
-        ## self.assertFalse(widget.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled())
+        ## assert not widget.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled()
         # Let's put some valid value in lineedit
         widget.steps_de.setText("1")
         # This should enable the OK button
