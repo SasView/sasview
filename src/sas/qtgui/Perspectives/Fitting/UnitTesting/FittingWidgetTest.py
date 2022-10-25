@@ -570,17 +570,17 @@ class FittingWidgetTest:
         # Change the pd value
         assert widget.poly_params['radius_bell.width'] == 0.0
         widget._poly_model.item(0,1).setText("0.8")
-        assert round(abs(widget.poly_params['radius_bell.width']-0.8), 7) == 0
+        assert widget.poly_params['radius_bell.width'] == pytest.approx(0.8, abs=1e-7)
         # Test that sasmodel is updated with the new value
-        assert round(abs(widget.kernel_module.getParam('radius_bell.width')-0.8), 7) == 0
+        assert widget.kernel_module.getParam('radius_bell.width') == pytest.approx(0.8, abs=1e-7)
 
         # Uncheck pd in the fitting widget
         widget.chkPolydispersity.setCheckState(2)
         widget.chkPolydispersity.click()
         # Should not change the value of the qt model
-        assert round(abs(widget.poly_params['radius_bell.width']-0.8), 7) == 0
+        assert widget.poly_params['radius_bell.width'] == pytest.approx(0.8, abs=1e-7)
         # sasmodel should be set to 0
-        assert round(abs(widget.kernel_module.getParam('radius_bell.width')-0.0), 7) == 0
+        assert widget.kernel_module.getParam('radius_bell.width') == pytest.approx(0.0, abs=1e-7)
 
         # try something stupid
         widget._poly_model.item(0,4).setText("butt")
@@ -616,7 +616,7 @@ class FittingWidgetTest:
         widget.onPolyComboIndexChange('rectangle', 0)
         # check values
         assert widget.poly_params['radius_bell.npts'] == 35
-        assert round(abs(widget.poly_params['radius_bell.nsigmas']-1.73205), 5) == 0
+        assert widget.poly_params['radius_bell.nsigmas'] == pytest.approx(1.73205, abs=1e-5)
         # Change the index
         widget.onPolyComboIndexChange('lognormal', 0)
         # check values
