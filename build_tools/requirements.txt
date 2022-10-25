@@ -33,3 +33,5 @@ importlib-resources
 bumps
 html2text
 jsonschema
+pyqtgraph
+pyopengl
