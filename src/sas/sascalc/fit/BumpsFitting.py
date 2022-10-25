@@ -41,7 +41,7 @@ class Progress(object):
         # Depending on the time remaining, either display the expected
         # time of completion, or the amount of time remaining.  Use precision
         # appropriate for the duration.
-        if remaining_time >= 1800:
+        if remaining_time >= 18000:
             completion_time = datetime.now() + timedelta(seconds=remaining_time)
             if remaining_time >= 36000:
                 time = completion_time.strftime('%Y-%m-%d %H:%M')
