@@ -18,8 +18,8 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
-from sas.system import env
 from sas import config
+from sas.system import lib
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -107,11 +107,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
 
         sas_open_cl = self.cl_options[str(checked.text())]
         no_opencl_msg = sas_open_cl.lower() == "none"
-        env.sas_opencl = sas_open_cl
-        config.SAS_OPENCL = sas_open_cl
+        lib.reset_sasmodels(sas_open_cl)
 
-        # CRUFT: next version of reset_environment() will return env
-        sasmodels.sasview_model.reset_environment()
         return no_opencl_msg
 
     def testButtonClicked(self):
