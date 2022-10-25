@@ -1,6 +1,7 @@
 r""" Configuration class - stores configuration information for SasView
 
 
+..
                   _____  ________      _______ _
                  |  __ \|  ____\ \    / / ____| |
                  | |  | | |__   \ \  / / (___ | |
@@ -9,12 +10,13 @@ r""" Configuration class - stores configuration information for SasView
                  |_____/|______|   \/  |_____/(_)
 
 
- _____  ______          _____       _______ _    _ _____  _____ _
- |  __ \|  ____|   /\   |  __ \     |__   __| |  | |_   _|/ ____| |
- | |__) | |__     /  \  | |  | |       | |  | |__| | | | | (___ | |
- |  _  /|  __|   / /\ \ | |  | |       | |  |  __  | | |  \___ \| |
- | | \ \| |____ / ____ \| |__| |       | |  | |  | |_| |_ ____) |_|
- |_|  \_\______/_/    \_\_____/        |_|  |_|  |_|_____|_____/(_)
+..
+   _____  ______          _____       _______ _    _ _____  _____ _
+   |  __ \|  ____|   /\   |  __ \     |__   __| |  | |_   _|/ ____| |
+   | |__) | |__     /  \  | |  | |       | |  | |__| | | | | (___ | |
+   |  _  /|  __|   / /\ \ | |  | |       | |  |  __  | | |  \___ \| |
+   | | \ \| |____ / ____ \| |__| |       | |  | |  | |_| |_ ____) |_|
+   |_|  \_\______/_/    \_\_____/        |_|  |_|  |_|_____|_____/(_)
 
 
 
@@ -26,10 +28,11 @@ Configs
 =======
 
 Configs are a nightmare from the perspective of code maintainability. There are
-three main reasons for this
-  1) They have a tendency to accumulate junk because people don't realise that a
+three main reasons for this:
+
+  1) They have a tendency to accumulate junk because people dont realise that a
      config item is no longer needed
-  2) It's hard to trace the usages and types because values are loaded at runtime
+  2) Its hard to trace the usages and types because values are loaded at runtime
   3) Maintaining synchrony between config files and config usages is difficult, as
      it is the users that have control over the config files.
 
@@ -66,6 +69,7 @@ What Belongs in a Config
 ========================
 
 Things that do belong:
+
   1) Program settings that are configurable by users through the GUI
   2) Program settings that have no GUI editor, but that some advanced users
      might want to set manually with a text editor
@@ -73,11 +77,12 @@ Things that do belong:
   4) Very little else
 
 Things that don't belong, but were previously in the config:
+
   1) dynamic content, i.e. values that are modified programmatically,
-    this includes variables that are defined in terms of other variables,
-    but otherwise don't change
+     this includes variables that are defined in terms of other variables,
+     but otherwise dont change
   2) Paths to resources within sasview (use importlib.resources instead)
-  3) Blocks of data that won't be modified by the user and used primarily
+  3) Blocks of data that wont be modified by the user and used primarily
      by single class - e.g. the text for a message
   4) Large blocks of text in general
 
