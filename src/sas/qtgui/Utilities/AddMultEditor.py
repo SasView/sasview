@@ -35,10 +35,6 @@ model_info.description = '{desc_line}'
 Model = make_model_from_info(model_info)
 """
 
-# Color of backgrounds to underline valid or invalid input
-BG_WHITE = "background-color: rgb(255, 255, 255);"
-BG_RED = "background-color: rgb(244, 170, 164);"
-
 
 class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     """
@@ -87,6 +83,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
         txt_validator = QtGui.QRegExpValidator(rx)
         self.txtName.setValidator(txt_validator)
+        GuiUtils.updateProperty(self.txtName, 'urgent', 'false')
 
     def setupModels(self):
         """ Add list of models to 'Model1' and 'Model2' comboboxes """
@@ -160,7 +157,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             # allow overwriting -> only valid name needs to be checked
             # (done with validator in __init__ above)
             self.good_name = True
-            self.txtName.setStyleSheet(BG_WHITE)
+            GuiUtils.updateProperty(self.txtName, 'urgent', 'false')
             self.plugin_filename = os.path.join(self.plugin_dir, filename)
         else:
             # No overwriting -> check existence of filename
@@ -169,7 +166,10 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             models_list = [item + '.py' for item in self.list_models]
             if filename in models_list:
                 self.good_name = False
-                self.txtName.setStyleSheet(BG_RED)
+                GuiUtils.updateProperty(self.txtName, 'urgent', 'true')
+                self.txtName.style().unpolish(self.txtName)
+                self.txtName.style().polish(self.txtName)
+                self.txtName.update()
                 msg = "Plugin with specified name already exists.\n"
                 msg += "Please specify different filename or allow file overwrite."
                 logging.warning(msg)
@@ -181,7 +181,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                 logging.info("Model function ({}) has been set!\n".
                                 format(str(s_title)))
                 self.good_name = True
-                self.txtName.setStyleSheet(BG_WHITE)
+                GuiUtils.updateProperty(self.txtName, 'urgent', 'false')
                 self.plugin_filename = os.path.join(self.plugin_dir, filename)
 
         # Enable Apply push button only if valid name

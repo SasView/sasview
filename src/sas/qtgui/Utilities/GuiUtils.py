@@ -321,6 +321,17 @@ def updateModelItem(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(object_item)
 
+
+def updateProperty(obj: QtWidgets.QWidget, qt_prop: str, val: str):
+    """
+    Update a Qt property for a given Widget. This requires a series of operations on the widget.
+    """
+    obj.setProperty(qt_prop, val)
+    obj.style().unpolish(obj)
+    obj.style().polish(obj)
+    obj.update()
+
+
 def updateModelItemStatus(model_item, filename="", name="", status=2):
     """
     Update status of checkbox related to high- and low-Q extrapolation
