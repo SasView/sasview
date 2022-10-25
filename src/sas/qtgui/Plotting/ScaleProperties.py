@@ -1,9 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-
-import sas.sasview
-from sas.qtgui.UI import main_resources_rc
 
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ScalePropertiesUI import Ui_scalePropertiesUI

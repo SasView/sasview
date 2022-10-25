@@ -493,7 +493,7 @@ def residualsData1D(reference_data, current_data, weights):
     weight = None
 
     # 1d theory from model_thread is only in the range of index
-    if current_data.dy is None or current_data.dy == []:
+    if current_data.dy is None or not len(current_data.dy):
         dy = numpy.ones(len(current_data.y))
     else:
         #dy = weight if weight is not None else numpy.ones(len(current_data.y))

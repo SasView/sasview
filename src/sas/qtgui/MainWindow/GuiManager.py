@@ -218,7 +218,8 @@ class GuiManager:
         self.loadedPerspectives = {}
         self._current_perspective = None
 
-    def addCategories(self):
+    @staticmethod
+    def addCategories():
         """
         Make sure categories.json exists and if not compile it and install in ~/.sasview
         """
@@ -464,7 +465,8 @@ class GuiManager:
         """
         Update progress bar with the required value (0-100)
         """
-        assert -1 <= value <= 100
+        if value < -1 or value > 100:
+            return
         if value == -1:
             self.progress.setVisible(False)
             return
@@ -584,7 +586,7 @@ class GuiManager:
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
                 else:
-                    webbrowser.open(config.download_url)
+                    webbrowser.open(web.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
