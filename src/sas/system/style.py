@@ -27,7 +27,7 @@ class StyleSheet:
         self._find_style_sheet()
         sheet = self()
         self.style_sheet_filename()
-        with open(self.style_sheet, 'a') as file:
+        with open(self.style_sheet, 'w') as file:
             file.write(sheet)
 
     def _find_style_sheet(self, filename=DEFAULT_STYLE_SHEET_NAME):
