@@ -252,7 +252,7 @@ class PlotterWidget(PlotterBase):
         self.plot_lines[data.name] = line
 
         # Now add the legend with some customizations.
-        if self.showLegend and self.legendVisible:
+        if self.showLegend:
             width=_legendResize(self.canvas.size().width(), self.parent)
             if width is not None:
                 self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
@@ -260,7 +260,7 @@ class PlotterWidget(PlotterBase):
                 self.legend = ax.legend(loc='upper right', shadow=True)
             if self.legend:
                 self.legend.set_picker(True)
-
+            self.legend.set_visible(self.legendVisible)
         # Current labels for axes
         if self.yLabel and not is_fit:
             ax.set_ylabel(self.yLabel)
