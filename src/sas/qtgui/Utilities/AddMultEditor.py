@@ -167,9 +167,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             if filename in models_list:
                 self.good_name = False
                 GuiUtils.updateProperty(self.txtName, 'urgent', 'true')
-                self.txtName.style().unpolish(self.txtName)
-                self.txtName.style().polish(self.txtName)
-                self.txtName.update()
                 msg = "Plugin with specified name already exists.\n"
                 msg += "Please specify different filename or allow file overwrite."
                 logging.warning(msg)
