@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 
 # Local UI
 from .UI.MainWindowUI import Ui_SasView
@@ -124,6 +124,10 @@ def run_sasview():
 
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
+
+    timer = QTimer()
+    timer.timeout.connect(lambda: None)
+    timer.start(100)
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
