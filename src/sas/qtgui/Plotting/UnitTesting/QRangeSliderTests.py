@@ -114,10 +114,10 @@ class QRangeSlidersTest:
         self.moveSliderAndInputs(None, widget.txtExtrapolQMax)
         # Check npts after moving line
         self.slider.line_min.move(self.data.x[1], self.data.y[1], None)
-        assert round(abs(5-float(widget.txtNptsHighQ.text())), 7) == 0
+        assert float(widget.txtNptsHighQ.text()) == pytest.approx(5, abs=1e-7)
         # Move npts and check slider
         widget.txtNptsHighQ.setText('2')
-        assert round(abs(self.data.x[1]-self.slider.line_min.x), 7) == 0
+        assert self.data.x[1]-self.slider.line_min.x == pytest.approx(0, abs=1e-7)
 
     def testInversionSliders(self, slidersetup):
         '''Test the QRangeSlider class within the context of the Inversion perspective'''
@@ -147,7 +147,7 @@ class QRangeSlidersTest:
         linearFit.fit(None)
         self.slider = linearFit.q_sliders
         # Ensure base values match
-        assert round(abs(min(self.data.x)-float(linearFit.txtFitRangeMin.text())), 7) == 0
+        assert min(self.data.x) == pytest.approx(float(linearFit.txtFitRangeMin.text()), abs=1e-7)
         # Move inputs and sliders and ensure values match
         self.moveSliderAndInputs(linearFit.txtFitRangeMin, linearFit.txtFitRangeMax)
 
@@ -160,16 +160,16 @@ class QRangeSlidersTest:
         if minInput:
             assert self.slider.line_min.input == minInput
             self.slider.line_min.move(self.data.x[1], self.data.y[1], None)
-            assert round(abs(self.slider.line_min.x-float(minInput.text())), 7) == 0
+            assert self.slider.line_min.x == pytest.approx(float(minInput.text()), abs=1e-7)
         if maxInput:
             assert self.slider.line_max.input == maxInput
             self.slider.line_max.move(self.data.x[-2], self.data.y[-2], None)
-            assert round(abs(self.slider.line_max.x-float(maxInput.text())), 7) == 0
+            assert self.slider.line_max.x == pytest.approx(float(maxInput.text()), abs=1e-7)
 
         # Edit text input and ensure QSlider position matches
         if minInput:
             minInput.setText(f'{self.data.x[1]}')
-            assert round(abs(self.slider.line_min.x-float(minInput.text())), 7) == 0
+            assert self.slider.line_min.x == pytest.approx(float(minInput.text()), abs=1e-7)
         if maxInput:
             maxInput.setText(f'{self.data.x[-2]}')
-            assert round(abs(self.slider.line_max.x-float(maxInput.text())), 7) == 0
+            assert self.slider.line_max.x == pytest.approx(float(maxInput.text()), abs=1e-7)
