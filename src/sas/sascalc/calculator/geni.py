@@ -26,6 +26,21 @@ except ImportError:
         # Otherwise we have @njit(...), so return the identity decorator.
         return lambda fn: fn
 
+def jit_njit(*njit_args, **njit_kw):
+    original = None
+    compiled = None
+    def wrapper(*fn_args, **fn_kw):
+        nonlocal compiled
+        if compiled is None:
+            from numba import njit as numba_njit
+            compiled = numba_njit(*njit_args, **njit_kw)(original)
+        return compiled(*fn_args, **fn_kw)
+    def decorator(fn):
+        nonlocal original
+        original = fn
+        return wrapper
+    return decorator
+
 def Iq(q, x, y, z, sld, vol, is_avg=False):
     """
     Computes 1D isotropic.
@@ -93,7 +108,7 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
             I_out = I_out.reshape(qx.shape)
     return I_out * (1.0E+8/np.sum(vol))
 
-@njit('(f8[:], f8[:], f8[:], f8[:], f8[:])')
+@njit('(f8[:], f8[:], f8[:], f8[:], f8[:])', cache=True)
 def _calc_Iq_avg(Iq, q, r, sld, vol):
     weight = sld * vol
     for i, qi in enumerate(q):
@@ -136,7 +151,7 @@ def _calc_Iq_batch(Iq, q_pi, coords, weight):
         # Don't double-count the diagonal.
         Iq += 2*np.sum(I_jk, axis=1) - I_jk[:, 0]
 
-@njit('(f8[:], f8[:], f8[:, :], f8[:], f8[:])')
+@njit('(f8[:], f8[:], f8[:, :], f8[:], f8[:])', cache=True)
 def _calc_Iq_numba(Iq, q, coords, sld, vol):
     """
     **DEPRECATED**
@@ -166,7 +181,7 @@ def _calc_Iq_numba(Iq, q, coords, sld, vol):
 
 if USE_NUMBA:
     sig = "f8[:](f8[:],f8[:],f8[:],f8[:],f8[:])"
-    @njit(sig, parallel=True, fastmath=True)
+    @njit(sig, parallel=True, fastmath=True, cache=True)
     def _calc_Iqxy(scale, x, y, qx, qy):
         #print("calling numba for geni")
         Iq = np.empty_like(qx)
@@ -247,7 +262,7 @@ def orth(A, b): # A = 3 x n, and b_hat unit vector
     return A - np.outer(b, b)@A
  
 
-@njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
+@njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")", cache=True)
 def _calc_Iqxy_magnetic_helper(
         Iq, qx, qy, x, y, rho, vol, M, cos_spin, sin_spin, cos_phi, sin_phi,
         dd, du, ud, uu):

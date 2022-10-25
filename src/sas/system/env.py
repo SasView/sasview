@@ -1,3 +1,4 @@
+# ** DEPRECATED **
 """ Interface for environment variable access
 
 This is intended to handle any conversion from the environment variable string to more natural types.

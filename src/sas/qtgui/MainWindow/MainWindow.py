@@ -1,11 +1,10 @@
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
-import logging
 import os
 import sys
+import logging
 
-from sas import config
-from sas.system import env, version
+from sas.system.version import __version__
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
@@ -17,6 +16,8 @@ from PyQt5.QtCore import Qt
 # Local UI
 from .UI.MainWindowUI import Ui_SasView
 
+logger = logging.getLogger(__name__)
+
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
     def __init__(self, screen_resolution, parent=None):
@@ -25,7 +26,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.setupUi(self)
 
         # Add the version number to window title
-        self.setWindowTitle(f"SasView {version.__version__}")
+        self.setWindowTitle(f"SasView {__version__}")
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
         # some perspectives are fixed size.
@@ -45,8 +46,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         try:
             self.guiManager = GuiManager(self)
         except Exception as ex:
-            import logging
-            logging.error("Application failed with: "+str(ex))
+            logger.error("Application failed with: "+str(ex))
             raise ex
 
     def closeEvent(self, event):
@@ -68,30 +68,11 @@ def SplashScreen():
     return splashScreen
 
 def run_sasview():
-    app = QApplication([])
-
-    #Initialize logger
-    from sas.system.log import SetupLogger
-    SetupLogger(__name__).config_development()
-
-    # initialize sasmodels settings
-    from sas.system.user import get_user_dir
-    if "SAS_DLL_PATH" not in os.environ:
-        os.environ["SAS_DLL_PATH"] = os.path.join(
-            get_user_dir(), "compiled_models")
-
-    # Set open cl config from environment variable, if it is set
-
-    if env.sas_opencl is not None:
-        logging.getLogger(__name__).info("Getting OpenCL settings from environment variables")
-        config.SAS_OPENCL = env.sas_opencl
-    else:
-        logging.getLogger(__name__).info("Getting OpenCL settings from config")
-        env.sas_opencl = config.SAS_OPENCL
-
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    app = QApplication([])
 
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()

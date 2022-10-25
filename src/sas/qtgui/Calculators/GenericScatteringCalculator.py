@@ -346,7 +346,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         self.polarisation_arrow.set_visible(visible)
         self.p_text.set_visible(visible)
-        self.polarisation_arrow.base.canvas.draw()
+        #self.polarisation_arrow.base.canvas.draw()
     
     def reset_camera(self):
         self.view_azim = 45

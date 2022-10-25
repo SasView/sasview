@@ -84,3 +84,9 @@ class SetupLogger(object):
                 return
         print(f"'{filename}' not found.", file=sys.stderr)
         self.config_file = None
+
+def production():
+    return SetupLogger("sasview").config_production()
+
+def development():
+    return SetupLogger("sasview").config_development()
