@@ -71,7 +71,7 @@ class FileConverterTest:
         assert widget.cmdConvert
 
         iqdata = np.array([Utilities.extract_ascii_data(widget.ifile)])
-        assert round(abs(iqdata[0][0]-224.08691), 5) == 0
+        assert iqdata[0][0] == pytest.approx(224.08691, rel=1e-5)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnQFileOpen(self, widget, mocker):
@@ -89,7 +89,7 @@ class FileConverterTest:
         assert widget.cmdConvert
 
         qdata = Utilities.extract_ascii_data(widget.qfile)
-        assert round(abs(qdata[0]-0.13073), 5) == 0
+        assert qdata[0] == pytest.approx(0.13073, abs=1e-5)
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnConvert(self, widget, mocker):
@@ -140,5 +140,5 @@ class FileConverterTest:
         xml_dict = xml2dict(tree.getroot())
         output_qdata = float(xml_dict['SASentry']['SASdata']['Idata']['Q'])
         output_idata = float(xml_dict['SASentry']['SASdata']['Idata']['I'])
-        assert round(abs(output_qdata-0.86961), 5) == 0
-        assert round(abs(output_idata-0.21477), 5) == 0
+        assert output_qdata == pytest.approx(0.86961, abs=1e-5)
+        assert output_idata == pytest.approx(0.21477, abs=1e-5)
