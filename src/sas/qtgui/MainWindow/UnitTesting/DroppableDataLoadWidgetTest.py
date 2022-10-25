@@ -67,4 +67,4 @@ class DroppableDataLoadWidgetTest:
         form.dropEvent(drop_event)
         QApplication.processEvents()
         assert spy_file_read.count() == 1
-        #self.assertIn(self.testfile, str(spy_file_read.signal(index=0)))
+        #assert self.testfile in str(spy_file_read.signal(index=0))
