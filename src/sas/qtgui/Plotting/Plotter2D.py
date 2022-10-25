@@ -539,7 +539,7 @@ class Plotter2DWidget(PlotterBase):
             else:
                 cb = self.figure.colorbar(self.im, cax=cbax)
 
-            cb.update_bruteforce(self.im)
+            cb.update_normal(self.im)
             cb.set_label('$' + self.scale + '$')
 
             self.vmin = cb.vmin
