@@ -1,5 +1,5 @@
 /* Global Properties */
-* {font-size: 9pt; font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
+* {font-size: 9pt; font-family: "Lucinda Grande", "Lucinda Sans Unicode", Helvetica, Arial, Verdana, sans-serif}
 
 /* HTML Elements */
 h1 {font-size: 240%;}
@@ -10,3 +10,4 @@ QLineEdit:focus {background-color: #98dbcc; color: #333333}
 
 /* Class-specific Properties */
 .warning {background-color: red;}
+.angstrom {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}

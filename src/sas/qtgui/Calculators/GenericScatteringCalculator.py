@@ -240,6 +240,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # TODO the option Ellipsoid has not been implemented
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
 
+        # New font to display angstrom symbol
+        self.lblUnitSolventSLD.setProperty('class', 'angstrom')
+        self.lblUnitVolume.setProperty('class', 'angstrom')
+        self.lbl5.setProperty('class', 'angstrom')
+        self.lblUnitMx.setProperty('class', 'angstrom')
+        self.lblUnitMy.setProperty('class', 'angstrom')
+        self.lblUnitMz.setProperty('class', 'angstrom')
+        self.lblUnitNucl.setProperty('class', 'angstrom')
+        self.lblUnitx.setProperty('class', 'angstrom')
+        self.lblUnity.setProperty('class', 'angstrom')
+        self.lblUnitz.setProperty('class', 'angstrom')
+
     def setup_display(self):
         """
         This function sets up the GUI display of the different coordinate systems.

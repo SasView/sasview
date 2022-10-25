@@ -46,14 +46,13 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         self.manager = parent
 
         # New font to display angstrom symbol
-        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.lblUnitWavelength.setStyleSheet(new_font)
-        self.lblUnitQx.setStyleSheet(new_font)
-        self.lblUnitQy.setStyleSheet(new_font)
-        self.lblUnitSigmax.setStyleSheet(new_font)
-        self.lblUnitSigmay.setStyleSheet(new_font)
-        self.lblUnitSigmalamd.setStyleSheet(new_font)
-        self.lblUnit1DSigma.setStyleSheet(new_font)
+        self.lblUnitWavelength.setProperty('class', 'angstrom')
+        self.lblUnitQx.setProperty('class', 'angstrom')
+        self.lblUnitQy.setProperty('class', 'angstrom')
+        self.lblUnitSigmax.setProperty('class', 'angstrom')
+        self.lblUnitSigmay.setProperty('class', 'angstrom')
+        self.lblUnitSigmalamd.setProperty('class', 'angstrom')
+        self.lblUnit1DSigma.setProperty('class', 'angstrom')
 
         # by default Spectrum label and cbCustomSpectrum are not visible
         self.cbCustomSpectrum.setVisible(False)
