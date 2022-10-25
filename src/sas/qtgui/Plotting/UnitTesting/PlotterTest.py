@@ -92,7 +92,7 @@ class PlotterTest:
 
         assert plotter.ax.get_xscale() == 'linear'
         assert plotter.ax.get_yscale() == 'linear'
-        #self.assertEqual(plotter.data[0].ytransform, "y")
+        #assert plotter.data[0].ytransform == "y"
         assert FigureCanvas.draw_idle.called
 
     def testCreateContextMenuQuick(self, plotter, mocker):
@@ -279,7 +279,7 @@ class PlotterTest:
         plotter.plot(data2)
 
         # Assure the plotter window is visible
-        #self.assertTrue(plotter.isVisible())
+        #assert plotter.isVisible()
 
         # Assure we have two sets
         assert len(list(plotter.plot_dict.keys())) == 2
