@@ -56,7 +56,7 @@ class GuiManagerTest:
 
         assert isinstance(manager.ackWidget, Acknowledgements)
         assert isinstance(manager.aboutWidget, AboutBox)
-        #self.assertIsInstance(manager.welcomePanel, WelcomePanel)
+        #assert isinstance(manager.welcomePanel, WelcomePanel)
 
     def skip_testLogging(self, manager):
         """
@@ -128,7 +128,7 @@ class GuiManagerTest:
         manager.quitApplication()
 
         # See that the MessageBox method got called
-        #self.assertTrue(QMessageBox.question.called)
+        #assert QMessageBox.question.called
 
         # Say Yes to the close dialog
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
@@ -137,7 +137,7 @@ class GuiManagerTest:
         manager.quitApplication()
 
         # See that the MessageBox method got called
-        #self.assertTrue(QMessageBox.question.called)
+        #assert QMessageBox.question.called
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testCheckUpdate(self, manager, mocker):
