@@ -15,9 +15,6 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
-BG_WHITE = "background-color: rgb(255, 255, 255); color: rgb(0, 0, 0);"
-BG_RED = "background-color: rgb(244, 170, 164);"
-
 
 class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
@@ -271,16 +268,16 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
                 logging.warning(msg)
-                self.txtNumber.setStyleSheet(BG_RED)
+                self.txtNumber.setProperty('class', 'warning')
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
                 logging.warning(msg)
-                self.txtNumber.setStyleSheet(BG_RED)
+                self.txtNumber.setProperty('class', 'warning')
 
             else:
-                self.txtNumber.setStyleSheet(BG_WHITE)
+                self.txtNumber.setProperty('class', None)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
@@ -291,13 +288,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             return False
         else:
             if self.cbData2.currentText() == 'Number':
-                self.cbData1.setStyleSheet(BG_WHITE)
-                self.cbData2.setStyleSheet(BG_WHITE)
+                self.cbData1.setProperty('class', None)
+                self.cbData2.setProperty('class', None)
                 return True
 
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
+                self.cbData1.setProperty('class', 'warning')
+                self.cbData2.setProperty('class', 'warning')
                 print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logging.error('Cannot compute data of different dimensions')
                 return False
@@ -306,8 +303,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
                 logging.error('Cannot compute 1D data of different lengths')
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
+                self.cbData1.setProperty('class', 'warning')
+                self.cbData2.setProperty('class', 'warning')
                 return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
@@ -318,33 +315,32 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                     or not all(i == j for i, j in
                                 zip(self.data1.qy_data, self.data2.qy_data))
                          ):
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
+                self.cbData1.setProperty('class', 'warning')
+                self.cbData2.setProperty('class', 'warning')
                 logging.error('Cannot compute 2D data of different lengths')
                 return False
 
             else:
-                self.cbData1.setStyleSheet(BG_WHITE)
-                self.cbData2.setStyleSheet(BG_WHITE)
+                self.cbData1.setProperty('class', None)
+                self.cbData2.setProperty('class', None)
                 return True
 
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(BG_WHITE)
 
         if name_to_check is None or name_to_check == '':
-            self.txtOutputData.setStyleSheet(BG_RED)
+            self.txtOutputData.setProperty('class', 'warning')
             logging.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
-            self.txtOutputData.setStyleSheet(BG_RED)
+            self.txtOutputData.setProperty('class', 'warning')
             logging.warning('The Output data name already exists')
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(BG_WHITE)
+            self.txtOutputData.setProperty('class', None)
             return True
 
     # ########
