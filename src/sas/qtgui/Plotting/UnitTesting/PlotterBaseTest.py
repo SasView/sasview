@@ -143,15 +143,15 @@ class PlotterBaseTest:
         assert self.clipboard_called
 
         # Trigger toggle navigation bar and make sure the method is called
-        #self.assertEqual(actions[4].text(), "Toggle Navigation Menu")
+        #assert actions[4].text() == "Toggle Navigation Menu"
         #isShown = plotter.toolbar.isVisible()
-        #self.assertTrue(isShow)
+        #assert isShown
         #actions[4].trigger()
         #isShown = plotter.toolbar.isVisible()
-        #self.assertFalse(isShow)
+        #assert not isShown
         #actions[4].trigger()
         #isShown = plotter.toolbar.isVisible()
-        #self.assertTrue(isShow)
+        #assert isShown
 
 
     def testOnWindowsTitle(self, plotter, mocker):
