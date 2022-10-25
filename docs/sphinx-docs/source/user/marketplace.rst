@@ -2,7 +2,7 @@
 
 Model Marketplace
 =================
-The `Model Marketplace <http://marketplace.sasview.org/>`_ allows members
+The `Model Marketplace <https://marketplace.sasview.org/>`_ allows members
 of the SAS Community to contribute plug-in fitting models for *SasView*
 for all to use.
 
