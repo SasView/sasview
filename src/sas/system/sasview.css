@@ -1,5 +1,5 @@
 /* Global Properties */
-* {font-size: 9pt; font-family: "Lucinda Grande", "Lucinda Sans Unicode", Helvetica, Arial, Verdana, sans-serif}
+* {font-size: 9pt; font-family: Helvetica, Arial, Verdana, sans-serif}
 
 /* HTML Elements */
 h1 {font-size: 240%;}
@@ -8,6 +8,7 @@ h1 {font-size: 240%;}
 QLineEdit {background-color: white; color: black;}
 QLineEdit:focus {background-color: #98dbcc; color: #333333}
 QLineEdit[urgent=true] {background-color: red;}
+QTableWidgetItem[italic=true] {font-style: italic}
 
 QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
 

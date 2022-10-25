@@ -393,9 +393,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             for i_row, error in enumerate(error_values):
                 item = QtWidgets.QTableWidgetItem(GuiUtils.formatNumber(error, high=True))
                 # Fancy, italic font for errors
-                font = QtGui.QFont()
-                font.setItalic(True)
-                item.setFont(font)
+                GuiUtils.updateProperty(item, 'italic', 'true')
                 widget.setItem(i_row, error_column, item)
 
         # resize content

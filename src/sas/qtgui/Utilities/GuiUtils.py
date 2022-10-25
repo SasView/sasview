@@ -322,7 +322,7 @@ def updateModelItem(item, update_data, name=""):
     item.appendRow(object_item)
 
 
-def updateProperty(obj: QtWidgets.QWidget, qt_prop: str, val: str):
+def updateProperty(obj: QtWidgets, qt_prop: str, val: str):
     """
     Update a Qt property for a given Widget. This requires a series of operations on the widget.
     """
