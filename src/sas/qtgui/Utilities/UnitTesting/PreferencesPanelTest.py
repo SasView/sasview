@@ -1,6 +1,6 @@
 import os
 import pytest
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.PreferencesPanel import *
@@ -59,3 +59,32 @@ class PreferencesPanelTest:
         mocker.patch.object(widget, 'onClick')
         widget.buttonBox.buttons()[0].click()
         assert widget.onClick.called_once()
+
+    def testPreferencesWidget(self, widget, mocker):
+        mocker.patch.object(widget, 'checked', create=True)
+        mocker.patch.object(widget, 'combo', create=True)
+        mocker.patch.object(widget, 'textified', create=True)
+        mocker.patch.object(widget, 'resetPref', create=True)
+
+        pref = PreferencesWidget("Dummy Widget", widget.resetPref)
+        pref.addTextInput("blah", widget.textified)
+        pref.addCheckBox("ho hum", widget.checked)
+        pref.addComboBox("combo", ["a", "b", "c"], widget.combo, "a")
+
+        widget.addWidget(pref)
+
+        widget.restoreDefaultPreferences()
+        assert widget.resetPref.called_once()
+
+        for child in pref.layout().children():
+            if isinstance(child, QLineEdit):
+                child.setText("new text")
+            elif isinstance(child, QComboBox):
+                child.setCurrentIndex(1)
+            elif isinstance(child, QCheckBox):
+                child.setChecked(not child.checkState())
+
+        assert widget.textified.called_once()
+        assert widget.combo.called_once()
+        assert widget.checked.called_once()
+

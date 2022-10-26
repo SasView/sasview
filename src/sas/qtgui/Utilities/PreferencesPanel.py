@@ -33,8 +33,8 @@ def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_i
     """
     cb.clear()
     cb.addItems(new_items)
-    if default_item and default_item in new_items:
-        cb.setCurrentIndex(cb.findText(default_item))
+    index = cb.findText(default_item) if default_item and default_item in new_items else 0
+    cb.setCurrentIndex(index)
 
 
 class PreferencesPanel(QDialog, Ui_preferencesUI):
@@ -121,23 +121,25 @@ class PreferencesWidget(QWidget):
         :param title: The title of the interactive item to be added to the preferences panel.
         :return: A QVBoxLayout instance with a title box already added
         """
-        layout = QVBoxLayout(self.horizontalLayout)
-        label = QLabel(title + ": ", layout)
+        layout = QVBoxLayout(self)
+        label = QLabel(title + ": ", self)
         layout.addWidget(label)
         return layout
 
-    def addComboBox(self, title: str, params: List[Union[str, int, float]], callback: Callable, default: Optional[str]):
+    def addComboBox(self, title: str, params: List[Union[str, int, float]], callback: Callable,
+                    default: Optional[str] = None):
         """Add a title and combo box within the widget.
         :param title: The title of the combo box to be added to the preferences panel.
         :param params: A list of options to be added to the combo box.
         :param callback: A callback method called when the combobox value is changed.
+        :param default: The default option to be selected in the combo box. The first item is selected if None.
         """
         layout = self._createLayoutAndTitle(title)
-        box = QComboBox(layout)
+        box = QComboBox(self)
         cb_replace_all_items_with_new(box, params, default)
         box.currentIndexChanged.connect(callback)
         layout.addWidget(box)
-        self.horizontalLayout.addWidget(layout)
+        self.horizontalLayout.addLayout(layout)
 
     def addTextInput(self, title: str, callback: Callable, default_text: Optional[str] = ""):
         """Add a title and text box within the widget.
@@ -146,12 +148,12 @@ class PreferencesWidget(QWidget):
         :param default_text: An optional value to be put within the text box as a default. Defaults to an empty string.
         """
         layout = self._createLayoutAndTitle(title)
-        text_box = QLineEdit(layout)
+        text_box = QLineEdit(self)
         if default_text:
             text_box.setText(default_text)
         text_box.textChanged.connect(callback)
         layout.addWidget(text_box)
-        self.horizontalLayout.addWidget(layout)
+        self.horizontalLayout.addLayout(layout)
 
     def addCheckBox(self, title: str, callback: Callable, checked: Optional[bool] = False):
         """Add a title and check box within the widget.
@@ -160,8 +162,8 @@ class PreferencesWidget(QWidget):
         :param checked: An optional boolean value to specify if the check box is checked. Defaults to unchecked.
         """
         layout = self._createLayoutAndTitle(title)
-        check_box = QCheckBox(layout)
+        check_box = QCheckBox(self)
         check_box.setChecked(checked)
         check_box.toggled.connect(callback)
         layout.addWidget(check_box)
-        self.horizontalLayout.addWidget(layout)
+        self.horizontalLayout.addLayout(layout)
