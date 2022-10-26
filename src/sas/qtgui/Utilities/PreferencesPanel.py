@@ -1,22 +1,38 @@
 import logging
 
 from PyQt5.QtWidgets import QComboBox, QDialog, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
-from typing import Optional, Any, List, Union, Callable
+from typing import Optional, Any, List, Union, Callable, Dict
 
 from sas.system.config.config import config
 from sas.qtgui.Utilities.UI.PreferencesUI import Ui_preferencesUI
 
+import functools
+
+# Pre-made option widgets
+from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+
 logger = logging.getLogger(__name__)
 
 
-def set_config_value(attr: str, value: Any):
+
+def set_config_value(value: Any,attr: str, dtype: Optional[Any] = None ):
     """Helper method to set any config value, regardless if it exists or not
     :param attr: The configuration attribute that will be set
     :param value: The value the attribute will be set to. This could be a str, int, bool, a class instance, or any other
     """
+    if dtype is not None:
+        value = dtype(value)
     setattr(config, attr, value)
 
+def config_value_setter_generator(attr: str,dtype: Optional[Any] = None):
+    """Helper method that generates a callback to set a config value.
 
+    :param attr: name of the attribute to set
+    :param dtype:
+    :return: a function that takes a single argument, which will be cast to dtype
+            and set in config as attr
+    """
+    return functools.partial(set_config_value,attr=attr,dtype=dtype)
 def get_config_value(attr: str, default: Optional[Any] = None) -> Any:
     """Helper method to get any config value, regardless if it exists or not
     :param attr: The configuration attribute that will be returned
@@ -54,12 +70,22 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.warning = None
         # A list of callables used to restore the default values for each item in StackedWidget
         self.restoreDefaultMethods = []
+        # Add predefined widgets to window
+        self.addWidgets(BASE_PANELS)
         # Set defaults values for the list and stacked widgets
         self.stackedWidget.setCurrentIndex(0)
         self.listWidget.setCurrentRow(0)
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
         self.buttonBox.clicked.connect(self.onClick)
+
+    def addWidgets(self,widgets: Dict[str,Callable]):
+        """Add a list of widgets to the window"""
+        for name, widget in widgets.items():
+            if isinstance(widget,PreferencesWidget):
+                self.addWidget(widget)
+            else:
+                self.addWidget(widget())
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
@@ -90,10 +116,12 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         config.save()
         super(PreferencesPanel, self).close()
 
-    def addWidget(self, widget: QWidget):
+    def addWidget(self, widget: QWidget, name: Optional[str] = None):
         self.stackedWidget.addWidget(widget)
-        self.listWidget.addItem(widget.name)
-        if widget.resetDefaults is not None and callable(widget.resetDefaults):
+        name = widget.name if hasattr(widget, 'name') and widget.name else name
+        name = "Unknown" if not name else name
+        self.listWidget.addItem(name)
+        if hasattr(widget, 'resetDefaults') and callable(widget.resetDefaults):
             self.restoreDefaultMethods.append(widget.resetDefaults)
 
     def help(self):
@@ -112,16 +140,16 @@ class PreferencesWidget(QWidget):
         super(PreferencesWidget, self).__init__()
         self.name = name
         self.resetDefaults = default_method
-        self.horizontalLayout = QHBoxLayout()
-        self.setLayout(self.horizontalLayout)
+        self.verticalLayout = QVBoxLayout()
+        self.setLayout(self.verticalLayout)
         self.adjustSize()
 
     def _createLayoutAndTitle(self, title: str):
-        """A private class method that creates a vertical layout to hold the title and interactive item.
+        """A private class method that creates a horizontal layout to hold the title and interactive item.
         :param title: The title of the interactive item to be added to the preferences panel.
-        :return: A QVBoxLayout instance with a title box already added
+        :return: A QHBoxLayout instance with a title box already added
         """
-        layout = QVBoxLayout(self)
+        layout = QHBoxLayout(self)
         label = QLabel(title + ": ", self)
         layout.addWidget(label)
         return layout
@@ -139,7 +167,7 @@ class PreferencesWidget(QWidget):
         cb_replace_all_items_with_new(box, params, default)
         box.currentIndexChanged.connect(callback)
         layout.addWidget(box)
-        self.horizontalLayout.addLayout(layout)
+        self.verticalLayout.addLayout(layout)
 
     def addTextInput(self, title: str, callback: Callable, default_text: Optional[str] = ""):
         """Add a title and text box within the widget.
@@ -153,7 +181,7 @@ class PreferencesWidget(QWidget):
             text_box.setText(default_text)
         text_box.textChanged.connect(callback)
         layout.addWidget(text_box)
-        self.horizontalLayout.addLayout(layout)
+        self.verticalLayout.addLayout(layout)
 
     def addCheckBox(self, title: str, callback: Callable, checked: Optional[bool] = False):
         """Add a title and check box within the widget.
