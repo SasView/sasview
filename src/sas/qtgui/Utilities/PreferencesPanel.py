@@ -194,19 +194,4 @@ class PreferencesWidget(QWidget):
         check_box.setChecked(checked)
         check_box.toggled.connect(callback)
         layout.addWidget(check_box)
-        self.verticalLayout.addLayout(layout)
-
-PlottingOptions = PreferencesWidget(name="Plotting Options")
-PlottingOptions.addCheckBox(title="Use full-width plot legends (most compatible)?",
-                            callback=config_value_setter_generator('FITTING_PLOT_FULL_WIDTH_LEGENDS',dtype=bool),
-                            checked=config.FITTING_PLOT_FULL_WIDTH_LEGENDS)
-
-PlottingOptions.addCheckBox(title="Use truncated legend entries?",
-                            callback=config_value_setter_generator('FITTING_PLOT_LEGEND_TRUNCATE',dtype=bool),
-                            checked=config.FITTING_PLOT_LEGEND_TRUNCATE)
-PlottingOptions.addTextInput(title="Legend entry line length",
-                             callback=config_value_setter_generator('FITTING_PLOT_LEGEND_MAX_LINE_LENGTH',dtype=int),
-                             default_text=str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH)
-                             )
-BASE_PANELS = {#"Fitting Optimizers": FittingOptions,
-               "Plotting Options": PlottingOptions}
+        self.horizontalLayout.addLayout(layout)
