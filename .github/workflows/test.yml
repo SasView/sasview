@@ -54,7 +54,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
-        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5
+        python -m pip install numpy scipy matplotlib docutils pytest pytest_qt pytest-mock sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5 html2text importlib_resources uncertainties dominate html2text
 
     - name: Install pyopencl (Linux + macOS)
       if: ${{ matrix.os != 'windows-latest' }}
@@ -70,8 +70,18 @@ jobs:
 
     - name: Fetch sources for sibling projects
       run: |
+        git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
         git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+
+    - name: Build and install sasdata
+      run: |
+        cd ../sasdata
+        rm -rf build
+        rm -rf dist
+        python setup.py clean
+        python setup.py build
+        python -m pip install .
 
     - name: Build and install sasmodels
       run: |
@@ -97,7 +107,7 @@ jobs:
       run: |
         # SET SASVIEW GITHASH
         githash=$( git rev-parse HEAD )
-        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
+        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/system/version.py
         # BUILD SASVIEW
         python setup.py clean
         python setup.py build
@@ -114,5 +124,8 @@ jobs:
       env:
         PYOPENCL_COMPILER_OUTPUT: 1
       run: |
-        cd src/sas/qtgui
-        xvfb-run -a --server-args="-screen 0 1024x768x24" python GUITests.py || true
+        # Suppress SIGSEGV from the tests until they can be fixed
+        retval=0
+        xvfb-run -a --server-args="-screen 0 1024x768x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+        if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+        exit $retval

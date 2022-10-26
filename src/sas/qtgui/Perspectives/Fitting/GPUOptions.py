@@ -18,6 +18,9 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
+from sas.system import env
+from sas import config
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -39,8 +42,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     OpenCL Dialog to select the desired OpenCL driver
     """
 
-    clicked = False
-    sas_open_cl = None
     cl_options = None
     testingDoneSignal = QtCore.pyqtSignal(str)
     testingFailedSignal = QtCore.pyqtSignal(str)
@@ -49,77 +50,66 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         super(GPUOptions, self).__init__(parent)
         self.parent = parent
         self.setupUi(self)
+
+        self.radio_buttons = []
+
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-        self.addOpenCLOptions()
+        self.add_options()
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
-        self.createLinks()
+
+        self.testButton.clicked.connect(self.testButtonClicked)
+        self.helpButton.clicked.connect(self.helpButtonClicked)
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
 
-    def addOpenCLOptions(self):
+
+    def add_options(self):
         """
         Populate the window with a list of OpenCL options
         """
         # Get list of openCL options and add to GUI
         cl_tuple = _get_clinfo()
-        self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
 
-        # Keys are the names in the form "platform: device". Corresponding values are the combined indices, e.g.
-        # "0:1", for setting the SAS_OPENCL env.
         self.cl_options = {}
 
+
         for title, descr in cl_tuple:
+
             # Create an item for each openCL option
-            check_box = QtWidgets.QCheckBox()
-            check_box.setObjectName(_fromUtf8(descr))
-            check_box.setText(_translate("GPUOptions", descr, None))
-            self.optionsLayout.addWidget(check_box)
-            if (title == self.sas_open_cl) or (
-                            title == "None" and not self.clicked):
-                check_box.click()
-                self.clicked = True
+            radio_button = QtWidgets.QRadioButton()
+            radio_button.setObjectName(_fromUtf8(descr))
+            radio_button.setText(_translate("GPUOptions", descr, None))
+            self.optionsLayout.addWidget(radio_button)
+
+            if title.lower() == config.SAS_OPENCL.lower():
+
+                radio_button.setChecked(True)
+
             self.cl_options[descr] = title
+            self.radio_buttons.append(radio_button)
+
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
-
-    def createLinks(self):
-        """
-        Link user interactions to function calls
-        """
-        self.testButton.clicked.connect(self.testButtonClicked)
-        self.helpButton.clicked.connect(self.helpButtonClicked)
-        for item in self.openCLCheckBoxGroup.findChildren(QtWidgets.QCheckBox):
-            item.clicked.connect(self.checked)
-
-    def checked(self):
-        """
-        Only allow a single check box to be selected. Uncheck others.
-        """
-        checked = None
-        for box in self.openCLCheckBoxGroup.findChildren(QtWidgets.QCheckBox):
-            if box.isChecked() and (self.cl_options[str(box.text())] == self.sas_open_cl or (
-                    str(box.text()) == "No OpenCL" and self.sas_open_cl == "")):
-                box.setChecked(False)
-            elif box.isChecked():
-                checked = box
-        if hasattr(checked, "text"):
-            self.sas_open_cl = self.cl_options[str(checked.text())]
-        else:
-            self.sas_open_cl = None
 
     def set_sas_open_cl(self):
         """
         Set SAS_OPENCL value when tests run or OK button clicked
         """
-        no_opencl_msg = False
-        if self.sas_open_cl:
-            os.environ["SAS_OPENCL"] = self.sas_open_cl
-            if self.sas_open_cl.lower() == "none":
-                no_opencl_msg = True
-        else:
-            if "SAS_OPENCL" in os.environ:
-                del os.environ["SAS_OPENCL"]
+
+        checked = None
+        for box in self.radio_buttons:
+            if box.isChecked():
+                checked = box
+
+        if checked is None:
+            raise RuntimeError("Error: No radio button selected somehow")
+
+        sas_open_cl = self.cl_options[str(checked.text())]
+        no_opencl_msg = sas_open_cl.lower() == "none"
+        env.sas_opencl = sas_open_cl
+        config.SAS_OPENCL = sas_open_cl
+
         # CRUFT: next version of reset_environment() will return env
         sasmodels.sasview_model.reset_environment()
         return no_opencl_msg
@@ -322,17 +312,17 @@ def _get_clinfo():
         cl = None
 
     if cl is None:
-        logger.warn("Unable to import the pyopencl package.  It may not "
+        logger.warning("Unable to import the pyopencl package.  It may not "
                     "have been installed.  If you wish to use OpenCL, try "
                     "running pip install --user pyopencl")
     else:
         try:
             cl_platforms = cl.get_platforms()
         except cl.LogicError as err:
-            logger.warn("Unable to fetch the OpenCL platforms.  This likely "
+            logger.warning("Unable to fetch the OpenCL platforms.  This likely "
                         "means that the opencl drivers for your system are "
                         "not installed.")
-            logger.warn(err)
+            logger.warning(err)
 
     p_index = 0
     for cl_platform in cl_platforms:
@@ -350,5 +340,5 @@ def _get_clinfo():
             d_index += 1
         p_index += 1
 
-    clinfo.append(("None", "No OpenCL"))
+    clinfo.append(("none", "No OpenCL"))
     return clinfo

@@ -90,7 +90,7 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
             # Save the color as #RRGGBB
             self.custom_color = True
             self._color = str(proposed_color.name())
-   
+
     def onColorIndexChange(self):
         """
         Dynamically add/remove "Custom" color index
@@ -100,4 +100,3 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
         self.custom_color = False
         if custom_index > -1:
             self.cbColor.removeItem(custom_index)
-        

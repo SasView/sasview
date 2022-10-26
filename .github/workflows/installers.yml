@@ -61,7 +61,7 @@ jobs:
     - name: Install lxml and MPL (Linux + Win)
       if: ${{ matrix.os != 'macos-latest' }}
       run: |
-        python -m pip install matplotlib==2.2.5
+        python -m pip install matplotlib~=3.5.2
         python -m pip install lxml
 
     - name: Install Python dependencies
@@ -72,7 +72,9 @@ jobs:
         python -m pip install numpy scipy==1.7.3 docutils "pytest<6" sphinx unittest-xml-reporting
         python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab==3.6.6 pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
-        python -m pip install qt5reactor periodictable uncertainties debugpy
+        python -m pip install qt5reactor periodictable uncertainties dominate importlib_resources
+        python -m pip install html2text
+
 
     - name: Install PyQt (Windows + Linux)
       if: ${{ matrix.os != 'macos-latest' }}
@@ -83,7 +85,7 @@ jobs:
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
         python -m pip install PyQt5==5.13
-        python -m pip install matplotlib==3.4.3
+        python -m pip install matplotlib~=3.5.2
         python -m pip install --no-binary lxml lxml
 
     - name: Install pyopencl (Windows)
@@ -105,8 +107,18 @@ jobs:
 
     - name: Fetch sources for sibling projects
       run: |
+        git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
         git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+
+    - name: Build and install sasdata
+      run: |
+        cd ../sasdata
+        rm -rf build
+        rm -rf dist
+        python setup.py clean
+        python setup.py build
+        python -m pip install .
 
     - name: Build and install sasmodels
       run: |
@@ -126,13 +138,19 @@ jobs:
         python setup.py build
         python -m pip install .
 
+    ### Document the build environment
+
+    - name: Python package version list
+      run: |
+        python -m pip freeze
+
     ### Actual building/testing of sasview
 
     - name: Build sasview
       run: |
         # SET SASVIEW GITHASH
         githash=$( git rev-parse HEAD )
-        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
+        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/system/version.py
         # BUILD SASVIEW
         python setup.py clean
         python setup.py build
@@ -182,27 +200,3 @@ jobs:
         name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
-
-    - name: Declare env variables on push only
-      if: github.event_name == 'push'
-      shell: bash
-      run: echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-    - name: Declare env variables on pull_request only
-      if: github.event_name == 'pull_request'
-      shell: bash
-      run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
-
-    - name: Upload installer to GitHub releases
-      #Release and main branch will be treated differently
-      if: env.BRANCH_NAME != 'main'
-      uses: ncipollo/release-action@v1
-      with:
-        draft: true
-        prerelease: true
-        allowUpdates: true
-        replacesArtifacts: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
-        name: ${{ env.BRANCH_NAME }}
-        tag: ${{ env.BRANCH_NAME }}

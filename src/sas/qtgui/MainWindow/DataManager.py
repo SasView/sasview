@@ -37,12 +37,12 @@ from sas.qtgui.Plotting.Plottables import View
 
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.MainWindow.DataState import DataState
-import sas.sascalc.dataloader.data_info as DataInfo
+import sasdata.dataloader.data_info as DataInfo
 
 # used for import/export
-from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sasdata.dataloader.data_info import Sample, Source, Vector
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 
 class DataManager(object):
@@ -145,7 +145,7 @@ class DataManager(object):
             return ""
 
         # Explicitly match [0-9]+ at the end of the name
-        result = re.split("[[0-9]+]$", name)
+        result = re.split("\[[0-9]+\]$", name)
         base_name = result[0].strip()
 
         # data_name_dict: {'baseName': [0, 1, .. n]}
@@ -278,7 +278,7 @@ class DataManager(object):
         Remove 'name' or 'name [n]' from data_name_dict
         """
         # Split on whitespace - split 'name [n]' into list of len() == 2
-        data_name_split = re.split("[[0-9]+]$", name)
+        data_name_split = re.split("\[[0-9]+\]$", name)
         base_name = data_name_split[0].strip()
         if name in self.data_name_dict:
             self.data_name_dict[name].remove(0)

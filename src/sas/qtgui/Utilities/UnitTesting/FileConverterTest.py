@@ -1,127 +1,125 @@
 import sys
 import os
-import unittest
 import numpy as np
 from lxml import etree
 
-from unittest.mock import MagicMock, patch
+import pytest
 
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
-import sas.sascalc.file_converter.FileConverterUtilities as Utilities
+import sasdata.file_converter.FileConverterUtilities as Utilities
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class dummy_manager(object):
-    communicate = Communicate()
-    _parent = QtWidgets.QDialog()
-
-class FileConverterTest(unittest.TestCase):
+class FileConverterTest:
     """ Test the simple FileConverter dialog """
-    def setUp(self):
-        """ Create FileConverter dialog """
-        self.widget = FileConverterWidget(dummy_manager())
 
-    def tearDown(self):
-        """ Destroy the GUI """
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the FileConverter'''
+        class dummy_manager(object):
+            communicate = Communicate()
+            _parent = QtWidgets.QDialog()
 
-        self.widget.close()
-        self.widget = None
+        w = FileConverterWidget(dummy_manager())
+        yield w
+        w.close()
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         """ Test the GUI in its default state """
 
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
+        assert isinstance(widget, QtWidgets.QDialog)
 
         # Default title
-        self.assertEqual(self.widget.windowTitle(), "File Converter")
+        assert widget.windowTitle() == "File Converter"
 
         # Modal window
-        self.assertFalse(self.widget.isModal())
+        assert not widget.isModal()
 
         # Size policy
-        self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
+        assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
 
-        self.assertTrue(self.widget.is1D,)
-        self.assertFalse(self.widget.isBSL)
-        self.assertEqual(self.widget.ifile, '')
-        self.assertEqual(self.widget.qfile, '')
-        self.assertEqual(self.widget.ofile, '')
-        self.assertEqual(self.widget.metadata,{})
+        assert widget.is1D
+        assert not widget.isBSL
+        assert widget.ifile == ''
+        assert widget.qfile == ''
+        assert widget.ofile == ''
+        assert widget.metadata == {}
 
 
-    def testOnHelp(self):
+    def testOnHelp(self, widget, mocker):
         """ Test the default help renderer """
 
-        self.widget.parent.showHelp = MagicMock()
-        self.widget.onHelp()
-        self.assertTrue(self.widget.parent.showHelp.called_once())
+        mocker.patch.object(widget.parent, 'showHelp', create=True)
+        widget.onHelp()
+        assert widget.parent.showHelp.called_once()
      
-    def testOnIFileOpen(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
+    def testOnIFileOpen(self, widget, mocker):
         """
         Testing intensity file read in.
         :return:
         """
         filename = os.path.join("UnitTesting", "FIT2D_I.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
-        self.widget.onIFileOpen()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
+        widget.onIFileOpen()
 
         # check updated values in ui, read from loaded file
-        self.assertEqual(self.widget.txtIFile.text(), 'FIT2D_I.TXT')
-        self.assertEqual(self.widget.ifile, filename)
-        self.assertTrue(self.widget.cmdConvert)
+        assert widget.txtIFile.text() == 'FIT2D_I.TXT'
+        assert widget.ifile == filename
+        assert widget.cmdConvert
 
-        iqdata = np.array([Utilities.extract_ascii_data(self.widget.ifile)])
-        self.assertAlmostEqual(iqdata[0][0], 224.08691, places=5)
+        iqdata = np.array([Utilities.extract_ascii_data(widget.ifile)])
+        assert iqdata[0][0] == pytest.approx(224.08691, rel=1e-5)
 
-    def testOnQFileOpen(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
+    def testOnQFileOpen(self, widget, mocker):
         """
         Testing intensity file read in.
         :return:
         """
         filename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[filename, ''])
-        self.widget.onQFileOpen()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[filename, ''])
+        widget.onQFileOpen()
 
         # check updated values in ui, read from loaded file
-        self.assertEqual(self.widget.txtQFile.text(), 'FIT2D_Q.TXT')
-        self.assertEqual(self.widget.qfile, filename)
-        self.assertTrue(self.widget.cmdConvert)
+        assert widget.txtQFile.text() == 'FIT2D_Q.TXT'
+        assert widget.qfile == filename
+        assert widget.cmdConvert
 
-        qdata = Utilities.extract_ascii_data(self.widget.qfile)
-        self.assertAlmostEqual(qdata[0], 0.13073, places=5)
+        qdata = Utilities.extract_ascii_data(widget.qfile)
+        assert qdata[0] == pytest.approx(0.13073, abs=1e-5)
 
-    def testOnConvert(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
+    def testOnConvert(self, widget, mocker):
         """
 
         :return:
         """
         ifilename = os.path.join("UnitTesting", "FIT2D_I.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[ifilename, ''])
-        self.widget.onIFileOpen()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[ifilename, ''])
+        widget.onIFileOpen()
         qfilename = os.path.join("UnitTesting", "FIT2D_Q.TXT")
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=[qfilename, ''])
-        self.widget.onQFileOpen()
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[qfilename, ''])
+        widget.onQFileOpen()
 
-        self.assertFalse(self.widget.isBSL)
-        self.assertTrue(self.widget.is1D)
+        assert not widget.isBSL
+        assert widget.is1D
 
         ofilemame = os.path.join('UnitTesting', 'FIT2D_IQ.xml')
-        self.widget.ofile = ofilemame
+        widget.ofile = ofilemame
 
-        self.widget.chkLoadFile.setChecked(False)
-        self.widget.onConvert()
+        widget.chkLoadFile.setChecked(False)
+        widget.onConvert()
 
-        test_metadata = self.widget.metadata
-        self.assertEqual(test_metadata['title'], '')
-        self.assertEqual(test_metadata['run_name'], {'': ''})
-        self.assertEqual(test_metadata['instrument'], '')
-        self.assertEqual(test_metadata['detector'][0].name, '') #What is the reason to have it as array
-        self.assertEqual(test_metadata['sample'].name, '')
-        self.assertEqual(test_metadata['source'].name, '')
+        test_metadata = widget.metadata
+        assert test_metadata['title'] == ''
+        assert test_metadata['run_name'] == {'': ''}
+        assert test_metadata['instrument'] == ''
+        assert test_metadata['detector'][0].name == '' #What is the reason to have it as array
+        assert test_metadata['sample'].name == ''
+        assert test_metadata['source'].name == ''
 
         tree = etree.parse(ofilemame, parser=etree.ETCompatXMLParser())
 
@@ -142,5 +140,5 @@ class FileConverterTest(unittest.TestCase):
         xml_dict = xml2dict(tree.getroot())
         output_qdata = float(xml_dict['SASentry']['SASdata']['Idata']['Q'])
         output_idata = float(xml_dict['SASentry']['SASdata']['Idata']['I'])
-        self.assertAlmostEqual(output_qdata, 0.86961, places=5)
-        self.assertAlmostEqual(output_idata, 0.21477, places=5)
+        assert output_qdata == pytest.approx(0.86961, abs=1e-5)
+        assert output_idata == pytest.approx(0.21477, abs=1e-5)

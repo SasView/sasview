@@ -10,15 +10,12 @@ block_cipher = None
 PYTHON_LOC = sys.exec_prefix
 
 datas = [
-    ('../src/sas/sasview/images', 'images'),
+    ('../src/sas/qtgui/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
-    ('../src/sas/sasview/test', 'test'),
-    ('../src/sas/sasview/custom_config.py', '.'),
-    ('../src/sas/sasview/local_config.py', '.'),
-    ('../src/sas/sasview/wxcruft.py', '.'),
+    ('../src/sas/example_data', 'example_data'),
+    ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
-    ('../src/sas/logger_config.py', '.'),
-    ('../src/sas/logging.ini', '.'),
+    ('../src/sas/system/log.ini', '.'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build/html','doc')
 ]
@@ -26,9 +23,6 @@ datas = [
 if platform.system() == 'Darwin':
     datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
     datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','debugpy'),'debugpy'))
-else:
-    datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','debugpy'),'debugpy'))
 
 def add_data(data):
     for component in data:
@@ -49,24 +43,8 @@ import periodictable
 add_data(periodictable.data_files())
 
 hiddenimports = [
-    'sas.sascalc.dataloader.readers.abs_reader',
-    'sas.sascalc.dataloader.readers.anton_paar_saxs_reader',
-    'sas.sascalc.dataloader.readers.ascii_reader',
-    'sas.sascalc.dataloader.readers.cansas_reader_HDF5',
-    'sas.sascalc.dataloader.readers.cansas_reader',
-    'sas.sascalc.dataloader.readers.danse_reader',
-    'sas.sascalc.dataloader.readers.red2d_reader',
-    'sas.sascalc.dataloader.readers.sesans_reader',
-    'sas.sascalc.dataloader.readers.tiff_reader',
-    'sas.sascalc.dataloader.readers.xml_reader',
-    #'PyQt5',
-    #'periodictable.core',
-    #'sasmodels.core',
     'pyopencl',
-    #'tinycc',
-    #'SocketServer',
-    #'logging',
-    #'logging.config',
+    'setuptools._distutils',
     'reportlab',
     'reportlab.graphics',
     'reportlab.graphics.barcode.common',
@@ -80,24 +58,8 @@ hiddenimports = [
     'reportlab.graphics.barcode.eanbc',
     'reportlab.graphics.barcode.ecc200datamatrix',
     'reportlab.graphics.barcode.fourstate',
-    #'ipykernel',
-    #'ipykernel.datapub',
-    #'pygments',
-    #'pygments.lexers',
-    #'pygments.lexers.python',
-    #'pygments.styles',
-    #'pygments.styles.default',
-    #'atexit', 'cython', 'sip', 'xhtml2pdf',
-    #'zmq', 'zmq.utils', 'zmq.utils.strtypes',
-    #'zmq.utils.jsonapi','zmq.utils.garbage',
-    #'zmq.backend.cython','zmq.backend.cffi',
-    #'site','lxml._elementpath','lxml.etree',
-    #'scipy._lib.messagestream',
-    #'numba',
     'xmlrpc',
     'xmlrpc.server',
-    'debugpy',
-    'debugpy._vendored',
     'uncertainties',
 ]
 
@@ -130,7 +92,7 @@ if platform.system() == 'Darwin':
           name='sasview',
           debug=False,
           upx=False,
-          icon=os.path.join("../src/sas/sasview/images","ball.icns"),
+          icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
           version="version.txt",
           console=False )
 else:
@@ -142,7 +104,7 @@ else:
         name='sasview',
         debug=False,
         bootloader_ignore_signals=False,
-        icon=os.path.join("../src/sas/sasview/images","ball.ico"),
+        icon=os.path.join("../src/sas/qtgui/images","ball.ico"),
         strip=False,
         upx=True,
         console=False)
@@ -161,6 +123,6 @@ coll = COLLECT(
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
         name='SasView5.app',
-        icon='../src/sas/sasview/images/ball.icns',
+        icon='../src/sas/qtgui/images/ball.icns',
         bundle_identifier='org.sasview.SasView5',
         info_plist={'NSHighResolutionCapable': 'True'})

@@ -1,7 +1,10 @@
 from PyQt5 import QtWidgets
 
 import sas.sasview
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
+import sas.system.version
+
+from sas import config
+from sas.system import legal
 
 from sas.qtgui.MainWindow.UI.WelcomePanelUI import Ui_WelcomePanelUI
 
@@ -12,10 +15,9 @@ class WelcomePanel(QtWidgets.QDialog, Ui_WelcomePanelUI):
 
         self.setWindowTitle("Welcome")
 
-        version = sas.sasview.__version__
-        build = sas.sasview.__build__
+        version = sas.system.version.__version__  # TODO: Make consistent with other version references
 
-        ver = "\nSasView %s\nBuild: %s\n%s" % (version, build, LocalConfig._copyright)
+        ver = "\nSasView %s\n%s" % (version, legal.copyright)
 
         self.lblVersion.setText(ver)
 

@@ -20,7 +20,7 @@ from __future__ import division
 import math
 import numpy as np
 
-from sas.sascalc.dataloader.data_info import Data1D as LoaderData1D
+from sasdata.dataloader.data_info import Data1D as LoaderData1D
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
@@ -448,7 +448,7 @@ class InvariantCalculator(object):
         :note: this function must be call before computing any type
          of invariant
 
-        :return: new data = self._scale *data - self._background
+        :return: new data = self._scale x data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
@@ -475,7 +475,7 @@ class InvariantCalculator(object):
 
         :param qmin: data first q value to consider during the fit
         :param qmax: data last q value to consider during the fit
-        :param power : power value to consider for power-law
+        :param power: power value to consider for power-law
         :param function: the function to use during the fit
 
         :return a: the scale of the function
@@ -543,10 +543,11 @@ class InvariantCalculator(object):
     def _get_qstar_uncertainty(self, data):
         """
         Compute invariant uncertainty with with pinhole data.
-        This uncertainty is given as follow: ::
+        This uncertainty is given as follows::
 
            dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
                 (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
+                
         where n >= len(data.x)-1
         dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
         dx0 = (x1 - x0)/2

@@ -114,7 +114,7 @@ class SectorMask(BaseInteractor):
         if self.data is None:
             return
         ## Averaging
-        from sas.sascalc.dataloader.manipulations import Sectorcut
+        from sasdata.data_util.manipulations import Sectorcut
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
 

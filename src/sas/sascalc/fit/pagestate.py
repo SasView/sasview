@@ -28,13 +28,13 @@ from lxml import etree
 from sasmodels import convert
 import sasmodels.weights
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 
-import sas.sascalc.dataloader
-from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
-from sas.sascalc.dataloader.readers.cansas_reader import get_content, write_node
-from sas.sascalc.dataloader.data_info import Data2D, Collimation, Detector
-from sas.sascalc.dataloader.data_info import Process, Aperture
+import sasdata.dataloader
+from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
+from sasdata.dataloader.readers.cansas_reader import get_content, write_node
+from sasdata.dataloader.data_info import Data2D, Collimation, Detector
+from sasdata.dataloader.data_info import Process, Aperture
 
 logger = logging.getLogger(__name__)
 

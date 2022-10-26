@@ -15,9 +15,9 @@ class GenReader(CalcThread):
                  worktime=0.01
                  ):
         CalcThread.__init__(self, completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+                            updatefn,
+                            yieldtime,
+                            worktime)
         self.path = path
         #Instantiate a loader 
         self.loader = loader

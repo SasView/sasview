@@ -30,7 +30,6 @@
 *.so
 *.exe
 
-/.vagrant
 /build
 /dist
 sasview.egg-info
@@ -39,6 +38,7 @@ default_categories.json
 /setup.cfg
 **/UI/*.py
 !**/UI/__init__.py
+config.json
 
 # doc build
 /docs/sphinx-docs/build
@@ -62,6 +62,9 @@ default_categories.json
 /test/fileconverter/data/export2d.h5
 **/logs
 tests.log
+
+# Test reports
+/src/sas/qtgui/Utilities/Reports/report_test*
 
 # Installer files
 /sasview-install
