@@ -393,16 +393,39 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             d_width = 0.0
         if d_length is None:
             d_length = 0.0
+        q_max = max(self.data.x)
+        smearing_error_flag = False
         if d_length < d_width:
-            logging.critical(f'Length specified which is less than width.'
-                          f'This is not slit-smearing, probably you switched the two parameters?')
+            msg = f'Length specified which is less than width. \n' \
+                  f'This is not slit-smearing, probably you switched the two parameters? \n' \
+                  f'I am internally using the smaller parameter as the width and larger as the length. \n' \
+                  f'This is the only mathematically valid version of this.'
+            smearing_error_flag = True
             temp = d_length
             d_length = d_width
             d_width = temp
-        if d_length < 10 * d_width: #todo check for qmax constraint.
-            logging.critical(f'Slit length specified which is less than 10 x slit width.'
-                          f'This is not slit-smearing (at least not in the form we implement).'
-                          f'Use pinhole smearing instead.')
+        elif d_length < 10 * d_width:
+            msg = f'Slit length specified which is less than 10 x slit width. ' \
+                  f'This is not slit-smearing (at least not in the form we implement). \n' \
+                  f'Use pinhole smearing instead.'
+            smearing_error_flag = True
+        elif d_length < q_max:
+            msg = f'Length specified which is less than q_max for the data. \n' \
+                  f'This is not covered by existing smearing model. \n' \
+                  f'Use pinhole smearing instead. '
+            smearing_error_flag = True
+        # override all these errors if both values are zero (initial starting state)
+        if d_length == 0 and d_width == 0:
+            smearing_error_flag = False
+
+
+        if smearing_error_flag:
+            logging.critical(msg)
+            errorbox = QtWidgets.QMessageBox()
+            errorbox.setWindowTitle('Smearing Input Error')
+            errorbox.setText(msg)
+            errorbox.exec_()
+
         self.slit_width = d_width
         self.slit_length = d_length
 
