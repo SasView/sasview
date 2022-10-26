@@ -29,10 +29,10 @@ def _legendResize(width, parent):
     resize factor for the legend, based on total canvas width
     """
     # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
-    if not hasattr(parent.parent, "manager"):
-        return None
     if parent is None or parent.parent is None or parent.parent.manager is None \
         or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
+        return None
+    if not hasattr(parent.parent, "manager"):
         return None
 
     screen_width = parent.parent.manager.parent._parent.screen_width
@@ -53,7 +53,7 @@ class PlotterWidget(PlotterBase):
     1D Plot widget for use with a QDialog
     """
     def __init__(self, parent=None, manager=None, quickplot=False):
-        super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+        super().__init__(parent, manager=manager, quickplot=quickplot)
 
         self.parent = parent
 
@@ -87,8 +87,6 @@ class PlotterWidget(PlotterBase):
         self.toolbar._actions['forward'].triggered.connect(self._forward)
         self.toolbar._actions['pan'].triggered.connect(self._pan)
         self.toolbar._actions['zoom'].triggered.connect(self._zoom)
-
-        parent.geometry()
 
     @property
     def data(self):
@@ -1023,8 +1021,7 @@ class PlotterWidget(PlotterBase):
 class Plotter(QtWidgets.QDialog, PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
-        QtWidgets.QDialog.__init__(self)
-        PlotterWidget.__init__(self, parent=self, manager=parent, quickplot=quickplot)
+        PlotterWidget.__init__(self, parent=None, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)

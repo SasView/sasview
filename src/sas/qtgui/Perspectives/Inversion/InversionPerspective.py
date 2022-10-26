@@ -523,7 +523,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                 self.logic.add_errors()
             self.updateDataList(data)
             self.populateDataComboBox(self.logic.data.name, data)
-        self.dataList.setCurrentIndex(len(self.dataList) - 1)
+        self.dataList.setCurrentIndex(self.dataList.count() - 1)
         #Checking for 1D again to mitigate the case when 2D data is last on the data list
         if isinstance(self.logic.data, Data1D):
             self.setCurrentData(data)
@@ -682,13 +682,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             self.dataPlot.slider_low_q_setter = []
             self.dataPlot.slider_high_q_setter = []
         self._data = None
-        length = len(self.dataList)
+        length = self.dataList.count()
         for index in reversed(range(length)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
         # Last file removed
         self.dataDeleted = False
-        if len(self._dataList) == 0:
+        if self._dataList.count() == 0:
             self.prPlot = None
             self.dataPlot = None
             self.logic.data = None

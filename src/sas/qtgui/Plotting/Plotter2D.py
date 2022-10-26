@@ -620,7 +620,6 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     Plotter widget implementation
     """
     def __init__(self, parent=None, quickplot=False, dimension=2):
-        QtWidgets.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

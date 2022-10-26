@@ -414,16 +414,18 @@ class GuiManager:
         #
         # Selection on perspective choice menu
         #
-        if isinstance(new_perspective, FittingWindow):
+        # checking `isinstance`` fails in PySide2 with
+        # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
+        if type(new_perspective) == FittingWindow:
             self.checkAnalysisOption(self._workspace.actionFitting)
 
-        elif isinstance(new_perspective, InvariantWindow):
+        elif type(new_perspective) == InvariantWindow:
             self.checkAnalysisOption(self._workspace.actionInvariant)
 
-        elif isinstance(new_perspective, InversionWindow):
+        elif type(new_perspective) == InversionWindow:
             self.checkAnalysisOption(self._workspace.actionInversion)
 
-        elif isinstance(new_perspective, CorfuncWindow):
+        elif type(new_perspective) == CorfuncWindow:
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
 
