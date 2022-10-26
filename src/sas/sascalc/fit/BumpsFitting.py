@@ -38,22 +38,18 @@ from sas.sascalc.fit.expression import compile_constraints
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
-        # Completion time is displayed as a delta (e.g., 36s, 2m 36s or 3h 12m) if completion time is less
-        # than delta_cutoff hours, or as HH:MM if it is within 24 hours. Otherwise it is displayed using a
-        # full timestamp YYYY-mm-dd HH:MM.
-        delta_cutoff = 5  # hours before switching from duration to clock time
         if remaining_time < 60:
-            time = '%ds' % remaining_time
+            delta_time = '%ds' % remaining_time
         elif remaining_time < 3600:
-            time = '%dm %ds' % (remaining_time // 60, remaining_time % 60)
-        elif remaining_time < delta_cutoff * 3600:
-            time = '%dh %dm' % (remaining_time // 3600, (remaining_time % 3600) // 60)
+            delta_time = '%dm %ds' % (remaining_time // 60, remaining_time % 60)
+        elif remaining_time < 24 * 3600:
+            delta_time = '%dh %dm' % (remaining_time // 3600, (remaining_time % 3600) // 60)
         else:
-            completion_time = datetime.now() + timedelta(seconds=remaining_time)
-            time = completion_time.strftime('%Y-%m-%d %H:%M')
+            delta_time = '%dd %dh' % (remaining_time // (24 * 3600), (remaining_time % (24 * 3600)) // 3600)
+        finish_time = (datetime.now() + timedelta(seconds=remaining_time)).strftime('%Y-%m-%d %H:%M')
         chisq = "%.3g"%(2*history.value[0]/dof)
         step = "%d of %d"%(history.step[0], max_step)
-        header = "=== Steps: %s  chisq: %s  ETA: %s\n"%(step, chisq, time)
+        header = "=== Steps: %s  chisq: %s  ETA: %s (%s from now)\n"%(step, chisq, finish_time, delta_time)
         parameters = ["%15s: %-10.3g%s"%(k,v,("\n" if i%3==2 else " | "))
                       for i, (k, v) in enumerate(zip(pars, history.point[0]))]
         self.msg = "".join([header]+parameters)
