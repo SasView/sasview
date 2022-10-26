@@ -23,22 +23,19 @@ def pyrrc(in_file, out_file):
     # from PySide2.pyrcc_main import main
     # run(main, "pyrcc", in_file, "-o", out_file)
     # rcc -g python application.qrc > application_rc.py
-    run_line = f"rcc -g python {in_file} > {out_file}"
+    # pyside2-rcc icons.rc -o rc_icons.py
+    # run_line = f"pyside2-rcc -g python {in_file} -o {out_file}"
+    run_line = f"rcc {in_file} -o {out_file}"
     os.system(run_line)
+
 
 def pyuic(in_file, out_file):
     """
     Run the qt UI compiler
     """
-    #from PySide2.uic.pyuic import main
-    # pyside2-uic -x mainwindow.ui -o desktop.py
-    #main = "pyside2-uic"
-    #run(main, "pyuic", "-o", out_file, in_file)
-    in_file2 = os.path.abspath(in_file) #.encode('unicode_escape').decode()
-    out_file2 = os.path.abspath(out_file) #.encode('unicode_escape').decode()
-    #exec(f"pyside2-uic {in_file2} -o {out_file2}")
+    in_file2 = os.path.abspath(in_file)
+    out_file2 = os.path.abspath(out_file)
     run_line = "pyside2-uic " + in_file2 + " -o " + out_file2
-    # exec(run_line, globals(), locals())
     os.system(run_line)
 
 def file_in_newer(file_in, file_out):
