@@ -34,6 +34,6 @@ def main():
     mouseClick(waitForObjectItem(":groupBox_4.cbSmearing_QComboBox", "Custom Slit Smear"), 89, 5, 0, Qt.LeftButton)
     test.compare(str(waitForObjectExists(":groupBox_4.cbSmearing_QComboBox").currentText), "Custom Slit Smear")
     test.compare(waitForObjectExists(":groupBox_4.lblSmearUp_QLabel").visible, True)
-    test.compare(str(waitForObjectExists(":groupBox_4.lblSmearUp_QLabel").text), "Slit height")
+    test.compare(str(waitForObjectExists(":groupBox_4.lblSmearUp_QLabel").text), "Slit length")
     test.compare(str(waitForObjectExists(":groupBox_4.lblSmearDown_QLabel").text), "Slit width")
     test.compare(waitForObjectExists(":groupBox_4.lblSmearDown_QLabel").visible, True)
