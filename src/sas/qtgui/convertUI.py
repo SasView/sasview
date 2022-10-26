@@ -20,11 +20,6 @@ def pyrrc(in_file, out_file):
     """
     Run the qt resource compiler
     """
-    # from PySide2.pyrcc_main import main
-    # run(main, "pyrcc", in_file, "-o", out_file)
-    # rcc -g python application.qrc > application_rc.py
-    # pyside2-rcc icons.rc -o rc_icons.py
-    # run_line = f"pyside2-rcc -g python {in_file} -o {out_file}"
     run_line = f"rcc {in_file} -o {out_file}"
     os.system(run_line)
 
