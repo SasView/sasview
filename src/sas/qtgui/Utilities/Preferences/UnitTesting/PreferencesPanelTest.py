@@ -3,7 +3,8 @@ import pytest
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.PreferencesPanel import *
+from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 
 class PreferencesPanelTest:
@@ -33,7 +34,7 @@ class PreferencesPanelTest:
     def testDefaults(self, widget):
         """Test the freshly-opened panel with no changes made"""
         assert widget.stackedWidget.count() == widget.listWidget.count()
-        assert -1 == widget.stackedWidget.currentIndex()
+        assert 0 == widget.stackedWidget.currentIndex()
 
     def testPreferencesInteractions(self, widget):
         """Test the base interactions in window behavior"""
