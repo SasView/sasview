@@ -1110,6 +1110,9 @@ Note that SESANS data is not subject to an incoherent background signal in the
 way that normal SANS data is. For this reason the *background* parameter in
 any model being used to fit SESANS data should be fixed at zero.
 
+The procedure just described supersedes the original procedure using the
+command line interpreter, see :ref:`sesans_fitting`.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 29Oct2021
+.. note::  This help document was last changed by Steve King, 26Oct2022
