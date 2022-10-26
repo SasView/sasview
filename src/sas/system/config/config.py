@@ -176,6 +176,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        self.QT_SCALE_FACTOR = 1.0
 
         #
         # Lock the class down, this is necessary both for

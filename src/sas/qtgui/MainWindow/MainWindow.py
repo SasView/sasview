@@ -67,11 +67,16 @@ def SplashScreen():
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
+def get_highdpi_scaling():
+    return 1.0
+
 def run_sasview():
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
 
     app = QApplication([])
+
 
     #Initialize logger
     from sas.system.log import SetupLogger
