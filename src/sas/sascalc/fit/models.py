@@ -47,7 +47,7 @@ def _check_plugin(model, name):
     Do some checking before model adding plugins in the list
 
     :param model: class model to add into the plugin list
-    :param name:name of the module plugin
+    :param name: name of the module plugin
 
     :return model: model if valid model or None if not valid
 

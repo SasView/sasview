@@ -1,51 +1,43 @@
 import sys
-import unittest
 import logging
+import pytest
 
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
-# set up import paths
-import sas.qtgui.path_prepare
-
-from UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
 
-if not QApplication.instance():
-    app = QApplication(sys.argv)
 
-class ModelEditorTest(unittest.TestCase):
-    def setUp(self):
-        """
-        Prepare the editor
-        """
-        self.widget = ModelEditor(None)
+class ModelEditorTest:
 
-    def tearDown(self):
-        """Destroy the DataOperationUtility"""
-        self.widget.close()
-        self.widget = None
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the editor'''
+        w = ModelEditor(None)
+        yield w
+        w.close()
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget.highlight, PythonHighlighter)
+        assert isinstance(widget.highlight, PythonHighlighter)
 
-    def testEdit(self):
+    def testEdit(self, widget):
         """Test that a signal is emitted on edit"""
-        spy_signal = QtSignalSpy(self.widget, self.widget.modelModified)
+        spy_signal = QtSignalSpy(widget, widget.modelModified)
 
         # Edit text
         text = "test"
-        self.widget.txtEditor.setPlainText(text)
+        widget.txtEditor.setPlainText(text)
 
         # Assure the signal got emitted
-        self.assertEqual(spy_signal.count(), 1)
+        assert spy_signal.count() == 1
 
         # Assure getModel() returns right content
-        self.assertTrue(text, self.widget.txtEditor.toPlainText())
+        assert text, widget.txtEditor.toPlainText()
 
 

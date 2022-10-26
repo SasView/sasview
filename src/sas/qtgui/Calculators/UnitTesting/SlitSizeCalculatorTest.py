@@ -1,104 +1,98 @@
 import sys
-import unittest
 import logging
+
+import pytest
 
 from PySide2 import QtGui, QtWidgets
 from PySide2.QtTest import QTest
 from PySide2.QtCore import Qt
 from unittest.mock import MagicMock
 
-# set up import paths
-import sas.qtgui.path_prepare
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sasdata.dataloader.loader import Loader
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-
-class SlitSizeCalculatorTest(unittest.TestCase):
+class SlitSizeCalculatorTest:
     """Test the SlitSizeCalculator"""
-    def setUp(self):
-        """Create the SlitSizeCalculator"""
-        self.widget = SlitSizeCalculator(None)
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        """Create/Destroy the SlitSizeCalculator"""
+        w = SlitSizeCalculator(None)
 
-    def tearDown(self):
-        """Destroy the SlitSizeCalculator"""
-        self.widget.close()
-        self.widget = None
+        yield w
 
-    def testDefaults(self):
+        w.close()
+        w = None
+
+    def testDefaults(self, widget):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget, QtWidgets.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "Slit Size Calculator")
-        self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
+        assert isinstance(widget, QtWidgets.QWidget)
+        assert widget.windowTitle() == "Slit Size Calculator"
+        assert widget.sizePolicy().Policy() == QtWidgets.QSizePolicy.Fixed
 
-    def testHelp(self):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
-        self.widget._parent = QtWidgets.QWidget()
-        self.widget._parent.showHelp = MagicMock()
-        self.widget.onHelp()
-        self.assertTrue(self.widget._parent.showHelp.called_once())
-        args = self.widget._parent.showHelp.call_args
-        self.assertIn('slit_calculator_help.html', args[0][0])
+        widget._parent = QtWidgets.QWidget()
+        mocker.patch.object(widget._parent, 'showHelp', create=True)
+        widget.onHelp()
+        assert widget._parent.showHelp.called_once()
+        args = widget._parent.showHelp.call_args
+        assert 'slit_calculator_help.html' in args[0][0]
 
-    def testBrowseButton(self):
-        browseButton = self.widget.browseButton
+    def testBrowseButton(self, widget, mocker):
+        browseButton = widget.browseButton
 
         filename = "beam_profile.DAT"
 
         # Return no files.
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=('',''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=('',''))
 
         # Click on the Browse button
         QTest.mouseClick(browseButton, Qt.LeftButton)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtWidgets.QFileDialog.getOpenFileName.called)
+        assert QtWidgets.QFileDialog.getOpenFileName.called
         QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
         # Now, return a single file
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=(filename,''))
 
         # Click on the Load button
         QTest.mouseClick(browseButton, Qt.LeftButton)
         QtWidgets.qApp.processEvents()
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtWidgets.QFileDialog.getOpenFileName.called)
+        assert QtWidgets.QFileDialog.getOpenFileName.called
         QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
-
-    def notestCalculateSlitSize(self):
+    @pytest.mark.skip(reason="2022-09 already broken - already skipped")
+    def testCalculateSlitSize(self, widget):
         """ Test slit size calculated value """
 
         filename = "beam_profile.DAT"
         loader = Loader()
         data = loader.load(filename)[0]
 
-        self.widget.calculateSlitSize(data)
+        widget.calculateSlitSize(data)
         # The value "5.5858" was obtained by manual calculation.
         # It turns out our slit length is FWHM/2
-        self.assertAlmostEqual(float(self.widget.slit_length_out.text()), 5.5858/2, 3)
+        assert float(widget.slit_length_out.text()) == pytest.approx(5.5858/2, abs=1e-3)
 
-    def testWrongInput(self):
+    @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
+    def testWrongInput(self, widget, mocker):
         """ Test on wrong input data """
 
         filename = "Dec07031.ASC"
         loader = Loader()
         data = loader.load(filename)[0]
 
-        logging.error = MagicMock()
+        mocker.patch.object(logging, 'error')
 
-        self.widget.calculateSlitSize(data)
+        widget.calculateSlitSize(data)
 
-        self.assertTrue(logging.error.called_once())
+        assert logging.error.called_once()
 
         data = None
-        self.widget.calculateSlitSize(data)
-        self.assertTrue(logging.error.call_count == 2)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        widget.calculateSlitSize(data)
+        assert logging.error.call_count == 2

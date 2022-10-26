@@ -157,7 +157,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # validators
         # scale, volume and background must be positive
-        validat_regex_pos = QtCore.QRegExp('^[+]?([.]\d+|\d+([.]\d+)?)$')
+        validat_regex_pos = QtCore.QRegExp(r'^[+]?([.]\d+|\d+([.]\d+)?)$')
         self.txtScale.setValidator(QtGui.QRegExpValidator(validat_regex_pos,
                                                           self.txtScale))
         self.txtBackground.setValidator(QtGui.QRegExpValidator(
@@ -166,14 +166,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             validat_regex_pos, self.txtTotalVolume))
 
         # fraction of spin up between 0 and 1
-        validat_regexbetween0_1 = QtCore.QRegExp('^(0(\.\d*)*|1(\.0+)?)$')
+        validat_regexbetween0_1 = QtCore.QRegExp(r'^(0(\.\d*)*|1(\.0+)?)$')
         self.txtUpFracIn.setValidator(
             QtGui.QRegExpValidator(validat_regexbetween0_1, self.txtUpFracIn))
         self.txtUpFracOut.setValidator(
             QtGui.QRegExpValidator(validat_regexbetween0_1, self.txtUpFracOut))
 
         # angles, SLD must be float values
-        validat_regex_float = QtCore.QRegExp('^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$')
+        validat_regex_float = QtCore.QRegExp(r'^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$')
         self.txtUpTheta.setValidator(
             QtGui.QRegExpValidator(validat_regex_float, self.txtUpTheta))
         self.txtUpPhi.setValidator(
@@ -212,12 +212,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             QtGui.QRegExpValidator(validat_regex_float, self.txtSampleRoll))   
 
         # 0 < Qmax <= 1000
-        validat_regex_q = QtCore.QRegExp('^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
+        validat_regex_q = QtCore.QRegExp(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
         self.txtQxMax.setValidator(QtGui.QRegExpValidator(validat_regex_q,
                                                           self.txtQxMax))
 
         # 2 <= Qbin and nodes integers < 1000
-        validat_regex_int = QtCore.QRegExp('^[2-9]|[1-9]\d{1,2}$')        
+        validat_regex_int = QtCore.QRegExp(r'^[2-9]|[1-9]\d{1,2}$')
         self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_int,
                                                             self.txtNoQBins))
 
@@ -264,11 +264,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.view_elev = 45
         self.mouse_down = False
         sampleWindow = FigureCanvas(Figure())
-        axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
+        sampleWindow.figure.add_axes(axes_sample)
         envWindow = FigureCanvas(Figure())
-        axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
+        envWindow.figure.add_axes(axes_env)
         beamWindow = FigureCanvas(Figure())
-        axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev)
+        axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
+        beamWindow.figure.add_axes(axes_beam)
         self.coord_windows = [sampleWindow, envWindow, beamWindow]
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
@@ -1426,8 +1429,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             data = Data1D(x=self.data.x, y=self.data_to_plot)
             data.title = "GenSAS {}  #{} 1D".format(self.file_name(),
                                                     int(self.graph_num))
-            data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
-            data.yaxis('\\rm{Intensity}', 'cm^{-1}')
+            data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
+            data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
 
             self.graph_num += 1
         else:
@@ -1516,10 +1519,11 @@ class Plotter3DWidget(PlotterBase):
 
         self.figure.clear()
         self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
-        ax = Axes3D(self.figure)
-        ax.set_xlabel('x ($\A{}$)'.format(data.pos_unit))
-        ax.set_ylabel('z ($\A{}$)'.format(data.pos_unit))
-        ax.set_zlabel('y ($\A{}$)'.format(data.pos_unit))
+        ax = Axes3D(self.figure, auto_add_to_figure=False)
+        self.figure.add_axes(ax)
+        ax.set_xlabel(r'x ($\A{}$)'.format(data.pos_unit))
+        ax.set_ylabel(r'z ($\A{}$)'.format(data.pos_unit))
+        ax.set_zlabel(r'y ($\A{}$)'.format(data.pos_unit))
 
         # I. Plot null points
         if is_zero.any():

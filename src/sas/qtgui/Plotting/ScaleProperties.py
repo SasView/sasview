@@ -2,9 +2,6 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-import sas.sasview
-from sas.qtgui.UI import main_resources_rc
-
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ScalePropertiesUI import Ui_scalePropertiesUI
 

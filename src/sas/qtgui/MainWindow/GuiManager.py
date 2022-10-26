@@ -33,6 +33,7 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.PreferencesPanel import PreferencesPanel
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -135,23 +136,6 @@ class GuiManager:
         """
         Populate the main window with widgets
         """
-        # Preload all perspectives
-        self.loadAllPerspectives()
-
-        # Add FileDialog widget as docked
-        self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
-        ObjectLibrary.addObject('DataExplorer', self.filesWidget)
-
-        self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
-        self.dockedFilesWidget.setFloating(False)
-        self.dockedFilesWidget.setWidget(self.filesWidget)
-
-        # Modify menu items on widget visibility change
-        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
-
-        self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
-        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
-
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
@@ -162,10 +146,26 @@ class GuiManager:
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
+        # Preload all perspectives
+        self.loadAllPerspectives()
+        # Add FileDialog widget as docked
+        self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
+        ObjectLibrary.addObject('DataExplorer', self.filesWidget)
+
+        self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget.setFloating(False)
+        self.dockedFilesWidget.setWidget(self.filesWidget)
+        # Modify menu items on widget visibility change
+        self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
+
+        self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
+
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
+        self.preferences = PreferencesPanel(self._parent)
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
@@ -181,7 +181,7 @@ class GuiManager:
         self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
         self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
-        
+
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
@@ -220,7 +220,8 @@ class GuiManager:
         self.loadedPerspectives = {}
         self._current_perspective = None
 
-    def addCategories(self):
+    @staticmethod
+    def addCategories():
         """
         Make sure categories.json exists and if not compile it and install in ~/.sasview
         """
@@ -468,7 +469,8 @@ class GuiManager:
         """
         Update progress bar with the required value (0-100)
         """
-        assert -1 <= value <= 100
+        if value < -1 or value > 100:
+            return
         if value == -1:
             self.progress.setVisible(False)
             return
@@ -588,7 +590,7 @@ class GuiManager:
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
                 else:
-                    webbrowser.open(config.download_url)
+                    webbrowser.open(web.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
@@ -654,6 +656,7 @@ class GuiManager:
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
         self._workspace.actionUndo.triggered.connect(self.actionUndo)
@@ -803,6 +806,9 @@ class GuiManager:
             self.filesWidget.saveAnalysis(analysis, tab_id, per.ext)
         else:
             logger.warning('No analysis was available to be saved.')
+
+    def actionOpen_Preferences(self):
+        self.preferences.show()
 
     def actionQuit(self):
         """

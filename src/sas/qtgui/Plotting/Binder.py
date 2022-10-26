@@ -130,9 +130,11 @@ class BindArtist(object):
         """Register a callback for an artist to a particular trigger event.
 
         usage:
+        
             self.connect(eventname,artist,action)
 
         where:
+        
             eventname is a string
             artist is the particular graph object to respond to the event
             action(event,**kw) is called when the event is triggered
@@ -144,6 +146,7 @@ class BindArtist(object):
         returned by Line2D and by collections.
 
         The following events are supported:
+        
             enter: mouse cursor moves into the artist or to a new index
             leave: mouse cursor leaves the artist
             click: mouse button pressed on the artist
@@ -153,6 +156,7 @@ class BindArtist(object):
             keyrelease: key released for the artist
 
         The event received by action has a number of attributes:
+        
             name is the event name which was triggered
             artist is the object which triggered the event
             x,y are the screen coordinates of the mouse
@@ -160,27 +164,28 @@ class BindArtist(object):
             button is the mouse button being pressed/released
             key is the key being pressed/released
             shift,control,alt,meta are flags which are true if the
-                corresponding key is pressed at the time of the event.
+            corresponding key is pressed at the time of the event.
             details is a dictionary of artist specific details, such as the
-                id(s) of the point that were clicked.
+            id(s) of the point that were clicked.
 
         When receiving an event, first check the modifier state to be
         sure it applies.  E.g., the callback for 'press' might be:
+        
             if event.button == 1 and event.shift: process Shift-click
 
         TODO: Only receive events with the correct modifiers (e.g., S-click,
-        TODO:   or *-click for any modifiers).
+        TODO: or *-click for any modifiers).
         TODO: Only receive button events for the correct button (e.g., click1
-        TODO:   release3, or dclick* for any button)
+        TODO: release3, or dclick* for any button)
         TODO: Support virtual artist, so that and artist can be flagged as
-        TODO:   having a tag list and receive the correct events
+        TODO: having a tag list and receive the correct events
         TODO: Support virtual events for binding to button-3 vs shift button-1
-        TODO:   without changing callback code
+        TODO: without changing callback code
         TODO: Attach multiple callbacks to the same event?
         TODO: Clean up interaction with toolbar modes
         TODO: push/pushclear/pop context so that binding changes for
-             the duration
-        TODO:   e.g., to support ? context sensitive help
+        TODO: the duration
+        TODO: e.g., to support ? context sensitive help
         """
         # Check that the trigger is valid
         if trigger not in self._actions:

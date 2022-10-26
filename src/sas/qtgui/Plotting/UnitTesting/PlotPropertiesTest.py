@@ -1,47 +1,43 @@
 import sys
-import unittest
-from unittest.mock import MagicMock
+
+import pytest
 
 from PySide2 import QtGui, QtWidgets
-
-# set up import paths
-import path_prepare
 
 # Local
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class PlotPropertiesTest(unittest.TestCase):
+class PlotPropertiesTest:
     '''Test the PlotProperties'''
-    def setUp(self):
-        '''Create the PlotProperties'''
 
-        self.widget = PlotProperties(None,
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the PlotProperties'''
+        w = PlotProperties(None,
                          color=1,
                          marker=3,
                          marker_size=10,
                          legend="LL")
 
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.widget.close()
-        self.widget = None
+        yield w
 
-    def testDefaults(self):
+        '''Destroy the GUI'''
+        w.close()
+
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Modify Plot Properties")
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert widget.windowTitle() == "Modify Plot Properties"
 
         # Check the combo boxes
-        self.assertEqual(self.widget.cbColor.currentText(), "Green")
-        self.assertEqual(self.widget.cbColor.count(), 7)
-        self.assertEqual(self.widget.cbShape.currentText(), "Triangle Down")
-        self.assertEqual(self.widget.txtLegend.text(), "LL")
-        self.assertEqual(self.widget.sbSize.value(), 10)
+        assert widget.cbColor.currentText() == "Green"
+        assert widget.cbColor.count() == 7
+        assert widget.cbShape.currentText() == "Triangle Down"
+        assert widget.txtLegend.text() == "LL"
+        assert widget.sbSize.value() == 10
 
-    def testDefaultsWithCustomColor(self):
+    def testDefaultsWithCustomColor(self, widget):
         '''Test the GUI when called with custom color'''
         widget = PlotProperties(None,
                          color="#FF00FF",
@@ -49,55 +45,52 @@ class PlotPropertiesTest(unittest.TestCase):
                          marker_size=10,
                          legend="LL")
 
-        self.assertEqual(widget.cbColor.currentText(), "Custom")
-        self.assertEqual(widget.cbColor.count(), 8)
+        assert widget.cbColor.currentText() == "Custom"
+        assert widget.cbColor.count() == 8
         
-    def testOnColorChange(self):
+    def testOnColorChange(self, widget, mocker):
         '''Test the response to color change event'''
         # Accept the new color
-        QtWidgets.QColorDialog.getColor = MagicMock(return_value=QtGui.QColor(255, 0, 255))
+        mocker.patch.object(QtWidgets.QColorDialog, 'getColor', return_value=QtGui.QColor(255, 0, 255))
 
-        self.widget.onColorChange()
+        widget.onColorChange()
 
-        self.assertEqual(self.widget.color(), "#ff00ff")
-        self.assertTrue(self.widget.custom_color)
-        self.assertEqual(self.widget.cbColor.currentIndex(), 7)
-        self.assertEqual(self.widget.cbColor.currentText(), "Custom")
+        assert widget.color() == "#ff00ff"
+        assert widget.custom_color
+        assert widget.cbColor.currentIndex() == 7
+        assert widget.cbColor.currentText() == "Custom"
 
         # Reset the color - this will remove "Custom" from the combobox
         # and set its index to "Green"
-        self.widget.cbColor.setCurrentIndex(1)
-        self.assertEqual(self.widget.cbColor.currentText(), "Green")
+        widget.cbColor.setCurrentIndex(1)
+        assert widget.cbColor.currentText() == "Green"
 
         # Cancel the dialog now
         bad_color = QtGui.QColor() # constructs an invalid color
-        QtWidgets.QColorDialog.getColor = MagicMock(return_value=bad_color)
-        self.widget.onColorChange()
+        mocker.patch.object(QtWidgets.QColorDialog, 'getColor', return_value=bad_color)
+        widget.onColorChange()
 
-        self.assertEqual(self.widget.color(), 1)
-        self.assertFalse(self.widget.custom_color)
-        self.assertEqual(self.widget.cbColor.currentIndex(), 1)
-        self.assertEqual(self.widget.cbColor.currentText(), "Green")
+        assert widget.color() == 1
+        assert not widget.custom_color
+        assert widget.cbColor.currentIndex() == 1
+        assert widget.cbColor.currentText() == "Green"
 
 
-    def testOnColorIndexChange(self):
+    def testOnColorIndexChange(self, widget):
         '''Test the response to color index change event'''
         # Intitial population of the color combo box
-        self.widget.onColorIndexChange()
-        self.assertEqual(self.widget.cbColor.count(), 7)
+        widget.onColorIndexChange()
+        assert widget.cbColor.count() == 7
         # Block the callback so we can update the cb
-        self.widget.cbColor.blockSignals(True)
+        widget.cbColor.blockSignals(True)
         # Add the Custom entry
-        self.widget.cbColor.addItems(["Custom"])
+        widget.cbColor.addItems(["Custom"])
         # Unblock the callback
-        self.widget.cbColor.blockSignals(False)
+        widget.cbColor.blockSignals(False)
         # Assert the new CB
-        self.assertEqual(self.widget.cbColor.count(), 8)
+        assert widget.cbColor.count() == 8
         # Call the method
-        self.widget.onColorIndexChange()
+        widget.onColorIndexChange()
         # see that the Custom entry disappeared
-        self.assertEqual(self.widget.cbColor.count(), 7)
-        self.assertEqual(self.widget.cbColor.findText("Custom"), -1)
-
-if __name__ == "__main__":
-    unittest.main()
+        assert widget.cbColor.count() == 7
+        assert widget.cbColor.findText("Custom") == -1

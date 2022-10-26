@@ -33,7 +33,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.screen_width = screen_resolution.width()
         self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
-
+        QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
         if sys.platform == "darwin":  # Mac
             self.menubar.setNativeMenuBar(False)
@@ -116,7 +116,6 @@ def run_sasview():
 
     # Show the main SV window
     mainwindow = MainSasViewWindow(screen_resolution)
-    mainwindow.showMaximized()
 
     # no more splash screen
     splash.finish(mainwindow)

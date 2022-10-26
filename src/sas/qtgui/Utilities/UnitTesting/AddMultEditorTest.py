@@ -1,165 +1,164 @@
 import sys
 import os
-import unittest
+
+import pytest
+
 import webbrowser
 import tempfile
-from unittest.mock import MagicMock, patch
 
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-
-# set up import paths
-import path_prepare
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
 # Local
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class dummy_manager(object):
-    HELP_DIRECTORY_LOCATION = "html"
-    communicate = Communicate()
-    _parent = QtWidgets.QDialog()
 
-class AddMultEditorTest(unittest.TestCase):
+class AddMultEditorTest:
     """ Test the simple AddMultEditor dialog """
-    @patch.object(AddMultEditor, 'readModels')
-    def setUp(self, mock_list_models):
-        """ Create AddMultEditor dialog """
+
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp, mocker):
+        '''Create/Destroy the AddMultEditor'''
+        class dummy_manager(object):
+            HELP_DIRECTORY_LOCATION = "html"
+            communicate = Communicate()
+            _parent = QtWidgets.QDialog()
 
         # mock models from plugin folder
-        mock_list_models.return_value = ['cylinder', 'rpa',
-                                         'core_shell_cylinder', 'sphere']
+        mocker.patch.object(AddMultEditor, 'readModels',
+            return_value=[
+                'cylinder', 'rpa',
+                'core_shell_cylinder', 'sphere'
+            ])
 
-        self.widget = AddMultEditor(dummy_manager())
+        w = AddMultEditor(dummy_manager())
+        yield w
+        w.close()
 
-    def tearDown(self):
-        """ Destroy the GUI """
+    #@patch.object(AddMultEditor, 'readModels')
 
-        self.widget.close()
-        self.widget = None
-
-    def testDefaults(self):
+    def testDefaults(self, widget):
         """ Test the GUI in its default state """
 
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
+        assert isinstance(widget, QtWidgets.QDialog)
 
-        self.assertEqual(self.widget.sizePolicy().verticalPolicy(), 0)
-        self.assertEqual(self.widget.sizePolicy().horizontalPolicy(), 5)
+        assert widget.sizePolicy().verticalPolicy() == 0
+        assert widget.sizePolicy().horizontalPolicy() == 5
 
         # Default title
-        self.assertEqual(self.widget.windowTitle(), "Easy Add/Multiply Editor")
+        assert widget.windowTitle() == "Easy Add/Multiply Editor"
 
         # Default types
-        self.assertIsInstance(self.widget.cbOperator, QtWidgets.QComboBox)
-        self.assertIsInstance(self.widget.cbModel1, QtWidgets.QComboBox)
-        self.assertIsInstance(self.widget.cbModel2, QtWidgets.QComboBox)
+        assert isinstance(widget.cbOperator, QtWidgets.QComboBox)
+        assert isinstance(widget.cbModel1, QtWidgets.QComboBox)
+        assert isinstance(widget.cbModel2, QtWidgets.QComboBox)
 
         # Modal window
-        self.assertFalse(self.widget.isModal())
+        assert not widget.isModal()
 
         # Checkbox not tristate, not checked
-        self.assertFalse(self.widget.chkOverwrite.isTristate())
-        self.assertFalse(self.widget.chkOverwrite.isChecked())
+        assert not widget.chkOverwrite.isTristate()
+        assert not widget.chkOverwrite.isChecked()
 
         # Push buttons disabled
-        self.assertFalse(self.widget.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).isEnabled())
+        assert not widget.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).isEnabled()
 
         # Text of labels...
-        self.assertEqual(self.widget.chkOverwrite.text(),
-                         "Overwrite existing model")
+        assert widget.chkOverwrite.text() == \
+                         "Overwrite existing model"
 
         # Allowed operators
-        self.assertListEqual([str(self.widget.cbOperator.itemText(i)) for i in
-                              range(self.widget.cbOperator.count())],
-                             ['+', '*'])
+        assert [str(widget.cbOperator.itemText(i)) for i in
+                              range(widget.cbOperator.count())] == \
+                             ['+', '*', '@']
 
         # Default operator
-        self.assertEqual(self.widget.cbOperator.currentText(), '+')
+        assert widget.cbOperator.currentText() == '+'
 
         # checkbox unchecked
-        self.assertFalse(self.widget.chkOverwrite.isChecked())
+        assert not widget.chkOverwrite.isChecked()
 
         # Default 'good_name' flag, name for plugin file and plugin dir
-        self.assertFalse(self.widget.good_name)
-        self.assertIsNone(self.widget.plugin_filename)
+        assert not widget.good_name
+        assert widget.plugin_filename is None
 
         # default content of displayed equation (to create the new model)
-        self.assertEqual(self.widget.lblEquation.text(),
-                         "<html><head/><body><p>Plugin_model = "
-                         "scale_factor * (model_1 + model_2) + background"
-                         "</p></body></html>")
+        #assert widget.lblEquation.text() == (
+                         #"<html><head/><body><p>Plugin_model = "
+                         #"scale_factor * (model_1 + model_2) + background"
+                         #"</p></body></html>"
+        #)
 
         # Tooltips
-        self.assertEqual(self.widget.cbOperator.toolTip(),
-                         "Add: +\nMultiply: *")
-        self.assertEqual(self.widget.txtName.toolTip(),
-                         "Sum / Multiply model function name.")
-        self.widget.chkOverwrite.setChecked(True)
+        assert widget.cbOperator.toolTip() == \
+                         "Add: +\nMultiply: *"
+        assert widget.txtName.toolTip() == \
+                         "Sum / Multiply model function name."
+        widget.chkOverwrite.setChecked(True)
 
-        self.assertNotEqual(len(self.widget.chkOverwrite.toolTip()), 0)
+        assert len(widget.chkOverwrite.toolTip()) != 0
 
-    def testOnModelComboboxes(self):
+    def testOnModelComboboxes(self, widget):
         """ Test on Model1 and Model2 comboboxes """
 
         # content of model_1 and model_2 comboboxes
         # same content for the two comboboxes
-        self.assertEqual(self.widget.cbModel1.count(),
-                         self.widget.cbModel2.count())
+        assert widget.cbModel1.count() == \
+                         widget.cbModel2.count()
 
-        self.assertEqual(self.widget.cbModel1.count(), 4)
+        assert widget.cbModel1.count() == 4
 
         # default of cbModel1 and cbModel2
-        self.assertEqual(self.widget.cbModel1.currentText(), 'sphere')
-        self.assertEqual(self.widget.cbModel2.currentText(), 'cylinder')
+        assert widget.cbModel1.currentText() == 'sphere'
+        assert widget.cbModel2.currentText() == 'cylinder'
 
-    def testValidateName(self):
+    def testValidateName(self, widget):
         """ Test validity of output name (syntax only) """
 
         # Invalid plugin name
-        self.widget.txtName.setText('+++')
+        widget.txtName.setText('+++')
 
-        state = self.widget.txtName.validator().validate(self.widget.txtName.text(), 0)[0]
-        self.assertEqual(state, QtGui.QValidator.Invalid)
+        state = widget.txtName.validator().validate(widget.txtName.text(), 0)[0]
+        assert state == QtGui.QValidator.Invalid
 
         # Valid new plugin name
-        self.widget.txtName.setText('cylinder_test_case')
+        widget.txtName.setText('cylinder_test_case')
         state = \
-        self.widget.txtName.validator().validate(self.widget.txtName.text(),
+        widget.txtName.validator().validate(widget.txtName.text(),
                                                  0)[0]
-        self.assertEqual(state, QtGui.QValidator.Acceptable)
+        assert state == QtGui.QValidator.Acceptable
 
-    def testOnApply(self):
+    def testOnApply(self, widget, mocker):
         """ Test onApply """
 
-        self.widget.txtName.setText("new_model")
-        self.widget.updateModels = MagicMock()
+        widget.txtName.setText("new_model")
+        mocker.patch.object(widget, 'updateModels')
 
         # make sure the flag is set correctly
-        self.widget.is_modified = True
+        widget.is_modified = True
 
         # Mock self.write_new_model_to_file
-        self.widget.plugin_dir = tempfile.gettempdir()
-        self.widget.plugin_filename = \
-            os.path.join(self.widget.plugin_dir, 'new_model.py')
+        widget.plugin_dir = tempfile.gettempdir()
+        widget.plugin_filename = \
+            os.path.join(widget.plugin_dir, 'new_model.py')
 
-        self.widget.write_new_mode_to_file = MagicMock()
+        mocker.patch.object(widget, 'write_new_mode_to_file', create=True)
 
         # invoke the tested method
-        self.widget.onApply()
+        widget.onApply()
 
-        self.assertTrue(self.widget.write_new_mode_to_file.called_once_with(
-        os.path.join(self.widget.plugin_dir, 'new_model.py'),
-        self.widget.cbModel1.currentText(),
-        self.widget.cbModel2.currentText(),
-        self.widget.cbOperator.currentText()))
+        assert widget.write_new_mode_to_file.called_once_with(
+        os.path.join(widget.plugin_dir, 'new_model.py'),
+        widget.cbModel1.currentText(),
+        widget.cbModel2.currentText(),
+        widget.cbOperator.currentText())
 
-        self.assertTrue(self.widget.updateModels.called_once())
+        assert widget.updateModels.called_once()
 
-    def testWriteNewModelToFile(self):
+    def testWriteNewModelToFile(self, widget):
         """ Test content of generated plugin"""
 
         dummy_file_path = os.path.join(tempfile.gettempdir(),
@@ -167,16 +166,16 @@ class AddMultEditorTest(unittest.TestCase):
 
         # prepare data to create file and check its content: names of 2 models,
         # operator and description (default or not)
-        model1_name = self.widget.cbModel1.currentText()
-        model2_name = self.widget.cbModel2.currentText()
-        symbol_operator = self.widget.cbOperator.currentText()
+        model1_name = widget.cbModel1.currentText()
+        model2_name = widget.cbModel2.currentText()
+        symbol_operator = widget.cbOperator.currentText()
 
         # default description
         desc_line = "{} {} {}".format(model1_name,
                                       symbol_operator,
                                       model2_name)
 
-        self.widget.write_new_model_to_file(dummy_file_path, model1_name,
+        widget.write_new_model_to_file(dummy_file_path, model1_name,
                                             model2_name, symbol_operator)
         # check content of dummy file path
         with open(dummy_file_path, 'r') as f_in:
@@ -194,15 +193,15 @@ class AddMultEditorTest(unittest.TestCase):
                         "Model = make_model_from_info(model_info)"]
 
         for item in completed_template:
-            self.assertIn(item, lines_from_generated_file)
+            assert item in lines_from_generated_file
 
         # check content with description entered by user
-        self.widget.txtDescription.setText('New description for test  ')
+        widget.txtDescription.setText('New description for test  ')
 
         new_desc_line = "model_info.description = '{}'".format('New description for test')
 
         # re-run function to test
-        self.widget.write_new_model_to_file(dummy_file_path, model1_name,
+        widget.write_new_model_to_file(dummy_file_path, model1_name,
                                             model2_name, symbol_operator)
 
         # check content of dummy file path
@@ -214,125 +213,127 @@ class AddMultEditorTest(unittest.TestCase):
 
         # check content of generated file
         for item in completed_template:
-            self.assertIn(item, lines_from_generated_file)
+            assert item in lines_from_generated_file
 
-    def testOnOperatorChange(self):
+    def testOnOperatorChange(self, widget):
         """
         Test modification of displayed equation
         when selected operator is changed
         """
 
         # check default
-        self.assertIn(self.widget.cbOperator.currentText(),
-                      self.widget.lblEquation.text())
+        assert widget.cbOperator.currentText() in \
+                      widget.lblEquation.text()
 
         # change operator
-        if self.widget.cbOperator.currentIndex() == 0:
-            self.widget.cbOperator.setCurrentIndex(1)
+        if widget.cbOperator.currentIndex() == 0:
+            widget.cbOperator.setCurrentIndex(1)
         else:
-            self.widget.cbOperator.setCurrentIndex(0)
+            widget.cbOperator.setCurrentIndex(0)
 
-        self.assertIn(self.widget.cbOperator.currentText(),
-                      self.widget.lblEquation.text())
+        assert widget.cbOperator.currentText() in \
+                      widget.lblEquation.text()
 
-    def testOnHelp(self):
+    def testOnHelp(self, widget, mocker):
         """ Test the default help renderer """
 
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open', create=True)
 
         # invoke the tested method
-        self.widget.onHelp()
+        widget.onHelp()
 
         # see that webbrowser open was attempted
         webbrowser.open.assert_called()
 
-    def testOnNameCheck(self):
+    def testOnNameCheck(self, widget, mocker):
         """ Test onNameCheck """
 
         # Enter plugin name already present in list of existing models
-        self.widget.txtName.setText("cylinder")
+        widget.txtName.setText("cylinder")
 
         # Scenario 1
         # overwrite not checked -> message box should appear
         # and good_name set to False, 'Apply' button disabled
 
         # mock QMessageBox
-        QtWidgets.QMessageBox.critical = MagicMock()
+        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
 
-        self.widget.chkOverwrite.setChecked(False)
-        self.widget.txtName.editingFinished.emit()
-        self.assertFalse(self.widget.good_name)
-        self.assertFalse(self.widget.buttonBox.button(
-            QtWidgets.QDialogButtonBox.Apply).isEnabled())
+        widget.chkOverwrite.setChecked(False)
+        widget.txtName.editingFinished.emit()
+        assert not widget.good_name
+        assert not widget.buttonBox.button(
+            QtWidgets.QDialogButtonBox.Apply).isEnabled()
 
-        self.assertTrue(QtWidgets.QMessageBox.critical.called_once())
+        assert QtWidgets.QMessageBox.critical.called_once()
 
         msg = "Plugin with specified name already exists.\n"
         msg += "Please specify different filename or allow file overwrite."
 
-        self.assertIn('Plugin Error', QtWidgets.QMessageBox.critical.call_args[0][1])
-        self.assertIn(msg, QtWidgets.QMessageBox.critical.call_args[0][2])
+        assert 'Plugin Error' in QtWidgets.QMessageBox.critical.call_args[0][1]
+        assert msg in QtWidgets.QMessageBox.critical.call_args[0][2]
 
         # Scenario 2
         # overwrite checked -> no message box displayed
         # and good_name set to True, Apply button enabled, output name created
 
         # mock QMessageBox
-        QtWidgets.QMessageBox.critical = MagicMock()
+        mocker.patch.object(QtWidgets.QMessageBox, 'critical')
         # create dummy plugin_dir for output file
-        self.widget.plugin_dir = tempfile.gettempdir()
+        widget.plugin_dir = tempfile.gettempdir()
 
-        self.widget.chkOverwrite.setChecked(True)
-        self.widget.txtName.editingFinished.emit()
-        self.assertTrue(self.widget.good_name)
-        self.assertTrue(self.widget.buttonBox.button(
-            QtWidgets.QDialogButtonBox.Apply).isEnabled())
+        widget.chkOverwrite.setChecked(True)
+        widget.txtName.editingFinished.emit()
+        assert widget.good_name
+        assert widget.buttonBox.button(
+            QtWidgets.QDialogButtonBox.Apply).isEnabled()
 
-        self.assertFalse(QtWidgets.QMessageBox.critical.called)
+        assert not QtWidgets.QMessageBox.critical.called
 
-        self.assertIn('cylinder.py', self.widget.plugin_filename)
+        assert 'cylinder.py' in widget.plugin_filename
 
         # Scenario 3 Enter valid new plugin name -> filename created and Apply
         # button enabled
         # forbidding overwriting should not change anything
         # since it's a new name
-        self.widget.txtName.setText("   cylinder0   ")
-        self.widget.chkOverwrite.setChecked(False)
-        self.widget.txtName.editingFinished.emit()
-        self.assertIn("cylinder0.py", self.widget.plugin_filename)
-        self.assertTrue(self.widget.buttonBox.button(
-            QtWidgets.QDialogButtonBox.Apply).isEnabled())
+        widget.txtName.setText("   cylinder0   ")
+        widget.chkOverwrite.setChecked(False)
+        widget.txtName.editingFinished.emit()
+        assert "cylinder0.py" in widget.plugin_filename
+        assert widget.buttonBox.button(
+            QtWidgets.QDialogButtonBox.Apply).isEnabled()
 
-    @patch.object(AddMultEditor, 'readModels')
-    def testOnUpdateModels(self, mock_new_list_models):
+    def testOnUpdateModels(self, widget, mocker):
         """ Test onUpdateModels """
 
-        ini_count_models = self.widget.cbModel1.count()
+        ini_count_models = widget.cbModel1.count()
 
-        mock_new_list_models.return_value = ['cylinder', 'rpa',
-                                             'core_shell_cylinder', 'sphere',
-                                             'cylinder0']
+        mocker.patch.object(AddMultEditor, 'readModels',
+            return_value=[
+                'cylinder', 'rpa',
+                'core_shell_cylinder', 'sphere',
+                'cylinder0',
+            ])
 
-        self.widget.updateModels()
+        widget.updateModels()
         # check that the number of models in the comboboxes
         # has been incremented by 1
-        self.assertEqual(self.widget.cbModel1.count(), ini_count_models + 1)
-        self.assertEqual(self.widget.cbModel2.count(), ini_count_models + 1)
+        assert widget.cbModel1.count() == ini_count_models + 1
+        assert widget.cbModel2.count() == ini_count_models + 1
 
         # check that the new model is in the list
-        combobox = self.widget.cbModel1
-        self.assertIn('cylinder0', [combobox.itemText(indx)
-                                    for indx in range(combobox.count())])
+        combobox = widget.cbModel1
+        assert 'cylinder0' in [combobox.itemText(indx)
+                                    for indx in range(combobox.count())]
 
-    def testOnReadModels(self):
+    def testOnReadModels(self, widget):
         """ The output of ReadModels is the return value of MagicMock defined
         in the SetUp of these tests. """
 
-        self.assertEqual(self.widget.list_models, ['cylinder', 'rpa',
+        assert widget.list_models == ['cylinder', 'rpa',
                                                    'core_shell_cylinder',
-                                                   'sphere'])
+                                                   'sphere']
 
-    def testCheckModel(self):
+    def testCheckModel(self, widget):
         """ Test CheckModel"""
 
         # TODO first: solve problem with empty 'test'

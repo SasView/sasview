@@ -2,7 +2,9 @@ numpy
 scipy==1.7.3 
 pyside2
 docutils 
-pytest<6 
+pytest
+pytest_qt
+pytest-mock
 unittest-xml-reporting
 tinycc 
 h5py 
@@ -22,7 +24,6 @@ pylint
 qt5reactor 
 periodictable 
 uncertainties 
-debugpy
 matplotlib~=3.5.2
 lxml
 pytools 

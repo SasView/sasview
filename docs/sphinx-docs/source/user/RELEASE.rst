@@ -154,7 +154,7 @@ The full sasview and sasmodels changelogs, respectively, are available at:
 
 New Models
 ^^^^^^^^^^
-The following models have been added to the `[Model Marketplace] <http://marketplace.sasview.org/>`_ since v5.0.4 was released:
+The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.4 was released:
 
 * Magnetic Whirl
 * Maier-Saupe distribution
@@ -169,7 +169,7 @@ temporarily withdrawn. Some gremlins had crept into how the model parameters
 interacted with the Fit Page which meant you were not performing the calculation
 you thought you were. This is being investigated. Should you need it, a separate
 binary blend model (the most performed calculation) is available from the
-`[Model Marketplace] <http://marketplace.sasview.org/>`_ .
+`[Model Marketplace] <https://marketplace.sasview.org/>`_ .
 
 All the known bugs/feature requests can be found in the issues on github.
 Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
@@ -305,7 +305,7 @@ Bug fixes
 
 New Models
 ^^^^^^^^^^
-The following models have been added to the `[Model Marketplace] <http://marketplace.sasview.org/>`_ since v5.0.0 was released:
+The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.0 was released:
 
 * Magnetic vortex in a disc
 * Field-dependent magnetic SANS of misaligned magnetic moments in bulk ferromagnets
