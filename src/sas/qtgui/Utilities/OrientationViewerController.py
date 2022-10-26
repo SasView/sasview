@@ -12,6 +12,9 @@ class Orientation(NamedTuple):
     theta: int
     phi: int
     psi: int
+    dtheta: int
+    dphi: int
+    dpsi: int
 
 class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierControllerUI):
 
@@ -28,13 +31,20 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
         self.thetaSlider.valueChanged.connect(self.onAngleChange)
         self.phiSlider.valueChanged.connect(self.onAngleChange)
         self.psiSlider.valueChanged.connect(self.onAngleChange)
+        self.deltaTheta.valueChanged.connect(self.onAngleChange)
+        self.deltaPhi.valueChanged.connect(self.onAngleChange)
+        self.deltaPsi.valueChanged.connect(self.onAngleChange)
 
     def onAngleChange(self):
         theta = self.thetaSlider.value()
         phi = self.phiSlider.value()
         psi = self.psiSlider.value()
 
-        self.valueEdited.emit(Orientation(theta, phi, psi))
+        dtheta = self.deltaTheta.value()
+        dphi = self.deltaPhi.value()
+        dpsi = self.deltaPsi.value()
+
+        self.valueEdited.emit(Orientation(theta, phi, psi, dtheta, dphi, dpsi))
 
 
 
