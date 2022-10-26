@@ -94,10 +94,13 @@ def run_sasview():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     # Main must have reference to the splash screen, so making it explicit
-    splash = SplashScreen()
-    splash.show()
+
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     app.setStyleSheet("* {font-size: 11pt;}")
+
+    splash = SplashScreen()
+    splash.show()
+
     # Main application style.
     #app.setStyle('Fusion')
 
