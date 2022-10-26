@@ -68,6 +68,9 @@ def SplashScreen():
     return splashScreen
 
 def run_sasview():
+
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+
     app = QApplication([])
 
     #Initialize logger
@@ -96,7 +99,7 @@ def run_sasview():
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()
     splash.show()
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     # Main application style.
     #app.setStyle('Fusion')
 
