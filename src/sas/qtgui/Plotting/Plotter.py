@@ -241,7 +241,7 @@ class PlotterWidget(PlotterBase):
                     if config.FITTING_PLOT_LEGEND_TRUNCATE:
                         if len(l)> config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH:
                             half_legend_width = math.floor(max_legend_width/2)
-                            newlabels.append(f'{l[0:half_legend_width-3]} .. {l[-half_legend_width+3:-1]}')
+                            newlabels.append(f'{l[0:half_legend_width-3]} .. {l[-half_legend_width+3:]}')
                         else:
                             newlabels.append(l)
                     else:
