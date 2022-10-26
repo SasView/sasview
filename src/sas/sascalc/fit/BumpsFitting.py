@@ -38,22 +38,19 @@ from sas.sascalc.fit.expression import compile_constraints
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
-        # Depending on the time remaining, either display the expected
-        # time of completion, or the amount of time remaining.  Use precision
-        # appropriate for the duration.
-        if remaining_time >= 18000:
-            completion_time = datetime.now() + timedelta(seconds=remaining_time)
-            if remaining_time >= 36000:
-                time = completion_time.strftime('%Y-%m-%d %H:%M')
-            else:
-                time = completion_time.strftime('%H:%M')
+        # Completion time is displayed as a delta (e.g., 36s, 2m 36s or 3h 12m) if completion time is less
+        # than delta_cutoff hours, or as HH:MM if it is within 24 hours. Otherwise it is displayed using a
+        # full timestamp YYYY-mm-dd HH:MM.
+        delta_cutoff = 5  # hours before switching from duration to clock time
+        if remaining_time < 60:
+            time = '%ds' % remaining_time
+        elif remaining_time < 3600:
+            time = '%dm %ds' % (remaining_time // 60, remaining_time % 60)
+        elif remaining_time < delta_cutoff * 3600:
+            time = '%dh %dm' % (remaining_time // 3600, (remaining_time % 3600) // 60)
         else:
-            if remaining_time >= 3600:
-                time = '%dh %dm'%(remaining_time//3600, (remaining_time%3600)//60)
-            elif remaining_time >= 60:
-                time = '%dm %ds'%(remaining_time//60, remaining_time%60)
-            else:
-                time = '%ds'%remaining_time
+            completion_time = datetime.now() + timedelta(seconds=remaining_time)
+            time = completion_time.strftime('%Y-%m-%d %H:%M')
         chisq = "%.3g"%(2*history.value[0]/dof)
         step = "%d of %d"%(history.step[0], max_step)
         header = "=== Steps: %s  chisq: %s  ETA: %s\n"%(step, chisq, time)
