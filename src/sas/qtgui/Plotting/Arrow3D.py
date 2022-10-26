@@ -14,7 +14,6 @@ class Arrow3D(FancyArrowPatch):
     def __init__(self, base, xs, ys, zs, colors, *args, **kwargs):
         """
         Init
-
         :Params xs: [[x0, x0+dx0], [x1, x1+dx1], ...]
         :Params ys: [[y0, y0+dy0], [y1, y1+dy1], ...]
         :Params zs: [[z0, z0+dz0], [z1, z1+dz1], ...]

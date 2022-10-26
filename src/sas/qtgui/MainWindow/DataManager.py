@@ -53,7 +53,7 @@ class DataManager(object):
         """
         Store opened path and data object created at the loading time
         :param auto_plot: if True the datamanager sends data to plotting
-                            plugin.
+        plugin.
         :param auto_set_data: if True the datamanager sends to the current
         perspective
         """
