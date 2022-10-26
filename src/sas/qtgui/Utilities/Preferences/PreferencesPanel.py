@@ -1,20 +1,20 @@
 import logging
 
 from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
-from typing import Optional, Callable, Dict
+from typing import Optional, Callable, Dict, Type
 
 from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
-# PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
 # The PreferencesPanel object will instantiate all widgets during its instantiation.
 #  e.g:
 #  `from foo.bar import BarWidget  # BarWidget is a child of PreferencesWidget`
 #  `BASE_PANELS = {"Bar Widget Options": BarWidget}`
+# PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
 
 # Pre-made option widgets
-BASE_PANELS = {}  # type: Dict[str, PreferencesWidget]
+BASE_PANELS = {}  # type: Dict[str, Type[PreferencesWidget]]
 
 logger = logging.getLogger(__name__)
 
@@ -45,13 +45,13 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
         self.buttonBox.clicked.connect(self.onClick)
 
-    def addWidgets(self,widgets: Dict[str, Callable]):
+    def addWidgets(self, widgets: Dict[str, Callable]):
         """Add a list of widgets to the window"""
         for name, widget in widgets.items():
             if isinstance(widget, PreferencesWidget):
-                self.addWidget(widget)
-            else:
-                self.addWidget(widget())
+                self.addWidget(widget, name)
+            elif callable(widget):
+                self.addWidget(widget(), name)
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
