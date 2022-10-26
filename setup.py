@@ -188,6 +188,13 @@ package_dir["sas.qtgui.Utilities.Reports.UI"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "Reports", "UI")
 packages.append("sas.qtgui.Utilities.Reports.UI")
 
+package_dir["sas.qtgui.Utilities.Preferences}"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "Preferences")
+packages.append("sas.qtgui.Utilities.Preferences")
+package_dir["sas.qtgui.Utilities.Preferences.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "Preferences", "UI")
+packages.append("sas.qtgui.Utilities.Preferences.UI")
+
 package_dir["sas.qtgui.Calculators"] = os.path.join(
     "src", "sas", "qtgui", "Calculators")
 package_dir["sas.qtgui.Calculators.UI"] = os.path.join(
@@ -279,6 +286,7 @@ package_data['sas.qtgui'] = ['images/*',
                              'Utilities/UI/*',
                              'Utilities/Reports/UI/*',
                              'Utilities/Reports/*.css',
+                             'Utilities/Preferences/UI/*',
                              'UI/*',
                              'UI/res/*',
                              ]
