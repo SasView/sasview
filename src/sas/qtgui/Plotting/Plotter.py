@@ -1,3 +1,5 @@
+import math
+
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
@@ -24,6 +26,7 @@ from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
+from sas import config
 
 class PlotterWidget(PlotterBase):
     """
@@ -230,15 +233,25 @@ class PlotterWidget(PlotterBase):
 
         # Now add the legend with some customizations.
         if self.showLegend:
-            max_legend_width = 30
+            max_legend_width = config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH
             handles, labels = ax.get_legend_handles_labels()
             newhandles = []
             newlabels = []
             for h,l in zip(handles,labels):
-                    newlabels.append(textwrap.fill(l,max_legend_width))
+                    if config.FITTING_PLOT_LEGEND_TRUNCATE:
+                        if len(l)> config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH:
+                            half_legend_width = math.floor(max_legend_width/2)
+                            newlabels.append(f'{l[0:half_legend_width-3]} .. {l[-half_legend_width+3:-1]}')
+                        else:
+                            newlabels.append(l)
+                    else:
+                        newlabels.append(textwrap.fill(l,max_legend_width))
                     newhandles.append(h)
 
-            self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
+            if config.FITTING_PLOT_FULL_WIDTH_LEGENDS:
+                self.legend = ax.legend(newhandles,newlabels,loc='best', mode='expand')
+            else:
+                self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
             self.legend.set_picker(True)
             self.legend.set_visible(self.legendVisible)
             

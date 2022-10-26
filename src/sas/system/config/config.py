@@ -181,7 +181,15 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
+        # width legends.
+        self.FITTING_PLOT_FULL_WIDTH_LEGENDS = False
 
+        # If True, truncates names in Fitting plot legends such that each name is maximum one line.
+        self.FITTING_PLOT_LEGEND_TRUNCATE = False
+
+        # sets the maximum number of characters per Fitting plot legend entry.
+        self.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH = 30
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files
