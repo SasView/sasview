@@ -182,7 +182,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Window scaling values
         self.QT_SCALE_FACTOR = 1.0
-        self.QT_AUTO_SCALE_FACTOR = False
+        self.QT_AUTO_SCREEN_SCALE_FACTOR = False
 
         # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
         # width legends.

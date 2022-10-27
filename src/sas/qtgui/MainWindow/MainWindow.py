@@ -74,7 +74,7 @@ def run_sasview():
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
-    os.environ["QT_AUTO_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCALE_FACTOR else "0"
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCREEN_SCALE_FACTOR else "0"
 
 
     app = QApplication([])
