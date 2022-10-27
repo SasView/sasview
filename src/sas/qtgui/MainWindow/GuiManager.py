@@ -31,6 +31,7 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.PreferencesPanel import PreferencesPanel
@@ -517,15 +518,14 @@ class GuiManager:
         """
         # Display confirmation messagebox
         quit_msg = "Are you sure you want to exit the application?"
-        reply = QMessageBox.question(
-            self._parent,
-            'Information',
-            quit_msg,
-            QMessageBox.Yes,
-            QMessageBox.No)
 
-        # Exit if yes
-        if reply == QMessageBox.Yes:
+        answer = hidable_dialog("Exit SasView", quit_msg, config.SHOW_EXIT_MESSAGE)
+
+        if answer.result:
+
+            # Only set ask again on accepted quit, otherwise the user might
+            # never be able to leave SasView (@butlerpd might prefer this behaviour though)
+            config.SHOW_EXIT_MESSAGE = answer.ask_again
 
             # save the paths etc.
             self.saveCustomConfig()

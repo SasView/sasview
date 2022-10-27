@@ -181,6 +181,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        self.SHOW_EXIT_MESSAGE = True
 
         #
         # Lock the class down, this is necessary both for
