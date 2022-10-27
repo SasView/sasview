@@ -9,7 +9,7 @@ from sas.system import config
 logger = logging.getLogger(__name__)
 
 
-def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
+def set_config_value(value: Any, attr: str, dtype: Optional[Callable] = None):
     """Helper method to set any config value
     :param attr: The configuration attribute that will be set
     :param value: The value the attribute will be set to. This could be a str, int, bool, a class instance, or any other
@@ -20,10 +20,10 @@ def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
         if dtype is not None:
             value = dtype(value)
         # Another sanity check - the config system would also raise on data type mismatch, so potentially redundant
-        if type(config.attr) == type(value):
+        if type(getattr(config,attr)) == type(value):
             setattr(config, attr, value)
         else:
-            raise TypeError(f"Data type mismatch: {value} has type {type(value)}, expected {type(config.attr)}")
+            raise TypeError(f"Data type mismatch: {value} has type {type(value)}, expected {type(getattr(config,attr))}")
     else:
         # The only way to get here **should** be during development, thus the debug log.
         logger.debug(f"Please add {attr} to the configuration and give it a sensible default value.")

@@ -14,7 +14,10 @@ from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
 
 # Pre-made option widgets
-BASE_PANELS = {}  # type: Dict[str, Type[PreferencesWidget]]
+BASE_PANELS = {
+    "Display Settings":DisplayPreferencesWidget,
+
+}  # type: Dict[str, Type[PreferencesWidget]]
 
 logger = logging.getLogger(__name__)
 
