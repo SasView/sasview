@@ -409,11 +409,11 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                   f'This is not slit-smearing (at least not in the form we implement). \n' \
                   f'Use pinhole smearing instead.'
             smearing_error_flag = True
-        elif d_length < q_max:
-            msg = f'Length specified which is less than q_max for the data. \n' \
-                  f'This is not covered by existing smearing model. \n' \
-                  f'Use pinhole smearing instead. '
-            smearing_error_flag = True
+        # elif d_length < q_max:
+        #     msg = f'Length specified which is less than q_max for the data. \n' \
+        #           f'This is not covered by existing smearing model. \n' \
+        #           f'Use pinhole smearing instead. '
+        #     smearing_error_flag = True
         # override all these errors if both values are zero (initial starting state)
         if d_length == 0 and d_width == 0:
             smearing_error_flag = False
