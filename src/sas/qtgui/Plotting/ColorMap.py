@@ -4,7 +4,6 @@ Allows users to change the range of the current graph
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-import sas.qtgui.path_prepare
 
 import matplotlib as mpl
 import numpy

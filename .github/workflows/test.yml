@@ -120,7 +120,8 @@ jobs:
         python -m pytest -v -s test
 
     - name: Test GUI (Linux)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+      ## if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: ${{ false }}
       env:
         PYOPENCL_COMPILER_OUTPUT: 1
       run: |

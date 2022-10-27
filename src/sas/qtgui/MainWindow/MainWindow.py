@@ -10,7 +10,7 @@ from PySide2.QtWidgets import QMdiArea
 from PySide2.QtWidgets import QSplashScreen
 from PySide2.QtWidgets import QApplication
 from PySide2.QtGui import QPixmap
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QTimer
 
 # Local UI
 from .UI.MainWindowUI import Ui_SasView
