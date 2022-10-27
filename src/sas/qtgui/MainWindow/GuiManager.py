@@ -519,7 +519,7 @@ class GuiManager:
         # Display confirmation messagebox
         quit_msg = "Are you sure you want to exit the application?"
 
-        answer = hidable_dialog("Exit SasView", quit_msg, config.SHOW_EXIT_MESSAGE)
+        answer = hidable_dialog("Exit SasView", quit_msg, config.SHOW_EXIT_MESSAGE, parent=self._parent)
 
         if answer.result:
 
