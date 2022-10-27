@@ -6,6 +6,7 @@ from typing import Optional, Callable, Dict, Type
 from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.qtgui.Utilities.Preferences.DisplayPreferencesWidget import DisplayPreferencesWidget
 
 # The PreferencesPanel object will instantiate all widgets during its instantiation.
 #  e.g:
