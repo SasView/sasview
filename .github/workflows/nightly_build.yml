@@ -38,6 +38,6 @@ jobs:
         allowUpdates: true
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "SasView5.dmg, setupSasView.exe"
+        artifacts: "SasView-Installer-macos*/SasView5.dmg, SasView-Installer-windows*/setupSasView.exe"
         name: "Nightly Build"
         tag: "nightly_build"
