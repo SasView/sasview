@@ -9,14 +9,6 @@ jobs:
     name: Deploy nightly
     runs-on: ubuntu-latest
     steps:
-
-    #- name: Find matching workflow
-    #  uses: SamhammerAG/last-successful-build-action@v2
-    #  with:
-    #      token: "${{ secrets.GITHUB_TOKEN }}"
-    #      branch: "main"
-    #      workflow: "Installer"
-
     - name: Download artifact
       id: download-artifact
       uses: dawidd6/action-download-artifact@v2
@@ -24,11 +16,6 @@ jobs:
         github_token: ${{secrets.GITHUB_TOKEN}}
         workflow: installers.yml
         branch: main
-
-    - name: List files in the folder
-      run: |
-          ls ${{ github.workspace }}
-
           
     - name: Upload installer to GitHub releases
       uses: ncipollo/release-action@v1
