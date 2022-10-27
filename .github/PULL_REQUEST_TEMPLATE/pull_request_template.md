@@ -23,6 +23,6 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] Code has been review
 - [ ] Functionality has been tested
 - [ ] Installers (GH artifacts) have been tested (install and works) 
-- [ ] User documentation is avaialable and complete
-- [ ] Developers documentation is avaialable and complete
+- [ ] User documentation is available and complete
+- [ ] Developers documentation is available and complete
 
