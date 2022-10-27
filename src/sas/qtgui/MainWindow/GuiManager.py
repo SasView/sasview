@@ -1073,9 +1073,8 @@ class GuiManager:
     def actionFit_Options(self):
         """
         """
-        if getattr(self._current_perspective, "fit_options_widget"):
-            self._current_perspective.fit_options_widget.show()
-        pass
+        self.preferences.setMenuByName("Fitting Optimizers")
+        self.preferences.show()
 
     def actionGPU_Options(self):
         """

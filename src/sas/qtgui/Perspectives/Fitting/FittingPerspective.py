@@ -81,7 +81,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
         default_optimizer = config.DEFAULT_FITTING_OPTIMIZER
-        self.fit_options.selected_id = default_optimizer if default_optimizer != "" else fitters.MPFit.id
+        exists = default_optimizer != "" and default_optimizer not in self.fit_options.ids
+        self.fit_options.selected_id = default_optimizer if exists else fitters.MPFit.id
 
         # GPU Options
         self.gpu_options_widget = GPUOptions(self)
@@ -94,7 +95,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.setCornerWidget(self.plusButton)
         self.plusButton.setToolTip("Add a new Fit Page")
         self.plusButton.clicked.connect(lambda: self.addFit(None))
-
 
     def updateWindowTitle(self):
         """
