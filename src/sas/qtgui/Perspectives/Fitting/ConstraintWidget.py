@@ -571,7 +571,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         new_function = rhs
         new_tab = self.available_tabs[new_model]
-        model_key = tab.getModelKey(param)
+        model_key = tab.getModelKeyFromName(param)
         # Make sure we are dealing with fit tabs
         assert isinstance(tab, FittingWidget)
         assert isinstance(new_tab, FittingWidget)
@@ -580,7 +580,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Apply the new constraint
             constraint = Constraint(param=new_param, func=new_function,
                                     value_ex=new_model + "." + new_param)
-            model_key = tab.getModelKey(new_param)
+            model_key = tab.getModelKeyFromName(new_param)
             new_tab.addConstraintToRow(constraint=constraint,
                                        row=tab.getRowFromName(new_param), model_key=model_key)
             # If the constraint is valid and we are changing model or
@@ -1103,7 +1103,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
-        model_key = constrained_tab.getModelKey(constraint.param)
+        model_key = constrained_tab.getModelKeyFromName(constraint.param)
 
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row, model_key=model_key)

@@ -838,12 +838,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model = self.model_dict[model_key]
 
         # special case for polydisp
+
+        # MG: There is an issue here, with PD parameters being called
+        # either as .width or Distribution of >
+
+        print('MG: FittingWidget --> getRowFromName: name = ', name)
         if model == self._poly_model:
-            name = self.polyParamToName(name)
+            name = self.polyNameToParam(name)
+            print('MG: poly_name = ', name)
         for row in range(model.rowCount()):
             row_name = model.item(row).text()
             if row_name == name:
+                print('MG: will return row = ', row)
                 return row
+        print('MG: will return None')
         return None
 
     def getParamNames(self):
@@ -899,7 +907,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Translate polydisperse parameter name into QTable representation
         """
-        param_name = param_name.replace('Distribution of ','')
+        param_name = param_name.replace('Distribution of ', '')
         param_name += '.width'
         return param_name
 
@@ -937,11 +945,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Given parameter name get the model index.
         """
-        if constraint in self.getParamNamesMain():
+        if constraint.param in self.getParamNamesMain():
             return "standard"
-        elif constraint in self.getParamNamesPoly():
+        elif constraint.param in self.getParamNamesPoly():
             return "poly"
-        elif constraint in self.getParamNamesMagnet():
+        elif constraint.param in self.getParamNamesMagnet():
             return "magnet"
         else:
             return None
@@ -1310,9 +1318,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model = self.model_dict[model_key]
         params = []
         param_number = model.rowCount()
-        params += [(model.item(s, 0).data(role=QtCore.Qt.UserRole),
-                    model.item(s, 1).child(0).data().func)
-                    for s in range(param_number) if self.rowHasActiveComplexConstraint(s, model_key)]
+        for s in range(param_number):
+            if self.rowHasActiveComplexConstraint(s, model_key):
+                if model.item(s, 0).data(role=QtCore.Qt.UserRole):
+                    parameter_name = str(model.item(s, 0).data(role=QtCore.Qt.UserRole))
+                else:
+                    parameter_name = str(model.item(s, 0).data(0))
+                params.append((parameter_name, model.item(s, 1).child(0).data().func))
         return params
 
     def getFullConstraintNameListForModel(self, model_key):
@@ -1744,8 +1756,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # update in param model
         if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
+            model_key = self.getModelKeyFromName(parameter_name)
             row = self.getRowFromName(parameter_name)
-            param_item = self._model_model.item(row).child(0).child(0, model_column)
+            #MG: Trying something here
+            #param_item = self._model_model.item(row).child(0).child(0, model_column)
+            param_item = self.model_dict[model_key].item(row).child(0).child(0, model_column)
             if param_item is None:
                 return
             self._model_model.blockSignals(True)
