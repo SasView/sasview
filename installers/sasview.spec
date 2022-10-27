@@ -22,6 +22,7 @@ datas = [
 #TODO: Hopefully we can get away from version specific packages
 if platform.system() == 'Darwin':
     datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
+    datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
     datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), '.'))
 
 def add_data(data):
