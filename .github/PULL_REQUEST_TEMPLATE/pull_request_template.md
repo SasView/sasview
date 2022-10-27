@@ -16,13 +16,14 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] I have made corresponding changes to the documentation
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass with my changes (both localy and on github)
-- [ ] I have checked that all newly added code and dependencies comply with BSD 3-Clause license 
+- [ ] I have checked that all newly added code and dependencies comply with SasView license (BSD 3-Clause)
 
 # Review Checklist:
 
-- [ ] Code has been review
+- [ ] Code has been reviewed
 - [ ] Functionality has been tested
-- [ ] Installers (GH artifacts) have been tested (install and works) 
-- [ ] User documentation is available and complete
-- [ ] Developers documentation is available and complete
+- [ ] Windows installer (GH artifact) has been tested (installed and worked) 
+- [ ] MacOSX installer (GH artifact) has been tested (installed and worked) 
+- [ ] User documentation is available and complete (if required)
+- [ ] Developers documentation is available and complete (if required)
 
