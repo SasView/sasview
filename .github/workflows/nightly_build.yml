@@ -9,15 +9,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [windows-latest, macOS-latest]
     runs-on: ${{ matrix.os }}
     steps:
 
     - name: Find matching workflow
       uses: SamhammerAG/last-successful-build-action@v2
       with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
           branch: "main"
           workflow: "Installer"
-          verify: true
 
 
+    - name: Upload installer to GitHub releases
+      uses: ncipollo/release-action@v1
+      with:
+          draft: true
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          #SHA of the latest succesful commit ${{ github.sha }}
+          artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
+          name: "Nightly Build"
+          tag: "nightly_build"
