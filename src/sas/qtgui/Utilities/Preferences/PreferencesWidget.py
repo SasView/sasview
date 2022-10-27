@@ -28,15 +28,6 @@ def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
         # The only way to get here **should** be during development, thus the debug log.
         logger.debug(f"Please add {attr} to the configuration and give it a sensible default value.")
 
-def config_value_setter_generator(attr: str,dtype: Optional[Any] = None):
-    """Helper method that generates a callback to set a config value.
-
-    :param attr: name of the attribute to set
-    :param dtype:
-    :return: a function that takes a single argument, which will be cast to dtype
-            and set in config as attr
-    """
-    return functools.partial(set_config_value,attr=attr,dtype=dtype)
 def get_config_value(attr: str, default: Optional[Any] = None) -> Any:
     """Helper method to get any config value, regardless if it exists or not
     :param attr: The configuration attribute that will be returned
