@@ -49,7 +49,7 @@ def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_i
     cb.setCurrentIndex(index)
 
 
-def config_value_setter_generator(attr: str, dtype: Optional[Any] = None):
+def config_value_setter_generator(attr: str, dtype: Optional[Callable] = None):
     """Helper method that generates a callback to set a config value.
 
     :param attr: name of the attribute to set
