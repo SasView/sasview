@@ -1,57 +1,48 @@
 import sys
-import unittest
+
+import pytest
 
 from PyQt5 import QtGui, QtWidgets
-
-# set up import paths
-import sas.qtgui.path_prepare
 
 # Local
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class SetGraphRangeTest(unittest.TestCase):
+class SetGraphRangeTest:
     '''Test the SetGraphRange'''
-    def setUp(self):
-        '''Create the SetGraphRange'''
 
-        self.widget = SetGraphRange(None)
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the SetGraphRange'''
+        w = SetGraphRange(None)
+        yield w
+        w.close()
 
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.widget.close()
-        self.widget = None
-
-    def testDefaults(self):
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Set Graph Range")
-        self.assertIsInstance(self.widget.txtXmin, QtWidgets.QLineEdit)
-        self.assertIsInstance(self.widget.txtXmin.validator(), QtGui.QDoubleValidator)
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert widget.windowTitle() == "Set Graph Range"
+        assert isinstance(widget.txtXmin, QtWidgets.QLineEdit)
+        assert isinstance(widget.txtXmin.validator(), QtGui.QDoubleValidator)
         
-    def testGoodRanges(self):
+    def testGoodRanges(self, widget):
         '''Test the X range values set by caller''' 
-        self.assertEqual(self.widget.xrange(), (0.0, 0.0))
-        self.assertEqual(self.widget.yrange(), (0.0, 0.0))
+        assert widget.xrange() == (0.0, 0.0)
+        assert widget.yrange() == (0.0, 0.0)
 
         new_widget = SetGraphRange(None, ("1.0", 2.0), (8.0, "-2"))
-        self.assertEqual(new_widget.xrange(), (1.0, 2.0))
-        self.assertEqual(new_widget.yrange(), (8.0, -2.0))
+        assert new_widget.xrange() == (1.0, 2.0)
+        assert new_widget.yrange() == (8.0, -2.0)
 
 
-    def testBadRanges(self):
+    def testBadRanges(self, widget):
         '''Test the incorrect X range values set by caller'''
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             new_widget = SetGraphRange(None, ("1.0", "aa"), (None, "@"))
-            self.assertEqual(new_widget.xrange(), (1.0, 0.0))
-            self.assertEqual(new_widget.yrange(), (0.0, 0.0))
+            assert new_widget.xrange() == (1.0, 0.0)
+            assert new_widget.yrange() == (0.0, 0.0)
 
-        with self.assertRaises(AssertionError):
+        with pytest.raises(AssertionError):
             new_widget = SetGraphRange(None, "I'm a tuple", None)
-            self.assertEqual(new_widget.xrange(), (1.0, 0.0))
-            self.assertEqual(new_widget.yrange(), (0.0, 0.0))
-
-if __name__ == "__main__":
-    unittest.main()
+            assert new_widget.xrange() == (1.0, 0.0)
+            assert new_widget.yrange() == (0.0, 0.0)

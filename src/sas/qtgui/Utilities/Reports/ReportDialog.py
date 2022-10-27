@@ -80,7 +80,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         else:
             location = self.save_location
         # Use a sensible filename default
-        default_name = os.path.join(location, 'report.pdf')
+        default_name = os.path.join(str(location), 'report.pdf')
 
         kwargs = {
             'parent'   : self,

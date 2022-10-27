@@ -1,11 +1,13 @@
+import math
+
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 import functools
 import copy
-import sys
 import matplotlib as mpl
 import numpy as np
+import textwrap
 from matplotlib.font_manager import FontProperties
 from packaging import version
 
@@ -24,29 +26,7 @@ from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-def _legendResize(width, parent):
-    """
-    resize factor for the legend, based on total canvas width
-    """
-    # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
-    if not hasattr(parent.parent, "manager"):
-        return None
-    if parent is None or parent.parent is None or parent.parent.manager is None \
-        or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
-        return None
-
-    screen_width = parent.parent.manager.parent._parent.screen_width
-    screen_height = parent.parent.manager.parent._parent.screen_height
-    screen_factor = screen_width * screen_height
-
-    if sys.platform == 'win32':
-        factor = 4
-        denomintor = 100
-        scale_factor = width/denomintor + factor
-    else:
-        #Function inferred based on tests for several resolutions
-        scale_factor = (3e-6*screen_factor + 1)*width/640
-    return scale_factor
+from sas import config
 
 class PlotterWidget(PlotterBase):
     """
@@ -87,6 +67,8 @@ class PlotterWidget(PlotterBase):
         self.toolbar._actions['forward'].triggered.connect(self._forward)
         self.toolbar._actions['pan'].triggered.connect(self._pan)
         self.toolbar._actions['zoom'].triggered.connect(self._zoom)
+
+        self.legendVisible = True
 
         parent.geometry()
 
@@ -251,14 +233,28 @@ class PlotterWidget(PlotterBase):
 
         # Now add the legend with some customizations.
         if self.showLegend:
-            width=_legendResize(self.canvas.size().width(), self.parent)
-            if width is not None:
-                self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
-            else:
-                self.legend = ax.legend(loc='upper right', shadow=True)
-            if self.legend:
-                self.legend.set_picker(True)
+            max_legend_width = config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH
+            handles, labels = ax.get_legend_handles_labels()
+            newhandles = []
+            newlabels = []
+            for h,l in zip(handles,labels):
+                    if config.FITTING_PLOT_LEGEND_TRUNCATE:
+                        if len(l)> config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH:
+                            half_legend_width = math.floor(max_legend_width/2)
+                            newlabels.append(f'{l[0:half_legend_width-3]} .. {l[-half_legend_width+3:]}')
+                        else:
+                            newlabels.append(l)
+                    else:
+                        newlabels.append(textwrap.fill(l,max_legend_width))
+                    newhandles.append(h)
 
+            if config.FITTING_PLOT_FULL_WIDTH_LEGENDS:
+                self.legend = ax.legend(newhandles,newlabels,loc='best', mode='expand')
+            else:
+                self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
+            self.legend.set_picker(True)
+            self.legend.set_visible(self.legendVisible)
+            
         # Current labels for axes
         if self.yLabel and not is_fit:
             ax.set_ylabel(self.yLabel)
@@ -299,16 +295,6 @@ class PlotterWidget(PlotterBase):
         # refresh canvas
         self.canvas.draw_idle()
 
-    def onResize(self, event):
-        """
-        Resize the legend window/font on canvas resize
-        """
-        if not self.showLegend:
-            return
-        width = _legendResize(event.width, self.parent)
-        # resize the legend to follow the canvas width.
-        if width is not None:
-            self.legend.prop.set_size(width)
 
     def createContextMenu(self):
         """
@@ -799,8 +785,9 @@ class PlotterWidget(PlotterBase):
         if not self.showLegend:
             return
 
-        visible = self.legend.get_visible()
-        self.legend.set_visible(not visible)
+        #visible = self.legend.get_visible()
+        self.legendVisible = not self.legendVisible
+        self.legend.set_visible(self.legendVisible)
         self.canvas.draw_idle()
 
     def onCusotmizeLabel(self):
