@@ -1,8 +1,7 @@
 name: Nightly Build Artifacts
 on:
-  [push, pull_request]
-  #schedule:
-  #  - cron: '0 0 * * *' # Eventuall will run at 2 AM UTC, for testimng 
+  schedule:
+    - cron: '0 2 * * *' # will run at 2 AM UTC
 
 jobs:
   nightly:
