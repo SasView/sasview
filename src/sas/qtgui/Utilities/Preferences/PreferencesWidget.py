@@ -20,7 +20,7 @@ def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
         if dtype is not None:
             value = dtype(value)
         # Another sanity check - the config system would also raise on data type mismatch, so potentially redundant
-        if type(config.attr) == type(value):
+        if type(getattr(config, attr)) == type(value):
             setattr(config, attr, value)
         else:
             raise TypeError(f"Data type mismatch: {value} has type {type(value)}, expected {type(config.attr)}")
@@ -85,12 +85,13 @@ class PreferencesWidget(QWidget):
         return layout
 
     def addComboBox(self, title: str, params: List[Union[str, int, float]], callback: Callable,
-                    default: Optional[str] = None):
+                    default: Optional[str] = None) -> QComboBox:
         """Add a title and combo box within the widget.
         :param title: The title of the combo box to be added to the preferences panel.
         :param params: A list of options to be added to the combo box.
         :param callback: A callback method called when the combobox value is changed.
         :param default: The default option to be selected in the combo box. The first item is selected if None.
+        :return: QComboBox instance to allow subclasses to assign instance name
         """
         layout = self._createLayoutAndTitle(title)
         box = QComboBox(self)
@@ -98,12 +99,14 @@ class PreferencesWidget(QWidget):
         box.currentIndexChanged.connect(callback)
         layout.addWidget(box)
         self.verticalLayout.addLayout(layout)
+        return box
 
-    def addTextInput(self, title: str, callback: Callable, default_text: Optional[str] = ""):
+    def addTextInput(self, title: str, callback: Callable, default_text: Optional[str] = "") -> QLineEdit:
         """Add a title and text box within the widget.
         :param title: The title of the text box to be added to the preferences panel.
         :param callback: A callback method called when the combobox value is changed.
         :param default_text: An optional value to be put within the text box as a default. Defaults to an empty string.
+        :return: QLineEdit instance to allow subclasses to assign instance name
         """
         layout = self._createLayoutAndTitle(title)
         text_box = QLineEdit(self)
@@ -112,12 +115,14 @@ class PreferencesWidget(QWidget):
         text_box.textChanged.connect(callback)
         layout.addWidget(text_box)
         self.verticalLayout.addLayout(layout)
+        return text_box
 
-    def addCheckBox(self, title: str, callback: Callable, checked: Optional[bool] = False):
+    def addCheckBox(self, title: str, callback: Callable, checked: Optional[bool] = False) -> QCheckBox:
         """Add a title and check box within the widget.
         :param title: The title of the check box to be added to the preferences panel.
         :param callback: A callback method called when the combobox value is changed.
         :param checked: An optional boolean value to specify if the check box is checked. Defaults to unchecked.
+        :return: QCheckBox instance to allow subclasses to assign instance name
         """
         layout = self._createLayoutAndTitle(title)
         check_box = QCheckBox(self)
@@ -125,3 +130,4 @@ class PreferencesWidget(QWidget):
         check_box.toggled.connect(callback)
         layout.addWidget(check_box)
         self.verticalLayout.addLayout(layout)
+        return check_box
