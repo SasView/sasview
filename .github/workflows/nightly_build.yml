@@ -18,21 +18,21 @@ jobs:
     #      workflow: "Installer"
 
     - name: Download artifact
-    id: download-artifact
-    uses: dawidd6/action-download-artifact@v2
-    with:
-      	github_token: ${{secrets.GITHUB_TOKEN}}
-      	workflow: installer.yml
-    	branch: main
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: installer.yml
+        branch: main
 
     - name: Upload installer to GitHub releases
       uses: ncipollo/release-action@v1
       with:
-          draft: true
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "SasView5.dmg, setupSasView.exe"
-          name: "Nightly Build"
-          tag: "nightly_build"
+        draft: true
+        prerelease: true
+        allowUpdates: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "SasView5.dmg, setupSasView.exe"
+        name: "Nightly Build"
+        tag: "nightly_build"
