@@ -1,9 +1,9 @@
 from bumps import fitters
 
 
-class Fitting:
+class FittingConfig:
     def __init__(self):
         self.DEFAULT_OPTIMIZER = fitters.MPFit.id
 
 
-fitting = Fitting()
+fitting = FittingConfig()
