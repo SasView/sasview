@@ -7,6 +7,9 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+from bumps import options
+from bumps import fitters
+
 from sas.system import fitting
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -76,7 +79,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self._allow_close = False
 
         # Fit options - uniform for all tabs
-        self.fit_options = fitting.FIT_CONFIG
+        self.fit_options = options.FIT_CONFIG
         self.fit_options_widget = FittingOptions(self, config=self.fit_options)
         self.fit_options.selected_id = fitting.DEFAULT_OPTIMIZER
 
@@ -457,7 +460,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         React to the fitting algorithm change by modifying window title
         """
-        fitter = [f.id for f in fitting.FITTERS if f.name == str(fit_engine)][0]
+        fitter = [f.id for f in fitters.FITTERS if f.name == str(fit_engine)][0]
         # set the optimizer
         self.fit_options.selected_id = str(fitter)
         # Update the title
