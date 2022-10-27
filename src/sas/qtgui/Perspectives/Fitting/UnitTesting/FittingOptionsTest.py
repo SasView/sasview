@@ -10,7 +10,8 @@ from PyQt5 import QtGui, QtWidgets
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
-from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.qtgui.Utilities.Preferences.FittingOptionsWidget import FittingOptions
 
 class FittingOptionsTest:
     '''Test the FittingOptions dialog'''
@@ -18,15 +19,13 @@ class FittingOptionsTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the FittingOptions'''
-        w = FittingOptions(None, config=options.FIT_CONFIG)
+        w = FittingOptions()
         yield w
         w.close()
 
     def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        assert isinstance(widget, QtWidgets.QDialog)
-        # Default title
-        assert widget.windowTitle() == "Fit Algorithms"
+        assert isinstance(widget, PreferencesWidget)
 
         # The combo box
         assert isinstance(widget.cbAlgorithm, QtWidgets.QComboBox)
@@ -58,16 +57,6 @@ class FittingOptionsTest:
         # bottom value for floats and ints
         assert widget.steps_de.validator().bottom() == 0
         assert widget.CR_de.validator().bottom() == 0
-
-        # Behaviour on empty cell
-        widget.onAlgorithmChange(3)
-        widget.steps_de.setText("")
-        # This should disable the OK button
-        ## assert not widget.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled()
-        # Let's put some valid value in lineedit
-        widget.steps_de.setText("1")
-        # This should enable the OK button
-        assert widget.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).isEnabled()
 
     def testOnAlgorithmChange(self, widget):
         '''Test the combo box change callback'''

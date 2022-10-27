@@ -41,11 +41,12 @@ class FittingOptions(PreferencesWidget):
     def _addAllWidgets(self):
         # Add default fit algorithm widget
         self.config = FIT_CONFIG
+        active_names = [name for fit_id, name in self.config.names.items() if fit_id in self.config.active_ids]
         default_id = config.DEFAULT_FITTING_OPTIMIZER
         algorithm = self.config.names[default_id]
         self.addHeaderText("Values to persist between SasView sessions:")
         self.defaultOptimizer = self.addComboBox("Default Fit Algorithm",
-                                                 self.config.names.values(),
+                                                 active_names,
                                                  self.setDefaultOptimizer,
                                                  algorithm)
         self.addHorizontalLine()
@@ -53,7 +54,7 @@ class FittingOptions(PreferencesWidget):
         # Add all other widgets
         self.addHeaderText("Fitting options for this session only:")
         self.cbAlgorithm = self.addComboBox("Active Fit Algorithm",
-                                            self.config.names.values(),
+                                            active_names,
                                             self.setActiveOptimizer,
                                             algorithm)
         self._addFittingOptionsWidgets()
@@ -375,7 +376,8 @@ class FittingOptions(PreferencesWidget):
 
     def setActiveOptimizer(self):
         """Grab the optimizer value and set it in the config file"""
-        self.parent.guiManager.loadedPerspectives["Fitting"].onFittingOptionsChange(self.cbAlgorithm.currentText())
+        if self.parent is not None:
+            self.parent.guiManager.loadedPerspectives["Fitting"].onFittingOptionsChange(self.cbAlgorithm.currentText())
         self.onAlgorithmChange(self.cbAlgorithm.currentIndex())
 
     def assignValidators(self):
@@ -393,7 +395,7 @@ class FittingOptions(PreferencesWidget):
                 validator.setBottom(0)
             else:
                 continue
-            for fitter_id in FIT_CONFIG.fitters.keys():
+            for fitter_id in FIT_CONFIG.active_ids:
                 line_edit = self.widgetFromOption(str(option), current_fitter=str(fitter_id))
                 if hasattr(line_edit, 'setValidator') and validator is not None:
                     line_edit.setValidator(validator)
