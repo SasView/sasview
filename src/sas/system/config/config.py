@@ -170,6 +170,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.DEFAULT_OPEN_FOLDER = ""
         self.TOOLBAR_SHOW = True
         self.DEFAULT_PERSPECTIVE = "Fitting"
+        self.DEFAULT_FITTING_OPTIMIZER = ""
         # self.DEFAULT_PERSPECTIVE = "Corfunc"
 
         # Logging options

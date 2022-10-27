@@ -2,18 +2,17 @@ import os
 import types
 import webbrowser
 
-from bumps import fitters
-import bumps.options
+from bumps.options import FIT_CONFIG, FIT_FIELDS, ChoiceList
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from sas.system import fitting
+from sas.system import config
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget, set_config_value
 
 
 class FittingOptions(PreferencesWidget):
@@ -38,20 +37,28 @@ class FittingOptions(PreferencesWidget):
 
     def __init__(self):
         super(FittingOptions, self).__init__(self.name)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-        # no reason to have this widget resizable
-        self.setFixedSize(self.minimumSizeHint())
+        # Add default fit algorithm widget
+        self.defaultOptimizer = self.addComboBox("Default Fit Algorithm to Use On Loading",
+                                                 FIT_CONFIG.names.values(),
+                                                 self.setDefaultOptimizer,
+                                                 config.DEFAULT_FITTING_OPTIMIZER)
+        # Add all other widgets
         # Listen to GUI Manager signal updating fit options
         # FIXME: Link this to the appropriate input
         self.fit_option_changed.connect(FittingWindow.onFittingOptionsChange)
+
+    def setDefaultOptimizer(self, caller: QtWidgets.QComboBox):
+        """
+        Grab the optimizer value and set it in the config file
+        """
+        set_config_value('DEFAULT_FITTING_OPTIMIZER', self.defaultOptimizer.currentText())
 
     def assignValidators(self):
         """
         Use options.FIT_FIELDS to assert which line edit gets what validator
         """
-        for option in bumps.options.FIT_FIELDS.keys():
-            (f_name, f_type) = bumps.options.FIT_FIELDS[option]
+        for option in FIT_FIELDS.keys():
+            (f_name, f_type) = FIT_FIELDS[option]
             validator = None
             if type(f_type) == types.FunctionType:
                 validator = QtGui.QIntValidator()
@@ -61,7 +68,7 @@ class FittingOptions(PreferencesWidget):
                 validator.setBottom(0)
             else:
                 continue
-            for fitter_id in fitters.FIT_ACTIVE_IDS:
+            for fitter_id in FIT_CONFIG.fitters.keys():
                 line_edit = self.widgetFromOption(str(option), current_fitter=str(fitter_id))
                 if hasattr(line_edit, 'setValidator') and validator is not None:
                     line_edit.setValidator(validator)
@@ -87,7 +94,7 @@ class FittingOptions(PreferencesWidget):
         """
         # Find the algorithm ID from name
         self.current_fitter_id = \
-            [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
+            [n.id for n in FIT_CONFIG.fitters.values() if n.name == str(self.cbAlgorithm.currentText())][0]
 
         # find the right stacked widget
         widget_name = "self.page_"+str(self.current_fitter_id)
@@ -221,9 +228,9 @@ class FittingOptions(PreferencesWidget):
             if not hasattr(self, attribute):
                 continue
             widget_name = 'self.'+attribute
-            if option not in bumps.options.FIT_FIELDS:
+            if option not in FIT_FIELDS:
                 return
-            if isinstance(bumps.options.FIT_FIELDS[option][1], bumps.options.ChoiceList):
+            if isinstance(FIT_FIELDS[option][1], ChoiceList):
                 control = eval(widget_name)
                 control.setCurrentIndex(control.findText(str(options[option])))
             else:

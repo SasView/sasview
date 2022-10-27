@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from bumps import options
 from bumps import fitters
 
-from sas.system import fitting
+from sas.system import config
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -80,7 +80,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
-        self.fit_options.selected_id = fitting.DEFAULT_OPTIMIZER
+        default_optimizer = config.DEFAULT_FITTING_OPTIMIZER
+        self.fit_options.selected_id = default_optimizer if default_optimizer != "" else fitters.MPFit.id
 
         # GPU Options
         self.gpu_options_widget = GPUOptions(self)
