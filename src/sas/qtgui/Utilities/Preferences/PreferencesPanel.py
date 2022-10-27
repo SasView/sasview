@@ -91,6 +91,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         super(PreferencesPanel, self).close()
 
     def addWidget(self, widget: QWidget, name: Optional[str] = None):
+        widget.parent = self.parent
         self.stackedWidget.addWidget(widget)
         name = widget.name if hasattr(widget, 'name') and widget.name else name
         name = "Unknown" if not name else name

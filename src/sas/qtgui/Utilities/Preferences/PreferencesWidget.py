@@ -75,6 +75,7 @@ class PreferencesWidget(QWidget):
 
     def __init__(self, name: str, default_method: Optional[Callable] = None):
         super(PreferencesWidget, self).__init__()
+        self.parent = None
         self.name = name
         self.resetDefaults = default_method
         self.verticalLayout = QVBoxLayout()
