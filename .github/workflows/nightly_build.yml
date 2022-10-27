@@ -26,8 +26,9 @@ jobs:
         branch: main
 
     - name: List files in the folder
-        run: |
-          ls
+      run: |
+          ls ${{ github.workspace }}
+
           
     - name: Upload installer to GitHub releases
       uses: ncipollo/release-action@v1
