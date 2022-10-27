@@ -1,20 +1,32 @@
 import functools
+import logging
 
 from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
 from typing import Optional, List, Union, Callable, Any
 
 from sas.system import config
 
+logger = logging.getLogger(__name__)
 
 
-def set_config_value(value: Any,attr: str, dtype: Optional[Any] = None ):
-    """Helper method to set any config value, regardless if it exists or not
+def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
+    """Helper method to set any config value
     :param attr: The configuration attribute that will be set
     :param value: The value the attribute will be set to. This could be a str, int, bool, a class instance, or any other
+    :param dtype: The datatype to cast the input value to if casting is desired
     """
-    if dtype is not None:
-        value = dtype(value)
-    setattr(config, attr, value)
+    if hasattr(config, attr):
+        # Attempt to coerce value to a specific type. Useful for numeric values from text boxes, etc.
+        if dtype is not None:
+            value = dtype(value)
+        # Another sanity check - the config system would also raise on data type mismatch, so potentially redundant
+        if type(config.attr) == type(value):
+            setattr(config, attr, value)
+        else:
+            raise TypeError(f"Data type mismatch: {value} has type {type(value)}, expected {type(config.attr)}")
+    else:
+        # The only way to get here **should** be during development, thus the debug log.
+        logger.debug(f"Please add {attr} to the configuration and give it a sensible default value.")
 
 def config_value_setter_generator(attr: str,dtype: Optional[Any] = None):
     """Helper method that generates a callback to set a config value.
@@ -45,16 +57,17 @@ def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_i
     cb.setCurrentIndex(index)
 
 
-def config_value_setter_generator(attr: str,dtype: Optional[Any] = None):
+def config_value_setter_generator(attr: str, dtype: Optional[Callable] = None):
     """Helper method that generates a callback to set a config value.
 
     :param attr: name of the attribute to set
-    :param dtype:
+    :param dtype: The datatype to cast the input value to if casting is desired
     :return: a function that takes a single argument, which will be cast to dtype
             and set in config as attr
     """
+    
+    return functools.partial(set_config_value, attr=attr, dtype=dtype)
 
-    return functools.partial(set_config_value,attr=attr,dtype=dtype)
 
 
 class PreferencesWidget(QWidget):
@@ -67,7 +80,7 @@ class PreferencesWidget(QWidget):
         super(PreferencesWidget, self).__init__()
         self.name = name
         self.resetDefaults = default_method
-        self.verticalLayout = QHBoxLayout()
+        self.verticalLayout = QVBoxLayout()
         self.setLayout(self.verticalLayout)
         self.adjustSize()
 
