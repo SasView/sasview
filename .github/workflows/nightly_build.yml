@@ -1,25 +1,29 @@
-name: Last Succesful Build
+name: Nightly Build Artifacts
 on:
-  schedule:
-    - cron: '0 2 * * *' # run at 2 AM UTC
+  [push, pull_request]
+  #schedule:
+  #  - cron: '0 0 * * *' # Eventuall will run at 2 AM UTC, for testimng 
 
 jobs:
   nightly:
     name: Deploy nightly
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macOS-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
 
-    - name: Find matching workflow
-      uses: SamhammerAG/last-successful-build-action@v2
-      with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          branch: "main"
-          workflow: "Installer"
+    #- name: Find matching workflow
+    #  uses: SamhammerAG/last-successful-build-action@v2
+    #  with:
+    #      token: "${{ secrets.GITHUB_TOKEN }}"
+    #      branch: "main"
+    #      workflow: "Installer"
 
+    - name: Download artifact
+    id: download-artifact
+    uses: dawidd6/action-download-artifact@v2
+    with:
+      	github_token: ${{secrets.GITHUB_TOKEN}}
+      	workflow: installer.yml
+    	branch: main
 
     - name: Upload installer to GitHub releases
       uses: ncipollo/release-action@v1
@@ -29,7 +33,6 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          #SHA of the latest succesful commit ${{ github.sha }}
-          artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
+          artifacts: "SasView5.dmg, setupSasView.exe"
           name: "Nightly Build"
           tag: "nightly_build"
