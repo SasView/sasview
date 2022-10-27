@@ -566,7 +566,6 @@ class PlotterWidget(PlotterBase):
         Resets the chart X and Y ranges to their original values
         """
         # Clear graph and plot everything again
-        mpl.pyplot.cla()
         self.ax.cla()
         self.setRange = None
         for ids in self.plot_dict:
@@ -643,7 +642,6 @@ class PlotterWidget(PlotterBase):
         xl = self.ax.xaxis.label.get_text()
         yl = self.ax.yaxis.label.get_text()
 
-        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate Artist bindings after plot clear
@@ -713,7 +711,6 @@ class PlotterWidget(PlotterBase):
         self.plot_dict = {}
 
         # Clean the canvas
-        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate the plots but reverse the error flag for the current
