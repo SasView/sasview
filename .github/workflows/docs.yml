@@ -42,7 +42,7 @@ jobs:
     - name: Install packaged dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install opencl-headers ocl-icd-opencl-dev libpocl2 xvfb pyside2
+        sudo apt-get install opencl-headers ocl-icd-opencl-dev libpocl2 xvfb
 
     - name: Install Python dependencies
       run: |
