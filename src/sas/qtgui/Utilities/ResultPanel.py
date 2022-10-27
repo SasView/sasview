@@ -9,9 +9,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from bumps.dream.stats import var_stats, format_vars
-
-
 class ResultPanel(QtWidgets.QTabWidget):
     """
     FitPanel class contains fields allowing to fit  models and  data
@@ -55,6 +52,8 @@ class ResultPanel(QtWidgets.QTabWidget):
         sys.modules['bumps.gui.plot_view'] = PlotView
 
     def onPlotResults(self, results, optimizer="Unknown"):
+        # import moved here due to its cost
+        from bumps.dream.stats import var_stats, format_vars
         # Clear up previous results
         for view in (self.convergenceView, self.correlationView,
                      self.uncertaintyView, self.traceView):

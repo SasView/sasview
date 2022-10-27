@@ -143,6 +143,7 @@ class PlotterWidget(PlotterBase):
         ax = self.ax
         x = data.view.x
         y = data.view.y
+        label = data.name # was self._title
 
         # Marker symbol. Passed marker is one of matplotlib.markers characters
         # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
@@ -186,22 +187,22 @@ class PlotterWidget(PlotterBase):
         l_width = markersize * 0.4
         if marker == '-' or marker == '--':
             line = self.ax.plot(x, y, color=color, lw=l_width, marker='',
-                             linestyle=marker, label=self._title, zorder=10)[0]
+                             linestyle=marker, label=label, zorder=10)[0]
 
         elif marker == 'vline':
             y_min = min(y)*9.0/10.0 if min(y) < 0 else 0.0
             line = self.ax.vlines(x=x, ymin=y_min, ymax=y, color=color,
-                            linestyle='-', label=self._title, lw=l_width, zorder=1)
+                            linestyle='-', label=label, lw=l_width, zorder=1)
 
         elif marker == 'step':
             line = self.ax.step(x, y, color=color, marker='', linestyle='-',
-                                label=self._title, lw=l_width, zorder=1)[0]
+                                label=label, lw=l_width, zorder=1)[0]
 
         else:
             # plot data with/without errorbars
             if hide_error:
                 line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
-                        linestyle='', label=self._title, picker=True)
+                        linestyle='', label=label, picker=True)
             else:
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
@@ -218,7 +219,7 @@ class PlotterWidget(PlotterBase):
                             markersize=markersize,
                             lolims=False, uplims=False,
                             xlolims=False, xuplims=False,
-                            label=self._title,
+                            label=label,
                             zorder=1,
                             picker=True)
 
@@ -565,7 +566,6 @@ class PlotterWidget(PlotterBase):
         Resets the chart X and Y ranges to their original values
         """
         # Clear graph and plot everything again
-        mpl.pyplot.cla()
         self.ax.cla()
         self.setRange = None
         for ids in self.plot_dict:
@@ -642,7 +642,6 @@ class PlotterWidget(PlotterBase):
         xl = self.ax.xaxis.label.get_text()
         yl = self.ax.yaxis.label.get_text()
 
-        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate Artist bindings after plot clear
@@ -712,7 +711,6 @@ class PlotterWidget(PlotterBase):
         self.plot_dict = {}
 
         # Clean the canvas
-        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate the plots but reverse the error flag for the current

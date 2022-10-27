@@ -134,5 +134,9 @@ def run_sasview():
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
 
+    timer = QTimer()
+    timer.timeout.connect(lambda: None)
+    timer.start(100)
+
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
