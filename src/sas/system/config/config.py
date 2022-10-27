@@ -180,10 +180,13 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        # Window scaling values
+        self.QT_SCALE_FACTOR = 1.0
+        self.QT_AUTO_SCALE_FACTOR = False
+
         # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
         # width legends.
         self.FITTING_PLOT_FULL_WIDTH_LEGENDS = False
-        self.QT_SCALE_FACTOR = 1.0
 
         # If True, truncates names in Fitting plot legends such that each name is maximum one line.
         self.FITTING_PLOT_LEGEND_TRUNCATE = False
