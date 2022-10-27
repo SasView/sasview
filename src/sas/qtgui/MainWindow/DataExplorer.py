@@ -778,8 +778,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         try:
             if self.chkSwap.isChecked():
                 self._perspective().swapData(selected_items[0])
+                if self._perspective().name == 'Fitting':
+                    self._perspective().tabs[0].onPlot() #todo sort out where the plot should go.
             else:
                 self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+                if self._perspective().name == 'Fitting':
+                    self._perspective().tabs[0].onPlot()
+
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(ex, exc_info=True)
