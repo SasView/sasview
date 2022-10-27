@@ -22,7 +22,7 @@ jobs:
       uses: dawidd6/action-download-artifact@v2
       with:
         github_token: ${{secrets.GITHUB_TOKEN}}
-        workflow: installer.yml
+        workflow: installers.yml
         branch: main
 
     - name: Upload installer to GitHub releases
