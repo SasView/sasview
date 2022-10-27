@@ -18,7 +18,6 @@ from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
-from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.perspective import Perspective
 
