@@ -25,6 +25,10 @@ jobs:
         workflow: installers.yml
         branch: main
 
+    - name: List files in the folder
+        run: |
+          ls
+          
     - name: Upload installer to GitHub releases
       uses: ncipollo/release-action@v1
       with:
