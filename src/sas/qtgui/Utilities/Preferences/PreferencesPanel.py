@@ -12,9 +12,10 @@ from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 #  `from foo.bar import BarWidget  # BarWidget is a child of PreferencesWidget`
 #  `BASE_PANELS = {"Bar Widget Options": BarWidget}`
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
+from .FittingOptionsWidget import FittingOptions
 
 # Pre-made option widgets
-BASE_PANELS = {}  # type: Dict[str, Type[PreferencesWidget]]
+BASE_PANELS = {FittingOptions.name: FittingOptions}  # type: Dict[str, Type[PreferencesWidget]]
 
 logger = logging.getLogger(__name__)
 
