@@ -23,7 +23,6 @@ pylint
 qt5reactor 
 periodictable 
 uncertainties
-debugpy
 matplotlib~=3.5.2
 PyQt5
 lxml
