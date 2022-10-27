@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 
 # Local UI
 from .UI.MainWindowUI import Ui_SasView
@@ -35,7 +35,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.screen_width = screen_resolution.width()
         self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
-
+        QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
         if sys.platform == "darwin":  # Mac
             self.menubar.setNativeMenuBar(False)
@@ -117,13 +117,16 @@ def run_sasview():
 
     # Show the main SV window
     mainwindow = MainSasViewWindow(screen_resolution)
-    mainwindow.showMaximized()
 
     # no more splash screen
     splash.finish(mainwindow)
 
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
+
+    timer = QTimer()
+    timer.timeout.connect(lambda: None)
+    timer.start(100)
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
