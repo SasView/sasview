@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
+from PyQt5.QtWidgets import QDialog, QPushButton, QWidget, QListWidgetItem
 from typing import Optional, Callable, Dict, Type
 
 from sas.system.config.config import config
@@ -25,8 +25,6 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     options menus available. The right side of the window is a stackedWidget object that houses the options
     associated with each listWidget item.
     **Important Note** When adding new preference widgets, the index for the listWidget and stackedWidget *must* match
-    Release notes:
-    SasView v5.0.5: Added defaults for loaded data units and plotted units
     """
 
     def __init__(self, parent=None):
@@ -56,7 +54,16 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
-        row = self.listWidget.currentRow()
+        self.setMenuIndex(self.listWidget.currentRow())
+
+    def setMenuByName(self, name: str):
+        """Set the index to be changed by the title name"""
+        self.listWidget.setCurrentItem(QListWidgetItem(name))
+        self.setMenuIndex(self.listWidget.currentRow())
+
+    def setMenuIndex(self, row: int):
+        """Set the menu to a given index"""
+        self.listWidget.setCurrentRow(row)
         self.stackedWidget.setCurrentIndex(row)
 
     def onClick(self, btn: QPushButton):

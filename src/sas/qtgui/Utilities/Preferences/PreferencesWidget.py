@@ -1,7 +1,7 @@
 import functools
 import logging
 
-from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
 from typing import Optional, List, Union, Callable, Any
 
 from sas.system import config
@@ -60,6 +60,13 @@ def config_value_setter_generator(attr: str, dtype: Optional[Any] = None):
     return functools.partial(set_config_value, attr=attr, dtype=dtype)
 
 
+class QHLine(QFrame):
+    def __init__(self):
+        super(QHLine, self).__init__()
+        self.setFrameShape(QFrame.HLine)
+        self.setFrameShadow(QFrame.Sunken)
+
+
 class PreferencesWidget(QWidget):
     """A helper class that bundles all values needed to add a new widget to the preferences panel
     """
@@ -72,7 +79,16 @@ class PreferencesWidget(QWidget):
         self.resetDefaults = default_method
         self.verticalLayout = QVBoxLayout()
         self.setLayout(self.verticalLayout)
+        self._addAllWidgets()
+        self.verticalLayout.addStretch()
         self.adjustSize()
+
+    def _addAllWidgets(self):
+        """
+        Psuedo-abstract class that children should override. All widgets should be added here to push all items to the
+        top of the window.
+        """
+        pass
 
     def _createLayoutAndTitle(self, title: str):
         """A private class method that creates a vertical layout to hold the title and interactive item.
@@ -131,3 +147,11 @@ class PreferencesWidget(QWidget):
         layout.addWidget(check_box)
         self.verticalLayout.addLayout(layout)
         return check_box
+
+    def addHorizontalLine(self):
+        self.verticalLayout.addWidget(QHLine())
+
+    def addHeaderText(self, text: str):
+        label = QLabel()
+        label.setText(text)
+        self.verticalLayout.addWidget(label)

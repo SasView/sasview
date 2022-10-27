@@ -37,21 +37,34 @@ class FittingOptions(PreferencesWidget):
 
     def __init__(self):
         super(FittingOptions, self).__init__(self.name)
-        # Add default fit algorithm widget
-        self.defaultOptimizer = self.addComboBox("Default Fit Algorithm to Use On Loading",
-                                                 FIT_CONFIG.names.values(),
-                                                 self.setDefaultOptimizer,
-                                                 config.DEFAULT_FITTING_OPTIMIZER)
-        # Add all other widgets
         # Listen to GUI Manager signal updating fit options
         # FIXME: Link this to the appropriate input
         self.fit_option_changed.connect(FittingWindow.onFittingOptionsChange)
 
-    def setDefaultOptimizer(self, caller: QtWidgets.QComboBox):
+    def _addAllWidgets(self):
+        # Add default fit algorithm widget
+        self.addHeaderText("Values to persist between SasView sessions:")
+        self.defaultOptimizer = self.addComboBox("Default Fit Algorithm",
+                                                 FIT_CONFIG.names.values(),
+                                                 self.setDefaultOptimizer,
+                                                 FIT_CONFIG.names[config.DEFAULT_FITTING_OPTIMIZER])
+        self.addHorizontalLine()
+
+        # Add all other widgets
+        self.addHeaderText("Fitting options for this session only:")
+        self.activeOptimizer = self.addComboBox("Default Fit Algorithm",
+                                                FIT_CONFIG.names.values(),
+                                                 self.setActiveOptimizer,
+                                                 FIT_CONFIG.names[config.DEFAULT_FITTING_OPTIMIZER])
+
+    def setDefaultOptimizer(self):
         """
         Grab the optimizer value and set it in the config file
         """
-        set_config_value('DEFAULT_FITTING_OPTIMIZER', self.defaultOptimizer.currentText())
+        # TODO: This should also update 'active optimizer' once it exists.
+        text = self.defaultOptimizer.currentText()
+        id = dict((new_val, new_k) for new_k, new_val in FIT_CONFIG.names.items()).get(text)
+        set_config_value('DEFAULT_FITTING_OPTIMIZER', id)
 
     def assignValidators(self):
         """
