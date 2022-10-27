@@ -1,10 +1,11 @@
 import sys
 import webbrowser
 
+import pytest
+
 from PySide2 import QtGui, QtWidgets
 from PySide2.QtTest import QTest
 from PySide2 import QtCore
-from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.Calculators.DensityPanel import DensityPanel, MODEL
