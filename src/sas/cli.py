@@ -1,20 +1,20 @@
 """
 SasView command line interface.
 
-sasview -V
-    Print SasView version and exit.
-sasview -m module [args...]
+sasview [options] -m module [args...]
     Run module as main.
-sasview -c "python statements" [args...]
+sasview [options] -c "python statements" [args...]
     Execute python statements with sasview libraries available.
-sasview -i [args...]
-    Start ipython interpreter using args.
-sasview script [args...]
+sasview [options] script [args...]
     Run script with sasview libraries available
-sasview
-    Start sasview gui
+sasview [options]
+    Start sasview gui if not interactive
 
-You can also run it as "python -m sas.cli".
+Options:
+
+    -i: Start an interactive interpreter after the command is executed.
+    -q: Don't print.
+    -V: Print SasView version.
 """
 import sys
 
@@ -41,7 +41,9 @@ def parse_cli(argv):
     parser.add_argument("-c", "--command", type=str,
         help="Execute command")
     parser.add_argument("-i", "--interactive", action='store_true',
-        help="Start ipython with remaining arguments")
+        help="Start interactive interpreter after running command")
+    parser.add_argument("-q", "--quiet", action='store_true',
+        help="Don't print banner when entering interactive mode")
     parser.add_argument("args", nargs="*",
         help="script followed by args")
 
@@ -63,9 +65,7 @@ def parse_cli(argv):
         # with the trigger (e.g., -mmodule)
         if have_trigger:
             collect_rest = True
-        elif arg in ('-i', '--interactive'):
-            have_trigger = collect_rest = True
-        elif arg.startswith('-m') or arg.startswith('--module'):
+        if arg.startswith('-m') or arg.startswith('--module'):
             have_trigger = True
             collect_rest = arg not in ('-m', '--module')
         elif arg.startswith('-c') or arg.startswith('--command'):
@@ -76,17 +76,6 @@ def parse_cli(argv):
     if collect_rest:
         opts.args = rest
     return opts
-
-def run_interactive(args):
-    """Run sasview as an interactive python interpreter"""
-    try:
-        from IPython import start_ipython
-        sys.argv = ["ipython", "--pylab", *args]
-        sys.exit(start_ipython())
-    except ImportError:
-        import code
-        sys.argv = args
-        code.interact(local={'exit': sys.exit})
 
 def main(logging="production"):
     from sas.system import log
@@ -108,24 +97,37 @@ def main(logging="production"):
     if cli.version: # -V
         import sas
         print(f"SasView {sas.__version__}")
-    elif cli.module: # -m module [arg...]
+
+    context = {'exit': sys.exit}
+    if cli.module: # -m module [arg...]
         import runpy
         # TODO: argv[0] should be the path to the module file not the dotted name
         sys.argv = [cli.module, *cli.args]
-        runpy.run_module(cli.module, run_name="__main__")
+        context = runpy.run_module(cli.module, run_name="__main__")
     elif cli.command: # -c "command"
         sys.argv = ["-c", *cli.args]
-        exec(cli.command)
-    elif cli.interactive: # -i
-        run_interactive(cli.args)
+        exec(cli.command, context)
     elif cli.args: # script [arg...]
         import runpy
         sys.argv = cli.args
-        runpy.run_path(cli.args[0], run_name="__main__")
-    else: # no arguments
-        from sas.qtgui.MainWindow.MainWindow import run_sasview as run_gui
+        context = runpy.run_path(cli.args[0], run_name="__main__")
+    elif not cli.interactive: # no arguments so start the GUI
+        from sas.qtgui.MainWindow.MainWindow import run_sasview
         # sys.argv is unchanged
-        run_gui()
+        # Maybe hand cli.quiet to run_sasview?
+        run_sasview()
+        return 0 # don't drop into the interactive interpreter
+
+    # TODO: Capture the global/local environment of the script/module
+    # TODO: Start interactive with ipython rather than normal python
+    # For ipython use:
+    #     from IPython import start_ipython
+    #     sys.argv = ["ipython", *args]
+    #     sys.exit(start_ipython())
+    if cli.interactive:
+        import code
+        exitmsg = banner = "" if cli.quiet else None
+        code.interact(banner=banner, exitmsg=exitmsg, local=context)
 
     return 0
 
