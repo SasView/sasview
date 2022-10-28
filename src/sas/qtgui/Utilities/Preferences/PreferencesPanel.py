@@ -37,9 +37,6 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.setupUi(self)
         self.parent = parent
         self.setWindowTitle("Preferences")
-        self.warning = None
-        # A list of callables used to restore the default values for each item in StackedWidget
-        self.restoreDefaultMethods = []
         # Add predefined widgets to window
         self.addWidgets(BASE_PANELS)
         # Set defaults values for the list and stacked widgets
@@ -84,13 +81,10 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             self.help()
 
     def restoreDefaultPreferences(self):
-        """Reset all preferences to their default preferences"""
-        for method in self.restoreDefaultMethods:
-            if callable(method):
-                method()
-            else:
-                logger.warning(f'While restoring defaults, {str(method)} of type {type(method)}'
-                               + ' was given. A callable object was expected.')
+        """Reset preferences for the active widget to the default values."""
+        widget = self.stackedWidget.currentWidget()
+        if hasattr(widget, 'restoreDefaults') and callable(widget.restoreDefaults):
+            widget.restoreDefaults()
 
     def close(self):
         """Save the configuration values when the preferences window is closed"""
@@ -107,9 +101,6 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         name = widget.name if hasattr(widget, 'name') and widget.name else name
         name = "Unknown" if not name else name
         self.listWidget.addItem(name)
-        # Add the widget default reset method to the global set
-        if hasattr(widget, 'resetDefaults') and callable(widget.resetDefaults):
-            self.restoreDefaultMethods.append(widget.resetDefaults)
 
     def help(self):
         """Open the help window associated with the preferences window"""

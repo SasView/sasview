@@ -74,11 +74,10 @@ class PreferencesWidget(QWidget):
     # Default name that will be used in the PreferencesPanel listWidget
     name = None  # type: str
 
-    def __init__(self, name: str, default_method: Optional[Callable] = None):
+    def __init__(self, name: str):
         super(PreferencesWidget, self).__init__()
         self.parent = None
         self.name = name
-        self.resetDefaults = default_method
         # Create generic layout
         self.verticalLayout = QVBoxLayout()
         self.setLayout(self.verticalLayout)
@@ -89,10 +88,15 @@ class PreferencesWidget(QWidget):
         self.adjustSize()
 
     def _addAllWidgets(self):
-        """A private psuedo-abstract class that children should override. All widgets should be added here to force
-        elements to the top of the window.
+        """A private pseudo-abstract class that children should override. All new widgets should be added using this
+        method to create consistency between all preference widgets.
         """
-        pass
+        raise NotImplementedError(f"{self.name} has not implemented _addAllWidgets.")
+
+    def restoreDefaults(self):
+        """A pseudo-abstract class that children should override.
+        """
+        raise NotImplementedError(f"{self.name} has not implemented restoreDefaults.")
 
     def _createLayoutAndTitle(self, title: str):
         """A private class method that creates a horizontal layout to hold the title and interactive item.

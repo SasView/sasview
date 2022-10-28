@@ -59,8 +59,13 @@ class FittingOptions(PreferencesWidget):
         self.verticalLayout.addWidget(self.stackedWidget)
         self.onAlgorithmChange(self.cbAlgorithm.currentIndex())
 
+    def restoreDefaults(self):
+        name = self.config.names['lm']
+        self.defaultOptimizer.setCurrentIndex(self.defaultOptimizer.findText(name))
+        self.setActiveOptimizer()
+
     def _addFittingOptionsWidgets(self):
-        """This is a direct copy from teh python file generated from the old UI file."""
+        """This is a direct copy from the python file generated from the old UI file."""
         self.stackedWidget = QtWidgets.QStackedWidget()
         self.stackedWidget.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.stackedWidget.setObjectName("stackedWidget")
