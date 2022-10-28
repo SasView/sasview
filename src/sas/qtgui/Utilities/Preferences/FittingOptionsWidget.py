@@ -373,7 +373,7 @@ class FittingOptions(PreferencesWidget):
         """Capture the default optimizer value in the and set it in the config file"""
         text = self.defaultOptimizer.currentText()
         id = dict((new_val, new_k) for new_k, new_val in FIT_CONFIG.names.items()).get(text)
-        set_config_value('DEFAULT_FITTING_OPTIMIZER', id)
+        set_config_value(id, 'DEFAULT_FITTING_OPTIMIZER')
         self.cbAlgorithm.setCurrentIndex(self.defaultOptimizer.currentIndex())
         self.setActiveOptimizer()
 
