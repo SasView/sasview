@@ -18,5 +18,5 @@ class DisplayPreferencesWidget(PreferencesWidget):
             checked=config.QT_AUTO_SCREEN_SCALE_FACTOR)
 
     def restoreDefaults(self):
-        self.qtScaleFactor.setText(str(1.0))
-        self.autoScaling.setChecked(False)
+        self.qtScaleFactor.setText(str(config.defaults.get('QT_SCALE_FACTOR')))
+        self.autoScaling.setChecked(config.defaults.get('QT_AUTO_SCREEN_SCALE_FACTOR'))

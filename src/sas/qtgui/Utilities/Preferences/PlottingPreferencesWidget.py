@@ -22,6 +22,6 @@ class PlottingPreferencesWidget(PreferencesWidget):
             default_text=str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))
 
     def restoreDefaults(self):
-        self.legendFullWidth.setChecked(False)
-        self.legendTruncate.setChecked(False)
-        self.legendLineLength.setText('30')
+        self.legendFullWidth.setChecked(config.defaults.get('FITTING_PLOT_FULL_WIDTH_LEGENDS'))
+        self.legendTruncate.setChecked(config.defaults.get('FITTING_PLOT_LEGEND_TRUNCATE'))
+        self.legendLineLength.setText(str(config.defaults.get('FITTING_PLOT_LEGEND_MAX_LINE_LENGTH')))

@@ -60,7 +60,7 @@ class FittingOptions(PreferencesWidget):
         self.onAlgorithmChange(self.cbAlgorithm.currentIndex())
 
     def restoreDefaults(self):
-        name = self.config.names['lm']
+        name = self.config.names[config.defaults.get('DEFAULT_FITTING_OPTIMIZER')]
         self.defaultOptimizer.setCurrentIndex(self.defaultOptimizer.findText(name))
         self.setActiveOptimizer()
 
