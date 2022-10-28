@@ -1319,7 +1319,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            extension_list = config.PLUGIN_STATE_EXTENSIONS
+            extension_list = config.PLUGIN_STATE_EXTENSIONS.copy()
             if config.APPLICATION_STATE_EXTENSION is not None:
                 extension_list.append(config.APPLICATION_STATE_EXTENSION)
 
