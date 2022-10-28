@@ -5,6 +5,7 @@ import sys
 import logging
 
 from sas.system.version import __version__
+from sas.system import config
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
@@ -78,7 +79,7 @@ def run_sasview():
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCREEN_SCALE_FACTOR else "0"
-    
+
     app = QApplication([])
 
     # Main must have reference to the splash screen, so making it explicit
