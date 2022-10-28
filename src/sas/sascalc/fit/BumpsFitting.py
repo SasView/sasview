@@ -39,18 +39,18 @@ class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
         if remaining_time < 60:
-            delta_time = '%ds' % remaining_time
+            delta_time = f"{remaining_time}s"
         elif remaining_time < 3600:
-            delta_time = '%dm %ds' % (remaining_time // 60, remaining_time % 60)
+            delta_time = f"{remaining_time // 60}m {remaining_time % 60}s"
         elif remaining_time < 24 * 3600:
-            delta_time = '%dh %dm' % (remaining_time // 3600, (remaining_time % 3600) // 60)
+            delta_time = f"{remaining_time // 3600}h {remaining_time % 3600 // 60}m"
         else:
-            delta_time = '%dd %dh' % (remaining_time // (24 * 3600), (remaining_time % (24 * 3600)) // 3600)
+            delta_time = f"{remaining_time // (24 * 3600)}d {remaining_time % (24 * 3600) // 3600}h"
         finish_time = (datetime.now() + timedelta(seconds=remaining_time)).strftime('%Y-%m-%d %H:%M')
-        chisq = "%.3g"%(2*history.value[0]/dof)
-        step = "%d of %d"%(history.step[0], max_step)
-        header = "=== Steps: %s  chisq: %s  ETA: %s (%s from now)\n"%(step, chisq, finish_time, delta_time)
-        parameters = ["%15s: %-10.3g%s"%(k,v,("\n" if i%3==2 else " | "))
+        chisq = 2*history.value[0]/dof
+        header = f"=== Steps: {history.step[0]} of {int(max_step)}  chisq: {chisq:.3g}"
+        header += f" ETA: {finish_time} ({delta_time} from now)\n"
+        parameters = [(f"{k:20s}:{v:10.3g}" + ("\n" if i%3==2 else " | "))
                       for i, (k, v) in enumerate(zip(pars, history.point[0]))]
         self.msg = "".join([header]+parameters)
 
