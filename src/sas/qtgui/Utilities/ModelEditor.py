@@ -1,5 +1,5 @@
-from PySide2 import QtCore
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
 from sas.qtgui.Utilities import GuiUtils

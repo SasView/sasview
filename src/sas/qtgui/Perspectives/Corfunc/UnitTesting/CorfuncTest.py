@@ -3,9 +3,9 @@ import sys
 
 import pytest
 
-from PySide2 import QtGui, QtWidgets
-from PySide2 import QtCore
-from PySide2.QtTest import QTest
+from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6.QtTest import QTest
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D

@@ -3,9 +3,9 @@ Widget/logic for smearing data.
 """
 import copy
 import numpy as np
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
 from sas.qtgui.Plotting.PlotterData import Data1D

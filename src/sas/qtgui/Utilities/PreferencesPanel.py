@@ -1,6 +1,6 @@
 import logging
 
-from PySide2.QtWidgets import QComboBox, QDialog, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
+from PySide6.QtWidgets import QComboBox, QDialog, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox
 from typing import Optional, Any, List, Union, Callable
 
 from sas.system.config.config import config

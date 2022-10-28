@@ -4,7 +4,7 @@ import time
 import logging
 import webbrowser
 
-from PySide2 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets, QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D

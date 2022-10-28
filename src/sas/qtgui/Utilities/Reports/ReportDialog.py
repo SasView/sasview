@@ -6,8 +6,8 @@ import traceback
 from xhtml2pdf import pisa
 from typing import Optional
 
-from PySide2 import QtWidgets, QtCore
-from PySide2 import QtPrintSupport
+from PySide6 import QtWidgets, QtCore
+from PySide6 import QtPrintSupport
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary

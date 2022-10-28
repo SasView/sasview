@@ -4,10 +4,10 @@ import webbrowser
 import logging
 import pytest
 
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-from PySide2.QtTest import QTest
-from PySide2 import QtCore
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 from unittest.mock import MagicMock
 
 # Local

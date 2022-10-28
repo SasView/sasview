@@ -2,9 +2,9 @@
 Widget/logic for smearing data.
 """
 import numpy as np
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils

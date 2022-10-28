@@ -1,6 +1,6 @@
 import os
 import pytest
-from PySide2.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
+from PySide6.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.PreferencesPanel import *

@@ -6,7 +6,7 @@ import logging
 
 import pytest
 
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 

@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 
-from PySide2.QtCore import *
+from PySide6.QtCore import *
 
 
 class QtHandler(QObject, logging.Handler):

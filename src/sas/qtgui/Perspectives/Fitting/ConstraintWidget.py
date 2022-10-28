@@ -6,7 +6,7 @@ from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 

@@ -2,8 +2,8 @@ import sys
 import webbrowser
 import pytest
 
-from PySide2 import QtCore
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui, QtWidgets
 from unittest.mock import MagicMock
 
 # SV imports

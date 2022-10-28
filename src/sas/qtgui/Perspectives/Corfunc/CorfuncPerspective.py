@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # global
-from PySide2.QtGui import QStandardItem
+from PySide6.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 from numpy.linalg.linalg import LinAlgError
@@ -13,8 +13,8 @@ from typing import Optional, List, Tuple
 
 import logging
 
-from PySide2 import QtCore
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui, QtWidgets
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module

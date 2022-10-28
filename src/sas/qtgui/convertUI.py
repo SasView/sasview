@@ -30,7 +30,7 @@ def pyuic(in_file, out_file):
     """
     in_file2 = os.path.abspath(in_file)
     out_file2 = os.path.abspath(out_file)
-    run_line = "pyside2-uic " + in_file2 + " -o " + out_file2
+    run_line = "PySide6-uic " + in_file2 + " -o " + out_file2
     os.system(run_line)
 
 def file_in_newer(file_in, file_out):

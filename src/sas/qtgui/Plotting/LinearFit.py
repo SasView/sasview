@@ -5,9 +5,9 @@ import re
 import numpy
 from numbers import Number
 from typing import Optional
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 

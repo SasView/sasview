@@ -5,7 +5,7 @@ import pytest
 
 import numpy as np
 
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 # Local
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint

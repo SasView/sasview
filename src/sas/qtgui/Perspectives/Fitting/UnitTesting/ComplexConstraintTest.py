@@ -4,7 +4,7 @@ import webbrowser
 
 import pytest
 
-from PySide2 import QtGui, QtWidgets, QtCore, QtTest
+from PySide6 import QtGui, QtWidgets, QtCore, QtTest
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint

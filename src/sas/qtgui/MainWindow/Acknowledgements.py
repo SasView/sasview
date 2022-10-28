@@ -1,5 +1,5 @@
 import functools
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 import sas.sasview
 import sas.system.version

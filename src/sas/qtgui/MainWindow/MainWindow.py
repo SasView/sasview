@@ -5,12 +5,12 @@ import sys
 from sas import config
 from sas.system import env, version
 
-from PySide2.QtWidgets import QMainWindow
-from PySide2.QtWidgets import QMdiArea
-from PySide2.QtWidgets import QSplashScreen
-from PySide2.QtWidgets import QApplication
-from PySide2.QtGui import QPixmap
-from PySide2.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QMainWindow
+from PySide6.QtWidgets import QMdiArea
+from PySide6.QtWidgets import QSplashScreen
+from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QPixmap, QGuiApplication, QCursor
+from PySide6.QtCore import Qt, QTimer
 
 # Local UI
 from .UI.MainWindowUI import Ui_SasView
@@ -30,8 +30,8 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # the two scrollbars will help managing the workspace.
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.screen_width = screen_resolution.width()
-        self.screen_height = screen_resolution.height()
+        #self.screen_width = screen_resolution.width()
+        #self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
         QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
@@ -112,7 +112,10 @@ def run_sasview():
     # DO NOT move the following import to the top!
     from twisted.internet import reactor
 
-    screen_resolution = app.desktop().screenGeometry()
+    screen = QGuiApplication.screenAt(QCursor.pos())
+    screen_resolution = screen.geometry().center()
+
+    # screen_resolution = app.primaryScreen().screenGeometry()
 
     # Show the main SV window
     mainwindow = MainSasViewWindow(screen_resolution)

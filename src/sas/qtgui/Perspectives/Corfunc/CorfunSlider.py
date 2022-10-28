@@ -3,9 +3,9 @@ from typing import Optional, Tuple
 import math
 import numpy as np
 
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt, Signal
-from PySide2.QtGui import QFontMetrics
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFontMetrics
 
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 

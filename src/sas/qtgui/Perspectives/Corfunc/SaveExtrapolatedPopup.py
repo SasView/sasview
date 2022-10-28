@@ -1,7 +1,7 @@
 import numpy as np
 
-from PySide2 import QtCore
-from PySide2.QtWidgets import QDialog, QFileDialog, QMessageBox
+from PySide6 import QtCore
+from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 
 from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel

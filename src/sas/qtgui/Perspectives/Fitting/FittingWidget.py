@@ -11,9 +11,9 @@ from twisted.internet import threads
 import numpy as np
 import webbrowser
 
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sasmodels import generate
 from sasmodels import modelinfo

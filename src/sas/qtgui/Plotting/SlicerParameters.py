@@ -6,9 +6,9 @@ import os
 import functools
 import logging
 
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D

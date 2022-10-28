@@ -5,7 +5,7 @@ import pytest
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 

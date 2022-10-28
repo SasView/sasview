@@ -1,9 +1,9 @@
 # global
 import numpy as np
 import logging
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld

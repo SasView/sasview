@@ -1,5 +1,5 @@
-from PySide2.QtCore import QRegExp
-from PySide2.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from PySide6.QtCore import QRegExp
+from PySide6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -189,7 +189,7 @@ class PythonHighlighter (QSyntaxHighlighter):
             return False
 
 if __name__ == '__main__':
-    from PySide2 import QtWidgets
+    from PySide6 import QtWidgets
 
     app = QtWidgets.QApplication([])
     editor = QtWidgets.QPlainTextEdit()

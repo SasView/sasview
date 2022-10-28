@@ -1,7 +1,7 @@
 import sys
 import os
-from PySide2 import QtCore
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui, QtWidgets
 
 # local
 from .UI.InvariantDetailsUI import Ui_Dialog

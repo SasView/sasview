@@ -1,8 +1,8 @@
 import pytest
 
-from PySide2.QtWidgets import QApplication
-from PySide2.QtTest import QTest
-from PySide2 import QtCore
+from PySide6.QtWidgets import QApplication
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.Utilities.GuiUtils import *

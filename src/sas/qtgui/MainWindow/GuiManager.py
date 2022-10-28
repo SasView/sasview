@@ -7,9 +7,9 @@ import traceback
 
 from typing import Optional, Dict
 
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import Qt, QLocale
+from PySide6.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import Qt, QLocale
 
 import matplotlib as mpl
 
@@ -415,7 +415,7 @@ class GuiManager:
         #
         # Selection on perspective choice menu
         #
-        # checking `isinstance`` fails in PySide2 with
+        # checking `isinstance`` fails in PySide6 with
         # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
         if type(new_perspective) == FittingWindow:
             self.checkAnalysisOption(self._workspace.actionFitting)

@@ -2,7 +2,7 @@
 Allows users to change the title of the current graph
 from "Graph_n" to any ASCII text.
 """
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from sas.qtgui.Plotting.UI.WindowTitleUI import Ui_WindowTitle
 

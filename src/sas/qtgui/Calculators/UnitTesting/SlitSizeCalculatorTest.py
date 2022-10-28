@@ -3,9 +3,9 @@ import logging
 
 import pytest
 
-from PySide2 import QtGui, QtWidgets
-from PySide2.QtTest import QTest
-from PySide2.QtCore import Qt
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 from unittest.mock import MagicMock
 
 

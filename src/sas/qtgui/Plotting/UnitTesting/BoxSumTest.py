@@ -1,8 +1,8 @@
 import sys
 import pytest
 
-from PySide2 import QtGui,QtWidgets
-from PySide2 import QtCore
+from PySide6 import QtGui,QtWidgets
+from PySide6 import QtCore
 
 # Local
 from sas.qtgui.Plotting.BoxSum import BoxSum

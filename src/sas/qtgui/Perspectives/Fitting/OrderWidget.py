@@ -1,7 +1,7 @@
 """
 Widget/logic for dataset ordering.
 """
-from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 

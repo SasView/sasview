@@ -3,8 +3,8 @@ import numpy as np
 from unittest.mock import MagicMock
 import pytest
 
-from PySide2 import QtGui, QtCore, QtWidgets
-from PySide2.QtTest import QTest
+from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6.QtTest import QTest, QSignalSpy
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -262,8 +262,7 @@ class ConstraintWidgetTest:
         test_tab.addConstraintToRow.assert_called_with(self.constraint1, 1)
         test_tab.changeCheckboxStatus.assert_called_with(1, True)
 
-    # disabled since PySide2 doesn't have QSignalSpy
-    def notestFitComplete(self, widget, mocker):
+    def testFitComplete(self, widget, mocker):
         ''' test the handling of fit results'''
         mocker.patch.object(widget, 'getTabsForFit', return_value=[[None], [None]])
         spy = QSignalSpy(widget.parent.communicate.statusBarUpdateSignal)
@@ -296,8 +295,7 @@ class ConstraintWidgetTest:
         assert spy[2][0] == 'Fitting completed successfully in: 1.5 ' \
                                     's.\n'
 
-    # disabled since PySide2 doesn't have QSignalSpy
-    def notestBatchFitComplete(self, widget, mocker):
+    def testBatchFitComplete(self, widget, mocker):
         ''' test the handling of batch fit results'''
         mocker.patch.object(widget, 'getTabsForFit', return_value=[[None], [None]])
         spy = QSignalSpy(widget.parent.communicate.statusBarUpdateSignal)

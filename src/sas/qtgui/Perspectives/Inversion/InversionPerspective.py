@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils

@@ -8,9 +8,9 @@ import timeit
 
 from scipy.spatial.transform import Rotation
 
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from mpl_toolkits.mplot3d.axes3d import Axes3D

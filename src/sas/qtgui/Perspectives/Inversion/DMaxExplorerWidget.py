@@ -9,9 +9,9 @@ their distribution as a function of D_max.
 # global
 import logging
 import numpy as np
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 # sas-global
 from sas.qtgui.Plotting.PlotterData import Data1D
