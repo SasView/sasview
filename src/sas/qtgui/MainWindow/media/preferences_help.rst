@@ -16,26 +16,26 @@ labelled *persistent* in this document, will be retained for the next time SasVi
 
 :ref:`Plot_Preferences`, :ref:`Display_Preferences`, :ref:`Fit_Optimizer_Preferences`
 
-.. Plot_Preferences:
+.. _Plot_Preferences:
 
 Plotting Preferences
-----------------------
+--------------------
 Plotting preferences only apply to new plots. Existing plots will retain existing settings.
 
 **Use full-width plot legends (most compatible)?**: With this option selected, plot legends will always be the full width
 of the plot it is on. The legend will also be partially transparent to better view the data. *persistent*
 
 **Use truncated legend entries?**: By selecting this option, legend labels are truncated to a single line of length
-*Legend entry line length* leaving only the begining and end of the label. The central characters will be replaced with
+*Legend entry line length* leaving only the beginning and end of the label. The central characters will be replaced with
 an ellipsis and whitespace. *persistent*
 
 **Legend entry line length**: This defines the maximum number of characters to display in a single line of a plot legend
 before wrapping to the next line. *persistent*
 
-.. Display_Preferences:
+.. _Display_Preferences:
 
 Display Preferences
-----------------------
+-------------------
 The display preferences modify underlying features of our GUI framework, Qt. For more information on each setting,
 please read more on the `Qt High DPI Settings <https://doc.qt.io/qt-5/highdpi.html#high-dpi-support-in-qt>`_.
 
@@ -46,10 +46,10 @@ SasView is required to take effect. *persistent*
 size of point-sized fonts, since point is a physical measurement unit. Multiple screens may get different scale factors.
 *persistent*
 
-.. Fit_Optimizer_Preferences:
+.. _Fit_Optimizer_Preferences:
 
 Fit Optimizer Preferences
-----------------------
+-------------------------
 
 **Default Fitting Algorithm**: The fitting optimizer that will be set when SasView starts. *persistent*
 
