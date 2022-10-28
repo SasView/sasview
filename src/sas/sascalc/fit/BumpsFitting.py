@@ -38,26 +38,19 @@ from sas.sascalc.fit.expression import compile_constraints
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
-        # Depending on the time remaining, either display the expected
-        # time of completion, or the amount of time remaining.  Use precision
-        # appropriate for the duration.
-        if remaining_time >= 1800:
-            completion_time = datetime.now() + timedelta(seconds=remaining_time)
-            if remaining_time >= 36000:
-                time = completion_time.strftime('%Y-%m-%d %H:%M')
-            else:
-                time = completion_time.strftime('%H:%M')
+        if remaining_time < 60:
+            delta_time = f"{remaining_time}s"
+        elif remaining_time < 3600:
+            delta_time = f"{remaining_time // 60}m {remaining_time % 60}s"
+        elif remaining_time < 24 * 3600:
+            delta_time = f"{remaining_time // 3600}h {remaining_time % 3600 // 60}m"
         else:
-            if remaining_time >= 3600:
-                time = '%dh %dm'%(remaining_time//3600, (remaining_time%3600)//60)
-            elif remaining_time >= 60:
-                time = '%dm %ds'%(remaining_time//60, remaining_time%60)
-            else:
-                time = '%ds'%remaining_time
-        chisq = "%.3g"%(2*history.value[0]/dof)
-        step = "%d of %d"%(history.step[0], max_step)
-        header = "=== Steps: %s  chisq: %s  ETA: %s\n"%(step, chisq, time)
-        parameters = ["%15s: %-10.3g%s"%(k,v,("\n" if i%3==2 else " | "))
+            delta_time = f"{remaining_time // (24 * 3600)}d {remaining_time % (24 * 3600) // 3600}h"
+        finish_time = (datetime.now() + timedelta(seconds=remaining_time)).strftime('%Y-%m-%d %H:%M')
+        chisq = 2*history.value[0]/dof
+        header = f"=== Steps: {history.step[0]} of {int(max_step)}  chisq: {chisq:.3g}"
+        header += f" ETA: {finish_time} ({delta_time} from now)\n"
+        parameters = [(f"{k:20s}:{v:10.3g}" + ("\n" if i%3==2 else " | "))
                       for i, (k, v) in enumerate(zip(pars, history.point[0]))]
         self.msg = "".join([header]+parameters)
 
