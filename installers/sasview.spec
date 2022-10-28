@@ -68,7 +68,10 @@ hiddenimports = [
 
 if os.name == 'nt':
     # Need win32 to run sasview from the command line.
-    hiddenimports.append('win32')
+    hiddenimports.extend([
+        'win32',
+        'win32.win32console',
+    ])
 
 a = Analysis(
     ['sasview.py'],
