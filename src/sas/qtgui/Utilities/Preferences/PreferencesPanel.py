@@ -15,13 +15,13 @@ from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
 from .PlottingPreferencesWidget import PlottingPreferencesWidget
 from .FittingOptionsWidget import FittingOptions
-from sas.qtgui.Utilities.Preferences.DisplayPreferencesWidget import DisplayPreferencesWidget
-# Pre-made option widgets
+from .DisplayPreferencesWidget import DisplayPreferencesWidget
 
-BASE_PANELS = {"Plotting Settings":PlottingPreferencesWidget,
-               "Display Settings":DisplayPreferencesWidget,
+# Pre-made option widgets
+BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
+               "Display Settings": DisplayPreferencesWidget,
                FittingOptions.name: FittingOptions,
-            }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
+               }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 
 logger = logging.getLogger(__name__)
 
@@ -109,5 +109,5 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def help(self):
         """Open the help window associated with the preferences window"""
-        tree_location = "/user/qtgui/MainWindow/preferences_help.html"
-        self.parent.showHelp(tree_location)
+        tree_location = "qtgui/MainWindow/preferences_help.html"
+        self.parent.guiManager.showHelp(tree_location)
