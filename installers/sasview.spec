@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import sys
+import os
 from pathlib import Path
 import warnings
 import platform
@@ -64,6 +65,10 @@ hiddenimports = [
     'debugpy',
     'uncertainties',
 ]
+
+if os.name == 'nt':
+    # Need win32 to run sasview from the command line.
+    hiddenimports.append('win32')
 
 a = Analysis(
     ['sasview.py'],
