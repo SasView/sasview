@@ -6,6 +6,8 @@ import numpy as np
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+import logging
+logger = logging.getLogger(__name__)
 
 from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -257,7 +259,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Use pinhole labels
         """
-        self.lblSmearUp.setText('Slit height')
+        self.lblSmearUp.setText('Slit length')
         self.lblSmearDown.setText('Slit width')
         self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
@@ -276,7 +278,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             text_unit = '%'
         elif self.smear_type == "Slit":
             text_down = '<html><head/><body><p>Slit width</p></body></html>'
-            text_up = '<html><head/><body><p>Slit height</p></body></html>'
+            text_up = '<html><head/><body><p>Slit length</p></body></html>'
             text_unit = '<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>'
         else:
             text_unit = '%'
@@ -384,16 +386,48 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Create a custom slit smear object that will change the way residuals
         are compute when fitting
         """
-        _, accuracy, d_width, d_height = self.state()
+        _, accuracy, d_width, d_length = self.state()
 
         # Check changes in slit width
         if d_width is None:
             d_width = 0.0
-        if d_height is None:
-            d_height = 0.0
+        if d_length is None:
+            d_length = 0.0
+        q_max = max(self.data.x)
+        smearing_error_flag = False
+        if d_length < d_width:
+            msg = f'Length specified which is less than width. \n' \
+                  f'This is not slit-smearing, probably you switched the two parameters? \n' \
+                  f'I am internally using the smaller parameter as the width and larger as the length. \n' \
+                  f'This is the only mathematically valid version of this.'
+            smearing_error_flag = True
+            temp = d_length
+            d_length = d_width
+            d_width = temp
+        elif d_length < 10 * d_width:
+            msg = f'Slit length specified which is less than 10 x slit width. ' \
+                  f'This is not slit-smearing (at least not in the form we implement). \n' \
+                  f'Use pinhole smearing instead.'
+            smearing_error_flag = True
+        # elif d_length < q_max:
+        #     msg = f'Length specified which is less than q_max for the data. \n' \
+        #           f'This is not covered by existing smearing model. \n' \
+        #           f'Use pinhole smearing instead. '
+        #     smearing_error_flag = True
+        # override all these errors if both values are zero (initial starting state)
+        if d_length == 0 and d_width == 0:
+            smearing_error_flag = False
+
+
+        if smearing_error_flag:
+            logging.critical(msg)
+            errorbox = QtWidgets.QMessageBox()
+            errorbox.setWindowTitle('Smearing Input Error')
+            errorbox.setText(msg)
+            errorbox.exec_()
 
         self.slit_width = d_width
-        self.slit_height = d_height
+        self.slit_length = d_length
 
         if isinstance(self.data, Data2D):
             self.current_smearer = smear_selection(self.data, self.kernel_model)
@@ -406,7 +440,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         data.dxw = None
 
         try:
-            self.dxl = d_height
+            self.dxl = d_length
             data.dxl = self.dxl * np.ones(data_len)
         except:
             self.dxl = None

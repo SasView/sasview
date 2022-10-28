@@ -3,7 +3,8 @@ import pytest
 from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.PreferencesPanel import *
+from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 
 class PreferencesPanelTest:
