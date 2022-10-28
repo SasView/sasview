@@ -34,3 +34,4 @@ importlib-resources
 bumps
 html2text
 jsonschema
+win32; platform_system == "Windows"
