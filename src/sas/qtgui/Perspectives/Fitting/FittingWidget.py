@@ -1879,7 +1879,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data going in
         data = self.logic.data
-        model = copy.deepcopy(self.kernel_module)
+        model = self.kernel_module
         qmin = self.q_range_min
         qmax = self.q_range_max
 
