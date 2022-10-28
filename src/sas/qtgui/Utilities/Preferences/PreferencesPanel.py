@@ -103,9 +103,9 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         widget.parent = self.parent
         self.stackedWidget.addWidget(widget)
         # Set display name in the listWidget with the priority of
-        #  widget.name > name passed to method > "Unknown"
-        name = widget.name if hasattr(widget, 'name') and widget.name else name
-        name = "Unknown" if not name else name
+        #  name passed to method > widget.name > "Generic Preferences"
+        name = name if name is not None else getattr(widget, 'name', None)
+        name = name if name is not None else "Generic Preferences"
         self.listWidget.addItem(name)
         # Add the widget default reset method to the global set
         if hasattr(widget, 'resetDefaults') and callable(widget.resetDefaults):
