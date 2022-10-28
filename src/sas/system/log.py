@@ -70,6 +70,6 @@ class SetupLogger(object):
         '''
         self._config_file = None
         try:
-            self._config_file = importlib.resources.open_text('sas', filename)
+            self._config_file = importlib.resources.open_text('sas.system', filename)
         except FileNotFoundError:
             print(f"ERROR: '{filename}' not found...", file=sys.stderr)

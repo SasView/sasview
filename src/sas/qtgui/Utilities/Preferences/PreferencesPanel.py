@@ -113,5 +113,5 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def help(self):
         """Open the help window associated with the preferences window"""
-        tree_location = "qtgui/MainWindow/preferences_help.html"
+        tree_location = "/user/qtgui/MainWindow/preferences_help.html"
         self.parent.guiManager.showHelp(tree_location)
