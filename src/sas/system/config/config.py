@@ -180,12 +180,12 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
-        # Auto-plot when sending data to Fitting
-        self.FITTING_PLOT_ON_SEND_DATA = True
-
         # Window scaling values
         self.QT_SCALE_FACTOR = 1.0
         self.QT_AUTO_SCREEN_SCALE_FACTOR = False
+
+        # Auto-plot when sending data to Fitting
+        self.FITTING_PLOT_ON_SEND_DATA = True
 
         # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
         # width legends.

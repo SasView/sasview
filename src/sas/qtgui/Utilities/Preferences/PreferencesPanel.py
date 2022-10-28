@@ -18,6 +18,7 @@ from .PlottingPreferencesWidget import PlottingPreferencesWidget
 
 BASE_PANELS = {"Plotting Settings":PlottingPreferencesWidget,
                "Display Settings":DisplayPreferencesWidget,
+               "Fitting Settings":FittingPreferencesWidget,
             }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 
 logger = logging.getLogger(__name__)
