@@ -28,11 +28,16 @@ class OrientationViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__()
 
-        self.graph = gl.GLViewWidget()
-        glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA)
-        glEnable(GL_BLEND)
-        glEnable(GL_COLOR_MATERIAL)
 
+        self.graph = gl.GLViewWidget()
+
+        glBegin(GL_VERTEX_ARRAY)
+
+        glEnd()
+
+        glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA)
+        glEnable(GL_COLOR_MATERIAL)
+        glEnable(GL_BLEND)
 
         #
         # self.graph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -220,6 +225,8 @@ def main():
     app = QtWidgets.QApplication([])
 
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setAttribute(Qt.AA_ShareOpenGLContexts)
+
 
     mainWindow = QtWidgets.QMainWindow()
     viewer = OrientationViewer(mainWindow)
