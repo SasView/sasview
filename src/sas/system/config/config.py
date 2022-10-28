@@ -181,6 +181,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        # Auto-plot when sending data to Fitting
+        self.FITTING_PLOT_ON_SEND_DATA = True
 
         #
         # Lock the class down, this is necessary both for
