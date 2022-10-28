@@ -64,7 +64,7 @@ jobs:
     - name: Install pyopencl (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        python -m pip install pytools mako cffi
+        python -m pip install pytools mako cffi pywin32
         choco install opencl-intel-cpu-runtime
         python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
 
