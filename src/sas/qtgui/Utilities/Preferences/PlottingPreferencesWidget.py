@@ -6,6 +6,8 @@ from .PreferencesWidget import PreferencesWidget, config_value_setter_generator
 class PlottingPreferencesWidget(PreferencesWidget):
     def __init__(self):
         super(PlottingPreferencesWidget, self).__init__("Plotting Options")
+
+    def _addAllWidgets(self):
         self.addCheckBox(title="Use full-width plot legends (most compatible)?",
                          callback=config_value_setter_generator('FITTING_PLOT_FULL_WIDTH_LEGENDS', dtype=bool),
                          checked=config.FITTING_PLOT_FULL_WIDTH_LEGENDS)
