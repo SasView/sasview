@@ -1,14 +1,14 @@
-# Description
+## Description
 
 Please include a summary of the change and which issue is fixed. List any dependencies that are required for this change.
 
 Fixes # (issue/issues)
 
-# How Has This Been Tested?
+## How Has This Been Tested?
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
 
-# Review Checklist (please remove items if they don't apply):
+## Review Checklist (please remove items if they don't apply):
 
 - [ ] Code has been reviewed
 - [ ] Functionality has been tested
