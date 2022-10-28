@@ -76,13 +76,7 @@ def run_sasview():
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    # TODO: Move to sas.cli.main if needed for scripts.
-    # sas.cli.main does not yet import sas.config so leave here until needed.
-    # Alternative: define a qt setup function that can be called from a script.
-    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
-    os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
-    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCREEN_SCALE_FACTOR else "0"
-
+    # Note: Qt environment variables are initialized in sas.system.lib.setup_qt_env
     app = QApplication([])
 
     # Main must have reference to the splash screen, so making it explicit

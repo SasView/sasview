@@ -103,6 +103,7 @@ def main(logging="production"):
     else:
         raise ValueError(f"Unknown logging mode \"{logging}\"")
     lib.setup_sasmodels()
+    lib.setup_qt_env() # Note: does not import any gui libraries
 
     if cli.version: # -V
         import sas
