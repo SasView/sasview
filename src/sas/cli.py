@@ -11,6 +11,8 @@ sasview script [args...]
     Run script with sasview libraries available
 sasview
     Start sasview gui
+
+You can also run it as "python -m sas.cli".
 """
 import sys
 
@@ -85,6 +87,4 @@ def main(logging="production"):
         run_gui()
 
 if __name__ == "__main__":
-    from multiprocessing import freeze_support
-    freeze_support()
     main()
