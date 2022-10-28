@@ -1,7 +1,8 @@
 import logging
 
-from PyQt5.QtWidgets import QDialog, QPushButton, QWidget, QListWidgetItem
-from typing import Optional, Callable, Dict, Type
+from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
+from PyQt5.QtCore import Qt
+from typing import Optional, Callable, Dict
 
 from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
@@ -63,7 +64,9 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def setMenuByName(self, name: str):
         """Set the index to be changed by the title name"""
-        self.listWidget.setCurrentItem(QListWidgetItem(name))
+        for item in self.listWidget.findItems(name, Qt.MatchContains):
+            if item.text() == name:
+                self.listWidget.setCurrentItem(item)
         self.setMenuIndex(self.listWidget.currentRow())
 
     def setMenuIndex(self, row: int):
