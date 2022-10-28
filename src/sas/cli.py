@@ -126,5 +126,7 @@ def main(logging="production"):
         # sys.argv is unchanged
         run_gui()
 
+    return 0
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

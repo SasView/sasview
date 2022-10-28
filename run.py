@@ -85,4 +85,4 @@ def prepare():
 if __name__ == "__main__":
     prepare()
     import sas.cli
-    sas.cli.main(logging="development")
+    sys.exit(sas.cli.main(logging="development"))
