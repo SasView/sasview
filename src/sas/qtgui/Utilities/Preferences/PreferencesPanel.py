@@ -2,7 +2,7 @@ import logging
 
 from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
 from PyQt5.QtCore import Qt
-from typing import Optional, Callable, Dict
+from typing import Optional, Callable, Dict, Any
 
 from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
@@ -30,10 +30,9 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     """A preferences panel to house all SasView related settings. The left side of the window is a listWidget with a
     options menus available. The right side of the window is a stackedWidget object that houses the options
     associated with each listWidget item.
-    **Important Note** When adding new preference widgets, the index for the listWidget and stackedWidget *must* match
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[Any] = None):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
         self.parent = parent
@@ -51,7 +50,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.buttonBox.clicked.connect(self.onClick)
 
     def addWidgets(self, widgets: Dict[str, Callable]):
-        """Add a list of widgets to the window"""
+        """Add a list of named widgets to the window"""
         for name, widget in widgets.items():
             if isinstance(widget, PreferencesWidget):
                 self.addWidget(widget, name)
@@ -60,17 +59,17 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
-        self.setMenuIndex(self.listWidget.currentRow())
+        self.setWidgetIndex(self.listWidget.currentRow())
 
     def setMenuByName(self, name: str):
-        """Set the index to be changed by the title name"""
+        """Set the index of the listWidget and stackedWidget, using the display name as the search term"""
         for item in self.listWidget.findItems(name, Qt.MatchContains):
             if item.text() == name:
                 self.listWidget.setCurrentItem(item)
-        self.setMenuIndex(self.listWidget.currentRow())
+        self.setWidgetIndex(self.listWidget.currentRow())
 
-    def setMenuIndex(self, row: int):
-        """Set the menu to a given index"""
+    def setWidgetIndex(self, row: int):
+        """Set the menu and options stack to a given index"""
         self.listWidget.setCurrentRow(row)
         self.stackedWidget.setCurrentIndex(row)
 
@@ -99,11 +98,16 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         super(PreferencesPanel, self).close()
 
     def addWidget(self, widget: QWidget, name: Optional[str] = None):
+        """Add a single widget to the panel"""
+        # Set the parent of the new widget to the parent of this window
         widget.parent = self.parent
         self.stackedWidget.addWidget(widget)
+        # Set display name in the listWidget with the priority of
+        #  widget.name > name passed to method > "Unknown"
         name = widget.name if hasattr(widget, 'name') and widget.name else name
         name = "Unknown" if not name else name
         self.listWidget.addItem(name)
+        # Add the widget default reset method to the global set
         if hasattr(widget, 'resetDefaults') and callable(widget.resetDefaults):
             self.restoreDefaultMethods.append(widget.resetDefaults)
 

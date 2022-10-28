@@ -17,7 +17,6 @@ from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget,
 class FittingOptions(PreferencesWidget):
     """
     Hard-coded version of the fit options dialog available from BUMPS.
-    This should be make more "dynamic".
     bumps.options.FIT_FIELDS gives mapping between parameter names, parameter strings and field type
     (double line edit, integer line edit, combo box etc.), e.g.::
 
@@ -36,7 +35,6 @@ class FittingOptions(PreferencesWidget):
 
     def __init__(self):
         super(FittingOptions, self).__init__(self.name)
-        # Listen to GUI Manager signal updating fit options
 
     def _addAllWidgets(self):
         # Add default fit algorithm widget

@@ -28,6 +28,7 @@ def set_config_value(value: Any, attr: str, dtype: Optional[Callable] = None):
         # The only way to get here **should** be during development, thus the debug log.
         logger.debug(f"Please add {attr} to the configuration and give it a sensible default value.")
 
+
 def get_config_value(attr: str, default: Optional[Any] = None) -> Any:
     """Helper method to get any config value, regardless if it exists or not
     :param attr: The configuration attribute that will be returned
@@ -61,17 +62,16 @@ def config_value_setter_generator(attr: str, dtype: Optional[Callable] = None):
 
 
 class QHLine(QFrame):
+    """::CRUFT:: This creates a horizontal line in PyQt5. PyQt6 QFrame has finer shape control"""
     def __init__(self):
         super(QHLine, self).__init__()
         self.setFrameShape(QFrame.HLine)
         self.setFrameShadow(QFrame.Sunken)
 
 
-
 class PreferencesWidget(QWidget):
-    """A helper class that bundles all values needed to add a new widget to the preferences panel
-    """
-    # Name that will be added to the PreferencesPanel listWidget
+    """A helper class that bundles all values needed to add a new widget to the preferences panel"""
+    # Default name that will be used in the PreferencesPanel listWidget
     name = None  # type: str
 
     def __init__(self, name: str, default_method: Optional[Callable] = None):
@@ -79,16 +79,18 @@ class PreferencesWidget(QWidget):
         self.parent = None
         self.name = name
         self.resetDefaults = default_method
+        # Create generic layout
         self.verticalLayout = QVBoxLayout()
         self.setLayout(self.verticalLayout)
+        # Child class generates GUI elements
         self._addAllWidgets()
+        # Push all elements to the top of the window
         self.verticalLayout.addStretch()
         self.adjustSize()
 
     def _addAllWidgets(self):
-        """
-        Psuedo-abstract class that children should override. All widgets should be added here to push all items to the
-        top of the window.
+        """A private psuedo-abstract class that children should override. All widgets should be added here to force
+        elements to the top of the window.
         """
         pass
 
@@ -151,9 +153,13 @@ class PreferencesWidget(QWidget):
         return check_box
 
     def addHorizontalLine(self):
+        """Add a horizontal line as a divider."""
         self.verticalLayout.addWidget(QHLine())
 
     def addHeaderText(self, text: str):
+        """Add a static text box to the widget, likely as a heading to separate options
+        :param text: The title of the check box to be added to the preferences panel.
+        """
         label = QLabel()
         label.setText(text)
         self.verticalLayout.addWidget(label)
