@@ -1307,7 +1307,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_error = False
         error_message = ""
         number_of_files = len(path)
-        self.communicator.progressBarUpdateSignal.emit(0.0)
+        self.communicator.progressBarUpdateSignal.emit(0)
 
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)

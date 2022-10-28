@@ -309,17 +309,17 @@ def _get_clinfo():
         cl = None
 
     if cl is None:
-        logger.warn("Unable to import the pyopencl package.  It may not "
+        logger.warning("Unable to import the pyopencl package.  It may not "
                     "have been installed.  If you wish to use OpenCL, try "
                     "running pip install --user pyopencl")
     else:
         try:
             cl_platforms = cl.get_platforms()
         except cl.LogicError as err:
-            logger.warn("Unable to fetch the OpenCL platforms.  This likely "
+            logger.warning("Unable to fetch the OpenCL platforms.  This likely "
                         "means that the opencl drivers for your system are "
                         "not installed.")
-            logger.warn(err)
+            logger.warning(err)
 
     p_index = 0
     for cl_platform in cl_platforms:

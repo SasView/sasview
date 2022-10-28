@@ -1,36 +1,34 @@
 import sys
-import unittest
 
-# set up import paths
-import sas.qtgui.path_prepare
+import pytest
 
 # Tested module
-from sas.qtgui.Perspectives.Fitting.FitPage import *
+from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 
-class FitPageTest(unittest.TestCase):
+class FitPageTest:
     '''Test the FitPage methods'''
 
-    def setUp(self):
-        self.page = FitPage()
+    @pytest.fixture(autouse=True)
+    def page(self, qapp):
+        '''Create/Destroy the AboutBox'''
+        p = FitPage()
+        yield p
 
-    def tearDown(self):
-        del self.page
-
-    def testDefaults(self):
+    def testDefaults(self, page):
         """
         Test all the global constants defined in the file.
         """
-        self.assertIsInstance(self.page.fit_options, dict)
-        self.assertIsInstance(self.page.smearing_options, dict)
-        self.assertEqual(self.page.current_category, "")
-        self.assertEqual(self.page.current_model, "")
-        self.assertEqual(self.page.current_factor, "")
-        self.assertEqual(self.page.page_id, 0)
-        self.assertFalse(self.page.data_is_loaded)
-        self.assertEqual(self.page.name, "")
-        self.assertIsNone(self.page.data)
-        self.assertIsNone(self.page.kernel_module)
-        self.assertEqual(self.page.parameters_to_fit, [])
+        assert isinstance(page.fit_options, dict)
+        assert isinstance(page.smearing_options, dict)
+        assert page.current_category == ""
+        assert page.current_model == ""
+        assert page.current_factor == ""
+        assert page.page_id == 0
+        assert not page.data_is_loaded
+        assert page.name == ""
+        assert page.data is None
+        assert page.kernel_module is None
+        assert page.parameters_to_fit == []
 
     def testSave(self):
         """
