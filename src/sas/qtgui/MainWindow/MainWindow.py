@@ -67,17 +67,24 @@ def SplashScreen():
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
+def get_highdpi_scaling():
+    return 1.0
+
 def run_sasview():
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCREEN_SCALE_FACTOR else "0"
+    
     app = QApplication([])
 
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()
     splash.show()
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     # Main application style.
     #app.setStyle('Fusion')
 
