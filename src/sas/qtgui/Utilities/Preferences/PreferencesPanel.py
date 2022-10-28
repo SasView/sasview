@@ -6,15 +6,19 @@ from typing import Optional, Callable, Dict, Type
 from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.qtgui.Utilities.Preferences.DisplayPreferencesWidget import DisplayPreferencesWidget
 
 # The PreferencesPanel object will instantiate all widgets during its instantiation.
 #  e.g:
 #  `from foo.bar import BarWidget  # BarWidget is a child of PreferencesWidget`
 #  `BASE_PANELS = {"Bar Widget Options": BarWidget}`
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
-
+from .PlottingPreferencesWidget import PlottingPreferencesWidget
 # Pre-made option widgets
-BASE_PANELS = {}  # type: Dict[str, Type[PreferencesWidget]]
+
+BASE_PANELS = {"Plotting Settings":PlottingPreferencesWidget,
+               "Display Settings":DisplayPreferencesWidget,
+            }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 
 logger = logging.getLogger(__name__)
 
@@ -93,4 +97,4 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def help(self):
         """Open the help window associated with the preferences window"""
         tree_location = "/user/qtgui/MainWindow/preferences_help.html"
-        self.parent.showHelp(tree_location)
+        self.parent.guiManager.showHelp(tree_location)

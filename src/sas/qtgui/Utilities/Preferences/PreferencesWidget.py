@@ -9,7 +9,7 @@ from sas.system import config
 logger = logging.getLogger(__name__)
 
 
-def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
+def set_config_value(value: Any, attr: str, dtype: Optional[Callable] = None):
     """Helper method to set any config value
     :param attr: The configuration attribute that will be set
     :param value: The value the attribute will be set to. This could be a str, int, bool, a class instance, or any other
@@ -20,14 +20,13 @@ def set_config_value(attr: str, value: Any, dtype: Optional[Callable] = None):
         if dtype is not None:
             value = dtype(value)
         # Another sanity check - the config system would also raise on data type mismatch, so potentially redundant
-        if type(config.attr) == type(value):
+        if type(getattr(config,attr)) == type(value):
             setattr(config, attr, value)
         else:
-            raise TypeError(f"Data type mismatch: {value} has type {type(value)}, expected {type(config.attr)}")
+            raise TypeError(f"Data type mismatch: {value} has type {type(value)}, expected {type(getattr(config,attr))}")
     else:
         # The only way to get here **should** be during development, thus the debug log.
         logger.debug(f"Please add {attr} to the configuration and give it a sensible default value.")
-
 
 def get_config_value(attr: str, default: Optional[Any] = None) -> Any:
     """Helper method to get any config value, regardless if it exists or not
@@ -57,7 +56,9 @@ def config_value_setter_generator(attr: str, dtype: Optional[Callable] = None):
     :return: a function that takes a single argument, which will be cast to dtype
             and set in config as attr
     """
+    
     return functools.partial(set_config_value, attr=attr, dtype=dtype)
+
 
 
 class PreferencesWidget(QWidget):
@@ -75,9 +76,9 @@ class PreferencesWidget(QWidget):
         self.adjustSize()
 
     def _createLayoutAndTitle(self, title: str):
-        """A private class method that creates a vertical layout to hold the title and interactive item.
+        """A private class method that creates a horizontal layout to hold the title and interactive item.
         :param title: The title of the interactive item to be added to the preferences panel.
-        :return: A QVBoxLayout instance with a title box already added
+        :return: A QHBoxLayout instance with a title box already added
         """
         layout = QHBoxLayout()
         label = QLabel(title + ": ", self)

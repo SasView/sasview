@@ -1,6 +1,4 @@
-import sys
 import webbrowser
-
 import pytest
 
 from PyQt5 import QtGui, QtWidgets
@@ -9,7 +7,6 @@ from PyQt5 import QtCore
 
 import sas.sasview
 import sas.system.version
-from sas import config
 from sas.system import web, legal
 
 # Local
