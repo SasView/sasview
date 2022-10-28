@@ -66,7 +66,7 @@ hiddenimports = [
     'uncertainties',
 ]
 
-if os.name == 'nt':
+if platform.system() == 'Windows':
     # Need win32 to run sasview from the command line.
     hiddenimports.extend([
         'win32',
