@@ -44,9 +44,10 @@ class ConfigBase:
         self._defaults: Dict[str, SchemaElement] = {}
         self._deleted_attributes: List[str] = []
         self._bad_entries: Dict[str, Any] = {}
+        self._disable_writing = False
         self._meta_attributes = ["_locked", "_schema", "_defaults",
                                  "_deleted_attributes", "_meta_attributes",
-                                 "_bad_entries"]
+                                 "_disable_writing", "_bad_entries"]
 
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
