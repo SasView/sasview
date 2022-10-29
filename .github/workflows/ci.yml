@@ -222,6 +222,10 @@ jobs:
           mkdir -p dist
           pyinstaller sasview.spec
           cd dist
+          # the following builds a symlink farm in the package; it should
+          # not be necessary, but without it, there will be lots of errors
+          # about .so not found under linux.
+          command -v ldconfig >/dev/null 2>&1 && ldconfig -n sasview
           tar zcf sasview-pyinstaller-dist.tar.gz sasview
 
       - name: Build sasview installer with INNO (Windows)
