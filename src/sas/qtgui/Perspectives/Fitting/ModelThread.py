@@ -100,6 +100,8 @@ class Calc2D(CalcThread):
         output[index_model] = value
         elapsed = time.time() - self.starttime
 
+        setattr(self.data,'isExpData',True)
+
         res = dict(image = output, data = self.data, page_id = self.page_id,
             model = self.model, state = self.state,
             toggle_mode_on = self.toggle_mode_on, elapsed = elapsed,
@@ -253,6 +255,8 @@ class Calc1D(CalcThread):
                 intermediate_results = {}
 
         elapsed = time.time() - self.starttime
+
+        setattr(self.data,'isExpData',True)
 
         res = dict(x = self.data.x[index], y = output[index],
             page_id = self.page_id, state = self.state, weight = self.weight,
