@@ -4,6 +4,7 @@ Widget for simple add / multiply editor.
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
+import numpy as np
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -11,8 +12,6 @@ from PyQt5 import QtWidgets
 import webbrowser
 
 import os
-import numpy as np
-import re
 import logging
 import traceback
 
@@ -73,6 +72,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.setupSignals()
 
         self.list_models = self.readModels()
+        self.list_standard_models = self.readModels(std_only=True)
 
         # Fill models' comboboxes
         self.setupModels()
@@ -91,8 +91,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     def setupModels(self):
         """ Add list of models to 'Model1' and 'Model2' comboboxes """
         # Load the model dict
-        self.cbModel1.addItems(self.list_models)
-        self.cbModel2.addItems(self.list_models)
+        self.cbModel1.addItems(self.list_standard_models)
+        self.cbModel2.addItems(self.list_standard_models)
 
         # set the default initial value of Model1 and Model2
         index_ini_model1 = self.cbModel1.findText('sphere', QtCore.Qt.MatchFixedString)
@@ -109,12 +109,14 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         else:
             self.cbModel2.setCurrentIndex(0)
 
-    def readModels(self):
-        """ Generate list of models """
-        models = load_standard_models()
+    def readModels(self, std_only=False):
+        """ Generate list of all models """
+        s_models = load_standard_models()
         models_dict = {}
-        for model in models:
-            if model.category is None or 'custom' in model.category:
+        for model in s_models:
+            if model.category is None:
+                continue
+            if std_only and 'custom' in model.category:
                 continue
             models_dict[model.name] = model
 
@@ -189,8 +191,11 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     def onOperatorChange(self, index):
         """ Respond to operator combo box changes """
 
-        self.lblEquation.setText("Plugin_model = scale_factor * "
-                                 "(model_1 {} model_2) + background".
+        self.lblEquation.setText('<html><head/><body><p><span style=" font-weight:600;">'
+                                 'Plugin_model = scale_factor * '
+                                 '(model_1 {} model_2) + background</span></p><p>'
+                                 '<p>To add/multiply plugin models, or combine more than two models, '
+                                 'please check Help below.<br/></p></body></html>'.
                                  format(self.cbOperator.currentText()))
 
     def onApply(self):
@@ -280,7 +285,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel2.clear()
         self.cbModel2.blockSignals(False)
         # Retrieve the list of models
-        model_list = self.readModels()
+        model_list = self.readModels(std_only=True)
         # Populate the models comboboxes
         self.cbModel1.addItems(model_list)
         self.cbModel2.addItems(model_list)

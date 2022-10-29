@@ -4,7 +4,6 @@ Allows users to change the range of the current graph
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-import sas.qtgui.path_prepare
 
 import matplotlib as mpl
 import numpy
@@ -175,7 +174,7 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
             self.updateMap()
 
         self.slider.lowValueChanged.connect(set_vmin)
-        self.slider.highValueChanged.connect(set_vmin)
+        self.slider.highValueChanged.connect(set_vmax)
 
     def updateMap(self):
         self._norm = mpl.colors.Normalize(vmin=self.vmin, vmax=self.vmax)

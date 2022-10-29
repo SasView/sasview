@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.8]
+        python-version: [3.9]
 
     steps:
 
@@ -48,7 +48,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install wheel setuptools
-        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5
+        python -m pip install numpy scipy matplotlib docutils "pytest<6" sphinx unittest-xml-reporting tinycc lxml h5py sphinx pyparsing html5lib reportlab pybind11 appdirs six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint qt5reactor periodictable PyQt5 html2text importlib_resources
 
     - name: Install pyopencl
       run: |
@@ -56,8 +56,18 @@ jobs:
 
     - name: Fetch sources for sibling projects
       run: |
+        git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
         git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+
+    - name: Build and install sasdata
+      run: |
+        cd ../sasdata
+        rm -rf build
+        rm -rf dist
+        python setup.py clean
+        python setup.py build
+        python -m pip install .
 
     - name: Build and install sasmodels
       run: |
@@ -83,7 +93,7 @@ jobs:
       run: |
         # SET SASVIEW GITHASH
         githash=$( git rev-parse HEAD )
-        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
+        sed -i.bak s/GIT_COMMIT/$githash/g src/sas/system/version.py
         # BUILD SASVIEW
         python setup.py clean
         python setup.py build

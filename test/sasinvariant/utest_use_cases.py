@@ -8,7 +8,7 @@
 
 import os.path
 import unittest
-from sas.sascalc.dataloader.loader import  Loader
+from sasdata.dataloader.loader import Loader
 from sas.sascalc.invariant import invariant
 
 

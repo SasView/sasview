@@ -1,204 +1,64 @@
-"""
-This module provides the intelligence behind the gui interface for Corfunc.
-"""
-# pylint: disable=E1101
+
+import numpy as np
+import math
 
 # global
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
-    as FigureCanvas
+from PyQt5.QtGui import QStandardItem
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from matplotlib.figure import Figure
+
 from numpy.linalg.linalg import LinAlgError
-import numpy as np
+
+
+from typing import Optional, List, Tuple
+
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
+
+from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
+from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Plotting.PlotterData import Data1D
+
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # pylint: enable=import-error, no-name-in-module
 
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .CorfuncUtils import WIDGETS as W
+from .util import WIDGETS, safe_float, TransformedData
+from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
+from ..perspective import Perspective
 
 
-class MyMplCanvas(FigureCanvas):
-    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-
-    def __init__(self, model, width=5, height=4, dpi=100):
-        self.model = model
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, self.fig)
-
-        self.data = None
-        self.extrap = None
-        self.dragging = None
-        self.draggable = False
-        self.leftdown = False
-        self.fig.canvas.mpl_connect("button_release_event", self.on_mouse_up)
-        self.fig.canvas.mpl_connect("button_press_event", self.on_mouse_down)
-        self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
-
-    def on_legend(self, qx, qy):
-        """
-        Checks if mouse coursor is on legend box
-        :return:
-        """
-        on_legend_box = False
-        bbox = self.legend.get_window_extent()
-        if qx > bbox.xmin and qx < bbox.xmax and qy > bbox.ymin  and qy < bbox.ymax:
-            on_legend_box = True
-        return  on_legend_box
-
-    def on_mouse_down(self, event):
-        if not self.draggable:
-            return
-        if event.button == 1:
-            self.leftdown = True
-        if self.on_legend(event.x, event.y):
-            return
-
-        qmin = float(self.model.item(W.W_QMIN).text())
-        qmax1 = float(self.model.item(W.W_QMAX).text())
-        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
-
-        q = event.xdata
-
-        if (np.abs(q-qmin) < np.abs(q-qmax1) and
-            np.abs(q-qmin) < np.abs(q-qmax2)):
-            self.dragging = "qmin"
-        elif (np.abs(q-qmax2) < np.abs(q-qmax1)):
-            self.dragging = "qmax2"
-        else:
-            self.dragging = "qmax1"
-
-    def on_mouse_up(self, event):
-        if not self.dragging:
-            return None
-        if event.button == 1:
-            self.leftdown = False
-        if self.on_legend(event.x, event.y):
-            return
-
-        if self.dragging == "qmin":
-            item = W.W_QMIN
-        elif self.dragging == "qmax1":
-            item = W.W_QMAX
-        else:
-            item = W.W_QCUTOFF
-
-        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
-
-        self.dragging = None
-
-    def on_motion(self, event):
-        if not self.leftdown:
-            return
-        if not self.draggable:
-            return
-        if self.dragging is None:
-            return
-
-        if self.dragging == "qmin":
-            item = W.W_QMIN
-        elif self.dragging == "qmax1":
-            item = W.W_QMAX
-        else:
-            item = W.W_QCUTOFF
-
-        self.model.setItem(item, QtGui.QStandardItem(str(GuiUtils.formatNumber(event.xdata))))
-
-
-    def draw_q_space(self):
-        """Draw the Q space data in the plot window
-
-        This draws the q space data in self.data, as well
-        as the bounds set by self.qmin, self.qmax1, and self.qmax2.
-        It will also plot the extrpolation in self.extrap, if it exists."""
-
-        self.draggable = True;
-
-        self.fig.clf()
-
-        self.axes = self.fig.add_subplot(111)
-        self.axes.set_xscale("log")
-        self.axes.set_yscale("log")
-        self.axes.set_xlabel("Q [$\AA^{-1}$]")
-        self.axes.set_ylabel("I(Q) [cm$^{-1}$]")
-        self.axes.set_title("Scattering data")
-        self.fig.tight_layout()
-
-        qmin = float(self.model.item(W.W_QMIN).text())
-        qmax1 = float(self.model.item(W.W_QMAX).text())
-        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
-
-        if self.data:
-            # self.axes.plot(self.data.x, self.data.y, label="Experimental Data")
-            self.axes.errorbar(self.data.x, self.data.y, yerr=self.data.dy, label="Experimental Data")
-            self.axes.axvline(qmin)
-            self.axes.axvline(qmax1)
-            self.axes.axvline(qmax2)
-            self.axes.set_xlim(min(self.data.x) / 2,
-                               max(self.data.x) * 1.5 - 0.5 * min(self.data.x))
-            self.axes.set_ylim(min(self.data.y) / 2,
-                               max(self.data.y) * 1.5 - 0.5 * min(self.data.y))
-
-        if self.extrap:
-            self.axes.plot(self.extrap.x, self.extrap.y, label="Extrapolation")
-
-        if self.data or self.extrap:
-            self.legend = self.axes.legend()
-
-        self.draw()
-
-    def draw_real_space(self):
-        """
-        This function draws the real space data onto the plot
-
-        The 1d correlation function in self.data, the 3d correlation function
-        in self.data3, and the interface distribution function in self.data_idf
-        are all draw in on the plot in linear cooredinates."""
-
-        self.draggable = False
-
-        self.fig.clf()
-
-        self.axes = self.fig.add_subplot(111)
-        self.axes.set_xscale("linear")
-        self.axes.set_yscale("linear")
-        self.axes.set_xlabel("Z [$\AA$]")
-        self.axes.set_ylabel("Correlation")
-        self.axes.set_title("Real Space Correlations")
-        self.fig.tight_layout()
-
-        if self.data:
-            data1, data3, data_idf = self.data
-            self.axes.plot(data1.x, data1.y, label="1D Correlation")
-            self.axes.plot(data3.x, data3.y, label="3D Correlation")
-            self.axes.set_xlim(0, max(data1.x) / 4)
-            self.legend = self.axes.legend()
-
-        self.draw()
-
-
-class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
+class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
-    name = "Corfunc"  # For displaying in the combo box
-    ext = " crf"  # File extension used for saving analysis files
 
-    trigger = QtCore.pyqtSignal(tuple)
+    name = "Corfunc"
+    ext = "crf"
+
+    @property
+    def title(self):
+        """ Window title """
+        return "Corfunc Perspective"
+
+    trigger = QtCore.pyqtSignal(TransformedData)
 
 # pylint: disable=unused-argument
     def __init__(self, parent=None):
         super(CorfuncWindow, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("Corfunc Perspective")
+        self.setWindowTitle(self.title)
 
         self.parent = parent
         self.mapper = None
@@ -208,20 +68,36 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self._calculator = CorfuncCalculator()
         self._allow_close = False
-        self._model_item = None
+        self._model_item: Optional[QStandardItem] = None
+        self.data: Optional[Data1D] = None
+        self.extrap: Optional[Data1D] = None
         self.has_data = False
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
+        self.extrapolation_curve = None
 
-        self._canvas = MyMplCanvas(self.model)
-        self.plotLayout.insertWidget(0, self._canvas)
-        self.plotLayout.insertWidget(1, NavigationToolbar2QT(self._canvas, self))
-        self._realplot = MyMplCanvas(self.model)
-        self.plotLayout.insertWidget(2, self._realplot)
-        self.plotLayout.insertWidget(3, NavigationToolbar2QT(self._realplot, self))
+        # Add slider widget
+        self.slider = CorfuncSlider()
+        self.sliderLayout.insertWidget(1, self.slider)
 
-        self.gridLayout_4.setColumnStretch(0, 1)
-        self.gridLayout_4.setColumnStretch(1, 2)
+        # Plots
+        self._q_space_plot = QSpaceCanvas(self)
+        self.qSpaceLayout.insertWidget(0, self._q_space_plot)
+        self.qSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._q_space_plot, self))
+
+        self._real_space_plot = RealSpaceCanvas(self)
+        self.realSpaceLayout.insertWidget(0, self._real_space_plot)
+        self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
+
+        self._idf_plot = IDFCanvas(self)
+        self.idfLayout.insertWidget(0, self._idf_plot)
+        self.idfLayout.insertWidget(1, NavigationToolbar2QT(self._idf_plot, self))
+
+        # Things to make the corfunc panel behave
+        self.horizontalLayout_3.setStretch(0, 0)
+        self.horizontalLayout_3.setStretch(1, 1)
+        self.scrollArea.setFixedWidth(600)
+        self.adjustSize()
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -233,6 +109,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         # Set up the mapper
         self.setup_mapper()
 
+    def set_background_warning(self, show_warning: bool = True):
+        if show_warning:
+            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+        else:
+            self.txtBackground.setStyleSheet("")
+
     def isSerializable(self):
         """
         Tell the caller that this perspective writes its state
@@ -243,63 +125,87 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         """Connect the buttons to their appropriate slots."""
         self.cmdExtrapolate.clicked.connect(self.extrapolate)
         self.cmdExtrapolate.setEnabled(False)
+
         self.cmdTransform.clicked.connect(self.transform)
         self.cmdTransform.setEnabled(False)
+
         self.cmdExtract.clicked.connect(self.extract)
         self.cmdExtract.setEnabled(False)
+
         self.cmdSave.clicked.connect(self.on_save)
         self.cmdSave.setEnabled(False)
 
+        self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
+        self.cmdSaveExtrapolation.setEnabled(False)
+
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
+
         self.cmdHelp.clicked.connect(self.showHelp)
 
         self.model.itemChanged.connect(self.model_changed)
 
+        self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
+        self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
+        self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.set_text_enable(False)
+
+        self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
+        self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
+
         self.trigger.connect(self.finish_transform)
+        self.txtBackground.textChanged.connect(self.on_background_text_changed)
+
+    def set_text_enable(self, state: bool):
+        self.txtLowerQMax.setEnabled(state)
+        self.txtUpperQMin.setEnabled(state)
+        self.txtUpperQMax.setEnabled(state)
 
     def setup_model(self):
         """Populate the model with default data."""
         # filename
         item = QtGui.QStandardItem(self._path)
-        self.model.setItem(W.W_FILENAME, item)
+        self.model.setItem(WIDGETS.W_FILENAME, item)
 
-        self.model.setItem(W.W_QMIN,
+        self.model.setItem(WIDGETS.W_QMIN,
                            QtGui.QStandardItem("0.01"))
-        self.model.setItem(W.W_QMAX,
+        self.model.setItem(WIDGETS.W_QMAX,
                            QtGui.QStandardItem("0.20"))
-        self.model.setItem(W.W_QCUTOFF,
+        self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem("0.22"))
-        self.model.setItem(W.W_BACKGROUND,
+        self.model.setItem(WIDGETS.W_BACKGROUND,
                            QtGui.QStandardItem("0"))
         #self.model.setItem(W.W_TRANSFORM,
         #                   QtGui.QStandardItem("Fourier"))
-        self.model.setItem(W.W_GUINIERA,
+        self.model.setItem(WIDGETS.W_GUINIERA,
                            QtGui.QStandardItem("0.0"))
-        self.model.setItem(W.W_GUINIERB,
+        self.model.setItem(WIDGETS.W_GUINIERB,
                            QtGui.QStandardItem("0.0"))
-        self.model.setItem(W.W_PORODK,
+        self.model.setItem(WIDGETS.W_PORODK,
                            QtGui.QStandardItem("0.0"))
-        self.model.setItem(W.W_PORODSIGMA,
+        self.model.setItem(WIDGETS.W_PORODSIGMA,
                            QtGui.QStandardItem("0.0"))
-        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(str(0)))
-        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(str(0)))
-        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
-        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(str(0)))
-        self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(0)))
-        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(str(0)))
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the Invariant Persepective"""
         if not data_list or self._model_item not in data_list:
             return
         # Clear data plots
-        self._canvas.data = None
-        self._canvas.extrap = None
-        self._canvas.draw_q_space()
-        self._realplot.data = None
-        self._realplot.extrap = None
-        self._realplot.draw_real_space()
+        self._q_space_plot.data = None
+        self._q_space_plot.extrap = None
+
+        self._real_space_plot.data = None
+        self._idf_plot.data = None
+
+        self.slider.setEnabled(False)
         # Clear calculator, model, and data path
         self._calculator = CorfuncCalculator()
         self._model_item = None
@@ -307,53 +213,57 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._path = ""
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
+        self.set_text_enable(False)
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
         if not self.mapper:
             return
         self.mapper.toFirst()
-        self._canvas.draw_q_space()
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self._q_space_plot.draw_data()
 
     def _update_calculator(self):
-        self._calculator.lowerq = float(self.model.item(W.W_QMIN).text())
-        qmax1 = float(self.model.item(W.W_QMAX).text())
-        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
-        self._calculator.upperq = (qmax1, qmax2)
+        self._calculator.extrapolation_parameters = self.extrapolation_parmameters
+
         self._calculator.background = \
-            float(self.model.item(W.W_BACKGROUND).text())
+            float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
     def extrapolate(self):
         """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
         self.model.itemChanged.disconnect(self.model_changed)
         try:
-            params, extrapolation, _ = self._calculator.compute_extrapolation()
+            params, extrapolation, self.extrapolation_curve = self._calculator.compute_extrapolation()
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
                       "cutoff Q, or increasing the lower Q."
             QtWidgets.QMessageBox.warning(self, "Calculation Error",
                                       message)
-            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
-            self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
-            self._canvas.extrap = None
+            self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem(""))
+            self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(""))
+            self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(""))
+            self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(""))
+            self._q_space_plot.extrap = None
             self.model_changed(None)
             return
         finally:
             self.model.itemChanged.connect(self.model_changed)
 
-        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
-        self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
-        self.model.setItem(W.W_PORODSIGMA,
-                            QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
+        self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
+        self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
+        self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
+        self.model.setItem(WIDGETS.W_PORODSIGMA,
+                           QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
 
-        self._canvas.extrap = extrapolation
+        self.extrap = extrapolation
+        self._q_space_plot.extrap = extrapolation
         self.model_changed(None)
         self.cmdTransform.setEnabled(True)
+        self.cmdSaveExtrapolation.setEnabled(True)
+
+        self.tabWidget.setCurrentIndex(0)
 
 
     def transform(self):
@@ -362,69 +272,62 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         method = "fourier"
 
-        extrap = self._canvas.extrap
-        background = float(self.model.item(W.W_BACKGROUND).text())
+        extrap = self.extrap
+        background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
         def updatefn(msg):
             """Report progress of transformation."""
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-        def completefn(transforms):
+        def completefn(transformed_data: Tuple[Data1D, Data1D, Data1D]):
             """Extract the values from the transforms and plot"""
-            self.trigger.emit(transforms)
+            self.trigger.emit(TransformedData(*transformed_data)) # TODO: Make this return more structured data earlier
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, background,
                                            completefn, updatefn)
 
 
-    def finish_transform(self, transforms):
-        self._realplot.data = transforms
 
-        self.update_real_space_plot(transforms)
 
-        self._realplot.draw_real_space()
+    def finish_transform(self, data: TransformedData):
+
+        self.transformed_data = data
+
+        self._real_space_plot.data = data.gamma_1, data.gamma_3
+
+        # self.update_real_space_plot(transforms)
+
+        self._idf_plot.data = data.idf
+
         self.cmdExtract.setEnabled(True)
         self.cmdSave.setEnabled(True)
 
+        self.tabWidget.setCurrentIndex(1)
+
     def extract(self):
-        transforms = self._realplot.data
 
-        params = self._calculator.extract_parameters(transforms[0])
+        if self.transformed_data is None:
+            return
 
-        self.model.itemChanged.disconnect(self.model_changed)
-        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
-        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
-        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
-        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
-        self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
-        self.model.itemChanged.connect(self.model_changed)
-        self.model_changed(None)
+        params = self._calculator.extract_parameters(self.transformed_data[0])
 
+        if params is not None:
 
-    def update_real_space_plot(self, datas):
-        """take the datas tuple and create a plot in DE"""
+            self.model.itemChanged.disconnect(self.model_changed)
 
-        assert isinstance(datas, tuple)
-        plot_id = id(self)
-        titles = [f"1D Correlation [{self._path}]", f"3D Correlation [{self._path}]",
-                  'Interface Distribution Function']
-        for i, plot in enumerate(datas):
-            plot_to_add = self.parent.createGuiData(plot)
-            # set plot properties
-            title = plot_to_add.title
-            plot_to_add.scale = 'linear'
-            plot_to_add.symbol = 'Line'
-            plot_to_add._xaxis = "x"
-            plot_to_add._xunit = "A"
-            plot_to_add._yaxis = "\Gamma"
-            if i < len(titles):
-                title = titles[i]
-                plot_to_add.name = titles[i]
-            GuiUtils.updateModelItemWithPlot(self._model_item, plot_to_add, title)
-            #self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
-        pass
+            self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params.core_thickness)))
+            self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params.interface_thickness)))
+            self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params.hard_block_thickness)))
+            self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params.soft_block_thickness)))
+            self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params.local_crystallinity)))
+            self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_ryan)))
+            self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_stribeck)))
+            self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params.long_period)))
+
+            self.model.itemChanged.connect(self.model_changed)
+            self.model_changed(None)
+
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
@@ -432,25 +335,27 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
 
-        self.mapper.addMapping(self.txtLowerQMax, W.W_QMIN)
-        self.mapper.addMapping(self.txtUpperQMin, W.W_QMAX)
-        self.mapper.addMapping(self.txtUpperQMax, W.W_QCUTOFF)
-        self.mapper.addMapping(self.txtBackground, W.W_BACKGROUND)
+        self.mapper.addMapping(self.txtLowerQMax, WIDGETS.W_QMIN)
+        self.mapper.addMapping(self.txtUpperQMin, WIDGETS.W_QMAX)
+        self.mapper.addMapping(self.txtUpperQMax, WIDGETS.W_QCUTOFF)
+        self.mapper.addMapping(self.txtBackground, WIDGETS.W_BACKGROUND)
         #self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
 
-        self.mapper.addMapping(self.txtGuinierA, W.W_GUINIERA)
-        self.mapper.addMapping(self.txtGuinierB, W.W_GUINIERB)
-        self.mapper.addMapping(self.txtPorodK, W.W_PORODK)
-        self.mapper.addMapping(self.txtPorodSigma, W.W_PORODSIGMA)
+        self.mapper.addMapping(self.txtGuinierA, WIDGETS.W_GUINIERA)
+        self.mapper.addMapping(self.txtGuinierB, WIDGETS.W_GUINIERB)
+        self.mapper.addMapping(self.txtPorodK, WIDGETS.W_PORODK)
+        self.mapper.addMapping(self.txtPorodSigma, WIDGETS.W_PORODSIGMA)
 
-        self.mapper.addMapping(self.txtAvgCoreThick, W.W_CORETHICK)
-        self.mapper.addMapping(self.txtAvgIntThick, W.W_INTTHICK)
-        self.mapper.addMapping(self.txtAvgHardBlock, W.W_HARDBLOCK)
-        self.mapper.addMapping(self.txtPolydisp, W.W_POLY)
-        self.mapper.addMapping(self.txtLongPeriod, W.W_PERIOD)
-        self.mapper.addMapping(self.txtLocalCrystal, W.W_CRYSTAL)
+        self.mapper.addMapping(self.txtAvgCoreThick, WIDGETS.W_CORETHICK)
+        self.mapper.addMapping(self.txtAvgIntThick, WIDGETS.W_INTTHICK)
+        self.mapper.addMapping(self.txtAvgHardBlock, WIDGETS.W_HARDBLOCK)
+        self.mapper.addMapping(self.txtAvgSoftBlock, WIDGETS.W_SOFTBLOCK)
+        self.mapper.addMapping(self.txtPolyRyan, WIDGETS.W_POLY_RYAN)
+        self.mapper.addMapping(self.txtPolyStribeck, WIDGETS.W_POLY_STRIBECK)
+        self.mapper.addMapping(self.txtLongPeriod, WIDGETS.W_PERIOD)
+        self.mapper.addMapping(self.txtLocalCrystal, WIDGETS.W_CRYSTAL)
 
-        self.mapper.addMapping(self.txtFilename, W.W_FILENAME)
+        self.mapper.addMapping(self.txtFilename, WIDGETS.W_FILENAME)
 
         self.mapper.toFirst()
 
@@ -460,7 +365,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         try:
             background = self._calculator.compute_background()
             temp = QtGui.QStandardItem("{:.4g}".format(background))
-            self.model.setItem(W.W_BACKGROUND, temp)
+            self.model.setItem(WIDGETS.W_BACKGROUND, temp)
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q or increasing the cutoff Q"
@@ -477,32 +382,36 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         treeLocation = "/user/qtgui/Perspectives/Corfunc/corfunc_help.html"
         self.parent.showHelp(treeLocation)
 
-    @staticmethod
-    def allowBatch():
+    def allowBatch(self):
         """
         We cannot perform corfunc analysis in batch at this time.
         """
         return False
 
-    @staticmethod
-    def allowSwap():
+    def allowSwap(self):
         """
         We cannot swap data with corfunc analysis at this time.
         """
         return False
 
-    def setData(self, data_item, is_batch=False):
+    @property
+    def extrapolation_parmameters(self) -> Optional[ExtrapolationParameters]:
+        if self.data is not None:
+            return ExtrapolationParameters(
+                min(self.data.x),
+                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()),
+                max(self.data.x))
+        else:
+            return None
+
+    def setData(self, data_item: List[QStandardItem], is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
         """
-        if not isinstance(data_item, list):
-            msg = "Incorrect type passed to the Corfunc Perpsective"
-            raise AttributeError(msg)
 
-        if not isinstance(data_item[0], QtGui.QStandardItem):
-            msg = "Incorrect type passed to the Corfunc Perspective"
-            raise AttributeError(msg)
 
         if self.has_data:
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
@@ -515,33 +424,64 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
+        self.data = data
         self._model_item = model_item
         self._calculator.set_data(data)
         self.cmdCalculateBg.setEnabled(True)
         self.cmdExtrapolate.setEnabled(True)
 
         self.model.itemChanged.disconnect(self.model_changed)
-        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
-        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
+
+        self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
+
+        self._q_space_plot.data = data
+        self._q_space_plot.extrap = None
+
+        # Put the slider in sensible places
+        log_data_min = math.log(min(self.data.x))
+        log_data_max = math.log(max(self.data.x))
+
+        def fractional_position(f):
+            return math.exp(f*log_data_max + (1-f)*log_data_min)
+
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
+        self.model.setItem(WIDGETS.W_QCUTOFF,
+                           QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
+
+
+        # Reconnect model
         self.model.itemChanged.connect(self.model_changed)
 
-        self._canvas.data = data
-        self._canvas.extrap = None
+        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self.slider.setEnabled(True)
+
         self.model_changed(None)
         self.cmdTransform.setEnabled(False)
         self._path = data.name
-        self.model.setItem(W.W_FILENAME, QtGui.QStandardItem(self._path))
-        self._realplot.data = None
-        self._realplot.draw_real_space()
+        self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
+
+        self._real_space_plot.data = None
+        self._idf_plot.data = None
+
+        self.set_text_enable(True)
         self.has_data = True
+
+        self.tabWidget.setCurrentIndex(0)
+
 
     def setClosable(self, value=True):
         """
@@ -567,12 +507,91 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
-    def title(self):
-        """
-        Window title function used by certain error messages.
-        Check DataExplorer.py, line 355
-        """
-        return "Corfunc Perspective"
+    def on_extrapolation_text_changed_1(self, text):
+        """ Text in LowerQMax changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
+        params = self.extrapolation_parmameters._replace(point_1=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
+
+    def on_extrapolation_text_changed_2(self, text):
+        """ Text in UpperQMin changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
+        params = self.extrapolation_parmameters._replace(point_2=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
+
+    def on_extrapolation_text_changed_3(self, text):
+        """ Text in UpperQMax changed"""
+
+        #
+        # Note: We need to update based on params below, not a call to self.extrapolation_parameters,
+        #       because that value wont be updated until after the QLineEdit.textEdited signals are
+        #       processed
+        #
+
+        params = self.extrapolation_parmameters._replace(point_3=safe_float(text))
+        self.slider.extrapolation_parameters = params
+        self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
+        self.notify_extrapolation_text_box_validity(params)
+
+    def notify_extrapolation_text_box_validity(self, params):
+        """ Set the colour of the text boxes to red if they have bad parameter definitions"""
+        box_1_style = ""
+        box_2_style = ""
+        box_3_style = ""
+        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
+
+        if params.point_1 <= params.data_q_min:
+            box_1_style = red
+
+        if params.point_2 <= params.point_1:
+            box_1_style = red
+            box_2_style = red
+
+        if params.point_3 <= params.point_2:
+            box_2_style = red
+            box_3_style = red
+
+        if params.data_q_max <= params.point_3:
+            box_3_style = red
+
+        # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
+        if params.point_3 <= params.point_1:
+            box_1_style = red
+            box_3_style = red
+
+        self.txtLowerQMax.setStyleSheet(box_1_style)
+        self.txtUpperQMin.setStyleSheet(box_2_style)
+        self.txtUpperQMax.setStyleSheet(box_3_style)
+
+    def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
+        """ Slider state changed"""
+        format_string = "%.8g"
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem(format_string%state.point_1))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem(format_string%state.point_2))
+        self.model.setItem(WIDGETS.W_QCUTOFF,
+                           QtGui.QStandardItem(format_string%state.point_3))
+
+    def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
+        """ Slider is being moved about"""
+        self._q_space_plot.update_lines(state)
 
     def on_save(self):
         """
@@ -580,20 +599,57 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         """
         f_name = QtWidgets.QFileDialog.getSaveFileName(
             caption="Save As",
-            filter="Corfunc Text Output (*.crf)",
+            filter="Comma Separated Values (*.csv)",
             parent=None)[0]
         if not f_name:
             return
         if "." not in f_name:
-            f_name += ".crf"
+            f_name += ".csv"
 
-        data1, data3, data_idf = self._realplot.data
 
         with open(f_name, "w") as outfile:
-            outfile.write("X 1D 3D IDF\n")
+            outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
-                       np.vstack([(data1.x, data1.y, data3.y, data_idf.y)]).T)
+                       np.vstack([(
+                           self.transformed_data.gamma_1.x,
+                           self.transformed_data.gamma_1.y,
+                           self.transformed_data.gamma_3.y,
+                           self.transformed_data.idf.y)]).T,
+                       delimiter=",")
     # pylint: enable=invalid-name
+
+    def on_save_extrapolation(self):
+        q = self.data.x
+        if self.extrapolation_curve is not None:
+            window = SaveExtrapolatedPopup(q, self.extrapolation_curve)
+            window.exec_()
+        else:
+            raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
+
+    def on_background_text_changed(self, data):
+        """ Background value number changed"""
+        # If data has a "bad" value we want to indicate this
+        # The only good values can be interpreted as non-negative floats
+
+        is_bad = True
+
+        try:
+            value = float(data)
+            if self.data is not None:
+                min = np.min(self.data.y)
+                if value <= min:
+                    is_bad = False
+                else:
+                    logging.warning(f"Background value results in negative intensities ({value} > {min})")
+            else:
+                is_bad = False
+
+        except ValueError:
+            pass
+
+        self.set_background_warning(is_bad)
+
+
 
     def serializeAll(self):
         """
@@ -642,8 +698,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             'avg_core_thick': self.txtAvgCoreThick.text(),
             'avg_inter_thick': self.txtAvgIntThick.text(),
             'avg_hard_block_thick': self.txtAvgHardBlock.text(),
+            'avg_soft_block_thick': self.txtAvgSoftBlock.text(),
             'local_crystalinity': self.txtLocalCrystal.text(),
-            'polydispersity': self.txtPolydisp.text(),
+            'polydispersity': self.txtPolyRyan.text(),
+            'polydispersity_stribeck': self.txtPolyStribeck.text(),
             'long_period': self.txtLongPeriod.text(),
             'lower_q_max': self.txtLowerQMax.text(),
             'upper_q_min': self.txtUpperQMin.text(),
@@ -664,34 +722,38 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             raise TypeError(f"{msg}: {c_name} received")
         # Assign values to 'Invariant' tab inputs - use defaults if not found
         self.model.setItem(
-            W.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
+            WIDGETS.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
         self.model.setItem(
-            W.W_GUINIERB, QtGui.QStandardItem(params.get('guinier_b', '0.0')))
+            WIDGETS.W_GUINIERB, QtGui.QStandardItem(params.get('guinier_b', '0.0')))
         self.model.setItem(
-            W.W_PORODK, QtGui.QStandardItem(params.get('porod_k', '0.0')))
-        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(
+            WIDGETS.W_PORODK, QtGui.QStandardItem(params.get('porod_k', '0.0')))
+        self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(
             params.get('porod_sigma', '0.0')))
-        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(
+        self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(
             params.get('avg_core_thick', '0')))
-        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(
+        self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(
             params.get('avg_inter_thick', '0')))
-        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(
+        self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(
             params.get('avg_hard_block_thick', '0')))
-        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(
+        self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(
+            params.get('avg_soft_block_thick', '0')))
+        self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(
             params.get('local_crystalinity', '0')))
         self.model.setItem(
-            W.W_POLY, QtGui.QStandardItem(params.get('polydispersity', '0')))
+            WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(params.get('polydispersity', '0')))
         self.model.setItem(
-            W.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
+            WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(params.get('polydispersity_stribeck', '0')))
         self.model.setItem(
-            W.W_FILENAME, QtGui.QStandardItem(params.get('data_name', '')))
+            WIDGETS.W_PERIOD, QtGui.QStandardItem(params.get('long_period', '0')))
         self.model.setItem(
-            W.W_QMIN, QtGui.QStandardItem(params.get('lower_q_max', '0.01')))
+            WIDGETS.W_FILENAME, QtGui.QStandardItem(params.get('data_name', '')))
         self.model.setItem(
-            W.W_QMAX, QtGui.QStandardItem(params.get('upper_q_min', '0.20')))
+            WIDGETS.W_QMIN, QtGui.QStandardItem(params.get('lower_q_max', '0.01')))
         self.model.setItem(
-            W.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
-        self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(
+            WIDGETS.W_QMAX, QtGui.QStandardItem(params.get('upper_q_min', '0.20')))
+        self.model.setItem(
+            WIDGETS.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
+        self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(
             params.get('background', '0')))
         self.cmdCalculateBg.setEnabled(params.get('background', '0') != '0')
         self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
@@ -702,3 +764,44 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             self.extrapolate()
         if params.get('long_period', '0') != '0':
             self.transform()
+
+    @property
+    def real_space_figure(self):
+        return self._real_space_plot.fig
+
+    @property
+    def q_space_figure(self):
+        return self._q_space_plot.fig
+
+    @property
+    def idf_figure(self):
+        return self._idf_plot.fig
+
+    @property
+    def supports_reports(self) -> bool:
+        return True
+
+    def getReport(self) -> Optional[ReportData]:
+        if not self.has_data:
+            return None
+
+        report = ReportBase("Correlation Function")
+        report.add_data_details(self.data)
+
+        # Format keys
+        parameters = self.getState()
+        fancy_parameters = {}
+
+        for key in parameters:
+            nice_key = " ".join([s.capitalize() for s in key.split("_")])
+            if parameters[key].strip() == '':
+                fancy_parameters[nice_key] = '-'
+            else:
+                fancy_parameters[nice_key] = parameters[key]
+
+        report.add_table_dict(fancy_parameters, ("Parameter", "Value"))
+        report.add_plot(self.q_space_figure)
+        report.add_plot(self.real_space_figure)
+        report.add_plot(self.idf_figure)
+
+        return report.report_data

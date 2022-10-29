@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from collections import defaultdict
+from typing import Any, Tuple
 
 import copy
 import logging
@@ -20,12 +21,11 @@ from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
+from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.sascalc.fit.pagestate import PageState
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -65,11 +65,10 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
 from sasmodels.sasview_model import SasviewModel
 if not hasattr(SasviewModel, 'get_weights'):
-    def get_weights(self, name):
+    def get_weights(self: Any, name: str) -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
         """
-        # type: (str) -> Tuple(np.ndarray, np.ndarray)
         _, x, w = self._get_weights(self._model_info.parameters[name])
         return x, w
 
@@ -109,6 +108,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
     Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
     Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
+    keyPressedSignal = QtCore.pyqtSignal(QtCore.QEvent)
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
@@ -599,6 +599,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._poly_model.dataChanged.connect(self.onPolyModelChange)
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.lstParams.installEventFilter(self)
+        self.lstPoly.installEventFilter(self)
+        self.lstMagnetic.installEventFilter(self)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -618,6 +621,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
         self.communicate.updateMaskedDataSignal.connect(self.onMaskedData)
+
+        # Catch all key press events
+        self.keyPressedSignal.connect(self.onKey)
+
+    def keyPressEvent(self, event):
+        super(FittingWidget, self).keyPressEvent(event)
+        self.keyPressedSignal.emit(event)
+
+    def eventFilter(self, obj, event):
+        # Catch enter key presses when editing model params
+        if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
+            if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+                self.onKey(event)
+                return True
+        return False
 
     def modelName(self):
         """
@@ -1232,6 +1250,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.cbModel.setCurrentIndex(self._previous_model_index)
                 self.cbModel.blockSignals(False)
             return
+        if self.model_data is not None:
+            # Store any old parameters before switching to a new model
+            self.page_parameters = self.getParameterDict()
 
         # Assure the control is active
         if not self.cbModel.isEnabled():
@@ -1279,7 +1300,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb = QtWidgets.QApplication.clipboard()
         cb_text = cb.text()
         # get the screenshot of the current param state
-        self.onCopyToClipboard("")
+        self.clipboard_copy()
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1288,7 +1309,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.respondToModelStructure(model=model, structure_factor=structure)
         # recast the original parameters into the model
-        self.onParameterPaste()
+        self.clipboard_paste()
         # revert to the original clipboard
         cb.setText(cb_text)
 
@@ -1314,9 +1335,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
 
         current_text = self.cbModel.currentText()
-        self.cbModel.blockSignals(True)
         self.cbModel.clear()
-        self.cbModel.blockSignals(False)
         self.enableModelCombo()
         self.disableStructureCombo()
         # Retrieve the list of models
@@ -1381,7 +1400,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Update the chart
         if self.data_is_loaded:
-            self.cmdPlot.setText("Show Plot")
+            self.cmdPlot.setText("Compute/Plot")
             self.calculateQGridForModel()
         else:
             self.cmdPlot.setText("Calculate")
@@ -1437,6 +1456,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.model_parameters = None
             self._model_model.clear()
             return
+
+        if self.model_data is not None:
+            # Store any old parameters before switching to a new category
+            self.page_parameters = self.getParameterDict()
         # Wipe out the parameter model
         self._model_model.clear()
         # Safely clear and enable the model combo
@@ -1452,7 +1475,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.blockSignals(True)
         self.cbModel.addItem(MODEL_DEFAULT)
-        self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+        self.cbModel.addItems(sorted([model for (model, _) in model_list if model != 'rpa']))
         self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):
@@ -1574,9 +1597,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.kernel_module.details[parameter_name][pos] = value
         else:
             self.magnet_params[parameter_name] = value
-            #self.kernel_module.setParam(parameter_name) = value
-            # Force the chart update when actual parameters changed
-            self.recalculatePlotData()
 
         # Update state stack
         self.updateUndo()
@@ -1643,7 +1663,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         batch_inputs = {}
         batch_outputs = {}
         #---------------------------------
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             handler = None
             updater = None
         else:
@@ -1667,15 +1687,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         completefn = self.batchFittingCompleted if self.is_batch_fitting else self.fittingCompleted
 
         self.calc_fit = FitThread(handler=handler,
-                            fn=fitters,
-                            batch_inputs=batch_inputs,
-                            batch_outputs=batch_outputs,
-                            page_id=[[self.page_id]],
-                            updatefn=updater,
-                            completefn=completefn,
-                            reset_flag=self.is_chain_fitting)
+                                  fn=fitters,
+                                  batch_inputs=batch_inputs,
+                                  batch_outputs=batch_outputs,
+                                  page_id=[[self.page_id]],
+                                  updatefn=updater,
+                                  completefn=completefn,
+                                  reset_flag=self.is_chain_fitting)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # start the trhrhread with twisted
             calc_thread = threads.deferToThread(self.calc_fit.compute)
             calc_thread.addCallback(completefn)
@@ -1849,7 +1869,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-    def prepareFitters(self, fitter=None, fit_id=0):
+
+    def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
         """
         Prepare the Fitter object for use in fitting
         """
@@ -1858,7 +1879,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data going in
         data = self.logic.data
-        model = copy.deepcopy(self.kernel_module)
+        model = self.kernel_module
         qmin = self.q_range_min
         qmax = self.q_range_max
 
@@ -1900,6 +1921,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitter_single.set_data(data=weighted_data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
             fitter_single.select_problem_for_fit(id=fit_id, value=1)
+            fitter_single.set_weight_increase(fit_id, weight_increase)
             if fitter is None:
                 # Assign id to the new fitter only
                 fitter_single.fitter_id = [self.page_id]
@@ -2149,7 +2171,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current set of data
         """
         # Regardless of previous state, this should now be `plot show` functionality only
-        self.cmdPlot.setText("Show Plot")
+        self.cmdPlot.setText("Compute/Plot")
         # Force data recalculation so existing charts are updated
         if not self.data_is_loaded:
             self.showTheoryPlot()
@@ -2159,7 +2181,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # This allows charts to be properly updated in order
         # of plots being applied.
         QtWidgets.QApplication.processEvents()
-        self.recalculatePlotData() # recalc+plot theory again (2nd)
+        self.recalculatePlotData()  # recalc+plot theory again (2nd)
 
     def onSmearingOptionsUpdate(self):
         """
@@ -2169,6 +2191,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
         self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
+
+    def onKey(self, event):
+        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
+            self.onPlot()
 
     def recalculatePlotData(self):
         """
@@ -2227,7 +2253,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
-        self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
@@ -2292,6 +2317,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             plugin_list.append([name, True])
         if plugin_list:
             self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
+        # Adding plugins classified as structure factor to 'CATEGORY_STRUCTURE' list
+        if CATEGORY_STRUCTURE in self.master_category_dict:
+            plugin_structure_list = [
+                [name, True] for name, plug in self.custom_models.items()
+                if plug.is_structure_factor
+                and [name, True] not in self.master_category_dict[CATEGORY_STRUCTURE]
+            ]
+            if plugin_structure_list:
+                self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
 
     def regenerateModelDict(self):
         """
@@ -2332,7 +2366,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Adds weighting contribution to fitting data
         """
         if not self.data_is_loaded:
-            # no weighing for theories (dy = 0)
+            # no weighting for theories (dy = 0)
             return data
         new_data = copy.deepcopy(data)
         # Send original data for weighting
@@ -2639,10 +2673,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # necessary
         self.processEffectiveRadius()
 
-        # Force the chart update when actual parameters changed
-        if model_column == 1:
-            self.recalculatePlotData()
-
         # Update state stack
         self.updateUndo()
         self.page_parameters = self.getParameterDict()
@@ -2869,7 +2899,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                exception_handler=self.calcException,
                                                source=None)
         if use_threads:
-            if LocalConfig.USING_TWISTED:
+            if config.USING_TWISTED:
                 # start the thread with twisted
                 thread = threads.deferToThread(calc_thread.compute)
                 thread.addCallback(completefn)
@@ -2943,10 +2973,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data.show_q_range_sliders = True
         # Suppress the GUI update until the move is finished to limit model calculations
         fitted_data.slider_update_on_move = False
-        fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
-        fitted_data.slider_high_q_setter = self.options_widget.updateMaxQ
-        fitted_data.slider_low_q_input = self.options_widget.txtMinRange
-        fitted_data.slider_low_q_setter = self.options_widget.updateMinQ
+        fitted_data.slider_tab_name = self.modelName()
+        fitted_data.slider_perspective_name = 'Fitting'
+        fitted_data.slider_high_q_input = ['options_widget', 'txtMaxRange']
+        fitted_data.slider_high_q_setter = ['options_widget', 'updateMaxQ']
+        fitted_data.slider_low_q_input = ['options_widget', 'txtMinRange']
+        fitted_data.slider_low_q_setter = ['options_widget', 'updateMinQ']
 
         self.model_data = fitted_data
         new_plots = [fitted_data]
@@ -3035,7 +3067,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         # ensure the model does not recompute when updating the value
         self._model_model.blockSignals(True)
-        self._model_model.item(ER_row, 1).setText(str(ER_value))
+        self._model_model.item(ER_row, 1).setText(GuiUtils.formatNumber(ER_value, high=True))
         self._model_model.blockSignals(False)
         # ensure the view is updated immediately
         self._model_model.layoutChanged.emit()
@@ -3609,7 +3641,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def enableInteractiveElements(self):
         """
-        Set buttion caption on fitting/calculate finish
+        Set button caption on fitting/calculate finish
         Enable the param table(s)
         """
         # Notify the user that fitting is available
@@ -3620,7 +3652,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableInteractiveElements(self):
         """
-        Set buttion caption on fitting/calculate start
+        Set button caption on fitting/calculate start
         Disable the param table(s)
         """
         # Notify the user that fitting is being run
@@ -3631,7 +3663,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableInteractiveElementsOnCalculate(self):
         """
-        Set buttion caption on fitting/calculate start
+        Set button caption on fitting/calculate start
         Disable the param table(s)
         """
         # Notify the user that fitting is being run
@@ -3831,7 +3863,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Gather current fitting parameters as dict
         """
-        param_list = self.getFitParameters()
+
         param_list = self.getFitPage()
         param_list += self.getFitModel()
 
@@ -3845,59 +3877,95 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 line_dict[content[0]] = content[1:]
         return line_dict
 
-    def onCopyToClipboard(self, format=None):
+    def clipboard_copy(self):
+        copy_data = self.full_copy_data()
+        self.set_clipboard(copy_data)
+
+    def clipboard_paste(self):
         """
-        Copy current fitting parameters into the clipboard
-        using requested formatting:
-        plain, excel, latex
+        Use the clipboard to update fit state
         """
+        # Check if the clipboard contains right stuff
+        cb = QtWidgets.QApplication.clipboard()
+        cb_text = cb.text()
+
+        lines = cb_text.split(':')
+        if lines[0] != 'sasview_parameter_values':
+            msg = "Clipboard content is incompatible with the Fit Page."
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Clipboard")
+            msgbox.exec_()
+            return
+
+        # put the text into dictionary
+        line_dict = {}
+        for line in lines[1:]:
+            content = line.split(',')
+            if len(content) > 1 and content[0] != "tab_name":
+                line_dict[content[0]] = content[1:]
+
+        self.updatePageWithParameters(line_dict)
+
+    def clipboard_copy_excel(self):
+        self.set_clipboard(self.excel_copy_data())
+
+    def clipboard_copy_latex(self):
+        self.set_clipboard(self.latex_copy_data())
+
+    def full_copy_data(self):
+        """ Data destined for the clipboard when copy clicked"""
+        param_list = self.getFitPage()
+        param_list += self.getFitModel()
+        return FittingUtilities.formatParameters(param_list)
+
+    def excel_copy_data(self):
+        """ Excel format data destined for the clipboard"""
         param_list = self.getFitParameters()
-        if format=="":
-            param_list = self.getFitPage()
-            param_list += self.getFitModel()
-            formatted_output = FittingUtilities.formatParameters(param_list)
-        elif format == "Excel":
-            formatted_output = FittingUtilities.formatParametersExcel(param_list[1:])
-        elif format == "Latex":
-            formatted_output = FittingUtilities.formatParametersLatex(param_list[1:])
-        elif format == "Save":
-            Text_output = FittingUtilities.formatParameters(param_list, False)
-            Excel_output = FittingUtilities.formatParametersExcel(param_list[1:])
-            Latex_output = FittingUtilities.formatParametersLatex(param_list[1:])
+        return FittingUtilities.formatParametersExcel(param_list[1:])
+
+    def latex_copy_data(self):
+        """ Latex format data destined for the clipboard"""
+        param_list = self.getFitParameters()
+        return FittingUtilities.formatParametersLatex(param_list[1:])
+
+    def save_parameters(self):
+        """ Save parameters to a file"""
+        param_list = self.getFitParameters()
+
+        save_dialog = QtWidgets.QFileDialog()
+        save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        kwargs = {
+            'parent': self,
+            'caption': 'Save Project',
+            'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
+            'options': QtWidgets.QFileDialog.DontUseNativeDialog
+        }
+        file_path = save_dialog.getSaveFileName(**kwargs)
+        filename = file_path[0]
+
+        if not filename:
+            return
+        if file_path[1] == 'Text (*.txt)':
+            save_data = FittingUtilities.formatParameters(param_list, line_sep="\n")
+            filename = '.'.join((filename, 'txt'))
+        elif file_path[1] == 'Excel (*.xls)':
+            save_data = FittingUtilities.formatParametersExcel(param_list[1:])
+            filename = '.'.join((filename, 'xls'))
+        elif file_path[1] == 'Latex (*.log)':
+            save_data = FittingUtilities.formatParametersLatex(param_list[1:])
+            filename = '.'.join((filename, 'log'))
         else:
-            raise AttributeError("Bad parameter output format specifier.")
+            raise ValueError(f"Unknown File Format {file_path[1]}")
 
-        # Dump formatted_output to the clipboard
+        with open(filename, 'w') as file:
+            file.write(save_data)
 
-
-        if format == "Save":
-            save_dialog = QtWidgets.QFileDialog()
-            save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-            kwargs = {
-                'parent': self,
-                'caption': 'Save Project',
-                'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
-                'options': QtWidgets.QFileDialog.DontUseNativeDialog
-            }
-            file_path = save_dialog.getSaveFileName(**kwargs)
-            filename = file_path[0]
-
-            if file_path[1] == 'Text (*.txt)':
-                Type_output = Text_output
-                filename = '.'.join((filename, 'txt'))
-            elif file_path[1] == 'Excel (*.xls)':
-                Type_output = Excel_output
-                filename = '.'.join((filename, 'xls'))
-            elif file_path[1] == 'Latex (*.log)':
-                Type_output = Latex_output
-                filename = '.'.join((filename, 'log'))
-
-            file_open = open(filename, 'w')
-            with file_open:
-                file_open.write(Type_output)
-        else:
-            cb = QtWidgets.QApplication.clipboard()
-            cb.setText(formatted_output)
+    def set_clipboard(self, data: str):
+        """ Set the data in the clipboard """
+        cb = QtWidgets.QApplication.clipboard()
+        cb.setText(data)
 
 
     def getFitModel(self):
@@ -4079,33 +4147,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_list.append(['multiplicity', str(self.kernel_module.multiplicity)])
 
         return param_list
-
-    def onParameterPaste(self):
-        """
-        Use the clipboard to update fit state
-        """
-        # Check if the clipboard contains right stuff
-        cb = QtWidgets.QApplication.clipboard()
-        cb_text = cb.text()
-
-        lines = cb_text.split(':')
-        if lines[0] != 'sasview_parameter_values':
-            msg = "Clipboard content is incompatible with the Fit Page."
-            msgbox = QtWidgets.QMessageBox(self)
-            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
-            msgbox.setText(msg)
-            msgbox.setWindowTitle("Clipboard")
-            retval = msgbox.exec_()
-            return
-
-        # put the text into dictionary
-        line_dict = {}
-        for line in lines[1:]:
-            content = line.split(',')
-            if len(content) > 1 and content[0] != "tab_name":
-                line_dict[content[0]] = content[1:]
-
-        self.updatePageWithParameters(line_dict)
 
     def createPageForParameters(self, line_dict):
         """

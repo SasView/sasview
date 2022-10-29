@@ -102,7 +102,14 @@ SasView offers the flexibility to automatically constrain (tie) some of these
 parameters together so that, for example, *radius_effective* = *radius*. See
 :ref:`Add/Multiply_Models`.
 
-Also see :ref:`Interaction_and_Mixture_Models` for further information.
+Also see :ref:`Interaction_Models` for further information.
+
+.. note::
+
+    SasView v5.0.4 incorporated a technical change to how the volume
+    normalisation is incorporated in the interaction calculator that computes
+    $I(Q)$ from $P(Q) S(Q)$. The change will affect all future versions of
+    SasView. For more details, please see the :ref:`Release_Notes`.
 
 Mixture Models
 ^^^^^^^^^^^^^^
@@ -445,13 +452,16 @@ Selecting "Edit Custom Model" option opens the editor window.
 
 .. image :: model_editor_empty.png
 
-Initially, the editor is empty. A custom model can be loaded by clicking on the *Load plugin...* button and choosing one of the existing custom plugins.
+Initially, the editor is empty. A custom model can be loaded by clicking on the
+*Load plugin...* button and choosing one of the existing custom plugins.
 
 Once the model is loaded, it can be edited and saved with *Save* button.
-Saving the model will perform the validation and only when the model is correct it will be saved to a file.
-Successful model check is indicated by a SasView status bar message.
+Saving the model will perform the validation and only when the model is correct
+it will be saved to a file. Successful model check is indicated by a SasView
+status bar message.
 
-When *Cancel* is clicked, any changes to the model are discarded and the window is closed.
+When *Cancel* is clicked, any changes to the model are discarded and the window
+is closed.
 
 
 For details of the SasView plugin model format see :ref:`Writing_a_Plugin` .
@@ -465,11 +475,13 @@ category and then select the model from the drop-down menu.
 Plugin Manager
 ^^^^^^^^^^^^^^
 
-Selecting the *Manage Custom Models* option shows a list of all the plugin models in the plugin model folder, on Windows this is
+Selecting the *Manage Custom Models* option shows a list of all the plugin
+models in the plugin model folder, on Windows this is
 
   *C:\\Users\\{username}\\.sasview\\plugin_models*
 
-You can add, edit, duplicate and delete these models using buttons on the right side of the list.
+You can add, edit, duplicate and delete these models using buttons on the right
+side of the list.
 
 .. image:: plugin_manager.png
 
@@ -477,24 +489,28 @@ You can add, edit, duplicate and delete these models using buttons on the right 
 Add a model
 ^^^^^^^^^^^
 
-Clicking the "Add" button opens the Model Editor window, allowing you to create a new plugin as described above.
+Clicking the "Add" button opens the Model Editor window, allowing you to create
+a new plugin as described above.
 
 Duplicate a model
 ^^^^^^^^^^^^^^^^^
 
-Clicking the "Duplicate" button will create a copy of the selected model(s). Naming of the duplicate follows the standard, with added * (n)* to the plugin model name, with *n* being the first unused yet integer.
+Clicking the "Duplicate" button will create a copy of the selected model(s).
+Naming of the duplicate follows the standard, with an *n* added to the
+plugin model name, where *n* is the first unused integer.
 
 Edit a model
 ^^^^^^^^^^^^
 
-When a single model is selected, clicking this button will open the Advanced *Model Editor* allowing you to edit the
-Python code of the model.
-If no models or multiple models are selected, the *Edit* button is disabled.
+When a single model is selected, clicking this button will open the Advanced
+*Model Editor* allowing you to edit the Python code of the model. If no models
+or multiple models are selected, the *Edit* button is disabled.
 
 Delete Plugin Models
 ^^^^^^^^^^^^^^^^^^^^
 
-Simply highlight the plugin model(s) to be removed and click on the "Delete" button. The operation is final.
+Simply highlight the plugin model(s) to be removed and click on the "Delete"
+button. The operation is final.
 
 *NB: Models shipped with SasView cannot be removed in this way.*
 
@@ -508,8 +524,8 @@ Fit Algorithms
 It is possible to specify which optimiser SasView should use to fit the data, and
 to modify some of the configurational parameters for each optimiser.
 
-From *Fitting* in the menu bar select *Fit Algorithms*, then select one of the following
-optimisers:
+From *Fitting* in the menu bar select *Fit Algorithms*, then select one of the
+following optimisers:
 
 *  DREAM
 *  Levenberg-Marquardt
@@ -590,7 +606,8 @@ messages, warnings and errors.
 .. image:: log_explorer.png
 
 The bottom part of the SasView application window contains the *Log Explorer*.
-The *Log Explorer* displays available message history and run-time traceback information.
+The *Log Explorer* displays available message history and run-time traceback
+information.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -610,7 +627,8 @@ When data is sent to the fitting, the Fit Page will show the dataset name.
 
 .. image:: dataset_name.png
 
-Clicking on the *Show Plot* will cause the data can be plotted in a graph window as markers.
+Clicking on the *Show Plot* will cause the data can be plotted in a graph window
+as markers.
 
 If a graph does not appear, or a graph window appears but is empty, then the data
 has not loaded correctly. Check to see if there is a message in the :ref:`Status_Bar`
@@ -650,7 +668,76 @@ The DREAM optimiser is the most sophisticated, but may not necessarily be the be
 option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
 initially.
 
+Polydisperse Parameters
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Some model parameters, for example, radii/lengths or orientation angles can be
+polydisperse; i.e. they can have a distribution of possible values. Polydisperse
+parameters are defined as such when the model is coded, and can be activated by
+clicking the *Polydispersity* checkbox on the *Fit Page*.
+
+.. image:: enable_pd.png
+
+Clicking on the *Polydispersity* tab then provides access to these polydisperse
+parameters and allows the type (i.e. the *function* to be used) and 'width'
+(the *PD[ratio]*) to be adjusted. If necessary the 'step size' (*Npts*) and
+'range' (*Nsigs*) of the function can also be adjusted.
+
+.. image:: pd_tab.png
+
+For more information, see the descriptions of :ref:`polydispersityhelp`. In
+particular, pay attention to the Suggested Applications and Usage Notes therein.
+The detail of how SasView computes the scattering from polydisperse systems is
+described in the :ref:`PStheory` section.
+
+Note that SasView defaults to Gaussian distributions, but these will not always
+be the best choice. Also, the definitions of the centre (e.g. whether it is the
+mean or median value, for example) and the actual width of the function will
+vary depending on the chosen distribution! For orientation distributions the
+*PD[ratio]* parameter is absolute. But for distributions applied to 'volume'
+(size) parameters the *PD[ratio]* parameter will always be relative to the
+current centre value.
+
+.. note:: **Polydispersity distributions in SasView define the number density
+           of the given population of scatterers. The resulting scattering is
+           then the number average over the distribution.**
+
+It is possible to optimise a *PD[ratio]* parameter during fitting by checking
+the accompanying checkbox. However, this is usually only effective in the
+latter stages of a converging fit.
+
+.. note:: Neither the *PD[ratio]*, or the parameter to which it is applied, can
+          be optimised if using an Array Distribution. See
+          :ref:`polydispersityhelp`.
+
+Reparameterizing Models
+^^^^^^^^^^^^^^^^^^^^^^^
+
+It is also possible to reparameterize a particle model, for instance, to give
+greater control over polydispersity due to intra-particle constraints, see
+:ref:`Reparameterized_Models`. For example, if the particles aspect ratio is
+constrained but not its volume, or if its volume must be preserved but a range
+of aspect ratios are permitted for each volume. This may require a User-Defined
+distribution function to fully describe the model (see
+:ref:`polydispersityhelp`).
+
+Using a GPU
+^^^^^^^^^^^
+
+Incoporating polydispersity in a fit can certainly improve the overall solution
+and add a dose of realism to it (few real systems are monodisperse!). But doing
+so will slow the fitting process, sometimes quite dramatically. In these
+circumstances enabling a GPU, if present, will help.
+
+.. image:: gpu_options.png
+
+If a *potential* GPU device is present the dialog will show it. The *Test*
+button can then be used to check if your system has the necessary drivers to
+use it. But also see :ref:`gpu-setup` .
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Simultaneous_Fit_Mode:
 
 Simultaneous Fit Mode
 ---------------------
@@ -684,16 +771,18 @@ Now go to each *FitPage* in turn and:
 *  Enter any parameter limits (recommended);
 *  Select which parameters will refine (selecting all is generally a bad idea...);
 
-When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu bar.
+When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu
+bar.
 
 In the *Const & Simul Fit* page that appears, select which data sets are to be
-simultaneously fitted (this will probably be all of them or you would not have loaded
-them in the first place!).
+simultaneously fitted (this will probably be all of them or you would not have
+loaded them in the first place!).
 
 .. image:: constraint_1.png
 
-To tie parameters between the data sets with constraints, select the data sets and right click.
-From the menu choose *Mutual constraint of parameters in selected models*
+To tie parameters between the data sets with constraints, select the data sets
+and right click. From the menu choose *Mutual constraint of parameters in
+selected models*
 
 .. image:: constraint_menu.png
 
@@ -722,8 +811,9 @@ Alternatively, right clicking on two selected fitpages in the
 Here you can choose datasets for fitting and define constraints between parameters in
 both datasets.
 
-Clicking the *Add constraints* button or choosing the *Mutual constraint of parameters
-in selected models...* option will bring up the *Complex Constraint* dialog.
+Clicking the *Add constraints* button or choosing the *Mutual constraint of
+parameters in selected models...* option will bring up the *Complex Constraint*
+dialog.
 
 .. image:: complex_constraint.png
 
@@ -742,6 +832,59 @@ Many constraints can be entered for a single fit.
 
 The results of the model-fitting will be returned to each of the individual
 *FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
+
+Simultaneous Fits with a Modified Weighting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When simultaneously fitting different data sets, the degree of influence that each
+of them has on the final fit is defined by their statistical weight, i.e. mainly
+the number of points and their uncertainty in each data set.
+The SasView fitting engine tries to minimize the total $\chi^2$, where the difference
+between the data and the model for each data point is added quadratically using a
+weight that by default is inversely proportional to the y axis error. As a consequence,
+datasets with more points and smaller errors will exert a greater influence on
+the fit. While the weighting scheme can be modified in the *Fit Options* tab,
+even setting the weighting to None (i.e. all data points from all data sets have
+the same weight, equal to 1) will not solve the potential issue of having disparate
+number of data points in different sets. In this case, if one data set has much
+more (less) points than the remaining data sets, it will have a much larger (smaller)
+influence in the global fit.
+
+This is especially true for data gathered using different methods with different
+associated errors. For example attempting to fit SANS and SAXS data often leads to the
+SAXS data dominating the fit. The *Modify Weighting* option provides a way of getting
+around this issue by allowing the user to multiply the individual weights by a global
+factor that can be adjusted for each data set.
+
+Checking the *Modify Weighting* box reveals a fifth column in the source choice
+dialog called Weighting. This is depicted in the screenshot below.
+
+.. image:: weighting_scheme_default.png
+
+The pre-filled option in the weighting column is 1.0, and only numerical inputs
+(integer or floating point numbers) are allowed. It is important to understand
+that when the *Modify Weighting* box is checked, **the weights of each data set
+will be modified, even when all the weights in the weighting column are equal
+to 1.** Actually, when all the user weights are equal to 1, SasView will try to
+calculate appropriate weights in order to ensure that all the data sets have
+approximately a similar influence in the total fit. This is done by estimating the
+statistical weight of each data set *j* as $W_j = \sum_i^{N_j} (1/e_i)^2$, where at present
+$e_i$ is the relative error of point *i*, i.e. $e_i = \sigma_i / |I_i|$, and then
+the weight to apply to each data set is computed as $Min(W_j)/W_j$. Thus, the weight of the
+initially "lighter" set remains equal to 1, while the remaining sets will be scaled down by
+a factor < 1. Then the user weighting factors multiply this scaling factor, giving the
+final weight for each data set that will be sent to the fitting engine. The final weights
+used in the simultaneous fit are given in the *Log Explorer* window and can provide a useful
+indication of how much each data set has been "modified" with respect to the original data.
+
+**Warning:** This option gives the user the flexibility to play with the data sets, in order
+to drive the global fit in a desired direction. It can be useful when a particular set contains
+important information to determine one or several model parameters, but it is ignored in the
+global fit because of statistical issues. However, ideally this option should never be needed,
+as difficulties when trying to fit simultaneously several sets are often an indication of
+other problems such as systematic errors, inadequate error/resolution estimation, etc.
+Therefore, users are advised to be extremely careful when using this option and to
+carefully check any result obtained using modified weights.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -903,8 +1046,8 @@ Parameter Plots
       Example: radius [2 : 5] , radius [10 : 25]
 ..
 
-Any row (dataset) can be plotted by selecting it and either right-clicking and choosing
-*Plot selected fits* menu item or by clicking on the *Plot* button.
+Any row (dataset) can be plotted by selecting it and either right-clicking and
+choosing *Plot selected fits* menu item or by clicking on the *Plot* button.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -952,8 +1095,8 @@ Fitting with the following caveats:
    second and later *BatchPage* s that have the same name as a parameter in the
    first will show up allowing for plotting of that parameter across the
    models. The other parameters will not be available in the grid.
-   To choose the order of the fitpages in the fitting process, drag and drop rows in the
-   *Source choice for simultaneous fitting* table.
+   To choose the order of the fitpages in the fitting process, drag and drop
+   rows in the *Source choice for simultaneous fitting* table.
 
 .. note::
    a corollary of the above is that currently models created as a sum|multiply
@@ -978,4 +1121,51 @@ finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 05 Feb 2020
+.. _fitting_sesans:
+
+Fitting SESANS Data
+-------------------
+
+Since SasView version 4.1.1 it has been possible to fit SESANS data using
+the same fitting perspective as used to fit SANS data. This is accomplished
+using an on-the-fly :ref:`SESANS` from *Q*-space to real-space.
+
+To use this functionality it is important that the SESANS data file has
+the extension .ses to distinguish it from *Q*-space data. The SESANS user
+community is gradually refining the structure and content of its data files.
+Some current examples can be found in the \\test\\sesans_data folder within
+the SasView installation folder. For more information about the contents
+of .ses files, see :ref:`Formats`.
+
+Load the .ses file and Send to Fitting as normal.
+
+.. image:: fitting_sesans_1.png
+
+The first true indication that the data are not SANS data comes when the
+data are plotted. Instead of *Intensity* vs *Q*, the data are displayed
+as a normalised depolarisation (*P*) vs spin-echo length (*z*).
+
+.. image:: fitting_sesans_2.png
+
+Since SESANS data normally represent much longer length scales than SANS
+data, it will likely be necessary to significantly increase key size
+parameters in a model before attempting any fitting. In the screenshot
+above, the radius of the sphere has been increased from its default
+value of 50 |Ang| to 5000 |Ang| in order to get the transform to show
+something sensible.
+
+The model parameters can then be optimised by checking them as required
+and clicking the Fit button as is normal.
+
+.. image:: fitting_sesans_3.png
+
+Note that SESANS data is not subject to an incoherent background signal in the
+way that normal SANS data is. For this reason the *background* parameter in
+any model being used to fit SESANS data should be fixed at zero.
+
+The procedure just described supersedes the original procedure using the
+command line interpreter, see :ref:`sesans_fitting`.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 26Oct2022

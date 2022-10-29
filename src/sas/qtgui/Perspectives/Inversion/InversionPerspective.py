@@ -16,12 +16,13 @@ from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
+from sas.qtgui.Perspectives.perspective import Perspective
 
-
-def is_float(value):
-    """Converts text input values to floats. Empty strings throw ValueError"""
+def str_to_float(string: str):
+    """Converts text input values to float.
+    Failure to parse string returns zero"""
     try:
-        return float(value)
+        return float(string)
     except ValueError:
         return 0.0
 
@@ -35,13 +36,19 @@ DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 logger = logging.getLogger(__name__)
 
 
-class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
+class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     """
     The main window for the P(r) Inversion perspective.
     """
 
     name = "Inversion"
-    ext = "pr"  # Extension used for saving analyses
+    ext = "pr"
+
+    @property
+    def title(self) -> str:
+        """ Window title"""
+        return "P(r) Inversion Perspective"
+
     estimateSignal = QtCore.pyqtSignal(tuple)
     estimateNTSignal = QtCore.pyqtSignal(tuple)
     estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
@@ -49,10 +56,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     calculateSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None):
-        super(InversionWindow, self).__init__()
+        super().__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("P(r) Inversion Perspective")
+        self.setWindowTitle(self.title)
 
         self._manager = parent
         #Needed for Batch fitting
@@ -201,15 +208,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.backgroundInput.textChanged.connect(
             lambda: self.set_background(self.backgroundInput.text()))
         self.regularizationConstantInput.textChanged.connect(
-            lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
+            lambda: self._calculator.set_alpha(str_to_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
-            lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
+            lambda: self._calculator.set_dmax(str_to_float(self.maxDistanceInput.text())))
         self.maxQInput.editingFinished.connect(self.check_q_high)
         self.minQInput.editingFinished.connect(self.check_q_low)
         self.slitHeightInput.textChanged.connect(
-            lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
+            lambda: self._calculator.set_slit_height(str_to_float(self.slitHeightInput.text())))
         self.slitWidthInput.textChanged.connect(
-            lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
+            lambda: self._calculator.set_slit_width(str_to_float(self.slitWidthInput.text())))
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
@@ -331,15 +338,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
                                             and not self.isCalculating)
-        self.removeButton.setEnabled(self.logic.data_is_loaded)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded)
+        self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
-        self.regConstantSuggestionButton.setEnabled(
-            self.logic.data_is_loaded and
-            self._calculator.suggested_alpha != self._calculator.alpha)
-        self.noOfTermsSuggestionButton.setEnabled(
-            self.logic.data_is_loaded and
-            self._calculator.nfunc != self.nTermsSuggested)
+        self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
 
     def populateDataComboBox(self, name, data_ref):
         """
@@ -377,7 +380,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.set_background(self.backgroundInput.text())
 
     def set_background(self, value):
-        self._calculator.background = is_float(value)
+        self._calculator.background = float(value)
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -409,16 +412,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Toggle the background between manual and estimated
         """
-        if self.estimateBgd.isChecked():
-            self.manualBgd.setChecked(False)
-            self.backgroundInput.setEnabled(False)
-            self._calculator.set_est_bck = True
-        elif self.manualBgd.isChecked():
-            self.estimateBgd.setChecked(False)
-            self.backgroundInput.setEnabled(True)
-            self._calculator.set_est_bck = False
-        else:
-            pass
+        self.model.blockSignals(True)
+        value = 1 if self.estimateBgd.isChecked() else 0
+        itemt = QtGui.QStandardItem(str(value == 1).lower())
+        self.model.setItem(WIDGETS.W_ESTIMATE, itemt)
+        itemt = QtGui.QStandardItem(str(value == 0).lower())
+        self.model.setItem(WIDGETS.W_MANUAL_INPUT, itemt)
+        self._calculator.set_est_bck(value)
+        self.backgroundInput.setEnabled(self._calculator.est_bck == 0)
+        self.model.blockSignals(False)
 
     def openExplorerWindow(self):
         """
@@ -457,10 +459,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def check_q_low(self, q_value=None):
         """ Validate the low q value """
         if not q_value:
-            q_value = float(self.minQInput.text()) if self.minQInput.text() else ''
-        if q_value == '':
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(q_value))
-            return
+            q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
         q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
         q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
@@ -477,10 +476,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def check_q_high(self, q_value=None):
         """ Validate the value of high q sent by the slider """
         if not q_value:
-            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else ''
-        if q_value == '':
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(q_value))
-            return
+            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
         q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
         q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
         if q_value > q_max:
@@ -532,7 +528,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if isinstance(self.logic.data, Data1D):
             self.setCurrentData(data)
 
-    def updateDataList(self, dataRef):
+    def updateDataList(self, dataRef): # TODO Typing, name, underscore prefix
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
             return
@@ -626,10 +622,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         cov = self._calculator.cov
         elapsed = self._calculator.elapsed
         alpha = self._calculator.suggested_alpha
-        self.model.setItem(WIDGETS.W_QMIN,
-                           QtGui.QStandardItem("{:.4g}".format(pr.get_qmin())))
-        self.model.setItem(WIDGETS.W_QMAX,
-                           QtGui.QStandardItem("{:.4g}".format(pr.get_qmax())))
+        self.check_q_high(pr.get_qmax())
+        self.check_q_low(pr.get_qmin())
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
@@ -638,6 +632,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:.2g}".format(alpha))
 
         if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
@@ -680,6 +675,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.closeDMax()
         for data in data_list:
             self._dataList.pop(data, None)
+        if self.dataPlot:
+            # Reset dataplot sliders
+            self.dataPlot.slider_low_q_input = []
+            self.dataPlot.slider_high_q_input = []
+            self.dataPlot.slider_low_q_setter = []
+            self.dataPlot.slider_high_q_setter = []
         self._data = None
         length = len(self.dataList)
         for index in reversed(range(length)):
@@ -742,26 +743,30 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         return tab_id
 
     def updateFromParameters(self, params):
-        self._calculator.suggested_alpha = params['alpha']
+        self._calculator.q_max = params['q_max']
+        self.check_q_high(self._calculator.get_qmax())
+        self._calculator.q_min = params['q_min']
+        self.check_q_low(self._calculator.get_qmin())
+        self._calculator.alpha = params['alpha']
+        self._calculator.suggested_alpha = params['suggested_alpha']
+        self._calculator.d_max = params['d_max']
+        self._calculator.nfunc = params['nfunc']
+        self.nTermsSuggested = self._calculator.nfunc
         self.updateDynamicGuiValues()
         self.acceptAlpha()
-        self.backgroundInput.setText(str(params['background']))
+        self.acceptNoTerms()
+        self._calculator.background = params['background']
         self._calculator.chi2 = params['chi2']
         self._calculator.cov = params['cov']
-        self._calculator.d_max = params['d_max']
         self._calculator.elapsed = params['elapsed']
         self._calculator.err = params['err']
         self._calculator.set_est_bck = bool(params['est_bck'])
         self._calculator.nerr = params['nerr']
-        self.noOfTermsInput.setText(str(params['nfunc']))
         self._calculator.npoints = params['npoints']
         self._calculator.ny = params['ny']
         self._calculator.out = params['out']
-        self._calculator.q_max = params['q_max']
-        self._calculator.q_min = params['q_min']
         self._calculator.slit_height = params['slit_height']
         self._calculator.slit_width = params['slit_width']
-        self._calculator.suggested_alpha = params['suggested_alpha']
         self._calculator.x = params['x']
         self._calculator.y = params['y']
         self.updateGuiValues()
@@ -1049,10 +1054,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dataPlot.filename = self.logic.data.filename
 
         self.dataPlot.show_q_range_sliders = True
-        self.dataPlot.slider_low_q_input = self.minQInput
-        self.dataPlot.slider_low_q_setter = self.check_q_low
-        self.dataPlot.slider_high_q_input = self.maxQInput
-        self.dataPlot.slider_high_q_setter = self.check_q_high
+        self.dataPlot.slider_update_on_move = False
+        self.dataPlot.slider_perspective_name = "Inversion"
+        self.dataPlot.slider_low_q_input = ['minQInput']
+        self.dataPlot.slider_low_q_setter = ['check_q_low']
+        self.dataPlot.slider_high_q_input = ['maxQInput']
+        self.dataPlot.slider_high_q_setter = ['check_q_high']
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

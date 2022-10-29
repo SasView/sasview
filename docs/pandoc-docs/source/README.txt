@@ -1,1 +1,0 @@
-Need to slurp all tutorial .fodt files from https://github.com/SasView/tutorials/ to this folder

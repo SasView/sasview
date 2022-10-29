@@ -51,16 +51,14 @@ def setup_sasmodels():
     Prepare sasmodels for running within sasview.
     """
     # Set SAS_MODELPATH so sasmodels can find our custom models
-    import sas
-    plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
+
+    from sas.system.user import get_user_dir
+    plugin_dir = os.path.join(get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir
 
 def prepare():
     # Don't create *.pyc files
     sys.dont_write_bytecode = True
-
-    # Debug numpy warnings
-    #import numpy; numpy.seterr(all='raise')
 
     # find the directories for the source and build
     from distutils.util import get_platform
@@ -73,15 +71,6 @@ def prepare():
     # place than it otherwise would be.
     os.environ['SASVIEW_DOC_PATH'] = joinpath(build_path, "doc")
 
-    # Make sure that we have a private version of mplconfig
-    #mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
-    #os.environ['MPLCONFIGDIR'] = mplconfig
-    #if not os.path.exists(mplconfig): os.mkdir(mplconfig)
-    #import matplotlib
-    # matplotlib.use('Agg')
-    # print matplotlib.__file__
-    #import pylab; pylab.hold(False)
-    # add periodictable to the path
     try:
         import periodictable
     except ImportError:
@@ -92,28 +81,12 @@ def prepare():
     except ImportError:
         addpath(joinpath(root, '..', 'bumps'))
 
-    # == no more C sources so no need to build project to run it ==
-    ## Build project if the build directory does not already exist.
-    #if not os.path.exists(build_path):
-    #    import subprocess
-    #    with cd(root):
-    #        subprocess.call((sys.executable, "setup.py", "build"), shell=False)
-
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
 
     # sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
 
-    # Note: only needed when running gui so suppress for now.
-    ## Run the UI conversion tool.
-    #import sas.qtgui.convertUI
-
-    # initialize OpenCL setting
-    import sas
-    SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
-    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
-        os.environ["SAS_OPENCL"] = SAS_OPENCL
 
 
 if __name__ == "__main__":
@@ -122,13 +95,8 @@ if __name__ == "__main__":
     root = abspath(dirname(realpath(sys.argv[0])))
 
     addpath(joinpath(root, 'src'))
-    addpath(joinpath(root, joinpath('..', 'sasmodels'))) # dependency (for loading custom_config.py during log setup)
-
-    #from sas.logger_config import SetupLogger
-    #logger = SetupLogger(__name__).config_development()
-
-    #logger.debug("Starting SASVIEW in debug mode.")
     prepare()
+
     # Run the UI conversion tool when executed from script.  This has to
     # happen after prepare() so that sas.qtgui is on the path.
     import sas.qtgui.convertUI
