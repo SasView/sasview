@@ -963,10 +963,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraint_names = fit_page.getComplexConstraintsForAllModels()
         constraints = fit_page.getConstraintObjectsForAllModels()
 
-        # these three assignments need proper extension to all models, not just main model
-        active_constraint_names = fit_page.getComplexConstraintsForModel(model_key=model_key)
-        constraint_names = fit_page.getFullConstraintNameListForModel(model_key=model_key)
-        constraints = fit_page.getConstraintObjectsForModel(model_key=model_key)
+        model_keys = ['standard', 'poly', 'magnet']
+        active_constraint_names = []
+        constraint_names = []
+        constraints = []
+        for model_key in model_keys:
+            active_constraint_names += fit_page.getComplexConstraintsForModel(model_key=model_key)
+            constraint_names += fit_page.getFullConstraintNameListForModel(model_key=model_key)
+            constraints += fit_page.getConstraintObjectsForModel(model_key=model_key)
 
         if not constraints:
             return

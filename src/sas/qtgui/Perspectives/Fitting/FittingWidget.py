@@ -834,24 +834,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Given parameter name get the row number in a model.
         The model is the main _model_model by default
         """
+        # In case some confussion with poly params arriving here with name as 'Distribution of ' instead of '.width'
+        if "Distribution of" in name:
+            name = self.polyNameToParam(name)
         model_key = self.getModelKeyFromName(name)
         model = self.model_dict[model_key]
 
-        # special case for polydisp
-
-        # MG: There is an issue here, with PD parameters being called
-        # either as .width or Distribution of >
-
-        print('MG: FittingWidget --> getRowFromName: name = ', name)
-        if model == self._poly_model:
-            name = self.polyNameToParam(name)
-            print('MG: poly_name = ', name)
         for row in range(model.rowCount()):
             row_name = model.item(row).text()
+            if model_key == 'poly':
+                if "Distribution of" in row_name:
+                    row_name = self.polyNameToParam(row_name)
             if row_name == name:
-                print('MG: will return row = ', row)
                 return row
-        print('MG: will return None')
         return None
 
     def getParamNames(self):
@@ -1758,8 +1753,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
             model_key = self.getModelKeyFromName(parameter_name)
             row = self.getRowFromName(parameter_name)
-            #MG: Trying something here
-            #param_item = self._model_model.item(row).child(0).child(0, model_column)
             param_item = self.model_dict[model_key].item(row).child(0).child(0, model_column)
             if param_item is None:
                 return
@@ -3008,10 +3001,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return model.item(row, 0).checkState() == QtCore.Qt.Checked
 
         model = self.model_dict[model_key]
-        return [str(model.item(row_index, 0).text())
-                for row_index in range(model.rowCount())
-                if isChecked(row_index)]
 
+        if model_key == "poly":
+            return [self.polyNameToParam(str(model.item(row_index, 0).text()))
+                    for row_index in range(model.rowCount())
+                    if isChecked(row_index)]
+        else:
+            return [str(model.item(row_index, 0).text())
+                    for row_index in range(model.rowCount())
+                    if isChecked(row_index)]
     def createNewIndex(self, fitted_data):
         """
         Create a model or theory index with passed Data1D/Data2D
