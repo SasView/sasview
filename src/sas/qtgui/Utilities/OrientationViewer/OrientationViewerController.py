@@ -9,12 +9,14 @@ from sas.qtgui.Utilities.UI.OrientationViewerControllerUI import Ui_OrientationV
 
 class Orientation(NamedTuple):
     """ Data sent when updating the plot"""
-    theta: int
-    phi: int
-    psi: int
-    dtheta: int
-    dphi: int
-    dpsi: int
+    theta: int = 0
+    phi: int = 0
+    psi: int = 0
+    dtheta: int = 0
+    dphi: int = 0
+    dpsi: int = 0
+
+
 
 class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierControllerUI):
 
