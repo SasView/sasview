@@ -2238,7 +2238,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         data_shown = False
         item = None
         for item, plot in plots.items():
-            if not hasattr(plot,'isExpData') and fitpage_name in plot.name:
+            if plot.plot_role != Data1D.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
                 self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
         # return the last data item seen, if nothing was plotted; supposed to be just data)
