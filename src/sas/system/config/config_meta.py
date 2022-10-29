@@ -91,7 +91,12 @@ class ConfigBase:
         with open(self.config_filename(True), 'w') as file:
             self.save_to_file_object(file)
 
-    def become_default(self):
+    def override_with_defaults(self):
+        """
+        Set the config entries to defaults, and prevent saving from happening
+
+        Added with the ability to disable for testing in mind
+        """
         self._bad_entries.clear()
         self.update(self._defaults)
         self._disable_writing = True
@@ -102,7 +107,10 @@ class ConfigBase:
         Only changed and unknown variables will be included in the saved file
         """
 
-        if not self._disable_writing:
+        if self._disable_writing:
+            logger.info("Config write disabled by `override_with_defaults`")
+
+        else:
 
             data = {}
             for key in self._defaults:
