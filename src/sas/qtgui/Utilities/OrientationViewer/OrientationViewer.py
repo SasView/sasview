@@ -42,6 +42,8 @@ class OrientationViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__()
 
+        self.parent = parent
+
         # Put a barrier that will stop a flood of events going to the calculator
         self.set_image_data = FloodBarrier[Orientation](self._set_image_data, Orientation(), 0.5)
 

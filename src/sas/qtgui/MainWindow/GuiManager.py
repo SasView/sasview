@@ -31,6 +31,7 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import OrientationViewer
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
@@ -191,6 +192,8 @@ class GuiManager:
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+
+        self.orientation_viewer = OrientationViewer()
 
     def loadAllPerspectives(self):
         # Close any existing perspectives to prevent multiple open instances
@@ -1010,11 +1013,7 @@ class GuiManager:
         """
         Make sasmodels orientation & jitter viewer available
         """
-        from sasmodels.jitter import run as orientation_run
-        try:
-            orientation_run()
-        except Exception as ex:
-            logging.error(str(ex))
+        self.orientation_viewer.show()
 
     def actionImage_Viewer(self):
         """
