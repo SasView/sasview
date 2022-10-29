@@ -1300,7 +1300,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         cb = QtWidgets.QApplication.clipboard()
         cb_text = cb.text()
         # get the screenshot of the current param state
-        self.onCopyToClipboard("")
+        self.clipboard_copy()
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1309,7 +1309,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.respondToModelStructure(model=model, structure_factor=structure)
         # recast the original parameters into the model
-        self.onParameterPaste()
+        self.clipboard_paste()
         # revert to the original clipboard
         cb.setText(cb_text)
 
@@ -1879,7 +1879,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data going in
         data = self.logic.data
-        model = copy.deepcopy(self.kernel_module)
+        model = self.kernel_module
         qmin = self.q_range_min
         qmax = self.q_range_max
 

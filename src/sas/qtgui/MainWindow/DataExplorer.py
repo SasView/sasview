@@ -1307,12 +1307,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_error = False
         error_message = ""
         number_of_files = len(path)
-        self.communicator.progressBarUpdateSignal.emit(0.0)
+        self.communicator.progressBarUpdateSignal.emit(0)
 
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            extension_list = config.PLUGIN_STATE_EXTENSIONS
+            extension_list = config.PLUGIN_STATE_EXTENSIONS.copy()
             if config.APPLICATION_STATE_EXTENSION is not None:
                 extension_list.append(config.APPLICATION_STATE_EXTENSION)
 
