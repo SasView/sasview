@@ -2917,8 +2917,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Prepare the fitting data object, based on current ModelModel
         """
         if self.kernel_module is None:
-            return
-        self.calculateQGridForModelExt()
+            if self.data_is_loaded:
+                self.SASModelToQModel('porod')
+                self.calculateQGridForModelExt()
+        else:
+            self.calculateQGridForModelExt()
 
     def calculateDataFailed(self, reason):
         """

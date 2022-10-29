@@ -22,6 +22,8 @@ from sas.qtgui.Perspectives.perspective import Perspective
 
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
+from sas import config
+
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
     """
@@ -263,6 +265,13 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.addTab(tab, icon, tab_name)
         # Show the new tab
         self.setCurrentWidget(tab)
+        # If configured, plot the current data
+        if config.FITTING_PLOT_ON_SEND_DATA:
+            #First, create model and residuals inside this data.
+            tab.calculateQGridForModel()
+            #then simply push plot
+            tab.onPlot()
+
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
