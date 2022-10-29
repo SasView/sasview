@@ -17,6 +17,7 @@ from PyQt5 import QtWidgets
 
 from sasmodels import generate
 from sasmodels import modelinfo
+from sasmodels.sasview_model import SasviewModel
 from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
@@ -63,7 +64,6 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
 # CRUFT: remove when new release of sasmodels is available
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
-from sasmodels.sasview_model import SasviewModel
 if not hasattr(SasviewModel, 'get_weights'):
     def get_weights(self: Any, name: str) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -1289,9 +1289,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for model_key in self.model_dict.keys():
             model = self.model_dict[model_key]
             param_number = model.rowCount()
-            params += [(model.item(s, 0).text(),
-                        model.item(s, 1).child(0).data().func)
-                        for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
+            if model_key == 'poly':
+                params += [(self.polyNameToParam(model.item(s, 0).text()),
+                           model.item(s, 1).child(0).data().func)
+                           for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
+            else:
+                params += [(model.item(s, 0).text(),
+                           model.item(s, 1).child(0).data().func)
+                           for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
         return params
 
     def getComplexConstraintsForAllModels(self):

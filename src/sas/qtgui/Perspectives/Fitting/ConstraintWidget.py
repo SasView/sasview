@@ -964,6 +964,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraints = fit_page.getConstraintObjectsForAllModels()
 
         model_keys = ['standard', 'poly', 'magnet']
+        # MG: check if model_keys are available in self.model_dict.keys()
         active_constraint_names = []
         constraint_names = []
         constraints = []
