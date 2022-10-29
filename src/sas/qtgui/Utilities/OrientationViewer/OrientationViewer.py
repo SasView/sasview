@@ -1,4 +1,4 @@
-
+from typing import Optional
 import numpy as np
 
 from PyQt5 import QtWidgets
@@ -43,7 +43,7 @@ class OrientationViewer(QtWidgets.QWidget):
         super().__init__()
 
         # Put a barrier that will stop a flood of events going to the calculator
-        self.set_image_data = FloodBarrier[Orientation](self._set_image_data, 0.5)
+        self.set_image_data = FloodBarrier[Orientation](self._set_image_data, Orientation(), 0.5)
 
         self.graph = gl.GLViewWidget()
 
@@ -118,7 +118,10 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
 
-    def on_angle_change(self, orientation: Orientation):
+    def on_angle_change(self, orientation: Optional[Orientation]):
+
+        if orientation is None:
+            return
 
         for a, b, c, ghost in self.ghosts:
 

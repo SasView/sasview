@@ -11,19 +11,17 @@ class FloodBarrier(Generic[T], threading.Event):
     does come along, then it relplaces it and waits.
 
     This should prevent a flood of messages being sent to a calculation."""
-    def __init__(self, done_call: Callable[[T], Any], wait_time_s: float = 0.05):
+    def __init__(self, done_call: Callable[[T], Any], initial_value: T, wait_time_s: float = 0.05):
         super().__init__()
 
         self.done_call = done_call
         self.wait_time_s = wait_time_s
-
-        self.value: Optional[T] = None
+        self.value = initial_value
 
         self.current_timer: Optional[threading.Timer] = None
 
     def on_timout(self):
         self.done_call(self.value)
-        self.value = None
 
     def __call__(self, value: T):
 
