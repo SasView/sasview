@@ -62,6 +62,7 @@ hiddenimports = [
     'xmlrpc',
     'xmlrpc.server',
     'debugpy',
+    'debugpy._vendored',
     'uncertainties',
 ]
 
