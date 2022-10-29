@@ -172,9 +172,9 @@ class Calc1D(CalcThread):
         ##smearer the ouput of the plot
         if self.smearer is not None:
             if self.data.isSesans:
-                # For SESANS, data.x, qmin and qmax, and therefore get_bin_range are in correlation space, and
-                # the Hankel transform from q space to correlation space is set up as a resolution function, i.e.,
-                # the "unsmeared" data is in q space and the "smeared" data is in correlation space.
+                # For SESANS, data.x, qmin and qmax, and therefore get_bin_range are in real space, and
+                # the Hankel transform from q space to real space is set up as a resolution function, i.e.,
+                # the "unsmeared" data is in q space and the "smeared" data is in real space.
                 # Therefore, q_calc needs to be used here to calculate the unsmeared_out rather than data.x.
                 mask = self.smearer.resolution.q_calc
                 first_bin = 0
