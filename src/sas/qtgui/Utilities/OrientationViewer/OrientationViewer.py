@@ -92,10 +92,10 @@ class OrientationViewer(QtWidgets.QWidget):
         self.arrow.scale(0.05, 0.05, 0.05)
         self.arrow.translate(0,0,1)
 
-        self.image_plane.translate(0,0,-2)
+        self.image_plane.translate(0,0,-0.5) # It's 1 unit thick, so half way
 
         for _, _, _, ghost in self.ghosts:
-            ghost.setTransform(OrientationViewerGraphics.createTransform(0, 0, 0, OrientationViewer.cuboid_scaling))
+            ghost.setTransform(OrientationViewerGraphics.createCubeTransform(0, 0, 0, OrientationViewer.cuboid_scaling))
 
 
         self.controller.valueEdited.connect(self.on_angle_change)
@@ -126,7 +126,7 @@ class OrientationViewer(QtWidgets.QWidget):
         for a, b, c, ghost in self.ghosts:
 
             ghost.setTransform(
-                OrientationViewerGraphics.createTransform(
+                OrientationViewerGraphics.createCubeTransform(
                     orientation.theta + 0.5*a*orientation.dtheta,
                     orientation.phi + 0.5*b*orientation.dphi,
                     orientation.psi + 0.5*c*orientation.dpsi,
