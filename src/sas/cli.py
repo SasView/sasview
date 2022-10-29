@@ -1,20 +1,39 @@
+#
+#Also see sasmodels\doc\guide\scripting.rst
+#
 """
-SasView command line interface.
+**SasView command line interface**
 
-sasview [options] -m module [args...]
-    Run module as main.
-sasview [options] -c "python statements" [args...]
-    Execute python statements with sasview libraries available.
-sasview [options] script [args...]
-    Run script with sasview libraries available
-sasview [options]
-    Start sasview gui if not interactive
+This functionality is under development.
 
-Options:
+**Usage:**
 
-    -i: Start an interactive interpreter after the command is executed.
-    -q: Don't print.
-    -V: Print SasView version.
+sasview [flags]
+    *Run SasView. If no flag is given, or -q or -V are given, this will start
+    the GUI.*
+
+sasview [flags] script [args...]
+    *Run a python script using the installed SasView libraries [passing
+    optional arguments]*
+
+sasview [flags] -m module [args...]
+    *Run a SasView/Sasmodels/Bumps module as main [passing optional arguments]*
+
+sasview [flags] -c "python statements" [args...]
+    *Execute python statements using the installed SasView libraries*
+
+**Flags:**
+
+    -i: Interactive. *Start an interactive Python interpreter console.*
+
+    -q: Quiet. *Suppress startup messages.*
+
+    -V: Version. *Return the SasView version number.*
+
+Note: On Windows, any console output gets written to NUL by default. If
+redirecting to STDOUT does not work, try redirecting (e.g. with >)/writing
+output to file.
+
 """
 import sys
 
