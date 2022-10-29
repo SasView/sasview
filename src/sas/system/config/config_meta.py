@@ -91,25 +91,33 @@ class ConfigBase:
         with open(self.config_filename(True), 'w') as file:
             self.save_to_file_object(file)
 
+    def become_default(self):
+        self._bad_entries.clear()
+        self.update(self._defaults)
+        self._disable_writing = True
+
     def save_to_file_object(self, file):
         """ Save config file
 
         Only changed and unknown variables will be included in the saved file
         """
-        data = {}
-        for key in self._defaults:
-            old_value = self._defaults[key]
-            new_value = getattr(self, key)
-            if new_value != old_value:
-                data[key] = new_value
 
-        data.update(self._bad_entries)
+        if not self._disable_writing:
 
-        output_data = {
-            "sasview_version": sas.system.version.__version__,
-            "config_data": data}
+            data = {}
+            for key in self._defaults:
+                old_value = self._defaults[key]
+                new_value = getattr(self, key)
+                if new_value != old_value:
+                    data[key] = new_value
 
-        json.dump(output_data, file, indent=2)
+            data.update(self._bad_entries)
+
+            output_data = {
+                "sasview_version": sas.system.version.__version__,
+                "config_data": data}
+
+            json.dump(output_data, file, indent=2)
 
     def load(self):
         filename = self.config_filename(False)
