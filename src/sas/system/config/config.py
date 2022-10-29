@@ -180,6 +180,8 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        self.SHOW_EXIT_MESSAGE = True
+        
         # Window scaling values
         self.QT_SCALE_FACTOR = 1.0
         self.QT_AUTO_SCREEN_SCALE_FACTOR = False
