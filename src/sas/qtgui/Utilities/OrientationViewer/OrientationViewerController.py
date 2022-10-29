@@ -29,6 +29,8 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
 
         self.setupUi(self)
 
+        self.setLabels(Orientation())
+
         # All sliders emit the same signal - the angular coordinates in degrees
         self.thetaSlider.valueChanged.connect(self.onAngleChange)
         self.phiSlider.valueChanged.connect(self.onAngleChange)
@@ -36,6 +38,17 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
         self.deltaTheta.valueChanged.connect(self.onAngleChange)
         self.deltaPhi.valueChanged.connect(self.onAngleChange)
         self.deltaPsi.valueChanged.connect(self.onAngleChange)
+
+    def setLabels(self, orientation: Orientation):
+
+        self.thetaNumber.setText(f"{orientation.theta}°")
+        self.phiNumber.setText(f"{orientation.phi}°")
+        self.psiNumber.setText(f"{orientation.psi}°")
+
+        self.deltaThetaNumber.setText(f"{orientation.dtheta}°")
+        self.deltaPhiNumber.setText(f"{orientation.dphi}°")
+        self.deltaPsiNumber.setText(f"{orientation.dpsi}°")
+
 
     def onAngleChange(self):
         theta = self.thetaSlider.value()
