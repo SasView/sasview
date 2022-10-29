@@ -59,8 +59,9 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
         dphi = self.deltaPhi.value()
         dpsi = self.deltaPsi.value()
 
-        self.valueEdited.emit(Orientation(theta, phi, psi, dtheta, dphi, dpsi))
-
+        orientation = Orientation(theta, phi, psi, dtheta, dphi, dpsi)
+        self.valueEdited.emit(orientation)
+        self.setLabels(orientation)
 
 
 def main():
