@@ -216,7 +216,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.order_widget.updateData(self.all_data)
 
         # Overwrite data type descriptor
-
         self.is2D = True if isinstance(self.logic.data, Data2D) else False
 
         # Let others know we're full of data now
@@ -543,7 +542,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 if key[-6:] == '.width':
                     self.kernel_module.setParam(key, (value if isChecked else 0))
 
-
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
@@ -815,10 +813,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create a new item and add the Constraint object as a child
         self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
 
-
     def getModelKeyFromName(self, name):
         """
-        Given parameter name get the model index.
+        Given parameter name, get the model index.
         """
         if name in self.getParamNamesMain():
             return "standard"
@@ -831,20 +828,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getRowFromName(self, name):
         """
-        Given parameter name get the row number in a model.
+        Given parameter name, get the row number in a model.
         The model is the main _model_model by default
         """
-        # In case some confussion with poly params arriving here with name as 'Distribution of ' instead of '.width'
-        if "Distribution of" in name:
-            name = self.polyNameToParam(name)
         model_key = self.getModelKeyFromName(name)
         model = self.model_dict[model_key]
 
         for row in range(model.rowCount()):
             row_name = model.item(row).text()
             if model_key == 'poly':
-                if "Distribution of" in row_name:
-                    row_name = self.polyNameToParam(row_name)
+                row_name = self.polyNameToParam(row_name)
             if row_name == name:
                 return row
         return None
@@ -900,7 +893,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def polyNameToParam(self, param_name):
         """
-        Translate polydisperse parameter name into QTable representation
+        Translate polydisperse QTable representation into parameter name
         """
         param_name = param_name.replace('Distribution of ', '')
         param_name += '.width'
@@ -990,7 +983,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model.item(row, 1).setChild(0, item)
         # Set min/max to the value constrained
         self.constraintAddedSignal.emit([row], model_key)
-        # Show visual hints for the coself.constraintAddedSignal.emit([row], model_key)nstraint
+        # Show visual hints for the constraint
         font = QtGui.QFont()
         font.setItalic(True)
         brush = QtGui.QBrush(QtGui.QColor('blue'))
@@ -1013,7 +1006,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
         for row in self.selectedParameters(model_key=model_key):
-            # assert(self.isCheckable(row, model_key=model_key))
             param = model.item(row, 0).text()
             value = model.item(row, 1).text()
             min_t = model.item(row, min_col).text()
@@ -1042,7 +1034,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def editConstraint(self):
         """
-        Delete constraints from selected parameters.
+        Edit constraints for selected parameters.
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
@@ -1094,7 +1086,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
-
             self.deleteConstraintOnParameter(param=param, model_key=model_key)
 
     def deleteConstraintOnParameter(self, param=None, model_key="standard"):
@@ -1103,7 +1094,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         param_list = self.lst_dict[model_key]
         model = self.model_dict[model_key]
-
         for row in range(model.rowCount()):
             if not self.isCheckable(row, model_key=model_key):
                 continue
@@ -1116,11 +1106,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 continue
             if not isinstance(constraint, Constraint):
                 continue
-            if "Distribution of" in constraint.param:
-                cons_param = self.polyNameToParam(constraint.param)
-            else:
-                cons_param = constraint.param
-            if param and cons_param != param:
+            if param and constraint.param != param:
                 continue
             # Now we got the right row. Delete the constraint and clean up
             # Retrieve old values and put them on the model
@@ -1135,7 +1121,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     max_col = param_list.itemDelegate().param_max
                 except AttributeError:
                     max_col = 3
-                print("max_col", max_col)
                 model.item(row, max_col).setText(constraint.max)
             # Remove constraint item
             item.removeRow(0)
@@ -1149,7 +1134,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         For the given row, return its constraint, if any (otherwise None)
         """
         model = self.model_dict[model_key]
-
         if not self.isCheckable(row, model_key=model_key):
             return None
         item = model.item(row, 1)
@@ -1165,11 +1149,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         all_params = self.kernel_module._model_info.parameters.kernel_parameters
         all_params = list(self.kernel_module.details.keys())
 
-        #all_param_names = [param.name for param in all_params]
-        ## Assure scale and background are always included
-        #if 'scale' not in all_param_names:
+        # all_param_names = [param.name for param in all_params]
+        # Assure scale and background are always included
+        # if 'scale' not in all_param_names:
         #    all_param_names.append('scale')
-        #if 'background' not in all_param_names:
+        # if 'background' not in all_param_names:
         #    all_param_names.append('background')
         return all_params
 
@@ -1259,7 +1243,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def selectedParameters(self, model_key="standard"):
         """ Returns list of selected (highlighted) parameters """
-
         return [s.row() for s in self.lst_dict[model_key].selectionModel().selectedRows()
                 if self.isCheckable(s.row(), model_key=model_key)]
 
@@ -1301,11 +1284,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getComplexConstraintsForAllModels(self):
         """
+        Returns a list of tuples containing all the constraints defined
+        for a given FitPage
         """
         constraints = []
         for model_key in self.model_dict.keys():
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
-
         return constraints
 
     def getComplexConstraintsForModel(self, model_key):
@@ -1340,18 +1324,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for s in range(param_number):
             if self.rowHasConstraint(s, model_key=model_key):
                 param_name = model.item(s, 0).text()
-                if 'Distribution of ' in param_name:
+                if model_key == 'poly':
                     param_name = self.polyNameToParam(model.item(s, 0).text())
                 params.append((param_name, model.item(s, 1).child(0).data().func))
         return params
 
     def getConstraintObjectsForAllModels(self):
         """
+        Returns a list of the constraint object for a given FitPage
         """
         constraints = []
         for model_key in self.model_dict.keys():
             constraints += self.getConstraintObjectsForModel(model_key=model_key)
-
         return constraints
 
     def getConstraintObjectsForModel(self, model_key):
@@ -1362,7 +1346,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_number = model.rowCount()
         constraints = [model.item(s, 1).child(0).data()
                        for s in range(param_number) if self.rowHasConstraint(s, model_key=model_key)]
-
         return constraints
 
     def getConstraintsForFitting(self):
@@ -1414,7 +1397,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def showModelDescription(self):
         """
-        Creates a window with model description, when right clicked in the treeview
+        Creates a window with model description, when right-clicked in the treeview
         """
         msg = 'Model description:\n'
         if self.kernel_module is not None:
@@ -1697,12 +1680,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
         parameter_name = str(name_index.data()) # "distribution of sld" etc.
-        if "istribution of" in parameter_name:
-            # just the last word
-            parameter_name = parameter_name.rsplit()[-1]
+        parameter_name_w = self.polyNameToParam(parameter_name)
+        # Needs to retrieve also name of main parameter in order to update
+        # corresponding values in FitPage
+        parameter_name = parameter_name.rsplit()[-1]
 
         delegate = self.lstPoly.itemDelegate()
-        parameter_name_w = parameter_name + '.width'
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
@@ -1747,9 +1730,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column not in delegate.columnDict():
                 return
-            key = parameter_name + '.' + delegate.columnDict()[model_column]
-            self.poly_params[key] = value
-            self.kernel_module.setParam(key, value)
+            self.poly_params[parameter_name_w] = value
+            self.kernel_module.setParam(parameter_name_w, value)
 
             # Update plot
             self.updateData()
@@ -1787,7 +1769,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.updateUndo()
             return
 
-        # Extract changed value.
+        # Extract changed value
         try:
             value = GuiUtils.toDouble(item.text())
         except TypeError:
@@ -3174,7 +3156,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def _appendPlotsPolyDisp(self, new_plots, return_data, fitted_data):
         """
         Internal helper for 1D and 2D for creating plots of the polydispersity distribution for
-        parameters which have a polydispersity enabled.
+        parameters which have a polydispersity enabled
         """
         for plot in FittingUtilities.plotPolydispersities(return_data.get('model', None)):
             data_id = fitted_data.id.split()
@@ -3423,7 +3405,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Standard of multishell poly parameter driver
         """
         param_name = param.name
-        # see it the parameter is multishell
+        # see it if the parameter is multishell
         if '[' in param.name:
             # Skip empty shells
             if self.current_shell_displayed == 0:
@@ -4007,7 +3989,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.smearing_options[fp.SMEARING_MIN] = smearing_min
         fp.smearing_options[fp.SMEARING_MAX] = smearing_max
 
-        # TODO: add polidyspersity and magnetism
+        # TODO: add polydispersity and magnetism
 
     def updateUndo(self):
         """
@@ -4702,5 +4684,3 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
                 self.model_dict[model_key].item(self.getRowFromName(param), 1).text())
         return sym_dict
-
-

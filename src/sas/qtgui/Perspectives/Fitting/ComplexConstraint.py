@@ -212,7 +212,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         # temporarily disable validation
         return
-        #
+
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)

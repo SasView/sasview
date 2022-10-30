@@ -504,16 +504,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint when the user edits the constraint list. If the
-        user changes the constrained parameter, the constraint is erased and a
-        new one is created.
-        Checking is performed on the constrained entered by the user, showing
-        message box warning him the constraint is not valid and cancelling
-        his changes by reloading the view. View is reloaded
-        when the user is finished for consistency.
+        Modify the constraint when the user edits the constraint list.
+        If the user changes the constrained parameter, the constraint is erased
+        and a new one is created.
+        Checking is performed on the constrained entered by the user.
+        In case of an error during checking, a warning message box is shown
+        and the constraint is cancelled by reloading the view.
+        View is also reloaded when the user is finished for consistency.
         """
         item = self.tblConstraints.item(row, column)
-        # extract information from the constraint object
+        # Extract information from the constraint object
         constraint = self.available_constraints[row]
         model = constraint.value_ex[:constraint.value_ex.index(".")]
         param = constraint.param
@@ -533,9 +533,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
+
         # Then check if the parameter is correctly defined with colons
         # separating model and parameter name
-
         lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
         if ":" not in lhs:
             msg = ("Incorrect constrained parameter definition. Please use "
@@ -551,7 +551,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # We can parse the string
         new_param = lhs.split(":", 1)[1].strip()
         new_model = lhs.split(":", 1)[0].strip()
-        # Check that the symbol is known so we dont get an unknown tab
+        # Check that the symbol is known so we don't get an unknown tab
         # All the conditional statements could be grouped in one or
         # alternatively we could check with expression.py, but we would still
         # need to do some checks to parse the string
@@ -587,7 +587,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # parameter, delete the old constraint
             if (self.constraint_accepted and new_model != model or
                     new_param != param):
-                print(1, param)
                 tab.deleteConstraintOnParameter(param)
             # Reload the view
             self.initializeFitList()
@@ -899,8 +898,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             moniker = constraint[:constraint.index(':')]
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
-            print(2, param)
-            tab.deleteConstraintOnParameter(param)
+            model_key = tab.getModelKeyFromName(param)
+            tab.deleteConstraintOnParameter(param, model_key=model_key)
 
         # Constraints removed - refresh the table widget
         self.initializeFitList()
@@ -963,18 +962,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         constraint_names = fit_page.getComplexConstraintsForAllModels()
         constraints = fit_page.getConstraintObjectsForAllModels()
 
-        model_keys = ['standard', 'poly', 'magnet']
-        # MG: check if model_keys are available in self.model_dict.keys()
         active_constraint_names = []
         constraint_names = []
         constraints = []
-        for model_key in model_keys:
+        for model_key in fit_page.model_dict.keys():
             active_constraint_names += fit_page.getComplexConstraintsForModel(model_key=model_key)
             constraint_names += fit_page.getFullConstraintNameListForModel(model_key=model_key)
             constraints += fit_page.getConstraintObjectsForModel(model_key=model_key)
 
         if not constraints:
             return
+
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
         for constraint, constraint_name in zip(constraints, constraint_names):
@@ -1117,7 +1115,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Select this parameter for adjusting/fitting
         # constrained_tab.selectCheckbox(constrained_row, model=model)
-
 
     def showMultiConstraint(self):
         """
