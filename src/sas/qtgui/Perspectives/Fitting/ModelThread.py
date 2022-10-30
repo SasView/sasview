@@ -254,8 +254,6 @@ class Calc1D(CalcThread):
 
         elapsed = time.time() - self.starttime
 
-        setattr(self.data,'isExpData',True)
-
         res = dict(x = self.data.x[index], y = output[index],
             page_id = self.page_id, state = self.state, weight = self.weight,
             fid = self.fid, toggle_mode_on = self.toggle_mode_on,

@@ -778,14 +778,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         try:
             if self.chkSwap.isChecked():
                 self._perspective().swapData(selected_items[0])
-                if self._perspective().name == 'Fitting':
-                    if config.FITTING_PLOT_ON_SEND_DATA:
-                        self.newPlot() #todo sort out where the plot should go.
             else:
                 self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
-                if self._perspective().name == 'Fitting':
-                    if config.FITTING_PLOT_ON_SEND_DATA:
-                        self.newPlot()
 
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))

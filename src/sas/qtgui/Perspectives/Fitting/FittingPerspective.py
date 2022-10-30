@@ -23,6 +23,10 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 from sas import config
+import time
+
+import logging
+logger = logging.getLogger(__name__)
 
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
@@ -266,15 +270,23 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Show the new tab
         self.setCurrentWidget(tab)
         # If configured, plot the current data
-        if config.FITTING_PLOT_ON_SEND_DATA:
-            #First, create model and residuals inside this data.
-            tab.calculateQGridForModel()
-            #then simply push plot
-            tab.onPlot()
+        self.maybePlotOnLoad(tab)
 
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
+    def maybePlotOnLoad(self,tab):
+        if tab.data_is_loaded and config.FITTING_PLOT_ON_SEND_DATA:
+            #First, create model and residuals inside this data.
+            def tidyup(self):
+                logger.info(msg='calculation complete, running tidy-up function')
+                time.sleep(2)
+                tab.onPlot()
+                time.sleep(2)
+                tab._model_model.clear()
+                tab.cmdPlot.setEnabled(False)
+            tab.SASModelToQModel('porod')
+            tab.calculateQGridForModelExt(completefn= tidyup)
     def addConstraintTab(self):
         """
         Add a new C&S fitting tab
@@ -440,6 +452,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 self.tabs[first_good_tab].data = data
                 tab_name = str(self.tabText(first_good_tab))
                 self.updateFitDict(data, tab_name)
+                self.maybePlotOnLoad(self.tabs[first_good_tab])
             else:
                 self.addFit(data, is_batch=is_batch)
 
