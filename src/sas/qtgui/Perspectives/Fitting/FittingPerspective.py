@@ -280,9 +280,12 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             #First, create model and residuals inside this data.
             def tidyup(self):
                 logger.info(msg='calculation complete, running tidy-up function')
-                time.sleep(2)
-                tab.onPlot()
-                time.sleep(2)
+                #time.sleep(2)
+                #tab.onPlot()
+                #QtWidgets.QApplication.processEvents()
+                tab.showPlot()
+                #QtWidgets.QApplication.processEvents()
+                #time.sleep(2)
                 tab._model_model.clear()
                 tab.cmdPlot.setEnabled(False)
             tab.SASModelToQModel('porod')
