@@ -4207,12 +4207,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         if 'smearing_min' in line_dict.keys():
             try:
-                self.smearing_widget.dq_l = float(line_dict['smearing_min'][0])
+                self.smearing_widget.dq_r = float(line_dict['smearing_min'][0])
             except ValueError:
                 pass
         if 'smearing_max' in line_dict.keys():
             try:
-                self.smearing_widget.dq_r = float(line_dict['smearing_max'][0])
+                self.smearing_widget.dq_l = float(line_dict['smearing_max'][0])
             except ValueError:
                 pass
 
