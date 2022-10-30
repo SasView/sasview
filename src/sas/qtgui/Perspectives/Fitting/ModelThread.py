@@ -253,7 +253,7 @@ class Calc1D(CalcThread):
                 intermediate_results = {}
 
         elapsed = time.time() - self.starttime
-
+  
         res = dict(x = self.data.x[index], y = output[index],
             page_id = self.page_id, state = self.state, weight = self.weight,
             fid = self.fid, toggle_mode_on = self.toggle_mode_on,
