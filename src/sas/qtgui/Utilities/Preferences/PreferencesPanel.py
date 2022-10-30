@@ -7,17 +7,19 @@ from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 from sas.qtgui.Utilities.Preferences.DisplayPreferencesWidget import DisplayPreferencesWidget
-
+from sas.qtgui.Utilities.Preferences.PlottingPreferencesWidget import PlottingPreferencesWidget
+from sas.qtgui.Utilities.Preferences.FittingPreferencesWidget import FittingPreferencesWidget
 # The PreferencesPanel object will instantiate all widgets during its instantiation.
 #  e.g:
 #  `from foo.bar import BarWidget  # BarWidget is a child of PreferencesWidget`
 #  `BASE_PANELS = {"Bar Widget Options": BarWidget}`
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
-from .PlottingPreferencesWidget import PlottingPreferencesWidget
+
 # Pre-made option widgets
 
 BASE_PANELS = {"Plotting Settings":PlottingPreferencesWidget,
                "Display Settings":DisplayPreferencesWidget,
+               "Fitting Settings":FittingPreferencesWidget,
             }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 
 logger = logging.getLogger(__name__)
