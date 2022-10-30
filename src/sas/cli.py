@@ -1,5 +1,5 @@
 #
-#Also see sasmodels\doc\guide\scripting.rst
+#Also see sasview\src\sas\qtgui\Perspectives\Fitting\media\cli.rst
 #
 """
 **SasView command line interface**
