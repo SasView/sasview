@@ -1,8 +1,12 @@
-from abc import ABC, abstractmethod
+
+
+from abc import abstractmethod
 
 import numpy as np
 
-class WireModel(ABC):
+from sas.qtgui.GL.Renderable import Renderable
+
+class WireModel(Renderable):
 
     @abstractmethod
     @property
@@ -12,4 +16,9 @@ class WireModel(ABC):
     @abstractmethod
     @property
     def edges(self) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    @property
+    def edge_colors(self) -> np.ndarray:
         pass

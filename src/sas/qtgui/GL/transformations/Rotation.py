@@ -1,10 +1,12 @@
 import numpy as np
+
+from sas.qtgui.GL.transformations.SceneGraphNode import SceneGraphNode
 from sas.qtgui.GL.Renderable import Renderable
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-class Rotation(Renderable):
+class Rotation(SceneGraphNode):
     """
     General transform - also doubles as a scene graph node
 
@@ -13,9 +15,8 @@ class Rotation(Renderable):
     """
 
     def __init__(self, rotation: np.ndarray, *children: Renderable):
-        super().__init__()
+        super().__init__(*children)
         self.rotation = rotation
-        self.children = children
 
     def render_solid(self):
         # Apply transform

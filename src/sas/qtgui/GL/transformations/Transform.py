@@ -4,8 +4,10 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 from sas.qtgui.GL.Renderable import Renderable
+from sas.qtgui.GL.transformations.SceneGraphNode import SceneGraphNode
 
-class Transform(Renderable):
+
+class Transform(SceneGraphNode):
     """
     General transform - also doubles as a scene graph node
 
@@ -14,9 +16,8 @@ class Transform(Renderable):
     """
 
     def __init__(self, matrix: np.ndarray, *children: Renderable):
-        super().__init__()
+        super().__init__(*children)
         self.matrix = matrix
-        self.children = children
 
     def render_solid(self):
         # Apply transform

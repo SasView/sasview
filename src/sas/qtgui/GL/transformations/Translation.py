@@ -1,21 +1,21 @@
 import numpy as np
 from sas.qtgui.GL.Renderable import Renderable
+from sas.qtgui.GL.transformations.SceneGraphNode import SceneGraphNode
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-class Translation(Renderable):
+class Translation(SceneGraphNode):
     """
     General transform - also doubles as a scene graph node
 
-    For the sake of speed, the transformation matrix shape is not checked.
+    For the sake of speed, the rotation matrix shape is not checked.
     It should be a 3 element vector
     """
 
-    def __init__(self, translation: np.ndarray, *children: Renderable):
-        super().__init__()
+    def __init__(self, rotation: np.ndarray, *children: Renderable):
+        super().__init__(*children)
         self.rotation = rotation
-        self.children = children
 
     def render_solid(self):
         # Apply transform
