@@ -2,7 +2,6 @@
 Allows users to change the range of the current graph
 """
 from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 import matplotlib as mpl
@@ -11,7 +10,7 @@ import numpy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
-from .rangeSlider import RangeSlider
+from superqt import QDoubleRangeSlider
 
 DEFAULT_MAP = 'jet'
 
@@ -31,9 +30,10 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         self.data = data
         self._cmap_orig = self._cmap = cmap if cmap is not None else DEFAULT_MAP
-        self.all_maps = [m for m in mpl.cm.datad]
-        self.maps = sorted(m for m in self.all_maps if not m.endswith("_r"))
-        self.rmaps = sorted(set(self.all_maps) - set(self.maps))
+
+        self.maps = [m for m in mpl.cm.datad]
+        self.rmaps = [m + '_r' for m in self.maps]
+        self.all_maps = self.maps + self.rmaps
 
         self.vmin = self.vmin_orig = vmin
         self.vmax = self.vmax_orig = vmax
@@ -106,8 +106,8 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         self.initMapCombobox()
         self.slider.setMinimum(self.vmin)
         self.slider.setMaximum(self.vmax)
-        self.slider.setLowValue(self.vmin)
-        self.slider.setHighValue(self.vmax)
+        self.slider.setRange(self.vmin, self.vmax)
+        self.slider.setSliderPosition([self.vmin, self.vmax])
         # Redraw the widget
         self.redrawColorBar()
         self.canvas.draw()
@@ -154,27 +154,33 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         """
         Create and display the double slider for data range mapping.
         """
-        self.slider = RangeSlider()
-        self.slider.setMinimum(self.vmin)
-        self.slider.setMaximum(self.vmax)
-        self.slider.setLowValue(self.vmin)
-        self.slider.setHighValue(self.vmax)
-        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider = QDoubleRangeSlider(QtCore.Qt.Horizontal)
+        self.slider.setValue([self.vmin, self.vmax])
+        self.slider.setRange(self.vmin, self.vmax)
+
+        self.slider.setTickPosition(QtWidgets.QSlider.TicksAbove)
+        self.slider.setSliderPosition([self.vmin, self.vmax])
 
         self.slider_label = QtWidgets.QLabel()
         self.slider_label.setText("Drag the sliders to adjust color range.")
 
         def set_vmin(value):
             self.vmin = value
-            self.txtMinAmplitude.setText(str(value))
+            self.txtMinAmplitude.setText(formatNumber(value))
             self.updateMap()
         def set_vmax(value):
             self.vmax = value
-            self.txtMaxAmplitude.setText(str(value))
+            self.txtMaxAmplitude.setText(formatNumber(value))
             self.updateMap()
 
-        self.slider.lowValueChanged.connect(set_vmin)
-        self.slider.highValueChanged.connect(set_vmax)
+        def set_values(values):
+            v1, v2 = values
+            if v1 != self.vmin:
+                set_vmin(v1)
+            if v2 != self.vmax:
+                set_vmax(v2)
+
+        self.slider.valueChanged.connect(set_values)
 
     def updateMap(self):
         self._norm = mpl.colors.Normalize(vmin=self.vmin, vmax=self.vmax)
