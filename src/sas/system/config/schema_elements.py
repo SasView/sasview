@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List
+from typing import Optional, List, Any
 import logging
 
 
@@ -25,6 +25,15 @@ class SchemaElement(ABC):
     def coerce(self, value):
         """ Force a variable to conform to the schema, if possible"""
         pass
+
+    def validate(self, value: Any) -> bool:
+        """ Return true if value is valid according to the schema"""
+        try:
+            self.coerce(value)
+            return True
+
+        except CoercionError:
+            return False
 
     def __eq__(self, value):
         return False
