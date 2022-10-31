@@ -608,7 +608,6 @@ def plotResiduals(reference_data, current_data, weights):
     res_name = reference_data.name if reference_data.name else reference_data.filename
     residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
     residuals.title = residuals.name
-    residuals.ytransform = 'y'
 
     # when 2 data have the same id override the 1 st plotted
     # include the last part if keeping charts for separate models is required
