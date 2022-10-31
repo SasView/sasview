@@ -19,3 +19,11 @@ class DisplayPreferencesWidget(PreferencesWidget):
             checked=config.QT_AUTO_SCREEN_SCALE_FACTOR)
         self.autoScaling.clicked.connect(
             lambda: self._stageChange('QT_AUTO_SCREEN_SCALE_FACTOR', self.autoScaling.isChecked()))
+
+    def _toggleBlockAllSignaling(self, toggle):
+        self.qtScaleFactor.blockSignals(toggle)
+        self.autoScaling.blockSignals(toggle)
+
+    def _restoreFromConfig(self):
+        self.qtScaleFactor.setText(str(config.QT_SCALE_FACTOR))
+        self.autoScaling.setChecked(config.QT_AUTO_SCREEN_SCALE_FACTOR)

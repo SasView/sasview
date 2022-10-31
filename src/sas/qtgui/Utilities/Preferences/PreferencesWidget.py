@@ -53,11 +53,27 @@ class PreferencesWidget(QWidget):
         for param in self.config_params:
             default = config.defaults.get(param)
             setattr(config, param, default)
+        self.restoreGUIValuesFromConfig()
 
-    def _stageChange(self, key, value):
+    def _stageChange(self, key: str, value: Union[str, bool, float, int, List]):
         """ All inputs should call this method when attempting to change config values. """
         if self.parent is not None and hasattr(self.parent, 'stageSingleChange'):
             self.parent.stageSingleChange(key, value)
+
+    def restoreGUIValuesFromConfig(self):
+        """A generic method that blocks all signalling, and restores the GUI values from the config file.
+        Called when staging is cancelled or defaults should be restored."""
+        self._toggleBlockAllSignaling(True)
+        self._restoreFromConfig()
+        self._toggleBlockAllSignaling(False)
+
+    def _restoreFromConfig(self):
+        """A pseudo-abstract class that children should override. Recalls all config values and restores the GUI. """
+        raise NotImplementedError(f"{self.name} has not implemented revertChanges.")
+
+    def _toggleBlockAllSignaling(self, toggle: bool):
+        """A pseudo-abstract class that children should override. Toggles signalling for all elements. """
+        raise NotImplementedError(f"{self.name} has not implemented _toggleBlockAllSignalling.")
 
     #############################################################
     # GUI Helper methods for widgets that don't have a UI element

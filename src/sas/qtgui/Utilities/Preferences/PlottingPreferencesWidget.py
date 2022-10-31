@@ -26,3 +26,13 @@ class PlottingPreferencesWidget(PreferencesWidget):
             default_text=str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))
         self.legendLineLength.textChanged.connect(
             lambda: self._stageChange('FITTING_PLOT_LEGEND_MAX_LINE_LENGTH', self.legendLineLength.text()))
+
+    def _toggleBlockAllSignaling(self, toggle):
+        self.legendFullWidth.blockSignals(toggle)
+        self.legendTruncate.blockSignals(toggle)
+        self.legendLineLength.blockSignals(toggle)
+
+    def _restoreFromConfig(self):
+        self.legendFullWidth.setChecked(config.FITTING_PLOT_FULL_WIDTH_LEGENDS)
+        self.legendTruncate.setChecked(config.FITTING_PLOT_LEGEND_TRUNCATE)
+        self.legendLineLength.setText(str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))

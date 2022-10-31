@@ -98,6 +98,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def _cancelStaging(self):
         """ When the Cancel button is clicked, throw away any staged changes and hide the window"""
+        for i in range(self.stackedWidget.count()):
+            self.stackedWidget.widget(i).restoreGUIValuesFromConfig()
         self._staged_changes = {}
         self.close()
 
