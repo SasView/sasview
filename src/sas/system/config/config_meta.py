@@ -48,6 +48,11 @@ class ConfigBase:
                                  "_deleted_attributes", "_meta_attributes",
                                  "_bad_entries"]
 
+    @property
+    def defaults(self):
+        """ Expose the default values to allow resetting of defaults. No setter should ever be created for this! """
+        return self._defaults
+
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
         version_parts = sas.system.version.__version__.split(".")
