@@ -35,7 +35,7 @@ class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
             delegate = self.itemDelegate()
             widget.currentIndexChanged.connect(lambda: delegate.commitData.emit(widget))
 
-SMEARING_1D = ["Custom Pinhole Smear", "Custom Slit Smear"]
+SMEARING_1D = ["Custom Pinhole Smear", "Custom Slit Smear", "Hankel Transform"]
 SMEARING_2D = ["Custom Pinhole Smear"]
 SMEARING_SESANS = "Hankel Transform"
 SMEARING_QD = "Use dQ Data"
@@ -167,7 +167,11 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             return
 
         if isinstance(self.data, Data1D):
-            self.cbSmearing.addItems(SMEARING_1D)
+            if self.data.isSesans:
+                self.cbSmearing.addItems(SMEARING_1D)
+                index_to_show = 4
+            else:
+                self.cbSmearing.addItems(SMEARING_1D[:-1])
         else:
             self.cbSmearing.addItems(SMEARING_2D)
         self.cbSmearing.blockSignals(False)
@@ -200,7 +204,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.onSlitSmear()
         elif text == "Hankel Transform":
             self.setElementsVisibility(False)
-            self.cbSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):
@@ -488,6 +491,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.smear_type = "Pinhole"
             self.dq_r = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
             self.dq_l = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)
+        elif (isinstance(self.smearer(), PySmear)
+              and isinstance(self.smearer().resolution, SesansTransform)):
+            self.smear_type = "Hankel Transform"
         # Check for slit smearing and get min max if it is.
         elif isinstance(self.smearer(), PySmear) and isinstance(self.smearer().resolution, Slit1D):
             self.smear_type = "Slit"
