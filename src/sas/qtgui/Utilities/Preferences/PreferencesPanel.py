@@ -43,11 +43,11 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.listWidget.setCurrentRow(0)
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
-        self.buttonBox.button(QDialogButtonBox.RestoreDefaults).connect(self.restoreDefaultPreferences)
-        self.buttonBox.button(QDialogButtonBox.Ok).connect(self._okClicked())
-        self.buttonBox.button(QDialogButtonBox.Cancel).connect(self._cancelStaging)
-        self.buttonBox.button(QDialogButtonBox.Apply).connect(self._saveStagedChanges)
-        self.buttonBox.button(QDialogButtonBox.Help).connect(self.help)
+        self.buttonBox.button(QDialogButtonBox.RestoreDefaults).clicked.connect(self.restoreDefaultPreferences)
+        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self._okClicked)
+        self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self._cancelStaging)
+        self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self._saveStagedChanges)
+        self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(self.help)
 
     def addWidgets(self, widgets: Dict[str, Callable]):
         """Add a list of named widgets to the window"""
