@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
+from PyQt5.QtWidgets import QDialog, QPushButton, QWidget, QDialogButtonBox
 from PyQt5.QtCore import Qt
 from typing import Optional, Callable, Dict, Any
 
@@ -43,7 +43,11 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.listWidget.setCurrentRow(0)
         # Add window actions
         self.listWidget.currentItemChanged.connect(self.prefMenuChanged)
-        self.buttonBox.clicked.connect(self.onClick)
+        self.buttonBox.button(QDialogButtonBox.RestoreDefaults).connect(self.restoreDefaultPreferences)
+        self.buttonBox.button(QDialogButtonBox.Ok).connect(self._okClicked())
+        self.buttonBox.button(QDialogButtonBox.Cancel).connect(self._cancelStaging)
+        self.buttonBox.button(QDialogButtonBox.Apply).connect(self._saveStagedChanges)
+        self.buttonBox.button(QDialogButtonBox.Help).connect(self.help)
 
     def addWidgets(self, widgets: Dict[str, Callable]):
         """Add a list of named widgets to the window"""
@@ -69,16 +73,6 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         """Set the menu and options stack to a given index"""
         self.listWidget.setCurrentRow(row)
         self.stackedWidget.setCurrentIndex(row)
-
-    def onClick(self, btn: QPushButton):
-        """Handle button click events in one area"""
-        # Reset to the default preferences
-        if btn.text() == 'Restore Defaults':
-            self.restoreDefaultPreferences()
-        elif btn.text() == 'OK':
-            self._okClicked()
-        elif btn.text() == 'Help':
-            self.help()
 
     def restoreDefaultPreferences(self):
         """Reset preferences for the active widget to the default values."""
