@@ -35,7 +35,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
     plot_signal = QtCore.pyqtSignal()
     QMIN_DEFAULT = 0.0005
     QMAX_DEFAULT = 0.5
-    NPTS_DEFAULT = 50
+    NPTS_DEFAULT = 150
     MODEL = [
         'MIN_RANGE',
         'MAX_RANGE',
@@ -126,6 +126,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtNptsFit,  self.MODEL.index('NPTS_FIT'))
 
         self.mapper.toFirst()
+
+    def setLogScale(self, log_scale):
+        self.chkLogData.setChecked(log_scale)
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
@@ -255,7 +258,6 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         npts = int(self.model.item(self.MODEL.index('NPTS')).text())
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
         log_points = self.chkLogData.isChecked()
-
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):

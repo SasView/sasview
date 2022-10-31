@@ -266,6 +266,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.log_points = True
         self.weighting = 0
         self.chi2 = None
+
         # Does the control support UNDO/REDO
         # temporarily off
         self.undo_supported = False
@@ -329,6 +330,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget = OptionsWidget(self, self.logic)
         layout.addWidget(self.options_widget)
         self.tabOptions.setLayout(layout)
+        self.options_widget.setLogScale(self.log_points)
 
         # Smearing widget
         layout = QtWidgets.QGridLayout()

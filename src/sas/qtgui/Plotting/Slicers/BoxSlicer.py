@@ -533,4 +533,3 @@ class BoxInteractorY(BoxInteractor):
                 print("Number of bins cannot be less than or equal to 0. Please adjust.")
                 isValid = False
         return isValid
-    
