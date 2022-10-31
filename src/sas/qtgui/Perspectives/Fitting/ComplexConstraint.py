@@ -210,7 +210,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
-        # temporarily disable validation
+        # temporarily disable validation, as not yet fully operational
         return
 
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
@@ -340,7 +340,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         for tab in tabs:
             if hasattr(tab, "kernel_module"):
-                if param in tab.kernel_module.params:
+                if (param in tab.kernel_module.params or
+                    param in tab.poly_params or
+                    param in tab.magnet_params):
                     value_ex = tab.kernel_module.name + "." +param
                     constraint = Constraint(param=param,
                                             value=param,
