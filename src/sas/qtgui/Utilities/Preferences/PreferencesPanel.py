@@ -1,24 +1,24 @@
 import logging
 
 from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
-from typing import Optional, Callable, Dict, Type
+from PyQt5.QtCore import Qt
+from typing import Optional, Callable, Dict, Any
 
-from sas.system.config.config import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
-from sas.qtgui.Utilities.Preferences.DisplayPreferencesWidget import DisplayPreferencesWidget
 
 # The PreferencesPanel object will instantiate all widgets during its instantiation.
 #  e.g:
 #  `from foo.bar import BarWidget  # BarWidget is a child of PreferencesWidget`
 #  `BASE_PANELS = {"Bar Widget Options": BarWidget}`
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
+from .DisplayPreferencesWidget import DisplayPreferencesWidget
 from .PlottingPreferencesWidget import PlottingPreferencesWidget
 # Pre-made option widgets
 
-BASE_PANELS = {"Plotting Settings":PlottingPreferencesWidget,
-               "Display Settings":DisplayPreferencesWidget,
-            }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
+BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
+               "Display Settings": DisplayPreferencesWidget,
+               }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 
 logger = logging.getLogger(__name__)
 
@@ -27,19 +27,14 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     """A preferences panel to house all SasView related settings. The left side of the window is a listWidget with a
     options menus available. The right side of the window is a stackedWidget object that houses the options
     associated with each listWidget item.
-    **Important Note** When adding new preference widgets, the index for the listWidget and stackedWidget *must* match
-    Release notes:
-    SasView v5.0.5: Added defaults for loaded data units and plotted units
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[Any] = None):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
+        self._staging = False
         self.parent = parent
         self.setWindowTitle("Preferences")
-        self.warning = None
-        # A list of callables used to restore the default values for each item in StackedWidget
-        self.restoreDefaultMethods = []
         # Add predefined widgets to window
         self.addWidgets(BASE_PANELS)
         # Set defaults values for the list and stacked widgets
@@ -50,7 +45,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.buttonBox.clicked.connect(self.onClick)
 
     def addWidgets(self, widgets: Dict[str, Callable]):
-        """Add a list of widgets to the window"""
+        """Add a list of named widgets to the window"""
         for name, widget in widgets.items():
             if isinstance(widget, PreferencesWidget):
                 self.addWidget(widget, name)
@@ -60,6 +55,18 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
         row = self.listWidget.currentRow()
+        self.setWidgetIndex(self.listWidget.currentRow())
+
+    def setMenuByName(self, name: str):
+        """Set the index of the listWidget and stackedWidget, using the display name as the search term"""
+        for item in self.listWidget.findItems(name, Qt.MatchContains):
+            if item.text() == name:
+                self.listWidget.setCurrentItem(item)
+        self.setWidgetIndex(self.listWidget.currentRow())
+
+    def setWidgetIndex(self, row: int):
+        """Set the menu and options stack to a given index"""
+        self.listWidget.setCurrentRow(row)
         self.stackedWidget.setCurrentIndex(row)
 
     def onClick(self, btn: QPushButton):
@@ -73,26 +80,26 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             self.help()
 
     def restoreDefaultPreferences(self):
-        """Reset all preferences to their default preferences"""
-        for method in self.restoreDefaultMethods:
-            if callable(method):
-                method()
-            else:
-                logger.warning(f'While restoring defaults, {str(method)} of type {type(method)}'
-                               + ' was given. A callable object was expected.')
+        """Reset preferences for the active widget to the default values."""
+        widget = self.stackedWidget.currentWidget()
+        if hasattr(widget, 'restoreDefaults') and callable(widget.restoreDefaults):
+            widget.restoreDefaults()
 
     def close(self):
         """Save the configuration values when the preferences window is closed"""
-        config.save()
         super(PreferencesPanel, self).close()
 
     def addWidget(self, widget: QWidget, name: Optional[str] = None):
+        """Add a single widget to the panel"""
+        # Set the parent of the new widget to the parent of this window
+        widget.parent = self.parent
         self.stackedWidget.addWidget(widget)
-        name = widget.name if hasattr(widget, 'name') and widget.name else name
-        name = "Unknown" if not name else name
+        # Set display name in the listWidget with the priority of
+        #  name passed to method > widget.name > "Generic Preferences"
+        name = name if name is not None else getattr(widget, 'name', None)
+        name = name if name is not None else "Generic Preferences"
+        # Add the widget default reset method to the global set
         self.listWidget.addItem(name)
-        if hasattr(widget, 'resetDefaults') and callable(widget.resetDefaults):
-            self.restoreDefaultMethods.append(widget.resetDefaults)
 
     def help(self):
         """Open the help window associated with the preferences window"""
