@@ -147,7 +147,22 @@ def main(logging="production"):
     #     sys.exit(start_ipython())
     if cli.interactive:
         import code
-        exitmsg = banner = "" if cli.quiet else None
+        # The python banner is something like
+        #     f"Python {sys.version} on {platform.system().lower()}"
+        # where sys.version contains "VERSION (HGTAG, DATE)\n[COMPILER]"
+        # We are replacing it with something that includes the sasview version.
+        if cli.quiet:
+            exitmsg = banner = ""
+        else:
+            import platform
+            import sas
+            # Form dotted python version number out of sys.version_info
+            major, minor, micro = sys.version_info[:3]
+            sasview_ver = f"SasView {sas.__version__}"
+            python_ver = f"Python {major}.{minor}.{micro}"
+            os_ver = platform.system()
+            banner = f"{sasview_ver} for {python_ver} on {os_ver}"
+            exitmsg = ""
         code.interact(banner=banner, exitmsg=exitmsg, local=context)
 
     return 0
