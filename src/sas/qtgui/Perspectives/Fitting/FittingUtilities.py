@@ -632,6 +632,8 @@ def plotPolydispersities(model):
         # similar to FittingLogic._create1DPlot() but different data/axes
         data1d = Data1D(x=xarr, y=yarr)
         xunit = model.details[name][0]
+        data1d.xtransform = 'x'
+        data1d.ytransform = 'y'
         data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
         data1d.yaxis(r'\rm{probability}', 'normalized')
         data1d.scale = 'linear'
