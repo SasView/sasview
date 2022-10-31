@@ -99,6 +99,8 @@ class PreferencesWidget(QWidget):
         """
         layout = self._createLayoutAndTitle(title)
         text_box = QLineEdit(self)
+        if default_text:
+            text_box.setText(default_text)
         layout.addWidget(text_box)
         self.verticalLayout.addLayout(layout)
         return text_box
