@@ -54,6 +54,11 @@ class PreferencesWidget(QWidget):
             default = config.defaults.get(param)
             setattr(config, param, default)
 
+    def _stageChange(self, key, value):
+        """ All inputs should call this method when attempting to change config values. """
+        if self.parent is not None and hasattr(self.parent, 'stageSingleChange'):
+            self.parent.stageSingleChange(key, value)
+
     #############################################################
     # GUI Helper methods for widgets that don't have a UI element
 
