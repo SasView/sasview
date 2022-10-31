@@ -34,3 +34,5 @@ importlib-resources
 bumps
 html2text
 jsonschema
+superqt
+
