@@ -39,7 +39,7 @@ preliminary analysis, but only works reliably for weakly correlated parameters.
 For full uncertainty analysis, :ref:`fit-dream` uses a random walk to explore
 the parameter space near the minimum, showing pair-wise correlations
 amongst the parameter values.  In order for :ref:`fit-dream` to return the
-correct uncertainy, the function to be optimized should be a conditional
+correct uncertainty, the function to be optimized should be a conditional
 probability density, with *nllf* as the negative log likelihood function
 of seeing point $x$ in the parameter space.  Other functions
 can be fitted, but uncertainty estimates will be meaningless.
@@ -132,7 +132,7 @@ References
 
 .. [#Levenberg1944]
     Levenberg, K.
-    *Quarterly Journal of Applied Mathmatics*
+    *Quarterly Journal of Applied Mathematics*
     1944, II (2), 164–168.
 
 .. [#Marquardt1963]
@@ -351,7 +351,7 @@ within tolerance) and tiny (that is, all the points are close to each
 other) then the fit will terminate.  Use ``ftol=v`` and ``xtol=v`` from the
 command line.
 
-Use ``--fit=de`` to select diffrential evolution from the command line.
+Use ``--fit=de`` to select differential evolution from the command line.
 
 References
 ----------
