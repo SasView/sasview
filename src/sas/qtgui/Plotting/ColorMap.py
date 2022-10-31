@@ -6,6 +6,7 @@ from PyQt5 import QtWidgets
 
 import matplotlib as mpl
 import numpy
+from typing import Union, Tuple
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -35,8 +36,17 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         self.rmaps = [m + '_r' for m in self.maps]
         self.all_maps = self.maps + self.rmaps
 
+        # see if data2d has preexisting info on vmin/vmax
+        if hasattr(self.data, 'vmin'):
+            vmin = self.data.vmin
+        if hasattr(self.data, 'vmax'):
+            vmax = self.data.vmax
         self.vmin = self.vmin_orig = vmin
         self.vmax = self.vmax_orig = vmax
+
+        # save instance-tied values
+        self.data.vmin = vmin
+        self.data.vmax = vmax
 
         # Initialize detector labels
         self.initDetectorData()
@@ -66,7 +76,6 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         # Handle combobox changes
         self.cbColorMap.currentIndexChanged.connect(self.onMapIndexChange)
-
         # Handle checkbox changes
         self.chkReverse.stateChanged.connect(self.onColorMapReversed)
 
@@ -155,6 +164,8 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         Create and display the double slider for data range mapping.
         """
         self.slider = QDoubleRangeSlider(QtCore.Qt.Horizontal)
+
+        # see if data2d has preexisting range info
         self.slider.setValue([self.vmin, self.vmax])
         self.slider.setRange(self.vmin, self.vmax)
 
@@ -173,7 +184,7 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
             self.txtMaxAmplitude.setText(formatNumber(value))
             self.updateMap()
 
-        def set_values(values):
+        def set_values(values: Tuple[Union[int,float], Union[int,float]]):
             v1, v2 = values
             if v1 != self.vmin:
                 set_vmin(v1)
@@ -269,7 +280,12 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
             max_amp = float(self.txtMaxAmplitude.text())
         except ValueError:
             pass
-
+        if min_amp >= max_amp:
+            min_amp = self.vmin
+            max_amp = self.vmax
+            self.txtMinAmplitude.setText(str(formatNumber(min_amp)))
+            self.txtMaxAmplitude.setText(str(formatNumber(max_amp)))
+            return
         self._norm = mpl.colors.Normalize(vmin=min_amp, vmax=max_amp)
         self.redrawColorBar()
         self.canvas.draw()
