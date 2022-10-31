@@ -21,8 +21,8 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.background_color = (0, 0, 0, 0)
 
         # Mouse control settings
-        self.mouse_sensitivity_azimuth = 0.01
-        self.mouse_sensitivity_elevation = 0.01
+        self.mouse_sensitivity_azimuth = 0.1
+        self.mouse_sensitivity_elevation = 0.1
         self.mouse_sensitivity_distance = 1.0
         self.mouse_sensitivity_position = 1.0
 
@@ -37,9 +37,9 @@ class GraphWidget(QtOpenGL.QGLWidget):
         glColor3f( 1.0, 1.5, 0.0 )
         glPolygonMode(GL_FRONT, GL_FILL)
         glBegin(GL_TRIANGLES)
-        glVertex3f(2.0,-1.2,0.0)
-        glVertex3f(2.6,0.0,0.0)
-        glVertex3f(2.9,-1.2,0.0)
+        glVertex3f(1.0,0.0,0.0)
+        glVertex3f(0.0,1.0,0.0)
+        glVertex3f(0.0,0.0,0.0)
         glEnd()
         glFlush()
 
@@ -58,10 +58,12 @@ class GraphWidget(QtOpenGL.QGLWidget):
         """
 
         self.set_projection()
-        self.set_model_view()
 
         glClearColor(*self.background_color)
         glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT )
+
+        self.set_model_view()
+
 
         self.test_paint()
 
@@ -91,7 +93,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
         tr.translate(0.0, 0.0, -self.view_distance)
 
         azimuth = self.view_azimuth + 90
-        elevation = self.view_elevation - 90
+        elevation = self.view_elevation
 
         if self.view_azimuth_difference is not None:
             azimuth += self.view_azimuth_difference
@@ -99,7 +101,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
         if self.view_elevation_difference is not None:
             elevation += self.view_elevation_difference
 
-        tr.rotate(elevation, 1, 0, 0)
+        # tr.rotate(elevation, 1, 0, 0)
         tr.rotate(azimuth, 0, 0, -1)
         tr.translate(*self.view_centre)
         return tr
@@ -128,8 +130,8 @@ class GraphWidget(QtOpenGL.QGLWidget):
         # Mouse released, add dragging offset the view variables
 
         # self.view_centre += np.array(self.view_centre_difference)
-        # self.view_elevation += self.view_elevation_difference
-        # self.view_azimuth += self.view_azimuth_difference
+        self.view_elevation += self.view_elevation_difference
+        self.view_azimuth += self.view_azimuth_difference
 
         self.view_centre_difference = None
         self.view_azimuth_difference = None
