@@ -693,7 +693,7 @@ class PlotterWidget(PlotterBase):
         marker = selected_plot.symbol
         marker_size = selected_plot.markersize
         # plot name
-        legend = selected_plot.title
+        legend = selected_plot.name
         plotPropertiesWidget = PlotProperties(self,
                                 color=color,
                                 marker=marker,
@@ -704,7 +704,7 @@ class PlotterWidget(PlotterBase):
             selected_plot.markersize = plotPropertiesWidget.markersize()
             selected_plot.custom_color = plotPropertiesWidget.color()
             selected_plot.symbol = plotPropertiesWidget.marker()
-            selected_plot.title = plotPropertiesWidget.legend()
+            selected_plot.name = plotPropertiesWidget.legend()
             # Redraw the plot
             self.replacePlot(id, selected_plot)
 
