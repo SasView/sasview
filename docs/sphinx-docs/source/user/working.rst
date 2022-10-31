@@ -18,12 +18,12 @@ Working with SasView
 
    Writing a Plugin Model <qtgui/Perspectives/Fitting/plugin>
 
-   Scripting Interface to sasmodels <qtgui/Perspectives/Fitting/scripting>
+   Scripting Interface to Sasmodels <qtgui/Perspectives/Fitting/scripting>
 
    Command Line Interpreter Syntax <qtgui/Perspectives/Fitting/cli>
 
    Environment Variables <environment>
 
-   Model marketplace <marketplace>
+   Model Marketplace <marketplace>
 
    Preferences <qtgui/MainWindow/preferences_help.rst>
