@@ -225,6 +225,27 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.data_is_loaded = True
         # Reset the smearer
         self.smearing_widget.resetSmearer()
+        if self.data.isSesans:
+            # update options defaults and settings for SESANS data
+            self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
+            # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
+            self.options_widget.label_13.setText("<html><head/><body><p>Å</p></body></html>")
+            self.options_widget.label_15.setText("<html><head/><body><p>Å</p></body></html>")
+            # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
+            self.smearing_widget.onIndexChange(4)
+            # update the Weighting box of the Fit Options tab on the Fit Panel
+            self.options_widget.rbWeighting2.setText("Use dP Data")
+            self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
+            self.options_widget.rbWeighting4.setText("Use |P Data|")
+            # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
+            self.label_17.setText("<html><head/><body><p>Å</p></body></html>")
+            self.label_19.setText("<html><head/><body><p>Å</p></body></html>")
+            # disable the background value upon data load
+            # disable background for SESANS data
+            background_row = self.getRowFromName("background")
+            if background_row is not None:
+                self.setParamEditableByRow(background_row, False)
+                self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(0.0, high=True))
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
         # Reinitialize model list for constrained/simult fitting
@@ -1640,6 +1661,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update column widths
         for column, width in self.lstParamHeaderSizes.items():
             self.lstParams.setColumnWidth(column, width)
+
+        # disable background for SESANS data
+        if self.data_is_loaded:
+            if self.data.isSesans:
+                background_row = self.getRowFromName("background")
+                self.setParamEditableByRow(background_row, False)
+                self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(0.0, high=True))
 
         # Update plot
         self.updateData()
