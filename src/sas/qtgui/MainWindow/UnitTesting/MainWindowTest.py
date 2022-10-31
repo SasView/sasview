@@ -13,7 +13,6 @@ from sas.qtgui.MainWindow.MainWindow import SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
 from sas.qtgui.Utilities.HidableDialog import HidableDialog, ShowAgainResult
 
-
 class MainWindowTest:
     """Test the Main Window GUI"""
     @pytest.fixture(autouse=True)

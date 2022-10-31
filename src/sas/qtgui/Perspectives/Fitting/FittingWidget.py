@@ -263,9 +263,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
         self.q_range_max = OptionsWidget.QMAX_DEFAULT
         self.npts = OptionsWidget.NPTS_DEFAULT
-        self.log_points = False
+        self.log_points = True
         self.weighting = 0
         self.chi2 = None
+
         # Does the control support UNDO/REDO
         # temporarily off
         self.undo_supported = False
@@ -329,6 +330,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget = OptionsWidget(self, self.logic)
         layout.addWidget(self.options_widget)
         self.tabOptions.setLayout(layout)
+        self.options_widget.setLogScale(self.log_points)
 
         # Smearing widget
         layout = QtWidgets.QGridLayout()
@@ -2238,7 +2240,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         data_shown = False
         item = None
         for item, plot in plots.items():
-            if fitpage_name in plot.name:
+            if plot.plot_role != Data1D.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
                 self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
         # return the last data item seen, if nothing was plotted; supposed to be just data)
@@ -2253,6 +2255,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
@@ -4216,12 +4219,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         if 'smearing_min' in line_dict.keys():
             try:
-                self.smearing_widget.dq_l = float(line_dict['smearing_min'][0])
+                self.smearing_widget.dq_r = float(line_dict['smearing_min'][0])
             except ValueError:
                 pass
         if 'smearing_max' in line_dict.keys():
             try:
-                self.smearing_widget.dq_r = float(line_dict['smearing_max'][0])
+                self.smearing_widget.dq_l = float(line_dict['smearing_max'][0])
             except ValueError:
                 pass
 
