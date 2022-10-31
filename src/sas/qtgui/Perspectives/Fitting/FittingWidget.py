@@ -263,9 +263,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
         self.q_range_max = OptionsWidget.QMAX_DEFAULT
         self.npts = OptionsWidget.NPTS_DEFAULT
-        self.log_points = False
+        self.log_points = True
         self.weighting = 0
         self.chi2 = None
+
         # Does the control support UNDO/REDO
         # temporarily off
         self.undo_supported = False
@@ -329,6 +330,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget = OptionsWidget(self, self.logic)
         layout.addWidget(self.options_widget)
         self.tabOptions.setLayout(layout)
+        self.options_widget.setLogScale(self.log_points)
 
         # Smearing widget
         layout = QtWidgets.QGridLayout()
@@ -2253,6 +2255,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
