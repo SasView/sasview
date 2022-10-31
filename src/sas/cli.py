@@ -4,7 +4,8 @@
 """
 **SasView command line interface**
 
-This functionality is under development.
+This functionality is under development. Interactive sessions do not yet
+work in the Windows console.
 
 **Usage:**
 
@@ -22,18 +23,18 @@ sasview [flags] -m module [args...]
 sasview [flags] -c "python statements" [args...]
     *Execute python statements using the installed SasView libraries*
 
+sasview -V
+    *Print sasview version and exit.*
+
 **Flags:**
 
-    -i: Interactive. *Start an interactive Python interpreter console.*
+    -i, --interactive. *Enter an interactive session after command/module/script.*
 
-    -q: Quiet. *Suppress startup messages.*
+    -q, --quiet. *Suppress startup messages on interactive console.*
 
-    -V: Version. *Return the SasView version number.*
-
-Note: On Windows, any console output gets written to NUL by default. If
-redirecting to STDOUT does not work, try redirecting (e.g. with >)/writing
-output to file.
-
+Note: On Windows any console output gets written to NUL by default. If
+output is not appearing then try redirecting to a file using for example
+*sasview ... > output.txt*.
 """
 import sys
 
@@ -66,7 +67,7 @@ def parse_cli(argv):
     parser.add_argument("args", nargs="*",
         help="script followed by args")
 
-    # Special case: abort argument processing after -i, -m or -c.
+    # Special case: abort argument processing after -m or -c.
     have_trigger = False
     collect_rest = False
     keep = []
@@ -116,6 +117,8 @@ def main(logging="production"):
     if cli.version: # -V
         import sas
         print(f"SasView {sas.__version__}")
+        # Exit immediately after -V.
+        return 0
 
     context = {'exit': sys.exit}
     if cli.module: # -m module [arg...]
@@ -137,7 +140,6 @@ def main(logging="production"):
         run_sasview()
         return 0 # don't drop into the interactive interpreter
 
-    # TODO: Capture the global/local environment of the script/module
     # TODO: Start interactive with ipython rather than normal python
     # For ipython use:
     #     from IPython import start_ipython
