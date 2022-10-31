@@ -102,12 +102,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
                    numpy.fabs(self.outer_circle.get_radius()))
         rmax = max(numpy.fabs(self.inner_circle.get_radius()),
                    numpy.fabs(self.outer_circle.get_radius()))
-        # If the user does not specify the numbers of points to plot
-        # the default number will be nbins= 36
-#        if nbins is None:
-#            self.nbins = 20
-#        else:
-#            self.nbins = nbins
         if nbins is not None:
             self.nbins = nbins
         # Create the data1D Q average of data2D
