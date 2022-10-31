@@ -192,7 +192,13 @@ class ConfigBase:
             if key not in self.__dict__:
                 raise ConfigLocked("New attribute attempt")
 
-        if self._schema[key].validate(key):
-            super().__setattr__(key, value)
+        if getattr(self, "_locked", False):
+            try:
+                super().__setattr__(key, self._schema[key].coerce(value))
+            except CoercionError:
+                raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
         else:
-            raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
+            super().__setattr__(key, value)
+    def validate(self, key, value):
+        """ Check whether a value conforms to the type in the schema"""
+        return self._schema[key].validate(value)
