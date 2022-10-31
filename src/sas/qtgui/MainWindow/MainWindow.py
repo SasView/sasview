@@ -80,6 +80,9 @@ def run_sasview():
     app = QApplication([])
 
 
+    app.setAttribute(Qt.AA_ShareOpenGLContexts)
+
+
     #Initialize logger
     from sas.system.log import SetupLogger
     SetupLogger(__name__).config_development()

@@ -50,7 +50,7 @@ class OrientationViewer(QtWidgets.QWidget):
         # Put a barrier that will stop a flood of events going to the calculator
         self.set_image_data = FloodBarrier[Orientation](self._set_image_data, Orientation(), 0.5)
 
-        self.graph = TestWidget(self)
+        self.graph = gl.GLViewWidget()
 
         self.graph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -60,53 +60,53 @@ class OrientationViewer(QtWidgets.QWidget):
         layout.addWidget(self.graph)
         layout.addWidget(self.controller)
         self.setLayout(layout)
-        #
-        # self.arrow = OrientationViewerGraphics.create_arrow()
-        # self.image_plane_coordinate_points = np.linspace(-3, 3, 256)
-        #
-        # # temporary plot data
-        # x, y = np.meshgrid(self.image_plane_coordinate_points, self.image_plane_coordinate_points)
-        # self.image_plane_data = np.zeros_like(x)
-        #
-        # self.colormap = mpl.colormaps["viridis"]
-        #
-        # self.image_plane_colors = self.colormap(self.image_plane_data)
-        #
-        # self.image_plane = gl.GLSurfacePlotItem(
-        #     self.image_plane_coordinate_points,
-        #     self.image_plane_coordinate_points,
-        #     self.image_plane_data,
-        #     self.image_plane_colors
-        # )
-        #
-        # ghost_alpha = 1/(OrientationViewer.n_ghosts_per_perameter**3)
-        # self.ghosts = []
-        # for a in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-        #     for b in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-        #         for c in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-        #             ghost = OrientationViewerGraphics.create_cube(ghost_alpha)
-        #             self.graph.addItem(ghost)
-        #             self.ghosts.append((a, b, c, ghost))
-        #
-        #
-        #
-        # self.graph.addItem(self.arrow)
-        # self.graph.addItem(self.image_plane)
-        #
-        # self.arrow.rotate(180, 1, 0, 0)
-        # self.arrow.scale(0.05, 0.05, 0.05)
-        # self.arrow.translate(0,0,1)
-        #
-        # self.image_plane.translate(0,0,-0.5) # It's 1 unit thick, so half way
-        #
-        # for _, _, _, ghost in self.ghosts:
-        #     ghost.setTransform(OrientationViewerGraphics.createCubeTransform(0, 0, 0, OrientationViewer.cuboid_scaling))
-        #
-        #
-        # self.controller.valueEdited.connect(self.on_angle_change)
-        #
-        # self.calculator = OrientationViewer.create_calculator()
-        # self.on_angle_change(Orientation())
+
+        self.arrow = OrientationViewerGraphics.create_arrow()
+        self.image_plane_coordinate_points = np.linspace(-3, 3, 256)
+
+        # temporary plot data
+        x, y = np.meshgrid(self.image_plane_coordinate_points, self.image_plane_coordinate_points)
+        self.image_plane_data = np.zeros_like(x)
+
+        self.colormap = mpl.colormaps["viridis"]
+
+        self.image_plane_colors = self.colormap(self.image_plane_data)
+
+        self.image_plane = gl.GLSurfacePlotItem(
+            self.image_plane_coordinate_points,
+            self.image_plane_coordinate_points,
+            self.image_plane_data,
+            self.image_plane_colors
+        )
+
+        ghost_alpha = 1/(OrientationViewer.n_ghosts_per_perameter**3)
+        self.ghosts = []
+        for a in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+            for b in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+                for c in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+                    ghost = OrientationViewerGraphics.create_cube(ghost_alpha)
+                    self.graph.addItem(ghost)
+                    self.ghosts.append((a, b, c, ghost))
+
+
+
+        self.graph.addItem(self.arrow)
+        self.graph.addItem(self.image_plane)
+
+        self.arrow.rotate(180, 1, 0, 0)
+        self.arrow.scale(0.05, 0.05, 0.05)
+        self.arrow.translate(0,0,1)
+
+        self.image_plane.translate(0,0,-0.5) # It's 1 unit thick, so half way
+
+        for _, _, _, ghost in self.ghosts:
+            ghost.setTransform(OrientationViewerGraphics.createCubeTransform(0, 0, 0, OrientationViewer.cuboid_scaling))
+
+
+        self.controller.valueEdited.connect(self.on_angle_change)
+
+        self.calculator = OrientationViewer.create_calculator()
+        self.on_angle_change(Orientation())
 
 
 
@@ -191,34 +191,6 @@ class OrientationViewer(QtWidgets.QWidget):
         return np.reshape(data, (OrientationViewer.n_q_samples, OrientationViewer.n_q_samples))
 
 
-class TestWidget(QGLWidget):
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.setMinimumSize(640, 480)
-
-    def paintGL(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-        glTranslatef(-2.5, 0.5, -6.0)
-        glColor3f( 1.0, 1.5, 0.0 )
-        glPolygonMode(GL_FRONT, GL_FILL)
-        glBegin(GL_TRIANGLES)
-        glVertex3f(2.0,-1.2,0.0)
-        glVertex3f(2.6,0.0,0.0)
-        glVertex3f(2.9,-1.2,0.0)
-        glEnd()
-        glFlush()
-
-    def initializeGL(self):
-        glClearDepth(1.0)
-        glDepthFunc(GL_LESS)
-        glEnable(GL_DEPTH_TEST)
-        glShadeModel(GL_SMOOTH)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(45.0,1.33,0.1, 100.0)
-        glMatrixMode(GL_MODELVIEW)
 
 def main():
     """ Show a demo of the slider """
