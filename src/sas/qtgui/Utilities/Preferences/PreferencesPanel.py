@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QDialog, QPushButton, QWidget
 from PyQt5.QtCore import Qt
 from typing import Optional, Callable, Dict, Any
 
+from sas.system import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
@@ -32,7 +33,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def __init__(self, parent: Optional[Any] = None):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
-        self._staging = False
+        self._staged_changes = {}
         self.parent = parent
         self.setWindowTitle("Preferences")
         # Add predefined widgets to window
@@ -75,7 +76,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         if btn.text() == 'Restore Defaults':
             self.restoreDefaultPreferences()
         elif btn.text() == 'OK':
-            self.close()
+            self._okClicked()
         elif btn.text() == 'Help':
             self.help()
 
@@ -84,6 +85,27 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         widget = self.stackedWidget.currentWidget()
         if hasattr(widget, 'restoreDefaults') and callable(widget.restoreDefaults):
             widget.restoreDefaults()
+
+    def stageSingleChange(self, key, value):
+        """ Preferences widgets should call this method when changing a variable to prevent direct configuration
+        changes"""
+        self._staged_changes[key] = value
+
+    def _okClicked(self):
+        """ Action triggered when the OK button is clicked"""
+        self._saveStagedChanges()
+        self.close()
+
+    def _saveStagedChanges(self):
+        """ When OK or Apply are clicked, all staged changes should be applied to the config. """
+        for k, v in self._staged_changes.items():
+            setattr(config, k, v)
+        self._staged_changes = {}
+
+    def _cancelStaging(self):
+        """ When the Cancel button is clicked, throw away any staged changes and hide the window"""
+        self._staged_changes = {}
+        self.close()
 
     def close(self):
         """Save the configuration values when the preferences window is closed"""
