@@ -19,6 +19,7 @@ from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Utilities.HidableDialog import HidableDialog
 
 
 class GuiManagerTest:
@@ -123,6 +124,7 @@ class GuiManagerTest:
 
         # Say No to the close dialog
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
+        mocker.patch.object(HidableDialog, 'exec', return_value=0)
 
         # Open, then close the manager
         manager.quitApplication()
@@ -132,6 +134,7 @@ class GuiManagerTest:
 
         # Say Yes to the close dialog
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
+        mocker.patch.object(HidableDialog, 'exec', return_value=1)
 
         # Open, then close the manager
         manager.quitApplication()
