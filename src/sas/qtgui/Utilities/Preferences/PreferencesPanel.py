@@ -114,7 +114,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def addWidget(self, widget: QWidget, name: Optional[str] = None):
         """Add a single widget to the panel"""
         # Set the parent of the new widget to the parent of this window
-        widget.parent = self.parent
+        widget.parent = self
         self.stackedWidget.addWidget(widget)
         # Set display name in the listWidget with the priority of
         #  name passed to method > widget.name > "Generic Preferences"
