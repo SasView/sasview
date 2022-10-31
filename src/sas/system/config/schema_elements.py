@@ -83,7 +83,7 @@ class SchemaFloat(SchemaVariable):
         if isinstance(value, (int, float)):
             return float(value)
         else:
-            raise CoercionError(f"Cannot coerce {type(value)} to bool")
+            raise CoercionError(f"Cannot coerce {type(value)} to float")
 
 
 class SchemaStr(SchemaVariable):
