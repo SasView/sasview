@@ -15,6 +15,7 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
+from sas.qtgui.Utilities.HidableDialog import HidableDialog
 
 from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
@@ -122,22 +123,22 @@ class GuiManagerTest:
         mocker.patch.object(sys, 'exit')
 
         # Say No to the close dialog
-        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
+        mocker.patch.object(HidableDialog, 'exec', return_value=False)
 
         # Open, then close the manager
         manager.quitApplication()
 
-        # See that the MessageBox method got called
-        #assert QMessageBox.question.called
+        # See that the HidableDialog.exec method got called
+        assert HidableDialog.exec.called
 
         # Say Yes to the close dialog
-        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
+        mocker.patch.object(HidableDialog, 'exec', return_value=True)
 
         # Open, then close the manager
         manager.quitApplication()
 
-        # See that the MessageBox method got called
-        #assert QMessageBox.question.called
+        # See that the HidableDialog.exec method got called
+        assert HidableDialog.exec.called
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testCheckUpdate(self, manager, mocker):

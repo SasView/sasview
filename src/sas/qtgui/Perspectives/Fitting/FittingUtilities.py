@@ -548,8 +548,12 @@ def residualsData1D(reference_data, current_data, weights):
     residuals.dxl = None
     residuals.dxw = None
     residuals.ytransform = 'y'
+    if reference_data.isSesans:
+        residuals.xtransform = 'x'
+        residuals.xaxis('\\rm{z} ', 'A')
     # For latter scale changes
-    residuals.xaxis('\\rm{Q} ', 'A^{-1}')
+    else:
+        residuals.xaxis('\\rm{Q} ', 'A^{-1}')
     residuals.yaxis('\\rm{Residuals} ', 'normalized')
 
     return residuals
