@@ -40,8 +40,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         'MIN_RANGE',
         'MAX_RANGE',
         'NPTS',
-        'NPTS_FIT',
-        'LOG_SPACED']
+        'NPTS_FIT']
 
     def __init__(self, parent=None, logic=None):
         super(OptionsWidget, self).__init__()
@@ -125,13 +124,12 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtMaxRange, self.MODEL.index('MAX_RANGE'))
         self.mapper.addMapping(self.txtNpts,     self.MODEL.index('NPTS'))
         self.mapper.addMapping(self.txtNptsFit,  self.MODEL.index('NPTS_FIT'))
-        self.mapper.addMapping(self.chkLogData,  self.MODEL.index('LOG_SPACED'))
 
         self.mapper.toFirst()
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
-        pass
+        self.plot_signal.emit()
 
     def onMaskEdit(self):
         """
@@ -256,7 +254,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         q_range_max = float(self.model.item(self.MODEL.index('MAX_RANGE')).text())
         npts = int(self.model.item(self.MODEL.index('NPTS')).text())
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
-        log_points = str(self.model.item(self.MODEL.index('LOG_SPACED')).text()) == 'true'
+        log_points = self.chkLogData.isChecked()
 
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
