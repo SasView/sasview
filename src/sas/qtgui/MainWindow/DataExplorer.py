@@ -699,6 +699,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Delete corresponding open plots
                 self.closePlotsForItem(item)
+                # Close result panel if results represent the deleted data item
+                # Results panel only stores Data1D/Data2D object
+                #   => QStandardItems must still exist for direct comparison
+                self.closeResultPanelOnDelete(item)
+
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -1894,7 +1899,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         pass  # debugger anchor
 
-    def onAnalysisUpdate(self, new_perspective=""):
+    def closeResultPanelOnDelete(self, items):
+        """
+        Given a standard item, close the fitting results panel if currently populated with item
+        """
+        # items - List[HashableStandardItem] of deleted data items
+        self.parent.results_panel.dataDeleted(items)
+
+    def onAnalysisUpdate(self, new_perspective_name: str):
         """
         Update the perspective combo index based on passed string
         """
