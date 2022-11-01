@@ -9,8 +9,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from .GuiUtils import dataFromItem
-
 
 class ResultPanel(QtWidgets.QTabWidget):
     """
@@ -97,10 +95,9 @@ class ResultPanel(QtWidgets.QTabWidget):
         if self.count()==0:
             self.close()
 
-    def dataDeleted(self, item):
-        if not item or not self.isVisible():
+    def dataDeleted(self, data):
+        if not data or not self.isVisible():
             return
-        data = dataFromItem(item)
         if data.id == self.data_id:
             self.close()
 
