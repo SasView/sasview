@@ -699,8 +699,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Close result panel if results represent the deleted data item
                 # Results panel only stores Data1D/Data2D object
                 #   => QStandardItems must still exist for direct comparison
-                self.closeResultPanelOnDelete(item)
-
+                self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -1910,12 +1909,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         pass  # debugger anchor
 
-    def closeResultPanelOnDelete(self, items):
+    def closeResultPanelOnDelete(self, data):
         """
         Given a standard item, close the fitting results panel if currently populated with item
         """
         # items - List[HashableStandardItem] of deleted data items
-        self.parent.results_panel.dataDeleted(items)
+        self.parent.results_panel.dataDeleted(data)
 
     def onAnalysisUpdate(self, new_perspective_name: str):
         """
