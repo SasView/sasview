@@ -9,6 +9,9 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+from .GuiUtils import dataFromItem
+
+
 class ResultPanel(QtWidgets.QTabWidget):
     """
     FitPanel class contains fields allowing to fit  models and  data
@@ -28,6 +31,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.manager = manager
         self.communicator = self.manager.communicator()
         self.setMinimumSize(400, 400)
+        self.data_id = None
 
         self.updateBumps() # patch bumps ## TEMPORARY ##
 
@@ -63,9 +67,10 @@ class ResultPanel(QtWidgets.QTabWidget):
             self.removeTab(index)
 
         result = results[0][0]
-        filename = result.data.sas_data.filename
+        name = result.data.sas_data.name
         current_optimizer = optimizer
-        self.setWindowTitle(self.window_name + " - " + filename + " - " + current_optimizer)
+        self.data_id = result.data.sas_data.id
+        self.setWindowTitle(self.window_name + " - " + name + " - " + current_optimizer)
         if hasattr(result, 'convergence') and len(result.convergence) > 0:
             best, pop = result.convergence[:, 0], result.convergence[:, 1:]
             self.convergenceView.update(best, pop)
@@ -92,6 +97,13 @@ class ResultPanel(QtWidgets.QTabWidget):
                 view.close()
         # no tabs in the widget - possibly LM optimizer. Mark "closed"
         if self.count()==0:
+            self.close()
+
+    def dataDeleted(self, item):
+        if not item or not self.isVisible():
+            return
+        data = dataFromItem(item)
+        if data.id == self.data_id:
             self.close()
 
     def closeEvent(self, event):

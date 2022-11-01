@@ -696,6 +696,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Delete corresponding open plots
                 self.closePlotsForItem(item)
+                # Close result panel if results represent the deleted data item
+                # Results panel only stores Data1D/Data2D object
+                #   => QStandardItems must still exist for direct comparison
+                self.closeResultPanelOnDelete(item)
+
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -1904,6 +1909,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
         pass  # debugger anchor
+
+    def closeResultPanelOnDelete(self, items):
+        """
+        Given a standard item, close the fitting results panel if currently populated with item
+        """
+        # items - List[HashableStandardItem] of deleted data items
+        self.parent.results_panel.dataDeleted(items)
 
     def onAnalysisUpdate(self, new_perspective_name: str):
         """
