@@ -35,3 +35,4 @@ bumps
 html2text
 jsonschema
 pywin32; platform_system == "Windows"
+superqt

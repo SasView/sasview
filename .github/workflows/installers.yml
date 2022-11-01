@@ -73,7 +73,7 @@ jobs:
         python -m pip install tinycc h5py sphinx pyparsing html5lib reportlab==3.6.6 pybind11 appdirs
         python -m pip install six numba mako ipython qtconsole xhtml2pdf unittest-xml-reporting pylint
         python -m pip install qt5reactor periodictable uncertainties dominate importlib_resources
-        python -m pip install html2text
+        python -m pip install html2text superqt
 
 
     - name: Install PyQt (Windows + Linux)

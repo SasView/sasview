@@ -15,6 +15,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
 
 logger = logging.getLogger(__name__)
