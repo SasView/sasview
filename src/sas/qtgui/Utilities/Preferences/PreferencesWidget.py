@@ -1,5 +1,6 @@
 import logging
 
+from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
 from typing import Optional, List, Union
 
@@ -116,10 +117,30 @@ class PreferencesWidget(QWidget):
         layout = self._createLayoutAndTitle(title)
         text_box = QLineEdit(self)
         if default_text:
-            text_box.setText(default_text)
+            text_box.setText(str(default_text))
         layout.addWidget(text_box)
         self.verticalLayout.addLayout(layout)
         return text_box
+
+    def addIntegerInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
+        """Similar to the text input creator, this creates a text input with an integer validator assigned to it.
+        :param title: The title of the text box to be added to the preferences panel.
+        :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
+        :return: QLineEdit instance to allow subclasses to assign instance name
+        """
+        int_box = self.addTextInput(title, str(default_number))
+        int_box.setValidator(QIntValidator())
+        return int_box
+
+    def addFloatInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
+        """Similar to the text input creator, this creates a text input with an float validator assigned to it.
+        :param title: The title of the text box to be added to the preferences panel.
+        :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
+        :return: QLineEdit instance to allow subclasses to assign instance name
+        """
+        float_box = self.addTextInput(title, str(default_number))
+        float_box.setValidator(QDoubleValidator())
+        return float_box
 
     def addCheckBox(self, title: str, checked: Optional[bool] = False) -> QCheckBox:
         """Add a title and check box within the widget.

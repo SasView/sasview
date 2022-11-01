@@ -9,11 +9,11 @@ class DisplayPreferencesWidget(PreferencesWidget):
         self.config_params = ['QT_SCALE_FACTOR', 'QT_AUTO_SCREEN_SCALE_FACTOR']
 
     def _addAllWidgets(self):
-        self.qtScaleFactor = self.addTextInput(
+        self.qtScaleFactor = self.addFloatInput(
             title="QT Screen Scale Factor",
-            default_text=str(config.QT_SCALE_FACTOR))
+            default_number=config.QT_SCALE_FACTOR)
         self.qtScaleFactor.textChanged.connect(
-            lambda: self._stageChange('QT_SCALE_FACTOR', self.qtScaleFactor.text()))
+            lambda: self._stageChange('QT_SCALE_FACTOR', float(self.qtScaleFactor.text())))
         self.autoScaling = self.addCheckBox(
             title="Automatic Screen Scale Factor",
             checked=config.QT_AUTO_SCREEN_SCALE_FACTOR)

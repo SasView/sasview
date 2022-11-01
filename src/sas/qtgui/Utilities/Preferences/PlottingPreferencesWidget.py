@@ -21,11 +21,11 @@ class PlottingPreferencesWidget(PreferencesWidget):
             checked=config.FITTING_PLOT_LEGEND_TRUNCATE)
         self.legendTruncate.clicked.connect(
             lambda: self._stageChange('FITTING_PLOT_LEGEND_TRUNCATE', self.legendTruncate.isChecked()))
-        self.legendLineLength = self.addTextInput(
+        self.legendLineLength = self.addIntegerInput(
             title="Legend entry line length",
-            default_text=str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))
+            default_number=config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH)
         self.legendLineLength.textChanged.connect(
-            lambda: self._stageChange('FITTING_PLOT_LEGEND_MAX_LINE_LENGTH', self.legendLineLength.text()))
+            lambda: self._stageChange('FITTING_PLOT_LEGEND_MAX_LINE_LENGTH', int(self.legendLineLength.text())))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.legendFullWidth.blockSignals(toggle)
