@@ -1900,10 +1900,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def closeResultPanelOnDelete(self, data):
         """
-        Given a standard item, close the fitting results panel if currently populated with item
+        Given a data1d/2d object, close the fitting results panel if currently populated with the data
         """
-        # items - List[HashableStandardItem] of deleted data items
-        self.parent.results_panel.dataDeleted(data)
+        # data - Single data1d/2d object to be deleted
+        self.parent.results_panel.onDataDeleted(data)
 
     def onAnalysisUpdate(self, new_perspective_name: str):
         """

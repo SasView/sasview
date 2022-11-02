@@ -54,13 +54,9 @@ class ResultPanel(QtWidgets.QTabWidget):
         sys.modules['bumps.gui.plot_view'] = PlotView
 
     def onPlotResults(self, results, optimizer="Unknown"):
-        # Clear up previous results
-        for view in (self.convergenceView, self.correlationView,
-                     self.uncertaintyView, self.traceView):
-            view.close()
-        # close all tabs. REMEMBER TO USE REVERSED RANGE!!!
-        for index in reversed(range(self.count())):
-            self.removeTab(index)
+        # import moved here due to its cost
+        from bumps.dream.stats import var_stats, format_vars
+        self.clearAnyData()
 
         result = results[0][0]
         name = result.data.sas_data.name
@@ -95,11 +91,25 @@ class ResultPanel(QtWidgets.QTabWidget):
         if self.count()==0:
             self.close()
 
-    def dataDeleted(self, data):
+    def onDataDeleted(self, data):
+        """ Check if the data set is shown in the window and close tabs as needed. """
         if not data or not self.isVisible():
             return
         if data.id == self.data_id:
+            self.setWindowTitle(self.window_name)
+            self.clearAnyData()
             self.close()
+
+    def clearAnyData(self):
+        """ Clear any previous results and reset window to its base state. """
+        self.data_id = None
+        # Clear up previous results
+        for view in (self.convergenceView, self.correlationView,
+                     self.uncertaintyView, self.traceView):
+            view.close()
+        # close all tabs. REMEMBER TO USE REVERSED RANGE!!!
+        for index in reversed(range(self.count())):
+            self.removeTab(index)
 
     def closeEvent(self, event):
         """
