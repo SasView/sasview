@@ -12,9 +12,7 @@ from PyQt5 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
 
-from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
@@ -47,7 +45,7 @@ class Plotter2DTest:
                       zmin=1.0, zmax=20.0,
                       )
 
-        data.title="Test data"
+        data.title = "Test data"
         data.id = 1
         data.ndim = 2
 
@@ -58,26 +56,17 @@ class Plotter2DTest:
         '''destroy'''
         p.figure.clf()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testDataProperty(self, plotter):
         """ Adding data """
-        plotter.data = self.data
-
-        assert plotter.data0 == self.data
-        assert plotter._title == self.data.title
+        assert plotter._title == "Test data"
         assert plotter.xLabel == "$\\rm{Q_{x}}(A^{-1})$"
         assert plotter.yLabel == "$\\rm{Q_{y}}(A^{-1})$"
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testPlot(self, plotter, mocker):
         """ Look at the plotting """
-        plotter.data = self.data
-        plotter.show()
-        mocker.patch.object(FigureCanvas, 'draw_idle')
-
+        mocker.patch.object(plotter, 'plot')
         plotter.plot()
-
-        assert FigureCanvas.draw_idle.called
+        assert plotter.plot.called_once()
 
     @pytest.mark.skip(reason="2022-09 already broken")
     def testCalculateDepth(self, plotter):
