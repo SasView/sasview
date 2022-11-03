@@ -107,4 +107,4 @@ class MainWindowTest:
         tmp_main.close()
 
         # See that the MessageBox method got called
-        assert HidableDialog.called_once()
+        assert HidableDialog.exec.called_once()
