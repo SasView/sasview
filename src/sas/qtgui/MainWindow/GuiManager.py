@@ -147,8 +147,6 @@ class GuiManager:
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Preload all perspectives
-        self.loadAllPerspectives()
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
@@ -167,6 +165,9 @@ class GuiManager:
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
         self.preferences = PreferencesPanel(self._parent)
+
+        # Load all perspectives - Must come after preferences panel is created
+        self.loadAllPerspectives()
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
@@ -202,6 +203,9 @@ class GuiManager:
             try:
                 loaded_perspective = perspective(parent=self)
                 loaded_dict[name] = loaded_perspective
+                pref_widgets = loaded_perspective.register_preferences()
+                for widget in pref_widgets:
+                    self.preferences.addWidget(widget)
             except Exception as e:
                 logger.error(f"Unable to load {name} perspective.\n{e}")
                 logger.error(e, exc_info=True)
