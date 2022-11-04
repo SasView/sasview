@@ -86,7 +86,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         """ Preferences widgets should call this method when changing a variable to prevent direct configuration
         changes"""
         self._staged_changes[key] = value
-        if config_restart_message:
+        if config_restart_message and config_restart_message not in self._staged_requiring_restart:
             self._staged_requiring_restart.append(config_restart_message)
 
     def _okClicked(self):
@@ -101,11 +101,11 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         if any(self._staged_requiring_restart):
             message = "SasView must restart for the following values to take effect:\n"
             for val in self._staged_requiring_restart:
-                message += f"{val}\n"
-            msgBox = QMessageBox()
-            msgBox.setText(message)
-            msgBox.setStandardButtons(QMessageBox.Ok)
-        self._staged_requiring_restart = {}
+                message += f"\t-{val}\n"
+            msgBox = QMessageBox(QMessageBox.Information, "", message, QMessageBox.Ok)
+            msgBox.show()
+            msgBox.exec()
+        self._staged_requiring_restart = []
         self._staged_changes = {}
 
     def _cancelStaging(self):
