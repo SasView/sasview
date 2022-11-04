@@ -139,10 +139,10 @@ class Perspective(object, metaclass=PerspectiveMeta):
     # Preferences registration
     #
 
-    @abstractmethod
-    def register_preferences(self) -> Optional[List[PreferencesWidget]]:
+    @property
+    def preferences(self) -> Optional[List[PreferencesWidget]]:
         """ Return a list of widgets that should be added to the preferences panel. """
-        pass
+        return []
 
     #
     # Copy and paste functionality
