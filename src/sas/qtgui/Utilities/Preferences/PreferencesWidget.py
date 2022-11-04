@@ -41,6 +41,7 @@ class PreferencesWidget(QWidget):
         self.name: str = name
         # All parameter names used in this panel
         self.config_params: List[str] = []
+        # A mapping of parameter names to messages displayed when prompting for a restart
         self.restart_params: Dict[str, str] = {}
         self.restart_required: bool = False
         # Create generic layout

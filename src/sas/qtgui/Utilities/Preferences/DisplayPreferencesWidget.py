@@ -7,6 +7,8 @@ class DisplayPreferencesWidget(PreferencesWidget):
     def __init__(self):
         super(DisplayPreferencesWidget, self).__init__("Display Settings")
         self.config_params = ['QT_SCALE_FACTOR', 'QT_AUTO_SCREEN_SCALE_FACTOR']
+        self.restart_params = {'QT_SCALE_FACTOR': 'Screen scale factor',
+                               'QT_AUTO_SCREEN_SCALE_FACTOR': "Automatic screen scale factoring"}
 
     def _addAllWidgets(self):
         self.qtScaleFactor = self.addFloatInput(
