@@ -85,14 +85,14 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(45.0,1.33,0.1, 100.0)
-        # glLoadMatrixf(np.array(self.projection_matrix().data(), dtype=np.float32))
+        # gluPerspective(45.0,1.33,0.1, 100.0)
+        glLoadMatrixf(np.array(self.projection_matrix().data(), dtype=np.float32))
 
     def view_matrix(self):
         tr = QtGui.QMatrix4x4()
         tr.translate(0.0, 0.0, -self.view_distance)
 
-        azimuth = self.view_azimuth + 90
+        azimuth = self.view_azimuth
         elevation = self.view_elevation
 
         if self.view_azimuth_difference is not None:
@@ -101,7 +101,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
         if self.view_elevation_difference is not None:
             elevation += self.view_elevation_difference
 
-        # tr.rotate(elevation, 1, 0, 0)
+        tr.rotate(elevation, 1, 0, 0)
         tr.rotate(azimuth, 0, 0, -1)
         tr.translate(*self.view_centre)
         return tr

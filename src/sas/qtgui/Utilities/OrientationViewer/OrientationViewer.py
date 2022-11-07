@@ -193,7 +193,7 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
 def main():
-    """ Show a demo of the slider """
+
     import os
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
