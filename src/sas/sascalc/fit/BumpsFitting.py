@@ -237,6 +237,22 @@ class ParameterExpressions(object):
         self.models = state
         self._setup()
 
+    def _allComputedParamsUncertaintiesDefined(self):
+        '''
+        Verify if all computed (constraints) parameters contain uncertainties.
+        Returns False as soon as one parameter is not an uncertainties object.
+        '''
+        for model in self.models:
+            if model.computed_pars:
+                for p in model.computed_pars:
+                    check = isinstance(p.value, uncertainties.core.AffineScalarFunc)
+                    if not check:
+                        check = isinstance(p.value, uncertainties.core.Variable)
+                    if not check:
+                        return False
+        return True
+
+
 class BumpsFit(FitEngine):
     """
     Fit a model using bumps.
@@ -299,7 +315,7 @@ class BumpsFit(FitEngine):
             try:
                 uncertainties.correlated_values(values, cov)
             except:
-                # No convergance 
+                # No convergence
                 for param, val, err in zip(varying, values, errs):
                     # Convert all varying parameters to uncertainties objects
                     param.value = uncertainties.ufloat(val, err)
@@ -310,7 +326,19 @@ class BumpsFit(FitEngine):
                     param.value = val
 
         # Propagate correlated uncertainty through constraints.
-        problem.setp_hook()
+        # Hack to deal with linked constraints, e.g. M2=M1, M3=M2, M4=M3, ...
+        # TODO: Find better way of handling this?
+        MAX_ITER = 10
+        iter = 0
+        while not problem.setp_hook._allComputedParamsUncertaintiesDefined():
+            iter += 1
+            if iter > MAX_ITER:
+                logging.warn(f"Handling of uncertainties of constrained parameters "
+                            f"exited after {MAX_ITER} iterations.\n"
+                            f"This could be due to a too complex constraining scheme "
+                            f"or a very long chain of linked constraints.")
+                break
+            problem.setp_hook()
 
         # collect the results
         all_results = []
@@ -341,9 +369,12 @@ class BumpsFit(FitEngine):
                             isinstance(p.value, uncertainties.core.AffineScalarFunc):
                         # value.n returns value p
                         pvec.append(p.value.n)
-                        # value.n returns error in p
+                        # value.s returns error in p
                         stderr.append(p.value.s)
                     # p constrained based on another parameter
+                    # Warning: This will not work for parameters that are tied
+                    # to other parameter already constrained.
+                    # Is this still needed with the added _allComputedParamsUncertaintiesDefined test?
                     else:
                         # Details of p
                         param_model, param_name = p.name.split(".")[0], p.name.split(".")[1]
@@ -351,11 +382,13 @@ class BumpsFit(FitEngine):
                         # list with 1 entry
                         constraints = [model.constraints for model in models if model.name == param_model][0]
                         # Parameters p is constrained on.
+                        # This does not work if the tying parameter is not in varying list, i.e.
+                        # if there are linked constraints
                         reference_params = [v for v in varying if str(v.name) in str(constraints[param_name])]
                         err_exp = str(constraints[param_name])
                         # Convert string entries into variable names within the code.
-                        for i, index in enumerate(reference_params):
-                            err_exp = err_exp.replace(reference_params[index].name, f"reference_params[{index}].value")
+                        for i, _ in enumerate(reference_params):
+                            err_exp = err_exp.replace(reference_params[i].name, f"reference_params[{i}].value")
                         try:
                             # Evaluate a string containing constraints as if it where a line of code
                             pvec.append(eval(err_exp).n)
@@ -372,15 +405,13 @@ class BumpsFit(FitEngine):
                             for i in range(len(constraints_sections)):
                                 if name_error in constraints_sections[i]:
                                     error_param = f"{name_error}.{constraints_sections[i+1]}"
-                            logging.error(f"Constraints ordered incorrectly. Attempting to constrain {p}, based on "
-                                          f"{error_param}, however {error_param} is not defined itself. This is "
-                                          f"because {error_param} is also constrained.\n"
-                                          f"The fitting will continue, but {name_error} will be incorrect.")
-                            logging.error(e)
+                            logging.warn(f"Not all uncertainties in constrained parameters could be defined.\n" 
+                                         f"Attempting to constrain {p}, based on {error_param}. "
+                                         f"However, {error_param} is not in the list of varying parameters.")
                         except Exception as e:
-                            logging.error(e)
                             pvec.append(p.value)
                             stderr.append(0)
+                            logging.error(e)
 
                 fitting_result.pvec = (np.array(pvec))
                 fitting_result.stderr = (np.array(stderr))
